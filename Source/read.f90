@@ -11693,7 +11693,7 @@ USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,SUBDEVICE_TYPE,DEVICE,N_DEVC,N_DEVC_TIME
                             DEVC_PIPE_OPERATING
 USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES,SEARCH_OTHER_MESHES
 INTEGER  :: N,NN,NM,MESH_NUMBER=0,N_DEVC_READ,IOR,TRIP_DIRECTION,VELO_INDEX,POINTS,I_POINT,PIPE_INDEX,ORIENTATION_INDEX, &
-            N_INTERVALS,MOVE_INDEX,IIG,JJG,KKG
+            N_INTERVALS,MOVE_INDEX,IIG,JJG,KKG,NOM
 REAL(EB) :: DEPTH,ORIENTATION(3),ROTATION,SETPOINT,FLOWRATE,BYPASS_FLOWRATE,DELAY,XYZ(3),CONVERSION_FACTOR,CONVERSION_ADDEND, &
             SMOOTHING_FACTOR,QUANTITY_RANGE(2),STATISTICS_START,STATISTICS_END,COORD_FACTOR,CELL_L,&
             TIME_PERIOD,FORCE_DIRECTION(3),XI,YJ,ZK,XBP(6),DX,DY,DZ,&
@@ -11962,30 +11962,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ENDIF
       ENDIF
 
-      ! Check if there are any devices with specified XB that do not fall within a mesh.
-
-      IF (XB(1)>-1.E5_EB) THEN
-         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
-         BAD = .TRUE.
-         CHECK_MESH_LOOP: DO NM=1,NMESHES
-            M=>MESHES(NM)
-            OVERLAPPING_X = .TRUE.
-            OVERLAPPING_Y = .TRUE.
-            OVERLAPPING_Z = .TRUE.
-            IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
-            IF (XB(1)/=XB(2) .AND. ((XB(1)>=M%XF.AND.XB(2)>=M%XF) .OR. (XB(1)<=M%XS.AND.XB(2)<=M%XS))) OVERLAPPING_X = .FALSE.
-            IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
-            IF (XB(3)/=XB(4) .AND. ((XB(3)>=M%YF.AND.XB(4)>=M%YF) .OR. (XB(3)<=M%YS.AND.XB(4)<=M%YS))) OVERLAPPING_Y = .FALSE.
-            IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
-            IF (XB(5)/=XB(6) .AND. ((XB(5)>=M%ZF.AND.XB(6)>=M%ZF) .OR. (XB(5)<=M%ZS.AND.XB(6)<=M%ZS))) OVERLAPPING_Z = .FALSE.
-            IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
-               BAD = .FALSE.
-               IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
-               MESH_NUMBER = NM
-            ENDIF
-         ENDDO CHECK_MESH_LOOP
-      ENDIF
-
       ! Assign a dummy XYZ triplet for devices that use a SPATIAL_STATISTIC
 
       IF (XB(1)>-1.E5_EB) THEN
@@ -12008,6 +11984,49 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
+      ENDIF
+
+      ! Check if there are any devices with specified XB that do not fall within a mesh.
+
+      IF (XB(1)>-1.E5_EB) THEN
+         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
+         BAD = .TRUE.
+         CHECK_MESH_LOOP: DO NM=1,NMESHES
+            M=>MESHES(NM)
+            OVERLAPPING_X = .TRUE.
+            OVERLAPPING_Y = .TRUE.
+            OVERLAPPING_Z = .TRUE.
+            IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
+            IF (XB(1)/=XB(2) .AND. ((XB(1)>=M%XF.AND.XB(2)>=M%XF) .OR. (XB(1)<=M%XS.AND.XB(2)<=M%XS))) OVERLAPPING_X = .FALSE.
+            IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
+            IF (XB(3)/=XB(4) .AND. ((XB(3)>=M%YF.AND.XB(4)>=M%YF) .OR. (XB(3)<=M%YS.AND.XB(4)<=M%YS))) OVERLAPPING_Y = .FALSE.
+            IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
+            IF (XB(5)/=XB(6) .AND. ((XB(5)>=M%ZF.AND.XB(6)>=M%ZF) .OR. (XB(5)<=M%ZS.AND.XB(6)<=M%ZS))) OVERLAPPING_Z = .FALSE.
+
+            ! Handle the case of XB plane on interpolated mesh boundary
+            ! This block is necessary so that XB statistics are not double counted at mesh interfaces.
+            ! The strategy is to assign the DV to the high-side mesh boundary.  For example, if the device plane is normal to X,
+            ! then the DV will be assigned to the mesh where XB(1)=XB(2)=M%XF.
+            NOM=0
+            IF (XB(1)==XB(2) .AND. OVERLAPPING_X) THEN
+               IF (XYZ(1)==M%XS) CALL SEARCH_OTHER_MESHES(XYZ(1)-TWO_EPSILON_EB,XYZ(2),XYZ(3),NOM,IIG,JJG,KKG,XI,YJ,ZK)
+               IF (NOM>0) OVERLAPPING_X = .FALSE. ! Device will be assigned to NOM
+            ENDIF
+            IF (XB(3)==XB(4) .AND. OVERLAPPING_Y) THEN
+               IF (XYZ(2)==M%YS) CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2)-TWO_EPSILON_EB,XYZ(3),NOM,IIG,JJG,KKG,XI,YJ,ZK)
+               IF (NOM>0) OVERLAPPING_Y = .FALSE.
+            ENDIF
+            IF (XB(5)==XB(6) .AND. OVERLAPPING_Z) THEN
+               IF (XYZ(3)==M%ZS) CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3)-TWO_EPSILON_EB,NOM,IIG,JJG,KKG,XI,YJ,ZK)
+               IF (NOM>0) OVERLAPPING_Z = .FALSE.
+            ENDIF
+
+            IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
+               BAD = .FALSE.
+               IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
+               MESH_NUMBER = NM
+            ENDIF
+         ENDDO CHECK_MESH_LOOP
       ENDIF
 
       ! Determine the bounds, XB, for an interpolated gas device
