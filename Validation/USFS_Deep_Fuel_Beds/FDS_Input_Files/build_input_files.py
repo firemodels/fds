@@ -54,12 +54,10 @@ for irow in df.index:
 
 # Record the fuel array parameters
     # calculate effective geometry descriptors
-    startx = 0.6; # leftmost edge of the fuel rod platform.
-    rg_gap = spacing * math.cos(angle_r); # effective horizontal distance between fuel rods.
-    dz_ht = rg_gap * math.tan(angle_r)
-#    eff_ht = rg_gap * math.tan(angle_r) + depth ; # effective height of bed
-    rod_width = 0.1524; # width of a fuel rod in m. (6 in)
-#    firegrid_top = max(round((max_ht+0.5),0)+2.0,2.0); # don't go any lower than 2.0 m.
+    startx = 0.6                            # leftmost edge of the fuel rod platform.
+    rg_gap = spacing * math.cos(angle_r)    # horizontal distance between fuel rods.
+    dz_ht = rg_gap * math.tan(angle_r)      # vertical distance between fueul rods
+    rod_width = 0.1524                      # width of a fuel rod in m. (6 in)
 
     # calculate fuel array parameters
     xpos1 = startx
@@ -69,8 +67,19 @@ for irow in df.index:
     else:
         zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r)
     zpos2 = zpos1 + depth
+
     param_group = [rg_gap] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
+
+    # calculate obst array parameters
+    block_base = 0.2                        # horizontal distance across each obst block.
+    bed_base = 4.8 * math.cos(angle_r)      # horizontal distance underneath the tilted fuel bed
+    dz_obst = block_base * math.tan(angle_r) # vertical distance between obst block bases
+
+    param_group = param_group + [dz_obst] + [math.floor(bed_base/block_base) -1]
+
     param_line = param_line + param_group
+
+
 
     #round off large trailing decimals
     for n in range(n_baisicparams, len(param_line)):
