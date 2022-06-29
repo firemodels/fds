@@ -12,59 +12,21 @@
 &DUMP DT_SLCF=0.5,DT_PART=0.5 /
 &MISC HUMIDITY=param5,TMPA=param4 /
 
-&PRES SOLVER='UGLMAT' /
-
-&RADI NUMBER_RADIATION_ANGLES=16, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1, PATH_LENGTH=0.10 /
-
 &VENT DB='XMIN', SURF_ID='OPEN' /
 &VENT DB='XMAX', SURF_ID='OPEN' /
 &VENT DB='YMIN', SURF_ID='OPEN' /
 &VENT DB='YMAX', SURF_ID='OPEN' /
 &VENT DB='ZMAX', SURF_ID='OPEN' /
 
-&REAC FUEL = 'WOOD'
-      O          = 2.5
-      C          = 3.4
-      H          = 6.2
-      SOOT_YIELD = 0.02
-      HEAT_OF_COMBUSTION = 17700 /
-
-&SPEC ID = 'WATER VAPOR' /
-
 &SURF ID = 'wet vegetation'
-      MATL_ID          = 'dry pine'
+      MATL_ID          = 'GENERIC VEGETATION'
       MOISTURE_FRACTION = param6
       SURFACE_VOLUME_RATIO = 8000
       LENGTH           = 0.1
       GEOMETRY         = 'CYLINDRICAL'
       COLOR            = 'SILVER' /
-      
-&MATL ID = 'dry pine'
-      DENSITY          = 513.6179
-      CONDUCTIVITY     = 0.1
-      SPECIFIC_HEAT    = 1.0
-      N_REACTIONS      = 1
-      REFERENCE_TEMPERATURE = 300
-      NU_MATL          = 0.1328
-      NU_SPEC          = 0.8672
-      SPEC_ID          = 'WOOD'
-      HEAT_OF_REACTION = 1000
-      MATL_ID          = 'CHAR' /
- 
-&MATL ID = 'MOISTURE'
-      DENSITY          = 1000
-      CONDUCTIVITY     = 0.1
-      SPECIFIC_HEAT    = 4.184
-      N_REACTIONS      = 1
-      REFERENCE_TEMPERATURE = 100
-      NU_SPEC          = 1.0
-      SPEC_ID          = 'WATER VAPOR'
-      HEAT_OF_REACTION = 2500 /
 
-&MATL ID = 'CHAR'
-      DENSITY                = 200
-      CONDUCTIVITY           = 1.0
-      SPECIFIC_HEAT          = 1.6 /
+&CATF OTHER_FILES = 'vegetation_model.txt' /
 
 &PART ID="EXCELSIOR", SAMPLING_FACTOR=1, SURF_ID='wet vegetation', PROP_ID='wood image'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=T /
@@ -75,10 +37,9 @@
       N_PARTICLES=100, MASS_PER_VOLUME=5.489, MULT_ID='FUEL_ARRAY' /
 
 - Fine mesh Platform underneath fuel array and out 40 cm on each side
-&SURF ID='platform',COLOR='GRAY' /
-
-&MOVE ID='mv1', X0=0.6, AXIS=0,1,0, ROTATION_ANGLE=-param8 /
-&GEOM XB=0.6,5.4,-1.45,1.45,-0.2,0, SURF_ID='platform', MOVE_ID='mv1'/
+&SURF ID='platform',COLOR='GRAY'/
+&OBST XB=0.6,0.8,-1.45,1.45,-0.2,0.0,SURF_ID='platform', MULT_ID='platform' / 
+&MULT ID='platform',DXB=0.2,0.2,0,0,paramf6,paramf6, N_UPPER=paramf7 /
 
 - Ignitor
 &RAMP ID='RAMP IGN',T=0,  F=1.0 /
@@ -86,7 +47,7 @@
 &RAMP ID='RAMP IGN',T=20, F=0.0 /
 &RAMP ID='RAMP IGN',T=180, F=0.0 /
 
-&INIT XB=0.6,0.75,-0.60,0.60,0.05,0.20, HRRPUV=333, RAMP_Q='RAMP IGN' /
+&INIT XB=0.6,0.9,-0.60,0.60,0.05,0.35, HRRPUV=333, RAMP_Q='RAMP IGN' /
 
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=T /
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
