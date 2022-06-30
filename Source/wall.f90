@@ -3712,6 +3712,7 @@ ONE_D%TMP(0)     =            MAX(TMPMIN,ONE_D%TMP(1)  *RFACF2+QDXKF)  ! Ghost v
 ONE_D%TMP(NWP+1) =            MAX(TMPMIN,ONE_D%TMP(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
 
 ONE_D%Q_CON_F = ONE_D%Q_CON_F + HTCF*DT_BC_SUB*(TMP_G-0.5_EB*ONE_D%TMP_F)
+ONE_D%TMP_F_OLD = ONE_D%TMP_F  ! Save this value for output of effective HTC
 
 ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
 ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
@@ -3791,7 +3792,6 @@ ONE_D%N_SUBSTEPS = ONE_D%N_SUBSTEPS + 1
 ENDDO SUB_TIMESTEP_LOOP
 
 ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
-ONE_D%TMP_F_OLD = ONE_D%TMP_F  ! Save this value for output of effective HTC
 ONE_D%HEAT_TRANS_COEF = HTCF
 
 ! If any gas massflux or particle mass flux is non-zero or the surface temperature exceeds the ignition temperature,
