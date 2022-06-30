@@ -3,14 +3,14 @@
 &SPEC ID='WATER VAPOR' /
 
 &MATL ID                    = 'GENERIC VEGETATION'
-      DENSITY               = 500.
+      DENSITY               = 513.6179
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT_RAMP    = 'c_v'
       A                     = 36300.
       E                     = 60300.
-      NU_SPEC               = 0.75
+      NU_SPEC               = 0.8672
       SPEC_ID               = 'FUEL VAPOR'
-      NU_MATL               = 0.25
+      NU_MATL               = 0.1328
       MATL_ID               = 'CHAR'
       HEAT_OF_REACTION      = 418. /
 
@@ -37,4 +37,3 @@
 &RAMP ID='c_v', T=  0., F=1.1 /
 &RAMP ID='c_v', T=200., F=2.0 /
 &RAMP ID='c_v', T=800., F=2.0 /
-
