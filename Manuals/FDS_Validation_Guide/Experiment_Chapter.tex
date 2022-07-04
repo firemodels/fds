@@ -1042,6 +1042,33 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \end{figure}
 
 
+\section{Memorial Tunnel Experiments}
+\label{Memorial_Tunnel_Description}
+
+Between 1993 and 1995, 98 fire ventilation experiments were conducted in the decommissioned Memorial Tunnel near Charlestown, West Virginia~\cite{Memorial}. The objective was to assist in the design of the ventilation system for the Central Artery Tunnel Project in Boston, Massachusetts. The fires ranged from 10~MW to 100~MW.
+
+The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at the peak of its semi-circular ceiling, with a 3.2~\% grade uphill from its south to north portal. At each portal, a fan room 4.3~m above the roadway extends 21.3~m into the tunnel. There is also a walkway along the west tunnel wall. A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}. Twenty-four longitudinal fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm).
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=5in]{FIGURES/Memorial_Tunnel/section}
+\caption[Memorial Tunnel cross section]{Sketch of the Memorial Tunnel cross section.}
+\label{Memorial_Tunnel_Cross_Section}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The simulations of the Memorial Tunnel experiments are performed with a 0.4~m uniform grid. The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling.
+
+The fuel used in the experiment is described in the report as a low sulfur No.~2 distillate fuel oil. In the simulations, the fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rate of the fire is specified as a function of time following the curve found in the test report.
+
+The jet fans are modeled as rectangular ducts with a specified volume flow of 45.8~m$^3$/s. This value is slightly higher than that which was reported because it is intended to match the thrust, $F=\rho A u^2$, rather than the volume flow, $\dot{V}=Au$, of the actual fan. Because the actual and modeled fan opening areas are different, it is not possible to match both the thrust and volume flow.
+
+\begin{itemize}
+\item Comparisons of centerline vertical temperature profiles can be found in Section~\ref{Memorial_Tunnel_Temperature_Profiles}.
+\item Comparisons of centerline vertical velocity profiles can be found in Section~\ref{Memorial_Tunnel_Velocity_Profiles}.
+\end{itemize}
+
 \section{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Description}
 

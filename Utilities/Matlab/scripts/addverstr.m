@@ -8,6 +8,7 @@ VerStr_Scale_X   = 0.60;
 VerStr_Scale_Y   = 1.05;
 Font_Name        = 'Times';
 Font_Interpreter = 'TeX';
+Font_Size        = 6;
 
 nvararg = length(varargin);
 
@@ -15,6 +16,7 @@ if nvararg>=1; VerStr_Scale_X   = varargin{1}; end
 if nvararg>=2; VerStr_Scale_Y   = varargin{2}; end
 if nvararg>=3; Font_Name        = varargin{3}; end
 if nvararg>=4; Font_Interpreter = varargin{4}; end
+if nvararg>=5; Font_Size        = varargin{5}; end
 
 if exist(fn,'file')
     VerStr = importdata(fn);
@@ -35,9 +37,9 @@ if exist(fn,'file')
     end
     if isnumeric(VerStr)
         text(X_VerStr_Position,Y_VerStr_Position,['VerStr ',num2str(VerStr)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter','none')
+            'FontSize',Font_Size,'FontName',Font_Name,'Interpreter','none')
     elseif ischar(VerStr{1})
         text(X_VerStr_Position,Y_VerStr_Position,[VerStr], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter','none')
+            'FontSize',Font_Size,'FontName',Font_Name,'Interpreter','none')
     end
 end
