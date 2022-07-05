@@ -287,7 +287,6 @@ REAL(EB) :: TMPA                               !< Ambient temperature (K)
 REAL(EB) :: TMPA4                              !< Ambient temperature to the fourth power (K^4)
 REAL(EB) :: RHOA                               !< Ambient density (kg/m3)
 REAL(EB) :: P_INF=101325._EB                   !< Ambient pressure at the ground (Pa)
-REAL(EB) :: RADIATIVE_FRACTION                 !< Radiative fraction
 REAL(EB) :: CP_GAMMA                           !< \f$ \frac{\gamma}{\gamma-1} \frac{R}{W_1} \f$
 REAL(EB) :: GAMMA=1.4_EB                       !< Ratio of specific heats, typically 1.4
 REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
