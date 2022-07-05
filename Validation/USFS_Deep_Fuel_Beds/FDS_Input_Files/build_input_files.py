@@ -58,14 +58,15 @@ for irow in df.index:
     rg_gap = spacing * math.cos(angle_r)    # horizontal distance between fuel rods.
     dz_ht = rg_gap * math.tan(angle_r)      # vertical distance between fueul rods
     rod_width = 0.1524                      # width of a fuel rod in m. (6 in)
+    raise_part = 0.0762                     # bottom of rods about 3 in above fuel bed
 
     # calculate fuel array parameters
     xpos1 = startx
     xpos2 = xpos1 + rod_width
     if (angle_r == 0.0):
-        zpos1 = 0
+        zpos1 = 0 + raise_part
     else:
-        zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r)
+        zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r) + raise_part
     zpos2 = zpos1 + depth
 
     param_group = [rg_gap] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
