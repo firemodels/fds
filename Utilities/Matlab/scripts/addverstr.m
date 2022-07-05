@@ -8,7 +8,7 @@ VerStr_Scale_X   = 0.60;
 VerStr_Scale_Y   = 1.05;
 Font_Name        = 'Times';
 Font_Interpreter = 'TeX';
-Font_Size        = 6;
+Font_Size        = 10;
 
 nvararg = length(varargin);
 
