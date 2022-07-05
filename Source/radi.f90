@@ -3842,7 +3842,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ENDIF WIDE_BAND_MODEL_IF
 
-   ! Add contribution to source term from a user-specified volumetric heat relase rate
+   ! Add contribution to source term from a user-specified volumetric heat release rate
 
    IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(1)
 
