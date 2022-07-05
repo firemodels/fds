@@ -175,21 +175,23 @@ M = importdata([outdir,'Cold_Flow_Series_1_devc.csv'],',',2);
 E = importdata([expdir,'Cold_Flow_Series_1.csv'],',',2);
 
 for j=1:15
-   mod_time_index = interp1(M.data(:,1),1:length(M.data(:,1)),300*j,'nearest');
+   mod_time_index(j) = interp1(M.data(:,1),1:length(M.data(:,1)),300*j,'nearest');
 end
 
 figure
 
-plot(E.data(:,1),E.data(:,3),'ko-') ; hold on
-plot(M.data(mod_time_index,1)/300,M.data(mod_time_index,2),'ko--') ; hold on
+plot([3 3 9 15 15],[169.4 164.7 292.6 372.4 379.9],'r^') ; hold on
+%plot(E.data(:,1),E.data(:,3),'ko-') ; hold on
+plot(M.data(mod_time_index,1)/300,M.data(mod_time_index,2),'ko-') ; hold on
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-axis([0 16 0 500])
+axis([0 16 0 400])
 legend_handle=legend('Measured','FDS','Location','SouthEast');
 set(legend_handle,'Fontsize',Key_Font_Size);
 xlabel('Number of Fans','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Volume Flow (m³/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+xticks([1 3 5 7 9 11 13 15]);
 
 % add Git revision if file is available
 Git_Filename = [outdir,'Cold_Flow_Series_1_git.txt'];
