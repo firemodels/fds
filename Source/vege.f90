@@ -138,6 +138,7 @@ END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 !> \brief Continue initialialization of level set routines
 !>
 !> \param NM Mesh number
+!> \param MODE Integer flag indicating (1) full initialization, or (2) partial initialization
 !> \details First, retrieve terrain height, Z_LS, from other meshes. Then do various other set up chores.
 
 SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM,MODE)

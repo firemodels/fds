@@ -1,7 +1,7 @@
 !> \brief Global constants, parameters, variables
 !>
-!> \details Each MPI process stores a copy of the GLOBAL_CONSTANTS. It cannot be
-!> assumed that these values are same for each MPI process.
+!> \details Each MPI process stores a copy of the parameters within this module. It cannot be
+!> assumed that these values are the same for each MPI process.
 
 MODULE GLOBAL_CONSTANTS
 
