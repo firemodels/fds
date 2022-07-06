@@ -9092,6 +9092,16 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Special shapes
 
       IF (TRIM(SHAPE)/='null') THEN
+
+         ! specify shape type
+         SELECT CASE(TRIM(SHAPE))
+            CASE('SPHERE');    SHAPE_TYPE = OBST_SPHERE_TYPE
+            CASE('CYLINDER');  SHAPE_TYPE = OBST_CYLINDER_TYPE
+            CASE('CONE');      SHAPE_TYPE = OBST_CONE_TYPE
+            CASE('BOX');       SHAPE_TYPE = OBST_BOX_TYPE
+         END SELECT
+
+         ! detect input errors
          IF ((SHAPE_TYPE==OBST_SPHERE_TYPE .OR. SHAPE_TYPE==OBST_CYLINDER_TYPE .OR. SHAPE_TYPE==OBST_CONE_TYPE) &
             .AND. RADIUS<0._EB) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires RADIUS'
@@ -9114,12 +9124,12 @@ MESH_LOOP: DO NM=1,NMESHES
             OBST_SHAPE_AREA_ADJUST = .FALSE.
             WRITE (LU_ERR,'(A)') 'WARNING: AREA_ADJUST not applied to reoriented SHAPE or SHAPE that spans multiple MESHES.'
          ENDIF
-         SELECT CASE(TRIM(SHAPE))
-            CASE('SPHERE')
-               SHAPE_TYPE = OBST_SPHERE_TYPE
+
+         ! compute shape areas
+         SELECT CASE(SHAPE_TYPE)
+            CASE(OBST_SPHERE_TYPE)
                SHAPE_AREA(1) = 4._EB*PI*RADIUS**2
-            CASE('CYLINDER')
-               SHAPE_TYPE = OBST_CYLINDER_TYPE
+            CASE(OBST_CYLINDER_TYPE)
                IF (OBST_SHAPE_AREA_ADJUST) THEN
                   SHAPE_AREA(1) = CIRCLE_CELL_INTERSECTION_AREA(XYZ(1),XYZ(2),RADIUS,M%XS,M%XF,M%YS,M%YF)
                ELSE
@@ -9128,13 +9138,11 @@ MESH_LOOP: DO NM=1,NMESHES
                SHAPE_AREA(2) = 2._EB*PI*RADIUS*HEIGHT
                SHAPE_AREA(3) = SHAPE_AREA(1)
                CALL ROTATION_MATRIX(ROTMAT,ORIENTATION,THETA)
-            CASE('CONE')
-               SHAPE_TYPE = OBST_CONE_TYPE
+            CASE(OBST_CONE_TYPE)
                SHAPE_AREA(1) = PI*RADIUS*( RADIUS + SQRT(HEIGHT**2 + RADIUS**2) ) - PI*RADIUS**2
                SHAPE_AREA(2) = PI*RADIUS**2
                CALL ROTATION_MATRIX(ROTMAT,ORIENTATION,THETA)
-            CASE('BOX')
-               SHAPE_TYPE = OBST_BOX_TYPE
+            CASE(OBST_BOX_TYPE)
                SHAPE_AREA(1) = LENGTH*WIDTH
                SHAPE_AREA(2) = WIDTH*HEIGHT
                SHAPE_AREA(3) = HEIGHT*LENGTH
