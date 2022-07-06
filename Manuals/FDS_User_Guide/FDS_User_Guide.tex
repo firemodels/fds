@@ -2886,10 +2886,10 @@ This section is labeled as a special topic because normally you do not need to m
 
 \subsubsection{Default Convective Heat Transfer Model}
 
-In an LES calculation, the convective heat transfer coefficient, $h$, is taken as the maximum of its free (natural) and forced forms:
+In an LES calculation, the convective heat transfer coefficient, $h$, is based on the larger of the Nusselt (Nu) numbers for free (natural) and forced convection:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} \right)   \label{q_con}
 \ee
-where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the surface, $T_{\rm w}$ is the wall (surface) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
+where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
 
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
@@ -2929,7 +2929,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{center}
 \end{table}
 
-The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
+The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -3148,7 +3148,9 @@ All obstructions in FDS are assumed to conform to the rectilinear mesh, and all 
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{lstlisting}
-can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
+can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS.
+
+Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object. Add {\ct HORIZONTAL=T} to the {\ct SURF} line if you have specified a cylindrical geometry and you want to ensure that the heat transfer coefficient is appropriate for a horizontal cylinder.
 
 
 \subsection{Special Topic: Solid Phase Numerical Gridding Issues}
@@ -3344,10 +3346,10 @@ FDS has a simple model to extrapolate burning rate data collected from a cone ca
 \end{lstlisting}
 
 \begin{figure}[ht]
-	\centering
-	\includegraphics[width=3.2in]{SCRIPT_FIGURES/cone_demo}
-	\caption[Demonstration of extrapolating cone test data to other heat fluxes.]{Demonstration of extrapolating cone test data to other heat fluxes.}
-	\label{fig:cone_demo}
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/cone_demo}
+\caption[Demonstration of extrapolating cone test data to other heat fluxes.]{Demonstration of extrapolating cone test data to other heat fluxes.}
+\label{fig:cone_demo}
 \end{figure}
 
 \section{Complex Pyrolysis Models}
@@ -6262,10 +6264,10 @@ By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporat
 By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{Ranz} with a B-number. Additional correlations are available by setting {\ct EVAP\_MODEL} on {\ct MISC}. The available options are:
 
 \begin{itemize}
-	\item [-1] uses the Ranz-Marshall correlation with no B-number.
-	\item[0] uses Ranz-Marshall correlation along with an evaporating species B-number applied to both the Nusselt and Sherwood number correlations. This is the default value. This is the M0 model from Sazhin \cite{Sazhin:2006}.
-	\item[1] is the default correlation with the Sherwood number correlation using a B-number based on the Lewis number computed at the film condition. This is the M1 model from Sazhin \cite{Sazhin:2006}.
-	\item[2] is the previous model plus a flux limiting factor applied to the B-number. This is the M2 model from Sazhin \cite{Sazhin:2006}.
+\item [-1] uses the Ranz-Marshall correlation with no B-number.
+\item[0] uses Ranz-Marshall correlation along with an evaporating species B-number applied to both the Nusselt and Sherwood number correlations. This is the default value. This is the M0 model from Sazhin \cite{Sazhin:2006}.
+\item[1] is the default correlation with the Sherwood number correlation using a B-number based on the Lewis number computed at the film condition. This is the M1 model from Sazhin \cite{Sazhin:2006}.
+\item[2] is the previous model plus a flux limiting factor applied to the B-number. This is the M2 model from Sazhin \cite{Sazhin:2006}.
 \end{itemize}
 
 \subsection{Thermal Properties}
@@ -12389,12 +12391,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                                      & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
 {\ct EXTINCTION\_TEMPERATURE}                             & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & -273.                   \\ \hline
-{\ct FREE\_SLIP}                                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
+{\ct FREE\_SLIP}                                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}                 \\ \hline
 {\ct GEOMETRY}                                            & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}                              & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT}                         & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct \footnotesize HEAT\_TRANSFER\_COEFFICIENT\_BACK}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}                               & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct HORIZONTAL}                                          & Logical         & Section~\ref{info:GEOMETRY}               &                     & {\ct F}                 \\ \hline
 {\ct HRRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
 {\ct HT3D}                                                & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct F}           \\ \hline
 {\ct ID}                                                  & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
@@ -12875,10 +12878,10 @@ where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-define
 
 Each time a device or control function changes its logical state, an event is recorded in a comma delimited format in a file called {\ct CHID\_devc\_ctrl\_log.csv}. A row is created for each state change. The format of the file is as follows:
 \begin{lstlisting}
-	Time (s) , Type    , ID    , State   , Value , Units
-	T(1)     , Type(1) , ID(1) , State(1), Val(1), Units(1)
-	.
-	.
+Time (s) , Type    , ID    , State   , Value , Units
+T(1)     , Type(1) , ID(1) , State(1), Val(1), Units(1)
+.
+.
 \end{lstlisting}
 where for the {\ct I}th state change {\ct T(I)} is the time of the state change, {\ct Type(I)} is type of the item that changed state (either {\ct DEVC} or {\ct CTRL}), {\ct ID(I)} is the {\ct ID} of item, {\ct State(I)} is the logical state of the item after the state change ({\ct T} for true or {\ct F} for false), {\ct Val(I)} is item value at the state change, and {\ct Units(I)} are the units associated with the value. No {\ct Value} is written for a logical control function (e.g. a {\ct FUNCTION\_TYPE} or {\ct ALL}, {\ct ANY}, {\ct ONLY}, {\ct AT\_LEAST}, {\ct X\_OF\_N}, {\ct KILL}, or {\ct RESTART}). For {\ct FUNCTION\_TYPE}s of {\ct DEADBAND} and {\ct CUSTOM} the input value to the function is written. No {\ct Units} value is written for a control function. If the device or control function does not have an {\ct ID} defined, then the number of the device or control function is written (i.e, if the item was the 5th device in the input file, then 5 would be written).
 
