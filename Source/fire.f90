@@ -411,7 +411,7 @@ END SUBROUTINE COMBUSTION_MODEL
 
 SUBROUTINE CHECK_AUTO_IGNITION(EXTINCT,TMP_IN,AIT,IIC,JJC,KKC)
 
-! For combustion to proceed, either the local gas temperature must be greater than AIT, or a neighboring cell must be burning.
+! For combustion to proceed the local gas temperature must be greater than AIT unless the cell has been excluded.
 
 LOGICAL, INTENT(INOUT) :: EXTINCT
 REAL(EB), INTENT(IN) :: TMP_IN,AIT
