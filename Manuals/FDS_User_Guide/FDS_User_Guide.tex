@@ -5490,11 +5490,21 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
+\subsubsection*{Pilot Ignition Zone}
+
 The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
 
+\subsubsection*{Pilot Fuel Model}
+
+An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed.  At present, specifying more than one reaction and fuel negates the use of the simple chemistry model, so this method is a bit more cumbersome to set up.  However, it provides a bit more control over the pilot heat release.  For example, it is straight forward to initialize a series of particles with a pilot fuel surface and a controlled mass flux of pilot fuel.
+\begin{lstlisting}
+&REAC FUEL='METHANE', ..., AUTO_IGNITION_TEMPERATURE=600. /
+&REAC FUEL='ETHYLENE', ..., AUTO_IGNITION_TEMPERATURE=-273. /
+\end{lstlisting}
+With the appropriate chemistry defined, the above {\ct REAC} lines will allow for ethylene to be used as a pilot fuel, avoiding an ignition threshold temperature for any cell where ethylene and its oxidizer are present.
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
