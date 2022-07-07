@@ -414,6 +414,7 @@ INTEGER :: MAX_PRIORITY=1                                           !< Maximum n
 INTEGER :: N_PASSIVE_SCALARS=0                                      !< Number of passive scalars
 INTEGER :: N_TOTAL_SCALARS=0                                        !< Number of total scalars, tracked and passive
 INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of chemistry substeps in combustion routine
+INTEGER :: CFT_REACTION_INDEX=1                                     !< Reaction index to base CFT extinction criterion
 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
