@@ -2444,7 +2444,9 @@ A sealed, adiabatic box, 1~m on a side, is filled with 10~kg of spherically-shap
 \end{figure}
 
 
-
+% Intersection of GEOM and INIT for HRRPUV with and without particles
+\label{geom_hrrpuv_init}
+\label{geom_part_init}
 
 
 
@@ -2658,6 +2660,7 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 
 \section{The Restart Feature}
 \label{device_restart}
+\label{clocks_restart}
 
 FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
 
@@ -4871,7 +4874,7 @@ H    & 60                    & 1.33              & Air        \\ \hline
 \end{tabular}
 \end{table}
 
-It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown Fig.~\ref{Needle_TGA_plot_A_B_temp}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 350~$^\circ$C, and 425~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown Fig.~\ref{Needle_TGA_plot_A_B_temp}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -6020,7 +6023,7 @@ A sensitivity analysis is carried out to verify that results are not sensitive t
 
 \subsection{Mass conservation 1 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_1}}{HVAC\_mass\_transport\_conservation\_1})}
 \label{HVAC_mass_transport_conservation_1}
-The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1a} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_1b} presents the species~1 and 2 masses in the left and right compartments.
+The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long with areas of \SI{0.01}{\meter\squared}. The ducts are initialized with species~1 with Duct~A having flow from left to right and duct~B having flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.292}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.292}{\kilogram}. The spatially mirrored behavior is expected of species~2 with ending values of \SI{0.208}{\kilogram}. Fig.~\ref{fig_HVAC_mass_transport_conservation_1a} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_1b} presents the species~1 and 2 masses in the left and right compartments.
 
 \begin{figure}[ht]
 \centering
@@ -6038,7 +6041,7 @@ The two compartments are connected by two ducts, A and B, each being \SI{10}{\me
 
 \subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
 \label{HVAC_mass_transport_conservation_2}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.6 \colon 0.4\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
@@ -6085,8 +6088,8 @@ The left compartment is separated into two sub-compartments, A and B. These sub-
 The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelsius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\kilo\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left to right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
 
 \begin{equation}
-h_{\mbox{\tiny CFD}} = c_p \frac{V(T_{\mbox{\tiny left}}}{2} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
-\label{eq_HVAC_mass_transport_energy}
+	h_{\mbox{\tiny CFD}} = c_p \frac{V(T_{\mbox{\tiny left}}}{2} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
+	\label{eq_HVAC_mass_transport_energy}
 \end{equation}
 
 \begin{figure}[ht]

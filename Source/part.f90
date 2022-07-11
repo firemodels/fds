@@ -2787,7 +2787,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_FILM_PROPERTIES, GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,&
                                GET_MOLECULAR_WEIGHT,GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,&
-                               GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS
+                               GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS,GET_TEMPERATURE
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
@@ -2814,10 +2814,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB) :: C_DROP2 !< Specific heat of particle (J/kg/K)
 REAL(EB) :: CP !< Specific heat (J/kg/K)
 REAL(EB) :: CP_BAR !< Average specific heat (J/kg/K)
-REAL(EB) :: CP_BAR_2 !< Average specific heat (J/kg/K)
 REAL(EB) :: CP_FILM !< Specific heat of the film (J/kg/K) at the film temperature
 REAL(EB) :: D_FILM !< Diffusivity into air of the droplet species (m2/s) at the film temperature
-REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
 REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
 REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
 REAL(EB) :: H1 !< Sensible enthalpy (J/kg/K)
@@ -2926,10 +2924,9 @@ REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
 REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
 INTEGER :: ARRAY_CASE
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
-LOGICAL :: TEMPITER !< Flag to continue temperature search iteration
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
@@ -3480,39 +3477,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H_NEW = H_G_OLD + (H_D_OLD - M_DROP*TMP_DROP_NEW*H_L + Q_CON_WALL + Q_RAD)*WGT
                TMP_G_I = TMP_G
                TMP_G_NEW = TMP_G
-
-               TEMPITER = .TRUE.
-               ITCOUNT = 0
-               ITERATE_TEMP: DO WHILE (TEMPITER)
-                  TEMPITER=.FALSE.
-
-                  ! Compute approximation of d(cp)/dT
-
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR,TMP_G_I)
-                  IF (TMP_G_I > 1._EB) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR_2,TMP_G_I-1._EB)
-                     DCPDT = CP_BAR-CP_BAR_2
-                  ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR_2,TMP_G_I+1._EB)
-                     DCPDT = CP_BAR_2-CP_BAR
-                  ENDIF
-
-                  TMP_G_I = TMP_G_I+(H_NEW-CP_BAR*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP_BAR+TMP_G_I*DCPDT))
-
-                  IF (TMP_G_I < 0._EB) THEN
-                     DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     CYCLE TIME_ITERATION_LOOP
-                  ENDIF
-
-                  ITCOUNT = ITCOUNT + 1
-                  IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
-                  IF (ITCOUNT > 10) THEN
-                     TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
-                     EXIT ITERATE_TEMP
-                  ENDIF
-                  TMP_G_NEW = TMP_G_I
-               ENDDO ITERATE_TEMP
-               TMP_G_NEW = MAX(TMP_G_NEW,TMPMIN)
+               CALL GET_TEMPERATURE(TMP_G_NEW,H_NEW/M_GAS_NEW,ZZ_GET2)
+               IF (TMP_G_NEW < 0._EB) THEN
+                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
+                  CYCLE TIME_ITERATION_LOOP
+               ENDIF
 
                ! Limit gas temperature change
 

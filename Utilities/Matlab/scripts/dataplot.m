@@ -331,6 +331,7 @@ for i=2:n_plots
         end
 
         % Plot the FDS or model data (d2)
+
         if ~exist(d2_Filename,'file')
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
@@ -363,8 +364,13 @@ for i=2:n_plots
                 indices = find(d2_Comp_Start    <=M(:,d2_Ind_Col)    & M(:,d2_Ind_Col)   <=d2_Comp_End & ...
                                d2_Dep_Comp_Start<=M(:,d2_Dep_Col(1)) & M(:,d2_Dep_Col(1))<=d2_Dep_Comp_End);
 
-                M_Ind = M(indices,d2_Ind_Col);
-                M_Dep = sum(M(indices,d2_Dep_Col),2);
+                if ~isempty(indices)
+                    M_Ind = M(indices,d2_Ind_Col);
+                    M_Dep = sum(M(indices,d2_Dep_Col),2);
+                else
+                    M_Ind = -999;
+                    M_Dep = -999;
+                end
 
                 if strcmp(Metric,'max')
                     Save_Predicted_Metric(i,j,1) = max(M_Dep)-d2_Initial_Value;
@@ -430,8 +436,13 @@ for i=2:n_plots
 
                 % Plots
                 indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
-                M_Ind = M(indices,d2_Ind_Col);
-                M_Dep = sum(M(indices,d2_Dep_Col),2);
+                if ~isempty(indices)
+                    M_Ind = M(indices,d2_Ind_Col);
+                    M_Dep = sum(M(indices,d2_Dep_Col),2);
+                else
+                    M_Ind = -999;
+                    M_Dep = -999;
+                end
                 clear d2_Dep_Col;
                 if strcmp(Flip_Axis,'no')
                     X = M_Ind/Scale_Ind;

@@ -384,6 +384,10 @@ IF (RESTART) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL READ_RESTART(T,DT,NM)
    ENDDO
+   IF (ABS(T-T_END)<TWO_EPSILON_EB) THEN
+      STOP_STATUS = SETUP_STOP
+      IF (MY_RANK==0) WRITE(LU_ERR,*) 'ERROR: RESTART initial time equals T_END'
+   ENDIF
    IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    CALL STOP_CHECK(1)
 ENDIF
@@ -1364,6 +1368,11 @@ IF (BAROCLINIC) THEN
    ITERATE_BAROCLINIC_TERM = .TRUE.
 ELSE
    ITERATE_BAROCLINIC_TERM = .FALSE.
+ENDIF
+
+IF(CC_IBM .AND. CC_UNSTRUCTURED_PROJECTION) THEN
+   IF(PREDICTOR) CALL MESH_EXCHANGE(6) ! Exchange linked face averaged velocities to be used in UN_NEW_OTHER estimation.
+   IF(CORRECTOR) CALL MESH_EXCHANGE(3)
 ENDIF
 
 PRESSURE_ITERATION_LOOP: DO
@@ -3607,7 +3616,7 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
                   TC_LOC(N)            = TC_LOC(N)          + SDV%VALUE_1
                   TC_LOC(N+N_DEVC)     = TC_LOC(N+N_DEVC)   + SDV%VALUE_2
                   TC_LOC(N+2*N_DEVC)   = TC_LOC(N+2*N_DEVC) + SDV%VALUE_3
-                  TC_LOC(N+3*N_DEVC)   = TC_LOC(N+3*N_DEVC) + SDV%VALUE_4                  
+                  TC_LOC(N+3*N_DEVC)   = TC_LOC(N+3*N_DEVC) + SDV%VALUE_4
                CASE(2)
                   IF (SDV%VALUE_1<TC2_LOC(1,N)) THEN
                      TC2_LOC(1,N) = SDV%VALUE_1

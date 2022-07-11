@@ -29,6 +29,7 @@ cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
+cd Memorial_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd Montoir_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh $OPTIONS; cd ..

@@ -47,7 +47,6 @@ PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
 PROCESS Casara_Arts_Ribbed_Channel
-PROCESS CHRISTIFIRE
 PROCESS Crown_Fires
 PROCESS CSIRO_Grassland_Fires
 PROCESS CSTB_Tunnel
@@ -74,6 +73,7 @@ PROCESS LLNL_Enclosure
 PROCESS LNG_Dispersion
 PROCESS Loughborough_Jet_Fires
 PROCESS McCaffrey_Plume
+PROCESS Memorial_Tunnel
 PROCESS Montoir_LNG_Fires
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
