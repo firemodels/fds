@@ -17,7 +17,7 @@ for irow in df.index:
 #    file_no = str(df.loc[irow,'RUN_NO'])
     burn_no = str(int(df.loc[irow,'BURN_NO']))    # burn number
     spacing = df.loc[irow,'SPACING']*0.0254       # spacing, in -> m
-    spacing_s = str(int(spacing*98.4252))         # spacing as a string in cm (36->35)
+    spacing_s = str(int(spacing*98.4252))         # spacing as a string in cm (intervals 5cm)
     angle_d =  int(df.loc[irow,'SLOPE'])          # angle in degrees
     angle_s = str(angle_d)                        # angle as a string
     angle_r = math.radians(df.loc[irow,'SLOPE'])  # angle in radians
@@ -31,17 +31,18 @@ for irow in df.index:
     temp = (df.loc[irow,'TMPA']-32.0)/1.8         # ambient temprature F -> C
     hmdy_rh = df.loc[irow,'HUMIDITY']             # ambient humidity
     burned_yn = int(df.loc[irow,'SPREAD'])        # did the fire spread 1=y 0=n.
-    pct_burn = str(df.loc[irow,'BURN_PERCENT'])   # spread percentage (as whole %)
+    pct_burn = int(df.loc[irow,'BURN_PERCENT'])   # spread percentage (as whole %)
+    type_burn = int(round((pct_burn+49)/100,0)) + burned_yn # bad=0 marginal=1 good=2
 
 # Record the baisic parameters:
-    # begin the row for that file, with the filename:
+    # begin the row for that file with the filename:
     param1CHID = "burn"+burn_no+"_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L"
     param_line =[param1CHID+".fds"]
     # CHID and coments about the exp outcome
     param2TITLE = "USFS Deep Fuel Beds burn"+burn_no+" - "+depth_s+" cm deep - "+angle_s+" degree slope - "+spacing_s+" cm spacing"
-    burnstring = ['did not burn','burned sucsessfully']
-    burnpctstr = ['',' with a burn percentage of ' + pct_burn]
-    param3BURN = "During the trial this run " + burnstring[burned_yn] + burnpctstr[burned_yn]
+    burnstring = ['an unsuccessful burn','a marginal burn','a successful burn']
+    burnpctstr = ['.',' with a burn percentage of ' + str(pct_burn)+'.','.']
+    param3BURN = 'In EXP this run is clasified as ' + burnstring[type_burn] + burnpctstr[type_burn]
     param_line = param_line + [param1CHID] + [param2TITLE] + [param3BURN]
     # FDS params tempature, humidity, and moisture content
     param4TEMP = str(round(temp,2))
@@ -67,20 +68,16 @@ for irow in df.index:
         zpos1 = 0 + raise_part
     else:
         zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r) + raise_part
-    zpos2 = zpos1 + depth
-
-    param_group = [rg_gap] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
+    #zpos2 = zpos1 + depth
+    param_group = [rg_gap] + [dz_ht] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [depth]
 
     # calculate obst array parameters
     block_base = 0.2                        # horizontal distance across each obst block.
     bed_base = 4.8 * math.cos(angle_r)      # horizontal distance underneath the tilted fuel bed
     dz_obst = block_base * math.tan(angle_r) # vertical distance between obst block bases
-
     param_group = param_group + [dz_obst] + [math.floor(bed_base/block_base) -1]
 
     param_line = param_line + param_group
-
-
 
     #round off large trailing decimals
     for n in range(n_baisicparams, len(param_line)):
@@ -103,5 +100,5 @@ dfout = pd.DataFrame(FINAL, columns=topline)
     #write paramfile
 dfout.to_csv('paramfile.csv', index=False)
 
-# Build Input files, run swaps.py
+# Build Input files: run swaps.py
 os.system('python ../../../Utilities/Input_File_Tools/swaps.py')
