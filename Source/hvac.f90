@@ -31,8 +31,6 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:):: LEAK_PATH !< Temporary array used to dete
 CHARACTER(255) :: MESSAGE !< Stores ERROR or WARNING message written to LU_ERR
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LHS !< Left hand side of HVAC solution array
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHS !< Right hand side of HVAC solution array
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: JACOBIAN_DR !< Jacobian of HVAC solution for ductruns
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: F_DR !< HVAC solution vector for ductruns with no fan
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: DPSTAR !< Array of extrapoloated presure for each ZONE.
 INTEGER :: ITER !< Current HVAC solver iterations
 INTEGER :: ITER_MAX=10  !< Maximum allowed solver iterations
