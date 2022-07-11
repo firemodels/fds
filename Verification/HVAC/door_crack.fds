@@ -39,7 +39,7 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 &VENT MB='YMAX', SURF_ID='OPEN' / 
 &VENT MB='ZMAX', SURF_ID='OPEN' / 
 
-&SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=T /
 &SLCF PBY=0.0,QUANTITY='MASS FRACTION',SPEC_ID='PROPANE' /
 &SLCF PBY=0.0,QUANTITY='MASS FRACTION',SPEC_ID='OXYGEN' /
 &SLCF PBY=0.0,QUANTITY='PRESSURE' /
@@ -48,6 +48,5 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 &DEVC ID='Velocity', QUANTITY='DUCT VELOCITY',DUCT_ID='DUCT1'/
 &DEVC ID='Pressure Ambient', QUANTITY='NODE PRESSURE',NODE_ID='IN'/
 &DEVC ID='Pressure Compartment', QUANTITY='NODE PRESSURE',NODE_ID='OUT'/
-
 
 &TAIL /

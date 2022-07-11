@@ -135,10 +135,6 @@ INTEGER, PARAMETER :: NEW=2                            !< Argument for DUCT()\%V
 INTEGER, PARAMETER :: GUESS=3                          !< Argument for DUCT()\%VEL()
 INTEGER, PARAMETER :: PREVIOUS=4                       !< Argument for DUCT()\%VEL()
 
-INTEGER, PARAMETER :: NODE1=1                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-INTEGER, PARAMETER :: NODE2=2                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-INTEGER, PARAMETER :: LINEAR_INTERPOLATION=-1          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-
 INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1               !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
@@ -241,7 +237,7 @@ LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
 LOGICAL :: STORE_OLD_VELOCITY=.FALSE.
-LOGICAL :: QFAN_BETA_TEST=.FALSE.
+LOGICAL :: HVAC_QFAN=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
@@ -338,6 +334,7 @@ REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in liquid evaporation algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
 REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
+REAL(EB) :: HVAC_MASS_TRANSPORT_CELL_L=-1._EB  !< Global cell size for HVAC mass transport (m)
 
 REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
 REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)

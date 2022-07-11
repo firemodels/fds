@@ -1363,6 +1363,7 @@ TYPE INITIALIZATION_TYPE
    CHARACTER(LABEL_LENGTH) :: SHAPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID
    CHARACTER(LABEL_LENGTH) :: CTRL_ID
+   CHARACTER(LABEL_LENGTH) :: NODE_ID
    CHARACTER(LABEL_LENGTH) :: ID
    CHARACTER(MESSAGE_LENGTH) :: BULK_DENSITY_FILE
 END TYPE INITIALIZATION_TYPE
@@ -1493,6 +1494,9 @@ TYPE DUCTNODE_TYPE
    INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
    INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
    INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
+   INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
+   INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
+   INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX        !< List of ducts attached to the node
    CHARACTER(LABEL_LENGTH) :: ID                           !< Name of the node
    CHARACTER(LABEL_LENGTH) :: VENT_ID='null'               !< Name of a VENT the node is attached to
@@ -1502,10 +1506,12 @@ TYPE DUCTNODE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIR              !< (i) Duct i lists the node first (-1) or second (+1)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_V             !< Current species mass fractions at an attached CENT
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD           !< Prior iteration species at the node
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ0              !< INIT node mass fraction
    REAL(EB) :: LOSS                                        !< Current node flow loss
    REAL(EB) :: TMP=273.15_EB                               !< Current node temperature (K)
    REAL(EB) :: TMP_OLD                                     !< Prior timestep node temperature (K)
    REAL(EB) :: TMP_V                                       !< Temperature of VENT connected to node (K)
+   REAL(EB) :: TMP0                                        !< INIT derived node temperature (K)
    REAL(EB) :: RHO                                         !< Current node density (kg/m3)
    REAL(EB) :: RHO_OLD                                     !< Prior timestep node density (kg/m3)
    REAL(EB) :: RHO_V                                       !< Node density of VENT connected to node (kg/m3)
@@ -1520,11 +1526,13 @@ TYPE DUCTNODE_TYPE
    REAL(EB) :: P                                           !< Pressure at the node (Pa)
    REAL(EB) :: P_OLD                                       !< Prior timestep pressure at the node (Pa)
    LOGICAL :: UPDATED                                      !< Node has been updated in the current timestep
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_SUM           !< Holds vent total species flow for HVAC_MASS_TRANSPORT
+   REAL(EB) :: E_SUM                                       !< Holds vent total energy flow for HVAC_MASS_TRANSPORT
    LOGICAL :: READ_IN                                      !< Node defintion is explicit in the input file
-   LOGICAL :: FIXED                                        !< Attached ducts have fully defined flow rates
    LOGICAL :: AMBIENT = .FALSE.                            !< Node is connected to the ambient
    LOGICAL :: LEAKAGE=.FALSE.                              !< Node is being used for leakage
    LOGICAL :: VENT=.FALSE.                                 !< Node has an attached vent
+   LOGICAL :: HMT_FILTER=.FALSE.                           !< Filter is in mass transport ductrun
    LOGICAL :: TRANSPORT_PARTICLES=.FALSE.                  !< Particles will be transported through the vent attached to the node
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: IN_MESH           !< (i) Flag indicating node is present in mesh i
 END TYPE DUCTNODE_TYPE
@@ -1548,21 +1556,27 @@ TYPE DUCT_TYPE
    INTEGER :: NODE_INDEX(2)=-1                            !< Nodes connected to ends of duct
    INTEGER :: DEVC_INDEX=-1                               !< Index for DEVC controlling fan, damper, or aircoil
    INTEGER :: CTRL_INDEX=-1                               !< Index for CTRL controlling fan, damper, or aircoil
-   INTEGER :: FAN_INDEX=-1                                !< Type of fan present in duct
+   INTEGER :: FAN_INDEX=-1                                !< Index of fan present in duct
    INTEGER :: AIRCOIL_INDEX=-1                            !< Type of aircoil present in fuct
+   INTEGER :: SURF_INDEX=-1                               !< Surface type for duct wall
    INTEGER :: RAMP_INDEX=0                                !< Index of RAMP used for MASS_FLOW or VOLUME_FLOW
    INTEGER :: RAMP_LOSS_INDEX=0                           !< Ramp for damper flow loss
-   INTEGER :: N_CELLS=1                                   !< Number of duct segments for HVAC mass transport
-   INTEGER :: DUCT_INTERP_TYPE_INDEX                      !< Method of interpolation for HVAC mass transport
-   INTEGER :: SURF_INDEX=-1                               !< Current node density (kg/m3)
+   INTEGER :: N_CELLS=0                                   !< Number of duct segments for HVAC mass transport
+   INTEGER :: N_WAYPOINTS=0                               !< Number of waypoints for a duct
    INTEGER :: LPC_INDEX=-1                                !< Particle class for visualization
-   INTEGER :: QFAN_N=-1                                   !< Number of fans in a ductrun
+   INTEGER :: QFAN_INDEX=-1                               !< Index of duct fan in ductrun fan array
+   INTEGER :: DUCTRUN=-1                                  !< Ductrun duct belongs to
+   INTEGER :: DUCTRUN_INDEX=-1                            !< Index in ductrun duct belongs to
+   INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
+   INTEGER :: N_HT_SEGMENTS=0                             !< Number of heat trasnfer segments
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
    REAL(EB) :: COIL_Q=0._EB                               !< Current heat rate from an aircoil (W)
+   REAL(EB) :: HT_Q=0._EB                                 !< Current duct wall heat transfer rate (W)
    REAL(EB) :: CP_D                                       !< Upstream specific heat (J/kg/K)
    REAL(EB) :: CP_D_OLD                                   !< Prior timestep upstream specific heat (J/kg/K)
    REAL(EB) :: DIAMETER                                   !< Duct diamater (m)
+   REAL(EB) :: PERIMETER                                  !< Duct perimeter (m)
    REAL(EB) :: DP_FAN(2)=0._EB                            !< Prior and current fan pressure (Pa)
    REAL(EB) :: DX=-1._EB                                  !< Duct segment length (m)
    REAL(EB) :: LENGTH                                     !< Duct length (m)
@@ -1582,6 +1596,8 @@ TYPE DUCT_TYPE
    REAL(EB) :: LEAK_PRESSURE_EXPONENT=0.5_EB              !< Pressure exponent in leakage expression
    REAL(EB) :: LEAK_REFERENCE_PRESSURE=4._EB              !< Reference pressure in leakage expression (Pa)
    REAL(EB) :: DISCHARGE_COEFFICIENT=1._EB                !< Discharge coefficient, C, in leakage expression
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: HT_INDEX         !< Index to a duct heat transfer segment
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: SEGMENT_INDEX    !< Mapping of heat transfer segements to mass flow segments
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C            !< Current specific heat in each duct segment (J/kg/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C_OLD        !< Prior timestep specific heat in each duct segment (J/kg/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C           !< Current density in each duct segment (kg/m3)
@@ -1592,25 +1608,80 @@ TYPE DUCT_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD          !< Prior timestep species mass fractions in duct
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C          !< Current species mass fractions in each duct segment
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C_OLD      !< Prior timestep species mass fractions in each duct segment
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VEL_SYSTEM  !< Storage array for duct run velocites (m/s)
-   LOGICAL :: ROUND = .TRUE.                              !< Duct has a round cross-section
-   LOGICAL :: SQUARE = .FALSE.                            !< Duct has a square cross-section
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WAYPOINTS_XYZ !< Waypoints for a duct (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WAYPOINTS_L   !< Length of duct between waypoints (m)
    LOGICAL :: DAMPER = .FALSE.                            !< Duct contains a damper
    LOGICAL :: DAMPER_OPEN = .TRUE.                        !< Duct damper is open
    LOGICAL :: FAN_OPERATING=.TRUE.                        !< Duct fan is operating
    LOGICAL :: COIL_OPERATING=.TRUE.                       !< Duct aircoil is operating
    LOGICAL :: FIXED=.FALSE.                               !< Duct has flow defined
-   LOGICAL :: REVERSE=.FALSE.                             !< Fan direction is opposite that implied by the node order
    LOGICAL :: UPDATED                                     !< Duct solution has been updated in the current timestep
+   LOGICAL :: REVERSE=.FALSE.                             !< Fan direction is opposite that implied by the node order
    LOGICAL :: LEAK_ENTHALPY=.FALSE.                       !< Conserve enthalpy for leakage flow
    LOGICAL :: LEAKAGE=.FALSE.                             !< Duct is being used for bulk leakage
    LOGICAL :: LOCALIZED_LEAKAGE=.FALSE.                   !< Duct is being used for localized leakage
+   LOGICAL :: DUCT_HT=.FALSE.                             !< Duct heat transfer
+   LOGICAL :: ROUND=.TRUE.                                !< Duct is a round duct
    CHARACTER(LABEL_LENGTH) :: ID                          !< Name of duct
    REAL(EB) :: FAN_ON_TIME = 1.E10_EB                     !< Time fan in duct is turned on
    REAL(EB) :: COIL_ON_TIME = 1.E10_EB                    !< Time aircoil in duct is turned on
 END TYPE DUCT_TYPE
 
 TYPE (DUCT_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: DUCT
+
+!>\brief Parameters associated with a duct heat transfer segement
+TYPE DUCT_HT_SEGMENT_TYPE
+   INTEGER:: DUCT_INDEX                       !< Index of duct HT segment is in
+   INTEGER:: SEGMENT_INDEX                    !< Index of duct mass transfer segment HT segement is in
+   INTEGER:: MESH_INDEX                       !< Mesh location of segment
+   INTEGER :: IIG                             !< Gas cell \f$ x \f$ index
+   INTEGER :: JJG                             !< Gas cell \f$ y \f$ index
+   INTEGER :: KKG                             !< Gas cell \f$ z \f$ index
+   INTEGER :: N_SUBSTEPS                      !< Number of sub timesteps for heat transfer solution
+   REAL(EB) :: X                              !< \f$ x \f$ coordinate of segment center in gas cell (m)
+   REAL(EB) :: Y                              !< \f$ y \f$ coordinate of segment center in gas cell (m)
+   REAL(EB) :: Z                              !< \f$ z \f$ coordinate of segment center in gas cell (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:):: TMP  !< Duct wall node temperatures (K)
+   REAL(EB):: TMP_I                           !< Inside wall temperature (K)
+   REAL(EB):: TMP_O                           !< Outside wall temperature (K)
+   REAL(EB):: TMP_G                           !< Gas temperature outside the duct (K)
+   REAL(EB):: RHO_G                           !< Density outside the duct (K)
+   REAL(EB):: VEL_G                           !< Gas velocity outside of the duct (m/s)
+   REAL(EB):: HTC_I                           !< Inside heat trasnfer coefficient (W/m/K)
+   REAL(EB):: HTC_O                           !< Outside heat trasnfer coefficient (W/m/K)
+   REAL(EB):: Q_CON_I                         !< Inside convectve heat flux (W/m2)
+   REAL(EB):: Q_CON_O                         !< Outside convectve heat flux (W/m2)
+   REAL(EB):: Q_RAD_I                         !< Net radiation heat flux insde (W/m2)
+   REAL(EB):: Q_RAD_O                         !< Incident radiation heat flux outside(W/m2)
+   REAL(EB):: KAPPA                           !< Duct absorptivity
+END TYPE DUCT_HT_SEGMENT_TYPE
+
+TYPE(DUCT_HT_SEGMENT_TYPE), POINTER, DIMENSION(:) :: DUCT_HT_SEGMENT
+
+!> \brief array for passing HT segment data between meshes
+
+INTEGER, PARAMETER :: N_HT_SEGMENT_REALS = 10
+INTEGER, PARAMETER :: N_HT_SEGMENT_INTEGERS = 6
+
+TYPE HT_SEGMENT_TRANSFER_TYPE
+   INTEGER:: DUCT_INDEX                       !< Index of duct HT segment is in
+   INTEGER:: SEGMENT_INDEX                    !< Index of duct mass transfer segment HT segement is in
+   INTEGER:: MESH_INDEX                       !< Mesh location of segment
+   INTEGER :: IIG                             !< Gas cell \f$ x \f$ index
+   INTEGER :: JJG                             !< Gas cell \f$ y \f$ index
+   INTEGER :: KKG                             !< Gas cell \f$ z \f$ index
+   REAL(EB) :: X                              !< \f$ x \f$ coordinate of segment center in gas cell (m)
+   REAL(EB) :: Y                              !< \f$ y \f$ coordinate of segment center in gas cell (m)
+   REAL(EB) :: Z                              !< \f$ z \f$ coordinate of segment center in gas cell (m)
+   REAL(EB):: TMP_G                           !< Gas temperature outside the duct (K)
+   REAL(EB):: RHO_G                           !< Density outside the duct (K)
+   REAL(EB):: VEL_G                           !< Gas velocity outside of the duct (m/s)
+   REAL(EB),DIMENSION(:),ALLOCATABLE:: ZZ_G   !< Species mass fractions outside of the duct (kg/kg)
+   REAL(EB):: Q_RAD_O                         !< Incident radiation heat flux outside(W/m2)
+   REAL(EB):: TMP_O                           !< Outside wall temperature (K)
+   REAL(EB):: HTC_O                           !< Outside heat trasnfer coefficient (W/m/K)
+   REAL(EB):: Q_CON_O                         !< Outside convectve heat flux (W/m2)
+END TYPE HT_SEGMENT_TRANSFER_TYPE
 
 !> \brief Parameters associated with HVAC TYPE_ID FAN
 
@@ -1658,13 +1729,32 @@ END TYPE NETWORK_TYPE
 TYPE(NETWORK_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: NETWORK
 
 TYPE DUCTRUN_TYPE
-   INTEGER :: N_DUCTS,N_DUCTNODES,DUCT_INTERP_TYPE_INDEX,N_MATRIX_SYSTEM=-1,N_QFANS=-1,N_FANS
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX,NODE_INDEX,MATRIX_SYSTEM_INDEX,QFAN_INDEX
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHS_SYSTEM_2,LHS_SYSTEM_1,LHS_SYSTEM_2
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHS_SYSTEM_1
+   INTEGER :: N_DUCTS = 0                              !< Number of ducts in ductrun
+   INTEGER :: N_DUCTNODES = 0                          !< Number of ductnodes in ductrun
+   INTEGER :: N_M_DUCTS = 0                            !< Number of ducts in ductrun solution matrix
+   INTEGER :: N_M_DUCTNODES = 0                        !< Number of ductnodes in ductrun solution matrix
+   INTEGER :: N_QFANS = 0                              !< Number of fans (FAN%FAN_TYPE/=1) in ductrun
+   LOGICAL :: MASS_TRANSPORT = .FALSE.                 !< A mass transport duct is in the ductrun
+   REAL(EB) :: DT_CFL = 0._EB                          !< CFL for a ductrun with HVAC mass transport
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: FAN_OPERATING !< If a QFAN is operating
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX    !< List of ducts in ductrun
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX    !< List of node in ductrun
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: FAN_INDEX     !< List of fans in ductrun   
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_M_INDEX  !< Position of ducts being solved for in ductrun solution matrix
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_M_INDEX  !< Position of ductnodes being solved for in ductrun solution matrix
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_D      !< Ductrun upstream duct density (kg/m3) (duct,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_N      !< Ductrun node density (kg/m3) (node,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: ZZ_D     !< Ductrun upstream duct mass fraction (kg/kg) (duct,fan,species)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: ZZ_N     !< Ductrun node mass fraction (kg/kg) (node,fan,species)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TMP_D      !< Ductrun upstream duct temperature (K) (duct,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TMP_N      !< Ductrun node temperature (K) (node,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_D       !< Ductrun upstream duct specific heat (J/kg/K) (duct,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_N       !< Ductrun node specific heat (J/kg/K) (node,fan)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LOSS       !< Ductrun duct loss (duct)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VEL      !< Ductrun duct elocity (m/s) (duct,fan,old/new/guess/previous)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: P        !< Ductrun node pressure (Pa) (node,fan,old/new)
 END TYPE DUCTRUN_TYPE
 
 TYPE(DUCTRUN_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: DUCTRUN
-
 
 END MODULE TYPES

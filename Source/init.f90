@@ -436,6 +436,7 @@ ENDIF
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
+   IF (IN%NODE_ID/='null') CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
