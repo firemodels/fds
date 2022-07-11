@@ -2814,10 +2814,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB) :: C_DROP2 !< Specific heat of particle (J/kg/K)
 REAL(EB) :: CP !< Specific heat (J/kg/K)
 REAL(EB) :: CP_BAR !< Average specific heat (J/kg/K)
-REAL(EB) :: CP_BAR_2 !< Average specific heat (J/kg/K)
 REAL(EB) :: CP_FILM !< Specific heat of the film (J/kg/K) at the film temperature
 REAL(EB) :: D_FILM !< Diffusivity into air of the droplet species (m2/s) at the film temperature
-REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
 REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
 REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
 REAL(EB) :: H1 !< Sensible enthalpy (J/kg/K)
@@ -2926,10 +2924,9 @@ REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
 REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
 INTEGER :: ARRAY_CASE
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
-LOGICAL :: TEMPITER !< Flag to continue temperature search iteration
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
