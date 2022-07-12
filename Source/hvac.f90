@@ -1575,7 +1575,7 @@ ITER_LOOP_2: DO
             DU%TMP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%TMP+DUCTNODE(DU%NODE_INDEX(2))%TMP)
             DU%CP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%CP+DUCTNODE(DU%NODE_INDEX(2))%CP)
             DU%ZZ(:) = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)+DUCTNODE(DU%NODE_INDEX(2))%ZZ(:))
-            DUCT_MF(ND) = 0._EB
+            DUCT_MF(NE%DUCT_INDEX(ND)) = 0._EB
             D_UPDATED(NE%DUCT_INDEX(ND)) = .TRUE.
          ENDIF
          CYCLE DUCT_LOOP_2
@@ -1585,7 +1585,7 @@ ITER_LOOP_2: DO
          DU%TMP_D  = DN%TMP
          DU%CP_D   = DN%CP
          DU%ZZ(:) = DN%ZZ(:)
-         DUCT_MF(ND) = DU%VEL(NEW)*DU%AREA*DU%RHO_D
+         DUCT_MF(NE%DUCT_INDEX(ND)) = DU%VEL(NEW)*DU%AREA*DU%RHO_D
          D_UPDATED(NE%DUCT_INDEX(ND)) = .TRUE.
       ENDIF
    ENDDO DUCT_LOOP_2
@@ -2552,7 +2552,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
       ENDIF
    ENDIF
 
-   NODECLASS: IF(DN%VENT .OR. DN%AMBIENT) THEN
+   NODECLASS: IF (DN%VENT .OR. DN%AMBIENT) THEN
       ! If node is an external node loss is simply based on inflow or outflow or half loss if no flow
       IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(1))%LOCALIZED_LEAKAGE) CYCLE
       IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 1.E-6_EB) THEN
@@ -2562,7 +2562,8 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
       ELSE
          DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + 0.5_EB*(DN%LOSS_ARRAY(1,2)+DN%LOSS_ARRAY(2,1))
       ENDIF
-   ELSEIF(DN%N_DUCTS==2) THEN NODECLASS
+
+   ELSEIF (DN%N_DUCTS==2) THEN NODECLASS
       IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
       IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 1.E-6_EB) THEN
          DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
@@ -2574,11 +2575,12 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
       ENDIF
 
    ELSE NODECLASS
-      ! For an internal node determine how many ducts are outflow
+      ! For an internal node each outlet is weights the inlet flows
       NUM_OUT = 0
       DO ND=1,DN%N_DUCTS
          DU => DUCT(DN%DUCT_INDEX(ND))
-         IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) NUM_OUT = NUM_OUT + 1
+         IF (DU%AREA < TWO_EPSILON_EB) CYCLE
+         IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB) NUM_OUT = NUM_OUT + 1
       ENDDO
 
       NUM_OUT_IF: IF (NUM_OUT==0 .OR. NUM_OUT==DN%N_DUCTS) THEN
@@ -2593,52 +2595,21 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
             DU%TOTAL_LOSS = DU%TOTAL_LOSS + LOSS_SUM / (DN%N_DUCTS-1) / DN%N_DUCTS
          ENDDO
 
-      ELSEIF (NUM_OUT==1) THEN NUM_OUT_IF
-         ! If one duct is outflow weight the inflowing losses based area ratios
-         DO ND=1,DN%N_DUCTS
-            DU => DUCT(DN%DUCT_INDEX(ND))
-            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) <-1.E-6_EB) THEN
-               NUM_OUT = ND
-               EXIT
-            ENDIF
-         ENDDO
-         DO ND=1,DN%N_DUCTS
-            IF (ND==NUM_OUT) CYCLE
-            DU => DUCT(DN%DUCT_INDEX(ND))
-            DU%TOTAL_LOSS = DU%TOTAL_LOSS + DN%LOSS_ARRAY(ND,NUM_OUT) * (DU%AREA/DUCT(DN%DUCT_INDEX(NUM_OUT))%AREA)**2
-         ENDDO
-
-      ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN NUM_OUT_IF
-         ! If one duct is inflow simply assign the losses of the inflowing duct
-         DO ND=1,DN%N_DUCTS
-            DU => DUCT(DN%DUCT_INDEX(ND))
-            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) THEN
-               CYCLE
-            ELSE
-               NUM_OUT = ND
-               EXIT
-            ENDIF
-         ENDDO
-         DO ND=1,DN%N_DUCTS
-            IF (ND/=NUM_OUT) &
-               DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS + DN%LOSS_ARRAY(NUM_OUT,ND)
-         ENDDO
-
       ELSE NUM_OUT_IF
-         ! If some are inflow and sum are outflow weight outflow losses as fraction of inflow volume flow
+         ! Weight the outflowing losses based on fraction of inflow volume flow
+         VFLOW = 0._EB
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF(.NOT. DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB)  VFLOW = VFLOW + (ABS(DU%VEL(PREVIOUS))+TWO_EPSILON_EB)*DU%AREA
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) > 0._EB) VFLOW = VFLOW + ABS(DU%VEL(PREVIOUS)*DU%AREA)
          ENDDO
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) THEN
-               DO ND2=1,DN%N_DUCTS
-                  DU2 => DUCT(DN%DUCT_INDEX(ND2))
-                  IF (.NOT. DU2%VEL(PREVIOUS)*DN%DIR(ND2) < -1.E-6_EB) DU%TOTAL_LOSS = DU%TOTAL_LOSS + &
-                     (ABS(DU2%VEL(PREVIOUS))+TWO_EPSILON_EB)*DU2%AREA/VFLOW*DN%LOSS_ARRAY(ND2,ND)
-               ENDDO
-            ENDIF
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) > 0._EB) CYCLE
+            DO ND2=1,DN%N_DUCTS
+               DU2 => DUCT(DN%DUCT_INDEX(ND2))
+               IF (ND == ND2 .OR. DU2%VEL(PREVIOUS)*DN%DIR(ND2) <=0._EB) CYCLE
+               DU%TOTAL_LOSS = DU%TOTAL_LOSS + DN%LOSS_ARRAY(ND2,ND) * ABS(DU2%VEL(PREVIOUS)*DU2%AREA)/VFLOW
+            ENDDO
          ENDDO
       ENDIF NUM_OUT_IF
    ENDIF NODECLASS
@@ -3927,6 +3898,7 @@ DO ND = 1, DR%N_M_DUCTS
    ELSE
       DP_FAN = 0._EB
    ENDIF
+
    RHS(ND) = DR%VEL(ND,NF,OLD)+DT_QF/DU%LENGTH*((HEAD+RGZ+DP_FAN)/DR%RHO_D(ND,NF) + &
                    0.5_EB*DR%LOSS(ND,NF)*ABS(DR%VEL(ND,NF,PREVIOUS))*DR%VEL(ND,NF,GUESS))
 ENDDO
@@ -4127,7 +4099,7 @@ NODELOOP : DO NN=1,DR%N_DUCTNODES
          DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(2))%AREA/AREA)**2
       ELSE
          D_INDEX = DUCT(DN%DUCT_INDEX(1))%DUCTRUN_INDEX
-         DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(1))%AREA/AREA)**2
+         IF (D_INDEX > 0) DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(1))%AREA/AREA)**2
       ENDIF
    ENDIF
 
@@ -4148,9 +4120,11 @@ NODELOOP : DO NN=1,DR%N_DUCTNODES
       ELSE
          DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + 0.5_EB*(DN%LOSS_ARRAY(1,2)+DN%LOSS_ARRAY(2,1))
       ENDIF
+
    ELSEIF(DN%N_DUCTS==2) THEN NODECLASS
-      D_INDEX = DUCT(DN%DUCT_INDEX(2))%DUCTRUN_INDEX
-      DM_INDEX = DUCT(DN%DUCT_INDEX(2))%DUCTRUN_M_INDEX
+      D_INDEX = DUCT(DN%DUCT_INDEX(1))%DUCTRUN_INDEX
+      IF (D_INDEX <=0) CYCLE NODELOOP
+      DM_INDEX = DUCT(DN%DUCT_INDEX(1))%DUCTRUN_M_INDEX
       IF (DM_INDEX <=0) THEN
          DVEL = DUCT(DN%DUCT_INDEX(1))%VEL(NEW)
       ELSE
@@ -4165,107 +4139,61 @@ NODELOOP : DO NN=1,DR%N_DUCTNODES
       ENDIF
 
    ELSE NODECLASS
-      ! For an internal node determine how many ducts are outflow
+      ! For an internal node each outlet is weights the inlet flows
       NUM_OUT = 0
       DO ND=1,DN%N_DUCTS
+         DU => DUCT(DN%DUCT_INDEX(ND))
+         IF (DU%AREA < TWO_EPSILON_EB) CYCLE
          DM_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_M_INDEX
          IF (DM_INDEX <=0) THEN
             DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
          ELSE
             DVEL = DR%VEL(DM_INDEX,NF,OLD)
          ENDIF
-         IF (DVEL*DN%DIR(ND) < -1.E-6_EB) NUM_OUT = NUM_OUT + 1
+         IF (DVEL*DN%DIR(ND) < 0._EB) NUM_OUT = NUM_OUT + 1
       ENDDO
 
       NUM_OUT_IF: IF (NUM_OUT==0 .OR. NUM_OUT==DN%N_DUCTS) THEN
          ! If all are inflow or outflow each duct gets the average of its inflowing losses normalized by the number of ducts
          DO ND=1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
             LOSS_SUM = 0._EB
             DO ND2=1,DN%N_DUCTS
                IF (ND2==ND) CYCLE
                LOSS_SUM = LOSS_SUM + DN%LOSS_ARRAY(ND2,ND)
             ENDDO
-            D_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_INDEX
-            DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + LOSS_SUM / (DN%N_DUCTS-1) / DN%N_DUCTS
+            D_INDEX = DU%DUCTRUN_INDEX
+            IF (D_INDEX > 0) DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + LOSS_SUM / (DN%N_DUCTS-1) / DN%N_DUCTS
          ENDDO
-
-      ELSEIF (NUM_OUT==1) THEN NUM_OUT_IF
-         ! If one duct is outflow weight the inflowing losses based area ratios
-         DO ND=1,DN%N_DUCTS
-            DM_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_M_INDEX
-            IF (DM_INDEX <=0) THEN
-               DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
-            ELSE
-               DVEL = DR%VEL(DM_INDEX,NF,OLD)
-            ENDIF
-            IF (DVEL*DN%DIR(ND) < -1.E-6_EB) THEN
-               NUM_OUT = ND
-               EXIT
-            ENDIF
-         ENDDO
-         DO ND=1,DN%N_DUCTS
-            IF (ND==NUM_OUT) CYCLE
-            DU => DUCT(DN%DUCT_INDEX(ND))
-            D_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_INDEX
-            DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + DN%LOSS_ARRAY(ND,NUM_OUT) * (DU%AREA/DUCT(DN%DUCT_INDEX(NUM_OUT))%AREA)**2
-         ENDDO
-
-      ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN NUM_OUT_IF
-         ! If one duct is inflow simply assign the losses of the inflowing duct
-         DO ND=1,DN%N_DUCTS
-            DM_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_M_INDEX
-            IF (DM_INDEX <=0) THEN
-               DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
-            ELSE
-               DVEL = DR%VEL(DM_INDEX,NF,OLD)
-            ENDIF
-            IF (DVEL*DN%DIR(ND) < -1.E-6_EB) THEN
-               CYCLE
-            ELSE
-               NUM_OUT = ND
-               EXIT
-            ENDIF
-         ENDDO
-         DO ND=1,DN%N_DUCTS
-            IF (ND/=NUM_OUT) THEN
-               D_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_INDEX
-               DR%LOSS(D_INDEX,NF)  = DR%LOSS(D_INDEX,NF) + DN%LOSS_ARRAY(NUM_OUT,ND)
-            ENDIF
-         ENDDO
-
+      
       ELSE NUM_OUT_IF
-         ! If some are inflow and some are outflow weight outflow losses as fraction of inflow volume flow
+         ! Weight the outflowing losses based on fraction of inflow volume flow
+         VFLOW = 0._EB
          DO ND=1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
             DM_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_M_INDEX
             IF (DM_INDEX <=0) THEN
                DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
             ELSE
                DVEL = DR%VEL(DM_INDEX,NF,OLD)
             ENDIF
-            IF (DVEL*DN%DIR(ND) < -1.E-6_EB)  &
-               VFLOW = VFLOW + (ABS(DVEL)+TWO_EPSILON_EB)*DU%AREA
+            IF (DVEL*DN%DIR(ND) > 0._EB) VFLOW = VFLOW + ABS(DVEL*DU%AREA)
          ENDDO
          DO ND=1,DN%N_DUCTS
-            D_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_INDEX
-            DM_INDEX = DUCT(DN%DUCT_INDEX(ND))%DUCTRUN_M_INDEX
-            IF (DM_INDEX <=0) THEN
-               DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
-            ELSE
-               DVEL = DR%VEL(DM_INDEX,NF,OLD)
-            ENDIF
-            IF (DVEL*DN%DIR(ND) < -1.E-6_EB) THEN
-               DO ND2=1,DN%N_DUCTS
-                  DM_INDEX = DUCT(DN%DUCT_INDEX(ND2))%DUCTRUN_M_INDEX
-                  IF (DM_INDEX <=0) THEN
-                     DVEL = DUCT(DN%DUCT_INDEX(ND))%VEL(NEW)
-                  ELSE
-                     DVEL = DR%VEL(DM_INDEX,NF,OLD)
-                  ENDIF
-                  IF (.NOT. DVEL < -1.E-6_EB) &
-                     DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + &
-                     (ABS(DVEL)+TWO_EPSILON_EB)*DU2%AREA/VFLOW*DN%LOSS_ARRAY(ND2,ND)
-               ENDDO
-            ENDIF
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            D_INDEX = DU%DUCTRUN_INDEX
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) > 0._EB .OR. D_INDEX <=0) CYCLE
+            DO ND2=1,DN%N_DUCTS
+               DU2 => DUCT(DN%DUCT_INDEX(ND2))
+               DM_INDEX = DUCT(DN%DUCT_INDEX(ND2))%DUCTRUN_M_INDEX
+               IF (DM_INDEX <=0) THEN
+                  DVEL = DUCT(DN%DUCT_INDEX(ND2))%VEL(NEW)
+               ELSE
+                  DVEL = DR%VEL(DM_INDEX,NF,OLD)
+               ENDIF
+               IF (ND == ND2 .OR. DVEL*DN%DIR(ND2) <=0._EB) CYCLE
+               DR%LOSS(D_INDEX,NF) = DR%LOSS(D_INDEX,NF) + DN%LOSS_ARRAY(ND2,ND) * ABS(DVEL*DU2%AREA)/VFLOW
+            ENDDO
          ENDDO
       ENDIF NUM_OUT_IF
    ENDIF NODECLASS
@@ -4273,6 +4201,7 @@ ENDDO NODELOOP
 
 DO ND = 1, DR%N_DUCTS
    DU => DUCT(DR%DUCT_INDEX(ND))
+   IF (DU%AREA < TWO_EPSILON_EB) CYCLE
    IF (DU%ROUGHNESS > 0._EB) THEN
       DM_INDEX = DU%DUCTRUN_M_INDEX
       IF (DM_INDEX <=0) THEN
@@ -4323,7 +4252,7 @@ DUCTLOOP: DO ND=1,DR%N_DUCTS
    IF (DR%DUCT_M_INDEX(ND)<=0) THEN
       DVEL = DU%VEL(NEW)
    ELSE
-      DVEL = DR%VEL(DR%DUCT_M_INDEX(ND),NF,NEW)
+      DVEL = DR%VEL(ND,NF,NEW)
    ENDIF
    IF (ABS(DVEL) > TWO_EPSILON_EB) THEN
       IF (DVEL>0._EB) THEN
