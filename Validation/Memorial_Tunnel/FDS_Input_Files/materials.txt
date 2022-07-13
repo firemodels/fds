@@ -1,0 +1,49 @@
+
+&MATL ID            = 'CONCRETE'
+      SPECIFIC_HEAT = 1.20
+      DENSITY       = 2000.0
+      EMISSIVITY    = 0.9
+      CONDUCTIVITY  = 1.2 /
+
+&MATL ID            = 'INSBC'
+      SPECIFIC_HEAT = 1.1
+      DENSITY       = 900.0
+      EMISSIVITY    = 0.5
+      CONDUCTIVITY  = 0.21 /
+
+&MATL ID            = 'ROAD_SURFACE'
+      SPECIFIC_HEAT = 1.2
+      DENSITY       = 2000.0
+      EMISSIVITY    = 0.9
+      CONDUCTIVITY  = 1.2 /
+
+&SURF ID                  = 'TUNNEL_WALL_INS'
+      MATL_ID(1:2,1)      = 'INSBC','CONCRETE'
+      COLOR               = 'BLUE'
+      BACKING             = 'INSULATED'
+      THICKNESS(1:2)      = 0.15,0.6
+      ROUGHNESS           = 0.05 /
+
+&SURF ID          = 'TUNNEL_WALL'
+      MATL_ID     = 'CONCRETE'
+      COLOR       = 'GRAY'
+      BACKING     = 'INSULATED'
+      THICKNESS   = 0.6
+      ROUGHNESS   = 0.05
+      DEFAULT     = T /
+
+&SURF ID          = 'ROAD'
+      MATL_ID     = 'CONCRETE'
+      COLOR       = 'BLACK'
+      BACKING     = 'INSULATED'
+      ROUGHNESS   = 0.05
+      THICKNESS   = 0.6 /
+
+&SURF ID          = 'CAR'
+      COLOR       = 'ORCHID'
+      ROUGHNESS   = 0.05 /
+
+&SURF ID          = 'COVER'
+      COLOR       = 'BRICK'
+      ROUGHNESS   = 0.05 /
+
