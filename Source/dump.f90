@@ -2644,7 +2644,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    ENDIF
    IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
       WRITE(LU_OUTPUT,'(6X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):  ', AUTO_IGNITION_TEMPERATURE - TMPM
+      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):  ', RN%AUTO_IGNIT_TMP - TMPM
       WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C): ', RN%CRIT_FLAME_TMP - TMPM
    ENDIF
    IF (SIM_MODE/=DNS_MODE) THEN
