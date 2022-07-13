@@ -1570,6 +1570,7 @@ TYPE DUCT_TYPE
    INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
    INTEGER :: N_HT_SEGMENTS=0                             !< Number of heat trasnfer segments
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
+   REAL(EB) :: AREA_OLD                                   !< Prior timestep duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
    REAL(EB) :: COIL_Q=0._EB                               !< Current heat rate from an aircoil (W)
    REAL(EB) :: HT_Q=0._EB                                 !< Current duct wall heat transfer rate (W)
