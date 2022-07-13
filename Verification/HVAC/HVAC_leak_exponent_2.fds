@@ -4,6 +4,7 @@
 &MULT ID='mesh', DX=0.96, DY=0.96, DZ=1.20, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &TIME T_END=300. /
+&RADI RADIATION=F/
 
 &MATL ID            = 'STEEL'
       SPECIFIC_HEAT = 0.465
