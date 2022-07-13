@@ -15,9 +15,6 @@
 
 &OBST XB=608.0,614.4,-2.0,2.0,0.4,0.8, SURF_IDS='FIRE','COVER','COVER' /
 
-&RAMP ID='RAMP_FIRE', T=   0., F= 0.008 /
-&RAMP ID='RAMP_FIRE', T=   0., F= 0.005 /
-&RAMP ID='RAMP_FIRE', T=   0., F= 0.016 /
 &RAMP ID='RAMP_FIRE', T=   0., F= 0.014 /
 &RAMP ID='RAMP_FIRE', T=   2., F= 0.181 /
 &RAMP ID='RAMP_FIRE', T=  20., F= 0.597 /
