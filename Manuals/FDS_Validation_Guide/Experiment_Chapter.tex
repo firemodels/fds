@@ -631,6 +631,8 @@ Under the assumption that Air contains 383~ppm CO$_2$ and water vapor correspond
 
 The pilot ring is modeled with a ``pilot fuel model''.  We use 36 particles arranged in a uniform ring around the burner.  The mass flow rate of ethylene from each particle is set to achieve the total 1 kW from the pilot ring.  In the pilot fuel model, the fuel stream from the pilot particles sees an auto-ignition temperature (AIT) of 0 K.  That is, fuel emanating from the pilot particles is not subject to an ignition temperature threshold.  Further, this fuel undergoes simple 1-step, fast chemistry.  The fuel emanating from the main burner (for each different fuel type, including ethylene) undergoes 2-step, fast chemistry as discussed above and is subject to an ignition temperature threshold with the AIT for each fuel taken from Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  Likewise, the critical flame temperatures for each fuel are taken from ~\cite{SFPE:Beyler}.  While there are now 3 chemical reactions for each case (a pilot fuel reaction plus the two main fuel reactions), each with its own ``fuel'', the CFT for the extinction model is based on the fuel for the main burner first step reaction, either methane, ethylene, propylene, or propane.
 
+The burner surface temperature was modeled by specifying a 2.54 cm thick surface made of sand.  The back side temperature was held constant at \SI{25}{\degreeCelsius} to match the water cooled burner in the experiment.
+
 The radiative fraction has been predicted rather than specified in all simulations.
 
 \section{FM/FPRF Data Center Experiments}
