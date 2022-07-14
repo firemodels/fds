@@ -5,7 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-# good burn: 136, 144, marginal burn: 41,80 no burn: 30,60
+# good burn: 136, 114, marginal burn: 41,80 no burn: 30,60
 
 #$QFDS $DEBUG $QUEUE -p 16 -d $INDIR burn136_120D_30S_35L.fds
 $QFDS $DEBUG $QUEUE -p 16 -d $INDIR burn114_120D_18S_35L.fds
