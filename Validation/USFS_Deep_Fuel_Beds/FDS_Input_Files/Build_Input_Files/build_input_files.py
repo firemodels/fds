@@ -100,5 +100,8 @@ dfout = pd.DataFrame(FINAL, columns=topline)
     #write paramfile
 dfout.to_csv('paramfile.csv', index=False)
 
-# Build Input files: run swaps.py
-os.system('python ../../../Utilities/Input_File_Tools/swaps.py')
+# Build input files: run swaps.py
+os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
+
+# Move inpupt files up on level to FDS_Input_Files
+os.system('mv ./burn*.fds ../.')
