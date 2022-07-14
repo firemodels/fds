@@ -57,4 +57,7 @@ dfout = pd.DataFrame(FINAL, columns=topline)
 dfout.to_csv('paramfile.csv', index=False)
 
 # build input files: run swaps.py
-os.system('python ../../../Utilities/Input_File_Tools/swaps.py')
+os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
+
+# move input files up one level
+os.system('mv file*.fds ../.')
