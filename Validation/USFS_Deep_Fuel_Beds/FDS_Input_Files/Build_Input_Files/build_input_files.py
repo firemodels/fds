@@ -103,5 +103,5 @@ dfout.to_csv('paramfile.csv', index=False)
 # Build input files: run swaps.py
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
-# Move inpupt files up on level to FDS_Input_Files
+# Move inpupt files up one level to FDS_Input_Files
 os.system('mv ./burn*.fds ../.')
