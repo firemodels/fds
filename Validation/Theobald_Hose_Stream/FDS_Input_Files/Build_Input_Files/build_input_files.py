@@ -33,7 +33,7 @@ for irow in df.index:
     noz_A = str(int(df.loc[irow,'firing angle (deg.)']))
 
 # make the row for that file
-    CHID = "file"+file_num+"_nozzle"+noz_name+"_"+rep_0(noz_D)+"D_"+rep_0(noz_P)+"P_"+noz_A+"A"
+    CHID = "Theobald_Test_"+file_num #+"_nozzle"+noz_name+"_"+rep_0(noz_D)+"D_"+rep_0(noz_P)+"P_"+noz_A+"A"
     filename = CHID + ".fds"
     T_str = "Theobald 1981 hose stream test series. nozzle"
     TITLE = T_str+noz_name+"- "+ noz_D+"mm diameter- "+noz_P+"bar pressure- "+noz_A+" degree angle"
@@ -60,4 +60,4 @@ dfout.to_csv('paramfile.csv', index=False)
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
 # move input files up one level
-os.system('mv file*.fds ../.')
+os.system('mv Theobald_Test_*.fds ../.')
