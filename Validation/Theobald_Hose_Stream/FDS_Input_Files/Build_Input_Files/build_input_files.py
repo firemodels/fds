@@ -33,16 +33,22 @@ for irow in df.index:
     noz_A = str(int(df.loc[irow,'firing angle (deg.)']))
 
 # make the row for that file
-    CHID = "Theobald_Test_"+file_num #+"_nozzle"+noz_name+"_"+rep_0(noz_D)+"D_"+rep_0(noz_P)+"P_"+noz_A+"A"
+    CHID = "Theobald_Test_" + file_num
     filename = CHID + ".fds"
     T_str = "Theobald 1981 hose stream test series. nozzle"
-    TITLE = T_str+noz_name+"- "+ noz_D+"mm diameter- "+noz_P+"bar pressure- "+noz_A+" degree angle"
+    TITLE = T_str+noz_name+"- "+noz_D+"mm diameter- "+noz_P+"bar pressure- "+noz_A+" degree angle"
 
-    ORIENT3 = round(math.tan(math.radians(noz_angle)),2)           # z of orientation vector (x is 1)
-    partvelo = 3.71*math.sqrt(noz_pres*14.504)              # velocity in m/s, (bar->psi before calc)
-    flowrate = round((partvelo*math.pi*(noz_dmtr/2.0)**2)*60000.0,2) # flow rate in L/min (from m3/s)
-    partvelo = round(partvelo,3)
-    paramline = [filename]+[CHID]+[TITLE]+[partvelo]+[flowrate]+[ORIENT3]+[max_range]+[max_range+.1]
+    orient_z = round(math.tan(math.radians(noz_angle)),2)           # z of orientation vector (1,0,z)
+    efx_velo = 3.71*math.sqrt(noz_pres*14.504)       # efflux velocity in m/s, (bar->psi before calc)
+    flowrate = round((efx_velo*math.pi*(noz_dmtr/2.0)**2)*60000.0,2) # flow rate in L/min (from m3/s)
+    We = 13864.0*noz_dmtr*efx_velo**2              # Weber Number (@ 20C, diameter(m), velocity(m/s))
+    Re = 996605.43*noz_dmtr*efx_velo            # Reynolds Number (@ 20C, diameter(m), velocity(m/s))
+    breaklength50 = 1.7*noz_dmtr*(We**0.5)*(Re*10e-4)**(-0.625) # length@ stream 50% discontinuous(m)
+
+    fdsbreaklength = breaklength50*0.75        # FDS PRIMARY_BREAKUP_LENGTH (m)
+
+    paramline = [filename] + [CHID] + [TITLE] + [round(efx_velo,3)] + [flowrate] + [orient_z]
+    paramline = paramline  + [max_range] + [round((max_range+0.1),1)] + [round(fdsbreaklength,2)]
 
 # add paramline to FINAL matrix for each irow
     FINAL = FINAL + [paramline]
@@ -59,5 +65,5 @@ dfout.to_csv('paramfile.csv', index=False)
 # build input files: run swaps.py
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
-# move input files up one level
+# Move inpupt files up one level to FDS_Input_Files
 os.system('mv Theobald_Test_*.fds ../.')
