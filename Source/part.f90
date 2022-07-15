@@ -987,7 +987,7 @@ IN_Z0 = X_OFFSET + IN%Z0
 ! Cut off parts of the INIT region that are outside the current mesh
 
 IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
-! Skip mesh than is contained completely within a ring
+! Skip mesh that is contained completely within a ring
 IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
 X1 = MAX(IN_X1,XS)
 X2 = MIN(IN_X2,XF)
