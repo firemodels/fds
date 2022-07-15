@@ -6689,11 +6689,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDDO
             IF (MOISTURE_FRACTION(NL)>TWO_EPSILON_EB .AND.  MATL_MASS_FRACTION(NL,NN)>TWO_EPSILON_EB) THEN
                IF (MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S < 1._EB) THEN
-                  MATERIAL(NNN)%RHO_S = MATERIAL(NNN)%RHO_S/&
-                                        (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
+                  SF%DENSITY_ADJUST_FACTOR(NL,NN) = 1._EB / &
+                                                   (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
                ENDIF
             ENDIF
-            SUM_D = SUM_D + MATL_MASS_FRACTION(NL,NN)/MATERIAL(NNN)%RHO_S
+            SUM_D = SUM_D + MATL_MASS_FRACTION(NL,NN)/(SF%DENSITY_ADJUST_FACTOR(NL,NN)*MATERIAL(NNN)%RHO_S)
          ENDDO
          RHO_DRY = 1._EB/SUM_D
          SF%PACKING_RATIO(NL) = MASS_PER_VOLUME(NL)/RHO_DRY
@@ -7208,9 +7208,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
             IF (MATL_NAME(NNN)==NAME_LIST(N_LIST)) THEN
                INDEX_LIST(N_LIST) = NNN
                SF%LAYER_MATL_INDEX(NL,NN) = NNN
-               SF%LAYER_DENSITY(NL) = SF%LAYER_DENSITY(NL)+SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S
-               EMISSIVITY = EMISSIVITY + &
-                  MATERIAL(NNN)%EMISSIVITY*SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S ! volume based
+               SF%LAYER_DENSITY(NL) = SF%LAYER_DENSITY(NL) + SF%LAYER_MATL_FRAC(NL,NN) / &
+                                      (SF%DENSITY_ADJUST_FACTOR(NL,NN)*MATERIAL(NNN)%RHO_S)
+               EMISSIVITY = EMISSIVITY + MATERIAL(NNN)%EMISSIVITY*SF%LAYER_MATL_FRAC(NL,NN) / &
+                                         (SF%DENSITY_ADJUST_FACTOR(NL,NN)*MATERIAL(NNN)%RHO_S)
             ENDIF
          ENDDO
          IF (INDEX_LIST(N_LIST)<0) THEN
@@ -8075,7 +8076,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          DO NN=1,SF%N_LAYER_MATL(NL)
             NNN = SF%LAYER_MATL_INDEX(NL,NN)
             ML => MATERIAL(NNN)
-            VOLFRAC = SF%LAYER_MATL_FRAC(NL,NNN)*SF%LAYER_DENSITY(NL)/ML%RHO_S
+            VOLFRAC = SF%LAYER_MATL_FRAC(NL,NNN)*SF%LAYER_DENSITY(NL)/(SF%DENSITY_ADJUST_FACTOR(NL,NN)*ML%RHO_S)
             VOLSUM = VOLSUM + VOLFRAC
             SF%LAYER_POROSITY(NL) = SF%LAYER_POROSITY(NL) + VOLFRAC*ML%POROSITY
          ENDDO
@@ -8243,7 +8244,9 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    CALL GET_WALL_NODE_WEIGHTS(SF%N_CELLS_INI,SF%N_LAYERS,SF%N_LAYER_CELLS,SF%LAYER_THICKNESS,SF%GEOMETRY, &
          SF%X_S,SF%LAYER_DIVIDE,SF%DX,SF%RDX,SF%RDXN,SF%DX_WGT,SF%DXF,SF%DXB,SF%LAYER_INDEX,SF%MF_FRAC,SF%INNER_RADIUS)
 
-   ! Initialize the material densities of the solid
+   ! Initialize the material component densities of the solid, SF%RHO_0(II,N),
+   ! where II is the interior cell index and N is the surface material index.
+   ! The surface material indices are a subset of the full list of materials.
 
    SF%RHO_0 = 0._EB
 
@@ -8254,6 +8257,25 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
          DO N=1,SF%N_MATL
             IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) &
                SF%RHO_0(II,N) = SF%LAYER_MATL_FRAC(IL,NN)*SF%LAYER_DENSITY(IL)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Create an array of material densities, SF%RHO_S(IL,N), where IL is the
+   ! layer index and N is the surface material index. Notice that this array
+   ! is similar the actual density of the material, ML%RHO_S, but it is
+   ! sometimes adjusted to account for the fact that moisture might be added to
+   ! a material's void space, changing its density but not the volume of the
+   ! layer.
+
+   DO IL=1,SF%N_LAYERS
+      DO NN=1,SF%N_LAYER_MATL(IL)
+         DO N=1,SF%N_MATL
+            IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) THEN
+               SF%RHO_S(IL,N) = MATERIAL(SF%MATL_INDEX(N))%RHO_S*SF%DENSITY_ADJUST_FACTOR(IL,NN)
+            ELSE
+               SF%RHO_S(IL,N) = MATERIAL(SF%MATL_INDEX(N))%RHO_S
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
