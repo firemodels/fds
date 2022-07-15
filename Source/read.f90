@@ -6691,6 +6691,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
                IF (MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S < 1._EB) THEN
                   SF%DENSITY_ADJUST_FACTOR(NL,NN) = 1._EB / &
                                                    (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
+               ELSE
+                  WRITE(MESSAGE,'(3A)') 'ERROR: MOISTURE_FRACTION on SURF ',TRIM(SF%ID),' exceeds theoretical limit.'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
             SUM_D = SUM_D + MATL_MASS_FRACTION(NL,NN)/(SF%DENSITY_ADJUST_FACTOR(NL,NN)*MATERIAL(NNN)%RHO_S)
