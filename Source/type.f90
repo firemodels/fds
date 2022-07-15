@@ -1174,22 +1174,21 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
-   LOGICAL:: SHARED=.FALSE.
+   LOGICAL:: SHAREDH=.FALSE.
    INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKH
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
 END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
-   LOGICAL :: SHARED=.FALSE.
+   LOGICAL :: SHAREDZ=.FALSE.
    INTEGER :: IWC=0, UNKF=0
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB
@@ -1741,7 +1740,7 @@ TYPE DUCTRUN_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: FAN_OPERATING !< If a QFAN is operating
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX    !< List of ducts in ductrun
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX    !< List of node in ductrun
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: FAN_INDEX     !< List of fans in ductrun   
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: FAN_INDEX     !< List of fans in ductrun
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_M_INDEX  !< Position of ducts being solved for in ductrun solution matrix
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_M_INDEX  !< Position of ductnodes being solved for in ductrun solution matrix
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_D      !< Ductrun upstream duct density (kg/m3) (duct,fan)
