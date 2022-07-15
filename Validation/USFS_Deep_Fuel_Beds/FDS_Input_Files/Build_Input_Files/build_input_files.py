@@ -104,7 +104,4 @@ dfout.to_csv('paramfile.csv', index=False)
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
 # Move inpupt files up one level to FDS_Input_Files
-for f in dfout['Template.fds']:
-    if os.path.isfile('../' + f):
-        os.remove('../' + f)
-    os.rename(f, '../' + f)
+os.system('mv ./burn*.fds ../.')
