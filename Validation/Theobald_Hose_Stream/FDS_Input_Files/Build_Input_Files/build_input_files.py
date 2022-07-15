@@ -65,7 +65,7 @@ dfout.to_csv('paramfile.csv', index=False)
 # build input files: run swaps.py
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
-# move input files up one level
+# Move inpupt files up one level to FDS_Input_Files
 for f in dfout['theobald_Template.fds']:
     if os.path.isfile('../' + f):
         os.remove('../' + f)
