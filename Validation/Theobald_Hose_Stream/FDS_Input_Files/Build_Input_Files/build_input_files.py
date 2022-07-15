@@ -33,7 +33,7 @@ for irow in df.index:
     noz_A = str(int(df.loc[irow,'firing angle (deg.)']))
 
 # make the row for that file
-    CHID = "Theobald_Test_"+file_num+"_nozzle"+noz_name+"_"+rep_0(noz_D)+"D_"+rep_0(noz_P)+"P_"+noz_A+"A"
+    CHID = "Theobald_Test_" + file_num
     filename = CHID + ".fds"
     T_str = "Theobald 1981 hose stream test series. nozzle"
     TITLE = T_str+noz_name+"- "+noz_D+"mm diameter- "+noz_P+"bar pressure- "+noz_A+" degree angle"
