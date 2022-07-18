@@ -6,10 +6,15 @@ import os
 from os import listdir
 
 input_file_list = [f for f in listdir('../') if f[-4:] == '.fds']
-shutil.copy('Run_All_base.txt','Run_All.sh')
 forestring = '$QFDS $DEBUG $QUEUE -p 16 -d $INDIR '
 
-f = open('Run_All.sh', 'a')
+f = open('Run_All.sh', 'w')
+f.write('#!/bin/bash\n\n')
+f.write('# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.\n')
+f.write('# See the file Validation/Common_Run_All.sh for more information.\n')
+f.write('export SVNROOT=`pwd`/../..\nsource $SVNROOT/Validation/Common_Run_All.sh\n\n')
+f.write('# good burn: 136, 114, marginal burn: 41,80 no burn: 30,60)\n\n')
+
 for filename in input_file_list:
     f.write(forestring + filename +'\n')
 f.write('\necho FDS cases submitted')
