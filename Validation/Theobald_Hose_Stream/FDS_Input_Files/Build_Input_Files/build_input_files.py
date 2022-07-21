@@ -45,7 +45,7 @@ for irow in df.index:
     Re = 996605.43*noz_dmtr*efx_velo            # Reynolds Number (@ 20C, diameter(m), velocity(m/s))
     breaklength50 = 1.7*noz_dmtr*(We**0.5)*(Re*10e-4)**(-0.625) # length@ stream 50% discontinuous(m)
 
-    fdsbreaklength = breaklength50*0.75        # FDS PRIMARY_BREAKUP_LENGTH (m)
+    fdsbreaklength = breaklength50*1.0        # FDS PRIMARY_BREAKUP_LENGTH (m)
 
     paramline = [filename] + [CHID] + [TITLE] + [round(efx_velo,3)] + [flowrate] + [orient_z]
     paramline = paramline  + [max_range] + [round((max_range+0.1),1)] + [round(fdsbreaklength,2)]
