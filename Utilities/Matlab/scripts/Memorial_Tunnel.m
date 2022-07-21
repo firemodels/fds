@@ -25,7 +25,7 @@ Plot_Y          = 0.2;
 Paper_Width     = 6.5;
 Paper_Height    = 1.3;
 
-for k=1:3  % Experiment
+for k=1:0  % Experiment
 
    clear M E mod_data_indices exp_data_indices
 
@@ -33,7 +33,7 @@ for k=1:3  % Experiment
    mod_data_indices = {[9:15],[43:51],[61:69],[79:87],[97:105],[124:132],[151:159],[178:186],[196:204],[212:218]};
    exp_data_indices = {[73:79],[65:72],[57:64],[49:56],[41:48],[33:40],[25:32],[17:24],[9:16],[2:8]};
 
-   M = importdata([outdir,'Test_',test{k},'_devc.csv'],',',2);
+   M = importdata([outdir,'Test_',test{k},'_cat_devc.csv'],',',2);
    E = importdata([expdir,'VP-',test{k},'.csv'],',',2);
 
    scale = -3;
@@ -78,7 +78,7 @@ for k=1:3  % Experiment
       text(30,7.2,['Test ',test{k},' Velocity Profiles'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
       text(30,6.5,['Time: ',num2str(time(i)),' min'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
 
-      Git_Filename = [outdir,'Test_',test{k},'_git.txt'];
+      Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
       addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
 
       set(gcf,'Visible',Figure_Visibility);
@@ -145,7 +145,7 @@ for k=1:3  % Experiment
       text(30,7.2,['Test ',test{k},' Temperature Profiles'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
       text(30,6.5,['Time: ',num2str(time(i)),' min'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
 
-      Git_Filename = [outdir,'Test_',test{k},'_git.txt'];
+      Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
       addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
 
       %set(gcf,'Visible',Figure_Visibility);
@@ -171,7 +171,7 @@ pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Memorial_Tunnel/';
 
 plot_style
 
-M = importdata([outdir,'Cold_Flow_Series_1_devc.csv'],',',2);
+M = importdata([outdir,'Cold_Flow_Series_1_cat_devc.csv'],',',2);
 E = importdata([expdir,'Cold_Flow_Series_1.csv'],',',2);
 
 for j=1:15
@@ -194,7 +194,7 @@ ylabel('Volume Flow (m³/s)','FontSize',Title_Font_Size,'Interpreter',Font_Inter
 xticks([1 3 5 7 9 11 13 15]);
 
 % add Git revision if file is available
-Git_Filename = [outdir,'Cold_Flow_Series_1_git.txt'];
+Git_Filename = [outdir,'Cold_Flow_Series_1_cat_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
