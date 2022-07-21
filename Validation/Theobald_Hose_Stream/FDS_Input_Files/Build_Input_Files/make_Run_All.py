@@ -2,9 +2,9 @@
 # this one is for Theobald Hose Stream and runs on batch4
 
 import os
-from os import listdir
+import pandas as pd
 
-input_file_list = [f for f in listdir('../') if f[-4:] == '.fds']
+input_file_list = pd.read_csv('paramfile.csv', header=0)['theobald_Template.fds']
 forestring = '$QFDS $DEBUG $QUEUE -d $INDIR '
 
 f = open('Run_All.sh', 'w')
