@@ -2070,8 +2070,8 @@ CC_IF_1 : IF (CC_IBM) THEN
       K      = RCFACE_H(IFACE)%IJK(KAXIS)
       X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
@@ -2236,8 +2236,8 @@ CC_IF_2 : IF (CC_IBM) THEN
       K      = RCFACE_H(IFACE)%IJK(KAXIS)
       X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
@@ -2252,14 +2252,14 @@ CC_IF_2 : IF (CC_IBM) THEN
             IF ( K == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      RCFACE_H(IFACE)%JD(1:2,1:2) = 0
+      RCFACE_H(IFACE)%JDH(1:2,1:2) = 0
       ! Add to global matrix arrays:
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_H_MAT(IND(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_H_MAT(ILOC,IND(LOCROW)) ) THEN
-                   RCFACE_H(IFACE)%JD(LOCROW,IIND) = ILOC
+                   RCFACE_H(IFACE)%JDH(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -2500,8 +2500,8 @@ CC_IF : IF ( CC_IBM ) THEN
       K      = RCFACE_H(IFACE)%IJK(KAXIS)
       X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND; LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
@@ -2527,7 +2527,7 @@ CC_IF : IF ( CC_IBM ) THEN
       DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
          DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
              IROW=IND(ILOC)                     ! Process Local Unknown number.
-             JCOL=RCFACE_H(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_H
+             JCOL=RCFACE_H(IFACE)%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
              ! Add coefficient:
              D_H_MAT(JCOL,IROW) = D_H_MAT(JCOL,IROW) + KFACE(ILOC,JLOC)
          ENDDO

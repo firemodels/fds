@@ -136,6 +136,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: FUEL=.FALSE.                           !< Flag indicating if droplets evaporate into fuel gas
    LOGICAL :: DUCT_PARTICLE=.FALSE.                  !< Flag indicating if particles can pass through a duct
    LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
+   LOGICAL :: TRACK_EMBERS=.TRUE.                    !< Flag indicating if flying embers are tracked or removed immediately
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
@@ -758,6 +759,7 @@ TYPE SURFACE_TYPE
    REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,TMP_INNER,STRETCH_FACTOR,&
                                       MOISTURE_FRACTION,SURFACE_VOLUME_RATIO,PACKING_RATIO,KAPPA_S=-1._EB,RENODE_DELTA_T
    REAL(EB), DIMENSION(MAX_NUMBER_FSK_POINTS) :: FSK_K, FSK_W, FSK_A
+   REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: DENSITY_ADJUST_FACTOR=1._EB,RHO_S
    INTEGER :: NUMBER_FSK_POINTS
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_NAME
@@ -1173,22 +1175,21 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
-   LOGICAL:: SHARED=.FALSE.
+   LOGICAL:: SHAREDH=.FALSE.
    INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKH
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
 END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
-   LOGICAL :: SHARED=.FALSE.
+   LOGICAL :: SHAREDZ=.FALSE.
    INTEGER :: IWC=0, UNKF=0
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB
@@ -1570,6 +1571,7 @@ TYPE DUCT_TYPE
    INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
    INTEGER :: N_HT_SEGMENTS=0                             !< Number of heat trasnfer segments
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
+   REAL(EB) :: AREA_OLD                                   !< Prior timestep duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
    REAL(EB) :: COIL_Q=0._EB                               !< Current heat rate from an aircoil (W)
    REAL(EB) :: HT_Q=0._EB                                 !< Current duct wall heat transfer rate (W)
@@ -1739,7 +1741,7 @@ TYPE DUCTRUN_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: FAN_OPERATING !< If a QFAN is operating
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX    !< List of ducts in ductrun
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX    !< List of node in ductrun
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: FAN_INDEX     !< List of fans in ductrun   
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: FAN_INDEX     !< List of fans in ductrun
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_M_INDEX  !< Position of ducts being solved for in ductrun solution matrix
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_M_INDEX  !< Position of ductnodes being solved for in ductrun solution matrix
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_D      !< Ductrun upstream duct density (kg/m3) (duct,fan)

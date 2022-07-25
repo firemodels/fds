@@ -377,7 +377,7 @@ DO K=1,KBAR
             IRC  = FCVAR(I+ILH,J,K,IBM_FFNF,X1AXIS)
             MURDN = MU_TMP/DX(I)
             IF (IRC>0) THEN
-               IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+               IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                MURDN = MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
             ENDIF
             AF   = DY(J)*DZ(K); VELN = US(I+ILH,J,K)
@@ -390,7 +390,7 @@ DO K=1,KBAR
             IRC  = FCVAR(I,J+ILH,K,IBM_FFNF,X1AXIS)
             MURDN = TWOD_FCT * MU_TMP/DY(J)
             IF (IRC>0) THEN
-               IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+               IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                MURDN = TWOD_FCT*MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
             ENDIF
             AF   = DX(I)*DZ(K); VELN = VS(I,J+ILH,K)
@@ -403,7 +403,7 @@ DO K=1,KBAR
             IRC  = FCVAR(I,J,K+ILH,IBM_FFNF,X1AXIS)
             MURDN = MU_TMP/DZ(K)
             IF (IRC>0) THEN
-               IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+               IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                MURDN = MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
             ENDIF
             AF   = DX(I)*DY(J); VELN = WS(I,J,K+ILH)
@@ -438,7 +438,7 @@ CUTCELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                IRC  = FCVAR(I-1+ILH,J,K,IBM_FFNF,X1AXIS)
                MURDN = MU_TMP/DX(I)
                IF (IRC>0) THEN
-                  IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+                  IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                   MURDN = MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
                ENDIF
                AF   = DY(J)*DZ(K); VELN = US(I-1+ILH,J,K)
@@ -446,7 +446,7 @@ CUTCELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                IRC  = FCVAR(I,J-1+ILH,K,IBM_FFNF,X1AXIS)
                MURDN = TWOD_FCT * MU_TMP/DY(J)
                IF (IRC>0) THEN
-                  IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+                  IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                   MURDN=TWOD_FCT*MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
                ENDIF
                AF   = DX(I)*DZ(K); VELN = VS(I,J-1+ILH,K)
@@ -454,7 +454,7 @@ CUTCELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                IRC  = FCVAR(I,J,K-1+ILH,IBM_FFNF,X1AXIS)
                MURDN = MU_TMP/DZ(K)
                IF (IRC>0) THEN
-                  IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE
+                  IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE
                   MURDN = MU_TMP/(IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,HIGH_IND)-IBM_RCFACE_Z(IRC)%XCEN(X1AXIS,LOW_IND))
                ENDIF
                AF   = DX(I)*DY(J); VELN = WS(I,J,K-1+ILH)
@@ -2213,7 +2213,7 @@ ELSE STORE_IF
             J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
             K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
             X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
-            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHARED) THEN
+            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHAREDH) THEN
                SELECT CASE(X1AXIS)
                CASE(IAXIS); US(I,J,K)= 0._EB
                CASE(JAXIS); VS(I,J,K)= 0._EB
@@ -2481,7 +2481,7 @@ ELSE STORE_IF
             J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
             K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
             X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
-            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHARED) THEN
+            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHAREDH) THEN
                SELECT CASE(X1AXIS)
                CASE(IAXIS); U(I,J,K)= 0._EB
                CASE(JAXIS); V(I,J,K)= 0._EB
@@ -2674,7 +2674,7 @@ PRED_1 : IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    ! RC faces:
    DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
       IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
       I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
       X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
       SELECT CASE(X1AXIS)
@@ -2724,7 +2724,7 @@ ELSE PRED_1
    ! RC faces:
    DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
       IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
       I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
       X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
       SELECT CASE(X1AXIS)
@@ -2768,7 +2768,7 @@ PRED_2 : IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    ENDDO
    DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
       IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
       I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
       X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
       SELECT CASE(X1AXIS)
@@ -2805,7 +2805,7 @@ ELSE PRED_2
    ENDDO
    DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
       IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+      IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
       I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
       X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
       SELECT CASE(X1AXIS)
@@ -2871,7 +2871,7 @@ DO K=1,KBAR
          X1AXIS = IAXIS
          DO ILH=-1,0
             IRC  = FCVAR(I+ILH,J,K,IBM_FFNF,X1AXIS)
-            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
             AF   = DY(J)*DZ(K); ATOT(X1AXIS,IROW) = ATOT(X1AXIS,IROW) + AF
             VELN = PRFCT*US(I+ILH,J,K) + (1._EB-PRFCT)*U(I+ILH,J,K)
             UVWA(X1AXIS,IROW) = UVWA(X1AXIS,IROW) + VELN * AF
@@ -2880,7 +2880,7 @@ DO K=1,KBAR
          X1AXIS = JAXIS
          DO ILH=-1,0
             IRC  = FCVAR(I,J+ILH,K,IBM_FFNF,X1AXIS)
-            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
             AF   = DX(I)*DZ(K); ATOT(X1AXIS,IROW) = ATOT(X1AXIS,IROW) + AF
             VELN = PRFCT*VS(I,J+ILH,K) + (1._EB-PRFCT)*V(I,J+ILH,K)
             UVWA(X1AXIS,IROW) = UVWA(X1AXIS,IROW) + VELN * AF
@@ -2889,7 +2889,7 @@ DO K=1,KBAR
          X1AXIS = KAXIS
          DO ILH=-1,0
             IRC  = FCVAR(I,J,K+ILH,IBM_FFNF,X1AXIS)
-            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+            IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
             AF   = DX(I)*DY(J); ATOT(X1AXIS,IROW) = ATOT(X1AXIS,IROW) + AF
             VELN = PRFCT*WS(I,J,K+ILH) + (1._EB-PRFCT)*W(I,J,K+ILH)
             UVWA(X1AXIS,IROW) = UVWA(X1AXIS,IROW) + VELN * AF
@@ -2914,17 +2914,17 @@ CUTCELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
             SELECT CASE(X1AXIS)
             CASE(IAXIS)
                IRC  = FCVAR(I-1+ILH,J,K,IBM_FFNF,X1AXIS)
-               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
                AF   = DY(J)*DZ(K)
                VELN = PRFCT*US(I-1+ILH,J,K) + (1._EB-PRFCT)*U(I-1+ILH,J,K)
             CASE(JAXIS)
                IRC  = FCVAR(I,J-1+ILH,K,IBM_FFNF,X1AXIS)
-               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
                AF   = DX(I)*DZ(K)
                VELN = PRFCT*VS(I,J-1+ILH,K) + (1._EB-PRFCT)*V(I,J-1+ILH,K)
             CASE(KAXIS)
                IRC  = FCVAR(I,J,K-1+ILH,IBM_FFNF,X1AXIS)
-               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHARED) CYCLE; ENDIF
+               IF (IRC>0) THEN; IF(IBM_RCFACE_Z(IRC)%SHAREDZ) CYCLE; ENDIF
                AF   = DX(I)*DY(J)
                VELN = PRFCT*WS(I,J,K-1+ILH) + (1._EB-PRFCT)*W(I,J,K-1+ILH)
             END SELECT
@@ -11708,8 +11708,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       X1AXIS = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNKZ(LOW_IND)
+      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNKZ(HIGH_IND)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -12536,8 +12536,8 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       X1AXIS = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNKZ(LOW_IND)
+      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNKZ(HIGH_IND)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -14042,7 +14042,7 @@ ENDDO
 ! RC faces:
 DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
    IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-   IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+   IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
    I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
    X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
    SELECT CASE(X1AXIS)
@@ -14098,7 +14098,7 @@ DO K=0,KBAR
 ENDDO
 DO ICF=1,MESHES(NM)%IBM_NRCFACE_Z
    IF(IBM_RCFACE_Z(ICF)%UNKF<1) CYCLE
-   IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHARED) CYCLE
+   IF (DO_SHARED_INT .AND. IBM_RCFACE_Z(ICF)%SHAREDZ) CYCLE
    I = IBM_RCFACE_Z(ICF)%IJK(IAXIS); J = IBM_RCFACE_Z(ICF)%IJK(JAXIS); K = IBM_RCFACE_Z(ICF)%IJK(KAXIS)
    X1AXIS = IBM_RCFACE_Z(ICF)%IJK(KAXIS+1)
    SELECT CASE(X1AXIS)
@@ -20424,7 +20424,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       FCVAR(I,J,K,IBM_FFNF,X1AXIS) = ICF
 
       ! Then set if SHARED:
-      IF(IBM_RCFACE_Z(ICF)%UNK(LOW_IND)==IBM_RCFACE_Z(ICF)%UNK(HIGH_IND)) IBM_RCFACE_Z(ICF)%SHARED = .TRUE.
+      IF(IBM_RCFACE_Z(ICF)%UNKZ(LOW_IND)==IBM_RCFACE_Z(ICF)%UNKZ(HIGH_IND)) IBM_RCFACE_Z(ICF)%SHAREDZ = .TRUE.
    ENDDO
 
 ENDDO
@@ -20990,8 +20990,8 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
    X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
 
    ! Unknowns on related cells:
-   IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(LOW_IND)
-   IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(HIGH_IND)
+   IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
+   IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
 
    IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
    IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
@@ -21029,7 +21029,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
    DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
       DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
           IROW=IND_LOC(ILOC)                                ! Process Local Unknown number.
-          JCOL=MESHES(NM)%IBM_RCFACE_H(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_H
+          JCOL=MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
           ! Add coefficient:
           D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
       ENDDO
@@ -21217,8 +21217,8 @@ LOOP_FLAG_COND : IF ( LOOP_FLAG ) THEN ! MESH_LOOP_1 in calling routine.
       K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
       X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
+      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! Row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
       ! Row ind(1),ind(2):
@@ -21331,8 +21331,8 @@ ELSE ! MESH_LOOP_2 in calling routine.
       K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
       X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
+      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! Row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
       ! Row ind(1),ind(2):
@@ -21349,14 +21349,14 @@ ELSE ! MESH_LOOP_2 in calling routine.
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      MESHES(NM)%IBM_RCFACE_H(IFACE)%JD(1:2,1:2) = 0
+      MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(1:2,1:2) = 0
       ! Add to global matrix arrays:
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_H(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_RCFACE_H(IFACE)%JD(LOCROW,IIND) = ILOC
+                   MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -22114,12 +22114,12 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CELL_UNKH
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CELL_UNKH
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
 
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
 
@@ -22137,7 +22137,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                   ENDDO
                   IF (INLIST) THEN
                      ! Cell at i+1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
                      MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                            CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                      CYCLE
@@ -22152,7 +22152,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
 
@@ -22173,12 +22173,12 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CELL_UNKH
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CELL_UNKH
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
 
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
 
@@ -22196,7 +22196,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                   ENDDO
                   IF (INLIST) THEN
                      ! Cell at i+1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
+                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
                      MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
                      CYCLE
@@ -22211,7 +22211,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
 
@@ -22251,12 +22251,12 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
 
                   ! Cell at i+1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CELL_UNKH
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CELL_UNKH
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
 
@@ -22274,7 +22274,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                   ENDDO
                   IF (INLIST) THEN
                      ! Cell at i-1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
                      MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                      CYCLE
@@ -22289,7 +22289,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
 
@@ -22310,12 +22310,12 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
 
                   ! Cell at i+1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CELL_UNKH
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CELL_UNKH
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                       (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
 
@@ -22333,7 +22333,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                   ENDDO
                   IF (INLIST) THEN
                      ! Cell at i-1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
+                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
                      MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
                      CYCLE
@@ -22348,7 +22348,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
+                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
 
@@ -22429,12 +22429,12 @@ IF (PRES_FLAG==UGLMAT_FLAG) THEN
 
                ! Add all info required for matrix build:
                ! Cell at i-1, i.e. regular GASPHASE:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
                MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
 
                ! Cell at i+1, i.e. cut-cell:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
                IF ( .NOT.PRES_ON_CARTESIAN ) THEN
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                ELSE
@@ -22449,7 +22449,7 @@ IF (PRES_FLAG==UGLMAT_FLAG) THEN
 
                ! Add all info required for matrix build:
                ! Cell at i-1, i.e. cut-cell:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
                IF ( .NOT.PRES_ON_CARTESIAN ) THEN
                   MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                ELSE
@@ -22457,7 +22457,7 @@ IF (PRES_FLAG==UGLMAT_FLAG) THEN
                ENDIF
 
                ! Cell at i+1, i.e. regular GASPHASE:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
                MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
 
@@ -22472,8 +22472,8 @@ ENDIF
 
 ! Finally define shared RCFACE_H face:
 DO IRC=1,MESHES(NM)%IBM_NRCFACE_H
-   IF(MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND)==MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND)) &
-   MESHES(NM)%IBM_RCFACE_H(IRC)%SHARED = .TRUE.
+   IF(MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND)==MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND)) &
+   MESHES(NM)%IBM_RCFACE_H(IRC)%SHAREDH = .TRUE.
 ENDDO
 
 
@@ -22998,14 +22998,14 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Add all info required for matrix build:
             ! Cell at i-1, i.e. regular GASPHASE:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
             (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
             (/ IBM_FTYPE_RGGAS, INCELL, JNCELL, KNCELL /)
 
             ! Cell at i+1, i.e. cut-cell:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
             CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23027,7 +23027,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Add all info required for matrix build:
             ! Cell at i+1, i.e. cut-cell:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
             CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23067,7 +23067,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Add all info required for matrix build:
             ! Cell at i-1, i.e. cut-cell:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                  CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
@@ -23076,7 +23076,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CUT_CELL(ICC)%FACE_LIST(4,IFACE) = IRC
 
             ! Cell at i+1, i.e. regular GASPHASE:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                        (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23096,7 +23096,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Add high cell info required for matrix build:
             ! Cell at i-1, i.e. cut-cell:
-            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+            MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                 CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
@@ -23179,14 +23179,14 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                   (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
                   (/ IBM_FTYPE_RGGAS, INCELL, JNCELL, KNCELL /)
 
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                   CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23209,7 +23209,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INLIST) THEN
                      ! This cut-cell is on the high side of face iifc:
                      ! Cell at i+1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_Z(IIFC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                     MESHES(NM)%IBM_RCFACE_Z(IIFC)%UNKZ(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                      MESHES(NM)%IBM_RCFACE_Z(IIFC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                      MESHES(NM)%IBM_RCFACE_Z(IIFC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23228,7 +23228,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
                   ! Add all info required for matrix build:
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                   CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23266,7 +23266,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
                   ! Add all info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                        CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
@@ -23275,7 +23275,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   CUT_CELL(ICC)%FACE_LIST(4,IFACE) = IRC
 
                   ! Cell at i+1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(HIGH_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(HIGH_IND) = CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKZ)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
                              (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND) = &
@@ -23296,7 +23296,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INLIST) THEN
                      ! This cut-cell is on the high side of face iifc:
                      ! Cell at i-1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_Z(IIFC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                     MESHES(NM)%IBM_RCFACE_Z(IIFC)%UNKZ(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                      MESHES(NM)%IBM_RCFACE_Z(IIFC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                           CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                      MESHES(NM)%IBM_RCFACE_Z(IIFC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
@@ -23315,7 +23315,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
                   ! Add high cell info required for matrix build:
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNK(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
+                  MESHES(NM)%IBM_RCFACE_Z(IRC)%UNKZ(LOW_IND) = CUT_CELL(ICC)%UNKZ(JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
                       CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
                   MESHES(NM)%IBM_RCFACE_Z(IRC)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND) = &
@@ -24606,8 +24606,8 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       ENDIF
                    CASE(IBM_FTYPE_RCGAS) IAXIS_OFACE_SELECT
                       OICF     = OFACE(2)
-                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(LOW_IND)
-                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(HIGH_IND)
+                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(LOW_IND)
+                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(HIGH_IND)
                       IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to RC face:
                          IF(M%IBM_RCFACE_Z(OICF)%UNKF<1) THEN
                              M%NUNK_F = M%NUNK_F + 1
@@ -24731,8 +24731,8 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       ENDIF
                    CASE(IBM_FTYPE_RCGAS) JAXIS_OFACE_SELECT
                       OICF     = OFACE(2)
-                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(LOW_IND)
-                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(HIGH_IND)
+                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(LOW_IND)
+                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(HIGH_IND)
                       IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to RC face:
                          IF(M%IBM_RCFACE_Z(OICF)%UNKF<1) THEN
                              M%NUNK_F = M%NUNK_F + 1
@@ -24874,8 +24874,8 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       ENDIF
                    CASE(IBM_FTYPE_RCGAS) KAXIS_OFACE_SELECT
                       OICF     = OFACE(2)
-                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(LOW_IND)
-                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNK(HIGH_IND)
+                      OLO_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(LOW_IND)
+                      OHI_UNKZ = M%IBM_RCFACE_Z(OICF)%UNKZ(HIGH_IND)
                       IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to RC face:
                          IF(M%IBM_RCFACE_Z(OICF)%UNKF<1) THEN
                              M%NUNK_F = M%NUNK_F + 1

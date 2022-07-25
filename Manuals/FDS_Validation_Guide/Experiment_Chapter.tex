@@ -609,15 +609,15 @@ Rob Fleury, a master's degree student at the University of Canterbury in Christc
 \section{FM Burner Experiments}
 \label{FM_Burner_Description}
 
-A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a cylindrical, water-cooled steel burner (15.2~cm O.D., 13.7~cm I.D.) was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
+A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a cylindrical, water-cooled steel burner (15.2~cm O.D., 13.7~cm I.D.) was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of premixed ethylene pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
 
-In the same enclosure and using the same burner, Ren et. al~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at similar locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction. Additional experiments were performed at 19~\%, 17~\%, and 15~\% oxygen in which global radiation measurements were made, including total radiative fraction and the vertical distribution of radiative emission.
+In the same enclosure and using the same burner, Ren et al.~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at similar locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction. Additional experiments were performed at 19~\%, 17~\%, and 15~\% oxygen in which global radiation measurements were made, including total radiative fraction and the vertical distribution of radiative emission.
 
 \subsubsection{Modeling Notes}
 
 The FDS simulations of the 10~kW ethylene, methane, propane and propylene fires are run for 65~s, in which time the oxygen concentration in the co-flow stream is ramped down linearly from 21~\% to 8~\%. The volume flow of the co-flow stream has been increased tenfold compared to the experiments to prevent a downwash of ambient air into the sealed compartment. The 15~kW ethylene fire simulations at the various fixed oxygen levels are performed for 20~s. For these simulations, the oxygen volume fraction is specified directly, as is the co-flow stream.
 
-The combustion and extinction are modeled using a two-step reaction scheme. In the first step, fuel is converted to CO, soot, and water vapor, and in the second step, the CO and soot are oxidized to form CO$_2$. Both reactions are fast, but the oxidation step follows the first reaction in serial. That is, in a given time step, all available oxygen first converts fuel to CO and Soot, assumed to be C$_{0.9}$H$_{0.1}$. Any leftover oxygen is then used to oxidize existing CO and Soot. There are two assumptions. First, it is assumed that 3/5 of the carbon in the fuel molecule is converted to CO, and 2/5 to Soot in the first reaction step. Second, the post-flame yields of Soot and CO are set to 0.043 and 0.013, respectively, based on Tewarson's measurements reported in the SFPE Handbook~\cite{SFPE:Tewarson}.
+The 10 kW variable fuel cases examining combustion efficiency and extinction are modeled using a two-step reaction scheme. In the first step, fuel is converted to CO, soot, and water vapor, and in the second step, the CO and Soot are oxidized to form CO$_2$. Both reactions are fast, but the oxidation step follows the first reaction in serial. That is, in a given time step, all available oxygen first converts fuel to CO and Soot, assumed to be C$_{0.9}$H$_{0.1}$. Any leftover oxygen is then used to oxidize existing CO and Soot. There are two assumptions: (i) the ratio of fuel C that is converted to CO in the first reaction step (the remainder goes to Soot) and (ii) the post-flame yields of CO and Soot.  For the first assumption (the intermediate step), we assume that 95 \% of the carbon goes to CO for a clean fuel like methane, we assume 85 \% goes to CO for propane, and that 60 \% goes to CO for both ethylene and propylene.  The post flame yields for each fuel are taken from Tewarson's measurements reported in the SFPE Handbook~\cite{SFPE:Tewarson}.
 
 Under the assumption that Air contains 383~ppm CO$_2$ and water vapor corresponding to 40~\% humidity, the full two-step reaction scheme for ethylene is written in terms of ``lumped'' species as follows:
 \begin{eqnarray}
@@ -626,13 +626,14 @@ Under the assumption that Air contains 383~ppm CO$_2$ and water vapor correspond
 & & 10.07 \, \underbrace{\mathrm{(0.119 \; CO +  0.201 \; H_2O + 0.088 \; Soot +  0.591\, N_2 + 0.0003 \, CO_2)}}_\text{Products 1}
 \end{eqnarray}
 \be
-(\text{Products 1}) + 0.63 \; (\text{Air}) \longrightarrow  1.49 \, \underbrace{\mathrm{(0.0009 \, CO + 0.0073 \, Soot + 0.126 \, CO_2 +  0.141 \; H_2O  + 0.725 \; N_2)}}_\text{Products 2}
+(\text{Products 1}) + 0.63 \; (\text{Air}) \longrightarrow  1.49 \, \underbrace{\mathrm{(0.0009 \, CO + 0.0077 \, Soot + 0.126 \, CO_2 +  0.141 \; H_2O  + 0.724 \; N_2)}}_\text{Products 2}
 \ee
-For each of the four fuels simulated, it has been assumed that 3/5 of the carbon in the fuel molecule is converted to CO in the first step. However, there are only detailed measurements of radiative emission and soot volume fraction for ethylene. Thus, it is not clear how the carbon is distributed between the soot and CO in the early stages. For lighter sooting fuels like methane, the fraction of carbon allocated to CO approaches unity.
+
+The pilot ring is modeled with a ``pilot fuel model''.  We use 36 particles arranged in a uniform ring around the burner.  The mass flow rate of ethylene from each particle is set to achieve the total 1 kW from the pilot ring.  In the pilot fuel model, the fuel stream from the pilot particles sees an auto-ignition temperature (AIT) of 0 K.  That is, fuel emanating from the pilot particles is not subject to an ignition temperature threshold.  Further, this fuel undergoes simple 1-step, fast chemistry.  The fuel emanating from the main burner (for each different fuel type, including ethylene) undergoes 2-step, fast chemistry as discussed above and is subject to an ignition temperature threshold with the AIT for each fuel taken from Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  Likewise, the critical flame temperatures for each fuel are taken from ~\cite{SFPE:Beyler}.  While there are now 3 chemical reactions for each case (a pilot fuel reaction plus the two main fuel reactions), each with its own ``fuel'', the CFT for the extinction model is based on the fuel for the main burner first step reaction, either methane, ethylene, propylene, or propane.
+
+The burner surface temperature was modeled by specifying a 2.54 cm thick surface made of sand.  The back side temperature was held constant at \SI{25}{\degreeCelsius} to match the water cooled burner in the experiment.
 
 The radiative fraction has been predicted rather than specified in all simulations.
-
-
 
 \section{FM/FPRF Data Center Experiments}
 \label{FM_FPRF_Datacenter_Description}
@@ -1047,7 +1048,9 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 
 Between 1993 and 1995, 98 fire ventilation experiments were conducted in the decommissioned Memorial Tunnel near Charlestown, West Virginia~\cite{Memorial}. The objective was to assist in the design of the ventilation system for the Central Artery Tunnel Project in Boston, Massachusetts. The fires ranged from 10~MW to 100~MW.
 
-The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at the peak of its semi-circular ceiling, with a 3.2~\% grade uphill from its south to north portal. At each portal, a fan room 4.3~m above the roadway extends 21.3~m into the tunnel. There is also a walkway along the west tunnel wall. A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}. Twenty-four longitudinal fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm).
+The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at the peak of its semi-circular ceiling, with a 3.2~\% grade uphill from its south to north portal. At each portal, a fan room 4.3~m above the roadway extends 21.3~m into the tunnel. There is also a walkway along the west tunnel wall.
+
+Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pan), and Sequence~18 (9 additional fans installed downhill of the fuel pan). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction. 
 
 \begin{figure}[!ht]
 \centering
@@ -1056,18 +1059,47 @@ The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at t
 \label{Memorial_Tunnel_Cross_Section}
 \end{figure}
 
+\begin{table}[!ht]
+\caption[Summary of Memorial Tunnel Experiments]{Summary of Memorial Tunnel Experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Test     & Sequence & Heat Release  & Number   & Fan Start   \\ 
+Number   & Number   & Rate (MW)     & of Fans  & Time (min)  \\ \hline \hline
+501      & 15       & 20            & 0        & N/A         \\ \hline
+502      & 15       & 50            & 0        & N/A         \\ \hline
+605      & 17       & 10            & 1-15     & 0           \\ \hline
+606A     & 17       & 10            & 0-3      & 5           \\ \hline
+607      & 17       & 20            & 2-3      & 0           \\ \hline
+608      & 17       & 20            & 0-4      & 2           \\ \hline
+610      & 17       & 50            & 4-6      & 0           \\ \hline
+611      & 17       & 50            & 0-6      & 2           \\ \hline
+612B     & 17       & 50            & 0-10     & 5           \\ \hline
+615B     & 17       & 100           & 0-6      & 2           \\ \hline
+617A     & 17       & 10            & 1-5      & 0           \\ \hline
+618A     & 17       & 20            & 0-4      & 2           \\ \hline
+621A     & 17       & 100           & 2-8      & 0           \\ \hline
+622B     & 17       & 50            & 0-10     & 0           \\ \hline
+623B     & 18       & 20            & 1-6      & 0           \\ \hline
+624B     & 18       & 50            & 0-7      & 2           \\ \hline
+625B     & 18       & 100           & 3-7      & 0           \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:Memorial_Test_Matrix}
+\end{table}
+
+
 \subsubsection{Modeling Notes}
 
-The simulations of the Memorial Tunnel experiments are performed with a 0.4~m uniform grid. The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling.
+The simulations of the Memorial Tunnel experiments are performed with a 0.28~m uniform grid. The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling.
 
 The fuel used in the experiment is described in the report as a low sulfur No.~2 distillate fuel oil. In the simulations, the fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rate of the fire is specified as a function of time following the curve found in the test report.
 
-The jet fans are modeled as rectangular ducts with a specified volume flow of 45.8~m$^3$/s. This value is slightly higher than that which was reported because it is intended to match the thrust, $F=\rho A u^2$, rather than the volume flow, $\dot{V}=Au$, of the actual fan. Because the actual and modeled fan opening areas are different, it is not possible to match both the thrust and volume flow.
+The jet fans are modeled as rectangular ducts with a specified volume flow of 42.9~m$^3$/s (91\,000~cfm). The fan speed is ramped up or down in approximately 10~s.
 
 \begin{itemize}
-\item Comparisons of centerline vertical temperature profiles can be found in Section~\ref{Memorial_Tunnel_Temperature_Profiles}.
-\item Comparisons of near-ceiling temperature can be found in Section~\ref{Memorial_Tunnel_Ceiling_Jet}.
-\item Comparisons of centerline vertical velocity profiles can be found in Section~\ref{Memorial_Tunnel_Velocity_Profiles}.
+\item Comparisons of near-ceiling temperature and velocity can be found in Section~\ref{Memorial_Tunnel_Ceiling_Jet}.
+\item Comparisons of bulk volume flow through the tunnel can be found in Section~\ref{Memorial_Tunnel_Volume_Flow}.
 \end{itemize}
 
 \section{Montoir LNG Fires}

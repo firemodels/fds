@@ -1,6 +1,6 @@
 &HEAD CHID='ground_vegetation_drag', TITLE='Comparison of boundary models' /
 
-&TIME T_END=30. /
+&TIME T_END=90. /
 
 &MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,0.0,0.5 /
 &MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,1.5,2.0 /
@@ -17,7 +17,13 @@
 
 &VENT SURF_ID='GROUND', XB=0.0,6.0,-0.5,0.5,1.5,1.5 /
 
-&SURF ID='BLOW', VEL=-2., COLOR='BLUE' /
+&SURF ID='BLOW', VEL=-2., RAMP_V='wind', COLOR='BLUE' /
+&RAMP ID='wind', T= 0., F=0. /
+&RAMP ID='wind', T=10., F=1. /
+&RAMP ID='wind', T=30., F=1. /
+&RAMP ID='wind', T=40., F=2. /
+&RAMP ID='wind', T=60., F=2. /
+&RAMP ID='wind', T=70., F=3. /
 
 &MATL ID = 'SOIL'
       CONDUCTIVITY = 0.25             
