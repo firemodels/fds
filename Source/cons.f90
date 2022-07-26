@@ -252,7 +252,7 @@ LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not 
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
-LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.             !< Allow adjustable direct force via CTRL logic
+LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
