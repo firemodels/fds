@@ -1339,7 +1339,7 @@ ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
    ENDIF
 ENDDO ZONE_MESH_LOOP_2
 
-! 3.b Build REGFACE_H, RCFACE_H arrays. These face arrays are defined per mesh and axis and have
+! 3.b Build REGFACE_H, RCF_H arrays. These face arrays are defined per mesh and axis and have
 !     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
 CALL ULMAT_GET_H_REGFACES(NM)
 IF(CC_IBM) CALL GET_H_CUTFACES(ONE_NM=NM)
@@ -1972,7 +1972,7 @@ INTEGER :: X1AXIS,IFACE,I,J,K,ICF,IND(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW,LOCROW_1,LOCROW_2,IIND,NII,ILOC,NUNKH,IROW,ICC
 INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,IW,II,JJ,KK,IIG,JJG,KKG
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
-TYPE(IBM_RCFACE_TYPE),  POINTER, DIMENSION(:) ::  RCFACE_H=>NULL()
+TYPE(IBM_RCFACE_LST_TYPE), POINTER :: RCF=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 INTEGER :: WC_JD(1:2,1:2)
@@ -2006,10 +2006,9 @@ ENDDO
 
 ! RC faces:
 DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-   I = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-   J = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-   K = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-   IF(ZONE_MESH(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT==IPZ) MESHES(NM)%IBM_RCFACE_H(IFACE)%PRES_ZONE=IPZ
+   RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+   I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
+   IF(ZONE_MESH(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT==IPZ) RCF%PRES_ZONE=IPZ
 ENDDO
 
 ! Cut faces:
@@ -2059,19 +2058,15 @@ ENDDO AXIS_LOOP_1
 ! Here check wall cells/external CFACEs of Type INTERPOLATED or OPEN_BOUNDARY and add in place-one sided.
 ! ....
 
-! Finally Add nonzeros corresponding to IBM_RCFACE_H, CUT_FACE
+! Finally Add nonzeros corresponding to RC_FACE, CUT_FACE
 CC_IF_1 : IF (CC_IBM) THEN
-   RCFACE_H => MESHES(NM)%IBM_RCFACE_H
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    RCFACE_LOOP_1 : DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-      IF(RCFACE_H(IFACE)%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP_1
-      I      = RCFACE_H(IFACE)%IJK(IAXIS)
-      J      = RCFACE_H(IFACE)%IJK(JAXIS)
-      K      = RCFACE_H(IFACE)%IJK(KAXIS)
-      X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
+      RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE)); IF(RCF%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP_1
+      I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
+      IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
@@ -2088,7 +2083,6 @@ CC_IF_1 : IF (CC_IBM) THEN
       ENDSELECT
       CALL ADD_INPLACE_NNZ_H(LOCROW_1,LOCROW_2,IND) ! Add to matrix arrays.
    ENDDO RCFACE_LOOP_1
-   NULLIFY(RCFACE_H)
 
    PRESONCART_IF_1 : IF ( .NOT.PRES_ON_CARTESIAN ) THEN
       CF_LOOP_1 : DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
@@ -2227,17 +2221,13 @@ ENDDO WALL_LOOP_2
 
 
 CC_IF_2 : IF (CC_IBM) THEN
-   RCFACE_H => MESHES(NM)%IBM_RCFACE_H
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    RCFACE_LOOP_2 : DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-      IF(RCFACE_H(IFACE)%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP_2
-      I      = RCFACE_H(IFACE)%IJK(IAXIS)
-      J      = RCFACE_H(IFACE)%IJK(JAXIS)
-      K      = RCFACE_H(IFACE)%IJK(KAXIS)
-      X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
+      RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE)); IF(RCF%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP_2
+      I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
+      IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
@@ -2252,21 +2242,20 @@ CC_IF_2 : IF (CC_IBM) THEN
             IF ( K == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      RCFACE_H(IFACE)%JDH(1:2,1:2) = 0
+      RCF%JDH(1:2,1:2) = 0
       ! Add to global matrix arrays:
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_H_MAT(IND(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_H_MAT(ILOC,IND(LOCROW)) ) THEN
-                   RCFACE_H(IFACE)%JDH(LOCROW,IIND) = ILOC
+                   RCF%JDH(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
          ENDDO
       ENDDO
    ENDDO RCFACE_LOOP_2
-   NULLIFY(RCFACE_H)
 
    PRESONCART_IF_2 : IF ( .NOT.PRES_ON_CARTESIAN ) THEN
       CF_LOOP_3 : DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
@@ -2407,7 +2396,7 @@ INTEGER :: LOCROW_1,LOCROW_2,ILOC,NUNKH
 INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE
 REAL(EB):: AF,IDX,BIJ,KFACE(2,2)
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
-TYPE(IBM_RCFACE_TYPE),  POINTER, DIMENSION(:) ::  RCFACE_H=>NULL()
+TYPE(IBM_RCFACE_LST_TYPE), POINTER :: RCF=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 REAL(EB), POINTER, DIMENSION(:)   :: DX1,DX2,DX3
 
@@ -2491,17 +2480,13 @@ ENDDO AXIS_LOOP_1
 
 ! Contribution to Laplacian matrix from Cut-cells:
 CC_IF : IF ( CC_IBM ) THEN
-   RCFACE_H=>MESHES(NM)%IBM_RCFACE_H
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    RCFACE_LOOP : DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-      IF(RCFACE_H(IFACE)%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP
-      I      = RCFACE_H(IFACE)%IJK(IAXIS)
-      J      = RCFACE_H(IFACE)%IJK(JAXIS)
-      K      = RCFACE_H(IFACE)%IJK(KAXIS)
-      X1AXIS = RCFACE_H(IFACE)%IJK(KAXIS+1)
+      RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE)); IF(RCF%PRES_ZONE/=IPZ) CYCLE RCFACE_LOOP
+      I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = RCFACE_H(IFACE)%UNKH(LOW_IND)
-      IND(HIGH_IND) = RCFACE_H(IFACE)%UNKH(HIGH_IND)
+      IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND; LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
@@ -2518,22 +2503,20 @@ CC_IF : IF ( CC_IBM ) THEN
             IF ( K == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( RCFACE_H(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                                                  RCFACE_H(IFACE)%XCEN(X1AXIS,LOW_IND) )
+      IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
       ! Now add to Adiff corresponding coeff:
       BIJ   = IDX*AF
       !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
       KFACE(1,1) = BIJ; KFACE(2,1) =-BIJ; KFACE(1,2) =-BIJ; KFACE(2,2) = BIJ
-      DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
-         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
-             IROW=IND(ILOC)                     ! Process Local Unknown number.
-             JCOL=RCFACE_H(IFACE)%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
+      DO ILOC=LOCROW_1,LOCROW_2      ! Local row number in Kface
+         DO JLOC=LOW_IND,HIGH_IND    ! Local col number in Kface, JD
+             IROW=IND(ILOC)          ! Process Local Unknown number.
+             JCOL=RCF%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
              ! Add coefficient:
              D_H_MAT(JCOL,IROW) = D_H_MAT(JCOL,IROW) + KFACE(ILOC,JLOC)
          ENDDO
       ENDDO
    ENDDO RCFACE_LOOP
-   NULLIFY(RCFACE_H)
 
    ! Now Gasphase CUT_FACES:
    PRESONCART_IF : IF ( .NOT.PRES_ON_CARTESIAN ) THEN
@@ -3431,7 +3414,7 @@ CASE(3)
    ! 4. IBM_GASPHASE cut-faces:
    IF(CC_IBM) CALL GET_H_CUTFACES
 
-   ! 5. Exchange information at block boundaries for IBM_RCFACE_H, CUT_FACE
+   ! 5. Exchange information at block boundaries for RC_FACE, CUT_FACE
    ! fields on each mesh:
    CALL GET_BOUNDFACE_GEOM_INFO_H
 
@@ -4639,7 +4622,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ENDDO WALL_LOOP_1
 
-   ! Finally Add nonzeros corresponding to IBM_RCFACE_H, CUT_FACE
+   ! Finally Add nonzeros corresponding to RC_FACE, CUT_FACE
    IF (CC_IBM) CALL GET_CC_MATRIXGRAPH_H(NM,NM_START,.TRUE.)
 
 ENDDO MESH_LOOP_1

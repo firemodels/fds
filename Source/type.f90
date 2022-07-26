@@ -1174,22 +1174,14 @@ TYPE IBM_REGFACEZ_TYPE
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_REGFACEZ_TYPE
 
-TYPE IBM_RCFACE_TYPE
-   LOGICAL:: SHAREDH=.FALSE.
-   INTEGER:: PRES_ZONE=-1
-   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKH
-   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
-END TYPE IBM_RCFACE_TYPE
-
 TYPE IBM_RCFACE_LST_TYPE
-   LOGICAL :: SHAREDZ=.FALSE.
-   INTEGER :: IWC=0, UNKF=0
+   LOGICAL :: SHAREDZ=.FALSE., SHAREDH=.FALSE.
+   INTEGER :: IWC=0, UNKF=0, PRES_ZONE=-1
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ,UNKH
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB

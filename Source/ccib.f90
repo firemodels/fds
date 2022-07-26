@@ -2209,11 +2209,9 @@ ELSE STORE_IF
 
          ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
          DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-            I      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-            J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-            K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-            X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
-            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHAREDH) THEN
+            RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+            I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
+            IF (LINKED_PRESSURE .AND. RCF%SHAREDH) THEN
                SELECT CASE(X1AXIS)
                CASE(IAXIS); US(I,J,K)= 0._EB
                CASE(JAXIS); VS(I,J,K)= 0._EB
@@ -2221,8 +2219,7 @@ ELSE STORE_IF
                END SELECT
                CYCLE
             ENDIF
-            IDX = 1._EB / ( MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                            MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
             SELECT CASE(X1AXIS)
                CASE(IAXIS)
                   US(I,J,K)= U(I,J,K) - DT*( FVX(I,J,K) + IDX*(H(I+1,J,K)-H(I,J,K)) )
@@ -2477,11 +2474,9 @@ ELSE STORE_IF
 
          ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
          DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-            I      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-            J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-            K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-            X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
-            IF (LINKED_PRESSURE .AND. MESHES(NM)%IBM_RCFACE_H(IFACE)%SHAREDH) THEN
+            RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+            I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
+            IF (LINKED_PRESSURE .AND. RCF%SHAREDH) THEN
                SELECT CASE(X1AXIS)
                CASE(IAXIS); U(I,J,K)= 0._EB
                CASE(JAXIS); V(I,J,K)= 0._EB
@@ -2489,8 +2484,7 @@ ELSE STORE_IF
                END SELECT
                CYCLE
             ENDIF
-            IDX = 1._EB/( MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                          MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            IDX = 1._EB/( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
             SELECT CASE(X1AXIS)
                CASE(IAXIS)
                   U(I,J,K)= 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - &
@@ -20983,15 +20977,12 @@ KHI_CELL = KHI_FACE         ! Last internal cell index.
 
 ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
 DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-
-   I      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-   J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-   K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-   X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
+   RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+   I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
 
    ! Unknowns on related cells:
-   IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
-   IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
+   IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+   IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
 
    IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
    IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
@@ -21017,8 +21008,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
          IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
    ENDSELECT
 
-   IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                                               MESHES(NM)%IBM_RCFACE_H(IFACE)%XCEN(X1AXIS,LOW_IND) )
+   IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
 
    ! Now add to Adiff corresponding coeff:
    BIJ   = IDX*AF
@@ -21029,7 +21019,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
    DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
       DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
           IROW=IND_LOC(ILOC)                                ! Process Local Unknown number.
-          JCOL=MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
+          JCOL=RCF%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
           ! Add coefficient:
           D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
       ENDDO
@@ -21212,13 +21202,11 @@ LOOP_FLAG_COND : IF ( LOOP_FLAG ) THEN ! MESH_LOOP_1 in calling routine.
 
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-      I      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-      J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-      K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
+      RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+      I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
+      IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! Row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
       ! Row ind(1),ind(2):
@@ -21326,13 +21314,11 @@ ELSE ! MESH_LOOP_2 in calling routine.
 
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    DO IFACE=1,MESHES(NM)%IBM_NRCFACE_H
-      I      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(IAXIS)
-      J      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(JAXIS)
-      K      = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%IBM_RCFACE_H(IFACE)%IJK(KAXIS+1)
+      RCF => IBM_RCFACE_Z(MESHES(NM)%RCF_H(IFACE));
+      I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_H(IFACE)%UNKH(HIGH_IND)
+      IND(LOW_IND)  = RCF%UNKH(LOW_IND)
+      IND(HIGH_IND) = RCF%UNKH(HIGH_IND)
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! Row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
       ! Row ind(1),ind(2):
@@ -21349,14 +21335,14 @@ ELSE ! MESH_LOOP_2 in calling routine.
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(1:2,1:2) = 0
+      RCF%JDH(1:2,1:2) = 0
       ! Add to global matrix arrays:
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_H(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_RCFACE_H(IFACE)%JDH(LOCROW,IIND) = ILOC
+                   RCF%JDH(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -21852,21 +21838,19 @@ END SUBROUTINE GET_GASPHASE_CUTFACES_DATA
 
 SUBROUTINE GET_RCFACES_H(NM)
 
-
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
 INTEGER :: IRC,IIFC,X1AXIS,X2AXIS,X3AXIS
 INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: IJKFACE
-INTEGER :: NCELL,ICC,JCC,IJK(MAX_DIM),IFC,IFACE,LOWHIGH
+INTEGER :: ICC,JCC,IJK(MAX_DIM),IFC,IFACE,LOWHIGH
 INTEGER :: XIAXIS,XJAXIS,XKAXIS,INDXI1(MAX_DIM),INCELL,JNCELL,KNCELL,INFACE,JNFACE,KNFACE
 INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 LOGICAL :: INLIST
 
-INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,IIG,JJG,KKG,CELL_UNKH
+INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,CELL_UNKH
 TYPE (WALL_TYPE), POINTER :: WC
-
-LOGICAL :: FLGIN
+TYPE (MESH_TYPE), POINTER :: M
 
 ! Test for Pressure Solver:
 SELECT CASE(PRES_FLAG)
@@ -21874,48 +21858,49 @@ SELECT CASE(PRES_FLAG)
    CASE (UGLMAT_FLAG,ULMAT_FLAG)
 END SELECT
 
+M => MESHES(NM)
+
 ! Mesh sizes:
-NXB=IBAR; NYB=JBAR; NZB=KBAR
+NXB=M%IBAR; NYB=M%JBAR; NZB=M%KBAR
 
 ! X direction bounds:
 ILO_FACE = 0                    ! Low mesh boundary face index.
-IHI_FACE = IBAR                 ! High mesh boundary face index.
-ILO_CELL = ILO_FACE + 1     ! First internal cell index. See notes.
-IHI_CELL = IHI_FACE ! Last internal cell index.
+IHI_FACE = M%IBAR               ! High mesh boundary face index.
+ILO_CELL = ILO_FACE + 1         ! First internal cell index. See notes.
+IHI_CELL = IHI_FACE             ! Last internal cell index.
 ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
 IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
 
 ! Y direction bounds:
 JLO_FACE = 0                    ! Low mesh boundary face index.
-JHI_FACE = JBAR                 ! High mesh boundary face index.
-JLO_CELL = JLO_FACE + 1     ! First internal cell index. See notes.
-JHI_CELL = JHI_FACE ! Last internal cell index.
+JHI_FACE = M%JBAR               ! High mesh boundary face index.
+JLO_CELL = JLO_FACE + 1         ! First internal cell index. See notes.
+JHI_CELL = JHI_FACE             ! Last internal cell index.
 JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
 JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
 
 ! Z direction bounds:
 KLO_FACE = 0                    ! Low mesh boundary face index.
-KHI_FACE = KBAR                 ! High mesh boundary face index.
-KLO_CELL = KLO_FACE + 1     ! First internal cell index. See notes.
-KHI_CELL = KHI_FACE ! Last internal cell index.
+KHI_FACE = M%KBAR               ! High mesh boundary face index.
+KLO_CELL = KLO_FACE + 1         ! First internal cell index. See notes.
+KHI_CELL = KHI_FACE             ! Last internal cell index.
 KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
 KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
 
 ! First count for allocation:
 ALLOCATE( IJKFACE(ILO_FACE:IHI_FACE,JLO_FACE:JHI_FACE,KLO_FACE:KHI_FACE,IAXIS:KAXIS) )
 IJKFACE(:,:,:,:) = 0
-DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-   NCELL = CUT_CELL(ICC)%NCELL
-   IJK(IAXIS:KAXIS) = CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
-   DO JCC=1,NCELL
+DO ICC=1,M%N_CUTCELL_MESH
+   CC => M%CUT_CELL(ICC); IJK(IAXIS:KAXIS) = CC%IJK(IAXIS:KAXIS)
+   DO JCC=1,CC%NCELL
       ! Loop faces and test:
-      DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-         IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+      DO IFC=1,CC%CCELEM(1,JCC)
+         IFACE = CC%CCELEM(IFC+1,JCC)
          ! If face type in face_list is not IBM_FTYPE_RCGAS, drop:
-         IF(CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE
+         IF(CC%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE
          ! Which face?
-         LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-         X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+         LOWHIGH = CC%FACE_LIST(2,IFACE)
+         X1AXIS  = CC%FACE_LIST(3,IFACE)
          SELECT CASE(X1AXIS)
          CASE(IAXIS)
             X2AXIS = JAXIS; X3AXIS = KAXIS
@@ -21934,41 +21919,33 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
          IF (LOWHIGH == LOW_IND) THEN
             ! Face indexes:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INFACE = INDXI1(XIAXIS)
-            JNFACE = INDXI1(XJAXIS)
-            KNFACE = INDXI1(XKAXIS)
+            INFACE = INDXI1(XIAXIS); JNFACE = INDXI1(XJAXIS); KNFACE = INDXI1(XKAXIS)
 
             ! Location of next Cartesian cell:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INCELL = INDXI1(XIAXIS)
-            JNCELL = INDXI1(XJAXIS)
-            KNCELL = INDXI1(XKAXIS)
+            INCELL = INDXI1(XIAXIS); JNCELL = INDXI1(XJAXIS); KNCELL = INDXI1(XKAXIS)
 
-            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
+            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = M%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
+            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = M%MUNKH(INCELL,JNCELL,KNCELL)
             IF ( CELL_UNKH > 0 ) THEN
                IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
-            ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+            ELSEIF ( M%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
                IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
             ENDIF
          ELSE ! HIGH_IND
             ! Face indexes:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS), IJK(X2AXIS), IJK(X3AXIS) /)
-            INFACE = INDXI1(XIAXIS)
-            JNFACE = INDXI1(XJAXIS)
-            KNFACE = INDXI1(XKAXIS)
+            INFACE = INDXI1(XIAXIS); JNFACE = INDXI1(XJAXIS); KNFACE = INDXI1(XKAXIS)
 
             ! Location of next Cartesian cell:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)+1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INCELL = INDXI1(XIAXIS)
-            JNCELL = INDXI1(XJAXIS)
-            KNCELL = INDXI1(XKAXIS)
+            INCELL = INDXI1(XIAXIS); JNCELL = INDXI1(XJAXIS); KNCELL = INDXI1(XKAXIS)
 
-            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
+            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = M%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
+            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = M%MUNKH(INCELL,JNCELL,KNCELL)
             IF ( CELL_UNKH > 0 ) THEN
                IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
-            ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+            ELSEIF ( M%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
                IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
             ENDIF
          ENDIF
@@ -21977,16 +21954,10 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
    ENDDO
 ENDDO
 
-! Check for RCFACE_H on the boundary of the domain, where the cut-cell is in the cut-cell region.
+! Check for RCF_H on the boundary of the domain, where the cut-cell is in the cut-cell region.
 ! Now Apply external wall cell loop for guard-cell cut cells:
-GUARD_CUT_CELL_LOOP_1 :  DO IW=1,N_EXTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   BC => BOUNDARY_COORD(WC%BC_INDEX)
-   II = BC%II
-   JJ = BC%JJ
-   KK = BC%KK
-   IOR = BC%IOR
-
+GRD_CC_LOOP_1 :  DO IW=1,M%N_EXTERNAL_WALL_CELLS
+   WC=>M%WALL(IW); BC => M%BOUNDARY_COORD(WC%BC_INDEX); II = BC%II; JJ = BC%JJ; KK = BC%KK; IOR = BC%IOR
    ! Which face:
    X1AXIS=ABS(IOR)
    SELECT CASE(IOR)
@@ -22007,26 +21978,17 @@ GUARD_CUT_CELL_LOOP_1 :  DO IW=1,N_EXTERNAL_WALL_CELLS
    IF( PRES_FLAG==UGLMAT_FLAG .AND. &
       (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY) ) THEN
       ! Drop if FACE is not type IBM_GASPHASE
-      IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_1
-
-      IIG  = BC%IIG
-      JJG  = BC%JJG
-      KKG  = BC%KKG
-
-      ! Is this an actual RCFACE_VEL laying on the mesh boundary, where the cut-cell is in the guard-cell region?
-      FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_CGSC)==IBM_GASPHASE)
-
-      IF(.NOT.FLGIN) CYCLE GUARD_CUT_CELL_LOOP_1
-
+      IF (M%FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GRD_CC_LOOP_1
+      ! Is this an actual RCF_H laying on the mesh boundary, where the cut-cell is in the guard-cell region?
+      IF(.NOT.((M%CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE).AND.(M%CCVAR(BC%IIG,BC%JJG,BC%KKG,IBM_CGSC)==IBM_GASPHASE))) &
+      CYCLE GRD_CC_LOOP_1
       IJKFACE(IIF,JJF,KKF,X1AXIS) = 1
 
-   ELSE ! All other types of BCs (SOLID_BOUNDARY, NULL_BOUNDARY, OPEN_BOUNDARY) will not be added to RCFACES_H.
-
+   ELSE ! All other types of BCs (SOLID_BOUNDARY, NULL_BOUNDARY, OPEN_BOUNDARY) will not be added to RCF_H.
       IJKFACE(IIF,JJF,KKF,X1AXIS) = 0
 
    ENDIF
-
-ENDDO GUARD_CUT_CELL_LOOP_1
+ENDDO GRD_CC_LOOP_1
 
 IRC = SUM(IJKFACE(:,:,:,:))
 IF (IRC == 0) THEN
@@ -22037,47 +21999,42 @@ ELSE
    ! Populate position and cell size arrays: Uniform grid implementation.
    ! X direction:
    ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
-   XCELL(ILO_CELL-1:IHI_CELL+1) = MESHES(NM)%XC(ILO_CELL-1:IHI_CELL+1)
+   XCELL(ILO_CELL-1:IHI_CELL+1) = M%XC(ILO_CELL-1:IHI_CELL+1)
 
    ! Y direction:
    ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
-   YCELL(JLO_CELL-1:JHI_CELL+1) = MESHES(NM)%YC(JLO_CELL-1:JHI_CELL+1)
+   YCELL(JLO_CELL-1:JHI_CELL+1) = M%YC(JLO_CELL-1:JHI_CELL+1)
 
    ! Z direction:
    ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
-   ZCELL(KLO_CELL-1:KHI_CELL+1) = MESHES(NM)%ZC(KLO_CELL-1:KHI_CELL+1)
+   ZCELL(KLO_CELL-1:KHI_CELL+1) = M%ZC(KLO_CELL-1:KHI_CELL+1)
 ENDIF
 
-MESHES(NM)%IBM_NRCFACE_H = IRC ! Same number of regular - cut cell faces as scalars.
-ALLOCATE( MESHES(NM)%IBM_RCFACE_H(IRC) )
+M%IBM_NRCFACE_H = IRC ! Same number of regular - cut cell faces as scalars.
+ALLOCATE( M%RCF_H(IRC) )
 IRC = 0
-DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-   NCELL = CUT_CELL(ICC)%NCELL
-   IJK(IAXIS:KAXIS) = CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
-
-   DO JCC=1,NCELL
+DO ICC=1,M%N_CUTCELL_MESH
+   CC => M%CUT_CELL(ICC); IJK(IAXIS:KAXIS) = CC%IJK(IAXIS:KAXIS)
+   DO JCC=1,CC%NCELL
       ! Loop faces and test:
-      DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-         IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+      DO IFC=1,CC%CCELEM(1,JCC)
+         IFACE = CC%CCELEM(IFC+1,JCC)
          ! If face type in face_list is not IBM_FTYPE_RCGAS, drop:
-         IF(CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE
+         IF(CC%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE
          ! Which face?
-         LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-         X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+         LOWHIGH = CC%FACE_LIST(2,IFACE)
+         X1AXIS  = CC%FACE_LIST(3,IFACE)
          SELECT CASE(X1AXIS)
          CASE(IAXIS)
-            X2AXIS = JAXIS
-            X3AXIS = KAXIS
+            X2AXIS = JAXIS; X3AXIS = KAXIS
             ! location in I,J,K od x2,x2,x3 axes:
             XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
          CASE(JAXIS)
-            X2AXIS = KAXIS
-            X3AXIS = IAXIS
+            X2AXIS = KAXIS; X3AXIS = IAXIS
             ! location in I,J,K od x2,x2,x3 axes:
             XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
          CASE(KAXIS)
-            X2AXIS = IAXIS
-            X3AXIS = JAXIS
+            X2AXIS = IAXIS; X3AXIS = JAXIS
             ! location in I,J,K od x2,x2,x3 axes:
             XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
          END SELECT
@@ -22086,275 +22043,97 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
             ! Face indexes:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INFACE = INDXI1(XIAXIS)
-            JNFACE = INDXI1(XJAXIS)
-            KNFACE = INDXI1(XKAXIS)
+            INFACE = INDXI1(XIAXIS); JNFACE = INDXI1(XJAXIS); KNFACE = INDXI1(XKAXIS)
 
             IF(IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) /= 1) CYCLE ! This is to cycle external WALL CELLs of types other
-                                                                ! than INTERPOLATED_BOUNDARY of PERIODIC_BOUNDARY.
+                                                                ! than INTERPOLATED_BOUNDARY or PERIODIC_BOUNDARY.
 
             ! Location of next Cartesian cell:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INCELL = INDXI1(XIAXIS)
-            JNCELL = INDXI1(XJAXIS)
-            KNCELL = INDXI1(XKAXIS)
+            INCELL = INDXI1(XIAXIS); JNCELL = INDXI1(XJAXIS); KNCELL = INDXI1(XKAXIS)
 
-            IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured pressure Poisson matrix build,
-                                               ! use cut-cell vols:
-               IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-               IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
-               IF ( CELL_UNKH > 0 ) THEN
+            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = M%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
+            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = M%MUNKH(INCELL,JNCELL,KNCELL)
+            IF ( CELL_UNKH > 0 ) THEN
+               ! Add face to RCF_H list:
+               IRC = IRC + 1
+               M%RCF_H(IRC) = FCVAR(INFACE,JNFACE,KNFACE,IBM_FFNF,X1AXIS)
+               ! Cell at i-1, i.e. regular GASPHASE:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND) = CELL_UNKH
+               ! Cell at i+1, i.e. cut-cell:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND) = CC%UNKH(JCC)
 
-                  ! Add face to IBM_RCFACE_H data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i-1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CELL_UNKH
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
-
+            ELSEIF ( M%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+               ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
+               INLIST = .FALSE.
+               DO IIFC=1,IRC
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(IAXIS)   /= INFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(JAXIS)   /= JNFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(KAXIS)   /= KNFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(KAXIS+1) /= X1AXIS ) CYCLE
+                  INLIST = .TRUE.
+                  EXIT
+               ENDDO
+               IF (INLIST) THEN
                   ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-
-               ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
-
-                  ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
-                  INLIST = .FALSE.
-                  DO IIFC=1,IRC
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(IAXIS)   /= INFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(JAXIS)   /= JNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS)   /= KNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS+1) /= X1AXIS ) CYCLE
-                     INLIST = .TRUE.
-                     EXIT
-                  ENDDO
-                  IF (INLIST) THEN
-                     ! Cell at i+1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                           CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-                     CYCLE
-                  ENDIF
-
-                  ! Add face to IBM_RCFACE_H data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-
+                  M%IBM_RCFACE_Z(M%RCF_H(IIFC))%UNKH(HIGH_IND) = CC%UNKH(JCC)
+                  CYCLE
                ENDIF
+               ! Add face to RCF_H list:
+               IRC = IRC + 1
+               M%RCF_H(IRC) = FCVAR(INFACE,JNFACE,KNFACE,IBM_FFNF,X1AXIS)
+               ! Cell at i+1, i.e. cut-cell:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND) = CC%UNKH(JCC)
 
-            ELSE ! Unstructured build, use underlying cartesian cells:
-
-               IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-               IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
-               IF ( CELL_UNKH > 0 ) THEN  ! Regular Gasphase
-
-                  ! Add face to IBM_RCFACE_H data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i-1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CELL_UNKH
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
-
-                  ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-
-               ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
-
-                  ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
-                  INLIST = .FALSE.
-                  DO IIFC=1,IRC
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(IAXIS)   /= INFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(JAXIS)   /= JNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS)   /= KNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS+1) /= X1AXIS ) CYCLE
-                     INLIST = .TRUE.
-                     EXIT
-                  ENDDO
-                  IF (INLIST) THEN
-                     ! Cell at i+1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                     (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-                     CYCLE
-                  ENDIF
-
-                  ! Add face to IBM_RCFACE_H data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i+1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-
-               ENDIF
             ENDIF
 
          ELSE ! IF_LOW_HIGH_H : HIGH_IND
 
             ! Face indexes:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS), IJK(X2AXIS), IJK(X3AXIS) /)
-            INFACE = INDXI1(XIAXIS)
-            JNFACE = INDXI1(XJAXIS)
-            KNFACE = INDXI1(XKAXIS)
+            INFACE = INDXI1(XIAXIS); JNFACE = INDXI1(XJAXIS); KNFACE = INDXI1(XKAXIS)
 
             IF(IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) /= 1) CYCLE ! This is to cycle external WALL CELLs of types other
                                                                 ! than INTERPOLATED_BOUNDARY of PERIODIC_BOUNDARY.
 
             ! Location of next Cartesian cell:
             INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)+1, IJK(X2AXIS), IJK(X3AXIS) /)
-            INCELL = INDXI1(XIAXIS)
-            JNCELL = INDXI1(XJAXIS)
-            KNCELL = INDXI1(XKAXIS)
+            INCELL = INDXI1(XIAXIS); JNCELL = INDXI1(XJAXIS); KNCELL = INDXI1(XKAXIS)
 
-            IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured pressure Poisson matrix build,
-                                               ! use cut-cell vols:
+            IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = M%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
+            IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = M%MUNKH(INCELL,JNCELL,KNCELL)
+            IF ( CELL_UNKH > 0 ) THEN
+               ! Add face to RCF_H list:
+               IRC = IRC + 1
+               M%RCF_H(IRC) = FCVAR(INFACE,JNFACE,KNFACE,IBM_FFNF,X1AXIS)
+               ! Cell at i-1, i.e. cut-cell:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND) = CC%UNKH(JCC)
+               ! Cell at i+1, i.e. regular GASPHASE:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND) = CELL_UNKH
 
-               IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-               IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
-               IF ( CELL_UNKH > 0 ) THEN
-
-                  ! Add face to IBM_RCFACE_H data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
+            ELSEIF ( M%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+               ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
+               INLIST = .FALSE.
+               DO IIFC=1,IRC
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(IAXIS)   /= INFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(JAXIS)   /= JNFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(KAXIS)   /= KNFACE ) CYCLE
+                  IF ( M%IBM_RCFACE_Z(M%RCF_H(IIFC))%IJK(KAXIS+1) /= X1AXIS ) CYCLE
+                  INLIST = .TRUE.
+                  EXIT
+               ENDDO
+               IF (INLIST) THEN
                   ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-
-                  ! Cell at i+1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CELL_UNKH
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
-
-               ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
-
-                  ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
-                  INLIST = .FALSE.
-                  DO IIFC=1,IRC
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(IAXIS)   /= INFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(JAXIS)   /= JNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS)   /= KNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS+1) /= X1AXIS ) CYCLE
-                     INLIST = .TRUE.
-                     EXIT
-                  ENDDO
-                  IF (INLIST) THEN
-                     ! Cell at i-1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                     CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-                     CYCLE
-                  ENDIF
-
-                  ! Add face to REGC_FACE_H  data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(JCC)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-
+                  M%IBM_RCFACE_Z(M%RCF_H(IIFC))%UNKH(LOW_IND) = CC%UNKH(JCC)
+                  CYCLE
                ENDIF
+               ! Add face to RCF_H list:
+               IRC = IRC + 1
+               M%RCF_H(IRC) = FCVAR(INFACE,JNFACE,KNFACE,IBM_FFNF,X1AXIS)
+               ! Cell at i-1, i.e. cut-cell:
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND) = CC%UNKH(JCC)
 
-            ELSE ! Unstructured build, use underlying cartesian cells:
-
-               IF (PRES_FLAG==UGLMAT_FLAG) CELL_UNKH = MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH)
-               IF (PRES_FLAG== ULMAT_FLAG) CELL_UNKH = MESHES(NM)%MUNKH(INCELL,JNCELL,KNCELL)
-               IF ( CELL_UNKH > 0 ) THEN  ! Regular Gasphase
-
-                  ! Add face to REGC_FACE_H  data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-
-                  ! Cell at i+1, i.e. regular GASPHASE:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CELL_UNKH
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-                      (/ XCELL(INCELL), YCELL(JNCELL), ZCELL(KNCELL) /)
-
-               ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
-
-                  ! Test that Cut-cell to Cut-cell reg face hasn't been added before:
-                  INLIST = .FALSE.
-                  DO IIFC=1,IRC
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(IAXIS)   /= INFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(JAXIS)   /= JNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS)   /= KNFACE ) CYCLE
-                     IF ( MESHES(NM)%IBM_RCFACE_H(IIFC)%IJK(KAXIS+1) /= X1AXIS ) CYCLE
-                     INLIST = .TRUE.
-                     EXIT
-                  ENDDO
-                  IF (INLIST) THEN
-                     ! Cell at i-1, i.e. cut-cell:
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
-                     MESHES(NM)%IBM_RCFACE_H(IIFC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                     (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-                     CYCLE
-                  ENDIF
-
-                  ! Add face to REGC_FACE_H  data structure:
-                  IRC = IRC + 1
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ INFACE, JNFACE, KNFACE, X1AXIS/)
-
-                  ! Can compute Area and centroid location of reg
-                  ! face when building matrix.
-
-                  ! Add all info required for matrix build:
-                  ! Cell at i-1, i.e. cut-cell:
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-                      (/ XCELL(IJK(IAXIS)), YCELL(IJK(JAXIS)), ZCELL(IJK(KAXIS)) /)
-
-               ENDIF
-            ENDIF ! .NOT.PRES_ON_CARTESIAN
-
+            ENDIF
          ENDIF IF_LOW_HIGH_H
 
       ENDDO
@@ -22362,120 +22141,77 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 ENDDO
 
 IF (PRES_FLAG==UGLMAT_FLAG) THEN
-   GUARD_CUT_CELL_LOOP_2 :  DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      IF (.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) &
-      CYCLE GUARD_CUT_CELL_LOOP_2
-
-      BC => BOUNDARY_COORD(WC%BC_INDEX)
-      II = BC%II
-      JJ = BC%JJ
-      KK = BC%KK
-      IOR = BC%IOR
+   GRD_CC_LOOP_2 :  DO IW=1,M%N_EXTERNAL_WALL_CELLS
+      WC=>M%WALL(IW)
+      IF(.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY.OR.WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE GRD_CC_LOOP_2
+      BC => M%BOUNDARY_COORD(WC%BC_INDEX); II = BC%II; JJ = BC%JJ; KK = BC%KK; IOR = BC%IOR
 
       ! Which face:
       X1AXIS=ABS(IOR)
       SELECT CASE(IOR)
       CASE( IAXIS)
-         IIF=II  ; JJF=JJ  ; KKF=KK
-         LOWHIGH_TEST=HIGH_IND ! Face on high side of Guard-Cell
+         IIF=II  ; JJF=JJ  ; KKF=KK  ; LOWHIGH_TEST=HIGH_IND ! Face on high side of Guard-Cell
       CASE(-IAXIS)
-         IIF=II-1; JJF=JJ  ; KKF=KK
-         LOWHIGH_TEST=LOW_IND
+         IIF=II-1; JJF=JJ  ; KKF=KK  ; LOWHIGH_TEST= LOW_IND
       CASE( JAXIS)
-         IIF=II  ; JJF=JJ  ; KKF=KK
-         LOWHIGH_TEST=HIGH_IND
+         IIF=II  ; JJF=JJ  ; KKF=KK  ; LOWHIGH_TEST=HIGH_IND
       CASE(-JAXIS)
-         IIF=II  ; JJF=JJ-1; KKF=KK
-         LOWHIGH_TEST=LOW_IND
+         IIF=II  ; JJF=JJ-1; KKF=KK  ; LOWHIGH_TEST= LOW_IND
       CASE( KAXIS)
-         IIF=II  ; JJF=JJ  ; KKF=KK
-         LOWHIGH_TEST=HIGH_IND
+         IIF=II  ; JJF=JJ  ; KKF=KK  ; LOWHIGH_TEST=HIGH_IND
       CASE(-KAXIS)
-         IIF=II  ; JJF=JJ  ; KKF=KK-1
-         LOWHIGH_TEST=LOW_IND
+         IIF=II  ; JJF=JJ  ; KKF=KK-1; LOWHIGH_TEST= LOW_IND
       END SELECT
 
       ! Drop if FACE is not type IBM_GASPHASE
-      IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_2
+      IF (M%FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GRD_CC_LOOP_2
 
-      BC => BOUNDARY_COORD(WC%BC_INDEX)
-      IIG = BC%IIG
-      JJG = BC%JJG
-      KKG = BC%KKG
+      ! Is this an actual RCF_H laying on the mesh boundary, where the cut-cell is in the guard-cell region?
+      IF(.NOT.((M%CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE).AND.(M%CCVAR(BC%IIG,BC%JJG,BC%KKG,IBM_UNKH)>0))) &
+      CYCLE GRD_CC_LOOP_2
 
-      ! Is this an actual RCFACE_H laying on the mesh boundary, where the cut-cell is in the guard-cell region?
-      FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_UNKH) > 0)
-
-      IF(.NOT.FLGIN) CYCLE GUARD_CUT_CELL_LOOP_2
-
-      ICC=CCVAR(II,JJ,KK,IBM_IDCC)
-      DO JCC=1,CUT_CELL(ICC)%NCELL
+      CC => M%CUT_CELL(M%CCVAR(II,JJ,KK,IBM_IDCC))
+      DO JCC=1,CC%NCELL
          ! Loop faces and test:
-         DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-            IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+         DO IFC=1,CC%CCELEM(1,JCC)
+            IFACE = CC%CCELEM(IFC+1,JCC)
             ! Which face ?
-            LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-            IF ( CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE ! Must Be gasphase cut-face
+            LOWHIGH = CC%FACE_LIST(2,IFACE)
+            IF ( CC%FACE_LIST(1,IFACE) /= IBM_FTYPE_RCGAS) CYCLE  ! Must Be gasphase RCFACE
             IF ( LOWHIGH                              /= LOWHIGH_TEST) CYCLE ! In same side as EWC from guard-cell
-            IF ( CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
+            IF ( CC%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE           ! Normal to same axis as EWC
 
-             ! If so, we need to add it to the IBM_RCFACE_H list:
+             ! If so, we need to add it to RCF_H list:
             IF (LOWHIGH == LOW_IND) THEN ! Face on low side of guard cut-cell
-
-               ! Add face to IBM_RCFACE_H data structure:
                IRC = IRC + 1
-               MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ IIF, JJF, KKF, X1AXIS/)
-
-               ! Add all info required for matrix build:
+               M%RCF_H(IRC) = M%FCVAR(IIF,JJF,KKF,IBM_FFNF,X1AXIS)
                ! Cell at i-1, i.e. regular GASPHASE:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
-               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
-               (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
-
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND)  = M%CCVAR(BC%IIG,BC%JJG,BC%KKG,IBM_UNKH)
                ! Cell at i+1, i.e. cut-cell:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CUT_CELL(ICC)%UNKH(1)
-               IF ( .NOT.PRES_ON_CARTESIAN ) THEN
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-               ELSE
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = (/ XCELL(II), YCELL(JJ), ZCELL(KK) /)
-               ENDIF
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND) = CC%UNKH(JCC)
 
             ELSEIF(LOWHIGH == HIGH_IND) THEN ! Face on high side of guard cut-cell
-
-               ! Add face to IBM_RCFACE_H data structure:
                IRC = IRC + 1
-               MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ IIF, JJF, KKF, X1AXIS/)
-
-               ! Add all info required for matrix build:
+               M%RCF_H(IRC) = M%FCVAR(IIF,JJF,KKF,IBM_FFNF,X1AXIS)
                ! Cell at i-1, i.e. cut-cell:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND) = CUT_CELL(ICC)%UNKH(1)
-               IF ( .NOT.PRES_ON_CARTESIAN ) THEN
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
-               ELSE
-                  MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = (/ XCELL(II), YCELL(JJ), ZCELL(KK) /)
-               ENDIF
-
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND)  = CC%UNKH(JCC)
                ! Cell at i+1, i.e. regular GASPHASE:
-               MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
-               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
-               (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
+               M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND) = M%CCVAR(BC%IIG,BC%JJG,BC%KKG,IBM_UNKH)
 
             ENDIF
             ! At this point the face has been found, cycle:
-            CYCLE GUARD_CUT_CELL_LOOP_2
+            CYCLE GRD_CC_LOOP_2
          ENDDO
       ENDDO
 
-   ENDDO GUARD_CUT_CELL_LOOP_2
+   ENDDO GRD_CC_LOOP_2
 ENDIF
 
-! Finally define shared RCFACE_H face:
-DO IRC=1,MESHES(NM)%IBM_NRCFACE_H
-   IF(MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(LOW_IND)==MESHES(NM)%IBM_RCFACE_H(IRC)%UNKH(HIGH_IND)) &
-   MESHES(NM)%IBM_RCFACE_H(IRC)%SHAREDH = .TRUE.
+! Finally define shared RCF_H face:
+DO IRC=1,M%IBM_NRCFACE_H
+   IF(M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(LOW_IND)==M%IBM_RCFACE_Z(M%RCF_H(IRC))%UNKH(HIGH_IND)) &
+   M%IBM_RCFACE_Z(M%RCF_H(IRC))%SHAREDH = .TRUE.
 ENDDO
-
 
 DEALLOCATE(XCELL,YCELL,ZCELL)
 DEALLOCATE(IJKFACE)
