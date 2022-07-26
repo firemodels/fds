@@ -166,6 +166,7 @@ TYPE CONTROL_TYPE
    LOGICAL :: PRIOR_STATE=.FALSE.   !< Prior timestep logical state of the control function
    LOGICAL :: LATCH=.TRUE.          !< Control function can only change state once
    LOGICAL :: UPDATED=.FALSE.       !< Control function has been updatead in the current timestep
+   LOGICAL :: CONTROL_FORCE(3)=.FALSE. !< Indicates whether control value will be used as a direct force in the momentum equation
    INTEGER :: CONTROL_INDEX=0       !< Indicates the type of control function
    INTEGER :: N_INPUTS=0            !< Number of inputs to the control function
    INTEGER :: RAMP_INDEX=0          !< Index of a RAMP used for the CUSTOM control function
