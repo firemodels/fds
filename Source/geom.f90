@@ -75,8 +75,8 @@ INTEGER,  PARAMETER :: IBM_FGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID
                                       ! IBM_INBOUNDCF type.
 INTEGER,  PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%CUT_FACE data struct entry index location,
                                       ! IBM_INBOUNDCF type cut-faces.
-INTEGER,  PARAMETER :: IBM_FFNF   = 4 ! In GET_CRTCFCC_INT_STENCILS Flag that defines if face is to be IB forced or not.
-                                      ! After SET_CCIBM_MATVEC_DATA, position in IBM_RCFACE_Z of I,J,K,IAXIS face.
+INTEGER,  PARAMETER :: IBM_IDRC   = 4 ! In GET_CRTCFCC_INT_STENCILS Flag that defines if face is to be IB forced or not.
+                                      ! After SET_CCIBM_MATVEC_DATA, position in RC_FACE of I,J,K,IAXIS face.
 INTEGER,  PARAMETER :: IBM_IDRA   = 5 ! Integer ICF that defines RAD_FACE(ICF) position for radiation FVM.
 INTEGER,  PARAMETER :: IBM_UNKF   = 6 ! Momentum Force indexing.
 INTEGER,  PARAMETER :: IBM_NFVARS = 6 ! Number of face variables in MESHES(N)%FCVAR.
@@ -325,7 +325,7 @@ PUBLIC :: BLOCK_IBM_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SET
           POINT_IN_CFACE,RANDOM_CFACE_XYZ,&
           READ_GEOM,READ_TRNF,ROTATION_MATRIX, &
           WRITE_GEOM,WRITE_GEOM_ALL, &
-          FCELL,IBM_SOLID,IBM_VGSC,IBM_CGSC,IBM_FGSC,IBM_IDCF,IBM_UNKZ,IBM_GASPHASE,IBM_CUTCFE,IBM_FFNF,&
+          FCELL,IBM_SOLID,IBM_VGSC,IBM_CGSC,IBM_FGSC,IBM_IDCF,IBM_UNKZ,IBM_GASPHASE,IBM_CUTCFE,IBM_IDRC,&
           IBM_FTYPE_CFGAS,IBM_FTYPE_CFINB,IBM_FTYPE_RGGAS, &
           IBM_IDCC,IBM_IDRA,IBM_EGSC,IBM_IDCE,IBM_INBOUNDARY,IBM_UNDEFINED, &
           IBM_NCVARS, IBM_UNKH, IBM_UNKF, INDEX_UNDEFINED, INIT_CFACE_CELL, NUNKH_LOC, INT_N_EXT_PTS, &
