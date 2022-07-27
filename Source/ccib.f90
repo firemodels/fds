@@ -811,7 +811,7 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
      LHSS       = LHSS       + LHSS_CC
    ENDDO
    ! Add to RHSS:
-   RHSS = -(CUT_CELL(ICC)%DDDTVOL + DIV_FN_VOL)
+   RHSS = -(CUT_CELL(ICC)%DDDTVOL(1) + DIV_FN_VOL)
 
 ELSE DO_SEPARABLE_IF
    DO JCC=1,CUT_CELL(ICC)%NCELL
@@ -824,7 +824,7 @@ ELSE DO_SEPARABLE_IF
      LHSS       = LHSS       + LHSS_CC
    ENDDO
    ! Add to RHSS:
-   RHSS = -(CUT_CELL(ICC)%DDDTVOL + DIV_FN_VOL)
+   RHSS = -(CUT_CELL(ICC)%DDDTVOL(1) + DIV_FN_VOL)
 
 ENDIF DO_SEPARABLE_IF
 
@@ -1929,19 +1929,34 @@ PRED_CORR_IF : IF (PREDICTOR) THEN
       IPZ    = PRESSURE_ZONE(I,J,K)
       NCELL  = CUT_CELL(ICC)%NCELL
       DIVVOL = 0._EB; DPCC   = 0._EB; VOL    = 0._EB
-      DO JCC=1,NCELL
-         VOL  = VOL + CUT_CELL(ICC)%VOLUME(JCC)
-         CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,0._EB,DIV_JCC) ! Velocity divg of U,V,W -> PRFCT=0._EB
-         DIVVOL = DIVVOL + DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)
-         ! Thermodynamic divergence * vol:
-         DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) ) * CUT_CELL(ICC)%VOLUME(JCC)
-         ! Add Pressure derivative to divergence:
-         IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
-         DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
-      ENDDO
-      ! Define average DDDT for CUT_CELL(ICC):
-      CUT_CELL(ICC)%DIVVOL_PR= DIVVOL
-      CUT_CELL(ICC)%DDDTVOL  = (DPCC-DIVVOL)*RDT
+      IF (ONE_UNKH_PER_CUTCELL) THEN ! DDDTVOL(JCC) defined per cut-cell.
+         DO JCC=1,NCELL
+            CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,0._EB,DIV_JCC) ! Velocity divg of U,V,W -> PRFCT=0._EB
+            CUT_CELL(ICC)%DVOL_PR(JCC) = DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)
+            DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL_PR(JCC)
+            ! Thermodynamic divergence * vol:
+            DPCC= ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) )*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Add Pressure derivative to divergence:
+            IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+            DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%DDDTVOL(JCC)  = (DPCC-CUT_CELL(ICC)%DVOL_PR(JCC))*RDT
+         ENDDO
+      ELSE
+         DO JCC=1,NCELL
+            VOL  = VOL + CUT_CELL(ICC)%VOLUME(JCC)
+            CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,0._EB,DIV_JCC) ! Velocity divg of U,V,W -> PRFCT=0._EB
+            DIVVOL = DIVVOL + DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Thermodynamic divergence * vol:
+            DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) )*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Add Pressure derivative to divergence:
+            IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+            DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+         ENDDO
+         ! Define average DDDT for CUT_CELL(ICC):
+         CUT_CELL(ICC)%DDDTVOL(1)  = (DPCC-DIVVOL)*RDT
+         CUT_CELL(ICC)%DVOL_PR(1)  = DIVVOL
+      ENDIF
+
    ENDDO ICC_LOOP_1
 
 ELSEIF (CORRECTOR) THEN PRED_CORR_IF
@@ -1954,18 +1969,29 @@ ELSEIF (CORRECTOR) THEN PRED_CORR_IF
       IPZ    = PRESSURE_ZONE(I,J,K)
       NCELL  = CUT_CELL(ICC)%NCELL
       DIVVOL = 0._EB; DPCC   = 0._EB; VOL    = 0._EB
-      DO JCC=1,NCELL
-         VOL  = VOL + CUT_CELL(ICC)%VOLUME(JCC)
-         CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,1._EB,DIV_JCC) ! Velocity divg of US,VS,WS -> PRFCT=1._EB
-         DIVVOL = DIVVOL + DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)
-         ! Thermodynamic divergence * vol:
-         DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) ) * CUT_CELL(ICC)%VOLUME(JCC)
-         ! Add Pressure derivative to divergence:
-         IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
-         DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
-      ENDDO
-      ! Define average DDDT for CUT_CELL(ICC):
-      CUT_CELL(ICC)%DDDTVOL  = (2._EB*DPCC-(DIVVOL+CUT_CELL(ICC)%DIVVOL_PR))*RDT
+      IF (ONE_UNKH_PER_CUTCELL) THEN ! DDDTVOL(JCC) defined per cut-cell.
+         DO JCC=1,NCELL
+            CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,1._EB,DIV_JCC) ! Velocity divg of US,VS,WS -> PRFCT=1._EB
+            DPCC= ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) )*CUT_CELL(ICC)%VOLUME(JCC)
+            IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+            DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%DDDTVOL(JCC)  =  &
+            (2._EB*DPCC-(DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)+CUT_CELL(ICC)%DVOL_PR(JCC)))*RDT
+         ENDDO
+      ELSE
+         DO JCC=1,NCELL
+            VOL  = VOL + CUT_CELL(ICC)%VOLUME(JCC)
+            CALL GET_VELOC_DIVERGENCE_CUTCELL(ICC,JCC,1._EB,DIV_JCC) ! Velocity divg of US,VS,WS -> PRFCT=1._EB
+            DIVVOL = DIVVOL + DIV_JCC*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Thermodynamic divergence * vol:
+            DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) )*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Add Pressure derivative to divergence:
+            IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+            DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+         ENDDO
+         ! Define average DDDT for CUT_CELL(ICC):
+         CUT_CELL(ICC)%DDDTVOL(1)  = (2._EB*DPCC-(DIVVOL+CUT_CELL(ICC)%DVOL_PR(1)))*RDT
+      ENDIF
    ENDDO ICC_LOOP_2
 
 ENDIF PRED_CORR_IF
@@ -1986,7 +2012,7 @@ LOGICAL, INTENT(IN) :: STORE_FLG
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: U_STORE,V_STORE,W_STORE
 ! Local Vars:
 INTEGER :: I,J,K,ICF,JCF,IZERO,X1AXIS,IFACE,IOR,IW,IRC
-REAL(EB):: IDX,T_NOW
+REAL(EB):: IDX,T_NOW,H_HI,H_LO
 
 IF(.NOT. (CC_UNSTRUCTURED_PROJECTION) ) RETURN ! No need to downscale velocity.
 
@@ -2068,11 +2094,21 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,IAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I+1,J,K)-H(I,J,K)) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I+1,J,K)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(  I,J,K)
+                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I+1,J,K)-H(I,J,K)) )
+                        ENDDO
+                     ENDIF
                      US(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
+
                   ENDIF
                ENDDO
             ENDDO
@@ -2084,10 +2120,19 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,JAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I,J+1,K)-H(I,J,K)) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX  = 1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J+1,K)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,  J,K)
+                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I,J+1,K)-H(I,J,K)) )
+                        ENDDO
+                     ENDIF
                      VS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
                   ENDIF
                ENDDO
@@ -2100,10 +2145,19 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,KAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                        CF%VELS(JCF) = CF%VEL(JCF) -  DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I,J,K+1)-H(I,J,K)) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX  = 1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J,K+1)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,J,K  )
+                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                           CF%VELS(JCF) = CF%VEL(JCF) -  DT*( CF%FN(JCF) + CF%FN_B(JCF) + IDX*(H(I,J,K+1)-H(I,J,K)) )
+                        ENDDO
+                     ENDIF
                      WS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
                   ENDIF
                ENDDO
@@ -2237,11 +2291,21 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,IAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                          DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I+1,J,K)-HS(I,J,K))) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I+1,J,K)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I  ,J,K)
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO)) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I+1,J,K)-HS(I,J,K))) )
+                        ENDDO
+                     ENDIF
                      U(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
                   ENDIF
                ENDDO
@@ -2254,11 +2318,21 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,JAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                          DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I,J+1,K)-HS(I,J,K))) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J+1,K)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J  ,K)
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO)) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I,J+1,K)-HS(I,J,K))) )
+                        ENDDO
+                     ENDIF
                      V(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
                   ENDIF
                ENDDO
@@ -2271,11 +2345,21 @@ ELSE STORE_IF
                   ICF = FCVAR(I,J,K,IBM_IDCF,KAXIS)
                   IF (ICF>0) THEN
                      CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE
-                        IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                          DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I,J,K+1)-HS(I,J,K))) )
-                     ENDDO
+                     IF (ONE_UNKH_PER_CUTCELL) THEN
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J,K+1)
+                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J,K  )
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(H_HI-H_LO)) )
+                        ENDDO
+                     ELSE
+                        DO JCF=1,CF%NFACE
+                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                             DT*( CF%FN( JCF) + CF%FN_B(JCF) + IDX*(HS(I,J,K+1)-HS(I,J,K))) )
+                        ENDDO
+                     ENDIF
                      W(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
                   ENDIF
                ENDDO
@@ -5339,10 +5423,12 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ELSE
          ! Unstructured projection and .NOT.GRADH_ON_CARTESIAN:
-         IF (PREDICTOR) THEN
-            CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K) ! Use underlying value of HP.
-         ELSE
-            CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
+         IF (.NOT.ONE_UNKH_PER_CUTCELL) THEN
+            IF (PREDICTOR) THEN
+               CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K) ! Use underlying value of HP.
+            ELSE
+               CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
+            ENDIF
          ENDIF
       ENDIF
 
@@ -20342,7 +20428,7 @@ IF (.NOT.PRES_ON_CARTESIAN) THEN
       ENDDO
 
       ! Add to F_H:
-      F_H(IROW) = -(CUT_CELL(ICC)%DDDTVOL + DIV_FN_VOL)
+      F_H(IROW) = -(CUT_CELL(ICC)%DDDTVOL(1) + DIV_FN_VOL)
 
    ENDDO CUTCELL_LOOP_A
 
@@ -23561,11 +23647,9 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
    ! 2. Number cut-cells:
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      CC => CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
       IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-      DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-         CUT_CELL(ICC)%UNKZ(JCC) = CUT_CELL(ICC)%UNKZ(JCC) + UNKZ_IND(NM)
-      ENDDO
+      DO JCC=1,CC%NCELL; CC%UNKZ(JCC) = CC%UNKZ(JCC) + UNKZ_IND(NM); ENDDO
    ENDDO
 ENDDO
 
