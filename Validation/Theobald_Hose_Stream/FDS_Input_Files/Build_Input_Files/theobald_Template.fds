@@ -8,7 +8,7 @@
 &SPEC ID='WATER VAPOR'/
 
 &PART ID='water drops', SPEC_ID='WATER VAPOR', QUANTITIES(1:3)='PARTICLE DIAMETER','PARTICLE TEMPERATURE','PARTICLE AGE',
-      DIAMETER=1000., SAMPLING_FACTOR=10, PRIMARY_BREAKUP_LENGTH=param8, PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR=0.01 /
+      DIAMETER=1000., SAMPLING_FACTOR=10, PRIMARY_BREAKUP_LENGTH=param8, PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR=0.0 /
 
 &PROP ID='nozzle', PART_ID='water drops', PARTICLE_VELOCITY=param3, FLOW_RATE=param4,
       SPRAY_ANGLE(1:2,1)=0,1, SPRAY_PATTERN_SHAPE='UNIFORM',
@@ -16,24 +16,9 @@
 
 &DEVC XYZ=0,0,0, PROP_ID='nozzle', ORIENTATION=1,0,param5, QUANTITY='TIME', SETPOINT=0., ID='hose_nozzle' /
 
-&DEVC ID='max range bucket', XB=param6,param7,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-
-&DEVC ID='0m bucket',  XB= 0, 0.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='5m bucket',  XB= 5, 5.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='10m bucket', XB=10,10.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='15m bucket', XB=15,15.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='20m bucket', XB=20,20.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='25m bucket', XB=25,25.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='30m bucket', XB=30,30.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='35m bucket', XB=35,35.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='40m bucket', XB=40,40.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='45m bucket', XB=45,45.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='50m bucket', XB=50,50.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='55m bucket', XB=55,55.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='60m bucket', XB=60,60.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='65m bucket', XB=65,65.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='70m bucket', XB=70,70.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
-&DEVC ID='75m bucket', XB=75,75.1,0,0.1,-3,-3, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
+&DEVC ID='AMPUA', XB=0,74,0,0,-3,-3, POINTS=75, QUANTITY='AMPUA', PART_ID='water drops', IOR=+3 /
+&DEVC ID='ZMAX', XBP=35,35,0,0,0,17, DX=40, DY=10, DZ=0.5, POINTS=35, QUANTITY='MPUV', PART_ID='water drops', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC ID='ZMAX_X', XBP=0,75,0,0,7,7, DX=0.5, DY=10, DZ=10, POINTS=151, QUANTITY='PARTICLE W', PART_ID='water drops', SPATIAL_STATISTIC='MEAN' /
 
 
 &VENT MB='XMIN', SURF_ID='OPEN' /

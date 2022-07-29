@@ -8535,7 +8535,7 @@ If you want to design a system of controls and devices that involves multiple ch
 
 If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function.
 
-The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function.
+The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as {\ct ANY} or {\ct DEADBAND}. For {\ct CUSTOM} the output will be the value of the {\ct RAMP} function, and for {\ct TIME\_DELAY} the value will be the evaluated delay.
 
 Each state change of a control function is recorded to a log file, see Section~\ref{out:DEVC_CTRL_log}.
 

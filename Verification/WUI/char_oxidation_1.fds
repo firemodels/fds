@@ -81,7 +81,6 @@
 &VENT MB='ZMAX',SURF_ID='OPEN' /
  
 &DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC ID='T_surf', INIT_ID='foliage part', QUANTITY='WALL TEMPERATURE'/
 
 &TAIL /
 

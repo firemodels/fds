@@ -5,6 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
+$QFDS -p 84 $DEBUG $QUEUE -d $INDIR Cold_Flow_Series_1.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_501.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_502.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_605.fds
@@ -22,6 +23,5 @@ $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_622B.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_623B.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_624B.fds
 $QFDS -p 84 $DEBUG $QUEUE -d $INDIR Test_625B.fds
-$QFDS -p 84 $DEBUG $QUEUE -d $INDIR Cold_Flow_Series_1.fds
 
 echo FDS cases submitted
