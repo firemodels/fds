@@ -13262,7 +13262,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDDO C2
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
+            WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist for DEVC ',TRIM(DV%ID)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (CONTROL(DV%CTRL_INDEX)%CONTROL_INDEX>2 .AND. CONTROL(DV%CTRL_INDEX)%CONTROL_INDEX<101) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' for DEVC ',TRIM(DV%ID), &
+               ' is a logic only function and can only use the QUANTITY of CONTROL.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
