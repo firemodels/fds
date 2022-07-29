@@ -142,7 +142,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 ! 201-300 are functions with two inputs only
 ! 301-400 are functions with two or more inputs
 ! 401-500 are functions with only a single DEVC input
-INTEGER, PARAMETER :: TIME_DELAY=1,DEADBAND=2,CUSTOM=3,KILL=4,CORE_DUMP=5,&
+INTEGER, PARAMETER :: TIME_DELAY=1,CUSTOM=2,DEADBAND=3,KILL=4,CORE_DUMP=5,&
                       AND_GATE=51,OR_GATE=52,XOR_GATE=53,X_OF_N_GATE=54,&
                       CF_EXP=101,CF_LOG=102,CF_PID=103,CF_SIN=104,CF_COS=105,CF_TAN=106,CF_ASIN=107,CF_ACOS=108,CF_ATAN=109,&
                       CF_ABS=110,&
