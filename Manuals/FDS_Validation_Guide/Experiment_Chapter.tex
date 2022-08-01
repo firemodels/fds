@@ -1046,11 +1046,13 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \section{Memorial Tunnel Experiments}
 \label{Memorial_Tunnel_Description}
 
-Between 1993 and 1995, 98 fire ventilation experiments were conducted in the decommissioned Memorial Tunnel near Charlestown, West Virginia~\cite{Memorial}. The objective was to assist in the design of the ventilation system for the Central Artery Tunnel Project in Boston, Massachusetts. The fires ranged from 10~MW to 100~MW.
+Between 1993 and 1995, 98 fire ventilation experiments were conducted in a decommissioned road tunnel near Charlestown, West Virginia~\cite{Memorial}. The experiments were intended to support the design of the ventilation system for the Central Artery Tunnel Project in Boston, Massachusetts.
 
 The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at the peak of its semi-circular ceiling, with a 3.2~\% grade uphill from its south to north portal. At each portal, a fan room 4.3~m above the roadway extends 21.3~m into the tunnel. There is also a walkway along the west tunnel wall.
 
-Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pan), and Sequence~18 (9 additional fans installed downhill of the fuel pan). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction. 
+The fuel used in the experiments is described in the report as a ``low sulfur No.~2 fuel oil.'' The fuel was pumped into pans sized to produce nominally 50~MW, 20~MW, 10~MW, and 30~MW fires. Using a combination of pans, fires of 10~MW, 20~MW, 50~MW or 100~MW were produced.
+
+Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction. 
 
 \begin{figure}[!ht]
 \centering
@@ -1091,16 +1093,14 @@ Number   & Number   & Rate (MW)     & of Fans  & Time (min)  \\ \hline \hline
 
 \subsubsection{Modeling Notes}
 
-The simulations of the Memorial Tunnel experiments are performed with a 0.28~m uniform grid. The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling.
+The simulations of the Memorial Tunnel experiments are performed with a 0.28~m uniform grid. This grid size is chosen so that the exit area of the jet fans can be approximated by a four by four array of cells. The jet fans are modeled as rectangular ducts with a specified volume flow of 42.9~m$^3$/s (91\,000~cfm). The fan speed is ramped up or down in approximately 10~s.
 
-The fuel used in the experiment is described in the report as a low sulfur No.~2 distillate fuel oil. In the simulations, the fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rate of the fire is specified as a function of time following the curve found in the test report.
+The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling, vehicle silhouettes, and instrumentation packages.
 
-The jet fans are modeled as rectangular ducts with a specified volume flow of 42.9~m$^3$/s (91\,000~cfm). The fan speed is ramped up or down in approximately 10~s.
+The fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rates of the fires are specified as functions of time following the measured curves found in the test report.
 
-\begin{itemize}
-\item Comparisons of near-ceiling temperature and velocity can be found in Section~\ref{Memorial_Tunnel_Ceiling_Jet}.
-\item Comparisons of bulk volume flow through the tunnel can be found in Section~\ref{Memorial_Tunnel_Volume_Flow}.
-\end{itemize}
+The results of the simulations are found in Section~\ref{Memorial_Tunnel_Volume_Flow}.
+
 
 \section{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Description}

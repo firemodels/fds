@@ -11,12 +11,27 @@ outdir = '../../../out/Memorial_Tunnel/';
 expdir = '../../../exp/Memorial_Tunnel/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Memorial_Tunnel/';
 
-time = [0 1 2 3 4 5 6 8 10 12 14 16 18 20 22 24 26 28 30];
+times = {[ 5 10 16 20 26 30],...  % 501
+         [ 5 10 16 20 26 30],...  % 502
+         [12 16 22 26 28 30],...  % 605
+         [ 4  8 16 20 24 26],...  % 606A
+         [ 8 10 14 22 26 28],...  % 607
+         [ 1  2  4  6 12 20],...  % 608
+         [ 6  8 12 22 24 26],...  % 610
+         [ 2  6  8 16 20 26],...  % 611
+         [ 2  6 10 14 18 22],...  % 612B
+         [ 2  4  6 10 18 28],...  % 615B
+         [16 18 20 22 28 30],...  % 617A
+         [ 2  5  6 12 24 26],...  % 618A
+         [ 1  2  3 12 14 24],...  % 621A
+         [ 3  4  5  8 10 14],...  % 622B
+         [ 2  4  6 10 20 28],...  % 623B
+         [ 1  2  3  4  6  8],...  % 624B
+         [ 6  8 10 18 20 21]};    % 625B
 pos = [19.8 125.6 230.7 340.8 446.2 528.2 573.3 586.1 604.1 615.4 627.6 645.0 681.5 723.3 833.9];
 hgt_mod = {[0.3 1.1 2.0 2.6 3.2 3.7 4.1],[0.3 1.2 2.4 3.7 4.8 5.7 6.5 7.0 7.4]};
 hgt_exp = {[0.3 1.1 2.0 2.6 3.2 3.7 4.1],[0.3 1.2 2.4 3.7 4.8 5.7 6.5 7.0]};
 test  = {'501','502','605','606A','607','608','610','611','612B','615B','617A','618A','621A','622B','623B','624B','625B'};
-%levels = [21 38 60 93 149 204 260 316 371 427 482 538 593 649 704 760 816];  % Original values 
 levels = [50 100 200 400 600 800];
 single_level = [50 50];
 % Loops:             214     , 213     , 211    , 209   , 208   , 207    , 307     , 306     , 305     , 205     , 304     , 303     , 302     , 301     , 202
@@ -50,17 +65,14 @@ for k=1:17 % Experiments
    EV = importdata([expdir,'VF-',test{k},'.csv'],',',2);
    H  = importdata([expdir,'HRR-',test{k},'.csv'],',',2);
    
-   for i=1:19 % Times
+   for i=1:length(times{k}) % Times
        
       clear X_mod Y_mod Z_mod X_exp Y_exp Z_exp
        
-      if k==13 & i>17 ; break ; end
-      if k==17 & i>16 ; break ; end
-
-      mod_time_index = interp1(M.data(:,1),1:length(M.data(:,1)),60*time(i),'nearest');
-      exp_time_index = interp1(E.data(:,1),1:length(E.data(:,1)),60*time(i),'nearest');
-      hrr_time_index = interp1(H.data(:,1),1:length(H.data(:,1)),60*time(i),'nearest');
-      exp_VF_time_index = interp1(EV.data(:,1),1:length(EV.data(:,1)),60*time(i),'nearest');
+      mod_time_index = interp1(M.data(:,1),1:length(M.data(:,1)),60*times{k}(i),'nearest');
+      exp_time_index = interp1(E.data(:,1),1:length(E.data(:,1)),60*times{k}(i),'nearest');
+      hrr_time_index = interp1(H.data(:,1),1:length(H.data(:,1)),60*times{k}(i),'nearest');
+      exp_VF_time_index = interp1(EV.data(:,1),1:length(EV.data(:,1)),60*times{k}(i),'nearest');
    
       [X_mod,Y_mod] = meshgrid(pos(2:14),hgt_mod{2});
       [X_exp,Y_exp] = meshgrid(pos(2:14),hgt_exp{2});
@@ -82,14 +94,14 @@ for k=1:17 % Experiments
           );
       Z_exp_interp = interp2(X_exp,Y_exp,Z_exp,X_exp_interp,Y_exp_interp,'makima');
 
-      [C_mod,h_mod] = contour(X_mod_interp,Y_mod_interp,Z_mod_interp,levels,'k-') ; hold on
-      [C_exp,h_exp] = contour(X_exp_interp,Y_exp_interp,Z_exp_interp,levels,'r-') ; hold on
-      clabel(C_mod,h_mod,'FontSize',3,'Color','black','LabelSpacing',300)
-      clabel(C_exp,h_exp,'FontSize',3,'Color','red','LabelSpacing',300)
-
       reset(gca)
       reset(gcf)
-      box on
+
+      [C_mod,h_mod] = contour(X_mod_interp,Y_mod_interp,Z_mod_interp,levels,'r-') ; hold on
+      [C_exp,h_exp] = contour(X_exp_interp,Y_exp_interp,Z_exp_interp,levels,'k-') ; hold on
+      clabel(C_mod,h_mod,'FontSize',3,'Color','red'  ,'LabelSpacing',300)
+      clabel(C_exp,h_exp,'FontSize',3,'Color','black','LabelSpacing',300)
+
       a = get(gca,'XTickLabel');  
       set(gca,'XTickLabel',a,'fontsize',4)
       set(gca,'TickLength',[0 0])
@@ -101,19 +113,18 @@ for k=1:17 % Experiments
       set(gca,'FontName',Font_Name)
       axis([0 854 0 8])
       text(10,7.2,['Test ',test{k}],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-      text(10,6.3,['Time: ',num2str(time(i)),' min'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
+      text(10,6.3,['Time: ',num2str(times{k}(i)),' min'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
       text(10,5.4,['HRR: ',num2str(H.data(hrr_time_index,2)/1000.,'%.1f'),' MW'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-      text(10,4.5,'FDS in black; Exp in red','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
+      text(10,4.5,'FDS red; Exp black','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
       
       Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
       addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
 
-      %set(gcf,'Visible',Figure_Visibility);
       set(gcf,'Units',Paper_Units);
       set(gcf,'PaperUnits',Paper_Units);
       set(gcf,'PaperSize',[Paper_Width Paper_Height]);
       set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-      print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_T_',num2str(time(i))])
+      print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_T_',num2str(times{k}(i))])
 
       hold off
 
@@ -127,7 +138,7 @@ for k=1:17 % Experiments
    [X_exp,Y_exp] = meshgrid(pos(2:14),E.data(:,1)/60);
    for kk=1:length(M.data(:,1))
       for ii=2:14
-         Z_mod(kk,ii-1) = M.data(kk,mod_data_indices{ii}(9));
+         Z_mod(kk,ii-1) = M.data(kk,mod_data_indices{ii}(8));
       end
    end
 
@@ -150,15 +161,15 @@ for k=1:17 % Experiments
        );
    Z_exp_interp = interp2(X_exp,Y_exp,Z_exp,X_exp_interp,Y_exp_interp,'makima');
 
-   [C_mod,h_mod] = contour(X_mod_interp,Y_mod_interp,Z_mod_interp,single_level,'k-') ; hold on
-   [C_exp,h_exp] = contour(X_exp_interp,Y_exp_interp,Z_exp_interp,single_level,'r-') ; hold on
-   clabel(C_mod,h_mod,'FontSize',3,'Color','black','LabelSpacing',300)
-   clabel(C_exp,h_exp,'FontSize',3,'Color','red','LabelSpacing',300)
-   plot([615.4 615.4],[0 30],'k--')
-
    reset(gca)
    reset(gcf)
-   box on
+
+   [C_mod,h_mod] = contour(X_mod_interp,Y_mod_interp,Z_mod_interp,single_level,'r-') ; hold on
+   [C_exp,h_exp] = contour(X_exp_interp,Y_exp_interp,Z_exp_interp,single_level,'k-') ; hold on
+   clabel(C_mod,h_mod,'FontSize',3,'Color','red'  ,'LabelSpacing',300)
+   clabel(C_exp,h_exp,'FontSize',3,'Color','black','LabelSpacing',300)
+   plot([615.4 615.4],[0 30],'k--')
+
    a = get(gca,'XTickLabel');
    set(gca,'XTickLabel',a,'fontsize',4)
    set(gca,'TickLength',[0 0])
@@ -170,12 +181,11 @@ for k=1:17 % Experiments
    set(gca,'FontName',Font_Name)
    axis([0 854 0 30])
    text(10,26,['Test ',test{k}],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-   text(10,22,'FDS in black; Exp in red','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
+   text(10,22,'FDS red; Exp black','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
 
    Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
    addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
 
-   %set(gcf,'Visible',Figure_Visibility);
    set(gcf,'Units',Paper_Units);
    set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Paper_Width_2 Paper_Height_2]);
@@ -267,7 +277,6 @@ set(h,'MarkerFaceColor',get(h,'Color'));
 h2=semilogx(HRR_crit_mod_nosup,V_crit_mod_nosup,'rs') ; hold on
 set(h2,'MarkerFaceColor',get(h2,'Color'));
 
-%semilogx([8.5 42.1 105],[2.1 3.58 3.58],'k-') ; hold on  % Wu-Bakar Critical Velocity Correlation
 semilogx([8.5 105],[1.9 3.5],'k-') ; hold on
 
 xtick = [10 50 100];
@@ -313,8 +322,7 @@ end
 
 figure
 
-plot([3 3 9 15 15],[169.4 164.7 292.6 372.4 379.9],'r^') ; hold on
-%plot(E.data(:,1),E.data(:,3),'ko-') ; hold on
+plot([3 3 9 15 15],[169.4 164.7 292.6 372.4 379.9],'k^') ; hold on
 plot(M.data(mod_time_index,1)/300,M.data(mod_time_index,2),'ko-') ; hold on
 
 set(gca,'FontName',Font_Name)
