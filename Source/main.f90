@@ -3211,7 +3211,7 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                BC%II=BC%IIG ; BC%JJ=BC%JJG ; BC%KK=BC%KKG
                IF (LP%INIT_INDEX>0) THEN
                   DO NN=1,N_DEVC
-                     IF (DEVICE(NN)%INIT_ID==INITIALIZATION(LP%INIT_INDEX)%ID) THEN
+                     IF (DEVICE(NN)%INIT_ID==INITIALIZATION(LP%INIT_INDEX)%ID .AND. DEVICE(NN)%INIT_ID/='null') THEN
                         DEVICE(NN)%LP_TAG = LP%TAG
                         DEVICE(NN)%PART_CLASS_INDEX = IPC
                      ENDIF
