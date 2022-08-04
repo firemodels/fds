@@ -7,7 +7,7 @@ import pandas as pd
 import os
 
     # read input data to dataframe
-df = pd.read_csv('exp_params.csv', header=0)
+df = pd.read_csv('../../../../../exp/USFS_Deep_Fuel_Beds/exp_params.csv', header=0)
 
     # initalize matrix to write final dataframe
 FINAL = []
