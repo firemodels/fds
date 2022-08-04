@@ -85,5 +85,6 @@ fm_datacenter_veltest
 mccaffrey_plume
 Wu_Bakar_Tunnels
 Memorial_Tunnel
+% Theobald_Hose_Stream
 
 display('validation scripts completed successfully!')

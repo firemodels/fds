@@ -43,7 +43,7 @@ for irow in df.index:
     flowrate = round((efx_velo*math.pi*(noz_dmtr/2.0)**2)*60000.0,2) # flow rate in L/min (from m3/s)
     We = 13864.0*noz_dmtr*efx_velo**2              # Weber Number (@ 20C, diameter(m), velocity(m/s))
     Re = 996605.43*noz_dmtr*efx_velo            # Reynolds Number (@ 20C, diameter(m), velocity(m/s))
-    breaklength50 = 1.7*noz_dmtr*(We**0.5)*(Re*10e-4)**(-0.625) # length@ stream 50% discontinuous(m)
+    breaklength50 = 1.7*noz_dmtr*(We**0.5)*(Re*1e-4)**(-0.625) # length@ stream 50% discontinuous(m)
 
     fdsbreaklength = breaklength50*1.0        # FDS PRIMARY_BREAKUP_LENGTH (m)
 
