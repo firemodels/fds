@@ -121,7 +121,7 @@ switch ColVar
         Color_Variable = 'operating pressure';
         Ticks = [2.1,2.8,4.1,4.8,6.2];
         TickLabels = {'2.1','2.8','4.1','4.8','6.2'};
-        ColorBar_Label = 'Operating Pressure (Pa) 10e5';
+        ColorBar_Label = 'Operating Pressure (Pa) 1e5';
         filename_add = '';
     case 2 
         Color_Variable = 'firing angle';
