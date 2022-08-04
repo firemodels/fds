@@ -1126,7 +1126,7 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RHO, RHOS ! Cut cells densities.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RSUM,TMP ! Cut cells temperatures.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: D,DS,DVOL ! Cut cell thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: D,DS,DVOL,DVOL_PR ! Cut cell thermodynamic divg.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: CHI_R,MIX_TIME ! Cut-cell combustion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC      ! variables.
@@ -1136,7 +1136,7 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
                                                                           ! and scalars.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL,DDDTVOL
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
@@ -1152,7 +1152,7 @@ TYPE IBM_CUTCELL_TYPE
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
    INTEGER :: N_NOMICC=0
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: NOMICC
-   REAL(EB):: DIVVOL_PR=0._EB, DIVVOL_BC=0._EB, DDDTVOL=0._EB
+   REAL(EB):: DIVVOL_BC=0._EB
 END TYPE IBM_CUTCELL_TYPE
 
 
@@ -1174,22 +1174,14 @@ TYPE IBM_REGFACEZ_TYPE
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_REGFACEZ_TYPE
 
-TYPE IBM_RCFACE_TYPE
-   LOGICAL:: SHAREDH=.FALSE.
-   INTEGER:: PRES_ZONE=-1
-   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKH
-   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
-END TYPE IBM_RCFACE_TYPE
-
 TYPE IBM_RCFACE_LST_TYPE
-   LOGICAL :: SHAREDZ=.FALSE.
-   INTEGER :: IWC=0, UNKF=0
+   LOGICAL :: SHAREDZ=.FALSE., SHAREDH=.FALSE.
+   INTEGER :: IWC=0, UNKF=0, PRES_ZONE=-1
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ,UNKH
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB

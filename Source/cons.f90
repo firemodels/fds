@@ -252,6 +252,7 @@ LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not 
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
+LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -665,7 +666,6 @@ LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
 LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
 
 LOGICAL :: CC_IBM=.FALSE.
-LOGICAL :: LINKED_PRESSURE = .FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
@@ -677,6 +677,7 @@ LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.TRUE.
+LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
