@@ -8688,6 +8688,16 @@ The PID controller can be used to time integrate the mass loss from a pyrolyzing
 \end{lstlisting}
 Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}.
 
+\subsubsection{Special Case: using PID for controlling momentum }
+\label{sec:pidmom}
+
+The PID controller can be used to adjust a mean momentum source term to achieve various output targets related to momentum.  One simple example would be to control the bulk flow rate in a channel.  In the following, we monitor the mean streamwise velocity and set {\ct CONTROL\_FORCE(1)=T} to add a source term to the $x$ momentum equation (use 2 and 3 for $y$ and $z$, respectively).  The result is similar to manually adjusting {\ct FORCE\_VECTOR(1)} to achieve the desired flow rate.  In the case below, the PID controller will keep the mean bulk flow near the {\ct TARGET\_VALUE} of 10 m/s.
+\begin{lstlisting}
+&DEVC ID='Ub', XB=..., QUANTITY='U-VELOCITY', SPATIAL_STATISTIC='MEAN'/
+&CTRL ID='MY PID', FUNCTION_TYPE='PID', TARGET_VALUE=10, INPUT_ID='Ub', PROPORTIONAL_GAIN=0.1, CONTROL_FORCE(1)=T/
+&DEVC ID='FORCE X', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
+\end{lstlisting}
+
 
 \subsection{Control Function: \texorpdfstring{{\tt PERCENTILE}}{PERCENTILE} }
 \label{info:PERCENTILE}
@@ -11071,23 +11081,24 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct CONSTANT}           & Real        & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
-{\ct DELAY}              & Real        & Section~\ref{info:dry_pipe}             & s  &  0.                    \\ \hline
-{\ct DIFFERENTIAL\_GAIN} & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
-{\ct FUNCTION\_TYPE}     & Character   & Section~\ref{info:basic_control}        &    &                        \\ \hline
-{\ct ID}                 & Character   & Section~\ref{info:CTRL}                 &    &                        \\ \hline
-{\ct INITIAL\_STATE}     & Logical     & Section~\ref{info:basic_control}        &    & {\ct F}          \\ \hline
-{\ct INPUT\_ID}          & Char.~Array & Section~\ref{info:CTRL}                 &    &                        \\ \hline
-{\ct INTEGRAL\_GAIN}     & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
-{\ct LATCH}              & Logical     & Section~\ref{info:basic_control}        &    & {\ct T}           \\ \hline
-{\ct N}                  & Integer     & Section~\ref{info:CTRL}                 &    &   1                    \\ \hline
-{\ct ON\_BOUND}          & Character   & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}            \\ \hline
-{\ct PERCENTILE}         & Real        & Section~\ref{info:PERCENTILE}           &    &                        \\ \hline
-{\ct PROPORTIONAL\_GAIN} & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
-{\ct RAMP\_ID}           & Character   & Section~\ref{info:CUSTOM}               &    &                        \\ \hline
-{\ct SETPOINT(2)}        & Real        & Section~\ref{info:basic_control}        &    &                        \\ \hline
-{\ct TARGET\_VALUE}      & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
-{\ct TRIP\_DIRECTION}    & Integer     & Section~\ref{info:basic_control}        &    &   1                    \\ \hline
+{\ct CONSTANT}           & Real           & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
+{\ct CONTROL\_FORCE(3)}  & Logical Array  & Section~\ref{info:CONTROL_PID}          &    & {\ct F}                \\ \hline
+{\ct DELAY}              & Real           & Section~\ref{info:dry_pipe}             & s  &  0.                    \\ \hline
+{\ct DIFFERENTIAL\_GAIN} & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
+{\ct FUNCTION\_TYPE}     & Character      & Section~\ref{info:basic_control}        &    &                        \\ \hline
+{\ct ID}                 & Character      & Section~\ref{info:CTRL}                 &    &                        \\ \hline
+{\ct INITIAL\_STATE}     & Logical        & Section~\ref{info:basic_control}        &    & {\ct F}                \\ \hline
+{\ct INPUT\_ID}          & Char.~Array    & Section~\ref{info:CTRL}                 &    &                        \\ \hline
+{\ct INTEGRAL\_GAIN}     & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
+{\ct LATCH}              & Logical        & Section~\ref{info:basic_control}        &    & {\ct T}                \\ \hline
+{\ct N}                  & Integer        & Section~\ref{info:CTRL}                 &    &   1                    \\ \hline
+{\ct ON\_BOUND}          & Character      & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}            \\ \hline
+{\ct PERCENTILE}         & Real           & Section~\ref{info:PERCENTILE}           &    &                        \\ \hline
+{\ct PROPORTIONAL\_GAIN} & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
+{\ct RAMP\_ID}           & Character      & Section~\ref{info:CUSTOM}               &    &                        \\ \hline
+{\ct SETPOINT(2)}        & Real           & Section~\ref{info:basic_control}        &    &                        \\ \hline
+{\ct TARGET\_VALUE}      & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
+{\ct TRIP\_DIRECTION}    & Integer        & Section~\ref{info:basic_control}        &    &   1                    \\ \hline
 \end{longtable}
 
 
@@ -11278,38 +11289,38 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
-{\ct CYLINDER\_LENGTH}& Real                  & Section~\ref{info:GEOM}            &   m       &                      \\ \hline
-{\ct CYLINDER\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                       \\ \hline
-{\ct CYLINDER\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
-{\ct CYLINDER\_AXIS}& Real Triplet          & Section~\ref{info:GEOM}            &          &             \\ \hline
-{\ct CYLINDER\_NSEG\_AXIS}& Integer          & Section~\ref{info:GEOM}            &          &             \\ \hline
-{\ct CYLINDER\_NSEG\_THETA}& Integer          & Section~\ref{info:GEOM}            &          &             \\ \hline
-{\ct EXTEND\_TERRAIN}& Logical          & Section~\ref{info:GEOM}            &          &    {\ct F}         \\ \hline
-{\ct EXTRUDE}& Real                  & Section~\ref{info:GEOM}            &   m       &                    \\ \hline
-{\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'\_\#}           \\ \hline
-{\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
-{\ct IS\_TERRAIN} & Logical          & Section~\ref{info:GEOM}            &          &    {\ct F}         \\ \hline
-{\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct MOVE\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
-{\ct N\_LAT}       & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct POLY}        & array of Integers     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
-{\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                    \\ \hline
-{\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &                        \\ \hline
-{\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
-{\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
-{\ct TEXTURE\_SCALE}& Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct TRANSPARENCY}  & Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
-{\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m     &   0.0                    \\ \hline
-{\ct ZVAL\_HORIZON}        & Real                   & Section~\ref{info:GEOM}    &      &                    \\ \hline
+{\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
+{\ct CYLINDER\_LENGTH} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct CYLINDER\_RADIUS} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct CYLINDER\_ORIGIN} & Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct CYLINDER\_AXIS}   & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct CYLINDER\_NSEG\_AXIS} & Integer            & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct CYLINDER\_NSEG\_THETA}& Integer            & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct EXTEND\_TERRAIN}  & Logical                & Section~\ref{info:GEOM}            &           &  {\ct F}                 \\ \hline
+{\ct EXTRUDE}          & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct FACES}            & array of Integer Triplets  & Section~\ref{info:GEOM}        &           &   0                      \\ \hline
+{\ct ID}               & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'geom'\_\#}        \\ \hline
+{\ct IJK}              & Integer Triplet        & Section~\ref{info:GEOM}            &           &  0,0,0                   \\ \hline
+{\ct IS\_TERRAIN}      & Logical                & Section~\ref{info:GEOM}            &           &  {\ct F}                 \\ \hline
+{\ct MATL\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct MOVE\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
+{\ct N\_LAT}           & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
+{\ct N\_LEVELS}        & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
+{\ct N\_LONG}          & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
+{\ct POLY}             & array of Integers      & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
+{\ct SPHERE\_ORIGIN}   & Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct SPHERE\_RADIUS}   & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct SPHERE\_TYPE}     & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct SURF\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct TEXTURE\_MAPPING} & Character              & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
+{\ct TEXTURE\_ORIGIN}  & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
+{\ct TEXTURE\_SCALE}   & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct TRANSPARENCY}     & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct VERTS}            & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct VOLUS}            & array of Integer Quadruplets & Section~\ref{info:GEOM}      &           &    0                     \\ \hline
+{\ct XB}               & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct ZVALS}            & Real                   & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 
 % Related to moving geometry:
 %{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
