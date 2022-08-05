@@ -73,9 +73,9 @@ for irow in df.index:
 
     # increase domain height for select cases with high values of max height
     if irow in [40,41,42,83,84,85]:
-        paramline = paramline + [60] + [25.5]
+        paramline = paramline + [60] + [27.0] + [55]
     else:
-        paramline = paramline + [40] + [17.0]
+        paramline = paramline + [40] + [17.0] + [35]
 
 # add paramline to FINAL matrix for each irow
     FINAL = FINAL + [paramline]
@@ -85,7 +85,7 @@ topline = ['theobald_Template.fds']
 for i in range(1,10):
     topline = topline + ["param"+str(i)]
 
-topline = topline + ["param_k"] + ["param_xb6"]
+topline = topline + ["param_k"] + ["param_xb6"] + ["param_pts"]
 
 # make fdout and wirte paramfile
 dfout = pd.DataFrame(FINAL, columns=topline)
