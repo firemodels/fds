@@ -1,6 +1,6 @@
 &HEAD CHID='param1', TITLE='param2' /
 
-&MESH IJK=160,40,40, XB=-5,75,-10,10,-3,17 /
+&MESH IJK=160,40,param_k, XB=-5,75,-10,10,-3,param_xb6 /
 
 &TIME T_END=60. /
 

@@ -71,13 +71,21 @@ for irow in df.index:
     # set droplet diameter to 1/10th of nozzle diameter (allow secondary breakup if necessary)
     paramline = paramline  + [noz_dmtr*1.e6/10.]
 
+    # increase domain height for select cases with high values of max height
+    if irow in [40,41,42,83,84,85]:
+        paramline = paramline + [60] + [25.5]
+    else:
+        paramline = paramline + [40] + [17.0]
+
 # add paramline to FINAL matrix for each irow
     FINAL = FINAL + [paramline]
 
 # make the header list
 topline = ['theobald_Template.fds']
-for i in range(1, len(paramline)):
+for i in range(1,10):
     topline = topline + ["param"+str(i)]
+
+topline = topline + ["param_k"] + ["param_xb6"]
 
 # make fdout and wirte paramfile
 dfout = pd.DataFrame(FINAL, columns=topline)
