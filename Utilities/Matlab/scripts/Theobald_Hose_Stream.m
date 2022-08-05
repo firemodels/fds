@@ -10,12 +10,6 @@ outdir = '../../../out/Theobald_Hose_Stream/';
 expdir = '../../../exp/Theobald_Hose_Stream/';
 plot_dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Theobald_Hose_Stream/'];
 
-%     % Runs from scripts folder (testing implementation)
-% params_loc = '../../../Validation/Theobald_Hose_Stream/FDS_Input_Files/Build_Input_Files/';
-% outdir = '../../../../out/Theobald_Hose_Stream/';
-% expdir = '../../../../exp/Theobald_Hose_Stream/';
-% plot_dir = [pwd, '/../../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Theobald_Hose_Stream/'];
-
 chid_loc = [params_loc,'paramfile.csv'];
 exp_loc = [expdir,'theobald_effect_1981_fds.csv'];
 
@@ -50,33 +44,32 @@ for runno = 1:s_Theobald(1)
     out_import = importdata([outdir,linefile], ',', 2);
 
     % import fds data
-    AMPUAx = out_import.data(:,1);
-    AMPUA = out_import.data(:,2);
+    AMPUAx = out_import.data(:,find(strcmp(out_import.colheaders,'AMPUA-x')));
+    AMPUA = out_import.data(:,find(strcmp(out_import.colheaders,'AMPUA')));
     AMPUA = AMPUA(~isnan(AMPUA));
-    ZMAXz = out_import.data(:,3);
-    ZMAX = out_import.data(:,4);
+    ZMAXz = out_import.data(:,find(strcmp(out_import.colheaders,'ZMAX-z')));
+    ZMAX = out_import.data(:,find(strcmp(out_import.colheaders,'ZMAX')));
     ZMAX = ZMAX(~isnan(ZMAX));
-    ZMAX_Xz = out_import.data(:,5);
-    ZMAX_X = out_import.data(:,6);
+    ZMAX_Xz = out_import.data(:,find(strcmp(out_import.colheaders,'ZMAX_X-z')));
+    ZMAX_X = out_import.data(:,find(strcmp(out_import.colheaders,'ZMAX_X')));
     
-    s_AMPUA = size(AMPUA);
-    s_ZMAX = size(ZMAX);
-
     % find FDS max range
-    f = s_AMPUA(1);
-    while AMPUA(f) < 1e-3  % threashold value, list read end to start
-        f = f-1;
+    for f=length(AMPUA):-1:1
         max_range = AMPUAx(f);
+        if AMPUA(f) > 1
+            break
+        end
     end
 
     % find FDS max height
-    f = s_ZMAX(1);
-    while ZMAX(f) < 0.5 % threashold value, list read end to start
-        f = f-1;
-        max_height = ZMAXz(f); 
+    for f=length(ZMAX):-1:1
+        max_height = ZMAXz(f);
+        if ZMAX(f) > 1
+            break
+        end
     end
 
-    % get FDS max height dist
+    % get max height dist
     max_height_dist = ZMAX_X(f);
 
     % build fds results lists
