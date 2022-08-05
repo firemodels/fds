@@ -32,7 +32,7 @@
 ! These cases a very challenging for the pressure solver. The selected values seem to give enough pressure iterations to
 ! drop the velocity error down to a plateau value.
 
-&PRES MAX_PRESSURE_ITERATIONS=30, VELOCITY_TOLERANCE=0.001, SUSPEND_PRESSURE_ITERATIONS=F/
+&PRES MAX_PRESSURE_ITERATIONS=50, VELOCITY_TOLERANCE=0.005, SUSPEND_PRESSURE_ITERATIONS=F/
 
 ! For ZOI runs suggest T_END = arc time + 8 s
 
