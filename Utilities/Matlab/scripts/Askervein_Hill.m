@@ -1,8 +1,8 @@
 % N. Crump  6/11/2021 - 8/5/2021
 %Matlabs script to transpose the Askervein hill case files into a form
-%usable by the FDS falidation script.
+%usable by the FDS validation script.
 
-%Mission Process:
+% Script Process:
 %-Read in the decv.csv file from the out directory
 %-Transpose the matrix such that each device has it's own row, not column
 %-Identify the ASW and ANE (Line A SouthWest -> NorthEast)Devices
@@ -41,21 +41,12 @@
 %   Check values with >> whos DIST DIRECTION UPWASH AVG_SPEED SIGM_SPEED SIGMw
 
 
-
 % outdir = '../../../../out/Askervein_Hill/';
 outdir = '../../../out/Askervein_Hill/';
-
 
 %import data from file
 filename = 'Askervein_TU03A_16m_devc.csv';
 A = importdata([outdir,filename], ",", 2);
-
-disp('Edit Askervein_Hill.m after latest 16m input fiel has run')
-%When the latest 16m input file has run,
-%remove the lines wich end in (!!!OLD FILE!!)
-% Uncomment the lines beneath them
-
-% and uncomment the lines at the bottom, 
 
 % isolates unique part of device file name for easeir resolution comparisons
  ID = strrep(strrep(filename,'Askervein_TU03A_',''),'_devc.csv','');
@@ -79,8 +70,7 @@ DIST = ["(m)", "DIST", -85, -60, -50, -35, -20, -10, 0, 10, 20, 40]';
 %data at TIME_STOP (slot variable), this array holds the avarage SPEED data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"SPEED HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"SPEED ASW20"')));
@@ -93,8 +83,7 @@ SPEED = [ASW85,ASW60,ASW50,ASW35,ASW20,ASW10,A_HT,ANE10,ANE20,ANE40,];
 %data at TIME_STOP (slot variable), this array holds the SIGM SPEED data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"SIGM SPEED ASW20"')));
@@ -108,8 +97,7 @@ SIGM_SPEED = ["(m/s)","SIGM_SPEED",ASW85,ASW60,ASW50,ASW35,ASW20,ASW10,A_HT,ANE1
 %data at TIME_STOP (slot variable), this array holds the SIGMw data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"SIGMw HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"SIGMw ASW20"')));
@@ -124,8 +112,7 @@ SIGMw = ["(m/s)";"SIGMw";SIGMw'];
 %data at TIME_STOP (slot variable), this array holds the AVGu data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"AVGu HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"AVGu ASW20"')));
@@ -138,8 +125,7 @@ AVGu = [ASW85,ASW60,ASW50,ASW35,ASW20,ASW10,A_HT,ANE10,ANE20,ANE40,];
 %data at TIME_STOP (slot variable), this array holds the AVGv data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"AVGv HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"AVGv ASW20"')));
@@ -152,8 +138,7 @@ AVGv = [ASW85,ASW60,ASW50,ASW35,ASW20,ASW10,A_HT,ANE10,ANE20,ANE40,];
 %data at TIME_STOP (slot variable), this array holds the AVGw data
 A_HT = A.data(slot,find(strcmp(A.colheaders,'"AVGw HT 10 m t"')));
 ASW85 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW85"')));
-ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW UK 30 m tower"'))); %(!!!OLD FILE!!)
-% ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW UK 30 m tower 10m"')));
+ASW60 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW UK 30 m tower 10m"')));
 ASW50 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW50"')));
 ASW35 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW35"')));
 ASW20 = A.data(slot,find(strcmp(A.colheaders,'"AVGw ASW20"')));
