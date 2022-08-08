@@ -5,7 +5,8 @@
 close all
 clear all
 
-outdir = '../../../out/Casara_Arts_Ribbed_Channel/';
+% outdir = '../../../out/Casara_Arts_Ribbed_Channel/';
+outdir = '../../../fds/Validation/Casara_Arts_Ribbed_Channel/Current_Results/';
 expdir = '../../../exp/Casara_Arts_Ribbed_Channel/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
@@ -13,13 +14,14 @@ plot_style
 
 nx = [20 40 80 160]; % not correct at the moment, just referencing old file names
 lnx = length(nx);
+Ub=6.2; % exp bulk velocity
 L= 0.3; % channel length
 D = 0.1; % channel height
 h = 0.03;
 dx = L./[10 20 40 80];
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
 fds_key = {'FDS {\it h/\deltax}=3' 'FDS {\it h/\deltax}=6' 'FDS {\it h/\deltax}=12' 'FDS {\it h/\deltax}=24'};
-geom = {'_','_geom_'};
+geom = {'_' '_geom_'};
 
 if ~exist([expdir,'ribbed_channel_data.csv'])
     display(['Error: File ' [expdir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
@@ -49,7 +51,6 @@ for ii=1:length(geom)
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-    Ub=6.2;
     H(1)=plot([0 100],Ub*ones(1,2),'k-','linewidth',2); hold on
 
     for i=1:lnx
@@ -57,7 +58,7 @@ for ii=1:length(geom)
         Ub_fds = M{i}.data(:,2);
         H(1+i)=plot(t_fds,Ub_fds,fds_marker{i});
         t_range = find(t_fds>2);
-        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.02
+        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.01
             disp(['Matlab Warning: Ub mean nx ',geom{ii},num2str(nx(i)),' = ',num2str(mean(Ub_fds(t_range)))])
         end
     end
