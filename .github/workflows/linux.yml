@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   linux-intel-intelmpi:
-    # debug build on ubuntu using ifort and intelmpi
+    # debug build on ubuntu using ifort with intelmpi and mkl
     # based on https://github.com/oneapi-src/oneapi-ci
 
     name: linux intel intelmpi
@@ -68,7 +68,7 @@ jobs:
 
 
   linux-gnu-openmpi:
-    # debug build on ubuntu using gfortran and openmpi
+    # debug build on ubuntu using gfortran with openmpi and mkl
 
     name: linux gnu openmpi
     runs-on: [ubuntu-latest]
