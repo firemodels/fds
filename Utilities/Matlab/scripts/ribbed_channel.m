@@ -5,8 +5,7 @@
 close all
 clear all
 
-% outdir = '../../../out/Casara_Arts_Ribbed_Channel/';
-outdir = '../../../fds/Validation/Casara_Arts_Ribbed_Channel/Current_Results/';
+outdir = '../../../out/Casara_Arts_Ribbed_Channel/';
 expdir = '../../../exp/Casara_Arts_Ribbed_Channel/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
