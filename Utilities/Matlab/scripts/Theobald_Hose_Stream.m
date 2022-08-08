@@ -105,23 +105,6 @@ Plot_Y  = 0.75;
 Paper_Height = 6.0;
 Paper_Width  = 6.5;
 
-% % Change if the ColorBar should be Pressure or Firing Angle
-% ColVar = 1;
-% switch ColVar
-%     case 1
-%         Color_Variable = 'operating pressure';
-%         Ticks = [2.1,2.8,4.1,4.8,6.2];
-%         TickLabels = {'2.1','2.8','4.1','4.8','6.2'};
-%         ColorBar_Label = 'Operating Pressure (Pa) 1e5';
-%         filename_add = '';
-%     case 2
-%         Color_Variable = 'firing angle';
-%         Ticks = [20,25,30,35,40,45];
-%         TickLabels = {'20','25','30','35','40','45'};
-%         ColorBar_Label = 'Firing Angle (deg)';
-%         filename_add = '_fa';
-% end
-
 % ----------------- Plot 1 Max Range -----------------
 plot_filename = 'Theobald_Hose_Stream_Max_Range';
 Ind_Title = 'Measured Max Range EXP (m)';
