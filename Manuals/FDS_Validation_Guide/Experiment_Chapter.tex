@@ -1052,7 +1052,7 @@ The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at t
 
 The fuel used in the experiments is described in the report as a ``low sulfur No.~2 fuel oil.'' The fuel was pumped into pans sized to produce nominally 50~MW, 20~MW, 10~MW, and 30~MW fires. Using a combination of pans, fires of 10~MW, 20~MW, 50~MW or 100~MW were produced.
 
-Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction. 
+Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction.
 
 \begin{figure}[!ht]
 \centering
@@ -2476,16 +2476,16 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 Fires fueled by methanol and propane ranging from 5.6~kW to 16.8~kW were conducted in a 1:20 reduced-scale tunnel at Southwest Jiaotong University, Chengdu, China~\cite{Wang:TUST2019}. The tunnel was 0.45~m wide, 0.23~m high and 20.8~m long. The burner was located at the center of the tunnel and both ends were open. Temperatures and gas concentrations (i.e., O$_2$, CO and CO$_2$) were measured. The results showed that both methanol and propane fires self-extinguished in the 20.8~m long tunnel within approximately 10~min, except for the 5.6~kW methanol fire. The larger the heat release rate, the faster the self-extinction of the fire. The oxygen concentrations in the 20.8~m long tunnel decreased to approximately 12~\% except for the 5.6~kW methanol fire, which remained well above the limiting oxygen concentration.  Self-extinction was not observed for fires of the same heat release rates in a 10~m long tunnel of the same cross section. The oxygen concentrations in the 10~m long tunnel decreased to approximately 17~\%.  In the long tunnel with large fire sizes, the smoke layer descended to the floor, inhibiting the supply of fresh air reaching the fire.
 
 
-\section{Wu Bakar Tunnel Experiments}
-\label{Wu_Bakar_Tunnels_Description}
+\section{Theobald Hose Stream Experiments}
+\label{Theobald_Description}
 
-An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inwards 7$^\circ$ from the vertical leading to a circular arch ceiling.
-
-A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
+Fire hose nozzle jets with nominal diameters of 1.3 cm up to 2.5 cm were studied over a range of operating pressures and jet orientation angles.  The maximum throw distance was recorded as well as the max height of the ballistic arc and the distance to the max height.  Details of the experiments are presented in \cite{Theobald:1981}.  In the paper, the \emph{primary breakup length} is correlated as a function of Weber number (We) and Reynolds number (Re) of the water jet.
 
 \subsubsection{Modeling Notes}
 
-Five simulations are conducted; one for each tunnel type. In each, the heat release rate is stepped over from the lowest to highest reported value in 20~s increments. During each steady period, the near-ceiling temperatures are recorded and used to infer the location of the back-layer; that is, the back-layer extent coincides with a drop in the ceiling jet temperature to within 10~$^\circ$C of ambient. The surface roughness of the tunnel walls is estimated to be 1~mm. The wall material is taken as generic steel.
+FDS models liquid water by means of Lagrangian particles.  This is the same model used to describe sprinkler droplets.  A key difference between sprinklers and hose streams, however, is that sprinkler nozzles purposely atomize the water jet immediately as the water is introduced into the computational domain.  To model hose streams, FDS introduces two new parameters to the {\ct PART} class: {\ct PRIMARY\_BREAKUP\_LENGTH} and {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}.  The particles enter the domain and for the time period before the particle has traveled the distance {\ct PRIMARY\_BREAKUP\_LENGTH}, the particle drag coefficient is multiplied by the specified {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}, which may be zero.  In this way, FDS can mimic the jet core, which experiences little to no drag before the jet goes unstable.
+
+To calibrate the FDS results (this case is a calibration exercise more than a validation), the {\ct PRIMARY\_} {\ct BREAKUP\_LENGTH} was set to twice the value of $Z$ (the value of 50 \% jet breakup) in the paper and the {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR} was set to zero.
 
 
 \section{UL/NIST Vent Experiments}
@@ -3233,12 +3233,20 @@ Two fuels were used in the tests. The properties of the fuels were obtained from
 \label{WTC_Drawing}
 \end{figure}
 
+
+\section{Wu Bakar Tunnel Experiments}
+\label{Wu_Bakar_Tunnels_Description}
+
+An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inwards 7$^\circ$ from the vertical leading to a circular arch ceiling.
+
+A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
+
+\subsubsection{Modeling Notes}
+
+Five simulations are conducted; one for each tunnel type. In each, the heat release rate is stepped over from the lowest to highest reported value in 20~s increments. During each steady period, the near-ceiling temperatures are recorded and used to infer the location of the back-layer; that is, the back-layer extent coincides with a drop in the ceiling jet temperature to within 10~$^\circ$C of ambient. The surface roughness of the tunnel walls is estimated to be 1~mm. The wall material is taken as generic steel.
+
+
 \FloatBarrier
-
-
-
-
-
 
 
 \section{Summary of Experiments}

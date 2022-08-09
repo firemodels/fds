@@ -1,14 +1,12 @@
-
 %6/24/2022 Noelle Crump
 
 close all
 clear all
 
-    % Runs from Matlab folder (Validation plots implementation)
 params_loc = '../../Validation/Theobald_Hose_Stream/FDS_Input_Files/Build_Input_Files/';
 outdir = '../../../out/Theobald_Hose_Stream/';
 expdir = '../../../exp/Theobald_Hose_Stream/';
-plot_dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Theobald_Hose_Stream/'];
+plot_dir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Theobald_Hose_Stream/'];
 
 chid_loc = [params_loc,'paramfile.csv'];
 exp_loc = [expdir,'theobald_effect_1981_fds.csv'];
@@ -107,49 +105,42 @@ Plot_Y  = 0.75;
 Paper_Height = 6.0;
 Paper_Width  = 6.5;
 
-% Change if the ColorBar should be Pressure or Firing Angle
-ColVar = 1;
-switch ColVar
-    case 1 
-        Color_Variable = 'operating pressure';
-        Ticks = [2.1,2.8,4.1,4.8,6.2];
-        TickLabels = {'2.1','2.8','4.1','4.8','6.2'};
-        ColorBar_Label = 'Operating Pressure (Pa) 1e5';
-        filename_add = '';
-    case 2 
-        Color_Variable = 'firing angle';
-        Ticks = [20,25,30,35,40,45];
-        TickLabels = {'20','25','30','35','40','45'};
-        ColorBar_Label = 'Firing Angle (deg)';
-        filename_add = '_fa';
-end
-
 % ----------------- Plot 1 Max Range -----------------
 plot_filename = 'Theobald_Hose_Stream_Max_Range';
-Ind_Title = 'Measured Range EXP (m)';
-Dep_Title = 'Predicted Range FDS (m)';
+Ind_Title = 'Measured Max Range EXP (m)';
+Dep_Title = 'Predicted Max Range FDS (m)';
 
 figure();
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-h = gscatter(TheoArr1(:,1),TheoArr1(:,2),TheoArr1(:,3),'c','v',5);
-h(2).Marker = 'diamond';
-h(3).Marker = 'square';
-h(4).Marker = '^';
-h(2).Color = 'm';
-h(3).Color = 'r';
-h(4).Color = 'g';
+range_6 = find(T1.('nozzle')==6);
+h(1)=scatter(T1(range_6,:),'max range exp','max range out','filled');
+h(1).SizeData=T1{range_6,'diameter'}*.2;
+h(1).CData=[0.8500 0.3250 0.0980];
 
 hold on
 
-scatter(T1,'max range exp','max range out','SizeVariable','diameter','ColorVariable',Color_Variable);
-c = colorbar('Ticks',Ticks,'TickLabels',TickLabels);
-c.Label.String = ColorBar_Label;
+range_7 = find(T1.('nozzle')==7);
+h(2)=scatter(T1(range_7,:),'max range exp','max range out','filled');
+h(2).SizeData=T1{range_7,'diameter'}*.2;
+h(2).CData=[0 0.4470 0.7410];
+
+range_9 = find(T1.('nozzle')==9);
+h(3)=scatter(T1(range_9,:),'max range exp','max range out','filled');
+h(3).SizeData=T1{range_9,'diameter'}*.2;
+h(3).CData=[0.9290 0.6940 0.1250];
+
+range_10 = find(T1.('nozzle')==10);
+h(4)=scatter(T1(range_10,:),'max range exp','max range out','filled');
+h(4).SizeData=T1{range_10,'diameter'}*.2;
+h(4).CData=[0.4940 0.1840 0.5560];
+
+set(gca,'Box','on')
 
 lim = [15,65];
 plot(lim,lim,'k-');
-title('Theobald Hose Stream Max Range');
+% title('Theobald Hose Stream Max Range');
 xlim(lim)
 ylim(lim)
 
@@ -159,40 +150,50 @@ ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-lh = legend('Nozzle 6','Nozzle 7','Nozzle 9 (Rouse)','Nozzle 10','Nozzle Diameter','','location','northwest');
+lh = legend('Nozzle 6','Nozzle 7','Nozzle 9 (Rouse)','Nozzle 10','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+
+% add Git version if file is available
+Git_Filename = [outdir,'Theobald_Test_0_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plot_dir,plot_filename,filename_add]);
+print(gcf,'-dpdf',[plot_dir,plot_filename]);
 
 hold off
 
 % ----------------- Plot 2 Max Height -----------------
 plot_filename = 'Theobald_Hose_Stream_Max_Height';
-Ind_Title = 'Measured Height EXP (m)';
-Dep_Title = 'Predicted Height FDS (m)';
+Ind_Title = 'Measured Max Height EXP (m)';
+Dep_Title = 'Predicted Max Height FDS (m)';
 
 figure();
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-h = gscatter(TheoArr2(:,1),TheoArr2(:,2),TheoArr2(:,3),'m','d',5);
-h(2).Marker = 'square';
-h(2).Color = 'r';
+range_7 = find(T2.('nozzle')==7);
+h(1)=scatter(T2(range_7,:),'max height exp','max height out','filled');
+h(1).SizeData=T2{range_7,'diameter'}*.2;
+h(1).CData=[0 0.4470 0.7410];
 
 hold on
 
-scatter(T2,'max height exp','max height out','SizeVariable','diameter','ColorVariable',Color_Variable);
-c = colorbar('Ticks',Ticks,'TickLabels',TickLabels);
-c.Label.String = ColorBar_Label;
+range_9 = find(T2.('nozzle')==9);
+h(2)=scatter(T2(range_9,:),'max height exp','max height out','filled');
+h(2).SizeData=T2{range_9,'diameter'}*.2;
+h(2).CData=[0.9290 0.6940 0.1250];
+
+set(gca,'Box','on')
+
+hold on
 
 lim = [0,18];
 plot(lim,lim,'k-');
-title('Theobald Hose Stream Max Height');
+% title('Theobald Hose Stream Max Height');
 xlim(lim)
 ylim(lim)
 
@@ -202,38 +203,49 @@ ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-lh = legend('Nozzle 7','Nozzle 9 (Rouse)','Nozzle Diameter','','location','northwest');
+lh = legend('Nozzle 7','Nozzle 9 (Rouse)','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+
+% add Git version if file is available
+Git_Filename = [outdir,'Theobald_Test_0_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plot_dir,plot_filename,filename_add]);
+print(gcf,'-dpdf',[plot_dir,plot_filename]);
 hold off
 
 % ----------------- Plot 3 Max Height Dist -----------------
 plot_filename ='Theobald_Hose_Stream_Max_Height_Distance';
-Ind_Title ='Measured Distance EXP (m)';
-Dep_Title ='Predicted Distance FDS (m)';
+Ind_Title ='Measured Max Height Distance EXP (m)';
+Dep_Title ='Predicted Max Height Distance FDS (m)';
 
 figure();
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-h=gscatter(TheoArr3(:,1),TheoArr3(:,2),TheoArr3(:,3),'m','d',5);
-h(2).Marker='square';
-h(2).Color='r';
+range_7 = find(T3.('nozzle')==7);
+h(1)=scatter(T3(range_7,:),'max height dist exp','max height dist out','filled');
+h(1).SizeData=T3{range_7,'diameter'}*.2;
+h(1).CData=[0 0.4470 0.7410];
 
 hold on
-scatter(T3,'max height dist exp','max height dist out','SizeVariable','diameter','ColorVariable',Color_Variable);
-c = colorbar('Ticks',Ticks,'TickLabels',TickLabels);
-c.Label.String = ColorBar_Label;
 
-lim = [4,40];
+range_9 = find(T3.('nozzle')==9);
+h(2)=scatter(T3(range_9,:),'max height dist exp','max height dist out','filled');
+h(2).SizeData=T3{range_9,'diameter'}*.2;
+h(2).CData=[0.9290 0.6940 0.1250];
+
+set(gca,'Box','on')
+
+hold on
+
+lim = [5,45];
 plot(lim,lim,'k-');
-title('Theobald Hose Stream Max Height Distance');
+% title('Theobald Hose Stream Max Height Distance');
 xlim(lim)
 ylim(lim)
 
@@ -243,13 +255,17 @@ ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-lh = legend('Nozzle 7','Nozzle 9 (Rouse)','Nozzle Diameter','','location','northwest');
+lh = legend(h(1:2),'Nozzle 7','Nozzle 9 (Rouse)','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+
+% add Git version if file is available
+Git_Filename = [outdir,'Theobald_Test_0_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plot_dir,plot_filename,filename_add]);
-return
+print(gcf,'-dpdf',[plot_dir,plot_filename]);
+
