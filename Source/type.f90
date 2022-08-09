@@ -264,6 +264,29 @@ TYPE BOUNDARY_ONE_D_TYPE
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
+
+!> \brief Variables associated with a WALL boundary cell that allows 3D heat transfer
+!> \details If you change the number of scalar variables in BOUNDARY_THR_D_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_THR_D_SCALAR_REALS=0
+INTEGER, PARAMETER :: N_THR_D_SCALAR_INTEGERS=0
+INTEGER, PARAMETER :: N_THR_D_SCALAR_LOGICALS=0
+
+TYPE BOUNDARY_THR_D_TYPE
+
+   TYPE(INTERNAL_NODE_TYPE), ALLOCATABLE, DIMENSION(:) :: NODE
+
+END TYPE BOUNDARY_THR_D_TYPE
+
+
+TYPE INTERNAL_NODE_TYPE
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ADJACENT_WALL_INDEX,ADJACENT_WALL_NODE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ADJACENT_WALL_WEIGHT
+   REAL(EB) :: TMP_AVG
+   INTEGER :: ADJACENT_WALL_VALUES=0
+END TYPE INTERNAL_NODE_TYPE
+
+
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
@@ -376,6 +399,7 @@ TYPE WALL_TYPE
    INTEGER :: WALL_INDEX=0            !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
+   INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
    INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPS
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
@@ -772,6 +796,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_THR_D_TYPE=.FALSE.    !< This surface requires in-depth 3-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
