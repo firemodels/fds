@@ -6434,8 +6434,18 @@ To prevent FDS from generating a distribution of droplets altogether, set {\ct M
 
 If you set {\ct CHECK\_DISTRIBUTION=T} on the {\ct PART} line, FDS will write out the cumulative distribution function for that particular particle class in a file called {\ct CHID\_PART\_ID\_cdf.csv}. If you do this, you might want to avoid spaces in the {\ct ID} of the {\ct PART} line.
 
+\subsection{Dense Clouds of Droplets}
+\label{info:DENSE_VOLUME_FRACTION}
 
+If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
+\subsection{Primary Breakup}
+\label{info:primary_breakup}
+
+Using {\ct DENSE\_VOLUME\_FRACTION} for wake reduction may not provide enough drag reduction for a fire hose stream.  To accommodate this scenario, FDS introduces a ``primary breakup'' method.  If {\ct PRIMARY\_} {\ct BREAKUP\_LENGTH} is set on the {\ct PART} line, then until a particle travels that distance its drag coefficient is multiplied by {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}, also set on {\ct PART}, and typically a small value, even zero.  In this way, the particle stream behaves like a hose stream prior to instability.  The parameters are empirical and the model should be tuned for a specific hose nozzle, see \cite{Theobald:1981}, for example.
+\begin{lstlisting}
+&PART ID='hose stream',..., PRIMARY_BREAKUP_LENGTH=10, PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR=0 /
+\end{lstlisting}
 
 \subsection{Secondary Breakup}
 \label{info:secondary_breakup}
@@ -6443,10 +6453,6 @@ If you set {\ct CHECK\_DISTRIBUTION=T} on the {\ct PART} line, FDS will write ou
 If {\ct BREAKUP=T} is set on the {\ct PART} line, particles may undergo secondary breakup.
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the median volumetric diameter, $D_{\rm v,0.5}$, {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}. These parameters are defined the same as {\ct GAMMA\_D} and {\ct SIGMA\_D} in section~\ref{info:particle_size} but instead apply after breakup.
 
-\subsection{Dense Clouds of Droplets}
-\label{info:DENSE_VOLUME_FRACTION}
-
-If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
 \subsection{Warning Messages Related to Droplets}
 \label{info:Droplet_Warnings}
@@ -11947,11 +11953,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
-{\ct NEW\_PARTICLE\_INCREMENT}        & Integer        & Section~\ref{info:controlling_droplets}
-                                      &                & 50                       \\ \hline
+{\ct NEW\_PARTICLE\_INCREMENT}           & Integer     & Section~\ref{info:controlling_droplets}                               &                   & 50                    \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
+{\ct PRIMARY\_BREAKUP\_LENGTH}           & Real        & Section~\ref{info:primary_breakup}                                    & m                 &                       \\ \hline
+{\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR} & Real & Section~\ref{info:primary_breakup}                                    &                   & 1.0                   \\ \hline
 {\ct PROP\_ID}                           & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
 {\ct QUANTITIES(10)}                     & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
 {\ct QUANTITIES\_SPEC\_ID(10)}           & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
