@@ -36,8 +36,8 @@ env:
 
 jobs:
   osx-intel-openmpi:
-    # debug build on osx using ifort with openmpi and mkl
-    # based on https://github.com/oneapi-src/oneapi-ci
+    # build on osx using ifort with openmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
   
     name: osx intel openmpi
     runs-on: [macos-latest]
@@ -117,12 +117,18 @@ jobs:
         cd ${MKLROOT}/interfaces/mklmpi/
         sudo make libintel64
 
-    - name: build fds
+    - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_intel_osx_db
         sh ./make_fds.sh
         ./fds_ompi_intel_osx_db
+    - name: build fds release
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        cd ./Build/ompi_intel_osx
+        sh ./make_fds.sh
+        ./fds_ompi_intel_osx
 
 
   osx-gnu-openmpi:
@@ -168,9 +174,15 @@ jobs:
         cd ${MKLROOT}/interfaces/mklmpi/
         sudo make libintel64
 
-    - name: build fds
+    - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_osx_db
         sh ./make_fds.sh
         ./fds_ompi_gnu_osx_db
+    - name: build fds release
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        cd ./Build/ompi_gnu_osx
+        sh ./make_fds.sh
+        ./fds_ompi_gnu_osx

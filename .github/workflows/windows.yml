@@ -34,8 +34,8 @@ env:
 
 jobs:
   windows-intel-intelmpi:
-    # debug build on windows using ifort with intelmpi and mkl
-    # based on https://github.com/oneapi-src/oneapi-ci
+    # build on windows using ifort with intelmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
 
     name: windows intel intelmpi
     runs-on: [windows-latest]
@@ -81,9 +81,15 @@ jobs:
           echo mkl=2022.1.0
           echo mpi=2021.6.0
         ) > oneapi_config.txt
-    - name: build fds
+    - name: build fds debug
       run: |
         call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
         cd Build\impi_intel_win_db
         call make_fds.bat
         fds_impi_intel_win_db.exe
+    - name: build fds release
+      run: |
+        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        cd Build\impi_intel_win
+        call make_fds.bat
+        fds_impi_intel_win.exe
