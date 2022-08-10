@@ -42,7 +42,7 @@ LNG_Dispersion
 LNG_wind_profiles
 FM_Vertical_Wall_Flames
 umd_line_burner_process
-% Askervein_Hill
+%Askervein_Hill
 UWO_Wind_Tunnel
 FM_Burner
 Crown_Fires
@@ -85,5 +85,7 @@ fm_datacenter_veltest
 mccaffrey_plume
 Wu_Bakar_Tunnels
 Memorial_Tunnel
+Theobald_Hose_Stream
+%USFS_Deep_Fuel_Beds
 
 display('validation scripts completed successfully!')
