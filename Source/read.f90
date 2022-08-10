@@ -9518,7 +9518,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                   OB%HT3D         = .TRUE.
                   SOLID_HT3D      = .TRUE. ! global parameter
-                  CHECK_HT        = .TRUE. ! test heat flux contribution to CFL time step contraint
+               !  CHECK_HT        = .TRUE. ! test heat flux contribution to CFL time step contraint
 
                   IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
                      ! test if OB is on boundary
