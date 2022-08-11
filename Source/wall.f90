@@ -1998,9 +1998,8 @@ TYPE(BOUNDARY_THR_D_TYPE), POINTER :: THR_D
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC2
 TYPE(WALL_TYPE), POINTER :: WC2
 
-! Sweep over all 3D wall cells and look for those that are not in the current sweep
-! direction. Copy the updated temperatures from the sweep direction to the
-! non-sweep directions.
+! Sweep over all 3D wall cells and look for those that are not oriented in the current sweep direction. 
+! Copy the updated temperatures of the sweep direction to the non-sweep directions.
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
@@ -2016,15 +2015,15 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    NODE_LOOP: DO I=1,NWP  ! Nodes of the chosen wall cell.
       ONE_D%TMP(I) = 0._EB
-      DO II = 1,THR_D%NODE(I)%ADJACENT_WALL_VALUES
+      WEIGHT_LOOP: DO II=1,THR_D%NODE(I)%ADJACENT_WALL_VALUES
          IWA = THR_D%NODE(I)%ADJACENT_WALL_INDEX(II)
          I_NODE = THR_D%NODE(I)%ADJACENT_WALL_NODE(II)
          WC2 => WALL(IWA)
          BC2 => BOUNDARY_COORD(WC2%BC_INDEX)
-         IF (ABS(BC2%IOR)/=HT_3D_SWEEP_DIRECTION) CYCLE
+         IF (ABS(BC2%IOR)/=HT_3D_SWEEP_DIRECTION) CYCLE WEIGHT_LOOP
          ONE_D2 => BOUNDARY_ONE_D(WC2%OD_INDEX)
          ONE_D%TMP(I) = ONE_D%TMP(I) + THR_D%NODE(I)%ADJACENT_WALL_WEIGHT(II)*ONE_D2%TMP(I_NODE)
-      ENDDO
+      ENDDO WEIGHT_LOOP
    ENDDO NODE_LOOP
 
 ENDDO WALL_LOOP
