@@ -86,6 +86,6 @@ mccaffrey_plume
 Wu_Bakar_Tunnels
 Memorial_Tunnel
 Theobald_Hose_Stream
-%USFS_Deep_Fuel_Beds
+USFS_Deep_Fuel_Beds
 
 display('validation scripts completed successfully!')
