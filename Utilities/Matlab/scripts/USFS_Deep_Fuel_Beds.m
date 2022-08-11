@@ -60,11 +60,16 @@ plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
-h = scatter(BURN_PCT_EXP,BURN_PCT_FDS);
+h = scatter(BURN_PCT_EXP,BURN_PCT_FDS,10,'filled');
 box on
 
 hold on
 plot([0,100],[0,100],'k-')
+
+for i=1:length(BURN_NO)
+    % add run number to each marker
+    text(BURN_PCT_EXP(i),BURN_PCT_FDS(i),[' ',num2str(BURN_NO(i))],'FontName',Font_Name);
+end
 
 xlim([0,100])
 ylim([0,100])
