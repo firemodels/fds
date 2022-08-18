@@ -36,7 +36,7 @@ CONTAINS
 !> \param T Current time (s)
 !> \param DT Current time step (s)
 !> \param NM Mesh number
- 
+
 SUBROUTINE WALL_BC(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
@@ -172,7 +172,7 @@ ENDDO WALL_CELL_LOOP
 
 ! Loop through all CFACEs and apply heat transfer BCs
 
-CFACE_LOOP: DO ICF=N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
+CFACE_LOOP: DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
    CFA=>CFACE(ICF)
    IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY .AND. .NOT.SOLID_HT3D) CYCLE CFACE_LOOP
    SURF_INDEX = CFA%SURF_INDEX
@@ -3952,7 +3952,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
    ENDDO MATERIAL_LOOP_00
 
    IF (X_L_SUM < TWO_EPSILON_EB) RETURN
-   
+
    SUM_Y_GAS = 0._EB
    SPEC_ID_ALREADY_USED = .FALSE.
    SMIX_INDEX = 0
@@ -3979,7 +3979,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
          CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
          Y_GAS(N) = Y_ALL(SPECIES_MIXTURE(SMIX_INDEX(N))%SINGLE_SPEC_INDEX)
          IF (SPECIES_MIXTURE(SMIX_INDEX(N))%CONDENSATION_SMIX_INDEX > 0) &
-               Y_GAS(N) = Y_GAS(N) - ZZ_GET(SPECIES_MIXTURE(SMIX_INDEX(N))%CONDENSATION_SMIX_INDEX)      
+               Y_GAS(N) = Y_GAS(N) - ZZ_GET(SPECIES_MIXTURE(SMIX_INDEX(N))%CONDENSATION_SMIX_INDEX)
       ELSE
          Y_GAS(N) = ZZ_GET(SMIX_INDEX(N))
       ENDIF
@@ -4008,7 +4008,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
       IF (.NOT.LIQUID(N)) CYCLE MATERIAL_LOOP_1
       SUM_Y_SV_SMIX(SMIX_INDEX(N)) = SUM_Y_SV_SMIX(SMIX_INDEX(N)) + Y_SV(N)
    ENDDO MATERIAL_LOOP_1
-   
+
    IF (SUM_Y_SV<ALMOST_ONE) THEN
       B_NUMBER = MAX(0._EB,(SUM_Y_SV-SUM(Y_GAS))/(1._EB-SUM_Y_SV))
    ELSE
@@ -4032,7 +4032,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
       CASE(SURF_CYLINDRICAL); EVAP_FILM_FAC = PLATE_FILM_FAC
       CASE(SURF_CARTESIAN); EVAP_FILM_FAC = PLATE_FILM_FAC
    END SELECT
-   
+
    CALL GET_FILM_PROPERTIES(N_MATS,EVAP_FILM_FAC,Y_SV,Y_GAS,SMIX_INDEX,TMP_F,TMP(IIG,JJG,KKG),ZZ_GET,&
                            PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,&
                            RHO_FILM,PR_FILM,SC_FILM)
@@ -4091,7 +4091,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
          CASE (PYROLYSIS_LIQUID)
 
-            ! Limit the burning rate to (200 kW/m2) / h_g 
+            ! Limit the burning rate to (200 kW/m2) / h_g
 
              MFLUX_MAX = 200E3_EB/ML%HEAT_OF_GASIFICATION
 
@@ -4109,8 +4109,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
             IF (DX_S(SOLID_CELL_INDEX)>TWO_EPSILON_EB) THEN
 
-               ! If the liquid temperature (TMP_S) is greater than the boiling temperature of the current liquid component 
-               ! (ML%TMP_BOIL), calculate the additional mass loss rate of this component (RHO_DOT_EXTRA) necessary to bring 
+               ! If the liquid temperature (TMP_S) is greater than the boiling temperature of the current liquid component
+               ! (ML%TMP_BOIL), calculate the additional mass loss rate of this component (RHO_DOT_EXTRA) necessary to bring
                ! the liquid temperature back to the boiling temperature.
 
                RHO_DOT_EXTRA = 0._EB

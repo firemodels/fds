@@ -68,7 +68,7 @@ plot([0,100],[0,100],'k-')
 
 for i=1:length(BURN_NO)
     % add run number to each marker
-    text(BURN_PCT_EXP(i),BURN_PCT_FDS(i),[' ',num2str(BURN_NO(i))],'FontName',Font_Name);
+    text(BURN_PCT_EXP(i),BURN_PCT_FDS(i),['     ',num2str(BURN_NO(i))],'FontName',Font_Name,'FontSize',2);
 end
 
 xlim([0,100])
