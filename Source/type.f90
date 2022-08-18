@@ -172,7 +172,7 @@ END TYPE BAND_TYPE
 !> \brief Coordinate variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_COORD_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=3     !< Number of scalar reals in BOUNDARY_COORD
+INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=6     !< Number of scalar reals in BOUNDARY_COORD
 INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_INTEGERS=7  !< Number of scalar integers in BOUNDARY_COORD
 INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_LOGICALS=0  !< Number of scalar logicals in BOUNDARY_COORD
 INTEGER :: N_BOUNDARY_COORD_STORAGE_REALS                 !< Total number of reals in BOUNDARY_COORD
@@ -192,6 +192,9 @@ TYPE BOUNDARY_COORD_TYPE
    REAL(EB) :: X             !< \f$ x \f$ coordinate of boundary cell center
    REAL(EB) :: Y             !< \f$ y \f$ coordinate of boundary cell center
    REAL(EB) :: Z             !< \f$ z \f$ coordinate of boundary cell center
+   REAL(EB) :: DX=0._EB      !< Width of cell (m)
+   REAL(EB) :: DY=0._EB      !< Width of cell (m)
+   REAL(EB) :: DZ=0._EB      !< Width of cell (m)
 
 END TYPE BOUNDARY_COORD_TYPE
 
@@ -386,7 +389,7 @@ END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4
 INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=18
-INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=3
 
 TYPE WALL_TYPE
 
@@ -414,6 +417,8 @@ TYPE WALL_TYPE
    INTEGER :: JD21_INDEX=0
    INTEGER :: JD22_INDEX=0
    INTEGER :: CUT_FACE_INDEX=0
+
+   LOGICAL, DIMENSION(3) :: THIN=.FALSE.  !< Thin wall cell for 3D heat transfer
 
 END TYPE WALL_TYPE
 
