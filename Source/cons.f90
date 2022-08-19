@@ -417,6 +417,7 @@ INTEGER :: CFT_REACTION_INDEX=1                                     !< Reaction 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
 LOGICAL :: PILOT_FUEL_MODEL=.FALSE.                                 !< Allow pilot fuel with low AIT
+LOGICAL :: SUBGRID_IGNITION_MODEL=.FALSE.                           !< Add TMP_SGS when checking AIT
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
