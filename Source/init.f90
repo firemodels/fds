@@ -457,6 +457,17 @@ DO N=1,N_INIT
    ENDDO
 ENDDO
 
+! If HRRPUV is initialized, double check RHOMIN
+
+IF (INIT_HRRPUV) THEN
+   ! consider large HRRPUV used for ignition:
+   ! the following formula follows from considering a single cell with heat release
+   ! the diverenge may be related to the heat release by div = qdot'''/(rho*cp*T) = (1/V)*dV/dt
+   ! for a given mass, the expansion in volume leads to a decrease in density, which may not
+   ! be captured by the ideal gas law with TMPMAX computed in READ_CLIP
+   RHOMIN = MIN(RHOMIN, RHOA*EXP(-MAXVAL(INITIALIZATION%HRRPUV)*DT_INITIAL/(RHOA*CP_GAMMA*TMPA)))
+ENDIF
+
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
 DO K=1,KBAR
