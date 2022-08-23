@@ -446,7 +446,7 @@ REAL(EB), INTENT(OUT) :: TMP_SGS
 INTEGER, INTENT(IN) :: IIC,JJC,KKC
 REAL(EB) :: TMP_LOC(-1:1,-1:1,-1:1),TMP_TEST
 INTEGER :: L,M,N
-REAL(EB), PARAMETER :: C_IGN=5._EB ! needs further study
+REAL(EB), PARAMETER :: C_IGN=1._EB ! needs further study
 
 ! populate local 3x3x3 array with cell temperature
 TMP_LOC=TMP(IIC,JJC,KKC)
@@ -463,7 +463,7 @@ ENDDO
 CALL TEST_FILTER_LOCAL(TMP_TEST,TMP_LOC)
 
 ! compute estimate of subgrid temperature fluctuation using scale similarity model
-TMP_SGS = C_IGN*ABS(TMP(IIC,JJC,KKC)-TMP_TEST)
+TMP_SGS = C_IGN*SQRT(ABS(TMP(IIC,JJC,KKC)**2-TMP_TEST**2))
 
 END SUBROUTINE SUBGRID_TEMPERATURE
 
