@@ -699,7 +699,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%J1==OB%J2) THIN_INDEX = 2
+         IF (OB%K1==OB%K2) THIN_INDEX = 3
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -707,9 +715,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%J1==OB%J2) THIN_INDEX = 2
-         IF (OB%K1==OB%K2) THIN_INDEX = 3
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -725,7 +730,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 1
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%J1==OB%J2) THIN_INDEX = 2
+         IF (OB%K1==OB%K2) THIN_INDEX = 3
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -733,9 +746,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%J1==OB%J2) THIN_INDEX = 2
-         IF (OB%K1==OB%K2) THIN_INDEX = 3
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -751,7 +761,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -2
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%I1==OB%I2) THIN_INDEX = 1
+         IF (OB%K1==OB%K2) THIN_INDEX = 3
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -759,9 +777,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%I1==OB%I2) THIN_INDEX = 1
-         IF (OB%K1==OB%K2) THIN_INDEX = 3
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -777,7 +792,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 2
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%I1==OB%I2) THIN_INDEX = 1
+         IF (OB%K1==OB%K2) THIN_INDEX = 3
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -785,9 +808,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%I1==OB%I2) THIN_INDEX = 1
-         IF (OB%K1==OB%K2) THIN_INDEX = 3
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -803,7 +823,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -3
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%I1==OB%I2) THIN_INDEX = 1
+         IF (OB%J1==OB%J2) THIN_INDEX = 2
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -811,9 +839,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%I1==OB%I2) THIN_INDEX = 1
-         IF (OB%J1==OB%J2) THIN_INDEX = 2
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -829,7 +854,15 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 3
          SURF_INDEX = OB%SURF_INDEX(IOR)
-         IW  = M%WALL_INDEX(IC,-IOR)
+         THIN_INDEX = 0
+         IF (OB%I1==OB%I2) THIN_INDEX = 1
+         IF (OB%J1==OB%J2) THIN_INDEX = 2
+         IF (THIN_INDEX>0) THEN
+            IW = 0
+         ELSE
+            IW  = M%WALL_INDEX(IC,-IOR)
+            IF (ANY(M%WALL(IW)%THIN)) IW = 0
+         ENDIF
          IF (IW==0) THEN
             M%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + 1
             M%N_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
@@ -837,9 +870,6 @@ OBST_LOOP_2: DO N=1,M%N_OBST
          ELSE
             IF (.NOT.OB%OVERLAY .OR. OB%HIDDEN) CYCLE
          ENDIF
-         THIN_INDEX = 0
-         IF (OB%I1==OB%I2) THIN_INDEX = 1
-         IF (OB%J1==OB%J2) THIN_INDEX = 2
          CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,SURF_INDEX,IERR,T_BEGIN,THIN_INDEX=THIN_INDEX)
          IF (IERR>0) RETURN
       ENDDO
@@ -1029,7 +1059,7 @@ SUBROUTINE INITIALIZE_MESH_VARIABLES_2(NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT,LES_FILTER_WIDTH_FUNCTION
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE CONTROL_VARIABLES
-INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IERR,IPZ,NOM,ITER,IZERO,IIG,JJG,KKG,ICF,NSLICE
+INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IOR2,IERR,IPZ,NOM,ITER,IZERO,IIG,JJG,KKG,ICF,NSLICE
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),VC,RTRM,CP,XXC,YYC,ZZC
 INTEGER :: IBP1,JBP1,KBP1,IBAR,JBAR,KBAR
@@ -1254,21 +1284,33 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             OM => MESHES(NOM)
          ENDIF
          IC = OM%CELL_INDEX(II,JJ,KK)
-         IF (.NOT.OM%SOLID(IC) .AND. OM%WALL_INDEX(IC,IOR)>0) THEN ! the back wall face is found
-            WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
-            WC%BACK_MESH  = NOM
-            EXIT ZERO_OR_ONE_CELL_THICK
-         ELSE ! see if the obstruction is one cell thick. If not, get out.
-            IF (.NOT.SF%VARIABLE_THICKNESS .AND. ITER==2) CYCLE WALL_LOOP
-            SELECT CASE(IOR)
-               CASE(-1) ; II=II+1
-               CASE( 1) ; II=II-1
-               CASE(-2) ; JJ=JJ+1
-               CASE( 2) ; JJ=JJ-1
-               CASE(-3) ; KK=KK+1
-               CASE( 3) ; KK=KK-1
-            END SELECT
+         IOR2 = 0
+         IF (WC%THIN(1)) IOR2 = 1
+         IF (WC%THIN(2)) IOR2 = 2
+         IF (WC%THIN(3)) IOR2 = 3
+         IF (IOR2>0) THEN
+            IF (OM%WALL_INDEX(IC,IOR2)==0) THEN  ! the back wall slit is found
+               WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
+               WC%BACK_MESH  = NOM
+               EXIT ZERO_OR_ONE_CELL_THICK
+            ENDIF
+         ELSE
+            IF (.NOT.OM%SOLID(IC) .AND. OM%WALL_INDEX(IC,IOR)>0) THEN ! the back wall face is found
+               WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
+               WC%BACK_MESH  = NOM
+               EXIT ZERO_OR_ONE_CELL_THICK
+            ENDIF
          ENDIF
+
+         IF (.NOT.SF%VARIABLE_THICKNESS .AND. ITER==2) CYCLE WALL_LOOP
+         SELECT CASE(IOR)
+            CASE(-1) ; II=II+1
+            CASE( 1) ; II=II-1
+            CASE(-2) ; JJ=JJ+1
+            CASE( 2) ; JJ=JJ-1
+            CASE(-3) ; KK=KK+1
+            CASE( 3) ; KK=KK-1
+         END SELECT
 
       ENDDO ZERO_OR_ONE_CELL_THICK
 
@@ -1366,7 +1408,8 @@ USE GEOMETRY_FUNCTIONS, ONLY: GET_N_LAYER_CELLS,GET_WALL_NODE_COORDINATES
 INTEGER :: N_LAYER_CELLS_OLD(1)=0,IW2,NWP,NWP2,I2,IWA,DM
 LOGICAL :: REMESH_LAYER(1)=.TRUE.,IOR_AVOID(-3:3)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: X_S_OLD
-REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,XX1,XX2,YY1,YY2,ZZ1,ZZ2,PRIMARY_VOLUME,OVERLAP_VOLUME,DXX,DYY,DZZ,DUM,WEIGHT_FACTOR,EXTRUDE
+REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,XX1,XX2,YY1,YY2,ZZ1,ZZ2,PRIMARY_VOLUME,OVERLAP_VOLUME,DXX,DYY,DZZ,DUM,WEIGHT_FACTOR,EXTRUDE,&
+            SUM_WGT(3)
 TYPE(WALL_TYPE), POINTER :: WC2
 TYPE(SURFACE_TYPE), POINTER :: SF2
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D2
@@ -1485,15 +1528,18 @@ PRIMARY_WALL_LOOP_2: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             IF (WC2%THIN(1) .AND. XX1>XX2) THEN ; DUM=XX2 ; XX2=XX1 ; XX1=DUM ; ENDIF
             IF (WC2%THIN(2) .AND. YY1>YY2) THEN ; DUM=YY2 ; YY2=YY1 ; YY1=DUM ; ENDIF
             IF (WC2%THIN(3) .AND. ZZ1>ZZ2) THEN ; DUM=ZZ2 ; ZZ2=ZZ1 ; ZZ1=DUM ; ENDIF
-            IF (ABS(BC2%IOR)==1 .AND. WC%THIN(1)) THEN ; XX1=M%X(BC%II) ; XX2=XX1+EXTRUDE*BC%DX ; ENDIF
-            IF (ABS(BC2%IOR)==2 .AND. WC%THIN(2)) THEN ; YY1=M%Y(BC%JJ) ; YY2=YY1+EXTRUDE*BC%DY ; ENDIF
-            IF (ABS(BC2%IOR)==3 .AND. WC%THIN(3)) THEN ; ZZ1=M%Z(BC%KK) ; ZZ2=ZZ1+EXTRUDE*BC%DZ ; ENDIF
+            IF (ABS(BC2%IOR)==1 .AND. WC%THIN(1) .AND. BC%II==BC2%II) THEN ; XX1=M%X(BC%II) ; XX2=XX1+EXTRUDE*BC%DX ; ENDIF
+            IF (ABS(BC2%IOR)==2 .AND. WC%THIN(2) .AND. BC%JJ==BC2%JJ) THEN ; YY1=M%Y(BC%JJ) ; YY2=YY1+EXTRUDE*BC%DY ; ENDIF
+            IF (ABS(BC2%IOR)==3 .AND. WC%THIN(3) .AND. BC%KK==BC2%KK) THEN ; ZZ1=M%Z(BC%KK) ; ZZ2=ZZ1+EXTRUDE*BC%DZ ; ENDIF
             DXX = MIN(XX2,X2)-MAX(XX1,X1) ; IF (DXX<=0._EB) CYCLE ALTERNATE_NODE_LOOP
             DYY = MIN(YY2,Y2)-MAX(YY1,Y1) ; IF (DYY<=0._EB) CYCLE ALTERNATE_NODE_LOOP
             DZZ = MIN(ZZ2,Z2)-MAX(ZZ1,Z1) ; IF (DZZ<=0._EB) CYCLE ALTERNATE_NODE_LOOP
             OVERLAP_VOLUME = DXX*DYY*DZZ
             WEIGHT_FACTOR = OVERLAP_VOLUME/PRIMARY_VOLUME
             IF (WEIGHT_FACTOR<TOL) CYCLE ALTERNATE_NODE_LOOP
+!if (bc%iig==20 .and. bc%jjg==11 .and. bc%kkg==7 .and. bc%ior==3 .and. i==1) then
+!   write(0,*) bc2%iig,bc2%jjg,bc2%kkg,bc2%ior,z1,z2,zz1,zz2,WEIGHT_FACTOR
+!endif
             IWA = IWA + 1
             DM = SIZE(THR_D%NODE(I)%ALTERNATE_WALL_INDEX)
             IF (IWA>DM) THEN  ! If the primary node array does not have enough entries, add more
@@ -1520,8 +1566,22 @@ PRIMARY_WALL_LOOP_2: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
       IF (ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN
          IERR = 1
+!        WRITE(0,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,F6.3)') &
+!           'WARNING: Wall cell=',iw,' IJK=',bc%iig,',',bc%jjg,',',bc%kkg,' IOR=',bc%ior,' Node=',i,' weight=',&
+!           SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
+         SUM_WGT = 0._EB
+         DO IWA=1,THR_D%NODE(I)%ALTERNATE_WALL_VALUES
+            IOR = M%BOUNDARY_COORD(M%WALL(THR_D%NODE(I)%ALTERNATE_WALL_INDEX(IWA))%BC_INDEX)%IOR
+            SUM_WGT(ABS(IOR)) = SUM_WGT(ABS(IOR)) + THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA)
+         ENDDO
+         DO IWA=1,THR_D%NODE(I)%ALTERNATE_WALL_VALUES
+            IOR = M%BOUNDARY_COORD(M%WALL(THR_D%NODE(I)%ALTERNATE_WALL_INDEX(IWA))%BC_INDEX)%IOR
+            IF (SUM_WGT(ABS(IOR))>0._EB) THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA) = &
+                                         THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA)/SUM_WGT(ABS(IOR))
+         ENDDO
+         IERR = 1
          WRITE(0,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,F6.3)') &
-            'ERROR: Wall cell=',iw,' IJK=',bc%iig,',',bc%jjg,',',bc%kkg,' IOR=',bc%ior,' Node=',i,' weight=',&
+            'WARNING: Wall cell=',iw,' IJK=',bc%iig,',',bc%jjg,',',bc%kkg,' IOR=',bc%ior,' Node=',i,' weight=',&
             SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
       ENDIF
 
