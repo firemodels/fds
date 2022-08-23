@@ -1,0 +1,26 @@
+! The objective of this test is to ensure that an OBST located on the fine mesh side
+! of a coarse mesh interface does not snap to the coarse mesh creating two zones.
+
+&HEAD CHID='obst_coarse_fine_interface' TITLE='Test of OBST near a coarse-fine interface' /
+
+&TIME T_END=10/
+&MESH IJK=6,4,6 XB=5,6.5,2,3,-3,-1.5 /
+&MESH IJK=3,3,3 XB=5,6.5,3,4.5,-3,-1.5 /
+
+&SURF ID='inlet', VEL=-1, COLOR='RED'/
+&VENT XB=5.25,5.5,2.5,2.25,-2.99,-2.99, SURF_ID='inlet'/
+
+&OBST XB=5,5.5,3,3.5,-3,-1.5 RGB=89,89,89/
+&OBST XB=5.5,6,2.5,3,-3,-1.5 RGB=89,89,89/
+&OBST XB=6,6.25,2.25,2.75,-3,-1.5 RGB=89,89,89/
+
+&DEVC XYZ=5.375,2.75,-2.25, QUANTITY='BACKGROUND PRESSURE', ID='P1'/
+&DEVC XYZ=5.375,4.00,-2.25, QUANTITY='BACKGROUND PRESSURE', ID='P2'/
+
+&CTRL ID='DP', FUNCTION_TYPE='SUBTRACT', INPUT_ID='P1','P2'/
+&DEVC XYZ=5.375,2.75,-2.25, QUANTITY='CONTROL VALUE', CTRL_ID='DP', ID='DP'/
+
+&SLCF DB='ZMID', QUANTITY='BACKGROUND PRESSURE', CELL_CENTERED=T/
+&SLCF DB='ZMID', QUANTITY='PRESSURE ZONE', CELL_CENTERED=T/
+
+&TAIL /
