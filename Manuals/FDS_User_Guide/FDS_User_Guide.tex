@@ -941,6 +941,7 @@ Some parallel computing environments do not have a centralized file system, in w
 \label{info:mesh_alignment}
 
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
+
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
 \setlength{\unitlength}{0.015in}
@@ -948,57 +949,63 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 \newsavebox{\mygraph}
 \savebox{\mygraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0,20)(0,20){3}{\line(1,0){100}}
-\multiput(20, 0)(20,0){4}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0,20)(0,20){2}{\line(1,0){100}}
+\multiput(20, 0)(20,0){4}{\line(0,1){60}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,60){ }}
 \end{picture} }
 
 \newsavebox{\myfinegraph}
 \savebox{\myfinegraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0,10)(0,10){7}{\line(1,0){100}}
-\multiput(10, 0)(10,0){9}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0,10)(0,10){3}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){40}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,40){ }}
 \end{picture} }
 
 \newsavebox{\myotherfinegraph}
 \savebox{\myotherfinegraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0, 8)(0, 8){9}{\line(1,0){100}}
-\multiput(10, 0)(10,0){9}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0, 8)(0, 8){4}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){40}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,40){ }}
 \end{picture} }
 
-\put(  0,420){\usebox{\mygraph}}
-\put(100,420){\usebox{\mygraph}}
-\put(230,470){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
+\put(  0,470){\usebox{\mygraph}}
+\put(100,470){\usebox{\mygraph}}
+\put(230,500){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
 
-\put(  0,320){\usebox{\mygraph}}
-\put(100,320){\usebox{\myfinegraph}}
-\put(230,370){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+\put(  0,380){\usebox{\mygraph}}
+\put(100,380){\usebox{\myfinegraph}}
+\put(230,410){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
 
-\put(  0,200){\usebox{\mygraph}}
-\put( 80,220){\usebox{\myfinegraph}}
-\put(230,270){\parbox{2.5in}{This is allowed, but of questionable value.}}
+\put(  0,270){\usebox{\mygraph}}
+\put( 80,290){\usebox{\myfinegraph}}
+\put(230,300){\parbox{2.5in}{This is allowed, but of questionable value.}}
 
-\put(  0,100){\usebox{\mygraph}}
-\put( 80,110){\usebox{\myfinegraph}}
-\put(230,160){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
+\put(  0,180){\usebox{\mygraph}}
+\put( 80,190){\usebox{\myfinegraph}}
+\put(230,210){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
+
+\put(  0, 90){\usebox{\mygraph}}
+\put(100,120){\usebox{\myfinegraph}}
+\put(100, 80){\usebox{\myfinegraph}}
+\put(230,120){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones of the same mesh.}}
 
 \put(  0,  0){\usebox{\mygraph}}
 \put(100,  0){\usebox{\myotherfinegraph}}
-\put(230, 50){\parbox{2.5in}{This is not allowed.}}
+\put(230, 30){\parbox{2.5in}{This is not allowed.}}
 \end{picture}
 
 \caption[Rules governing the alignment of meshes]{Rules governing the alignment of meshes.}
 \label{fig:meshes}
 \end{figure}
+
 The following rules of thumb should also be followed when setting up a multiple mesh calculation:
 \begin{itemize}
 \item Avoid putting mesh boundaries where critical action is expected, especially fire. Sometimes fire spread from mesh to mesh cannot be avoided, but if at all possible try to keep mesh interfaces relatively free of complicated phenomena since the exchange of information across mesh boundaries is not yet as accurate as cell to cell exchanges within one mesh.
