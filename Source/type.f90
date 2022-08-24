@@ -203,7 +203,7 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=27
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=6
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
 TYPE BOUNDARY_ONE_D_TYPE
@@ -234,6 +234,8 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER :: NODE_INDEX=0     !< HVAC node index associated with surface
    INTEGER :: N_SUBSTEPS=1     !< Number of substeps in the 1-D conduction/reaction update
+   INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
+   INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
 
    REAL(EB) :: AREA=0._EB            !< Face area (m2)
    REAL(EB) :: HEAT_TRANS_COEF=0._EB !< Heat transfer coefficient (W/m2/K)
