@@ -388,6 +388,7 @@ $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_uscarc.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
+$QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
