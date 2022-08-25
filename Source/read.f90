@@ -6816,7 +6816,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! If a RADIUS is specified, consider it the same as THICKNESS(1)
 
-   IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
+   IF (THICKNESS(1)<0._EB .AND. RADIUS>0._EB) THICKNESS(1) = RADIUS
 
    ! If HT3D set THICKNESS(1) to null value to pass error traps
 
