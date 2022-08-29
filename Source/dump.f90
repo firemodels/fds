@@ -7292,10 +7292,10 @@ IND_SELECT: SELECT CASE(IND)
       LAG_LOOP: DO IL=DV%N_T_E-1,0,-1
          IF (DV%T_E(IL) > T-DT_E) CYCLE LAG_LOOP
          T_RATIO = (T-DT_E-DV%T_E(IL))/(DV%T_E(IL+1)-DV%T_E(IL))
-         Y_E_LAG = DV%Y_E(IL) + T_RATIO*(DV%Y_E(IL+1)-DV%Y_E(IL))
+         Y_E_LAG = MAX(0._EB,DV%Y_E(IL) + T_RATIO*(DV%Y_E(IL+1)-DV%Y_E(IL)))
          EXIT LAG_LOOP
       ENDDO LAG_LOOP
-      DV%Y_C = DV%Y_C + DT*(Y_E_LAG - DV%Y_C)/DT_C
+      DV%Y_C = MAX(0._EB,DV%Y_C + DT*(Y_E_LAG - DV%Y_C)/DT_C)
       GAS_PHASE_OUTPUT_RES = (1._EB-EXP(-MASS_EXT_COEF*RHO(I,J,K)*DV%Y_C))*100._EB  ! Obscuration
 
    CASE(159) ! CONTROL VALUE
