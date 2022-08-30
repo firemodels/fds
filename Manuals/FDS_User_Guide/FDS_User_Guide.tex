@@ -941,6 +941,7 @@ Some parallel computing environments do not have a centralized file system, in w
 \label{info:mesh_alignment}
 
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
+
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
 \setlength{\unitlength}{0.015in}
@@ -948,57 +949,63 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 \newsavebox{\mygraph}
 \savebox{\mygraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0,20)(0,20){3}{\line(1,0){100}}
-\multiput(20, 0)(20,0){4}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0,20)(0,20){2}{\line(1,0){100}}
+\multiput(20, 0)(20,0){4}{\line(0,1){60}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,60){ }}
 \end{picture} }
 
 \newsavebox{\myfinegraph}
 \savebox{\myfinegraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0,10)(0,10){7}{\line(1,0){100}}
-\multiput(10, 0)(10,0){9}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0,10)(0,10){3}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){40}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,40){ }}
 \end{picture} }
 
 \newsavebox{\myotherfinegraph}
 \savebox{\myotherfinegraph}{
 \begin{picture}(0,0)
-\thinlines
-\multiput( 0, 8)(0, 8){9}{\line(1,0){100}}
-\multiput(10, 0)(10,0){9}{\line(0,1){80}}
-\thicklines
-\put(0,0){\framebox(100,80){ }}
+\linethickness{0.05mm}
+\multiput( 0, 8)(0, 8){4}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){40}}
+\linethickness{0.50mm}
+\put(0,0){\framebox(100,40){ }}
 \end{picture} }
 
-\put(  0,420){\usebox{\mygraph}}
-\put(100,420){\usebox{\mygraph}}
-\put(230,470){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
+\put(  0,470){\usebox{\mygraph}}
+\put(100,470){\usebox{\mygraph}}
+\put(230,500){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
 
-\put(  0,320){\usebox{\mygraph}}
-\put(100,320){\usebox{\myfinegraph}}
-\put(230,370){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+\put(  0,380){\usebox{\mygraph}}
+\put(100,380){\usebox{\myfinegraph}}
+\put(230,410){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
 
-\put(  0,200){\usebox{\mygraph}}
-\put( 80,220){\usebox{\myfinegraph}}
-\put(230,270){\parbox{2.5in}{This is allowed, but of questionable value.}}
+\put(  0,270){\usebox{\mygraph}}
+\put( 80,290){\usebox{\myfinegraph}}
+\put(230,300){\parbox{2.5in}{This is allowed, but of questionable value.}}
 
-\put(  0,100){\usebox{\mygraph}}
-\put( 80,110){\usebox{\myfinegraph}}
-\put(230,160){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
+\put(  0,180){\usebox{\mygraph}}
+\put( 80,190){\usebox{\myfinegraph}}
+\put(230,210){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
+
+\put(  0, 90){\usebox{\mygraph}}
+\put(100,120){\usebox{\myfinegraph}}
+\put(100, 80){\usebox{\myfinegraph}}
+\put(230,120){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones of the same mesh.}}
 
 \put(  0,  0){\usebox{\mygraph}}
 \put(100,  0){\usebox{\myotherfinegraph}}
-\put(230, 50){\parbox{2.5in}{This is not allowed.}}
+\put(230, 30){\parbox{2.5in}{This is not allowed.}}
 \end{picture}
 
 \caption[Rules governing the alignment of meshes]{Rules governing the alignment of meshes.}
 \label{fig:meshes}
 \end{figure}
+
 The following rules of thumb should also be followed when setting up a multiple mesh calculation:
 \begin{itemize}
 \item Avoid putting mesh boundaries where critical action is expected, especially fire. Sometimes fire spread from mesh to mesh cannot be avoided, but if at all possible try to keep mesh interfaces relatively free of complicated phenomena since the exchange of information across mesh boundaries is not yet as accurate as cell to cell exchanges within one mesh.
@@ -1533,7 +1540,7 @@ For a single mesh, the solution of the simplified (i.e. separable) form of the P
 
 If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
-By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct F} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
+By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct F} on the {\ct PRES} line.
 
 To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_POISSON} to {\ct T} on the {\ct PRES} line, instructing FDS to check that the left-hand and right-hand sides of the Poisson equation are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file. Note that this verifies the accuracy of the {\em local}, not the global, pressure solution. To check the accuracy of the global pressure solution, see Section~\ref{tunnel_demo}.
 
@@ -3876,7 +3883,11 @@ There are a number of techniques to measure the thermo-physical properties of a 
       MATL_ID(1,3) = 'Component C',
       MATL_MASS_FRACTION(1,1:3) = 0.26,0.33,0.41 /
 \end{lstlisting}
-The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct F}
+The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct F}.
+
+\begin{warning}
+Note: If applying {\ct TGA\_ANALYSIS} to a multi-mesh case or a case where the {\ct SURF} is associated with a {\ct PART} class yet to be inserted into the calculation, FDS may not find the {\ct SURF} and hence throw an error.  It is best to simplify the domain to a single particle or wall cell in a single mesh.
+\end{warning}
 
 The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
 
@@ -4514,6 +4525,7 @@ Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach num
 
 \subsubsection{Example Case: Irregularly Shaped Zone}
 \label{zone_shape}
+\label{obst_coarse_fine_interface}
 
 This example is similar to the ones in the previous section, except in this case, the pressure zone is L-shaped and split across two meshes. The objective is simply to ensure that the specification of the pressure zone is properly accounted for in the model. Figure~\ref{zone_shape_fig} compares the predicted pressure in the compartment compared to an exact solution. Air is injected into the compartment for 5~s, after which the compartment is opened to a smaller compartment. At 15~s, the smaller compartment is opened to the outside.
 
@@ -6434,8 +6446,18 @@ To prevent FDS from generating a distribution of droplets altogether, set {\ct M
 
 If you set {\ct CHECK\_DISTRIBUTION=T} on the {\ct PART} line, FDS will write out the cumulative distribution function for that particular particle class in a file called {\ct CHID\_PART\_ID\_cdf.csv}. If you do this, you might want to avoid spaces in the {\ct ID} of the {\ct PART} line.
 
+\subsection{Dense Clouds of Droplets}
+\label{info:DENSE_VOLUME_FRACTION}
 
+If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
+\subsection{Primary Breakup}
+\label{info:primary_breakup}
+
+Using {\ct DENSE\_VOLUME\_FRACTION} for wake reduction may not provide enough drag reduction for a fire hose stream.  To accommodate this scenario, FDS introduces a ``primary breakup'' method.  If {\ct PRIMARY\_} {\ct BREAKUP\_LENGTH} is set on the {\ct PART} line, then until a particle travels that distance its drag coefficient is multiplied by {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}, also set on {\ct PART}, and typically a small value, even zero.  In this way, the particle stream behaves like a hose stream prior to instability.  The parameters are empirical and the model should be tuned for a specific hose nozzle, see \cite{Theobald:1981}, for example.
+\begin{lstlisting}
+&PART ID='hose stream',..., PRIMARY_BREAKUP_LENGTH=10, PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR=0 /
+\end{lstlisting}
 
 \subsection{Secondary Breakup}
 \label{info:secondary_breakup}
@@ -6443,10 +6465,6 @@ If you set {\ct CHECK\_DISTRIBUTION=T} on the {\ct PART} line, FDS will write ou
 If {\ct BREAKUP=T} is set on the {\ct PART} line, particles may undergo secondary breakup.
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the median volumetric diameter, $D_{\rm v,0.5}$, {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}. These parameters are defined the same as {\ct GAMMA\_D} and {\ct SIGMA\_D} in section~\ref{info:particle_size} but instead apply after breakup.
 
-\subsection{Dense Clouds of Droplets}
-\label{info:DENSE_VOLUME_FRACTION}
-
-If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
 \subsection{Warning Messages Related to Droplets}
 \label{info:Droplet_Warnings}
@@ -11947,11 +11965,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
-{\ct NEW\_PARTICLE\_INCREMENT}        & Integer        & Section~\ref{info:controlling_droplets}
-                                      &                & 50                       \\ \hline
+{\ct NEW\_PARTICLE\_INCREMENT}           & Integer     & Section~\ref{info:controlling_droplets}                               &                   & 50                    \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
+{\ct PRIMARY\_BREAKUP\_LENGTH}           & Real        & Section~\ref{info:primary_breakup}                                    & m                 &                       \\ \hline
+{\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR} & Real & Section~\ref{info:primary_breakup}                                    &                   & 1.0                   \\ \hline
 {\ct PROP\_ID}                           & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
 {\ct QUANTITIES(10)}                     & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
 {\ct QUANTITIES\_SPEC\_ID(10)}           & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline

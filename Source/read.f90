@@ -1626,6 +1626,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 POROUS_FLOOR,PR,PROFILING,&
                 P_INF,RAMP_GX,RAMP_GY,RAMP_GZ,RESTART,RESTART_CHID,&
                 SC,SHARED_FILE_SYSTEM,SIMULATION_MODE,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_DENSITY,SOOT_OXIDATION,&
+                SUBGRID_IGNITION_MODEL,&
                 TAU_DEFAULT,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
                 THERMOPHORETIC_DEPOSITION,THERMOPHORETIC_SETTLING,THICKEN_OBSTRUCTIONS,&
                 TMPA,TURBULENCE_MODEL,TURBULENT_DEPOSITION,UVW_FILE,&
@@ -4258,6 +4259,13 @@ IF (ANY(ABS(REACTION%AUTO_IGNIT_TMP-AUTO_IGNITION_TEMPERATURE)>TWO_EPSILON_EB)) 
    CFT_REACTION_INDEX=MAXLOC(REACTION%AUTO_IGNIT_TMP,1)
 ENDIF
 
+! Throw an error if SUBGRID_IGNITION_MODEL is used without setting an AUTO_IGNITION_TEMPERATURE
+
+IF (SUBGRID_IGNITION_MODEL .AND. AUTO_IGNITION_TEMPERATURE<TWO_EPSILON_EB) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: SUBGRID_IGNITION_MODEL requires AUTO_IGNITION_TEMPERATURE > 0 K'
+   CALL SHUTDOWN(MESSAGE) ; RETURN
+ENDIF
+
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 CONTAINS
@@ -6808,7 +6816,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! If a RADIUS is specified, consider it the same as THICKNESS(1)
 
-   IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
+   IF (THICKNESS(1)<0._EB .AND. RADIUS>0._EB) THICKNESS(1) = RADIUS
 
    ! If HT3D set THICKNESS(1) to null value to pass error traps
 
@@ -8967,19 +8975,20 @@ END SUBROUTINE READ_TABL
 
 SUBROUTINE READ_OBST
 
-USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL,CIRCLE_CELL_INTERSECTION_AREA
+USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL,CIRCLE_CELL_INTERSECTION_AREA,SEARCH_OTHER_MESHES
 USE COMPLEX_GEOMETRY, ONLY: INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB,INTERSECT_OBB_AABB,ROTATION_MATRIX
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,PYRO3D_IOR
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,PYRO3D_IOR,IIO,JJO,KKO
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID,RAMP_Q
 CHARACTER(25) :: COLOR
 LOGICAL :: OVERLAY,IS_INTERSECT,PYRO3D_MASS_TRANSPORT
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3)
+            INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3),&
+            XXI,YYJ,ZZK,DX_GHOST,DY_GHOST,DZ_GHOST
 LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,&
            HT3D,WARN_HT3D,PYRO3D_RESIDUE
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
@@ -9222,34 +9231,82 @@ MESH_LOOP: DO NM=1,NMESHES
                THICKEN_LOC = THICKEN
 
                IF ( (XB2>=XS-0.5_EB*DX(0)   .AND. XB2<XS) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)>=XS-DX(0)    .AND. XB2<XS) ) THEN
-                  XB1 = XS
-                  XB2 = XS
-                  THICKEN_LOC = .FALSE.
+                  DX_GHOST = DX(0)
+                  CALL SEARCH_OTHER_MESHES(XS-0.1_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DX)) THEN
+                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  ENDIF
+                  IF (XB2>=XS-0.5_EB*DX_GHOST) THEN
+                     XB1 = XS
+                     XB2 = XS
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
                IF ( (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)< XF+DX(IBP1) .AND. XB1>XF) ) THEN
-                  XB1 = XF
-                  XB2 = XF
-                  THICKEN_LOC = .FALSE.
+                  DX_GHOST = DX(IBP1)
+                  CALL SEARCH_OTHER_MESHES(XF+0.1_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DX)) THEN
+                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  ENDIF
+                  IF (XB1<XF+0.5_EB*DX_GHOST) THEN
+                     XB1 = XF
+                     XB2 = XF
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
                IF ( (XB4>=YS-0.5_EB*DY(0)   .AND. XB4<YS) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)>=YS-DY(0)    .AND. XB4<YS) ) THEN
-                  XB3 = YS
-                  XB4 = YS
-                  THICKEN_LOC = .FALSE.
+                  DY_GHOST = DY(0)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.1_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DY)) THEN
+                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  ENDIF
+                  IF (XB4>=YS-0.5_EB*DY_GHOST) THEN
+                     XB3 = YS
+                     XB4 = YS
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
                IF ( (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)< YF+DY(JBP1) .AND. XB3>YF) ) THEN
-                  XB3 = YF
-                  XB4 = YF
-                  THICKEN_LOC = .FALSE.
+                  DY_GHOST = DY(JBP1)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.1_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DY)) THEN
+                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  ENDIF
+                  IF (XB3<YS+0.5_EB*DY_GHOST) THEN
+                     XB3 = YF
+                     XB4 = YF
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
                IF ( (XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)>=ZS-DZ(0)    .AND. XB6<ZS) ) THEN
-                  XB5 = ZS
-                  XB6 = ZS
-                  THICKEN_LOC = .FALSE.
+                  DZ_GHOST = DZ(0)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.1_EB*DZ(0),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DZ)) THEN
+                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  ENDIF
+                  IF (XB6>=ZS-0.5_EB*DZ_GHOST) THEN
+                     XB5 = ZS
+                     XB6 = ZS
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
                IF ( (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF) ) THEN
-                  XB5 = ZF
-                  XB6 = ZF
-                  THICKEN_LOC = .FALSE.
+                  DZ_GHOST = DZ(KBP1)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.1_EB*DZ(KBP1),&
+                                           NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DZ)) THEN
+                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  ENDIF
+                  IF (XB5<ZF+0.5_EB*DZ_GHOST) THEN
+                     XB5 = ZF
+                     XB6 = ZF
+                     THICKEN_LOC = .FALSE.
+                  ENDIF
                ENDIF
 
                ! Save the original, undivided obstruction face areas.

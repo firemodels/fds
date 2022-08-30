@@ -115,24 +115,24 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 range_6 = find(T1.('nozzle')==6);
-h(1)=scatter(T1(range_6,:),'max range exp','max range out','filled');
+h(1)=scatter(T1(range_6,:).('max range exp'),T1(range_6,:).('max range out'),'filled');
 h(1).SizeData=T1{range_6,'diameter'}*.2;
 h(1).CData=[0.8500 0.3250 0.0980];
 
 hold on
 
 range_7 = find(T1.('nozzle')==7);
-h(2)=scatter(T1(range_7,:),'max range exp','max range out','filled');
+h(2)=scatter(T1(range_7,:).('max range exp'),T1(range_7,:).('max range out'),'filled');
 h(2).SizeData=T1{range_7,'diameter'}*.2;
 h(2).CData=[0 0.4470 0.7410];
 
 range_9 = find(T1.('nozzle')==9);
-h(3)=scatter(T1(range_9,:),'max range exp','max range out','filled');
+h(3)=scatter(T1(range_9,:).('max range exp'),T1(range_9,:).('max range out'),'filled');
 h(3).SizeData=T1{range_9,'diameter'}*.2;
 h(3).CData=[0.9290 0.6940 0.1250];
 
 range_10 = find(T1.('nozzle')==10);
-h(4)=scatter(T1(range_10,:),'max range exp','max range out','filled');
+h(4)=scatter(T1(range_10,:).('max range exp'),T1(range_10,:).('max range out'),'filled');
 h(4).SizeData=T1{range_10,'diameter'}*.2;
 h(4).CData=[0.4940 0.1840 0.5560];
 
@@ -176,14 +176,14 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 range_7 = find(T2.('nozzle')==7);
-h(1)=scatter(T2(range_7,:),'max height exp','max height out','filled');
+h(1)=scatter(T2(range_7,:).('max height exp'),T2(range_7,:).('max height out'),'filled');
 h(1).SizeData=T2{range_7,'diameter'}*.2;
 h(1).CData=[0 0.4470 0.7410];
 
 hold on
 
 range_9 = find(T2.('nozzle')==9);
-h(2)=scatter(T2(range_9,:),'max height exp','max height out','filled');
+h(2)=scatter(T2(range_9,:).('max height exp'),T2(range_9,:).('max height out'),'filled');
 h(2).SizeData=T2{range_9,'diameter'}*.2;
 h(2).CData=[0.9290 0.6940 0.1250];
 
@@ -228,14 +228,14 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 range_7 = find(T3.('nozzle')==7);
-h(1)=scatter(T3(range_7,:),'max height dist exp','max height dist out','filled');
+h(1)=scatter(T3(range_7,:).('max height dist exp'),T3(range_7,:).('max height dist out'),'filled');
 h(1).SizeData=T3{range_7,'diameter'}*.2;
 h(1).CData=[0 0.4470 0.7410];
 
 hold on
 
 range_9 = find(T3.('nozzle')==9);
-h(2)=scatter(T3(range_9,:),'max height dist exp','max height dist out','filled');
+h(2)=scatter(T3(range_9,:).('max height dist exp'),T3(range_9,:).('max height dist out'),'filled');
 h(2).SizeData=T3{range_9,'diameter'}*.2;
 h(2).CData=[0.9290 0.6940 0.1250];
 
