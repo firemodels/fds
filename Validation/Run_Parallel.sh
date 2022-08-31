@@ -45,6 +45,7 @@ cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_Structure_Separation;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
 cd Phoenix_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..

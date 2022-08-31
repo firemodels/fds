@@ -9238,8 +9238,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DX_GHOST = DX(0)
                   CALL SEARCH_OTHER_MESHES(XS-0.1_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DX)) THEN
-                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DX))DX_GHOST = MESHES(NOM)%DX(IIO)
                   ENDIF
                   IF (XB2>=XS-0.5_EB*DX_GHOST) THEN
                      XB1 = XS
@@ -9251,8 +9251,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DX_GHOST = DX(IBP1)
                   CALL SEARCH_OTHER_MESHES(XF+0.1_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DX)) THEN
-                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DX)) DX_GHOST = MESHES(NOM)%DX(IIO)
                   ENDIF
                   IF (XB1<XF+0.5_EB*DX_GHOST) THEN
                      XB1 = XF
@@ -9264,8 +9264,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DY_GHOST = DY(0)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.1_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DY)) THEN
-                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
                   ENDIF
                   IF (XB4>=YS-0.5_EB*DY_GHOST) THEN
                      XB3 = YS
@@ -9277,8 +9277,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DY_GHOST = DY(JBP1)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.1_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DY)) THEN
-                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
                   ENDIF
                   IF (XB3<YS+0.5_EB*DY_GHOST) THEN
                      XB3 = YF
@@ -9290,8 +9290,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DZ_GHOST = DZ(0)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.1_EB*DZ(0),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DZ)) THEN
-                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
                   ENDIF
                   IF (XB6>=ZS-0.5_EB*DZ_GHOST) THEN
                      XB5 = ZS
@@ -9303,8 +9303,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   DZ_GHOST = DZ(KBP1)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.1_EB*DZ(KBP1),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM>0 .AND. ALLOCATED(MESHES(NOM)%DZ)) THEN
-                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  IF (NOM>0) THEN
+                     IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
                   ENDIF
                   IF (XB5<ZF+0.5_EB*DZ_GHOST) THEN
                      XB5 = ZF
