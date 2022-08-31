@@ -25,7 +25,7 @@ https://montgomerycomd.alerteagle.com/history2021-jpg.aspx
       SPEC_ID(4)='NITROGEN',       VOLUME_FRACTION(4)=0.4
       SPEC_ID(5)='CARBON DIOXIDE', VOLUME_FRACTION(5)=0.2/
 
-&REAC FUEL='natural gas', RADIATIVE_FRACTION=0.2/ Hamins et al. 26th Comb Symp (1996)
+&REAC FUEL='natural gas', RADIATIVE_FRACTION=0.25/
 
 &CLIP MINIMUM_DENSITY=0.01/
 
