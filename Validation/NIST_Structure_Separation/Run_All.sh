@@ -5,6 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG  $QUEUE -d $INDIR SSE_Verification_4MW.fds
+$QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_4MW.fds
+$QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_8MWb.fds
 
 echo FDS cases submitted
