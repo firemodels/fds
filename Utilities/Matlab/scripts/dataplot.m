@@ -307,7 +307,8 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K1(j) = semilogy(X,Y,char(style(j))); hold on
                     end
-                    set(K1(j),'linewidth',Line_Width)
+                    set(K1(j),'linewidth', D1_Line_Width)
+                    set(K1(j),'markersize',D1_Marker_Size)
                 else
                     if ~strcmp(char(style(j)),'blank')
                        if strcmp(Plot_Type,'linear')
@@ -320,7 +321,8 @@ for i=2:n_plots
                        elseif strcmp(Plot_Type,'semilogy')
                            K1(length(K1_save)+j) = semilogy(X,Y,char(style(j))); hold on
                        end
-                       set(K1(length(K1_save)+j),'linewidth',Line_Width)
+                       set(K1(length(K1_save)+j),'linewidth', D1_Line_Width)
+                       set(K1(length(K1_save)+j),'markersize',D1_Marker_Size)
                     end
                 end
             end
@@ -462,7 +464,8 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K2(j) = semilogy(X,Y,char(style(j)));
                     end
-                    set(K2(j),'linewidth',Line_Width)
+                    set(K2(j),'linewidth', D2_Line_Width)
+                    set(K2(j),'markersize',D2_Marker_Size)
                 else
                     if ~strcmp(char(style(j)),'blank')
                        if strcmp(Plot_Type,'linear')
@@ -475,7 +478,8 @@ for i=2:n_plots
                        elseif strcmp(Plot_Type,'semilogy')
                            K2(length(K2_save)+j) = semilogy(X,Y,char(style(j)));
                        end
-                       set(K2(length(K2_save)+j),'linewidth',Line_Width)
+                       set(K2(length(K2_save)+j),'linewidth', D2_Line_Width)
+                       set(K2(length(K2_save)+j),'markersize',D2_Marker_Size)
                     end
                 end
             end
