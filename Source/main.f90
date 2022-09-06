@@ -273,12 +273,6 @@ IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_BACK_W
 
 CALL STOP_CHECK(1)
 
-! Initialize 3-D solid interpolation arrays
-
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL INITIALIZE_VARIABLE_THICKNESS_WALL_CELLS(NM)
-ENDDO
-
 ! Initialize turb arrays
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -2143,13 +2137,19 @@ USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_BOUNDARY_TYPES
 INTEGER :: NOM,SURF_INDEX,SLOTS
 TYPE(SURFACE_TYPE), POINTER :: SF
 
+! Exchannge N_WALL_CELLS_SEND and N_WALL_CELLS_RECV
+! DEFINITION MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_SEND
+! Number of wall cells in Mesh NM that must be sent to Mesh NOM.
+! DEFINITION MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_RECV
+! Number of wall cells in Mesh NOM that must be received by Mesh NM.
+
 CALL POST_RECEIVES(8)
 CALL MESH_EXCHANGE(8)
 
-! DEFINITION MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_SEND
-! Number of wall cells in Mesh NM which must be sent to Mesh NOM.
-! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_CELL_INDICES_SEND(IW)
-! Index IW of the wall cell in Mesh NM that needs to be sent to Mesh NOM.
+! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_CELL_INDICES_SEND(1:MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_SEND)
+! Array of wall cell indices in Mesh NM that need to be sent to Mesh NOM.
+! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_SURF_INDICES_SEND(1:MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_SEND)
+! Array of wall SURF indices that correspond to the wall indices sent from NM to NOM
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO NOM=1,NMESHES
@@ -2165,6 +2165,8 @@ ENDDO
 CALL POST_RECEIVES(9)
 CALL MESH_EXCHANGE(9)
 
+! Ensure that each SURFace has a consistent storage space for reals, integers and logical variables
+
 DO SURF_INDEX=1,N_SURF
    SF => SURFACE(SURF_INDEX)
    CALL MPI_ALLREDUCE(MPI_IN_PLACE,SF%N_WALL_STORAGE_REALS   ,INTEGER_ONE,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IERR)
@@ -2172,7 +2174,7 @@ DO SURF_INDEX=1,N_SURF
    CALL MPI_ALLREDUCE(MPI_IN_PLACE,SF%N_WALL_STORAGE_LOGICALS,INTEGER_ONE,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IERR)
 ENDDO
 
-! Set up arrays to send and receive exposed back wall cell information.
+! Set up storage arrays to send and receive WALL variables from neighboring meshes.
 
 MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
@@ -2209,16 +2211,26 @@ ENDDO MESH_LOOP_1
 
 CALL STOP_CHECK(1)
 
-! Set up persistent SEND and RECV calls for BACK_WALL info
+! Set up persistent SEND and RECV calls for MPI communication of WALL cells
 
 CALL POST_RECEIVES(10)
 CALL MESH_EXCHANGE(10)
+
+! Adjust the thickness and internal noding of VARIABLE_THICKNESS surfaces
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL ADJUST_VARIABLE_THICKNESS_WALL_CELLS(NM)
 ENDDO
 
+! Exchange WALL cells 
+
 CALL MESH_EXCHANGE(6)
+
+! Initialize 3-D solid interpolation arrays
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL INITIALIZE_VARIABLE_THICKNESS_WALL_CELLS(NM)
+ENDDO
 
 END SUBROUTINE INITIALIZE_BACK_WALL_EXCHANGE
 
