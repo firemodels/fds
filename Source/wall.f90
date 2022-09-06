@@ -3070,7 +3070,9 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
       ! Create a temporary array to hold the material component densities at the current depth layer, I
 
-      RHO_TEMP(1:SF%N_MATL) = ONE_D%MATL_COMP(1:SF%N_MATL)%RHO(I)
+      DO N=1,SF%N_MATL
+         RHO_TEMP(N) = ONE_D%MATL_COMP(N)%RHO(I)
+      ENDDO
 
       IF (PRESENT(PARTICLE_INDEX)) THEN
          CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),ONE_D%TMP_F,BC%IOR,&
@@ -3085,7 +3087,9 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                         Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,ONE_D%B_NUMBER,LAYER_INDEX(I),SOLID_CELL_INDEX=I)
       ENDIF
 
-      ONE_D%MATL_COMP(1:SF%N_MATL)%RHO_DOT(I) = RHO_DOT_TEMP(1:SF%N_MATL)
+      DO N=1,SF%N_MATL
+         ONE_D%MATL_COMP(N)%RHO_DOT(I) = RHO_DOT_TEMP(N)
+      ENDDO
 
       ! Compute the mass flux of reaction gases at the surface
       IF (.NOT. SF%MT1D) THEN
