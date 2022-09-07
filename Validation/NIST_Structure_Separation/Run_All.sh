@@ -8,4 +8,7 @@ source $SVNROOT/Validation/Common_Run_All.sh
 $QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_4MW.fds
 $QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_8MWb.fds
 
+$QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_4MW_10cm.fds
+$QFDS -p 48 $DEBUG $QUEUE -d $INDIR SSE_Verification_8MWb_10cm.fds
+
 echo FDS cases submitted
