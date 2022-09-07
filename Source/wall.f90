@@ -3260,6 +3260,10 @@ ELSEIF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS == 0)) THEN
    Q_RAD_OUT = ONE_D%EMISSIVITY*RFLUX_DOWN
 ENDIF
 
+! If the 3D solver is used, divide Q_S by 3
+
+IF (SF%VARIABLE_THICKNESS) Q_S = Q_S/3._EB
+
 ! Explicitly update the temperature field and adjust time step if the change in temperature exceeds DELTA_TMP_MAX
 
 IF (ICYC>WALL_INCREMENT) THEN
@@ -3465,9 +3469,9 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
 
                !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
-               CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
-                  SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),&
-                  DDSUM)
+               CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),SF%STRETCH_FACTOR(NL),&
+                                      SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),&
+                                      SMALLEST_CELL_SIZE(NL),DDSUM)
                   LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
                      N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
                      IF (MOD(N_LAYER_CELLS_NEW(NL),2)==0) THEN
@@ -3508,7 +3512,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ELSE EXPAND_CONTRACT
             !Since cells only expanding, there is no issue with remeshing layer
             CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
-               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL), &
+               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL), &
                ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                REMESH_LAYER(NL) = .TRUE.

@@ -670,6 +670,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
    REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
    REAL(EB) :: CELL_SIZE_FACTOR
+   REAL(EB) :: CELL_SIZE
    REAL(EB) :: E_COEFFICIENT
    REAL(EB) :: TEXTURE_WIDTH
    REAL(EB) :: TEXTURE_HEIGHT
