@@ -361,7 +361,8 @@ TYPE WALL_TYPE
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
@@ -372,8 +373,6 @@ TYPE WALL_TYPE
    INTEGER :: JD21_INDEX=0
    INTEGER :: JD22_INDEX=0
    INTEGER :: CUT_FACE_INDEX=0
-
-   LOGICAL, DIMENSION(3) :: THIN=.FALSE.  !< Thin wall cell for 3D heat transfer
 
 END TYPE WALL_TYPE
 
