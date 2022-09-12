@@ -199,8 +199,6 @@ $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
-$QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
-$QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -p 4 -d Fires couch.fds
 $QFDS -d Fires fire_const_gamma.fds
 $QFDS -d Fires spray_burner.fds
@@ -274,38 +272,13 @@ $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
-$QFDS -d Heat_Transfer ht3d_nx_10.fds
-$QFDS -d Heat_Transfer ht3d_nx_20.fds
-$QFDS -d Heat_Transfer ht3d_nx_40.fds
-$QFDS -d Heat_Transfer ht3d_nx_80.fds
-$QFDS -d Heat_Transfer ht3d_nx_160.fds
-$QFDS -d Heat_Transfer ht3d_ny_10.fds
-$QFDS -d Heat_Transfer ht3d_ny_20.fds
-$QFDS -d Heat_Transfer ht3d_ny_40.fds
-$QFDS -d Heat_Transfer ht3d_ny_80.fds
-$QFDS -d Heat_Transfer ht3d_ny_160.fds
-$QFDS -d Heat_Transfer ht3d_nz_10.fds
-$QFDS -d Heat_Transfer ht3d_nz_20.fds
-$QFDS -d Heat_Transfer ht3d_nz_40.fds
-$QFDS -d Heat_Transfer ht3d_nz_80.fds
-$QFDS -d Heat_Transfer ht3d_nz_160.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
-$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
-$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
-$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
-$QFDS -d Heat_Transfer ht3d_sphere_25.fds
-$QFDS -d Heat_Transfer ht3d_sphere_51.fds
-$QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
-$QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
+$QFDS -d Heat_Transfer ht3d_sphere_24.fds
+$QFDS -d Heat_Transfer ht3d_sphere_48.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_96.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n10.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n20.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n10.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n20.fds
-$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n40.fds
 $QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
 $QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_1.fds
 $QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_2.fds
@@ -478,10 +451,6 @@ $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
 $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
-$QFDS -d Pyrolysis pyro3d_wood_char.fds
-$QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
-$QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
-$QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
@@ -558,8 +527,6 @@ $QFDS -d Radiation wall_internal_radiation.fds
 $QFDS -p 4 -d Restart device_restart_a.fds
 $QFDS -p 4 -d Restart device_restart_base_case.fds
 $QFDS -d Restart restart_test1a.fds
-$QFDS -d Restart pyro3d_restart_a.fds
-$QFDS -d Restart pyro3d_restart_base_case.fds
 $QFDS -d Restart geom_restart_a.fds
 $QFDS -d Restart geom_restart_base_case.fds
 $QFDS -d Restart clocks_restart_a.fds

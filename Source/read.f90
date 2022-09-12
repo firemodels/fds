@@ -1381,7 +1381,7 @@ SUBROUTINE READ_TIME(DT)
 
 REAL(EB), INTENT(OUT) :: DT
 NAMELIST /TIME/ DT,DT_END_FILL,DT_END_MINIMUM,FYI,LIMITING_DT_RATIO,LOCK_TIME_STEP,&
-                RESTRICT_TIME_STEP,T_BEGIN,T_END,T_END_GEOM,TIME_SHRINK_FACTOR,WALL_INCREMENT,WALL_INCREMENT_HT3D
+                RESTRICT_TIME_STEP,T_BEGIN,T_END,T_END_GEOM,TIME_SHRINK_FACTOR,WALL_INCREMENT
 
 DT                   = -1._EB
 TIME_SHRINK_FACTOR   = 1._EB
@@ -1616,7 +1616,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 CNF_CUTOFF,COMPUTE_CUTCELLS_ONLY,CONSTANT_SPECIFIC_HEAT_RATIO,&
                 C_SMAGORINSKY,C_VREMAN,C_WALE,DEPOSITION,EVAP_MODEL,&
                 FLUX_LIMITER,FREEZE_VELOCITY,FYI,GAMMA,GEOM_DEFAULT_THICKNESS,GRAVITATIONAL_DEPOSITION,&
-                GRAVITATIONAL_SETTLING,GVEC,H_F_REFERENCE_TEMPERATURE,HT3D_TEST,&
+                GRAVITATIONAL_SETTLING,GVEC,H_F_REFERENCE_TEMPERATURE,&
                 HUMIDITY,HVAC_LOCAL_PRESSURE,HVAC_MASS_TRANSPORT_CELL_L,HVAC_PRES_RELAX,HVAC_QFAN,IBLANK_SMV,I_MAX_TEMP,&
                 LES_FILTER_TYPE,LEVEL_SET_ELLIPSE,LEVEL_SET_MODE,&
                 MAXIMUM_GEOMETRY_FACES,MAXIMUM_GEOMETRY_ZVALS,MAXIMUM_VISIBILITY,MAX_LEAK_PATHS,MINIMUM_FILM_THICKNESS,&
@@ -6516,7 +6516,7 @@ REAL(EB) :: VEG_LSET_IGNITE_TIME,VEG_LSET_QCON,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_FL
             VEG_LSET_M1,VEG_LSET_M10,VEG_LSET_M100,VEG_LSET_MLW,VEG_LSET_MLH,VEG_LSET_SURF_LOAD,VEG_LSET_FIREBASE_TIME,&
             VEG_LSET_CHAR_FRACTION,VEL_PART,INIT_PER_AREA
 LOGICAL :: DEFAULT,VEG_LSET_SPREAD,VEG_LSET_TAN2,TGA_ANALYSIS,COMPUTE_EMISSIVITY,&
-           COMPUTE_EMISSIVITY_BACK,HT3D,THERM_THICK,VARIABLE_THICKNESS
+           COMPUTE_EMISSIVITY_BACK,THERM_THICK,VARIABLE_THICKNESS
 ! Mass transfer variables
 LOGICAL :: MASS_TRANSFER
 CHARACTER(LABEL_LENGTH) :: INIT_SPEC_ID(MAX_LAYERS,MAX_SPECIES)
@@ -6531,7 +6531,7 @@ NAMELIST /SURF/ ADIABATIC,AREA_MULTIPLIER,BACKING,BURN_AWAY,BURN_DURATION,&
                 EMISSIVITY,EMISSIVITY_BACK,EXTERNAL_FLUX,EXTINCTION_TEMPERATURE,&
                 FSK_A,FSK_K,FSK_W,&
                 FREE_SLIP,FYI,GEOMETRY,HEAT_OF_VAPORIZATION,HEAT_TRANSFER_COEFFICIENT,HEAT_TRANSFER_COEFFICIENT_BACK,&
-                HEAT_TRANSFER_MODEL,HORIZONTAL,HRRPUA,HT3D,ID,IGNITION_TEMPERATURE,IMPERMEABLE,&
+                HEAT_TRANSFER_MODEL,HORIZONTAL,HRRPUA,ID,IGNITION_TEMPERATURE,IMPERMEABLE,&
                 INIT_IDS,INIT_PER_AREA,&
                 INIT_SPEC_ID, INIT_SPEC_MASS_FRACTION, &
                 INNER_RADIUS,INTERNAL_HEAT_SOURCE,LAYER_DIVIDE,&
@@ -6836,10 +6836,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (THICKNESS(1)<0._EB .AND. RADIUS>0._EB) THICKNESS(1) = RADIUS
 
-   ! If HT3D set THICKNESS(1) to null value to pass error traps
-
-   IF (HT3D .AND. MATL_ID(1,1)/='null') THICKNESS(1) = 1._EB
-
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
@@ -6919,7 +6915,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%FYI                  = FYI
    SF%EXTERNAL_FLUX        = 1000._EB*EXTERNAL_FLUX
    SF%HORIZONTAL           = HORIZONTAL
-   SF%HT3D                 = HT3D
    SF%INIT_IDS             = INIT_IDS
    IF (INIT_IDS(1)/='null') INIT_INVOKED_BY_SURF = .TRUE.
    SF%INIT_PER_AREA        = INIT_PER_AREA
@@ -7346,8 +7341,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       IF (TMP_INNER(NN)>= -TMPM) TMPMIN = MIN(TMPMIN,TMP_INNER(NN)+TMPM)
    ENDDO
 
-   IF (SF%HT3D) SF%TMP_INNER_HT3D = TMP_INNER(1) + TMPM
-
    ! Store the names and indices of all materials associated with the surface
 
    NNN = 0
@@ -7392,12 +7385,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB .AND. TMP_FRONT >= -TMPM) SF%SET_H =.TRUE.
-   IF (HT3D) THEN
-      IF ( SF%NET_HEAT_FLUX < 1.E12_EB .OR. ABS(SF%CONVECTIVE_HEAT_FLUX) > TWO_EPSILON_EB .OR. TMP_FRONT >= -TMPM ) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have HT3D with specified TMP or FLUX bc'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-   ENDIF
 
    SF%THERMAL_BC_INDEX = SPECIFIED_TEMPERATURE  ! Default thermal boundary condition
 
@@ -7409,7 +7396,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB)                 SF%THERMAL_BC_INDEX = NET_FLUX_BC
    IF (ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) SF%THERMAL_BC_INDEX = CONVECTIVE_FLUX_BC
    IF (THERM_THICK)                                 SF%THERMAL_BC_INDEX = THERMALLY_THICK
-   IF (HT3D)                                        SF%THERMAL_BC_INDEX = THERMALLY_THICK_HT3D
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE)             SF%THERMAL_BC_INDEX = INFLOW_OUTFLOW
 
    ! Boundary layer profile
@@ -7573,7 +7559,6 @@ HEAT_TRANSFER_COEFFICIENT_BACK = -1._EB
 MASS_TRANSFER_COEFFICIENT = -1._EB
 HORIZONTAL              = .FALSE.
 HRRPUA                  = 0._EB
-HT3D                    = .FALSE.
 ID                      = 'null'
 IGNITION_TEMPERATURE    = 50000._EB
 IMPERMEABLE             = .FALSE.
@@ -8209,7 +8194,6 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    PROC_SURF_GRID = .FALSE.
    SF => SURFACE(SURF_INDEX)
    IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) PROC_SURF_GRID = .TRUE.
-   IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK_HT3D .AND. SF%LAYER_THICKNESS(1)>TWO_EPSILON_EB) PROC_SURF_GRID = .TRUE.
    IF (.NOT.PROC_SURF_GRID) CYCLE SURF_GRID_LOOP
 
    ! Compute number of points per layer, and then sum up to get total points for the surface
@@ -9013,21 +8997,17 @@ USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,PYRO3D_IOR,IIO,JJO,KKO
-CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID,RAMP_Q
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,IIO,JJO,KKO
+CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID,RAMP_Q
 CHARACTER(25) :: COLOR
-LOGICAL :: OVERLAY,IS_INTERSECT,PYRO3D_MASS_TRANSPORT
+LOGICAL :: OVERLAY,IS_INTERSECT
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3),&
+            HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3),&
             XXI,YYJ,ZZK,DX_GHOST,DY_GHOST,DZ_GHOST
-LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,&
-           HT3D,WARN_HT3D,PYRO3D_RESIDUE
-NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
-                COLOR,CTRL_ID,DEVC_ID,FYI,HEIGHT,HT3D,ID,INTERNAL_HEAT_SOURCE,&
-                LENGTH,MATL_ID,MULT_ID,&
-                ORIENTATION,OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,PYRO3D_IOR,PYRO3D_MASS_TRANSPORT,&
-                RADIUS,RAMP_Q,REMOVABLE,RGB,&
-                SHAPE,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THETA,THICKEN,&
+LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE
+NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,COLOR,CTRL_ID,DEVC_ID,FYI,HEIGHT,ID,&
+                LENGTH,MATL_ID,MULT_ID,ORIENTATION,OUTLINE,OVERLAY,PERMIT_HOLE,&
+                RADIUS,RAMP_Q,REMOVABLE,RGB,SHAPE,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THETA,THICKEN,&
                 TRANSPARENCY,WIDTH,XB,XYZ
 
 MESH_LOOP: DO NM=1,NMESHES
@@ -9113,15 +9093,12 @@ MESH_LOOP: DO NM=1,NMESHES
       ID       = 'null'
       MATL_ID  = 'null'
       MULT_ID  = 'null'
-      PROP_ID  = 'null'
       SURF_ID  = 'null'
       SURF_IDS = 'null'
       SURF_ID6 = 'null'
       COLOR    = 'null'
       RGB         = -1
       BULK_DENSITY= -1._EB
-      HT3D        = .FALSE.
-      INTERNAL_HEAT_SOURCE = 0._EB
       RAMP_Q      = 'null'
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
@@ -9144,8 +9121,6 @@ MESH_LOOP: DO NM=1,NMESHES
       HEIGHT      = -1._EB
       ORIENTATION = (/0._EB,0._EB,1._EB/)
       THETA       = 0._EB
-      PYRO3D_IOR  = 0
-      PYRO3D_MASS_TRANSPORT = .FALSE.
       SHAPE_TYPE  = -1
       SHAPE_AREA  = 0._EB
 
@@ -9548,8 +9523,6 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Property ID
 
-               OB%PROP_ID = PROP_ID
-
                CALL SEARCH_CONTROLLER('OBST',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
                IF (DEVC_ID /='null' .OR. CTRL_ID /='null') OB%REMOVABLE = .TRUE.
 
@@ -9589,128 +9562,6 @@ MESH_LOOP: DO NM=1,NMESHES
 
                OB%BULK_DENSITY = BULK_DENSITY
                IF (BULK_DENSITY > 0._EB) OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
-
-               ! Error traps and warnings for HT3D
-
-               IF (.NOT.HT3D .AND. ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
-
-               ! 3D Solid heat transfer and pyrolysis
-
-               HT3D_IF: IF (HT3D) THEN
-
-                  OB%HT3D         = .TRUE.
-                  SOLID_HT3D      = .TRUE. ! global parameter
-               !  CHECK_HT        = .TRUE. ! test heat flux contribution to CFL time step contraint
-
-                  IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
-                     ! test if OB is on boundary
-                     WARN_HT3D = .TRUE.
-                     IF (OB%I1==OB%I2 .AND. (OB%I1==0 .OR. OB%I2==IBAR)) WARN_HT3D = .FALSE.
-                     IF (OB%J1==OB%J2 .AND. (OB%J1==0 .OR. OB%J2==IBAR)) WARN_HT3D = .FALSE.
-                     IF (OB%K1==OB%K2 .AND. (OB%K1==0 .OR. OB%K2==IBAR)) WARN_HT3D = .FALSE.
-                     IF (WARN_HT3D) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
-                           ' has zero volume, consider THICKEN=T or move mesh boundary, HT3D set to F.'
-                        OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
-                     ENDIF
-                  ENDIF
-
-                  ! Set MATL_ID for HT3D
-
-                  OB%MATL_ID = MATL_ID
-                  DO NNN=1,N_MATL
-                     ML=>MATERIAL(NNN)
-                     IF (TRIM(OB%MATL_ID)==TRIM(ML%ID)) THEN
-                        OB%MATL_INDEX=NNN
-                        IF (ABS(OB%VOLUME_ADJUST)>TWO_EPSILON_EB) OB%BULK_DENSITY=ML%RHO_S
-                        EXIT
-                     ENDIF
-                  ENDDO
-
-                  OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
-
-                     ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
-
-                     DO NNN=-3,3
-                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
-                           OB%MATL_SURF_INDEX = OB%SURF_INDEX(NNN)
-                           EXIT
-                        ENDIF
-                     ENDDO
-
-                     ! MATL_ID not found on OBST or SURF lines
-
-                     IF (OB%MATL_SURF_INDEX==-1) THEN
-                        WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
-                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                     ENDIF
-
-                     SF => SURFACE(OB%MATL_SURF_INDEX)
-
-                     ! SURF associated with HT3D may have only 1 layer
-
-                     IF (SF%N_LAYERS/=1) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
-                           TRIM(SF%ID),"', N_LAYERS must be 1 for HT3D SURF."
-                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                     ENDIF
-
-                     ! Emissivities for SURF with MATL_IDs set in READ_SURF
-
-                     ! Allocate and initialize MATL densities in OBST for 3D pyrolysis
-
-                     OB%HT3D_RESTART = .TRUE. ! determines write/read of OB%RHO for RESTART; needed because OB%HT3D changes state
-                     ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
-                     CALL ChkMemErr('READ_OBST','RHO',IZERO)
-                     PYRO3D_RESIDUE=.FALSE.
-                     DO NNN=1,SF%N_MATL
-                        ML=>MATERIAL(SF%MATL_INDEX(NNN))
-                        IF (ML%N_REACTIONS>0) THEN
-                           OB%PYRO3D=.TRUE.
-                           OB%PYRO3D_IOR=PYRO3D_IOR      ! tell PYRO3D which direction to send pyrolyzate
-                           OB%MT3D=PYRO3D_MASS_TRANSPORT ! supercedes PYRO3D_IOR
-                           DO NR=1,ML%N_REACTIONS
-                              IF (ABS(SUM(ML%NU_RESIDUE(:,NR)))>TWO_EPSILON_EB) PYRO3D_RESIDUE=.TRUE.
-                           ENDDO
-                        ENDIF
-                        OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
-                     ENDDO
-                     IF (OB%PYRO3D .AND. .NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
-                        WRITE(MESSAGE,'(A,A,A)') &
-                           'ERROR: MATLs associated to SURF ',TRIM(SF%ID), &
-                           ', PYRO3D requires residue (NU_MATL) or BURN_AWAY for the corresponding materials'
-                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                     ENDIF
-
-                  ELSE OBST_MATL_IF
-
-                     ! Don't allow both OBST and SURF with MATL_IDs
-
-                     DO NNN=-3,3
-                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
-                           WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
-                              TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
-                           CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                        ENDIF
-                     ENDDO
-
-                     ! Set SURF emissivities to MATL emissivity
-
-                     DO NNN=-3,3
-                        SURFACE(OB%SURF_INDEX(NNN))%EMISSIVITY = MATERIAL(OB%MATL_INDEX)%EMISSIVITY
-                     ENDDO
-
-                  ENDIF OBST_MATL_IF
-
-                  ! Volumetric heat source term
-
-                  OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-                  IF (RAMP_Q/='null') CALL GET_RAMP_INDEX(RAMP_Q,'TIME',OB%RAMP_Q_INDEX)
-
-               ENDIF HT3D_IF
 
                ! Make obstruction invisible if it's within a finer mesh
 
@@ -12982,7 +12833,7 @@ END SUBROUTINE PROC_CTRL
 SUBROUTINE PROC_OBST
 
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
-INTEGER :: NM,N,I,J,K,IS,JS,KS,IC1,IC2
+INTEGER :: NM,I,J,K,IS,JS,KS,IC1,IC2
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -12990,15 +12841,6 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
-
-   ! Assign a property index to the obstruction for use in Smokeview
-
-   DO N=1,N_OBST
-      OB=>OBSTRUCTION(N)
-      IF (OB%PROP_ID /='null') THEN
-         CALL GET_PROPERTY_INDEX(OB%PROP_INDEX,'OBST',OB%PROP_ID)
-      ENDIF
-   ENDDO
 
    ! Make mesh edge cells not solid if cells on either side are not solid
 

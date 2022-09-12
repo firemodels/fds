@@ -658,7 +658,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
    REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
    REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
-   REAL(EB) :: TMP_INNER_HT3D=-1._EB                     !< Specified inner temperature for 3D heating (K)
    REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
    REAL(EB) :: VEL_GRAD
    REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
@@ -746,8 +745,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
-              HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
@@ -829,8 +827,6 @@ TYPE OBSTRUCTION_TYPE
 
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of controlling device
    CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
-   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'  !< Name of PROPerty type
-   CHARACTER(LABEL_LENGTH) :: MATL_ID='null'  !< Name of material type
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
    INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
@@ -839,7 +835,6 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
    REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume
    REAL(EB) :: BULK_DENSITY=-1._EB            !< Mass per unit volume (kg/m3) of specified OBST
-   REAL(EB) :: INTERNAL_HEAT_SOURCE=0._EB     !< Energy generation rate per unit volume (W/m3)
    REAL(EB) :: X1=0._EB                       !< Lower specified \f$ x \f$ boundary (m)
    REAL(EB) :: X2=1._EB                       !< Upper specified \f$ x \f$ boundary (m)
    REAL(EB) :: Y1=0._EB                       !< Lower specified \f$ y \f$ boundary (m)
@@ -866,12 +861,9 @@ TYPE OBSTRUCTION_TYPE
    INTEGER :: SHAPE_TYPE=-1       !< Indicator of shape carved out of larger obstruction
    INTEGER :: DEVC_INDEX=-1       !< Index of controlling device
    INTEGER :: CTRL_INDEX=-1       !< Index of controlling controller
-   INTEGER :: PROP_INDEX=-1       !< Index of PROPerty type
    INTEGER :: DEVC_INDEX_O=-1     !< Original DEVC_INDEX
    INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
-   INTEGER :: MATL_INDEX=-1       !< Index of material
    INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
-   INTEGER :: RAMP_Q_INDEX=0      !< Index of HRR ramp
 
    LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview
    LOGICAL :: HIDDEN=.FALSE.                    !< Hide obstruction in Smokeview and ignore in simulation
@@ -883,15 +875,6 @@ TYPE OBSTRUCTION_TYPE
    LOGICAL :: OVERLAY=.TRUE.                    !< The obstruction can have another obstruction overlap a surface
    LOGICAL :: SCHEDULED_FOR_REMOVAL=.FALSE.     !< The obstruction is scheduled for removal during the current time step
    LOGICAL :: SCHEDULED_FOR_CREATION=.FALSE.    !< The obstruction is scheduled for creation during the current time step
-
-   ! 3D pyrolysis:
-   LOGICAL :: PYRO3D=.FALSE.
-   LOGICAL :: MT3D=.FALSE.
-   LOGICAL :: HT3D=.FALSE.,HT3D_RESTART=.FALSE.
-   LOGICAL :: PYRO3D_LIQUID=.FALSE.
-   INTEGER :: MATL_SURF_INDEX=-1
-   INTEGER :: PYRO3D_IOR=0
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO
 
 END TYPE OBSTRUCTION_TYPE
 
