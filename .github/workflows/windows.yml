@@ -1,0 +1,95 @@
+name: github-windows
+
+
+on:
+  push:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+  pull_request:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+
+
+concurrency:
+  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+permissions:
+  contents: read
+
+
+env:
+  # update urls for oneapi packages according to
+  # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18674/w_BaseKit_p_2022.2.0.252_offline.exe
+  WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18680/w_HPCKit_p_2022.2.0.173_offline.exe
+  WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
+
+
+jobs:
+  windows-intel-intelmpi:
+    # build on windows using ifort with intelmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
+
+    name: windows intel intelmpi
+    runs-on: [windows-latest]
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - uses: actions/checkout@v3
+
+      # install oneapi components from web installer based on
+      # oneapi-ci/scripts/install_windows.bat
+    - name: cache install oneapi
+      id: cache-install
+      uses: actions/cache@v3
+      with:
+        path: C:\Program Files (x86)\Intel\oneAPI\
+        key: install-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_BASEKIT_COMPONENTS }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_HPCKIT_COMPONENTS }}
+    - name: install oneapi mkl
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: |
+        curl.exe --output %TEMP%\webimage_base.exe --url %WINDOWS_BASEKIT_URL% --retry 5 --retry-delay 5
+        start /b /wait %TEMP%\webimage_base.exe -s -x -f webimage_base_extracted --log extract_base.log
+        del %TEMP%\webimage_base.exe
+        webimage_base_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_BASEKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
+        rd /s/q "webimage_base_extracted"
+    - name: install oneapi compiler, mpi
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: |
+        curl.exe --output %TEMP%\webimage_hpc.exe --url %WINDOWS_HPCKIT_URL% --retry 5 --retry-delay 5
+        start /b /wait %TEMP%\webimage_hpc.exe -s -x -f webimage_hpc_extracted --log extract_hpc.log
+        del %TEMP%\webimage_hpc.exe
+        webimage_hpc_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_HPCKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
+        rd /s/q "webimage_hpc_extracted"
+
+      # github-actions does not cache windows symlinks, so we need to specify the version of each component explicitly
+      # https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-windows/use-a-config-file-for-setvars-bat-on-windows.html
+      # https://oneapi-src.github.io/oneapi-ci/
+    - name: specify oneapi version
+      run: |
+        (
+          echo compiler=2022.1.0
+          echo mkl=2022.1.0
+          echo mpi=2021.6.0
+        ) > oneapi_config.txt
+    - name: build fds debug
+      run: |
+        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        cd Build\impi_intel_win_db
+        call make_fds.bat
+        fds_impi_intel_win_db.exe
+    - name: build fds release
+      run: |
+        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        cd Build\impi_intel_win
+        call make_fds.bat
+        fds_impi_intel_win.exe

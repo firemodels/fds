@@ -42,10 +42,14 @@ switch style
         Label_Font_Size = 16;
         Scat_Title_Font_Size = 14;
         Scat_Label_Font_Size = 14;
-        Marker_Size = 4;
+        Marker_Size    = 4;
+        D1_Marker_Size = 4;
+        D2_Marker_Size = 4;
 
         % Line properties
         Line_Width      = 1.0;
+        D1_Line_Width   = 1.0;
+        D2_Line_Width   = 1.0;
 
         % Plot properties
         Plot_Units      = 'inches';
@@ -82,12 +86,16 @@ switch style
         Key_Font_Size   = 16;
         Title_Font_Size = 20;
         Label_Font_Size = 20;
-        Marker_Size = 10;
         Scat_Title_Font_Size = 14;
         Scat_Label_Font_Size = 14;
+        Marker_Size    = 10;
+        D1_Marker_Size = 10;
+        D2_Marker_Size = 10;
 
         % Line properties
         Line_Width      = 1; % get(gca,'linewidth')
+        D1_Line_Width   = 1; % get(gca,'linewidth')
+        D2_Line_Width   = 1; % get(gca,'linewidth')
 
         % Plot properties
         Plot_Units      = 'normalized'; %get(gca,'units')
@@ -97,7 +105,7 @@ switch style
         Plot_X          = Pos(1);
         Plot_Y          = Pos(2);
         Plot_Width      = Pos(3);
-        Plot_Height     = Pos(4); %*.95; % use for exponential notation on y-axis tick labels
+        Plot_Height     = Pos(4)*.95; % use for exponential notation on y-axis tick labels
 
         Scat_Plot_Width      = 4.75;
         Scat_Plot_Height     = 4.75;

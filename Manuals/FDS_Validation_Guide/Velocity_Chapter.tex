@@ -780,37 +780,3 @@ Bi-directional probes were positioned inside two of the four inlet openings and 
 \label{Steckler_Scatterplot}
 \end{figure}
 
-\clearpage
-
-\section{Wu Bakar Tunnel Experiments}
-
-This section contains the results of the simulations of the Wu and Bakar experiments described in Section~\ref{Wu_Bakar_Tunnels_Description}. Five simulations are conducted. In each, the heat release rate is stepped up from its lowest reported value to its highest, each step lasting 20~s. For each of the eight heat release rates, the tunnel velocity is set to the reported critical velocity. Temperature readings along the ceiling indicate where the smoke layer temperature drops below 30~$^\circ$C, 10~$^\circ$C above ambient. This is taken as the extent of the back-layer. Using an empirical correlation for the normalized back-layer length, $L_{\rm b}^*$, developed by Li~et al.~\cite{Li:FSJ2010}
-\be
-   L_{\rm b}^* = \left\{ \begin{array}{ll} 18.5 \, \ln (0.81 \, Q^{*1/3}/V^*) & Q^*\le 0.15 \\
-                                      18.5 \, \ln (0.43 /V^*)            & Q^*>   0.15 \end{array} \right.
-\ee
-where
-\be
-   L_{\rm b}^* = \frac{L_{\rm b}}{\bar{H}} \quad ; \quad \bar{H}=\frac{4A}{P} \quad ; \quad Q^*=\frac{Q}{\rho_\infty c_p T_\infty \sqrt{g \bar{H}^5} } \quad ; \quad V^* = \frac{V}{\sqrt{g \bar{H}}}
-\ee
-the FDS-predicted critical velocity, $V_{\rm FDS}$, can be estimated from the measured, $V_{\rm exp}$, via
-\be
-   V_{\rm FDS} \approx V_{\rm exp} \left( 1 + \frac{L_{\rm b,FDS}}{18.5 \, \bar{H}} \right)
-\ee
-Note that $\bar{H}$ is known as the {\em hydraulic diameter} which takes into consideration the tunnel's cross-sectional area, $A$, and perimeter, $P$. For a square cross section, the hydraulic diameter equals the tunnel height.
-
-\begin{figure}[!h]
-\begin{center}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/Wu_Bakar_Tunnels/Wu_Bakar_Critical_Velocity}
-\end{center}
-\caption[Wu and Bakar critical velocity correlation with FDS results added]
-{Wu and Bakar critical velocity correlation with FDS results added.}
-\label{Wu_Bakar_Correlation}
-\end{figure}
-
-The non-dimensionalized critical velocity predictions are plotted against the non-dimensionalized HRR in Fig.~\ref{Wu_Bakar_Correlation}. The solid line in the figure is the correlation developed by Wu and Bakar~\cite{Wu:FSJ2000}:
-\be
-   V^* = \left\{ \begin{array}{ll} 0.4 \, (Q^*/0.2)^{1/3} & Q^* \le 0.2 \\ 0.4 & Q^* > 0.2 \end{array} \right.
-\ee
-
-

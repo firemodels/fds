@@ -24,63 +24,106 @@ permissions:
 
 jobs:
   linux-intel-intelmpi:
-    # debug build on ubuntu using ifort and intelmpi
-    # based on https://github.com/oneapi-src/oneapi-ci
+    # build on ubuntu using ifort with intelmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
 
     name: linux intel intelmpi
     runs-on: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v3
+
+      # install oneapi components from apt repository based on
+      # oneapi-ci/scripts/setup_apt_repo_linux.sh
+      # oneapi-ci/scripts/apt_depends.sh
+      # oneapi-ci/scripts/install_linux_apt.sh
     - name: setup apt repository
       run: |
-        # oneapi-ci/scripts/setup_apt_repo_linux.sh
         wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
         sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
         echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
         sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/oneAPI.list" -o APT::Get::List-Cleanup="0"
     - name: collect versioned dependencies of apt packages
       run : |
-        # oneapi-ci/scripts/apt_depends.sh
         apt-cache depends intel-oneapi-compiler-fortran \
                           intel-oneapi-mpi-devel \
                           intel-oneapi-mkl-devel | tee dependencies.txt
-    - name: cache install
+    - name: cache install oneapi
       id: cache-install
       uses: actions/cache@v3
       with:
         path: /opt/intel/oneapi
         key: install-${{ hashFiles('**/dependencies.txt') }}
-    - name: install
+    - name: install oneapi compiler, mpi, mkl
       if: steps.cache-install.outputs.cache-hit != 'true'
       run: |
-        # oneapi-ci/scripts/install_linux_apt.sh
         sudo apt-get install -y intel-oneapi-compiler-fortran \
                                 intel-oneapi-mpi-devel \
                                 intel-oneapi-mkl-devel
         sudo apt-get clean
-    - name: build
+
+    - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux_db
         sh ./make_fds.sh
         ./fds_impi_intel_linux_db
+    - name: build fds release
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        cd ./Build/impi_intel_linux
+        sh ./make_fds.sh
+        ./fds_impi_intel_linux
 
 
   linux-gnu-openmpi:
-    # debug build on ubuntu using gfortran and openmpi
+    # build on ubuntu using gfortran with openmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
 
     name: linux gnu openmpi
     runs-on: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v3
-    - name: install
+    - name: install openmpi
       run: |
         sudo apt-get update
         sudo apt-get install openmpi-bin
-    - name: build
+
+      # install oneapi components from apt repository based on
+      # oneapi-ci/scripts/setup_apt_repo_linux.sh
+      # oneapi-ci/scripts/apt_depends.sh
+      # oneapi-ci/scripts/install_linux_apt.sh
+    - name: setup apt repository
       run: |
+        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+        echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+        sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/oneAPI.list" -o APT::Get::List-Cleanup="0"
+    - name: collect versioned dependencies of apt packages
+      run : |
+        apt-cache depends intel-oneapi-mkl-devel | tee dependencies.txt
+    - name: cache install oneapi
+      id: cache-install
+      uses: actions/cache@v3
+      with:
+        path: /opt/intel/oneapi
+        key: install-${{ hashFiles('**/dependencies.txt') }}
+    - name: install oneapi mkl
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get install -y intel-oneapi-mkl-devel
+        sudo apt-get clean
+
+    - name: build fds debug
+      run: |
+        source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_linux_db
         sh ./make_fds.sh
         ./fds_ompi_gnu_linux_db
+    - name: build fds release
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        cd ./Build/ompi_gnu_linux
+        sh ./make_fds.sh
+        ./fds_ompi_gnu_linux

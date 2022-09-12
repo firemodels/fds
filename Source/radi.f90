@@ -3842,7 +3842,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ENDIF WIDE_BAND_MODEL_IF
 
-   ! Add contribution to source term from a user-specified volumetric heat relase rate
+   ! Add contribution to source term from a user-specified volumetric heat release rate
 
    IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(1)
 
@@ -4596,12 +4596,16 @@ END SUBROUTINE RADIATION_FVM
 
 
 !> \brief Add user-specified HRRPUV to the heat release rate term, Q
+!> \param MODE Indicator of whether volumetric heat release rate, HRRPUV, is to be added to or subtracted from Q
+!> \details If MODE=0, add the user-specified volumetric HRRPUV to the total, Q (W/m3)
+!> \details If MODE=1, add the user-specified volumetric HRRPUV to the total, Q (W/m3), and add radiative emission
+!> \details If MODE=2, subtract the user-specified volumetric HRRPUV from the total, Q (W/m3)
 
 SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
 INTEGER, INTENT(IN) :: MODE
 REAL(EB) :: TIME_RAMP_FACTOR,RR
-INTEGER :: N,I,J,K
+INTEGER :: N,I,J,K,ICC,JCC
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
 
 DO N=1,N_INIT
@@ -4629,6 +4633,17 @@ DO N=1,N_INIT
             ELSE
                Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
             ENDIF
+            ! handle HRRPUV initialization in cutcells
+            ! note: CC not yet connected to radiant fraction correction
+            CC_IBM_IF: IF (CC_IBM) THEN
+               IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) EXIT CC_IBM_IF
+               IF (CCVAR(I,J,K,IBM_IDCC) > 0) THEN ! we have a cutcell
+                  ICC=CCVAR(I,J,K,IBM_IDCC)
+                  DO JCC=1,CUT_CELL(ICC)%NCELL
+                     CUT_CELL(ICC)%Q(JCC) = CUT_CELL(ICC)%Q(JCC) + TIME_RAMP_FACTOR*IN%HRRPUV
+                  ENDDO
+               ENDIF
+            ENDIF CC_IBM_IF
          ENDDO
       ENDDO
    ENDDO

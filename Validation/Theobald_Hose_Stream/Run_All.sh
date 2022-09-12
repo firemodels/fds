@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
+export SVNROOT=`pwd`/../..
+source $SVNROOT/Validation/Common_Run_All.sh
+
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_0.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_1.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_2.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_3.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_4.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_5.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_7.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_9.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_10.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_11.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_12.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_13.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_14.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_15.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_17.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_18.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_19.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_20.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_21.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_22.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_23.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_24.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_25.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_26.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_27.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_28.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_29.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_30.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_31.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_32.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_33.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_34.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_35.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_36.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_37.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_38.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_39.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_40.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_41.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_42.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_43.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_44.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_45.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_46.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_47.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_48.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_49.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_50.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_51.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_52.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_53.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_54.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_55.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_56.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_57.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_58.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_59.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_60.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_61.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_62.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_63.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_64.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_65.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_66.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_67.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_68.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_69.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_70.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_71.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_72.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_73.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_74.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_75.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_76.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_77.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_78.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_79.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_80.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_81.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_82.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_83.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_84.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_85.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_86.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_87.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_88.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Theobald_Test_89.fds
+
+echo FDS cases submitted

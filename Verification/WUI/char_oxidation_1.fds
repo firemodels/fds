@@ -65,13 +65,13 @@
 
 &INIT ID                   = 'foliage part',
       PART_ID              = 'foliage part' 
-      XB                   = -0.3, 0.1,-0.2, 0.2,0.4,0.6
+      XB                   = -0.3, 0.1,-0.2, 0.2,0.2,0.4
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
       MASS_PER_VOLUME      = 1.66
       DRY                  = T /
 
-&SURF ID='radiant panel', TMP_FRONT=1800, COLOR='RED' /
+&SURF ID='radiant panel', TMP_FRONT=1700, COLOR='RED' /
 
 &VENT MB='XMIN',SURF_ID='radiant panel' /
 &VENT MB='XMAX',SURF_ID='OPEN' /
@@ -81,7 +81,6 @@
 &VENT MB='ZMAX',SURF_ID='OPEN' /
  
 &DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC ID='T_surf', INIT_ID='foliage part', QUANTITY='WALL TEMPERATURE'/
 
 &TAIL /
 

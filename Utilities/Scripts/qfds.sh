@@ -108,6 +108,7 @@ function usage {
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
+  echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -y dir - run case in directory dir"
@@ -186,6 +187,7 @@ CHECK_DIRTY=
 casedir=
 use_default_casedir=
 MULTITHREAD=
+USERMAX=
 
 # use maximum number of mpi procceses possible per node
 MAX_MPI_PROCESSES_PER_NODE=1
@@ -229,7 +231,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:YzZ:' OPTION
+while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -317,6 +319,9 @@ case $OPTION  in
    if [ "$TYPE" == "db" ]; then
      use_debug=1
    fi
+   ;;
+  U)
+   USERMAX="$OPTARG"
    ;;
   v)
    showinput=1
@@ -880,6 +885,16 @@ if [ "$showinput" == "1" ]; then
   cat $scriptfile
   echo
   exit
+fi
+
+# wait until number of jobs running alread by user is less than USERMAX
+if [ "$USERMAX" != "" ]; then
+  nuser=`squeue | grep -v JOBID | awk '{print $4}' | grep $USER | wc -l`
+  while [ $nuser -gt $USERMAX ]
+  do
+    nuser=`squeue | grep -v JOBID | awk '{print $4}' | grep $USER | wc -l`
+    sleep 10
+  done
 fi
 
 #*** output info to screen

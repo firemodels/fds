@@ -13,13 +13,14 @@ plot_style
 
 nx = [20 40 80 160]; % not correct at the moment, just referencing old file names
 lnx = length(nx);
+Ub=6.2; % exp bulk velocity
 L= 0.3; % channel length
 D = 0.1; % channel height
 h = 0.03;
 dx = L./[10 20 40 80];
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
 fds_key = {'FDS {\it h/\deltax}=3' 'FDS {\it h/\deltax}=6' 'FDS {\it h/\deltax}=12' 'FDS {\it h/\deltax}=24'};
-geom = {'_','_geom_'};
+geom = {'_' '_geom_'};
 
 if ~exist([expdir,'ribbed_channel_data.csv'])
     display(['Error: File ' [expdir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
@@ -49,7 +50,6 @@ for ii=1:length(geom)
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-    Ub=6.2;
     H(1)=plot([0 100],Ub*ones(1,2),'k-','linewidth',2); hold on
 
     for i=1:lnx

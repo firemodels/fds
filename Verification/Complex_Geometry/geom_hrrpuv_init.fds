@@ -1,0 +1,20 @@
+&HEAD CHID='geom_hrrpuv_init' TITLE='Test intersection of GEOM XB and INIT XB applied to HRRPUV' /
+
+&MESH IJK=20,20,20, XB=-1,1,-1,1,-1,1 /
+
+&TIME T_END=10 /
+
+&VENT DB='XMIN', SURF_ID='OPEN'/
+&VENT DB='XMAX', SURF_ID='OPEN'/
+&VENT DB='YMIN', SURF_ID='OPEN'/
+&VENT DB='YMAX', SURF_ID='OPEN'/
+&VENT DB='ZMIN', SURF_ID='OPEN'/
+&VENT DB='ZMAX', SURF_ID='OPEN'/
+
+&GEOM XB=-.5,0,-.5,0,-.5,0 /
+
+&INIT XB=-.5,.5,-.5,.5,-.5,.5, HRRPUV=100/
+
+&SLCF DB='YMID', QUANTITY='HRRPUV', CELL_CENTERED=T /
+
+&TAIL /

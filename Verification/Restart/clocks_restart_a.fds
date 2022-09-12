@@ -1,0 +1,27 @@
+&HEAD CHID='clocks_restart_a'/
+
+&MESH IJK=20,20,20, XB=0.0,5.0,0.0,5.0,0.0,5.0/
+
+&TIME T_END=29.0/
+&DUMP DT_RESTART=15.0, DT_SL3D=0.25, DT_CPU=30/
+
+&REAC ID='CABINET',
+      FUEL='REAC_FUEL',
+      FORMULA='C6H10O5',
+      SOOT_YIELD=0.15,
+      HEAT_OF_COMBUSTION=2.4E+4/
+
+&SURF ID='Fire_8_cabinets',
+      COLOR='RED',
+      HRRPUA=316.949,
+      TMP_FRONT=300.0/
+
+&OBST ID='Fire_8_cabinets', XB=1.5,3.5,1.5,3.5,0.25,0.5, SURF_IDS='Fire_8_cabinets','INERT','INERT'/
+
+&VENT SURF_ID='OPEN', XB=5.0,5.0,0.0,5.0,0.0,5.0/
+&VENT SURF_ID='OPEN', XB=0.0,0.0,0.0,5.0,0.0,5.0/
+&VENT SURF_ID='OPEN', XB=0.0,5.0,5.0,5.0,0.0,5.0/
+&VENT SURF_ID='OPEN', XB=0.0,5.0,0.0,0.0,0.0,5.0/
+&VENT SURF_ID='OPEN', XB=0.0,5.0,0.0,5.0,5.0,5.0/
+
+&TAIL /
