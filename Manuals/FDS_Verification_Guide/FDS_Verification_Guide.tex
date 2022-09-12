@@ -2662,7 +2662,7 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 \label{device_restart}
 \label{clocks_restart}
 
-FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
+FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart.
 
 \begin{figure}[!ht]
 \centering
@@ -4140,65 +4140,6 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 
 This section presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
 
-\subsection{3D vs 1D Heat Transfer (\texorpdfstring{\textct{ht3d\_vs\_ht1d}}{ht3d\_vs\_ht1d})}
-\label{ht3d_vs_ht1d}
-
-This case checks that the 3D heat conduction algorithm matches the 1D algorithm for a configuration that is only 1D. Consider a $\delta=0.02$~m thick block of tungsten that is insulated on the sides and back and exposed to $\dot{q}''=1350$~kW/m$^2$ for $\Delta t=7.15$~s. The density of tungsten is $\rho=19250$~kg/m$^3$ and the specific heat $c=0.132$~kJ/(kg$\cdot$K). Given an ambient temperature of $T_0=20$~$^\circ$C, the temperature of the block is expected to rise to:
-\be
-   T = T_0 + \frac{ \dot{q}'' \, \Delta t}{\delta \, c \, \rho} \approx 209.9 \; ^\circ \hbox{C}
-\ee
-as shown in Fig.~\ref{fig:ht3d_vs_ht1d}.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_vs_ht1d}
-\caption[The \textct{ht3d\_vs\_ht1d} test case]{Comparison of the temperature rise based on a 3-D and 1-D heat conduction calculation.}
-\label{fig:ht3d_vs_ht1d}
-\end{figure}
-
-\FloatBarrier
-
-
-\subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
-\label{sec:heat_diff}
-\label{ht3d_nx_10}
-\label{ht3d_nx_20}
-\label{ht3d_nx_40}
-\label{ht3d_nx_80}
-\label{ht3d_nx_160}
-\label{ht3d_ny_10}
-\label{ht3d_ny_20}
-\label{ht3d_ny_40}
-\label{ht3d_ny_80}
-\label{ht3d_ny_160}
-\label{ht3d_nz_10}
-\label{ht3d_nz_20}
-\label{ht3d_nz_40}
-\label{ht3d_nz_80}
-\label{ht3d_nz_160}
-
-This test case is an initial value problem for the heat equation in 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
-\begin{equation}
-\label{eq:expdecay}
-T(x,t) = T_0 + A \sin(\lambda(x-x_0)) \exp(-\lambda^2 \alpha t)
-\end{equation}
-where $\lambda = 2\pi/L$.
-
-Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for each coordinate direction.  The left plot shows the spatial profiles at the initial (dashed line) and final states for the various resolutions.  The grid spacing is $\Delta x = L/nx$.  The right plot shows second-order convergence of the L2 error.  Note that even though the time integration scheme is explicit Euler (first order in time) the spatial convergence remains second order by virtue of the Von Neumann time step restriction $\Delta t < \Delta x^2/(2\alpha)$.
-
-\begin{figure}[ht]
-\centering
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
-\end{tabular*}
-\caption[The \textct{ht3d\_nx\_x} test cases]{One-dimensional heat diffusion in a square bar. (Left) Initial and final profiles for each case.  (Right) Spatial order-of-accuracy plot showing second-order convergence for all three spatial directions.}
-\label{fig:ht3d_diff}
-\end{figure}
-
-\FloatBarrier
-
 
 \subsection{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
 \label{ht3d_slab}
@@ -4254,77 +4195,34 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 
 \FloatBarrier
 
-\subsection{3D Heat Diffusion Across Mesh Boundaries (\texorpdfstring{\textct{ht3d\_2mesh}}{ht3d\_2mesh})}
-\label{sec:ht3d_2mesh}
-\label{ht3d_2mesh_x}
-\label{ht3d_2mesh_y}
-\label{ht3d_2mesh_z}
-
-This set of cases tests the ability of the 3D heat conduction solver to transfer heat across mesh boundaries.  The set of up is a 1 m long insulated square bar, 0.2 m $\times$ 0.2 m in cross section.  One end is held at \SI{200}{\degreeCelsius} and the other at \SI{20}{\degreeCelsius}.  The mesh boundary lies at the midpoint between the two ends (Position = 0 m).  The thermal diffusivity is unity.  The solution is run for 100 s from an initial condition of \SI{20}{\degreeCelsius} everywhere except the hot surface.  The steady state profile is linear between the two end temperatures.  Results for three different orientations of the bar are shown in Fig.~\ref{fig:ht3d_2mesh} below.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_2mesh}
-\caption[The \textct{ht3d\_2mesh} test cases]{Test of 3D heat transfer across mesh boundaries.}
-\label{fig:ht3d_2mesh}
-\end{figure}
-
-\FloatBarrier
-
 \subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
 \label{sec:ht3d_sphere}
-\label{ht3d_sphere_102}
-\label{ht3d_sphere_51}
-\label{ht3d_sphere_25}
+\label{ht3d_sphere_96}
+\label{ht3d_sphere_48}
+\label{ht3d_sphere_24}
 
 \textbf{Salah Benkorichi, Omega Fire Engineering Ltd.}\\
 
-In this example, a solid sphere of radius 0.1 m with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
+A solid sphere of radius $a=0.1$~m with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} has an initial temperature of $T_0=20 \; ^\circ$C and its exterior surface temperature is held at this temperature. The 3-D heat conduction equation can be written as
 \begin{equation}
 \label{eq:sphere}
-\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]
+\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right] \quad ; \quad T(r,0) = T_0 \quad; \quad T(a,t) = T_0
 \end{equation}
-where $k$ is the thermal conductivity and $\alpha$ is the thermal diffusivity.  The initial and boundary conditions are
-\begin{equation}
-\label{eq:sphere_int}
-\left. T  \right|_{t=0} =T_0 \qquad; \qquad \left. T \right|_{r=a} = T_0 \qquad; \qquad \left. \frac{\partial T}{\partial r} \right|_{r=0}=0
-\end{equation}
-where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):
+where $k$ is the thermal conductivity and $\alpha$ is the thermal diffusivity. The exact solution to Eq.~(\ref{eq:sphere}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):
 \begin{equation}
 \label{eq:sphere_sol}
 T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
 \end{equation}
-
-The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the $L_\infty$ error as a function of cell size.
+The simulation is run for 180~s. Shown in Fig.~\ref{fig:ht3d_sphere_time} is a comparison of analytical and numerical radial temperature profiles at several points in time for the high resolution case. Also shown is the $L_\infty$ error as a function of cell size.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_51_165}
 \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}
-\caption[The \textct{ht3d\_sphere} profiles]{(Left) Temperature contours at $t = 165$ s for $n=51$ cells across diameter. (Right) A comparison between radial profiles of the analytical and numerical solution at various times in the simulation.}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
+\caption[The \textct{ht3d\_sphere} temperature profiles and convergence rate]{(Left) Comparison of analytical and numerical radial profiles of temperature at various times. (Right) $L_{\infty}$ error in temperature at $t=180$~s for three levels of grid refinement.}
 \label{fig:ht3d_sphere_time}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
-\caption[The \textct{ht3d\_sphere} convergence]{$L_{\infty}$ error in sphere temperature at $t=180$ s with different cell numbers [102, 51, 25] from left to right.}
-\label{fig:ht3d_sphere_conv}
-\end{figure}
-
-\subsection{3D Internal Radiation (\texorpdfstring{\textct{ht3d\_radiation}}{ht3d\_radiation})}
-\label{ht3d_radiation}
-
-\textbf{Morgan Bruns, Virginia Military Institute}\\
-
-This is a 1D problem set up in the 3D heat transfer solver.  The hot surface of a block of material is held at 700 \si{\degreeCelsius}.  The cold side is held at 20 \si{\degreeCelsius}.  The thermal conductivity is set to 0.1 \si{W/(m.K)}.  The refractive index $n$ is set to 1.5 and two values of absorption coefficient $\kappa = [100, 2000]$ 1/m are used.  If there where no internal radiation, the temperature solution would, of course, just be linear.  For a thermally thick material, the radiative conductivity $k_{\mathrm{r}} = 16 n^2 \sigma T^3 / 3 \kappa$ is added to the thermal conductivity.  Figure \ref{fig:ht3d_radiation} shows FDS results compared to the analytical solution from \cite{Modest:2003}.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_radiation}
-\caption[The \textct{ht3d\_radiation} solution]{Steady-state temperature profiles inside a solid.  We consider two values of absorption coefficient, $\kappa = [100, 2000]$ 1/m and look at FDS solutions at three grid resolutions.}
-\label{fig:ht3d_radiation}
-\end{figure}
 
 
 
@@ -5029,90 +4927,7 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 \end{table}
 
 
-\section{Three-Dimensional Pyrolysis (PYRO3D) (Beta)}
-\label{sec:pyro3d}
-
-
-\subsection{Char Formation (\texorpdfstring{\textct{pyro3d\_wood\_char}}{pyro3d\_wood\_char})}
-\label{pyro3d_wood_char}
-
-This case is a simple mass conservation test for pyrolysis of wood into char and gas.  A small block of wood, 0.08 m on a side, is heated externally at 50 \si{kW/m^2} on all sides.  Gas phase combustion is suppressed.  The pyrolysis stoichiometry splits the wood to equal parts by mass of char and gas.  In Fig.~\ref{fig:pyro3d_wood_char}, you can see that the pine wood mass goes to zero, the char ends up with half the original wood mass, and the pyrolyzate gas production is equal to the char production.
-
-\begin{figure}[!ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_wood_char}
-	\caption[PYRO3D char formation (the {\ct pyro3d\_wood\_char} case)]{Conversion of wood to char and pyrolyzate gas with 3D solid heat transfer and pyrolysis.}
-	\label{fig:pyro3d_wood_char}
-\end{figure}
-
-
-\subsection{Burn Away (\texorpdfstring{\textct{box\_burn\_away1\_pyro3d\_vs\_pyro1d}}{box\_burn\_away1\_pyro3d\_vs\_pyro1d})}
-\label{box_burn_away1_pyro3d_vs_pyro1d}
-
-This case is a replicate of the {\ct box\_burn\_away1} case used as verification of the 1D pyrolysis solver (PYRO1D).  A foam block 0.4 m on a side (0.064 \si{m^3}) with a bulk density of 20 \si{kg/m^3} (total mass of 1.28 kg) is heated from a wall kept at 1000 \si{\degreeCelsius}.  The gas phase (and hence 3D solid phase) grid resolution is relatively coarse, $\delta x = 0.1 \;\si{m}$.  However, the cell spacing for the 1D solver is internally computed to be approximately $3 \times 10^{-3} \;\si{m}$.  The 1D solver thus resolves the temperature gradient near the surface on the inside of the solid.  The 3D solver uses an internal wall model to enhance the heat flux into the solid cell.  The verification target here is simply the total mass of 1.28 kg.  Results are shown for the 3D solver with and without mass transport of fuel gas.  In the latter, the gas is ejected to the nearest wall cell upon pyrolysis.
-
-\begin{figure}[!ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/box_burn_away1_pyro3d_vs_pyro1d}
-	\caption[PYRO3D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
-	\label{fig:box_burn_away1_pyro3d_vs_pyro1d}
-\end{figure}
-
-\subsection{Mass Loss Rate and Thickness (\texorpdfstring{\textct{pyro3d\_vs\_pyro1d}}{pyro3d\_vs\_pyro1d})}
-\label{pyro3d_vs_pyro1d}
-
-This case compares mass loss rates and material thickness for pyrolysis of black PMMA between the 1D pyrolysis solver without burn away and the 3D solver with burn away.  The 3D solver is effectively solving a 1D problem, so the results should be very similar.  In-depth radiation absorption is not considered.  The problem is set up with insulating sides for each column of material.  The material is heated from the top with an external flux of 50 \si{kW/m^2}.  The material thickness is 0.01 m.  The grid resolution of the 3D solver is set to be equivalent to the node spacing for the 1D solver, $\delta z = 2.8571 \times 10^{-4} \;\si{m}$.  The key difference between the solvers is that in the 1D solver the top face of the {\ct OBST} does not move, instead the material {\ct THICKNESS} changes and shrinks from the bottom up.  Conversely, in the 3D solver, cells burn away as their mass goes to zero.  If the material mass of a given cell goes below a threshold, the mass is shifted to a neighboring cell before the cell is burned away.  The final cell burns down to a numerical threshold mass before that mass is finally clipped for numerical reasons.  We still track the local solid volume within a cell, and this ratio times the cell size gives a measure of the material thickness for the 3D solver. Fig.~\ref{fig:pyro3d_vs_pyro1d} shows mass loss rate per unit area (left) and the material thickness (right) for the 1D and 3D solutions.  Note that in the 3D solution the ``thickness'' is taken as the integral of the volume ratio $V_{\rm solid}/V_{\rm cell}$ over the height of the column.
-
-\begin{figure}[!ht]
-	\centering
-	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-       \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_mlr} &
-       \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_thickness}
-    \end{tabular*}
-	\caption[PYRO3D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
-	\label{fig:pyro3d_vs_pyro1d}
-\end{figure}
-
-\subsection{Parallel Solid Phase Reactions (\texorpdfstring{\textct{pyro3d\_vs\_pyro1d\_wood\_moist}}{pyro3d\_vs\_pyro1d\_wood\_moist})}
-\label{pyro3d_vs_pyro1d_wood_moist}
-
-\textbf{Morteza Gholami Haghighi Fard, Aalto University}\\
-
-\noindent This case compares the mass conservation results between the 3D pyrolysis solver and 1D solver for a solid which undergoes a more complicated pyrolysis reaction than a solid with single virgin material. A wooden sample composed of 10 \% moisture content and 90 \% birch material (by mass) is heated up with an external flux of 50 \si{kW/m^2} from the top in both solvers. The moisture content evaporates into water vapor completely. Diversely, half of the birch material pyrolyzes into gaseous fuel while the other half converts to char residue. For the sake of comparability of 1D and 3D solvers, geometry and grid resolutions are set the same as the {\ct pyro3d\_vs\_pyro1d} verification case. Fig.~\ref{fig:pyro3d_vs_pyro1d_wood_moist} compares the gas production and solid phase material exchange for two solvers. As one can see, both algorithms generate similar results.
-
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_wood_moist_gas} \\
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_wood_moist_solid}
-	\caption[PYRO3D parallel solid phase reactions (the {\ct pyro3d\_vs\_pyro1d\_wood\_moist} case)]{Comparison of mass conservation results of 3D and 1D pyrolysis solvers for a wooden sample with parallel pyrolysis reactions. The top plot compares the gas production and the lower plot compares the solid phase material exchange. Verification targets are mass curves.}
-	\label{fig:pyro3d_vs_pyro1d_wood_moist}
-\end{figure}
-
-\subsection{Restart Function (\texorpdfstring{\textct{pyro3d\_restart}}{pyro3d\_restart})}
-	\label{pyro3d_restart}
-
-	\textbf{Morteza Gholami Haghighi Fard, Aalto University}\\
-
-	\noindent This case analyses the numerical reliability of the restart function on the PYRO3D routine. A cube of 0.002 m $\times$ 0.002 m $\times$ 0.010 m black PMMA sample pyrolyzes with burn away capability of the 3D solver. The material is heated with 50 \si{kW/m^2} external flux from the top, while other sides of the material are thermally insulated. The grid resolution is 0.001 m and combustion is ignored in the simulations. A test case is forcefully stopped at 350 s of the simulation time and restarted until all the material is burned away at about 600 s. Another simulation is performed completely without any interruption until the entire PMMA is consumed. The verification target is identical time-resolved mass loss rate curves for both simulations. It is confirmed by a point by point comparison of the results, shown in Fig.~\ref{fig:pyro3d_restart}.
-
-	\begin{figure}[!ht]
-		\centering
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_restart}
-		\caption[PYRO3D restart (the {\ct pyro3d\_restart} case)]{Comparison of mass loss rate for a restarted and an uninterrupted 3D pyrolysis simulations with burn away. Verification target is equal values of all points along each curve.}
-		\label{fig:pyro3d_restart}
-	\end{figure}
-
-\subsection{Mass Transport (\texorpdfstring{\textct{pyro3d\_transport}}{pyro3d\_transport})}
-\label{pyro3d_transport}
-
-This case is a 3D version of the {\ct FAA\_Polymers\_PMMA} validation case.  A block of ``black'' PMMA 0.096 m $\times$ 0.096 m $\times$ 0.009 m, giving $8.294 \times 10^{-5} \;\si{m^3}$, with a bulk density of 1100 \si{kg/m^3}, giving 0.0912 kg of total mass, is heated from above with 52 \si{kW/m^2}, generating methane as a pyrolysis gas.  The verification target to confirm that as the PMMA is consumed the correct amount of methane gets produced.  The results are shown below in Fig.~\ref{fig:pyro3d_transport}.
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_transport}
-    \caption[PYRO3D with mass transport of fuel gas (the {\ct pyro3d\_transport} case)]{Check of mass conservation in conversion of solid (PMMA) to fuel gas (methane) with burn away using the 3D pyrolysis mass transport algorithm.}
-    \label{fig:pyro3d_transport}
-\end{figure}
+\newpage
 
 \section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
 \label{cone_demo_2}
@@ -5931,7 +5746,7 @@ The overall mass in the domain should not change. Figure~\ref{fig_zone_shape_2} 
 \label{HVAC_leak_exponent_2}
 
 As the interior pressure rises in a typical building, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}. Additionally, a discharge coefficient, $C_{\rm d}$, is often applied in practice.
-\be  
+\be
    \dot{V}_{\rm L} = C_{\rm d} \, A_{\rm L,ref} \left( \frac{|\Delta p|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \sqrt{\frac{2 |\Delta p|}{\rho_0}}
 \ee
 By default, $C_{\rm d}=1$, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.

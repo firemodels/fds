@@ -745,7 +745,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,MT1D=.FALSE.,SET_H=.FALSE.
+              BOUNDARY_FUEL_MODEL=.FALSE.,MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
@@ -761,7 +761,7 @@ TYPE SURFACE_TYPE
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
    CHARACTER(LABEL_LENGTH), DIMENSION(10) :: INIT_IDS='null'
 
-   LOGICAL :: VARIABLE_THICKNESS=.FALSE.  ! This surface is as thick as the underlying OBST
+   LOGICAL :: HT3D=.FALSE.  ! This surface is as thick as the underlying OBST
 
    ! 1D mass transfer
 
