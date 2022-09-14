@@ -4941,6 +4941,13 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
       ENDIF
       IF (SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID > 0._EB) LPC%DENSITY=SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID
+      
+      !Check for specified flux surfaces
+      IF (ANY(SURFACE%THERMAL_BC_INDEX==CONVECTIVE_FLUX_BC) .OR. ANY(SURFACE%THERMAL_BC_INDEX==NET_FLUX_BC)) THEN
+         WRITE(MESSAGE,'(A,A)') 'WARNING: Using liquid droplets with ADIABATIC, NET_HEAT_FLUX, or CONVECTIVE_HEAT_FLUX ',&
+                                'specified on a SURF can lead to instabilities if droplets can hit the surface.'
+         IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+      ENDIF
    ENDIF
 
    ! Arrays for particle size distribution
