@@ -621,8 +621,11 @@ An FDS calculation may end before the specified time limit. Following is a list 
 \item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct LIMITING\_DT\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are:
     \begin{itemize}
     \item mesh cells that have an aspect ratio larger than 2 to 1
-    \item high speed flow through a small opening
+    \item a change in grid resolution of more than a factor of 2 at a mesh interface
+    \item mismatched obstructions or hollow ducts at a mesh interface where the grid resolution changes
+    \item high speed flow through a small opening, in particular openings intended to model leakage. There are better ways to model leakage, as described in Section~\ref{info:Leaks}.
     \item a sudden change in the heat release rate
+    \item the use of {\ct ADIABATIC} as a solid phase boundary condition. This parameter should only be used for testing because no solid material has a thermal conductivity of zero. Using this parameter can cause unphysical fluctations at the solid-gas interface.
     \item the removal or creation of an obstruction, like the opening or closing of a door
     \item a high (>100 g/mol) molecular weight fuel molecule that is not in the FDS database, Table~\ref{tab:gasspecies}. In such cases, reduce the molecular weight but maintain the atom ratios.
     \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Section~\ref{info:PRES} for details.
