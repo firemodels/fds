@@ -3249,12 +3249,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         MCBAR = -1._EB
                         ARRAY_CASE = 2
                      ENDIF
+                  ELSEIF (SF%THERMAL_BC_INDEX==CONVECTIVE_FLUX_BC .OR. SF%THERMAL_BC_INDEX==NET_FLUX_BC) THEN
+                     ARRAY_CASE = 1
                   ELSE
                      MCBAR = -1._EB
                      ARRAY_CASE = 2
                   ENDIF
 
-                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB) THEN
+                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB .AND. ARRAY_CASE > 1) THEN
                      LENGTH = 2._EB*R_DROP
                      NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
@@ -3283,8 +3285,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
-                     H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
-
+                     IF (ARRAY_CASE==1) THEN
+                        H_WALL = 0._EB
+                     ELSE
+                        H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
+                     ENDIF
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_FILM/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
@@ -3318,7 +3323,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
                IF (LPC%HEAT_TRANSFER_COEFFICIENT_GAS>=0._EB) H_HEAT=LPC%HEAT_TRANSFER_COEFFICIENT_GAS
-               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_HEAT=LPC%MASS_TRANSFER_COEFFICIENT
+               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_MASS=LPC%MASS_TRANSFER_COEFFICIENT
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
