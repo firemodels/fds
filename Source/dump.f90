@@ -1448,7 +1448,7 @@ WRITE(LU_SMV,'(1X,A)') TRIM(CHID)//'.end'
 ! Write out the name of the input file
 
 WRITE(LU_SMV,'(/A)') 'INPF'
-WRITE(LU_SMV,'(1X,A)') TRIM(FN_COPY)
+WRITE(LU_SMV,'(1X,A)') TRIM(FN_INPUT)
 
 ! Write out git revision number
 
