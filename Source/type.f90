@@ -173,20 +173,23 @@ END TYPE BAND_TYPE
 
 TYPE BOUNDARY_COORD_TYPE
 
-   INTEGER :: II             !< Ghost cell \f$ x \f$ index
-   INTEGER :: JJ             !< Ghost cell \f$ y \f$ index
-   INTEGER :: KK             !< Ghost cell \f$ z \f$ index
-   INTEGER :: IIG            !< Gas cell \f$ x \f$ index
-   INTEGER :: JJG            !< Gas cell \f$ y \f$ index
-   INTEGER :: KKG            !< Gas cell \f$ z \f$ index
+   INTEGER :: II             !< Ghost cell x index
+   INTEGER :: JJ             !< Ghost cell y index
+   INTEGER :: KK             !< Ghost cell z index
+   INTEGER :: IIG            !< Gas cell x index
+   INTEGER :: JJG            !< Gas cell y index
+   INTEGER :: KKG            !< Gas cell z index
    INTEGER :: IOR=0          !< Index of orientation of the WALL cell
 
-   REAL(EB) :: X             !< \f$ x \f$ coordinate of boundary cell center
-   REAL(EB) :: Y             !< \f$ y \f$ coordinate of boundary cell center
-   REAL(EB) :: Z             !< \f$ z \f$ coordinate of boundary cell center
-   REAL(EB) :: DX=0._EB      !< Width of cell (m)
-   REAL(EB) :: DY=0._EB      !< Width of cell (m)
-   REAL(EB) :: DZ=0._EB      !< Width of cell (m)
+   REAL(EB) :: X             !< x coordinate of boundary cell center
+   REAL(EB) :: Y             !< y coordinate of boundary cell center
+   REAL(EB) :: Z             !< z coordinate of boundary cell center
+   REAL(EB) :: X1            !< Lower x extent of boundary cell (m)
+   REAL(EB) :: X2            !< Upper x extent of boundary cell (m)
+   REAL(EB) :: Y1            !< Lower y extent of boundary cell (m)
+   REAL(EB) :: Y2            !< Upper y extent of boundary cell (m)
+   REAL(EB) :: Z1            !< Lower z extent of boundary cell (m)
+   REAL(EB) :: Z2            !< Upper z extent of boundary cell (m)
 
 END TYPE BOUNDARY_COORD_TYPE
 
@@ -266,7 +269,8 @@ END TYPE BOUNDARY_THR_D_TYPE
 
 
 TYPE INTERNAL_NODE_TYPE
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH,&
+                                         ALTERNATE_WALL_TYPE,ALTERNATE_WALL_IOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT
    INTEGER :: ALTERNATE_WALL_VALUES=0
 END TYPE INTERNAL_NODE_TYPE
@@ -396,6 +400,25 @@ TYPE EXTERNAL_WALL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN  !< Species diffusive flux as computed in divg.f90
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDNS !< RHO_D_DZDN estimated at next time step
 END TYPE EXTERNAL_WALL_TYPE
+
+
+!> \brief Variables associated with the side edge of a thin obstruction
+
+TYPE THIN_WALL_TYPE
+
+   INTEGER :: THIN_WALL_INDEX=0       !< Index of itself -- used to determine if the WALL cell has been assigned
+   INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
+   INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
+   INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
+   INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
+   INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
+   INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
+   INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
+   INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+
+END TYPE THIN_WALL_TYPE
 
 
 !> \brief Variables associated with a single primitive gas species
