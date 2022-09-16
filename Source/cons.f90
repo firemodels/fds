@@ -558,6 +558,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LU_SLCF,LU_SLCF_GEOM,LU_BNDF,LU_BNDF_GEO
 INTEGER                              :: DEVC_COLUMN_LIMIT=254,CTRL_COLUMN_LIMIT=254
 
 CHARACTER(250)                             :: FN_INPUT='null'
+CHARACTER(250)                             :: FN_COPY='null'
 CHARACTER(80)                              :: FN_STOP='null',FN_CPU,FN_CFL,FN_OUTPUT='null'
 CHARACTER(80)                              :: FN_MASS,FN_HRR,FN_STEPS,FN_SMV,FN_END,FN_ERR,FN_NOTREADY,FN_VELOCITY_ERROR,FN_GIT
 CHARACTER(80)                              :: FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA,FN_DEVC_CTRL
