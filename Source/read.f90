@@ -13931,7 +13931,7 @@ SUBROUTINE COPY_INPF
       IF (PER>0) THEN
          FN_COPY = FN_INPUT(1:PER)//"inp"
       ELSE
-         FN_COPY = FN_INPUT//".inp"
+         FN_COPY = TRIM(FN_INPUT)//".inp"
       ENDIF
       LU_COPY=12
       OPEN(LU_COPY,FILE=TRIM(FN_COPY),ACTION='WRITE')
