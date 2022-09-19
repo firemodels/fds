@@ -2884,10 +2884,14 @@ ENDIF
 
 IF (SF%TMP_FRONT>0._EB) THEN
    ONE_D%TMP_F = M%TMP_0(BC%KK) + &
-                    EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_TEMP),TAU=SF%TAU(TIME_TEMP))*(SF%TMP_FRONT-M%TMP_0(BC%KK))
+                 EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_TEMP),TAU=SF%TAU(TIME_TEMP))*(SF%TMP_FRONT-M%TMP_0(BC%KK))
 ELSE
    IF (SF%RAMP_T_I_INDEX < 0) ONE_D%TMP_F = M%TMP_0(BC%KK)
 ENDIF
+
+! Reinitialize wall cell outgoing radiation for change in TMP_F
+
+ONE_D%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
 
 ! Record original boundary condition index for exterior wall cells that might get covered up
 
