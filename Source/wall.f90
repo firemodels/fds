@@ -1837,7 +1837,7 @@ ELSE COMPUTE_GRID
    LAYER_INDEX(0:NWP+1) = SF%LAYER_INDEX(0:NWP+1)
    MF_FRAC(1:NWP)       = SF%MF_FRAC(1:NWP)
 ENDIF COMPUTE_GRID
-   
+
 ! Compute convective heat flux at the surface
 
 DTMP = ONE_D%TMP_G - ONE_D%TMP_F
@@ -2036,7 +2036,7 @@ IF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS>0)) THEN
    Q_RAD_OUT = 0._EB
    DO NR = 1,SF%NUMBER_FSK_POINTS
       TWO_DX_KAPPA_S = 0._EB
-      
+
       TWO_DX_KAPPA_S(1:NWP) = 2._EB*SF%FSK_K(NR)/RDX_S(1:NWP)
 
       ! solution inwards
