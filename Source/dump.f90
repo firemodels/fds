@@ -7511,18 +7511,18 @@ IND_SELECT: SELECT CASE(IND)
          ENDIF
          IF (.NOT.PY%PDPA_INTEGRATE) THEN
             DV%PDPA_NUMER = 0._EB
-            DV%PDPA_DENUM = 0._EB
+            DV%PDPA_DENOM = 0._EB
          ENDIF
-         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTHPI*PY%PDPA_RADIUS**3
+         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENOM = DV%PDPA_DENOM + FOTHPI*PY%PDPA_RADIUS**3
          IF (PY%QUANTITY == 'MASS CONCENTRATION' .OR. &
              PY%QUANTITY == 'ENTHALPY'           .OR. &
              PY%QUANTITY == 'PARTICLE FLUX X'    .OR. &
              PY%QUANTITY == 'PARTICLE FLUX Y'    .OR. &
              PY%QUANTITY == 'PARTICLE FLUX Z' ) THEN
              IF (PY%PDPA_NORMALIZE) THEN
-                DV%PDPA_DENUM = DV%PDPA_DENUM + FOTHPI*(2._EB*PY%PDPA_RADIUS)**3
+                DV%PDPA_DENOM = DV%PDPA_DENOM + FOTHPI*(2._EB*PY%PDPA_RADIUS)**3
              ELSE
-                DV%PDPA_DENUM = 8._EB
+                DV%PDPA_DENOM = 8._EB
              ENDIF
          ENDIF
          DLOOP: DO I=1,NLP
@@ -7591,10 +7591,10 @@ IND_SELECT: SELECT CASE(IND)
                 (PY%QUANTITY /= 'PARTICLE FLUX Y') .AND. &
                 (PY%QUANTITY /= 'PARTICLE FLUX Z') .AND. &
                 (PY%QUANTITY /= 'ENTHALPY')) THEN
-               DV%PDPA_DENUM = DV%PDPA_DENUM + LP%PWT*(2._EB*R_D)**PY%PDPA_N
+               DV%PDPA_DENOM = DV%PDPA_DENOM + LP%PWT*(2._EB*R_D)**PY%PDPA_N
             ENDIF
          ENDDO DLOOP
-         IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT_RES = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
+         IF (DV%PDPA_DENOM > 0._EB) GAS_PHASE_OUTPUT_RES = (DV%PDPA_NUMER/DV%PDPA_DENOM)**EXPON
       ENDIF
    CASE(251)  ! WIND CHILL INDEX
       ! Wind speed at head height m/s, temperature Celsius
