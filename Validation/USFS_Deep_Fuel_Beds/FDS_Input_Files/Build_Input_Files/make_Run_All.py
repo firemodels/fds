@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 input_file_list = pd.read_csv('paramfile.csv', header=0)['Template.fds']
-forestring = '$QFDS $DEBUG $QUEUE -p 16 -d $INDIR '
+forestring = '$QFDS $DEBUG $QUEUE -p 80 -d $INDIR '
 
 f = open('Run_All.sh', 'w')
 f.write('#!/bin/bash\n\n')
