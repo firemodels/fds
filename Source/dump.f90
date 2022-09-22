@@ -7529,7 +7529,7 @@ IND_SELECT: SELECT CASE(IND)
                   PDPA_FORMULA = 2
                   IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
--                                             SPECIES(LPC%Y_INDEX)%C_P_L_BAR,TMP_F,CPBAR)
+                                                SPECIES(LPC%Y_INDEX)%C_P_L_BAR,TMP_F,CPBAR)
                      PHI = 0.001_EB*LPC%FTPR*R_D**3*CPBAR*TMP_F ! kJ
                   ELSEIF (LPC%SURF_INDEX>0) THEN
                      SF => SURFACE(LPC%SURF_INDEX)
