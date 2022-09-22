@@ -2919,9 +2919,9 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
 \ee
 For forced convection, the Nusselt number takes the form:
 \be
-   \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}  \quad ; \quad m=1/3
+   \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}
 \ee
-The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}.
+The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}. Alternatively, it is possible to specify custom coefficients by setting the values of {\ct NUSSELT\_C0}, {\ct NUSSELT\_C1}, {\ct NUSSELT\_C2}, and {\ct NUSSELT\_M} on the {\ct SURF} line. If using this feature, you must define the value of all four coefficients.
 
 \begin{table}[!ht]
 \caption[Coefficients used for forced convection heat transfer correlations]{Coefficients used for forced convection heat transfer correlations~\cite{Incropera:1}}
@@ -2929,7 +2929,7 @@ The values of the coefficients are given in Table~\ref{convective_heat_transfer_
 \begin{center}
 \begin{tabular}{|lccccc|}
 \hline
-Geometry     & $C_0$    & $C_1$   & $C_2$ & $n$    & Re             \\ \hline
+Geometry     & $C_0$    & $C_1$   & $C_2$ & $m$    & Re             \\ \hline
 Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
 Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
 Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
@@ -12481,6 +12481,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct NUSSELT\_C0}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct NUSSELT\_C1}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct NUSSELT\_C2}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct NUSSELT\_M}                                          & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct PARTICLE\_EXTRACTION\_VELOCITY}                      & Real            & Section~\ref{info:particle_removal}       & m/s                 &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}                                & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}                          & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
