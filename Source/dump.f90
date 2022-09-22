@@ -6606,7 +6606,7 @@ REAL(EB) :: H_TC,TMP_TC,RE_D,NUSSELT,VEL,K_G,MU_G,DROPLET_COOLING,&
             UVW,UODX,VODY,WODZ,XHAT,ZHAT,BBF,RHO_S,GAMMA_LOC,VC,TIME_RAMP_FACTOR,VOL,PHI,GAS_PHASE_OUTPUT_CC,&
             RHO_GET(N_MATL),VSRVC,GAS_PHASE_OUTPUT_CFA,CFACE_AREA,VELOCITY_COMPONENT(1:3),TMP_F,R_D
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,IP,JP,KP,FED_ACTIVITY,IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,&
-           ICC,JCC,NCELL,IZ,AXIS,ICF,NFACE,JCF,OBST_INDEX,JCC_LO,JCC_HI
+           ICC,JCC,NCELL,IZ,AXIS,ICF,NFACE,JCF,OBST_INDEX,JCC_LO,JCC_HI,PDPA_FORMULA
 REAL(FB) :: RN
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 REAL :: CPUTIME
@@ -7497,40 +7497,20 @@ IND_SELECT: SELECT CASE(IND)
 
    CASE(231) ! PDPA
       GAS_PHASE_OUTPUT_RES = 0._EB
-      IF ( ((PY%PDPA_START<=T) .AND. (PY%PDPA_END>=T)) .OR. .NOT.PY%PDPA_INTEGRATE ) THEN
-         IF ((PY%PDPA_M-PY%PDPA_N) == 0) THEN
-            EXPON = 1._EB
-         ELSEIF ((PY%QUANTITY=='MASS CONCENTRATION') .OR. &
-                 (PY%QUANTITY=='ENTHALPY')           .OR. &
-                 (PY%QUANTITY=='PARTICLE FLUX X')    .OR. &
-                 (PY%QUANTITY=='PARTICLE FLUX Y')    .OR. &
-                 (PY%QUANTITY=='PARTICLE FLUX Z')) THEN
-            EXPON = 1._EB
-         ELSE
-            EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
-         ENDIF
+
+      PDPA_IF: IF ( (PY%PDPA_START<=T .AND. T<=PY%PDPA_END) .OR. .NOT.PY%PDPA_INTEGRATE ) THEN
+
          IF (.NOT.PY%PDPA_INTEGRATE) THEN
             DV%PDPA_NUMER = 0._EB
             DV%PDPA_DENOM = 0._EB
          ENDIF
-         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENOM = DV%PDPA_DENOM + FOTHPI*PY%PDPA_RADIUS**3
-         IF (PY%QUANTITY == 'MASS CONCENTRATION' .OR. &
-             PY%QUANTITY == 'ENTHALPY'           .OR. &
-             PY%QUANTITY == 'PARTICLE FLUX X'    .OR. &
-             PY%QUANTITY == 'PARTICLE FLUX Y'    .OR. &
-             PY%QUANTITY == 'PARTICLE FLUX Z' ) THEN
-             IF (PY%PDPA_NORMALIZE) THEN
-                DV%PDPA_DENOM = DV%PDPA_DENOM + FOTHPI*(2._EB*PY%PDPA_RADIUS)**3
-             ELSE
-                DV%PDPA_DENOM = 8._EB
-             ENDIF
-         ENDIF
-         DLOOP: DO I=1,NLP
+
+         PDPA_PARTICLE_LOOP: DO I=1,NLP
             LP=>LAGRANGIAN_PARTICLE(I)
             LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-            IF (PY%PART_INDEX/=LP%CLASS_INDEX .AND. PY%PART_INDEX/=-1) CYCLE DLOOP
+            IF (PY%PART_INDEX/=LP%CLASS_INDEX .AND. PY%PART_INDEX/=-1) CYCLE PDPA_PARTICLE_LOOP
             BC => BOUNDARY_COORD(LP%BC_INDEX)
-            IF ((BC%X-DV%X)**2+(BC%Y-DV%Y)**2+(BC%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
+            IF ((BC%X-DV%X)**2+(BC%Y-DV%Y)**2+(BC%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE PDPA_PARTICLE_LOOP
             IF (LP%OD_INDEX>0) THEN
                ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
                R_D = MAXVAL(ONE_D%X)
@@ -7540,62 +7520,89 @@ IND_SELECT: SELECT CASE(IND)
                TMP_F = TMPA
             ENDIF
             ! see Table 20.1 in FDS User Guide
-            SELECT CASE(PY%QUANTITY)
-               CASE('U-VELOCITY')
-                  PHI = LP%U
-               CASE('V-VELOCITY')
-                  PHI = LP%V
-               CASE('W-VELOCITY')
-                  PHI = LP%W
-               CASE('VELOCITY')
-                  PHI = SQRT(LP%U**2 + LP%V**2 + LP%W**2)
-               CASE('PARTICLE FLUX X')
-                  PHI = LPC%FTPR*LP%U
-               CASE('PARTICLE FLUX Y')
-                  PHI = LPC%FTPR*LP%V
-               CASE('PARTICLE FLUX Z')
-                  PHI = LPC%FTPR*LP%W
-               CASE('MASS CONCENTRATION')
-                  PHI = LPC%FTPR
-               CASE('TEMPERATURE')
-                  PHI = TMP_F - TMPM
+            PDPA_QUANTITY_SELECT: SELECT CASE(PY%QUANTITY)
+               CASE DEFAULT ! DIAMETER
+                  PHI = 1._EB
+                  PDPA_FORMULA = 1
                CASE('ENTHALPY')
                   PHI = 0._EB
+                  PDPA_FORMULA = 2
                   IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
-                                             SPECIES(LPC%Y_INDEX)%C_P_L_BAR,TMP_F,CPBAR)
-                     PHI = CPBAR*TMP_F
-                     PHI = 0.001_EB*LPC%FTPR*PHI
+-                                             SPECIES(LPC%Y_INDEX)%C_P_L_BAR,TMP_F,CPBAR)
+                     PHI = 0.001_EB*LPC%FTPR*R_D**3*CPBAR*TMP_F ! kJ
                   ELSEIF (LPC%SURF_INDEX>0) THEN
                      SF => SURFACE(LPC%SURF_INDEX)
                      IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                         ! SURFACE_DENSITY with MODE=3 returns energy density kJ/(m3-initial)
                         ! here VOL multiplies by the initial volume
-                        VOL = FOTHPI*(SF%INNER_RADIUS+SF%THICKNESS)**3
+                        SELECT CASE(SF%GEOMETRY)
+                           CASE(SURF_CARTESIAN);   VOL = SF%LENGTH * SF%WIDTH * 2._EB*SF%THICKNESS
+                           CASE(SURF_CYLINDRICAL); VOL = SF%LENGTH * PI*(SF%INNER_RADIUS+SF%THICKNESS)**2
+                           CASE(SURF_SPHERICAL);   VOL = FOTHPI*(SF%INNER_RADIUS+SF%THICKNESS)**3
+                        END SELECT
                         PHI = 0.001_EB*SURFACE_DENSITY(NM,3,LAGRANGIAN_PARTICLE_INDEX=I) * VOL ! kJ
-                        ! negate the D_i^m factor
-                        IF (R_D>TWO_EPSILON_EB) PHI = PHI / (2._EB*R_D)**PY%PDPA_M
                      ENDIF
                   ENDIF
-               CASE DEFAULT
+               CASE('PARTICLE FLUX X')
+                  PHI = LPC%FTPR*R_D**3*LP%U
+                  PDPA_FORMULA = 2
+               CASE('PARTICLE FLUX Y')
+                  PHI = LPC%FTPR*R_D**3*LP%V
+                  PDPA_FORMULA = 2
+               CASE('PARTICLE FLUX Z')
+                  PHI = LPC%FTPR*R_D**3*LP%W
+                  PDPA_FORMULA = 2
+               CASE ('U-VELOCITY')
+                  PHI = LP%U
+                  PDPA_FORMULA = 1
+               CASE('V-VELOCITY')
+                  PHI = LP%V
+                  PDPA_FORMULA = 1
+               CASE('W-VELOCITY')
+                  PHI = LP%W
+                  PDPA_FORMULA = 1
+               CASE('VELOCITY')
+                  PHI = SQRT(LP%U**2 + LP%V**2 + LP%W**2)
+                  PDPA_FORMULA = 1
+               CASE('TEMPERATURE')
+                  PDPA_FORMULA = 1
+                  PHI = TMP_F - TMPM
+               CASE('MASS CONCENTRATION')
+                  PHI = LPC%FTPR*R_D**3
+                  PDPA_FORMULA = 2
+               CASE('NUMBER CONCENTRATION')
                   PHI = 1._EB
+                  PDPA_FORMULA = 2
+            END SELECT PDPA_QUANTITY_SELECT
+
+            SELECT CASE(PDPA_FORMULA)
+               CASE(1)
+                  IF (PY%PDPA_M-PY%PDPA_N==0) THEN
+                     EXPON = 1._EB
+                  ELSE
+                     EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
+                  ENDIF
+                  DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*R_D)**PY%PDPA_M * PHI
+                  DV%PDPA_DENOM = DV%PDPA_DENOM + LP%PWT*(2._EB*R_D)**PY%PDPA_N
+               CASE(2)
+                  EXPON = 1._EB
+                  DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*PHI
+                  IF (PY%PDPA_NORMALIZE) THEN
+                     DV%PDPA_DENOM = FOTHPI*PY%PDPA_RADIUS**3
+                  ELSE
+                     DV%PDPA_DENOM = 1._EB
+                  ENDIF
             END SELECT
-            ! Compute numerator and denumerator
-            DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*R_D)**PY%PDPA_M * PHI
+
             IF (PY%HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%HISTOGRAM_NBINS,PY%HISTOGRAM_LIMITS,DV%HISTOGRAM_COUNTS,&
                                               (2._EB*R_D)**PY%PDPA_M * PHI,LP%PWT*R_D**PY%PDPA_N)
 
-            IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
-                (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
-                (PY%QUANTITY /= 'PARTICLE FLUX X') .AND. &
-                (PY%QUANTITY /= 'PARTICLE FLUX Y') .AND. &
-                (PY%QUANTITY /= 'PARTICLE FLUX Z') .AND. &
-                (PY%QUANTITY /= 'ENTHALPY')) THEN
-               DV%PDPA_DENOM = DV%PDPA_DENOM + LP%PWT*(2._EB*R_D)**PY%PDPA_N
-            ENDIF
-         ENDDO DLOOP
-         IF (DV%PDPA_DENOM > 0._EB) GAS_PHASE_OUTPUT_RES = (DV%PDPA_NUMER/DV%PDPA_DENOM)**EXPON
-      ENDIF
+         ENDDO PDPA_PARTICLE_LOOP
+
+         IF (DV%PDPA_DENOM>TWO_EPSILON_EB) GAS_PHASE_OUTPUT_RES = (DV%PDPA_NUMER/DV%PDPA_DENOM)**EXPON
+
+      ENDIF PDPA_IF
    CASE(251)  ! WIND CHILL INDEX
       ! Wind speed at head height m/s, temperature Celsius
       ! WCT = 13.12 + 0.6215*TMP_G - 13.956*VEL_10m**(0.16) + 0.4867*TMP_G*VEL_10m**(0.16)
