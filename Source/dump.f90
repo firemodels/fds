@@ -2573,8 +2573,8 @@ IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
 IF (N_SIMPLE_CHEMISTRY_REACTIONS>1) THEN
    WRITE(LU_OUTPUT,'(/3X,A)') 'Multiple step reaction'
-   WRITE(LU_OUTPUT,'(3X,A)')  'Fuel                                     Total Heat of Combustion (kJ/kg)'
-   WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') REACTION(1)%FUEL,REACTION(1)%HOC_COMPLETE/1000._EB
+   WRITE(LU_OUTPUT,'(3X,A)')  'Fuel                                        Total Heat of Combustion (kJ/kg)'
+   WRITE(LU_OUTPUT,'(3X,A,4X,F12.4)') REACTION(1)%FUEL,REACTION(1)%HOC_COMPLETE/1000._EB
 ENDIF
 
 REACTION_LOOP: DO N=1,N_REACTIONS
@@ -2656,7 +2656,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
    ENDIF
-   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE) THEN
+   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
       ! first, create a stoichiometric mixture for current REACTION
       ZZ_REAC=0._EB
       ZZ_PROD=0._EB
@@ -2675,7 +2675,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
       ! normalize stoichiometric mixture compositions
       IF (ABS(SUM(ZZ_REAC))>TWO_EPSILON_EB) ZZ_REAC = ZZ_REAC/SUM(ZZ_REAC)
       IF (ABS(SUM(ZZ_PROD))>TWO_EPSILON_EB) ZZ_PROD = ZZ_PROD/SUM(ZZ_PROD)
-      CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA)
+      CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA,N)
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Check of equivalence ratio at stoich:   ', PHI_TILDE
       WRITE(LU_OUTPUT,'(6X,A,F8.1)')  'Stoich adiabatic flame temperature (C): ', TMP_FLAME - TMPM
    ENDIF
