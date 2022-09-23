@@ -781,12 +781,12 @@ END SUBROUTINE REACTION_RATE
 
 !> \brief Compute adiabatic flame temperature for reaction mixture
 !>
-!> \param TMP_FLAME Adiabatic flame temperature in stoichiometric reaction pocket (deg C)
-!> \param PHI_TILDE Equivalence ratio in stoich reaction pocket
-!> \param ZZ_HAT    Post flame composition stoich reaction pocket
-!> \param ZZ_0      Pre flame cell mixture composition
-!> \param ZZ_IN     Post flame cell mixture composition
-!> \param TMP_IN    Cell temperature
+!> \param TMP_FLAME  Adiabatic flame temperature in stoichiometric reaction pocket (K)
+!> \param PHI_TILDE  Equivalence ratio in stoich reaction pocket
+!> \param ZZ_HAT     Post flame composition stoich reaction pocket
+!> \param ZZ_0       Pre flame cell mixture composition
+!> \param ZZ_IN      Post flame cell mixture composition
+!> \param TMP_IN     Cell temperature (K)
 
 SUBROUTINE GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_HAT,ZZ_0,ZZ_IN,TMP_IN)
 
