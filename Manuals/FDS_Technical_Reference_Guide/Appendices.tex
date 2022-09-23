@@ -1529,9 +1529,13 @@ Benzene \cite{Bertie:AS1993b}                       &  11.5-6200                
 
 
 
-\chapter{Solving the 1-D Heat Conduction Equation}
+\chapter{Solving the Heat Conduction Equation}
 \label{solid-phase-discretization}
 
+By default, FDS solves the 1-D heat conduction equation in the direction normal to a solid surface. There is also an optional 3-D solver that makes use of the 1-D solver in an alternating direction implicit (ADI) scheme.
+
+
+\section{One-Dimensional Heat Conduction in Solids}
 
 The 1-D heat conduction equation in Cartesian coordinates is:
 \begin{equation}
@@ -1691,6 +1695,27 @@ If $\Delta T_{\rm s}^*$ exceeds a user-specified threshold, $\Delta T_{\max}$, t
    \dt = \dt_{\rm gas} \, 2^{-\lceil \ln \eta / \ln 2 \rceil }  \quad ; \quad \eta = \Delta T_{s}^*  / \Delta T_{\max}
 \end{equation}
 Note that $\lceil x \rceil$ denotes the least integer greater than $x$. To prevent an endless spiral of decreasing solid phase time steps, there is a user-specified limit of the number of subdivisions of the gas phase time step. The default is $2^2=4$.
+
+
+\section{Optional 3-D Solid Phase Heat Transfer}
+
+The solid phase heat conduction equation can be solved in 3-D by applying the 1-D equation~\ref{crank-nicolson} in the following three-step alternating direction implicit (ADI) scheme:
+\begin{align}
+\label{crank-nicolson_3d}
+(\rho_{\rm s} \, c_{\rm s})_i \frac{T_{{\rm s},i}^{n+1}-T_{{\rm s},i}^{n}}{3 \, \delta t}
+& = \frac{1}{2 \, \delta x_i} \left( k_{{\rm s},i+\frac{1}{2}} \frac{T_{{\rm s},i+1}^{n}  -T_{{\rm s},i}^{n}}  {\delta x_{i+\frac{1}{2}}} - k_{{\rm s},i-\frac{1}{2}} \frac{T_{{\rm s},i}^{n}  -T_{{\rm s},i-1}^{n}}  {\delta x_{i-\frac{1}{2}}} \right) \notag \\[0.1in]
+& + \frac{1}{2 \, \delta x_i} \left( k_{{\rm s},i+\frac{1}{2}} \frac{T_{{\rm s},i+1}^{n+1}-T_{{\rm s},i}^{n+1}}{\delta x_{i+\frac{1}{2}}} - k_{{\rm s},i-\frac{1}{2}} \frac{T_{{\rm s},i}^{n+1}-T_{{\rm s},i-1}^{n+1}}{\delta x_{i-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}  \\[0.2in]
+(\rho_{\rm s} \, c_{\rm s})_j \frac{T_{{\rm s},j}^{n+2}-T_{{\rm s},j}^{n+1}}{3 \, \delta t}
+& = \frac{1}{2 \, \delta y_j} \left( k_{{\rm s},j+\frac{1}{2}} \frac{T_{{\rm s},j+1}^{n+1}-T_{{\rm s},j}^{n+1}}{\delta y_{j+\frac{1}{2}}} - k_{{\rm s},j-\frac{1}{2}} \frac{T_{{\rm s},j}^{n+1}-T_{{\rm s},j-1}^{n+1}}{\delta y_{j-\frac{1}{2}}} \right) \notag \\[0.1in]
+& + \frac{1}{2 \, \delta y_j} \left( k_{{\rm s},j+\frac{1}{2}} \frac{T_{{\rm s},j+1}^{n+2}-T_{{\rm s},j}^{n+2}}{\delta y_{j+\frac{1}{2}}} - k_{{\rm s},j-\frac{1}{2}} \frac{T_{{\rm s},j}^{n+2}-T_{{\rm s},j-1}^{n+1}}{\delta y_{j-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}  \\[0.2in]
+(\rho_{\rm s} \, c_{\rm s})_k \frac{T_{{\rm s},k}^{n+3}-T_{{\rm s},k}^{n+2}}{3 \, \delta t}
+& = \frac{1}{2 \, \delta z_k} \left( k_{{\rm s},k+\frac{1}{2}} \frac{T_{{\rm s},k+1}^{n+2}-T_{{\rm s},k}^{n+2}}{\delta z_{k+\frac{1}{2}}} - k_{{\rm s},k-\frac{1}{2}} \frac{T_{{\rm s},k}^{n+2}-T_{{\rm s},k-1}^{n+2}}{\delta z_{k-\frac{1}{2}}} \right) \notag \\[0.1in]
+& + \frac{1}{2 \, \delta z_k} \left( k_{{\rm s},k+\frac{1}{2}} \frac{T_{{\rm s},k+1}^{n+3}-T_{{\rm s},k}^{n+3}}{\delta z_{k+\frac{1}{2}}} - k_{{\rm s},k-\frac{1}{2}} \frac{T_{{\rm s},k}^{n+3}-T_{{\rm s},k-1}^{n+3}}{\delta z_{k-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}
+\end{align}
+The full update of the 3-D equations is performed over the course of three 1-D solves. Between each 1-D update, the resulting temperature field from, say, the $x$ direction is interpolated onto the $y$ and $z$ directions via linear interpolation. Because of this, the spatial resolution of each direction need not be the same, or uniform. As with the 1-D solver, cells can be clustered near the boundary to capture steep gradients in temperature.
+
+This type of splitting scheme is discussed by Toro~\cite{Toro}, Chapter~16, ``Methods for Multi-Dimensional PDEs.''
+
 
 \chapter{Development of an Implicit Solution for Droplet Evaporation}
 \label{app_drop_evaporation}

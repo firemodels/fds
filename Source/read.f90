@@ -9358,9 +9358,8 @@ MESH_LOOP: DO NM=1,NMESHES
 
                OB=>OBSTRUCTION(N)
 
-               OB%UNDIVIDED_INPUT_AREA(1) = UNDIVIDED_INPUT_AREA(1)
-               OB%UNDIVIDED_INPUT_AREA(2) = UNDIVIDED_INPUT_AREA(2)
-               OB%UNDIVIDED_INPUT_AREA(3) = UNDIVIDED_INPUT_AREA(3)
+               OB%UNDIVIDED_INPUT_LENGTH(1:3) = UNDIVIDED_INPUT_LENGTH(1:3)
+               OB%UNDIVIDED_INPUT_AREA(1:3)   = UNDIVIDED_INPUT_AREA(1:3)
 
                OB%X1 = XB1
                OB%X2 = XB2
@@ -9524,7 +9523,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   SURF_INDEX = OB%SURF_INDEX(IOR)
                   IF (SURFACE(SURF_INDEX)%HT3D) THEN
                      SURFACE(SURF_INDEX)%LAYER_THICKNESS(1) = MAX(SURFACE(SURF_INDEX)%LAYER_THICKNESS(1),&
-                                                                  MAXVAL(UNDIVIDED_INPUT_LENGTH))
+                                                                  MAXVAL(OB%UNDIVIDED_INPUT_LENGTH))
                   ENDIF
                ENDDO
 

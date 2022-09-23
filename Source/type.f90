@@ -876,11 +876,12 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB) :: Z2=1._EB                       !< Upper specified \f$ z \f$ boundary (m)
    REAL(EB) :: MASS=1.E6_EB                   !< Actual mass of the obstruction (kg)
 
-   REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB           !< Specified area of x, y, and z faces (m2)
-   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB !< Area of x, y, z faces (m2) unbroken by mesh boundaries
-   REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB            !< Area of idealized top, sides, bottom (m2)
-   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB               !< Origin of texture map (m)
-   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB             !< Effective areas of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB              !< Specified area of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB    !< Area of x, y, z faces (m2) unbroken by mesh boundaries
+   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_LENGTH=-1._EB  !< Length in x, y, z direction (m) unbroken by mesh boundaries
+   REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB               !< Area of idealized top, sides, bottom (m2)
+   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB                  !< Origin of texture map (m)
+   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB                !< Effective areas of x, y, and z faces (m2)
 
    INTEGER :: I1=-1               !< Lower I node
    INTEGER :: I2=-1               !< Upper I node
