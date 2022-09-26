@@ -4195,6 +4195,26 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 
 \FloatBarrier
 
+\subsection{3D Heat Diffusion in Thin Steel Plates (\texorpdfstring{\textct{ht3d\_network}}{ht3d\_network})}
+\label{ht3d_network}
+
+This case tests the 3-D solid phase solver for a network of thin steel plates. Consider the image in Fig.~\ref{fig:ht3d_network} which shows a collection of connected steel plates that are 20~cm wide and 1~cm thick. Two hot panels heat up the single plate to the left and the heat is conducted through the network of plates. Besides the left-most plate, all other plates are perfectly insulated. The plot on the right simply demonstrates that the temperature of the outer two of the four right-most extremities are the same, verifying that the distribution of heat is symmetric given a symmetric arrangement of plates.
+
+\begin{figure}[ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_network_28800} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_network} 
+\end{tabular*}
+\caption[The \textct{ht3d\_network} test case]{(Left) A collection of thin steel plates are heated at the left and heat is conducted laterally along the plates. (Right) The plot shows the temperature at the outer right extremities after 8~h.}
+\label{fig:ht3d_network}
+\end{figure}
+
+
+\FloatBarrier
+
+
 \subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
 \label{sec:ht3d_sphere}
 \label{ht3d_sphere_96}
