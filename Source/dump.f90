@@ -2644,7 +2644,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
    ENDIF
-   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
+   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY .AND. N_REACTIONS==1) THEN
       ! first, create a stoichiometric mixture for current REACTION
       ZZ_REAC=0._EB
       ZZ_PROD=0._EB
@@ -5580,11 +5580,11 @@ QUANTITY_LOOP: DO IQ=1,NQT
          IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          IF (SL%DEBUG) THEN
             IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J),I=I1,I2),J=J1,J2),K=K1,K2)
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K),I=I1,I2),J=J1,J2),K=K1,K2)
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I),I=I1,I2),J=J1,J2),K=K1,K2)
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
             ENDIF
          ENDIF
          CLOSE(LU_SLCF(IQ,NM))
@@ -5626,6 +5626,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
                SLICE_MIN = MESHES(NM)%XPLT(I1)
                SLICE_MAX = MESHES(NM)%XPLT(I2)
             ENDIF
+            SLICE_MIN = SLICE_MIN + STIME
+            SLICE_MAX = SLICE_MAX + STIME
          ELSE
             IF (CC_CELL_CENTERED) THEN
                SLICE_MIN = QQ(MIN(I1+1,I2),MIN(J1+1,J2),MIN(K1+1,K2),1)
