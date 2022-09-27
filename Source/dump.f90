@@ -5313,7 +5313,7 @@ INTEGER, POINTER, DIMENSION(:,:,:) :: C
 REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
-REAL(FB) :: SLICE_MIN, SLICE_MAX
+REAL(FB) :: SLICE_MIN, SLICE_MAX, DSLICE
 INTEGER :: NX, NY, NZ
 INTEGER :: IFACT, JFACT, KFACT
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
@@ -5579,11 +5579,24 @@ QUANTITY_LOOP: DO IQ=1,NQT
          IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          IF (SL%DEBUG) THEN
             IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
+               SLICE_MIN = MESHES(NM)%YPLT(J1) - STIME
+               SLICE_MAX = MESHES(NM)%YPLT(J2) + STIME
+               DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(J2-J1, FB)
+               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(J-J1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
+               SLICE_MIN = MESHES(NM)%ZPLT(K1) - STIME
+               SLICE_MAX = MESHES(NM)%ZPLT(K2) + STIME
+               DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(K2-K1, FB)
+               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(K-K1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I)+STIME,I=I1,I2),J=J1,J2),K=K1,K2)
+               SLICE_MIN = MESHES(NM)%XPLT(I1) - STIME
+               SLICE_MAX = MESHES(NM)%XPLT(I2) + STIME
+               IF (I1 .EQ. I2 ) THEN
+                  DSLICE = 0.0_FB
+               ELSE
+                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(I2-I1, FB)
+               ENDIF
+               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(I-I1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
             ENDIF
          ENDIF
          CLOSE(LU_SLCF(IQ,NM))
@@ -5614,20 +5627,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
             CLOSE(LU_SLCF(IQ3,NM))
          ENDIF
 
-         IF (SL%DEBUG) THEN
-            IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
-               SLICE_MIN = MESHES(NM)%YPLT(J1)
-               SLICE_MAX = MESHES(NM)%YPLT(J2)
-            ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
-               SLICE_MIN = MESHES(NM)%ZPLT(K1)
-               SLICE_MAX = MESHES(NM)%ZPLT(K2)
-            ELSE
-               SLICE_MIN = MESHES(NM)%XPLT(I1)
-               SLICE_MAX = MESHES(NM)%XPLT(I2)
-            ENDIF
-            SLICE_MIN = SLICE_MIN + STIME
-            SLICE_MAX = SLICE_MAX + STIME
-         ELSE
+         IF (.NOT.SL%DEBUG) THEN
             IF (CC_CELL_CENTERED) THEN
                SLICE_MIN = QQ(MIN(I1+1,I2),MIN(J1+1,J2),MIN(K1+1,K2),1)
                SLICE_MAX = SLICE_MIN
