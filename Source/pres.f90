@@ -1047,12 +1047,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC%VEL_ERR_NEW = VELOCITY_ERROR
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(ONE_D%RDN*DT)
 
-   ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
-
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      IF (OM%NIC_R>OM%NIC_S) CYCLE CHECK_WALL_LOOP
-   ENDIF
-
    ! Save maximum velocity error
 
    IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
