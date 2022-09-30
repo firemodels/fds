@@ -568,7 +568,9 @@ END SUBROUTINE EXTINCT_2
 
 SUBROUTINE EXTINCT_3(EXTINCT,ZZ_0,ZZ_IN,TMP_IN)
 
-! Test only
+!!! Experimental !!!
+
+! This model treats excess air and excess fuel equivalently, whereas EXTINCT_2 treats excess fuel as a diluent
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
@@ -586,23 +588,55 @@ ELSE
    CFT = R1%CRIT_FLAME_TMP
 ENDIF
 
-! Define the modified pre and post mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
+! This construct for the equivalence ratio does not rely on a single reaction
 
-PHI_TILDE = ((ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX))+(ZZ_0(R1%FUEL_SMIX_INDEX) - ZZ_IN(R1%FUEL_SMIX_INDEX))) / &
-            (ZZ_0(R1%AIR_SMIX_INDEX)+ZZ_0(R1%FUEL_SMIX_INDEX))  ! Fraction of air+fuel consumed over initial air+fuel
+IF (ZZ_IN(R1%AIR_SMIX_INDEX)>TWO_EPSILON_EB) THEN
+   ! Excess AIR
+   PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / MAX( ZZ_0(R1%AIR_SMIX_INDEX), TWO_EPSILON_EB )
+ELSE
+   ! Excess FUEL
+   PHI_TILDE = ZZ_0(R1%FUEL_SMIX_INDEX) / MAX( (ZZ_0(R1%FUEL_SMIX_INDEX) - ZZ_IN(R1%FUEL_SMIX_INDEX)), TWO_EPSILON_EB )
+ENDIF
 
-DO NS=1,N_TRACKED_SPECIES
-   IF (NS==R1%FUEL_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = ZZ_0(NS) - ZZ_IN(NS)
-      ZZ_HAT(NS)   = 0._EB
-   ELSEIF (NS==R1%AIR_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = ZZ_0(NS) - ZZ_IN(NS)
-      ZZ_HAT(NS)   = 0._EB
-   ELSE  ! Products
-      ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
-      ZZ_HAT(NS)   = (PHI_TILDE-1._EB)*ZZ_0(NS) + ZZ_IN(NS)
-   ENDIF
-ENDDO
+IF ( PHI_TILDE < TWO_EPSILON_EB ) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ELSEIF ( (1._EB/PHI_TILDE) < TWO_EPSILON_EB ) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ENDIF
+
+! Define the stoichiometric pre and post mixtures (ZZ_HAT_0 and ZZ_HAT).
+
+IF (PHI_TILDE<1._EB) THEN
+   ! Excess AIR
+   DO NS=1,N_TRACKED_SPECIES
+      IF (NS==R1%FUEL_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = ZZ_0(NS)
+         ZZ_HAT(NS)   = 0._EB
+      ELSEIF (NS==R1%AIR_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = 0._EB
+      ELSE  ! Products
+         ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = ZZ_IN(NS) - (1._EB - PHI_TILDE) * ZZ_0(NS)
+      ENDIF
+   ENDDO
+ELSE
+   ! Excess FUEL
+   DO NS=1,N_TRACKED_SPECIES
+      IF (NS==R1%FUEL_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = 1._EB/PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = 0._EB
+      ELSEIF (NS==R1%AIR_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = ZZ_0(NS)
+         ZZ_HAT(NS)   = 0._EB
+      ELSE  ! Products
+         ZZ_HAT_0(NS) = 1._EB/PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = ZZ_IN(NS) - (1._EB - 1._EB/PHI_TILDE) * ZZ_0(NS)
+      ENDIF
+   ENDDO
+ENDIF
 
 ! Normalize the modified pre and post mixtures
 
@@ -619,7 +653,7 @@ ELSE
    ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 ENDIF
 
-! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
+! See if enough energy is released to raise the reactants in the stoich pocket to a temperature above the critical flame temp.
 
 CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction (includes chemical enthalpy)
 CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,CFT) ! H of products at the critical flame temperature
