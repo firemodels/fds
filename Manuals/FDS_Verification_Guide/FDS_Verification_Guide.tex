@@ -155,7 +155,7 @@ The following individuals contributed to the verification process of FDS.
 \item Salah Benkorichi of Ulster University, Belfast, developed the HT3D sphere test case.
 \item Kiyoung Moon and Jung-il Choi of Yonsei University, Seoul, South Korea, provided the Heat Channel Flow case.
 \item Jesus Alberto Mejias Tuni of Politecnico di Torino provided the 1-D tunnel cases with heat release.
-\item Morteza Gholami Haghighi Fard of Aalto University, Finland, contributed the PYRO3D ``Parallel Solid Phase Reactions'' case.
+\item Morteza Gholami Haghighi Fard of Aalto University, Finland, contributed to the development of 3-D pyrolysis.
 \end{itemize}
 
 
@@ -558,7 +558,7 @@ In this chapter we present test cases aimed at exercising the advective, pressur
 \label{ns2d_64_nupt1}
 
 In this section we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization of the terms in
-the governing equations. Consider the 2D incompressible Navier-Stokes equations
+the governing equations. Consider the 2-D incompressible Navier-Stokes equations
 \begin{equation}
 \label{eqn_NS}
 \frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} = - \nabla{p} + \nu \nabla^2 \mathbf{u} \,\mbox{,}
@@ -641,7 +641,7 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \section{Analytical Solution to the Continuity Equation}
 
-Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.
+Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2-D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.
 
 The aim of the present work is to develop analytical solutions for the compressible NS equations that can be used for verification of both compressible and variable-density low-Mach flow solvers.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
 \begin{equation}
@@ -650,9 +650,9 @@ The aim of the present work is to develop analytical solutions for the compressi
 \end{equation}
 Further, for certain simple specifications of the velocity this PDE can be solved using the method of characteristics.
 
-In what follows we present 1D and 2D solutions to (\ref{eqn_continuity}) for two basic irrotational flow fields.  All the solutions are periodic in space.  The first configuration is a pulsating flow that cycles between compressing the fluid toward the center and then the corners of the domain.  In the second configuration, time periodicity is achieved by using a constant and uniform advection velocity in combination with the compression waves.  This results in a solution with a qualitatively different character than the first.
+In what follows we present 1-D and 2-D solutions to (\ref{eqn_continuity}) for two basic irrotational flow fields.  All the solutions are periodic in space.  The first configuration is a pulsating flow that cycles between compressing the fluid toward the center and then the corners of the domain.  In the second configuration, time periodicity is achieved by using a constant and uniform advection velocity in combination with the compression waves.  This results in a solution with a qualitatively different character than the first.
 
-\subsection{Pulsating 1D solution}
+\subsection{Pulsating 1-D solution}
 \label{soln_1d}
 
 We specify the velocity as
@@ -660,13 +660,13 @@ We specify the velocity as
 \label{eqn_velocity1d}
 u(x,t)  = B \sin(x) \cos(\omega t) \,\mbox{,}
 \end{equation}
-where $B$ is a constant amplitude and $\omega$ is the frequency of the compression cycle. The velocity divergence in 1D is then
+where $B$ is a constant amplitude and $\omega$ is the frequency of the compression cycle. The velocity divergence in 1-D is then
 \begin{equation}
 \label{eqn_pdesource1d}
 \frac{\partial u}{\partial x} = B \cos(x) \cos(\omega t) \,\mbox{.}
 \end{equation}
 
-Let $q \equiv \ln \rho$ (this notation is used throughout this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
+Let $q \equiv \ln \rho$ (this notation is used throughout this work).  The 1-D continuity equation can then be written as the following linear hyperbolic PDE:
 \begin{equation}
 \label{eqn_cont1d}
 \frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \cos(x) \cos(\omega t) = 0 \,\mbox{,}
@@ -684,10 +684,10 @@ x_0(x,t) = 2 \arctan\left( \tan\left[\frac{x}{2}\right] \exp\left[-\frac{B}{\ome
 Note that we have taken the initial time to be zero, as is done throughout this work.
 
 
-\subsection{Pulsating 2D solution (\texorpdfstring{\textct{pulsating}}{pulsating})}
+\subsection{Pulsating 2-D solution (\texorpdfstring{\textct{pulsating}}{pulsating})}
 \label{soln_2d}
 
-There is a simple extension of the 1D stationary wave solution to 2D. In this section we consider the velocity field $\mathbf{u}=[u,v]^T$ with components and velocity divergence given by
+There is a simple extension of the 1-D stationary wave solution to 2-D. In this section we consider the velocity field $\mathbf{u}=[u,v]^T$ with components and velocity divergence given by
 \begin{eqnarray}
 \label{eqn_u2d}
 u(x,t) &=& B \sin(x) \cos(\omega t) \,\mbox{,} \vspace{0.2cm}\\
@@ -697,7 +697,7 @@ v(y,t) &=& B \sin(y) \cos(\omega t) \,\mbox{,}
 \label{eqn_div2d}
 \nabla\cdot\mathbf{u} = B(\cos[x] + \cos[y]) \cos(\omega t) \,\mbox{,}
 \end{equation}
-where, again, $B$ is a constant amplitude and $\omega$ is the compression frequency.  The 2D continuity equation may then be written as
+where, again, $B$ is a constant amplitude and $\omega$ is the compression frequency.  The 2-D continuity equation may then be written as
 \begin{equation}
 \label{eqn_cont2d}
 \frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \sin(y) \cos(\omega t) \frac{\partial q}{\partial y} + B( \cos[x] + \cos[y]) \cos(\omega t) = 0 \,\mbox{,}
@@ -742,15 +742,15 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Fig.~\ref{fig_pulsa
    \label{fig_pulsating 2D wave}
 \end{figure}
 
-\subsection{Stationary compression wave in 1D}
+\subsection{Stationary compression wave in 1-D}
 \label{stationary_1d}
 
-Another problem which can be solved analytically is that of a stationary compression wave.  In this section we consider a stationary compression wave combined with a constant and uniform advection velocity in 1D.  The velocity is specified to be
+Another problem which can be solved analytically is that of a stationary compression wave.  In this section we consider a stationary compression wave combined with a constant and uniform advection velocity in 1-D.  The velocity is specified to be
 \begin{equation}
 \label{eqn_statu1d}
 u(x) = c + \sin(x) \,\mbox{,}
 \end{equation}
-where $|c|>1$ is a constant.  The 1D continuity equation becomes
+where $|c|>1$ is a constant.  The 1-D continuity equation becomes
 \begin{equation}
 \label{eqn_stat1dcont}
 \frac{\partial q}{\partial t} + [c + \sin(x)] \frac{\partial q}{\partial x} + \cos(x) = 0 \,\mbox{.}
@@ -777,10 +777,10 @@ and
 x_0(x,t) = 2\arctan\left( \frac{b}{c} \tan \left[ \arctan\left\{ \frac{1+c\tan[x/2]}{b} \right\} - \frac{bt}{2} \right] - \frac{1}{c} \right) \,\mbox{.}
 \end{equation}
 
-\subsection{Stationary compression wave in 2D (\texorpdfstring{\textct{compression\_wave}}{compression\_wave})}
+\subsection{Stationary compression wave in 2-D (\texorpdfstring{\textct{compression\_wave}}{compression\_wave})}
 \label{stationary_2d}
 
-As with the pulsating flow, there is a simple extension of the 1D stationary wave solution to 2D.  In this section we consider the velocity field with components
+As with the pulsating flow, there is a simple extension of the 1-D stationary wave solution to 2-D.  In this section we consider the velocity field with components
 \begin{eqnarray}
 u(x) &=& c_1 + \sin(x) \,\mbox{,} \\
 v(y) &=& c_2 + \sin(y) \,\mbox{.}
@@ -910,7 +910,7 @@ For the consine wave intial condition the derivatives of the scalar field are co
 
 \textbf{Tony Saad and James Sutherland, The University of Utah}\\
 
-\noindent This is a 1D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum, $u$, are
+\noindent This is a 1-D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum, $u$, are
 \begin{equation}
 \frac{\partial Z}{\partial t} = - u\frac{\partial Z}{\partial x} \,\mbox{,}
 \end{equation}
@@ -925,7 +925,7 @@ The equation of state gives the following relationship between the mixture fract
 The FDS input files may be found in\\
 {\ct /Verification/Scalar\_Analytical\_Solution/saad\_512\_cfl*.fds}.\\
 
-\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1D domain of length $L=2$ m (see Fig.~\ref{fig:saad_temporal_order} below).
+\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1-D domain of length $L=2$ m (see Fig.~\ref{fig:saad_temporal_order} below).
 \begin{align}
 Z(x,0) = \frac{1}{2}\left( 1 + \sin(2\pi x/L) \right)
 \end{align}
@@ -951,7 +951,7 @@ This procedure effectively filters out the spatial error.  It is, in fact, possi
 
 \paragraph{Temporal Order Results} The {\ct saad*.fds} cases are run with three different time steps, each refined by a factor of 2, and integrated to a total time $T=0.390625$ s.  This time represents 100 time steps for a case with CFL = 1.  To assess the asymptotic temporal order from Eq.~(\ref{eq:temporal_order}), we use the three finest time steps corresponding to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$], respectively.
 
-The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1D domain. The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $l_2$ norm of $p$ computed pointwise is \input{SCRIPT_FIGURES/saad_l2_norm}\!.  Note that the $l_\infty$ norm (computed pointwise) is degenerate for the reasons just discussed.  A method to overcome this issue is discussed in Sec.~\ref{sec:shunn_mms}.
+The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1-D domain. The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $l_2$ norm of $p$ computed pointwise is \input{SCRIPT_FIGURES/saad_l2_norm}\!.  Note that the $l_\infty$ norm (computed pointwise) is degenerate for the reasons just discussed.  A method to overcome this issue is discussed in Sec.~\ref{sec:shunn_mms}.
 
 \begin{figure}[ht]
 \centering
@@ -966,7 +966,7 @@ The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the 
 \section{Variable-Density Manufactured Solution (\texorpdfstring{\textct{shunn3}}{shunn3})}
 \label{sec:shunn_mms}
 
-To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
+To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2-D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
 
 \begin{table}[!hbt]
 \centering
@@ -1186,7 +1186,7 @@ Norm & $\rho$ & $Z$ & $u$ & $H$ \\
 
 \textbf{Howard R. Baum, NIST Fellow Emeritus}\\
 
-\noindent This problem describes the collapse of a hot layer of depth $d$ adjacent to a wall at plane $y=0$ in zero gravity.  The wall is presumed to remain cool at the ambient temperature $T_0$ while the hot layer is initially $T_h$.  The initial velocity field is quiescent.  Starting at time $t=0$ the hot layer begins to diffuse into the upper cool ambient atmosphere and to expand due to dilatation.  There is also heat transfer to the wall.  The problem is 1D in the spatial coordinate $y$ and time dependent.  We are interested in the evolution of the temperature $T(y,t)$ and the velocity $v(y,t)$.
+\noindent This problem describes the collapse of a hot layer of depth $d$ adjacent to a wall at plane $y=0$ in zero gravity.  The wall is presumed to remain cool at the ambient temperature $T_0$ while the hot layer is initially $T_h$.  The initial velocity field is quiescent.  Starting at time $t=0$ the hot layer begins to diffuse into the upper cool ambient atmosphere and to expand due to dilatation.  There is also heat transfer to the wall.  The problem is 1-D in the spatial coordinate $y$ and time dependent.  We are interested in the evolution of the temperature $T(y,t)$ and the velocity $v(y,t)$.
 
 For the present problem the governing equations are
 \begin{gather}
@@ -1239,7 +1239,7 @@ Figure~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted t
 
 
 
-\section{2D Vortex Simulation (\texorpdfstring{\textct{vort2d}}{vort2d})}
+\section{2-D Vortex Simulation (\texorpdfstring{\textct{vort2d}}{vort2d})}
 \label{two_dimensional_vortex}
 
 \textbf{Max Gould, NIST SURF student}\\
@@ -1568,7 +1568,7 @@ For the case where the specific heat varies as a function of the temperature. In
   \frac{ \dq'''}{\rho_\infty u_\infty} &=&  \frac{\d}{\d x} (h_{\rm s})  \label{1stLaw}
 \end{eqnarray}
 
-Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1D form of the first law of thermodynamics, proving the divergence equation as a consistent energy balance. Then, for the case where the $c_p$ is a linear function of the temperature, $c_p=aT +b$, we have
+Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1-D form of the first law of thermodynamics, proving the divergence equation as a consistent energy balance. Then, for the case where the $c_p$ is a linear function of the temperature, $c_p=aT +b$, we have
 \begin{eqnarray}
   \frac{ \dq'''}{\rho_\infty u_\infty} \Delta x &=&  T^2 \frac{a}{2} +bT -  (T_\infty^2 \frac{a}{2} +bT_\infty) \label{LinearCP}
 \end{eqnarray}
@@ -1607,7 +1607,7 @@ In this section we test the FDS model against the low Reynolds number (Re) data 
 
 The initial condition for the FDS simulation is generated by superimposing Fourier modes with random phases such that the spectrum matches that of the initial CBC data.  An iterative procedure is employed where the field is allowed to decay for small time increments subject to Navier-Stokes physics, each wavenumber is then injected with energy to again match the initial filtered CBC spectrum.  The specific filter used here is discussed in \cite{McDermott:2005b}.
 
-To provide the reader with a qualitative sense of the flow, Fig.~\ref{fig_cbc_smv} shows the initial and final states of the velocity field in the 3D periodic domain.  The flow is unforced and so if viscosity is present the total energy decays with time due to viscous dissipation.
+To provide the reader with a qualitative sense of the flow, Fig.~\ref{fig_cbc_smv} shows the initial and final states of the velocity field in the 3-D periodic domain.  The flow is unforced and so if viscosity is present the total energy decays with time due to viscous dissipation.
 
 \subsection{Constant Smagorinsky (\texorpdfstring{\textct{csmag}}{csmag})}
 
@@ -1766,7 +1766,7 @@ where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor.  In 
 \subsection{Laminar Results}
 \label{laminar}
 
-As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2-D laminar (Poiseuille) flow calculation of
 flow through a straight channel.
 The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.
 The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.
@@ -1780,7 +1780,7 @@ is determined from the steady-state mean velocity $\bar{u}$ which is output by F
 \begin{figure}
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/poiseuille_convergence}
-\caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
+\caption[Convergence for laminar (Poiseuille) flow in a 2-D channel]{FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2-D channel.}
 \label{fig_poiseuille_convergence}
 \end{figure}
 
@@ -1789,7 +1789,7 @@ is determined from the steady-state mean velocity $\bar{u}$ which is output by F
 
 \paragraph{Smooth Walls}
 
-To verify the wall model for turbulent flow we perform 3D LES of a square duct with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section except here we perform 3D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$\,:\,$N_y$\,:\,$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a mean steady state driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated stress from the wall model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
+To verify the wall model for turbulent flow we perform 3-D LES of a square duct with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section except here we perform 3-D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$\,:\,$N_y$\,:\,$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a mean steady state driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated stress from the wall model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
 \begin{equation}
 \label{eqn_colebrook}
 \frac{1}{\sqrt{f}} = -2.0 \log_{10} \left( \frac{s/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
@@ -1828,7 +1828,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 \begin{figure}[ht]
 \centering
 \includegraphics[width=4.5in]{SCRIPT_FIGURES/fds_moody_chart}
-\caption[FDS Moody chart]{The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
+\caption[FDS Moody chart]{The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2-D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
 \label{fig_fds_moody_chart}
 \end{figure}
 
@@ -1901,7 +1901,7 @@ Given the boundary conditions $\theta=0$ at $y=0$, $\eta=0$ and $\theta=1$ at $y
 \end{equation}
 This solution is plotted in Fig.~\ref{fig:pohlhausen} (left) for different Prandtl numbers (Pr) and may be compared to the plot in Fig.~B-2 of \cite{Holman:1} for verification.
 
-In this test series, the 2D FDS domain is set 10 m in length and 1 m in height.  The simulation is run as a DNS with the viscosity, conductivity, and specific heat set to provide Prandtl numbers of [0.5, 1, 2].  The grid resolution (after a convergence study) is set to $\delta x=\delta z=1.25$ cm. The inlet velocity is set to 1 m/s with an ambient air temperature of $T_\infty=20$ \si{\degreeCelsius}. The wall boundary is set to a fixed temperature of $T_w=21$ \si{\degreeCelsius}. The outflow is set to {\ct OPEN}.  The top boundary is homogeneous Neumann for velocity and Dirichlet for temperature at $T_\infty=20$ \si{\degreeCelsius}.  The simulation is run to steady state.  The resulting temperature profiles $T(z)$ at $x=5$ m are shown in Fig.~\ref{fig:pohlhausen} (right).
+In this test series, the 2-D FDS domain is set 10 m in length and 1 m in height.  The simulation is run as a DNS with the viscosity, conductivity, and specific heat set to provide Prandtl numbers of [0.5, 1, 2].  The grid resolution (after a convergence study) is set to $\delta x=\delta z=1.25$ cm. The inlet velocity is set to 1 m/s with an ambient air temperature of $T_\infty=20$ \si{\degreeCelsius}. The wall boundary is set to a fixed temperature of $T_w=21$ \si{\degreeCelsius}. The outflow is set to {\ct OPEN}.  The top boundary is homogeneous Neumann for velocity and Dirichlet for temperature at $T_\infty=20$ \si{\degreeCelsius}.  The simulation is run to steady state.  The resulting temperature profiles $T(z)$ at $x=5$ m are shown in Fig.~\ref{fig:pohlhausen} (right).
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1981,7 +1981,7 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 
 In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1,Casara:2} for flow in a square duct with a ribbed obstruction. This configuration was also studied numerically by \cite{Lohasz:1}. The rib height is $h = 0.03$ m and the duct height is $D = 0.1$ m.  The distance between ribs in the periodic duct (the ,``pitch'') is $10 \, h$.  The length of our domain is therefore 0.3 m. The bulk velocity $U_b$ is 6.2 \si{m/s} with ambient air at 20 \si{\degreeCelsius} (density is 1.2 \si{kg/m^3} and the dynamic viscosity is $1.86 \times 10^{-5}$ \si{kg/m/s}). The Reynolds number based on $D$ is nominally 40,000. The streamwise mean pressure drop is adjusted to achieve the desired mean bulk flowrate (see Fig.~\ref{fig_ribbed_channel_Ubulk}).  The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{3,6,12,24\}$.
 
-A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 12$ case.  The goals of this calculation are to predict the flow profile above the ribs and the recirculation patterns on the windward and leeward side of the ribs.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  A change in sign of the mean $u$ velocity component indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 0.3 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.125 m to 0.175 m.  As can be seen from the plot, the $h/\delta x = 12$ resolution (green sideways triangles) provides sufficient accuracy of the reattachment length (note that the correspondence with the vectors in the image).  Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 3$ we achieve any recirculation at all.  The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}. The finest resolution, $h/\delta x=24$, is sufficient to accurately capture the root-mean-square velocity fluctuations on top of the rib, as can be seen in the bottom-right plot of the figure.
+A side view image of mean velocity vectors in the 3-D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 12$ case.  The goals of this calculation are to predict the flow profile above the ribs and the recirculation patterns on the windward and leeward side of the ribs.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  A change in sign of the mean $u$ velocity component indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 0.3 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.125 m to 0.175 m.  As can be seen from the plot, the $h/\delta x = 12$ resolution (green sideways triangles) provides sufficient accuracy of the reattachment length (note that the correspondence with the vectors in the image).  Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 3$ we achieve any recirculation at all.  The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}. The finest resolution, $h/\delta x=24$, is sufficient to accurately capture the root-mean-square velocity fluctuations on top of the rib, as can be seen in the bottom-right plot of the figure.
 
 Note that the discrepancy between the model and experimental results for the mean streamwise profile above the rib (Fig.~\ref{fig_ribbed_channel}, upper-right) can be explained by an asymmetry in the PIV data, as can be seen in Figures 11 and 12 of \cite{Casara:2}.  These results should not be interpreted as spanwise means, they are based on PIV data along the centerline plane.
 
@@ -2371,7 +2371,7 @@ The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integr
 \subsection{Mixing with Variable Specific Heats (\texorpdfstring{\textct{energy\_budget\_tmix}}{energy\_budget\_tmix})}
 \label{energy_budget_tmix}
 
-This case tests the ability of FDS to properly account for temperature dependent specific heats.  A coarse 2D channel mixing case is presented where hot gas at 900 \si{\degree C} with a constant specific heat of $c_p=1$ \si{kJ/(kg.K)} enters from the bottom left vent with a flux of 1 \si{kg/(m^2.s)} and cold gas at 20 \si{\degree C} with a constant specific heat of $c_p=10$ \si{kJ/(kg.K)} enters from a top left vent with the same mass flux.  The gases mix in a center channel and exit the domain flowing to the right.
+This case tests the ability of FDS to properly account for temperature dependent specific heats.  A coarse 2-D channel mixing case is presented where hot gas at 900 \si{\degree C} with a constant specific heat of $c_p=1$ \si{kJ/(kg.K)} enters from the bottom left vent with a flux of 1 \si{kg/(m^2.s)} and cold gas at 20 \si{\degree C} with a constant specific heat of $c_p=10$ \si{kJ/(kg.K)} enters from a top left vent with the same mass flux.  The gases mix in a center channel and exit the domain flowing to the right.
 
 The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1 \times 10 \times (20+273.15) = 4104.65$ \si{kJ/(m^2.s)}.  The mixture heat capacity at the outlet is 5.5 \si{kJ/(kg.K)} and the flux is 2 \si{kg/(m^2.s)}.  Therefore the outlet temperature is $4104.65/2/5.5 - 273.15 = 100$ \si{\degree C}.
 \begin{figure}[ht]
@@ -3962,7 +3962,7 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \section{Temperature-Dependent Thermal Properties (\texorpdfstring{\textct{heat\_conduction\_kc}}{heat\_conduction\_kc})}
 \label{heat_conduction_kc}
 
-This example demonstrates the 1D heat conduction in Cartesian, cylindrical, and spherical geometries with temperature-dependent thermal properties.
+This example demonstrates the 1-D heat conduction in Cartesian, cylindrical, and spherical geometries with temperature-dependent thermal properties.
 The Cartesian solution was computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
 model~\cite{Childs}. The cylindrical and spherical solutions were computed using a commercial finite-element solver, ABAQUS.
 
@@ -4135,10 +4135,29 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 
 \clearpage
 
-\section{Solid Heat Transfer 3D (Beta)}
+\section{Solid Heat Transfer 3-D}
 \label{sec:ht3d}
 
-This section presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+This section presents test cases for solid phase heat diffusion (conduction) in 3-D.  This feature is not yet connected to the 1-D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+
+
+\subsection{Energy Conservation in a 3-D Solid (\texorpdfstring{\textct{ht3d\_energy\_conservation}}{ht3d\_energy\_conservation})}
+\label{ht3d_energy_conservation}
+
+A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface for 10~s. Figure \ref{fig:ht3d_energy_conservation} displays the increased internal enthalpy versus the net heat flux integrated over the surface and integrated over time.
+
+\begin{figure}[ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_fine} 
+\end{tabular*}
+\caption[The \textct{ht3d\_energy\_conservation} test case]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. At right is the same plot showing how the 3-D temperature field is updated over three time steps.}
+\label{fig:ht3d_energy_conservation}
+\end{figure}
+
+\FloatBarrier
 
 
 \subsection{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
@@ -4151,20 +4170,20 @@ In this test case, we utilize the non-steady state conduction solution provided 
 \end{equation}
 where $\erfc = 1 - \erf(x)$.
 
-This is a 1D problem in depth into the solid.  In FDS, the problem is solved in 2D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
+This is a 1-D problem in depth into the solid.  In FDS, the problem is solved in 2-D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
 
 The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface (wall) temperature, $T_{\rm w}$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_{\rm w}(t) \equiv T(0,t)$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_slab}
-\caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3D heat transfer.}
+\caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3-D heat transfer.}
 \label{fig:ht3d_slab}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
+\subsection{3-D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
 \label{ht3d_ibeam}
 
 The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 1.7 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
@@ -4195,7 +4214,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 
 \FloatBarrier
 
-\subsection{3D Heat Diffusion in Thin Steel Plates (\texorpdfstring{\textct{ht3d\_network}}{ht3d\_network})}
+\subsection{3-D Heat Diffusion in Thin Steel Plates (\texorpdfstring{\textct{ht3d\_network}}{ht3d\_network})}
 \label{ht3d_network}
 
 This case tests the 3-D solid phase solver for a network of thin steel plates. Consider the image in Fig.~\ref{fig:ht3d_network} which shows a collection of connected steel plates that are 20~cm wide and 1~cm thick. Two hot panels heat up the single plate to the left and the heat is conducted through the network of plates. Besides the left-most plate, all other plates are perfectly insulated. The plot on the right simply demonstrates that the temperature of the outer two of the four right-most extremities are the same, verifying that the distribution of heat is symmetric given a symmetric arrangement of plates.
@@ -4215,7 +4234,7 @@ This case tests the 3-D solid phase solver for a network of thin steel plates. C
 \FloatBarrier
 
 
-\subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
+\subsection{3-D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
 \label{sec:ht3d_sphere}
 \label{ht3d_sphere_96}
 \label{ht3d_sphere_48}
@@ -5183,7 +5202,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \subsection{Particle Trajectory (\texorpdfstring{\textct{flat\_fire}}{flat\_fire})}
 \label{flat_fire}
 
-There are no known solutions of the particle trajectory equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is relatively small compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u_{\rm p}$, is a good approximation for the velocity magnitude, $|\mathbf{u_{\rm p}}|$. In 2D, this approximation decouples the horizontal ($x$) equation of motion from the vertical ($z$) and reduces the vertical equation of motion to a linear ODE:
+There are no known solutions of the particle trajectory equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is relatively small compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u_{\rm p}$, is a good approximation for the velocity magnitude, $|\mathbf{u_{\rm p}}|$. In 2-D, this approximation decouples the horizontal ($x$) equation of motion from the vertical ($z$) and reduces the vertical equation of motion to a linear ODE:
 \begin{align}
    &\frac{\d u_{\rm p}}{\d t} = -K \, u_{\rm p}^2 \quad ;  \quad K \equiv \frac{3 \rho_{\rm a} C_{\rm d}}{8 \rho_{\rm p} r_{\rm p}} \\[.1in]
    &\frac{\d w_{\rm p}}{\d t} = -K \, u_{\rm p} \, w_{\rm p} - g
@@ -6441,7 +6460,7 @@ For the $\&$OBSTs and grid aligned stress method where the momentum equations ar
 
 \label{sec:poiseuille_cc}
 
-Consider a gas with density $\rho=1.165$ kg/m$^3$, and molecular viscosity $\mu=0.025$ kg/m/s, being advected through a 2D channel of height $H=1$ m and length $L=10$ m, by means of a constant force field along the channel direction $F_x=1$ N/m$^3$. This force field is equivalent to a pressure drop $dp/dx=-1$ Pa/m. The analytical solution for the friction factor in this laminar flow is:
+Consider a gas with density $\rho=1.165$ kg/m$^3$, and molecular viscosity $\mu=0.025$ kg/m/s, being advected through a 2-D channel of height $H=1$ m and length $L=10$ m, by means of a constant force field along the channel direction $F_x=1$ N/m$^3$. This force field is equivalent to a pressure drop $dp/dx=-1$ Pa/m. The analytical solution for the friction factor in this laminar flow is:
 %
 \begin{equation}
    f_{an} = 24/Re_H
@@ -6613,7 +6632,7 @@ using the base functions as shown below.
 \subsection{Favre Average (\texorpdfstring{\textct{shunn3\_FavreZ}}{shunn3\_FavreZ})}
 \label{sec:favre_average}
 
-The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2D analytical solution for both the density and mixture fraction.  In this section, to test the statistical output {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} we compare FDS results at two grid resolutions, $\delta x$ = [$L/32$, $L/64$], with $L=2$.  The case is run to $t=10$ s.  Both the running average and Favre average are output at ($x=0,y=0$), the center of the domain.  Note that this imparts an $\mathcal{O}(\delta x)$ error to the output.  The higher grid resolution is therefore more accurate.
+The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2-D analytical solution for both the density and mixture fraction.  In this section, to test the statistical output {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} we compare FDS results at two grid resolutions, $\delta x$ = [$L/32$, $L/64$], with $L=2$.  The case is run to $t=10$ s.  Both the running average and Favre average are output at ($x=0,y=0$), the center of the domain.  Note that this imparts an $\mathcal{O}(\delta x)$ error to the output.  The higher grid resolution is therefore more accurate.
 
 \begin{figure}[h!]
 \centering
