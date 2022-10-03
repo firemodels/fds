@@ -4157,6 +4157,19 @@ A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface
 \label{fig:ht3d_energy_conservation}
 \end{figure}
 
+Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for cases where the internal grid cell is 0.25 times the gas phase grid cell size (left plot), and where the internal grid cells stretch as they would for a 1-D heat conduction calculation (right). The grid stretching is not recommended for the 3-D solver.
+
+\begin{figure}[ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_3}
+\end{tabular*}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. The left plot is the case where the internal grid cells are 0.25 the size of the gas phase cells, and the right plot is the case where the internal cells stretch as is done in the 1-D solver.}
+\label{fig:ht3d_energy_conservation_2}
+\end{figure}
+
 \FloatBarrier
 
 
