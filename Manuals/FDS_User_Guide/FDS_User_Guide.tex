@@ -8630,7 +8630,7 @@ Note that a deadband controller needs to have {\ct LATCH} set to {\ct F}
 
 \subsection{Control Function: \texorpdfstring{{\tt RESTART} and {\tt KILL}} {RESTARTKILL} }
 
-There are times when you might only want to run a simulation until some goal is reached, or you might want to create some baseline condition and then run multiple permutations of that baseline. For example, you might want to run a series of simulations where different mitigation strategies are tested once a detector alarms. Using the {\ct RESTART} control function, you can cause a restart file to be created once a desired condition is met.  The simulation can continue and the restart files can be copied to have the job identifying string, {\ct CHID}, of the various permutations (providing of course that the usual restrictions on the use of restart files are followed). For example, the lines
+There are times when you might only want to run a simulation until some goal is reached, or you might want to create some baseline condition and then run multiple permutations of that baseline. For example, you might want to run a series of simulations where different mitigation strategies are tested once a detector alarms. Using the {\ct RESTART} control function, you can cause a restart file to be created once a desired condition is met. The simulation can continue and the restart files can be copied to have the job identifying string, {\ct CHID}, of the various permutations (providing of course that the usual restrictions on the use of restart files are followed).  Using the {\ct KILL} control function stops FDS once a desired condition is met. If you want to both write restart files and stop FDS, then you would need to use both functions with the same {\ct INPUT\_ID}. For example, the lines
 \begin{lstlisting}
 &DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
 &DEVC ID='velo', QUANTITY='VELOCITY', SETPOINT=10., XYZ=4.5,6.7,3.6 /
@@ -8638,9 +8638,14 @@ There are times when you might only want to run a simulation until some goal is 
 &CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
 &CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='velo' /
 \end{lstlisting}
-will kill the job and output restart files when the temperature at the given point rises above 1000~$^\circ$C; or just force restart files to be output when the velocity at a given point exceeds 10~m/s.
+will kill the job when the temperature at the given point rises above 1000~$^\circ$C; or just force restart files to be output when the velocity at a given point exceeds 10~m/s. The lines
+\begin{lstlisting}
+&DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
 
-
+&CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
+&CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='temp' /
+\end{lstlisting}
+will kill the job when the temperature at the given point rises above 1000~$^\circ$C and also write restart files.
 
 \subsection{Control Function: \texorpdfstring{{\tt CUSTOM}}{CUSTOM} }
 \label{info:CUSTOM}
