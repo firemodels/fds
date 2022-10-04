@@ -6886,8 +6886,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//', BACKING '//TRIM(BACKING)//' not recognized'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
-   SF%HT3D = HT3D
-   IF (SF%HT3D) THEN
+   IF (HT3D) THEN
+      SF%HT_DIM = 3
       SF%INCLUDE_BOUNDARY_THR_D_TYPE = .TRUE.
       SOLID_HEAT_TRANSFER_3D         = .TRUE.
    ENDIF
@@ -6911,7 +6911,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%DUCT_PATH            = DUCT_PATH
    SF%DT_INSERT            = DT_INSERT
    SF%E_COEFFICIENT        = E_COEFFICIENT
-   IF (SF%HT3D .AND. EMISSIVITY>=0._EB .AND. EMISSIVITY_BACK<0._EB) EMISSIVITY_BACK = EMISSIVITY
+   IF (SF%HT_DIM>1 .AND. EMISSIVITY>=0._EB .AND. EMISSIVITY_BACK<0._EB) EMISSIVITY_BACK = EMISSIVITY
    SF%EMISSIVITY           = EMISSIVITY
    SF%EMISSIVITY_BACK      = EMISSIVITY_BACK
    SF%FIRE_SPREAD_RATE     = SPREAD_RATE / TIME_SHRINK_FACTOR
@@ -7226,7 +7226,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%N_LAYERS = 0
    N_LIST = 0
    NAME_LIST = 'null'
-   IF (SF%HT3D) THICKNESS(1) = 1.0_EB  ! Dummy thickness
+   IF (SF%HT_DIM>1) THICKNESS(1) = 1.0_EB  ! Dummy thickness
    SF%THICKNESS  = 0._EB
    SF%LAYER_MATL_INDEX = 0
    SF%LAYER_DENSITY    = 0._EB
@@ -7657,7 +7657,7 @@ TEXTURE_WIDTH           = 1._EB
 TEXTURE_HEIGHT          = 1._EB
 TGA_ANALYSIS            = .FALSE.
 THICKNESS               = -1._EB
-HT3D      = .FALSE.
+HT3D                    = .FALSE.
 TMP_BACK                = -TMPM-1._EB
 TMP_FRONT               = -TMPM-1._EB
 TMP_INNER               = -TMPM-1._EB
@@ -9020,7 +9020,7 @@ USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2,OBT
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,IIO,JJO,KKO,SURF_INDEX,IOR
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,IIO,JJO,KKO,IOR
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: OVERLAY,IS_INTERSECT
@@ -9503,6 +9503,12 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDIF
                ENDDO
 
+               ! Check for thin obstruction
+
+               IF (OB%I1==OB%I2 .AND. OB%I1>0 .AND. OB%I2<IBAR) OB%THIN = .TRUE.
+               IF (OB%J1==OB%J2 .AND. OB%J1>0 .AND. OB%J2<JBAR) OB%THIN = .TRUE.
+               IF (OB%K1==OB%K2 .AND. OB%K1>0 .AND. OB%K2<KBAR) OB%THIN = .TRUE.
+
                ! Save boundary condition info for obstacles
 
                OB%SURF_INDEX(:) = DEFAULT_SURF_INDEX
@@ -9523,14 +9529,16 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! If the obstruction is assigned a SURF with 3-D heat transfer (HT3D), adjust the nominal layer thickness for this
                ! surface. Storage arrays for WALL and THIN_WALL are based on the maximum thickness.
+               ! Also, look for thin obstructions that could off-gas so that certain arrays can be allocated.
 
                DO IOR=-3,3
                   IF (IOR==0) CYCLE
-                  SURF_INDEX = OB%SURF_INDEX(IOR)
-                  IF (SURFACE(SURF_INDEX)%HT3D) THEN
-                     SURFACE(SURF_INDEX)%LAYER_THICKNESS(1) = MAX(SURFACE(SURF_INDEX)%LAYER_THICKNESS(1),&
-                                                                  MAXVAL(OB%UNDIVIDED_INPUT_LENGTH))
-                  ENDIF
+                  SF => SURFACE(OB%SURF_INDEX(IOR))
+                  IF (SF%HT_DIM>1) SF%LAYER_THICKNESS(1) = MAX(SF%LAYER_THICKNESS(1),MAXVAL(OB%UNDIVIDED_INPUT_LENGTH))
+                  DO NNN=1,SF%N_MATL
+                     ML => MATERIAL(SF%MATL_INDEX(NNN))
+                     IF (ML%N_REACTIONS>0 .AND. OB%THIN) REACTING_THIN_OBSTRUCTIONS = .TRUE.
+                  ENDDO
                ENDDO
 
                ! Determine if the OBST is CONSUMABLE

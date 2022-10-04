@@ -1,0 +1,39 @@
+&HEAD CHID='ht3d_mass_conservation', TITLE='Mass budget for simple HT3D case' /
+
+&MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
+
+&TIME T_END=100, WALL_INCREMENT=1 /
+
+&SPEC ID='WOOD MOISTURE' /
+
+&DUMP MASS_FILE=T, DT_MASS=1. /
+
+&MATL ID                 = 'WOOD'
+      DENSITY            = 400.
+      CONDUCTIVITY       = 5.0
+      SPECIFIC_HEAT      = 1.0
+      REFERENCE_TEMPERATURE = 100
+      PYROLYSIS_RANGE    = 20.
+      MATL_ID            = 'DRY WOOD'
+      NU_MATL            = 0.95
+      SPEC_ID            = 'WOOD MOISTURE'
+      NU_SPEC            = 0.05
+      HEAT_OF_REACTION   = 300. /
+
+&MATL ID                 = 'DRY WOOD'
+      DENSITY            = 380.
+      CONDUCTIVITY       = 5.
+      SPECIFIC_HEAT      = 1. /
+
+&SURF ID='CHUNK', COLOR='BROWN', MATL_ID='WOOD', HT3D=T, CELL_SIZE=0.01 /
+&SURF ID='HOT', TMP_FRONT=1000, COLOR='RED', TAU_T=0, HEAT_TRANSFER_COEFFICIENT=0, DEFAULT=T /
+
+&OBST XB=0.45,0.55,0.45,0.55,0.45,0.55, SURF_ID='CHUNK' /
+&OBST XB=0.35,0.45,0.35,0.65,0.35,0.65, SURF_ID='CHUNK' /
+&OBST XB=0.35,0.65,0.35,0.65,0.64,0.65, SURF_ID='CHUNK' /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T /
+
+&TAIL/
+
+
