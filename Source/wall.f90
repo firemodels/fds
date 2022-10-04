@@ -2756,7 +2756,7 @@ REAL(EB) :: DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             DEL_DOT_Q_SC,Q_DOT_G_PPP,Q_DOT_O2_PPP,Q_DOT_G_PP,Q_DOT_O2_PP,R_SURF,U_SURF,V_SURF,W_SURF,T_BC_SUB,DT_BC_SUB,&
             Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,RHO_C_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL,T_BOIL_EFF,&
             Q_DOT_PART(MAX_LPC),M_DOT_PART(MAX_LPC),Q_DOT_PART_S(MAX_LPC),M_DOT_PART_S(MAX_LPC),RADIUS,HTC_LIMIT,TMP_G,&
-            ZZ_G(1:N_TRACKED_SPECIES)
+            ZZ_G(1:N_TRACKED_SPECIES),CP1,CP2
 REAL(EB) :: D_Z_N(0:I_MAX_TEMP),D_Z_TEMP,D_Z_P(0:NWP_MAX+1), D_DRHOZDX(0:NWP_MAX),D_BAR,PHI_BAR,D_STAR_BAR,&
             RR_SUM,GAS_DENSITY,POROSITY(0:NWP_MAX+1),DDSUM,SMALLEST_CELL_SIZE(1:MAX_LAYERS)
 REAL(EB), POINTER, DIMENSION(:) :: DELTA_TMP
@@ -3552,15 +3552,19 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ITER = ITER + 1
                   C_S = 0._EB
                   H_S = 0._EB
+                  CP1 = 0
+                  CP2 = 0
                   ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
                   H_S = 0._EB
                   T_S: DO N=1,SF%N_MATL
                      IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
                      ML  => MATERIAL(SF%MATL_INDEX(N))
                      H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
+                     CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*ONE_D%MATL_COMP(N)%RHO(I)
+                     CP2 = CP1 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*ONE_D%MATL_COMP(N)%RHO(I)
                   ENDDO T_S
                   C_S = H_S/T_NODE
-                  ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/C_S
+                  ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/(C_S+T_NODE*(CP2-CP1))
                   IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
                   IF (ITER > 20) THEN
                      ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
