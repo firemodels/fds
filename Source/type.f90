@@ -142,6 +142,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
+   LOGICAL :: DEBUG=.FALSE.                          !< Flag indicating if known quantities are output for smokeviewe debugging
 
    TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
