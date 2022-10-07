@@ -1538,7 +1538,7 @@ The discretized form of this PDE, that is, its approximation on a numerical grid
 In the next two sections, these simplifications of the Poisson equation will be discussed, along with parameters that you might need to set to increase the accuracy of the solution for certain applications.
 
 
-\section{Accuracy of the Pressure Solver on Multiple Meshes}
+\section{Accuracy of the Pressure Solver}
 \label{pressure_solver}
 
 For a single mesh, the solution of the simplified (i.e. separable) form of the Poisson equation for the pressure can be solved relatively quickly and accurately (i.e. to machine precision) using an FFT-based solver. However, for multiple meshes of varying grid resolution and configuration, it is not possible to use the fast solver for the global solution of the Poisson equation. Instead, the fast solver is employed mesh by mesh in parallel, and the pressure field on each mesh is forced to match at the mesh boundaries through repeated solves on the individual meshes. It is prohibitively time-consuming to iterate the global pressure solution to the same level of accuracy as the local pressure solutions. The inaccuracy of the global pressure solution is manifested in a slight mismatch in the normal component of velocity at the mesh boundaries. An error tolerance is specified for this mismatch in velocity. These small errors in the normal component of velocity also appear within an individual mesh at solid, internal boundaries. The fast, FFT-based solver can only enforce exact no-flux conditions at exterior boundaries of the mesh.
@@ -1874,6 +1874,8 @@ Obstructions may be created or removed during a simulation. See Section~\ref{inf
 An obstruction that is relatively thin compared to the gas phase numerical grid spacing is approximated as an infinitely thin sheet. These obstructions, like window panes, form a flow and (partial) radiation barrier, but if the numerical mesh is coarse relative to its thickness, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. Smokeview renders this obstruction as a thin sheet, but it is allowed to have thermally-thick boundary conditions.
 
 This obstruction has the drawback that it is not possible to specify a normal velocity component on its surface. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected or extracted reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. If you want to create a simple fan, for example, the obstruction should be specified to be at least one mesh cell thick. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=T} on the {\ct MISC} line, or {\ct THICKEN=T} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
+
+Another drawback occurs when using the default FFT-based pressure solver. Thin obstructions are more prone to errors in the normal velocity at the obstruction. If thin obstructions see large pressure gradients across the obstruction or are impacted by high normal velocities, then tighter tolerances for the FFT-based solver or the use of another pressure solver may be warranted. For details see the discussion in Section~\ref{pressure_solver}.
 
 Thin obstructions may generate a mass source without specification of a normal velocity component.  The gas cell next to the obstruction is given a volumetric source term, but the momentum at the surface remains zero.
 
