@@ -553,7 +553,7 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
    CHARACTER(LABEL_LENGTH) :: RAMP_CFT    !< Name of ramp for critical flame temperature
    CHARACTER(LABEL_LENGTH) :: SPEC_ID_CFT !< Name of species for CFT ramp
-    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
@@ -601,6 +601,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
+   INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
@@ -610,6 +611,7 @@ TYPE REACTION_TYPE
    LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
    LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
    LOGICAL :: FAST_CHEMISTRY=.FALSE.        !< Indicator of fast reaction
+   LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
    LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
 END TYPE REACTION_TYPE

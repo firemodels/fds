@@ -141,7 +141,7 @@ INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYP
 INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_BOX_TYPE=4                  !< Flag for OB\%SHAPE_TYPE
 
-INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1  !< Number of SIMPLE_CHEMISTRY reactions
+INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS(MAX_GAS_REACTIONS)=0  !< Number of SIMPLE_CHEMISTRY reactions
 
 INTEGER :: FUEL_INDEX=0                    !< Index for FUEL in SIMPLE_CHEMISTRY model
 INTEGER :: O2_INDEX=0                      !< Index for O2 in SIMPLE_CHEMISTRY model
@@ -161,9 +161,9 @@ INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
 
-REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
-REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
-REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0.2_EB   !< Fraction of nitrogen atoms in the fuel that are converted to HCN
+REAL(EB) :: FUEL_C_TO_CO_FRACTION(MAX_GAS_REACTIONS)=0.6667_EB !< Fraction of C atoms in the fuel that are converted to CO
+REAL(EB) :: FUEL_H_TO_H2_FRACTION(MAX_GAS_REACTIONS)=0._EB     !< Fraction of H atoms in the fuel that are converted to H2
+REAL(EB) :: FUEL_N_TO_HCN_FRACTION(MAX_GAS_REACTIONS)=0.2_EB   !< Fraction of N atoms in the fuel that are converted to HCN
 
 ! Miscellaneous logical constants
 
