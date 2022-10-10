@@ -1,9 +1,9 @@
-&HEAD CHID='ashrae7_table',TITLE='AHSRAHE Fundamentals HVAC Sample Case 7 User Defined Fan Curve' /
+&HEAD CHID='ashrae7_table',TITLE='ASHRAE Fundamentals HVAC Sample Case 7 User Defined Fan Curve' /
 
 &MESH IJK=20,20,20, XB=0.,10.,0.,10.,0.,10./
 
-&MISC STRATIFICATION=.FALSE.,TMPA=19.33/
-&RADI RADIATION=.FALSE./
+&MISC STRATIFICATION=F,TMPA=19.33/
+&RADI RADIATION=F/
 
 &VENT PBZ=10,SURF_ID='OPEN'/
 &VENT PBX=0,SURF_ID='OPEN'/

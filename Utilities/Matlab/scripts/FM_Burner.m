@@ -21,14 +21,14 @@ for i_fuel=1:4;
 
       Time_FDS = DEV.data(:,find(strcmp(DEV.colheaders,'Time')));
       XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'"XO2"')));
-      Qdot_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'HRR')))-1.;
+      Qdot_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'HRR')));
       Qrad_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'Q_RADI')));
       ntp      = length(Time_FDS);
 
       fid = fopen([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_',res_name{fds_resolution},'.csv'],'wt','n');
       fprintf(fid,'%s\n','XO2,eta,Chi_R');
       for ii=1:ntp
-         fprintf(fid,'%5.3f,%6.2f,%6.2f\n',XO2_FDS(ii),Qdot_FDS(ii)/10.,max(0,-Qrad_FDS(ii)/max(0.001,Qdot_FDS(ii))));
+         fprintf(fid,'%5.3f,%6.2f,%6.2f\n',XO2_FDS(ii),Qdot_FDS(ii)/max(Qdot_FDS),max(0,-Qrad_FDS(ii)/max(0.001,Qdot_FDS(ii))));
       end
       fclose(fid);
 

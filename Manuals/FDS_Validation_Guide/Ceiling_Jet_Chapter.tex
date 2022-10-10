@@ -415,6 +415,7 @@ The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate t
 \end{figure}
 
 
+
 \clearpage
 
 \subsection{NIST Composite Beam}
@@ -1276,8 +1277,341 @@ The second method of predicting smoke detector activation is to use an empirical
 
 
 
+\clearpage
+
+\section{Backlayering of Smoke in Tunnels}
+
+This section presents small and large-scale experiments focused on the phenomenon known as ``backlayering;'' that is, where jet fans are installed near the ceiling of a tunnel to blow smoke from a fire in one direction. Propagation of smoke upwind of the fire is called backlayering.
 
 
 
+
+\subsection{Wu Bakar Tunnel Experiments}
+
+This section contains the results of the simulations of the Wu and Bakar experiments described in Section~\ref{Wu_Bakar_Tunnels_Description}. Five simulations are conducted. In each, the heat release rate is stepped up from its lowest reported value to its highest, each step lasting 20~s. For each of the eight heat release rates, the tunnel velocity is set to the reported critical velocity. Temperature readings along the ceiling indicate where the smoke layer temperature drops below 30~$^\circ$C, 10~$^\circ$C above ambient. This is taken as the extent of the back-layer. Using an empirical correlation for the normalized back-layer length, $L_{\rm b}^*$, developed by Li~et al.~\cite{Li:FSJ2010}
+\be
+   L_{\rm b}^* = \left\{ \begin{array}{ll} 18.5 \, \ln (0.81 \, Q^{*1/3}/V^*) & Q^*\le 0.15 \\
+                                      18.5 \, \ln (0.43 /V^*)            & Q^*>   0.15 \end{array} \right.
+\ee
+where
+\be
+   L_{\rm b}^* = \frac{L_{\rm b}}{\bar{H}} \quad ; \quad \bar{H}=\frac{4A}{P} \quad ; \quad Q^*=\frac{Q}{\rho_\infty c_p T_\infty \sqrt{g \bar{H}^5} } \quad ; \quad V^* = \frac{V}{\sqrt{g \bar{H}}}
+\ee
+the FDS-predicted critical velocity, $V_{\rm FDS}$, can be estimated from the measured, $V_{\rm exp}$, via
+\be
+   V_{\rm FDS} \approx V_{\rm exp} \left( 1 + \frac{L_{\rm b,FDS}}{18.5 \, \bar{H}} \right)
+\ee
+Note that $\bar{H}$ is known as the {\em hydraulic diameter} which takes into consideration the tunnel's cross-sectional area, $A$, and perimeter, $P$. For a square cross section, the hydraulic diameter equals the tunnel height.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[height=2.5in]{SCRIPT_FIGURES/Wu_Bakar_Tunnels/Wu_Bakar_Critical_Velocity}
+\end{center}
+\caption[Wu and Bakar critical velocity correlation with FDS results added]
+{Wu and Bakar critical velocity correlation with FDS results added.}
+\label{Wu_Bakar_Correlation}
+\end{figure}
+
+The non-dimensionalized critical velocity predictions are plotted against the non-dimensionalized HRR in Fig.~\ref{Wu_Bakar_Correlation}. The solid line in the figure is the correlation developed by Wu and Bakar~\cite{Wu:FSJ2000}:
+\be
+   V^* = \left\{ \begin{array}{ll} 0.4 \, (Q^*/0.2)^{1/3} & Q^* \le 0.2 \\ 0.4 & Q^* > 0.2 \end{array} \right.
+\ee
+
+
+\FloatBarrier
+
+\subsection{Memorial Tunnel Experiments}
+\label{Memorial_Tunnel_Volume_Flow}
+
+A description of the Memorial Tunnel experiments can be found in Section~\ref{Memorial_Tunnel_Description}. Figure~\ref{Memorial_Tunnel_Cold_Flow} compares predicted and measured volume flow through the tunnel as a function of the number of activated jet fans. Note that the experimental data has been reported in Ref.~\cite{Memorial_Phase_IV}, published in 1999. The original test report, published in 1995~\cite{Memorial}, contains a section (8.8) where these cold flow fan tests are discussed. The reported volume flows in the original report are approximately 20~\% higher than those reported in the follow-up report. The reason for the discrepancy is that the cross-sectional area was reduced at the measurement locations due to the installation of instrument packages.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Cold_Flow_Series_1_Volume_Flow}
+\end{center}
+\caption[Volume flow in Memorial Tunnel as a function of the number of jet fans]
+{Volume flow in Memorial Tunnel as a function of the number of jet fans.}
+\label{Memorial_Tunnel_Cold_Flow}
+\end{figure}
+
+The figures on the following pages summarize the results of 17 simulations of the longitudinal fan experiments (Sequences 15, 17, and 18). For each experiment, the measured heat release rate is shown. The model heat release rate is specified to match, but some deviations between the two are evident. Next, the measured and predicted volume flow through the tunnel is presented. The measured and predicted values are taken at Loop~214, just inside the north (uphill) portal. Next shown are the near-ceiling temperature and velocity at Loop~305, approximately 10~m uphill of the fire. ``Backlayering'' of smoke is assumed if the temperature at this location rises significantly above ambient. The jet fans were positioned uphill of the fire and usually blew in the downhill direction, except for Tests 23B, 24B, and 25B, where the fans were positioned downhill of the fire, but still blew in the downhill direction. The fan flow direction was reversed during some of the experiments.
+
+The fifth figure indicates where a near-ceiling temperature of 50~$^\circ$C is located, as interpolated from the measurements made 0.9~m below the ceiling at the numbered locations shown on the horizontal axis. This position varies in time as the jet fans are activated. The fire location is designated with the letter ``F''. In most cases, the fans blew air downhill from the north portal (left) towards the south portal (right). Backlayering is indicated when the location of 50~$^\circ$C falls to the left of the dashed vertical line.
+
+Finally, the contour plots show comparisons of measured and predicted gas temperature in the vertical centerline plane of the tunnel. The temperature contours are drawn from temperature values obtained along 13 vertical arrays of thermocouples at measurement stations that are labelled along the bottom of each plot. Data from Loops~214 and 202 have not been used. The fire location is designated with the letter ``F'', which corresponds to Loop~205.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_501_T_10}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 501]{Summary of Memorial Tunnel Test 501. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_501}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_502_T_10}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 502]{Summary of Memorial Tunnel Test 502. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_502}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_605_T_28}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 605]{Summary of Memorial Tunnel Test 605. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_605}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_606A_T_4}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 606A]{Summary of Memorial Tunnel Test 606A. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_606A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_607_T_10}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 607]{Summary of Memorial Tunnel Test 607. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_607}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_608_T_2}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 608]{Summary of Memorial Tunnel Test 608. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_608}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_610_T_24}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 610]{Summary of Memorial Tunnel Test 610. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_610}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_611_T_2}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 611]{Summary of Memorial Tunnel Test 611. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_611}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_612B_T_2}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 612B]{Summary of Memorial Tunnel Test 612B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_612B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_615B_T_28}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 615B]{Summary of Memorial Tunnel Test 615B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_615B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_617A_T_30}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 617A]{Summary of Memorial Tunnel Test 617A. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_617A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_618A_T_5}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 618A]{Summary of Memorial Tunnel Test 618A. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_618A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_621A_T_12}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 621A]{Summary of Memorial Tunnel Test 621A. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_621A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_622B_T_5}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 622B]{Summary of Memorial Tunnel Test 622B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_622B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_623B_T_10}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 623B]{Summary of Memorial Tunnel Test 623B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_623B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_624B_T_3}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 624B]{Summary of Memorial Tunnel Test 624B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_624B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B-214-VF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B-CJ} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B-CJ-Vel} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B_tvT}} \\
+\multicolumn{2}{c}{\includegraphics[width=6.5in]{SCRIPT_FIGURES/Memorial_Tunnel/Test_625B_T_20}}
+\end{tabular*}
+\caption[Summary of Memorial Tunnel Test 625B]{Summary of Memorial Tunnel Test 625B. The measured and specified heat release rates are shown in the upper left figure. The measured and predicted volume flows through the North Portal are shown in the upper right. Note that a positive value denotes a flow direction from south to north, against the direction of the fan flow. The Ceiling Jet Temperature shown in the left figure of the second row is taken near the ceiling at Loops~305 and 306, 10~m and 30~m uphill of the fire. The Ceiling Jet Velocity, second row right, is taken near the ceiling at Loop~305, 10~m uphill of the fire. The third row figure indicates the location of the 50~$^\circ$C near-ceiling temperature as a function of time. The last plot displays measured and predicted temperature contours along the vertical centerline plane.}
+\label{Memorial_Tunnel_625B}
+\end{figure}
+
+
+\clearpage
+
+\subsection{FHWA Tunnel Experiments}
+\label{FHWA_Tunnel_Results}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-07-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-07_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-08-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-08_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-09-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-09_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-10-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-10_tvT} 
+\end{tabular*}
+\caption[Summary of FHWA Tunnel experiments 7, 8, 9 and 10]{Summary of FHWA Tunnel experiments 7, 8, 9 and 10.}
+\label{FHWA_Tunnel_Results_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-11-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-11_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-13-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-13_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-14-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-14_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-15-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-15_tvT}
+\end{tabular*}
+\caption[Summary of FHWA Tunnel experiments 11, 13, 14 and 15]{Summary of FHWA Tunnel experiments 11, 13, 14 and 15.}
+\label{FHWA_Tunnel_Results_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-19-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-19_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-22-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-22_tvT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-24-HRR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FHWA_Tunnel/IFAB-24_tvT} 
+\end{tabular*}
+\caption[Summary of FHWA Tunnel experiments 19, 22 and 24]{Summary of FHWA Tunnel experiments 19, 22 and 24.}
+\label{FHWA_Tunnel_Results_3}
+\end{figure}
 
 

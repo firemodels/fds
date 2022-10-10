@@ -10,7 +10,6 @@ cd Bittern_Sprinkler_Experiments; ./Run_All.sh $OPTIONS; cd ..
 cd BRE_Spray; ./Run_All.sh $OPTIONS; cd ..
 cd Bryant_Doorway; ./Run_All.sh $OPTIONS; cd ..
 cd CAROLFIRE; ./Run_All.sh $OPTIONS; cd ..
-cd CHRISTIFIRE; ./Run_All.sh $OPTIONS; cd ..
 cd Cup_Burner; ./Run_All.sh $OPTIONS; cd ..
 cd Droplet_Evaporation; ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Polymers; ./Run_All.sh $OPTIONS; cd ..

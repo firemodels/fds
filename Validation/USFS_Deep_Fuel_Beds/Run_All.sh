@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
+export SVNROOT=`pwd`/../..
+source $SVNROOT/Validation/Common_Run_All.sh
+
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn28_60D_0S_20L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn29_60D_0S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn30_30D_3S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn31_30D_6S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn34_30D_33S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn35_120D_33S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn36_30D_39S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn37_30D_36S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn38_60D_0S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn39_60D_9S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn40_60D_18S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn41_60D_24S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn42_60D_27S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn43_60D_30S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn44_30D_24S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn45_30D_27S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn46_60D_24S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn47_60D_24S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn48_60D_21S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn49_60D_18S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn50_60D_15S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn51_60D_12S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn52_60D_9S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn53_60D_0S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn54_60D_6S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn55_60D_6S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn56_60D_9S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn57_60D_12S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn58_30D_18S_20L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn59_30D_9S_20L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn60_120D_0S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn61_120D_15S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn62_120D_12S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn63_120D_9S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn64_120D_9S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn65_120D_12S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn66_120D_12S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn67_120D_15S_30L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn68_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn69_120D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn70_120D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn71_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn72_120D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn73_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn74_120D_24S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn75_120D_24S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn76_120D_21S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn77_120D_21S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn78_120D_21S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn79_120D_18S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn80_120D_3S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn81_120D_24S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn82_120D_24S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn83_120D_27S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn84_120D_30S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn85_120D_30S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn86_120D_33S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn87_120D_27S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn88_120D_33S_45L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn89_120D_21S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn90_120D_27S_40L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn91_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn92_120D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn93_120D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn94_120D_9S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn95_120D_12S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn96_120D_12S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn97_120D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn98_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn99_60D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn100_60D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn101_60D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn102_60D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn103_60D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn104_60D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn105_60D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn106_60D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn107_60D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn108_60D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn109_60D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn110_60D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn111_60D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn112_60D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn113_60D_33S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn114_120D_18S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn115_30D_27S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn116_30D_30S_25L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn117_30D_30S_25L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn118_120D_18S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn119_120D_15S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn120_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn121_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn122_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn123_120D_18S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn124_120D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn125_120D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn126_120D_21S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn127_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn128_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn129_120D_24S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn130_120D_27S_35L.fds
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn131_120D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn132_120D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn133_120D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn134_120D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn135_120D_27S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn136_120D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn137_120D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn138_120D_30S_35L.fds # movie available
+$QFDS $DEBUG $QUEUE -p 80 -d $INDIR burn140_120D_27S_35L.fds
+
+echo FDS cases submitted

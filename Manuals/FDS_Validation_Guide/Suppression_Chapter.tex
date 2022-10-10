@@ -27,7 +27,7 @@ A cup burner is an apparatus used to determine the minimum extinguishing concent
 
 \subsection{FM Burner Experiments}
 
-A description of the FM Burner experiments can be found in Section~\ref{FM_Burner_Description}. Briefly, a 15.2~cm round steel burner generating a 10~kW fire was supplied with oxygen by an air stream from below that was slowly diluted with nitrogen until the flame extinguished.  In the FDS simulations, nitrogen is added to the air stream supplied through the floor of the enclosure, linearly decreasing the oxygen volume fraction over one minute of simulated time. In Fig.~\ref{fig_fm_burner}, the combustion efficiency, $\eta$, is plotted as a function of oxygen volume fraction for all four fuels tested and compared with the measurements of Zeng and Wang~\cite{Zeng:26ICDERS}.  The auto-ignition temperature (AIT) threshold for each fuel is set according to the Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  The modeled burner is piloted using a ring of 36 hot (2000 \si{\degreeCelsius}) particles ejecting enough fuel to produce 1~kW (to match the experimental pilot).
+A description of the FM Burner experiments can be found in Section~\ref{FM_Burner_Description}. Briefly, a 15.2~cm round steel burner generating a 10~kW fire was supplied with oxygen by an air stream from below that was slowly diluted with nitrogen until the flame extinguished.  In the FDS simulations, nitrogen is added to the air stream supplied through the floor of the enclosure, linearly decreasing the oxygen volume fraction over one minute of simulated time. In Fig.~\ref{fig_fm_burner}, the combustion efficiency, $\eta$, is plotted as a function of oxygen volume fraction for all four fuels tested and compared with the measurements of Zeng and Wang~\cite{Zeng:26ICDERS}.  The auto-ignition temperature (AIT) threshold for each fuel is set according to the Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  The modeled burner is piloted using a ring of 36 particles ejecting enough fuel to produce 1~kW (to match the experimental pilot).
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -133,7 +133,7 @@ The figures on the following pages contain plots of the heat release rate in bot
 
 These experiments involve fires within large, steel electrical enclosures. A brief description of the experiments and photographs of the enclosures are found in Section~\ref{NIST_NRC_OLIVE-Fire_Description}. Table~\ref{OLIVE_matrix} lists the leakage and vent areas of the enclosures, along with the measured maximum heat release rate (HRR).
 
-Figures \ref{NIST_NRC_HRR_1} through \ref{NIST_NRC_HRR_3} compare predicted versus measured heat release rates. Each plot contains two sets of curves. The black curves represent the nominal HRR based solely on the metered natural gas flow. The gas flow was ramped up in increments of 25~kW, 50~kW, or 100~kW until the HRR determined via oxygen consumption calorimetry (red curves) diverged, at which point the maximum achievable HRR within the enclosure had been reached.
+Figures \ref{NIST_NRC_HRR_1} through \ref{NIST_NRC_HRR_5} compare predicted versus measured heat release rates and gas species near the ceiling of each enclosure. The HRR plots on the left contain two sets of curves. The black curves represent the nominal HRR based solely on the metered natural gas flow. The gas flow was ramped up in increments of 25~kW, 50~kW, or 100~kW until the HRR determined via oxygen consumption calorimetry (red curves) diverged, at which point the maximum achievable HRR within the enclosure had been reached.
 
 \begin{table}[!h]
 \begin{center}
@@ -169,43 +169,77 @@ No.    & No.        & (m$^2$)       & (m$^2$)             & (m$^2$)        & (kW
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_3_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_4_hrr} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_3_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_4_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_4_gas} \\
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_8_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_9_hrr} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_12_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_13_hrr}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_8_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_9_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_9_gas}
 \end{tabular*}
-\caption[NIST/NRC OLIVE-Fire maximum HRR, Tests 3, 4, 8, 9, 12, 13]
-{NIST/NRC OLIVE-Fire maximum HRR, Tests 3, 4, 8, 9, 12, 13.}
+\caption[NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 3, 4, 8, 9]
+{NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 3, 4, 8, 9.}
 \label{NIST_NRC_HRR_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_12_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_12_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_13_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_13_gas} \\
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_15_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_16_hrr} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_17_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_19_hrr} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_22_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_23_hrr}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_15_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_16_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_16_gas}
 \end{tabular*}
-\caption[NIST/NRC OLIVE-Fire maximum HRR, Tests 15, 16, 17, 19, 22, 23]
-{NIST/NRC OLIVE-Fire maximum HRR, Tests 15, 16, 17, 19, 22, 23.}
+\caption[NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 12, 13, 15, 16]
+{NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 12, 13, 15, 16.}
 \label{NIST_NRC_HRR_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_24_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_26_hrr} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_27_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_29_hrr} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_30_hrr} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_31_hrr}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_17_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_17_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_19_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_19_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_22_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_22_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_23_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_23_gas}
 \end{tabular*}
-\caption[NIST/NRC OLIVE-Fire maximum HRR, Tests 24, 26, 27, 29, 30, 31]
-{NIST/NRC OLIVE-Fire maximum HRR, Tests 24, 26, 27, 29, 30, 31.}
+\caption[NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 17, 19, 22, 23]
+{NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 17, 19, 22, 23.}
 \label{NIST_NRC_HRR_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_24_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_24_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_26_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_26_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_27_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_27_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_29_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_29_gas}
+\end{tabular*}
+\caption[NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 24, 26, 27, 29]
+{NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 24, 26, 27, 29.}
+\label{NIST_NRC_HRR_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_30_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_30_gas} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_31_hrr} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/NIST_NRC_OLIVE-Fire/Test_31_gas}
+\end{tabular*}
+\caption[NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 30, 31]
+{NIST/NRC OLIVE-Fire maximum HRR and gas concentrations, Tests 30, 31.}
+\label{NIST_NRC_HRR_5}
 \end{figure}
 
 \clearpage
@@ -355,6 +389,37 @@ Fire Scenario       & Ventilation                       & \multicolumn{5}{c|}{Ex
 \label{USCG_Scatter}
 \end{center}
 \end{figure}
+
+\clearpage
+
+\section{Theobald Hose Stream Experiments}
+
+Figures \ref{fig:Theobald_max_range}-\ref{fig:Theobald_max_height_distance} show scatter plots for the maximum range, the maximum height, and the maximum height distance from the Theobald experiments \cite{Theobald:1981}.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Range}
+\caption[Theobald Hose Stream max range]{Theobald Hose Stream max range.}
+\label{fig:Theobald_max_range}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height}
+\caption[Theobald Hose Stream max range]{Theobald Hose Stream max height.}
+\label{fig:Theobald_max_height}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height_Distance}
+\caption[Theobald Hose Stream max range]{Theobald Hose Stream max height distance.}
+\label{fig:Theobald_max_height_distance}
+\end{center}
+\end{figure}
+
 
 \clearpage
 

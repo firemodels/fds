@@ -13,7 +13,8 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 PRIVATE
 
-PUBLIC INSERT_ALL_PARTICLES,UPDATE_PARTICLES,REMOVE_PARTICLES,GENERATE_PARTICLE_DISTRIBUTIONS,PARTICLE_MOMENTUM_TRANSFER
+PUBLIC INSERT_ALL_PARTICLES,MOVE_PARTICLES,PARTICLE_MASS_ENERGY_TRANSFER,REMOVE_PARTICLES,&
+       GENERATE_PARTICLE_DISTRIBUTIONS,PARTICLE_MOMENTUM_TRANSFER
 
 CONTAINS
 
@@ -987,7 +988,7 @@ IN_Z0 = X_OFFSET + IN%Z0
 ! Cut off parts of the INIT region that are outside the current mesh
 
 IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
-! Skip mesh than is contained completely within a ring
+! Skip mesh that is contained completely within a ring
 IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
 X1 = MAX(IN_X1,XS)
 X2 = MIN(IN_X2,XF)
@@ -1305,6 +1306,10 @@ IF (IN%ID/='null') THEN
    DO ND=1,N_DEVC
       DV => DEVICE(ND)
       IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
+         IF (DV%LP_TAG>0 .AND. DV%LP_TAG/=PARTICLE_TAG) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: INIT_ID on DEVC ',TRIM(DV%ID),' cannot have more than one particle'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+         ENDIF
          DV%LP_TAG = PARTICLE_TAG
          DV%PART_CLASS_INDEX = ILPC
          DV%MESH = NM
@@ -1322,6 +1327,10 @@ IF (IN%ID/='null') THEN
    DO ND=1,N_PROF
       PF => PROFILE(ND)
       IF (IN%ID==PF%INIT_ID) THEN
+         IF (PF%LP_TAG>0 .AND. PF%LP_TAG/=PARTICLE_TAG) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: INIT_ID on PROF ',TRIM(PF%ID),' cannot have more than one particle'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+         ENDIF
          PF%LP_TAG = PARTICLE_TAG
          PF%PART_CLASS_INDEX = ILPC
          PF%MESH = NM
@@ -1513,7 +1522,7 @@ IF (LPC%SOLID_PARTICLE) THEN
 
       CASE DEFAULT
 
-         IF (.NOT.LPC%MONODISPERSE) THEN
+         IF (.NOT.LPC%MONODISPERSE .AND. LPC%SURF_INDEX/=TGA_SURF_INDEX) THEN
             CALL PARTICLE_SIZE_WEIGHT(RADIUS,LP%PWT)
             SCALE_FACTOR = RADIUS/LP_SF%THICKNESS
             LP_ONE_D%X(:) = LP_ONE_D%X(:)*SCALE_FACTOR
@@ -1622,35 +1631,6 @@ END SUBROUTINE PARTICLE_SIZE_WEIGHT
 END SUBROUTINE INSERT_ALL_PARTICLES
 
 
-!> \brief Control routine for particle movement and energy transfer
-
-SUBROUTINE UPDATE_PARTICLES(T,DT,NM)
-
-REAL(EB), INTENT(IN) :: T,DT
-INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW
-
-! Return if there are no particles in this mesh
-
-IF (MESHES(NM)%NLP==0) RETURN
-
-! Set the CPU timer and point to the current mesh variables
-
-TNOW=CURRENT_TIME()
-CALL POINT_TO_MESH(NM)
-
-! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
-
-IF (CORRECTOR) THEN
-   CALL MOVE_PARTICLES(T,DT,NM)
-   CALL PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
-ENDIF
-
-T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
-
-END SUBROUTINE UPDATE_PARTICLES
-
-
 !> \brief Update particle position over one gas phase time step
 
 SUBROUTINE MOVE_PARTICLES(T,DT,NM)
@@ -1659,7 +1639,7 @@ USE TRAN, ONLY: GET_IJK
 USE COMPLEX_GEOMETRY, ONLY: IBM_CGSC,IBM_IDCF,IBM_GASPHASE,IBM_SOLID,POINT_IN_CFACE
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 INTEGER :: IFACE,ICF,INDCF,ICF_MIN
-REAL(EB) :: DIST2,DIST2_MIN,VEL_VECTOR_1(3),VEL_VECTOR_2(3),P_VECTOR(3)
+REAL(EB) :: DIST2,DIST2_MIN,VEL_VECTOR_1(3),VEL_VECTOR_2(3),P_VECTOR(3),TNOW
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL     :: RN
@@ -1680,6 +1660,11 @@ LOGICAL :: TEST_POS, BOUNCE_CF, IN_CFACE, SLIDE_CF
 INTEGER :: DIND, MADD(3,3)
 INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
+IF (MESHES(NM)%NLP==0) RETURN
+
+! Set the CPU timer and point to the current mesh variables
+
+TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 ! Determine the Number of Particles (Droplets) Per Cell (NDPC)
@@ -2216,6 +2201,8 @@ ENDDO PARTICLE_LOOP
 
 CALL REMOVE_PARTICLES(T,NM)
 
+T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
+
 CONTAINS
 
 
@@ -2470,7 +2457,13 @@ IF (LPC%EMBER_PARTICLE .AND. .NOT.LP%EMBER) THEN
    EMBER_DENSITY = 0._EB
    IF (EMBER_VOLUME>TWO_EPSILON_EB) EMBER_DENSITY = LP%MASS/EMBER_VOLUME
    IF ( EMBER_DENSITY < LPC%EMBER_DENSITY_THRESHOLD .AND. &
-        QREL > LPC%EMBER_VELOCITY_THRESHOLD ) LP%EMBER = .TRUE.
+        QREL > LPC%EMBER_VELOCITY_THRESHOLD ) THEN 
+      IF (LPC%TRACK_EMBERS) THEN
+         LP%EMBER = .TRUE.
+      ELSE
+         ONE_D%BURNAWAY = .TRUE.
+      ENDIF
+   ENDIF
 ENDIF
 
 ! Move the particles unless they are STATIC
@@ -2787,7 +2780,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_FILM_PROPERTIES, GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,&
                                GET_MOLECULAR_WEIGHT,GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,&
-                               GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS
+                               GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS,GET_ENTHALPY,GET_TEMPERATURE
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
@@ -2814,10 +2807,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB) :: C_DROP2 !< Specific heat of particle (J/kg/K)
 REAL(EB) :: CP !< Specific heat (J/kg/K)
 REAL(EB) :: CP_BAR !< Average specific heat (J/kg/K)
-REAL(EB) :: CP_BAR_2 !< Average specific heat (J/kg/K)
 REAL(EB) :: CP_FILM !< Specific heat of the film (J/kg/K) at the film temperature
 REAL(EB) :: D_FILM !< Diffusivity into air of the droplet species (m2/s) at the film temperature
-REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
 REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
 REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
 REAL(EB) :: H1 !< Sensible enthalpy (J/kg/K)
@@ -2926,10 +2917,9 @@ REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
 REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
 INTEGER :: ARRAY_CASE
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
-LOGICAL :: TEMPITER !< Flag to continue temperature search iteration
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
@@ -2940,8 +2930,18 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (SPECIES_TYPE), POINTER :: SS
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (CFACE_TYPE), POINTER :: CFA
+REAL(EB) :: TNOW
 
+! Set the CPU timer and point to the current mesh variables
+
+TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
+
+IF (MESHES(NM)%NLP==0) THEN
+   CALL PARTICLE_RUNNING_AVERAGES
+   T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
+   RETURN
+ENDIF
 
 ! Working arrays
 
@@ -3135,8 +3135,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                M_GAS_OLD = M_GAS
             ENDIF
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_BAR,TMP_G)
-            H_G_OLD = CP_BAR * TMP_G * M_GAS
+            CALL GET_ENTHALPY(ZZ_GET,H_G_OLD,TMP_G)
+            CP_BAR= H_G_OLD / TMP_G
+            H_G_OLD = H_G_OLD * M_GAS
             H_S_G_OLD = CP * TMP_G * M_GAS
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
             U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
@@ -3248,12 +3249,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         MCBAR = -1._EB
                         ARRAY_CASE = 2
                      ENDIF
+                  ELSEIF (SF%THERMAL_BC_INDEX==CONVECTIVE_FLUX_BC .OR. SF%THERMAL_BC_INDEX==NET_FLUX_BC) THEN
+                     ARRAY_CASE = 1
                   ELSE
                      MCBAR = -1._EB
                      ARRAY_CASE = 2
                   ENDIF
 
-                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB) THEN
+                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB .AND. ARRAY_CASE > 1) THEN
                      LENGTH = 2._EB*R_DROP
                      NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
@@ -3282,8 +3285,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
-                     H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
-
+                     IF (ARRAY_CASE==1) THEN
+                        H_WALL = 0._EB
+                     ELSE
+                        H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
+                     ENDIF
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_FILM/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
@@ -3317,7 +3323,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
                IF (LPC%HEAT_TRANSFER_COEFFICIENT_GAS>=0._EB) H_HEAT=LPC%HEAT_TRANSFER_COEFFICIENT_GAS
-               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_HEAT=LPC%MASS_TRANSFER_COEFFICIENT
+               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_MASS=LPC%MASS_TRANSFER_COEFFICIENT
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
@@ -3480,39 +3486,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H_NEW = H_G_OLD + (H_D_OLD - M_DROP*TMP_DROP_NEW*H_L + Q_CON_WALL + Q_RAD)*WGT
                TMP_G_I = TMP_G
                TMP_G_NEW = TMP_G
-
-               TEMPITER = .TRUE.
-               ITCOUNT = 0
-               ITERATE_TEMP: DO WHILE (TEMPITER)
-                  TEMPITER=.FALSE.
-
-                  ! Compute approximation of d(cp)/dT
-
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR,TMP_G_I)
-                  IF (TMP_G_I > 1._EB) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR_2,TMP_G_I-1._EB)
-                     DCPDT = CP_BAR-CP_BAR_2
-                  ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR_2,TMP_G_I+1._EB)
-                     DCPDT = CP_BAR_2-CP_BAR
-                  ENDIF
-
-                  TMP_G_I = TMP_G_I+(H_NEW-CP_BAR*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP_BAR+TMP_G_I*DCPDT))
-
-                  IF (TMP_G_I < 0._EB) THEN
-                     DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     CYCLE TIME_ITERATION_LOOP
-                  ENDIF
-
-                  ITCOUNT = ITCOUNT + 1
-                  IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
-                  IF (ITCOUNT > 10) THEN
-                     TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
-                     EXIT ITERATE_TEMP
-                  ENDIF
-                  TMP_G_NEW = TMP_G_I
-               ENDDO ITERATE_TEMP
-               TMP_G_NEW = MAX(TMP_G_NEW,TMPMIN)
+               CALL GET_TEMPERATURE(TMP_G_NEW,H_NEW/M_GAS_NEW,ZZ_GET2)
+               IF (TMP_G_NEW < 0._EB) THEN
+                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
+                  CYCLE TIME_ITERATION_LOOP
+               ENDIF
 
                ! Limit gas temperature change
 
@@ -3617,7 +3595,22 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
-! Second loop is for summing the part quantities
+! Sum up various quantities used in running averages
+
+CALL PARTICLE_RUNNING_AVERAGES
+
+! Remove PARTICLEs that have completely evaporated
+
+CALL REMOVE_PARTICLES(T,NM)
+
+T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
+
+CONTAINS
+
+
+!> \brief Sum up various quantities used in running averages
+
+SUBROUTINE PARTICLE_RUNNING_AVERAGES
 
 SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
 
@@ -3778,9 +3771,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
 
 ENDIF SUM_PART_QUANTITIES
 
-! Remove PARTICLEs that have completely evaporated
-
-CALL REMOVE_PARTICLES(T,NM)
+END SUBROUTINE PARTICLE_RUNNING_AVERAGES
 
 END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER
 

@@ -1,7 +1,7 @@
 !> \brief Global constants, parameters, variables
 !>
-!> \details Each MPI process stores a copy of the GLOBAL_CONSTANTS. It cannot be
-!> assumed that these values are same for each MPI process.
+!> \details Each MPI process stores a copy of the parameters within this module. It cannot be
+!> assumed that these values are the same for each MPI process.
 
 MODULE GLOBAL_CONSTANTS
 
@@ -32,6 +32,7 @@ INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< Flag for COMBUSTION_ODE_SOLV
 
 INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
 INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
+INTEGER, PARAMETER :: EXTINCTION_3=3             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 3)
 
 INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL: No turbulence model (DNS)
 INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constant Smagorinsky turbulence model
@@ -135,10 +136,6 @@ INTEGER, PARAMETER :: NEW=2                            !< Argument for DUCT()\%V
 INTEGER, PARAMETER :: GUESS=3                          !< Argument for DUCT()\%VEL()
 INTEGER, PARAMETER :: PREVIOUS=4                       !< Argument for DUCT()\%VEL()
 
-INTEGER, PARAMETER :: NODE1=1                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-INTEGER, PARAMETER :: NODE2=2                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-INTEGER, PARAMETER :: LINEAR_INTERPOLATION=-1          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
-
 INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1               !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
@@ -241,7 +238,7 @@ LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
 LOGICAL :: STORE_OLD_VELOCITY=.FALSE.
-LOGICAL :: QFAN_BETA_TEST=.FALSE.
+LOGICAL :: HVAC_QFAN=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
@@ -256,6 +253,7 @@ LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not 
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
+LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -287,7 +285,6 @@ REAL(EB) :: TMPA                               !< Ambient temperature (K)
 REAL(EB) :: TMPA4                              !< Ambient temperature to the fourth power (K^4)
 REAL(EB) :: RHOA                               !< Ambient density (kg/m3)
 REAL(EB) :: P_INF=101325._EB                   !< Ambient pressure at the ground (Pa)
-REAL(EB) :: RADIATIVE_FRACTION                 !< Radiative fraction
 REAL(EB) :: CP_GAMMA                           !< \f$ \frac{\gamma}{\gamma-1} \frac{R}{W_1} \f$
 REAL(EB) :: GAMMA=1.4_EB                       !< Ratio of specific heats, typically 1.4
 REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
@@ -339,6 +336,7 @@ REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in liquid evaporation algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
 REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
+REAL(EB) :: HVAC_MASS_TRANSPORT_CELL_L=-1._EB  !< Global cell size for HVAC mass transport (m)
 
 REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
 REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)
@@ -372,7 +370,7 @@ REAL(EB) :: T_END                                           !< Ending time of si
 REAL(EB) :: T_END_GEOM
 REAL(EB) :: TIME_SHRINK_FACTOR                              !< Factor to reduce specific heat and total run time
 REAL(EB) :: RELAXATION_FACTOR=1._EB                         !< Factor used to relax normal velocity nudging at immersed boundaries
-REAL(EB) :: MPI_TIMEOUT=300._EB                             !< Time to wait for MPI messages to be received (s)
+REAL(EB) :: MPI_TIMEOUT=30._EB                              !< Time to wait for MPI messages to be received (s)
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 
@@ -397,7 +395,7 @@ REAL(EB) :: INITIAL_UNMIXED_FRACTION=1._EB                          !< Initial a
 REAL(EB) :: RICHARDSON_ERROR_TOLERANCE=1.E-6_EB                     !< Error tolerance in Richardson extrapolation
 REAL(EB) :: H_F_REFERENCE_TEMPERATURE=25._EB                        !< Heat of formation reference temperature (C->K)
 REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperature above which fuel and oxygen burn freely (C->K)
-REAL(EB) :: AUTO_IGNITION_TEMPERATURE=0._EB                         !< Temperature above which reaction is allowed (C->K)
+REAL(EB) :: AUTO_IGNITION_TEMPERATURE=-273.15_EB                    !< Temperature above which reaction is allowed (C->K)
 REAL(EB) :: AIT_EXCLUSION_ZONE(6,MAX_AIT_EXCLUSION_ZONES)=-1.E6_EB  !< Volume in which AUTO_IGNITION_TEMPERATURE has no effect
 
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
@@ -415,9 +413,13 @@ INTEGER :: MAX_PRIORITY=1                                           !< Maximum n
 INTEGER :: N_PASSIVE_SCALARS=0                                      !< Number of passive scalars
 INTEGER :: N_TOTAL_SCALARS=0                                        !< Number of total scalars, tracked and passive
 INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of chemistry substeps in combustion routine
+INTEGER :: CFT_REACTION_INDEX=1                                     !< Reaction index to base CFT extinction criterion
 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
+LOGICAL :: PILOT_FUEL_MODEL=.FALSE.                                 !< Allow pilot fuel with low AIT
+LOGICAL :: SUBGRID_IGNITION_MODEL=.FALSE.                           !< Add TMP_SGS when checking AIT
+LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.TRUE.               !< Report adiabatic flame temperature per REAC in LU_OUTPUT
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
@@ -481,7 +483,7 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 
 LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
 LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
-LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
+LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.FALSE.                   !< Flag for stopping pressure iterations if solution seems stuck
 LOGICAL :: INSEPARABLE_POISSON=.FALSE.                           !< Flag for solving the inseparable Poisson equation
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
@@ -667,7 +669,6 @@ LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
 LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
 
 LOGICAL :: CC_IBM=.FALSE.
-LOGICAL :: LINKED_PRESSURE = .FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
@@ -679,6 +680,7 @@ LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.TRUE.
+LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.

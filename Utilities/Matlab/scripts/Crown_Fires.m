@@ -9,7 +9,7 @@ close all
 clear all
 
 outdir = '../../../out/Crown_Fires/';
-file_name = dir([outdir,'*_devc.csv']);
+file_name = dir([outdir,'*_cat_devc.csv']);
 n_files = length(file_name);
 
 for i=1:n_files;

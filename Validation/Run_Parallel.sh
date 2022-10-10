@@ -30,6 +30,7 @@ cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
+cd Memorial_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd Montoir_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh $OPTIONS; cd ..
@@ -45,6 +46,7 @@ cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_Structure_Separation;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
 cd Phoenix_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..

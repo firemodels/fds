@@ -4,6 +4,7 @@
 &MULT ID='mesh', DX=0.96, DY=0.96, DZ=1.20, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &TIME T_END=300. /
+&RADI RADIATION=F/
 
 &MATL ID            = 'STEEL'
       SPECIFIC_HEAT = 0.465
@@ -12,7 +13,7 @@
 
 &SURF ID            = 'STEEL PLATE'
       MATL_ID       = 'STEEL'
-      DEFAULT       = .TRUE.
+      DEFAULT       = T
       THICKNESS     = 0.003
       COLOR         = 'GRAY 40' /
 
@@ -48,7 +49,7 @@
 &HVAC ID='Right-Back Leak', TYPE_ID='LEAK', VENT_ID='Right-Back-Inside', VENT2_ID='Right-Back-Outside', AREA=0.01,
       LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
 
-&SLCF PBY=0.03, QUANTITY='PRESSURE', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0.03, QUANTITY='PRESSURE', CELL_CENTERED=T /
 
 &DUMP DT_DEVC=5. /
 

@@ -267,35 +267,33 @@ lower two-thirds of the doorway because of difficulties in seeding the hot outfl
 \label{Bryant_Drawing}
 \end{figure}
 
-\section{British Steel - Fire Research Station (BST/FRS) Natural Fire Tests}
+\section{BST/FRS Wood Crib Fire Experiments}
 \label{BST_FRS_wood_cribs_description}
 
-The fire tests were conducted as a collaborative project between British Steel Technical and the Fire Research Station inside the large BRE large building test facility in Cardington, England. Test results have been digized from the report \cite{BST_FRS:1994}.
+In 1993, British Steel Technical, Swinden Laboratories, in collaboration with the Building Research Establishment (BRE), Fire Research Station, conducted nine fire experiments inside the BRE ex-airship hangar testing facility at Cardington, Bedfordshire, England~\cite{BST_FRS:1994}. The objective of the experiments was to examine the influence of combustible loading and ventilation on fire severity.
 
-The roof of the structure was made of reinforced aeraged concrete slabs (20 cm thick) with density of 450 kg/m$^3$.
-Walls were made of 215 mm thick lightweight concrete blocks ($\rho$ = 1375 kg/m$^3$). The floor was covered with 125 mm deep layer of sand ($\rho$ = 1750 kg/m$^3$). Both roof and walls were lined with 2 $\times$ 25 mm layers of standard grade ceramic fibre blanket ($\rho$ = 128 kg/m$^3$). 
-Taking into account the lining materials, the internal dimensions of the compartment were: length = 22.855 m, width = 5.595 m, height = 2.750 m.
+The roof of the test compartment was made of 20~cm thick reinforced aerated concrete slabs with a density of 450~kg/m$^3$. The walls were made of 215~mm thick lightweight concrete blocks with a density of 1375~kg/m$^3$. The floor was covered with a 125~mm deep layer of sand with a density of 1750~kg/m$^3$. Both the roof and walls were lined with two 25~mm thick layers of standard grade ceramic fiber blanket with a density of 128~kg/m$^3$. Taking into account the lining materials, the compartment was 22.9~m long, 5.6~m deep, and 2.8~m high.
 
-Ventilation was provided at one end of the compartment through an opening that was full width and, at maximum, full height of the compartment. Lightweight concrete blocks were used to construct temporary walls to reduce the ventilation from fully open to 1/8 of the available ventilation area.
+Ventilation was provided at one end of the compartment through a full-width, variable height opening. Lightweight concrete blocks were used to construct temporary walls to reduce the ventilation from fully open to an eighth of the available area.
 
-Fire load consisted of 33 $\times$ 1 m square wood cribs in 11 rows. Each crib was constructed using 1 m long and 50 $\times$ 50 mm cross section sticks of Western Hemlock softwood ($\rho$ = 400 kg/m$^3$), dried to 10 \% moisture content. The sticks were stacked with 50 mm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. Fire load was ignited from the back of the compartment, from the three cribs simultaneously. 
+The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was constructed of 1~m long and 5~cm square cross section sticks of Western Hemlock softwood ( density 400~kg/m$^3$), dried to 10~\% moisture content. The sticks were stacked with 5~cm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. The rear-most three cribs at the back of the compartment were ignited simultaneously. Temperatures were measured along crib lines 2 (back), 6 (middle) and 10 (front), using 3~mm thermocouples placed 300~mm below the ceiling. The average of three thermocouples at the same longitudial position is used for model validation.
+
 \begin{table}[ht]
 \begin{center}
-\caption[BST/FRS test cases]{Fire load densities and relative ventilation areas (of full compartment cross section) in the BST/FRS tests~\cite{BST_FRS:1994}.}
+\caption[BST/FRS test cases]{Fire load densities and relative ventilation areas in the BST/FRS experiments~\cite{BST_FRS:1994}.}
 \label{BST_FRS_wood_cribs_tests}
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
 Test number                     & 1   & 2   & 3   & 4   & 5  & 6  \\ \hline \hline 
-Fire load density (kg/m$^2$)    & 40  & 20  & 20  & 40  & 20 & 20 \\
-Ventilation area (\%)           & 100 & 100 & 50  & 50  & 25 & 12.5 \\ \hline
+Combustible load (kg/m$^2$)     & 40  & 20  & 20  & 40  & 20 & 20 \\
+Relative Ventilation Area       & 1/1 & 1/1 & 1/2 & 1/2 & 1/4 & 1/8 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-Temperatures were measured from criblines 2 (back), 6 (middle) and 10 (front), using 3 mm thermocouples placed 300 mm below the ceiling surface. Average of three thermocouples at same longitudial position is used in validation.
+\subsubsection{Modeling Notes}
 
-\subsubsection{Modelling Notes}
-The fire spread on wood cribs is modelled as a combination of simple and complex pyrolysis models. The unresolved surface area of the wood cribs is compensated using a area multiplicator input parameter. Modelling is reported in~\cite{Janardhan:FSJ2021}.
+The fire spread on wood cribs is modeled as a combination of simple and complex pyrolysis models. The unresolved surface area of the wood cribs is compensated using a area multiplicator input parameter. Modeling is reported in~\cite{Janardhan:FSJ2021}.
 
 
 \section{Cable Response to Live Fire -- CAROLFIRE}
@@ -611,15 +609,15 @@ Rob Fleury, a master's degree student at the University of Canterbury in Christc
 \section{FM Burner Experiments}
 \label{FM_Burner_Description}
 
-A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a cylindrical, water-cooled steel burner (15.2~cm O.D., 13.7~cm I.D.) was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
+A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a cylindrical, water-cooled steel burner (15.2~cm O.D., 13.7~cm I.D.) was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of premixed ethylene pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
 
-In the same enclosure and using the same burner, Ren et. al~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at similar locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction. Additional experiments were performed at 19~\%, 17~\%, and 15~\% oxygen in which global radiation measurements were made, including total radiative fraction and the vertical distribution of radiative emission.
+In the same enclosure and using the same burner, Ren et al.~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at similar locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction. Additional experiments were performed at 19~\%, 17~\%, and 15~\% oxygen in which global radiation measurements were made, including total radiative fraction and the vertical distribution of radiative emission.
 
 \subsubsection{Modeling Notes}
 
 The FDS simulations of the 10~kW ethylene, methane, propane and propylene fires are run for 65~s, in which time the oxygen concentration in the co-flow stream is ramped down linearly from 21~\% to 8~\%. The volume flow of the co-flow stream has been increased tenfold compared to the experiments to prevent a downwash of ambient air into the sealed compartment. The 15~kW ethylene fire simulations at the various fixed oxygen levels are performed for 20~s. For these simulations, the oxygen volume fraction is specified directly, as is the co-flow stream.
 
-The combustion and extinction are modeled using a two-step reaction scheme. In the first step, fuel is converted to CO, soot, and water vapor, and in the second step, the CO and soot are oxidized to form CO$_2$. Both reactions are fast, but the oxidation step follows the first reaction in serial. That is, in a given time step, all available oxygen first converts fuel to CO and Soot, assumed to be C$_{0.9}$H$_{0.1}$. Any leftover oxygen is then used to oxidize existing CO and Soot. There are two assumptions. First, it is assumed that 3/5 of the carbon in the fuel molecule is converted to CO, and 2/5 to Soot in the first reaction step. Second, the post-flame yields of Soot and CO are set to 0.043 and 0.013, respectively, based on Tewarson's measurements reported in the SFPE Handbook~\cite{SFPE:Tewarson}.
+The 10 kW variable fuel cases examining combustion efficiency and extinction are modeled using a two-step reaction scheme. In the first step, fuel is converted to CO, soot, and water vapor, and in the second step, the CO and Soot are oxidized to form CO$_2$. Both reactions are fast, but the oxidation step follows the first reaction in serial. That is, in a given time step, all available oxygen first converts fuel to CO and Soot, assumed to be C$_{0.9}$H$_{0.1}$. Any leftover oxygen is then used to oxidize existing CO and Soot. There are two assumptions: (i) the ratio of fuel C that is converted to CO in the first reaction step (the remainder goes to Soot) and (ii) the post-flame yields of CO and Soot.  For the first assumption (the intermediate step), we assume that 95 \% of the carbon goes to CO for a clean fuel like methane, we assume 85 \% goes to CO for propane, and that 60 \% goes to CO for both ethylene and propylene.  The post flame yields for each fuel are taken from Tewarson's measurements reported in the SFPE Handbook~\cite{SFPE:Tewarson}.
 
 Under the assumption that Air contains 383~ppm CO$_2$ and water vapor corresponding to 40~\% humidity, the full two-step reaction scheme for ethylene is written in terms of ``lumped'' species as follows:
 \begin{eqnarray}
@@ -628,13 +626,14 @@ Under the assumption that Air contains 383~ppm CO$_2$ and water vapor correspond
 & & 10.07 \, \underbrace{\mathrm{(0.119 \; CO +  0.201 \; H_2O + 0.088 \; Soot +  0.591\, N_2 + 0.0003 \, CO_2)}}_\text{Products 1}
 \end{eqnarray}
 \be
-(\text{Products 1}) + 0.63 \; (\text{Air}) \longrightarrow  1.49 \, \underbrace{\mathrm{(0.0009 \, CO + 0.0073 \, Soot + 0.126 \, CO_2 +  0.141 \; H_2O  + 0.725 \; N_2)}}_\text{Products 2}
+(\text{Products 1}) + 0.63 \; (\text{Air}) \longrightarrow  1.49 \, \underbrace{\mathrm{(0.0009 \, CO + 0.0077 \, Soot + 0.126 \, CO_2 +  0.141 \; H_2O  + 0.724 \; N_2)}}_\text{Products 2}
 \ee
-For each of the four fuels simulated, it has been assumed that 3/5 of the carbon in the fuel molecule is converted to CO in the first step. However, there are only detailed measurements of radiative emission and soot volume fraction for ethylene. Thus, it is not clear how the carbon is distributed between the soot and CO in the early stages. For lighter sooting fuels like methane, the fraction of carbon allocated to CO approaches unity.
+
+The pilot ring is modeled with a ``pilot fuel model''.  We use 36 particles arranged in a uniform ring around the burner.  The mass flow rate of ethylene from each particle is set to achieve the total 1 kW from the pilot ring.  In the pilot fuel model, the fuel stream from the pilot particles sees an auto-ignition temperature (AIT) of 0 K.  That is, fuel emanating from the pilot particles is not subject to an ignition temperature threshold.  Further, this fuel undergoes simple 1-step, fast chemistry.  The fuel emanating from the main burner (for each different fuel type, including ethylene) undergoes 2-step, fast chemistry as discussed above and is subject to an ignition temperature threshold with the AIT for each fuel taken from Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  Likewise, the critical flame temperatures for each fuel are taken from ~\cite{SFPE:Beyler}.  While there are now 3 chemical reactions for each case (a pilot fuel reaction plus the two main fuel reactions), each with its own ``fuel'', the CFT for the extinction model is based on the fuel for the main burner first step reaction, either methane, ethylene, propylene, or propane.
+
+The burner surface temperature was modeled by specifying a 2.54 cm thick surface made of sand.  The back side temperature was held constant at \SI{25}{\degreeCelsius} to match the water cooled burner in the experiment.
 
 The radiative fraction has been predicted rather than specified in all simulations.
-
-
 
 \section{FM/FPRF Data Center Experiments}
 \label{FM_FPRF_Datacenter_Description}
@@ -1042,6 +1041,65 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 {McCaffrey Plume Burner Surface Temperatures.}
 \label{fig:McCaffrey_Surf_Temp}
 \end{figure}
+
+
+\section{Memorial Tunnel Experiments}
+\label{Memorial_Tunnel_Description}
+
+Between 1993 and 1995, 98 fire ventilation experiments were conducted in a decommissioned road tunnel near Charlestown, West Virginia~\cite{Memorial}. The experiments were intended to support the design of the ventilation system for the Central Artery Tunnel Project in Boston, Massachusetts.
+
+The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at the peak of its semi-circular ceiling, with a 3.2~\% grade uphill from its south to north portal. At each portal, a fan room 4.3~m above the roadway extends 21.3~m into the tunnel. There is also a walkway along the west tunnel wall.
+
+The fuel used in the experiments is described in the report as a ``low sulfur No.~2 fuel oil.'' The fuel was pumped into pans sized to produce nominally 50~MW, 20~MW, 10~MW, and 30~MW fires. Using a combination of pans, fires of 10~MW, 20~MW, 50~MW or 100~MW were produced.
+
+Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=5in]{FIGURES/Memorial_Tunnel/section}
+\caption[Memorial Tunnel cross section]{Sketch of the Memorial Tunnel cross section.}
+\label{Memorial_Tunnel_Cross_Section}
+\end{figure}
+
+\begin{table}[!ht]
+\caption[Summary of Memorial Tunnel Experiments]{Summary of Memorial Tunnel Experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Test     & Sequence & Heat Release  & Number   & Fan Start   \\ 
+Number   & Number   & Rate (MW)     & of Fans  & Time (min)  \\ \hline \hline
+501      & 15       & 20            & 0        & N/A         \\ \hline
+502      & 15       & 50            & 0        & N/A         \\ \hline
+605      & 17       & 10            & 1-15     & 0           \\ \hline
+606A     & 17       & 10            & 0-3      & 5           \\ \hline
+607      & 17       & 20            & 2-3      & 0           \\ \hline
+608      & 17       & 20            & 0-4      & 2           \\ \hline
+610      & 17       & 50            & 4-6      & 0           \\ \hline
+611      & 17       & 50            & 0-6      & 2           \\ \hline
+612B     & 17       & 50            & 0-10     & 5           \\ \hline
+615B     & 17       & 100           & 0-6      & 2           \\ \hline
+617A     & 17       & 10            & 1-5      & 0           \\ \hline
+618A     & 17       & 20            & 0-4      & 2           \\ \hline
+621A     & 17       & 100           & 2-8      & 0           \\ \hline
+622B     & 17       & 50            & 0-10     & 0           \\ \hline
+623B     & 18       & 20            & 1-6      & 0           \\ \hline
+624B     & 18       & 50            & 0-7      & 2           \\ \hline
+625B     & 18       & 100           & 3-7      & 0           \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:Memorial_Test_Matrix}
+\end{table}
+
+
+\subsubsection{Modeling Notes}
+
+The simulations of the Memorial Tunnel experiments are performed with a 0.28~m uniform grid. This grid size is chosen so that the exit area of the jet fans can be approximated by a four by four array of cells. The jet fans are modeled as rectangular ducts with a specified volume flow of 42.9~m$^3$/s (91\,000~cfm). The fan speed is ramped up or down in approximately 10~s.
+
+The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions approximate the semi-circular tunnel ceiling, vehicle silhouettes, and instrumentation packages.
+
+The fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rates of the fires are specified as functions of time following the measured curves found in the test report.
+
+The results of the simulations are found in Section~\ref{Memorial_Tunnel_Volume_Flow}.
 
 
 \section{Montoir LNG Fires}
@@ -2418,16 +2476,16 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 Fires fueled by methanol and propane ranging from 5.6~kW to 16.8~kW were conducted in a 1:20 reduced-scale tunnel at Southwest Jiaotong University, Chengdu, China~\cite{Wang:TUST2019}. The tunnel was 0.45~m wide, 0.23~m high and 20.8~m long. The burner was located at the center of the tunnel and both ends were open. Temperatures and gas concentrations (i.e., O$_2$, CO and CO$_2$) were measured. The results showed that both methanol and propane fires self-extinguished in the 20.8~m long tunnel within approximately 10~min, except for the 5.6~kW methanol fire. The larger the heat release rate, the faster the self-extinction of the fire. The oxygen concentrations in the 20.8~m long tunnel decreased to approximately 12~\% except for the 5.6~kW methanol fire, which remained well above the limiting oxygen concentration.  Self-extinction was not observed for fires of the same heat release rates in a 10~m long tunnel of the same cross section. The oxygen concentrations in the 10~m long tunnel decreased to approximately 17~\%.  In the long tunnel with large fire sizes, the smoke layer descended to the floor, inhibiting the supply of fresh air reaching the fire.
 
 
-\section{Wu Bakar Tunnel Experiments}
-\label{Wu_Bakar_Tunnels_Description}
+\section{Theobald Hose Stream Experiments}
+\label{Theobald_Description}
 
-An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inwards 7$^\circ$ from the vertical leading to a circular arch ceiling.
-
-A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
+Fire hose nozzle jets with nominal diameters of 1.3 cm up to 2.5 cm were studied over a range of operating pressures and jet orientation angles.  The maximum throw distance was recorded as well as the max height of the ballistic arc and the distance to the max height.  Details of the experiments are presented in \cite{Theobald:1981}.  In the paper, the \emph{primary breakup length} is correlated as a function of Weber number (We) and Reynolds number (Re) of the water jet.
 
 \subsubsection{Modeling Notes}
 
-Five simulations are conducted; one for each tunnel type. In each, the heat release rate is stepped over from the lowest to highest reported value in 20~s increments. During each steady period, the near-ceiling temperatures are recorded and used to infer the location of the back-layer; that is, the back-layer extent coincides with a drop in the ceiling jet temperature to within 10~$^\circ$C of ambient. The surface roughness of the tunnel walls is estimated to be 1~mm. The wall material is taken as generic steel.
+FDS models liquid water by means of Lagrangian particles.  This is the same model used to describe sprinkler droplets.  A key difference between sprinklers and hose streams, however, is that sprinkler nozzles purposely atomize the water jet immediately as the water is introduced into the computational domain.  To model hose streams, FDS introduces two new parameters to the {\ct PART} class: {\ct PRIMARY\_BREAKUP\_LENGTH} and {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}.  The particles enter the domain and for the time period before the particle has traveled the distance {\ct PRIMARY\_BREAKUP\_LENGTH}, the particle drag coefficient is multiplied by the specified {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}, which may be zero.  In this way, FDS can mimic the jet core, which experiences little to no drag before the jet goes unstable.
+
+To calibrate the FDS results (this case is a calibration exercise more than a validation), the {\ct PRIMARY\_} {\ct BREAKUP\_LENGTH} was set to twice the value of $Z$ (the value of 50 \% jet breakup) in the paper and the {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR} was set to zero.
 
 
 \section{UL/NIST Vent Experiments}
@@ -3175,12 +3233,20 @@ Two fuels were used in the tests. The properties of the fuels were obtained from
 \label{WTC_Drawing}
 \end{figure}
 
+
+\section{Wu Bakar Tunnel Experiments}
+\label{Wu_Bakar_Tunnels_Description}
+
+An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inwards 7$^\circ$ from the vertical leading to a circular arch ceiling.
+
+A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
+
+\subsubsection{Modeling Notes}
+
+Five simulations are conducted; one for each tunnel type. In each, the heat release rate is stepped over from the lowest to highest reported value in 20~s increments. During each steady period, the near-ceiling temperatures are recorded and used to infer the location of the back-layer; that is, the back-layer extent coincides with a drop in the ceiling jet temperature to within 10~$^\circ$C of ambient. The surface roughness of the tunnel walls is estimated to be 1~mm. The wall material is taken as generic steel.
+
+
 \FloatBarrier
-
-
-
-
-
 
 
 \section{Summary of Experiments}

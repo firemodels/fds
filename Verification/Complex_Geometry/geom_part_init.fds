@@ -1,0 +1,30 @@
+&HEAD CHID='geom_part_init' TITLE='Test intersection of GEOM XB and INIT XB with particles' /
+
+&MESH IJK=20,20,20, XB=-1,1,-1,1,-1,1 /
+
+&TIME T_END=10 /
+
+&VENT DB='XMIN', SURF_ID='OPEN'/
+&VENT DB='XMAX', SURF_ID='OPEN'/
+&VENT DB='YMIN', SURF_ID='OPEN'/
+&VENT DB='YMAX', SURF_ID='OPEN'/
+&VENT DB='ZMIN', SURF_ID='OPEN'/
+&VENT DB='ZMAX', SURF_ID='OPEN'/
+
+&REAC FUEL='METHANE'/
+&COMB INITIAL_UNMIXED_FRACTION=0, SUPPRESSION=F/
+
+&GEOM XB=-.5,0,-.5,0,-.5,0 /
+
+!radius gives 1 m2 area with 10,000 particles (1 m^2 = 10,000 * 4*pi*r^2)
+
+&SURF ID='heat release', HRRPUA=100, COLOR='RED', RADIUS=0.002820947917739, GEOMETRY='SPHERICAL'/
+
+&PART ID='burning particles', SAMPLING_FACTOR=10, SURF_ID='heat release', STATIC=T,
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE DIAMETER'/
+
+&INIT XB=-.5,.5,-.5,.5,-.5,.5, PART_ID='burning particles', N_PARTICLES=10000/
+
+&SLCF DB='YMID', QUANTITY='HRRPUV', CELL_CENTERED=T /
+
+&TAIL /
