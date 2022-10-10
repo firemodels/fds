@@ -10895,10 +10895,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-               IF (.NOT.SOLID(CELL_INDEX(I2+1,J2,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2)) .AND. VT%RADIUS<=0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
@@ -10907,10 +10903,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-               IF (.NOT.SOLID(CELL_INDEX(I2,J2+1,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2)) .AND. VT%RADIUS<=0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
@@ -10919,10 +10911,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-               IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2)) .AND. VT%RADIUS<=0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
             ENDIF
       END SELECT
 
