@@ -1,0 +1,6 @@
+
+&MESH IJK=40,25,25, XB=0.0,2.0,-1.25,0.00,0.0,1.25, MULT_ID='mesh' /
+&MULT ID='mesh', DX=2., DY=1.25, I_UPPER=5, J_UPPER=1 /
+
+&TRNZ CC=1.25, PC=0.50, IDERIV=1, MESH_NUMBER=0 /
+
