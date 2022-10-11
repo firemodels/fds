@@ -24,8 +24,8 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&COMB RADIATIVE_FRACTION=0., EXTINCTION_MODEL='EXTINCTION 2', N_SIMPLE_CHEMISTRY_REACTIONS=2, AUTO_IGNITION_TEMPERATURE=400. /
-&REAC FUEL='METHANE', AIT_EXCLUSION_ZONE=-0.60,-0.28, 0.24, 0.56,0.50,0.56 /
+&COMB RADIATIVE_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, AUTO_IGNITION_TEMPERATURE=540. /
+&REAC FUEL='METHANE', CRITICAL_FLAME_TEMPERATURE=1507, AIT_EXCLUSION_ZONE=-0.60,-0.28, 0.24, 0.56,0.50,0.56 /
 
 &SURF ID='FIRE', HRRPUA=488.3, COLOR='ORANGE', TMP_FRONT=300., RAMP_Q='fire ramp' / 
 &RAMP ID='fire ramp', T=   0., F=0.000 /
@@ -51,38 +51,21 @@
 &OBST XB= 0.84, 0.88,-0.76, 0.76, 0.00, 2.28 / Right
 &OBST XB=-0.88, 0.88,-0.80, 0.80, 2.28, 2.32 / Top
 
- VENT XB=-0.72,-0.16,-0.76,-0.76,1.84,2.12, ID='Inside Upper Left Vent',  SURF_ID='STEEL PLATE' /
- VENT XB=-0.72,-0.16,-0.80,-0.80,1.84,2.12, ID='Outside Upper Left Vent', SURF_ID='STEEL PLATE' /
- HVAC ID='Upper Left Vent', TYPE_ID='LEAK', VENT_ID='Inside Upper Left Vent', VENT2_ID='Outside Upper Left Vent', AREA=0.041,
-      LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
- VENT XB=-0.72,-0.16,-0.76,-0.76,0.16,0.44, ID='Inside Lower Left Vent',  SURF_ID='STEEL PLATE' /
- VENT XB=-0.72,-0.16,-0.80,-0.80,0.16,0.44, ID='Outside Lower Left Vent', SURF_ID='STEEL PLATE' /
- HVAC ID='Lower Left Vent', TYPE_ID='LEAK', VENT_ID='Inside Lower Left Vent', VENT2_ID='Outside Lower Left Vent', AREA=0.041,
-      LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
- VENT XB= 0.16, 0.72,-0.76,-0.76,1.84,2.12, ID='Inside Upper Right Vent',  SURF_ID='STEEL PLATE' /
- VENT XB= 0.16, 0.72,-0.80,-0.80,1.84,2.12, ID='Outside Upper Right Vent', SURF_ID='STEEL PLATE' /
- HVAC ID='Upper Right Vent', TYPE_ID='LEAK', VENT_ID='Inside Upper Right Vent', VENT2_ID='Outside Upper Right Vent', AREA=0.041,
-      LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
- VENT XB= 0.16, 0.72,-0.76,-0.76,0.16,0.44, ID='Inside Lower Right Vent',  SURF_ID='STEEL PLATE' /
- VENT XB= 0.16, 0.72,-0.80,-0.80,0.16,0.44, ID='Outside Lower Right Vent', SURF_ID='STEEL PLATE' /
- HVAC ID='Lower Right Vent', TYPE_ID='LEAK', VENT_ID='Inside Lower Right Vent', VENT2_ID='Outside Lower Right Vent', AREA=0.041,
-      LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
-
 &VENT XB=-0.84,-0.84,-0.68, 0.68, 0.08, 0.72, ID='Inside Left Lower Leakage', SURF_ID='STEEL PLATE' /
 &VENT XB=-0.88,-0.88,-0.68, 0.68, 0.08, 0.72, ID='Outside Left Lower Leakage', SURF_ID='STEEL PLATE' /
-&HVAC ID='Left Lower Leakage', TYPE_ID='LEAK', VENT_ID='Inside Left Lower Leakage', VENT2_ID='Outside Left Lower Leakage', AREA=0.0275,
+&HVAC ID='Left Lower Leakage', TYPE_ID='LEAK', VENT_ID='Inside Left Lower Leakage', VENT2_ID='Outside Left Lower Leakage', AREA=0.04,
       LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
 &VENT XB=-0.84,-0.84,-0.68, 0.68, 1.68, 2.12, ID='Inside Left Upper Leakage', SURF_ID='STEEL PLATE' /
 &VENT XB=-0.88,-0.88,-0.68, 0.68, 1.68, 2.12, ID='Outside Left Upper Leakage', SURF_ID='STEEL PLATE' /
-&HVAC ID='Left Upper Leakage', TYPE_ID='LEAK', VENT_ID='Inside Left Upper Leakage', VENT2_ID='Outside Left Upper Leakage', AREA=0.0275,
+&HVAC ID='Left Upper Leakage', TYPE_ID='LEAK', VENT_ID='Inside Left Upper Leakage', VENT2_ID='Outside Left Upper Leakage', AREA=0.015,
       LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
 &VENT XB= 0.84, 0.84,-0.68, 0.68, 0.08, 0.72, ID='Inside Right Lower Leakage', SURF_ID='STEEL PLATE' /
 &VENT XB= 0.88, 0.88,-0.68, 0.68, 0.08, 0.72, ID='Outside Right Lower Leakage', SURF_ID='STEEL PLATE' /
-&HVAC ID='Right Lower Leakage', TYPE_ID='LEAK', VENT_ID='Inside Right Lower Leakage', VENT2_ID='Outside Right Lower Leakage', AREA=0.0275,
+&HVAC ID='Right Lower Leakage', TYPE_ID='LEAK', VENT_ID='Inside Right Lower Leakage', VENT2_ID='Outside Right Lower Leakage', AREA=0.04,
       LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
 &VENT XB= 0.84, 0.84,-0.68, 0.68, 1.68, 2.12, ID='Inside Right Upper Leakage', SURF_ID='STEEL PLATE' /
 &VENT XB= 0.88, 0.88,-0.68, 0.68, 1.68, 2.12, ID='Outside Right Upper Leakage', SURF_ID='STEEL PLATE' /
-&HVAC ID='Right Upper Leakage', TYPE_ID='LEAK', VENT_ID='Inside Right Upper Leakage', VENT2_ID='Outside Right Upper Leakage', AREA=0.0275,
+&HVAC ID='Right Upper Leakage', TYPE_ID='LEAK', VENT_ID='Inside Right Upper Leakage', VENT2_ID='Outside Right Upper Leakage', AREA=0.015,
       LEAK_PRESSURE_EXPONENT=0.6, LEAK_REFERENCE_PRESSURE=1., DISCHARGE_COEFFICIENT=0.61 /
 
  SURF ID='BLOW', COLOR='BLUE', VOLUME_FLOW=-0.125, TAU_V=200. /
