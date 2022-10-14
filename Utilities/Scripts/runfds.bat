@@ -62,30 +62,32 @@ goto loop1
 exit /b
 
 :: -------------------------------------------------------------
+:get_cpu_load_instance
+:: -------------------------------------------------------------
+wmic cpu get loadpercentage | head -2 | tail -1 > cpu_load.txt
+:: look for a number, if not found then assume is 0 and smaller then loadavg
+type cpu_load.txt | grep -c [0-9] > cpu_load_count.txt
+set /p count=<cpu_load_count.txt
+if "%count%" == "0" exit /b
+
+set /p cpuload=<cpu_load.txt
+if %cpuload% GTR %loadavg% set loadavg=%cpuload%
+Timeout /t 1 >nul
+exit /b
+
+:: -------------------------------------------------------------
 :get_cpu_load
 :: -------------------------------------------------------------
 
-wmic cpu get loadpercentage | head -2 | tail -1 > cpu_load.txt
-set /p cpuload1=<cpu_load.txt
-Timeout /t 1 >nul
+set loadavg=0
+call :get_cpu_load_instance
+call :get_cpu_load_instance
+call :get_cpu_load_instance
+call :get_cpu_load_instance
 
-wmic cpu get loadpercentage | head -2 | tail -1 > cpu_load.txt
-set /p cpuload2=<cpu_load.txt
-Timeout /t 1 >nul 
+echo loadavg=%loadavg%
 
-wmic cpu get loadpercentage | head -2 | tail -1 > cpu_load.txt
-set /p cpuload3=<cpu_load.txt
-Timeout /t 1 >nul 
-
-wmic cpu get loadpercentage | head -2 | tail -1 > cpu_load.txt
-set /p cpuload4=<cpu_load.txt
-
-set loadavg=%cpuload1%
-if %cpuload2% GTR %loadavg% set loadavg=%cpuload2%
-if %cpuload3% GTR %loadavg% set loadavg=%cpuload3%
-if %cpuload4% GTR %loadavg% set loadavg=%cpuload4%
-
-erase cpu_load.txt
+erase cpu_load.txt cpu_load_count.txt
 
 exit /b
 
