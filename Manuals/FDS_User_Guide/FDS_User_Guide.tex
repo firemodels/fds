@@ -3915,9 +3915,25 @@ Details of the output quantities are discussed in Section~\ref{info:material_com
 
 
 
+\section{Pyrolysis and Energy Conservation}
+\label{solid_phase_energy_conservation}
 
+The physical meaning of the {\ct HEAT\_OF\_REACTION} is the energy gained or loss to change the material into the resulting residue(s) and/or gas(es). In other words the {\ct HEAT\_OF\_REACTION} is the enthalpy of the products at the current solid temperature minus the enthalpy of the initial material at the current solid temperature. For total internal energy to be conserved, this must hold true. A challenge is that while the heat of reaction may be known for a solid material, detailed knowledge of the material enthalpy or the enthalpy of any residue or gaseous products is often not known. In cases where a reference enthalpy for a materials is known, one can input on the {\ct MATL} line the {\ct REFERENCE\_ENTHALPY} in kJ/kg and the {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} in $^\circ$C. 
 
+FDS will attempt to adjust all material enthalpies so that internal energy is conserved. For each material reaction a linear equation is defined:
 
+\be
+H_{\rm x} \left(T_{\rm ref} \right) + H_{\rm x,adj} + H_{\rm x,r} \left(T_{\rm ref} \right) = \sum_{i=1}^{\rm N\_residues} \nu_{\rm i} \left( H_{\rm i} \left(T_{\rm ref} \right) + H_{\rm i,adj}  \right) + 
+\sum_{j=1}^{\rm N\_species} \nu_{\rm j}  H_{\rm j} \left(T_{\rm ref} \right)
+\ee
+
+where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the {\ct HEAT\_OF\_REACTION}, $T_{\rm ref}$ is the temperature at which the {\ct HEAT\_OF\_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct entahlpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined {\ct SPECIFIC\_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Section~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pryolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on {\ct REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on {\ct REAC}, FDS adjusts the species enthalpy so that the correct {\ct HEAT\_OF\_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
+
+The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is overdetermined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactios, then the system is underdetertmined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude. 
+
+In the case of a singular matrix, a warning is written that no adjustment is done. A singular matrix happens when a row in the matrix is a linear combination of one or more other rows. If this happens, there is likely an error in one of the {\ct MATL} definitions.
+
+The value of $T_{\rm ref}$ used for a reaction is the value specified by the {\ct REFERENCE\_TEMPERATURE} for that reaction. If no value is given (when the reaction is defined using {\ct A} and {\ct E}), then FDS will do a virtual TGA using just the single reaction for the single material. The temperature where the peak reaction rate occurs is used for $T_{\rm ref}$. Since in most cases the specific heat of a material and the specific heats of its residues and product gases are not the same, the heat of reaction is temperature dependent. FDS will create a temperature dependent array for the heat of reaction that accounts for this where the value at $T_{\rm ref}$ is fixed to the value specified with {\ct HEAT\_OF\_REACTION}.
 
 \chapter{Ventilation}
 
@@ -4837,28 +4853,6 @@ the {\ct RAMP} function like this:
 &RAMP ID='k_steel', T=677., F=30.    /
 \end{lstlisting}
 Note that for temperature ramps, as opposed to time ramps, the parameter {\ct F} is the actual physical quantity, not just a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, there should be no value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the given range, FDS will assume a constant value equal to the first or last {\ct F} specified. Note also that the {\ct DENSITY} of a material cannot be controlled with a {\ct RAMP} function.
-
-In the case of burning materials or evaporating liquids, the {\ct HEAT\_OF\_REACTION} may be temperature dependent.  Similar to the specific heat ramp, you may specify a {\ct HEAT\_OF\_REACTION\_RAMP}, with temperature in $\si{\degreeCelsius}$ and heat of reaction or vaporization in kJ/kg.  Here is an example for water:
-\begin{lstlisting}
-&MATL ID                     = 'WATER'
-      EMISSIVITY             = 0.95
-      DENSITY                = 1000.
-      SPEC_ID                = 'WATER VAPOR'
-      NU_SPEC                = 1
-      CONDUCTIVITY           = 0.609
-      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
-      SPECIFIC_HEAT_RAMP     = 'c_H2O'
-      BOILING_TEMPERATURE    = 100. /
-
-&RAMP ID='hv_H2O', T=0.,   F=2500./
-&RAMP ID='hv_H2O', T=50.,  F=2390./
-&RAMP ID='hv_H2O', T=100., F=2270./
-
-&RAMP ID='c_H2O', T=0.,   F=4.23/
-&RAMP ID='c_H2O', T=50.,  F=4.18/
-&RAMP ID='c_H2O', T=100., F=4.22/
-\end{lstlisting}
-Note here the liquid properties have been set via ramps to match the properties of the thermally thin droplet model.
 
 \section{Spatially-Dependent Velocity Profiles}
 \label{info:RAMP_Vel_Prof}
@@ -11622,7 +11616,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEATING\_RATE(:)}              & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.            \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:,:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             &               \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real Array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.            \\ \hline
-{\ct HEAT\_OF\_REACTION\_RAMP(:)}   & Char.~Array     & Section~\ref{info:RAMP_Temperature}   &                   &               \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 {\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      &                   & $\infty$      \\ \hline

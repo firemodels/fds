@@ -4544,7 +4544,60 @@ We consider the contracting volume model applied to a spherical baking soda (NaH
 \label{fig:part_baking_soda}
 \end{figure}
 
+\section{Conservation of Pyrolyzed Energy (\texorpdfstring{\textct{matl\_e\_cons}}{matl\_e\_cons})}
+\label{matl_e_cons}
 
+Seven simple test cases are created to verify the process of ensuring the {\ct MATL} reactions conserve energy. Each case is a cube 1~m on a side with 4 grid cells in each dimension. One or more materials and gas species are defined. All materials are defined with a density of 1~\si{kg/m^3}. All species are defined with a molecular weight of 1000~\si{g/mol}. This is done for convenience as it means that the heat of formation in \si{kJ/mol} is the same numerical values as the enthalpy in \si{kJ/kg}. For each material that is defined, a single wall cell {\ct VENT} is defined with a {\ct SURF} such that the wall cell contains 1~kg of material. The {\ct WALL ENTHALPY} is output for each wall cell.
+
+In case 1, there is a single species is given a heat of formation of 0~\si{kJ/mol}. A single material is defined with a specific heat of 0.5~\si{kJ/kg/K} and a reaction that produces the gas species with a heat of reaction of 1000~\si{kJ/kg} at a reference temperature of 300~$^\circ$C with a pyrolysis range of 40~K.  This gives:
+
+\begin{eqnarray}
+   H_{\rm MATL1}(300~^\circ \rm C) + H_{\rm MATL1,adj} + 1000~{\rm kJ/kg} &=& H_{\rm SPEC1}(300~^\circ {\rm C}) \\
+   286.575~{\rm kJ/kg} + H_{\rm MATL1,adj}+ 1000~{\rm kJ/kg} &=& 275~{\rm kJ/kg} \\
+   H_{\rm MATL1,adj} &=&-1011.575~{\rm kJ/kg}
+\end{eqnarray}
+
+At ambient temperature this makes the expected enthalpy of the wall cell 298.15~K $\times$ 0.5~\si{kJ/kg/K}-1011.575~\si{kJ/kg}=-865~\si{kJ/kg}.
+
+Case 2 repeats case 1 with a species heat of formation of 1000~\si{kJ/mol}. This makes the expected ambient enthalpy -1865~\si{kJ/kg}. 
+
+Case 3 combines case 1 and case 2 into a single input. The case 1 material is changed from using a reference temperature and pyrolysis range to using the resulting A ($7.68\times10^{31}$~1/s) and E (371000~\si{J/mol}) which was taken from the case 1 output file. This case tests the virtual TGA (the case 1 material will only have the same adjustment if there is the same reference temperature) and that multiple sets of reactions are correctly handled.
+
+Case 4 takes case 1 and changes the reaction to produce equal amounts of the gas species and a second material. The second material has a specific heat of 1.5~\si{kJ/kg/K} and a reaction that produces the gas species with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 400~$^\circ$C. This case has two total reactions that include two total materials. The solution can be found by hand by first finding the adjustment for the second material (following the example for case 1) and then using that adjustment to find the value for the first material. 
+
+Case 5 takes case 4 and adds a second reaction for the first material. This reaction creates a second copy of the first material with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 280~$^\circ$C. This can be thought of as a phase change. The second copy also produces equal amounts of the gas species and the other material expect with a heat of reaction of 500~\si{kJ/kg}. This is now an overdetermined system as there are three materials and four reactions; however, note that the parallel paths to creating the gas species have the same total enthalpy change. The first material directly pyrolyzing has a heat of reaction of 1000~\si{kJ/kg}, and the path of the phase change also has a total enthalpy change of 1000~\si{kJ/kg} split between the phase change and the pyrolysis. Therefore, even though the system is overdetermined, an exact solution is expected. This is seen in the results where the first and second material enthalpies in case 5 match those from case 4. 
+
+Case 6 takes case 5 and increases the heat of reaction post-phase change to 1000~\si{kJ/kg}. Now an exact solution is no longer expected. It can be seen that the second material has the same enthalpy but the first material and its phase-change have different ambient enthalpies. The post-phase change material enthalpy has changed by 333~\si{kJ/kg} but the reaction enthalpy changed by 500~\si{kJ/kg} so energy is not completely conserved. As a least squares solution, it is conserved as best as it can be. 
+
+Case 7 takes case 4 and removes the reaction from the second material. This is now an underdetermined system where there are two materials and a single reaction. Following the process for case 1, one gets that
+\be
+ H_{\rm MATL1,adj} - 0.5 H_{\rm MATL2,adj} =-719.2125~{\rm kJ/kg}	
+\ee
+
+The minimum matrix solution is $H_{\rm MATL1,adj}$=-575.37~\si{kJ/kg} and  $H_{\rm MATL2,adj}$=287.68~\si{kJ/kg}. It can be shown that this is a minimal solution by taking the norm of the solution vector. This can be expressed in terms of only $H_{\rm MATL1,adj}$ as 
+\be
+H_{\rm MATL1,adj}^2 + (2 (H_{\rm MATL1,adj}+791.2125~{\rm kJ/kg}))^2
+\ee
+
+The minimum is where the derivative is zero or 
+\be
+10 H_{\rm MATL1,adj} + 8 \times 791.2125~{\rm kJ/kg} =-575.37~{\rm kJ/kg}.
+\ee
+
+\begin{figure}[p]
+	\noindent
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_1} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_2} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_3} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_4} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_5} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_6} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_7}
+	\end{tabular*}
+	\caption[The \textct{matl\_e\_cons} test cases]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases }
+	\label{fig_matl_e_cons}
+\end{figure}
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}

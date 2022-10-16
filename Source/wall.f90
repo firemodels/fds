@@ -3846,7 +3846,7 @@ REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_S_PPP(MAX_MATERIALS),Q_DOT_PART(MAX
 REAL(EB), INTENT(OUT) :: Q_DOT_G_PPP,Q_DOT_O2_PPP,B_NUMBER
 REAL(EB), INTENT(INOUT) :: T_BOIL_EFF
 INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
-INTEGER :: N,NN,J,NS,SMIX_INDEX(N_MATS),NWP,NP,NP2,ITMP
+INTEGER :: N,NN,NNN,J,NS,SMIX_INDEX(N_MATS),NWP,NP,NP2,ITMP
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
@@ -4034,7 +4034,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
             ! Limit the burning rate to (200 kW/m2) / h_g
 
-             MFLUX_MAX = 200E3_EB/ML%HEAT_OF_GASIFICATION
+             MFLUX_MAX = 200.E3_EB/ML%H_R(J,INT(TMP_F))
 
             ! Calculate the mass flux of liquid component N at the surface if this is a surface cell.
 
@@ -4157,9 +4157,11 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       ! Compute new component density, RHO_S(N)
 
       RHO_DOT_OUT(N) = RHO_DOT_OUT(N) + RHO_DOT  ! rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
-      DO NN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
-         RHO_DOT_OUT(NN) = RHO_DOT_OUT(NN) - ML%NU_RESIDUE(MATL_INDEX(NN),J)*RHO_DOT
-         M_DOT_S_PPP(NN) = M_DOT_S_PPP(NN) + ML%NU_RESIDUE(MATL_INDEX(NN),J)*RHO_DOT ! (m_dot_alpha')'''
+      DO NN=1,ML%N_RESIDUE(J) ! Get residue production (alpha' represents the other materials)
+         NNN = FINDLOC(MATL_INDEX,ML%RESIDUE_MATL_INDEX(NN,J),1)
+         NNN = MATL_INDEX(NNN)
+         RHO_DOT_OUT(NNN) = RHO_DOT_OUT(NNN) - ML%NU_RESIDUE(NN,J)*RHO_DOT
+         M_DOT_S_PPP(NNN) = M_DOT_S_PPP(NNN) + ML%NU_RESIDUE(NN,J)*RHO_DOT ! (m_dot_alpha')'''
       ENDDO
 
       ! Optional variable heat of reaction
