@@ -579,6 +579,9 @@ TYPE REACTION_TYPE
    REAL(EB) :: SOOT_YIELD                   !< Soot yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: H2_YIELD                     !< H2 yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: HCN_YIELD                    !< HCN yield in SIMPLE_CHEMISTRY model
+   REAL(EB) :: FUEL_C_TO_CO_FRACTION        !< For 2-step simple chemistry, fuel C that goes to CO instead of C
+   REAL(EB) :: FUEL_H_TO_H2_FRACTION        !< For 2-step simple chemistry, fuel H that goes to H2 instead of H2O
+   REAL(EB) :: FUEL_N_TO_HCN_FRACTION       !< For 2-step simple chemistry fuel N that goes to HCN instead of N2
    REAL(EB) :: SOOT_H_FRACTION              !< Mass fraction of hydrogen within soot
    REAL(EB) :: RHO_EXPONENT                 !< Exponent of density in reaction expression
    REAL(EB) :: CRIT_FLAME_TMP               !< Critical Flame Temperature (K)
@@ -603,8 +606,10 @@ TYPE REACTION_TYPE
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
    INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
+   INTEGER :: PAIR_INDEX                    !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
+   INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
    INTEGER :: RAMP_CFT_INDEX=0              !< Index of critical flame temperature ramp
    INTEGER :: RAMP_CFT_SPEC_INDEX=0         !< Index of critical flame temperature ramp species
