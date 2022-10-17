@@ -2712,10 +2712,23 @@ MATL_LOOP: DO N=1,N_MATL
 
    WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,TRIM(MATL_NAME(N))
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
-   WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
-   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Specific Heat (kJ/kg/K)      ',ML%C_S(NINT(TMPA))*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Conductivity (W/m/K)         ',ML%K_S(NINT(TMPA))
+   WRITE(LU_OUTPUT,'(A,F8.3)') '     Emissivity:                               ',ML%EMISSIVITY
+   WRITE(LU_OUTPUT,'(A,F8.1)') '     Density (kg/m3):                          ',ML%RHO_S
+   ITMP = NINT(TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Specific Heat (kJ/kg/K) Ambient, ',ITMP,' K: ',ML%C_S(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%C_S(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%C_S(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%C_S(800)*0.001_EB
+   
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Therm. Cond. (W/m/K) Ambient,    ',ITMP,' K: ', ML%K_S(ITMP)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%K_S(350)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%K_S(500)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%K_S(800)
+
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Enthalpy (kJ/kg) Ambient,        ',ITMP,' K: ',ML%H(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%H(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%H(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
@@ -2724,18 +2737,30 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID .OR. ML%PYROLYSIS_MODEL==PYROLYSIS_VEGETATION) THEN
       DO NR=1,ML%N_REACTIONS
          WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
-         DO NN=1,N_MATL
-            IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
-                                  '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
+         WRITE(LU_OUTPUT,'(A)')      '        Residue Yields:'
+         DO NN=1,ML%N_RESIDUE(NR)
+            IF (ABS(ML%NU_RESIDUE(NN,NR)) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)')'        ',&
+               MATERIAL(ML%RESIDUE_MATL_INDEX(NN,NR))%ID,': ', ML%NU_RESIDUE(NN,NR)
          ENDDO
          WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
          DO NS = 1,N_TRACKED_SPECIES
-         WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
+            WRITE(LU_OUTPUT,'(A,A,A,F6.3)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
          ENDDO
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR,NINT(TMPA))/1000._EB
-         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s):                     ',ML%A(NR)
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol):                   ',ML%E(NR)/1000.
+         IF (ML%TMP_REF(NR) <= TWO_EPSILON_EB) THEN
+            ITMP = INT(TMPA)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB            
+         ELSE
+            ITMP = NINT(ML%TMP_REF(NR))
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S:                          ',ML%N_S(NR)
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T:                          ',ML%N_T(NR)
          IF (ML%N_O2(NR)>0._EB) THEN
             WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
             WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)

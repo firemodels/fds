@@ -101,18 +101,20 @@ I = 1,2,3 in any of the internal wall points.
       THICKNESS=0.001 /
 
 &MATL ID = 'MAT_A'
+      ADJUST_H = F
       CONDUCTIVITY=0.1
       SPECIFIC_HEAT= 1.0
-      DENSITY= 1. 
+      DENSITY= 1.
       A = 0.389
       E = 0.
       NU_MATL = 1.0
       MATL_ID = 'MAT_B'/
 
 &MATL ID = 'MAT_B'
+      ADJUST_H = F
       CONDUCTIVITY=0.1
       SPECIFIC_HEAT= 1.0
-      DENSITY= 1. 
+      DENSITY= 1.
       A = 0.262
       E = 0.
       NU_MATL = 1.0
@@ -131,6 +133,6 @@ I = 1,2,3 in any of the internal wall points.
 &DEVC ID='Yb', XYZ=0.0,0.0,0.,IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='MAT_B', DEPTH=0.0001 /
 &DEVC ID='Yc', XYZ=0.0,0.0,0.,IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='MAT_C', DEPTH=0.0001 /
 
-&TAIL / 
+&TAIL /
 
 
