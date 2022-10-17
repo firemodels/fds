@@ -2431,7 +2431,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             IF (SF%CONE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
                IF (PREDICTOR) THEN
                   RP => RAMPS(SF%RAMP_INDEX(N))
-                  IF (T = 0) THEN
+                  IF (T == 0) THEN
                       ONE_D%Q_IN_SMOOTH = (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN)
                   ELSEIF (T < 10) THEN
                       ONE_D%Q_IN_SMOOTH = ONE_D%Q_IN_SMOOTH * (T - DT) + (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN) * DT
