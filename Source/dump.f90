@@ -2748,12 +2748,17 @@ MATL_LOOP: DO N=1,N_MATL
          ENDDO
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s):                     ',ML%A(NR)
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol):                   ',ML%E(NR)/1000.
-         ITMP = NINT(ML%TMP_REF(NR))
-         WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
-         ITMP = NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB)
-         WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
-         ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
-         WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+         IF (ML%TMP_REF(NR) <= TWO_EPSILON_EB) THEN
+            ITMP = TMPA
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB            
+         ELSE
+            ITMP = NINT(ML%TMP_REF(NR))
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+         ENDIF
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S:                          ',ML%N_S(NR)
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T:                          ',ML%N_T(NR)
          IF (ML%N_O2(NR)>0._EB) THEN
