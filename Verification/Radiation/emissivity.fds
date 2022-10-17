@@ -1,13 +1,13 @@
-The emissivity of the TEST surface changes due to the change in 
-the mass fractions of MAT_A and MAT_B, having emissivities of 
-1.0 and 0.0, respectively. The exact solution is a linear function 
+The emissivity of the TEST surface changes due to the change in
+the mass fractions of MAT_A and MAT_B, having emissivities of
+1.0 and 0.0, respectively. The exact solution is a linear function
 going from 1.0 to 0.0 when time goes from 0 to 10 s.
 
 The emissivity is measured using EMISSIVITY output quantity.
 
 &HEAD CHID='emissivity', TITLE='Test surface emissivity' /
 
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
 &TIME T_END=10 DT = 0.01 WALL_INCREMENT = 1/
 
@@ -21,10 +21,11 @@ The emissivity is measured using EMISSIVITY output quantity.
       THICKNESS=0.001/
 
 &MATL ID = 'MAT_A'
+      ADJUST_H=F
       EMISSIVITY = 1.0
       CONDUCTIVITY=1.0
       SPECIFIC_HEAT= 1.0
-      DENSITY= 10.0 
+      DENSITY= 10.0
       N_REACTIONS = 1
       A = 1.
       E = 0.
@@ -33,6 +34,7 @@ The emissivity is measured using EMISSIVITY output quantity.
       MATL_ID = 'MAT_B'/
 
 &MATL ID = 'MAT_B'
+      ADJUST_H=F
       EMISSIVITY = 0.0
       CONDUCTIVITY=1.0
       SPECIFIC_HEAT= 1.0

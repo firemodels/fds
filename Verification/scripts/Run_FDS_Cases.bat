@@ -5,7 +5,6 @@ set DEBUG=
 set rundebug=0
 set run_all=1
 set run_subset=0
-set size=_64
 
 set stopscript=0
 call :getopts %*
@@ -48,8 +47,8 @@ set RUNTFDS_E=call %SVNROOT%\fds\Verification\scripts\erase_stop.bat
 ::set SH2BAT=%SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat
 set SH2BAT=sh2bat
 
-set FDSBASE=fds_impi_win%size%%DEBUG%.exe
-set "FDSEXE=%SVNROOT%\fds\Build\impi_intel_win%size%%DEBUG%\%FDSBASE%"
+set FDSBASE=fds_impi_intel_win%DEBUG%.exe
+set "FDSEXE=%SVNROOT%\fds\Build\impi_intel_win%DEBUG%\%FDSBASE%"
 
 :: ---------- Ensure that various programs exists
 
@@ -144,7 +143,7 @@ tasklist | find /i /c "%FDSBASE%" > %waitfile%
 set /p numexe=<%waitfile%
 echo Number of cases running - %numexe%
 if %numexe% == 0 goto finished
-Timeout /t 30 >nul 
+Timeout /t 30 >nul
 goto loop1
 erase %waitfile%
 
@@ -197,9 +196,9 @@ exit /b
 if not (%1)==() goto getopts
 exit /b
 
-:usage  
+:usage
 echo Run_FDS_Cases [options]
-echo. 
+echo.
 echo -help   - display this message
 echo -debug  - run cases using the debug version of FDS
 echo -subset - run a subset of FDS cases

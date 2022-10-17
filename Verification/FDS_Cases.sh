@@ -293,6 +293,8 @@ $QFDS -d HVAC ashrae7_quadratic.fds
 $QFDS -d HVAC ashrae7_table.fds
 $QFDS -d HVAC door_crack.fds
 $QFDS -d HVAC fan_test.fds
+$QFDS -d HVAC qfan_test.fds
+$QFDS -d HVAC qfan_multi.fds
 $QFDS -d HVAC HVAC_aircoil.fds
 $QFDS -d HVAC HVAC_damper.fds
 $QFDS -d HVAC HVAC_energy_pressure.fds
@@ -457,6 +459,13 @@ $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_pool.fds
+$QFDS -d Pyrolysis matl_e_cons_1.fds
+$QFDS -d Pyrolysis matl_e_cons_2.fds
+$QFDS -d Pyrolysis matl_e_cons_3.fds
+$QFDS -d Pyrolysis matl_e_cons_4.fds
+$QFDS -d Pyrolysis matl_e_cons_5.fds
+$QFDS -d Pyrolysis matl_e_cons_6.fds
+$QFDS -d Pyrolysis matl_e_cons_7.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds

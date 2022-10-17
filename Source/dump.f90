@@ -2646,7 +2646,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
    ENDIF
-   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY .AND. N_REACTIONS==1) THEN
+   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
       ! first, create a stoichiometric mixture for current REACTION
       ZZ_REAC=0._EB
       ZZ_PROD=0._EB
@@ -2700,10 +2700,23 @@ MATL_LOOP: DO N=1,N_MATL
 
    WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,TRIM(MATL_NAME(N))
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
-   WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
-   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Specific Heat (kJ/kg/K)      ',ML%C_S(NINT(TMPA))*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Conductivity (W/m/K)         ',ML%K_S(NINT(TMPA))
+   WRITE(LU_OUTPUT,'(A,F8.3)') '     Emissivity:                               ',ML%EMISSIVITY
+   WRITE(LU_OUTPUT,'(A,F8.1)') '     Density (kg/m3):                          ',ML%RHO_S
+   ITMP = NINT(TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Specific Heat (kJ/kg/K) Ambient, ',ITMP,' K: ',ML%C_S(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%C_S(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%C_S(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%C_S(800)*0.001_EB
+   
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Therm. Cond. (W/m/K) Ambient,    ',ITMP,' K: ', ML%K_S(ITMP)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%K_S(350)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%K_S(500)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%K_S(800)
+
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Enthalpy (kJ/kg) Ambient,        ',ITMP,' K: ',ML%H(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%H(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%H(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
@@ -2712,18 +2725,30 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID .OR. ML%PYROLYSIS_MODEL==PYROLYSIS_VEGETATION) THEN
       DO NR=1,ML%N_REACTIONS
          WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
-         DO NN=1,N_MATL
-            IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
-                                  '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
+         WRITE(LU_OUTPUT,'(A)')      '        Residue Yields:'
+         DO NN=1,ML%N_RESIDUE(NR)
+            IF (ABS(ML%NU_RESIDUE(NN,NR)) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)')'        ',&
+               MATERIAL(ML%RESIDUE_MATL_INDEX(NN,NR))%ID,': ', ML%NU_RESIDUE(NN,NR)
          ENDDO
          WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
          DO NS = 1,N_TRACKED_SPECIES
-         WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
+            WRITE(LU_OUTPUT,'(A,A,A,F6.3)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
          ENDDO
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR,NINT(TMPA))/1000._EB
-         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s):                     ',ML%A(NR)
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol):                   ',ML%E(NR)/1000.
+         IF (ML%TMP_REF(NR) <= TWO_EPSILON_EB) THEN
+            ITMP = TMPA
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB            
+         ELSE
+            ITMP = NINT(ML%TMP_REF(NR))
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S:                          ',ML%N_S(NR)
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T:                          ',ML%N_T(NR)
          IF (ML%N_O2(NR)>0._EB) THEN
             WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
             WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
@@ -3541,7 +3566,8 @@ INTEGER  :: NPP,NPLIM,IP,N,NN,IZERO
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: QP
 INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
-REAL(EB) :: PART_MIN, PART_MAX
+REAL(EB) :: PART_MIN, PART_MAX, PFACTOR
+REAL(FB) :: PFACTOR_FB
 INTEGER, PARAMETER :: PART_BOUNDFILE_VERSION=1
 
 CALL POINT_TO_MESH(NM)
@@ -3603,21 +3629,39 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (EB_PART_FILE)      WRITE(LU_PART(NM)) (XP(IP),IP=1,NPLIM),(YP(IP),IP=1,NPLIM),(ZP(IP),IP=1,NPLIM)
    IF (.NOT.EB_PART_FILE) WRITE(LU_PART(NM)) (REAL(XP(IP),FB),IP=1,NPLIM),(REAL(YP(IP),FB),IP=1,NPLIM),(REAL(ZP(IP),FB),IP=1,NPLIM)
    WRITE(LU_PART(NM)) (TA(IP),IP=1,NPLIM)
-   IF (     EB_PART_FILE .AND. LPC%N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((QP(IP,NN),IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
-   IF (.NOT.EB_PART_FILE .AND. LPC%N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((REAL(QP(IP,NN),FB),IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
+   IF (LPC%DEBUG) THEN
+      PFACTOR = 0.0_EB
+      IF(NPLIM > 1) PFACTOR = 2.0_EB*STIME/REAL(NPLIM-1,FB)
+      IF (LPC%N_QUANTITIES > 0) THEN
+         IF (EB_PART_FILE) THEN
+            WRITE(LU_PART(NM)) ((-STIME+REAL(IP-1,EB)*PFACTOR,IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
+         ELSE
+            PFACTOR_FB = REAL(PFACTOR,FB)
+            WRITE(LU_PART(NM)) ((REAL(-STIME,FB)+REAL(IP-1,FB)*PFACTOR_FB,IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
+         ENDIF
+      ENDIF
+   ELSE
+      IF (     EB_PART_FILE .AND. LPC%N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((QP(IP,NN),IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
+      IF (.NOT.EB_PART_FILE .AND. LPC%N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((REAL(QP(IP,NN),FB),IP=1,NPLIM),NN=1,LPC%N_QUANTITIES)
+   ENDIF
 
    WRITE(LU_PART(NM+NMESHES),'(I4,1X,I7)')LPC%N_QUANTITIES, NPLIM
    DO NN = 1, LPC%N_QUANTITIES
-      IF (NPLIM > 0) THEN
-         PART_MAX = QP(1,NN)
-         PART_MIN = PART_MAX
-         DO IP = 2, NPLIM
-            PART_MIN = MIN(QP(IP,NN),PART_MIN)
-            PART_MAX = MAX(QP(IP,NN),PART_MAX)
-         ENDDO
+      IF (LPC%DEBUG) THEN
+         PART_MIN = -STIME
+         PART_MAX =  STIME
       ELSE
-         PART_MIN = 1.0_EB
-         PART_MAX = 0.0_EB
+         IF (NPLIM > 0) THEN
+            PART_MAX = QP(1,NN)
+            PART_MIN = PART_MAX
+            DO IP = 2, NPLIM
+               PART_MIN = MIN(QP(IP,NN),PART_MIN)
+               PART_MAX = MAX(QP(IP,NN),PART_MAX)
+            ENDDO
+         ELSE
+            PART_MIN = 1.0_EB
+            PART_MAX = 0.0_EB
+         ENDIF
       ENDIF
       WRITE(LU_PART(NM+NMESHES),'(5X,ES13.6,1X,ES13.6)')PART_MIN, PART_MAX
    ENDDO
@@ -9768,8 +9812,9 @@ END SUBROUTINE DUMP_MASS
 SUBROUTINE DUMP_BNDF(T,DT,NM)
 
 REAL(EB), INTENT(IN) :: T,DT
-REAL(FB) :: STIME, BOUND_MIN, BOUND_MAX
+REAL(FB) :: STIME, BOUND_MIN, BOUND_MAX, BF_FACTOR
 INTEGER :: ISUM,NF,IND,I,J,K,IC,IW,L,L1,L2,N,N1,N2,IP,NC,I1,I2,J1,J2,K1,K2
+INTEGER :: NBF_DEBUG
 INTEGER, INTENT(IN) :: NM
 TYPE(PATCH_TYPE), POINTER :: PA
 
@@ -9869,9 +9914,12 @@ FILE_LOOP: DO NF=1,N_BNDF
             ENDDO
             ENDDO
          ELSE
-            WRITE(LU_BNDF(NF,NM)) ((REAL(100*NM,FB),L=L1-1,L2),N=N1-1,N2)
-            BOUND_MIN = MIN(REAL(100*NM,FB),BOUND_MIN)
-            BOUND_MAX = MAX(REAL(100*NM,FB),BOUND_MAX)
+            NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
+            BF_FACTOR = 0.0_FB
+            IF ( NBF_DEBUG .GT. 1) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
+            WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
+            BOUND_MIN = -STIME
+            BOUND_MAX =  STIME
          ENDIF
 
       ELSE
@@ -9884,9 +9932,12 @@ FILE_LOOP: DO NF=1,N_BNDF
             ENDDO
             ENDDO
          ELSE
-            WRITE(LU_BNDF(NF,NM)) ((REAL(100*NM,FB),L=L1,L2+1),N=N1,N2+1)
-            BOUND_MIN = MIN(REAL(100*NM,FB),BOUND_MIN)
-            BOUND_MAX = MAX(REAL(100*NM,FB),BOUND_MAX)
+            NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
+            BF_FACTOR = 0.0_FB
+            IF ( NBF_DEBUG .GT. 1 ) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
+            WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
+            BOUND_MIN = -STIME
+            BOUND_MAX =  STIME
          ENDIF
       ENDIF
 
