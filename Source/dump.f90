@@ -2737,7 +2737,7 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s):                     ',ML%A(NR)
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol):                   ',ML%E(NR)/1000.
          IF (ML%TMP_REF(NR) <= TWO_EPSILON_EB) THEN
-            ITMP = TMPA
+            ITMP = INT(TMPA)
             WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB            
          ELSE
             ITMP = NINT(ML%TMP_REF(NR))
