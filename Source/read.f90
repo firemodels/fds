@@ -6034,7 +6034,7 @@ ENDDO
 ! Allocate the MATERIAL derived type
 
 ALLOCATE(MATERIAL(1:N_MATL),STAT=IZERO)
-CALL ChkMemErr('READ','MATERIAL',IZERO)
+CALL ChkMemErr('READ','MATERIAL',IZERO)
 ! Read the MATL lines in the order listed in the input file
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
