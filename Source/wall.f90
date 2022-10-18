@@ -1602,16 +1602,11 @@ REAL(EB) :: RDT,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,RHO_C_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL,T_BOIL_EFF,&
             Q_DOT_PART(MAX_LPC),M_DOT_PART(MAX_LPC),Q_DOT_PART_S(MAX_LPC),M_DOT_PART_S(MAX_LPC),RADIUS,HTC_LIMIT,&
             ZZ_G(1:N_TRACKED_SPECIES),CP1,CP2
-! MT1D
-!REAL(EB) :: D_Z_N(0:I_MAX_TEMP),D_Z_TEMP,D_Z_P(0:NWP_MAX+1), D_DRHOZDX(0:NWP_MAX),D_BAR,PHI_BAR,D_STAR_BAR,&
-!            RR_SUM,GAS_DENSITY
 REAL(EB) :: POROSITY(0:NWP_MAX+1),DDSUM, SMALLEST_CELL_SIZE(1:MAX_LAYERS)
 REAL(EB), POINTER, DIMENSION(:) :: DELTA_TMP
 INTEGER :: IIB,JJB,KKB,IWB,NWP,I,NR,NL,N,I_OBST,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS,EXPON,ITMP,ITER
 REAL(EB) :: DX_MIN(MAX_LAYERS),THICKNESS
 REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: INT_WGT
-! Move MT1D to own branch
-!REAL(EB), DIMENSION(:) :: RHO_ZZ_F(1:N_TRACKED_SPECIES),RHO_ZZ_B(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
 INTEGER  :: NWP_NEW,I_GRAD,IZERO,SURF_INDEX,SURF_INDEX_BACK,BACKING
 LOGICAL :: E_FOUND,CHANGE_THICKNESS,CONST_C(NWP_MAX),REMESH_LAYER(MAX_LAYERS),REMESH_CHECK
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
@@ -1776,35 +1771,6 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ONE_D%Q_DOT_O2_PP                            = 0._EB
    ONE_D%M_DOT_PART_ACTUAL                      = 0._EB
 ENDIF
-
-! Get gas concentrations at boundaries
-
-!IF (SF%MT1D) THEN
-!#   ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_G(1:N_TRACKED_SPECIES)
-!#   RHO_ZZ_F(1:N_TRACKED_SPECIES) = ONE_D%RHO_F*ZZ_GET(1:N_TRACKED_SPECIES)
-!   SELECT CASE(BACKING)
-!   CASE(VOID)  ! Non-insulated backing to an ambient void
-!      ZZ_GET(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-!      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
-!      GAS_DENSITY = P_INF/(TMP_0(BC%KK)*RR_SUM)
-!      RHO_ZZ_B(1:N_TRACKED_SPECIES) = GAS_DENSITY*ZZ_GET
-!   CASE(INSULATED)  ! No mass transfer out the back
-!   CASE(EXPOSED)
-!      IF (WC%BACK_MESH/=NM .AND. WC%BACK_MESH>0) THEN  ! Back side is in other mesh.
-!         IIB = BC_BACK%IIG
-!         JJB = BC_BACK%JJG
-!         KKB = BC_BACK%KKG
-!         ZZ_GET(1:N_TRACKED_SPECIES) = OMESH(WC%BACK_MESH)%ZZ(IIB,JJB,KKB,1:N_TRACKED_SPECIES)
-!         RHO_ZZ_B(1:N_TRACKED_SPECIES) = OMESH(WC%BACK_MESH)%RHO(IIB,JJB,KKB)*ZZ_GET(1:N_TRACKED_SPECIES)
-!      ELSE  ! Back side is in current mesh.
-!         IIB = BC_BACK%IIG
-!         JJB = BC_BACK%JJG
-!         KKB = BC_BACK%KKG
-!         ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIB,JJB,KKB,1:N_TRACKED_SPECIES)
-!         RHO_ZZ_B(1:N_TRACKED_SPECIES) = RHO(IIB,JJB,KKB)*ZZ_GET(1:N_TRACKED_SPECIES)
-!      ENDIF
-!   END SELECT
-!ENDIF
 
 ! Start time iterations here
 
@@ -1978,7 +1944,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ENDDO
 
       ! Compute the mass flux of reaction gases at the surface
-!      IF (.NOT. SF%MT1D) THEN
+
       GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
       Q_DOT_G_PP  = Q_DOT_G_PP  + Q_DOT_G_PPP*GEOM_FACTOR
       Q_DOT_O2_PP = Q_DOT_O2_PP + Q_DOT_O2_PPP*GEOM_FACTOR
@@ -1987,7 +1953,6 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       M_DOT_G_PP_ACTUAL = M_DOT_G_PP_ACTUAL + M_DOT_G_PPP_ACTUAL*GEOM_FACTOR
 
       M_DOT_S_PP(1:SF%N_MATL) = M_DOT_S_PP(1:SF%N_MATL)  + M_DOT_S_PPP(1:SF%N_MATL)*GEOM_FACTOR
-!      ENDIF
 
       ! Compute particle mass flux at the surface
       IF (SF%N_LPC > 0) THEN
@@ -2607,57 +2572,6 @@ IF (SF%N_LPC > 0) THEN
    ONE_D%T_MATL_PART = ONE_D%T_MATL_PART + DT_BC_SUB
    ONE_D%M_DOT_PART_ACTUAL = SUM(M_DOT_PART_S(1:SF%N_LPC))
 ENDIF
-
-! Compute 1D mass transfer within the solid
-
-!MASS_TRANSFER_1D: IF (SF%MT1D) THEN
-!
-!   DO NS = 1,SF%N_SPEC
-!      ! Set diffusivity
-!      D_Z_N = D_Z(:,NS)
-!      DO I=1,NWP+1
-!         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,ONE_D%TMP(I),D_Z_TEMP)
-!         D_Z_P(I) = D_Z_TEMP
-!         ! if user specifies diffusivity on MATL line, over-ride defaults
-!         DO N=1,N_MATL
-!            ML => MATERIAL(N)
-!            IF (ML%DIFFUSIVITY_GAS(NS)>TWO_EPSILON_EB) D_Z_P(I) = ML%DIFFUSIVITY_GAS(NS)
-!            EXIT
-!         ENDDO
-!      ENDDO
-!      ! Set boundary conditions
-!      ONE_D%SPEC_COMP(NS)%RHO_ZZ(0) = RHO_ZZ_F(NS)
-!      IF (BACKING==INSULATED) THEN
-!         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP)
-!      ELSE
-!         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = RHO_ZZ_B(NS)
-!      ENDIF
-!      ! Calculate diffusive fluxes
-!      D_Z_P(0) = D_Z_P(1)
-!      D_Z_P(NWP+1) = D_Z_P(NWP)
-!      POROSITY(0) = POROSITY(1)
-!      POROSITY(NWP+1) = POROSITY(NWP)
-!      DO I=0,NWP
-!         IF (MIN(POROSITY(I),POROSITY(I+1))<1E-6) THEN
-!            D_DRHOZDX(I) = 0._EB
-!         ELSE
-!            PHI_BAR = 1._EB / ( DX_WGT_S(I)/POROSITY(I) + (1._EB-DX_WGT_S(I))/POROSITY(I+1) )
-!            D_BAR  = 1._EB / ( DX_WGT_S(I)/D_Z_P(I) + (1._EB-DX_WGT_S(I))/D_Z_P(I+1) )
-!            D_STAR_BAR = D_BAR*PHI_BAR
-!            D_DRHOZDX(I) = D_STAR_BAR*(ONE_D%SPEC_COMP(NS)%RHO_ZZ(I+1)-ONE_D%SPEC_COMP(NS)%RHO_ZZ(I))*RDXN_S(I)
-!         ENDIF
-!      ENDDO
-!      D_DRHOZDX(0) = 2._EB*D_DRHOZDX(0)           ! RDXN_S is equal to cell size at first and last cell
-!      D_DRHOZDX(NWP) = 2._EB*D_DRHOZDX(NWP)       ! Distance from surface to cell centre is only half of that
-!      ! Update gas concentrations
-!      DO I=1,NWP
-!         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)+DT_BC_SUB*(D_DRHOZDX(I)-D_DRHOZDX(I-1))*RDX_S(I)
-!         ! + M_DOT_G_PP_ACTUAL
-!         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = MAX(0._EB,ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)) ! guarantee boundedness
-!      ENDDO
-!   ENDDO
-!ENDIF MASS_TRANSFER_1D
-
 
 ! Determine if the iterations are done, otherwise return to the top
 

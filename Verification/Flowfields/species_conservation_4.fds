@@ -1,4 +1,4 @@
-&HEAD CHID='species_conservation_4', TITLE='Test of species generation from a solid wall undergoing a reaction.' / 
+&HEAD CHID='species_conservation_4', TITLE='Test of species generation from a solid wall undergoing a reaction.' /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
@@ -12,12 +12,13 @@
 &SPEC ID='CHLORINE' /
 
 &MATL ID                   = 'STUFF'
+      ADJUST_H             = F
       CONDUCTIVITY         = 0.144
       SPECIFIC_HEAT        = 2.0
       DENSITY              = 100.
       N_REACTIONS          = 1
       SPEC_ID(1:4,1)       = 'CARBON DIOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','CHLORINE',
-      NU_SPEC(1:4,1)       = 0.25, 0.25, 0.25,0.25, 
+      NU_SPEC(1:4,1)       = 0.25, 0.25, 0.25,0.25,
       REFERENCE_TEMPERATURE=330. /
 
 &SURF ID                   = 'PATCH'
