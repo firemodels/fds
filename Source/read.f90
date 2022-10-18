@@ -6666,10 +6666,6 @@ REAL(EB) :: VEG_LSET_IGNITE_TIME,VEG_LSET_QCON,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_FL
             VEG_LSET_CHAR_FRACTION,VEL_PART,INIT_PER_AREA
 LOGICAL :: DEFAULT,VEG_LSET_SPREAD,VEG_LSET_TAN2,TGA_ANALYSIS,COMPUTE_EMISSIVITY,&
            COMPUTE_EMISSIVITY_BACK,HT3D,THERM_THICK
-! Mass transfer variables
-LOGICAL :: MASS_TRANSFER
-CHARACTER(LABEL_LENGTH) :: INIT_SPEC_ID(MAX_LAYERS,MAX_SPECIES)
-REAL(EB) :: INIT_SPEC_MASS_FRACTION(MAX_LAYERS,MAX_SPECIES)
 ! Ember generating variables
 REAL(EB) :: EMBER_GENERATION_HEIGHT(2)
 
@@ -6682,7 +6678,6 @@ NAMELIST /SURF/ ADIABATIC,AREA_MULTIPLIER,BACKING,BURN_AWAY,BURN_DURATION,&
                 FREE_SLIP,FYI,GEOMETRY,HEAT_OF_VAPORIZATION,HEAT_TRANSFER_COEFFICIENT,HEAT_TRANSFER_COEFFICIENT_BACK,&
                 HEAT_TRANSFER_MODEL,HORIZONTAL,HRRPUA,HT3D,ID,IGNITION_TEMPERATURE,IMPERMEABLE,&
                 INIT_IDS,INIT_PER_AREA,&
-                INIT_SPEC_ID, INIT_SPEC_MASS_FRACTION, &
                 INNER_RADIUS,INTERNAL_HEAT_SOURCE,LAYER_DIVIDE,&
                 LEAK_PATH,LEAK_PATH_ID,LENGTH,MASS_FLUX,MASS_FLUX_TOTAL,MASS_FLUX_VAR,MASS_FRACTION,MASS_TRANSFER,&
                 MASS_TRANSFER_COEFFICIENT, &
@@ -7104,7 +7099,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%LEAK_PATH            = LEAK_PATH
    SF%LEAK_PATH_ID         = LEAK_PATH_ID
    SF%LENGTH               = LENGTH
-   SF%MT1D                 = MASS_TRANSFER
    SF%MASS_FLUX            = 0._EB
    SF%MASS_FLUX_VAR        = MASS_FLUX_VAR
    SF%MASS_FRACTION        = 0._EB
@@ -7651,27 +7645,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDDO
 
 
-   ! Set mass transfer parameters and variables
-   IF (SF%MT1D) THEN
-      SF%N_SPEC = N_TRACKED_SPECIES
-      DO NL=1,SF%N_LAYERS
-         DO NN=1,MAX_SPECIES
-            IF (TRIM(INIT_SPEC_ID(NL,NN))=='null') EXIT
-            DO NNN=1,N_TRACKED_SPECIES
-               IF (TRIM(SPECIES_MIXTURE(NNN)%ID)==TRIM(INIT_SPEC_ID(NL,NN))) THEN
-                  SF%LAYER_SPEC_FRAC(NL,NNN) = INIT_SPEC_MASS_FRACTION(NL,NN)
-                  EXIT
-               ENDIF
-               IF (NNN==N_TRACKED_SPECIES) THEN
-                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),' SPEC ',&
-                       TRIM(INIT_SPEC_ID(NL,NN)),' not found'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
-
 ENDDO READ_SURF_LOOP
 
 !Check for specified flux surfaces
@@ -7731,8 +7704,6 @@ IGNITION_TEMPERATURE    = 50000._EB
 IMPERMEABLE             = .FALSE.
 INIT_IDS                = 'null'
 INIT_PER_AREA           = 0._EB
-INIT_SPEC_ID            = 'null'
-INIT_SPEC_MASS_FRACTION = 0._EB
 INNER_RADIUS            =  0._EB
 INTERNAL_HEAT_SOURCE    = 0._EB
 LAYER_DIVIDE            = -1._EB
@@ -7743,7 +7714,6 @@ MASS_FLUX               = 0._EB
 MASS_FLUX_TOTAL         = 0._EB
 MASS_FLUX_VAR           = -1._EB
 MASS_FRACTION           = 0._EB
-MASS_TRANSFER           = .FALSE.
 MASS_PER_VOLUME         = 0._EB
 MATL_ID                 = 'null'
 MATL_MASS_FRACTION      = 0._EB
@@ -8245,44 +8215,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       SF%RAMP_INDEX(REACTION(1)%FUEL_SMIX_INDEX) = NR
    ENDIF
 
-   ! 1D mass transfer
-
-   IF (SF%MT1D) THEN
-
-      ! Check initial gas concentrations
-
-      DO NL=1,SF%N_LAYERS
-         IF (SUM(SF%LAYER_SPEC_FRAC(NL,:)) > 1._EB) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ', TRIM(SF%ID),&
-                 ' Sum of inital species mass fractions > 1'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-         IF (SF%LAYER_SPEC_FRAC(NL,1)<=TWO_EPSILON_EB) THEN
-            SF%LAYER_SPEC_FRAC(NL,1) = 1._EB - SUM(SF%LAYER_SPEC_FRAC(NL,2:N_TRACKED_SPECIES))
-         ELSE
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),&
-                 ' Cannot specify background species for INIT_SPEC_ID'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
-
-      ! Calculate layer porosity
-
-      DO NL=1,SF%N_LAYERS
-         VOLSUM = 0._EB
-         DO NN=1,SF%N_LAYER_MATL(NL)
-            NNN = SF%LAYER_MATL_INDEX(NL,NN)
-            ML => MATERIAL(NNN)
-            VOLFRAC = SF%LAYER_MATL_FRAC(NL,NNN)*SF%LAYER_DENSITY(NL)/(SF%DENSITY_ADJUST_FACTOR(NL,NN)*ML%RHO_S)
-            VOLSUM = VOLSUM + VOLFRAC
-            SF%LAYER_POROSITY(NL) = SF%LAYER_POROSITY(NL) + VOLFRAC*ML%POROSITY
-         ENDDO
-         IF (VOLSUM > 0._EB) THEN
-            SF%LAYER_POROSITY(NL) = SF%LAYER_POROSITY(NL)/VOLSUM
-         ENDIF
-      ENDDO
-   ENDIF
-
    ! Build particle list
 
    IF (SF%LAYER_DENSITY(1)>0._EB .AND. N_LAGRANGIAN_CLASSES >0) THEN
@@ -8426,9 +8358,6 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    ALLOCATE(SF%LAYER_INDEX(0:SF%N_CELLS_MAX+1))
    ALLOCATE(SF%MF_FRAC(1:SF%N_CELLS_MAX))
    ALLOCATE(SF%RHO_0(0:SF%N_CELLS_MAX+1,SF%N_MATL))
-   IF (SF%MT1D) THEN
-      ALLOCATE(SF%PHIRHOZ_0(0:SF%N_CELLS_MAX+1,SF%N_SPEC))
-   ENDIF
 
    ! Compute node coordinates
    ! X_S_OLD provides the right size array into GET_WALL_NODE_COORDINATES. REMESH_LAYER defined as .TRUE.
@@ -8476,20 +8405,6 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
          ENDDO
       ENDDO
    ENDDO
-
-   ! Initialize the porosity and gas concentrations inside the solid (porous media)
-
-   IF (SF%MT1D) THEN
-      DO II=0,SF%N_CELLS_INI+1
-         IL = SF%LAYER_INDEX(II)
-         ZZ_GET = SF%LAYER_SPEC_FRAC(IL,1:N_TRACKED_SPECIES)
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
-         GAS_DENSITY = P_INF/(SF%TMP_INNER(IL)*RR_SUM)
-         DO N=1,SF%N_SPEC
-            SF%PHIRHOZ_0(II,N) = SF%LAYER_POROSITY(IL)*SF%LAYER_SPEC_FRAC(IL,N)*GAS_DENSITY
-         ENDDO
-      ENDDO
-   ENDIF
 
 ENDDO SURF_GRID_LOOP
 
