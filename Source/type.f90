@@ -194,7 +194,7 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=27
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=28
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
