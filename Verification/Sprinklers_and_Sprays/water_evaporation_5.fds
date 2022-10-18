@@ -1,5 +1,5 @@
 Comparison of evaporation rate for one single droplet in ambient air, done with both thermally-thick and thin models.
-Measurement of droplet diameter versus time extracted from 
+Measurement of droplet diameter versus time extracted from
 Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
 
 &HEAD CHID='water_evaporation_5', TITLE='Comparison of thermally-thick and thin water droplets' /
@@ -32,28 +32,31 @@ Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progre
       NU_SPEC                = 1
       CONDUCTIVITY           = 0.609
       SPECIFIC_HEAT_RAMP     = 'c_H2O'
-      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
+      HEAT_OF_REACTION       = 2269.09
       BOILING_TEMPERATURE    = 100. /
 
-! Ramps defined to match thermally-thin case
+! Ramp defined to match thermally-thin case
 
-&RAMP ID='hv_H2O', T=  0., F=2500.72 /
-&RAMP ID='hv_H2O', T=  5., F=2489.04 /
-&RAMP ID='hv_H2O', T= 10., F=2477.39 /
-&RAMP ID='hv_H2O', T= 15., F=2465.78 /
-&RAMP ID='hv_H2O', T= 20., F=2454.19 /
-&RAMP ID='hv_H2O', T= 25., F=2442.59 /
-&RAMP ID='hv_H2O', T= 30., F=2431.00 /
-&RAMP ID='hv_H2O', T=100., F=2269.09 /
 
-&RAMP ID='c_H2O', T= 0.,  F=4.227 /
-&RAMP ID='c_H2O', T= 5.,  F=4.198 /
-&RAMP ID='c_H2O', T= 10., F=4.185 /
-&RAMP ID='c_H2O', T= 15., F=4.182 /
-&RAMP ID='c_H2O', T= 20., F=4.182 /
-&RAMP ID='c_H2O', T= 25., F=4.183 /
-&RAMP ID='c_H2O', T= 30., F=4.183 /
-&RAMP ID='c_H2O', T=100., F=4.217 /
+&RAMP ID='c_H2O', T=0, F=4.227/
+&RAMP ID='c_H2O', T=5, F=4.198/
+&RAMP ID='c_H2O', T=10, F=4.185/
+&RAMP ID='c_H2O', T=15, F=4.182/
+&RAMP ID='c_H2O', T=20, F=4.182/
+&RAMP ID='c_H2O', T=25, F=4.183/
+&RAMP ID='c_H2O', T=35, F=4.183/
+&RAMP ID='c_H2O', T=40, F=4.182/
+&RAMP ID='c_H2O', T=45, F=4.181/
+&RAMP ID='c_H2O', T=55, F=4.181/
+&RAMP ID='c_H2O', T=60, F=4.183/
+&RAMP ID='c_H2O', T=65, F=4.185/
+&RAMP ID='c_H2O', T=70, F=4.188/
+&RAMP ID='c_H2O', T=75, F=4.191/
+&RAMP ID='c_H2O', T=80, F=4.195/
+&RAMP ID='c_H2O', T=85, F=4.199/
+&RAMP ID='c_H2O', T=90, F=4.203/
+&RAMP ID='c_H2O', T=95, F=4.209/
+&RAMP ID='c_H2O', T=100, F=4.217/
 
 &PART ID='thick drop', SURF_ID='MY DROPLET', STATIC=T, SAMPLING_FACTOR=1 /
 &INIT ID='thick', PART_ID='thick drop', XYZ=0.075,0.075,0.075, N_PARTICLES=1 /

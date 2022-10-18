@@ -485,6 +485,13 @@ $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis water_pool.fds
+$QFDS -d Pyrolysis matl_e_cons_1.fds
+$QFDS -d Pyrolysis matl_e_cons_2.fds
+$QFDS -d Pyrolysis matl_e_cons_3.fds
+$QFDS -d Pyrolysis matl_e_cons_4.fds
+$QFDS -d Pyrolysis matl_e_cons_5.fds
+$QFDS -d Pyrolysis matl_e_cons_6.fds
+$QFDS -d Pyrolysis matl_e_cons_7.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds

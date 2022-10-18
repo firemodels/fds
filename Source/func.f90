@@ -1200,13 +1200,6 @@ IF (.NOT.ALREADY_ALLOCATED) THEN
       IF (ALLOCATED(ONE_D%MATL_COMP(NN)%RHO)) DEALLOCATE(ONE_D%MATL_COMP(NN)%RHO)
       ALLOCATE(ONE_D%MATL_COMP(NN)%RHO(0:SF%N_CELLS_MAX+1))
    ENDDO
-! Remove MT1D
-!   IF (ALLOCATED(ONE_D%SPEC_COMP)) DEALLOCATE(ONE_D%SPEC_COMP)
-!   ALLOCATE(ONE_D%SPEC_COMP(1:SF%N_SPEC))
-!   DO NN=1,SF%N_SPEC
-!      IF (ALLOCATED(ONE_D%SPEC_COMP(NN)%RHO_ZZ)) DEALLOCATE(ONE_D%SPEC_COMP(NN)%RHO_ZZ)
-!      ALLOCATE(ONE_D%SPEC_COMP(NN)%RHO_ZZ(0:SF%N_CELLS_MAX+1))
-!   ENDDO
 ENDIF
 
 ONE_D%M_DOT_G_PP_ACTUAL = 0._EB
@@ -1230,10 +1223,6 @@ DO NN=1,SF%N_MATL
    ONE_D%MATL_COMP(NN)%RHO_DOT = 0._EB
    ONE_D%MATL_COMP(NN)%RHO(0:SF%N_CELLS_INI+1) = SF%RHO_0(0:SF%N_CELLS_INI+1,NN)
 ENDDO
-! Remove MT1D
-!DO NN=1,SF%N_SPEC
-!   ONE_D%SPEC_COMP(NN)%RHO_ZZ(0:SF%N_CELLS_INI+1) = SF%PHIRHOZ_0(0:SF%N_CELLS_INI+1,NN)
-!ENDDO
 
 ! Set initial temperature profile within the solid
 
@@ -1742,12 +1731,6 @@ DO NN=1,SF%N_MATL
    I1 = I2+1 ; I2 = I1 + (SF%N_CELLS_MAX+2) - 1
    CALL EQUATE(OS%REALS(I1:I2,STORAGE_INDEX) , ONE_D%MATL_COMP(NN)%RHO_DOT(0:I2-I1) , UNPACK_IT)
 ENDDO
-
-! Remove MT1D
-!DO NN=1,SF%N_SPEC
-!   I1 = I2+1 ; I2 = I1 + (SF%N_CELLS_MAX+2) - 1
-!   CALL EQUATE(OS%REALS(I1:I2,STORAGE_INDEX) , ONE_D%SPEC_COMP(NN)%RHO_ZZ(0:I2-I1) , UNPACK_IT)
-!ENDDO
 
 RC = I2
 
@@ -3350,6 +3333,58 @@ DO L=N,1,-1
 ENDDO
 
 END SUBROUTINE GAUSSJ
+
+
+!> \brief Solve a linear system of equations for m=n and m/=n
+!> \param A Primary matrix of A*x=b
+!> \param X Solution vector of A*x=b
+!> \param M Column dimension of A and dimension of x
+!> \param N Row dimension of A and dimension of b
+!> \param B Constant vector of b A*x=b
+!> \param IERR Error code
+
+SUBROUTINE LINEAR_SYSTEM_SOLVE(M,N,A,B,X,IERR)
+INTEGER, INTENT(IN) :: M,N
+REAL(EB), INTENT(INOUT) :: A(N,M),B(N),X(M)
+REAL(EB) :: AT(M,N),AAT(N,N),ATA(M,M),ATB(M)
+INTEGER, INTENT(OUT) :: IERR
+
+IERR = 0
+! System is underdetermined - find a minimal solution
+! Solution is given by x = A^T t, solve t = (A A^T)**-1 b, get x as A^T t. 
+IF (M > N) THEN
+   AT = TRANSPOSE(A)
+   AAT = MATMUL(A,AT)
+   CALL GAUSSJ(AAT,N,N,B,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      X = MATMUL(AT,B)
+   ENDIF
+! System is overdetermined - find least squares solution
+! Solution is x = (A^T A)**-1 A^T b
+ELSEIF (N > M) THEN
+   AT = TRANSPOSE(A)
+   ATA = MATMUL(AT,A)
+   ATB = MATMUL(AT,B)
+   CALL GAUSSJ(ATA,M,M,ATB,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      IERR = 200
+      X = ATB
+   ENDIF
+! Solution is x = A**-1 b
+ELSE
+   CALL GAUSSJ(A,M,M,B,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      X = B
+   ENDIF
+ENDIF
+
+END SUBROUTINE LINEAR_SYSTEM_SOLVE
 
 
 !> \brief Linearly interpolate the value of a given function at a given point
@@ -5191,6 +5226,40 @@ Y_SV = Y_SV/MASS
 
 END SUBROUTINE GET_Y_SURF
 
+
+!> \brief Estimates the peak reaction temperature for a material reaction
+!> \param N_MATL MATL index
+!> \param NR Reaction index
+
+SUBROUTINE GET_TMP_REF(N_MATL,NR)
+INTEGER, INTENT(IN) :: N_MATL,NR
+REAL(EB) :: HEATING_RATE,DT=0.01_EB,DTDT,RR_MAX,REACTION_RATE,TMP,RHO_S
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+
+ML=> MATERIAL(N_MATL)
+
+IF (ML%RATE_REF(NR) > 0._EB) THEN
+   HEATING_RATE = ML%RATE_REF(NR)
+ELSE
+   HEATING_RATE = TGA_HEATING_RATE
+ENDIF
+
+TMP = 0._EB
+DTDT = HEATING_RATE/60._EB
+RR_MAX = 0._EB
+RHO_S = ML%RHO_S
+DO WHILE (INT(TMP)<I_MAX_TEMP)
+   TMP = TMP + DTDT * DT
+   REACTION_RATE = ML%A(NR)*RHO_S**ML%N_S(NR)*EXP(-ML%E(NR)/(R0*TMP))
+   IF (REACTION_RATE > RR_MAX) THEN
+      ML%TMP_REF(NR) = TMP
+      RR_MAX = REACTION_RATE
+   ENDIF
+   RHO_S = RHO_S - REACTION_RATE * DT
+   IF (RHO_S<0._EB) EXIT
+ENDDO
+
+END SUBROUTINE GET_TMP_REF
 
 END MODULE PHYSICAL_FUNCTIONS
 

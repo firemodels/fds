@@ -158,13 +158,6 @@ TYPE MATL_COMP_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
-! Move MT1D into own development branch
-!!> \brief Gas mass concentration in solid for 1-D mass transfer
-!
-!TYPE SPEC_COMP_TYPE
-!   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_ZZ !< (0:NWP+1) Gas concentratoin (kg/m3)
-!END TYPE SPEC_COMP_TYPE
-
 !> \brief Radiation intensity at a boundary for a given wavelength band
 
 TYPE BAND_TYPE
@@ -225,8 +218,6 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_ENTHALPY       !< Accumulated enthalpy of particles waiting to be injected (kJ/m2)
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
-!   move MT1d to own branch
-!   TYPE(SPEC_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: SPEC_COMP !< (1:SF\%N_SPEC) Gas component
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
@@ -629,50 +620,50 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
-   REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
-   CHARACTER(LABEL_LENGTH) :: RAMP_H_R(MAX_REACTIONS)   !< Name of RAMP for Heat of Reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid
    CHARACTER(LABEL_LENGTH) :: RAMP_C_S                  !< Name of RAMP for specific heat of solid
    INTEGER :: N_REACTIONS                               !< Number of solid phase reactions
    INTEGER :: PROP_INDEX=-1
    INTEGER :: I_RAMP_K_S=-1                             !< Index of conductivity RAMP
    INTEGER :: I_RAMP_C_S=-1                             !< Index of specific heat RAMP
-   INTEGER, DIMENSION(MAX_REACTIONS) :: N_RESIDUE       !< Number of residue materials
-   INTEGER, DIMENSION(MAX_REACTIONS) :: I_RAMP_H_R=-1   !< Index of the heat of reaction RAMP
-   INTEGER, DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_INDEX !< Index of the residue
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
    INTEGER, DIMENSION(3) :: RGB                         !< Color indices for material
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_REF        !< Reference temperature used for calculating kinetic constants (K)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: RATE_REF       !< Reference rate used for calculating kinetic constants (1/s)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: MAX_REACTION_RATE !< Maximum reaction rate (kg/m3/s)
-   REAL(EB), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: NU_RESIDUE=0._EB !< Mass stoichiometric coefficient of residue
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: A              !< Pre-exponential constant (1/s)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: E              !< Activation energy (J/kmol)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_S            !< Reaction order
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_T            !< Optional exponent for temperature in reaction expression
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_O2           !< Optional exponent for oxygen term in reaction expression
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: GAS_DIFFUSION_DEPTH !< Length scale used in char oxidation calculation (m)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: NU_O2_CHAR     !< Mass stoichiometric coefficient for oxygen in char reaaction
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: BETA_CHAR      !< Constant used in char oxidation model
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: HEATING_RATE   !< Heating rate (K/s) used in calculation of kinetic constants
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RATE_REF      !< Reference rate used for calculating kinetic constants (1/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_REACTION_RATE !< Maximum reaction rate (kg/m3/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_RESIDUE  !< Mass stoichiometric coefficient of residue
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: A             !< Pre-exponential constant (1/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: E             !< Activation energy (J/kmol)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S           !< Reaction order
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_T           !< Optional exponent for temperature in reaction expression
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_O2          !< Optional exponent for oxygen term in reaction expression
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: GAS_DIFFUSION_DEPTH !< Length scale used in char oxidation calculation (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_O2_CHAR    !< Mass stoichiometric coefficient for oxygen in char reaaction
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BETA_CHAR     !< Constant used in char oxidation model
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEATING_RATE  !< Heating rate (K/s) used in calculation of kinetic constants
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
    REAL(EB), DIMENSION(MAX_LPC,MAX_REACTIONS) :: NU_PART !< Mass stoichiometric coefficient that dictates fraction of mass to parts
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS       !< Mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC       !< Mass stoichiometric coefficient for particles
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R          !< Heat of Reaction (J/kg)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R         !< Heat of Reaction (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIFFUSIVITY_GAS
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S           !< Material conductivity as function of temperaure (W/m/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S           !< Material specific heat as function of temperaure (J/kg/K)
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
-   REAL(EB), DIMENSION(MAX_SPECIES) :: DIFFUSIVITY_SPEC
+   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: DIFFUSIVITY_SPEC
    LOGICAL :: ALLOW_SHRINKING
    LOGICAL :: ALLOW_SWELLING
    LOGICAL :: CONST_C=.TRUE.
+   LOGICAL :: ADJUST_H = .TRUE.
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: SPEC_ID
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LPC,MAX_REACTIONS) :: PART_ID
@@ -780,7 +771,7 @@ TYPE SURFACE_TYPE
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
-              HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
+              HT3D=.FALSE., SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
