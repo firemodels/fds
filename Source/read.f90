@@ -6034,8 +6034,7 @@ ENDDO
 ! Allocate the MATERIAL derived type
 
 ALLOCATE(MATERIAL(1:N_MATL),STAT=IZERO)
-CALL ChkMemErr('READ','MATERIAL',IZERO)
-
+CALL ChkMemErr('READ','MATERIAL',IZERO)
 ! Read the MATL lines in the order listed in the input file
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -6230,7 +6229,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    IF (BOILING_TEMPERATURE<50000._EB) THEN
       ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
       ML%N_REACTIONS = 1
-   ELSEIF (ML%BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
+   ELSEIF (N_REACTIONS > 0 .AND. BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
       WALL_INCREMENT     = 1  ! Do pyrolysis every time step
       ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
       IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
@@ -6241,7 +6240,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! If oxygen is consumed in the charring process, set a global variable for
    ! use in calculating the heat release rate based on oxygen consumption
 
-   IF (ML%NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
+   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
 
    ! No pyrolysis
 
