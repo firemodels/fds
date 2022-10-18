@@ -2398,6 +2398,15 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ENDDO
 
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+      ! Calculate smoothed incident heat flux if cone scaling is applied
+      IF (SF%CONE_HEAT_FLUX > 0._EB) THEN
+         IF (ONE_D%Q_IN_SMOOTH == 0._EB) THEN
+            ONE_D%Q_IN_SMOOTH = (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN)
+         ELSE
+            ONE_D%Q_IN_SMOOTH = (ONE_D%Q_IN_SMOOTH*(SF%HF_SMOOTHING_WINDOW-DT) + (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN)*DT)/ &
+                                 SF%HF_SMOOTHING_WINDOW
+         ENDIF
+      ENDIF
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
 
@@ -2431,13 +2440,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             IF (SF%CONE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
                IF (PREDICTOR) THEN
                   RP => RAMPS(SF%RAMP_INDEX(N))
-                  IF (T == 0) THEN
-                      ONE_D%Q_IN_SMOOTH = (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN)
-                  ELSEIF (T < 10) THEN
-                      ONE_D%Q_IN_SMOOTH = ONE_D%Q_IN_SMOOTH * (T - DT) + (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN) * DT
-                  ELSE
-                      ONE_D%Q_IN_SMOOTH = ONE_D%Q_IN_SMOOTH * (10 - DT) + (ONE_D%Q_CON_F + ONE_D%Q_RAD_IN) * DT
-                  ENDIF
                   
                   IF (SF%EMISSIVITY > 0._EB) THEN
                      ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%CONE_HEAT_FLUX * SF%EMISSIVITY)
