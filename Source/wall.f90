@@ -3508,9 +3508,6 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
             CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%MATL_COMP(N)%RHO(1:N_CELLS))
-            DO I=1,NWP_NEW
-               IF (ONE_D%MATL_COMP(N)%RHO(I)>0._EB .AND. .NOT. MATERIAL(SF%MATL_INDEX(N))%CONST_C) CONST_C(I) = .FALSE.
-            ENDDO
          ENDDO
 
          DEALLOCATE(INT_WGT)
@@ -3519,35 +3516,31 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          DO I=1,NWP_NEW
             H_NODE = RHO_H_S(I)
             T_NODE = TMP_S(I)
-            IF (.NOT. CONST_C(I)) THEN
-               ITER = 0
-               T_SEARCH: DO
-                  ITER = ITER + 1
-                  C_S = 0._EB
-                  H_S = 0._EB
-                  CP1 = 0
-                  CP2 = 0
-                  ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
-                  H_S = 0._EB
-                  T_S: DO N=1,SF%N_MATL
-                     IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
-                     ML  => MATERIAL(SF%MATL_INDEX(N))
-                     H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
-                     CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*ONE_D%MATL_COMP(N)%RHO(I)
-                     CP2 = CP2 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*ONE_D%MATL_COMP(N)%RHO(I)
-                  ENDDO T_S
-                  C_S = H_S/T_NODE
-                  ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/(C_S+T_NODE*(CP2-CP1))
-                  IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
-                  IF (ITER > 20) THEN
-                     ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
-                     EXIT T_SEARCH
-                  ENDIF
-                  T_NODE = ONE_D%TMP(I)
-               ENDDO T_SEARCH
-            ELSE
-               ONE_D%TMP(I)=T_NODE
-            ENDIF
+            ITER = 0
+            T_SEARCH: DO
+               ITER = ITER + 1
+               C_S = 0._EB
+               H_S = 0._EB
+               CP1 = 0
+               CP2 = 0
+               ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
+               H_S = 0._EB
+               T_S: DO N=1,SF%N_MATL
+                  IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
+                  ML  => MATERIAL(SF%MATL_INDEX(N))
+                  H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
+                  CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*ONE_D%MATL_COMP(N)%RHO(I)
+                  CP2 = CP2 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*ONE_D%MATL_COMP(N)%RHO(I)
+               ENDDO T_S
+               C_S = H_S/T_NODE
+               ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/(C_S+T_NODE*(CP2-CP1))
+               IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
+               IF (ITER > 20) THEN
+                  ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
+                  EXIT T_SEARCH
+               ENDIF
+               T_NODE = ONE_D%TMP(I)
+            ENDDO T_SEARCH
             DO N=1,SF%N_MATL
                ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I) /&
                   ((SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I))**I_GRAD)
