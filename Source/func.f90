@@ -771,7 +771,7 @@ END SUBROUTINE REALLOCATE_P_ZONE
 !> \brief Allocate principal boundary arrays
 !> \param NM Mesh index
 !> \param N_SLOTS Number of entries
-
+ 
 SUBROUTINE ALLOCATE_BOUNDARY_TYPES(NM,N_SLOTS)
 
 INTEGER, INTENT(IN) :: NM,N_SLOTS
