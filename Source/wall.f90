@@ -740,6 +740,9 @@ END SUBROUTINE THERMAL_BC
 
 
 !> \brief Transfer heat from one 3-D sweep dirction to the other two.
+!> \param NM Mesh index
+!> \details Sweep over all 3D wall cells and look for those that are not oriented in the current sweep direction. 
+!> Copy the updated temperatures of the sweep direction to the non-sweep directions.
 
 SUBROUTINE HT3D_TEMPERATURE_EXCHANGE(NM)
 
@@ -753,9 +756,6 @@ TYPE(THIN_WALL_TYPE), POINTER :: TW,TW2
 TYPE(MESH_TYPE), POINTER :: M
 
 M => MESHES(NM)
-
-! Sweep over all 3D wall cells and look for those that are not oriented in the current sweep direction. 
-! Copy the updated temperatures of the sweep direction to the non-sweep directions.
 
 WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
@@ -771,6 +771,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    NODE_LOOP: DO I=1,NWP  ! Nodes of the chosen wall cell.
       IF (THR_D%NODE(I)%ALTERNATE_WALL_COUNT==0) CYCLE NODE_LOOP
+      IF (.NOT.ANY(ABS(THR_D%NODE(I)%ALTERNATE_WALL_IOR(:))==HT_3D_SWEEP_DIRECTION)) CYCLE NODE_LOOP
       ONE_D%TMP(I) = 0._EB
       WEIGHT_LOOP: DO II=1,THR_D%NODE(I)%ALTERNATE_WALL_COUNT
          IWA = THR_D%NODE(I)%ALTERNATE_WALL_INDEX(II)
@@ -804,6 +805,7 @@ THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
 
    NODE_LOOP_2: DO I=1,NWP  ! Nodes of the chosen wall cell.
       IF (THR_D%NODE(I)%ALTERNATE_WALL_COUNT==0) CYCLE NODE_LOOP_2
+      IF (.NOT.ANY(ABS(THR_D%NODE(I)%ALTERNATE_WALL_IOR(:))==HT_3D_SWEEP_DIRECTION)) CYCLE NODE_LOOP_2
       ONE_D%TMP(I) = 0._EB
       WEIGHT_LOOP_2: DO II=1,THR_D%NODE(I)%ALTERNATE_WALL_COUNT
          IWA = THR_D%NODE(I)%ALTERNATE_WALL_INDEX(II)
