@@ -2763,9 +2763,9 @@ REAL(EB) :: DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             M_DOT_G_PP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PP_ACTUAL(N_TRACKED_SPECIES),&
             M_DOT_S_PPP(MAX_MATERIALS),M_DOT_S_PP(MAX_MATERIALS),GEOM_FACTOR,RHO_TEMP(MAX_MATERIALS),RHO_DOT_TEMP(MAX_MATERIALS),&
             DEL_DOT_Q_SC,Q_DOT_G_PPP,Q_DOT_O2_PPP,Q_DOT_G_PP,Q_DOT_O2_PP,R_SURF,U_SURF,V_SURF,W_SURF,T_BC_SUB,DT_BC_SUB,&
-            Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,RHO_C_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL,T_BOIL_EFF,&
+            Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,TMP_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL,T_BOIL_EFF,&
             Q_DOT_PART(MAX_LPC),M_DOT_PART(MAX_LPC),Q_DOT_PART_S(MAX_LPC),M_DOT_PART_S(MAX_LPC),RADIUS,HTC_LIMIT,TMP_G,&
-            ZZ_G(1:N_TRACKED_SPECIES),CP1,CP2
+            ZZ_G(1:N_TRACKED_SPECIES),CP1,CP2,DENOM
 REAL(EB) :: POROSITY(0:NWP_MAX+1),DDSUM, SMALLEST_CELL_SIZE(1:MAX_LAYERS)
 REAL(EB), POINTER, DIMENSION(:) :: DELTA_TMP
 INTEGER :: IIB,JJB,KKB,IWB,NWP,I,NR,NL,N,I_OBST,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS,EXPON,ITMP,ITER
@@ -3472,7 +3472,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       REMESH_IF: IF (ANY(REMESH_LAYER)) THEN
 
          RHO_H_S = 0._EB
-         RHO_C_S = 0._EB
+         TMP_S = 0._EB
 
          !Store wall enthalpy for later temperature extraction.
 
@@ -3489,7 +3489,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             DO N=1,SF%N_MATL
                ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I) * VOL
             ENDDO
-            RHO_C_S(I) = RHO_H_S(I) / ONE_D%TMP(I)
+            TMP_S(I)=ONE_D%TMP(I)*VOL
          ENDDO
 
          CALL GET_WALL_NODE_COORDINATES(NWP_NEW,NWP,SF%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%N_LAYER_CELLS, &
@@ -3507,14 +3507,16 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
-         CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_C_S(1:N_CELLS))
+         CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,TMP_S(1:N_CELLS))
+         
+         DO I=1,NWP_NEW
+            VOL = (THICKNESS+SF%INNER_RADIUS-X_S_NEW(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-X_S_NEW(I))**I_GRAD
+            TMP_S(I) = TMP_S(I) / VOL
+         ENDDO
 
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
             CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%MATL_COMP(N)%RHO(1:N_CELLS))
-            DO I=1,NWP_NEW
-               IF (ONE_D%MATL_COMP(N)%RHO(I)>0._EB .AND. .NOT. MATERIAL(SF%MATL_INDEX(N))%CONST_C) CONST_C(I) = .FALSE.
-            ENDDO
          ENDDO
 
          DEALLOCATE(INT_WGT)
@@ -3522,36 +3524,37 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ! Extract temperature
          DO I=1,NWP_NEW
             H_NODE = RHO_H_S(I)
-            T_NODE = H_NODE/RHO_C_S(I)
-            IF (.NOT. CONST_C(I)) THEN
-               ITER = 0
-               T_SEARCH: DO
-                  ITER = ITER + 1
-                  C_S = 0._EB
-                  H_S = 0._EB
-                  CP1 = 0
-                  CP2 = 0
-                  ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
-                  H_S = 0._EB
-                  T_S: DO N=1,SF%N_MATL
-                     IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
-                     ML  => MATERIAL(SF%MATL_INDEX(N))
-                     H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
-                     CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*ONE_D%MATL_COMP(N)%RHO(I)
-                     CP2 = CP1 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*ONE_D%MATL_COMP(N)%RHO(I)
-                  ENDDO T_S
-                  C_S = H_S/T_NODE
-                  ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/(C_S+T_NODE*(CP2-CP1))
-                  IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
-                  IF (ITER > 20) THEN
-                     ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
-                     EXIT T_SEARCH
-                  ENDIF
-                  T_NODE = ONE_D%TMP(I)
-               ENDDO T_SEARCH
-            ELSE
-               ONE_D%TMP(I)=T_NODE
-            ENDIF
+            T_NODE = TMP_S(I)
+            ITER = 0
+            T_SEARCH: DO
+               ITER = ITER + 1
+               C_S = 0._EB
+               H_S = 0._EB
+               CP1 = 0
+               CP2 = 0
+               ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
+               H_S = 0._EB
+               T_S: DO N=1,SF%N_MATL
+                  IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
+                  ML  => MATERIAL(SF%MATL_INDEX(N))
+                  H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
+                  CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*ONE_D%MATL_COMP(N)%RHO(I)
+                  CP2 = CP2 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*ONE_D%MATL_COMP(N)%RHO(I)
+               ENDDO T_S
+               C_S = H_S/T_NODE
+               DENOM = C_S+T_NODE*(CP2-CP1)
+               IF (ABS(DENOM) < TWO_EPSILON_EB) THEN
+                  ONE_D%TMP(I) = T_NODE
+               ELSE
+                  ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/DENOM
+               ENDIF
+               IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
+               IF (ITER > 20) THEN
+                  ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
+                  EXIT T_SEARCH
+               ENDIF
+               T_NODE = ONE_D%TMP(I)
+            ENDDO T_SEARCH
             DO N=1,SF%N_MATL
                ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I) /&
                   ((SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I))**I_GRAD)
