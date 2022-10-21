@@ -7604,11 +7604,23 @@ Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531
 \end{figure}
 
 
-The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.001$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. The internal energy gained by the gas, $\Delta E_{\rm gas}$, is equal to the energy lost by the pine needle minus the energies associated with the endothermic reaction 1 and exothermic reaction 2:
+The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.125$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. 
+
+To simplify calculation of the exact answer, all species and material $c_{\rm s}$ are set to $1$~kJ/(kg$\cdot$K). Energy is conserved if the enthalpy change of the particle is equal and opposite to the internal energy change of the gas. Note that it is internal energy and not enthalpy since the box is sealed and any pressure rise must be accounted for in the energy balance.
+
+At the start of the simulation the particle enthalpy is:
 \be
-   \Delta E_{\rm gas} =  m_{\rm p}  \, \left( (1-\nu_{\rm char} \nu_{\rm ash}) \, c_{\rm s} \, T_{\rm s,i} - \Delta h_{\rm pyr} - \nu_{\rm char} \, \Delta h_{\rm char} \right)
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 293.15~{\rm kJ/kg} = 0.011512~{\rm kJ}
 \ee
-$\Delta h_{\rm pyr}=400$~kJ/kg is the heat of reaction 1 and $\Delta h_{\rm char}=-12000$~kJ/kg is the heat of reaction 2. The top left plot in Fig.~\ref{char_oxidation_2_fig} displays the evolution in time of the total mass of the pine needle (needle), the plant material (pulp), char, and ash. The top right plot displays the fuel vapor, CO$_2$, and O$_2$. The bottom left plot displays the energy lost by the particle and gained by the gas, $\Delta E_{\rm gas}$. The bottom right plot displays the temperature of the pine needle.
+
+At the end of the simulation only ash is left which is 2~\% of the char mass which was 25~\% of the inital particle mass. The ash will end up at the gas temperature.
+
+\be
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 0.02 \times 0.25 \times 1073.15~{\rm kJ/kg} = 0.000211~{\rm kJ}
+\ee
+
+The particle will therefore lose 0.011301~kJ.
+
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_solid_mass}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_mass} \\
