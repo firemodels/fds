@@ -4102,7 +4102,11 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
          ZZ_GET(NS)=1._EB
          CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_S)
          CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
-         Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT*(H_S-H_S_B)
+         IF (ML%NU_GAS(NS,J) > 0._EB) THEN
+            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT*(H_S-H_S_B)
+         ELSE
+            Q_DOT_S_PPP = Q_DOT_S_PPP - ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT*(H_S-H_S_B)
+         ENDIF
       ENDDO
 
       IF (ANY(ML%NU_LPC(:,J)>0._EB)) THEN
