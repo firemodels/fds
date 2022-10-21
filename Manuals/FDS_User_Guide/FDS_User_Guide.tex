@@ -1569,31 +1569,31 @@ Because these alternative methods are based on the Intel\textsuperscript{\textre
 \caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
 \begin{tabular}{lcccccccc}
 \toprule
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{3}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
-\cmidrule(rl){4-6} \cmidrule(rl){7-9}
-\textbf{Solver} & \textbf{Global}$^1$ & \textbf{Unstructured}$^2$ & \textbf{Refinement}$^3$ & \textbf{Stretching} & \textbf{Zones} & \textbf{Velocity @ Mesh}$^4$ & \textbf{Velocity @ Solid}$^5$ & \textbf{Inseparability}$^6$ \\
+\multicolumn{1}{c}{} & \multicolumn{4}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
+\cmidrule(rl){2-5} \cmidrule(rl){6-8}
+\textbf{Solver} & \textbf{Refinement}$^1$ & \textbf{Stretching} & \textbf{Add/Remove}$^2$ & \textbf{Zones} & \textbf{Velocity @ Mesh}$^3$ & \textbf{Velocity @ Solid}$^4$ & \textbf{Inseparability}$^5$ \\
 \midrule
 \rowcolor{lavender}
-FFT (default)  & $\times$ & $\times$   & \checkmark & 2 directions  & \checkmark & iterative & iterative  & iterative \\
-ULMAT          & $\times$ & \checkmark & \checkmark & \checkmark    & \checkmark & iterative & exact      & iterative \\
+FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
+ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
-GLMAT          & \checkmark & $\times$   & $\times$ & $\times$      & \checkmark & exact      & iterative & iterative \\
-UGLMAT         & \checkmark & \checkmark & $\times$ & $\times$      & $\times$   & exact      & exact     & iterative \\
+GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
+UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
 % \rowcolor{lavender}
-% USCARC         & \checkmark & \checkmark & $\times$ & \checkmark    & \checkmark & exact      & exact     & exact   \\
-% PFFT (future)  & \checkmark & $\times$   & $\times$ & 1 direction   & \checkmark & exact      & iterative & iterative \\
+% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
+% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
     \small
     \item Notes:
     \begin{itemize}
-        \item[$^1$] ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
-        \item[$^2$] ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.  So, any unstructured solver will have ``exact'' listed for handling errors under ``Velocity @ Solid''.
-        \item[$^3$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
-        \item[$^4$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.
-        \item[$^5$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.
-        \item[$^6$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+        \item[$^1$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
+        \item[$^2$] ``Add/Remove'' refers to the ability of the solver to handle changes in geometry during the course of the simulation, either by adding or removing {\ct OBST} or {\ct GEOM} via {\ct CTRL} functions.
+        \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
+        \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
+        \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
     \end{itemize}
 \end{tablenotes}
 \end{threeparttable}
