@@ -4,12 +4,12 @@ CO+0.5O2=CO2
 CO2=CO+0.5O2
 ------------------------------------------------
 
-&HEAD CHID='reactionrate_arrhenius_1p75order_2stepr', TITLE='Finite_Rate_1p75_Order' /
+&HEAD CHID='reactionrate_arrhenius_1p75order_2stepr', TITLE='Finite_Rate_1p75_Order reversible' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 / 
 &COMB INITIAL_UNMIXED_FRACTION=0.0 / 
 
-&TIME T_END=10 /
+&TIME T_END=10, DT=0.05 /
 
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
 &SPEC ID='PROPANE' /
@@ -46,7 +46,7 @@ CO2=CO+0.5O2
       A = 4e-4
       E = 0
       SPEC_ID_NU= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-     SPEC_ID_N_S='CARBON DIOXIDE'
+      SPEC_ID_N_S='CARBON DIOXIDE'
       NU= -1,0.5,1
       N_S = 1.0 /
 
