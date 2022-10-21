@@ -2401,7 +2401,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ! Calculate smoothed incident heat flux if cone scaling is applied
       IF (SF%CONE_HEAT_FLUX > 0._EB) THEN
          TSI = MIN(T-T_BEGIN+DT, SF%CONE_FLUX_SMOOTHING_WINDOW)
-         ONE_D%Q_IN_SMOOTH = (ONE_D%Q_IN_SMOOTH *(TSI-DT) + DT*(ONE_D%Q_CONF_F+ONE_D%Q_RAD_IN))/TSI
+         ONE_D%Q_IN_SMOOTH = (ONE_D%Q_IN_SMOOTH *(TSI-DT) + DT*(ONE_D%Q_CON_F+ONE_D%Q_RAD_IN))/TSI
       ENDIF
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
