@@ -194,7 +194,7 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=27
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=28
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
@@ -253,6 +253,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
+   REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident heat flux for scaling (W/m2)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
@@ -731,6 +732,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: DELTA_TMP_MAX=10._EB
    REAL(EB) :: BURN_DURATION=1.E6_EB
    REAL(EB) :: CONE_HEAT_FLUX=-1._EB
+   REAL(EB) :: CONE_FLUX_SMOOTHING_WINDOW=10._EB
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
    REAL(EB) :: NUSSELT_C0=-1._EB
