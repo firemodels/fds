@@ -1334,7 +1334,7 @@ INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX,II,JJ,KK,ITMP
 REAL(EB) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
             RHO_IN(N_MATL),RHO_DOT_OUT(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,&
             TMP_F,Q_DOT_G_PPP,Q_DOT_O2_PPP,T_BOIL_EFF,H_NODE,T_NODE,H_S,C_S,RHOH,RHOH2,&
-            M_DOT_P(MAX_LPC),Q_DOT_P(MAX_LPC),B_NUMBER
+            M_DOT_P(MAX_LPC),Q_DOT_P(MAX_LPC),B_NUMBER,CP1,CP2,DENOM
 LOGICAL :: OB2_FOUND
 REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
@@ -1555,7 +1555,6 @@ OBST_LOOP_2: DO N=1,N_OBST
                               (VC*SUM(OB%RHO(I,J,K,1:MS%N_MATL))+VC2*SUM(OB2%RHO(I,J,K,1:MS%N_MATL)))
                      ! transfer mass of solid
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-
                      ! compute new cell temperature
                      ITER = 0
                      T_SEARCH: DO
@@ -1567,9 +1566,16 @@ OBST_LOOP_2: DO N=1,N_OBST
                            IF (OB2%RHO(II2,JJ2,KK2,NN)<=0._EB) CYCLE T_S
                            ML  => MATERIAL(MS%MATL_INDEX(NN))
                            H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*OB2%RHO(II2,JJ2,KK2,NN)
+                           CP1 = CP1 + ML%H(ITMP)/REAL(ITMP,EB)*OB2%RHO(II2,JJ2,KK2,NN)
+                           CP2 = CP2 + ML%H(ITMP+1)/REAL(ITMP+1,EB)*OB2%RHO(II2,JJ2,KK2,NN)
                         ENDDO T_S
                         C_S = H_S/T_NODE
-                        TMP(II2,JJ2,KK2) = T_NODE + (H_NODE - H_S)/C_S
+                        DENOM = C_S+T_NODE*(CP2-CP1)
+                        IF (ABS(DENOM) < TWO_EPSILON_EB) THEN
+                           TMP(II2,JJ2,KK2) = T_NODE
+                        ELSE
+                           TMP(II2,JJ2,KK2) = T_NODE + (H_NODE - H_S)/DENOM
+                        ENDIF
                         IF (ABS(TMP(II2,JJ2,KK2) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
                         IF (ITER > 20) THEN
                            TMP(II2,JJ2,KK2) = 0.5_EB*(TMP(II2,JJ2,KK2)+T_NODE)
