@@ -1,4 +1,4 @@
-&HEAD CHID='species_conservation_3', TITLE='Check species conservation from evaporating box' / 
+&HEAD CHID='species_conservation_3', TITLE='Check species conservation from evaporating box' /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
@@ -11,12 +11,13 @@
 &SPEC ID='CHLORINE' /
 
 &MATL ID                   = 'TRICLORAN90'
+      ADJUST_H             = F
       CONDUCTIVITY         = 0.144
       SPECIFIC_HEAT        = 2.0
       DENSITY              = 100.
       N_REACTIONS          = 1
       SPEC_ID(1:4,1)       ='CARBON DIOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','CHLORINE',
-      NU_SPEC(1:4,1)       = 0.4, 0.27, 0.13,0.2, 
+      NU_SPEC(1:4,1)       = 0.4, 0.27, 0.13,0.2,
       REFERENCE_TEMPERATURE=400. /
 
 &SURF ID                   = 'CUBO'

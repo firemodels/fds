@@ -2596,11 +2596,12 @@ REACTION_LOOP: DO N=1,N_REACTIONS
 
    IF (N_REACTIONS>1) THEN
       IF (RN%ID/='null')  THEN
-         WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
+         WRITE(LU_OUTPUT,'(/3X,A,A)')    'Reaction ID:  ', TRIM(RN%ID)
       ELSE
          WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',N
       ENDIF
-      IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/6X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+                      WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
+      IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
    ENDIF
 
    WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
@@ -8885,6 +8886,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ELSE
          SOLID_PHASE_OUTPUT = ONE_D%HEAT_TRANS_COEF
       ENDIF
+   CASE(72) ! SCALING HEAT FLUX
+      SOLID_PHASE_OUTPUT = ONE_D%Q_IN_SMOOTH*0.001_EB
 
    CASE(100) ! CONDENSATION HEAT FLUX
       SOLID_PHASE_OUTPUT = ONE_D%Q_CONDENSE * 0.001_EB
