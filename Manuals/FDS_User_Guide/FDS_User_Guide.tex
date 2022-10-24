@@ -1555,9 +1555,17 @@ It is possible for the pressure interation scheme to seem ``stuck''---the soluti
 
 The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
 \begin{description}
-\item[{\ct SOLVER='ULMAT'}] With this solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
+\item[{\ct SOLVER='ULMAT'}]  This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
+
+With the {\ct ULMAT} solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
+
+The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use should be limited to meshes of at most 150,000 cells. This number depends on the amount of random access memory (RAM) that you can devote to each MPI process, and you might want to experiment with larger meshes if you have, say, tens of gigabytes of RAM per MPI process.
+
 \item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
-\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that it does not allow for internal sealed regions within the domain. It is also the most expensive of the alternative solvers.
+
+The {\ct GLMAT} solver is used mainly for testing and diagnostics. Because it solves the pressure over the entire computational domain, it is limited to about 1~million cells total unless your computer has an extraordinary amount of RAM.
+
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that (1) it does not allow for internal sealed regions within the domain, (2) it is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
@@ -1569,31 +1577,31 @@ Because these alternative methods are based on the Intel\textsuperscript{\textre
 \caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
 \begin{tabular}{lcccccccc}
 \toprule
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{3}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
-\cmidrule(rl){4-6} \cmidrule(rl){7-9}
-\textbf{Solver} & \textbf{Global}$^1$ & \textbf{Unstructured}$^2$ & \textbf{Refinement}$^3$ & \textbf{Stretching} & \textbf{Zones} & \textbf{Velocity @ Mesh}$^4$ & \textbf{Velocity @ Solid}$^5$ & \textbf{Inseparability}$^6$ \\
+\multicolumn{1}{c}{} & \multicolumn{4}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
+\cmidrule(rl){2-5} \cmidrule(rl){6-8}
+\textbf{Solver} & \textbf{Refinement}$^1$ & \textbf{Stretching} & \textbf{Add/Remove}$^2$ & \textbf{Zones} & \textbf{Velocity @ Mesh}$^3$ & \textbf{Velocity @ Solid}$^4$ & \textbf{Inseparability}$^5$ \\
 \midrule
 \rowcolor{lavender}
-FFT (default)  & $\times$ & $\times$   & \checkmark & 2 directions  & \checkmark & iterative & iterative  & iterative \\
-ULMAT          & $\times$ & \checkmark & \checkmark & \checkmark    & \checkmark & iterative & exact      & iterative \\
+FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
+ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
-GLMAT          & \checkmark & $\times$   & $\times$ & $\times$      & \checkmark & exact      & iterative & iterative \\
-UGLMAT         & \checkmark & \checkmark & $\times$ & $\times$      & $\times$   & exact      & exact     & iterative \\
+GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
+UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
 % \rowcolor{lavender}
-% USCARC         & \checkmark & \checkmark & $\times$ & \checkmark    & \checkmark & exact      & exact     & exact   \\
-% PFFT (future)  & \checkmark & $\times$   & $\times$ & 1 direction   & \checkmark & exact      & iterative & iterative \\
+% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
+% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
     \small
     \item Notes:
     \begin{itemize}
-        \item[$^1$] ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
-        \item[$^2$] ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.  So, any unstructured solver will have ``exact'' listed for handling errors under ``Velocity @ Solid''.
-        \item[$^3$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
-        \item[$^4$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.
-        \item[$^5$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.
-        \item[$^6$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+        \item[$^1$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
+        \item[$^2$] ``Add/Remove'' refers to the ability of the solver to handle changes in geometry during the course of the simulation, either by adding or removing {\ct OBST} or {\ct GEOM} via {\ct CTRL} functions.
+        \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
+        \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
+        \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
     \end{itemize}
 \end{tablenotes}
 \end{threeparttable}
@@ -3285,7 +3293,9 @@ Finally, if you desire that the burning stop if the surface temperature drops be
 
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct CONE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct CONE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct CONE\_HEAT\_FLUX} to the FDS incident flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct CONE\_HEAT\_FLUX}. An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
+FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct CONE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct CONE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct CONE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct CONE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct CONE\_FLUX\_SMOOTHING\_WINDOW} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct SCALING\_HEAT\_FLUX}. 
+
+An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%. 
 
 \begin{lstlisting}
 &MATL ID='SAMPLE', CONDUCTIVITY=100, DENSITY=1000, SPECIFIC_HEAT=1, EMISSIVITY=1/
@@ -7496,11 +7506,23 @@ Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531
 \end{figure}
 
 
-The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.001$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. The internal energy gained by the gas, $\Delta E_{\rm gas}$, is equal to the energy lost by the pine needle minus the energies associated with the endothermic reaction 1 and exothermic reaction 2:
+The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.125$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. 
+
+To simplify calculation of the exact answer, all species and material $c$ values are set to $1$~kJ/(kg$\cdot$K). Energy is conserved if the enthalpy change of the particle is equal and opposite to the internal energy change of the gas. Note that it is internal energy and not enthalpy since the box is sealed and any pressure rise must be accounted for in the energy balance.
+
+At the start of the simulation the particle enthalpy is:
 \be
-   \Delta E_{\rm gas} =  m_{\rm p}  \, \left( (1-\nu_{\rm char} \nu_{\rm ash}) \, c_{\rm s} \, T_{\rm s,i} - \Delta h_{\rm pyr} - \nu_{\rm char} \, \Delta h_{\rm char} \right)
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 293.15~{\rm kJ/kg} = 0.011512~{\rm kJ}
 \ee
-$\Delta h_{\rm pyr}=400$~kJ/kg is the heat of reaction 1 and $\Delta h_{\rm char}=-12000$~kJ/kg is the heat of reaction 2. The top left plot in Fig.~\ref{char_oxidation_2_fig} displays the evolution in time of the total mass of the pine needle (needle), the plant material (pulp), char, and ash. The top right plot displays the fuel vapor, CO$_2$, and O$_2$. The bottom left plot displays the energy lost by the particle and gained by the gas, $\Delta E_{\rm gas}$. The bottom right plot displays the temperature of the pine needle.
+
+At the end of the simulation only ash is left which is 2~\% of the char mass which was 25~\% of the inital particle mass. The ash will end up at the gas temperature.
+
+\be
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 0.02 \times 0.25 \times 1073.15~{\rm kJ/kg} = 0.000211~{\rm kJ}
+\ee
+
+The particle will therefore lose 0.011301~kJ.
+
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_solid_mass}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_mass} \\
@@ -9630,6 +9652,8 @@ To record the volume flow at a solid surface or vent, add a line like the follow
 \end{lstlisting}
 This line instructs FDS to sum the normal component of velocity over any surface with the given {\ct SURF\_ID} within the volume bounded by {\ct XB}. Note that a flow entering into the computational domain is negative.
 
+Even though you may only be interested in the volume flow through a plane, provide an actual volume using {\ct XB} to ensure that even if the vent or obstruction is snapped to the nearest grid cell, the area over which the integral is summed will not fall outside of your specified volume limits.
+
 
 
 \subsection{Mass Flow}
@@ -10726,6 +10750,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
 {\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct SCALING\_HEAT\_FLUX}                       & Section~\ref{info:specified_burning}              & kW/m$^2$       & B,D          \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -10770,8 +10795,9 @@ $^6$                 \> Requires {\ct REAC\_ID}. \\
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification
-of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+\begin{sloppypar}
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+\end{sloppypar}
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
 \caption[HVAC output quantities]{Summary of HVAC output quantities.}
@@ -12322,6 +12348,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
+{\ct CONE\_FLUX\_SMOOTHING\_WINDOW}                       & Real            & Section~\ref{info:specified_burning}      & s                   & 10.0                    \\ \hline
 {\ct CONE\_HEAT\_FLUX}                                    & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline

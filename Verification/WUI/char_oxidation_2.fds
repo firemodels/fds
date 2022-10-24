@@ -1,18 +1,19 @@
 &HEAD CHID='char_oxidation_2', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=90, DT=0.01, WALL_INCREMENT=1 / 
+&TIME T_END=10, DT=0.001, WALL_INCREMENT=1 /
 
-&MISC TMPA=800. /
+&MISC TMPA=800./
+&CLIP MAXIMUM_TEMPERATURE=5000 /
 
-&RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1 /
+&RADI RADIATION=F/
 
-&MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&MESH IJK=10,10,10 XB=2.0,3.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=4,4,4, XB=0.0,0.5,0.0,0.5,0.0,0.5 /
+&MESH IJK=4,4,4, XB=1.0,1.5,0.0,0.5,0.0,0.5 /
 
 &SPEC ID='NITROGEN', SPECIFIC_HEAT=1, BACKGROUND=T /
-&SPEC ID='WOOD FUEL VAPOR', SPECIFIC_HEAT=1 /
-&SPEC ID='WATER VAPOR', SPECIFIC_HEAT=1. /
-&SPEC ID='CARBON DIOXIDE', SPECIFIC_HEAT=1. /
+&SPEC ID='WOOD FUEL VAPOR', MW=40,SPECIFIC_HEAT=1,ENTHALPY_OF_FORMATION=33.2593199/
+&SPEC ID='WATER VAPOR', SPECIFIC_HEAT=1.,ENTHALPY_OF_FORMATION=63.93814345 /
+&SPEC ID='CARBON DIOXIDE', SPECIFIC_HEAT=1.,ENTHALPY_OF_FORMATION=-187.6823624 /
 &SPEC ID='OXYGEN', SPECIFIC_HEAT=1., MASS_FRACTION_0=0.05 /
 
 &SURF ID='WALL', ADIABATIC=T, DEFAULT=T /
@@ -35,25 +36,25 @@
       GEOMETRY             = 'CYLINDRICAL' /
 
 &PART ID='dry needle part'
-      SURF_ID='dry needle surf' 
+      SURF_ID='dry needle surf'
       DRAG_COEFFICIENT=2.8
       QUANTITIES='PARTICLE TEMPERATURE'
       STATIC=.TRUE. /
 &PART ID='wet needle part'
-      SURF_ID='wet needle surf' 
+      SURF_ID='wet needle surf'
       DRAG_COEFFICIENT=2.8
       QUANTITIES='PARTICLE TEMPERATURE'
       STATIC=.TRUE. /
 
 &INIT ID                   = 'dry needle init',
-      PART_ID              = 'dry needle part' 
-      XYZ                  = 0.45,0.45,0.45
+      PART_ID              = 'dry needle part'
+      XYZ                  = 0.25,0.25,0.25
       N_PARTICLES          = 1 /
 &INIT ID                   = 'wet needle init',
-      PART_ID              = 'wet needle part' 
-      XYZ                  = 2.45,0.45,0.45
+      PART_ID              = 'wet needle part'
+      XYZ                  = 1.25,0.25,0.25
       N_PARTICLES          = 1 /
-      
+
 &MATL ID                 = 'pulp'
       DENSITY            = 500.
       CONDUCTIVITY       = 50.1
@@ -86,36 +87,51 @@
       CONDUCTIVITY  = 50.1
       SPECIFIC_HEAT = 1.0 /
 
-&DEVC XB=0,1,0,1,0,1, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='Delta e_gas dry needle', RELATIVE=T /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='Delta e_gas wet needle', RELATIVE=T /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='WALL ENTHALPY', INIT_ID='dry needle init', ID='Delta e_part dry needle', RELATIVE=T /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='WALL ENTHALPY', INIT_ID='wet needle init', ID='Delta e_part wet needle', RELATIVE=T /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='MPUV', PART_ID='dry needle part', ID='dry needle mass', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='MPUV', PART_ID='wet needle part', ID='wet needle mass', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC XB=0,1,0,1,0,1, ID='mass fuel gas dry needle', QUANTITY='DENSITY', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, ID='mass fuel gas wet needle', QUANTITY='DENSITY', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=0,1,0,1,0,1, ID='mass CO2 dry needle', QUANTITY='DENSITY', SPEC_ID='CARBON DIOXIDE', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, ID='mass CO2 wet needle', QUANTITY='DENSITY', SPEC_ID='CARBON DIOXIDE', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=0,1,0,1,0,1, ID='mass O2 dry needle', QUANTITY='DENSITY', SPEC_ID='OXYGEN', SPATIAL_STATISTIC='VOLUME INTEGRAL', RELATIVE=T /
-&DEVC XB=2,3,0,1,0,1, ID='mass O2 wet needle', QUANTITY='DENSITY', SPEC_ID='OXYGEN', SPATIAL_STATISTIC='VOLUME INTEGRAL', RELATIVE=T /
-&DEVC XB=0,1,0,1,0,1, ID='mass pulp dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='pulp', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='dry needle part'/
-&DEVC XB=2,3,0,1,0,1, ID='mass pulp wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='pulp', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='wet needle part'/
-&DEVC XB=0,1,0,1,0,1, ID='mass CHAR dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='CHAR', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='dry needle part'/
-&DEVC XB=2,3,0,1,0,1, ID='mass CHAR wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='CHAR', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='wet needle part'/
-&DEVC XB=0,1,0,1,0,1, ID='mass ASH dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='ASH', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='dry needle part'/
-&DEVC XB=2,3,0,1,0,1, ID='mass ASH wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='ASH', SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='wet needle part'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='e_gas dry needle'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='WALL ENTHALPY', INIT_ID='dry needle init', ID='e_part dry needle'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='Delta e_gas dry needle', RELATIVE=T /
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='WALL ENTHALPY', INIT_ID='dry needle init', ID='Delta e_part dry needle', RELATIVE=T /
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='MPUV', PART_ID='dry needle part', ID='dry needle mass', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass fuel gas dry needle', QUANTITY='DENSITY', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass CO2 dry needle', QUANTITY='DENSITY', SPEC_ID='CARBON DIOXIDE', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass O2 dry needle', QUANTITY='DENSITY', SPEC_ID='OXYGEN', SPATIAL_STATISTIC='VOLUME INTEGRAL', RELATIVE=T /
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='dx dry needle', QUANTITY='WALL THICKNESS', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass dry needle', QUANTITY='SURFACE DENSITY', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass pulp dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='pulp', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass CHAR dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='CHAR', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, ID='mass ASH dry needle', QUANTITY='SURFACE DENSITY', MATL_ID='ASH', INIT_ID='dry needle init'/
 &DEVC ID='T_surf dry needle',INIT_ID='dry needle init', QUANTITY='WALL TEMPERATURE' /
+&DEVC ID='T_inner dry needle',INIT_ID='dry needle init', QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=-0.000000001 /
+&DEVC ID='T_back dry needle',INIT_ID='dry needle init', QUANTITY='BACK WALL TEMPERATURE' /
+&DEVC ID='T_gas dry needle',INIT_ID='dry needle init', QUANTITY='GAS TEMPERATURE' /
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='TEMPERATURE', ID='mean temp dry needle', SPATIAL_STATISTIC='VOLUME MEAN' /
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='PARTICLE RADIATION LOSS', ID='part rad flux dry needle', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='NET HEAT FLUX', ID='net flux dry needle', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='CONVECTIVE HEAT FLUX', ID='con flux dry needle', INIT_ID='dry needle init'/
+&DEVC XB=0,0.5,0,0.5,0,0.5, QUANTITY='RADIATIVE HEAT FLUX', ID='rad flux dry needle', INIT_ID='dry needle init'/
+
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='e_gas wet needle'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='WALL ENTHALPY', INIT_ID='wet needle init', ID='e_part wet needle'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='INTERNAL ENERGY', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='Delta e_gas wet needle', RELATIVE=T /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='WALL ENTHALPY', INIT_ID='wet needle init', ID='Delta e_part wet needle', RELATIVE=T /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='MPUV', PART_ID='wet needle part', ID='wet needle mass', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass fuel gas wet needle', QUANTITY='DENSITY', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass CO2 wet needle', QUANTITY='DENSITY', SPEC_ID='CARBON DIOXIDE', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass O2 wet needle', QUANTITY='DENSITY', SPEC_ID='OXYGEN', SPATIAL_STATISTIC='VOLUME INTEGRAL', RELATIVE=T /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='dx wet needle', QUANTITY='WALL THICKNESS', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass wet needle', QUANTITY='SURFACE DENSITY', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass pulp wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='pulp', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass CHAR wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='CHAR', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, ID='mass ASH wet needle', QUANTITY='SURFACE DENSITY', MATL_ID='ASH', INIT_ID='wet needle init'/
 &DEVC ID='T_surf wet needle',INIT_ID='wet needle init', QUANTITY='WALL TEMPERATURE' /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='TEMPERATURE', ID='mean temp dry needle', SPATIAL_STATISTIC='VOLUME MEAN' /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='TEMPERATURE', ID='mean temp wet needle', SPATIAL_STATISTIC='VOLUME MEAN' /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='PARTICLE RADIATION LOSS', ID='part rad flux dry needle', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='PARTICLE RADIATION LOSS', ID='part rad flux wet needle', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='NET HEAT FLUX', ID='wall net flux dry needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='NET HEAT FLUX', ID='wall net flux wet needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='CONVECTIVE HEAT FLUX', ID='wall con flux dry needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='CONVECTIVE HEAT FLUX', ID='wall con flux wet needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
-&DEVC XB=0,1,0,1,0,1, QUANTITY='RADIATIVE HEAT FLUX', ID='wall rad flux dry needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
-&DEVC XB=2,3,0,1,0,1, QUANTITY='RADIATIVE HEAT FLUX', ID='wall rad flux wet needle', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
+&DEVC ID='T_inner wet needle',INIT_ID='wet needle init', QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=-0.000000001 /
+&DEVC ID='T_back wet needle',INIT_ID='wet needle init', QUANTITY='BACK WALL TEMPERATURE' /
+&DEVC ID='T_gas wet needle',INIT_ID='wet needle init', QUANTITY='GAS TEMPERATURE' /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='TEMPERATURE', ID='mean temp wet needle', SPATIAL_STATISTIC='VOLUME MEAN' /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='PARTICLE RADIATION LOSS', ID='part rad flux wet needle', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='NET HEAT FLUX', ID='net flux wet needle', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='CONVECTIVE HEAT FLUX', ID='con flux wet needle', INIT_ID='wet needle init'/
+&DEVC XB=1.0,1.5,0.0,0.5,0.0,0.5, QUANTITY='RADIATIVE HEAT FLUX', ID='rad flux wet needle', INIT_ID='wet needle init'/
 
 &TAIL /
 
