@@ -3293,7 +3293,7 @@ Finally, if you desire that the burning stop if the surface temperature drops be
 
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct CONE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct CONE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct CONE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct CONE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct CONE\_FLUX\_SMOOTHING\_WINDOW} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct SCALING\_HEAT\_FLUX}. 
+FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. 
 
 An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%. 
 
@@ -3302,13 +3302,13 @@ An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}
 
 &SURF ID='SAMPLE25', IGNITION_TEMPERATURE=0, EXTERNAL_FLUX=25,
       HEAT_TRANSFER_COEFFICIENT=0, HRRPUA=1, RAMP_Q='CONE',
-      CONE_HEAT_FLUX=50,MATL_ID='SAMPLE',THICKNESS=0.01 /
+      REFERENCE_HEAT_FLUX=50,MATL_ID='SAMPLE',THICKNESS=0.01 /
 &SURF ID='SAMPLE50', IGNITION_TEMPERATURE=0, EXTERNAL_FLUX=50,
       HEAT_TRANSFER_COEFFICIENT=0, HRRPUA=1, RAMP_Q='CONE',
-      CONE_HEAT_FLUX=50, MATL_ID='SAMPLE', THICKNESS=0.01 /
+      REFERENCE_HEAT_FLUX=50, MATL_ID='SAMPLE', THICKNESS=0.01 /
 &SURF ID='SAMPLE75', IGNITION_TEMPERATURE=0, EXTERNAL_FLUX=75,
       HEAT_TRANSFER_COEFFICIENT=0, HRRPUA=1, RAMP_Q='CONE',
-      CONE_HEAT_FLUX=50, MATL_ID='SAMPLE', THICKNESS=0.01 /
+      REFERENCE_HEAT_FLUX=50, MATL_ID='SAMPLE', THICKNESS=0.01 /
 
 &VENT XB=0.1,0.3,0.0,0.1,0.0,0.0, SURF_ID='SAMPLE25' /
 &VENT XB=0.6,0.7,0.0,0.1,0.0,0.0, SURF_ID='SAMPLE50' /
@@ -10749,8 +10749,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RAM}                                       & Memory usage (Linux only)                         & MB             & D            \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
 {\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:specified_burning}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct SCALING\_HEAT\_FLUX}                       & Section~\ref{info:specified_burning}              & kW/m$^2$       & B,D          \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -12348,8 +12348,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
-{\ct CONE\_FLUX\_SMOOTHING\_WINDOW}                       & Real            & Section~\ref{info:specified_burning}      & s                   & 10.0                    \\ \hline
-{\ct CONE\_HEAT\_FLUX}                                    & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVERT\_VOLUME\_TO\_MASS}                           & Logical         & Section~\ref{info:MASS_FLUX}              &                     & {\ct F}                 \\ \hline
@@ -12422,6 +12420,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V\_X}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Z}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX}                               & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:specified_burning}      & s                   & 10.0                    \\ \hline
 {\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
