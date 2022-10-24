@@ -9087,7 +9087,8 @@ USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,PYRO3D_IOR,IIO,JJO,KKO
+INTEGER :: NM,NOM,NOM2,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,&
+           SHAPE_TYPE,PYRO3D_IOR,IIO,JJO,KKO
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID,RAMP_Q
 CHARACTER(25) :: COLOR
 LOGICAL :: OVERLAY,IS_INTERSECT,PYRO3D_MASS_TRANSPORT
@@ -9095,7 +9096,7 @@ REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_S
             INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3),&
             XXI,YYJ,ZZK,DX_GHOST,DY_GHOST,DZ_GHOST
 LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,&
-           HT3D,WARN_HT3D,PYRO3D_RESIDUE
+           HT3D,WARN_HT3D,PYRO3D_RESIDUE,REJECT_OBST
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
                 COLOR,CTRL_ID,DEVC_ID,FYI,HEIGHT,HT3D,ID,INTERNAL_HEAT_SOURCE,&
                 LENGTH,MATL_ID,MULT_ID,&
@@ -9330,15 +9331,20 @@ MESH_LOOP: DO NM=1,NMESHES
 
                N = N + 1
 
-               ! Look for obstructions that are within a half grid cell of the current mesh. If the obstruction is thin and has the
-               ! THICKEN attribute, look for it within an entire grid cell.
+               ! Look for obstructions that are within a half grid cell of the current mesh. 
+               ! If the obstruction is thin and has the THICKEN attribute, look for it within an entire grid cell.
+               ! If there OBST is in another mesh with a gap in between, reject it.
 
                THICKEN_LOC = THICKEN
+               REJECT_OBST = .FALSE.
 
                IF ( (XB2>=XS-0.5_EB*DX(0)   .AND. XB2<XS) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)>=XS-DX(0)    .AND. XB2<XS) ) THEN
                   DX_GHOST = DX(0)
-                  CALL SEARCH_OTHER_MESHES(XS-0.1_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                  CALL SEARCH_OTHER_MESHES(XS-0.01_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(XS-0.51_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DX))DX_GHOST = MESHES(NOM)%DX(IIO)
                   ENDIF
@@ -9350,8 +9356,11 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
                IF ( (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)< XF+DX(IBP1) .AND. XB1>XF) ) THEN
                   DX_GHOST = DX(IBP1)
-                  CALL SEARCH_OTHER_MESHES(XF+0.1_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                  CALL SEARCH_OTHER_MESHES(XF+0.01_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(XF+0.51_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DX)) DX_GHOST = MESHES(NOM)%DX(IIO)
                   ENDIF
@@ -9363,8 +9372,11 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
                IF ( (XB4>=YS-0.5_EB*DY(0)   .AND. XB4<YS) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)>=YS-DY(0)    .AND. XB4<YS) ) THEN
                   DY_GHOST = DY(0)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.1_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.01_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.51_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
                   ENDIF
@@ -9376,8 +9388,11 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
                IF ( (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)< YF+DY(JBP1) .AND. XB3>YF) ) THEN
                   DY_GHOST = DY(JBP1)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.1_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.01_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.51_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
                   ENDIF
@@ -9389,8 +9404,11 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
                IF ( (XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)>=ZS-DZ(0)    .AND. XB6<ZS) ) THEN
                   DZ_GHOST = DZ(0)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.1_EB*DZ(0),&
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.01_EB*DZ(0),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.51_EB*DZ(0),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
                   ENDIF
@@ -9402,8 +9420,11 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
                IF ( (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF) ) THEN
                   DZ_GHOST = DZ(KBP1)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.1_EB*DZ(KBP1),&
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.01_EB*DZ(KBP1),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.51_EB*DZ(KBP1),&
+                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
+                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
                      IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
                   ENDIF
@@ -9428,7 +9449,7 @@ MESH_LOOP: DO NM=1,NMESHES
                XB4 = MIN(XB4,YF)
                XB5 = MAX(XB5,ZS)
                XB6 = MIN(XB6,ZF)
-               IF (XB1>XF .OR. XB2<XS .OR. XB3>YF .OR. XB4<YS .OR. XB5>ZF .OR. XB6<ZS) THEN
+               IF (XB1>XF .OR. XB2<XS .OR. XB3>YF .OR. XB4<YS .OR. XB5>ZF .OR. XB6<ZS .OR. REJECT_OBST) THEN
                   N = N-1
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
