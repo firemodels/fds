@@ -1976,6 +1976,42 @@ A series of tests were performed as part of an effort to develop a gauge capable
 	\label{tab:NIST_SDG}
 \end{table}
 
+
+\section{NIST Structure Separation Experiments}
+\label{NIST_Structure_Separation_Description}
+
+Maranghides et al.~\cite{Maranghides:TN2161,Maranghides:TN2235} have developed a series of tests designed to understand safe structure separation distances for sheds, fences, and other combustible materials, with and without wind, in the wildland-urban interface (WUI).
+
+\subsubsection{Verification Tests}
+
+Prior to modeling heat fluxes to surfaces with attached flames or modeling ignition of siding material, a relatively simple test was carried out to record heat fluxes from a know fire source to targets in the proximity to the flame.  The 8 MW NFRL calibration burner \cite{Bryant:NISTSP1007} (see Fig.~\ref{NFRL_8MW_calibration_burner}) is positioned on a raised platform under the medium scale hood in NFRL.  Three heat flux gauge towers are positioned 1, 2, and 3 m from the burner edge (or 2, 3, and 4 m from the burner center).  Figure~\ref{NIST_SSE_Verification_Setup} shows a photograph from \cite{Maranghides:TN2235} (courtesy Matt Hoehler).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{../../../cad/NIST_Calibration_Burners/NIST_8MW_assembly_drawing}
+\caption[NFRL 8 MW calibration burner assembly drawing]{NFRL 8 MW calibration burner assembly drawing produced by NIST SURF student Louis Serrano Torres.  Units in inches.}
+\label{NFRL_8MW_calibration_burner}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{FIGURES/NIST_Structure_Separation/SSE_Verification_Exp_Setup}
+\caption[Structure Separation Verification setup]{Structure Separation Verification setup showing natural gas burner and heat flux gauge positions.}
+\label{NIST_SSE_Verification_Setup}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The burner is roughly 1 m $\times$ 1.5 m with 802 fuel ports 1/8th inch in diameter (see Fig.~\ref{NFRL_8MW_calibration_burner}).  The FDS model of the burner is built from particles (see Fig below).  Each particle has a radius set to give a spherical area equivalent to a 1/8th inch diameter fuel port.  The time ramp in the FDS simulation is compressed by a factor of 10.  The ``gauge heat flux'' is recorded in an orientation pointing toward the burner ($+x$ direction).  The burner flow baffle plates are made from thin {\ct OBST}.  Fictitious manifolds are made from thickened {\ct OBST}.  The number of radiation angles in increased to 400.  The radiation path length is set to 2 m.  Ambient conditions are taken from historical weather data for the day of the experiment.  The natural gas composition is taken from NFRL records on the day.  A radiant fraction of 0.25 is prescribed, which is both consistent with a methane flame with additional ethane and the heat flux data farthest from the fire source under the assumption of a point source model.  The burner has a $D^*$ of approximately 2.2.  As a baseline, a grid resolution of 5 cm provides a $D^*/\Delta x = 44$.  Reasonably high resolution may be necessary if near-flame heat flux values are of interest.  However, we also provide FDS results for 10 cm resolution.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.5\textwidth]{FIGURES/NIST_Structure_Separation/nfrl_burner_particles}
+\caption[FDS particle model of NFRL 8 MW burner]{Image of the FDS particle model for the 8 MW NFRL burner.}
+\label{FDS_NFRL_8MW_particle_burner}
+\end{figure}
+
+
 \section{NIST Vent Study}
 \label{NIST_Vent_Description}
 
