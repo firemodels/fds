@@ -9752,6 +9752,8 @@ To record the volume flow at a solid surface or vent, add a line like the follow
 \end{lstlisting}
 This line instructs FDS to sum the normal component of velocity over any surface with the given {\ct SURF\_ID} within the volume bounded by {\ct XB}. Note that a flow entering into the computational domain is negative.
 
+Even though you may only be interested in the volume flow through a plane, provide an actual volume using {\ct XB} to ensure that even if the vent or obstruction is snapped to the nearest grid cell, the area over which the integral is summed will not fall outside of your specified volume limits.
+
 
 
 \subsection{Mass Flow}
