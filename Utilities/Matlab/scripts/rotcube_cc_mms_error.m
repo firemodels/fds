@@ -41,16 +41,16 @@ ifile_s=1;
 ifile_f=3;
 ifile_ang = [0; atan(1./2.); atan(1.)];
 ifile_str = {'0deg_';'27deg_';'45deg_'};
-jfile_str = {'ibm';'stm';'obs'};
+jfile_str = {'stm';'obs'};
 
 skip_case = 0;
 nfile     = 0;
 for ifile=ifile_s:ifile_f
 
    jfile_s = 1;
-   jfile_f = 2;
+   jfile_f = 1;
    if(ifile==1)
-       jfile_f = 3;
+       jfile_f = 2;
    end
    for jfile=jfile_s:jfile_f
        nfile = nfile+1;
@@ -271,9 +271,9 @@ for ifile=1:nfile
     hh(3)=loglog(file(ifile).dx,file(ifile).e_H_2,'k+-');
     hh(4)=loglog(file(ifile).dx,10^-1*file(ifile).dx,'k--');
     hh(5)=loglog(file(ifile).dx,2*10^-3*file(ifile).dx.^2,'k-');
-    if(ifile <= 3)
+    if(ifile <= 2)
        axis([2*10^-3 3*10^-1 10^-7 10^-1]) 
-    elseif(ifile <=5)
+    elseif(ifile <=3)
        axis([10^-2 5*10^-1 10^-7 7*10^-1])
     else
        axis([5*10^-3 5*10^-1 10^-7 10^-1])
@@ -292,7 +292,7 @@ for ifile=1:nfile
         'Fontname',Font_Name)
     
     % add Git version if file is available
-    Git_Filename = [datadir,'rotated_cube_45deg_256_ibm_git.txt'];
+    Git_Filename = [datadir,'rotated_cube_45deg_256_stm_git.txt'];
     addverstr(gca,Git_Filename,'loglog')
     
     % print to pdf
@@ -307,7 +307,7 @@ for ifile=1:nfile
     
     print(gcf,'-dpdf',strng)
         
-    if (ifile==3) % OBST case:
+    if (ifile==2) % OBST case:
         % check errors
         if file(ifile).e_z_2(end) > 2e-6
             display(['Matlab Warning: Neumann BC Species in rotated_cube OBST ' ...
@@ -324,24 +324,7 @@ for ifile=1:nfile
                      file(ifile).name{end} ' is out of tolerance. e_H = ', ...
                      num2str(file(ifile).e_H_2(end))])
         end
-    elseif(ifile==4)
-        % check errors
-        if file(ifile).e_z_2(end) > 6e-5
-            display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg ibm ' ...
-            file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
-            num2str(file(ifile).e_z_2(end))])
-        end
-        if file(ifile).e_u_2(end) > 1.5e-4
-            display(['Matlab Warning: Velocity in rotated_cube 27deg ibm '             ...
-                     file(ifile).name{end} ' is out of tolerance. e_u = ', ...
-                     num2str(file(ifile).e_u_2(end))])
-        end
-        if file(ifile).e_H_2(end) > 2.5e-3
-            display(['Matlab Warning: Pressure in rotated_cube 27deg ibm '             ...
-                     file(ifile).name{end} ' is out of tolerance. e_H = ', ...
-                     num2str(file(ifile).e_H_2(end))])
-        end
-    elseif(ifile==5)
+    elseif(ifile==3)
         % check errors
         if file(ifile).e_z_2(end) > 6.5e-5
             display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg stm ' ...
