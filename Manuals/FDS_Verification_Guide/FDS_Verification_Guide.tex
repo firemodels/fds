@@ -6550,32 +6550,29 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 % Figures rotcube_cc 0deg:
 \begin{figure}[ht]
 \centering
-\includegraphics[trim = 5mm 2mm 7mm 2mm, clip, width=.365\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_ibm_mms_convergence.pdf}
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_stm_mms_convergence.pdf}
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Direct forcing immersed boundary method, (Middle) stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
 \end{figure}
 
 % Figures for accuracy 27deg:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_ibm_mms_convergence.pdf}
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Direct forcing immersed boundary method, (Right) stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
 \end{figure}
 
-Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with direct forcing IBM and stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
 
-Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference. Note that the Godunov flux limited interpolation does not have a detrimental effect in accuracy, simply because advective fluxes reduce to zero at the boundary.
+Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference.
 The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
-For the $\&$OBSTs and grid aligned stress method where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). The immersed boundary velocity reconstruction on cut-faces provides spatial accuracies between $\mathcal{O}(\Delta x)$ and $\mathcal{O}(\Delta x^2)$ in $L_2$ norm across the different inclination angles, which are inline with what is expected for immersed boundary methods of this type. For the stress method and inclined cases the spatial accuracy is $\mathcal{O}(\Delta x)$. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
+For the $\&$OBSTs and grid aligned stress method where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). For the stress method and inclined cases the spatial accuracy is higher than $\mathcal{O}(\Delta x)$. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
 
 % Figures for accuracy 45deg:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_ibm_mms_convergence.pdf}
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Direct forcing immersed boundary method, (Right) stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
 \end{figure}
 
 
@@ -6596,7 +6593,7 @@ where in our case $Re_H= \rho \overline{u} H/ \mu \simeq 155$, being the analyti
    \Delta p / L = f \frac{L}{H}  \frac{1}{2} \rho \overline{u}^2
 \end{equation}
 %
-which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}.
+which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the cut-cell scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}.
 %
 % figure
 \begin{figure}[h]
@@ -6609,21 +6606,7 @@ which can be used to compute the simulation error in $f$, as a function of the m
 %
 We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
 
-Consider the case of forcing cross velocities via the immersed boundary method (IBM). Friction factor errors computed as $|f-f_{an}|$ are shown in figures~\ref{Fig:PoiseConvg}a,b. Second order convergence of this error measure in all cases can be seen. There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the cut-cell size ratios and interpolation coefficients are changing from grid to grid. These error fluctuations are not seen when $h=\Delta z /3$, and cut-cells keep same sizes and interpolation coefficients respect to the Cartesian grids.
-%
-% figure
-\begin{figure}[h]
-      \centering
-      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a_ibm.pdf}
-      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na_ibm.pdf}
-      \caption{Poiseuille flow created by two geometries, IBM for cross velocities: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
-      \label{Fig:PoiseConvg}
-\end{figure}
-%
-
-In case of stress method for cross velocities (STM), the friction factor convergence can be seen in figures~\ref{Fig:PoiseConvg2}a,b.
+In case of stress method for cross velocities (STM), the friction factor error $|f-f_{an}|$ convergence can be seen in figures~\ref{Fig:PoiseConvg2}a,b.
 %
 % figure
 \begin{figure}[h]
