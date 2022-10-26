@@ -567,7 +567,7 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          KDTDZ(II,JJ,KK-1) = 0._EB
    END SELECT
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( ONE_D%Q_CON_F*ONE_D%RDN - WC%Q_LEAK )
+   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( ONE_D%AREA_ADJUST*ONE_D%Q_CON_F*ONE_D%RDN - WC%Q_LEAK )
 ENDDO CORRECTION_LOOP
 
 ! Compute (q + del dot k del T) and add to the divergence

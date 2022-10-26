@@ -12,9 +12,9 @@ N    = [10,20,40,80];
 outdir = '../../Verification/Complex_Geometry/';
 
 % Method for cross velocity forcing:
-vmethod=['_ibm'; '_stm'];
+vmethod=['_stm'];
 
-for im=1:2
+for im=1:1
  
    mth=vmethod(im,:);
    
