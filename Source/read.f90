@@ -1610,7 +1610,7 @@ CHARACTER(LABEL_LENGTH) :: ASSUMED_GAS_TEMPERATURE_RAMP,RAMP_GX,RAMP_GY,RAMP_GZ,
 
 NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANCE,ALLOW_SURFACE_PARTICLES, &
                 ALLOW_UNDERSIDE_PARTICLES,ASSUMED_GAS_TEMPERATURE,ASSUMED_GAS_TEMPERATURE_RAMP,&
-                BNDF_DEFAULT,CC_IBM,CC_SLIPIBM_VELO,CC_STRESS_METHOD,CCVOL_LINK,CC_ZEROIBM_VELO,&
+                BNDF_DEFAULT,CC_IBM,CCVOL_LINK,&
                 CC_UNSTRUCTURED_PROJECTION,C_DEARDORFF,&
                 CFL_MAX,CFL_MIN,CFL_VELOCITY_NORM,CHECK_HT,CHECK_MASS_CONSERVE,CHECK_VN, &
                 CNF_CUTOFF,COMPUTE_CUTCELLS_ONLY,CONSTANT_SPECIFIC_HEAT_RATIO,&
@@ -6130,7 +6130,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ENDIF
    ML%RGB                  = RGB
    ALLOCATE(ML%A(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%A',IZERO)   
+   CALL ChkMemErr('READ','ML%A',IZERO)
    ML%A(1:N_REACTIONS)                 = A(1:N_REACTIONS)
    ALLOCATE(ML%ADJUST_BURN_RATE(N_TRACKED_SPECIES,MAX(1,N_REACTIONS)),STAT=IZERO)
    CALL ChkMemErr('READ','ML%ADJUST_BURN_RATE',IZERO)
@@ -6139,19 +6139,19 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%ALLOW_SHRINKING                  = ALLOW_SHRINKING
    ML%ALLOW_SWELLING                   = ALLOW_SWELLING
    ALLOCATE(ML%BETA_CHAR(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%BETA_CHAR',IZERO)   
+   CALL ChkMemErr('READ','ML%BETA_CHAR',IZERO)
    ML%BETA_CHAR(1:N_REACTIONS)         = BETA_CHAR(1:N_REACTIONS)
    ALLOCATE(ML%C_S(0:I_MAX_TEMP),STAT=IZERO)
    CALL ChkMemErr('READ','ML%C_S',IZERO)
    ML%C_S                              = 1000._EB*SPECIFIC_HEAT/TIME_SHRINK_FACTOR
    ML%DIFFUSIVITY_SPEC  = DIFFUSIVITY_SPEC
    ALLOCATE(ML%E(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%E',IZERO)   
+   CALL ChkMemErr('READ','ML%E',IZERO)
    ML%E(1:N_REACTIONS)                 = 1000._EB*E(1:N_REACTIONS)
    ML%EMISSIVITY                       = EMISSIVITY
    ML%FYI                              = FYI
    ALLOCATE(ML%GAS_DIFFUSION_DEPTH(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%GAS_DIFFUSION_DEPTH',IZERO)   
+   CALL ChkMemErr('READ','ML%GAS_DIFFUSION_DEPTH',IZERO)
    ML%GAS_DIFFUSION_DEPTH(1:N_REACTIONS) = GAS_DIFFUSION_DEPTH(1:N_REACTIONS)
    ML%HEAT_OF_COMBUSTION   = 1000._EB*HEAT_OF_COMBUSTION
    ALLOCATE(ML%H_R(N_REACTIONS,0:I_MAX_TEMP),STAT=IZERO)
@@ -6165,21 +6165,21 @@ READ_MATL_LOOP: DO N=1,N_MATL
    CALL ChkMemErr('READ','ML%K_S',IZERO)
    ML%K_S                              = CONDUCTIVITY
    ALLOCATE(ML%MAX_REACTION_RATE(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%MAX_REACTION_RATE',IZERO)   
+   CALL ChkMemErr('READ','ML%MAX_REACTION_RATE',IZERO)
    ML%MAX_REACTION_RATE(1:N_REACTIONS) = MAX_REACTION_RATE(1:N_REACTIONS)
-   ML%MW                               = MW   
+   ML%MW                               = MW
    ML%N_REACTIONS                      = N_REACTIONS
    ALLOCATE(ML%N_O2(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%N_O2',IZERO)   
+   CALL ChkMemErr('READ','ML%N_O2',IZERO)
    ML%N_O2(1:N_REACTIONS)              = N_O2(1:N_REACTIONS)
    ALLOCATE(ML%NU_O2_CHAR(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%NU_O2_CHAR',IZERO)   
+   CALL ChkMemErr('READ','ML%NU_O2_CHAR',IZERO)
    ML%NU_O2_CHAR(1:N_REACTIONS)        = NU_O2_CHAR(1:N_REACTIONS)
    ALLOCATE(ML%N_S(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%N_S',IZERO)   
+   CALL ChkMemErr('READ','ML%N_S',IZERO)
    ML%N_S(1:N_REACTIONS)               = N_S(1:N_REACTIONS)
    ALLOCATE(ML%N_T(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%N_T',IZERO)   
+   CALL ChkMemErr('READ','ML%N_T',IZERO)
    ML%N_T(1:N_REACTIONS)               = N_T(1:N_REACTIONS)
    ML%NU_PART                          = NU_PART
    ML%PART_ID                          = PART_ID
@@ -6194,17 +6194,17 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%REFRACTIVE_INDEX                 = REFRACTIVE_INDEX
    ML%RESIDUE_MATL_NAME                = MATL_ID
    ALLOCATE(ML%HEATING_RATE(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%HEATING_RATE',IZERO)     
+   CALL ChkMemErr('READ','ML%HEATING_RATE',IZERO)
    ML%HEATING_RATE(1:N_REACTIONS)      = HEATING_RATE(1:N_REACTIONS)/60._EB
    ALLOCATE(ML%PYROLYSIS_RANGE(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%PYROLYSIS_RANGE',IZERO)   
+   CALL ChkMemErr('READ','ML%PYROLYSIS_RANGE',IZERO)
    ML%PYROLYSIS_RANGE(1:N_REACTIONS)   = PYROLYSIS_RANGE(1:N_REACTIONS)
    ML%TMP_BOIL                         = BOILING_TEMPERATURE + TMPM
    ALLOCATE(ML%TMP_REF(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%TEMP_REF',IZERO)   
+   CALL ChkMemErr('READ','ML%TEMP_REF',IZERO)
    ML%TMP_REF(1:N_REACTIONS)           = REFERENCE_TEMPERATURE(1:N_REACTIONS) + TMPM
    ALLOCATE(ML%RATE_REF(N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%RATE_REF',IZERO)   
+   CALL ChkMemErr('READ','ML%RATE_REF',IZERO)
    ML%RATE_REF(1:N_REACTIONS)          = REFERENCE_RATE(1:N_REACTIONS)
    ALLOCATE(ML%NU_GAS(N_TRACKED_SPECIES,N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','ML%NU_GAS',IZERO)
@@ -6290,8 +6290,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
          ML%NU_RESIDUE(NN,NR) = NU_MATL(NN,NR)
       ENDDO
    ENDDO
-   
-   IF (ML%PYROLYSIS_MODEL == PYROLYSIS_LIQUID) ML%TMP_REF(1) = ML%TMP_BOIL   
+
+   IF (ML%PYROLYSIS_MODEL == PYROLYSIS_LIQUID) ML%TMP_REF(1) = ML%TMP_BOIL
 
 ENDDO READ_MATL_LOOP
 
@@ -6500,9 +6500,9 @@ PROC_MATL_LOOP: DO N=1,N_MATL
 ENDDO PROC_MATL_LOOP
 
 ! Construct and solve linear system to adjust MATL enthalpies to conserve energy. For reaction i for MATL m the equation is
-! H_m(ML%T_REF(i))+H_m,adj + H_R,m,i = Sum(nu_n (H_n(ML%T_REF(i)+H_n,adj)) 
+! H_m(ML%T_REF(i))+H_m,adj + H_R,m,i = Sum(nu_n (H_n(ML%T_REF(i)+H_n,adj))
 ! Where H_x,adj is the value to add or subtract from the existing temperature dependendent enthalpy (H_x) to balance the equation.
-! x could be a SPEC or a MATL; however, here we assume H_SPEC(T) are all correct as changing H_SPEC might impact REAC which has 
+! x could be a SPEC or a MATL; however, here we assume H_SPEC(T) are all correct as changing H_SPEC might impact REAC which has
 ! already adjusted H_SPEC to get the RN%HEAT_OF_COMBUSTION.
 
 ! Make sure all reactions have a TMP_REF
@@ -6604,7 +6604,7 @@ DO N=1,N_MATL
    IF (.NOT. ML%ADJUST_H) CYCLE
    IF (ML%N_REACTIONS > 0) THEN
       DO NR=1,ML%N_REACTIONS
-         NU_INERT = 1._EB-SUM(ML%NU_RESIDUE(:,NR))-SUM(ML%NU_GAS(:,NR))         
+         NU_INERT = 1._EB-SUM(ML%NU_RESIDUE(:,NR))-SUM(ML%NU_GAS(:,NR))
          DO I=0,I_MAX_TEMP
            H_R_CALC(I) = -(1._EB-NU_INERT)*ML%H(I)
             DO NS=1,N_TRACKED_SPECIES
@@ -9330,7 +9330,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                N = N + 1
 
-               ! Look for obstructions that are within a half grid cell of the current mesh. 
+               ! Look for obstructions that are within a half grid cell of the current mesh.
                ! If the obstruction is thin and has the THICKEN attribute, look for it within an entire grid cell.
                ! If there OBST is in another mesh with a gap in between, reject it.
 
