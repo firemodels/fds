@@ -601,8 +601,12 @@ INTEGER :: N_VENT_TOTAL=0
 ! Sprinkler Variables
 
 REAL(EB) :: C_DIMARZO=6.E6_EB
-INTEGER :: N_ACTUATED_SPRINKLERS=0,EVAP_MODEL=0
+INTEGER :: N_ACTUATED_SPRINKLERS=0
 INTEGER, PARAMETER :: NDC=1000,NDC2=100
+INTEGER, PARAMETER :: RM_NO_B        = -1 !< Ranz-Marshall no B number
+INTEGER, PARAMETER :: RM_B           =  0 !< Ranz-Marshall with B number
+INTEGER, PARAMETER :: RM_LEWIS_B     =  1 !< Ranz-Marshall with Lewis number based B Number
+INTEGER, PARAMETER :: RM_FL_LEWIS_B  =  2 !< Ranz-Marshall with flux limited, Lewis number based B Number
 LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
 
 ! Particles

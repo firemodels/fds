@@ -1,0 +1,39 @@
+&HEAD CHID='thermocouple_time_constant', TITLE='Check Thermocouple time constant.' /
+
+# Test of thermocpule time constant for Backdraft simulations:
+# Thermocouple is sheathed, grounded of 1/8in diameter and assumed 
+# of Inconel 600 material with properties obtained from:
+# https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=NINC30:
+# The resulting time constant (time to record 63.2 C temp in this test) 
+# is T_c = 6.8 sec, in line with time constant plot provided in
+# https://www.omega.com/en-us/resources/thermocouples-response-time
+
+# Mesh:
+&MESH IJK=30,15,15, XB=-2.,2.,-1.,1.,-1.,1. /
+
+&TIME T_END=20. /
+&MISC TMPA =0.  /
+&SPEC ID='LJ AIR', LUMPED_COMPONENT_ONLY=T / 
+&SPEC ID='MY AIR', SPEC_ID(1)='LJ AIR', BACKGROUND=T, MASS_FRACTION(1)=1./
+&SPEC ID='TRACER', SPEC_ID(1)='LJ AIR', MASS_FRACTION(1)=1. /
+
+&SURF ID='INLET', FREE_SLIP=T, MASS_FRACTION(1)=1., SPEC_ID(1)='TRACER', VEL=-19.812, TAU_V=0., TMP_FRONT=100., TAU_T=0/
+&INIT XB=-2.,2.,-1.,1.,-1.,1., TEMPERATURE=100./
+
+&VENT MB='XMIN', SURF_ID='INLET' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+
+&SURF ID='default wall', FREE_SLIP=T, DEFAULT=T, ADIABATIC=T, HEAT_TRANSFER_COEFFICIENT=0., COLOR='GRAY' /
+
+&SLCF DB='YMID', QUANTITY='VELOCITY', VECTOR=T /
+&SLCF DB='YMID', QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF DB='YMID', QUANTITY='MASS FRACTION', SPEC_ID='TRACER', CELL_CENTERED=T /
+&SLCF DB='YMID', QUANTITY='DIVERGENCE', CELL_CENTERED=T /
+&SLCF DB='YMID', QUANTITY='H', CELL_CENTERED=T /
+
+# devices:
+&DEVC XYZ=-0.02,0.,0., QUANTITY='TEMPERATURE', ID='TMP' /
+&PROP ID='TC', DENSITY=8470, DIAMETER=0.0032, SPECIFIC_HEAT=0.444/
+&DEVC ID='T0', QUANTITY='THERMOCOUPLE', PROP_ID='TC', XYZ=-0.2,0.,0. /
+
+&TAIL /

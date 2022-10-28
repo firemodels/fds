@@ -3296,12 +3296,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      H_MASS = 0._EB
                   ELSE
                      !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
-                     SELECT CASE(EVAP_MODEL)
-                        CASE(-1) ! Ranz Marshall
+                     SELECT CASE(LPC%EVAP_MODEL)
+                        CASE(RM_NO_B)
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH
-                        CASE(0:1) !Sazhin M0 - M1, see next code block for Refs
+                        CASE(RM_B,RM_LEWIS_B) !Sazhin M0 - M1
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_ONE_D%B_NUMBER)/LP_ONE_D%B_NUMBER
-                        CASE(2) !Sazhin M2, see next code block for Refs
+                        CASE(RM_FL_LEWIS_B) !Sazhin M2
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_ONE_D%B_NUMBER)/ &
                                      (LP_ONE_D%B_NUMBER*F_B(LP_ONE_D%B_NUMBER))
                      END SELECT
@@ -3317,7 +3317,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   LENGTH = 2._EB*R_DROP
                   RE_L = RHO_FILM*VEL*LENGTH/MU_FILM
                   CALL DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,&
-                                                 LP_ONE_D%B_NUMBER,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
+                                                 LP_ONE_D%B_NUMBER,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX,&
+                                                 LPC%EVAP_MODEL)
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1

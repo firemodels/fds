@@ -6208,14 +6208,14 @@ To define an evaporating liquid droplet, you must specify the name of the gas sp
 \end{lstlisting}
 By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporation model. Alternatively, if you specify a {\ct SURF\_ID}, you are designating a solid particle that behaves according to the given {\ct SURF} line. Solid particles are described in Section~\ref{info:PART_SURF}.
 
-By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{Ranz} with a B-number. Additional correlations are available by setting {\ct EVAP\_MODEL} on {\ct MISC}. The available options are:
+By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{Ranz} with a B-number. Additional correlations are available by setting {\ct EVAP\_MODEL} on {\ct PART}. The available options are:
 
-\begin{itemize}
-\item [-1] uses the Ranz-Marshall correlation with no B-number.
-\item[0] uses Ranz-Marshall correlation along with an evaporating species B-number applied to both the Nusselt and Sherwood number correlations. This is the default value. This is the M0 model from Sazhin \cite{Sazhin:2006}.
-\item[1] is the default correlation with the Sherwood number correlation using a B-number based on the Lewis number computed at the film condition. This is the M1 model from Sazhin \cite{Sazhin:2006}.
-\item[2] is the previous model plus a flux limiting factor applied to the B-number. This is the M2 model from Sazhin \cite{Sazhin:2006}.
-\end{itemize}
+\begin{description}
+\item [{\ct RANZ-MARSHALL NO B-NUMBER}] uses the Ranz-Marshall correlation with no B-number.
+\item[{\ct RANZ-MARSHALL B-NUMBER}] uses Ranz-Marshall correlation along with an evaporating species B-number applied to both the Nusselt and Sherwood number correlations. This is the default value. This is the M0 model from Sazhin \cite{Sazhin:2006}.
+\item[{\ct RANZ-MARSHALL LEWIS B-NUMBER}] is the default correlation with the Sherwood number correlation using a B-number based on the Lewis number computed at the film condition. This is the M1 model from Sazhin \cite{Sazhin:2006}.
+\item[{\ct RANZ-MARSHALL FLUX-LIMITED LEWIS NO B-NUMBER}] is the previous model plus a flux limiting factor applied to the B-number. This is the M2 model from Sazhin \cite{Sazhin:2006}.
+\end{description}
 
 \subsection{Thermal Properties}
 \label{thermal_part_props}
@@ -11642,7 +11642,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
-{\ct EVAP\_MODEL}                                   & Integer      & Section~\ref{info:liquid_droplets}      &            & 1            \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}     \\ \hline
 {\ct GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
@@ -11877,6 +11876,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DISTRIBUTION}                       & Character   & Section~\ref{info:particle_size}                                      &                   & {\ct 'ROSIN...'}      \\ \hline
 {\ct DRAG\_COEFFICIENT(3)}               & Real Array  & Section~\ref{info:particle_drag}                                      &                   &                       \\ \hline
 {\ct DRAG\_LAW}                          & Character   & Section~\ref{info:particle_drag}                                      &                   & {\ct 'SPHERE'}        \\ \hline
+{\ct EVAP\_MODEL}                        & Character   & Section~\ref{info:liquid_droplets}                                    &                   & {\ct 'RANZ-MARSHALL B NUMBER'} \\ \hline
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
