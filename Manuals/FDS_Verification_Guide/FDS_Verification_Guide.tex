@@ -4151,7 +4151,7 @@ A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface
 \vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_fine} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_fine}
 \end{tabular*}
 \caption[The \textct{ht3d\_energy\_conservation} test case]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. At right is the same plot showing how the 3-D temperature field is updated over three time steps.}
 \label{fig:ht3d_energy_conservation}
@@ -4168,6 +4168,31 @@ Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for case
 \end{tabular*}
 \caption[Additional \textct{ht3d\_energy\_conservation} test cases]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. The left plot is the case where the internal grid cells are 0.25 the size of the gas phase cells, and the right plot is the case where the internal cells stretch as is done in the 1-D solver.}
 \label{fig:ht3d_energy_conservation_2}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Heat Transfer to a Steel Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
+\label{ht3d_beam_heating}
+
+A steel I-beam 1.76~m long, with flanges that are 0.22~m wide and 0.03~m thick and a web that is 0.6~m deep and 0.02~m thick, is heated within a sealed compartment that is filled with a gas that has a volume $V_{\rm g}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The steel has a density $\rho_{\rm s}=7500$~kg/m$^3$, specific heat $c_{\rm s}=0.5$~kJ/(kg$\cdot$K), and volume $V_{\rm s}=0.041536$~kg/m$^3$, and initial temperature $T_{\rm s,0}=293.15$~K. Initially, the gas and steel have internal energies given by:
+\be
+   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 191.95 \; \hbox{kJ} \quad ; \quad
+   U_{\rm s} = \rho_{\rm s} V_{\rm s} c_{\rm s} T_{\rm s,0} \approx 45661.04 \; \hbox{kJ}
+\ee
+After several minutes, the equilibrium temperature is expected to be:
+\be
+   T = \frac{U_{\rm g}+U_{\rm s}}{\rho_{\rm s} V_{\rm s} c_{\rm s} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 294.045 \; \hbox{K} \; \equiv 20.895 \; ^\circ \hbox{C}
+\ee
+where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 9.0847$ is the number of moles of gas.
+
+Figure~\ref{fig:ht3d_beam_heating_1} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_1}
+\caption[The \textct{ht3d\_beam\_heating\_1} test case]{Average surface temperature of a steel beam immersed in hot gas.}
+\label{fig:ht3d_beam_heating_1}
 \end{figure}
 
 \FloatBarrier
@@ -4252,7 +4277,7 @@ This case tests the 3-D solid phase solver for a network of thin steel plates. C
 \vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_network_28800} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_network} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_network}
 \end{tabular*}
 \caption[The \textct{ht3d\_network} test case]{(Left) A collection of thin steel plates are heated at the left and heat is conducted laterally along the plates. (Right) The plot shows the temperature at the outer right extremities after 8~h.}
 \label{fig:ht3d_network}
@@ -4524,27 +4549,27 @@ In case 1, there is a single species is given a heat of formation of 0~\si{kJ/mo
 
 At ambient temperature this makes the expected enthalpy of the wall cell 298.15~K $\times$ 0.5~\si{kJ/kg/K}-1011.575~\si{kJ/kg}=-865~\si{kJ/kg}.
 
-Case 2 repeats case 1 with a species heat of formation of 1000~\si{kJ/mol}. This makes the expected ambient enthalpy -1865~\si{kJ/kg}. 
+Case 2 repeats case 1 with a species heat of formation of 1000~\si{kJ/mol}. This makes the expected ambient enthalpy -1865~\si{kJ/kg}.
 
 Case 3 combines case 1 and case 2 into a single input. The case 1 material is changed from using a reference temperature and pyrolysis range to using the resulting A ($7.68\times10^{31}$~1/s) and E (371000~\si{J/mol}) which was taken from the case 1 output file. This case tests the virtual TGA (the case 1 material will only have the same adjustment if there is the same reference temperature) and that multiple sets of reactions are correctly handled.
 
-Case 4 takes case 1 and changes the reaction to produce equal amounts of the gas species and a second material. The second material has a specific heat of 1.5~\si{kJ/kg/K} and a reaction that produces the gas species with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 400~$^\circ$C. This case has two total reactions that include two total materials. The solution can be found by hand by first finding the adjustment for the second material (following the example for case 1) and then using that adjustment to find the value for the first material. 
+Case 4 takes case 1 and changes the reaction to produce equal amounts of the gas species and a second material. The second material has a specific heat of 1.5~\si{kJ/kg/K} and a reaction that produces the gas species with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 400~$^\circ$C. This case has two total reactions that include two total materials. The solution can be found by hand by first finding the adjustment for the second material (following the example for case 1) and then using that adjustment to find the value for the first material.
 
-Case 5 takes case 4 and adds a second reaction for the first material. This reaction creates a second copy of the first material with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 280~$^\circ$C. This can be thought of as a phase change. The second copy also produces equal amounts of the gas species and the other material expect with a heat of reaction of 500~\si{kJ/kg}. This is now an overdetermined system as there are three materials and four reactions; however, note that the parallel paths to creating the gas species have the same total enthalpy change. The first material directly pyrolyzing has a heat of reaction of 1000~\si{kJ/kg}, and the path of the phase change also has a total enthalpy change of 1000~\si{kJ/kg} split between the phase change and the pyrolysis. Therefore, even though the system is overdetermined, an exact solution is expected. This is seen in the results where the first and second material enthalpies in case 5 match those from case 4. 
+Case 5 takes case 4 and adds a second reaction for the first material. This reaction creates a second copy of the first material with a heat of reaction of 500~\si{kJ/kg} at a reference temperature of 280~$^\circ$C. This can be thought of as a phase change. The second copy also produces equal amounts of the gas species and the other material expect with a heat of reaction of 500~\si{kJ/kg}. This is now an overdetermined system as there are three materials and four reactions; however, note that the parallel paths to creating the gas species have the same total enthalpy change. The first material directly pyrolyzing has a heat of reaction of 1000~\si{kJ/kg}, and the path of the phase change also has a total enthalpy change of 1000~\si{kJ/kg} split between the phase change and the pyrolysis. Therefore, even though the system is overdetermined, an exact solution is expected. This is seen in the results where the first and second material enthalpies in case 5 match those from case 4.
 
-Case 6 takes case 5 and increases the heat of reaction post-phase change to 1000~\si{kJ/kg}. Now an exact solution is no longer expected. It can be seen that the second material has the same enthalpy but the first material and its phase-change have different ambient enthalpies. The post-phase change material enthalpy has changed by 333~\si{kJ/kg} but the reaction enthalpy changed by 500~\si{kJ/kg} so energy is not completely conserved. As a least squares solution, it is conserved as best as it can be. 
+Case 6 takes case 5 and increases the heat of reaction post-phase change to 1000~\si{kJ/kg}. Now an exact solution is no longer expected. It can be seen that the second material has the same enthalpy but the first material and its phase-change have different ambient enthalpies. The post-phase change material enthalpy has changed by 333~\si{kJ/kg} but the reaction enthalpy changed by 500~\si{kJ/kg} so energy is not completely conserved. As a least squares solution, it is conserved as best as it can be.
 
 Case 7 takes case 4 and removes the reaction from the second material. This is now an underdetermined system where there are two materials and a single reaction. Following the process for case 1, one gets that
 \be
  H_{\rm MATL1,adj} - 0.5 H_{\rm MATL2,adj} =-719.2125~{\rm kJ/kg}	
 \ee
 
-The minimum matrix solution is $H_{\rm MATL1,adj}$=-575.37~\si{kJ/kg} and  $H_{\rm MATL2,adj}$=287.68~\si{kJ/kg}. It can be shown that this is a minimal solution by taking the norm of the solution vector. This can be expressed in terms of only $H_{\rm MATL1,adj}$ as 
+The minimum matrix solution is $H_{\rm MATL1,adj}$=-575.37~\si{kJ/kg} and  $H_{\rm MATL2,adj}$=287.68~\si{kJ/kg}. It can be shown that this is a minimal solution by taking the norm of the solution vector. This can be expressed in terms of only $H_{\rm MATL1,adj}$ as
 \be
 H_{\rm MATL1,adj}^2 + (2 (H_{\rm MATL1,adj}+791.2125~{\rm kJ/kg}))^2
 \ee
 
-The minimum is where the derivative is zero or 
+The minimum is where the derivative is zero or
 \be
 10 H_{\rm MATL1,adj} + 8 \times 791.2125~{\rm kJ/kg} =-575.37~{\rm kJ/kg}.
 \ee
@@ -5751,7 +5776,7 @@ The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). No
 \section{HVAC Operation Point Single Fan (\texorpdfstring{\textct{qfan\_test}}{qfan\_test})}
 \label{qfan_test}
 
-This case tests a quadratic fan using the system curve approach to finding the fan operation point. Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One duct has a quadratic fan with a maximum volumetric flow of 0.16~\si{m^3/s} and a stall pressure of 10~Pa. Both ducts have a flow loss of 5. At each time step system curve is generated by fitting a quadratic to two points. The first point is using the current compartment pressure difference and solving for the system flow with the fan off ($\dot{V}_{\hbox{\footnotesize system 0}}$). 
+This case tests a quadratic fan using the system curve approach to finding the fan operation point. Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One duct has a quadratic fan with a maximum volumetric flow of 0.16~\si{m^3/s} and a stall pressure of 10~Pa. Both ducts have a flow loss of 5. At each time step system curve is generated by fitting a quadratic to two points. The first point is using the current compartment pressure difference and solving for the system flow with the fan off ($\dot{V}_{\hbox{\footnotesize system 0}}$).
 \be
 \dot{V}_{\hbox{\footnotesize system 0}} =A_{\hbox{\footnotesize duct}} \hbox{sign} (\Delta p) \sqrt{\frac{2 |\Delta p|}{\rho K}}
 \ee
@@ -5777,7 +5802,7 @@ The operation point for the fan at each timestep will be where the fan curve int
 
 This case tests the system curve approach for the cases a multiple fans in a duct run. Two duct runs are define. In one case two fans take parallel suction and discharge through a combined exhaust. In the second case there are two fans in series. All ducts are defined with an area of 0.04~\si{m^2} and a loss of 5. In each case two different quadratic fans are used. The first fan has a maximum volumetric flow of 0.2~\si{m^3/s} and a stall pressure of 10~Pa. The first fan has a maximum volumetric flow of 0.6~\si{m^3/s} and a stall pressure of 30~Pa. Since the domain is open, for all fans the zero fan pressure flow will be 0.0~\si{m^3/s}. With two fans in each duct run, two full fan pressure points are created, one for each fan. When the first fan is being solved for, the pressure of the second fan is set to zero and vice versa. This means in the parallel case that the system solution will mean some air exhausting through the duct branch with the fan that is off.
 
-In the parallel case the two full fan system points are (10~Pa, 0.0653~\si{m^3/s}) and (30.0~Pa, 0.113~\si{m^3/s}). In the series case the values are (10~Pa, 0.0517~\si{m^3/s}) and (30~Pa, 0.0895~\si{m^3/s}). The parallel case is higher since the effective exhaust duct area is 0.2~\si{m^2} rather than 0.1~\si{m^2}. 
+In the parallel case the two full fan system points are (10~Pa, 0.0653~\si{m^3/s}) and (30.0~Pa, 0.113~\si{m^3/s}). In the series case the values are (10~Pa, 0.0517~\si{m^3/s}) and (30~Pa, 0.0895~\si{m^3/s}). The parallel case is higher since the effective exhaust duct area is 0.2~\si{m^2} rather than 0.1~\si{m^2}.
 
 The fan pressures that intersect the system curves are 9.03~Pa and 29.0~Pa for the parallel case and 9.37~Pa and 29.4~Pa for the serial case. For the serial case this results in a system flow of 0.102~\si{m^3/s}. In the case of the parallel fans, the larger fan actually pushes flow out the smaller fans inlet. The predicted flows are -0.0258~\si{m^3/s} for the small fan, 0.0999~\si{m^3/s} for the large fan, and 0.0741~\si{m^3/s} out the exhaust duct.
 
