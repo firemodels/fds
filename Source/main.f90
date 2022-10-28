@@ -32,11 +32,12 @@ USE TURBULENCE, ONLY: NS_ANALYTICAL_SOLUTION,INIT_TURB_ARRAYS,COMPRESSION_WAVE,&
                       TWOD_VORTEX_CERFACS,TWOD_VORTEX_UMD,TWOD_SOBOROT_UMD, &
                       SYNTHETIC_TURBULENCE,SYNTHETIC_EDDY_SETUP,SANDIA_DAT
 USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3,SAAD_MMS_1
-USE CC_SCALARS_IBM,   ONLY: CCIBM_SET_DATA,CCIBM_END_STEP,CCREGION_DENSITY,CCIBM_TARGET_VELOCITY, &
+USE CC_SCALARS_IBM,   ONLY: CCIBM_SET_DATA,CCIBM_END_STEP,CCREGION_DENSITY, &
                             CHECK_SPEC_TRANSPORT_CONSERVE,MASS_CONSERVE_INIT,CCIBM_RHO0W_INTERP,  &
                             CCCOMPUTE_RADIATION,CCIBM_NO_FLUX,CCIBM_COMPUTE_VELOCITY_ERROR,       &
                             FINISH_CCIBM,INIT_CUTCELL_DATA,LINEARFIELDS_INTERP_TEST,              &
-                            MESH_CC_EXCHANGE,ROTATED_CUBE_ANN_SOLN,PARABOLIC_PROFILE_TEST
+                            MESH_CC_EXCHANGE,ROTATED_CUBE_ANN_SOLN,PARABOLIC_PROFILE_TEST,        &
+                            CCREGION_RESTORE_UVW_UNLINKED
 USE OPENMP_FDS
 USE MPI_F08
 USE SCRC, ONLY: SCARC_SETUP, SCARC_REASSIGN, SCARC_SOLVER, SCARC_NO_FLUX
@@ -593,6 +594,7 @@ MAIN_LOOP: DO
       ! Predict species mass fractions at the next time step.
 
       COMPUTE_DENSITY_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF(CC_IBM .AND. .NOT.FIRST_PASS) CALL CCREGION_RESTORE_UVW_UNLINKED(NM,ASSIGN_UNLINKED_VEL=.TRUE.)
          CALL DENSITY(T,DT,NM)
          IF (LEVEL_SET_MODE>0) CALL LEVEL_SET_FIRESPREAD(T,DT,NM)
       ENDDO COMPUTE_DENSITY_LOOP
@@ -710,13 +712,13 @@ MAIN_LOOP: DO
 
    IF (CFL_FILE) CALL WRITE_CFL_FILE
 
+   ! Compute linked velocity arrays. Flux average final velocity to cutfaces.
+
+   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
+
    ! Exchange velocity and pressures at interpolated boundaries
 
    CALL MESH_EXCHANGE(3)
-
-   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-
-   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -871,6 +873,10 @@ MAIN_LOOP: DO
       IF (DIAGNOSTICS .OR. STORE_CARTESIAN_DIVERGENCE) CALL CHECK_DIVERGENCE(NM)
    ENDDO CORRECT_VELOCITY_LOOP
 
+   ! Compute linked velocity arrays. Flux average final velocity to cutfaces.
+
+   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
+
    ! Exchange velocity, pressure, particles at interpolated boundaries
 
    CALL MESH_EXCHANGE(6)
@@ -883,10 +889,6 @@ MAIN_LOOP: DO
          IF (ICYC>1) EXIT
       ENDDO
    ENDIF
-
-   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-
-   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -1379,10 +1381,6 @@ ELSE
    ITERATE_BAROCLINIC_TERM = .FALSE.
 ENDIF
 
-IF(CC_IBM .AND. CC_UNSTRUCTURED_PROJECTION) THEN
-   IF(PREDICTOR) CALL MESH_EXCHANGE(6) ! Exchange linked face averaged velocities to be used in UN_NEW_OTHER estimation.
-   IF(CORRECTOR) CALL MESH_EXCHANGE(3)
-ENDIF
 
 PRESSURE_ITERATION_LOOP: DO
 
@@ -1392,14 +1390,10 @@ PRESSURE_ITERATION_LOOP: DO
    ! The following loops and exchange always get executed the first pass through the PRESSURE_ITERATION_LOOP.
    ! If we need to iterate the baroclinic torque term, the loop is executed each time.
 
-   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1 .OR. CC_IBM) THEN
+   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T,NM)
-         IF (CC_IBM) THEN
-            ! Wall model to define target velocities in gas cut faces.
-            IF(PRESSURE_ITERATIONS<=1 .AND. .NOT.CC_STRESS_METHOD) CALL CCIBM_TARGET_VELOCITY(DT,NM)
-            CALL CCIBM_NO_FLUX(DT,NM,.TRUE.) ! IBM Force, we do it here to get velocity flux matched.
-         ENDIF
+         IF (CC_IBM) CALL CCIBM_NO_FLUX(DT,NM,.TRUE.)
       ENDDO
       CALL MESH_EXCHANGE(5)  ! Exchange FVX, FVY, FVZ
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX

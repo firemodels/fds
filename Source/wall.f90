@@ -1561,6 +1561,8 @@ OBST_LOOP_2: DO N=1,N_OBST
                         ITER = ITER + 1
                         C_S = 0._EB
                         H_S = 0._EB
+                        CP1 = 0._EB
+                        CP2 = 0._EB
                         ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
                         T_S: DO NN=1,MS%N_MATL
                            IF (OB2%RHO(II2,JJ2,KK2,NN)<=0._EB) CYCLE T_S
@@ -2405,8 +2407,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
       ! Calculate smoothed incident heat flux if cone scaling is applied
-      IF (SF%CONE_HEAT_FLUX > 0._EB) THEN
-         TSI = MIN(T-T_BEGIN+DT, SF%CONE_FLUX_SMOOTHING_WINDOW)
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB) THEN
+         TSI = MIN(T-T_BEGIN+DT, SF%REFERENCE_HEAT_FLUX_TIME_INTERVAL+DT)
          ONE_D%Q_IN_SMOOTH = (ONE_D%Q_IN_SMOOTH *(TSI-DT) + DT*(ONE_D%Q_CON_F+ONE_D%Q_RAD_IN))/TSI
       ENDIF
 
@@ -2439,14 +2441,14 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
-            IF (SF%CONE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
+            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
                IF (PREDICTOR) THEN
                   RP => RAMPS(SF%RAMP_INDEX(N))
                   
                   IF (SF%EMISSIVITY > 0._EB) THEN
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%CONE_HEAT_FLUX * SF%EMISSIVITY)
+                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
                   ELSE
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%CONE_HEAT_FLUX)
+                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
                   ENDIF
                   CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
                   ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
