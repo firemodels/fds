@@ -102,8 +102,8 @@ set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Terminal Velocity Error (m/s)','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
-    '$\mathcal{O}(\delta t^2)$', 'Location', 'East','Interpreter', 'LaTeX','FontSize', Key_Font_Size);
+h = legend(H, {'FDS', '$\mathcal{O}(\delta t)$', ...
+    '$\mathcal{O}(\delta t^2)$'}, 'Location', 'East','Interpreter', 'LaTeX','FontSize', Key_Font_Size);
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
@@ -137,8 +137,8 @@ set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Position Error (m)','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
-    '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast','Interpreter','LaTeX','FontSize', Key_Font_Size);
+h = legend(H, {'FDS', '$\mathcal{O}(\delta t)$',...
+    '$\mathcal{O}(\delta t^2)$'}, 'Location', 'Southeast','Interpreter','LaTeX','FontSize', Key_Font_Size);
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);

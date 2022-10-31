@@ -120,6 +120,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
    INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
    INTEGER :: NEW_PARTICLE_INCREMENT=50   !< Number of new storage slots to allocate when NPLDIM is exceeded
+   INTEGER :: EVAP_MODEL                  !< Evaporation correlation
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
@@ -142,6 +143,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
+   LOGICAL :: DEBUG=.FALSE.                          !< Flag indicating if known quantities are output for smokeviewe debugging
 
    TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
@@ -156,12 +158,6 @@ TYPE MATL_COMP_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
-
-!> \brief Gas mass concentration in solid for 1-D mass transfer
-
-TYPE SPEC_COMP_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_ZZ !< (0:NWP+1) Gas concentratoin (kg/m3)
-END TYPE SPEC_COMP_TYPE
 
 !> \brief Radiation intensity at a boundary for a given wavelength band
 
@@ -202,7 +198,7 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=27
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=28
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
@@ -226,7 +222,6 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_ENTHALPY       !< Accumulated enthalpy of particles waiting to be injected (kJ/m2)
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
-   TYPE(SPEC_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: SPEC_COMP !< (1:SF\%N_SPEC) Gas component
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
@@ -257,11 +252,12 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB) :: Q_DOT_O2_PP=0._EB     !< Heat release rate per unit area (W/m2) due to oxygen consumption
    REAL(EB) :: Q_CONDENSE=0._EB      !< Heat release rate per unit area (W/m2) due to gas condensation
    REAL(EB) :: BURN_DURATION=0._EB   !< Duration of a specified fire (s)
-   REAL(EB) :: T_SCALE=0._EB         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
-   REAL(EB) :: Q_SCALE=0._EB         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
+   REAL(EB) :: T_SCALE=0._EB         !< Scaled time for a surface with REFERENCE_HEAT_FLUX (s)
+   REAL(EB) :: Q_SCALE=0._EB         !< Scaled integrated heat release for a surface with REFERENCE_HEAT_FLUX
    REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
+   REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident heat flux for scaling (W/m2)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
@@ -579,7 +575,9 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH) :: PRODUCTS    !< Name of reaction product (lumped) species
    CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
-   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
+   CHARACTER(LABEL_LENGTH) :: RAMP_CFT    !< Name of ramp for critical flame temperature
+   CHARACTER(LABEL_LENGTH) :: SPEC_ID_CFT !< Name of species for CFT ramp
+    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
@@ -630,6 +628,8 @@ TYPE REACTION_TYPE
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
+   INTEGER :: RAMP_CFT_INDEX=0              !< Index of critical flame temperature ramp
+   INTEGER :: RAMP_CFT_SPEC_INDEX=0         !< Index of critical flame temperature ramp species
    INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction
    LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
    LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
@@ -649,50 +649,50 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
-   REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
-   CHARACTER(LABEL_LENGTH) :: RAMP_H_R(MAX_REACTIONS)   !< Name of RAMP for Heat of Reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid
    CHARACTER(LABEL_LENGTH) :: RAMP_C_S                  !< Name of RAMP for specific heat of solid
    INTEGER :: N_REACTIONS                               !< Number of solid phase reactions
    INTEGER :: PROP_INDEX=-1
    INTEGER :: I_RAMP_K_S=-1                             !< Index of conductivity RAMP
    INTEGER :: I_RAMP_C_S=-1                             !< Index of specific heat RAMP
-   INTEGER, DIMENSION(MAX_REACTIONS) :: N_RESIDUE       !< Number of residue materials
-   INTEGER, DIMENSION(MAX_REACTIONS) :: I_RAMP_H_R=-1   !< Index of the heat of reaction RAMP
-   INTEGER, DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_INDEX !< Index of the residue
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
    INTEGER, DIMENSION(3) :: RGB                         !< Color indices for material
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_REF        !< Reference temperature used for calculating kinetic constants (K)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: RATE_REF       !< Reference rate used for calculating kinetic constants (1/s)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: MAX_REACTION_RATE !< Maximum reaction rate (kg/m3/s)
-   REAL(EB), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: NU_RESIDUE=0._EB !< Mass stoichiometric coefficient of residue
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: A              !< Pre-exponential constant (1/s)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: E              !< Activation energy (J/kmol)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_S            !< Reaction order
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_T            !< Optional exponent for temperature in reaction expression
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: N_O2           !< Optional exponent for oxygen term in reaction expression
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: GAS_DIFFUSION_DEPTH !< Length scale used in char oxidation calculation (m)
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: NU_O2_CHAR     !< Mass stoichiometric coefficient for oxygen in char reaaction
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: BETA_CHAR      !< Constant used in char oxidation model
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: HEATING_RATE   !< Heating rate (K/s) used in calculation of kinetic constants
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RATE_REF      !< Reference rate used for calculating kinetic constants (1/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_REACTION_RATE !< Maximum reaction rate (kg/m3/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_RESIDUE  !< Mass stoichiometric coefficient of residue
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: A             !< Pre-exponential constant (1/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: E             !< Activation energy (J/kmol)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S           !< Reaction order
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_T           !< Optional exponent for temperature in reaction expression
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_O2          !< Optional exponent for oxygen term in reaction expression
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: GAS_DIFFUSION_DEPTH !< Length scale used in char oxidation calculation (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_O2_CHAR    !< Mass stoichiometric coefficient for oxygen in char reaaction
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BETA_CHAR     !< Constant used in char oxidation model
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEATING_RATE  !< Heating rate (K/s) used in calculation of kinetic constants
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
    REAL(EB), DIMENSION(MAX_LPC,MAX_REACTIONS) :: NU_PART !< Mass stoichiometric coefficient that dictates fraction of mass to parts
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS       !< Mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC       !< Mass stoichiometric coefficient for particles
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R          !< Heat of Reaction (J/kg)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R         !< Heat of Reaction (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIFFUSIVITY_GAS
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S           !< Material conductivity as function of temperaure (W/m/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S           !< Material specific heat as function of temperaure (J/kg/K)
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
-   REAL(EB), DIMENSION(MAX_SPECIES) :: DIFFUSIVITY_SPEC
+   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: DIFFUSIVITY_SPEC
    LOGICAL :: ALLOW_SHRINKING
    LOGICAL :: ALLOW_SWELLING
    LOGICAL :: CONST_C=.TRUE.
+   LOGICAL :: ADJUST_H = .TRUE.
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: SPEC_ID
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LPC,MAX_REACTIONS) :: PART_ID
@@ -760,9 +760,14 @@ TYPE SURFACE_TYPE
    REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
    REAL(EB) :: DELTA_TMP_MAX=10._EB
    REAL(EB) :: BURN_DURATION=1.E6_EB
-   REAL(EB) :: CONE_HEAT_FLUX=-1._EB
+   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB
+   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=10._EB
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
+   REAL(EB) :: NUSSELT_C0=-1._EB
+   REAL(EB) :: NUSSELT_C1=-1._EB
+   REAL(EB) :: NUSSELT_C2=-1._EB
+   REAL(EB) :: NUSSELT_M=-1._EB
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -796,7 +801,7 @@ TYPE SURFACE_TYPE
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
-              HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
+              HT3D=.FALSE., SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
@@ -851,17 +856,21 @@ TYPE OMESH_TYPE
    TYPE (EXPOSED_WALL_TYPE), ALLOCATABLE, DIMENSION(:) :: EXPOSED_WALL
 
    ! CC_IBM data exchange arrays:
-   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0, NFEP_R_G=0
+   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
+              NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0, NFEP_R_G=0
    REAL(EB), ALLOCATABLE, DIMENSION(:) ::                &
-         REAL_SEND_PKG11,REAL_SEND_PKG12,REAL_SEND_PKG13,&
-         REAL_RECV_PKG11,REAL_RECV_PKG12,REAL_RECV_PKG13
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R
+         REAL_SEND_PKG11,REAL_SEND_PKG112,REAL_SEND_PKG12,REAL_SEND_PKG13,&
+         REAL_RECV_PKG11,REAL_RECV_PKG112,REAL_RECV_PKG12,REAL_RECV_PKG13
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R,&
+                                         ICF_UFFB_CF_S, ICF_UFFB_CF_R
    INTEGER, ALLOCATABLE, DIMENSION(:) :: UNKZ_CT_S, UNKZ_CC_S, UNKZ_CT_R, UNKZ_CC_R
 
    ! Face variables data (velocities):
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_FC_R,JJO_FC_R,KKO_FC_R,AXS_FC_R,IIO_FC_S,JJO_FC_S,KKO_FC_S,AXS_FC_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_CC_R,JJO_CC_R,KKO_CC_R,IIO_CC_S,JJO_CC_S,KKO_CC_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_LF_R,JJO_LF_R,KKO_LF_R,AXS_LF_R,IIO_LF_S,JJO_LF_S,KKO_LF_S,AXS_LF_S
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IFEP_R_1, IFEP_R_2, IFEP_R_3, IFEP_R_4, IFEP_R_5
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
 
    ! Level Set
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS
@@ -1071,9 +1080,11 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, RHO_D
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  TMP_FACE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO_D_DZDN, H_RHO_D_DZDN
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VELINT
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VEL_SAVE, VEL_LNK
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL_OMESH, VELS_OMESH, VEL_LNK_OMESH, FN_OMESH
+                                                       ! Velocities in cut-face of MESHES(NOM).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
-   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
+   REAL(EB) :: FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  EDGE_LIST ! [CE_TYPE IEC JEC] or [RG_TYPE SIDE LOHI_AXIS]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K  ]
 
@@ -1097,8 +1108,8 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: RHOPVN
-   INTEGER :: NOMICF(2)=0  ! [NOM icf]
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX, UNKF
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
 END TYPE IBM_CUTFACE_TYPE
 
 
@@ -1181,8 +1192,8 @@ TYPE IBM_CUTCELL_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
-   INTEGER :: N_NOMICC=0
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: NOMICC
+   INTEGER                                     :: N_NOMICC=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)       :: NOMICC
    REAL(EB):: DIVVOL_BC=0._EB
 END TYPE IBM_CUTCELL_TYPE
 
@@ -1203,6 +1214,7 @@ TYPE IBM_REGFACEZ_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
@@ -1218,6 +1230,7 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
 END TYPE IBM_RCFACE_LST_TYPE
 
 TYPE CSVF_TYPE

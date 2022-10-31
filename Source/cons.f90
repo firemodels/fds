@@ -32,6 +32,7 @@ INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< Flag for COMBUSTION_ODE_SOLV
 
 INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
 INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
+INTEGER, PARAMETER :: EXTINCTION_3=3             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 3)
 
 INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL: No turbulence model (DNS)
 INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constant Smagorinsky turbulence model
@@ -369,7 +370,7 @@ REAL(EB) :: T_END                                           !< Ending time of si
 REAL(EB) :: T_END_GEOM
 REAL(EB) :: TIME_SHRINK_FACTOR                              !< Factor to reduce specific heat and total run time
 REAL(EB) :: RELAXATION_FACTOR=1._EB                         !< Factor used to relax normal velocity nudging at immersed boundaries
-REAL(EB) :: MPI_TIMEOUT=300._EB                             !< Time to wait for MPI messages to be received (s)
+REAL(EB) :: MPI_TIMEOUT=30._EB                              !< Time to wait for MPI messages to be received (s)
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 
@@ -417,6 +418,8 @@ INTEGER :: CFT_REACTION_INDEX=1                                     !< Reaction 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
 LOGICAL :: PILOT_FUEL_MODEL=.FALSE.                                 !< Allow pilot fuel with low AIT
+LOGICAL :: SUBGRID_IGNITION_MODEL=.FALSE.                           !< Add TMP_SGS when checking AIT
+LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.TRUE.               !< Report adiabatic flame temperature per REAC in LU_OUTPUT
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
@@ -480,7 +483,7 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 
 LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
 LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
-LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
+LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.FALSE.                   !< Flag for stopping pressure iterations if solution seems stuck
 LOGICAL :: INSEPARABLE_POISSON=.FALSE.                           !< Flag for solving the inseparable Poisson equation
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
@@ -599,8 +602,12 @@ INTEGER :: N_VENT_TOTAL=0
 ! Sprinkler Variables
 
 REAL(EB) :: C_DIMARZO=6.E6_EB
-INTEGER :: N_ACTUATED_SPRINKLERS=0,EVAP_MODEL=0
+INTEGER :: N_ACTUATED_SPRINKLERS=0
 INTEGER, PARAMETER :: NDC=1000,NDC2=100
+INTEGER, PARAMETER :: RM_NO_B        = -1 !< Ranz-Marshall no B number
+INTEGER, PARAMETER :: RM_B           =  0 !< Ranz-Marshall with B number
+INTEGER, PARAMETER :: RM_LEWIS_B     =  1 !< Ranz-Marshall with Lewis number based B Number
+INTEGER, PARAMETER :: RM_FL_LEWIS_B  =  2 !< Ranz-Marshall with flux limited, Lewis number based B Number
 LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
 
 ! Particles

@@ -1,0 +1,19 @@
+
+Nozzle B Info
+
+&SPEC ID='WATER VAPOR' /
+
+&PART ID = 'WATERDROP',
+      SPEC_ID='WATER VAPOR'
+      DIAMETER = 284.5,
+      GAMMA_D = 2.4,
+      QUANTITIES = 'PARTICLE DIAMETER' /
+
+&PROP ID = 'DV',
+      PART_ID = 'WATERDROP',
+      FLOW_RATE = 4.9,
+      PARTICLE_VELOCITY = 13.8,
+      SPRAY_ANGLE = 2.3,75.3,
+      PARTICLES_PER_SECOND = 5000,
+      OFFSET = 0.05 /
+

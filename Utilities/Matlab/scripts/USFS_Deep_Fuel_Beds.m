@@ -48,10 +48,10 @@ for i = 1:length(BURN_NO)
     dry_fuel_mass = (1/(1+FMC(i)*0.01))*fuel_load; % (kg)
     total_fuel_energy = dry_fuel_mass*17425.0; % (kJ) 17425 = heat of combustion
 
-    ignition_hrr = trapz([0,10,20],[0,(500*.072),0]); % (kJ) hrr ramp
-    total_fds_hrr = trapz (time_col,hrr_col); % (kJ)
+    ignition_energy = trapz([0,10,20],[500*0.3*1.6,500*0.3*1.6,0]); % (kJ) hrr ramp
+    total_fds_energy = trapz (time_col,hrr_col); % (kJ)
 
-    BURN_PCT_FDS(i) = (total_fds_hrr-ignition_hrr)/total_fuel_energy * 100.;
+    BURN_PCT_FDS(i) = (total_fds_energy-ignition_energy)/total_fuel_energy * 100.;
 end
 
 figure

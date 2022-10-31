@@ -1522,7 +1522,7 @@ IF (LPC%SOLID_PARTICLE) THEN
 
       CASE DEFAULT
 
-         IF (.NOT.LPC%MONODISPERSE) THEN
+         IF (.NOT.LPC%MONODISPERSE .AND. LPC%SURF_INDEX/=TGA_SURF_INDEX) THEN
             CALL PARTICLE_SIZE_WEIGHT(RADIUS,LP%PWT)
             SCALE_FACTOR = RADIUS/LP_SF%THICKNESS
             LP_ONE_D%X(:) = LP_ONE_D%X(:)*SCALE_FACTOR
@@ -3249,12 +3249,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         MCBAR = -1._EB
                         ARRAY_CASE = 2
                      ENDIF
+                  ELSEIF (SF%THERMAL_BC_INDEX==CONVECTIVE_FLUX_BC .OR. SF%THERMAL_BC_INDEX==NET_FLUX_BC) THEN
+                     ARRAY_CASE = 1
                   ELSE
                      MCBAR = -1._EB
                      ARRAY_CASE = 2
                   ENDIF
 
-                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB) THEN
+                  IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB .AND. ARRAY_CASE > 1) THEN
                      LENGTH = 2._EB*R_DROP
                      NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
@@ -3283,20 +3285,23 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
-                     H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
-
+                     IF (ARRAY_CASE==1) THEN
+                        H_WALL = 0._EB
+                     ELSE
+                        H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
+                     ENDIF
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_FILM/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
                      H_MASS = 0._EB
                   ELSE
                      !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
-                     SELECT CASE(EVAP_MODEL)
-                        CASE(-1) ! Ranz Marshall
+                     SELECT CASE(LPC%EVAP_MODEL)
+                        CASE(RM_NO_B)
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH
-                        CASE(0:1) !Sazhin M0 - M1, see next code block for Refs
+                        CASE(RM_B,RM_LEWIS_B) !Sazhin M0 - M1
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_ONE_D%B_NUMBER)/LP_ONE_D%B_NUMBER
-                        CASE(2) !Sazhin M2, see next code block for Refs
+                        CASE(RM_FL_LEWIS_B) !Sazhin M2
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_ONE_D%B_NUMBER)/ &
                                      (LP_ONE_D%B_NUMBER*F_B(LP_ONE_D%B_NUMBER))
                      END SELECT
@@ -3312,13 +3317,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   LENGTH = 2._EB*R_DROP
                   RE_L = RHO_FILM*VEL*LENGTH/MU_FILM
                   CALL DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,&
-                                                 LP_ONE_D%B_NUMBER,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
+                                                 LP_ONE_D%B_NUMBER,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX,&
+                                                 LPC%EVAP_MODEL)
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
                IF (LPC%HEAT_TRANSFER_COEFFICIENT_GAS>=0._EB) H_HEAT=LPC%HEAT_TRANSFER_COEFFICIENT_GAS
-               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_HEAT=LPC%MASS_TRANSFER_COEFFICIENT
+               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_MASS=LPC%MASS_TRANSFER_COEFFICIENT
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))

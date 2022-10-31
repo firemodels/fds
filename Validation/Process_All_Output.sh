@@ -67,6 +67,7 @@ PROCESS Harrison_Spill_Plumes
 PROCESS Heated_Channel_Flow
 PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
+PROCESS JH_FDS
 PROCESS Juelich_SETCOM
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
@@ -92,6 +93,7 @@ PROCESS NIST_Pool_Fires
 PROCESS NIST_RSE_1994
 PROCESS NIST_RSE_2007
 PROCESS NIST_Smoke_Alarms
+PROCESS NIST_Structure_Separation
 PROCESS NIST_Vent_Study
 PROCESS NRCC_Facade
 PROCESS NRCC_Smoke_Tower

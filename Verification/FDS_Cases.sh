@@ -87,19 +87,6 @@ $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
 
-$QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80a_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N10nah_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20nah_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40nah_theta0_ibm.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80nah_theta0_ibm.fds
-
 $QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0_stm.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0_stm.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0_stm.fds
@@ -119,40 +106,25 @@ $QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
 $QFDS -d Complex_Geometry geom_bad_open_surface.fds
 $QFDS -d Complex_Geometry geom_self_intersection.fds
 
-$QFDS -d Complex_Geometry rotated_cube_0deg_32_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_32_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_32_obs.fds
-$QFDS -d Complex_Geometry rotated_cube_0deg_64_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_64_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_64_obs.fds
-$QFDS -d Complex_Geometry rotated_cube_0deg_128_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_128_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_128_obs.fds
-$QFDS -d Complex_Geometry rotated_cube_0deg_256_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_obs.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_ibm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_stm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
-$QFDS -d Complex_Geometry rotated_cube_27deg_32_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_27deg_64_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_64_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_27deg_128_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_128_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_27deg_256_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_stm.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_ibm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_45deg_32_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_45deg_64_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_64_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_45deg_128_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_128_stm.fds
-$QFDS -d Complex_Geometry rotated_cube_45deg_256_ibm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_stm.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_ibm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_stm.fds
 
 $QFDS -d Complex_Geometry zero_thick_roof.fds
@@ -315,6 +287,8 @@ $QFDS -d HVAC ashrae7_quadratic.fds
 $QFDS -d HVAC ashrae7_table.fds
 $QFDS -d HVAC door_crack.fds
 $QFDS -d HVAC fan_test.fds
+$QFDS -d HVAC qfan_test.fds
+$QFDS -d HVAC qfan_multi.fds
 $QFDS -d HVAC HVAC_aircoil.fds
 $QFDS -d HVAC HVAC_damper.fds
 $QFDS -d HVAC HVAC_energy_pressure.fds
@@ -388,6 +362,7 @@ $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_uscarc.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
+$QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
@@ -482,6 +457,13 @@ $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis water_pool.fds
+$QFDS -d Pyrolysis matl_e_cons_1.fds
+$QFDS -d Pyrolysis matl_e_cons_2.fds
+$QFDS -d Pyrolysis matl_e_cons_3.fds
+$QFDS -d Pyrolysis matl_e_cons_4.fds
+$QFDS -d Pyrolysis matl_e_cons_5.fds
+$QFDS -d Pyrolysis matl_e_cons_6.fds
+$QFDS -d Pyrolysis matl_e_cons_7.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds

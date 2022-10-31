@@ -1,8 +1,8 @@
-&HEAD CHID='box_burn_away_2D', TITLE='Test BURN_AWAY feature' / 
+&HEAD CHID='box_burn_away_2D', TITLE='Test BURN_AWAY feature' /
 
 The FOAM box is evaporated away by the high thermal radiation
 from HOT surfaces. The mass of the box is 0.4^3 m3 * 20 kg/m3 = 1.28 kg.
-This should be compared to the final value of fuel density volume integral, 
+This should be compared to the final value of fuel density volume integral,
 computed by the first DEVC.
 
 2D version of box_burn_away
@@ -38,7 +38,7 @@ The gas species is mixture fraction fuel.
 
 &OBST XB=0.30,0.70,0.0,1.0,0.30,0.70, SURF_ID='FOAM SLAB', BULK_DENSITY=20. /
 
-&SURF ID = 'HOT' TMP_FRONT = 1100., DEFAULT = .TRUE./
+&SURF ID = 'HOT' TMP_FRONT = 1500., DEFAULT = .TRUE./
 
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='BURNING RATE' /
