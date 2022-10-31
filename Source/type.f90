@@ -165,42 +165,30 @@ TYPE BAND_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ILW !< (1:NRA) Radiation intensity (W/m2/sr)
 END TYPE BAND_TYPE
 
-!> \brief Coordinate variables associated with a WALL or CFACE boundary cell
-!> \details If you change the number of scalar variables in BOUNDARY_COORD_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=6     !< Number of scalar reals in BOUNDARY_COORD
-INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_INTEGERS=7  !< Number of scalar integers in BOUNDARY_COORD
-INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_LOGICALS=0  !< Number of scalar logicals in BOUNDARY_COORD
-INTEGER :: N_BOUNDARY_COORD_STORAGE_REALS                 !< Total number of reals in BOUNDARY_COORD
-INTEGER :: N_BOUNDARY_COORD_STORAGE_INTEGERS              !< Total number of integers in BOUNDARY_COORD
-INTEGER :: N_BOUNDARY_COORD_STORAGE_LOGICALS              !< Total number of logicals in BOUNDARY_COORD
+!> \brief Coordinate variables associated with a WALL, CFACE, or PARTICLE
 
 TYPE BOUNDARY_COORD_TYPE
 
-   INTEGER :: II             !< Ghost cell \f$ x \f$ index
-   INTEGER :: JJ             !< Ghost cell \f$ y \f$ index
-   INTEGER :: KK             !< Ghost cell \f$ z \f$ index
-   INTEGER :: IIG            !< Gas cell \f$ x \f$ index
-   INTEGER :: JJG            !< Gas cell \f$ y \f$ index
-   INTEGER :: KKG            !< Gas cell \f$ z \f$ index
+   INTEGER :: II             !< Ghost cell x index
+   INTEGER :: JJ             !< Ghost cell y index
+   INTEGER :: KK             !< Ghost cell z index
+   INTEGER :: IIG            !< Gas cell x index
+   INTEGER :: JJG            !< Gas cell y index
+   INTEGER :: KKG            !< Gas cell z index
    INTEGER :: IOR=0          !< Index of orientation of the WALL cell
 
-   REAL(EB) :: X             !< \f$ x \f$ coordinate of boundary cell center
-   REAL(EB) :: Y             !< \f$ y \f$ coordinate of boundary cell center
-   REAL(EB) :: Z             !< \f$ z \f$ coordinate of boundary cell center
-   REAL(EB) :: DX=0._EB      !< Width of cell (m)
-   REAL(EB) :: DY=0._EB      !< Width of cell (m)
-   REAL(EB) :: DZ=0._EB      !< Width of cell (m)
+   REAL(EB) :: X             !< x coordinate of boundary cell center
+   REAL(EB) :: Y             !< y coordinate of boundary cell center
+   REAL(EB) :: Z             !< z coordinate of boundary cell center
+   REAL(EB) :: X1            !< Lower x extent of boundary cell (m)
+   REAL(EB) :: X2            !< Upper x extent of boundary cell (m)
+   REAL(EB) :: Y1            !< Lower y extent of boundary cell (m)
+   REAL(EB) :: Y2            !< Upper y extent of boundary cell (m)
+   REAL(EB) :: Z1            !< Lower z extent of boundary cell (m)
+   REAL(EB) :: Z2            !< Upper z extent of boundary cell (m)
 
 END TYPE BOUNDARY_COORD_TYPE
 
-
-!> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
-!> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=28
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
 TYPE BOUNDARY_ONE_D_TYPE
 
@@ -229,6 +217,8 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER :: NODE_INDEX=0     !< HVAC node index associated with surface
    INTEGER :: N_SUBSTEPS=1     !< Number of substeps in the 1-D conduction/reaction update
+   INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
+   INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
 
    REAL(EB) :: AREA=0._EB            !< Face area (m2)
    REAL(EB) :: HEAT_TRANS_COEF=0._EB !< Heat transfer coefficient (W/m2/K)
@@ -239,6 +229,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB) :: AREA_ADJUST=1._EB     !< Ratio of actual surface area to grid cell face area
    REAL(EB) :: T_IGN=0._EB           !< Ignition time (s)
    REAL(EB) :: TMP_F                 !< Surface temperature (K)
+   REAL(EB) :: TMP_G                 !< Near-surface gas temperature (K)
    REAL(EB) :: TMP_F_OLD             !< Holding value for surface temperature (K)
    REAL(EB) :: TMP_B                 !< Back surface temperature (K)
    REAL(EB) :: U_NORMAL=0._EB        !< Normal component of velocity (m/s) at surface, start of time step
@@ -265,11 +256,6 @@ END TYPE BOUNDARY_ONE_D_TYPE
 
 
 !> \brief Variables associated with a WALL boundary cell that allows 3D heat transfer
-!> \details If you change the number of scalar variables in BOUNDARY_THR_D_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_THR_D_SCALAR_REALS=0
-INTEGER, PARAMETER :: N_THR_D_SCALAR_INTEGERS=0
-INTEGER, PARAMETER :: N_THR_D_SCALAR_LOGICALS=0
 
 TYPE BOUNDARY_THR_D_TYPE
 
@@ -279,22 +265,14 @@ END TYPE BOUNDARY_THR_D_TYPE
 
 
 TYPE INTERNAL_NODE_TYPE
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH,&
+                                         ALTERNATE_WALL_TYPE,ALTERNATE_WALL_IOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT
-   INTEGER :: ALTERNATE_WALL_VALUES=0
+   INTEGER :: ALTERNATE_WALL_COUNT=0
 END TYPE INTERNAL_NODE_TYPE
 
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
-!> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=7
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=1
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
-INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
-                          BOUNDARY_PROPS_INTEGERS_ARRAY_SIZE=0, &
-                          BOUNDARY_PROPS_LOGICALS_ARRAY_SIZE=0
-INTEGER :: N_BOUNDARY_PROPS_STORAGE_REALS,N_BOUNDARY_PROPS_STORAGE_INTEGERS,N_BOUNDARY_PROPS_STORAGE_LOGICALS
 
 TYPE BOUNDARY_PROPS_TYPE
 
@@ -317,15 +295,6 @@ END TYPE BOUNDARY_PROPS_TYPE
 
 
 !> \brief Angular radiation intensities associated with a WALL, CFACE, or LAGRANGIAN_PARTICLE
-!> \details If you change the number of scalar variables in BOUNDARY_RADIA_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_REALS=0
-INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_INTEGERS=0
-INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_LOGICALS=0
-INTEGER, DIMENSION(10) :: BOUNDARY_RADIA_REALS_ARRAY_SIZE=0, &
-                          BOUNDARY_RADIA_INTEGERS_ARRAY_SIZE=0, &
-                          BOUNDARY_RADIA_LOGICALS_ARRAY_SIZE=0
-INTEGER :: N_BOUNDARY_RADIA_STORAGE_REALS,N_BOUNDARY_RADIA_STORAGE_INTEGERS,N_BOUNDARY_RADIA_STORAGE_LOGICALS
 
 TYPE BOUNDARY_RADIA_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: IL              !< (1:NSB) Radiance (W/m2/sr); output only
@@ -334,11 +303,6 @@ END TYPE BOUNDARY_RADIA_TYPE
 
 
 !> \brief Variables associated with a single Lagrangian particle
-!> \details If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=14
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_INTEGERS=14
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_LOGICALS=4
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
@@ -381,11 +345,6 @@ END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 
 !> \brief Variables associated with a WALL cell
-!> \details If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4
-INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=18
-INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=3
 
 TYPE WALL_TYPE
 
@@ -402,7 +361,8 @@ TYPE WALL_TYPE
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
@@ -413,8 +373,6 @@ TYPE WALL_TYPE
    INTEGER :: JD21_INDEX=0
    INTEGER :: JD22_INDEX=0
    INTEGER :: CUT_FACE_INDEX=0
-
-   LOGICAL, DIMENSION(3) :: THIN=.FALSE.  !< Thin wall cell for 3D heat transfer
 
 END TYPE WALL_TYPE
 
@@ -440,12 +398,23 @@ TYPE EXTERNAL_WALL_TYPE
 END TYPE EXTERNAL_WALL_TYPE
 
 
-!> \brief Derived type used to hold back side wall properties
+!> \brief Variables associated with the side edge of a thin obstruction
 
-TYPE EXPOSED_WALL_TYPE
-   REAL(EB) :: Q_RAD_IN  !< Incoming radiation heat flux (W/m2)
-   REAL(EB) :: TMP_GAS   !< Gas temperature (K)
-END TYPE EXPOSED_WALL_TYPE
+TYPE THIN_WALL_TYPE
+
+   INTEGER :: THIN_WALL_INDEX=0       !< Index of itself -- used to determine if the WALL cell has been assigned
+   INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
+   INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
+   INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
+   INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
+   INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
+   INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
+   INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
+   INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+
+END TYPE THIN_WALL_TYPE
 
 
 !> \brief Variables associated with a single primitive gas species
@@ -708,7 +677,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
    REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
    REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
-   REAL(EB) :: TMP_INNER_HT3D=-1._EB                     !< Specified inner temperature for 3D heating (K)
    REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
    REAL(EB) :: VEL_GRAD
    REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
@@ -723,6 +691,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
    REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
    REAL(EB) :: CELL_SIZE_FACTOR
+   REAL(EB) :: CELL_SIZE
    REAL(EB) :: E_COEFFICIENT
    REAL(EB) :: TEXTURE_WIDTH
    REAL(EB) :: TEXTURE_HEIGHT
@@ -764,6 +733,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=10._EB
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
+   REAL(EB) :: SWELL_RATIO=1._EB
    REAL(EB) :: NUSSELT_C0=-1._EB
    REAL(EB) :: NUSSELT_C1=-1._EB
    REAL(EB) :: NUSSELT_C2=-1._EB
@@ -782,7 +752,6 @@ TYPE SURFACE_TYPE
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
-   INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
@@ -800,15 +769,17 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
-              HT3D=.FALSE., SET_H=.FALSE.
+              BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.
+   INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
+   LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_THR_D_TYPE=.FALSE.    !< This surface requires in-depth 3-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
+   INTEGER :: N_THIN_WALL_STORAGE_REALS=0,N_THIN_WALL_STORAGE_INTEGERS=0,N_THIN_WALL_STORAGE_LOGICALS=0
    INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
@@ -816,8 +787,6 @@ TYPE SURFACE_TYPE
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
    CHARACTER(LABEL_LENGTH), DIMENSION(10) :: INIT_IDS='null'
-
-   LOGICAL :: VARIABLE_THICKNESS=.FALSE.  ! This surface is as thick as the underlying OBST
 
    ! 1D mass transfer
 
@@ -834,7 +803,7 @@ TYPE SURFACE_TYPE
                VEG_LSET_CHAR_FRACTION
    INTEGER :: VEG_LSET_FUEL_INDEX
 
-   TYPE(STORAGE_TYPE) :: WALL_STORAGE,CFACE_STORAGE
+   TYPE(STORAGE_TYPE) :: WALL_STORAGE,THIN_WALL_STORAGE,CFACE_STORAGE
 
 END TYPE SURFACE_TYPE
 
@@ -844,16 +813,23 @@ TYPE OMESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU,RHO,RHOS,TMP,U,V,W,US,VS,WS,H,HS,FVX,FVY,FVZ,D,DS,KRES,IL_S,IL_R,Q
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ,ZZS
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_R,JJO_R,KKO_R,IOR_R,IIO_S,JJO_S,KKO_S,IOR_S
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_PART_ORPHANS,N_PART_ADOPT,EXPOSED_WALL_CELL_BACK_INDICES,WALL_CELL_INDICES_SEND
-   INTEGER :: I_MIN_R=-10,I_MAX_R=-10,J_MIN_R=-10,J_MAX_R=-10,K_MIN_R=-10,K_MAX_R=-10,NIC_R=0,N_WALL_CELLS_SEND=0, &
-              I_MIN_S=-10,I_MAX_S=-10,J_MIN_S=-10,J_MAX_S=-10,K_MIN_S=-10,K_MAX_S=-10,NIC_S=0,N_EXPOSED_WALL_CELLS=0
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: WALL_CELL_INDICES_RECV,WALL_CELL_INDICES_SEND,&
+                                         WALL_SURF_INDICES_RECV,WALL_SURF_INDICES_SEND
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: THIN_WALL_CELL_INDICES_RECV,THIN_WALL_CELL_INDICES_SEND,&
+                                         THIN_WALL_SURF_INDICES_RECV,THIN_WALL_SURF_INDICES_SEND
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_PART_ORPHANS,N_PART_ADOPT
+   INTEGER :: N_WALL_CELLS_SEND,N_WALL_CELLS_RECV
+   INTEGER :: N_THIN_WALL_CELLS_SEND,N_THIN_WALL_CELLS_RECV
+   INTEGER :: I_MIN_R=-10,I_MAX_R=-10,J_MIN_R=-10,J_MAX_R=-10,K_MIN_R=-10,K_MAX_R=-10,NIC_R=0, &
+              I_MIN_S=-10,I_MAX_S=-10,J_MIN_S=-10,J_MAX_S=-10,K_MIN_S=-10,K_MAX_S=-10,NIC_S=0
    INTEGER, DIMENSION(7) :: INTEGER_SEND_BUFFER,INTEGER_RECV_BUFFER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: &
          REAL_SEND_PKG1,REAL_SEND_PKG2,REAL_SEND_PKG3,REAL_SEND_PKG4,REAL_SEND_PKG5,REAL_SEND_PKG6,REAL_SEND_PKG7,REAL_SEND_PKG8,&
          REAL_RECV_PKG1,REAL_RECV_PKG2,REAL_RECV_PKG3,REAL_RECV_PKG4,REAL_RECV_PKG5,REAL_RECV_PKG6,REAL_RECV_PKG7,REAL_RECV_PKG8
    INTEGER :: N_EXTERNAL_OBST=0,N_INTERNAL_OBST=0
    TYPE (STORAGE_TYPE), ALLOCATABLE, DIMENSION(:) :: ORPHAN_PARTICLE_STORAGE,ADOPT_PARTICLE_STORAGE
-   TYPE (EXPOSED_WALL_TYPE), ALLOCATABLE, DIMENSION(:) :: EXPOSED_WALL
+   TYPE (STORAGE_TYPE), ALLOCATABLE, DIMENSION(:) :: WALL_STORAGE_SEND,WALL_STORAGE_RECV
+   TYPE (STORAGE_TYPE), ALLOCATABLE, DIMENSION(:) :: THIN_WALL_STORAGE_SEND,THIN_WALL_STORAGE_RECV
 
    ! CC_IBM data exchange arrays:
    INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
@@ -885,8 +861,6 @@ TYPE OBSTRUCTION_TYPE
 
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of controlling device
    CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
-   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'  !< Name of PROPerty type
-   CHARACTER(LABEL_LENGTH) :: MATL_ID='null'  !< Name of material type
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
    INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
@@ -895,7 +869,6 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
    REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume
    REAL(EB) :: BULK_DENSITY=-1._EB            !< Mass per unit volume (kg/m3) of specified OBST
-   REAL(EB) :: INTERNAL_HEAT_SOURCE=0._EB     !< Energy generation rate per unit volume (W/m3)
    REAL(EB) :: X1=0._EB                       !< Lower specified \f$ x \f$ boundary (m)
    REAL(EB) :: X2=1._EB                       !< Upper specified \f$ x \f$ boundary (m)
    REAL(EB) :: Y1=0._EB                       !< Lower specified \f$ y \f$ boundary (m)
@@ -904,11 +877,12 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB) :: Z2=1._EB                       !< Upper specified \f$ z \f$ boundary (m)
    REAL(EB) :: MASS=1.E6_EB                   !< Actual mass of the obstruction (kg)
 
-   REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB           !< Specified area of x, y, and z faces (m2)
-   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB !< Area of x, y, z faces (m2) unbroken by mesh boundaries
-   REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB            !< Area of idealized top, sides, bottom (m2)
-   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB               !< Origin of texture map (m)
-   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB             !< Effective areas of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB              !< Specified area of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB    !< Area of x, y, z faces (m2) unbroken by mesh boundaries
+   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_LENGTH=-1._EB  !< Length in x, y, z direction (m) unbroken by mesh boundaries
+   REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB               !< Area of idealized top, sides, bottom (m2)
+   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB                  !< Origin of texture map (m)
+   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB                !< Effective areas of x, y, and z faces (m2)
 
    INTEGER :: I1=-1               !< Lower I node
    INTEGER :: I2=-1               !< Upper I node
@@ -922,14 +896,12 @@ TYPE OBSTRUCTION_TYPE
    INTEGER :: SHAPE_TYPE=-1       !< Indicator of shape carved out of larger obstruction
    INTEGER :: DEVC_INDEX=-1       !< Index of controlling device
    INTEGER :: CTRL_INDEX=-1       !< Index of controlling controller
-   INTEGER :: PROP_INDEX=-1       !< Index of PROPerty type
    INTEGER :: DEVC_INDEX_O=-1     !< Original DEVC_INDEX
    INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
-   INTEGER :: MATL_INDEX=-1       !< Index of material
    INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
-   INTEGER :: RAMP_Q_INDEX=0      !< Index of HRR ramp
 
    LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview
+   LOGICAL :: THIN=.FALSE.                      !< The obstruction is zero cells thick
    LOGICAL :: HIDDEN=.FALSE.                    !< Hide obstruction in Smokeview and ignore in simulation
    LOGICAL :: PERMIT_HOLE=.TRUE.                !< Allow the obstruction to have a hole cutout
    LOGICAL :: ALLOW_VENT=.TRUE.                 !< Allow a VENT to sit on the OBST
@@ -939,15 +911,6 @@ TYPE OBSTRUCTION_TYPE
    LOGICAL :: OVERLAY=.TRUE.                    !< The obstruction can have another obstruction overlap a surface
    LOGICAL :: SCHEDULED_FOR_REMOVAL=.FALSE.     !< The obstruction is scheduled for removal during the current time step
    LOGICAL :: SCHEDULED_FOR_CREATION=.FALSE.    !< The obstruction is scheduled for creation during the current time step
-
-   ! 3D pyrolysis:
-   LOGICAL :: PYRO3D=.FALSE.
-   LOGICAL :: MT3D=.FALSE.
-   LOGICAL :: HT3D=.FALSE.,HT3D_RESTART=.FALSE.
-   LOGICAL :: PYRO3D_LIQUID=.FALSE.
-   INTEGER :: MATL_SURF_INDEX=-1
-   INTEGER :: PYRO3D_IOR=0
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO
 
 END TYPE OBSTRUCTION_TYPE
 

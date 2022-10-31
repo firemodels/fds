@@ -53,7 +53,6 @@ INTEGER, PARAMETER :: NO_CONVECTION=2            !< Flag for SF\%THERMAL_BC_INDE
 INTEGER, PARAMETER :: THERMALLY_THICK=3          !< Flag for SF\%THERMAL_BC_INDEX: Thermally thick 1-D solid
 INTEGER, PARAMETER :: INFLOW_OUTFLOW=4           !< Flag for SF\%THERMAL_BC_INDEX: OPEN boundary
 INTEGER, PARAMETER :: INTERPOLATED_BC=6          !< Flag for SF\%THERMAL_BC_INDEX: Interface between two meshes
-INTEGER, PARAMETER :: THERMALLY_THICK_HT3D=7     !< Flag for SF\%THERMAL_BC_INDEX: Thermally thick 3-D solid
 
 INTEGER, PARAMETER :: DEFAULT_HTC_MODEL=0                  !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: LOGLAW_HTC_MODEL=1                   !< Flag for SF\%HEAT_TRANSFER_MODEL
@@ -231,9 +230,8 @@ LOGICAL :: WRITE_GEOM_FIRST=.TRUE.
 LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.         !< Use simple chemistry combustion model
 LOGICAL :: FIRST_PASS                       !< The point in the time step before the CFL constraint is applied
 LOGICAL :: VERBOSE=.FALSE.                  !< Add extra output in the .err file
-LOGICAL :: SOLID_HT3D=.FALSE.
+LOGICAL :: SOLID_HEAT_TRANSFER_3D=.FALSE.
 LOGICAL :: SOLID_MT3D=.FALSE.
-LOGICAL :: SOLID_PYRO3D=.FALSE.
 LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
@@ -254,6 +252,7 @@ LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
 LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
+LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that off-gas are present
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -533,7 +532,7 @@ LOGICAL  :: SCARC_VERBOSE = .FALSE.                              !< Flag for add
 ! Miscellaneous integer constants
 
 INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
-           STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,&
+           STOP_AT_ITER=0,WALL_INCREMENT=2,WALL_COUNTER=0,&
            CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0,HT_3D_SWEEP_DIRECTION=0
 
 LOGICAL  :: UPDATE_DEVICES_AGAIN=.FALSE.
