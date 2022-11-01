@@ -29,8 +29,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_EN
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC !,RHO_0_MMS,RHO_1_MMS
 USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_UNKZ, IBM_SOLID, IBM_CUTCFE
-USE CC_SCALARS_IBM, ONLY : ADD_CUTCELL_PSUM,ADD_LINKEDCELL_PSUM,SET_EXIMDIFFLX_3D,SET_DOMAINDIFFLX_3D,&
-                        SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D,CCREGION_DIVERGENCE_PART_1,CFACE_PREDICT_NORMAL_VELOCITY
+USE CC_SCALARS_IBM, ONLY : ADD_CUTCELL_PSUM,ADD_LINKEDCELL_PSUM,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,&
+                           SET_EXIMRHOZZLIM_3D,CCREGION_DIVERGENCE_PART_1,CFACE_PREDICT_NORMAL_VELOCITY
 
 ! Compute contributions to the divergence term
 
@@ -207,29 +207,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                ENDIF
          END SELECT BOUNDARY_TYPE_SELECT
       ENDDO WALL_LOOP
-
-      IF (CHECK_MASS_CONSERVE) THEN
-         ! When CHECK_MASS_CONSERVE make zero diffusive mass fluxes on open boundaries.
-         ! Using the open boundary mass fluxes leads to a small difference on the integrals done in this test.
-         DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-               BC => BOUNDARY_COORD(WC%BC_INDEX)
-               IIG = BC%IIG
-               JJG = BC%JJG
-               KKG = BC%KKG
-               IOR = BC%IOR
-               SELECT CASE(IOR)
-                  CASE( 1); RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
-                  CASE(-1); RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 2); RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
-                  CASE(-2); RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 3); RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
-                  CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
-               END SELECT
-            ENDIF
-         ENDDO
-      ENDIF
 
    ENDDO DIFFUSIVE_FLUX_LOOP
 
@@ -424,10 +401,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    ENDDO SPECIES_LOOP
 
 ENDIF SPECIES_GT_1_IF
-
-! Store diffusive species flux at domain boundaries if true (this should be deprecated)
-
-IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINDIFFLX_3D(ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,.NOT.PREDICTOR)
 
 ! Get the specific heat
 
