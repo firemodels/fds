@@ -8847,8 +8847,10 @@ FDS has various types of output files that store computed data. Some of the file
 \item To visualize particles and droplets, see Section~\ref{info:part_output}.
 \item For more information about particular output features, see Section~\ref{info:special_output}.
 \item A tool for extracting data from contour and boundary output files is described in Section~\ref{info:fds2ascii}.
-\item A list of the most frequently used output quantities is given in Section~\ref{info:outputquantities}.
-\item A list of the less frequently used output quantities is given in Section~\ref{info:oddoutputquantities}.
+\item A list of gas phase output quantities is given in Section~\ref{info:gasoutputquantities}.
+\item A list of solid phase output quantities is given in Section~\ref{info:solidoutputquantities}.
+\item A list of device-related output quantities is given in Section~\ref{info:deviceoutputquantities}.
+\item A list of particle and droplet output quantities is given in Section~\ref{info:particleoutputquantities}.
 \item A list of HVAC output quantities is given in Section~\ref{info:hvacoutputquantities}.
 \end{itemize}
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one {\ct DUMP} line in the input file.
@@ -8909,7 +8911,7 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 \label{info:DEVC2}
 
-Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
+Every device ({\ct DEVC}) records a particular {\ct QUANTITY}. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Tables~\ref{tab:gasoutputquantities} through \ref{tab:hvacoutputquantities}.
 
 There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
@@ -9280,7 +9282,7 @@ You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smoke
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
-The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
+The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
 
 {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF}, or discrete times, {\ct RAMP\_BNDF}, on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=F} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=T} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=T} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
@@ -9416,7 +9418,7 @@ If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Sm
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
-For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
+For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:particleoutputquantities}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
 
 
 \subsection{Detailed Properties of Solid Particles}
@@ -10509,145 +10511,126 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 
 \newpage
 
-\section{Summary of Frequently-Used Output Quantities}
-\label{info:outputquantities}
+\section{Gas Phase Output Quantities}
+\label{info:gasoutputquantities}
 
-Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities. The column ``File Type'' lists the allowed output files for the quantities. ``B'' is for Boundary ({\ct BNDF}), ``D'' is for Device ({\ct DEVC}), ``I'' is for Iso-surface ({\ct ISOF}), ``P'' is for Plot3D, ``PA'' for PArticle ({\ct PART}), ``S'' is for Slice ({\ct SLCF}). Be careful when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
+Table~\ref{tab:gasoutputquantities}, spread over the following pages, lists gas phase output quantities. The column ``File Type'' lists the allowed output files for the quantities: ``D'' is for Device ({\ct DEVC}), ``I'' is for Iso-surface ({\ct ISOF}), ``P'' is for Plot3D, ``S'' is for Slice ({\ct SLCF}).
 
 For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD}, {\ct SOOT\_YIELD}, and/or {\ct HCN\_YIELD} are specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'}, {\ct 'SOOT'}, and/or {\ct 'HYDROGEN CYANIDE'} are included as output species. The fuel species can be output via the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 \begin{lstlisting}
 &DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z',
       SPEC_ID='CARBON MONOXIDE', SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
-Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just remember that all output quantity names ought to be in single quotes.
+The {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. All output quantity names ought to be in single quotes.
 
 
 \clearpage
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
-\caption[Frequently used output quantities]{Summary of frequently used output quantities.}
-\label{tab:output} \\
+\caption[Gas phase output quantities]{Gas phase output quantities.}
+\label{tab:gasoutputquantities} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+{\ct QUANTITY}                                  & Explanation                                       & Units             & File Type    \\
 \hline \hline
 \endfirsthead
-\caption[]{Summary of frequently used output quantities (continued).} \\
+\caption[]{Gas phase output quantities (continued).} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+{\ct QUANTITY}                                  & Explanation                                       & Units             & File Type    \\
 \hline \hline
 \endhead
-{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_Gas_and_Soot}          & 1/m            & D,I,P,S      \\ \hline
-{\ct ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
-{\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
-{\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
-{\ct AMPUA}$^2$                                 & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct AMPUA\_Z}$^1$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
-{\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
-{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
-{\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
-{\ct CHI\_R}                                    & Section~\ref{info:CHI_R}                      &                & D,I,S        \\ \hline
-{\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
-{\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
-{\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
-{\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$       & B,D          \\ \hline
-{\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
-{\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
-{\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-{\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
-{\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
-{\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
-{\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                &                & D,P,S        \\ \hline
-{\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
-{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
-{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
-{\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
-{\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
-{\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
-{\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s            & B,D          \\ \hline
-{\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & B,D          \\ \hline
-{\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
-{\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct INCAPACITATION TIME}                       & Section~\ref{info:FED}                        & min            & D            \\ \hline
-{\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
-{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m              & D            \\ \hline
-{\ct INTERNAL ENERGY}                           & $\rho h - \bar{p}$                            & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
-{\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
-{\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
-{\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
-{\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Y}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Z}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FRACTION}$^1$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
-{\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
-{\ct MPUA}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUV}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
-{\ct MPUV\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
-{\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
-{\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
-{\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
-{\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
-{\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                   & m/s            & D            \\ \hline
-{\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
-{\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
-{\ct PARTICLE BULK DENSITY}                     & Section~\ref{info:part_output}                & kg/(m$^3$)     & PA           \\ \hline
-{\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
-{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                & kg             & PA           \\ \hline
-{\ct PARTICLE PHASE}                            & Section~\ref{info:part_output}                &                & PA           \\ \hline
-{\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
-{\ct PARTICLE U}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
-{\ct PARTICLE V}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
-{\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
-{\ct PARTICLE W}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
-{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{info:part_output}                &                & PA           \\ \hline
-{\ct PARTICLE X}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
-{\ct PARTICLE Y}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
-{\ct PARTICLE Z}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
-{\ct PRESSURE}                                  & Perturbation pressure, $\tilde{p}$            & Pa             & D,I,P,S      \\ \hline
-{\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                & B,D          \\ \hline
-{\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
-{\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                  & kW/m$^2$       & D            \\ \hline
-{\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
-{\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
-{\ct SPECIFIC HEAT}                             & $c_p$                                         & \si{kJ/(kg.K)} & D,I,P,S      \\ \hline
-{\ct SPECIFIC INTERNAL ENERGY}                  & $h - \bar{p}/\rho$                            & kJ/kg          & D,I,P,S      \\ \hline
-{\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
-{\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
-{\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
-{\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
-{\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
-{\ct TIME}                                      & Section~\ref{info:DEVC2}                      & s              & D            \\ \hline
-{\ct TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-{\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
-{\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
-{\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
-{\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
-{\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
-{\ct VELOCITY}$^3$                              & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
-{\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$ & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
-{\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
-{\ct VOLUME FRACTION}$^1$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
-{\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-{\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-{\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
-{\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
+{\ct ABSOLUTE PRESSURE}                         & Absolute pressure, $p=\overline{p}+\tilde{p}$     & Pa                & D,I,P,S      \\ \hline
+{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_Gas_and_Soot}              & 1/m               & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                           & mol/mol           & D,I,P,S      \\ \hline
+{\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct AUTO IGNITION TEMPERATURE}                 & Section \ref{info:ignition}                       & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                        & Pa                & D,I,P,S      \\ \hline
+{\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
+{\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s               & D,I,P,S      \\ \hline
+{\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s               & D,I,P,S      \\ \hline
+{\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s               & D,I,P,S      \\ \hline
+{\ct CFL}                                       & Section~\ref{info:TIMING}                         &                   & D,I,P,S      \\ \hline
+{\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                   & D            \\ \hline
+{\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
+{\ct CHI\_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
+{\ct COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & Thermal conductivity                              & \si{W/(m.K)}      & D,I,P,S      \\ \hline
+{\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
+{\ct DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
+{\ct DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct DIFFUSIVITY}$^1$                           & Species diffusivity, $D_\alpha$                   & m$^2$/s           & D,I,P,S      \\ \hline
+{\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
+{\ct DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
+{\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & kW/m$^2$          & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & kW/m$^2$          & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & kW/m$^2$          & D,I,P,S      \\ \hline
+{\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                   & D,S          \\ \hline
+{\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
+{\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
+{\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$         & D,I,P,S      \\ \hline
+{\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m              & D            \\ \hline
+{\ct HRRPUV}                                    & $\dq'''$                                          & kW/m$^3$          & D,I,P,S      \\ \hline
+{\ct HRRPUV REAC}$^6$                           & $\dq'''$ for {\ct REAC\_ID}                       & kW/m$^3$          & D,S          \\ \hline
+{\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa                & D,I,P,S      \\ \hline
+{\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$          & D,I,P,S      \\ \hline
+{\ct INTERNAL ENERGY}                           & $\rho h - \bar{p}$                                & kJ/m$^3$          & D,I,P,S      \\ \hline
+{\ct KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$         & D,I,P,S      \\ \hline
+{\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m                 & D,I,P,S      \\ \hline
+{\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                   & S,D          \\ \hline
+{\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Y}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Z}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FRACTION}$^1$                         & $Y_\alpha$                                        & kg/kg             & D,I,P,S      \\ \hline
+{\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s               & D            \\ \hline
+{\ct MIXING TIME}                               & Combustion mixing time, $\tau_{\rm mix}$          & s                 & D,I,P,S      \\ \hline
+{\ct MIXTURE FRACTION}                          & $Z$                                               & kg/kg             & D,I,P,S      \\ \hline
+{\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}     & D,I,P,S      \\ \hline
+{\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
+{\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                       & m/s               & D            \\ \hline
+{\ct PRESSURE}                                  & Perturbation pressure, $\tilde{p}$                & Pa                & D,I,P,S      \\ \hline
+{\ct PRESSURE ITERATIONS}                       & Number of pressure iterations                     &                   & D            \\ \hline
+{\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                           &                   & D,S          \\ \hline
+{\ct Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
+{\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s               & D,I,P,S      \\ \hline
+{\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
+{\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & kW/m$^2$          & D            \\ \hline
+{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
+{\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
+{\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
+{\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
+{\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/kg             & D,I,P,S      \\ \hline
+{\ct SPECIFIC HEAT}                             & $c_p$                                             & \si{kJ/(kg.K)}    & D,I,P,S      \\ \hline
+{\ct SPECIFIC INTERNAL ENERGY}                  & $h - \bar{p}/\rho$                                & kJ/kg             & D,I,P,S      \\ \hline
+{\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                       & kJ/kg             & D,I,P,S      \\ \hline
+{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s               & D,I,P,S      \\ \hline
+{\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s               & D,I,P,S      \\ \hline
+{\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s               & D,I,P,S      \\ \hline
+{\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s               & D,I,P,S      \\ \hline
+{\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
+{\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
+{\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
+{\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}                   & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+{\ct U-VELOCITY}                                & Gas velocity component, $u$                       & m/s               & D,I,P,S      \\ \hline
+{\ct V-VELOCITY}                                & Gas velocity component, $v$                       & m/s               & D,I,P,S      \\ \hline
+{\ct W-VELOCITY}                                & Gas velocity component, $w$                       & m/s               & D,I,P,S      \\ \hline
+{\ct VELOCITY}$^3$                              & Gas velocity                                      & m/s               & D,I,P,S      \\ \hline
+{\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$     & \si{kg/(m.s)}     & D,I,P,S      \\ \hline
+{\ct VISIBILITY}                                & Section~\ref{info:visibility}                     & m                 & D,I,P,S      \\ \hline
+{\ct VN}                                        & Section~\ref{info:TIMING}                         &                   & D,I,P,S      \\ \hline
+{\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                   & D            \\ \hline
+{\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s               & D,I,P,S      \\ \hline
+{\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s               & D,I,P,S      \\ \hline
+{\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s               & D,I,P,S      \\ \hline
+{\ct VOLUME FRACTION}$^1$                       & $X_\alpha$                                        & mol/mol           & D,I,P,S      \\ \hline
+{\ct WAVELET ERROR}                             & Section~\ref{info:meshquality}                    &                   & S            \\ \hline
 \end{longtable}
 
 \noindent
@@ -10659,129 +10642,80 @@ $^2$                  \> Requires the specification of a particle name using {\c
 $^3$                  \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
 $^4$                  \> Allows for an optional {\ct MATL\_ID}.\\
-$^5$                  \> Requires an {\ct ORIENTATION} on the {\ct DEVC} line.
+$^5$                  \> Requires an {\ct ORIENTATION} on the {\ct DEVC} line. \\
+$^6$                  \> Requires {\ct REAC\_ID}. \\
 
 \end{tabbing}
 
 \clearpage
 
-\section{Summary of Infrequently-Used Output Quantities}
-\label{info:oddoutputquantities}
+\section{Solid Phase Output Quantities}
+\label{info:solidoutputquantities}
 
-Table~\ref{tab:oddoutput} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can
-be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, and ``D'' refers to the device file, {\ct CHID\_devc.csv}.
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
-\caption[Infrequently used output quantities]{Summary of {\em infrequently} used output quantities.}
-\label{tab:oddoutput} \\
+\caption[Solid phase output quantities]{Solid phase output quantities.}
+\label{tab:solidoutputquantities} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+{\ct QUANTITY}                                  & Explanation                                   & Units              & File Type     \\
 \hline \hline
 \endfirsthead
-\caption[]{Summary of {\em infrequently} used output quantities (continued).} \\
+\caption[]{Solid phase output quantities (continued).} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+{\ct QUANTITY}                                  & Explanation                                   & Units              & File Type    \\
 \hline \hline
 \endhead
-{\ct ABSOLUTE PRESSURE}                         & Absolute Pressure                                 & Pa             & D,I,P,S      \\ \hline
-{\ct ADA}$^2$                                   & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADA\_Z}$^1$                                & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADD}$^2$                                   & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
-{\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
-{\ct AUTO IGNITION TEMPERATURE}$^5$             & Section \ref{info:ignition}                       & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
-{\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
-{\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
-{\ct CELL INDEX K}                              & Mesh cell index in z                              &                & D,S          \\ \hline
-{\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                & D,I,P,S      \\ \hline
-{\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,P,S      \\ \hline
-{\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,P,S      \\ \hline
-{\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,P,S      \\ \hline
-{\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
-{\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
-{\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
-{\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
-{\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
-{\ct DIFFUSIVE MASS FLUX X}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial x$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
-{\ct DIFFUSIVE MASS FLUX Y}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial y$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
-{\ct DIFFUSIVE MASS FLUX Z}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial z$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
-{\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$    & D,I,P,S      \\ \hline
-%{\ct DUDT}                                      & $\partial u/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
-%{\ct DVDT}                                      & $\partial v/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
-%{\ct DWDT}                                      & $\partial w/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
-%{\ct DHDX}                                      & $\partial H/\partial x$                           & m/s$^2$        & D,I,P,S      \\ \hline
-%{\ct DHDY}                                      & $\partial H/\partial y$                           & m/s$^2$        & D,I,P,S      \\ \hline
-%{\ct DHDZ}                                      & $\partial H/\partial z$                           & m/s$^2$        & D,I,P,S      \\ \hline
-{\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
-{\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
-{\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
-{\ct GAS DENSITY}                               & Gas Density near wall                             & \si{kg/m^3}    & B,D          \\ \hline
-{\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
-{\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                     & \si{W/(m^2.K)} & B,D          \\ \hline
-{\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
-{\ct HRRPUV REAC}$^6$                           & $\dq'''$ for {\ct REAC\_ID}                       & kW/m$^3$       & D,S          \\ \hline
-{\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa             & D,I,P,S      \\ \hline
-{\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
-{\ct KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
-{\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
-{\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
-{\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
-{\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
-{\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
-{\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
-{\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}            &                & D            \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
-{\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
-{\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct PDPA}                                      & Droplet statistics, Section~\ref{PDPA}            &                & D            \\ \hline
-{\ct PRESSURE ITERATIONS}                       & Number of pressure iterations                     &                & D            \\ \hline
-{\ct Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
-{\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s            & D,I,P,S      \\ \hline
-{\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct RAM}                                       & Memory usage (Linux only)                         & MB             & D            \\ \hline
-{\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
-{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$       & D,I,P,S      \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:specified_burning}              & kW/m$^2$       & B,D          \\ \hline
-{\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
-{\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
-{\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
-{\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
-{\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
-{\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}          &                & B,D          \\ \hline
-{\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
-{\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
-{\ct TOTAL MASS FLUX WALL}$^1$ & $\overline{\rho Y_\alpha} u_n + \rho D_\alpha \partial Y_\alpha/\partial n$, Sec.~\ref{info:wallflux} & kg/s/m$^2$ & D,S      \\ \hline
-{\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
-{\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
-{\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
-{\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
-{\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
-{\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
-{\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
-{\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
-%{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
-%{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
-{\ct WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                      & kJ             & B,D          \\ \hline
-{\ct WALL PRESSURE}                             & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
-{\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
-{\ct WAVELET ERROR}$^3$                         & Section~\ref{info:meshquality}                    &                & S            \\ \hline
+{\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C          & B,D          \\ \hline
+{\ct AMPUA}$^2$                                 & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct AMPUA\_Z}$^1$                              & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
+{\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
+{\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$           & B,D          \\ \hline
+{\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$           & B,D          \\ \hline
+{\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$           & B,D          \\ \hline
+{\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s                & B,D          \\ \hline
+{\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s                & B,D          \\ \hline
+{\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & kW/m$^2$           & B,D          \\ \hline
+{\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct EMISSIVITY}                                & Surface emissivity (usually constant)         &                    & B,D          \\ \hline
+{\ct GAS DENSITY}                               & Gas Density near wall                         & \si{kg/m^3}        & B,D          \\ \hline
+{\ct GAS TEMPERATURE}                           & Gas Temperature near wall                     & $^\circ$C          & B,D          \\ \hline
+{\ct HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                 & \si{W/(m^2.K)}     & B,D          \\ \hline
+{\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$           & B,D          \\ \hline
+{\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D            \\ \hline
+{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D            \\ \hline
+{\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
+{\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
+{\ct MPUA}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct MPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s                & B,D          \\ \hline
+{\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
+{\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
+{\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}        &                    & D            \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}        & 1/s                & D            \\ \hline
+{\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
+{\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:specified_burning}          & kW/m$^2$           & B,D          \\ \hline
+{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D            \\ \hline
+{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D            \\ \hline
+{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D            \\ \hline
+{\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
+{\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
+{\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$           & B,D          \\ \hline
+{\ct TOTAL MASS FLUX WALL}$^1$                  & Section~\ref{info:wallflux}                   & kg/s/m$^2$         & B,D          \\ \hline
+{\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                       & m/s                & B,D          \\ \hline
+{\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline
+{\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                      &                    & B,D          \\ \hline
+{\ct WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                  & kJ                 & B,D          \\ \hline
+{\ct WALL PRESSURE}                             & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline
+{\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C          & B,D          \\ \hline
+{\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m                  & B,D          \\ \hline
+{\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                  & \si{kg/(m.s)}      & B,D          \\ \hline
 \end{longtable}
 
 \noindent
@@ -10790,8 +10724,117 @@ $^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct S
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
-$^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1. \\
-$^6$                 \> Requires {\ct REAC\_ID}. \\
+\end{tabbing}
+
+
+\clearpage
+
+\section{Device, Control, and Other Miscellaneous Output Quantities}
+\label{info:deviceoutputquantities}
+
+Table~\ref{tab:deviceoutputquantities} below lists output quantities associated with devices and controls, as well as other miscellaneous output. The File Type ``D'' refers to the device output file {\ct CHID\_devc.csv}. The File Type ``S'' refers to a contour or ``slice'' file.
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\caption[Output quantities for devices, controls, and miscellaneous functions]{Output quantities for devices, controls, and miscellaneous functions.}
+\label{tab:deviceoutputquantities} \\
+\hline
+{\ct QUANTITY}                                  & Explanation                                   & Units          & File Type    \\
+\hline \hline
+\endfirsthead
+\caption[]{Output quantities for devices, controls, and miscellaneous functions (continued).} \\
+\hline
+{\ct QUANTITY}                                  & Explanation                                   & Units          & File Type    \\
+\hline \hline
+\endhead
+{\ct ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
+{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
+{\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
+{\ct CELL INDEX I}                              & Mesh cell index in x                          &                & D,S          \\ \hline
+{\ct CELL INDEX J}                              & Mesh cell index in y                          &                & D,S          \\ \hline
+{\ct CELL INDEX K}                              & Mesh cell index in z                          &                & D,S          \\ \hline
+{\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
+{\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
+{\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+{\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
+{\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct INCAPACITATION TIME}                       & Section~\ref{info:FED}                        & min            & D            \\ \hline
+{\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
+{\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
+{\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
+{\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
+{\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
+{\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
+{\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
+{\ct RAM}                                       & Memory usage (Linux only)                     & MB             & D            \\ \hline
+{\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]            &                & D            \\ \hline
+{\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
+{\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
+{\ct TIME}                                      & Section~\ref{info:DEVC2}                      & s              & D            \\ \hline
+{\ct TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+{\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
+{\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
+{\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+{\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+\end{longtable}
+
+
+\clearpage
+
+\section{Droplet and Particle Output Quantities}
+\label{info:particleoutputquantities}
+
+Table~\ref{tab:particleoutputquantities} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\caption[Particle and droplet output quantities]{Particle and droplet output quantities.}
+\label{tab:particleoutputquantities} \\
+\hline
+{\ct QUANTITY}                                  & Explanation                                       & Units             & File Type    \\
+\hline \hline
+\endfirsthead
+\caption[]{Particle and droplet output quantities (continued).} \\
+\hline
+{\ct QUANTITY}                                  & Explanation                                       & Units             & File Type    \\
+\hline \hline
+\endhead
+{\ct ADA}$^2$                                   & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$       & D,I,P,S      \\ \hline
+{\ct ADA\_Z}$^1$                                & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$       & D,I,P,S      \\ \hline
+{\ct ADD}$^2$                                   & Avg.~Droplet Diameter                             & $\mu$m            & D,I,P,S      \\ \hline
+{\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m            & D,I,P,S      \\ \hline
+{\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                    &                   & D,P,S        \\ \hline
+{\ct MPUV}$^2$                                  & Section~\ref{info:part_output}                    & kg/m$^3$          & D,P,S        \\ \hline
+{\ct MPUV\_Z}$^1$                               & Section~\ref{info:part_output}                    & kg/m$^3$          & D,P,S        \\ \hline
+{\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                    & s                 & PA           \\ \hline
+{\ct PARTICLE BULK DENSITY}                     & Section~\ref{info:part_output}                    & kg/(m$^3$)        & PA           \\ \hline
+{\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                    & $\mu$m            & PA           \\ \hline
+{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                    & kg                & PA           \\ \hline
+{\ct PARTICLE PHASE}                            & Section~\ref{info:part_output}                    &                   & PA           \\ \hline
+{\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
+{\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                    & $^\circ$C         & PA           \\ \hline
+{\ct PARTICLE U}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
+{\ct PARTICLE V}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
+{\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
+{\ct PARTICLE W}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
+{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{info:part_output}                    &                   & PA           \\ \hline
+{\ct PARTICLE X}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
+{\ct PARTICLE Y}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
+{\ct PARTICLE Z}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
+{\ct PDPA}                                      & Droplet statistics, Section~\ref{PDPA}            &                   & D            \\ \hline
+{\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
+{\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
+{\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                   & D,I,P,S      \\ \hline
+{\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                   & D,I,P,S      \\ \hline
+\end{longtable}
+
+\noindent
+\begin{tabbing}
+$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 \end{tabbing}
 
 
@@ -10801,19 +10844,19 @@ $^6$                 \> Requires {\ct REAC\_ID}. \\
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 \end{sloppypar}
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
-\caption[HVAC output quantities]{Summary of HVAC output quantities.}
-\label{tab:hvacoutput} \\
+\caption[HVAC output quantities]{HVAC output quantities.}
+\label{tab:hvacoutputquantities} \\
 \hline
-{\ct QUANTITY}                                  & Symbol                                    & Units            & File Type   \\
+{\ct QUANTITY}                                  & Explanation                                 & Units              & File Type   \\
 \hline \hline
 \endfirsthead
-\caption[]{Summary of HVAC output quantities (continued).} \\
+\caption[]{HVAC output quantities (continued).} \\
 \hline
-{\ct QUANTITY}                                  & Symbol                                    & Units            & File Type   \\
+{\ct QUANTITY}                                  & Explanation                                 & Units              & File Type   \\
 \hline \hline
 \endhead
 {\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil           &  kW                & D   \\ \hline
@@ -10898,13 +10941,13 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                 &           & {\ct F}   \\ \hline
-{\ct MATL\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PART\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
-{\ct QUANTITY}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct SPEC\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                      &           & {\ct F}   \\ \hline
+{\ct MATL\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct PART\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
+{\ct QUANTITY}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct SPEC\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
 \end{longtable}
 
 % Undocumented: DEBUG
@@ -11103,7 +11146,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
-{\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct PART\_ID}              & Character       & Section~\ref{info:particleoutputquantities}                     &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
 {\ct POINTS\_ARRAY\_X}      & Real Array      & Section~\ref{info:line_file}                                    & m     &               \\ \hline
@@ -11113,14 +11156,14 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
-{\ct REAC\_ID}              & Character       & Section~\ref{info:oddoutputquantities}                          &       &               \\ \hline
+{\ct REAC\_ID}              & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct SPEC\_ID}              & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 {\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
@@ -12225,13 +12268,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
-{\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct PART\_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 {\ct PROP\_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline
-{\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
-{\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct QUANTITY}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
+{\ct QUANTITY2}         & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
-{\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct SPEC\_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & {\ct F}     \\ \hline
 {\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
