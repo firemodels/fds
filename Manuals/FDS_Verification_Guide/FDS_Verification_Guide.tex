@@ -4186,13 +4186,15 @@ After several minutes, the equilibrium temperature is expected to be:
 \ee
 where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 9.0847$ is the number of moles of gas.
 
-Figure~\ref{fig:ht3d_beam_heating_1} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
+The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
+
+In a second case, a steel plate that is 1.76~m long, 0.58~m wide, and 0.02~m thick is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 21.808~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
 
 \begin{figure}[ht]
-\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_1}
-\caption[The \textct{ht3d\_beam\_heating\_1} test case]{Average surface temperature of a steel beam immersed in hot gas.}
-\label{fig:ht3d_beam_heating_1}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_2}
+\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of a steel beam immersed in hot gas. (Right) Average temperature of an insulated steel plate exposed to the same conditions.}
+\label{fig:ht3d_beam_heating}
 \end{figure}
 
 \FloatBarrier
