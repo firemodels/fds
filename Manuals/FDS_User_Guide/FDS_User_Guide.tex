@@ -9011,7 +9011,7 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 \label{info:DEVC2}
 
-Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
+Every device ({\ct DEVC}) records a particular {\ct QUANTITY}. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Tables~\ref{tab:gasoutputquantities} through \ref{tab:hvacoutputquantities}.
 
 There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
@@ -9382,7 +9382,7 @@ You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smoke
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
-The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
+The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
 
 {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF}, or discrete times, {\ct RAMP\_BNDF}, on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=F} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=T} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=T} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
@@ -9518,7 +9518,7 @@ If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Sm
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
-For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
+For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:particleoutputquantities}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
 
 
 \subsection{Detailed Properties of Solid Particles}
@@ -10944,12 +10944,12 @@ $^2$                 \> Requires the specification of a particle name using {\ct
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 \end{sloppypar}
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
 \caption[HVAC output quantities]{HVAC output quantities.}
-\label{tab:hvacoutput} \\
+\label{tab:hvacoutputquantities} \\
 \hline
 {\ct QUANTITY}                                  & Explanation                                 & Units              & File Type   \\
 \hline \hline
@@ -11041,13 +11041,13 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                 &           & {\ct F}   \\ \hline
-{\ct MATL\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PART\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
-{\ct QUANTITY}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct SPEC\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                      &           & {\ct F}   \\ \hline
+{\ct MATL\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct PART\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
+{\ct QUANTITY}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct SPEC\_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
+{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
 \end{longtable}
 
 % Undocumented: DEBUG
@@ -11246,7 +11246,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
-{\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct PART\_ID}              & Character       & Section~\ref{info:particleoutputquantities}                     &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
 {\ct POINTS\_ARRAY\_X}      & Real Array      & Section~\ref{info:line_file}                                    & m     &               \\ \hline
@@ -11256,14 +11256,14 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
-{\ct REAC\_ID}              & Character       & Section~\ref{sec:gasoutputquantities}                           &       &               \\ \hline
+{\ct REAC\_ID}              & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct SPEC\_ID}              & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 {\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
@@ -12376,13 +12376,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
-{\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct PART\_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 {\ct PROP\_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline
-{\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
-{\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct QUANTITY}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
+{\ct QUANTITY2}         & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
-{\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
+{\ct SPEC\_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 {\ct VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & {\ct F}     \\ \hline
 {\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
