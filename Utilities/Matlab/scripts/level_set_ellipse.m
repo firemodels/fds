@@ -49,7 +49,7 @@ for slope=slope_angle
         end
         DEVC = importdata([out_dir,[CHID,'_devc.csv']],',', 2);
         % distance from ignition for each point (along sloped surface)
-        dist = sqrt(5^2+(5*tand(slope)*cosd(theta-theta_s)).^2);
+        dist = sqrt(4^2+(4*tand(slope)*cosd(theta-theta_s)).^2);
         % spread rate from arrival time at each point
         r = dist./DEVC.data(end,2:end);
         % plot distance traveled in 10 seconds in cartesian space
@@ -151,6 +151,11 @@ for slope=slope_angle
         annotation('textarrow',[0.35,0.35+0.1*cosd(theta_s)],[0.2,0.2+0.1*sind(theta_s)],...
             'String','\Phi','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
     end
+
+   % add Git revision
+   Git_Filename = [out_dir,CHID,'_git.txt'];
+   addverstr(gca,Git_Filename,'linear')
+
     % save figure
     print(gcf,Image_File_Type,...
         [plot_dir,'level_set_ellipse_',num2str(slope,'%02d'),'deg'])
@@ -176,6 +181,11 @@ end
 xlabel('compass angle (°)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('relative error (-)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)     
 lh=legend();
+
+% add Git revision
+Git_Filename = [out_dir,CHID,'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
 % save figure
 print(gcf,Image_File_Type,[plot_dir,'level_set_ellipse_error'])
 
