@@ -245,6 +245,8 @@ $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_1.fds
+$QFDS -d Heat_Transfer ht3d_beam_heating_2.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_demo.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_2.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_3.fds
@@ -760,6 +762,10 @@ $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
+$QFDS -d WUI LS_ellipse_0ms_00deg.fds
+$QFDS -d WUI LS_ellipse_5ms_00deg.fds
+$QFDS -d WUI LS_ellipse_0ms_30deg.fds
+$QFDS -d WUI LS_ellipse_5ms_30deg.fds
 $QFDS -d WUI Morvan_TGA.fds
 $QFDS -d WUI Morvan_TGA_2.fds
 $QFDS -d WUI Needle_TGA_A.fds
