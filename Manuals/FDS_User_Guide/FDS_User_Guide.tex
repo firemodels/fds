@@ -3137,7 +3137,7 @@ vapors are to driven into the interior of the column. In fact, values from 0.0 t
 By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
 layers for other surfaces.
 
-\subsection{Special Topic: Specified Internal Heat Source}
+\subsection{Specified Internal Heat Source}
 
 \label{info:INTERNAL_HEAT_SOURCE}
 
@@ -3194,10 +3194,51 @@ If all the material components react and leave no solid residue, the thickness o
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
 
-\subsection{Solid Heat Transfer 3-D}
+\subsection{3-D Heat Conduction}
 \label{info:ht3d}
+\label{ht3d_demo}
 
-The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions. For certain configurations, you can specify {\ct {HT3D=T}} on a {\ct {SURF}} line.
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. 
+
+FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
+\begin{lstlisting}
+&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB' /
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
+\end{lstlisting}
+The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. 
+
+The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
+
+Figure~\ref{fig:ht3d_demo} displays a simple test case in which a steel assembly is heated by a small hot object. The plot at right asserts that the net heat flux integrated over the surface is equal to the heat absorbed by the solid:
+\be
+   \int_0^t \int_{\partial \Omega} \dot{q}''_{\rm net} \, \d S \, \d t'  = \int_\Omega \rho_{\rm s} \, c_{\rm s} \, \Delta T_{\rm s} \, \d V  \label{ebalance}
+\ee
+\begin{figure}[!ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_demo_100} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_demo}
+\end{tabular*}
+\caption[The \textct{ht3d\_demo} test case]{(Left) Surface temperature of a steel assembly exposed to a small hot object. (Right) Plot demonstrating that the increasing enthalpy of the steel is consistent with the integrated net heat flux over the surface.}
+\label{fig:ht3d_demo}
+\end{figure}
+The integral on the left hand side of Eq.~(\ref{ebalance}) is evaluated in FDS using the device line:
+\begin{lstlisting}
+&DEVC ID='...', XB=..., QUANTITY='NET HEAT FLUX', SURF_ID='STEEL SLAB'
+      SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'  /
+\end{lstlisting}
+The volume enclosed by {\ct XB} encompasses the entire assembly. The integral on the right is evaluated by:
+\begin{lstlisting}
+&DEVC ID='...', XB=..., QUANTITY='WALL ENTHALPY', IOR=3, SURF_ID='STEEL SLAB' 
+      SPATIAL_STATISTIC='SURFACE INTEGRAL', RELATIVE=T, CONVERSION_FACTOR=10000,  /
+\end{lstlisting}
+The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the {\ct IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the {\ct CONVERSION\_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter {\ct RELATIVE=T} means that only the change in enthalpy is desired.
+. 
+
+
+
 
 
 
