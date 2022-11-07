@@ -381,6 +381,7 @@ REAL(EB) :: MW_H2O                                                  !< Molecular
 REAL(EB) :: MW_CO                                                   !< Molecular weight of carbon monoxide (g/mol)
 REAL(EB) :: MW_H2                                                   !< Molecular weight of hydrogen (g/mol)
 REAL(EB) :: MW_HCN                                                  !< Molecular weight of hydrogen cyanide (g/mol)
+REAL(EB) :: MW_SOOT                                                 !< Molecular weight of soot (g/mol)
 REAL(EB) :: VISIBILITY_FACTOR=3._EB                                 !< Parameter in light extinction calculation
 REAL(EB) :: EC_LL                                                   !< Extinction Coefficient, Lower Limit (1/m)
 REAL(EB) :: ZZ_MIN_GLOBAL=1.E-10_EB                                 !< Minimum lumped species mass fraction
@@ -620,10 +621,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SOOT_OX
 ! Agglomeration model
 
 LOGICAL :: AGGLOMERATION = .TRUE.,SOOT_OXIDATION=.FALSE.
-INTEGER :: N_PARTICLE_BINS(MAX_SPECIES)=0,AGGLOMERATION_SPEC_INDEX(MAX_SPECIES)=-1,AGGLOMERATION_SMIX_INDEX(MAX_SPECIES)=-1,&
-           N_AGGLOMERATION_SPECIES=0
-REAL(EB) :: MIN_PARTICLE_DIAMETER(MAX_SPECIES),MAX_PARTICLE_DIAMETER(MAX_SPECIES),&
-            NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+INTEGER :: N_AGGLOMERATION_SPECIES=0
+INTEGER, ALLOCATABLE, DIMENSION(:) :: N_PARTICLE_BINS,AGGLOMERATION_SPEC_INDEX,AGGLOMERATION_SMIX_INDEX
+REAL(EB) :: NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_PARTICLE_DIAMETER,MAX_PARTICLE_DIAMETER
 
 ! Number of initial value, pressure zone, and multiplier derived types
 

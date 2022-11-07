@@ -506,7 +506,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
    REAL(EB) :: MEAN_DIAMETER
    REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
-   REAL(EB) :: REFERENCE_ENTHALPY=-2.E20_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY=-1.E30_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
    REAL(EB) :: THERMOPHORETIC_DIAMETER
    REAL(EB) :: REFERENCE_TEMPERATURE               !< Reference temperature of mixture (K)
    REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
@@ -566,7 +566,6 @@ TYPE REACTION_TYPE
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
-   REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
    REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
    REAL(EB) :: CO_YIELD                     !< CO yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: SOOT_YIELD                   !< Soot yield in SIMPLE_CHEMISTRY model
@@ -599,7 +598,7 @@ TYPE REACTION_TYPE
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
    INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
-   INTEGER :: PAIR_INDEX                    !< Paired reaction for 2-step chemistry
+   INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
