@@ -6198,6 +6198,55 @@ The left compartment is initialized with a temperature of \SI{100}{\degreeCelsiu
 \label{fig_HVAC_mass_transport_energy}
 \end{figure}
 
+\chapter{Wildland Fire Spread}
+
+This chapter deals with verification cases which are specific to solving problems related to wildland and Wildland-Urban Interface (WUI) fires. Currently, some relevant verification tests can also be found in other sections (light blue links refer to the User's Guide):
+\begin{itemize}
+  \item Convective heating in vegetation: Figure~\ref{UG-ground_vegetation_conv};
+  \item Radiation attenuation by vegetation: Figure~\ref{fig_radiation_gas-veg_consistency} and Figure~\ref{UG-ground_vegetation_radi};
+  \item Mass and energy conservation in burning vegetation: Figure~\ref{UG-char_oxidation_2_fig} and Figure~\ref{UG-pine_needles_fig}.
+\end{itemize}
+
+\section{Level Set Model}
+
+The level set model refers to an approach for solving parameterized fire spread over a surface using a Eulerian approach to front tracking~\cite{Rehm:LevelSet}. FDS allows for several levels of complexity in level set simulations, and the sections here deal with verification of relevant aspects.
+
+\subsection{Elliptical Fire Spread}
+One possible approach for advancing the fire front, and the default for level set in FDS, is to assume that point ignitions grow in an elliptical shape. Thus, the spread rate at any point along the front can be determined by assuming elliptical growth from this point (Huygens' principle)~\cite{Richards:1990,Finney:FARSITE}. The shape of the ellipse is determined by the Rothermel fire spread equation~\cite{Rothermel:1972} and empirical assumptions regarding the length-to-breadth ratio~\cite{Anderson:1983} and the head-to-backing fire spread ratio~\cite{Finney:FARSITE}. The orientation of the ellipse at a given point along the fireline is determined by the angle between the normal vector to the fireline and the vector summation of the wind and slope direction (with slope treated as an effective wind). Further details of the relevant equations and the solution technique employed in FDS can be found in Bova et al.~\cite{Bova:IJWF2015}.
+
+In the simplest configuration of a static uniform wind field ({\ct LEVEL\_SET\_MODE = 1}), a uniform slope, and a uniform fuel it is possible to solve the equations for elliptical spread directly and to calculate the spread in all directions from a point ignition. This allows verification of the algorithm in FDS. Four cases are configured to test the influence of wind and slope:
+
+\begin{itemize}
+  \item {\ct LS\_ellipse\_0ms\_00deg.fds}: no wind and no slope;
+  \item {\ct LS\_ellipse\_5ms\_00deg.fds}: a \SI[per-mode=symbol]{5}{\meter\per\second} wind from the west and no slope;
+  \item {\ct LS\_ellipse\_0ms\_30deg.fds}: no wind and a \SI{30}{\degree} slope oriented to the northeast;
+  \item {\ct LS\_ellipse\_5ms\_30deg.fds}: a \SI[per-mode=symbol]{5}{\meter\per\second} wind from the west and a \SI{30}{\degree} slope oriented to the northeast.
+\end{itemize}
+
+The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{1}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}. 
+
+The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. The relative errors between the FDS cases and the empirical model are shown in Figure~\ref{fig:level_set_ellipse_error}.
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/level_set_ellipse_00deg.pdf}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/level_set_ellipse_30deg.pdf}\\
+\end{tabular}
+\end{center}
+ \caption{Expected versus predicted shape of fire front after a period of \SI{10}{\second}. The cases on the left are for zero slope, and those on the right have \SI{30}{\degree} slope oriented to the northeast.}
+\label{fig:level_set_ellipse}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/level_set_ellipse_error.pdf}&
+\end{tabular}
+\end{center}
+ \caption{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
+\label{fig:level_set_ellipse_error}
+\end{figure}
 
 % Unstructured geometry verification tests:
 
