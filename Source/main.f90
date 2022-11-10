@@ -341,7 +341,7 @@ ENDDO
 
 ! Exchange information at mesh boundaries related to the various initialization routines just completed
 
-IF (.NOT.FREEZE_VELOCITY) THEN
+IF (LEVEL_SET_MODE/=1) THEN
    CALL MESH_EXCHANGE(1)
    CALL MESH_EXCHANGE(4)
    CALL MESH_EXCHANGE(6)
@@ -601,7 +601,7 @@ MAIN_LOOP: DO
 
       ! Exchange species mass fractions at interpolated boundaries.
 
-      IF (.NOT.FREEZE_VELOCITY) CALL MESH_EXCHANGE(1)
+      IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(1)
 
       ! Exchange level set values, if necessary
 
@@ -663,7 +663,7 @@ MAIN_LOOP: DO
 
       ! Solve for the pressure at the current time step
 
-      IF (.NOT.FREEZE_VELOCITY) CALL PRESSURE_ITERATION_SCHEME
+      IF (LEVEL_SET_MODE/=1) CALL PRESSURE_ITERATION_SCHEME
 
       ! Predict the velocity components at the next time step
 
@@ -714,7 +714,7 @@ MAIN_LOOP: DO
 
    ! Exchange velocity and pressures at interpolated boundaries
 
-   IF (.NOT.FREEZE_VELOCITY) CALL MESH_EXCHANGE(3)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(3)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -766,7 +766,7 @@ MAIN_LOOP: DO
 
    ! Exchange species mass fractions.
 
-   IF (.NOT.FREEZE_VELOCITY) CALL MESH_EXCHANGE(4)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(4)
    IF (LEVEL_SET_MODE>0) CALL MESH_EXCHANGE(14)
 
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
@@ -861,7 +861,7 @@ MAIN_LOOP: DO
 
    ! Solve the pressure equation.
 
-   IF (.NOT.FREEZE_VELOCITY) CALL PRESSURE_ITERATION_SCHEME
+   IF (LEVEL_SET_MODE/=1) CALL PRESSURE_ITERATION_SCHEME
 
    ! Update the  velocity.
 
@@ -876,7 +876,7 @@ MAIN_LOOP: DO
 
    ! Exchange velocity, pressure, particles at interpolated boundaries
 
-   IF (.NOT.FREEZE_VELOCITY) CALL MESH_EXCHANGE(6)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(6)
 
    ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
 
