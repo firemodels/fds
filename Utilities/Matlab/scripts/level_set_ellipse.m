@@ -145,11 +145,11 @@ for slope=slope_angle
     lh=legend();
     set(lh,'FontSize',Key_Font_Size,'location','southeast')
     % add annotations for wind and slope direction
-    annotation('textarrow',[0.2,0.3],[0.2,0.2],'String','U',...
+    annotation('textarrow',[0.25,0.35],[0.2,0.2],'String','wind',...
         'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
     if slope>0
-        annotation('textarrow',[0.35,0.35+0.1*cosd(theta_s)],[0.2,0.2+0.1*sind(theta_s)],...
-            'String','\Phi','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+        annotation('textarrow',[0.45,0.45+0.1*cosd(theta_s)],[0.23,0.23+0.1*sind(theta_s)],...
+            'String','slope','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
     end
 
    % add Git revision
