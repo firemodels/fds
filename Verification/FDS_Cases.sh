@@ -787,6 +787,10 @@ $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
+$QFDS -d WUI LS_ellipse_0ms_00deg.fds
+$QFDS -d WUI LS_ellipse_5ms_00deg.fds
+$QFDS -d WUI LS_ellipse_0ms_30deg.fds
+$QFDS -d WUI LS_ellipse_5ms_30deg.fds
 $QFDS -d WUI Morvan_TGA.fds
 $QFDS -d WUI Morvan_TGA_2.fds
 $QFDS -d WUI Needle_TGA_A.fds
