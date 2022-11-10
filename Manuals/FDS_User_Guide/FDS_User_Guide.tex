@@ -2850,16 +2850,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 
 \chapter{Fire and Thermal Boundary Conditions}
 
-This chapter describes how to specify the thermal properties of solid objects. This is
-the most challenging part of setting up the simulation. Why?  First,
-for both real and simulated fires, the growth of the fire is very
-sensitive to the thermal properties of the surrounding
-materials. Second, even if all the material properties are known to
-some degree, the physical phenomena of interest may not be simulated
-properly due to limitations in the model algorithms or resolution of
-the numerical mesh. It is your responsibility to supply the thermal
-properties of the materials, and then assess the performance of the
-model to ensure that the phenomena of interest are being captured.
+This chapter describes how to specify the thermal properties of solid objects. 
 
 
 \section{Basics}
@@ -2982,7 +2973,7 @@ For some special applications, it is often desired that a solid surface be adiab
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
 
 
-
+\newpage
 
 \section{Heat Conduction in Solids}
 \label{info:MATL}
@@ -3198,7 +3189,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \label{info:ht3d}
 \label{ht3d_demo}
 
-The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. 
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate.
 
 FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
@@ -3206,9 +3197,11 @@ FDS does have a limited 3-D heat conduction capability that is appropriate for s
 &SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. 
+The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells.
 
 The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
+
+\subsubsection{Example: Steel Assembly}
 
 Figure~\ref{fig:ht3d_demo} displays a simple test case in which a steel assembly is heated by a small hot object. The plot at right asserts that the net heat flux integrated over the surface is equal to the heat absorbed by the solid:
 \be
@@ -3231,23 +3224,51 @@ The integral on the left hand side of Eq.~(\ref{ebalance}) is evaluated in FDS u
 \end{lstlisting}
 The volume enclosed by {\ct XB} encompasses the entire assembly. The integral on the right is evaluated by:
 \begin{lstlisting}
-&DEVC ID='...', XB=..., QUANTITY='WALL ENTHALPY', IOR=3, SURF_ID='STEEL SLAB' 
+&DEVC ID='...', XB=..., QUANTITY='WALL ENTHALPY', IOR=3, SURF_ID='STEEL SLAB'
       SPATIAL_STATISTIC='SURFACE INTEGRAL', RELATIVE=T, CONVERSION_FACTOR=10000,  /
 \end{lstlisting}
 The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the {\ct IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the {\ct CONVERSION\_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter {\ct RELATIVE=T} means that only the change in enthalpy is desired.
-. 
+.
+
+\subsubsection{Example: Uncoated Structural Steel}
+
+Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
+\begin{lstlisting}
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /  Web
+&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB' /  Upper Flange
+&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB' /  Lower Flange
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+\end{lstlisting}
+
+\begin{figure}[!ht]
+\setlength{\unitlength}{1mm}
+\begin{picture}(30,70)(40,15)
+\put(51,21){\framebox(2,58){ }}
+\put(41,76){\framebox(22,3){ }}
+\put(41,21){\framebox(22,3){ }}
+\end{picture}
+\includegraphics[height=2.6in]{FIGURES/ht3d_beam_heating_1_wire_2}
+\includegraphics[height=2.6in]{FIGURES/ht3d_beam_heating_1_wire_1}
+\caption[Schematic diagram of an I-beam]{(Left) Cross section of an I-beam. (Center) 3-D representation of the beam. (Right) FDS approximated thin obstructions.}
+\label{fig:ht3d_beaming_heating}
+\end{figure}
+
+
+\subsubsection{Example: Coated Structural Steel}
+
+An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
+\begin{lstlisting}
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /
+&OBST XB=0.12,1.88,0.50,0.54,0.21,0.79, SURF_ID='WEB INSULATION' /
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', 
+      CELL_SIZE=0.1, HEAT_TRANSFER_COEFFICIENT=20 /
+&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE', 
+      THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
+\end{lstlisting}
 
 
 
-
-
-
-
-
-
-
-
-
+\newpage
 
 \section{Simple Pyrolysis Models}
 
@@ -3334,7 +3355,7 @@ Finally, if you desire that the burning stop if the surface temperature drops be
 
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}.
+FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}.
 
 An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
 
@@ -3369,6 +3390,9 @@ An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}
 \caption[Demonstration of extrapolating cone test data to other heat fluxes.]{Demonstration of extrapolating cone test data to other heat fluxes.}
 \label{fig:cone_demo}
 \end{figure}
+
+
+\newpage
 
 \section{Complex Pyrolysis Models}
 \label{info:solid_pyrolysis}
@@ -3771,7 +3795,7 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 
 
 
-
+\newpage
 
 
 \section{Testing Your Pyrolysis Model}
@@ -3869,15 +3893,13 @@ Details of the output quantities are discussed in Section~\ref{info:material_com
 \section{Pyrolysis and Energy Conservation}
 \label{solid_phase_energy_conservation}
 
-The physical meaning of the {\ct HEAT\_OF\_REACTION} is the energy gained or loss to change the material into the resulting residue(s) and/or gas(es). In other words the {\ct HEAT\_OF\_REACTION} is the enthalpy of the products at the current solid temperature minus the enthalpy of the initial material at the current solid temperature. For total internal energy to be conserved, this must hold true. A challenge is that while the heat of reaction may be known for a solid material, detailed knowledge of the material enthalpy or the enthalpy of any residue or gaseous products is often not known. In cases where a reference enthalpy for a materials is known, one can input on the {\ct MATL} line the {\ct REFERENCE\_ENTHALPY} in kJ/kg and the {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} in $^\circ$C.
+The {\ct HEAT\_OF\_REACTION} is the energy gained or lost in converting the material to residue(s) and/or gas(es). In other words the {\ct HEAT\_OF\_REACTION} is the enthalpy of the products at the current solid temperature minus the enthalpy of the initial material at the current solid temperature. For total internal energy to be conserved, this must hold true. A challenge is that while the heat of reaction may be known for a solid material, detailed knowledge of the material enthalpy or the enthalpy of any residue or gaseous products is often not known. In cases where a reference enthalpy for a material is known, you can input on the {\ct MATL} line the {\ct REFERENCE\_ENTHALPY} in kJ/kg and the {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} in $^\circ$C.
 
 FDS will attempt to adjust all material enthalpies so that internal energy is conserved. For each material reaction a linear equation is defined:
-
 \be
 H_{\rm x} \left(T_{\rm ref} \right) + H_{\rm x,adj} + H_{\rm x,r} \left(T_{\rm ref} \right) = \sum_{i=1}^{\rm N\_residues} \nu_{\rm i} \left( H_{\rm i} \left(T_{\rm ref} \right) + H_{\rm i,adj}  \right) +
 \sum_{j=1}^{\rm N\_species} \nu_{\rm j}  H_{\rm j} \left(T_{\rm ref} \right)
 \ee
-
 where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the {\ct HEAT\_OF\_REACTION}, $T_{\rm ref}$ is the temperature at which the {\ct HEAT\_OF\_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct entahlpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined {\ct SPECIFIC\_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Section~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pryolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on {\ct REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on {\ct REAC}, FDS adjusts the species enthalpy so that the correct {\ct HEAT\_OF\_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
 
 The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is overdetermined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactios, then the system is underdetertmined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude.
