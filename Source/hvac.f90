@@ -67,6 +67,7 @@ SUBROUTINE READ_HVAC
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 INTEGER , PARAMETER :: MAX_DUCTS = 20 !< Maximum number of ducts connected to a node
+INTEGER , PARAMETER :: MAX_WAYPOINTS = 30 !< Maximum number of ducts connected to a node
 INTEGER :: IOS !< Used for returning the status of a READ statement
 INTEGER :: IZERO !< Used for returning the status of an ALLOCATE statement
 INTEGER :: N_HVAC_READ !< Counter for number of HVAC inputs that have been read in
@@ -80,6 +81,7 @@ INTEGER :: N_CELLS !< Number of cells in a DUCT with HVAC_MASS_TRANSPORT
 REAL(EB) :: AREA !< Area (m2) of a DUCT.
 REAL(EB) :: DIAMETER !< Diameter (m) of a DUCT.
 REAL(EB) :: XYZ(3) !< Position (m) of a DUCTNODE.
+REAL(EB) :: WAYPOINTS(MAX_WAYPOINTS,3) !< Waypoint locations for a DUCT.
 REAL(EB) :: LOSS(MAX_DUCTS,MAX_DUCTS) !< Array of flow losses for a DUCT or DUCTNODE.
 REAL(EB) :: VOLUME_FLOW !< Fixed volume flow (m3/s) for a FAN or a DUCT.
 REAL(EB) :: MAX_FLOW !< Flow at zero pressure (m3/s) for a quadratic FAN.
@@ -117,6 +119,7 @@ CHARACTER(LABEL_LENGTH) :: DUCT_ID(MAX_DUCTS) !<IDs of DUCTs connected to a DUCT
 CHARACTER(LABEL_LENGTH) :: FAN_ID !< ID of a FAN located in a DUCT.
 CHARACTER(LABEL_LENGTH) :: FILTER_ID !< ID of a FILTER located at a DUCTNODE.
 CHARACTER(LABEL_LENGTH) :: ID !< Name of an HVAC component
+CHARACTER(LABEL_LENGTH) :: NETWORK_ID !< Network that HVAC component belongs to
 CHARACTER(LABEL_LENGTH) :: NODE_ID(2) !< IDs of the nodes for each end of a DUCT.
 CHARACTER(LABEL_LENGTH) :: RAMP_ID !< Name of a RAMP for DUCT flow, FAN curve, or AIRCOIL heat exchange.
 CHARACTER(LABEL_LENGTH) :: RAMP_LOSS !< Name of a RAMP for the flow loss of a variable damper where T=damper position and F=loss.
@@ -131,9 +134,9 @@ NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT
                 DAMPER,DEVC_ID,DIAMETER,DISCHARGE_COEFFICIENT,DUCT_ID,&
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,&
                 LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
-                MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NODE_ID,PERIMETER,&
+                MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NETWORK_ID,NODE_ID,PERIMETER,&
                 RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,SURF_ID,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
-                TYPE_ID,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
+                TYPE_ID,WAYPOINTS,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
 
 TNOW=CURRENT_TIME()
 
@@ -244,6 +247,11 @@ DO NN=1,N_HVAC_READ
          I_DUCT = I_DUCT + 1
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
+         IF (NETWORK_ID=='null') THEN
+            DU%NETWORK_ID='HVAC'
+         ELSE
+            DU%NETWORK_ID=NETWORK_ID
+         ENDIF
          IF (TRIM(ID)=='null' ) THEN
             WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -406,6 +414,29 @@ DO NN=1,N_HVAC_READ
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
          ENDIF
+         IF (ANY(WAYPOINTS>-1.E10_EB) THEN
+            DO N=1,MAX_WAYPOINTS
+               IF (ANY(WAYPOINTS(MAX_WAYPOINTS,1:3) >-1E.10_EB)) THEN
+                  IF (ALL(WAYPOINTS(MAX_WAYPOINTS,1:3) >-1E.10_EB)) THEN
+                     DU%N_WAYPOINTS = DU%N_WAYPOINTS + 1
+                  ELSE
+                     WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Waypoint number ',DU%N_WAYPOINTS+1', for duct ID: ',TRIM(DU%ID),&
+                                                 ' does not have all three coordinates specified.'
+                     CALL SHUTDOWN(MESSAGE); RETURN                     
+                  ENDIF
+               ELSE
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (DU%N_WAYPOINTS > 0) THEN
+               ALLOCATE(DU%WAYPOINTS_XYZ(DU%N_WAYPOINTS,3))
+               ALLOCATE(DU%WAYPOINTS_L(DU%N_WAYPOINTS))
+               DU%WAYPOINTS_L = 0._EB
+               DO N = 1,DU%N_WAYPOINTS
+                  DU%WAYPOINTS_XYZ(N,1:3) = WAYPOINTS(N,1:3)
+               ENDDO
+            ENDIF
+         ENDIF
 
       CASE('NODE')
          I_DUCTNODE = I_DUCTNODE + 1
@@ -413,6 +444,11 @@ DO NN=1,N_HVAC_READ
          NODE_FILTER_A(I_DUCTNODE) = FILTER_ID
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = ID
+         IF (NETWORK_ID=='null') THEN
+            DN%NETWORK_ID='HVAC'
+         ELSE
+            DN%NETWORK_ID=NETWORK_ID
+         ENDIF
          IF (TRIM(ID)=='null' ) THEN
             WRITE(MESSAGE,'(A,I5)') 'ERROR: Ductnode has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -704,6 +740,7 @@ TAU_AC       = TAU_DEFAULT
 TAU_FAN      = TAU_DEFAULT
 TAU_VF       = TAU_DEFAULT
 TRANSPORT_PARTICLES = .FALSE.
+WAYPOINTS    = -1.E10_EB
 VENT_ID      = 'null'
 VENT2_ID     = 'null'
 VOLUME_FLOW  = 1.E7_EB
@@ -3530,7 +3567,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_ENTHALPY
 LOGICAL, INTENT(IN) :: CHANGE
 INTEGER :: NN,NR,NF,NN3,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),&
            DR_DUCTS(N_DUCTS),DR_DUCTNODES(N_DUCTS),DUCTRUN_MAP(N_DUCTS),DR_INDEX
-LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS),MT_PRESENT(N_DUCTS)
+LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS)!,MT_PRESENT(N_DUCTS)
 REAL(EB) :: C0,ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
@@ -3546,7 +3583,7 @@ DUCT_COUNTER=0
 NODE_COUNTER=0
 FAN_PRESENT=.FALSE.
 NODE_CONNECTED=.FALSE.
-MT_PRESENT = .FALSE.
+!MT_PRESENT = .FALSE.
 NODE_CHECKED=.FALSE.
 
 DUCT%QFAN_INDEX = -1
@@ -3762,16 +3799,16 @@ DO NR = 1, N_DUCTRUNS
 ENDDO
 
 ! If HVAC_MASS_TRANSPORT in a duct run make sure all ducts have at least one cell.
-DO NR = 1, N_DUCTRUNS
-   IF (.NOT. MT_PRESENT(NR)) CYCLE
-   DO ND = 1,DUCTRUN(NR)%N_DUCTS
-      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: DUCT ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID), &
-            'has N_CELLS=0 and is in a ductrun with ducts that have N_CELLS>0'
-         CALL SHUTDOWN(MESSAGE); RETURN
-      ENDIF
-   ENDDO
-ENDDO
+!DO NR = 1, N_DUCTRUNS
+!   IF (.NOT. MT_PRESENT(NR)) CYCLE
+!   DO ND = 1,DUCTRUN(NR)%N_DUCTS
+!      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
+!         WRITE(MESSAGE,'(A,A,A)') 'ERROR: DUCT ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID), &
+!            'has N_CELLS=0 and is in a ductrun with ducts that have N_CELLS>0'
+!         CALL SHUTDOWN(MESSAGE); RETURN
+!      ENDIF
+!   ENDDO
+!ENDDO
 
 !DO NR=1,N_DUCTRUNS
 !   WRITE(*,*) 'DR:',NR,DUCTRUN(NR)%N_DUCTS,DUCTRUN(NR)%N_M_DUCTS,DUCTRUN(NR)%N_DUCTNODES,&
