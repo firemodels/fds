@@ -2430,6 +2430,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       MFT = 0._EB
 
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
+      !***** Move t-scale outside loop so inside loop do not have to evaluate again for mulitple fuels
 
       SUM_MASSFLUX_LOOP: DO N=1,N_TRACKED_SPECIES
          IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
@@ -3096,6 +3097,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 ELSEIF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN PYROLYSIS_PREDICTED_IF
 
    ! Take off energy corresponding to specified burning rate
+   !***** Figure out what to do for adjust if different spec have different HOC
 
    Q_S(1) = Q_S(1) - ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*SF%H_V/DX_S(1)
 
@@ -4133,7 +4135,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       IF (ML%NU_O2_CHAR(J)>0._EB) THEN
          IF (SIMPLE_CHEMISTRY) THEN
-            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(REACTION(1)%AIR_SMIX_INDEX)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
+            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(1)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
          ELSE
             Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(O2_INDEX)*H_R/ML%NU_O2_CHAR(J))
          ENDIF
