@@ -1765,7 +1765,11 @@ The simulations are performed with a spatial resolution of 4~cm. The enclosures 
 \begin{equation}
     \dot{V} = C \, A \, \left( \frac{2 \Delta p}{\rho_0} \right)^{0.5} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{0.1} \label{leak_eq}
 \end{equation}
-The discharge coefficient, $C=0.61$, is recommended by the manufacturer of the calibrated fan used for determining the leakage area, $A$. The extra pressure term in the expression represents a weak relationship between the discharge coefficient and the pressure rise. The pressure exponent of 0.6 best fits the leakage data. The reference pressure, $\Delta p_{\rm ref}$, is taken as 1~Pa to maintain unit consistency.
+The discharge coefficient, $C=0.61$, is recommended by the manufacturer of the calibrated fan used for determining the leakage area, $A$. The extra pressure term in the expression represents a weak relationship between the discharge coefficient and the pressure rise. The pressure exponent of 0.6 best fits the leakage data. The reference pressure, $\Delta p_{\rm ref}$, is taken as 1~Pa to maintain unit consistency. The measured leakage is applied using four ``patches,'' two above the neutral plane and two below. Because there is no way to determine the exact distribution of the leakage, the specification of the leakage area to the upper and lower patches is based on roughly matching the gas concentrations early in the simulation when the enclosure is well-ventilated. There is still considerable uncertainty in the leakge distribution and the amount of leakage because during the experiments the gaps and seams of the enclosures tended to open up as the gases within heated.
+
+The combustion of natural gas (assumed to be methane) within the enclosures is modeled using the two-step simple chemistry algorithm. That is, the first reaction converts methane to CO, soot, and water vapor, and the second step converts the CO and soot to CO$_2$, assuming enough oxygen is present following the first reaction. By default, two-thirds of the carbon atoms in the fuel molecule are converted to CO in the first step; the rest to soot.
+
+Extinction is modeled using the ``Extinction 1'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 540~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 540~$^\circ$C is reported in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
 
 \FloatBarrier
