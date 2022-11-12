@@ -1615,7 +1615,7 @@ TYPE DUCT_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C          !< Current species mass fractions in each duct segment
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C_OLD      !< Prior timestep species mass fractions in each duct segment
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WAYPOINTS_XYZ !< Waypoints for a duct (m)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WAYPOINTS_L   !< Normalized length of duct between waypoints (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WAYPOINTS_L   !< Length of duct between waypoints (m)
    LOGICAL :: DAMPER = .FALSE.                            !< Duct contains a damper
    LOGICAL :: DAMPER_OPEN = .TRUE.                        !< Duct damper is open
    LOGICAL :: FAN_OPERATING=.TRUE.                        !< Duct fan is operating
