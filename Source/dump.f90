@@ -2472,12 +2472,12 @@ SPEC_LOOP: DO N=1,N_SPECIES
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
          IF (SS%CONDENSABLE) WRITE(LU_OUTPUT,'( 3X,A)') 'Condensable Species'
    END SELECT
-   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)             ',SS%MW
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)             ',SS%MW*P_INF/(TMPA*R0)
    IF (SS%H_F < -1.E23_EB) THEN
-      WRITE(LU_OUTPUT,'(A,A)')    '   Enthalpy of Formation (J/kg)     ','not specified'
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
    ELSE
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'           Enthalpy of Formation (J/kg) ',SS%H_F
    ENDIF
 ENDDO SPEC_LOOP
 
@@ -2600,9 +2600,8 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
 
    IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
-      WRITE(LU_OUTPUT,'(/3X,A)') 'Multiple step reaction'
-      WRITE(LU_OUTPUT,'(3X,A)')  'Fuel                                        Total Heat of Combustion (kJ/kg)'
-      WRITE(LU_OUTPUT,'(3X,A,4X,F12.4)') REACTION(RN%PAIR_INDEX)%FUEL,REACTION(RN%PAIR_INDEX)%HOC_COMPLETE/1000._EB
+      WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
+         RN%HOC_COMPLETE/1000._EB
    ENDIF
 
    WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
@@ -6763,9 +6762,12 @@ IND_SELECT: SELECT CASE(IND)
                 GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + ZZ(II,JJ,KK,REACTION(NR)%PROD_SMIX_INDEX)/(1._EB+REACTION(NR)%S)
                 ! Two step second products
                 GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + ZZ(II,JJ,KK,REACTION(REACTION(NR)%PAIR_INDEX)%PROD_SMIX_INDEX)/ &
-                   (1._EB+REACTION(NR)%S)
+                   ((1._EB+REACTION(NR)%S)*(1._EB+REACTION(REACTION(NR)%PAIR_INDEX)%S))
             ENDIF
          ENDIF
+         IF (.NOT. REACTION(NR)%SIMPLE_CHEMISTRY) &
+            GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + ZZ(II,JJ,KK,REACTION(NR)%FUEL_SMIX_INDEX) + &
+                                   ZZ(II,JJ,KK,REACTION(NR)%PROD_SMIX_INDEX)/(1._EB+REACTION(NR)%S)
       ENDDO
    CASE(14)  ! DIVERGENCE
       GAS_PHASE_OUTPUT_RES = D(II,JJ,KK)

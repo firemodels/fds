@@ -1308,7 +1308,6 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ! Compute equilibrium vapor mass fraction
             X_CLOUD  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_G)))
             Y_CLOUD  = X_CLOUD/(MW_RATIO + (1._EB-MW_RATIO)*X_CLOUD)
-
             RVC = RDX(I)*RRN(I)*RDY(J)*RDZ(K)
             IF (Y_GAS > Y_CLOUD) THEN
                IF (ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE ILOOP
@@ -1378,7 +1377,6 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
       I = BC%IIG
       J = BC%JJG
       K = BC%KKG
-
       IF (ONE_D%AWM_AEROSOL(SS%AWM_INDEX) < TWO_EPSILON_EB .AND. ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE WALL_LOOP
 
       DHOR = H_V_B*SS%MW/R0
