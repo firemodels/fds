@@ -2442,18 +2442,21 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
-            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
-               IF (PREDICTOR) THEN
-                  RP => RAMPS(SF%RAMP_INDEX(N))
-                  
-                  IF (SF%EMISSIVITY > 0._EB) THEN
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
-                  ELSE
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
+            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>1) THEN
+               IF( N==REACTION(1)%FUEL_SMIX_INDEX) THEN
+                  IF (PREDICTOR) THEN
+                     RP => RAMPS(SF%RAMP_INDEX(N))               
+                     IF (SF%EMISSIVITY > 0._EB) THEN
+                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
+                     ELSE
+                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
+                     ENDIF
+                     CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
+                     ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
+                     ONE_D%Q_SCALE = Q_NEW
                   ENDIF
-                  CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
-                  ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
-                  ONE_D%Q_SCALE = Q_NEW
+               ELSE
+                  ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
                ENDIF
             ELSE
                ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
