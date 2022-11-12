@@ -1508,6 +1508,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX        !< List of ducts attached to the node
    CHARACTER(LABEL_LENGTH) :: ID                           !< Name of the node
+   CHARACTER(LABEL_LENGTH) :: NETWORK_ID                   !< Network node belongs to
    CHARACTER(LABEL_LENGTH) :: VENT_ID='null'               !< Name of a VENT the node is attached to
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LOSS_ARRAY     !< (i,j) Flow loss for flow from duct i to duct j
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FILTER_LOADING !< (loading for each species, old/new/guess)
@@ -1577,7 +1578,6 @@ TYPE DUCT_TYPE
    INTEGER :: DUCTRUN=-1                                  !< Ductrun duct belongs to
    INTEGER :: DUCTRUN_INDEX=-1                            !< Index in ductrun duct belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
-   INTEGER :: N_HT_SEGMENTS=0                             !< Number of heat trasnfer segments
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
    REAL(EB) :: AREA_OLD                                   !< Prior timestep duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
@@ -1633,6 +1633,7 @@ TYPE DUCT_TYPE
    LOGICAL :: DUCT_HT=.FALSE.                             !< Duct heat transfer
    LOGICAL :: ROUND=.TRUE.                                !< Duct is a round duct
    CHARACTER(LABEL_LENGTH) :: ID                          !< Name of duct
+   CHARACTER(LABEL_LENGTH) :: NETWORK_ID                  !< Network duct belongs to
    REAL(EB) :: FAN_ON_TIME = 1.E10_EB                     !< Time fan in duct is turned on
    REAL(EB) :: COIL_ON_TIME = 1.E10_EB                    !< Time aircoil in duct is turned on
 END TYPE DUCT_TYPE
