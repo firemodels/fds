@@ -2812,10 +2812,17 @@ DO N=1,N_SPECIES - N_COPY_PRIMITIVE
 
    ! If cp has been defined but no reference enthalpy or heat of formation, set a reference enthalpy
    IF ((SS%RAMP_CP/='null' .OR. SS%SPECIFIC_HEAT > 0._EB) .AND. &
-       (SS%REFERENCE_ENTHALPY < -1.E20_EB .AND. SS%H_F < -1.E20_EB)) SS%REFERENCE_ENTHALPY = 0._EB
+       (SS%REFERENCE_ENTHALPY < -1.E20_EB .AND. H_F_IN < -1.E20_EB)) THEN
+      SS%REFERENCE_ENTHALPY = 0._EB
+      SS%REFERENCE_TEMPERATURE = 0._EB
+      SS%H_F = -1.E23_EB
+       ENDIF
 
    ! If no CP is given and species not listed, will use gamma to get cp and will need a reference enthalpy
-   IF (SS%RAMP_CP=='null' .AND. SS%SPECIFIC_HEAT <= 0._EB .AND. .NOT. SS%LISTED) SS%REFERENCE_ENTHALPY = 0._EB
+   IF (SS%RAMP_CP=='null' .AND. SS%SPECIFIC_HEAT <= 0._EB .AND. .NOT. SS%LISTED) THEN
+      SS%REFERENCE_ENTHALPY = 0._EB
+      SS%REFERENCE_TEMPERATURE = 0._EB
+   ENDIF
 
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I0)') 'SPEC_',N
 
@@ -4897,6 +4904,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDDO
          RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION / SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
       ENDIF
+      RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
 
    ELSE SIMPLE_CHEMISTRY_IF ! Simple chemistry reaction
    
