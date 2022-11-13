@@ -8,16 +8,16 @@
 &TIME TIME_SHRINK_FACTOR=2., T_END=2400. /
 &DUMP DT_DEVC=20., DT_HRR=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&COMB RADIATIVE_FRACTION=0., EXTINCTION_MODEL='EXTINCTION 1', N_SIMPLE_CHEMISTRY_REACTIONS=2 /
+&COMB EXTINCTION_MODEL='EXTINCTION 1'/
 
-&REAC FUEL='ISOPROPANOL' /
+&REAC RADIATIVE_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL='ISOPROPANOL' /
 
 &SURF ID='WALL', MATL_ID='K-LITE HTZ','STEEL', THICKNESS=0.05,0.001, COLOR='ANTIQUE WHITE', DEFAULT=.TRUE. /
 &SURF ID='STEEL SHEET', MATL_ID='STEEL','K-LITE HTZ', THICKNESS=0.00635,0.025, COLOR='BLACK' /
 &SURF ID='CONCRETE', MATL_ID='CONCRETE', THICKNESS=0.3, COLOR='GRAY 40'/
 
 &PART ID='droplets', SPEC_ID='ISOPROPANOL', DIAMETER=200. /
-&PROP ID='nozzle', PART_ID='droplets', FLOW_RATE=2.51, FLOW_RAMP='fire_ramp', 
+&PROP ID='nozzle', PART_ID='droplets', FLOW_RATE=2.51, FLOW_RAMP='fire_ramp',
       PARTICLE_VELOCITY=3., SPRAY_ANGLE=35.,45. /
 
 &RAMP ID='fire_ramp', T=   0., F=0.000 /
@@ -53,10 +53,10 @@
 &VENT XB= 0.0, 2.4,-2.4, 0.0, 3.3, 3.3, SURF_ID='OPEN'/
 &VENT XB= 0.0, 2.4, 0.0, 0.0,-0.3, 0.0, SURF_ID='OPEN'/
 &VENT XB= 0.0, 2.4, 0.0, 0.0, 2.4, 3.3, SURF_ID='OPEN'/
-                             
+
 &OBST XB= 0.0, 2.4,-0.1, 0.0,-0.1, 2.4 /
-&HOLE XB= 1.1, 1.3,-0.2, 0.1, 0.0, 2.0 / 
- VENT XB= 1.1, 1.3, 0.0, 0.0, 0.0, 2.0, SURF_ID='OPEN' / 
+&HOLE XB= 1.1, 1.3,-0.2, 0.1, 0.0, 2.0 /
+ VENT XB= 1.1, 1.3, 0.0, 0.0, 0.0, 2.0, SURF_ID='OPEN' /
 
 &OBST XB= 1.1, 1.3,-0.3,-0.1,-0.1, 0.0 /
 
@@ -129,12 +129,12 @@
 &DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'MASS FRACTION', DRY=.TRUE., SPEC_ID='SOOT',              ID = 'YsootR' /
 &DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'MASS FRACTION', DRY=.TRUE., SPEC_ID='SOOT',              ID = 'YsootF' /
 
-&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFRFL'  /  
-&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFFFL'  /  
-&DEVC XYZ = 1.20, -.20, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFOFL'  /  
-&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFRCE'  / 
-&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFCCE'  / 
-&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFFCE'  / 
+&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFRFL'  /
+&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFFFL'  /
+&DEVC XYZ = 1.20, -.20, 0.00, QUANTITY = 'GAUGE HEAT FLUX', IOR= 3,                                ID = 'HFOFL'  /
+&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFRCE'  /
+&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFCCE'  /
+&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'GAUGE HEAT FLUX', IOR=-3,                                ID = 'HFFCE'  /
 
 &DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'WALL TEMPERATURE', IOR= 3,                               ID = 'TSHFRFL' /
 &DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'WALL TEMPERATURE', IOR= 3,                               ID = 'TSHFFFL' /
@@ -143,16 +143,16 @@
 &DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'WALL TEMPERATURE', IOR=-3,                               ID = 'TSHFCCE' /
 &DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'WALL TEMPERATURE', IOR=-3,                               ID = 'TSHFFCE' /
 
-&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'BACK WALL TEMPERATURE', IOR= 3,                          ID = 'TSXHFRFL' / 
-&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'BACK WALL TEMPERATURE', IOR= 3,                          ID = 'TSXHFFFL' / 
-&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFRCE' / 
-&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFCCE' / 
-&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFFCE' / 
+&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'BACK WALL TEMPERATURE', IOR= 3,                          ID = 'TSXHFRFL' /
+&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'BACK WALL TEMPERATURE', IOR= 3,                          ID = 'TSXHFFFL' /
+&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFRCE' /
+&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFCCE' /
+&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'BACK WALL TEMPERATURE', IOR=-3,                          ID = 'TSXHFFCE' /
 
-&DEVC XYZ = 1.20, 2.88, 0.03, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR3'   /  
-&DEVC XYZ = 1.20, 2.88, 0.30, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR30'  / 
-&DEVC XYZ = 1.20, 2.88, 0.60, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR60'  / 
-&DEVC XYZ = 1.20, 2.88, 0.90, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR90'  / 
+&DEVC XYZ = 1.20, 2.88, 0.03, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR3'   /
+&DEVC XYZ = 1.20, 2.88, 0.30, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR30'  /
+&DEVC XYZ = 1.20, 2.88, 0.60, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR60'  /
+&DEVC XYZ = 1.20, 2.88, 0.90, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR90'  /
 &DEVC XYZ = 1.20, 2.88, 1.05, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR105' /
 &DEVC XYZ = 1.20, 2.88, 1.20, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR120' /
 &DEVC XYZ = 1.20, 2.88, 1.35, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR135' /
@@ -160,11 +160,11 @@
 &DEVC XYZ = 1.20, 2.88, 1.80, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR180' /
 &DEVC XYZ = 1.20, 2.88, 2.10, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR210' /
 &DEVC XYZ = 1.20, 2.88, 2.38, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TR237' /
-                                                                                                                
-&DEVC XYZ = 1.20, 0.72, 0.03, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF3'   /  
-&DEVC XYZ = 1.20, 0.72, 0.30, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF30'  / 
-&DEVC XYZ = 1.20, 0.72, 0.60, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF60'  / 
-&DEVC XYZ = 1.20, 0.72, 0.90, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF90'  / 
+
+&DEVC XYZ = 1.20, 0.72, 0.03, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF3'   /
+&DEVC XYZ = 1.20, 0.72, 0.30, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF30'  /
+&DEVC XYZ = 1.20, 0.72, 0.60, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF60'  /
+&DEVC XYZ = 1.20, 0.72, 0.90, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF90'  /
 &DEVC XYZ = 1.20, 0.72, 1.05, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF105' /
 &DEVC XYZ = 1.20, 0.72, 1.20, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF120' /
 &DEVC XYZ = 1.20, 0.72, 1.35, QUANTITY = 'THERMOCOUPLE',                                           ID = 'TF135' /
