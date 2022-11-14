@@ -2442,7 +2442,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
-            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>1) THEN
+            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1) THEN
                IF( N==REACTION(1)%FUEL_SMIX_INDEX) THEN
                   IF (PREDICTOR) THEN
                      RP => RAMPS(SF%RAMP_INDEX(N))               
