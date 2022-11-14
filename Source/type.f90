@@ -506,7 +506,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
    REAL(EB) :: MEAN_DIAMETER
    REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
-   REAL(EB) :: REFERENCE_ENTHALPY=-2.E20_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY=-1.E30_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
    REAL(EB) :: THERMOPHORETIC_DIAMETER
    REAL(EB) :: REFERENCE_TEMPERATURE               !< Reference temperature of mixture (K)
    REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
@@ -533,7 +533,7 @@ TYPE SPECIES_MIXTURE_TYPE
 
    INTEGER :: AWM_INDEX = -1,RAMP_CP_INDEX=-1,SINGLE_SPEC_INDEX=-1,RAMP_K_INDEX=-1,RAMP_MU_INDEX=-1,RAMP_D_INDEX=-1,&
               RAMP_G_F_INDEX=-1,CONDENSATION_SMIX_INDEX=-1,EVAPORATION_SMIX_INDEX=-1,AGGLOMERATION_INDEX=-1
-   LOGICAL :: DEPOSITING=.FALSE.,VALID_ATOMS=.TRUE.,EVAPORATING=.FALSE.
+   LOGICAL :: DEPOSITING=.FALSE.,VALID_ATOMS=.TRUE.,EVAPORATING=.FALSE.,EXPLICIT_H_F=.FALSE.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
 
@@ -543,13 +543,11 @@ TYPE (SPECIES_MIXTURE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: SPECIES_MIXTUR
 
 TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
-   CHARACTER(LABEL_LENGTH) :: OXIDIZER    !< Name of reaction oxidizer (lumped) species
-   CHARACTER(LABEL_LENGTH) :: PRODUCTS    !< Name of reaction product (lumped) species
    CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
    CHARACTER(LABEL_LENGTH) :: RAMP_CFT    !< Name of ramp for critical flame temperature
    CHARACTER(LABEL_LENGTH) :: SPEC_ID_CFT !< Name of species for CFT ramp
-    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
@@ -568,13 +566,14 @@ TYPE REACTION_TYPE
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
-   REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
    REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
    REAL(EB) :: CO_YIELD                     !< CO yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: SOOT_YIELD                   !< Soot yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: H2_YIELD                     !< H2 yield in SIMPLE_CHEMISTRY model
    REAL(EB) :: HCN_YIELD                    !< HCN yield in SIMPLE_CHEMISTRY model
-   REAL(EB) :: SOOT_H_FRACTION              !< Mass fraction of hydrogen within soot
+   REAL(EB) :: FUEL_C_TO_CO_FRACTION        !< For 2-step simple chemistry, fuel C that goes to CO instead of C
+   REAL(EB) :: FUEL_H_TO_H2_FRACTION        !< For 2-step simple chemistry, fuel H that goes to H2 instead of H2O
+   REAL(EB) :: FUEL_N_TO_HCN_FRACTION       !< For 2-step simple chemistry fuel N that goes to HCN instead of N2
    REAL(EB) :: RHO_EXPONENT                 !< Exponent of density in reaction expression
    REAL(EB) :: CRIT_FLAME_TMP               !< Critical Flame Temperature (K)
    REAL(EB) :: AUTO_IGNIT_TMP               !< Reaction specific Auto Ignition Temperature (K)
@@ -595,10 +594,14 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S_READ        !< Holding array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
+   INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
+   INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
+   INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
+   INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
    INTEGER :: RAMP_CFT_INDEX=0              !< Index of critical flame temperature ramp
    INTEGER :: RAMP_CFT_SPEC_INDEX=0         !< Index of critical flame temperature ramp species
@@ -606,6 +609,7 @@ TYPE REACTION_TYPE
    LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
    LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
    LOGICAL :: FAST_CHEMISTRY=.FALSE.        !< Indicator of fast reaction
+   LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
    LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
 END TYPE REACTION_TYPE

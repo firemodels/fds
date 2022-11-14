@@ -1,12 +1,12 @@
-&HEAD CHID='NIST_CB_Test_2', TITLE='NFRL Composite beam test 2'  / 
+&HEAD CHID='NIST_CB_Test_2', TITLE='NFRL Composite beam test 2'  /
 
 &MESH IJK=32,30,40, XB=0.0,1.6,0.0,1.5,0.0,2.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=1.6, DY=1.5, DZ=2.0, I_LOWER=-4, I_UPPER=3, J_LOWER=-1, J_UPPER=0, K_UPPER=1 /
 
-&TIME T_END=6000, TIME_SHRINK_FACTOR=10 / 
+&TIME T_END=6000, TIME_SHRINK_FACTOR=10 /
 
-&COMB N_SIMPLE_CHEMISTRY_REACTIONS=2 /
-&REAC FUEL='METHANE' /
+
+&REAC N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL='METHANE' /
 
 &SURF ID='BURNER', HRRPUA=888.9, COLOR='BROWN', RAMP_Q='fire' /
 &RAMP ID='fire', T=   0., F=0.000 /
@@ -197,7 +197,7 @@
 &OBST XB= -6.3, -6.3, -0.1, 0.1, 0.00, 3.93, SURF_ID='COLUMN' /  west column, flange near the wall
 
 &OBST XB=  6.3,  6.3, -0.1, 0.1, 0.00, 3.93, SURF_ID='COLUMN' /  east column, flange near the wall
-&OBST XB=  6.3,  6.6,    0,   0, 0.00, 3.93, SURF_ID='COLUMN' /  east column, web 
+&OBST XB=  6.3,  6.6,    0,   0, 0.00, 3.93, SURF_ID='COLUMN' /  east column, web
 &OBST XB=  6.6,  6.6, -0.1, 0.1, 0.00, 3.93, SURF_ID='COLUMN' /  east column, flange away from wall
 
 &OBST XB= 6.15, 6.15, 0.2648,0.3448, 2.8664, 2.9464, SURF_ID6='PLATE FRONT','PLATE BACK','INERT','INERT','INERT','INERT' /
