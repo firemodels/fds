@@ -2441,7 +2441,7 @@ COUNT_SPEC_LINES: DO
          DEFINED_BACKGROUND = N_LUMPED
       ELSE
          WRITE(MESSAGE,'(A)') 'ERROR: Can only defined one BACKGROUND SPECies.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN         
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
 ENDDO COUNT_SPEC_LINES
@@ -2452,7 +2452,7 @@ ALLOCATE(SPEC_ID_READ(N_SPEC_READ))
 ! Get species names and do error checking
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 DO N=1,N_SPEC_READ
-   CALL SET_SPEC_DEFAULT   
+   CALL SET_SPEC_DEFAULT
    READ(LU_INPUT,NML=SPEC,IOSTAT=IOS)
    SPEC_ID_READ(N) = ID
    IF (BACKGROUND) THEN
@@ -2495,7 +2495,7 @@ DO N=1,N_SPEC_READ
    ENDIF
    IF (REFERENCE_ENTHALPY > -1.E20_EB .AND. ENTHALPY_OF_FORMATION > -1.E20_EB) THEN
       WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),', cannot define both REFERENCE_ENTHALPY and ENTHALPY_OF_FORMATION.'
-      CALL SHUTDOWN(MESSAGE) ; RETURN         
+      CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 !   IF (REFERENCE_ENTHALPY > -1.E20_EB .AND. (SPECIFIC_HEAT < 0._EB .AND. RAMP_CP=='null')) THEN
 !      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': REFERENCE_ENTHALPY requires SPECIFIC_HEAT or RAMP_CP'
@@ -2530,7 +2530,7 @@ DO N=1,N_SPEC_READ
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
-   
+
 ! Determined predefined species
 PREDEF_SPEC_IF: IF (SIMPLE_CHEMISTRY) THEN
    IF (.NOT. ANY(SPEC_ID_READ=='NITROGEN')) N_PREDEFINED = N_PREDEFINED + 1
@@ -2724,7 +2724,7 @@ DO N=1,N_SPECIES - N_COPY_PRIMITIVE
          NR2 = NR2 + 1
       ENDDO
    ENDIF
-   
+
    SS => SPECIES(N)
    SS%K_USER                      = CONDUCTIVITY
    SS%CONDUCTIVITY_SOLID          = CONDUCTIVITY_SOLID
@@ -2819,13 +2819,13 @@ DO N=1,N_SPECIES - N_COPY_PRIMITIVE
       SS%REFERENCE_TEMPERATURE = 0._EB
       SS%H_F = -1.E23_EB
    ENDIF
-   
+
 
    ! If no CP is given and species not listed, will use gamma to get cp and will need a reference enthalpy
    IF (SS%RAMP_CP=='null' .AND. SS%SPECIFIC_HEAT <= 0._EB .AND. .NOT. SS%LISTED) THEN
       SS%REFERENCE_ENTHALPY = 0._EB
       SS%REFERENCE_TEMPERATURE = 0._EB
-      SS%H_F = -1.E23_EB      
+      SS%H_F = -1.E23_EB
    ENDIF
 
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I0)') 'SPEC_',N
@@ -2922,7 +2922,7 @@ IF (N_COPY_PRIMITIVE > 0) THEN
       SPECIES(N_SPECIES - N_COPY_PRIMITIVE - N_SIMPLE_FUEL + N)%ID = ID
    ENDDO
 ENDIF
-         
+
 IF (N_AGGLOMERATION_SPECIES > 0) CALL INITIALIZE_AGGLOMERATION
 
 ! Setup SPECIES_MIXTURE Array
@@ -2982,7 +2982,7 @@ IF (N_TRACKED_SPECIES > N_PREDEFINED_SMIX) THEN
                IF (SPECIES(SPECIES_MIXTURE((N_DEFINE(N)))%SINGLE_SPEC_INDEX)%AWM_INDEX < 0) THEN
                   N_SURFACE_DENSITY_SPECIES = N_SURFACE_DENSITY_SPECIES + 1
                   SPECIES(SPECIES_MIXTURE((N_DEFINE(N)))%SINGLE_SPEC_INDEX)%AWM_INDEX = N_SURFACE_DENSITY_SPECIES
-               ENDIF               
+               ENDIF
             ENDIF
          ENDIF
          N = N + 1
@@ -3036,12 +3036,12 @@ ENDIF
 
 IF (N_PREDEFINED_SMIX > 0) THEN
    N = 1
-   CALL SETUP_PREDEFINED_SMIX(N,0) 
+   CALL SETUP_PREDEFINED_SMIX(N,0)
    IF (SIMPLE_CHEMISTRY) THEN
       N = 2
       DO NR=1,N_REACTIONS
          IF (.NOT. REACTION(NR)%SIMPLE_CHEMISTRY .OR. REACTION(NR)%PAIR_INDEX < NR) CYCLE
-         CALL SETUP_PREDEFINED_SMIX(N,NR) 
+         CALL SETUP_PREDEFINED_SMIX(N,NR)
       ENDDO
    ENDIF
 ENDIF
@@ -3243,7 +3243,7 @@ DO NS = 1,N_SUB_SPECIES
       IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(NS))) THEN
          SM%SPEC_ID(NS2) = SPECIES(NS2)%ID
          Y_INDEX(NS)  = NS2
-         IF (.NOT. (SS%LISTED .OR. SS%REFERENCE_ENTHALPY > -1.E23_EB .OR. SS%H_F >-1.E23_EB)) ALL_H_F = .FALSE.
+         IF (.NOT. SPECIES(Y_INDEX(NS))%EXPLICIT_H_F) ALL_H_F = .FALSE.
          IF (N_SUB_SPECIES==1) THEN
             SM%FORMULA = SPECIES(NS2)%FORMULA
             SM%SINGLE_SPEC_INDEX=NS2
@@ -3273,6 +3273,7 @@ DO NS = 1,N_SUB_SPECIES
          EXIT FIND_SPEC_ID
       ENDIF
    ENDDO FIND_SPEC_ID
+
    IF (Y_INDEX(NS)<0) THEN
       WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', sub species ',NS,' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -3454,7 +3455,7 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          ELSE
             NN = FINDLOC(SPECIES_MIXTURE%ID,RN%FUEL,1)
             FUEL_MW = SPECIES_MIXTURE(NN)%MW
-         ENDIF  
+         ENDIF
          CALL SET_SPEC_DEFAULT
          ID                 = RN%SPEC_ID_NU_READ(3)
          SUFFIX = LEN(TRIM(RN%SPEC_ID_NU_READ(3)))
@@ -3525,10 +3526,10 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          ELSE
             NN = FINDLOC(SPECIES_MIXTURE%ID,RN%FUEL,1)
             FUEL_MW = SPECIES_MIXTURE(NN)%MW
-         ENDIF  
+         ENDIF
 
-         ! Setup intermediate producs 
-         CALL SET_SPEC_DEFAULT   
+         ! Setup intermediate producs
+         CALL SET_SPEC_DEFAULT
          ID                 = RN%SPEC_ID_NU_READ(3)
          SUFFIX = LEN(TRIM(RN%SPEC_ID_NU_READ(3)))
          IF (SUFFIX > 21) THEN
@@ -3591,7 +3592,7 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          CALL DEFINE_MIXTURE(N)
          RN%PROD_SMIX_INDEX = N
 
-         ! Setup final producs 
+         ! Setup final producs
          N = N + 1
          RN2=>REACTION(REACTION(NR)%PAIR_INDEX)
          CALL SET_SPEC_DEFAULT
@@ -3647,8 +3648,8 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          SPECIES(SOOT_INDEX)%ATOMS(6)=1._EB-SOOT_H_FRACTION_GLOBAL
          CALL DEFINE_MIXTURE(N)
          RN2%PROD_SMIX_INDEX = N
-         N = N + 1         
-   END SELECT N_SIMPLE_CHEM_RXN       
+         N = N + 1
+   END SELECT N_SIMPLE_CHEM_RXN
 ENDIF BACKGROUND_IF
 
 END SUBROUTINE SETUP_PREDEFINED_SMIX
@@ -3752,7 +3753,7 @@ ALLOCATE(G_F_Z(0:I_MAX_TEMP,N_TOTAL_SCALARS))
 CALL ChkMemErr('READ','G_F_Z',IZERO)
 G_F_Z = 0._EB
 
-! Adjust reference enthalpy to 0 K 
+! Adjust reference enthalpy to 0 K
 DO N=1,N_SPECIES
    SS => SPECIES(N)
    IF (SS%SPECIFIC_HEAT < 0._EB .AND. SS%RAMP_CP_INDEX < 0 .AND. .NOT. SS%LISTED) THEN
@@ -3812,7 +3813,7 @@ DO N=1,N_TRACKED_SPECIES
          SM%REFERENCE_ENTHALPY = SM%REFERENCE_ENTHALPY - SM%SPECIFIC_HEAT*SM%REFERENCE_TEMPERATURE
          SM%H_F = SM%REFERENCE_ENTHALPY + SM%SPECIFIC_HEAT*H_F_REFERENCE_TEMPERATURE
       ENDIF
-   ENDIF      
+   ENDIF
    IF(SM%RAMP_CP_INDEX > 0) THEN
       IF (SM%H_F > -1.E20_EB) THEN
          CP2 = EVALUATE_RAMP(1._EB,SM%RAMP_CP_INDEX,TAU=1._EB)*1000._EB
@@ -3846,15 +3847,6 @@ DO N=1,N_TRACKED_SPECIES
          ENDDO
          SM%H_F = H1 + (H2-H1)*(H_F_REFERENCE_TEMPERATURE-INT(H_F_REFERENCE_TEMPERATURE))
       ENDIF
-   ENDIF
-   IF(SM%H_F <= -1.E20_EB) THEN
-      SM%H_F = 0._EB
-      EXPLICIT_H_F = .TRUE.
-      DO J=1,N_SPECIES
-         SM%H_F = SM%H_F + SM%MASS_FRACTION(J) * SPECIES(J)%H_F ! Calculate H_F of mixtures
-         IF (.NOT. SPECIES(J)%EXPLICIT_H_F) EXPLICIT_H_F = .FALSE.
-      ENDDO
-      SM%EXPLICIT_H_F = EXPLICIT_H_F
    ENDIF
 END DO
 
@@ -4247,7 +4239,7 @@ ENDDO COUNT_REAC_LOOP
 
 435 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-IF (N_REACTIONS==0) RETURN    
+IF (N_REACTIONS==0) RETURN
 
 ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 ALLOCATE(SIMPLE_FUEL_DEFINED(N_REACTIONS),STAT=IZERO)
@@ -4256,7 +4248,7 @@ SIMPLE_FUEL_DEFINED = .FALSE.
 ! Read and store the reaction parameters
 
 REAC_READ_LOOP: DO NR=1,N_REACTIONS
-   
+
    !****** Delete once working for one reaction
    IF (NR>1 .AND. ANY(REACTION%SIMPLE_CHEMISTRY)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: Can only define one reaction when using simple chemistry.'
@@ -4264,14 +4256,14 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    ! Read the REAC line
-   
+
    CALL CHECKREAD('REAC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT REAC_READ_LOOP
    CALL SET_REAC_DEFAULTS
    READ(LU_INPUT,REAC)
 
    RN => REACTION(NR)
-     
+
    IF ((RN%A_IN > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>TWO_EPSILON_EB .OR. RN%H>TWO_EPSILON_EB)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
       CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -4351,9 +4343,9 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDIF
    ENDIF
-   
+
    IF (A > 0._EB .OR.  E > 0._EB) SUPPRESSION = .FALSE.
-   
+
    IF ((A > 0._EB .OR. E > 0._EB) .AND. (SPEC_ID_N_S(1)=='null' .OR. N_S(1) < -998._EB)) THEN
       WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. SPEC_ID_N_S and N_S arrays must be defined.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -4433,7 +4425,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       RN%N_SPEC = NS2
-      
+
       IF (RN%N_SPEC > 0) THEN
          ALLOCATE(RN%N_S_READ(RN%N_SPEC))
          RN%N_S_READ(1:RN%N_SPEC) = N_S(1:RN%N_SPEC)
@@ -4463,11 +4455,11 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             WRITE(RN%SPEC_ID_NU_READ(3),'(A,I0)') 'PRODUCTS ',PROD_COUNTER
          ENDIF
       ELSE ! RN%N_SIMPLE_CHEMISTRY_REACTIONS=2
-         NEW_REAC = NEW_REAC + 1         
+         NEW_REAC = NEW_REAC + 1
          RN%PAIR_INDEX = N_REACTIONS+NEW_REAC
          RN%SPEC_ID_NU_READ(1) = RN%FUEL
          RN%SPEC_ID_NU_READ(2) = 'AIR'
-      
+
          ! Set up paired reaction INTERMEDIATE PRODUCTS + AIR -> PRODUCTS
          ALLOCATE(REAC_TEMP(N_REACTIONS),STAT=IZERO)
          REAC_TEMP = REACTION
@@ -4491,7 +4483,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             WRITE(RN2%FUEL,'(A,I0)') 'INTERMEDIATE PRODUCTS ',PROD_COUNTER
             WRITE(RN2%SPEC_ID_NU_READ(3),'(A,I0)') 'PRODUCTS ',PROD_COUNTER
          ENDIF
-         REACTION(NR)%SPEC_ID_NU_READ(3)  = RN2%FUEL                  
+         REACTION(NR)%SPEC_ID_NU_READ(3)  = RN2%FUEL
          RN2%SPEC_ID_NU_READ(1) = RN2%FUEL
          RN2%SPEC_ID_NU_READ(2) = 'AIR'
       ENDIF
@@ -4560,7 +4552,7 @@ N                           = 0._EB
 NU                          = 0._EB
 N_S                         = -999._EB
 N_T                         = 0._EB
-N_SIMPLE_CHEMISTRY_REACTIONS= 1 
+N_SIMPLE_CHEMISTRY_REACTIONS= 1
 O                           = 0._EB
 PRIORITY                    = 1
 RADIATIVE_FRACTION          = -1._EB
@@ -4595,7 +4587,7 @@ IF (N_REACTIONS <=0) RETURN
 ! The following information is what the user would have entered into the input file in the more general case
 DO NR=1,N_REACTIONS
    RN => REACTION(NR)
-   !Set up one or two step simple chemistry   
+   !Set up one or two step simple chemistry
    SIMPLE_CHEM_IF: IF (RN%SIMPLE_CHEMISTRY) THEN
       ! Second simple chemistry reaction setup when first is setup
       IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==-2) THEN
@@ -4609,9 +4601,9 @@ DO NR=1,N_REACTIONS
          RN%NU_READ(2)      = -RN%NU_O2/SPECIES_MIXTURE(1)%VOLUME_FRACTION(O2_INDEX)
          RN%NU_READ(3)      = -(RN%NU_READ(1)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW+RN%NU_READ(2)*SPECIES_MIXTURE(1)%MW)/ &
                               SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%MW
-         RN%N_SMIX          = 3 
+         RN%N_SMIX          = 3
       ELSE ! RN%N_SIMPLE_CHEMISTRY_REACTIONS=2
-   
+
          ! Setup FUEL + AIR -> INTERMEDIATE PRODUCTS
          IF (RN%NU_O2<=0._EB) THEN
             WRITE(MESSAGE,'(A)') 'ERROR: Fuel specified for simple chemistry has NU_O2 <=0 and it must require air for combustion.'
@@ -4625,7 +4617,7 @@ DO NR=1,N_REACTIONS
          ! Setup INTERMEDIATE PRODUCTS + AIR -> PRODUCTS
          RN2 => REACTION(RN%PAIR_INDEX)
          RN2%NU_READ(1)      = -RN%NU_READ(3)
-         RN2%NU_READ(2)      = -(RN2%NU_O2-RN%NU_O2)/SPECIES_MIXTURE(1)%VOLUME_FRACTION(O2_INDEX)         
+         RN2%NU_READ(2)      = -(RN2%NU_O2-RN%NU_O2)/SPECIES_MIXTURE(1)%VOLUME_FRACTION(O2_INDEX)
          RN2%NU_READ(3)      = -(RN%NU_READ(1)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW+&
                                  (RN%NU_READ(2)+RN2%NU_READ(2))*SPECIES_MIXTURE(1)%MW)/SPECIES_MIXTURE(RN2%PROD_SMIX_INDEX)%MW
          RN2%N_SMIX          = 3
@@ -4880,7 +4872,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (HF_COUNT > 1) THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 species heat of formation.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF        
+         ENDIF
          ! Find heat of formation of lumped fuel to satisfy specified heat of combustion
 
          IF (REDEFINE_H_F(RN%FUEL_SMIX_INDEX)) THEN
@@ -4911,7 +4903,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
 
    ELSE SIMPLE_CHEMISTRY_IF ! Simple chemistry reaction
-   
+
       ! Heat of Combustion calculation
       IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS == 1) THEN
          RN2 => REACTION(NR)
@@ -8336,7 +8328,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has a specified HRRPUA or MLRPUA plus another pyrolysis model'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
-      !##### removed when working      
+      !##### removed when working
       IF (N_REACTIONS > 1 .AND. .NOT. (N_REACTIONS==2 .AND. REACTION(1)%N_SIMPLE_CHEMISTRY_REACTIONS==2)) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has HRRPUA or MLRPUA set and there is more than one reaction.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
