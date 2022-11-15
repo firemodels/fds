@@ -442,7 +442,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: SPECIFIC_HEAT_LIQUID=-1            !< Liquid specific heat (J/kg/K)
    REAL(EB) :: DENSITY_LIQUID                     !< Liquid density (kg/m3)
    REAL(EB) :: HEAT_OF_VAPORIZATION=-1._EB        !< Heat of vaporization (J/kg)
-   REAL(EB) :: H_F                                !< Heat of fusion (J/kg)
+   REAL(EB) :: H_F                                !< Heat of formation (J/kg)
    REAL(EB) :: H_V_REFERENCE_TEMPERATURE=-1._EB   !< Heat of vaporization reference temperature (K)
    REAL(EB) :: TMP_V=-1._EB                       !< Vaporization temperature (K)
    REAL(EB) :: TMP_MELT=-1._EB                    !< Melting temperature (K)
@@ -519,7 +519,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: FIC_CONCENTRATION=0._EB
    REAL(EB) :: DENSITY_SOLID
    REAL(EB) :: CONDUCTIVITY_SOLID
-   REAL(EB) :: H_F=-1.E30_EB
+   REAL(EB) :: H_F = -1.E30_EB                    !< Heat of formation (J/kg)
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species

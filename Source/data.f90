@@ -2178,20 +2178,13 @@ REAL(EB),INTENT(IN) :: RCON
 REAL(EB),INTENT(OUT) :: CP,H,G_F
 LOGICAL,INTENT(OUT) :: FUEL
 REAL(EB) :: CP2,CP3,TE
-CHARACTER(LABEL_LENGTH) :: SPEC_ID_USE
-
-IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-   SPEC_ID_USE = 'XXX' ! Force the assumption of constant gamma (CP/CV) to get CP.
-ELSE
-   SPEC_ID_USE = SPEC_ID
-ENDIF
 
 TE = REAL(I_TMP,EB)
 FUEL = .FALSE.
 G_F = 0._EB !kJ/mol
-SELECT CASE (SPEC_ID_USE)
+
+SELECT CASE (SPEC_ID)
    CASE DEFAULT
-      CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
       H = 0._EB !J/kg
    CASE('ACETONE') !C3H6O NASA/TP-2002-211556
       TE = MIN(6000._EB,MAX(TE,200._EB))
@@ -2630,6 +2623,7 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       CP = CP * 8314.472_EB / 28.0134_EB !J/kg/K
       H = -309806.566683287_EB !J/kg
+      WRITE(*,*) 'N2',CP,H
    CASE('NITROGEN ATOM') ! N (NASA/TP-2002-211556)
       TE = MIN(6000._EB,MAX(TE,1000._EB))
       CP = 88765.0138_EB*TE**(-2)-107.12315_EB/TE+2.362188287_EB+0.0002916720081_EB*TE-0.00000017295151_EB*TE**2+&
@@ -2774,6 +2768,9 @@ SELECT CASE (SPEC_ID_USE)
       H = -71027.5860505296_EB !J/kg
 END SELECT
 
+! Only reset cp, need to keep H so combustion works
+IF (CONSTANT_SPECIFIC_HEAT_RATIO) CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
+   
 END SUBROUTINE JANAF_TABLE
 
 
@@ -3424,14 +3421,14 @@ GAS_NAME_SELECT: SELECT CASE(GAS_NAME)
       EPSOK = 362.6_EB
       FORMULA='C2H5OH'
       PR_GAS = 0.84_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
-      H_F = -234._EB
+      H_F = -234.95_EB ! NASA/TP-2002-211556
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('ETHYLENE')
       SIGMA = 4.163_EB
       EPSOK = 224.7_EB
       FORMULA = 'C2H4'
       PR_GAS = 0.83 ! airliquide.com
-      H_F = 52.47_EB
+      H_F = 52.50_EB ! NASA/TP-2002-211556
       IF (RADCAL_NAME=='null') RADCAL_NAME='ETHYLENE'
    CASE('FORMALDEHYDE')!Methanol as surrogate
       SIGMA = 3.626_EB
@@ -3510,13 +3507,13 @@ GAS_NAME_SELECT: SELECT CASE(GAS_NAME)
       EPSOK = 148.6_EB
       FORMULA = 'CH4'
       PR_GAS = 0.70_EB ! JPCRD 19(5)
-      H_F = -74.873_EB
+      H_F = -74.600_EB  ! NASA/TP-2002-211556
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANE'
    CASE('METHANOL')
       SIGMA = 3.626_EB
       EPSOK = 481.8_EB
       FORMULA = 'CH3OH'
-      H_F = -205._EB
+      H_F = -200.940_EB  ! NASA/TP-2002-211556
       PR_GAS = 0.95_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('N-DECANE')
@@ -3636,7 +3633,7 @@ GAS_NAME_SELECT: SELECT CASE(GAS_NAME)
       SIGMA = 2.641_EB
       EPSOK = 809.1_EB
       FORMULA = 'H2O'
-      H_F = -241.826_EB
+      H_F = -241.826_EB  ! NASA/TP-2002-211556
       PR_GAS = 1.0 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
    CASE('XENON')
