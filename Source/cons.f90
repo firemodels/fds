@@ -32,7 +32,6 @@ INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< Flag for COMBUSTION_ODE_SOLV
 
 INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
 INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
-INTEGER, PARAMETER :: EXTINCTION_3=3             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 3)
 
 INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL: No turbulence model (DNS)
 INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constant Smagorinsky turbulence model
@@ -140,8 +139,6 @@ INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYP
 INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_BOX_TYPE=4                  !< Flag for OB\%SHAPE_TYPE
 
-INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1  !< Number of SIMPLE_CHEMISTRY reactions
-
 INTEGER :: FUEL_INDEX=0                    !< Index for FUEL in SIMPLE_CHEMISTRY model
 INTEGER :: O2_INDEX=0                      !< Index for O2 in SIMPLE_CHEMISTRY model
 INTEGER :: N2_INDEX=0                      !< Index for N2 in SIMPLE_CHEMISTRY model
@@ -159,10 +156,6 @@ INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
-
-REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
-REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
-REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0.2_EB   !< Fraction of nitrogen atoms in the fuel that are converted to HCN
 
 ! Miscellaneous logical constants
 
@@ -386,6 +379,7 @@ REAL(EB) :: MW_H2O                                                  !< Molecular
 REAL(EB) :: MW_CO                                                   !< Molecular weight of carbon monoxide (g/mol)
 REAL(EB) :: MW_H2                                                   !< Molecular weight of hydrogen (g/mol)
 REAL(EB) :: MW_HCN                                                  !< Molecular weight of hydrogen cyanide (g/mol)
+REAL(EB) :: MW_SOOT                                                 !< Molecular weight of soot (g/mol)
 REAL(EB) :: VISIBILITY_FACTOR=3._EB                                 !< Parameter in light extinction calculation
 REAL(EB) :: EC_LL                                                   !< Extinction Coefficient, Lower Limit (1/m)
 REAL(EB) :: ZZ_MIN_GLOBAL=1.E-10_EB                                 !< Minimum lumped species mass fraction
@@ -625,10 +619,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SOOT_OX
 ! Agglomeration model
 
 LOGICAL :: AGGLOMERATION = .TRUE.,SOOT_OXIDATION=.FALSE.
-INTEGER :: N_PARTICLE_BINS(MAX_SPECIES)=0,AGGLOMERATION_SPEC_INDEX(MAX_SPECIES)=-1,AGGLOMERATION_SMIX_INDEX(MAX_SPECIES)=-1,&
-           N_AGGLOMERATION_SPECIES=0
-REAL(EB) :: MIN_PARTICLE_DIAMETER(MAX_SPECIES),MAX_PARTICLE_DIAMETER(MAX_SPECIES),&
-            NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+INTEGER :: N_AGGLOMERATION_SPECIES=0
+INTEGER, ALLOCATABLE, DIMENSION(:) :: N_PARTICLE_BINS,AGGLOMERATION_SPEC_INDEX,AGGLOMERATION_SMIX_INDEX
+REAL(EB) :: NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_PARTICLE_DIAMETER,MAX_PARTICLE_DIAMETER
 
 ! Number of initial value, pressure zone, and multiplier derived types
 

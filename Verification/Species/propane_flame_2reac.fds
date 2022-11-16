@@ -27,15 +27,13 @@
                        SPEC_ID(2)='WATER VAPOR',     VOLUME_FRACTION(2)=4.
                        SPEC_ID(3)='NITROGEN',        VOLUME_FRACTION(3)=18.80952381 /
 
-&COMB RADIATIVE_FRACTION=0.0 /
-
 &REAC ID = 'R1'
-      FUEL = 'PROPANE'
+      FUEL = 'PROPANE',RADIATIVE_FRACTION=0.0,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS 1'
       NU = -1,-3.00005,1 /
 
 &REAC ID = 'R2'
-      FUEL = 'PRODUCTS 1'
+      FUEL = 'PRODUCTS 1',RADIATIVE_FRACTION=0.0,
       SPEC_ID_NU = 'PRODUCTS 1','AIR','PRODUCTS 2'
       NU = -1,-1.99995,1
       PRIORITY = 2 /

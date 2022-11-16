@@ -9683,6 +9683,7 @@ produces a time history of the smoke layer height at $x=2$ and $y=3$ between $z=
 
 \subsection{Thermocouples}
 \label{info:THERMOCOUPLE}
+\label{thermocouple_time_constant}
 
 The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\rm TC}$~\cite{Welsh:1}
 \be
@@ -9690,6 +9691,21 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+
+The above discussion is appropriate for a so-called ``bare bead''  thermocouple, but often thermocouples are shielded or sheathed in various ways to mitigate the effect of thermal radiation. In such cases, there is no obvious bead diameter and there may be multiple metals and air gaps in the construction. Usually, the manufacturer provides a time constant, which is defined as the time required for the sensor to respond to 63.2~\% of its total output signal when suddenly plunged into a warm air stream flowing at 20~m/s. The analysis and testing is typically done at relatively low temperature, in which case the radiation term in Eq.~(\ref{TC}) can be neglected and the time constant, $\tau$, can be defined in terms of effective thermal properties and an effective diameter:
+\be
+   \tau = \frac{D_{\rm eff} \, \rho_{\rm eff} \, c_{\rm eff} }{6 \, h}  \quad ; \quad  h=\frac{k \, \NU}{D_{\rm eff}} \quad ; \quad \NU = 2 + 0.6 \, \RE^{1/2} \, \PR^{1/3}  \quad ; \quad
+   \RE = \frac{\rho \|\bu\| D_{\rm eff}}{\mu}  \label{TC_tau}
+\ee
+For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The {\ct TIME\_CONSTANT} is specified on a {\ct PROP} line which is identified by the {\ct DEVC} line using a {\ct PROP\_ID}. If you specify the {\ct TIME\_CONSTANT}, you can still specify the effective {\ct EMISSIVITY}, {\ct DENSITY}, {\ct SPECIFIC\_HEAT}, and {\ct HEAT\_TRANSFER\_COEFFICIENT} as well, but not the {\ct DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the {\ct TIME\_CONSTANT}.
+
+Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test case called {\ct thermocouple\_time\_constant} whose input file is in the {\ct Heat\_Transfer} samples folder. Three thermocouples with given time constants of 0.5~s, 3.0~s, and 8.0~s are suddenly subjected to a 20~m/s air stream of 30~$^\circ$C. It is expected that each TC should reach a temperature of 26.32~$^\circ$C at their given time constants.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/thermocouple_time_constant}
+\caption[Results of the {\ct thermocouple\_time\_constant} test case]{Temperature response of thermocouples with time constants of 0.5~s, 3.0~s, and 8.0~s compared with the exact solution of Eq.~(\ref{TC}).}
+\label{fig:thermocouple_time_constant}
+\end{figure}
 
 
 
@@ -12101,63 +12117,64 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
 \hline \hline
 \endhead
-{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24        \\ \hline
-{\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.         \\ \hline
-{\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8         \\ \hline
-{\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.          \\ \hline
-{\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.          \\ \hline
-{\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.          \\ \hline
-{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.          \\ \hline
-{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.          \\ \hline
-{\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.       \\ \hline
-{\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001       \\ \hline
-{\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85        \\ \hline
-{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2           \\ \hline
-{\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &             \\ \hline
-{\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.          \\ \hline
-{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.          \\ \hline
-{\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}  \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &             \\ \hline
-{\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F     \\ \hline
-{\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F     \\ \hline
-{\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &             \\ \hline
-{\ct HISTOGRAM\_NBINS}                  & Integer       & Section~\ref{info:histograms}             &                       & 10          \\ \hline
-{\ct HISTOGRAM\_NORMALIZE}              & Logical       & Section~\ref{info:histograms}             &                       & T      \\ \hline
-{\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &             \\ \hline
-{\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}  \\ \hline
-{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.       \\ \hline
-{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8         \\ \hline
-{\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &             \\ \hline
-{\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05        \\ \hline
-{\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.          \\ \hline
-{\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.          \\ \hline
-{\ct PARTICLES\_PER\_SECOND}            & Integer       & Section~\ref{info:sprinklers}             &                       & 5000        \\ \hline
-{\ct PARTICLE\_VELOCITY}                & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.          \\ \hline
-{\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END}\\ \hline
-{\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}\\ \hline
-{\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0           \\ \hline
-{\ct PDPA\_N}                           & Integer       & Section~\ref{PDPA}                        &                       & 0           \\ \hline
-{\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}\\ \hline
-{\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.          \\ \hline
-{\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.          \\ \hline
-{\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.        \\ \hline
-{\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &             \\ \hline
-{\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &             \\ \hline
-{\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &             \\ \hline
-{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44        \\ \hline
-{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.     \\ \hline
-{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.          \\ \hline
-{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.          \\ \hline
-{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
-{\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &             \\ \hline
+{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24                 \\ \hline
+{\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.                  \\ \hline
+{\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8                  \\ \hline
+{\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.                   \\ \hline
+{\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+{\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
+{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.                   \\ \hline
+{\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.                \\ \hline
+{\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001                \\ \hline
+{\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85                 \\ \hline
+{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2                    \\ \hline
+{\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &                      \\ \hline
+{\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.                   \\ \hline
+{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.                   \\ \hline
+{\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}           \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &                      \\ \hline
+{\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
+{\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
+{\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
+{\ct HISTOGRAM\_NBINS}                  & Integer       & Section~\ref{info:histograms}             &                       & 10                   \\ \hline
+{\ct HISTOGRAM\_NORMALIZE}              & Logical       & Section~\ref{info:histograms}             &                       & T                    \\ \hline
+{\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &                      \\ \hline
+{\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}           \\ \hline
+{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.                \\ \hline
+{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8                  \\ \hline
+{\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &                      \\ \hline
+{\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05                 \\ \hline
+{\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.                   \\ \hline
+{\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.                   \\ \hline
+{\ct PARTICLES\_PER\_SECOND}            & Integer       & Section~\ref{info:sprinklers}             &                       & 5000                 \\ \hline
+{\ct PARTICLE\_VELOCITY}                & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.                   \\ \hline
+{\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END}         \\ \hline
+{\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}              \\ \hline
+{\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0                    \\ \hline
+{\ct PDPA\_N}                           & Integer       & Section~\ref{PDPA}                        &                       & 0                    \\ \hline
+{\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}              \\ \hline
+{\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.                   \\ \hline
+{\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.                   \\ \hline
+{\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.                 \\ \hline
+{\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &                      \\ \hline
+{\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
+{\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
+{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44                 \\ \hline
+{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
+{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
+{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}     \\ \hline
+{\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct TIME\_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
+{\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \end{longtable}
 
 % Undocumented: FED_ACTIVITY

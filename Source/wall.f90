@@ -1271,6 +1271,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       MFT = 0._EB
 
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
+      !***** Move t-scale outside loop so inside loop do not have to evaluate again for mulitple fuels
 
       SUM_MASSFLUX_LOOP: DO N=1,N_TRACKED_SPECIES
          IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
@@ -1282,18 +1283,21 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
-            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N==REACTION(1)%FUEL_SMIX_INDEX) THEN
-               IF (PREDICTOR) THEN
-                  RP => RAMPS(SF%RAMP_INDEX(N))
-                  
-                  IF (SF%EMISSIVITY > 0._EB) THEN
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
-                  ELSE
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
+            IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1) THEN
+               IF( N==REACTION(1)%FUEL_SMIX_INDEX) THEN
+                  IF (PREDICTOR) THEN
+                     RP => RAMPS(SF%RAMP_INDEX(N))               
+                     IF (SF%EMISSIVITY > 0._EB) THEN
+                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
+                     ELSE
+                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
+                     ENDIF
+                     CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
+                     ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
+                     ONE_D%Q_SCALE = Q_NEW
                   ENDIF
-                  CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
-                  ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
-                  ONE_D%Q_SCALE = Q_NEW
+               ELSE
+                  ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
                ENDIF
             ELSE
                ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
@@ -1975,6 +1979,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 ELSEIF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN PYROLYSIS_PREDICTED_IF
 
    ! Take off energy corresponding to specified burning rate
+   !***** Figure out what to do for adjust if different spec have different HOC
 
    Q_S(1) = Q_S(1) - ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*SF%H_V/DX_S(1)
 
@@ -3005,7 +3010,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       IF (ML%NU_O2_CHAR(J)>0._EB) THEN
          IF (SIMPLE_CHEMISTRY) THEN
-            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(REACTION(1)%AIR_SMIX_INDEX)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
+            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(1)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
          ELSE
             Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(O2_INDEX)*H_R/ML%NU_O2_CHAR(J))
          ENDIF
