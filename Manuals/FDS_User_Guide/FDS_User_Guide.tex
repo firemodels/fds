@@ -5516,27 +5516,35 @@ Based on the oxygen and methane concentration and the temperature in each box, c
 The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that conditions that sustain burning (red crosses) or cause extinction (blue stars) fall closely on the expected results using thermophysical properties of the reactants and products.  The simpler model, {\ct 'EXTINCTION~1'} (left), merely conforms to the specified Burn-No Burn criterion. More detailed information on the extinction models can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 
+\FloatBarrier
 
 \subsection{Special Topic: Piloted Ignition}
 \label{info:ignition}
 
-By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
+By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-\subsubsection*{Pilot Ignition Zone}
-
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on the {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
 
-\subsubsection*{Pilot Fuel Model}
-
-An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed.  At present, specifying more than one reaction and fuel negates the use of the simple chemistry model, so this method is a bit more cumbersome to set up.  However, it provides a bit more control over the pilot heat release.  For example, it is straight forward to initialize a series of particles with a pilot fuel surface and a controlled mass flux of pilot fuel.
+An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed. For example, you can initialize a series of particles with a controlled mass flux of fuel:
 \begin{lstlisting}
-&REAC FUEL='METHANE', ..., AUTO_IGNITION_TEMPERATURE=600. /
+&REAC FUEL='METHANE', ..., AUTO_IGNITION_TEMPERATURE=540. /
 &REAC FUEL='ETHYLENE', ..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
 With the appropriate chemistry defined, the above {\ct REAC} lines will allow for ethylene to be used as a pilot fuel, avoiding an ignition threshold temperature for any cell where ethylene and its oxidizer are present.
+
+You can also simulate a spark ignition using the following lines of input:
+\begin{lstlisting} 
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=540 /
+&PROP ID='spark', SPARK=T /
+&DEVC ID='spark-1', XYZ=..., QUANTITY='TIME', SETPOINT=10, PROP_ID='spark' /
+\end{lstlisting}
+In this case, methane and air will not combust unless the grid cell temperature exceeds 540~$^\circ$C. However, within the grid cell containing the specified point {\ct XYZ}, a ``spark'' is generated at 10~s which effectively causes the AIT to go to 0~K and ignition of fuel and air is allowed, assuming a suitable amount of fuel and air is present.
+
+
+
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
@@ -12211,6 +12219,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.                 \\ \hline
 {\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &                      \\ \hline
 {\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
+{\ct SPARK}                             & Logical       & Section~\ref{info:ignition}               &                       & {\ct F}              \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
 {\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44                 \\ \hline
 {\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
