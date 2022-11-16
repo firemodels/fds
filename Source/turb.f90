@@ -1376,7 +1376,7 @@ IF (PRESENT(NUSSELT_C0)) THEN ! User has defined a custom Nusselt correlation
 ELSE
    SELECT CASE(SURF_GEOMETRY_INDEX)
       CASE (SURF_CARTESIAN)
-         NUSSELT = (0.037_EB*RE**0.8_EB-871._EB)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Table 7.7
+         NUSSELT = 0.0296_EB*RE**0.8_EB*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.36, Table 7.7
       CASE (SURF_CYLINDRICAL)
          ! Incropera and DeWitt, 7th, Eq. 7.52
          IF (RE >= 40000._EB) THEN
