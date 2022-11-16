@@ -2909,7 +2909,7 @@ This section is labeled as a special topic because normally you do not need to m
 \subsubsection{Default Convective Heat Transfer Model}
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on the larger of the Nusselt (Nu) numbers for free (natural) and forced convection:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} \right)   \label{q_con}
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} , \frac{2L}{\delta n}\right)   \label{q_con}
 \ee
 where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
 
@@ -2940,7 +2940,7 @@ The values of the coefficients are given in Table~\ref{convective_heat_transfer_
 \begin{tabular}{|lccccc|}
 \hline
 Geometry     & $C_0$    & $C_1$   & $C_2$ & $m$    & Re             \\ \hline
-Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
+Flat Plate   & 0        & 0.0296  & 0     & 0.8    & $\le 10^8$     \\
 Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
 Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
 Cylinder     & 0        & 0.683   & 0     & 0.466  & $40-4000$      \\
