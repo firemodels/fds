@@ -1704,8 +1704,6 @@ IF (MY_RANK==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS performed a level set analysis only and finished successfully'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
-      CASE(MPI_TIMEOUT_STOP)
-         WRITE(MESSAGE,'(A)') 'ERROR: An MPI exchange timed out - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
@@ -2995,7 +2993,7 @@ ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ1>0) THEN
    CALL MPI_STARTALL(N_REQ1,REQ1(1:N_REQ1),IERR)
-   CALL TIMEOUT('MPI exchange of density etc',N_REQ1,REQ1(1:N_REQ1))
+   CALL TIMEOUT('MPI exchange of gas species densities',N_REQ1,REQ1(1:N_REQ1))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==7 .AND. OMESH_PARTICLES .AND. N_REQ2>0) THEN
@@ -3300,6 +3298,7 @@ SUBROUTINE TIMEOUT(RNAME,NR,RR)
 REAL(EB) :: START_TIME,WAIT_TIME
 INTEGER, INTENT(IN) :: NR
 TYPE (MPI_REQUEST), DIMENSION(:) :: RR
+INTEGER :: ERRORCODE
 LOGICAL :: FLAG
 CHARACTER(*) :: RNAME
 
@@ -3313,9 +3312,10 @@ IF (.NOT.PROFILING) THEN
       CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
-         WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',PNAME(1:PNAMELEN)
-         FLAG = .TRUE.
-         STOP_STATUS = MPI_TIMEOUT_STOP
+         WRITE(LU_ERR,'(/A,A,A,I0,A,A,A/)') 'ERROR: ',TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',&
+                                            PNAME(1:PNAMELEN),'. FDS will abort.'
+         ERRORCODE = 1
+         CALL MPI_ABORT(MPI_COMM_WORLD,ERRORCODE,IERR)
       ENDIF
    ENDDO
 
