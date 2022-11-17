@@ -2929,19 +2929,21 @@ ENDIF
 
 ! Write out PLOT3D Info
 
-IF (PL3D_CLOCK(0)<T_END) THEN
-   WRITE(LU_OUTPUT,'(//A/)')   ' PLOT3D Information'
-   DO N=1,5
-      IF (PLOT3D_Y_INDEX(N)>0) THEN
-         WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
-            ', Species: ',TRIM(SPECIES(PLOT3D_Y_INDEX(N))%ID)
-      ELSEIF (PLOT3D_Z_INDEX(N)>=0) THEN
-         WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
-            ', Species: ',TRIM(SPECIES_MIXTURE(PLOT3D_Z_INDEX(N))%ID)
-      ELSE
-         WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N))
-      ENDIF
-   ENDDO
+IF (ALLOCATED(PL3D_CLOCK)) THEN
+   IF (PL3D_CLOCK(0)<T_END) THEN
+      WRITE(LU_OUTPUT,'(//A/)')   ' PLOT3D Information'
+      DO N=1,5
+         IF (PLOT3D_Y_INDEX(N)>0) THEN
+            WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
+               ', Species: ',TRIM(SPECIES(PLOT3D_Y_INDEX(N))%ID)
+         ELSEIF (PLOT3D_Z_INDEX(N)>=0) THEN
+            WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
+               ', Species: ',TRIM(SPECIES_MIXTURE(PLOT3D_Z_INDEX(N))%ID)
+         ELSE
+            WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N))
+         ENDIF
+      ENDDO
+   ENDIF
 ENDIF
 
 ! Write out Isosurface File Info
