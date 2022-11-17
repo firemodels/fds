@@ -1964,7 +1964,7 @@ T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\
 \end{equation}
 where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
 
-As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. The mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the buffer layer points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
+As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. The mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region).
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
@@ -1974,6 +1974,57 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 \end{figure}
 
 
+\section{Forced Convection Flat Plate Boundary Layer (\texorpdfstring{\textct{forced\_conv\_flat\_plate}}{forced\_conv\_flat\_plate})}
+\label{sec:forced_conv_flat_plate}
+
+In this section, we set up a series of cases to test the forced convection model in FDS.  The scenario is a constant temperature turbulent flat plate boundary layer.  Gravity is set to zero in order to explicitly exercise the forced convection model.  The inlet flow velocity is constant and uniform at the leading edge of the plate.  Three velocities are considered, [0.1, 1, 10] m/s.  The free stream fluid is nitrogen ($\rho=1.165$ \si{kg/m^3}) with constant properties: dynamic viscosity, $\mu=1 \times 10^{-5}$ \si{kg/m/s}, thermal conductivity, $k=0.01$ \si{W/m/K}, and specific heat, $c_p=1$ \si{kJ/kg/K}.  The free stream temperature is 20 \si{\degreeCelsius} and the wall temperature is a constant 30 \si{\degreeCelsius}.  The plate is 16 m long with constant and uniform inflow velocity and an {\ct OPEN} outflow boundary.  The domain is 2 m in width and 2 m in height.  The spanwise boundaries are {\ct PERIODIC} and the top boundary is {\ct MIRROR}.
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[width=.6\textwidth]{../../../cad/Convection/forced_conv_flat_plate_u10_10cm_1000}
+   \caption[Forced convection flat plate boundary layer]{\label{fig_forced_conv_image} Smokeview rendering of a temperature slice through the center of the bounary layer as well as the heat transfer coefficient on the constant temperature wall boundary for the 10 m/s case at 10 cm resolution.}
+\end{figure}
+
+The boundary layer thicknesses for each of the three velocity inlet conditions are [0.5227, 0.3298, 0.2081] m, respectively, evaluated at $x=16$ m from the correlation $\delta_x = 0.37\,x\,\mbox{Re}_x^{-1/5}$ (see \cite{Incropera:1} Table 7.7).  Three grid resolutions are considered, [25, 10, 2.5] cm.  The resolution of the boundary layer at the end of domain ($\delta_{16}/\delta x$) is provided below in Tab.~\ref{tab:bl_resolution}. Note that the boundary layer is generally under-resolved ($\delta_x/\delta x<10$).  Thus, accuracy of the wall heat flux relies heavily on the model for the heat transfer coefficient.  The simulation is set to run for 20 flow through times with averaging of results over the last half of the simulation.  An image of the spatially developing thermal boundary layer with medium resolution and 10 m/s inflow is shown in Fig.~\ref{fig_forced_conv_image}.  Also shown is the local heat transfer coefficient along the wall.
+
+\begin{table}[h]
+\centering
+\caption[Forced convection boundary layer resolution]{Forced convection boundary layer resolution, $\delta_{x=16\;\mbox{\scriptsize m}}/\delta x$.}
+\label{tab:bl_resolution}
+\begin{tabular}{l|lll}
+           & \multicolumn{3}{c}{free stream velocity} \\
+$\delta x$ & 0.1 m/s & 1 m/s & 10 m/s \\
+\hline
+25 cm    & 2.1  & 1.3   & 0.83 \\
+10 cm    & 5.2  & 3.3   & 2.1  \\
+2.5 cm   & 21.0 & 13.0  & 8.3
+\end{tabular}
+\end{table}
+
+The results are plotted in Fig.~\ref{fig_forced_conv_flat_plate}.  We are comparing FDS output to the local turbulent forced convection correlation,
+\begin{equation}
+\label{eq:local_forced_flat_plate_cor}
+\mbox{Nu}_x = 0.0296 \, \mbox{Re}_x^{4/5} \, \mbox{Pr}^{1/3}
+\end{equation}
+In these cases, the Prandtl number, Pr, is taken to be 0.7.  The correlation is plotted as the line labeled ``forced local'' in the legend of the plots.  The plots are comparisons of ``local'' Nusselt number as a function of ``local'' Reynolds number, as indicated by the subscript $x$.  In these formulae, the length scale is given by the distance from the leading edge of the plate.  Of course, FDS does not know this information when it is trying to determine the heat transfer coefficient on a given wall cell.  Hence, it uses a constant ``convective length scale'', in this case set to 1 m (the default value).  Also included in each plot is a dashed line representing $2Lx/\delta x$.  If this curve is larger than the correlation this is an indication that the ``DNS'' value was used for the heat transfer coefficient, that is $h = 2k/\delta x$.  This only happens for the 0.1 m/s case at the highest grid resolution.
+
+In order to make a comparison with the local correlation we need to scale the FDS heat transfer coefficient by the ratio of the local temperature difference to the free stream temperature difference assumed in the correlation.  We add device outputs of {\ct 'HTC'} and {\ct 'CONVECTIVE HEAT FLUX'} along the length of the plate.  From these two outputs we can discern the temperature difference at the wall, $\Delta T_{\mbox{\scriptsize FDS}}$.  The correlation temperature difference is $T_w - T_\infty$.  For a given heat flux the following holds, $\dot{q}_w^{\pp} = h_{\mbox{\scriptsize FDS}} \Delta T_{\mbox{\scriptsize FDS}} = h_{\mbox{\scriptsize cor}} (T_w - T_\infty)$.  For a given location, $x$, along the plate the FDS results for $\mbox{Nu}_x$ are taken to be,
+\begin{equation}
+\label{eq:Nu_scaling}
+\mbox{Nu}_x = \frac{h_{\mbox{\scriptsize cor},x} \, x}{k} = \left( \frac{h_{\mbox{\scriptsize FDS},x} \, \Delta T_{\mbox{\scriptsize FDS}}}{T_w - T_\infty} \right) \frac{x}{k}
+\end{equation}
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{lr}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/forced_conv_flat_plate_u0p1} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/forced_conv_flat_plate_u1}   \\
+      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/forced_conv_flat_plate_u10}}
+   \end{tabular*}
+   \caption[Nusselt correlation local turbulent flat plate]{\label{fig_forced_conv_flat_plate} FDS results for local Nusselt number in turbulent boundary layer flow over a flat plate.  Clockwise from top-left the flow velocity increases from 0.1 m/s to 10 m/s.  Dashed lines indicate local Nusselt number based on $2L/(\delta n)$, where $L=1$ m is the convective length scale and $\delta n$ is the wall-normal grid resolution.}
+\end{figure}
+
+
+\clearpage
 \section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
 \label{sec:ribbed_channel}
 
