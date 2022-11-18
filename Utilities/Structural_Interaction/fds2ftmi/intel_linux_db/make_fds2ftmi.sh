@@ -1,5 +1,4 @@
 #!/bin/bash
-
+rm -f *.o
 source $ONEAPI_ROOT/setvars.sh intel64
-rm *.o
-make -f ../Makefile intel_osx_64
+make -f ../Makefile intel_linux_db

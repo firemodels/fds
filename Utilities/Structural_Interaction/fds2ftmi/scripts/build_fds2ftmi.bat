@@ -27,11 +27,11 @@ cd %FIREBOT_DIR%\SCRIPT_FIGURES
 del *.pdf
 
 :: Compile fds_win_64
-cd %FDS_GITROOT%\Build\impi_intel_win
+cd %FDS_GITROOT%\Build\impi_intel_win_openmp
 echo Y | make_fds.bat
 
 :: Compile fds2ftmi_win_64
-cd %FDS2FTMI_DIR%\intel_win_64
+cd %FDS2FTMI_DIR%\intel_win
 echo Y | make_fds2ftmi.bat
 
 :: Print the FDS revision number on User Guide
