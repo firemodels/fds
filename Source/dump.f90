@@ -1906,6 +1906,16 @@ DO N=1,N_DEVC
    ENDIF
 ENDDO
 
+! Write out original vent information
+
+WRITE(LU_SMV,'(/A)') 'VENTORIG'
+WRITE(LU_SMV,'(I0)') SIZE(ORIGINAL_VENTS)
+DO N=1,SIZE(ORIGINAL_VENTS)
+   WRITE(LU_SMV,'(6F12.5,A,A)') ORIGINAL_VENTS(N)%X1,ORIGINAL_VENTS(N)%X2,&
+                                ORIGINAL_VENTS(N)%Y1,ORIGINAL_VENTS(N)%Y2,&
+                                ORIGINAL_VENTS(N)%Z1,ORIGINAL_VENTS(N)%Z2,' ! ',TRIM(ORIGINAL_VENTS(N)%ID)
+ENDDO
+
 ENDIF MASTER_NODE_IF
 
 ! Write out FN_BNDG, FN_BNDF_GEOM to .smv file:

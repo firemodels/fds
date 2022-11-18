@@ -10730,7 +10730,8 @@ USE CONTROL_VARIABLES, ONLY : CONTROL
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 
-INTEGER :: N,N_TOTAL,N_EXPLICIT,NM,NNN,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,II,JJ,KK,OBST_INDEX,N_IMPLICIT_VENTS,I_MODE
+INTEGER :: N,N_TOTAL,N_EXPLICIT,NM,NNN,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,II,JJ,KK,OBST_INDEX,N_IMPLICIT_VENTS,I_MODE,&
+           N_ORIGINAL_VENTS
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB_USER(6),XB_MESH(6), &
             REYNOLDS_STRESS(3,3),L_EDDY,VEL,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
@@ -10766,14 +10767,18 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
    ! Allocate the derived type variable VENTS that holds all vent info
 
-   IF (I_MODE==2) ALLOCATE(MESHES(NM)%VENTS(N_VENT),STAT=IZERO) ; CALL ChkMemErr('READ','VENTS',IZERO) ; VENTS=>MESHES(NM)%VENTS
+   IF (I_MODE==2) THEN
+      ALLOCATE(MESHES(NM)%VENTS(N_VENT),STAT=IZERO) ; CALL ChkMemErr('READ','VENTS',IZERO) ; VENTS=>MESHES(NM)%VENTS
+      IF (MY_RANK==0 .AND. .NOT.ALLOCATED(ORIGINAL_VENTS)) ALLOCATE(ORIGINAL_VENTS(N_ORIGINAL_VENTS))
+   ENDIF
 
    ! Rewind the input file and read all possible vents
 
-   N_VENT       = 0  ! Number of VENTs stored by each mesh
-   N_TOTAL      = 0  ! Counter of all VENTs, both explicit and implicit
-   N_EXPLICIT   = 0  ! Counter of explicitly declared VENTs
-   N_VENT_TOTAL = 0  ! Purely for Smokeview drawing of VENTs
+   N_VENT           = 0  ! Number of VENTs stored by each mesh
+   N_TOTAL          = 0  ! Counter of all VENTs, both explicit and implicit
+   N_EXPLICIT       = 0  ! Counter of explicitly declared VENTs
+   N_VENT_TOTAL     = 0  ! Purely for Smokeview drawing of VENTs
+   N_ORIGINAL_VENTS = 0  ! Number of specified vents for use with Smokeview and HVAC drawing
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -10930,6 +10935,20 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   XB_USER(4) = XB(4) + MR%DY0 + II*MR%DXB(4)
                   XB_USER(5) = XB(5) + MR%DZ0 + II*MR%DXB(5)
                   XB_USER(6) = XB(6) + MR%DZ0 + II*MR%DXB(6)
+               ENDIF
+
+               ! Save the original VENT coordinates in a special array on MPI process 0
+
+               N_ORIGINAL_VENTS = N_ORIGINAL_VENTS + 1
+
+               IF (NM==1 .AND. MY_RANK==0 .AND. I_MODE==2) THEN
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%ID = ID
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%X1 = XB_USER(1)
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%X2 = XB_USER(2)
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%Y1 = XB_USER(3)
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%Y2 = XB_USER(4)
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%Z1 = XB_USER(5)
+                  ORIGINAL_VENTS(N_ORIGINAL_VENTS)%Z2 = XB_USER(6)
                ENDIF
 
                ! Save the VENT coordinates for the given MESH
