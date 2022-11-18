@@ -695,6 +695,7 @@ TYPE SURFACE_TYPE
 
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
    REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                  !< Specified initial front surface temperture (K)
    REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
    REAL(EB) :: TMP_INNER_HT3D=-1._EB                     !< Specified inner temperature for 3D heating (K)
    REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
@@ -1246,6 +1247,15 @@ TYPE VENTS_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: U_EDDY,V_EDDY,W_EDDY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X_EDDY,Y_EDDY,Z_EDDY,CU_EDDY,CV_EDDY,CW_EDDY
 END TYPE VENTS_TYPE
+
+
+TYPE ORIGINAL_VENTS_TYPE
+   REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
+   CHARACTER(LABEL_LENGTH) :: ID='null'
+END TYPE ORIGINAL_VENTS_TYPE
+
+TYPE(ORIGINAL_VENTS_TYPE), ALLOCATABLE, DIMENSION(:) :: ORIGINAL_VENTS
+
 
 TYPE TABLES_TYPE
    INTEGER :: NUMBER_ROWS,NUMBER_COLUMNS
