@@ -439,7 +439,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: SPECIFIC_HEAT_LIQUID=-1            !< Liquid specific heat (J/kg/K)
    REAL(EB) :: DENSITY_LIQUID                     !< Liquid density (kg/m3)
    REAL(EB) :: HEAT_OF_VAPORIZATION=-1._EB        !< Heat of vaporization (J/kg)
-   REAL(EB) :: H_F                                !< Heat of fusion (J/kg)
+   REAL(EB) :: H_F                                !< Heat of formation (J/kg)
    REAL(EB) :: H_V_REFERENCE_TEMPERATURE=-1._EB   !< Heat of vaporization reference temperature (K)
    REAL(EB) :: TMP_V=-1._EB                       !< Vaporization temperature (K)
    REAL(EB) :: TMP_MELT=-1._EB                    !< Melting temperature (K)
@@ -516,7 +516,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: FIC_CONCENTRATION=0._EB
    REAL(EB) :: DENSITY_SOLID
    REAL(EB) :: CONDUCTIVITY_SOLID
-   REAL(EB) :: H_F=-1.E30_EB
+   REAL(EB) :: H_F = -1.E30_EB                    !< Heat of formation (J/kg)
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
@@ -538,12 +538,23 @@ END TYPE SPECIES_MIXTURE_TYPE
 
 TYPE (SPECIES_MIXTURE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: SPECIES_MIXTURE
 
+!> \brief Parameters associated with AIT_EXCLUSION_ZONE
+
+TYPE AIT_EXCLUSION_ZONE_TYPE
+   REAL(EB) :: X1            !< Lower x bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: X2            !< Upper x bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: Y1            !< Lower y bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: Y2            !< Upper y bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
+   INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+END TYPE AIT_EXCLUSION_ZONE_TYPE
+
+
 TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
    CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
-   CHARACTER(LABEL_LENGTH) :: RAMP_CFT    !< Name of ramp for critical flame temperature
-   CHARACTER(LABEL_LENGTH) :: SPEC_ID_CFT !< Name of species for CFT ramp
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
@@ -573,7 +584,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: FUEL_N_TO_HCN_FRACTION       !< For 2-step simple chemistry fuel N that goes to HCN instead of N2
    REAL(EB) :: RHO_EXPONENT                 !< Exponent of density in reaction expression
    REAL(EB) :: CRIT_FLAME_TMP               !< Critical Flame Temperature (K)
-   REAL(EB) :: AUTO_IGNIT_TMP               !< Reaction specific Auto Ignition Temperature (K)
+   REAL(EB) :: AUTO_IGNITION_TEMPERATURE    !< Reaction specific Auto Ignition Temperature (K)
    REAL(EB) :: NU_O2=0._EB                  !< Oxygen coefficient in SIMPLE_CHEMISTRY model
    REAL(EB) :: NU_N2=0._EB                  !< Nitrogen coefficient in SIMPLE_CHEMISTRY model
    REAL(EB) :: NU_H2O=0._EB                 !< Water coefficient in SIMPLE_CHEMISTRY model
@@ -600,8 +611,6 @@ TYPE REACTION_TYPE
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
-   INTEGER :: RAMP_CFT_INDEX=0              !< Index of critical flame temperature ramp
-   INTEGER :: RAMP_CFT_SPEC_INDEX=0         !< Index of critical flame temperature ramp species
    INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction
    LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
    LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
@@ -609,9 +618,12 @@ TYPE REACTION_TYPE
    LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
    LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
+   TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
+   INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
 END TYPE REACTION_TYPE
 
 TYPE (REACTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: REACTION
+
 
 TYPE MATERIAL_TYPE
    REAL(EB) :: RHO_S                                    !< Density (kg/m3) of the pure material
@@ -680,6 +692,7 @@ TYPE SURFACE_TYPE
 
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
    REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                  !< Specified initial front surface temperture (K)
    REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
    REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
    REAL(EB) :: VEL_GRAD
@@ -1228,6 +1241,15 @@ TYPE VENTS_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: U_EDDY,V_EDDY,W_EDDY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X_EDDY,Y_EDDY,Z_EDDY,CU_EDDY,CV_EDDY,CW_EDDY
 END TYPE VENTS_TYPE
+
+
+TYPE ORIGINAL_VENTS_TYPE
+   REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
+   CHARACTER(LABEL_LENGTH) :: ID='null'
+END TYPE ORIGINAL_VENTS_TYPE
+
+TYPE(ORIGINAL_VENTS_TYPE), ALLOCATABLE, DIMENSION(:) :: ORIGINAL_VENTS
+
 
 TYPE TABLES_TYPE
    INTEGER :: NUMBER_ROWS,NUMBER_COLUMNS

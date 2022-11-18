@@ -633,7 +633,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
     There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
 \item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky; using MPI and mulitple machines would be better. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
-\item[{\bf MPI Timeout Errors}:] If there is an error in communication from one MPI process to another, you might see an error statement like ``Mesh exchange for ... timed out for MPI process ...'' This indicates that, for whatever reason, an MPI message never reached its destination and the program shut down. Sometimes this is related to the particular {\em communication fabric} used by your compute cluster. If the error happens consistently at the same point in the simulation, report it.
+\item[{\bf MPI Timeout Errors}:] If there is an error or delay in communication from one MPI (Message Passing Interface) process to another, you might see an error statement like ``ERROR: MPI exchange ... timed out for MPI process ...'' This indicates that, for whatever reason, an MPI message never reached its destination and the program shut down. The input parameter {\ct MPI\_TIMEOUT}, specified on the {\ct MISC} line, sets the time that FDS waits for the communication to complete. By default, it is 600~s. This is an extremely long period of time to wait for an MPI communication to complete and it typically means that something has gone very wrong. If you believe that there is a reason for the delay, for example one mesh is much bigger in size or has much more work to do than other meshes, then set {\ct MPI\_TIMEOUT} to a larger value and hope for the best. However, the timeout might indicate that there is something wrong with the way the calculation has been set up, or something wrong with your network and the particular {\em communication fabric} that it uses. If you cannot determine the problem, submit a simple version of the case that fails to the \href{https://github.com/firemodels/fds/issues}{Issue Tracker}.
 \item[{\bf Mesh Connection Error}:] If the arrangement of meshes is complicated, FDS may not be able to sort out which mesh is connected to which, and typically the error message ``Mesh connection test timed out for MPI process ...'' appears early in the simulation, before any time-stepping occurs. One possible remedy to this problem, besides simplifying the mesh arrangement, is to ensure that the fine meshes or any embedded meshes are listed first in the input file. That way, FDS has a better chance of registering the proper connections between meshes.
 \item[{\bf File Writing Errors}:] Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
 \begin{lstlisting}
@@ -1018,7 +1018,7 @@ The following rules of thumb should also be followed when setting up a multiple 
 \item Be careful when using the shortcut convention of declaring an entire face of the domain to be an {\ct OPEN} vent. Every mesh takes on this attribute. See Section~\ref{info:VENT} for more details.
 \item If a planar obstruction is close to where two meshes abut, make sure that each mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one of the meshes, that mesh does not account for it, in which case information is not transferred properly between meshes.
 \end{itemize}
-If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct T} on any {\ct MESH} line. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye.
+If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct T} on any {\ct MESH} line along with setting {\ct T\_END} to zero. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye.
 
 The criterion for rejecting the alignment of two meshes is as follows. Suppose the size of the abutting coarse grid cell is $\dx_{\rm c}$ and the fine grid cell is $\dx_{\rm f}$. The meshes are out of alignment if
 \be
@@ -1507,16 +1507,11 @@ You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 \begin{lstlisting}
 &CSVF UVWFILE='my_velocity_field.csv' /
 \end{lstlisting}
-If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
+If multiple meshes are involved, enter the number of the first {\ct .csv} file only.  FDS will increment the mesh number (the integer adjacent to the ``{\ct m}'') to the total number of meshes.  For example, if you had 16 meshes you can use
 \begin{lstlisting}
-&CSVF UVWFILE='CHID_t001_m001.csv' /
-&CSVF UVWFILE='CHID_t001_m002.csv' /
+&CSVF UVWFILE='CHID_t1_m1' /
 \end{lstlisting}
-The above approach is deprecated because it may be cumbersome if a large number of meshes is needed.  To overcome this issue, you may set {\ct PER\_MESH=T}, which will append the mesh number and {\ct .csv} to the {\ct UVWFILE} string.  For example, if you had 16 meshes you can use
-\begin{lstlisting}
-&CSVF UVWFILE='CHID_t001_m', PER_MESH=T /
-\end{lstlisting}
-and FDS will read {\ct CHID\_t001\_m001.csv} through {\ct CHID\_t001\_m016.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+and FDS will read {\ct CHID\_t1\_m1.csv} through {\ct CHID\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
 
 
 
@@ -2900,7 +2895,7 @@ This section is labeled as a special topic because normally you do not need to m
 \subsubsection{Default Convective Heat Transfer Model}
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on the larger of the Nusselt (Nu) numbers for free (natural) and forced convection:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} \right)   \label{q_con}
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} , \frac{2L}{\delta n}\right)   \label{q_con}
 \ee
 where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
 
@@ -2931,7 +2926,7 @@ The values of the coefficients are given in Table~\ref{convective_heat_transfer_
 \begin{tabular}{|lccccc|}
 \hline
 Geometry     & $C_0$    & $C_1$   & $C_2$ & $m$    & Re             \\ \hline
-Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
+Flat Plate   & 0        & 0.0296  & 0     & 0.8    & $\le 10^8$     \\
 Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
 Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
 Cylinder     & 0        & 0.683   & 0     & 0.466  & $40-4000$      \\
@@ -2968,9 +2963,14 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsection{Special Topic: Adiabatic Surfaces}
 \label{info:adiabatic}
 
-For some special applications, it is often desired that a solid surface be adiabatic, that is, there is no net heat transfer (radiative and convective) from the gas to the solid. For this case, all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=T}, and nothing else.  FDS will compute a wall temperature so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}.
+A common boundary condition for diagnostic simulations is to force all surfaces to be perfectly insulated, that is, there is no net heat transfer (radiative and convective) from the gas to the solid. For these cases, specify {\ct ADIABATIC=T} on the {\ct SURF} line.  FDS will compute a wall temperature so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface to be {\ct ADIABATIC} is equivalent to {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}. In such cases, it is also common to initialize the gas and surface temperatures for the purpose of measuring the heat absorbed or generated by objects within the domain, for example:
+\begin{lstlisting} 
+&INIT XB=..., TEMPERATURE=2000. /
+&SURF ID='...', ADIABATIC=T, TMP_FRONT_INITIAL=2000. /
+\end{lstlisting}
+Note that {\ct TMP\_FRONT\_INITIAL} sets the initial temperature of the surface and has few other uses except for this particular application. If the surface is not {\ct ADIABATIC} and it has material properties, use {\ct TMP\_INNER} to set the surface and interior temperature.
 
-No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
+Also note that no solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only. Actual fire simulations can develop numerical instabilities if {\ct ADIABATIC} surfaces are used because the wall temperature and radiation fields are not updated simultaneously.
 
 
 \newpage
@@ -5479,27 +5479,35 @@ Based on the oxygen and methane concentration and the temperature in each box, c
 The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that conditions that sustain burning (red crosses) or cause extinction (blue stars) fall closely on the expected results using thermophysical properties of the reactants and products.  The simpler model, {\ct 'EXTINCTION~1'} (left), merely conforms to the specified Burn-No Burn criterion. More detailed information on the extinction models can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 
+\FloatBarrier
 
 \subsection{Special Topic: Piloted Ignition}
 \label{info:ignition}
 
-By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
+By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-\subsubsection*{Pilot Ignition Zone}
-
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on the {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
 
-\subsubsection*{Pilot Fuel Model}
-
-An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed.  At present, specifying more than one reaction and fuel negates the use of the simple chemistry model, so this method is a bit more cumbersome to set up.  However, it provides a bit more control over the pilot heat release.  For example, it is straight forward to initialize a series of particles with a pilot fuel surface and a controlled mass flux of pilot fuel.
+An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed. For example, you can initialize a series of particles with a controlled mass flux of fuel:
 \begin{lstlisting}
-&REAC FUEL='METHANE', ..., AUTO_IGNITION_TEMPERATURE=600. /
+&REAC FUEL='METHANE', ..., AUTO_IGNITION_TEMPERATURE=540. /
 &REAC FUEL='ETHYLENE', ..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
 With the appropriate chemistry defined, the above {\ct REAC} lines will allow for ethylene to be used as a pilot fuel, avoiding an ignition threshold temperature for any cell where ethylene and its oxidizer are present.
+
+You can also simulate a spark ignition using the following lines of input:
+\begin{lstlisting}
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=540 /
+&PROP ID='spark', SPARK=T /
+&DEVC ID='spark-1', XYZ=..., QUANTITY='TIME', SETPOINT=10, PROP_ID='spark' /
+\end{lstlisting}
+In this case, methane and air will not combust unless the grid cell temperature exceeds 540~$^\circ$C. However, within the grid cell containing the specified point {\ct XYZ}, a ``spark'' is generated at 10~s which effectively causes the AIT to go to 0~K and ignition of fuel and air is allowed, assuming a suitable amount of fuel and air is present.
+
+
+
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
@@ -9683,6 +9691,7 @@ produces a time history of the smoke layer height at $x=2$ and $y=3$ between $z=
 
 \subsection{Thermocouples}
 \label{info:THERMOCOUPLE}
+\label{thermocouple_time_constant}
 
 The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\rm TC}$~\cite{Welsh:1}
 \be
@@ -9690,6 +9699,21 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+
+The above discussion is appropriate for a so-called ``bare bead''  thermocouple, but often thermocouples are shielded or sheathed in various ways to mitigate the effect of thermal radiation. In such cases, there is no obvious bead diameter and there may be multiple metals and air gaps in the construction. Usually, the manufacturer provides a time constant, which is defined as the time required for the sensor to respond to 63.2~\% of its total output signal when suddenly plunged into a warm air stream flowing at 20~m/s. The analysis and testing is typically done at relatively low temperature, in which case the radiation term in Eq.~(\ref{TC}) can be neglected and the time constant, $\tau$, can be defined in terms of effective thermal properties and an effective diameter:
+\be
+   \tau = \frac{D_{\rm eff} \, \rho_{\rm eff} \, c_{\rm eff} }{6 \, h}  \quad ; \quad  h=\frac{k \, \NU}{D_{\rm eff}} \quad ; \quad \NU = 2 + 0.6 \, \RE^{1/2} \, \PR^{1/3}  \quad ; \quad
+   \RE = \frac{\rho \|\bu\| D_{\rm eff}}{\mu}  \label{TC_tau}
+\ee
+For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The {\ct TIME\_CONSTANT} is specified on a {\ct PROP} line which is identified by the {\ct DEVC} line using a {\ct PROP\_ID}. If you specify the {\ct TIME\_CONSTANT}, you can still specify the effective {\ct EMISSIVITY}, {\ct DENSITY}, {\ct SPECIFIC\_HEAT}, and {\ct HEAT\_TRANSFER\_COEFFICIENT} as well, but not the {\ct DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the {\ct TIME\_CONSTANT}.
+
+Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test case called {\ct thermocouple\_time\_constant} whose input file is in the {\ct Heat\_Transfer} samples folder. Three thermocouples with given time constants of 0.5~s, 3.0~s, and 8.0~s are suddenly subjected to a 20~m/s air stream of 30~$^\circ$C. It is expected that each TC should reach a temperature of 26.32~$^\circ$C at their given time constants.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/thermocouple_time_constant}
+\caption[Results of the {\ct thermocouple\_time\_constant} test case]{Temperature response of thermocouples with time constants of 0.5~s, 3.0~s, and 8.0~s compared with the exact solution of Eq.~(\ref{TC}).}
+\label{fig:thermocouple_time_constant}
+\end{figure}
 
 
 
@@ -10351,7 +10375,6 @@ There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the p
 In addition, the following flags can be useful in monitoring the performance of an MPI calculation. They are typically used for debugging.
 \begin{description}
 \item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct T} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries. See Section~\ref{tunnel_demo} for a description of this file.
-\item[{\ct MPI\_TIMEOUT}] The amount of time, in seconds, to wait for messages sent via MPI (Message Passing Interface) before timing out. This parameter is set on the {\ct MISC} line. The default value is 30~s. This parameter is only useful in forcing a job with deadlocked messages to finish and print out information about the lost message. It is very unlikely to solve a deadlock problem.
 \end{description}
 
 
@@ -10607,7 +10630,6 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct ADVECTIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                           & mol/mol           & D,I,P,S      \\ \hline
 {\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C         & D,I,P,S      \\ \hline
-{\ct AUTO IGNITION TEMPERATURE}                 & Section \ref{info:ignition}                       & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                        & Pa                & D,I,P,S      \\ \hline
 {\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s               & D,I,P,S      \\ \hline
@@ -11765,12 +11787,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
-{\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 30.               \\ \hline
+{\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
 {\ct NO\_PRESSURE\_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & {\ct F}           \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
-{\ct NUCLEATION\_SITES}                 & Real         & Section~\ref{info:condensation}         & sites/m$^3$ & 1E7              \\ \hline
+{\ct NUCLEATION\_SITES}                             & Real         & Section~\ref{info:condensation}         & sites/m$^3$ & 1E7              \\ \hline
 {\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct T}      \\ \hline
@@ -12101,63 +12123,65 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
 \hline \hline
 \endhead
-{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24        \\ \hline
-{\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.         \\ \hline
-{\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8         \\ \hline
-{\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.          \\ \hline
-{\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.          \\ \hline
-{\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.          \\ \hline
-{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.          \\ \hline
-{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.          \\ \hline
-{\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.       \\ \hline
-{\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001       \\ \hline
-{\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85        \\ \hline
-{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2           \\ \hline
-{\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &             \\ \hline
-{\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.          \\ \hline
-{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.          \\ \hline
-{\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}  \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &             \\ \hline
-{\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F     \\ \hline
-{\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F     \\ \hline
-{\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &             \\ \hline
-{\ct HISTOGRAM\_NBINS}                  & Integer       & Section~\ref{info:histograms}             &                       & 10          \\ \hline
-{\ct HISTOGRAM\_NORMALIZE}              & Logical       & Section~\ref{info:histograms}             &                       & T      \\ \hline
-{\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &             \\ \hline
-{\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}  \\ \hline
-{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.       \\ \hline
-{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8         \\ \hline
-{\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &             \\ \hline
-{\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05        \\ \hline
-{\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.          \\ \hline
-{\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.          \\ \hline
-{\ct PARTICLES\_PER\_SECOND}            & Integer       & Section~\ref{info:sprinklers}             &                       & 5000        \\ \hline
-{\ct PARTICLE\_VELOCITY}                & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.          \\ \hline
-{\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END}\\ \hline
-{\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}\\ \hline
-{\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0           \\ \hline
-{\ct PDPA\_N}                           & Integer       & Section~\ref{PDPA}                        &                       & 0           \\ \hline
-{\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}\\ \hline
-{\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.          \\ \hline
-{\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.          \\ \hline
-{\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
-{\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.        \\ \hline
-{\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &             \\ \hline
-{\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &             \\ \hline
-{\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &             \\ \hline
-{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44        \\ \hline
-{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.     \\ \hline
-{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.          \\ \hline
-{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.          \\ \hline
-{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
-{\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
-{\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &             \\ \hline
+{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24                 \\ \hline
+{\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.                  \\ \hline
+{\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8                  \\ \hline
+{\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.                   \\ \hline
+{\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+{\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
+{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.                   \\ \hline
+{\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.                \\ \hline
+{\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001                \\ \hline
+{\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85                 \\ \hline
+{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2                    \\ \hline
+{\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &                      \\ \hline
+{\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.                   \\ \hline
+{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.                   \\ \hline
+{\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}           \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &                      \\ \hline
+{\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
+{\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
+{\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
+{\ct HISTOGRAM\_NBINS}                  & Integer       & Section~\ref{info:histograms}             &                       & 10                   \\ \hline
+{\ct HISTOGRAM\_NORMALIZE}              & Logical       & Section~\ref{info:histograms}             &                       & T                    \\ \hline
+{\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &                      \\ \hline
+{\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}           \\ \hline
+{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.                \\ \hline
+{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8                  \\ \hline
+{\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &                      \\ \hline
+{\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05                 \\ \hline
+{\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.                   \\ \hline
+{\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.                   \\ \hline
+{\ct PARTICLES\_PER\_SECOND}            & Integer       & Section~\ref{info:sprinklers}             &                       & 5000                 \\ \hline
+{\ct PARTICLE\_VELOCITY}                & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.                   \\ \hline
+{\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END}         \\ \hline
+{\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}              \\ \hline
+{\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0                    \\ \hline
+{\ct PDPA\_N}                           & Integer       & Section~\ref{PDPA}                        &                       & 0                    \\ \hline
+{\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct T}              \\ \hline
+{\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.                   \\ \hline
+{\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.                   \\ \hline
+{\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+{\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.                 \\ \hline
+{\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &                      \\ \hline
+{\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
+{\ct SPARK}                             & Logical       & Section~\ref{info:ignition}               &                       & {\ct F}              \\ \hline
+{\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
+{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44                 \\ \hline
+{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
+{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
+{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}     \\ \hline
+{\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+{\ct TIME\_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
+{\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \end{longtable}
 
 % Undocumented: FED_ACTIVITY
@@ -12555,6 +12579,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
 {\ct TMP\_BACK}                                           & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                                          & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
 {\ct TMP\_INNER(:)}                                       & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline

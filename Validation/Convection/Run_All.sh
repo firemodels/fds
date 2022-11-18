@@ -5,6 +5,22 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
+# FORCED CONVECTION OVER A FLAT PLATE
+
+$QFDS $DEBUG -I $QUEUE -d $INDIR forced_conv_flat_plate_u0p1_25cm.fds
+$QFDS $DEBUG -I $QUEUE -d $INDIR forced_conv_flat_plate_u1_25cm.fds
+$QFDS $DEBUG -I $QUEUE -d $INDIR forced_conv_flat_plate_u10_25cm.fds
+
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR forced_conv_flat_plate_u0p1_10cm.fds
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR forced_conv_flat_plate_u1_10cm.fds
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR forced_conv_flat_plate_u10_10cm.fds
+
+$QFDS $DEBUG -I -p 64 $QUEUE -d $INDIR forced_conv_flat_plate_u0p1_2p5cm.fds
+$QFDS $DEBUG -I -p 64 $QUEUE -d $INDIR forced_conv_flat_plate_u1_2p5cm.fds
+$QFDS $DEBUG -I -p 64 $QUEUE -d $INDIR forced_conv_flat_plate_u10_2p5cm.fds
+
+# NATURAL CONVECTION IN A CLOSED CAVITY
+
 $QFDS $DEBUG -I $QUEUE -d $INDIR natconv_1_8.fds
 $QFDS $DEBUG -I $QUEUE -d $INDIR natconv_2_8.fds
 $QFDS $DEBUG -I $QUEUE -d $INDIR natconv_3_8.fds
