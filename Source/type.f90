@@ -443,6 +443,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: DENSITY_LIQUID                     !< Liquid density (kg/m3)
    REAL(EB) :: HEAT_OF_VAPORIZATION=-1._EB        !< Heat of vaporization (J/kg)
    REAL(EB) :: H_F                                !< Heat of formation (J/kg)
+   REAL(EB) :: H_F_LISTED=-1.E30_EB               !< Heat of formation for a listed species (J/kg)
    REAL(EB) :: H_V_REFERENCE_TEMPERATURE=-1._EB   !< Heat of vaporization reference temperature (K)
    REAL(EB) :: TMP_V=-1._EB                       !< Vaporization temperature (K)
    REAL(EB) :: TMP_MELT=-1._EB                    !< Melting temperature (K)
@@ -504,22 +505,23 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB   !< Absorption coefficient of visible light (m2/kg)
    REAL(EB) :: ADJUST_NU=1._EB                     !< Adjustment factor if stoichiometric coefficients given for non-normalized VF
    REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
-   REAL(EB) :: MEAN_DIAMETER
+   REAL(EB) :: MEAN_DIAMETER                       !< Aerosol particle diameter (m)
    REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
    REAL(EB) :: REFERENCE_ENTHALPY=-1.E30_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
-   REAL(EB) :: THERMOPHORETIC_DIAMETER
+   REAL(EB) :: THERMOPHORETIC_DIAMETER             !< Diameter (m) to use in thermophoretic calculation
    REAL(EB) :: REFERENCE_TEMPERATURE               !< Reference temperature of mixture (K)
    REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
    REAL(EB) :: K_USER=-1._EB                       !< User-specified thermal conductivity (W/m/K)
    REAL(EB) :: D_USER=-1._EB                       !< User-specified diffusion coefficient (m2/s)
    REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandhl number
-   REAL(EB) :: EPSK=-1._EB
-   REAL(EB) :: SIG=-1._EB
+   REAL(EB) :: EPSK=-1._EB                         !< Lennard-Jones \f$ \epsilon/k \f$ (K)
+   REAL(EB) :: SIG=-1._EB                          !< Lennard_Jones hard-sphere diameter (Angstroms)
    REAL(EB) :: FLD_LETHAL_DOSE=0._EB
    REAL(EB) :: FIC_CONCENTRATION=0._EB
-   REAL(EB) :: DENSITY_SOLID
-   REAL(EB) :: CONDUCTIVITY_SOLID
-   REAL(EB) :: H_F = -1.E30_EB                    !< Heat of formation (J/kg)
+   REAL(EB) :: DENSITY_SOLID                       !< Density for aerosol particle (kg/m3)
+   REAL(EB) :: CONDUCTIVITY_SOLID                  !< Conductivity for aerosol particle (W/m/K)
+   REAL(EB) :: H_F = -1.E30_EB                     !< Heat of formation (J/kg)
+   REAL(EB) :: H_F_HOC = -1.E30_EB                 !< Heat of formation used in RN%HEAT_OF_COMBUSTION calculation (J/kg)
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
@@ -528,12 +530,23 @@ TYPE SPECIES_MIXTURE_TYPE
    CHARACTER(LABEL_LENGTH) :: RAMP_K                              !< Name of conductivity ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_MU                             !< Name of viscosity ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_D                              !< Name of diffusion coefficient ramp
-   CHARACTER(LABEL_LENGTH) :: RAMP_G_F
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F                            !< Name of Gibbs free energy ramp
    CHARACTER(FORMULA_LENGTH) :: FORMULA='null'                    !< Chemical formula of lumped species
 
-   INTEGER :: AWM_INDEX = -1,RAMP_CP_INDEX=-1,SINGLE_SPEC_INDEX=-1,RAMP_K_INDEX=-1,RAMP_MU_INDEX=-1,RAMP_D_INDEX=-1,&
-              RAMP_G_F_INDEX=-1,CONDENSATION_SMIX_INDEX=-1,EVAPORATION_SMIX_INDEX=-1,AGGLOMERATION_INDEX=-1
-   LOGICAL :: DEPOSITING=.FALSE.,VALID_ATOMS=.TRUE.,EVAPORATING=.FALSE.,EXPLICIT_H_F=.FALSE.
+   INTEGER :: AWM_INDEX = -1              !< Index in the AWM array for deposited mass of an aerosol species
+   INTEGER :: RAMP_CP_INDEX=-1            !< Index of specific heat ramp
+   INTEGER :: SINGLE_SPEC_INDEX=-1        !< Index of the primitive species for a mixture with one subspecies
+   INTEGER :: RAMP_K_INDEX=-1             !< Index of conductivity ramp
+   INTEGER :: RAMP_MU_INDEX=-1            !< Index of viscosity ramp
+   INTEGER :: RAMP_D_INDEX=-1             !< Index of diffusivity ramp
+   INTEGER :: RAMP_G_F_INDEX=-1           !< Index of Gibbs free energy ramp
+   INTEGER :: CONDENSATION_SMIX_INDEX=-1  !< Species is condensible that condenses into the indexed species
+   INTEGER :: EVAPORATION_SMIX_INDEX=-1   !< Species is a condensate that evaporates into the indexed species
+   INTEGER :: AGGLOMERATION_INDEX=-1      !< Index of species in the agglomeration arrays
+   LOGICAL :: DEPOSITING=.FALSE.    !< Species is an aerosol species  
+   LOGICAL :: VALID_ATOMS=.TRUE.    !< Species has a chemical formula defined
+   LOGICAL :: EVAPORATING=.FALSE.   !< Species is the gas species for a liquid droplet
+   LOGICAL :: EXPLICIT_H_F=.FALSE.  !< All subspecies have an explicitly defined H_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
 
