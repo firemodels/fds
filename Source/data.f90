@@ -3528,7 +3528,7 @@ GAS_NAME_SELECT: SELECT CASE(GAS_NAME)
    CASE DEFAULT !Uses NITROGEN
       SIGMA = 3.798_EB
       EPSOK = 71.4_EB
-      H_F = 0._EB
+      H_F = -1.E30_EB
       MW = 28.01340_EB
       PR_GAS = 0.71_EB ! JPCRD 19(5)
       LISTED = .FALSE.
