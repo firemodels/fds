@@ -35,6 +35,9 @@ for i=1:length(vel)
     Nu_x = 0.0296 * Re_x.^0.8; % Incropera and Dewitt correlation, Eq. 7.36, Table 7.7
     Nu_1 = 0.0296 * Re_1.^0.8; % reference value for normalization of errors
 
+    % BL_thickness = 0.37*x.*Re_x.^(-0.2);
+    % BL_thickness(end)
+
     figure(i)
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
@@ -64,6 +67,13 @@ for i=1:length(vel)
         REL_ERROR(i,j) = abs(Nu_x(end)-Nu_x_fds(end))/Nu_x(end);
 
     end
+
+    xl = get(gca,'XLim');
+    yl = get(gca,'YLim');
+
+    xtxt = xl(1) + 0.5*(xl(2)-xl(1));
+    ytxt = yl(1) + 0.9*(yl(2)-yl(1));
+    text(xtxt,ytxt,['Velocity = ',num2str(u(i)),' m/s'],'FontName',Font_Name,'FontSize',Title_Font_Size)
 
     lh=legend(H,'forced local','FDS {\it\deltax}=25cm','FDS {\it\deltax}=10cm','FDS {\it\deltax}=2.5cm','2*1/0.25*{\itx}','2*1/0.10*{\itx}','2*1/0.025*{\itx}','location','northwest');
     set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
