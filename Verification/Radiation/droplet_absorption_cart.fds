@@ -1,6 +1,6 @@
 
 The droplet tempererature is increased by the absorption of thermal radiation.
-Considering the total mass of absorbing droplets, the ode for average droplet 
+Considering the total mass of absorbing droplets, the ode for average droplet
 temperature is
 
 m c_p dT/dt = Q_abs
@@ -9,7 +9,7 @@ With constant conditions, the average droplet temperature in the end should be
 
 dT = dt Q_abs / (m c_p)
 
-By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical 
+By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical
 value of dT should be equal to the time averaged Q_abs.
 
 --------------------FDS Data-----------------------------
@@ -17,9 +17,9 @@ value of dT should be equal to the time averaged Q_abs.
 
 &MESH IJK=3,3,3, XB=0.0,3.0,0.0,3.0,0.0,3.0 /
 
-&TIME T_END=.01 DT = 0.00001 / 
+&TIME T_END=.01 DT = 0.00001 /
 
-&MISC GVEC=0,0,0, Y_CO2_INFTY=0.,HUMIDITY=0./ 
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0.,HUMIDITY=0./
 
 &DUMP NFRAMES=100 /
 
@@ -39,7 +39,6 @@ value of dT should be equal to the time averaged Q_abs.
       MELTING_TEMPERATURE = -273.15
       SPECIFIC_HEAT_LIQUID = 1.0
       HEAT_OF_VAPORIZATION = 1000.
-      REFERENCE_ENTHALPY=298.15
       SPECIFIC_HEAT=1.      /
 
 &PART ID='drops'
@@ -50,7 +49,7 @@ value of dT should be equal to the time averaged Q_abs.
       MINIMUM_DIAMETER=10.
       SAMPLING_FACTOR=1 /
 
-&INIT N_PARTICLES = 100, 
+&INIT N_PARTICLES = 100,
       MASS_PER_VOLUME = 0.01
       XB = 1,2,1,2,1,2
       PART_ID = 'drops' /
