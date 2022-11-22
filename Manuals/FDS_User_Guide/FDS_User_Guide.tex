@@ -3207,6 +3207,7 @@ The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third sol
 \item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
 \item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
+
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
