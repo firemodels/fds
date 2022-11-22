@@ -1159,13 +1159,20 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    JJG = BC%JJG
    KKG = BC%KKG
    ICG = M%CELL_INDEX(IIG,JJG,KKG)
+   IF (M%SOLID(ICG)) CYCLE WALL_LOOP
    IOR = BC%IOR
 
    ! Search for 0 or 1 cell thick HT1D solids that abut mesh boundary and have EXPOSED back boundary condition.
 
-   IF (WC%OBST_INDEX==0) CYCLE WALL_LOOP
-   IF (M%SOLID(ICG)) CYCLE WALL_LOOP
    SF => SURFACE(WC%SURF_INDEX)
+   IF (WC%OBST_INDEX==0) THEN
+      IF (SF%HT_DIM>1) THEN
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' is HT3D and must be applied to an OBST'
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ENDIF
+      CYCLE WALL_LOOP
+   ENDIF
 
    IF_THERM_THICK_EXPOSED: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. SF%BACKING==EXPOSED) THEN ! search for the back side
 
@@ -1186,7 +1193,14 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             IF (KK==0)       ZZC = OM%Z(KK)   - MESH_SEPARATION_DISTANCE
             IF (KK==OM%KBP1) ZZC = OM%Z(KK-1) + MESH_SEPARATION_DISTANCE
             CALL SEARCH_OTHER_MESHES(XXC,YYC,ZZC,NOM,II,JJ,KK)
-            IF (NOM==0) CYCLE WALL_LOOP
+            IF (NOM==0) THEN
+               IF (SF%HT_DIM>1) THEN
+                  WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' is HT3D and cannot extend beyond the computational domain'
+                  STOP_STATUS = SETUP_STOP
+                  RETURN
+               ENDIF
+               CYCLE WALL_LOOP
+            ENDIF
             OM => MESHES(NOM)
          ENDIF
          IC = OM%CELL_INDEX(II,JJ,KK)
