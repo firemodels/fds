@@ -7619,22 +7619,22 @@ Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531
 \end{figure}
 
 
-The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.125$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle.
+The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers two pines needle both with an initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.125$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needles are a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. They are composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$ with one needle dry and the other needle having 20~\% moisture. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes three reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash, and the third is the evaporation of moisture. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle.
 
-To simplify calculation of the exact answer, all species and material $c$ values are set to $1$~kJ/(kg$\cdot$K). Energy is conserved if the enthalpy change of the particle is equal and opposite to the internal energy change of the gas. Note that it is internal energy and not enthalpy since the box is sealed and any pressure rise must be accounted for in the energy balance.
+To simplify calculation of the exact answer, all species and material $c$ values, except for the moisture, are set to $1$~kJ/(kg$\cdot$K). Energy is conserved if the enthalpy change of the particle is equal and opposite to the internal energy change of the gas. Note that it is internal energy and not enthalpy since the box is sealed and any pressure rise must be accounted for in the energy balance. For this case, since the gas species have a specified specific heat, their heat of formation are all 298.15~kJ/kg. Since there are four materials and three material reactions, following the discussion in Section~\ref{solid_phase_energy_conservation}, FDS will perform a least squares solution to determine the material heats of formation (the enthalpy at 298.15 K). The result of this calculation is a pulp heat of formation of 2,897~kJ/kg, a char heat of formation of 12293~kJ/kg, an ash heat of formation of 45.26~kJ/kg, and a moisture heat of formation of -2004~kJ/kg.
 
 At the start of the simulation the particle enthalpy is:
 \be
-H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 293.15~{\rm kJ/kg} = 0.011512~{\rm kJ}
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times (2987-5)~{\rm kJ/kg} = 0.1136~{\rm kJ}
 \ee
 
 At the end of the simulation only ash is left which is 2~\% of the char mass which was 25~\% of the inital particle mass. The ash will end up at the gas temperature.
 
 \be
-H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 0.02 \times 0.25 \times 1073.15~{\rm kJ/kg} = 0.000211~{\rm kJ}
+H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 0.02 \times 0.25 \times (45.26+775)~{\rm kJ/kg} = 0.000161~{\rm kJ}
 \ee
 
-The particle will therefore lose 0.011301~kJ.
+The particle will therefore lose 0.1134~kJ.
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_solid_mass}
