@@ -2655,10 +2655,10 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
    IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
       WRITE(LU_OUTPUT,'(/6X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
    ENDIF
-   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
+   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
       WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
       WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRIT_FLAME_TMP - TMPM
+      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
    ENDIF
    IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
