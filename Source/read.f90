@@ -3637,9 +3637,8 @@ END FUNCTION CHECK_CONDENSABLE
 
 END SUBROUTINE READ_SPEC
 
-!> \brief Setup arrays of primitive species properties to be used in PROC_SMIX
 
-!> \param N Species index
+!> \brief Setup arrays of primitive species properties to be used in PROC_SMIX
 
 SUBROUTINE PROC_SPEC_1
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP

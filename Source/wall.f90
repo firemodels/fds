@@ -3755,6 +3755,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 !> \param M_DOT_PART Rate of mass production of particles created in reactions (kg/m3/s)
 !> \param T_BOIL_EFF Effective boiling temperature (K)
 !> \param B_NUMBER B-number of liquid surface
+!> \param LAYER_INDEX Index of the solid layer
 !> \param SOLID_CELL_INDEX (OPTIONAL) Index of the interior solid cell
 !> \param R_DROP (OPTIONAL) Radius of liquid droplet
 !> \param LPU (OPTIONAL) x component of droplet velocity (m/s)
