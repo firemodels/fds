@@ -488,7 +488,7 @@ TYPE(REACTION_TYPE), POINTER :: R1
 ! Use a single critical flame temperature from reaction 1
 
 R1 => REACTION(1)
-CFT = R1%CRIT_FLAME_TMP
+CFT = R1%CRITICAL_FLAME_TEMPERATURE
 
 ! Evaluate extinction criterion using cell oxygen mass fraction based on Tech Guide Fig. 5.2 and Eq. 5.53
 
@@ -527,7 +527,7 @@ SUM_ZZ  = 0._EB
 DO NR=1,N_REACTIONS
    RN => REACTION(NR)
    IF (RN%PRIORITY/=1) CYCLE
-   SUM_CFT = SUM_CFT + ZZ_0(RN%FUEL_SMIX_INDEX)*RN%CRIT_FLAME_TMP
+   SUM_CFT = SUM_CFT + ZZ_0(RN%FUEL_SMIX_INDEX)*RN%CRITICAL_FLAME_TEMPERATURE
    SUM_ZZ  = SUM_ZZ  + ZZ_0(RN%FUEL_SMIX_INDEX)
 ENDDO
 
