@@ -3568,7 +3568,6 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          ! Setup final producs
          N = N + 1
          RN2=>REACTION(REACTION(NR)%PAIR_INDEX)
-         WRITE(*,*) NR,TRIM(REACTION(NR)%FUEL),REACTION(NR)%PAIR_INDEX,TRIM(RN2%FUEL),TRIM(RN2%SPEC_ID_NU_READ(1)),TRIM(RN2%SPEC_ID_NU_READ(2)),TRIM(RN2%SPEC_ID_NU_READ(3))
          CALL SET_SPEC_DEFAULT
          ID                 = RN2%SPEC_ID_NU_READ(3)
          SUFFIX = LEN(TRIM(RN%SPEC_ID_NU_READ(3)))
@@ -4360,7 +4359,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       RN%N_SPEC = 0
       ALLOCATE(RN%NU_READ(RN%N_SMIX))
       ALLOCATE(RN%SPEC_ID_NU_READ(RN%N_SMIX))
-WRITE(*,*) 'NR',NR
       PROD_COUNTER = PROD_COUNTER + 1
       IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==1) THEN
          RN%SPEC_ID_NU_READ(1) = RN%FUEL
@@ -4370,7 +4368,6 @@ WRITE(*,*) 'NR',NR
          ELSE
             WRITE(RN%SPEC_ID_NU_READ(3),'(A,I0)') 'PRODUCTS ',PROD_COUNTER
          ENDIF
-         WRITE(*,*) '1S:',RN%FUEL,RN%SPEC_ID_NU_READ
       ELSE ! RN%N_SIMPLE_CHEMISTRY_REACTIONS=2
          NEW_REAC = NEW_REAC + 1
          RN%PAIR_INDEX = N_REACTIONS+NEW_REAC
@@ -4386,16 +4383,12 @@ WRITE(*,*) 'NR',NR
          REACTION(1:NR) = REAC_TEMP(1:NR)
          IF (NEW_REAC > 1) REACTION(N_REACTIONS+1:N_REACTIONS+NEW_REAC-1) = REAC_TEMP(N_REACTIONS+1:N_REACTIONS+NEW_REAC-1)
          DEALLOCATE(REAC_TEMP)
-         WRITE(*,*) 'PI PC:',RN%PAIR_INDEX,PROD_COUNTER
          RN2 => REACTION(RN%PAIR_INDEX)
          RN2 = REACTION(NR)
          RN2%N_SIMPLE_CHEMISTRY_REACTIONS = -2
          RN2%PAIR_INDEX = NR
          RN2%PRIORITY = 2
          MAX_PRIORITY = MAX(MAX_PRIORITY,RN2%PRIORITY)
-         WRITE(*,*) 'RN2N:',RN2%N_SMIX
-         IF (ALLOCATED(RN2%SPEC_ID_NU_READ)) WRITE(*,*) 'ALLOCATED SINR'
-         IF (ALLOCATED(RN2%NU_READ)) WRITE(*,*) 'ALLOCATED NR'
          IF (PROD_COUNTER ==1) THEN
             RN2%FUEL = 'INTERMEDIATE PRODUCTS'
             RN2%SPEC_ID_NU_READ(3) = 'PRODUCTS'
@@ -4406,8 +4399,6 @@ WRITE(*,*) 'NR',NR
          REACTION(NR)%SPEC_ID_NU_READ(3)  = RN2%FUEL
          RN2%SPEC_ID_NU_READ(1) = RN2%FUEL
          RN2%SPEC_ID_NU_READ(2) = 'AIR'
-         WRITE(*,*) '2S1:',REACTION(NR)%FUEL,REACTION(NR)%SPEC_ID_NU_READ
-         WRITE(*,*) '2S2:',RN2%FUEL,RN2%SPEC_ID_NU_READ
       ENDIF
    ENDIF SIMPLE_IF
 
@@ -4494,7 +4485,7 @@ END SUBROUTINE READ_REAC
 SUBROUTINE PROC_REAC_1
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION, SHUTDOWN_ATOM
 REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
-INTEGER :: NS,NS2,NR,NSPEC
+INTEGER :: NS,NS2,NR
 LOGICAL :: NAME_FOUND,SKIP_ATOM_BALANCE
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
 TYPE (REACTION_TYPE), POINTER :: RN=>NULL(),RN2=>NULL()
@@ -8200,8 +8191,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                         NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
                         RN => REACTION(NR)
                         IF (DUPLICATE_FUEL(NR)) THEN
-                           WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and species ' // TRIM(SPECIES_MIXTURE(NS)%ID) // &
-                                                'is the FUEL for more than one REACtion.'
+                           WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and species ' // &
+                                                TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                         ENDIF
                         SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS) * RN%HOC_COMPLETE
@@ -8209,7 +8200,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   ENDIF
                ENDDO
                IF (SUM(SF%MASS_FLUX) < TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
+                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
+                                       ' uses HRRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                SF%MASS_FLUX = SF%MASS_FRACTION * SF%HRRPUA / SUM(SF%MASS_FLUX)
@@ -8234,7 +8226,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                      SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)
                ENDDO
                IF (SUM(SF%MASS_FLUX) < TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses MLRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
+                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
+                                       ' uses MLRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                SF%MASS_FLUX = SF%MASS_FRACTION * SF%MLRPUA / SUM(SF%MASS_FLUX)
