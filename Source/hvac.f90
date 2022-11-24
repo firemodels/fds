@@ -2342,10 +2342,9 @@ ENDDO NODE_LOOP
 
 END SUBROUTINE DETERMINE_FIXED_ELEMENTS
 
+
 !> \brief Determines what HVAC components lies in different, isolated networks (i.e. not sharing a common pressure zone)
-!>
-!> \param CHANGEIN Flag to force revaluation of the duct networks. Otherwise done only if there area damper changes.
-!> \param T Current time (s)
+!> \param CHANGE Flag to force revaluation of the duct networks. Otherwise done only if there area damper changes.
 !> \param T Current time (s)
 
 SUBROUTINE FIND_NETWORKS(CHANGE,T)
@@ -3804,10 +3803,9 @@ DR%P(1:DR%N_M_DUCTNODES,NF,NEW) = RHS(DR%N_M_DUCTS+1:DR%N_M_DUCTS+DR%N_M_DUCTNOD
 
 END SUBROUTINE MATRIX_SOLVE_QFAN
 
+
 !> \brief Builds the right hand side of the HVAC QFAN matrix for mass conservation at internal nodes
-!>
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
-!> \param NF Index indicating which ductrun fan is being solved
 
 SUBROUTINE RHSNODE_QFAN(DUCTRUN_INDEX)
 USE GLOBAL_CONSTANTS
@@ -3854,10 +3852,11 @@ ENDDO
 
 END SUBROUTINE LHSNODE_QFAN
 
+
 !> \brief Builds the right hand side of the HVAC QFAN flow matrix for momentum conservation in a duct
-!>
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
 !> \param NF Index indicating which ductrun fan is being solved
+!> \param T Current time (s)
 
 SUBROUTINE RHSDUCT_QFAN(DUCTRUN_INDEX,NF,T)
 
@@ -4060,10 +4059,9 @@ END DO COIL_LOOP
 
 END SUBROUTINE COIL_UPDATE_QFAN
 
+
 !> \brief Determines wall friction loss and assigns node losses to ducts
-!>
 !> \param T Current time (s)
-!> \param DT Current time step (s)
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
 !> \param NF Index indicating which HVAC ductrun dan is being solved
 

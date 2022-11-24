@@ -472,21 +472,25 @@ TMP_SGS = C_IGN*SQRT(ABS(TMP(IIC,JJC,KKC)**2-TMP_TEST**2))
 END SUBROUTINE SUBGRID_TEMPERATURE
 
 
+!> \brief Determine if the reaction can occur using the less detailed extinction model (FDS Tech Guide, Section 5.3.2)
+!> \param EXTINCT Logical parameter indicating if extinction has occurred in the cell
+!> \param ZZ_0 Array of lumped species mass fractions in the mixed part of the grid cell at the start of the time step
+!> \param TMP_IN Initial temperature of the grid cell
+
 SUBROUTINE EXTINCT_1(EXTINCT,ZZ_0,TMP_IN)
 
-! Mowrer model, linear relationship between gas temperature and limiting oxygen concentration.
-
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: TMP_IN,ZZ_0(1:N_TRACKED_SPECIES)
 LOGICAL, INTENT(INOUT) :: EXTINCT
 REAL(EB) :: Y_O2,Y_O2_LIM,TMP_FACTOR,CFT
 TYPE(REACTION_TYPE), POINTER :: R1
 
-EXTINCT = .FALSE.
+! Use a single critical flame temperature from reaction 1
 
 R1 => REACTION(1)
-CFT = R1%CRIT_FLAME_TMP
+CFT = R1%CRITICAL_FLAME_TEMPERATURE
+
+! Evaluate extinction criterion using cell oxygen mass fraction based on Tech Guide Fig. 5.2 and Eq. 5.53
 
 CALL GET_MASS_FRACTION(ZZ_0,O2_INDEX,Y_O2)
 IF (TMP_IN < FREE_BURN_TEMPERATURE) THEN
@@ -500,23 +504,43 @@ IF (Y_O2 < Y_O2_LIM) EXTINCT = .TRUE.
 END SUBROUTINE EXTINCT_1
 
 
+!> \brief Determine if the reaction can occur using the more detailed extinction model (FDS Tech Guide, Section 5.3.3)
+!> \param EXTINCT Logical parameter indicating if extinction has occurred in the cell
+!> \param ZZ_0 Array of lumped species mass fractions in the mixed part of the grid cell at the start of the time step
+!> \param ZZ_IN Array of lumped species mass fractions in the mixed part of the grid cell at the end of the time step
+!> \param TMP_IN Initial temperature of the grid cell
+
 SUBROUTINE EXTINCT_2(EXTINCT,ZZ_0,ZZ_IN,TMP_IN)
 
-! Default model, FDS Tech Guide, Section 5.3
-
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB),INTENT(IN) :: TMP_IN,ZZ_IN(1:N_TRACKED_SPECIES),ZZ_0(1:N_TRACKED_SPECIES)
 LOGICAL, INTENT(INOUT) :: EXTINCT
 REAL(EB) :: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,H_CRIT,PHI_TILDE,CFT
-INTEGER :: NS
-TYPE(REACTION_TYPE), POINTER :: R1
+INTEGER :: NS,NR
+REAL(EB) :: SUM_ZZ,SUM_CFT
+TYPE(REACTION_TYPE), POINTER :: RN,R1
+
+! Get the weighted average of the critical flame temperature (CFT) based on the relative amounts of fuels of the primary reactions
+
+SUM_CFT = 0._EB
+SUM_ZZ  = 0._EB
+DO NR=1,N_REACTIONS
+   RN => REACTION(NR)
+   IF (RN%PRIORITY/=1) CYCLE
+   SUM_CFT = SUM_CFT + ZZ_0(RN%FUEL_SMIX_INDEX)*RN%CRITICAL_FLAME_TEMPERATURE
+   SUM_ZZ  = SUM_ZZ  + ZZ_0(RN%FUEL_SMIX_INDEX)
+ENDDO
+
+IF (SUM_ZZ < TWO_EPSILON_EB) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ENDIF
+
+CFT = SUM_CFT/SUM_ZZ
+
+! Compute the modified cell equivalence ratio
 
 R1 => REACTION(1)
-
-IF (.NOT.R1%FAST_CHEMISTRY) RETURN
-
-CFT = R1%CRIT_FLAME_TMP
 PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.54)
 
 IF ( PHI_TILDE < TWO_EPSILON_EB ) THEN
@@ -524,41 +548,34 @@ IF ( PHI_TILDE < TWO_EPSILON_EB ) THEN
    RETURN
 ENDIF
 
-! Define the modified pre and post mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
+! Define the modified pre and post-reaction mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
 
-DO NS=1,N_TRACKED_SPECIES
-   IF (NS==R1%FUEL_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = ZZ_0(NS)
-      ZZ_HAT(NS)   = ZZ_IN(NS)
-   ELSEIF (NS==R1%AIR_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
-      ZZ_HAT(NS)   = 0._EB
-   ELSE  ! Products
-      ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
-      ZZ_HAT(NS)   = (PHI_TILDE-1._EB)*ZZ_0(NS) + ZZ_IN(NS)
-   ENDIF
+DO NR=1,N_REACTIONS
+   RN => REACTION(NR)
+   DO NS=1,N_TRACKED_SPECIES
+      IF (NS==RN%FUEL_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = ZZ_0(NS)
+         ZZ_HAT(NS)   = ZZ_IN(NS)
+      ELSEIF (NS==RN%AIR_SMIX_INDEX) THEN
+         ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = 0._EB
+      ELSE  ! Products
+         ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+         ZZ_HAT(NS)   = (PHI_TILDE-1._EB)*ZZ_0(NS) + ZZ_IN(NS)
+      ENDIF
+   ENDDO
 ENDDO
 
-! Normalize the modified pre and post mixtures
+! Normalize the modified pre and post-reaction mixtures
 
-IF (SUM(ZZ_HAT_0)<TWO_EPSILON_EB) THEN
-   EXTINCT = .TRUE.
-   RETURN
-ELSE
-   ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
-ENDIF
-IF (SUM(ZZ_HAT)<TWO_EPSILON_EB) THEN
-   EXTINCT = .TRUE.
-   RETURN
-ELSE
-   ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
-ENDIF
+ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
+ZZ_HAT   = ZZ_HAT/SUM(ZZ_HAT)
 
-! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
+! Determine if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
 
 CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction (includes chemical enthalpy)
-CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,CFT) ! H of products at the critical flame temperature
-IF (H_0 < H_CRIT) EXTINCT = .TRUE. ! FDS Tech Guide (5.54)
+CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,CFT)   ! H of products at the critical flame temperature
+IF (H_0 < H_CRIT) EXTINCT = .TRUE. ! FDS Tech Guide (5.55)
 
 END SUBROUTINE EXTINCT_2
 
