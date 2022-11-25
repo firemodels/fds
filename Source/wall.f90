@@ -2430,7 +2430,16 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       MFT = 0._EB
 
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
-      !***** Move t-scale outside loop so inside loop do not have to evaluate again for mulitple fuels
+
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR) THEN
+         RP => RAMPS(SF%RAMP_INDEX(TIME_HEAT))               
+         IF (SF%EMISSIVITY > 0._EB) THEN
+            ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
+         ELSE
+            ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
+         ENDIF
+         CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
+      ENDIF
 
       SUM_MASSFLUX_LOOP: DO N=1,N_TRACKED_SPECIES
          IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
@@ -2443,21 +2452,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
             IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1) THEN
-               IF( N==REACTION(1)%FUEL_SMIX_INDEX) THEN
-                  IF (PREDICTOR) THEN
-                     RP => RAMPS(SF%RAMP_INDEX(N))               
-                     IF (SF%EMISSIVITY > 0._EB) THEN
-                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
-                     ELSE
-                        ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,ONE_D%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX)
-                     ENDIF
-                     CALL INTERPOLATE1D_UNIFORM(1,RP%INTERPOLATED_DATA(1:RP%NUMBER_INTERPOLATION_POINTS),ONE_D%T_SCALE*RP%RDT,Q_NEW)
-                     ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
-                     ONE_D%Q_SCALE = Q_NEW
-                  ENDIF
-               ELSE
-                  ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
-               ENDIF
+               IF (PREDICTOR) ONE_D%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-ONE_D%Q_SCALE)/DT*SF%MASS_FLUX(N)
             ELSE
                ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(N),TAU=SF%TAU(N))*SF%MASS_FLUX(N)
             ENDIF
@@ -2465,6 +2460,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ENDIF
          MFT = MFT + ONE_D%M_DOT_G_PP_ADJUST(N)
       ENDDO SUM_MASSFLUX_LOOP
+      
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR) ONE_D%Q_SCALE = Q_NEW
 
       ! Apply user-specified mass flux variation
 
@@ -4328,7 +4325,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 REAL(EB) :: DT_TGA=0.01_EB,T_TGA,SURF_DEN_0,HRR
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: SURF_DEN
-INTEGER :: N_TGA,I,IW,IP,N
+INTEGER :: N_TGA,I,IW,IP,N,NR
 CHARACTER(80) :: MESSAGE,TCFORM
 TYPE(SURFACE_TYPE), POINTER :: SF
 
@@ -4387,8 +4384,11 @@ DO I=1,N_TGA
          ENDDO
       ENDIF
       IF (N_REACTIONS>0) THEN
-         HRR = ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*0.001*REACTION(1)%HEAT_OF_COMBUSTION/&
-                                                                                    (ONE_D%AREA_ADJUST*SURF_DEN_0)
+         HRR = 0._EB
+         DO NR=1,N_REACTIONS
+            HRR = ONE_D%M_DOT_G_PP_ADJUST(REACTION(NR)%FUEL_SMIX_INDEX)*0.001*REACTION(NR)%HEAT_OF_COMBUSTION / &
+                  (ONE_D%AREA_ADJUST*SURF_DEN_0)
+         ENDDO
       ELSE
          HRR = 0._EB
       ENDIF
