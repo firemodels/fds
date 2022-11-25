@@ -2845,7 +2845,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 
 \chapter{Fire and Thermal Boundary Conditions}
 
-This chapter describes how to specify the thermal properties of solid objects. 
+This chapter describes how to specify the thermal properties of solid objects.
 
 \section{Basics}
 \label{info:SURF_MATL_Basics}
@@ -3196,9 +3196,18 @@ FDS does have a limited 3-D heat conduction capability that is appropriate for s
 &SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells.
+The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. It is important to specify this parameter because by default, FDS uses a non-uniform grid for 1-D heat solid phase heat transfer that is not appropriate for 3-D applications.
 
 The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
+
+\subsubsection{Limitations}
+
+\begin{enumerate}
+\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
+\item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
+\item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
+
+\end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
 
@@ -3259,9 +3268,9 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
 \begin{lstlisting}
 &OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /
 &OBST XB=0.12,1.88,0.50,0.54,0.21,0.79, SURF_ID='WEB INSULATION' /
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', 
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK',
       CELL_SIZE=0.1, HEAT_TRANSFER_COEFFICIENT=20 /
-&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE', 
+&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE',
       THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
 \end{lstlisting}
 
