@@ -8182,6 +8182,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Set predefined HRRPUA or MLRPUA
 
    BURNING_IF: IF (BURNING) THEN
+      I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
       HRRPUA_MLRPUA_IF: IF (SF%HRRPUA > 0._EB .OR. SF%MLRPUA > 0._EB) THEN
          H_OR_M_IF: IF (SF%HRRPUA>0._EB) THEN
             IF (ANY(SF%MASS_FRACTION > 0._EB)) THEN
@@ -8195,7 +8196,10 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                                                 TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                         ENDIF
-                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS) * RN%HOC_COMPLETE
+                        IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) &
+                           SF%ADJUST_BURN_RATE(NS) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1) * &
+                                                     REACTION(1)%HOC_COMPLETE/RN%HOC_COMPLETE
+                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS) * RN%HOC_COMPLETE / SF%ADJUST_BURN_RATE(NS)
                      ENDIF
                   ENDIF
                ENDDO
@@ -8213,7 +8217,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
-               I_FUEL = RN%FUEL_SMIX_INDEX
+               IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) &
+                  SF%ADJUST_BURN_RATE(I_FUEL) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1)
                SF%MASS_FLUX(I_FUEL) = SF%HRRPUA/RN%HOC_COMPLETE/SF%ADJUST_BURN_RATE(I_FUEL)
                SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
                SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
@@ -8222,8 +8227,20 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          ELSEIF (SF%MLRPUA>0._EB) THEN H_OR_M_IF
             IF (ANY(SF%MASS_FRACTION > 0._EB)) THEN
                DO NS=1,N_TRACKED_SPECIES
-                  IF (SF%MASS_FRACTION(NS) > 0._EB .AND. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID)) &
-                     SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)
+                  IF (SF%MASS_FRACTION(NS) > 0._EB .AND. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID)) THEN
+                     NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
+                     RN => REACTION(NR)
+                     IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+                           IF (DUPLICATE_FUEL(NR)) THEN
+                           WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and species ' // &
+                                                TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        ENDIF
+                        SF%ADJUST_BURN_RATE(NS) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1) * &
+                                                  REACTION(1)%HOC_COMPLETE/RN%HOC_COMPLETE
+                      ENDIF
+                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS) * SF%MLRPUA
+                  ENDIF
                ENDDO
                IF (SUM(SF%MASS_FLUX) < TWO_EPSILON_EB) THEN
                   WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
@@ -8239,20 +8256,13 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
-               I_FUEL = RN%FUEL_SMIX_INDEX
+               IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) &
+                  SF%ADJUST_BURN_RATE(I_FUEL) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1)
                SF%MASS_FLUX(I_FUEL) = SF%MLRPUA
                SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
                SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
                SF%RAMP_INDEX(I_FUEL) = SF%RAMP_INDEX(TIME_HEAT)
             ENDIF
-         ELSE H_OR_M_IF
-            RN => REACTION(1)
-            I_FUEL = RN%FUEL_SMIX_INDEX
-            IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) &
-               SF%ADJUST_BURN_RATE(I_FUEL) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1)
-            SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
-            SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
-            SF%RAMP_INDEX(I_FUEL) = SF%RAMP_INDEX(TIME_HEAT)
          ENDIF H_OR_M_IF
       ENDIF HRRPUA_MLRPUA_IF
    ENDIF BURNING_IF
