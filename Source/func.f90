@@ -4970,6 +4970,7 @@ END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 !> \param TMP_FILM Film temperature for the droplet (K)
 !> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
 !> \param Z_INDEX Droplet species index in ZZ
+!> \param EVAP_MODEL Indicator of evaporation model
 
 SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
                                      SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX,EVAP_MODEL)

@@ -1361,9 +1361,12 @@ END SUBROUTINE NATURAL_CONVECTION_MODEL
 !> \param RE Reynolds number
 !> \param PR_ONTH_IN Prandtl number to the 1/3 power
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
+!> \param NUSSELT_C0 Constant in Nusselt number correlation
+!> \param NUSSELT_C1 Constant in Nusselt number correlation
+!> \param NUSSELT_C2 Constant in Nusselt number correlation
+!> \param NUSSELT_M Exponent in Nusselt number correlation
 
-SUBROUTINE FORCED_CONVECTION_MODEL(NUSSELT,RE,PR_ONTH_IN,SURF_GEOMETRY_INDEX,&
-   NUSSELT_C0,NUSSELT_C1,NUSSELT_C2,NUSSELT_M)
+SUBROUTINE FORCED_CONVECTION_MODEL(NUSSELT,RE,PR_ONTH_IN,SURF_GEOMETRY_INDEX,NUSSELT_C0,NUSSELT_C1,NUSSELT_C2,NUSSELT_M)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
 REAL(EB), INTENT(IN) :: RE,PR_ONTH_IN

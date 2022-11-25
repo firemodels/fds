@@ -2469,10 +2469,14 @@ SPEC_LOOP: DO N=1,N_SPECIES
    END SELECT
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)             ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)             ',SS%MW*P_INF/(TMPA*R0)
-   IF (SS%H_F < -1.E23_EB) THEN
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
-   ELSE
+   IF (SS%EXPLICIT_H_F) THEN
       WRITE(LU_OUTPUT,'(A,ES9.2)')'           Enthalpy of Formation (J/kg) ',SS%H_F
+   ELSE
+      IF (SS%LISTED) THEN
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'           Enthalpy of Formation (J/kg) ',SS%H_F_LISTED
+      ELSE   
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
+      ENDIF
    ENDIF
 ENDDO SPEC_LOOP
 
@@ -2639,10 +2643,10 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
    IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
       WRITE(LU_OUTPUT,'(/6X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
    ENDIF
-   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
+   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
       WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
       WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRIT_FLAME_TMP - TMPM
+      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
    ENDIF
    IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
