@@ -428,6 +428,8 @@ where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the cri
 
 This extinction model can be applied to multiple reaction schemes. The critical flame temperature criterion is applied to the entire reaction. In other words, the individual reactions are allowed to occur, and the enthalpy inequality (\ref{eq:extinction}) is applied to the initial and final species mass fractions. If insufficient energy has been released, all reactions are suppressed and the species mass fractions are returned to their original values at the start of the time step.
 
+If multiple fuels are present in the simulation, the critical flame temperature is taken as a weighted average of the CFTs of the multiple fuels that might be present within the grid cell at the start of the time step.
+
 
 \subsection{Auto-Ignition Temperature}
 
