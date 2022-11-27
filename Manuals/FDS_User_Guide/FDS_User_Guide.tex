@@ -3265,9 +3265,45 @@ applies 500~kW/m$^2$ to any surface with the attribute {\ct SURF\_ID='FIRE'}. Se
 
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  
 
+If either {\ct HRRPUA} or {\ct MLRPUA} are specified, but no {\ct SPEC\_ID} is given, then FDS will use the {\ct FUEL} for the first {\ct REAC} input. If a single {\ct SPEC\_ID} is given, then FDS will use that as the fuel. If multiple {\ct SPEC\_ID} along with {\ct MASS\_FRACTION} are given, then FDS will assume that the {\ct HRRPUA} or {\ct MLRPUA} refers to only species corresponding to {\ct FUEL} inputs on a {\ct REAC} line. For {\ct MLRPUA}, FDS will just multiply the {\ct MLRPUA} by the {\ct MASS\_FRACTION} of the fuel species to obtain the fuel species mass flux. If there are any non-fuel species, then the mass flux of those species will be set tp preserve their specified {\ct MASS\_FRACTION}. For {\ct HRRPUA}, FDS will compute the average heat of combustion for all the fuel species. This average heat of combustion is used to define the mass flux of fuel, i.e., the effective {\ct MLRPUA}. Non-fuel species are then treated as with {\ct MLRPUA}.
 
+In the example below, six fuel species are used for four different surfaces with {\ct HRRPUA}. Four of the fuel species are predefined with no {\ct HEAT\_OF\_COMBUSTION} on their associated {\ct REAC} inputs; their heats of combustion can be determined using their heats of formation. One species has a {\ct HEAT\_OF\_COMBUSTION} on its {\ct REAC} input. The sixth fuel species is user defined and used in a {\ct REAC} with no {\ct HEAT\_OF\_COMBUSTION}. Its heat of combustion can be determined using {\ct EPUMO2}. surface {\ct S1} has {\ct HRRPUA} but no {\ct SPEC\_ID}; therefore, it will use the {\ct FUEL} species for the first {\ct REAC} input ({\ct METHANE}) for the fuel. The fuel mass flux for {\ct S1} will be given by the {\ct HRRPUA} divided by the {\ct METHANE} heat of combustion. Surface {\ct S2} specifies that the fuel species is {\ct MYFUEL}. Surface {\ct S3} will have a total mass flux computed using the {\ct MASS\_FLUX} weighted average of the heats of combustion for {\ct PROPANE} and {\ct ETHANE}. Surface {\ct S4} will use species {\ct MYFUEL2} whose heat of combustion will be the weighted average of the {\ct TOLUENE} and {\ct HYDROGEN} heats of combustion using the {\ct SPEC} input's {\ct MASS\_FRACTION}. Results are shown in Fig.~\ref{fig:mulitple_reac_hrrpua}.
+
+\begin{lstlisting}
+&SPEC ID='TOLUENE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='HYDROGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC FUEL='MYFUEL',C=1,H=1,O=1/
+&SPEC ID='MYFUEL2',SPEC_ID='TOLUENE','HYDROGEN',MASS_FRACTION=0.5,0.5/
+
+&REAC FUEL='METHANE'/
+&REAC FUEL='PROPANE'/
+&REAC FUEL='ETHANE',HEAT_OF_COMBUSTION=40000/
+&REAC FUEL='MYFUEL2'/
+
+&SURF ID='S1',COLOR='RED',HRRPUA=1000/
+&SURF ID='S2',COLOR='ORANGE',HRRPUA=1000,SPEC_ID='MYFUEL'/
+&SURF ID='S3',COLOR='YELLOW',HRRPUA=1000,SPEC_ID='PROPANE','ETHANE',
+      MASS_FRACTION=0.2,0.8/
+&SURF ID='S4',COLOR='GREEN',HRRPUA=1000,SPEC_ID='MYFUEL2'/
+\end{lstlisting}
+
+If the second surface was specified as:
+
+\begin{lstlisting}
+&SURF ID='S2',COLOR='ORANGE',HRRPUA=1000,SPEC_ID='MYFUEL','NITROGEN',
+      MASS_FRACTION=0.25,0.75/
+\end{lstlisting}
+
+then the fuel mass flux would be the same as before, but now it would be diluted with three times the mass flux of {\ct NITROGEN}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=3.2in]{SCRIPT_FIGURES/multiple_reac_hrrpua}
+	\caption[Demonstration of specifying HRRPUA with multiple reactions.]{Demonstration of specifying HRRPUA with multiple reactions.}
+	\label{fig:mulitple_reac_hrrpua}
+\end{figure}
 
 \subsection{Special Topic: A Radially-Spreading Fire}
 \label{info:spread}
@@ -5001,9 +5037,11 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 \subsection{User-Defined Gas and Liquid Properties}
 \label{user_defined_gas_species_props}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermo-physical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermo-physical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
+If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermo-physical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used. The molecular weight will be computed by FDS if a chemical formula is specified. If the species is participating in a reaction, and it is not the fuel species, then a reference enthalpy  also be specified, see Section~\ref{info:Enthalpy}.  The remaining thermo-physical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
 
-Note that most of the parameters listed below, with the exception of the chemical {\ct FORMULA} or molecular weight, {\ct MW}, are not necessary for large eddy simulations (LES). If any of these properties listed below are not provided, FDS typically defaults to the properties of nitrogen, the dominant species in typical fire or combustion scenarios.
+If conductivity, viscosity, or diffusivity are not specified they will be computed assuming the Lennard-Jones parameters for nitrogen and the specified molecular weight of the species. See Section~\ref{info:Enthalpy} for the assumptions made if no specific heat or reference enthalpy are specified.
+
+Note that when using LES, the molecular values of conductivity, viscosity, or diffusivity are not used in the transport calculation (see the FDS Technical Reference Guide \cite{FDS_Tech_Guide} chapter titled Momentum Transport and Pressure). They are, however, used in correlations related to calculating heat and mass transfer coefficients. 
 
 \subsubsection{Specifying a Chemical Formula}
 \label{info:FORMULA}
@@ -5014,6 +5052,13 @@ If you want FDS to compute the molecular weight of the gas species, you can inpu
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='OHC2H4OH'/
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
 \end{lstlisting}
+
+Fuels compatible with the simple chemistry approach to defining reactions can use the inputs {\ct C, H, O,} and {\ct N}. Which specify the number of atoms of those elements in the fuel molecule. If these inputs are used, then {\ct FORMULA} should not be specified and vice versa. The following would be equivalent to the prior examples:
+
+\begin{lstlisting}
+	&SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
+\end{lstlisting}
+ 
 
 \subsubsection{Conductivity}
 
@@ -5030,15 +5075,17 @@ The enthalpy of the gas mixture is given by the following formula:
 \be
    h(T) = h(T_{\rm ref}) + \int_{T_{\rm ref}}^T c_p(T') \, \d T'
 \ee
-where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The (optional) {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C), is the temperature that corresponds to the \linebreak[4] {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The default value of the  {\ct REFERENCE\_TEMPERATURE} is 25~$^\circ$C.  If {\ct SPECIFIC\_HEAT} is specified and the {\ct REFERENCE\_ENTHALPY} is not, the {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$.
+where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The value of $h(T_{\rm ref})$ can be specified in two ways. The first is to specify {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C) and the value of the enthalpy at that temperature using {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The second is to specify the {\ct ENTHALPY\_OF\_FORMATION} in kJ/mol. For this input $T_{\rm ref}$ is taken as the \linebreak[4] {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line. The default value of either reference temperature is 25~$^\circ$C. 
 
-If no inputs for enthalpy are provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
+If no input for $h(T_{\rm ref})$ is provided, then FDS will assume that the enthalpy at 0~K is 0~kJ/kg, i.e. if a constant {\ct SPECIFIC\_HEAT} is given, then {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$.
+
+If no input for specific specific heat is provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line (note: this option also requires that {\ct STRATIFICATION} be set to {\ct F} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL} to {\ct 'EXTINCTION 1'} or {\ct SUPPRESSION=F} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line (note: this option also requires that {\ct STRATIFICATION} be set to {\ct F} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL} to {\ct 'EXTINCTION 1'} or {\ct SUPPRESSION=F} on the {\ct COMB} line).  For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
-The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
+Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies.
 
 \subsubsection{Viscosity}
 
@@ -5058,7 +5105,7 @@ Species molecular mass also affects the spectrum: a heavier species of a given m
 \subsubsection{Gibbs Energy}
 \label{info:gibbs_energy}
 
-If a reverse chemical reaction is specified using {\ct REVERSE=T} on a {\ct REAC} input, FDS will use the forward reaction kinetics, specified by {\ct FWD\_ID} on the same {\ct REAC} line, along with the equilibrium values of the reaction to determine the value of the rate constant for the reverse reaction.  The equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.  An exmaple reverse reaction is provided in Sec.~\ref{info:finite} on finite rate kinetics.
+If a reverse chemical reaction is specified using {\ct REVERSE=T} on a {\ct REAC} input, FDS will use the forward reaction kinetics, specified by {\ct FWD\_ID} on the same {\ct REAC} line, along with the equilibrium values of the reaction to determine the value of the rate constant for the reverse reaction.  The equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.  An example reverse reaction is provided in Sec.~\ref{info:finite} on finite rate kinetics.
 
 \subsubsection{Liquids}
 
@@ -5190,7 +5237,7 @@ There are two groups of parameters that govern combustion. The first, called the
 
 \section{Single-Step, Mixing-Controlled Combustion}
 
-This approach to combustion, referred to below as the ``simple chemistry'' combustion model, considers a single fuel species that is composed primarily of C, H, O, and N that reacts with oxygen in one mixing-controlled step to form H$_2$O, CO$_2$, soot, and CO. Information about the reaction is provided on the {\ct REAC} line. Starting with FDS~6, you {\em must} specify a {\ct REAC} line to model a fire. You are responsible for defining the basic fuel chemistry and the post-combustion yields of CO and soot. The default values are 0.
+This approach to combustion, referred to below as the ``simple chemistry'' combustion model, considers a single fuel species that is composed primarily of C, H, O, and N that reacts with oxygen in one mixing-controlled step to form H$_2$O, CO$_2$, soot, and CO. Information about the reaction is provided on the {\ct REAC} line. Starting with FDS~6, you {\em must} specify a {\ct REAC} line to model a fire. You are responsible for defining the basic fuel chemistry and the post-combustion yields of CO and soot (the default yields are 0). More than one simple chemistry reaction can be defined; however, each simple chemistry reaction must have a unique fuel.
 
 \subsection{Simple Chemistry Parameters}
 \label{info:simple_chemistry}
@@ -5216,23 +5263,14 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will
-cause FDS to use the built-in thermophysical properties for that species when computing quantities such as specific heat or viscosity.
-Table~\ref{tab:gasspecies} provides a listing of the available species.
-If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C, H, O, and N.
-If not listed in Table~\ref{tab:gasspecies}, FDS uses the gas thermophysical properties of {\ct ETHYLENE} along with the molecular weight given by the {\ct FORLMULA} or the values of C, H, O, and N.  Either way, FDS will implicitly create a {\ct SPEC} input for {\ct FUEL}.  This allows {\ct FUEL} to be used as a {\ct SPEC\_ID} input elsewhere (for example as an initial condition or an output quantity).  If you define {\ct FUEL} yourself as a {\ct SPEC}, any properties you specify will override the default values.
-\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.
-This input only has meaning when simple chemistry is being used and the formula can only contain C, H, O, or N.
-Specifying a formula means the individual inputs of C, H, O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
+\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. The {\ct FUEL} species must be either a predefined species or defined on a {\ct SPEC} input. Table~\ref{tab:gasspecies} provides a listing of the available predefined species. If the {\ct FUEL} is in the table, then FDS will use the predefined thermophysical properties and chemical formula for the fuel. See Section~\ref{info:primitive} for details on specifying a user-defined species. 
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line if more than one reactions are specified.
-\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either {\ct C} or {\ct H} must be specified.
-This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon monoxide, $y_{\CO}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied.
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied. This parameter is a global parameter which can also be defined on {\ct COMB}. Note that only one soot species is defined when simple chemistry is used; therefore, if {\ct SOOT\_H\_FRACTION} is defined multiple times then the last {\ct REAC} value specified will be applied to all reactions. 
 \item[{\ct HCN\_YIELD}] The fraction of fuel mass converted into hydrogen cyanide, $y_{\HCN}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied and the fuel contains nitrogen. (Default 0.)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
@@ -5257,13 +5295,17 @@ In this case, there is no need for a {\ct FORMULA} or atom count because the {\c
 In this case, the fuel species is again predefined.  However, here the heat of combustion is specified explicitly rather than calculated. Additionally, minor species yields have been specified with the soot yield specified as 0.01 and the CO yield specified as 0.02.
 See Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 \begin{lstlisting}
+&SPEC ID       = 'MY FUEL'
+       FORMULA = 'C3H8O3N4'/
+
 &REAC FUEL               = 'MY FUEL'
-      FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
-In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} or the atom counts must be defined.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
+In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} or the atom counts must be defined on {\ct SPEC}.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
 
 When simple chemistry is being used, FDS will automatically create three lumped species: {\ct AIR}, {\ct FUEL}, and {\ct PRODUCTS}.  The actual name of the fuel species will be the name given on the {\ct REAC} line (for example {\ct MY FUEL} in the last sample above). FDS creates these lumped species in the same manner as you would in an input file.  FDS first defines the primitive species and then defines the lumped species. In essence FDS internally creates input lines like those shown in Example 2 of Section~\ref{info:lumped}. This means when doing simple chemistry, that even though you did not explicitly define oxygen in the input file, you can request an output for oxygen since it was implicitly defined by FDS.
+
+Multiple simple chemistry reactions can be defined. Each new reaction will require that FDS track a new fuel and product species. 
 
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
@@ -5290,7 +5332,7 @@ If the enthalpy of formation of the fuel and heat of combustion are not specifie
 \end{equation}
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed. Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting the stoichiometric coefficient of the fuel $\nu_{\rm F}$ to 1. In FDS, the stoichiometric coefficients of the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{\rm F}$ to 1. Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
 
-If heats of reaction have been specified on the {\ct MATL} lines and the heats of combustion of the materials differ from that specified by the governing gas phase reaction, then add a {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) to the {\ct MATL} line. With the simple chemistry combustion model, it is assumed that there is only one fuel. However, in a realistic fire scenario, there may be many fuel gases generated by the various burning objects in the building. Specify the stoichiometry of the predominant reaction via the {\ct REAC} namelist group. If the stoichiometry of the burning material differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is used to ensure that an equivalent amount of fuel is injected into the flow domain from the burning object.
+If heats of reaction have been specified on the {\ct MATL} lines and the heats of combustion of the materials differ from that specified by the governing gas phase reaction, then add a {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) to the {\ct MATL} line. In a realistic fire scenarios, there may be many fuel gases generated by the various burning objects in the building. Specify the stoichiometry of the predominant reaction via the {\ct REAC} namelist group. If the stoichiometry of the burning material differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is used to ensure that an equivalent amount of fuel is injected into the flow domain from the burning object.
 
 The heat of combustion can be determined in a couple of ways. One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants. This is typically how values are tabulated for pure fuels (e.g., one species) in handbooks. This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, or {\ct HCN\_YIELD} that occurs in a real fire. Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion. Setting {\ct IDEAL=T} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, and {\ct HCN\_YIELD}. If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.
 
@@ -5305,14 +5347,14 @@ If the reaction is under defined, FDS will return an error at the start of the c
 \label{info:two-step_simple_chemistry}
 \label{propane_flame_2reac}
 
-The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
+The default simple chemistry single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct REAC} line for each simple chemistry reaction where two-steps are desired. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
 \begin{eqnarray}
   \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \! \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \! \mathrm{CO}   + \nu_{\text{\tiny S,1}} \! \mathrm{Soot} + \nu_{\text{\tiny \HCN,1}} \! \mathrm{HCN} +
   \nu_{\text{\tiny \NTWO ,1}} \!  \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
    \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \! \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \! \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \! \mathrm{CO}   + \nu_{\text{\tiny S,2}} \, \mathrm{Soot} + \nu_{\text{\tiny \HCN,2}} \, \mathrm{HCN} +
     \nu_{\text{\tiny \NTWO ,2}} \! \mathrm{N_2}
 \end{eqnarray}
-By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Also by default one out of five nitrogen atoms in the fuel are converted to HCN. This value is based on testing of nitrogen containing fuels over a range of equivalence ratios \cite{IAFSS:Purser} and can be changed via the parameter {\ct FUEL\_N\_TO\_HCN\_FRACTION}. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct REAC} line. It is 2/3, by default. Also by default one out of five nitrogen atoms in the fuel are converted to HCN. This value is based on testing of nitrogen containing fuels over a range of equivalence ratios \cite{IAFSS:Purser} and can be changed via the parameter {\ct FUEL\_N\_TO\_HCN\_FRACTION}. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
 
 Note that the parameters {\ct CO\_YIELD}, {\ct SOOT\_YIELD}, and {\ct HCN\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
 
@@ -5325,8 +5367,7 @@ A simple demonstration of two-step simple chemistry is given by the example case
 \end{eqnarray}
 The simple version of the input file specifies the combustion parameters as follows:
 \begin{lstlisting}
-&COMB ..., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
-&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0. /
+&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
 \end{lstlisting}
 For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms Soot with no additional hydrogen ({\ct SOOT\_H\_FRACTION=0}). To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
 \begin{figure}[!ht]
@@ -5336,6 +5377,19 @@ For simplicity in setting up the complex form of the input file, the post-flame 
 \caption[Results of the {\ct propane\_flame\_2reac} test cases]{Demonstration that the simplified form of the two-step simple chemistry input parameters are equivalent to a more complex form.}
 \label{fig:propane_flame_2reac}
 \end{figure}
+
+A more complex demonstration of the two-step simple chemistry is given by the \linebreak[4] {\ct multiple\_reac\_n\_simple.fds} case also located in the {\ct Species} folder. This case contains three reactions, two of which have two-step simpple chemistry (with different values for {\ct FUEL\_C\_TO\_CO\_FRACTION} anf {\ct FUEL\_C\_TO\_CO\_FRACTION}), and the third which is simple chemistry only (with a {\ct CO\_YIELD} of 0.3). In the case, three boxes are each initialized with a small amount of the fuel from one reaction and insufficient oxygen to complete the first (or only) step. The results in Fig.~\ref{fig:multiple_reac_n_simple} shows that FDS correctly performs each reaction as one or two steps with the appropriate yields.
+
+\begin{figure}[!ht]
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_CH4} &
+		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C3H8} \\
+		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C2H6}
+	\end{tabular*}
+	\caption[Results of the {\ct multiple\_reac\_n\_simple} test case.]{Results of the {\ct multiple\_reac\_n\_simple} test case; demonstration that FDS correctly assigns one or two step reactions with the correct yields. From top left cases are methane with two-step chemistry and {\ct FUEL\_X\_TO\_Y\_FRACTION}s of 0.2, propane with single-step chemistry and a {\ct CO\_YIELD} of 0.3, and ethane with two-step chemistry and fractions of 0.8.}
+	\label{fig:multiple_reac_n_simple}
+\end{figure}
+
 
 \subsection{Special Topic: Complete Heat of Combustion}
 \label{info:hoc_complete}
@@ -12239,33 +12293,28 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
-{\ct C}                                   & Real           & Section~\ref{info:simple_chemistry}          &                   & 0                 \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real           & Section~\ref{info:extinction}                &   $^\circ$C       & 1427              \\ \hline
 {\ct E}                                   & Real           & Section~\ref{info:finite}                    &   J/mol           &                   \\ \hline
 {\ct EPUMO2}                              & Real           & Section~\ref{info:heat_of_combustion}        &   kJ/kg           & 13100             \\ \hline
 {\ct EQUATION}                            & Character      & Section~\ref{info:EQUATION}                  &                   &                   \\ \hline
-{\ct FORMULA}                             & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
 {\ct FUEL}                                & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}           & Real           & Section~\ref{info:two-step_simple_chemistry} &                   &  2/3              \\ \hline
 {\ct FUEL\_H\_TO\_H2\_FRACTION}           & Real           & Section~\ref{info:two-step_simple_chemistry} &                   &  0                \\ \hline
 {\ct FUEL\_N\_TO\_HCN\_FRACTION}          & Real           & Section~\ref{info:two-step_simple_chemistry} &                   &  1/5              \\ \hline
 {\ct FUEL\_RADCAL\_ID}                    & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
 {\ct FWD\_ID}                             & Character      & Section~\ref{info:eqbm_reac}                 &                   &                   \\ \hline
-{\ct H}                                   & Real           & Section~\ref{info:simple_chemistry}          &                   & 0                 \\ \hline
 {\ct HCN\_YIELD}                          & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real           & Section~\ref{info:heat_of_combustion}        & kJ/kg             &                   \\ \hline
 {\ct HOC\_COMPLETE}                       & Real           & Section~\ref{info:hoc_complete}              & kJ/kg             &                   \\ \hline
 {\ct ID}                                  & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
 {\ct IDEAL}                               & Logical        & Section~\ref{info:simple_chemistry}          &                   & {\ct F}           \\ \hline
 {\ct LOWER\_OXYGEN\_LIMIT}                & Real           & Section~\ref{info:extinction}                & mol/mol           &                   \\ \hline
-{\ct N}                                   & Real           & Section~\ref{info:simple_chemistry}          &                   & 0                 \\ \hline
 {\ct N\_S(:)}                             & Real Array     & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS}     & Integer        & Section~\ref{info:two-step_simple_chemistry} &                   & 1                 \\ \hline
 {\ct N\_T}                                & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct NU(:)}                               & Real Array     & Section~\ref{info:finite}                    &                   &                   \\ \hline
-{\ct O}                                   & Real           & Section~\ref{info:simple_chemistry}          &                   & 0                 \\ \hline
 {\ct PRIORITY}                            & Integer        & Section~\ref{info:priority}                  &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real           & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
@@ -12358,6 +12407,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AEROSOL}                       & Logical           & Section~\ref{info:deposition}           &                   & {\ct F} \\ \hline
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
+{\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
@@ -12370,6 +12420,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FIC\_CONCENTRATION}            & Real              & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
 {\ct FLD\_LETHAL\_DOSE}             & Real              & Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
 {\ct FORMULA }                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct H}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}        & Real              & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
 {\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct ID }                           & Character         & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
@@ -12383,7 +12434,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MELTING\_TEMPERATURE}          & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MIN\_DIAMETER}                 & Real              & Section~\ref{info:agglomeration}        & m                 &               \\ \hline
 {\ct MW}                            & Real              & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct N}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct N\_BINS}                       & Integer           & Section~\ref{info:agglomeration}        &                   &               \\ \hline
+{\ct O}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct PR\_GAS}                       & Real              & Section~\ref{gas_species_props}         &                   & {\ct PR}      \\ \hline
 {\ct PRIMITIVE}                     & Logical           & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character         & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
