@@ -3557,14 +3557,13 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          IF (ABS(RN%NU_SOOT)<TWO_EPSILON_EB) RN%NU_SOOT = 0._EB
          RN%NU_H2           = RN%H*RN%FUEL_H_TO_H2_FRACTION*0.5_EB
          IF (ABS(RN%NU_H2)<TWO_EPSILON_EB) RN%NU_H2 = 0._EB
-         RN%NU_H2O          = 0.5_EB*(RN%H - 0.5_EB*RN%NU_H2 - RN%NU_HCN - RN%NU_SOOT*SOOT_H_FRACTION_GLOBAL)
+         RN%NU_H2O          = 0.5_EB*(RN%H - 2._EB*RN%NU_H2 - RN%NU_HCN - RN%NU_SOOT*SOOT_H_FRACTION_GLOBAL)
          IF (ABS(RN%NU_H2O)<TWO_EPSILON_EB) RN%NU_H2O = 0._EB
          RN%NU_CO2          = RN%C - RN%NU_CO - RN%NU_SOOT*(1._EB-SOOT_H_FRACTION_GLOBAL) - RN%NU_HCN
          IF (ABS(RN%NU_CO2)<TWO_EPSILON_EB) RN%NU_CO2 = 0._EB
          RN%NU_O2           = RN%NU_CO2 + 0.5_EB*(RN%NU_CO+RN%NU_H2O-RN%O)
          RN%NU_N2           = (RN%N-RN%NU_HCN)*0.5_EB
          IF (ABS(RN%NU_N2)<TWO_EPSILON_EB) RN%NU_N2 = 0._EB
-
          IF (RN%NU_N2 <0._EB) THEN
             WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough nitrogen in the fuel for the specified FUEL_N_TO_HCN_FRACTION'
             CALL SHUTDOWN(MESSAGE) ; RETURN
