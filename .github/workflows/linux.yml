@@ -88,7 +88,7 @@ jobs:
     - name: install openmpi
       run: |
         sudo apt-get update
-        sudo apt-get install openmpi-bin
+        sudo apt-get install libopenmpi-dev openmpi-bin
 
       # install oneapi components from apt repository based on
       # oneapi-ci/scripts/setup_apt_repo_linux.sh
