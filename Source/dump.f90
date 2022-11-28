@@ -14,9 +14,9 @@ USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 USE OUTPUT_DATA
-USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,IBM_FGSC,IBM_IDCF,IBM_IDCC,IBM_UNKZ,IBM_UNKF,IBM_FTYPE_RCGAS,&
-                             IBM_FTYPE_CFGAS,IBM_FTYPE_CFINB,IBM_SOLID,FCELL,IBM_CGSC,IBM_CUTCFE,TRIANGULATE,&
-                             IBM_VGSC,IBM_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
+USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,CC_UNKZ,CC_UNKF,CC_FTYPE_RCGAS,&
+                             CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_SOLID,FCELL,CC_CGSC,CC_CUTCFE,TRIANGULATE,&
+                             CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -3886,7 +3886,7 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               IF(MESHES(NM)%VERTVAR(I,J,K,IBM_VGSC) /= IBM_SOLID) CYCLE
+               IF(MESHES(NM)%VERTVAR(I,J,K,CC_VGSC) /= CC_SOLID) CYCLE
                QQ(I,J,K,1) = 0._FB
             ENDDO
          ENDDO
@@ -3979,8 +3979,8 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFAC
          DO K = K1+1, K2
             DO J = J1+1, J2
                IF(ANY(SOLID(CELL_INDEX(SLICE:SLICE+1,J,K)))) CYCLE
-               IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! a cutcell so count number of faces
+               IF (FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(SLICE,J,K,CC_IDCF,IAXIS) ! a cutcell so count number of faces
                   DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -3996,8 +3996,8 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFAC
          DO K = K1+1, K2
             DO I = I1+1, I2
                IF(ANY(SOLID(CELL_INDEX(I,SLICE:SLICE+1,K)))) CYCLE
-               IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
+               IF (FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I,SLICE,K,CC_IDCF,JAXIS)
                   DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -4013,8 +4013,8 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFAC
          DO I = I1+1, I2
             DO J = J1+1, J2
                IF(ANY(SOLID(CELL_INDEX(I,J,SLICE:SLICE+1)))) CYCLE
-               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
+               IF (FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I,J,SLICE,CC_IDCF,KAXIS)
                   DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -4031,8 +4031,8 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFAC
          DO J = 1, JBAR
             DO I = 1, IBAR
                IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN ! There are INBOUNDARY cut-faces on this cell:
-                  ICF = CCVAR(I,J,K,IBM_IDCF)
+               IF (CCVAR(I,J,K,CC_IDCF) > 0) THEN ! There are INBOUNDARY cut-faces on this cell:
+                  ICF = CCVAR(I,J,K,CC_IDCF)
                   DO IFACE=1,CUT_FACE(ICF)%NFACE ! Adds also SOLID side faces.
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -4047,25 +4047,25 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFAC
          DO J = 1, JBAR
             DO I = 1, IBAR
                IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (CCVAR(I,J,K,IBM_IDCC) <= 0) CYCLE
-               ICC = CCVAR(I,J,K,IBM_IDCC)
+               IF (CCVAR(I,J,K,CC_IDCC) <= 0) CYCLE
+               ICC = CCVAR(I,J,K,CC_IDCC)
                DO JCC=1,CUT_CELL(ICC)%NCELL
                   NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
                   ! Loop on faces corresponding to cut-cell ICC2:
                   DO ICCF=1,NFC
                      IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
                      SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
-                     CASE(IBM_FTYPE_RCGAS) ! REGULAR GASPHASE
+                     CASE(CC_FTYPE_RCGAS) ! REGULAR GASPHASE
                         NVF = 4
                         NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                         NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
-                     CASE(IBM_FTYPE_CFGAS)
+                     CASE(CC_FTYPE_CFGAS)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         NVF=CUT_FACE(ICF2)%CFELEM(1,IFACE2)
                         NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                         NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
-                     CASE(IBM_FTYPE_CFINB)
+                     CASE(CC_FTYPE_CFINB)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         NVF=CUT_FACE(ICF2)%CFELEM(1,IFACE2)
@@ -4228,8 +4228,8 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          DO K=1,NK-1
             DO J=1,NJ-1
                IF(ANY(SOLID(CELL_INDEX(SLICE:SLICE+1,J,K)))) CYCLE
-               IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices
+               IF (FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(SLICE,J,K,CC_IDCF,IAXIS) ! store cutcell faces and vertices
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -4265,14 +4265,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1 ! store solid and gas faces and vertices (2 faces per cell)
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                   FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                   FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -4293,8 +4293,8 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          DO K=1,NK-1
             DO I=1,NI-1
                IF(ANY(SOLID(CELL_INDEX(I,SLICE:SLICE+1,K)))) CYCLE
-               IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
+               IF (FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I,SLICE,K,CC_IDCF,JAXIS)
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -4326,14 +4326,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                   FACES(3*IFACE)   = IJK(I+1,K+1,NI)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                   FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -4354,8 +4354,8 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          DO J=1,NJ-1
             DO I=1,NI-1
                IF(ANY(SOLID(CELL_INDEX(I,J,SLICE:SLICE+1)))) CYCLE
-               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
+               IF (FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I,J,SLICE,CC_IDCF,KAXIS)
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -4387,14 +4387,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                   FACES(3*IFACE)   = IJK(I+1,J+1,NI)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                   FACES(3*IFACE)   = IJK(  I,J+1,NI)
@@ -4410,8 +4410,8 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          DO J=1,JBAR
             DO I=1,IBAR
             IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
-               ICF = CCVAR(I,J,K,IBM_IDCF)
+            IF (CCVAR(I,J,K,CC_IDCF) > 0) THEN
+               ICF = CCVAR(I,J,K,CC_IDCF)
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   VERTBEG = IVERTCUT + 1
@@ -4449,15 +4449,15 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          DO JJ = 1, JBAR
             DO II = 1, IBAR
                IF(SOLID(CELL_INDEX(II,JJ,KK))) CYCLE
-               IF (CCVAR(II,JJ,KK,IBM_IDCC) <= 0) CYCLE
-               ICC = CCVAR(II,JJ,KK,IBM_IDCC)
+               IF (CCVAR(II,JJ,KK,CC_IDCC) <= 0) CYCLE
+               ICC = CCVAR(II,JJ,KK,CC_IDCC)
                DO JCC=1,CUT_CELL(ICC)%NCELL
                   NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
                   ! Loop on faces corresponding to cut-cell ICC2:
                   DO ICCF=1,NFC
                      IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
                      SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
-                     CASE(IBM_FTYPE_RCGAS) ! REGULAR GASPHASE
+                     CASE(CC_FTYPE_RCGAS) ! REGULAR GASPHASE
                         LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
                         X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
                         ILH     = LOWHIGH - 1
@@ -4501,7 +4501,7 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 0 + 16
                         FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
-                     CASE(IBM_FTYPE_CFGAS)
+                     CASE(CC_FTYPE_CFGAS)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         X1AXIS  = CUT_FACE(ICF2)%IJK(KAXIS+1); DIR = X1AXIS
@@ -4528,7 +4528,7 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                            IF(IFACE2 > CUT_FACE(ICF2)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side.
                         ENDDO
                         DEALLOCATE(LOCTYPE)
-                     CASE(IBM_FTYPE_CFINB)
+                     CASE(CC_FTYPE_CFINB)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2); DIR = 0
@@ -4634,9 +4634,9 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
       DO K = K1+1, K2
          DO J = J1+1, J2
             IF(ANY(SOLID(CELL_INDEX(SLICE:SLICE+1,J,K)))) CYCLE
-            CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! is a cut cell
+            CELLTYPE = FCVAR(SLICE,J,K,CC_FGSC,IAXIS)
+            IF (CELLTYPE == CC_CUTCFE) THEN
+               ICF = FCVAR(SLICE,J,K,CC_IDCF,IAXIS) ! is a cut cell
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(VAL_CF,X1AXIS,ICF,IFACECF,CC_FACE_CENTERED,CC_CELL_CENTERED,&
                          IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
@@ -4655,7 +4655,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                      VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
-            ELSEIF(CELLTYPE == IBM_SOLID) THEN
+            ELSEIF(CELLTYPE == CC_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,SLICE,J,K,VAL_CF,&
                   IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
                IFACE = IFACE + 1  ! is a solid or gas cell
@@ -4665,7 +4665,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                ! Check if FACE is TYPE RC face:
-               IS_RCFACE = (CCVAR(SLICE,J,K,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(SLICE+1,J,K,IBM_CGSC)==IBM_CUTCFE)
+               IS_RCFACE = (CCVAR(SLICE,J,K,CC_CGSC)==CC_CUTCFE) .OR. (CCVAR(SLICE+1,J,K,CC_CGSC)==CC_CUTCFE)
                IF (IS_RCFACE) THEN
                   ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
                   ! ..
@@ -4689,9 +4689,9 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
       DO K = K1+1, K2
          DO I = I1+1, I2
             IF(ANY(SOLID(CELL_INDEX(I,SLICE:SLICE+1,K)))) CYCLE
-            CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
+            CELLTYPE = FCVAR(I,SLICE,K,CC_FGSC,JAXIS)
+            IF (CELLTYPE == CC_CUTCFE) THEN
+               ICF = FCVAR(I,SLICE,K,CC_IDCF,JAXIS)
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(VAL_CF,X1AXIS,ICF,IFACECF,CC_FACE_CENTERED,CC_CELL_CENTERED,&
                          IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
@@ -4710,7 +4710,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                      VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
-            ELSEIF(CELLTYPE == IBM_SOLID) THEN
+            ELSEIF(CELLTYPE == CC_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,I,SLICE,K,VAL_CF,&
                   IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
                IFACE = IFACE + 1  ! is a solid or gas cell
@@ -4720,7 +4720,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                ! Check if FACE is TYPE RC face:
-               IS_RCFACE = (CCVAR(I,SLICE,K,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(I,SLICE+1,K,IBM_CGSC)==IBM_CUTCFE)
+               IS_RCFACE = (CCVAR(I,SLICE,K,CC_CGSC)==CC_CUTCFE) .OR. (CCVAR(I,SLICE+1,K,CC_CGSC)==CC_CUTCFE)
                IF (IS_RCFACE) THEN
                   ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
                   ! ..
@@ -4743,9 +4743,9 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
       DO J = J1+1, J2
          DO I = I1+1, I2
             IF(ANY(SOLID(CELL_INDEX(I,J,SLICE:SLICE+1)))) CYCLE
-            CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
+            CELLTYPE = FCVAR(I,J,SLICE,CC_FGSC,KAXIS)
+            IF (CELLTYPE == CC_CUTCFE) THEN
+               ICF = FCVAR(I,J,SLICE,CC_IDCF,KAXIS)
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(VAL_CF,X1AXIS,ICF,IFACECF,CC_FACE_CENTERED,CC_CELL_CENTERED,&
                          IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
@@ -4764,7 +4764,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                      VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
-            ELSEIF(CELLTYPE == IBM_SOLID) THEN
+            ELSEIF(CELLTYPE == CC_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,I,J,SLICE,VAL_CF,&
                   IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
                IFACE = IFACE + 1  ! is a solid or gas cell
@@ -4774,7 +4774,7 @@ ELSEIF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                ! Check if FACE is TYPE RC face:
-               IS_RCFACE = (CCVAR(I,J,SLICE,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(I,J,SLICE+1,IBM_CGSC)==IBM_CUTCFE)
+               IS_RCFACE = (CCVAR(I,J,SLICE,CC_CGSC)==CC_CUTCFE) .OR. (CCVAR(I,J,SLICE+1,CC_CGSC)==CC_CUTCFE)
                IF (IS_RCFACE) THEN
                   ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
                   ! ..
@@ -4800,8 +4800,8 @@ ELSEIF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
       DO J=1,JBAR
          DO I=1,IBAR
          IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
-            ICF = CCVAR(I,J,K,IBM_IDCF)
+         IF (CCVAR(I,J,K,CC_IDCF) > 0) THEN
+            ICF = CCVAR(I,J,K,CC_IDCF)
             DO IFACECF=1,CUT_FACE(ICF)%NFACE
                VAL_CF = SOLID_PHASE_OUTPUT(NM,ABS(IND),Y_INDEX,Z_INDEX,PART_INDEX, &
                                            OPT_CFACE_INDEX=CUT_FACE(ICF)%CFACE_INDEX(IFACECF))
@@ -4822,21 +4822,21 @@ ELSEIF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
       DO JJ = 1, JBAR
          DO II = 1, IBAR
             IF(SOLID(CELL_INDEX(II,JJ,KK))) CYCLE
-            IF (CCVAR(II,JJ,KK,IBM_IDCC) <= 0) CYCLE
-            ICC = CCVAR(II,JJ,KK,IBM_IDCC)
+            IF (CCVAR(II,JJ,KK,CC_IDCC) <= 0) CYCLE
+            ICC = CCVAR(II,JJ,KK,CC_IDCC)
             DO JCC=1,CUT_CELL(ICC)%NCELL
                NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
                ! Loop on faces corresponding to cut-cell ICC2:
                DO ICCF=1,NFC
                   IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
                   SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
-                     CASE(IBM_FTYPE_RCGAS) ! REGULAR GASPHASE
+                     CASE(CC_FTYPE_RCGAS) ! REGULAR GASPHASE
                         DO IVCF = 1,2
                            IFACECUT = IFACECUT + 1
                            VALS(IFACECUT) = REAL(VAL_CF,FB)
                         ENDDO
 
-                     CASE(IBM_FTYPE_CFGAS)
+                     CASE(CC_FTYPE_CFGAS)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2)
@@ -4845,7 +4845,7 @@ ELSEIF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
                            VALS(IFACECUT) = REAL(VAL_CF,FB)
                         ENDDO
 
-                     CASE(IBM_FTYPE_CFINB)
+                     CASE(CC_FTYPE_CFINB)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                         IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                         NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2); DIR = 0
@@ -5130,13 +5130,13 @@ CASE(KAXIS)
    KK_LO=K+FCELL-1; KK_HI=K+FCELL
 END SELECT
 
-SOLID_LO = CCVAR(II_LO,JJ_LO,KK_LO,IBM_CGSC)
-SOLID_HI = CCVAR(II_HI,JJ_HI,KK_HI,IBM_CGSC)
+SOLID_LO = CCVAR(II_LO,JJ_LO,KK_LO,CC_CGSC)
+SOLID_HI = CCVAR(II_HI,JJ_HI,KK_HI,CC_CGSC)
 
 ! This discards interpolation from Adjacent cut-cells:
 CC1(LOW_IND:HIGH_IND) = 0._EB
-IF(SOLID_LO == IBM_SOLID) CC1( LOW_IND)= 1._EB
-IF(SOLID_HI == IBM_SOLID) CC1(HIGH_IND)= 1._EB
+IF(SOLID_LO == CC_SOLID) CC1( LOW_IND)= 1._EB
+IF(SOLID_HI == CC_SOLID) CC1(HIGH_IND)= 1._EB
 
 ! Interpolation coefficients:
 CCSUM = SUM(CC1(LOW_IND:HIGH_IND))
@@ -5258,7 +5258,7 @@ DO ICELL=1,16
    IF(JJ < 1 .OR. JJ > JBAR) CYCLE
    KK=IJK2(KAXIS,ICELL)
    IF(KK < 1 .OR. KK > KBAR) CYCLE
-   IF (CCVAR(II,JJ,KK,IBM_CGSC) /= IBM_SOLID) CYCLE
+   IF (CCVAR(II,JJ,KK,CC_CGSC) /= CC_SOLID) CYCLE
    FOUND=.TRUE.
    EXIT
 ENDDO
@@ -5272,7 +5272,7 @@ IF(.NOT.FOUND) THEN ! This is a thin object. Use first gas cut-cell value:
       IF(JJ < 1 .OR. JJ > JBAR) CYCLE
       KK=IJK2(KAXIS,ICELL)
       IF(KK < 1 .OR. KK > KBAR) CYCLE
-      IF (CCVAR(II,JJ,KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE
+      IF (CCVAR(II,JJ,KK,CC_CGSC) /= CC_CUTCFE) CYCLE
       FOUND=.TRUE.
       EXIT
    ENDDO
@@ -5326,7 +5326,7 @@ ENDIF
 VAL_LOC(LOW_IND:HIGH_IND)= 0._EB
 DO ISIDE=LOW_IND,LOCAL_IND
    SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE,IFACE))
-   CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
+   CASE(CC_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
       ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE,IFACE)
       JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE,IFACE)
       II = CUT_CELL(ICC)%IJK(IAXIS)
@@ -6110,18 +6110,18 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         CFACE_AREA = 0._EB
                         CC_IBM_IF: IF (CC_IBM) THEN
-                           IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) THEN
+                           IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) THEN
                               CYCLE I_DEVICE_CELL_LOOP
-                           ELSEIF(CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE) THEN
-                              ICC=CCVAR(I,J,K,IBM_IDCC)
+                           ELSEIF(CCVAR(I,J,K,CC_CGSC) == CC_CUTCFE) THEN
+                              ICC=CCVAR(I,J,K,CC_IDCC)
                               VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
                            ENDIF
                            ! face-centered quanties
                            AXIS = ABS(OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%IOR)
                            AXIS_IF: IF (AXIS>0) THEN
-                              FCVAR_IF: IF (FCVAR(I,J,K,IBM_IDCF,AXIS)>0) THEN
+                              FCVAR_IF: IF (FCVAR(I,J,K,CC_IDCF,AXIS)>0) THEN
                                  ! face centered quantities
-                                 ICF=FCVAR(I,J,K,IBM_IDCF,AXIS)
+                                 ICF=FCVAR(I,J,K,CC_IDCF,AXIS)
                                  CFACE_AREA = SUM( CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE) )
                               ENDIF FCVAR_IF
                            ENDIF AXIS_IF
@@ -7948,13 +7948,13 @@ IND_SELECT: SELECT CASE(IND)
 
 ! Fill GAS_PHASE_OUTPUT for CUT_CELLs.
 ! Some variables have already been filled in fire.f90
-! Below we fill the values allocated in IBM_CUTCELL_TYPE in type.f90
+! Below we fill the values allocated in CC_CUTCELL_TYPE in type.f90
 
 CC_IBM_IF: IF (CC_IBM) THEN
 
-   IF (CCVAR(II,JJ,KK,IBM_CGSC) == IBM_SOLID) EXIT CC_IBM_IF
+   IF (CCVAR(II,JJ,KK,CC_CGSC) == CC_SOLID) EXIT CC_IBM_IF
 
-   CCVAR_IF: IF (CCVAR(II,JJ,KK,IBM_IDCC) > 0) THEN ! we have a cutcell
+   CCVAR_IF: IF (CCVAR(II,JJ,KK,CC_IDCC) > 0) THEN ! we have a cutcell
       ! cell centered quantities
       GAS_PHASE_OUTPUT_CC = 0._EB
       VC = 0._EB
@@ -7963,7 +7963,7 @@ CC_IBM_IF: IF (CC_IBM) THEN
          JCC_LO = JCC_IN
          JCC_HI = JCC_IN
       ELSE
-         ICC=CCVAR(II,JJ,KK,IBM_IDCC)
+         ICC=CCVAR(II,JJ,KK,CC_IDCC)
          NCELL=CUT_CELL(ICC)%NCELL
          JCC_LO = 1
          JCC_HI = NCELL
@@ -8002,10 +8002,10 @@ CC_IBM_IF: IF (CC_IBM) THEN
             CASE(10)  ! VELOCITY
                VELOCITY_COMPONENT = (/U(II,JJ,KK),V(II,JJ,KK),W(II,JJ,KK)/)
                DO AXIS=1,3
-                  IF (FCVAR(II,JJ,KK,IBM_IDCF,AXIS)>0) THEN
+                  IF (FCVAR(II,JJ,KK,CC_IDCF,AXIS)>0) THEN
                      VELOCITY_COMPONENT(AXIS) = 0._EB
                      CFACE_AREA = 0._EB
-                     ICF=FCVAR(II,JJ,KK,IBM_IDCF,AXIS)
+                     ICF=FCVAR(II,JJ,KK,CC_IDCF,AXIS)
                      NFACE=CUT_FACE(ICF)%NFACE
                      DO JCF=1,NFACE
                         CFACE_AREA = CFACE_AREA + CUT_FACE(ICF)%AREA(JCF)
@@ -8051,11 +8051,11 @@ CC_IBM_IF: IF (CC_IBM) THEN
 
    AXIS = ABS(OUTPUT_QUANTITY(IND)%IOR)
    AXIS_IF: IF (AXIS>0) THEN
-      FCVAR_IF: IF (FCVAR(II,JJ,KK,IBM_IDCF,AXIS)>0) THEN
+      FCVAR_IF: IF (FCVAR(II,JJ,KK,CC_IDCF,AXIS)>0) THEN
          ! face centered quantities
          GAS_PHASE_OUTPUT_CFA = 0._EB
          CFACE_AREA = 0._EB
-         ICF=FCVAR(II,JJ,KK,IBM_IDCF,AXIS)
+         ICF=FCVAR(II,JJ,KK,CC_IDCF,AXIS)
          NFACE=CUT_FACE(ICF)%NFACE
          CFA_LOOP: DO JCF=1,NFACE
             CFACE_AREA = CFACE_AREA + CUT_FACE(ICF)%AREA(JCF)
@@ -9646,7 +9646,7 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
          IF(CC_IBM) THEN
-            IF (CCVAR(I,J,K,IBM_CGSC)/=IBM_GASPHASE) CYCLE
+            IF (CCVAR(I,J,K,CC_CGSC)/=CC_GASPHASE) CYCLE
          ENDIF
          IF (NM>1) THEN
             IF (INTERPOLATED_MESH(I,J,K)>0) CYCLE
@@ -9874,9 +9874,9 @@ DO K=1,KBAR
             IF (INTERPOLATED_MESH(I,J,K)/=0) CYCLE
          ENDIF
          IF (CC_IBM) THEN
-            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE
-            IF (CCVAR(I,J,K,IBM_IDCC) > 0) THEN ! we have a cutcell
-               ICC=CCVAR(I,J,K,IBM_IDCC)
+            IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) CYCLE
+            IF (CCVAR(I,J,K,CC_IDCC) > 0) THEN ! we have a cutcell
+               ICC=CCVAR(I,J,K,CC_IDCC)
                NCELL=CUT_CELL(ICC)%NCELL
                DO JCC=1,NCELL
                   VC = CUT_CELL(ICC)%VOLUME(JCC)
@@ -10639,7 +10639,7 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            IF(FCVAR(I,J,K,CC_FGSC,IAXIS) /= CC_GASPHASE) CYCLE
             NTOT_U = NTOT_U + 1
          ENDDO
       ENDDO
@@ -10648,14 +10648,14 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            IF(FCVAR(I,J,K,CC_FGSC,KAXIS) /= CC_GASPHASE) CYCLE
             NTOT_W = NTOT_W + 1
          ENDDO
       ENDDO
    ENDDO
    ! Now Gasphase cut-faces for both U and W:
    DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      IF (CUT_FACE(ICF)%STATUS /= CC_GASPHASE) CYCLE
       AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
       SELECT CASE(AXIS)
       CASE(IAXIS)
@@ -10669,7 +10669,7 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            IF(CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE
             NTOT_C = NTOT_C + 1
          ENDDO
       ENDDO
@@ -10686,7 +10686,7 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            IF(FCVAR(I,J,K,CC_FGSC,IAXIS) /= CC_GASPHASE) CYCLE
             WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
             0,',',X(I),',',ZC(K),',',DY(J)*DZ(K),',',U(I,J,K),',',0._EB,',',0._EB
          ENDDO
@@ -10694,7 +10694,7 @@ IF (CC_IBM) THEN
    ENDDO
    ! Now Gasphase cut-faces for U:
    DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      IF (CUT_FACE(ICF)%STATUS /= CC_GASPHASE) CYCLE
       AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
       SELECT CASE(AXIS)
       CASE(IAXIS)
@@ -10709,7 +10709,7 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            IF(FCVAR(I,J,K,CC_FGSC,KAXIS) /= CC_GASPHASE) CYCLE
             WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
             0,',',XC(I),',',Z(K),',',DY(J)*DX(I),',',W(I,J,K),',',0._EB,',',0._EB
          ENDDO
@@ -10717,7 +10717,7 @@ IF (CC_IBM) THEN
    ENDDO
    ! Now Gasphase cut-faces for W:
    DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      IF (CUT_FACE(ICF)%STATUS /= CC_GASPHASE) CYCLE
       AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
       SELECT CASE(AXIS)
       CASE(KAXIS)
@@ -10733,7 +10733,7 @@ IF (CC_IBM) THEN
    DO K=KMIN,KMAX
       DO J=JMIN,JMAX
          DO I=IMIN,IMAX
-            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            IF(CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE
             WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
             0,',',XC(I),',',ZC(K),',',DY(J)*DX(I)*DZ(K),',',ZZ(I,J,K,2),',',H(I,J,K),',', &
             RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
