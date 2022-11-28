@@ -1357,6 +1357,7 @@ INTEGER :: TYPE_INDICATOR
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 INTEGER :: IG, IS_TERRAIN_INT
 INTEGER :: II, JJ
+INTEGER :: N_NODE_OUT, N_DUCT_OUT
 CHARACTER(LABEL_LENGTH) :: DEV_QUAN
 
 ! If this is a RESTART case but an old .smv file does not exist, shutdown with an ERROR.
@@ -1915,6 +1916,59 @@ DO N=1,SIZE(ORIGINAL_VENTS)
                                 ORIGINAL_VENTS(N)%Y1,ORIGINAL_VENTS(N)%Y2,&
                                 ORIGINAL_VENTS(N)%Z1,ORIGINAL_VENTS(N)%Z2,' ! ',TRIM(ORIGINAL_VENTS(N)%ID)
 ENDDO
+
+! Write out HVAC information
+
+IF (HVAC_SOLVE) THEN
+   N_NODE_OUT = 0
+   N_DUCT_OUT = 0
+   DO N=1,N_DUCTNODES
+      IF (DUCTNODE(N)%LEAKAGE) CYCLE
+      N_NODE_OUT = N_NODE_OUT + 1
+   ENDDO
+   DO N=1,N_DUCTS
+      IF (DUCT(N)%LEAKAGE) CYCLE
+      N_DUCT_OUT = N_DUCT_OUT + 1
+   ENDDO
+
+   WRITE(LU_SMV,'(/A)') 'HVAC2' ! change to HVAC2 so smokeview won't parse this for now
+   WRITE(LU_SMV,'(A)') 'NODES'
+   WRITE(LU_SMV,'(I0)') N_NODE_OUT
+   DO N=1,N_DUCTNODES
+      IF (DUCTNODE(N)%LEAKAGE) CYCLE
+      WRITE(LU_SMV,'(I0,A,A,A,A)') N,' % ',TRIM(DUCTNODE(N)%ID),' % ','null' ! TRIM(DUCTNODE(N)%NETWORK_ID)
+      WRITE(LU_SMV,'(3F12.5)') DUCTNODE(N)%XYZ
+      IF (DUCTNODE(N)%FILTER_INDEX > 0) THEN
+         WRITE(LU_SMV,'(A)') 'FILTER'
+      ELSE
+         WRITE(LU_SMV,'(A)') 'NO FILTER'
+      ENDIF
+   ENDDO
+   WRITE(LU_SMV,'(A)') 'DUCTS'
+   WRITE(LU_SMV,'(I0)') N_DUCT_OUT
+   DO N=1,N_DUCTS
+      IF (DUCT(N)%LEAKAGE) CYCLE
+      WRITE(LU_SMV,'(3I0,A,A,A,A)') N,DUCT(N)%NODE_INDEX,' % ',TRIM(DUCT(N)%ID),' % ','null' !TRIM(DUCT(N)%NETWORK_ID)
+      IF (DUCT(N)%FAN_INDEX > 0) THEN
+         WRITE(LU_SMV,'(A)') 'FAN'
+      ELSEIF (DUCT(N)%AIRCOIL_INDEX > 0) THEN
+         WRITE(LU_SMV,'(A)') 'AIRCOIL'
+      ELSEIF (DUCT(N)%DAMPER > 0) THEN
+         WRITE(LU_SMV,'(A)') 'DAMPER'
+      ELSE
+         WRITE(LU_SMV,'(A)') '-'
+      ENDIF
+      WRITE(LU_SMV,'(A,I0)') 'MT_CELLS ',MAX(1,DUCT(N)%N_CELLS)
+     ! IF (ALLOCATED(DUCT(N)%HT_INDEX) THEN
+         !WRITE(LU_SMV,'(A,I0)') 'HT_CELLS ',LENGTH(DUCT(N)%HT_INDEX)
+         !WRITE(LU_SMV,'(3F12.5)')
+      !ELSE
+         !WRITE(LU_SMV,'(A,I0)') 'HT_CELLS ',0
+      !ENDIF
+      WRITE(LU_SMV,'(A,I0)') 'WAYPOINTS ',DUCT(N)%N_WAYPOINTS
+      IF (DUCT(N)%N_WAYPOINTS > 0) WRITE(LU_SMV,'(3F12.5)') (DUCT(N)%WAYPOINTS_XYZ(NN,:),NN=1,DUCT(N)%N_WAYPOINTS)
+   ENDDO
+ENDIF
 
 ENDIF MASTER_NODE_IF
 
