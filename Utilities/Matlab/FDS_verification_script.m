@@ -103,5 +103,7 @@ disp('geom_channel_test...');             geom_channel_test
 disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
 disp('level_set_ellipse...');             level_set_ellipse
 disp('htc_forced...');                    htc_forced
+disp('natconh...');                       natconh
+disp('natconv...');                       natconv
 
 display('verification scripts completed successfully!')
