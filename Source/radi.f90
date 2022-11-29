@@ -3494,7 +3494,7 @@ SUBROUTINE RADIATION_FVM
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE TRAN, ONLY : GET_IJK
-USE COMPLEX_GEOMETRY, ONLY : IBM_IDRA,IBM_CGSC,IBM_SOLID
+USE COMPLEX_GEOMETRY, ONLY : CC_IDRA,CC_CGSC,CC_SOLID
 USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION, GET_MASS_FRACTION
 REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,SOOT_MASS_FRACTION, &
@@ -4246,12 +4246,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDIF
                      ENDIF
                      IF (CC_IBM) THEN
-                        IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE SLICE_LOOP
+                        IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) CYCLE SLICE_LOOP
                         AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
                         ILXU_AUX = 0._EB; ILYU_AUX = 0._EB; ILZU_AUX = 0._EB
                         ! X axis
                         IADD= -(1+ISTEP)/2
-                        ICR = FCVAR(I+IADD,J,K,IBM_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
+                        ICR = FCVAR(I+IADD,J,K,CC_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
                            ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            CFA => CFACE(ICF)
@@ -4264,7 +4264,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDDO
                         ! Y axis
                         IADD= -(1+JSTEP)/2
-                        ICR = FCVAR(I,J+IADD,K,IBM_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
+                        ICR = FCVAR(I,J+IADD,K,CC_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
                            ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            CFA => CFACE(ICF)
@@ -4277,7 +4277,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDDO
                         ! Z axis
                         IADD= -(1+KSTEP)/2
-                        ICR = FCVAR(I,J,K+IADD,IBM_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
+                        ICR = FCVAR(I,J,K+IADD,CC_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
                            ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            CFA => CFACE(ICF)
@@ -4371,17 +4371,17 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   I = CUT_CELL(ICC)%IJK(IAXIS); ILO=I-1; IHI=I+1
                   ! Drop if cut-cell is same as cartesian cell.
                   IF( SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL)) > 0.99_EB*DX(I)*DY(J)*DZ(K) ) CYCLE CUT_CELL_DO
-                  IF (K==1    .OR. FCVAR(I,J,K-1,IBM_FGSC,KAXIS)==IBM_SOLID) KLO=K
-                  IF (K==KBAR .OR. FCVAR(I,J,K  ,IBM_FGSC,KAXIS)==IBM_SOLID) KHI=K
-                  IF (J==1    .OR. FCVAR(I,J-1,K,IBM_FGSC,JAXIS)==IBM_SOLID) JLO=J
-                  IF (J==JBAR .OR. FCVAR(I,J  ,K,IBM_FGSC,JAXIS)==IBM_SOLID) JHI=J
-                  IF (I==1    .OR. FCVAR(I-1,J,K,IBM_FGSC,IAXIS)==IBM_SOLID) ILO=I
-                  IF (I==IBAR .OR. FCVAR(I  ,J,K,IBM_FGSC,IAXIS)==IBM_SOLID) IHI=I
+                  IF (K==1    .OR. FCVAR(I,J,K-1,CC_FGSC,KAXIS)==CC_SOLID) KLO=K
+                  IF (K==KBAR .OR. FCVAR(I,J,K  ,CC_FGSC,KAXIS)==CC_SOLID) KHI=K
+                  IF (J==1    .OR. FCVAR(I,J-1,K,CC_FGSC,JAXIS)==CC_SOLID) JLO=J
+                  IF (J==JBAR .OR. FCVAR(I,J  ,K,CC_FGSC,JAXIS)==CC_SOLID) JHI=J
+                  IF (I==1    .OR. FCVAR(I-1,J,K,CC_FGSC,IAXIS)==CC_SOLID) ILO=I
+                  IF (I==IBAR .OR. FCVAR(I  ,J,K,CC_FGSC,IAXIS)==CC_SOLID) IHI=I
                   IL1 = 0._EB
                   DO KK=KLO,KHI
                     DO JJ=JLO,JHI
                       II_DO : DO II=ILO,IHI
-                        IF(CCVAR(II,JJ,KK,IBM_CGSC)/=IBM_GASPHASE) CYCLE II_DO
+                        IF(CCVAR(II,JJ,KK,CC_CGSC)/=CC_GASPHASE) CYCLE II_DO
                         IL1   = MAX(IL1,IL(II,JJ,KK))
                       ENDDO II_DO
                     ENDDO
@@ -4636,9 +4636,9 @@ DO N=1,N_INIT
             ! handle HRRPUV initialization in cutcells
             ! note: CC not yet connected to radiant fraction correction
             CC_IBM_IF: IF (CC_IBM) THEN
-               IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) EXIT CC_IBM_IF
-               IF (CCVAR(I,J,K,IBM_IDCC) > 0) THEN ! we have a cutcell
-                  ICC=CCVAR(I,J,K,IBM_IDCC)
+               IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) EXIT CC_IBM_IF
+               IF (CCVAR(I,J,K,CC_IDCC) > 0) THEN ! we have a cutcell
+                  ICC=CCVAR(I,J,K,CC_IDCC)
                   DO JCC=1,CUT_CELL(ICC)%NCELL
                      CUT_CELL(ICC)%Q(JCC) = CUT_CELL(ICC)%Q(JCC) + TIME_RAMP_FACTOR*IN%HRRPUV
                   ENDDO
