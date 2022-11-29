@@ -2113,7 +2113,7 @@ The differences seen in the stable case may be attributed to (i) the use of a dy
 \centering
 \caption[Schoenberg Ekman Layer parameters]{Schoenberg Ekman Layer parameters.}
 \label{tab:ekman_param}
-\begin{tabular}{|l|l|s|r|r|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
 Case     & Domain Size                    & $N_x \times N_y \times N_z$ & Surface Heat Flux & $U_g$ \\
          & $x\times y \times z$ (m)       &                             & (\si{W/m^2})      & (m/s) \\
@@ -4794,21 +4794,18 @@ Consider a thin plate of conductive material that is exposed on one side to an e
 \be
    \frac{\d T_{\rm s}}{\d t} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_{\rm s} \, \rho_{\rm s} \, \delta}
 \ee
-In this example, the initial exposure to the front side of the slab is 3~kW/m$^2$. The original material A undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this case means that material A disappears in exactly 5~s. This is achieved by setting $n_{\rm s}$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
+In this example, the initial exposure to the front side of the slab is 3~kW/m$^2$. The original Material~A undergoes a reaction to form Material~B.  The reaction rate is constant, 6~kg/(m$^3\cdot$s), which in this case means that Material~A, with an initial density of 30~kg/m$^3$, disappears in exactly 5~s. This is achieved by setting $n_{\rm s}$ and $E$ to 0 and $A$ to 6~kg/(m$^3\cdot$s) in the reaction rate term:
 \be
-    r = \left( \frac{\rho_{s,A}}{\rho_{s0}}\right)^{n_{s}}
-    A \; \exp \left(-\frac{E}{RT_{\rm s}}\right)
+    r = \rho_{s,A}^{n_{\rm s}} A \; \exp \left(-\frac{E}{RT_{\rm s}}\right)
 \ee
-The density and conductivity of both materials are 30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from 1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
+The density and conductivity of both materials are 30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of Material~A changes from 1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
 \begin{figure}[!htb]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/enthalpy}
 \caption[The \textct{enthalpy} test case]{Testing the enthalpy of solid materials.}
 \label{fig:solid_phase_enthalpy}
 \end{figure}
-Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy.
-This example (Fig.~\ref{fig:solid_phase_enthalpy}) tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
-convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
+Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy. This example (Fig.~\ref{fig:solid_phase_enthalpy}) tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
 
 
