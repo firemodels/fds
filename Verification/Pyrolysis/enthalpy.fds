@@ -14,8 +14,6 @@ curve after 80 degC.
 
 &TIME T_END=7, DT=0.005, WALL_INCREMENT=1 /
 
-&DUMP DT_PL3D=10000000. /
-
 &SURF ID='SLAB'
       COLOR='TOMATO 1'
       EXTERNAL_FLUX = 3.0
@@ -29,7 +27,7 @@ curve after 80 degC.
       CONDUCTIVITY=10.0
       SPECIFIC_HEAT_RAMP = 'c_ramp'
       DENSITY= 30.0
-      A = 0.2
+      A = 6.0
       E = 0.
       N_S = 0.
       NU_MATL = 1.0
