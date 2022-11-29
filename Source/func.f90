@@ -2218,7 +2218,7 @@ SORT_QUEUE: DO
          IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
       ENDIF
       IF (CC_IBM) THEN
-         IF(M%CCVAR(III,JJJ,KKK,1)==1) CYCLE SEARCH_LOOP  ! Cycle if cell is of type IBM_SOLID
+         IF(M%CCVAR(III,JJJ,KKK,1)==1) CYCLE SEARCH_LOOP  ! Cycle if cell is of type CC_SOLID
       ENDIF
 
       SELECT CASE(IOR)
@@ -2282,7 +2282,7 @@ SORT_QUEUE: DO
       IF (M%SOLID(IC_OLD) .AND. .NOT.M%SOLID(IC)) CYCLE SEARCH_LOOP
 
       IF (CC_IBM) THEN
-         ! Here IBM_CGSC=1, IBM_SOLID=1:
+         ! Here CC_CGSC=1, CC_SOLID=1:
          IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(IIN,JJN,KKN,1)/=1) CYCLE SEARCH_LOOP
          IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(IIN,JJN,KKN,1)==0) THEN
             IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
@@ -2291,7 +2291,7 @@ SORT_QUEUE: DO
 
       ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
-         ! Cell not SOLID for OBSTS, or GEOM cell not IBM_SOLID:
+         ! Cell not SOLID for OBSTS, or GEOM cell not CC_SOLID:
          IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(IIN,JJN,KKN,1)/=1 .AND. &
             M%PRESSURE_ZONE(IIN,JJN,KKN)>=0 .AND.  M%PRESSURE_ZONE(IIN,JJN,KKN)/=I_ZONE) THEN
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)

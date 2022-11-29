@@ -1001,16 +1001,16 @@ TYPE(VERTEX_TYPE), TARGET, ALLOCATABLE, DIMENSION(:) :: VERTEX
 
 ! --- CC_IBM types:
 ! Edge crossings data structure:
-INTEGER, PARAMETER :: IBM_MAXCROSS_EDGE = 10 ! Size definition parameter. Max number of crossings per Cartesian Edge.
-TYPE IBM_EDGECROSS_TYPE
+INTEGER, PARAMETER :: CC_MAXCROSS_EDGE = 10 ! Size definition parameter. Max number of crossings per Cartesian Edge.
+TYPE CC_EDGECROSS_TYPE
    INTEGER :: NCROSS   ! Number of BODINT_PLANE segments - Cartesian edge crossings.
-   REAL(EB), DIMENSION(1:IBM_MAXCROSS_EDGE)   ::  SVAR ! Locations along x2 axis of NCROSS intersections.
-   INTEGER,  DIMENSION(1:IBM_MAXCROSS_EDGE)   :: ISVAR ! Type of intersection (i.e. SG, GS or GG).
-   INTEGER,  DIMENSION(MAX_DIM+1)             ::   IJK ! [ i j k X2AXIS]
-END TYPE IBM_EDGECROSS_TYPE
+   REAL(EB), DIMENSION(1:CC_MAXCROSS_EDGE)   ::  SVAR ! Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(1:CC_MAXCROSS_EDGE)   :: ISVAR ! Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(MAX_DIM+1)            ::   IJK ! [ i j k X2AXIS]
+END TYPE CC_EDGECROSS_TYPE
 
 ! Cartesian Edge Cut-Edges data structure:
-TYPE IBM_CUTEDGE_TYPE
+TYPE CC_CUTEDGE_TYPE
    INTEGER :: IE=0
    INTEGER :: NVERT, NEDGE, NEDGE1, STATUS         ! Local Vertices, cut-edges and status of this Cartesian edge.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZVERT  ! Locations of vertices.
@@ -1021,10 +1021,10 @@ TYPE IBM_CUTEDGE_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:2, -2:2, JEC] Cut-face connected to edge.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ, MU_DUIDXJ ! Unstructured VelGrad components.
    INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
-END TYPE IBM_CUTEDGE_TYPE
+END TYPE CC_CUTEDGE_TYPE
 
-! IBM_EDGE type, used for computation of wall model turbulent viscosity, shear stress, vorticity.
-TYPE IBM_EDGE_TYPE
+! CC_EDGE type, used for computation of wall model turbulent viscosity, shear stress, vorticity.
+TYPE CC_EDGE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    INTEGER :: IE=0
    INTEGER, ALLOCATABLE, DIMENSION(:,:)            ::FACE_LIST  ! [1:3, -2:2] Reg/Cut face connected to edge.
@@ -1045,15 +1045,15 @@ TYPE IBM_EDGE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB,DUIDXJ,MU_DUIDXJ
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION,EDGE_IN_MESH
-END TYPE IBM_EDGE_TYPE
+END TYPE CC_EDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =3072 ! Size definition parameter. Max number of vertices per Cartesian Face.
-INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =3072 ! Size definition parameter. Max segments per face.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =3072 ! Size definition parameter. Max number of cut faces per Cartesian Face.
-INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE=  24 ! Size definition parameter.
+INTEGER, PARAMETER :: CC_MAXVERTS_FACE  =3072 ! Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: CC_MAXCEELEM_FACE =3072 ! Size definition parameter. Max segments per face.
+INTEGER, PARAMETER :: CC_MAXCFELEM_FACE =3072 ! Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: CC_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
-TYPE IBM_CUTFACE_TYPE
+TYPE CC_CUTFACE_TYPE
    INTEGER :: IWC=0,PRES_ZONE=-1
    INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
@@ -1103,7 +1103,7 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: RHOPVN
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX, UNKF
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
-END TYPE IBM_CUTFACE_TYPE
+END TYPE CC_CUTFACE_TYPE
 
 
 TYPE RAD_CFACE_TYPE
@@ -1147,31 +1147,30 @@ END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
 
-INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
-INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
+INTEGER, PARAMETER :: CC_MAXVERTS_CELL   =3072
+INTEGER, PARAMETER :: CC_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
 
-TYPE IBM_CUTCELL_TYPE
+TYPE CC_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)                       ::  LINK_LEV ! Level in local Linking Hierarchy tree.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
-   INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RHO, RHOS ! Cut cells densities.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RSUM,TMP ! Cut cells temperatures.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: D,DS,DVOL,DVOL_PR ! Cut cell thermodynamic divg.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: CHI_R,MIX_TIME ! Cut-cell combustion
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC      ! variables.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: REAC_SOURCE_TERM   !
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::   ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
-                                                                                ! fractions and rho*D_z,reaction source.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
-                                                                          ! and scalars.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL,DDDTVOL
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: FACE_LIST ! List of faces, cut-faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)        ::  LINK_LEV ! Level in local Linking Hierarchy tree.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        ::    VOLUME ! Cut-cell volumes.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    XYZCEN ! Cut-cell centroid locaitons.
+   INTEGER,  DIMENSION(MAX_DIM)               ::       IJK ! [ i j k ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RHO, RHOS ! Cut cells densities.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        ::  RSUM,TMP ! Cut cells temperatures.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: D,DS,DVOL,DVOL_PR ! Cut cell thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: CHI_R,MIX_TIME ! Cut-cell combustion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    Q_REAC      ! variables.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: REAC_SOURCE_TERM
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
+                                                                    ! fractions and rho*D_z,reaction source.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: UNKH,UNKZ ! Unknown number for pressure H, and scalars.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RTRM,R_H_G,RHO_0,WVEL,DDDTVOL
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
@@ -1183,21 +1182,21 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CCVARS      ! (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
-   INTEGER                                     :: N_NOMICC=0
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)       :: NOMICC
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: USE_CC_VOL
+   INTEGER                                    :: N_NOMICC=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICC
    REAL(EB):: DIVVOL_BC=0._EB
-END TYPE IBM_CUTCELL_TYPE
+END TYPE CC_CUTCELL_TYPE
 
 
-TYPE IBM_REGFACE_TYPE
+TYPE CC_REGFACE_TYPE
    INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-END TYPE IBM_REGFACE_TYPE
+END TYPE CC_REGFACE_TYPE
 
-TYPE IBM_REGFACEZ_TYPE
+TYPE CC_REGFACEZ_TYPE
    LOGICAL :: DO_LO_IND=.FALSE.,DO_HI_IND=.FALSE.
    INTEGER :: IWC=0
    REAL(EB):: FN_H_S=0._EB
@@ -1208,9 +1207,9 @@ TYPE IBM_REGFACEZ_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
-END TYPE IBM_REGFACEZ_TYPE
+END TYPE CC_REGFACEZ_TYPE
 
-TYPE IBM_RCFACE_LST_TYPE
+TYPE CC_RCFACE_TYPE
    LOGICAL :: SHAREDZ=.FALSE., SHAREDH=.FALSE.
    INTEGER :: IWC=0, UNKF=0, PRES_ZONE=-1
    REAL(EB):: TMP_FACE=0._EB
@@ -1224,7 +1223,7 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
-END TYPE IBM_RCFACE_LST_TYPE
+END TYPE CC_RCFACE_TYPE
 
 TYPE CSVF_TYPE
     CHARACTER(255) :: CSVFILE,UVWFILE
