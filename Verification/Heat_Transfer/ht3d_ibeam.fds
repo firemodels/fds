@@ -1,4 +1,4 @@
-&HEAD CHID='ht3d_ibeam_test', TITLE='Compare 3D heat transfer with ANSYS model'/
+&HEAD CHID='ht3d_ibeam', TITLE='Compare 3D heat transfer with ANSYS model'/
 
 &MESH IJK=44,44,44, XB=-.22,0.22,-.22,.22,0,.44/
 
