@@ -39,6 +39,7 @@ $RUNSMV -d Flowfields symmetry_test_2
 $RUNSMV -d Flowfields symmetry_test_mpi
 $RUNSMV -d Flowfields jet_fan
 $RUNSMV -d Flowfields velocity_bc_test
+$RUNSMV -d Heat_Transfer ht3d_demo
 $RUNSMV -d Heat_Transfer ht3d_ibeam
 $RUNSMV -d Heat_Transfer ht3d_network
 $RUNSMV -d HVAC HVAC_mass_conservation
