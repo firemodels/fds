@@ -12,7 +12,6 @@
 &SPEC ID='CHLORINE' /
 
 &MATL ID                   = 'STUFF'
-      ADJUST_H             = F
       CONDUCTIVITY         = 0.144
       SPECIFIC_HEAT        = 2.0
       DENSITY              = 100.
