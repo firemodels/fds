@@ -21,7 +21,6 @@ The emissivity is measured using EMISSIVITY output quantity.
       THICKNESS=0.001/
 
 &MATL ID = 'MAT_A'
-      ADJUST_H=F
       EMISSIVITY = 1.0
       CONDUCTIVITY=1.0
       SPECIFIC_HEAT= 1.0
@@ -34,7 +33,6 @@ The emissivity is measured using EMISSIVITY output quantity.
       MATL_ID = 'MAT_B'/
 
 &MATL ID = 'MAT_B'
-      ADJUST_H=F
       EMISSIVITY = 0.0
       CONDUCTIVITY=1.0
       SPECIFIC_HEAT= 1.0
