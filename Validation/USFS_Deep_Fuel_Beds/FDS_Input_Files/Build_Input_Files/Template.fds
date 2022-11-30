@@ -70,7 +70,7 @@
 ! &MULT ID='platform',DXB=0.2,0.2,0,0,paramf6,paramf6, N_UPPER=paramf7 /
 
 &MOVE ID='mv1', X0=0.8, AXIS=0,1,0, ROTATION_ANGLE=-27 /
-&GEOM XB=0.8,4.8,-1.45,1.45,-0.5,0, SURF_ID='platform', MOVE_ID='mv1'/
+&GEOM XB=0.8,5.6,-1.45,1.45,-0.5,0, SURF_ID='platform', MOVE_ID='mv1'/
 
 - Ignitor
 &RAMP ID='RAMP IGN',T=0,  F=1.0 /
