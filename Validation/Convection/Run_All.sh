@@ -138,14 +138,14 @@ $QFDS $DEBUG -I -p 64  $QUEUE -d $INDIR natconh_19_32.fds
 # FREE CONVECTION FROM A SPHERE
 
 $QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_1_8.fds
-$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_2_8.fds
-$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_3_8.fds
-$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_4_8.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR free_conv_sphere_2_8.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR free_conv_sphere_3_8.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR free_conv_sphere_4_8.fds
 
 $QFDS $DEBUG -I -p 120 $QUEUE -d $INDIR free_conv_sphere_1_16.fds
-$QFDS $DEBUG -I -p 120 $QUEUE -d $INDIR free_conv_sphere_2_16.fds
-$QFDS $DEBUG -I -p 120 $QUEUE -d $INDIR free_conv_sphere_3_16.fds
-$QFDS $DEBUG -I -p 120 $QUEUE -d $INDIR free_conv_sphere_4_16.fds
+$QFDS $DEBUG -I -p 72  $QUEUE -d $INDIR free_conv_sphere_2_16.fds
+$QFDS $DEBUG -I -p 72  $QUEUE -d $INDIR free_conv_sphere_3_16.fds
+$QFDS $DEBUG -I -p 72  $QUEUE -d $INDIR free_conv_sphere_4_16.fds
 
 # ROTATED NATURAL CONVECTION CASES USING GEOM
 
