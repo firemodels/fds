@@ -28,7 +28,7 @@ PUBLIC READ_DATA,READ_STOP,VERSION_INFO
 CHARACTER(LABEL_LENGTH) :: ID,MB,DB,ODE_SOLVER
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE,FYI
 CHARACTER(LABEL_LENGTH) :: SURF_DEFAULT='INERT',FUEL_RADCAL_ID='METHANE'
-CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: REAC_FUEL !< Array of reaction FUEL names 
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: REAC_FUEL !< Array of reaction FUEL names
 LOGICAL :: EX,THICKEN_OBSTRUCTIONS,BAD,IDEAL=.FALSE.,TARGET_PARTICLES_INCLUDED=.FALSE.
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: SIMPLE_FUEL_DEFINED
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DUPLICATE_FUEL !< FUEL for the reaction is present on more than one reaction
@@ -7411,7 +7411,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),&
                                    '. Cannot use RAMP_MF with MLRPUA or HRRPUA'
          CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF   
+   ENDIF
    IF (SPEC_ID(1)/='null' .AND. SPEC_ID(2)=='null' .AND. MASS_FRACTION(1)<TWO_EPSILON_EB .AND. &
       (HRRPUA > 0._EB .OR. MLRPUA > 0._EB)) MASS_FRACTION(1) = 1._EB
    IF (ANY(MASS_FLUX/=0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
@@ -8240,7 +8240,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   SF%TAU        = SF%TAU(TIME_HEAT)
                   SF%RAMP_MF    = SF%RAMP_Q
                   SF%RAMP_INDEX = SF%RAMP_INDEX(TIME_HEAT)
-               END WHERE 
+               END WHERE
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
@@ -8279,7 +8279,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   SF%TAU        = SF%TAU(TIME_HEAT)
                   SF%RAMP_MF    = SF%RAMP_Q
                   SF%RAMP_INDEX = SF%RAMP_INDEX(TIME_HEAT)
-               END WHERE 
+               END WHERE
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
@@ -15150,7 +15150,8 @@ IF (N_CSVF==0) RETURN
 
 CSVFILE  = 'null'
 UVWFILE  = 'null'
-PER_MESH = .TRUE.
+PER_MESH = .FALSE.
+IF (NMESHES>1) PER_MESH = .TRUE.
 
 ! Allocate CSVFINFO array
 
@@ -15180,7 +15181,7 @@ ENDDO READ_CSVF_LOOP
 
 IF (TRIM(UVWFILE)/='null' .AND. PER_MESH) THEN
    DO NM=1,NMESHES
-      WRITE(UVWFILE_NM,'(A,I3.3,A)') TRIM(UVWFILE),NM,'.csv'
+      WRITE(UVWFILE_NM,'(A,I0,A)') TRIM(UVWFILE),NM,'.csv'
       CSVFINFO(NM)%UVWFILE = UVWFILE_NM
    ENDDO
    UVW_RESTART = .TRUE.
