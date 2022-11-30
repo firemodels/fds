@@ -1,4 +1,4 @@
-\documentclass[11pt]{book}
+\documentclass[11pt,demo]{book}
 
 %\RequirePackage[12tabu, orthodox]{nag}
 
@@ -1509,9 +1509,9 @@ You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 \end{lstlisting}
 If multiple meshes are involved, enter the number of the first {\ct .csv} file only.  FDS will increment the mesh number (the integer adjacent to the ``{\ct m}'') to the total number of meshes.  For example, if you had 16 meshes you can use
 \begin{lstlisting}
-&CSVF UVWFILE='CHID_t1_m1' /
+&CSVF UVWFILE='CHID_uvw_t1_m1' /
 \end{lstlisting}
-and FDS will read {\ct CHID\_t1\_m1.csv} through {\ct CHID\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+and FDS will read {\ct CHID\_uwv\_t1\_m1.csv} through {\ct CHID\_uwv\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
 
 
 
@@ -3265,7 +3265,7 @@ applies 500~kW/m$^2$ to any surface with the attribute {\ct SURF\_ID='FIRE'}. Se
 
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
 
 If either {\ct HRRPUA} or {\ct MLRPUA} are specified, but no {\ct SPEC\_ID} is given, then FDS will use the {\ct FUEL} for the first {\ct REAC} input. If a single {\ct SPEC\_ID} is given, then FDS will use that as the fuel. If multiple {\ct SPEC\_ID} along with {\ct MASS\_FRACTION} are given, then FDS will assume that the {\ct HRRPUA} or {\ct MLRPUA} refers to only species corresponding to {\ct FUEL} inputs on a {\ct REAC} line. For {\ct MLRPUA}, FDS will just multiply the {\ct MLRPUA} by the {\ct MASS\_FRACTION} of the fuel species to obtain the fuel species mass flux. If there are any non-fuel species, then the mass flux of those species will be set tp preserve their specified {\ct MASS\_FRACTION}. For {\ct HRRPUA}, FDS will compute the average heat of combustion for all the fuel species. This average heat of combustion is used to define the mass flux of fuel, i.e., the effective {\ct MLRPUA}. Non-fuel species are then treated as with {\ct MLRPUA}.
 
@@ -5041,7 +5041,7 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 If conductivity, viscosity, or diffusivity are not specified they will be computed assuming the Lennard-Jones parameters for nitrogen and the specified molecular weight of the species. See Section~\ref{info:Enthalpy} for the assumptions made if no specific heat or reference enthalpy are specified.
 
-Note that when using LES, the molecular values of conductivity, viscosity, or diffusivity are not used in the transport calculation (see the FDS Technical Reference Guide \cite{FDS_Tech_Guide} chapter titled Momentum Transport and Pressure). They are, however, used in correlations related to calculating heat and mass transfer coefficients. 
+Note that when using LES, the molecular values of conductivity, viscosity, or diffusivity are not used in the transport calculation (see the FDS Technical Reference Guide \cite{FDS_Tech_Guide} chapter titled Momentum Transport and Pressure). They are, however, used in correlations related to calculating heat and mass transfer coefficients.
 
 \subsubsection{Specifying a Chemical Formula}
 \label{info:FORMULA}
@@ -5058,7 +5058,7 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 \begin{lstlisting}
 	&SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
- 
+
 
 \subsubsection{Conductivity}
 
@@ -5075,7 +5075,7 @@ The enthalpy of the gas mixture is given by the following formula:
 \be
    h(T) = h(T_{\rm ref}) + \int_{T_{\rm ref}}^T c_p(T') \, \d T'
 \ee
-where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The value of $h(T_{\rm ref})$ can be specified in two ways. The first is to specify {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C) and the value of the enthalpy at that temperature using {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The second is to specify the {\ct ENTHALPY\_OF\_FORMATION} in kJ/mol. For this input $T_{\rm ref}$ is taken as the \linebreak[4] {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line. The default value of either reference temperature is 25~$^\circ$C. 
+where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The value of $h(T_{\rm ref})$ can be specified in two ways. The first is to specify {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C) and the value of the enthalpy at that temperature using {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The second is to specify the {\ct ENTHALPY\_OF\_FORMATION} in kJ/mol. For this input $T_{\rm ref}$ is taken as the \linebreak[4] {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line. The default value of either reference temperature is 25~$^\circ$C.
 
 If no input for $h(T_{\rm ref})$ is provided, then FDS will assume that the enthalpy at 0~K is 0~kJ/kg, i.e. if a constant {\ct SPECIFIC\_HEAT} is given, then {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$.
 
@@ -5263,14 +5263,14 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. The {\ct FUEL} species must be either a predefined species or defined on a {\ct SPEC} input. Table~\ref{tab:gasspecies} provides a listing of the available predefined species. If the {\ct FUEL} is in the table, then FDS will use the predefined thermophysical properties and chemical formula for the fuel. See Section~\ref{info:primitive} for details on specifying a user-defined species. 
+\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. The {\ct FUEL} species must be either a predefined species or defined on a {\ct SPEC} input. Table~\ref{tab:gasspecies} provides a listing of the available predefined species. If the {\ct FUEL} is in the table, then FDS will use the predefined thermophysical properties and chemical formula for the fuel. See Section~\ref{info:primitive} for details on specifying a user-defined species.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line if more than one reactions are specified.
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon monoxide, $y_{\CO}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied. This parameter is a global parameter which can also be defined on {\ct COMB}. Note that only one soot species is defined when simple chemistry is used; therefore, if {\ct SOOT\_H\_FRACTION} is defined multiple times then the last {\ct REAC} value specified will be applied to all reactions. 
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied. This parameter is a global parameter which can also be defined on {\ct COMB}. Note that only one soot species is defined when simple chemistry is used; therefore, if {\ct SOOT\_H\_FRACTION} is defined multiple times then the last {\ct REAC} value specified will be applied to all reactions.
 \item[{\ct HCN\_YIELD}] The fraction of fuel mass converted into hydrogen cyanide, $y_{\HCN}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied and the fuel contains nitrogen. (Default 0.)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
@@ -5305,7 +5305,7 @@ In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} o
 
 When simple chemistry is being used, FDS will automatically create three lumped species: {\ct AIR}, {\ct FUEL}, and {\ct PRODUCTS}.  The actual name of the fuel species will be the name given on the {\ct REAC} line (for example {\ct MY FUEL} in the last sample above). FDS creates these lumped species in the same manner as you would in an input file.  FDS first defines the primitive species and then defines the lumped species. In essence FDS internally creates input lines like those shown in Example 2 of Section~\ref{info:lumped}. This means when doing simple chemistry, that even though you did not explicitly define oxygen in the input file, you can request an output for oxygen since it was implicitly defined by FDS.
 
-Multiple simple chemistry reactions can be defined. Each new reaction will require that FDS track a new fuel and product species. 
+Multiple simple chemistry reactions can be defined. Each new reaction will require that FDS track a new fuel and product species.
 
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
@@ -11135,11 +11135,10 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
 \hline \hline
 \endhead
-{\ct PER\_MESH}       & Logical        & Section~\ref{info:velo_restart}      &            & F \\ \hline
 {\ct UVWFILE}         & Character      & Section~\ref{info:velo_restart}      &            &         \\ \hline
 \end{longtable}
 
-% Undocumented: CSVFILE (Glenn)
+% Undocumented: CSVFILE (Glenn), PER_MESH (deprecated) defaults to T
 
 \vspace{\baselineskip}
 
