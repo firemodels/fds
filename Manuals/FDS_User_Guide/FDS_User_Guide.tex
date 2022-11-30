@@ -3254,7 +3254,7 @@ The parameters affecting in-depth radiation absorption are the material's refrac
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely on the availability of material properties and the appropriateness of the underlying pyrolysis model. Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details. It should also be noted that the user has to use only one pyrolysis model at a time.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
-
+\label{multiple_reac_hrrpua}
 \label{info:gas_burner}
 
 Solids and liquid fuels can be modeled by specifying their relevant properties via the {\ct MATL} namelist group. However, if you simply want to specify a fire of a given heat release rate (HRR), you need not specify any material properties. A specified fire is basically modeled as the ejection of gaseous fuel from a solid surface or vent. This is essentially a burner, with a specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of kW/m$^2$. For example
@@ -5346,6 +5346,7 @@ If the reaction is under defined, FDS will return an error at the start of the c
 \subsection{Special Topic: Two-Step Simple Chemistry}
 \label{info:two-step_simple_chemistry}
 \label{propane_flame_2reac}
+\label{multiple_reac_n_simple}
 
 The default simple chemistry single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct REAC} line for each simple chemistry reaction where two-steps are desired. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
 \begin{eqnarray}
