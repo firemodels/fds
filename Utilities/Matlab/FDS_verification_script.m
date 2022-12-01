@@ -105,5 +105,6 @@ disp('level_set_ellipse...');             level_set_ellipse
 disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
+disp('freecon_sphere...');                freecon_sphere
 
 display('verification scripts completed successfully!')
