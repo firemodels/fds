@@ -28,7 +28,7 @@ PUBLIC READ_DATA,READ_STOP,VERSION_INFO
 CHARACTER(LABEL_LENGTH) :: ID,MB,DB,ODE_SOLVER
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE,FYI
 CHARACTER(LABEL_LENGTH) :: SURF_DEFAULT='INERT',FUEL_RADCAL_ID='METHANE'
-CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: REAC_FUEL !< Array of reaction FUEL names 
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: REAC_FUEL !< Array of reaction FUEL names
 LOGICAL :: EX,THICKEN_OBSTRUCTIONS,BAD,IDEAL=.FALSE.,TARGET_PARTICLES_INCLUDED=.FALSE.
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: SIMPLE_FUEL_DEFINED
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DUPLICATE_FUEL !< FUEL for the reaction is present on more than one reaction
@@ -6180,11 +6180,15 @@ READ_MATL_LOOP: DO N=1,N_MATL
    NOT_BOILING: IF (BOILING_TEMPERATURE>4000._EB) THEN
 
       IF ( ( ANY(REFERENCE_TEMPERATURE>-TMPM) .OR. ANY(A>=0._EB) .OR. ANY(E>=0._EB) .OR. &
-             ANY(ABS(HEAT_OF_REACTION)>TWO_EPSILON_EB) ) .AND. N_REACTIONS==0) THEN
+             ANY(ABS(HEAT_OF_REACTION)<HUGE(1._EB))) .AND. N_REACTIONS==0) THEN
          N_REACTIONS = 1
       ENDIF
 
       DO NR=1,N_REACTIONS
+         IF (HEAT_OF_REACTION(NR) <=-HUGE(1._EB)) THEN
+            HEAT_OF_REACTION(NR) = 0._EB
+            ADJUST_H = .FALSE.
+         ENDIF
          IF (REFERENCE_TEMPERATURE(NR)<-TMPM  .AND. (E(NR)< 0._EB .OR. A(NR)<0._EB)) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NR,'. Set REFERENCE_TEMPERATURE or E, A'
             CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -6434,7 +6438,7 @@ EMISSIVITY             = 0.9_EB
 FYI                    = 'null'
 GAS_DIFFUSION_DEPTH    = 0.001_EB    ! m
 HEAT_OF_COMBUSTION     = -1._EB      ! kJ/kg
-HEAT_OF_REACTION       = 0._EB       ! kJ/kg
+HEAT_OF_REACTION       = -HUGE(1._EB) ! kJ/kg
 ID                     = 'null'
 MAX_REACTION_RATE      = HUGE(1._EB)
 MW                     = -1._EB
@@ -7422,7 +7426,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),&
                                    '. Cannot use RAMP_MF with MLRPUA or HRRPUA'
          CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF   
+   ENDIF
    IF (SPEC_ID(1)/='null' .AND. SPEC_ID(2)=='null' .AND. MASS_FRACTION(1)<TWO_EPSILON_EB .AND. &
       (HRRPUA > 0._EB .OR. MLRPUA > 0._EB)) MASS_FRACTION(1) = 1._EB
    IF (ANY(MASS_FLUX/=0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
@@ -8244,7 +8248,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   SF%TAU        = SF%TAU(TIME_HEAT)
                   SF%RAMP_MF    = SF%RAMP_Q
                   SF%RAMP_INDEX = SF%RAMP_INDEX(TIME_HEAT)
-               END WHERE 
+               END WHERE
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
@@ -8283,7 +8287,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   SF%TAU        = SF%TAU(TIME_HEAT)
                   SF%RAMP_MF    = SF%RAMP_Q
                   SF%RAMP_INDEX = SF%RAMP_INDEX(TIME_HEAT)
-               END WHERE 
+               END WHERE
                SF%MASS_FRACTION = 0._EB ! Set to zero for error checking later
             ELSE
                RN => REACTION(1)
@@ -15031,7 +15035,8 @@ IF (N_CSVF==0) RETURN
 
 CSVFILE  = 'null'
 UVWFILE  = 'null'
-PER_MESH = .TRUE.
+PER_MESH = .FALSE.
+IF (NMESHES>1) PER_MESH = .TRUE.
 
 ! Allocate CSVFINFO array
 
@@ -15061,7 +15066,7 @@ ENDDO READ_CSVF_LOOP
 
 IF (TRIM(UVWFILE)/='null' .AND. PER_MESH) THEN
    DO NM=1,NMESHES
-      WRITE(UVWFILE_NM,'(A,I3.3,A)') TRIM(UVWFILE),NM,'.csv'
+      WRITE(UVWFILE_NM,'(A,I0,A)') TRIM(UVWFILE),NM,'.csv'
       CSVFINFO(NM)%UVWFILE = UVWFILE_NM
    ENDDO
    UVW_RESTART = .TRUE.

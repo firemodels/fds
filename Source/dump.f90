@@ -2802,7 +2802,7 @@ MATL_LOOP: DO N=1,N_MATL
          ELSE
             ITMP = NINT(ML%TMP_REF(NR))
             WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
-            ITMP = NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB)
+            ITMP = MAX(0,NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB))
             WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
             ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
             WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB

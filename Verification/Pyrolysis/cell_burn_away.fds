@@ -21,7 +21,6 @@
       BURN_AWAY = .TRUE. /
 
 &MATL ID = 'STUFF'
-      ADJUST_H = F
       A = 2.5
       E = 0.
       N_S = 0.
