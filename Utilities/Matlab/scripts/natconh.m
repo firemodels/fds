@@ -147,7 +147,7 @@ for j=1:length(res)
         end
         col;
 
-        Q = mean(mean(abs(M.data(:,col))*1000));  % heat flow, W
+        Q = mean(mean(abs(M.data(:,col))*1000));  % heat flow, W/m2
 
         Nu_FDS = Q*(delta(i)/k)/(T(i)-T2);
 
@@ -170,3 +170,99 @@ set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/natural_convection_horizontal_enclosure');
 
 
+% Complex geometry cases (rotated grid 18 degrees)
+
+if 1
+
+figure
+set(gcf,'Visible',Figure_Visibility);
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+% loglog(Ra(r0),Nu(r0),'k-'); hold on
+% loglog(Ra(r1),Nu(r1),'k-')
+% loglog(Ra(r2),Nu(r2),'k-')
+% loglog(Ra(r3),Nu(r3),'k-')
+marker_handle(1)=loglog(RAYLEIGH,NUSSELT,'k-'); hold on
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+axis([1 1e15 .5 1e4])
+xlabel('Rayleigh Number','FontSize',Label_Font_Size)
+ylabel('Nusselt Number','FontSize',Label_Font_Size)
+%title('Natural Convection in Horizontal Enclosures')
+
+% FDS results
+
+casename={...
+'natconh_1',...
+'natconh_2',...
+'natconh_3',...
+'natconh_4',...
+'natconh_5',...
+'natconh_6',...
+'natconh_7',...
+'natconh_8',...
+'natconh_9',...
+'natconh_10',...
+'natconh_11',...
+'natconh_12',...
+'natconh_13',...
+'natconh_14',...
+'natconh_15',...
+'natconh_16',...
+'natconh_17',...
+'natconh_18',...
+'natconh_19'...
+};
+
+delta = S;
+T     = T1;
+
+marker_style = {'r^','bsq'};
+res = {'8','16'};
+
+for j=1:length(res)
+    for i=1:length(delta)
+
+        M = importdata([results_dir,casename{i},'_',res{j},'_rot_18_devc.csv']);
+
+        % check for steady state
+        t = M.data(:,1);
+        Q1 = M.data(:,find(strcmp(M.colheaders,'"Q1-0"')));
+        Q2 = M.data(:,find(strcmp(M.colheaders,'"Q2-0"')));
+        rho = M.data(end,find(strcmp(M.colheaders,'"rho"')));
+        alpha = k/(rho*cp);
+        nu = mu/rho;
+        b = 2./(T(i)+T2);
+        Ra(i) = (g*b*(T(i)-T2)*delta(i)^3)/(alpha*nu);
+
+        % figure(2)
+        % plot(t,Q1,'r-'); hold on
+        % plot(t,Q2,'b-');
+        % plot(t,Q1+Q2,'k--')
+
+        qrange = find(t>t(end)/2);
+        A = (delta(i)*8)^2;
+        q = mean(abs(Q2(qrange)))*1000/A;  % heat flux, W/m2
+
+        Nu_FDS = q*(delta(i)/k)/(T(i)-T2);
+
+        marker_handle(j+1)=plot(Ra(i),Nu_FDS,marker_style{j},'MarkerSize',8);
+    end
+end
+
+lh=legend(marker_handle(1:3),'Correlation, Nu = C Ra^n','GEOM {\itH/\Deltax}=8','GEOM {\itH/\Deltax}=16','Location','Northwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+
+% add Git if file is available
+
+Git_Filename = [results_dir,'natconh_19_16_rot_18_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
+
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/natconh_geom');
+
+end
