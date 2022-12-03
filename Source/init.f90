@@ -1165,14 +1165,6 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    ! Search for 0 or 1 cell thick HT1D solids that abut mesh boundary and have EXPOSED back boundary condition.
 
    SF => SURFACE(WC%SURF_INDEX)
-   IF (WC%OBST_INDEX==0) THEN
-      IF (SF%HT_DIM>1) THEN
-         WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' is HT3D and must be applied to an OBST'
-         STOP_STATUS = SETUP_STOP
-         RETURN
-      ENDIF
-      CYCLE WALL_LOOP
-   ENDIF
 
    IF_THERM_THICK_EXPOSED: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. SF%BACKING==EXPOSED) THEN ! search for the back side
 
@@ -3032,8 +3024,6 @@ ENDIF
 
 IC  = M%CELL_INDEX(I  ,J  ,K  )
 ICG = M%CELL_INDEX(IIG,JJG,KKG)
-M%WALL_INDEX(ICG,-IOR) = IW
-M%SURF_INDEX(ICG,-IOR) = SURF_INDEX_NEW
 
 ! Use BOUNDARY_TYPE to indicate whether the boundary cell is blocked or on an obstruction that is HIDDEN
 
@@ -3202,6 +3192,9 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ENDIF FOUND_OTHER_MESH
 
 ENDIF CHECK_MESHES
+
+M%WALL_INDEX(ICG,-IOR) = IW
+M%SURF_INDEX(ICG,-IOR) = SURF_INDEX_NEW
 
 ! Ensure that there is an open slot in M%WALL and its associated derived types
 

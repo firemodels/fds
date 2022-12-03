@@ -531,7 +531,7 @@ LOGICAL  :: UPDATE_DEVICES_AGAIN=.FALSE.
 
 REAL(EB) :: CHARACTERISTIC_CELL_SIZE=1.E6_EB  !< \f$ \min \left( \delta \xi \, \delta \eta \, \delta \zeta \right)^{1/3} \f$
 REAL(EB) :: MESH_SEPARATION_DISTANCE          !< Meshes separated if gap greater than min(0.001,0.05*CHARACTERISTIC_CELL_SIZE) (m)
-REAL(EB) :: NEIGHBOR_SEPARATION_DISTANCE      !< No message passing beyond 5*CHARACTERISTIC_CELL_SIZE (m)
+REAL(EB) :: NEIGHBOR_SEPARATION_DISTANCE=-1.  !< No message passing beyond 5*CHARACTERISTIC_CELL_SIZE (m)
 REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutting grid cells
 
 ! Logical units and output file names
