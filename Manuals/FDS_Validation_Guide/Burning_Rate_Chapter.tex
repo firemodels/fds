@@ -759,6 +759,88 @@ A common combustible used in fire research and testing is a wood crib; that is, 
 
 \newpage
 
+\subsection{Aalto Woods Cone Calorimeter Measurements}
+\label{Aalto_Woods_HRRPUA}
+
+Cone calorimeter measurements for 2~cm thick samples of spruce and pine under flaming, inert, and smoldering conditions are shown on the following pages. The samples undergo the following three decomposition steps:
+\begin{eqnarray}
+   \hbox{Wet Wood} &\to& \nu_{\rm m} \, \hbox{Moisture} + (1-\nu_{\rm m}) \, \hbox{Dry Wood} \\
+   \hbox{Dry Wood} &\to& \nu_{\rm char} \, \hbox{Char} + (1-\nu_{\rm char}) \, \hbox{Pyrolyzate} \\
+   \hbox{Char} + 2.67 \, \hbox{O}_2 &\to& 3.67 \, \hbox{CO}_2
+\end{eqnarray}
+The parameters for the reactions are listed in Table~\ref{Aalto_Woods_Properties}.
+
+\begin{table}[h!]
+\caption[Properties of spruce and pine]{Properties of spruce and pine, as estimated by PROPTI~\cite{Rinta-Paavola:2022}.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                     & Units         & Spruce                & Pine                                        \\ \hline \hline
+\multicolumn{4}{|c|}{Moisture}                                                                                     \\ \hline
+Density                      & kg/m$^3$      & \multicolumn{2}{|c|}{1000}                                          \\ \hline
+Conductivity                 & W/m/K         & \multicolumn{2}{|c|}{0.6}                                           \\ \hline
+Specific Heat                & kJ/kg/K       & \multicolumn{2}{|c|}{4.2}                                           \\ \hline
+Emissivity, $\epsilon$       &               & \multicolumn{2}{|c|}{0.9}                                           \\ \hline
+Pre-Exp.~Factor, $A$         & s$^{-1}$      & \multicolumn{2}{|c|}{$8.37 \times 10^{12}$}                         \\ \hline
+Activation Energy, $E$       & J/mol         & \multicolumn{2}{|c|}{$1.21 \times 10^{5}$}                          \\ \hline
+Heat of Reaction             & kJ/kg         & \multicolumn{2}{|c|}{2500}                                          \\ \hline
+\multicolumn{4}{|c|}{Wood}                                                                                         \\ \hline
+Density                      & kg/m$^3$      & 408                             & 493                               \\ \hline
+Conductivity                 & W/m/K         & $3.16\times 10^{-4}\, T-0.0305$ & $3.57\times 10^{-4}\, T-0.00462$  \\ \hline
+Specific Heat                & kJ/kg/K       & \multicolumn{2}{|c|}{$0.0044 \,T - 0.414$}                          \\ \hline
+Emissivity, $\epsilon$       &               & 0.9                             & 0.9                               \\ \hline
+Pre-Exp.~Factor, $A$         & s$^{-1}$      & $2.12 \times 10^{11}$           & $1.8 \times 10^{11}$              \\ \hline
+Activation Energy, $E$       & J/mol         & $1.91 \times 10^{5}$            & $1.85 \times 10^{5}$              \\ \hline
+Reaction Order, $n_{\rm s}$  &               & 1.89                            & 1.89                              \\ \hline
+Char Yield, $\nu_{\rm char}$ &               & 0.15                            & 0.16                              \\ \hline
+Heat of Reaction             & kJ/kg         & 112                             & 140                               \\ \hline
+Heat of Combustion           & kJ/kg         & 13750                           & 13850                             \\ \hline
+\multicolumn{4}{|c|}{Char}                                                                                         \\ \hline
+Density                      & kg/m$^3$      & 52.5                            & 104                               \\ \hline
+Conductivity                 & W/m/K         & \multicolumn{2}{|c|}{$8.2\times 10^{-5}\, T+0.091$}                 \\ \hline
+Specific Heat                & kJ/kg/K       & \multicolumn{2}{|c|}{$1.43+0.000355\,T-7.32\times 10^4/T^2$}        \\ \hline
+Emissivity, $\epsilon$       &               & 0.84                            & 0.838                             \\ \hline
+Pre-Exp.~Factor, $A$         & s$^{-1}$      & 3.75                            & 1.79                              \\ \hline
+Activation Energy, $E$       & J/mol         & 27685                           & 27685                             \\ \hline
+$n_{\rm O_2}$                &               & 0.68                            & 0.68                              \\ \hline
+Heat of Reaction             & kJ/kg         & -32000                          & -32000                            \\ \hline
+\end{tabular}
+\end{center}
+\label{Aalto_Woods_Properties}
+\end{table}
+
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_flaming_25} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_flaming_25} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_flaming_35} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_flaming_35} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_flaming_50} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_flaming_50} \\
+\end{tabular*}
+\caption[Aalto Woods heat release rates]{Aalto Woods heat release rates.}
+\label{Aalto_Woods_HRR}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_N2_35} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_N2_35} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_N2_50} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_N2_50} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_smolder_20} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_smolder_25} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_smolder_30} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/spruce_smolder_35}
+\end{tabular*}
+\caption[Aalto Woods mass loss rates]{Aalto Woods mass loss rates.}
+\label{Aalto_Woods_MLR}
+\end{figure}
+
+
+\clearpage
+
 \subsection{BST/FRS Wood Crib Experiments}
 \label{BST_FRS_wood_cribs_temperature}
 

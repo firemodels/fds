@@ -1,0 +1,33 @@
+
+&REAC FUEL='PYROLYZATE', C=6, H=10, O=5, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION = 13750. / 
+
+&MATL ID                    = 'wood'
+      EMISSIVITY            = 0.9
+      DENSITY               = 408.
+      CONDUCTIVITY_RAMP     = 'wood_k'
+      SPECIFIC_HEAT_RAMP    = 'wood_cp'
+      HEAT_OF_REACTION(1)   = 112.
+      A(1)                  = 2.12E11
+      E(1)                  = 1.91E5
+      N_S(1)                = 1.89
+      NU_SPEC(1,1)          = 0.85
+      SPEC_ID(1,1)          = 'PYROLYZATE'
+      NU_MATL(1,1)          = 0.15
+      MATL_ID(1,1)          = 'char' /
+   
+&MATL ID                    = 'char'
+      EMISSIVITY            = 0.84
+      DENSITY               = 52.5
+      CONDUCTIVITY_RAMP     = 'char_k'
+      SPECIFIC_HEAT_RAMP    = 'char_cp'
+      HEAT_OF_REACTION      = -32000.
+      A(1)                  = 3.75
+      E(1)                  = 27685.
+      N_O2(1)               = 0.68    
+      NU_SPEC               = 3.67
+      SPEC_ID               = 'CARBON DIOXIDE'
+      GAS_DIFFUSION_DEPTH   = 0.0001 /
+   
+&RAMP ID = 'wood_k', T = 20,  F = 0.062 /
+&RAMP ID = 'wood_k', T = 300, F = 0.151 /
+
