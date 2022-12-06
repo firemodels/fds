@@ -2058,7 +2058,7 @@ $>3.2 \times 10^5$       & 0.061  & 1/3
 
 The fluid is set to {\ct 'LJ AIR'} with constant viscosity, specific heat, and thermal conductivity: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid. (Note that the correlations are valid for Pr in the range 0.5-2.)
 
-There are 19 cases ranging in Ra from roughly 1 - $10^{14}$.  The Rayleigh number is varied by changin both the distance between the plates, $\delta$ ranges from 2 mm to 20 m, and the temperature difference.  The top plate is held fixed at 20 \si{\degreeCelsius} and the bottom plate temperature varies from 30 \si{\degreeCelsius} to 230 \si{\degreeCelsius}.
+There are 19 cases ranging in Ra from roughly 1 - $10^{14}$.  The Rayleigh number is varied by changing both the distance between the plates, $\delta$ ranges from 2 mm to 20 m, and the temperature difference.  The top plate is held fixed at 20 \si{\degreeCelsius} and the bottom plate temperature varies from 30 \si{\degreeCelsius} to 230 \si{\degreeCelsius}.
 
 Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta z$ = [8,16,32].  The resolution is uniform with $\delta x = \delta y = \delta z$.  The width and depth of the plates are each $8 \delta$.  The boundary conditions in the $x$ and $y$ directions are periodic.  The average heat flux on each plate is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconh} (left).
 
@@ -2073,18 +2073,47 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
    \caption[Nusselt correlation Rayleigh-B\'{e}nard convection]{\label{fig_natconh} FDS results for Nusselt number in Rayleigh-B\'{e}nard convection (natural convection between horizontal plates)---(left) Cartesian geometry; (right) cutcell geometry.}
 \end{figure}
 
-% \section{Natural Convection Vertical Enclosure (\texorpdfstring{\textct{natconv}}{natconv})}
-% \label{sec:natconv}
+\section{Natural Convection Vertical Enclosure (\texorpdfstring{\textct{natconv}}{natconv})}
+\label{sec:natconv}
 
+This section examines the problem of thermal convection in an enclosure with vertical plates of fixed temperature and insulated top and bottom boundaries.  The Nusselt number correlation requires an additional factor to account for the ratio of the length $L$ to the depth $\delta$ \cite{Holman:1}:
+\begin{equation}
+\mathrm{Nu} = C \,\mathrm{Ra}^n \,\left(\frac{L}{\delta}\right)^m
+\end{equation}
 
-% \begin{figure}[h]
-%    \centering
-%    \begin{tabular*}{\textwidth}{lr}
-%        \includegraphics[height=2.2in]{SCRIPT_FIGURES/natural_convection_vertical_enclosure} &
-%        \includegraphics[height=2.2in]{SCRIPT_FIGURES/natconv_geom} \\
-%    \end{tabular*}
-%    \caption[Nusselt correlation natural convection vertical enclosure]{\label{fig_natconv} FDS results for Nusselt number in natural convection within a vertical enclosure---(left) Cartesian geometry; (right) cutcell geometry.}
-% \end{figure}
+The values of $C$, $n$, and $m$ are given below in Tab.~\ref{tab:freeconv}.
+\begin{table}[h]
+% see table 7.3 in J.P. Holman 7th Ed.
+\centering
+\caption[Free convection correlation parameters for a vertical enclosure]{Free convection correlation parameters for a vertical enclosure, valid for the ranges Pr=[0.5-2] and $L/\delta$=[11-42] \cite{Holman:1}.}
+\label{tab:freeconv}
+\begin{tabular}{clll}
+Ra                                 & $C$    & $n$ & $m$  \\
+\hline
+$<2000$                            & 1      & 0   & 0    \\
+6000-$2 \times 10^5$               & 0.197  & 1/4 & -1/9 \\
+$2 \times 10^5$-$1.1 \times 10^7$  & 0.073  & 1/3 & -1/9
+\end{tabular}
+\end{table}
+
+\subsubsection*{Case setup}
+
+The setup for this series is very similar to the horizontal configuration discussed above (see Sec.~\ref{sec:natconh}). The fluid is set to {\ct 'LJ AIR'} with constant viscosity, specific heat, and thermal conductivity: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid.
+
+There are 17 cases ranging in Ra from roughly 1 - $10^{14}$.  The Rayleigh number is varied by changing both the distance between the plates, $\delta$ ranges from 2 mm to 20 m, and the temperature difference.  The right (cold) plate is held fixed at 20 \si{\degreeCelsius} and the left plate temperature varies from 30 \si{\degreeCelsius} to 230 \si{\degreeCelsius}.
+
+Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta x$ = [8,16,32].  The resolution is uniform with $\delta x = \delta y = \delta z$.  The length (vertical dimension) and depth (spanwise dimension) of the plates are $16 \delta$ and $4 \delta$, respectively.  The boundary conditions in the $y$ and $z$ directions are homogeneous Neumann ({\ct MIRROR} or ``insulated'').  The average heat flux on each plate is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconv} (left).
+
+For the complex geometry cases, the grid and gravity vector are rotated by 18 degrees.  A hollow cavity is formed using the {\ct GEOM} namelist format with a hot surface on the left and a cold surface on the right and insulated side walls.  Two grid resolutions are tested: $\delta/\delta z$ = [8,16].  The results are shown in Fig.~\ref{fig_natconv} (right).
+
+\begin{figure}[h]
+   \centering
+   \begin{tabular*}{\textwidth}{lr}
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/natural_convection_vertical_enclosure} &
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/natconv_geom} \\
+   \end{tabular*}
+   \caption[Nusselt correlation natural convection vertical enclosure]{\label{fig_natconv} FDS results for Nusselt number in natural convection within a vertical enclosure---(left) Cartesian geometry; (right) cutcell geometry.}
+\end{figure}
 
 
 \clearpage
