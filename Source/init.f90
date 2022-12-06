@@ -1231,7 +1231,9 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP
 
-! Count the wall indices in meshes neighboring mesh NM and save them for MPI exchange
+! Mesh NM creates a list of all WALL cells in all other meshes that might be used in either a 1-D or 3-D heat transfer calculation.
+! The list only includes those WALL cells that will need an MPI communication; that is Mesh NM and the other mesh do not share 
+! the same MPI process. The variable WALL_SAVE holds the list of WALL cells.
 
 WALL_SAVE_DIM = 10
 
@@ -1260,6 +1262,7 @@ DO N=1,M%N_NEIGHBORING_MESHES
    NOM = M%NEIGHBORING_MESH(N)
    IF (PROCESS(NOM)==MY_RANK) CYCLE
    M4 => MESHES(NOM)
+   IF ((M%XS>=M4%XF .OR. M%XF<=M4%XS) .AND. (M%YS>=M4%YF .OR. M%YF<=M4%YS) .AND. (M%ZS>=M4%ZF .OR. M%ZF<=M4%ZS)) CYCLE
    DO IC=1,CELL_COUNT(NOM)
       IF (M4%SOLID(IC)) CYCLE
       DO IOR=-3,3
@@ -1276,10 +1279,10 @@ DO N=1,M%N_NEIGHBORING_MESHES
 ENDDO
 
 ! DEFINITION MESHES(NM)%OMESH(NOM)%N_WALL_CELLS_RECV
-! Number of wall cells in Mesh NM whose exposed back faces are in Mesh NOM.
+! Number of WALL cells in Mesh NOM that need to be sent to Mesh NM.
 
 ! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_CELL_INDICES_RECV(1:N_WALL_CELLS_RECV)
-! Wall indices of the back faces of the exposed wall cells.
+! Indices of the WALL cells in Mesh NOM that are needed by Mesh NM.
 
 DO NOM=1,NMESHES
    WSC = WALL_SAVE(NOM)%COUNTER

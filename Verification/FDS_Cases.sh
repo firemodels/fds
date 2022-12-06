@@ -255,8 +255,8 @@ $QFDS -d Heat_Transfer ht3d_mass_conservation.fds
 $QFDS -d Heat_Transfer ht3d_network.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_sphere_24.fds
-$QFDS -d Heat_Transfer ht3d_sphere_48.fds
-$QFDS -p 8 -d Heat_Transfer ht3d_sphere_96.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_48.fds
+$QFDS -p 64 -d Heat_Transfer ht3d_sphere_96.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
 $QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
