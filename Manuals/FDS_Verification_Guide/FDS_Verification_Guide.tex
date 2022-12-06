@@ -2115,6 +2115,26 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
    \caption[Nusselt correlation natural convection vertical enclosure]{\label{fig_natconv} FDS results for Nusselt number in natural convection within a vertical enclosure---(left) Cartesian geometry; (right) cutcell geometry.}
 \end{figure}
 
+\clearpage
+\section{Free Convection from a Sphere (\texorpdfstring{\textct{free\_conv\_sphere}}{free\_conv\_sphere})}
+\label{sec:free_conv_sphere}
+
+In this section we present results for a set of four cases ranging in Rayleigh number from approximately 1 to $10^9$.  Yuge \cite{Yuge:1960} and Amato and Tien \cite{Amato:1972} propose the following Nusselt number correlations for free convection from a sphere \cite{Holman:1}.
+\begin{align}
+\mathrm{Nu}_f &= 2 + 0.43 \,\mathrm{Ra}_f^{1/4} \quad \mbox{for} \; 1 < \mathrm{Ra}_f < 10^5 \\
+\mathrm{Nu}_f &= 2 + 0.50 \,\mathrm{Ra}_f^{1/4} \quad \mbox{for} \; 3 \times 10^5 < \mathrm{Ra}_f < 8 \times 10^8
+\end{align}
+
+\subsubsection*{Case setup}
+
+The sphere is generated using the {\ct GEOM} namelist with three levels.  The surface temperature is uniform and constant at 30 \si{\degreeCelsius}.  The Rayleigh number is changed by adjusting the diameter of the sphere from 1 mm to 1 m.  Fluid properties are from {\ct 'LJ AIR'} and held constant: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid.  The convective heat flux is integrated over the surface of the sphere.  All external boundaries are {\ct OPEN} and the grid resolution is uniform. Results are presented in Fig.~\ref{fig_free_conv_sphere} for two grid resolutions corresponding to $D/\delta x$ = [8,16].
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/free_conv_sphere}
+   \caption[Nusselt correlation free convection from a sphere]{\label{fig_free_conv_sphere} FDS results for free convection from a sphere.}
+\end{figure}
+
 
 \clearpage
 \section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}

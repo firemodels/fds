@@ -120,7 +120,7 @@ for j=1:length(res)
     end
 end
 
-lh=legend(marker_handle,'Yuge (1960), Nu = 2 + 0.43 Ra^{1/4}','Amato & Tien (1972), Nu = 2 + 0.5 Ra^{1/4}','FDS {\itD/\Deltax}=8','FDS {\itD/\Deltax}=16','Location','Northwest');
+lh=legend(marker_handle,'Yuge (1960), Nu = 2 + 0.43 Ra^{1/4}','Amato & Tien (1972), Nu = 2 + 0.5 Ra^{1/4}','FDS {\itD/\deltax}=8','FDS {\itD/\deltax}=16','Location','Northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % title('Free Convection from a Sphere','FontSize',Label_Font_Size)
