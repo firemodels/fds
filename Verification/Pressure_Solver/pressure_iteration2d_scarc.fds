@@ -4,7 +4,7 @@
 &MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
 
 &MISC NOISE = .FALSE. 
-      DNS   = .TRUE./
+      SIMULATION_MODE='DNS'/
 
 &PRES SOLVER = 'SCARC' /
 
