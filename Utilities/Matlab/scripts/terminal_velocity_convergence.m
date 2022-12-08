@@ -35,8 +35,8 @@ if skip_case
 end
 
 % get precise ambient density
-M = importdata([repository, 'terminal_velocity_dt_1_0_devc.csv'],',',2);
-rhoa = M.data(end,2);
+M0 = importdata([repository, 'terminal_velocity_dt_1_0_devc.csv'],',',2);
+rhoa = M0.data(end,4);
 
 g = 9.8;
 Cd = 1;
@@ -49,31 +49,42 @@ ttest = 0.1;
 
 K = 3 * rhoa * Cd / (4 * rhod * D);
 
+dtvec = [1.0 0.1 0.01 0.001 0.0001];
 errvec = [];
 Linf = [];
+STIME = 20.;
 vtexact = sqrt(g / K);
 zexact = @(t) -log(cosh(sqrt(g * K) * t)) / K;
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_1_0_1.prt5'],'real*8');
-dtvec = [1.0 0.1 0.01 0.001 0.0001];
-errvec(1) = abs(abs(QP(length(QP))) - vtexact);
-Linf(1) = norm(ZP' - zexact(STIME), Inf);
-%errtvec(1) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_1_1.prt5'],'real*8');
-errvec(2) = abs(abs(QP(length(QP))) - vtexact);
-Linf(2) = norm(ZP' - zexact(STIME), Inf);
-%errtvec(2) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_01_1.prt5'],'real*8');
-errvec(3) = abs(abs(QP(length(QP))) - vtexact);
-Linf(3) = norm(ZP' - zexact(STIME), Inf);
-%errtvec(3) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_001_1.prt5'],'real*8');
-errvec(4) = abs(abs(QP(length(QP))) - vtexact);
-Linf(4) = norm(ZP' - zexact(STIME), Inf);
-%errtvec(4) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_0001_1.prt5'],'real*8');
-errvec(5) = abs(abs(QP(length(QP))) - vtexact);
-Linf(5) = norm(ZP' - zexact(STIME), Inf);
-%errtvec(6) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
+
+M1 = importdata([repository, 'terminal_velocity_dt_1_0_devc.csv'],',',2);
+QP = M1.data(end,2);
+ZP = M1.data(end,3);
+errvec(1) = abs(abs(QP) - vtexact);
+Linf(1) = abs(ZP - zexact(STIME));
+
+M2 = importdata([repository, 'terminal_velocity_dt_0_1_devc.csv'],',',2);
+QP = M2.data(end,2);
+ZP = M2.data(end,3);
+errvec(2) = abs(abs(QP) - vtexact);
+Linf(2) = abs(ZP - zexact(STIME));
+
+M3 = importdata([repository, 'terminal_velocity_dt_0_01_devc.csv'],',',2);
+QP = M3.data(end,2);
+ZP = M3.data(end,3);
+errvec(3) = abs(abs(QP) - vtexact);
+Linf(3) = abs(ZP - zexact(STIME));
+
+M4 = importdata([repository, 'terminal_velocity_dt_0_001_devc.csv'],',',2);
+QP = M4.data(end,2);
+ZP = M4.data(end,3);
+errvec(4) = abs(abs(QP) - vtexact);
+Linf(4) = abs(ZP - zexact(STIME));
+
+M5 = importdata([repository, 'terminal_velocity_dt_0_0001_devc.csv'],',',2);
+QP = M5.data(end,2);
+ZP = M5.data(end,3);
+errvec(5) = abs(abs(QP) - vtexact);
+Linf(5) = abs(ZP - zexact(STIME));
 
 if errvec(5) > 1e-6
    display(['Matlab Warning: The velocity in the terminal_velocity* cases is out of tolerance.'])
@@ -95,7 +106,6 @@ hold off
 dto = dtvec((length(dtvec) - 1):length(dtvec));
 erro = errvec((length(errvec) - 1):length(errvec));
 [a, b] = polyfit(log(dto), log(erro), 1);
-%fprintf('order of accuracy: %f\n', a(1))
 
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
@@ -130,7 +140,6 @@ hold off
 dto = dtvec((length(dtvec) - 1):length(dtvec));
 erro = Linf((length(Linf) - 1):length(Linf));
 [a, b] = polyfit(log(dto), log(erro), 1);
-%fprintf('order of accuracy: %f\n', a(1))
 
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
