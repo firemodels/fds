@@ -1432,6 +1432,7 @@ TYPE P_ZONE_TYPE
    REAL(EB) :: Y                                                   !< y coordinate of ZONE specifier (m)
    REAL(EB) :: Z                                                   !< z coordinate of ZONE specifier (m)
    REAL(EB) :: DPSTAR=0._EB
+   REAL(EB) :: VOLUME=0._EB                                        !< Volume (m3) of pressure zone
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA                !< Array of leak areas to other ZONEs
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
