@@ -1139,7 +1139,7 @@ There are four basic modes of operation in FDS: {\ct 'DNS'} (Direct Numerical Si
 \begin{lstlisting}
 &MISC ..., SIMULATION_MODE='DNS' /
 \end{lstlisting}
-indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=T} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
+indicates a direct numerical simulation. The default value is {\ct 'VLES'}.
 
 Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
 
@@ -5812,7 +5812,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct DNS=T} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
 
 \subsubsection{Single Step Reaction}
 
@@ -10997,7 +10997,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /BNDF/STATISTICS
 % ignorenamelistkw: /DEVC/STATISTICS, /DUMP/DT_DEVC_LINE, /DUMP/T_DEVC_LINE_END
 % ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
-% ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
+% ignorenamelistkw: /MISC/RADIATION, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
 % ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
 % ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG
 % ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING
