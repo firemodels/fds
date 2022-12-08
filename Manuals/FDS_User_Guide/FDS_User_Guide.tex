@@ -11288,7 +11288,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                        \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
 {\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
@@ -13125,9 +13124,6 @@ streamlines. It is also useful when parsing the file. The quantity data, {\ct QP
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
 several different quantities.
 
-\subsubsection*{Increased Precision of Particle File}
-
-Note that if {\ct EB\_PART\_FILE=T} is set on the {\ct DUMP} line then the {\ct .prt} file will be written with 8 byte reals instead of 4 byte reals.  This may be useful for development of verification cases, but it renders the {\ct .prt} files unreadable by Smokeview.
 
 \section{Profile Files}
 \label{out:PROF}
