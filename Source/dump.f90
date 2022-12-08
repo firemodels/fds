@@ -3102,6 +3102,15 @@ WRITE_SCARC: IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC'
    END SELECT
 ENDIF WRITE_SCARC
 
+! Write pressure ZONE info
+
+IF (N_ZONE>0) THEN
+   WRITE(LU_OUTPUT,'(//A/)')   ' Pressure Zone Information'
+   DO N=1,N_ZONE
+      WRITE(LU_OUTPUT,'(I4,A,ES12.4,A)') N,' Volume:',P_ZONE(N)%VOLUME,' m3'
+   ENDDO
+ENDIF
+
 ! Write out GLMAT info:
 
 GLMAT_IF : IF(TRIM(PRES_METHOD)=='GLMAT') THEN
