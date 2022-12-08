@@ -2,7 +2,7 @@
 
 &TIME T_END=60. /
 
-&DUMP DT_HRR=2., DT_DEVC_LINE=50. /
+&DUMP DT_HRR=2. /
 
 &MESH XB=-0.3, 0.0,-0.3,0.0,-0.05, 0.35, IJK=30,30,40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.3, DY=0.3, DZ=0.4, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
