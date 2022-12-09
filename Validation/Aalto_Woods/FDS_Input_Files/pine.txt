@@ -16,7 +16,7 @@
       MATL_ID(1,1)          = 'char' /   
    
 &MATL ID                    = 'char'
-      EMISSIVITY            = 0.838
+      EMISSIVITY            = 0.84
       DENSITY               = 104
       CONDUCTIVITY_RAMP     = 'char_k'
       SPECIFIC_HEAT_RAMP    = 'char_cp'
