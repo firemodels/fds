@@ -1361,32 +1361,42 @@ END SUBROUTINE NATURAL_CONVECTION_MODEL
 !> \param RE Reynolds number
 !> \param PR_ONTH_IN Prandtl number to the 1/3 power
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
+!> \param NUSSELT_C0 Constant in Nusselt number correlation
+!> \param NUSSELT_C1 Constant in Nusselt number correlation
+!> \param NUSSELT_C2 Constant in Nusselt number correlation
+!> \param NUSSELT_M Exponent in Nusselt number correlation
 
-SUBROUTINE FORCED_CONVECTION_MODEL(NUSSELT,RE,PR_ONTH_IN,SURF_GEOMETRY_INDEX)
+SUBROUTINE FORCED_CONVECTION_MODEL(NUSSELT,RE,PR_ONTH_IN,SURF_GEOMETRY_INDEX,NUSSELT_C0,NUSSELT_C1,NUSSELT_C2,NUSSELT_M)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
 REAL(EB), INTENT(IN) :: RE,PR_ONTH_IN
+REAL(EB), INTENT(IN), OPTIONAL :: NUSSELT_C0,NUSSELT_C1,NUSSELT_C2,NUSSELT_M
 INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX
 
-SELECT CASE(SURF_GEOMETRY_INDEX)
-   CASE (SURF_CARTESIAN)
-      NUSSELT = (0.037_EB*RE**0.8_EB-871._EB)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Table 7.7
-   CASE (SURF_CYLINDRICAL)
-      ! Incropera and DeWitt, 7th, Eq. 7.52
-      IF (RE >= 40000._EB) THEN
-         NUSSELT = 0.027_EB*RE**0.805_EB*PR_ONTH_IN
-      ELSEIF (RE >= 4000._EB) THEN
-         NUSSELT = 0.193_EB*RE**0.618_EB*PR_ONTH_IN
-      ELSEIF (RE >= 40._EB) THEN
-         NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH_IN
-      ELSEIF (RE >= 4._EB) THEN
-         NUSSELT = 0.911_EB*RE**0.385_EB*PR_ONTH_IN
-      ELSE
-         NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH_IN
-      ENDIF
-   CASE (SURF_SPHERICAL)
-      NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.57
-END SELECT
+
+IF (PRESENT(NUSSELT_C0)) THEN ! User has defined a custom Nusselt correlation
+   NUSSELT = NUSSELT_C0+(NUSSELT_C1*RE**NUSSELT_M-NUSSELT_C2)*PR_ONTH_IN
+ELSE
+   SELECT CASE(SURF_GEOMETRY_INDEX)
+      CASE (SURF_CARTESIAN)
+         NUSSELT = 0.0296_EB*RE**0.8_EB*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.36, Table 7.7
+      CASE (SURF_CYLINDRICAL)
+         ! Incropera and DeWitt, 7th, Eq. 7.52
+         IF (RE >= 40000._EB) THEN
+            NUSSELT = 0.027_EB*RE**0.805_EB*PR_ONTH_IN
+         ELSEIF (RE >= 4000._EB) THEN
+            NUSSELT = 0.193_EB*RE**0.618_EB*PR_ONTH_IN
+         ELSEIF (RE >= 40._EB) THEN
+            NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH_IN
+         ELSEIF (RE >= 4._EB) THEN
+            NUSSELT = 0.911_EB*RE**0.385_EB*PR_ONTH_IN
+         ELSE
+            NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH_IN
+         ENDIF
+      CASE (SURF_SPHERICAL)
+         NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.57
+   END SELECT
+ENDIF
 
 END SUBROUTINE FORCED_CONVECTION_MODEL
 

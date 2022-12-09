@@ -1,0 +1,57 @@
+
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT XB=-0.05,0.05,-0.05,0.05,0,0, SURF_ID='SAMPLE' /
+
+&MATL ID                = 'water'
+      DENSITY           = 1000.
+      CONDUCTIVITY      = 0.6
+      EMISSIVITY        = 0.9
+      SPECIFIC_HEAT     = 4.2
+      A(1)              = 8.37E12
+      E(1)              = 1.21E5
+      NU_SPEC           = 1.0
+      SPEC_ID           = 'WATER VAPOR'
+      HEAT_OF_REACTION  = 2500./
+
+&MATL ID = 'CERAMIC',
+      DENSITY= 128.,
+      CONDUCTIVITY_RAMP= 'KC_RAMP',
+      SPECIFIC_HEAT= 1.13 /
+
+&RAMP ID = 'KC_RAMP' T = 20., F = 0.04 /
+&RAMP ID = 'KC_RAMP' T =200., F = 0.05 /
+&RAMP ID = 'KC_RAMP' T =400., F = 0.08 /
+&RAMP ID = 'KC_RAMP' T =600., F = 0.12 /
+&RAMP ID = 'KC_RAMP' T =800., F = 0.18 /
+&RAMP ID = 'KC_RAMP' T =1000., F = 0.25 /
+
+&RAMP ID = 'char_k', T = 20, F = 0.115038 /
+&RAMP ID = 'char_k', T = 900, F = 0.187198 /
+
+&RAMP ID = 'wood_cp', T = 30, F = 0.92 /
+&RAMP ID = 'wood_cp', T = 230, F = 1.8 /
+&RAMP ID = 'wood_cp', T = 800, F = 4.308 /
+
+&RAMP ID = 'char_cp', T = 20., F = 0.6823 /
+&RAMP ID = 'char_cp', T = 40., F = 0.7947 /
+&RAMP ID = 'char_cp', T = 60., F = 0.8887 /
+&RAMP ID = 'char_cp', T = 80., F = 0.9684 /
+&RAMP ID = 'char_cp', T = 100., F = 1.0368 /
+&RAMP ID = 'char_cp', T = 140., F = 1.1478 /
+&RAMP ID = 'char_cp', T = 180., F = 1.2344 /
+&RAMP ID = 'char_cp', T = 220., F = 1.3041 /
+&RAMP ID = 'char_cp', T = 260., F = 1.3617 /
+&RAMP ID = 'char_cp', T = 300., F = 1.4106 /
+&RAMP ID = 'char_cp', T = 350., F = 1.4627 /
+&RAMP ID = 'char_cp', T = 400., F = 1.5074 /
+&RAMP ID = 'char_cp', T = 500., F = 1.5820 /
+&RAMP ID = 'char_cp', T = 600., F = 1.6440 /
+&RAMP ID = 'char_cp', T = 700., F = 1.6982 /
+&RAMP ID = 'char_cp', T = 800., F = 1.7474 /

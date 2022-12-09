@@ -47,6 +47,7 @@ PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
 PROCESS Casara_Arts_Ribbed_Channel
+PROCESS Convection
 PROCESS Crown_Fires
 PROCESS CSIRO_Grassland_Fires
 PROCESS CSTB_Tunnel
@@ -67,6 +68,7 @@ PROCESS Harrison_Spill_Plumes
 PROCESS Heated_Channel_Flow
 PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
+PROCESS JH_FDS
 PROCESS Juelich_SETCOM
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure

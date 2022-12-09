@@ -8,7 +8,7 @@
 
 &MISC GVEC(3)=0.
       NOISE=.FALSE.
-      DNS=.TRUE.
+      SIMULATION_MODE='DNS'
       PERIODIC_TEST=11
       P_INF=243738.74668
       CC_IBM = .TRUE. /

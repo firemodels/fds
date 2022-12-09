@@ -13,7 +13,7 @@
       THERMOPHORETIC_DEPOSITION=.FALSE.
       STRATIFICATION           =.FALSE.
       NOISE                    =.FALSE.
-      DNS                      =.TRUE.
+      SIMULATION_MODE='DNS'
       GVEC(3) = 0./
 
 &RADI RADIATION=.FALSE./

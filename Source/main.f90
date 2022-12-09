@@ -32,11 +32,11 @@ USE TURBULENCE, ONLY: NS_ANALYTICAL_SOLUTION,INIT_TURB_ARRAYS,COMPRESSION_WAVE,&
                       TWOD_VORTEX_CERFACS,TWOD_VORTEX_UMD,TWOD_SOBOROT_UMD, &
                       SYNTHETIC_TURBULENCE,SYNTHETIC_EDDY_SETUP,SANDIA_DAT
 USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3,SAAD_MMS_1
-USE CC_SCALARS_IBM,   ONLY: CCIBM_SET_DATA,CCIBM_END_STEP,CCREGION_DENSITY,CCIBM_TARGET_VELOCITY, &
-                            CHECK_SPEC_TRANSPORT_CONSERVE,MASS_CONSERVE_INIT,CCIBM_RHO0W_INTERP,  &
-                            CCCOMPUTE_RADIATION,CCIBM_NO_FLUX,CCIBM_COMPUTE_VELOCITY_ERROR,       &
-                            FINISH_CCIBM,INIT_CUTCELL_DATA,LINEARFIELDS_INTERP_TEST,              &
-                            MESH_CC_EXCHANGE,ROTATED_CUBE_ANN_SOLN,PARABOLIC_PROFILE_TEST
+USE CC_SCALARS,   ONLY: CC_SET_DATA,CC_END_STEP,CC_DENSITY,CC_RHO0W_INTERP,       &
+                        CCCOMPUTE_RADIATION,CC_NO_FLUX,CC_COMPUTE_VELOCITY_ERROR, &
+                        CC_NO_FLUX,CC_COMPUTE_VELOCITY_ERROR,FINISH_CC,        &
+                        INIT_CUTCELL_DATA,MESH_CC_EXCHANGE,ROTATED_CUBE_ANN_SOLN, &
+                        CC_RESTORE_UVW_UNLINKED
 USE OPENMP_FDS
 USE MPI_F08
 USE SCRC, ONLY: SCARC_SETUP, SCARC_REASSIGN, SCARC_SOLVER, SCARC_NO_FLUX
@@ -58,7 +58,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) ::  TC_GLB,TC_LOC,DT_NEW,TI_LOC,TI_GLB, &
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::  TC2_GLB,TC2_LOC
 LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES_GLOBAL,CONNECTED_ZONES_LOCAL
 LOGICAL, ALLOCATABLE, DIMENSION(:) ::  STATE_GLB,STATE_LOC
-INTEGER :: IW,ITER
+INTEGER :: ITER
 TYPE (MESH_TYPE), POINTER :: M,M4
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 
@@ -226,7 +226,7 @@ CALL MPI_INITIALIZATION_CHORES(5)
 ! Initial complex geometry CC setup
 
 IF (CC_IBM) THEN
-   CALL CCIBM_SET_DATA(FIRST_CALL=.TRUE.) ! Define Cartesian cell types (used to define pressure zones), cut-cells, cfaces.
+   CALL CC_SET_DATA(FIRST_CALL=.TRUE.) ! Define Cartesian cell types (used to define pressure zones), cut-cells, cfaces.
    CALL STOP_CHECK(1)
 ENDIF
 
@@ -281,7 +281,7 @@ ENDDO
 ! Final complex geometry CC setup
 
 IF (CC_IBM) THEN
-   CALL CCIBM_SET_DATA(FIRST_CALL=.FALSE.) ! Interpolation Stencils, Scalar transport MATVEC data, cface RDNs.
+   CALL CC_SET_DATA(FIRST_CALL=.FALSE.) ! Interpolation Stencils, Scalar transport MATVEC data, cface RDNs.
    CALL STOP_CHECK(1)
 ENDIF
 
@@ -328,14 +328,11 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (PERIODIC_TEST==21) CALL ROTATED_CUBE_ANN_SOLN(NM,T_BEGIN) ! No Rotation.
    IF (PERIODIC_TEST==22) CALL ROTATED_CUBE_ANN_SOLN(NM,T_BEGIN) ! 27 deg Rotation.
    IF (PERIODIC_TEST==23) CALL ROTATED_CUBE_ANN_SOLN(NM,T_BEGIN) ! 45 deg Rotation.
-   IF (PERIODIC_TEST==24) CALL PARABOLIC_PROFILE_TEST(NM,T_BEGIN)
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
 ENDDO
 
-IF (CC_IBM) THEN
-   CALL INIT_CUTCELL_DATA(T_BEGIN,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells, cut-faces and CFACEs.
-   IF (PERIODIC_TEST==101) CALL LINEARFIELDS_INTERP_TEST
-ENDIF
+! Init centroid data (i.e. rho,zz) on cut-cells, cut-faces and CFACEs.
+IF (CC_IBM) CALL INIT_CUTCELL_DATA(T_BEGIN,DT)
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TGA_SURF_INDEX>0) CYCLE
@@ -344,9 +341,11 @@ ENDDO
 
 ! Exchange information at mesh boundaries related to the various initialization routines just completed
 
-CALL MESH_EXCHANGE(1)
-CALL MESH_EXCHANGE(4)
-CALL MESH_EXCHANGE(6)
+IF (LEVEL_SET_MODE/=1) THEN
+   CALL MESH_EXCHANGE(1)
+   CALL MESH_EXCHANGE(4)
+   CALL MESH_EXCHANGE(6)
+ENDIF
 
 ! Ensure normal components of velocity match at mesh boundaries and do velocity BCs just in case the flow is not initialized to zero
 
@@ -402,11 +401,11 @@ IF (.NOT.RESTART) THEN
 
    DO ITER=1,INITIAL_RADIATION_ITERATIONS
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-         CALL WALL_BC(T_BEGIN,DT,NM)
          IF (RADIATION) THEN
             CALL COMPUTE_RADIATION(T_BEGIN,NM,ITER)
             IF (CC_IBM) CALL CCCOMPUTE_RADIATION(T_BEGIN,NM,ITER)
          ENDIF
+         CALL WALL_BC(T_BEGIN,DT,NM)
       ENDDO
       IF (RADIATION .AND. EXCHANGE_RADIATION) THEN
          DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
@@ -416,9 +415,7 @@ IF (.NOT.RESTART) THEN
    ENDDO
 
    IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed radiation initialization')
-
-   IF (CHECK_MASS_CONSERVE) CALL MASS_CONSERVE_INIT
-   IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) CALL CCIBM_RHO0W_INTERP
+   IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) CALL CC_RHO0W_INTERP
 
 ENDIF
 
@@ -593,17 +590,18 @@ MAIN_LOOP: DO
       ! Predict species mass fractions at the next time step.
 
       COMPUTE_DENSITY_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF(CC_IBM .AND. .NOT.FIRST_PASS) CALL CC_RESTORE_UVW_UNLINKED(NM,ASSIGN_UNLINKED_VEL=.TRUE.)
          CALL DENSITY(T,DT,NM)
          IF (LEVEL_SET_MODE>0) CALL LEVEL_SET_FIRESPREAD(T,DT,NM)
       ENDDO COMPUTE_DENSITY_LOOP
 
       IF (LEVEL_SET_MODE==2 .AND. CHECK_FREEZE_VELOCITY) CALL CHECK_FREEZE_VELOCITY_STATUS
 
-      IF (CC_IBM) CALL CCREGION_DENSITY(T,DT)
+      IF (CC_IBM) CALL CC_DENSITY(T,DT)
 
       ! Exchange species mass fractions at interpolated boundaries.
 
-      CALL MESH_EXCHANGE(1)
+      IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(1)
 
       ! Exchange level set values, if necessary
 
@@ -665,7 +663,7 @@ MAIN_LOOP: DO
 
       ! Solve for the pressure at the current time step
 
-      CALL PRESSURE_ITERATION_SCHEME
+      IF (LEVEL_SET_MODE/=1) CALL PRESSURE_ITERATION_SCHEME
 
       ! Predict the velocity components at the next time step
 
@@ -710,13 +708,13 @@ MAIN_LOOP: DO
 
    IF (CFL_FILE) CALL WRITE_CFL_FILE
 
+   ! Compute linked velocity arrays. Flux average final velocity to cutfaces.
+
+   IF (CC_IBM) CALL CC_END_STEP(T,DT,DIAGNOSTICS)
+
    ! Exchange velocity and pressures at interpolated boundaries
 
-   CALL MESH_EXCHANGE(3)
-
-   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-
-   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(3)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -764,12 +762,11 @@ MAIN_LOOP: DO
 
    IF (LEVEL_SET_MODE==2 .AND. CHECK_FREEZE_VELOCITY) CALL CHECK_FREEZE_VELOCITY_STATUS
 
-   IF (CC_IBM) CALL CCREGION_DENSITY(T,DT)
-   IF (CHECK_MASS_CONSERVE) CALL CHECK_SPEC_TRANSPORT_CONSERVE(T,DT,DIAGNOSTICS)
+   IF (CC_IBM) CALL CC_DENSITY(T,DT)
 
    ! Exchange species mass fractions.
 
-   CALL MESH_EXCHANGE(4)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(4)
    IF (LEVEL_SET_MODE>0) CALL MESH_EXCHANGE(14)
 
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
@@ -781,7 +778,7 @@ MAIN_LOOP: DO
          IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,DT,NM,APPLY_TO_ESTIMATED_VARIABLES=.TRUE.)
          IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM,APPLY_TO_ESTIMATED_VARIABLES=.TRUE.)
       ENDIF
-      IF (AGGLOMERATION .AND. ANY(AGGLOMERATION_SMIX_INDEX>0)) CALL CALC_AGGLOMERATION(DT,NM)
+      IF (N_AGGLOMERATION_SPECIES > 0) CALL CALC_AGGLOMERATION(DT,NM)
       IF (N_REACTIONS>0 .OR. INIT_HRRPUV) CALL COMBUSTION(T,DT,NM)
       IF (ANY(SPECIES_MIXTURE%CONDENSATION_SMIX_INDEX>0)) CALL CONDENSATION_EVAPORATION(DT,NM)
    ENDDO COMPUTE_DIVERGENCE_2
@@ -797,9 +794,11 @@ MAIN_LOOP: DO
 
    ! Exchange the number of particles sent from mesh to mesh (7), and if non-zero, exchange particles (11)
 
-   CALL MESH_EXCHANGE(7)
-   CALL POST_RECEIVES(11)
-   CALL MESH_EXCHANGE(11)
+   IF (OMESH_PARTICLES) THEN
+      CALL MESH_EXCHANGE(7)
+      CALL POST_RECEIVES(11)
+      CALL MESH_EXCHANGE(11)
+   ENDIF
 
    ! Particle heat and mass transfer
 
@@ -862,7 +861,7 @@ MAIN_LOOP: DO
 
    ! Solve the pressure equation.
 
-   CALL PRESSURE_ITERATION_SCHEME
+   IF (LEVEL_SET_MODE/=1) CALL PRESSURE_ITERATION_SCHEME
 
    ! Update the  velocity.
 
@@ -871,9 +870,13 @@ MAIN_LOOP: DO
       IF (DIAGNOSTICS .OR. STORE_CARTESIAN_DIVERGENCE) CALL CHECK_DIVERGENCE(NM)
    ENDDO CORRECT_VELOCITY_LOOP
 
+   ! Compute linked velocity arrays. Flux average final velocity to cutfaces.
+
+   IF (CC_IBM) CALL CC_END_STEP(T,DT,DIAGNOSTICS)
+
    ! Exchange velocity, pressure, particles at interpolated boundaries
 
-   CALL MESH_EXCHANGE(6)
+   IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(6)
 
    ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
 
@@ -883,10 +886,6 @@ MAIN_LOOP: DO
          IF (ICYC>1) EXIT
       ENDDO
    ENDIF
-
-   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-
-   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -942,7 +941,8 @@ MAIN_LOOP: DO
 
    CALL MPI_ALLGATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,RADIATION_COMPLETED,COUNTS,DISPLS,MPI_LOGICAL,MPI_COMM_WORLD,IERR)
 
-   IF ( (T>=RSRT_CLOCK(RSRT_COUNTER(1)) .OR. STOP_STATUS==USER_STOP) .AND.  (T>=T_END .OR. ALL(RADIATION_COMPLETED)) ) THEN
+   IF ( (T>=RSRT_CLOCK(RSRT_COUNTER(1)) .OR. STOP_STATUS==USER_STOP) .AND.  &
+      (T>=T_END .OR. ALL(RADIATION_COMPLETED) .OR. STOP_STATUS==CTRL_STOP )) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CALL DUMP_RESTART(T,DT,NM)
       ENDDO
@@ -971,7 +971,7 @@ END SELECT
 
 ! Finish unstructured geometry
 
-IF (CC_IBM) CALL FINISH_CCIBM
+IF (CC_IBM) CALL FINISH_CC
 
 ! Stop the calculation
 
@@ -1378,10 +1378,6 @@ ELSE
    ITERATE_BAROCLINIC_TERM = .FALSE.
 ENDIF
 
-IF(CC_IBM .AND. CC_UNSTRUCTURED_PROJECTION) THEN
-   IF(PREDICTOR) CALL MESH_EXCHANGE(6) ! Exchange linked face averaged velocities to be used in UN_NEW_OTHER estimation.
-   IF(CORRECTOR) CALL MESH_EXCHANGE(3)
-ENDIF
 
 PRESSURE_ITERATION_LOOP: DO
 
@@ -1391,14 +1387,10 @@ PRESSURE_ITERATION_LOOP: DO
    ! The following loops and exchange always get executed the first pass through the PRESSURE_ITERATION_LOOP.
    ! If we need to iterate the baroclinic torque term, the loop is executed each time.
 
-   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1 .OR. CC_IBM) THEN
+   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T,NM)
-         IF (CC_IBM) THEN
-            ! Wall model to define target velocities in gas cut faces.
-            IF(PRESSURE_ITERATIONS<=1 .AND. .NOT.CC_STRESS_METHOD) CALL CCIBM_TARGET_VELOCITY(DT,NM)
-            CALL CCIBM_NO_FLUX(DT,NM,.TRUE.) ! IBM Force, we do it here to get velocity flux matched.
-         ENDIF
+         IF (CC_IBM) CALL CC_NO_FLUX(DT,NM,.TRUE.)
       ENDDO
       CALL MESH_EXCHANGE(5)  ! Exchange FVX, FVY, FVZ
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -1416,7 +1408,7 @@ PRESSURE_ITERATION_LOOP: DO
       ELSE
          CALL NO_FLUX(DT,NM)
       ENDIF
-      IF (CC_IBM) CALL CCIBM_NO_FLUX(DT,NM,.FALSE.) ! set WALL_WORK1 to 0 in cells inside geometries.
+      IF (CC_IBM) CALL CC_NO_FLUX(DT,NM,.FALSE.) ! set WALL_WORK1 to 0 in cells inside geometries.
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
       CALL PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
    ENDDO
@@ -1460,7 +1452,7 @@ PRESSURE_ITERATION_LOOP: DO
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL COMPUTE_VELOCITY_ERROR(DT,NM)
-      IF (CC_IBM) CALL CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
+      IF (CC_IBM) CALL CC_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
    ENDDO
 
    ! Make all MPI processes aware of the maximum velocity error to decide if another pressure iteration is needed.
@@ -1712,8 +1704,6 @@ IF (MY_RANK==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS performed a level set analysis only and finished successfully'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
-      CASE(MPI_TIMEOUT_STOP)
-         WRITE(MESSAGE,'(A)') 'ERROR: An MPI exchange timed out - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
@@ -2173,8 +2163,9 @@ SUBROUTINE INITIALIZE_PRESSURE_ZONES
 
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE,SEARCH_OTHER_MESHES
 TYPE(P_ZONE_TYPE), POINTER :: PZ
-INTEGER :: N,N_OVERLAP,I,J,K,NOM
+INTEGER :: N,N_OVERLAP,I,J,K,NOM,IC,IZ
 LOGICAL :: FOUND_UNASSIGNED_CELL
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: BUFFER
 
 ! Ensure that all cells have been assigned a pressure zone, even within solids
 
@@ -2249,7 +2240,31 @@ ENDDO MESH_LOOP_2
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
    WHERE (M%PRESSURE_ZONE<0) M%PRESSURE_ZONE = 0
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
+            IZ = M%PRESSURE_ZONE(I,J,K)
+            IF (IZ==0) CYCLE
+            IC = M%CELL_INDEX(I,J,K)
+            IF (.NOT.M%SOLID(IC)) P_ZONE(IZ)%VOLUME = P_ZONE(IZ)%VOLUME + M%DX(I)*M%RC(I)*M%DY(J)*M%DZ(K)
+         ENDDO
+      ENDDO
+   ENDDO
 ENDDO
+
+! Sum the pressure zone volumes
+
+IF (N_MPI_PROCESSES>1 .AND. N_ZONE>0) THEN
+   ALLOCATE(BUFFER(N_ZONE))
+   DO IZ=1,N_ZONE
+      BUFFER(IZ) = P_ZONE(IZ)%VOLUME
+   ENDDO
+   CALL MPI_ALLREDUCE(MPI_IN_PLACE,BUFFER,N_ZONE,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+   DO IZ=1,N_ZONE
+      P_ZONE(IZ)%VOLUME = BUFFER(IZ)
+   ENDDO
+   DEALLOCATE(BUFFER)
+ENDIF
 
 END SUBROUTINE INITIALIZE_PRESSURE_ZONES
 
@@ -2535,7 +2550,7 @@ SUBROUTINE MESH_EXCHANGE(CODE)
 REAL(EB) :: TNOW,XI,YJ,ZK
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,NOM,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_NEW_STORAGE_SLOTS
-INTEGER :: NNN,NN1,NN2,IPC,CNT,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC,OBST_INDEX,IP
+INTEGER :: NNN,NN1,NN2,IPC,CNT,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC,OBST_INDEX,IP,IW
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2,RHOP,RHOP2,DP,DP2,UP,UP2,VP,VP2,WP,WP2
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,ZZP2
@@ -3003,7 +3018,7 @@ ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ1>0) THEN
    CALL MPI_STARTALL(N_REQ1,REQ1(1:N_REQ1),IERR)
-   CALL TIMEOUT('MPI exchange of density etc',N_REQ1,REQ1(1:N_REQ1))
+   CALL TIMEOUT('MPI exchange of gas species densities',N_REQ1,REQ1(1:N_REQ1))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==7 .AND. OMESH_PARTICLES .AND. N_REQ2>0) THEN
@@ -3308,6 +3323,7 @@ SUBROUTINE TIMEOUT(RNAME,NR,RR)
 REAL(EB) :: START_TIME,WAIT_TIME
 INTEGER, INTENT(IN) :: NR
 TYPE (MPI_REQUEST), DIMENSION(:) :: RR
+INTEGER :: ERRORCODE
 LOGICAL :: FLAG
 CHARACTER(*) :: RNAME
 
@@ -3321,9 +3337,10 @@ IF (.NOT.PROFILING) THEN
       CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
-         WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',PNAME(1:PNAMELEN)
-         FLAG = .TRUE.
-         STOP_STATUS = MPI_TIMEOUT_STOP
+         WRITE(LU_ERR,'(/A,A,A,I0,A,A,A/)') 'ERROR: ',TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',&
+                                            PNAME(1:PNAMELEN),'. FDS will abort.'
+         ERRORCODE = 1
+         CALL MPI_ABORT(MPI_COMM_WORLD,ERRORCODE,IERR)
       ENDIF
    ENDDO
 

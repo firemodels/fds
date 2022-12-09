@@ -5,6 +5,7 @@
 
 MODULE GLOBAL_CONSTANTS
 
+
 USE PRECISION_PARAMETERS
 USE MPI_F08
 USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
@@ -121,7 +122,6 @@ INTEGER, PARAMETER :: TGA_ANALYSIS_STOP=6              !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: LEVELSET_STOP=7                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
-INTEGER, PARAMETER :: MPI_TIMEOUT_STOP=11              !< Flag for STATUS_STOP
 
 INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
 INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
@@ -140,8 +140,6 @@ INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYP
 INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
 INTEGER, PARAMETER :: OBST_BOX_TYPE=4                  !< Flag for OB\%SHAPE_TYPE
 
-INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1  !< Number of SIMPLE_CHEMISTRY reactions
-
 INTEGER :: FUEL_INDEX=0                    !< Index for FUEL in SIMPLE_CHEMISTRY model
 INTEGER :: O2_INDEX=0                      !< Index for O2 in SIMPLE_CHEMISTRY model
 INTEGER :: N2_INDEX=0                      !< Index for N2 in SIMPLE_CHEMISTRY model
@@ -159,10 +157,6 @@ INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
-
-REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
-REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
-REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0.2_EB   !< Fraction of nitrogen atoms in the fuel that are converted to HCN
 
 ! Miscellaneous logical constants
 
@@ -369,7 +363,7 @@ REAL(EB) :: T_END                                           !< Ending time of si
 REAL(EB) :: T_END_GEOM
 REAL(EB) :: TIME_SHRINK_FACTOR                              !< Factor to reduce specific heat and total run time
 REAL(EB) :: RELAXATION_FACTOR=1._EB                         !< Factor used to relax normal velocity nudging at immersed boundaries
-REAL(EB) :: MPI_TIMEOUT=30._EB                              !< Time to wait for MPI messages to be received (s)
+REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for MPI messages to be received (s)
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 
@@ -386,6 +380,7 @@ REAL(EB) :: MW_H2O                                                  !< Molecular
 REAL(EB) :: MW_CO                                                   !< Molecular weight of carbon monoxide (g/mol)
 REAL(EB) :: MW_H2                                                   !< Molecular weight of hydrogen (g/mol)
 REAL(EB) :: MW_HCN                                                  !< Molecular weight of hydrogen cyanide (g/mol)
+REAL(EB) :: MW_SOOT                                                 !< Molecular weight of soot (g/mol)
 REAL(EB) :: VISIBILITY_FACTOR=3._EB                                 !< Parameter in light extinction calculation
 REAL(EB) :: EC_LL                                                   !< Extinction Coefficient, Lower Limit (1/m)
 REAL(EB) :: ZZ_MIN_GLOBAL=1.E-10_EB                                 !< Minimum lumped species mass fraction
@@ -394,9 +389,6 @@ REAL(EB) :: INITIAL_UNMIXED_FRACTION=1._EB                          !< Initial a
 REAL(EB) :: RICHARDSON_ERROR_TOLERANCE=1.E-6_EB                     !< Error tolerance in Richardson extrapolation
 REAL(EB) :: H_F_REFERENCE_TEMPERATURE=25._EB                        !< Heat of formation reference temperature (C->K)
 REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperature above which fuel and oxygen burn freely (C->K)
-REAL(EB) :: AUTO_IGNITION_TEMPERATURE=-273.15_EB                    !< Temperature above which reaction is allowed (C->K)
-REAL(EB) :: AIT_EXCLUSION_ZONE(6,MAX_AIT_EXCLUSION_ZONES)=-1.E6_EB  !< Volume in which AUTO_IGNITION_TEMPERATURE has no effect
-
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
 
@@ -412,12 +404,12 @@ INTEGER :: MAX_PRIORITY=1                                           !< Maximum n
 INTEGER :: N_PASSIVE_SCALARS=0                                      !< Number of passive scalars
 INTEGER :: N_TOTAL_SCALARS=0                                        !< Number of total scalars, tracked and passive
 INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of chemistry substeps in combustion routine
-INTEGER :: CFT_REACTION_INDEX=1                                     !< Reaction index to base CFT extinction criterion
 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
 LOGICAL :: PILOT_FUEL_MODEL=.FALSE.                                 !< Allow pilot fuel with low AIT
 LOGICAL :: SUBGRID_IGNITION_MODEL=.FALSE.                           !< Add TMP_SGS when checking AIT
+LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.FALSE.              !< Report adiabatic flame temperature per REAC in LU_OUTPUT
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
@@ -600,15 +592,19 @@ INTEGER :: N_VENT_TOTAL=0
 ! Sprinkler Variables
 
 REAL(EB) :: C_DIMARZO=6.E6_EB
-INTEGER :: N_ACTUATED_SPRINKLERS=0,EVAP_MODEL=0
+INTEGER :: N_ACTUATED_SPRINKLERS=0
 INTEGER, PARAMETER :: NDC=1000,NDC2=100
+INTEGER, PARAMETER :: RM_NO_B        = -1 !< Ranz-Marshall no B number
+INTEGER, PARAMETER :: RM_B           =  0 !< Ranz-Marshall with B number
+INTEGER, PARAMETER :: RM_LEWIS_B     =  1 !< Ranz-Marshall with Lewis number based B Number
+INTEGER, PARAMETER :: RM_FL_LEWIS_B  =  2 !< Ranz-Marshall with flux limited, Lewis number based B Number
 LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
 
 ! Particles
 
 INTEGER :: MAXIMUM_PARTICLES,N_LAGRANGIAN_CLASSES,N_LP_ARRAY_INDICES=0
 REAL(EB) :: CNF_CUTOFF=0.005_EB
-LOGICAL :: EB_PART_FILE=.FALSE.,PL3D_PARTICLE_FLUX=.FALSE.,SLCF_PARTICLE_FLUX=.FALSE.,DEVC_PARTICLE_FLUX=.FALSE.
+LOGICAL :: PL3D_PARTICLE_FLUX=.FALSE.,SLCF_PARTICLE_FLUX=.FALSE.,DEVC_PARTICLE_FLUX=.FALSE.
 LOGICAL :: OMESH_PARTICLES=.FALSE.,EXCHANGE_INSERTED_PARTICLES=.FALSE.
 
 INTEGER :: MOMENTUM_INTERPOLATION_METHOD=0
@@ -620,10 +616,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SOOT_OX
 ! Agglomeration model
 
 LOGICAL :: AGGLOMERATION = .TRUE.,SOOT_OXIDATION=.FALSE.
-INTEGER :: N_PARTICLE_BINS(MAX_SPECIES)=0,AGGLOMERATION_SPEC_INDEX(MAX_SPECIES)=-1,AGGLOMERATION_SMIX_INDEX(MAX_SPECIES)=-1,&
-           N_AGGLOMERATION_SPECIES=0
-REAL(EB) :: MIN_PARTICLE_DIAMETER(MAX_SPECIES),MAX_PARTICLE_DIAMETER(MAX_SPECIES),&
-            NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+INTEGER :: N_AGGLOMERATION_SPECIES=0
+INTEGER, ALLOCATABLE, DIMENSION(:) :: N_PARTICLE_BINS,AGGLOMERATION_SPEC_INDEX,AGGLOMERATION_SMIX_INDEX
+REAL(EB) :: NUCLEATION_SITES=1.E7_EB !1E7 is 10 nucleation sites per cm^3
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_PARTICLE_DIAMETER,MAX_PARTICLE_DIAMETER
 
 ! Number of initial value, pressure zone, and multiplier derived types
 
@@ -668,16 +664,11 @@ LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
 
 LOGICAL :: CC_IBM=.FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
-LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
 LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
 LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
 LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
-LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
-LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
-LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
-LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.TRUE.
 LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
@@ -709,11 +700,11 @@ INTEGER :: MAXIMUM_GEOMETRY_ZVALS= 100, MAXIMUM_GEOMETRY_VOLUS=2400,  &
 
 ! Allocation increment parameters:
 
-INTEGER, PARAMETER :: IBM_ALLOC_DVERT = 10
-INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
+INTEGER, PARAMETER :: CC_ALLOC_DVERT = 10
+INTEGER, PARAMETER :: CC_ALLOC_DELEM = 10
 
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  !< Up to two ws-triangles related to a segment
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  !< Up to 1 ws-triangle per BODINT_PLANE triangle
+INTEGER, PARAMETER :: CC_MAX_WSTRIANG_SEG =  2  !< Up to two ws-triangles related to a segment
+INTEGER, PARAMETER :: CC_MAX_WSTRIANG_TRI =  1  !< Up to 1 ws-triangle per BODINT_PLANE triangle
 
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: N_EDGES_DIM_CC

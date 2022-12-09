@@ -7,7 +7,7 @@ This tests DNS and axial symmetry.
 
 &TIME T_END=2.0 /
 
-&MISC DNS=.TRUE. /
+&MISC SIMULATION_MODE='DNS' /
 
 &RADI RADIATION=.FALSE. /
 

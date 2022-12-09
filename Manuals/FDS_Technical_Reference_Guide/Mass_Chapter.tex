@@ -216,7 +216,7 @@ In atmospheric flows, it may be beneficial to coarsen the mesh in the vertical d
 T(z) = \frac{P(z) \overline{W}(z)}{\rho(z) \, R} = \frac{\mathtt{PBAR}(z)}{\mathtt{RHO}(z) \, \mathtt{RSUM}(z)}
 \end{equation}
 
-At {\ct INTERPOATED} boundaries with mesh coarsening (or refinement) the positions of the ghost cell values do not match positions of the interior gas phase cell values from the neighboring mesh.  This is depicted for our problem in Fig.~\ref{fig:vertmeshcoarsening}.  Let $\delta z^{(1)}_{kkg}$ denote the cell height for the interior gas phase cell on Mesh 1, for example.  To match the temperature gradient at the mesh interface we require
+At {\ct INTERPOLATED} boundaries with mesh coarsening (or refinement) the positions of the ghost cell values do not match positions of the interior gas phase cell values from the neighboring mesh.  This is depicted for our problem in Fig.~\ref{fig:vertmeshcoarsening}.  Let $\delta z^{(1)}_{kkg}$ denote the cell height for the interior gas phase cell on Mesh 1, for example.  To match the temperature gradient at the mesh interface we require
 
 \begin{equation}
 \label{eq:TMPatminterp}

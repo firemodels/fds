@@ -2342,10 +2342,9 @@ ENDDO NODE_LOOP
 
 END SUBROUTINE DETERMINE_FIXED_ELEMENTS
 
+
 !> \brief Determines what HVAC components lies in different, isolated networks (i.e. not sharing a common pressure zone)
-!>
-!> \param CHANGEIN Flag to force revaluation of the duct networks. Otherwise done only if there area damper changes.
-!> \param T Current time (s)
+!> \param CHANGE Flag to force revaluation of the duct networks. Otherwise done only if there area damper changes.
 !> \param T Current time (s)
 
 SUBROUTINE FIND_NETWORKS(CHANGE,T)
@@ -3530,7 +3529,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_ENTHALPY
 LOGICAL, INTENT(IN) :: CHANGE
 INTEGER :: NN,NR,NF,NN3,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),&
            DR_DUCTS(N_DUCTS),DR_DUCTNODES(N_DUCTS),DUCTRUN_MAP(N_DUCTS),DR_INDEX
-LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS),MT_PRESENT(N_DUCTS)
+LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS)!,MT_PRESENT(N_DUCTS)
 REAL(EB) :: C0,ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
@@ -3546,7 +3545,7 @@ DUCT_COUNTER=0
 NODE_COUNTER=0
 FAN_PRESENT=.FALSE.
 NODE_CONNECTED=.FALSE.
-MT_PRESENT = .FALSE.
+!MT_PRESENT = .FALSE.
 NODE_CHECKED=.FALSE.
 
 DUCT%QFAN_INDEX = -1
@@ -3573,7 +3572,7 @@ L1:DO WHILE (NN <= N_DUCTNODES)
       IF (DU%AREA < TWO_EPSILON_EB) CYCLE DL
       DUCT_FOUND = .TRUE.
       DUCT_COUNTER(DN%DUCT_INDEX(ND)) = N_DUCTRUNS
-      IF (DU%N_CELLS > 0) MT_PRESENT(N_DUCTRUNS)=.TRUE.
+      !IF (DU%N_CELLS > 0) MT_PRESENT(N_DUCTRUNS)=.TRUE.
       IF (DU%NODE_INDEX(1)==NN) THEN
          NODE_COUNTER(DU%NODE_INDEX(2)) = N_DUCTRUNS
          NODE_CONNECTED(DU%NODE_INDEX(2)) = .TRUE.
@@ -3762,16 +3761,16 @@ DO NR = 1, N_DUCTRUNS
 ENDDO
 
 ! If HVAC_MASS_TRANSPORT in a duct run make sure all ducts have at least one cell.
-DO NR = 1, N_DUCTRUNS
-   IF (.NOT. MT_PRESENT(NR)) CYCLE
-   DO ND = 1,DUCTRUN(NR)%N_DUCTS
-      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: DUCT ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID), &
-            'has N_CELLS=0 and is in a ductrun with ducts that have N_CELLS>0'
-         CALL SHUTDOWN(MESSAGE); RETURN
-      ENDIF
-   ENDDO
-ENDDO
+!DO NR = 1, N_DUCTRUNS
+!   IF (.NOT. MT_PRESENT(NR)) CYCLE
+!   DO ND = 1,DUCTRUN(NR)%N_DUCTS
+!      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
+!         WRITE(MESSAGE,'(A,A,A)') 'ERROR: DUCT ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID), &
+!            'has N_CELLS=0 and is in a ductrun with ducts that have N_CELLS>0'
+!         CALL SHUTDOWN(MESSAGE); RETURN
+!      ENDIF
+!   ENDDO
+!ENDDO
 
 !DO NR=1,N_DUCTRUNS
 !   WRITE(*,*) 'DR:',NR,DUCTRUN(NR)%N_DUCTS,DUCTRUN(NR)%N_M_DUCTS,DUCTRUN(NR)%N_DUCTNODES,&
@@ -3804,10 +3803,9 @@ DR%P(1:DR%N_M_DUCTNODES,NF,NEW) = RHS(DR%N_M_DUCTS+1:DR%N_M_DUCTS+DR%N_M_DUCTNOD
 
 END SUBROUTINE MATRIX_SOLVE_QFAN
 
+
 !> \brief Builds the right hand side of the HVAC QFAN matrix for mass conservation at internal nodes
-!>
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
-!> \param NF Index indicating which ductrun fan is being solved
 
 SUBROUTINE RHSNODE_QFAN(DUCTRUN_INDEX)
 USE GLOBAL_CONSTANTS
@@ -3854,10 +3852,11 @@ ENDDO
 
 END SUBROUTINE LHSNODE_QFAN
 
+
 !> \brief Builds the right hand side of the HVAC QFAN flow matrix for momentum conservation in a duct
-!>
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
 !> \param NF Index indicating which ductrun fan is being solved
+!> \param T Current time (s)
 
 SUBROUTINE RHSDUCT_QFAN(DUCTRUN_INDEX,NF,T)
 
@@ -4060,10 +4059,9 @@ END DO COIL_LOOP
 
 END SUBROUTINE COIL_UPDATE_QFAN
 
+
 !> \brief Determines wall friction loss and assigns node losses to ducts
-!>
 !> \param T Current time (s)
-!> \param DT Current time step (s)
 !> \param DUCTRUN_INDEX Index indicating which HVAC ductrun is being solved
 !> \param NF Index indicating which HVAC ductrun dan is being solved
 

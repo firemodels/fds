@@ -10,16 +10,14 @@ curve after 80 degC.
 
 &HEAD CHID='enthalpy', TITLE='Test reaction enthalpy' /
 
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
 &TIME T_END=7, DT=0.005, WALL_INCREMENT=1 /
-
-&DUMP DT_PL3D=10000000. /
 
 &SURF ID='SLAB'
       COLOR='TOMATO 1'
       EXTERNAL_FLUX = 3.0
-      HEAT_TRANSFER_COEFFICIENT = 0. 
+      HEAT_TRANSFER_COEFFICIENT = 0.
       MATL_ID(1,:) = 'MAT_A'
       THICKNESS=0.001 /
 
@@ -27,8 +25,8 @@ curve after 80 degC.
       EMISSIVITY = 1.0
       CONDUCTIVITY=10.0
       SPECIFIC_HEAT_RAMP = 'c_ramp'
-      DENSITY= 30.0 
-      A = 0.2
+      DENSITY= 30.0
+      A = 6.0
       E = 0.
       N_S = 0.
       NU_MATL = 1.0

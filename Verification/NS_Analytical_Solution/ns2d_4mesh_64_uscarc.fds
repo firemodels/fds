@@ -10,7 +10,7 @@ Note that the time and space bounds are 2*pi.
 
 &PRES SOLVER = 'USCARC' /
 
-&MISC DNS=.TRUE., 
+&MISC SIMULATION_MODE='DNS', 
       STRATIFICATION=.FALSE., NOISE=.FALSE., CFL_MAX=0.25,
       PERIODIC_TEST=1 /
 

@@ -101,5 +101,10 @@ disp('ht3d_sphere...');                   ht3d_sphere
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
 disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
+disp('level_set_ellipse...');             level_set_ellipse
+disp('htc_forced...');                    htc_forced
+disp('natconh...');                       natconh
+disp('natconv...');                       natconv
+disp('freecon_sphere...');                freecon_sphere
 
 display('verification scripts completed successfully!')

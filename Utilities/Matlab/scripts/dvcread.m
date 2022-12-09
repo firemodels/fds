@@ -35,7 +35,11 @@ while ierror==0
     if irow==header_row
         headers = textline;
     end
-    [X ierror]=str2num(textline);
+    if textline == -1
+        ierror = 1;
+    else
+        [X ierror]=str2num(textline);
+    end
 end
 fclose(fid);
 
