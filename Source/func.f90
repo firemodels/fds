@@ -2281,15 +2281,16 @@ SORT_QUEUE: DO
 
       IF (M%SOLID(IC_OLD) .AND. .NOT.M%SOLID(IC)) CYCLE SEARCH_LOOP
 
+      ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
+
       IF (CC_IBM) THEN
+
          ! Here CC_CGSC=1, CC_SOLID=1:
-         IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(IIN,JJN,KKN,1)/=1) CYCLE SEARCH_LOOP
-         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(IIN,JJN,KKN,1)==0) THEN
+         IF (M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(IIN,JJN,KKN,1)/=1) CYCLE SEARCH_LOOP
+         IF (M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(IIN,JJN,KKN,1)==0) THEN
             IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
             IF(IOR<0 .AND. M%FCVAR( IIN, JJN, KKN,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
          ENDIF
-
-      ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
          ! Cell not SOLID for OBSTS, or GEOM cell not CC_SOLID:
          IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(IIN,JJN,KKN,1)/=1 .AND. &
@@ -2297,11 +2298,12 @@ SORT_QUEUE: DO
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)
             EXIT SORT_QUEUE
          ENDIF
-      ELSE
-         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(IIN,JJN,KKN)>=0 .AND.  M%PRESSURE_ZONE(IIN,JJN,KKN)/=I_ZONE) THEN
-            I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)
-            EXIT SORT_QUEUE
-         ENDIF
+
+      ELSEIF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(IIN,JJN,KKN)>=0 .AND.  M%PRESSURE_ZONE(IIN,JJN,KKN)/=I_ZONE) THEN
+
+         I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)
+         EXIT SORT_QUEUE
+
       ENDIF
 
       ! If the current cell is unassigned, assign the cell the ZONE index, I_ZONE, and then add this cell to the

@@ -291,25 +291,6 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 
 
 
-\section{A Note on Longer Run Times in FDS 6}
-
-A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing. In particular, starting with FDS~6.1.0, the default released version of FDS will employ OpenMP~\cite{Chapman:OpenMP} by default. OpenMP is a programming interface that enables FDS to exploit multiple processing units on a given computer. Most Windows-based personal computers now come with multi-core processors, but past versions of FDS could only exploit a single core for a given calculation. With this new release and the increasingly faster processors available on the market, FDS~6 ought to maintain and eventually surpass the computing speed of past versions.
-
-Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
-
-\begin{enumerate}
-\item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$.
-\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line together with {\ct STRATIFICATION=F} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL='EXTINCTION 1'}  or {\ct SUPPRESSION=F} on the {\ct COMB} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
-\item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION=F} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation.
-\item In situations where the heat transfer conditions are stationary or change only gradually, you can reduce the cost of the radiation solution by reducing the temporal resolution. More details in Section~\ref{info:RADI_Resolution}. A sensitivity study should be performed to determine the loss of accuracy.
-\end{enumerate}
-
-
-
-
-
-
-
 
 
 
@@ -1139,7 +1120,7 @@ There are four basic modes of operation in FDS: {\ct 'DNS'} (Direct Numerical Si
 \begin{lstlisting}
 &MISC ..., SIMULATION_MODE='DNS' /
 \end{lstlisting}
-indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=T} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
+indicates a direct numerical simulation. The default value is {\ct 'VLES'}.
 
 Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
 
@@ -5112,7 +5093,7 @@ If no input for specific specific heat is provided, then the specific heat of th
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line (note: this option also requires that {\ct STRATIFICATION} be set to {\ct F} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL} to {\ct 'EXTINCTION 1'} or {\ct SUPPRESSION=F} on the {\ct COMB} line).  For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies.
 
@@ -5447,7 +5428,7 @@ The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed infor
 
 Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a closed compartment is challenging because the relevant physical mechanisms typically occur at subgrid-scale. Flames are extinguished due to lowered temperatures and dilution of the fuel or oxygen supply. There are two flame extinction models in FDS that determine whether or not combustion is viable based on the cell temperature and the oxygen and fuel concentrations. In brief, for combustion to occur there must be sufficient oxygen and fuel to raise the cell temperature from its current value to a {\em critical flame temperature} (CFT). The CFT is based on the {\em oxygen index (OI)} concept discussed in Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}. The oxygen index is the volume fraction of oxygen in the oxidizer stream when extinguishment occurs. The adiabatic flame temperature\footnote{If you want to know the actual adiabatic flame temperature for each of your specified reactions, add {\ct COMPUTE\_ADIABATIC\_FLAME\_TEMPERATURE=T} to the {\ct COMB} line. The result is written to the file called {\ct CHID.out}.} of a stoichiometric mixture of fuel and oxygen at this limiting oxygen concentration, $T_{\rm OI}$, is taken as the CFT. Values for the CFT ($T_{\rm OI}$) are listed in Table~\ref{tab:CFT}. Both extinction models make use of the CFT.
 
-The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line\footnote{To eliminate any gas phase suppression, set {\ct SUPPRESSION=F} on the {\ct COMB} line.}. {\ct 'EXTINCTION~1'} is the default in Simple Very Large Eddy Simulation (SVLES) mode, whereas {\ct 'EXTINCTION~2'} is used in all other modes. The difference between the two models is that for {\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermophysical gas species properties are not invoked, as they are in the {\ct 'EXTINCTION~2'} model.
+The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line\footnote{To eliminate any gas phase suppression, set {\ct SUPPRESSION=F} on the {\ct COMB} line.}. {\ct 'EXTINCTION~1'} is the default for Very Large Eddy Simulation (VLES) and for Simple Very Large Eddy Simulation (SVLES) mode, whereas {\ct 'EXTINCTION~2'} is used for DNS and LES. The difference between the two models is that for {\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermophysical gas species properties are not invoked, as they are in the {\ct 'EXTINCTION~2'} model. Generally speaking, {\ct 'EXTINCTION~2'} requires a relatively fine grid because it uses the bulk cell temperature in its calculation of the critical flame temperature.
 
 \subsubsection{Extinction Model 1}
 
@@ -5841,7 +5822,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct DNS=T} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
 
 \subsubsection{Single Step Reaction}
 
@@ -11023,10 +11004,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelists: TRNY, TRNZ
 
 % ignore namelist/keyword combinations
-% ignorenamelistkw: /BNDF/STATISTICS
-% ignorenamelistkw: /DEVC/STATISTICS, /DUMP/DT_DEVC_LINE, /DUMP/T_DEVC_LINE_END
+% ignorenamelistkw: /BNDF/DEBUG
+% ignorenamelistkw: /DEVC/STATISTICS
+% ignorenamelistkw: /DUMP/DT_DEVC_LINE, /DUMP/MMS_TIMER, /DUMP/T_DEVC_LINE_END, /DUMP/TURB_INIT_CLOCK
 % ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
-% ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
+% ignorenamelistkw: /MISC/RADIATION, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
 % ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
 % ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG
 % ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING
@@ -11132,7 +11114,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct CHECK\_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & {\ct F}              \\ \hline
 {\ct COMPUTE\_ADIABATIC\_FLAME\_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & {\ct F}              \\ \hline
-{\ct EXTINCTION\_MODEL}                              & Character  & Section~\ref{info:extinction}                &           & {\ct 'EXTINCTION 2'} \\ \hline
+{\ct EXTINCTION\_MODEL}                              & Character  & Section~\ref{info:extinction}                &           &                      \\ \hline
 {\ct FIXED\_MIX\_TIME}                               & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                      \\ \hline
 {\ct FREE\_BURN\_TEMPERATURE}                        & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                  \\ \hline
@@ -11335,7 +11317,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                        \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
 {\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
@@ -13172,9 +13153,6 @@ streamlines. It is also useful when parsing the file. The quantity data, {\ct QP
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
 several different quantities.
 
-\subsubsection*{Increased Precision of Particle File}
-
-Note that if {\ct EB\_PART\_FILE=T} is set on the {\ct DUMP} line then the {\ct .prt} file will be written with 8 byte reals instead of 4 byte reals.  This may be useful for development of verification cases, but it renders the {\ct .prt} files unreadable by Smokeview.
 
 \section{Profile Files}
 \label{out:PROF}
