@@ -3074,34 +3074,6 @@ WRITE_RADIATION: IF (RADIATION .AND. ALLOCATED(RSA)) THEN
    ENDIF
 ENDIF WRITE_RADIATION
 
-! Write out SCARC info
-
-WRITE_SCARC: IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
-   WRITE(LU_OUTPUT,'(//1X,A,A/)')     TRIM(PRES_METHOD), ' Information'
-   WRITE(LU_OUTPUT,'(3X,A25,A12)') 'Discretization           ', TRIM(SCARC_MESH)
-   IF (INSEPARABLE_POISSON) THEN
-      WRITE(LU_OUTPUT,'(3X,A25,A12)') 'Poisson type             ', 'INSEPARABLE'
-   ELSE
-      WRITE(LU_OUTPUT,'(3X,A25,A12)') 'Poisson type             ', 'SEPARABLE'
-   ENDIF
-   WRITE(LU_OUTPUT,'(3X,A25,A12)') 'Global solver            ', TRIM(SCARC_METHOD)
-   SELECT CASE(TRIM(SCARC_METHOD))
-      CASE('KRYLOV')
-         WRITE(LU_OUTPUT,'(3X,A25,A12)')    'Preconditioner           ', TRIM(SCARC_PRECON)
-         IF (TRIM(SCARC_PRECON) == 'MKL') &
-            WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MKL precision            ', SCARC_PRECISION
-         WRITE(LU_OUTPUT,'(3X,A25,I12)')    'Max iterations           ', SCARC_KRYLOV_ITERATIONS
-         WRITE(LU_OUTPUT,'(3X,A25,E12.2)')  'Stopping accuracy        ', SCARC_KRYLOV_TOLERANCE
-         IF (TRIM(SCARC_COARSE) /= 'NONE') &
-            WRITE(LU_OUTPUT,'(3X,A25,A12)') 'Coarse solver            ', TRIM(SCARC_COARSE)
-         IF (TRIM(SCARC_COARSE) == 'DIRECT') &
-            WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MKL precision Coarse Grid', SCARC_PRECISION
-      CASE('MGM')
-         WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MGM internal BC type     ', TRIM(SCARC_MGM_BOUNDARY)
-         WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MGM Laplace solver       ', TRIM(SCARC_MGM_LAPLACE_SOLVER)
-   END SELECT
-ENDIF WRITE_SCARC
-
 ! Write pressure ZONE info
 
 IF (N_ZONE>0) THEN
@@ -3563,19 +3535,6 @@ IF (ITERATE_PRESSURE) THEN
    KK = PRESSURE_ERROR_MAX_LOC(3,NM)
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,4(I0,A))') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
                                             ' on Mesh ',NM,' at (',II,',',JJ,',',KK,')'
-ENDIF
-
-IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
-   IF (TRIM(SCARC_METHOD) /= 'MGM') THEN
-      WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: Iterations', SCARC_ITERATIONS, &
-                                                 ', Residual ',SCARC_RESIDUAL,&
-                                                 ', Rate  ',SCARC_CAPPA
-   ELSE
-      WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
-                                                 ', Residual ',SCARC_RESIDUAL,&
-                                                 ', Rate ',SCARC_CAPPA, &
-                                                 ', MGM Velocity Error ',SCARC_MGM_TOLERANCE
-   ENDIF
 ENDIF
 
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
@@ -7010,13 +6969,6 @@ IND_SELECT: SELECT CASE(IND)
 
    CASE(60)  ! ACTUATED SPRINKLERS
       GAS_PHASE_OUTPUT_RES = N_ACTUATED_SPRINKLERS
-
-   CASE(65)  ! SCARC RESIDUAL
-      GAS_PHASE_OUTPUT_RES = SCARC_RESIDUAL
-   CASE(66)  ! SCARC ITERATIONS
-      GAS_PHASE_OUTPUT_RES = SCARC_ITERATIONS
-   CASE(67)  ! SCARC CONVERGENCE RATE
-      GAS_PHASE_OUTPUT_RES = SCARC_CAPPA
 
    CASE(68:69)  ! SPECIFIC INTERNAL ENERGY and INTERNAL ENERGY (per unit volume)
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
