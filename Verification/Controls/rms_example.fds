@@ -10,7 +10,7 @@ ought to return the standard deviation of the uniform distribution over the unit
 &DEVC ID='rn',    QUANTITY='RANDOM NUMBER', XYZ=0,0,0 /
 &DEVC ID='t',     QUANTITY='TIME', XYZ=0,0,0 /
 &DEVC ID='u',     QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s' /
-&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s', STATISTICS='RMS', STATISTICS_START=5. /
+&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s', TEMPORAL_STATISTIC='RMS', STATISTICS_START=5. /
 
 &CTRL ID='exp(t)',  FUNCTION_TYPE='EXP',      INPUT_ID='t' /
 &CTRL ID='-t',      FUNCTION_TYPE='MULTIPLY', INPUT_ID='t','CONSTANT', CONSTANT=-1. /

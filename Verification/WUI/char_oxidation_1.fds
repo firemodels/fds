@@ -80,7 +80,7 @@
 &VENT MB='ZMIN',SURF_ID='OPEN' /
 &VENT MB='ZMAX',SURF_ID='OPEN' /
  
-&DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', SPATIAL_STATISTIC='VOLUME INTEGRAL'  /
 
 &TAIL /
 
