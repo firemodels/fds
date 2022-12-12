@@ -90,7 +90,7 @@ Accumulated Mass Per Unit Area, integrated over 10 m2.
 
 &DEVC QUANTITY='AMPUA', PART_ID='water drops' 
       ID = 'Water mass'
-      STATISTICS = 'SURFACE INTEGRAL'
+      SPATIAL_STATISTIC='SURFACE INTEGRAL'
       XB = -5,+5,-5,+5,0,0 /  
 
 Number of open nozzles

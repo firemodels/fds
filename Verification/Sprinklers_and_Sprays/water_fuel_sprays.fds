@@ -75,6 +75,6 @@ This example tests the combination of water and fuel droplets in the same simula
 &DEVC XYZ=24.41 20.78  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_3' /
 &DEVC XYZ=24.41 21.78  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_4' /
 
-&DEVC XB=22.0,27.0,19.0,24.0,0.0,7.6 QUANTITY = 'TEMPERATURE' STATISTICS='VOLUME MEAN' ID = 'T_ave' /
+&DEVC XB=22.0,27.0,19.0,24.0,0.0,7.6 QUANTITY = 'TEMPERATURE' SPATIAL_STATISTIC='VOLUME MEAN' ID = 'T_ave' /
 
 &TAIL /

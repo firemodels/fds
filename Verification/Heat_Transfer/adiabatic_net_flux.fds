@@ -25,7 +25,7 @@ that gas temperatures remain stable when flux goes to zero.
 
 &DEVC XYZ=1.0,1.0,0.0, QUANTITY='NET HEAT FLUX', ID='HF_Source', IOR= 3 /
 &DEVC XYZ=1.0,1.0,2.0, QUANTITY='NET HEAT FLUX', ID='HF_Target', IOR=-3 /
-&DEVC XB=0.0,2.0,0.0,2.0,0.0,2.0, QUANTITY='TEMPERATURE', ID='temp_gas', STATISTICS='VOLUME MEAN' /
+&DEVC XB=0.0,2.0,0.0,2.0,0.0,2.0, QUANTITY='TEMPERATURE', ID='temp_gas', SPATIAL_STATISTIC='VOLUME MEAN' /
 &DEVC XYZ=1.0,1.0,1.0, QUANTITY='PRESSURE', ID='pres'/
 
 &TAIL /
