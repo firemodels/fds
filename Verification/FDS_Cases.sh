@@ -189,7 +189,6 @@ $QFDS -p 8 -d Fires circular_burner.fds
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
 $QFDS -p 4 -d Flowfields divergence_test_3.fds
-$QFDS -p 4 -d Flowfields divergence_test_3_uscarc_inseparable.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
@@ -350,7 +349,6 @@ $QFDS -d NS_Analytical_Solution vort2d_40.fds
 $QFDS -d NS_Analytical_Solution vort2d_80.fds
 $QFDS -d NS_Analytical_Solution vort2d_160.fds
 $QFDS -d NS_Analytical_Solution vort2d_320.fds
-$QFDS -p 4 -d NS_Analytical_Solution ns2d_4mesh_64_uscarc.fds
 
 $QFDS -d Pressure_Effects isentropic.fds
 $QFDS -d Pressure_Effects isentropic2.fds
@@ -360,7 +358,6 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
-$QFDS -d Pressure_Effects zone_break_slow_uscarc.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
@@ -371,32 +368,17 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc_inseparable.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo_glmat.fds
-$QFDS -p 8 -d Pressure_Solver tunnel_demo_scarc_inseparable.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
-$QFDS -p 2 -d Pressure_Solver uscarc_inseparable_2zone.fds
-$QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
-$QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
-$QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
-$QFDS -p 4 -d Pressure_Solver obst_activation_2_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -708,7 +690,6 @@ $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64_uscarc.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_64.fds

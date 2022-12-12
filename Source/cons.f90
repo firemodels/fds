@@ -491,8 +491,6 @@ INTEGER, PARAMETER :: FFT_FLAG=0                                 !< Integer pres
 INTEGER, PARAMETER :: GLMAT_FLAG=1                               !< Integer pressure solver parameter GLMAT
 INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pressure solver parameter UGLMAT
 INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
-INTEGER, PARAMETER :: SCARC_FLAG=4                               !< Integer pressure solver parameter SCARC
-INTEGER, PARAMETER :: USCARC_FLAG=5                              !< Integer pressure solver parameter USCARC
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
 INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
@@ -504,22 +502,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure sol
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
-CHARACTER(LABEL_LENGTH) :: SCARC_COARSE = 'NONE'                 !< Type of coarse grid solver
-CHARACTER(LABEL_LENGTH) :: SCARC_MESH = 'STRUCTURED'             !< Discretization type
-CHARACTER(LABEL_LENGTH) :: SCARC_METHOD = 'NONE'                 !< Global (U)ScaRC solver
-CHARACTER(LABEL_LENGTH) :: SCARC_MGM_BOUNDARY = 'MEAN'           !< Type of interface boundary condition for local Laplace problems
-CHARACTER(LABEL_LENGTH) :: SCARC_MGM_LAPLACE_SOLVER = 'OPTIMIZED'!< Type of solver for local Laplace problems
-CHARACTER(LABEL_LENGTH) :: SCARC_POISSON = 'SEPARABLE'           !< Type of discretization for Poisson equation
-CHARACTER(LABEL_LENGTH) :: SCARC_PRECISION = 'DOUBLE'            !< Precision type for preconditioner (MKL only)
-CHARACTER(LABEL_LENGTH) :: SCARC_PRECON = 'NONE'                 !< Preconditioner for Krylov solver
-REAL(EB) :: SCARC_CAPPA =  0.0_EB                                !< Convergence rate of selected (U)ScarC solver
-INTEGER  :: SCARC_ITERATIONS = 0                                 !> Number of (U)ScaRC iterations performed
-INTEGER  :: SCARC_KRYLOV_ITERATIONS = 1000                       !> Maximum number of allowed Krylov iterations
-REAL(EB) :: SCARC_KRYLOV_TOLERANCE = 1.E-8_EB                    !< Requested tolerance for convergence
-INTEGER  :: SCARC_MGM_ITERATIONS = 20                            !< Maximum allowed number of Laplace iterations
-REAL(EB) :: SCARC_MGM_TOLERANCE = 1.E-4_EB                       !< Requested tolerance for interface velocity error
-REAL(EB) :: SCARC_RESIDUAL =  0.0_EB                             !< Residual of globally selected (U)ScaRC solver
-LOGICAL  :: SCARC_VERBOSE = .FALSE.                              !< Flag for additional verbose messages
 
 ! Miscellaneous integer constants
 
