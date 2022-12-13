@@ -1535,6 +1535,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
    INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
+   INTEGER :: CONNECTIVITY_INDEX=-1                        !< Index of node connectivity for Smokeview display
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX        !< List of ducts attached to the node
    CHARACTER(LABEL_LENGTH) :: ID                           !< Name of the node
    CHARACTER(LABEL_LENGTH) :: NETWORK_ID                   !< Network node belongs to
@@ -1573,6 +1574,7 @@ TYPE DUCTNODE_TYPE
    LOGICAL :: VENT=.FALSE.                                 !< Node has an attached vent
    LOGICAL :: HMT_FILTER=.FALSE.                           !< Filter is in mass transport ductrun
    LOGICAL :: TRANSPORT_PARTICLES=.FALSE.                  !< Particles will be transported through the vent attached to the node
+   LOGICAL :: SPECIFIED_XYZ=.FALSE.                        !< Node has explicit XYZ.
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: IN_MESH           !< (i) Flag indicating node is present in mesh i
 END TYPE DUCTNODE_TYPE
 
@@ -1607,6 +1609,7 @@ TYPE DUCT_TYPE
    INTEGER :: DUCTRUN=-1                                  !< Ductrun duct belongs to
    INTEGER :: DUCTRUN_INDEX=-1                            !< Index in ductrun duct belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
+   INTEGER :: CONNECTIVITY_INDEX=-1                       !< Index of duct connectivity for Smokeview display   
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
    REAL(EB) :: AREA_OLD                                   !< Prior timestep duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
@@ -1647,8 +1650,8 @@ TYPE DUCT_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD          !< Prior timestep species mass fractions in duct
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C          !< Current species mass fractions in each duct segment
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C_OLD      !< Prior timestep species mass fractions in each duct segment
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WAYPOINTS_XYZ !< Waypoints for a duct (m)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WAYPOINTS_L   !< Length of duct between waypoints (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WAYPOINT_XYZ  !< Waypoints for a duct (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WAYPOINT_L    !< Length of duct between waypoints (m)
    LOGICAL :: DAMPER = .FALSE.                            !< Duct contains a damper
    LOGICAL :: DAMPER_OPEN = .TRUE.                        !< Duct damper is open
    LOGICAL :: FAN_OPERATING=.TRUE.                        !< Duct fan is operating
