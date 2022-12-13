@@ -1431,6 +1431,9 @@ TYPE P_ZONE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DISCHARGE_COEFFICIENT    !< Array of leak disharge coefficients
+   INTEGER :: N_CELLS=0                                            !< Number of cells in the ZONE
+   INTEGER :: MESH_INDEX=0                                         !< Mesh for the CELL_INDICES
+   INTEGER, DIMENSION(3) :: CELL_INDICES=0                         !< Indices of one cell in the pressure zone
    INTEGER :: N_DUCTNODES                                          !< Number of duct nodes in the ZONE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
    CHARACTER(LABEL_LENGTH) :: ID='null'                            !< Identifier
