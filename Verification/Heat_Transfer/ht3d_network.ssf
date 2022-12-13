@@ -1,0 +1,14 @@
+RENDERDIR
+..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+LOADINIFILE
+ht3d_network.ini
+SETVIEWPOINT
+view 1
+LOADFILE
+ht3d_network_1_1.bf
+LOADFILE
+ht3d_network_2_1.bf
+SETTIMEVAL
+ 28800
+RENDERONCE
+ht3d_network_28800

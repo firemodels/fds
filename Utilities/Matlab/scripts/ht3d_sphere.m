@@ -19,16 +19,16 @@ cp    = 1000;       % J/kg/K
 g0    = 2e5;        % W/m3
 alpha = k/(rho*cp); % m2/s
 
-a1   = 0.10025; % m (this should match the last cell face in ht3d_sphere_102.fds)
-a2   = 0.1005;  % m (this should match the last cell face in ht3d_sphere_51.fds)
-a3   = 0.105;   % m (this should match the last cell face in ht3d_sphere_25.fds)
+a1   = 0.1; % m (this should match the last cell face in ht3d_sphere_96.fds)
+a2   = 0.1; % m (this should match the last cell face in ht3d_sphere_48.fds)
+a3   = 0.1; % m (this should match the last cell face in ht3d_sphere_24.fds)
 
 n1 = 41;
 n2 = 21;
 n3 = 11;
-r1 = linspace(0.0,0.099,n1); % this should match line DEVC in ht3d_sphere_102.fds
-r2 = linspace(0.0,0.098,n2); % this should match line DEVC in ht3d_sphere_51.fds
-r3 = linspace(0.0,0.100,n3); % this should match line DEVC in ht3d_sphere_25.fds
+r1 = linspace(0.0,0.1,n1); % this should match line DEVC in ht3d_sphere_96.fds
+r2 = linspace(0.0,0.1,n2); % this should match line DEVC in ht3d_sphere_48.fds
+r3 = linspace(0.0,0.1,n3); % this should match line DEVC in ht3d_sphere_24.fds
 
 t = [10 20 60 120 180]; % seconds
 
@@ -82,17 +82,17 @@ end
 %% gather FDS results
 
 ddir = '../../Verification/Heat_Transfer/';
-fnt = {'ht3d_sphere_51'};
-fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_102'};
-nc_array = [25,51,102];
+fnt = {'ht3d_sphere_48'};
+fileName = {'ht3d_sphere_24','ht3d_sphere_48','ht3d_sphere_96'};
+nc_array = [25,50,100];
 dx_array = 0.25./nc_array;
 
-M = importdata([ddir,fnt{1},'_devc.csv'],',',2);
-T_fds1 = M.data(2,2:end);
-T_fds2 = M.data(3,2:end);
-T_fds3 = M.data(7,2:end);
-T_fds4 = M.data(13,2:end);
-T_fds5 = M.data(end,2:end);
+M = importdata([ddir,fnt{1},'_prof_1.csv'],',',3);
+T_fds1 = M.data(2,64:end);
+T_fds2 = M.data(3,64:end);
+T_fds3 = M.data(7,64:end);
+T_fds4 = M.data(13,64:end);
+T_fds5 = M.data(end,64:end);
 t10 =  plot(r2,T_fds1,'--ob');
 t20 =  plot(r2,T_fds2,'--og');
 t60 =  plot(r2,T_fds3,'--or');
@@ -113,7 +113,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_48_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
@@ -133,7 +133,7 @@ DT  = {DT3(end),DT2(end),DT1(end)} ;
 r   = {r3(end),r2(end),r1(end)};
 
 for i=1:length(fileName)
-    M1 = importdata([ddir,fileName{i},'_devc.csv'],',',2);
+    M1 = importdata([ddir,fileName{i},'_prof_1.csv'],',',3);
     T_fds = M1.data(end,end); % FDS devices data
     T_fds1=T_fds(end);
     Linfe = [Linfe,1/(length(T_fds1))*max(abs(DT{i}-T_fds1))]; % populates Linf norm error vector, element-by-element
@@ -148,8 +148,8 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hh(1)=loglog(dxx,Linfe,'msq-'); hold on
-hh(2)=loglog(dxx,2e2*dxx,'k--');
-hh(3)=loglog(dxx,2e4*dxx.^2,'k-');
+hh(2)=loglog(dxx,1e2*dxx,'k--');
+hh(3)=loglog(dxx,1e4*dxx.^2,'k-');
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
@@ -161,7 +161,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_48_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
@@ -173,33 +173,3 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1')
 
-% % Plot L2 error convergence
-%%% this is bad case for L2 because the errors are almost nothing on the interior and this skews the results
-
-% figure
-% set(gca,'Units',Plot_Units)
-% set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
-% clear hh
-
-% hh(1)=loglog(dxx,L2e,'rsq-'); hold on
-% hh(2)=loglog(dxx,1e2*dxx,'k--');
-% hh(3)=loglog(dxx,1e4*dxx.^2,'k-');
-% set(gca,'FontName',Font_Name)
-% set(gca,'FontSize',Title_Font_Size)
-
-% xlabel('{\it \Deltax} (m)')
-% ylabel('L2 error (°C)')
-% lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
-% set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
-
-% Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
-% addverstr(gca,Git_Filename,'loglog')
-
-% % print to pdf
-% set(gcf,'Visible',Figure_Visibility);
-% set(gcf,'Units',Paper_Units);
-% set(gcf,'PaperUnits',Paper_Units);
-% set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-% set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2')

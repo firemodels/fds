@@ -2828,7 +2828,6 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 
 This chapter describes how to specify the thermal properties of solid objects.
 
-
 \section{Basics}
 \label{info:SURF_MATL_Basics}
 
@@ -3166,64 +3165,94 @@ If all the material components react and leave no solid residue, the thickness o
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
 
-\subsection{Solid Heat Transfer 3D (Beta)}
+\subsection{3-D Heat Conduction}
 \label{info:ht3d}
+\label{ht3d_demo}
 
-The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate.
 
-\subsubsection*{Invoking the 3D Heat Transfer Model (HT3D)}
-
-The method is invoked by adding {\ct {HT3D=T}} to an {\ct {OBST}} line.  The material properties for the solid are obtained either from a {\ct {MATL\_ID}} on the {\ct {OBST}} line (simple heat transfer) or from a {\ct SURF\_ID} (typically used in conjunction with pyrolysis).
-
-The thermal properties of the material are uniform within a cell.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick.  Note the difference here between the 1D and 3D models---at present, each layer of a material must be explicitly resolved by the 3D model using the Eulerian grid.  That is, at present, lateral heat transfer is not possible with ``thin obstructions'' with zero thickness.
-
-The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces {\ct SURF\_IDS} or {\ct SURF\_ID6} must be used.
-
-Unlike the default behavior of the 1D conduction solver, the 3D solver is updated every time step by default (by default the 1D solver is updated every other time step).  To change this behavior, set the desired value of {\ct WALL\_INCREMENT\_HT3D} on the {\ct TIME} line.  For example, a value of 2 will update the solver every other time step.
-
-\subsubsection*{Simple Heat Transfer}
-\label{sec:ht_only}
-
-The default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet condition for the surface temperature set to ambient.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} face should have {\ct {HT3D=T}} and, generally, no other specified thermal boundary condition.  For example,
+FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
-&MATL ID='steel', .../
-&SURF ID='s1', HT3D=T/
-&OBST XB=..., HT3D=T, MATL_ID='steel', SURF_ID='s1'/
+&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB' /
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-If the {\ct SURF} has an associated {\ct MATL\_ID}, then do not specify the material again on {\ct OBST}.
+The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. It is important to specify this parameter because by default, FDS uses a non-uniform grid for 1-D heat solid phase heat transfer that is not appropriate for 3-D applications.
 
-\subsubsection*{Specifying an Initial Temperature}
-\label{sec:init_tmp}
+The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
 
-If an initial temperature other than ambient is desired inside the solid, there are two options:  First, you may use an {\ct INIT} line per the following example:
+\subsubsection{Limitations}
+
+\begin{enumerate}
+\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
+\item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
+\item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
+
+\end{enumerate}
+
+\subsubsection{Example: Steel Assembly}
+
+Figure~\ref{fig:ht3d_demo} displays a simple test case in which a steel assembly is heated by a small hot object. The plot at right asserts that the net heat flux integrated over the surface is equal to the heat absorbed by the solid:
+\be
+   \int_0^t \int_{\partial \Omega} \dot{q}''_{\rm net} \, \d S \, \d t'  = \int_\Omega \rho_{\rm s} \, c_{\rm s} \, \Delta T_{\rm s} \, \d V  \label{ebalance}
+\ee
+\begin{figure}[!ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_demo_100} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_demo}
+\end{tabular*}
+\caption[The \textct{ht3d\_demo} test case]{(Left) Surface temperature of a steel assembly exposed to a small hot object. (Right) Plot demonstrating that the increasing enthalpy of the steel is consistent with the integrated net heat flux over the surface.}
+\label{fig:ht3d_demo}
+\end{figure}
+The integral on the left hand side of Eq.~(\ref{ebalance}) is evaluated in FDS using the device line:
 \begin{lstlisting}
-&INIT XB=-.1,.1,-.1,.1,-.1,.1, TEMPERATURE=100./
+&DEVC ID='...', XB=..., QUANTITY='NET HEAT FLUX', SURF_ID='STEEL SLAB'
+      SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'  /
 \end{lstlisting}
-Or, you may apply a {\ct SURF} to the {\ct OBST} with {\ct TMP\_INNER} specified.  Note that {\ct TMP\_INNER} on {\ct SURF} overrides the temperature from the {\ct INIT} line.
-
-\subsubsection*{Internal Heat Sources}
-\label{sec:heat_sources}
-
-Volumetric heat sources may be applied inside the solid.  Below is an example using an {\ct INIT} line, where {\ct HRRPUV} is in units of \si{kW/m^3}:
+The volume enclosed by {\ct XB} encompasses the entire assembly. The integral on the right is evaluated by:
 \begin{lstlisting}
-&INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
+&DEVC ID='...', XB=..., QUANTITY='WALL ENTHALPY', IOR=3, SURF_ID='STEEL SLAB'
+      SPATIAL_STATISTIC='SURFACE INTEGRAL', RELATIVE=T, CONVERSION_FACTOR=10000,  /
+\end{lstlisting}
+The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the {\ct IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the {\ct CONVERSION\_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter {\ct RELATIVE=T} means that only the change in enthalpy is desired.
+.
+
+\subsubsection{Example: Uncoated Structural Steel}
+
+Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
+\begin{lstlisting}
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /  Web
+&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB' /  Upper Flange
+&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB' /  Lower Flange
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
 \end{lstlisting}
 
-You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} line as shown in the example below.  In this case, the heat source is applied to each cell of the {\ct OBST}.
+\begin{figure}[!ht]
+\setlength{\unitlength}{0.75mm}
+\begin{picture}(30,70)(40,15)
+\put(51,21){\framebox(2,58){ }}
+\put(41,76){\framebox(22,3){ }}
+\put(41,21){\framebox(22,3){ }}
+\end{picture}
+\includegraphics[height=2.0in]{FIGURES/ht3d_beam_heating_1_wire_2}
+\includegraphics[height=2.0in]{FIGURES/ht3d_beam_heating_1_wire_1}
+\caption[Schematic diagram of an I-beam]{(Left) Cross section of an I-beam. (Center) 3-D representation of the beam. (Right) FDS approximated thin obstructions.}
+\label{fig:ht3d_beaming_heating}
+\end{figure}
+
+
+\subsubsection{Example: Coated Structural Steel}
+
+An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
 \begin{lstlisting}
-&MATL ID='orange', .../
-&SURF ID='SPHERE', HT3D=T/
-&OBST XB=..., HT3D=T, MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
-\end{lstlisting}
-
-Both {\ct HRRPUV} and {\ct INTERNAL\_HEAT\_SOURCE} may use a time ramp via {\ct RAMP\_Q} on their respective {\ct INIT} or {\ct OBST} lines.
-
-\subsubsection*{Internal Radiation}
-\label{sec:radiation_parameters}
-
-The parameters affecting in-depth radiation absorption are the material's refractive index and absorption coefficient.  They are specified on the MATL line:
-\begin{lstlisting}
-&MATL ID='...', REFRACTIVE_INDEX=1.33, ABSORPTION_COEFFICIENT=1000, .../
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /
+&OBST XB=0.12,1.88,0.50,0.54,0.21,0.79, SURF_ID='WEB INSULATION' /
+&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK',
+      CELL_SIZE=0.1, HEAT_TRANSFER_COEFFICIENT=20 /
+&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE',
+      THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
 \end{lstlisting}
 
 
