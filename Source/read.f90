@@ -3379,8 +3379,8 @@ RAMP_K                      = 'null'
 RAMP_MU                     = 'null'
 
 N_BINS                      = -1
-MIN_DIAMETER                = -1._EB !um
-MAX_DIAMETER                = -1._EB !um
+MIN_DIAMETER                = -1._EB !m
+MAX_DIAMETER                = -1._EB !m
 
 C                           = -1._EB
 H                           = -1._EB
