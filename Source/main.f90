@@ -3630,7 +3630,7 @@ IF (MY_RANK==0) THEN
             IF (DUCT(N)%DAMPER .OR. DUCT(N)%FAN_INDEX > 0 .OR. DUCT(N)%AIRCOIL_INDEX > 0) THEN
                IF (DUCT(N)%DEVC_INDEX > 0) THEN
                   IF (WRITE_ALL .OR. DEVICE(DUCT(N)%DEVC_INDEX)%CURRENT_STATE .NEQV. DEVICE(DUCT(N)%DEVC_INDEX)%PRIOR_STATE) THEN
-                     WRITE(LU_SMV,'(A)') 'DUCT ACT '//TRIM(DUCT(N)%ID)
+                     WRITE(LU_SMV,'(A)') 'DUCT_ACT '//TRIM(DUCT(N)%ID)
                      IF (DEVICE(DUCT(N)%DEVC_INDEX)%CURRENT_STATE) THEN
                         WRITE(LU_SMV,'(I6,F10.2,I6)') N,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR,1
                      ELSE
@@ -3639,7 +3639,7 @@ IF (MY_RANK==0) THEN
                   ENDIF
                ELSEIF (DUCT(N)%CTRL_INDEX > 0) THEN
                   IF (WRITE_ALL .OR. CONTROL(DUCT(N)%CTRL_INDEX)%CURRENT_STATE .NEQV. CONTROL(DUCT(N)%CTRL_INDEX)%PRIOR_STATE) THEN
-                     WRITE(LU_SMV,'(A)') 'DUCT ACT '//TRIM(DUCT(N)%ID)
+                     WRITE(LU_SMV,'(A)') 'DUCT_ACT '//TRIM(DUCT(N)%ID)
                      IF (CONTROL(DUCT(N)%CTRL_INDEX)%CURRENT_STATE) THEN
                         WRITE(LU_SMV,'(I6,F10.2,I6)') N,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR,1
                      ELSE
@@ -3648,7 +3648,7 @@ IF (MY_RANK==0) THEN
                   ENDIF
                ELSE
                   IF (WRITE_ALL) THEN
-                     WRITE(LU_SMV,'(A)') 'DUCT ACT '//TRIM(DUCT(N)%ID)
+                     WRITE(LU_SMV,'(A)') 'DUCT_ACT '//TRIM(DUCT(N)%ID)
                      WRITE(LU_SMV,'(I6,F10.2,I6)') N,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR,1
                   ENDIF
                ENDIF
