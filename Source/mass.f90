@@ -582,8 +582,7 @@ CONTAINS
 
 SUBROUTINE CHECK_MASS_DENSITY
 
-REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX,&
-            RHO_ZZ_TMP(1:N_TRACKED_SPECIES)
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX,SUM_RHO_ZZ
 INTEGER  :: IC,NN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO,DELTA_RHO_ZZ,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ
@@ -663,87 +662,80 @@ RHO_ZZ_MIN = 0._EB
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-DELTA_RHO_ZZ => WORK5
-DELTA_RHO_ZZ = 0._EB
+   DELTA_RHO_ZZ => WORK5
+   DELTA_RHO_ZZ = 0._EB
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      VC1( 0)  = DY(J)  *DZ(K)
-      VC1(-1)  = VC1( 0)
-      VC1( 1)  = VC1( 0)
-      VC1(-2)  = DY(J-1)*DZ(K)
-      VC1( 2)  = DY(J+1)*DZ(K)
-      VC1(-3)  = DY(J)  *DZ(K-1)
-      VC1( 3)  = DY(J)  *DZ(K+1)
-      DO I=1,IBAR
-
-         RHO_ZZ_MAX = RHOP(I,J,K)
-
-         IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
-         IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE
-         IF (RHO_ZZ(I,J,K,N)<RHO_ZZ_MIN) THEN
-            RHO_ZZ_CUT = RHO_ZZ_MIN
-            SIGN_FACTOR = 1._EB
-         ELSE
-            RHO_ZZ_CUT = RHO_ZZ_MAX
-            SIGN_FACTOR = -1._EB
-         ENDIF
-         MASS_N = 0._EB
-         VC( 0)  = DX(I)  * VC1( 0)
-         VC(-1)  = DX(I-1)* VC1(-1)
-         VC( 1)  = DX(I+1)* VC1( 1)
-         VC(-2)  = DX(I)  * VC1(-2)
-         VC( 2)  = DX(I)  * VC1( 2)
-         VC(-3)  = DX(I)  * VC1(-3)
-         VC( 3)  = DX(I)  * VC1( 3)
-
-         MASS_C = ABS(RHO_ZZ_CUT-RHO_ZZ(I,J,K,N))*VC(0)
-         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I-1,J,K,N)))-RHO_ZZ_CUT)*VC(-1)
-         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I+1,J,K,N)))-RHO_ZZ_CUT)*VC( 1)
-         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J-1,K,N)))-RHO_ZZ_CUT)*VC(-2)
-         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J+1,K,N)))-RHO_ZZ_CUT)*VC( 2)
-         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K-1,N)))-RHO_ZZ_CUT)*VC(-3)
-         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K+1,N)))-RHO_ZZ_CUT)*VC( 3)
-         SUM_MASS_N = SUM(MASS_N)
-         IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
-         CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
-         DELTA_RHO_ZZ(I,J,K)   = DELTA_RHO_ZZ(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
-         DELTA_RHO_ZZ(I-1,J,K) = DELTA_RHO_ZZ(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
-         DELTA_RHO_ZZ(I+1,J,K) = DELTA_RHO_ZZ(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
-         DELTA_RHO_ZZ(I,J-1,K) = DELTA_RHO_ZZ(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
-         DELTA_RHO_ZZ(I,J+1,K) = DELTA_RHO_ZZ(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
-         DELTA_RHO_ZZ(I,J,K-1) = DELTA_RHO_ZZ(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
-         DELTA_RHO_ZZ(I,J,K+1) = DELTA_RHO_ZZ(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         VC1( 0)  = DY(J)  *DZ(K)
+         VC1(-1)  = VC1( 0)
+         VC1( 1)  = VC1( 0)
+         VC1(-2)  = DY(J-1)*DZ(K)
+         VC1( 2)  = DY(J+1)*DZ(K)
+         VC1(-3)  = DY(J)  *DZ(K-1)
+         VC1( 3)  = DY(J)  *DZ(K+1)
+         DO I=1,IBAR
+   
+            RHO_ZZ_MAX = RHOP(I,J,K)
+   
+            IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
+            IC = CELL_INDEX(I,J,K)
+            IF (SOLID(IC)) CYCLE
+            IF (RHO_ZZ(I,J,K,N)<RHO_ZZ_MIN) THEN
+               RHO_ZZ_CUT = RHO_ZZ_MIN
+               SIGN_FACTOR = 1._EB
+            ELSE
+               RHO_ZZ_CUT = RHO_ZZ_MAX
+               SIGN_FACTOR = -1._EB
+            ENDIF
+            MASS_N = 0._EB
+            VC( 0)  = DX(I)  * VC1( 0)
+            VC(-1)  = DX(I-1)* VC1(-1)
+            VC( 1)  = DX(I+1)* VC1( 1)
+            VC(-2)  = DX(I)  * VC1(-2)
+            VC( 2)  = DX(I)  * VC1( 2)
+            VC(-3)  = DX(I)  * VC1(-3)
+            VC( 3)  = DX(I)  * VC1( 3)
+   
+            MASS_C = ABS(RHO_ZZ_CUT-RHO_ZZ(I,J,K,N))*VC(0)
+            IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I-1,J,K,N)))-RHO_ZZ_CUT)*VC(-1)
+            IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I+1,J,K,N)))-RHO_ZZ_CUT)*VC( 1)
+            IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J-1,K,N)))-RHO_ZZ_CUT)*VC(-2)
+            IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J+1,K,N)))-RHO_ZZ_CUT)*VC( 2)
+            IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K-1,N)))-RHO_ZZ_CUT)*VC(-3)
+            IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K+1,N)))-RHO_ZZ_CUT)*VC( 3)
+            SUM_MASS_N = SUM(MASS_N)
+            IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
+            CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
+            DELTA_RHO_ZZ(I,J,K)   = DELTA_RHO_ZZ(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
+            DELTA_RHO_ZZ(I-1,J,K) = DELTA_RHO_ZZ(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
+            DELTA_RHO_ZZ(I+1,J,K) = DELTA_RHO_ZZ(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
+            DELTA_RHO_ZZ(I,J-1,K) = DELTA_RHO_ZZ(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
+            DELTA_RHO_ZZ(I,J+1,K) = DELTA_RHO_ZZ(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
+            DELTA_RHO_ZZ(I,J,K-1) = DELTA_RHO_ZZ(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
+            DELTA_RHO_ZZ(I,J,K+1) = DELTA_RHO_ZZ(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         RHO_ZZ(I,J,K,N) = MIN(RHOP(I,J,K),MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K,N)+DELTA_RHO_ZZ(I,J,K)))
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHO_ZZ(I,J,K,N) = MIN(RHOP(I,J,K),MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K,N)+DELTA_RHO_ZZ(I,J,K)))
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
 ENDDO SPECIES_LOOP
 
-! Absorb error in most abundant species or renormalize
+! Renormalize RHO_ZZ so that lumped species, ZZ(:,:,:,1:N_TRACKED_SPECIES), sum to 1
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RHO_ZZ_TMP = MAX(0._EB,RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
-         N=MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1)
-         RHO_ZZ(I,J,K,N) = RHOP(I,J,K) - ( SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES)) - RHO_ZZ(I,J,K,N) )
-         NN=MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1) ! recheck most abundant species
-         IF (NN/=N) THEN ! includes the case RHO_ZZ(I,J,K,N)<0, assuming initial ALL(RHO_ZZ_TMP>=0.)
-            ! if most abundant species changes, then renormalize the mass fractions instead
-            RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHOP(I,J,K) * &
-              MAX(0._EB, MIN(1._EB, RHO_ZZ_TMP(1:N_TRACKED_SPECIES)/SUM(RHO_ZZ_TMP(1:N_TRACKED_SPECIES)) ))
-         ENDIF
+         SUM_RHO_ZZ = SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
+         RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHOP(I,J,K) * RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES)/SUM_RHO_ZZ
       ENDDO
    ENDDO
 ENDDO
