@@ -14,7 +14,6 @@ INTEGER, PARAMETER :: MAX_MATERIALS_TOTAL=400        !< Dimension of material wo
 INTEGER, PARAMETER :: MAX_REACTIONS=10               !< Maximum number of chemical reactions
 INTEGER, PARAMETER :: MAX_STEPS=20                   !< Maximum steps in processing of material residues
 INTEGER, PARAMETER :: MAX_NUMBER_SPECTRAL_BANDS=9    !< Maximum number of radiation spectral bands
-INTEGER, PARAMETER :: MAX_NUMBER_FSK_POINTS=32
 INTEGER, PARAMETER :: MAX_TERRAIN_IMAGES=10          !< Maximum number of images to paste onto complex terrain
 INTEGER, PARAMETER :: MAX_INPUT_ID=40                !< Maximum number of CTRL INPUT_IDs
 INTEGER, PARAMETER :: N_ZONE_POINTS=100              !< Maximum number of declared ZONE points (deprecated)

@@ -2196,42 +2196,42 @@ CFACE_LOOP_1 : DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTWALL_CFACE_CELLS+N_INTERNAL_
 
          SELECT CASE(IOR)
             CASE( 1)
-               IF (UU(0,J,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (UU(0,J,K)<0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(1,J,K)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
                ENDIF
                BXS(J,K) = CFA%PRES_BXN
             CASE(-1)
-               IF (UU(IBAR,J,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (UU(IBAR,J,K)>0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(IBAR,J,K)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
                ENDIF
                BXF(J,K) = CFA%PRES_BXN
             CASE( 2)
-               IF (VV(I,0,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (VV(I,0,K)<0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(I,1,K)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
                ENDIF
                BYS(I,K) = CFA%PRES_BXN
             CASE(-2)
-               IF (VV(I,JBAR,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (VV(I,JBAR,K)>0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(I,JBAR,K)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
                ENDIF
                BYF(I,K) = CFA%PRES_BXN
             CASE( 3)
-               IF (WW(I,J,0)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (WW(I,J,0)<0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(I,J,1)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
                ENDIF
                BZS(I,J) = CFA%PRES_BXN
             CASE(-3)
-               IF (WW(I,J,KBAR)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (WW(I,J,KBAR)>0._EB) THEN
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + KRES(I,J,KBAR)
                ELSE
                   CFA%PRES_BXN = P_EXTERNAL/CFA_ONE_D%RHO_F + H0
