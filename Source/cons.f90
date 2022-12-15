@@ -438,7 +438,6 @@ INTEGER :: NUMBER_RADIATION_ANGLES=0                       !< Number of solid an
 INTEGER :: ANGLE_INCREMENT=0                               !< Indicates how many radiation angles are updated in one time step
 INTEGER :: RADIATION_ITERATIONS=1                          !< Number of times to repeat radiation solve in a single time step
 INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiation solves before time stepping starts
-INTEGER :: NUMBER_FSK_POINTS=1
 
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
 REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$
@@ -474,7 +473,6 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
 LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
 LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.FALSE.                   !< Flag for stopping pressure iterations if solution seems stuck
-LOGICAL :: INSEPARABLE_POISSON=.FALSE.                           !< Flag for solving the inseparable Poisson equation
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
 REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration

@@ -221,37 +221,37 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          SELECT CASE(IOR)
             CASE( 1)
-               IF (UU(0,J,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (UU(0,J,K)<0._EB) THEN
                   BXS(J,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(1,J,K)
                ELSE
                   BXS(J,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-1)
-               IF (UU(IBAR,J,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (UU(IBAR,J,K)>0._EB) THEN
                   BXF(J,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(IBAR,J,K)
                ELSE
                   BXF(J,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE( 2)
-               IF (VV(I,0,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (VV(I,0,K)<0._EB) THEN
                   BYS(I,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,1,K)
                ELSE
                   BYS(I,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-2)
-               IF (VV(I,JBAR,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (VV(I,JBAR,K)>0._EB) THEN
                   BYF(I,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,JBAR,K)
                ELSE
                   BYF(I,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE( 3)
-               IF (WW(I,J,0)<0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (WW(I,J,0)<0._EB) THEN
                   BZS(I,J) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,J,1)
                ELSE
                   BZS(I,J) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-3)
-               IF (WW(I,J,KBAR)>0._EB .OR. INSEPARABLE_POISSON) THEN
+               IF (WW(I,J,KBAR)>0._EB) THEN
                   BZF(I,J) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,J,KBAR)
                ELSE
                   BZF(I,J) = P_EXTERNAL/ONE_D%RHO_F + H0
@@ -739,7 +739,7 @@ ENDIF
 ! Mandatory check of how well the computed pressure satisfies the inseparable Poisson equation:
 ! LHSS = del dot ((1/rho) del p + del K) = -del dot F - dD/dt = RHSS
 
-IF (ITERATE_BAROCLINIC_TERM .OR. INSEPARABLE_POISSON) THEN
+IF (ITERATE_BAROCLINIC_TERM) THEN
 
    P => WORK7
    RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR)
@@ -5263,7 +5263,7 @@ ENDIF
 ! Mandatory check of how well the computed pressure satisfies the inseparable Poisson equation:
 ! LHSS = del dot (1/rho) del p + del K = -del dot F - dD/dt = RHSS
 
-IF (ITERATE_BAROCLINIC_TERM .OR. INSEPARABLE_POISSON) THEN
+IF (ITERATE_BAROCLINIC_TERM) THEN
    P => WORK7
    P = RHOP*(HP-KRES)
    RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR); RESIDUAL = 0._EB

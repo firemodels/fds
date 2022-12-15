@@ -22,7 +22,7 @@
       H = 4 /
       
 
-&MISC TMPA=25., SURF_DEFAULT='GYPSUM_BOARD',
+&MISC TMPA=25.,
       STRATIFICATION=.FALSE.,
       CFL_VELOCITY_NORM=1 /
       
@@ -48,7 +48,7 @@
       SPECIFIC_HEAT = 0.840
       DENSITY       = 1440. /
 
-&SURF ID            = 'GYPSUM_BOARD'
+&SURF ID            = 'GYPSUM_BOARD', DEFAULT=T
       MATL_ID       = 'GYPSUM_BOARD'
       COLOR         = 'GRAY'
       THICKNESS     = .0127 /

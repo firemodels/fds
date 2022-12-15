@@ -3168,6 +3168,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \subsection{3-D Heat Conduction}
 \label{info:ht3d}
 \label{ht3d_demo}
+\label{info:mesh_separation}
 
 The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate.
 
@@ -3187,7 +3188,7 @@ The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third sol
 \item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
 \item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
-
+\item If your 3-D obstruction extends beyond meshes that abut, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -3244,6 +3245,7 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 
 
 \subsubsection{Example: Coated Structural Steel}
+\label{info:normal_direction_only}
 
 An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
 \begin{lstlisting}
@@ -3309,10 +3311,10 @@ If the second surface was specified as:
 then the fuel mass flux would be the same as before, but now it would be diluted with three times the mass flux of {\ct NITROGEN}.
 
 \begin{figure}[ht]
-	\centering
-	\includegraphics[width=3.2in]{SCRIPT_FIGURES/multiple_reac_hrrpua}
-	\caption[Demonstration of specifying HRRPUA with multiple reactions.]{Demonstration of specifying HRRPUA with multiple reactions.}
-	\label{fig:mulitple_reac_hrrpua}
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/multiple_reac_hrrpua}
+\caption[Demonstration of specifying HRRPUA with multiple reactions.]{Demonstration of specifying HRRPUA with multiple reactions.}
+\label{fig:mulitple_reac_hrrpua}
 \end{figure}
 
 \subsection{Special Topic: A Radially-Spreading Fire}
@@ -5069,7 +5071,7 @@ If you want FDS to compute the molecular weight of the gas species, you can inpu
 Fuels compatible with the simple chemistry approach to defining reactions can use the inputs {\ct C, H, O,} and {\ct N}. Which specify the number of atoms of those elements in the fuel molecule. If these inputs are used, then {\ct FORMULA} should not be specified and vice versa. The following would be equivalent to the prior examples:
 
 \begin{lstlisting}
-	&SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
+&SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
 
 
@@ -5395,13 +5397,13 @@ For simplicity in setting up the complex form of the input file, the post-flame 
 A more complex demonstration of the two-step simple chemistry is given by the \linebreak[4] {\ct multiple\_reac\_n\_simple.fds} case also located in the {\ct Species} folder. This case contains three reactions, two of which have two-step simpple chemistry (with different values for {\ct FUEL\_C\_TO\_CO\_FRACTION} anf {\ct FUEL\_C\_TO\_CO\_FRACTION}), and the third which is simple chemistry only (with a {\ct CO\_YIELD} of 0.3). In the case, three boxes are each initialized with a small amount of the fuel from one reaction and insufficient oxygen to complete the first (or only) step. The results in Fig.~\ref{fig:multiple_reac_n_simple} shows that FDS correctly performs each reaction as one or two steps with the appropriate yields.
 
 \begin{figure}[!ht]
-	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_CH4} &
-		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C3H8} \\
-		\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C2H6}
-	\end{tabular*}
-	\caption[Results of the {\ct multiple\_reac\_n\_simple} test case.]{Results of the {\ct multiple\_reac\_n\_simple} test case; demonstration that FDS correctly assigns one or two step reactions with the correct yields. From top left cases are methane with two-step chemistry and {\ct FUEL\_X\_TO\_Y\_FRACTION}s of 0.2, propane with single-step chemistry and a {\ct CO\_YIELD} of 0.3, and ethane with two-step chemistry and fractions of 0.8.}
-	\label{fig:multiple_reac_n_simple}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_CH4} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C3H8} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/multiple_reac_n_simple_C2H6}
+\end{tabular*}
+\caption[Results of the {\ct multiple\_reac\_n\_simple} test case.]{Results of the {\ct multiple\_reac\_n\_simple} test case; demonstration that FDS correctly assigns one or two step reactions with the correct yields. From top left cases are methane with two-step chemistry and {\ct FUEL\_X\_TO\_Y\_FRACTION}s of 0.2, propane with single-step chemistry and a {\ct CO\_YIELD} of 0.3, and ethane with two-step chemistry and fractions of 0.8.}
+\label{fig:multiple_reac_n_simple}
 \end{figure}
 
 
@@ -11009,22 +11011,10 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignore namelist/keyword combinations
 % ignorenamelistkw: /BNDF/DEBUG
 % ignorenamelistkw: /DEVC/STATISTICS
-% ignorenamelistkw: /DUMP/DT_DEVC_LINE, /DUMP/MMS_TIMER, /DUMP/T_DEVC_LINE_END, /DUMP/TURB_INIT_CLOCK
-% ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
-% ignorenamelistkw: /MISC/RADIATION, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
-% ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
-% ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG
-% ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING
-% ignorenamelistkw: /PRES/SCARC_MULTIGRID_ITERATIONS, /PRES/SCARC_MULTIGRID_ACCURACY
-% ignorenamelistkw: /PRES/SCARC_KRYLOV_ITERATIONS, /PRES/SCARC_KRYLOV_ACCURACY
-% ignorenamelistkw: /PRES/SCARC_SMOOTH_ITERATIONS, /PRES/SCARC_SMOOTH_ACCURACY,  /PRES/SCARC_SMOOTH_OMEGA
-% ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
-% ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS, /PRES/SCARC_COARSE_ACCURACY
-% ignorenamelistkw: /PROP/DROPLET_VELOCITY
-% ignorenamelistkw: /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
-% ignorenamelistkw: /SURF/EXTERNAL_FLUX_RAMP, /SURF/TAU_EXTERNAL_FLUX, /SURF/VOLUME_FLUX, /SURF/AERODYNAMIC_ROUGHNESS
-% ignorenamelistkw: /TIME/TWFIN
-% ignorenamelistkw: /WIND/OBUKHOV_LENGTH, /WIND/REFERENCE_HEIGHT, /WIND/REFERENCE_TEMPERATURE
+% ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK
+% ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
+% ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
+% ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI
@@ -11356,7 +11346,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                        \\ \hline
 \end{longtable}
 
-% Undocumented: GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM)
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
@@ -11761,82 +11750,83 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
-{\ct AEROSOL\_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & {\ct F}     \\ \hline
-{\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct F}     \\ \hline
-{\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct T}      \\ \hline
+{\ct AEROSOL\_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & {\ct F}           \\ \hline
+{\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct F}           \\ \hline
+{\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct T}           \\ \hline
 {\ct ALIGNMENT\_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
-{\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct T}      \\ \hline
-{\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct F}     \\ \hline
+{\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct T}           \\ \hline
+{\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct F}           \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}       & Real         & Section~\ref{solid_phase_verification}  & $^\circ$C  &                   \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP} & Character    & Section~\ref{solid_phase_verification}  &            &                   \\ \hline
-{\ct BNDF\_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & {\ct T}      \\ \hline
+{\ct BNDF\_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & {\ct T}           \\ \hline
 {\ct C\_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 {\ct CFL\_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
 {\ct CFL\_MIN}                                      & Real         & Section~\ref{info:CFL}                  &            & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                           & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
-{\ct CHECK\_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & {\ct F}     \\ \hline
-{\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct T}      \\ \hline
+{\ct CHECK\_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & {\ct F}           \\ \hline
+{\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct T}           \\ \hline
 {\ct CNF\_CUTOFF}                                   & Real         & Section~\ref{info:particle_size}        &            & 0.005             \\ \hline
-{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO} & Logical      & Section~\ref{info:Enthalpy}             &            & {\ct F}     \\ \hline
+{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO} & Logical      & Section~\ref{info:Enthalpy}             &            & {\ct F}           \\ \hline
 {\ct C\_SMAGORINSKY}                                & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
-{\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
+{\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
-{\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}     \\ \hline
+{\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
 {\ct GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
-{\ct GRAVITATIONAL\_DEPOSITION}                     & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
-{\ct GRAVITATIONAL\_SETTLING}                       & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
+{\ct GRAVITATIONAL\_DEPOSITION}                     & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct GRAVITATIONAL\_SETTLING}                       & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
 {\ct GVEC(3)}                                       & Real Array   & Section~\ref{info:GVEC}                 & m/s$^2$    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
 {\ct HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
-{\ct HVAC\_LOCAL\_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  {\ct T}      \\ \hline
-{\ct HVAC\_MASS\_TRANSPORT\_CELL\_L}                & Logical      & Section ~\ref{info:hvacmasstransport}   &            & {\ct F}     \\ \hline
+{\ct HVAC\_LOCAL\_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  {\ct T}          \\ \hline
+{\ct HVAC\_MASS\_TRANSPORT\_CELL\_L}                & Logical      & Section ~\ref{info:hvacmasstransport}   &            & {\ct F}           \\ \hline
 {\ct HVAC\_PRES\_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 0.5               \\ \hline
 {\ct HVAC\_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & {\ct F}           \\ \hline
-{\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct T}      \\ \hline
-{\ct I\_MAX\_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000               \\ \hline
-{\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct T}      \\ \hline
+{\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct T}           \\ \hline
+{\ct I\_MAX\_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
+{\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct T}           \\ \hline
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
-{\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
+{\ct NEIGHBOR\_SEPARATION\_DISTANCE}                & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
+{\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}           \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
 {\ct NO\_PRESSURE\_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & {\ct F}           \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
-{\ct NUCLEATION\_SITES}                             & Real         & Section~\ref{info:condensation}         & sites/m$^3$ & 1E7              \\ \hline
+{\ct NUCLEATION\_SITES}                             & Real         & Section~\ref{info:condensation}         & \#/m$^3$   & $1\times 10^7$    \\ \hline
 {\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
-{\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct T}      \\ \hline
-{\ct PARTICLE\_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & {\ct F}     \\ \hline
+{\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct T}           \\ \hline
+{\ct PARTICLE\_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & {\ct F}           \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
 {\ct PARTICLE\_CFL\_MIN}                            & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
-{\ct POROUS\_FLOOR}                                 & Logical      & Section~\ref{info:particle_removal}     &            & {\ct T}      \\ \hline
+{\ct POROUS\_FLOOR}                                 & Logical      & Section~\ref{info:particle_removal}     &            & {\ct T}           \\ \hline
 {\ct PR}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 {\ct P\_INF}                                        & Real         & Section~\ref{info:MISC_Basics}          & Pa         & 101325            \\ \hline
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GZ}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
-{\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}     \\ \hline
+{\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}           \\ \hline
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
 {\ct SC}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
-{\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}      \\ \hline
+{\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}           \\ \hline
 {\ct SIMULATION\_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & {\ct 'VLES'}      \\ \hline
 {\ct SMOKE\_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
-{\ct SOLID\_PHASE\_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & {\ct F}     \\ \hline
+{\ct SOLID\_PHASE\_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & {\ct F}           \\ \hline
 {\ct SOOT\_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
-{\ct SOOT\_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & {\ct F}     \\ \hline
+{\ct SOOT\_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & {\ct F}           \\ \hline
 {\ct TAU\_DEFAULT}                                  & Real         & Section~\ref{info:RAMP_Time}            & s          & 1.                \\ \hline
 {\ct TERRAIN\_IMAGE}                                & Character    & Section~\ref{info:complex_terrain}      &            &                   \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                            & Real Triplet & Section~\ref{info:texture_map}          & m          & (0.,0.,0.)        \\ \hline
-{\ct THERMOPHORETIC\_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
-{\ct THERMOPHORETIC\_SETTLING}                      & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
-{\ct THICKEN\_OBSTRUCTIONS}                         & Logical      & Section~\ref{info:OBST_Basics}          &            & {\ct F}     \\ \hline
+{\ct THERMOPHORETIC\_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct THERMOPHORETIC\_SETTLING}                      & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct THICKEN\_OBSTRUCTIONS}                         & Logical      & Section~\ref{info:OBST_Basics}          &            & {\ct F}           \\ \hline
 {\ct TMPA}                                          & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & {\ct 'DEARDORFF'} \\ \hline
-{\ct TURBULENT\_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
+{\ct TURBULENT\_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
 {\ct VERBOSE}                                       & Logical      & Section~\ref{info:multimesh}            &            &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 {\ct VN\_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
@@ -11845,11 +11835,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
-% DO_IMPLICIT_CCREGION (MV),
-% EVAP_MODEL,  MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
-% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TURB_INIT_CLOCK (RJM),
-% UVW_FILE (RJM)
 
 \vspace{\baselineskip}
 
@@ -12543,10 +12528,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MLRPUA }                                             & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
-{\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                        \\ \hline
-{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                        \\ \hline
+{\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
-{\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
+{\ct NORMAL\_DIRECTION\_ONLY}                             & Logical         & Section~\ref{info:normal_direction_only}  &                     & {\ct F}                 \\ \hline
+{\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}                 \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 {\ct NUSSELT\_C0}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct NUSSELT\_C1}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline

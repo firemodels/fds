@@ -645,7 +645,6 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
    REAL(EB) :: REFRACTIVE_INDEX
-   REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
    REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
@@ -660,7 +659,6 @@ TYPE MATERIAL_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
-   INTEGER, DIMENSION(3) :: RGB                         !< Color indices for material
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RATE_REF      !< Reference rate used for calculating kinetic constants (1/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_REACTION_RATE !< Maximum reaction rate (kg/m3/s)
@@ -680,13 +678,11 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R         !< Heat of Reaction (J/kg)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIFFUSIVITY_GAS
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S           !< Material conductivity as function of temperaure (W/m/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S           !< Material specific heat as function of temperaure (J/kg/K)
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
-   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: DIFFUSIVITY_SPEC
    LOGICAL :: ALLOW_SHRINKING
    LOGICAL :: ALLOW_SWELLING
    LOGICAL :: CONST_C=.TRUE.
@@ -790,9 +786,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS,INTERNAL_HEAT_SOURCE
    REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,TMP_INNER,STRETCH_FACTOR,&
                                       MOISTURE_FRACTION,SURFACE_VOLUME_RATIO,PACKING_RATIO,KAPPA_S=-1._EB,RENODE_DELTA_T
-   REAL(EB), DIMENSION(MAX_NUMBER_FSK_POINTS) :: FSK_K, FSK_W, FSK_A
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: DENSITY_ADJUST_FACTOR=1._EB,RHO_S
-   INTEGER :: NUMBER_FSK_POINTS
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_NAME
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_FRAC
@@ -821,7 +815,6 @@ TYPE SURFACE_TYPE
    ! 1D mass transfer
 
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_SPECIES) :: LAYER_SPEC_FRAC
-   REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_POROSITY
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHIRHOZ_0
 
    ! Level Set Firespread

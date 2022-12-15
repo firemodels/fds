@@ -1567,16 +1567,6 @@ DO N=0,N_SURF
    WRITE(LU_SMV,'(1X,A)') SF%TEXTURE_MAP
 ENDDO
 
-! Write out MATL info
-
-IF (N_MATL>0) THEN
-   DO N=1,N_MATL
-      WRITE(LU_SMV,'(/A)') 'MATERIAL'
-      WRITE(LU_SMV,'(1X,A)') MATERIAL(N)%ID
-      WRITE(LU_SMV,'(1X,3F13.5)') REAL(MATERIAL(N)%RGB,FB)/255.0_FB
-   ENDDO
-ENDIF
-
 ! Write out immersed file info
 
 IF (N_GEOMETRY>0) THEN
