@@ -582,8 +582,9 @@ CONTAINS
 
 SUBROUTINE CHECK_MASS_DENSITY
 
-REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX
-INTEGER  :: IC
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX,&
+            RHO_ZZ_TMP(1:N_TRACKED_SPECIES)
+INTEGER  :: IC,NN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO,DELTA_RHO_ZZ,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ
 
@@ -728,15 +729,21 @@ ENDDO
 
 ENDDO SPECIES_LOOP
 
-! Absorb error in most abundant species
+! Absorb error in most abundant species or renormalize
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         RHO_ZZ_TMP = MAX(0._EB,RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
          N=MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1)
          RHO_ZZ(I,J,K,N) = RHOP(I,J,K) - ( SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES)) - RHO_ZZ(I,J,K,N) )
-         RHO_ZZ(I,J,K,N) = MAX(0._EB,MIN(RHOP(I,J,K),RHO_ZZ(I,J,K,N)))
+         NN=MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1) ! recheck most abundant species
+         IF (NN/=N) THEN ! includes the case RHO_ZZ(I,J,K,N)<0, assuming initial ALL(RHO_ZZ_TMP>=0.)
+            ! if most abundant species changes, then renormalize the mass fractions instead
+            RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHOP(I,J,K) * &
+              MAX(0._EB, MIN(1._EB, RHO_ZZ_TMP(1:N_TRACKED_SPECIES)/SUM(RHO_ZZ_TMP(1:N_TRACKED_SPECIES)) ))
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
