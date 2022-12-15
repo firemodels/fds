@@ -9660,25 +9660,31 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Check if the SURF IDs exist
 
-               IF (SURF_ID/='null') CALL CHECK_SURF_NAME(SURF_ID,EX)
-               IF (.NOT.EX) THEN
-                  WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+               IF (SURF_ID/='null') THEN
+                  CALL CHECK_SURF_NAME(SURF_ID,EX)
+                  IF (.NOT.EX) THEN
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  ENDIF
                ENDIF
 
                DO NNNN=1,3
-                  IF (SURF_IDS(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
-                  IF (.NOT.EX) THEN
-                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
-                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  IF (SURF_IDS(NNNN)/='null') THEN
+                     CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
+                     IF (.NOT.EX) THEN
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                     ENDIF
                   ENDIF
                ENDDO
 
                DO NNNN=1,6
-                  IF (SURF_ID6(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
-                  IF (.NOT.EX) THEN
-                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
-                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  IF (SURF_ID6(NNNN)/='null') THEN
+                     CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
+                     IF (.NOT.EX) THEN
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                     ENDIF
                   ENDIF
                ENDDO
 
