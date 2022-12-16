@@ -123,7 +123,6 @@ CHARACTER(LABEL_LENGTH) :: NODE_ID(2) !< IDs of the nodes for each end of a DUCT
 CHARACTER(LABEL_LENGTH) :: RAMP_ID !< Name of a RAMP for DUCT flow, FAN curve, or AIRCOIL heat exchange.
 CHARACTER(LABEL_LENGTH) :: RAMP_LOSS !< Name of a RAMP for the flow loss of a variable damper where T=damper position and F=loss.
 CHARACTER(LABEL_LENGTH) :: SPEC_ID(MAX_SPECIES) !< List of species that are trapped by a filter.
-CHARACTER(LABEL_LENGTH) :: SURF_ID !< Surface type for a duct wall (not currently used).
 CHARACTER(LABEL_LENGTH) :: TYPE_ID !< Type of HVAC component (e.g. DUCT, FAN, DUCTNODE, etc.)
 CHARACTER(LABEL_LENGTH) :: VENT_ID !< Name of a VENT connected to a DUCTNODE or the first node for a LEAKAGE duct
 CHARACTER(LABEL_LENGTH) :: VENT2_ID !< VENT connected to the second node for a LEAKAGE duct
@@ -134,7 +133,7 @@ NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,&
                 LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
                 MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NETWORK_ID,NODE_ID,PERIMETER,&
-                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,SURF_ID,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
+                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
                 TYPE_ID,WAYPOINTS,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
 
 TNOW=CURRENT_TIME()
@@ -395,19 +394,6 @@ DO NN=1,N_HVAC_READ
             ENDDO
          ENDIF
 
-         IF (SURF_ID/='null') THEN
-            DUCT_HT = .TRUE.
-            SURF_LOOP: DO N= 1,N_SURF
-               IF (SURFACE(N)%ID==SURF_ID) THEN
-                  DU%SURF_INDEX = N
-                  EXIT SURF_LOOP
-               ENDIF
-            ENDDO SURF_LOOP
-            IF (DU%SURF_INDEX== -1) THEN
-               WRITE(MESSAGE,'(A,A)') 'ERROR: SURFACE not found for duct ID: ',TRIM(DU%ID)
-               CALL SHUTDOWN(MESSAGE); RETURN
-            ENDIF
-         ENDIF
          IF (ANY(WAYPOINTS > -HUGE(1._EB))) THEN
             DU%N_WAYPOINTS = 0
             DO NC=1,30
@@ -735,7 +721,6 @@ ROUGHNESS    = -1._EB
 ROUND        = .TRUE.
 SPEC_ID      = 'null'
 SQUARE       = .FALSE.
-SURF_ID      = 'null'
 TYPE_ID      = 'null'
 TAU_AC       = TAU_DEFAULT
 TAU_FAN      = TAU_DEFAULT
