@@ -1190,7 +1190,7 @@ By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent visc
 \begin{equation}
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
 \end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$.
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using {\ct LES\_FILTER\_TYPE='MAX'} on {\ct MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$.
 
 Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
 \be
@@ -3920,7 +3920,7 @@ Details of the output quantities are discussed in Section~\ref{info:material_com
 \section{Pyrolysis and Energy Conservation}
 \label{solid_phase_energy_conservation}
 
-The {\ct HEAT\_OF\_REACTION} is the energy gained or lost in converting the material to residue(s) and/or gas(es). In other words the {\ct HEAT\_OF\_REACTION} is the enthalpy of the products at the current solid temperature minus the enthalpy of the initial material at the current solid temperature. For total internal energy to be conserved, this must hold true. A challenge is that while the heat of reaction may be known for a solid material, detailed knowledge of the material enthalpy or the enthalpy of any residue or gaseous products is often not known. In cases where a reference enthalpy for a material is known, you can input on the {\ct MATL} line the {\ct REFERENCE\_ENTHALPY} in kJ/kg and the {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} in $^\circ$C. 
+The {\ct HEAT\_OF\_REACTION} is the energy gained or lost in converting the material to residue(s) and/or gas(es). In other words the {\ct HEAT\_OF\_REACTION} is the enthalpy of the products at the current solid temperature minus the enthalpy of the initial material at the current solid temperature. For total internal energy to be conserved, this must hold true. A challenge is that while the heat of reaction may be known for a solid material, detailed knowledge of the material enthalpy or the enthalpy of any residue or gaseous products is often not known. In cases where a reference enthalpy for a material is known, you can input on the {\ct MATL} line the {\ct REFERENCE\_ENTHALPY} in kJ/kg and the {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} in $^\circ$C.
 
 FDS will attempt to adjust all material enthalpies so that internal energy is conserved. For each material reaction a linear equation is defined:
 \be
@@ -11785,6 +11785,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HVAC\_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & {\ct F}           \\ \hline
 {\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct T}           \\ \hline
 {\ct I\_MAX\_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
+{\ct LES\_FILTER\_TYPE}                             & Character    & Section~\ref{info:LES}                  &            & {\ct 'MEAN'}      \\ \hline
 {\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct T}           \\ \hline
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
