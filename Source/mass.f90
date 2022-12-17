@@ -582,8 +582,10 @@ CONTAINS
 
 SUBROUTINE CHECK_MASS_DENSITY
 
-REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX,SUM_RHO_ZZ
-INTEGER  :: IC
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),&
+            RHO_ZZ_MIN,RHO_ZZ_MAX,SUM_RHO_ZZ,RHO_ZZ_TEST
+INTEGER :: IC
+LOGICAL :: CLIP_RHO_ZZ
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO,DELTA_RHO_ZZ,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ
 
@@ -654,7 +656,16 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DELTA_RHO(1:IBAR,1:JBAR,1:KBAR)))
+! Assign excess/deficit mass to neighboring cells if clipping has been done.
+! If there is only one gas species, set rho*Z=rho and return.
+
+IF (CLIP_RHOMIN .OR. CLIP_RHOMAX) THEN
+   RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DELTA_RHO(1:IBAR,1:JBAR,1:KBAR)))
+   IF (N_TRACKED_SPECIES==1) THEN
+      RHO_ZZ(1:IBAR,1:JBAR,1:KBAR,1) = RHOP(1:IBAR,1:JBAR,1:KBAR)
+      RETURN
+   ENDIF
+ENDIF
 
 ! Correct species mass density
 
@@ -664,6 +675,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    DELTA_RHO_ZZ => WORK5
    DELTA_RHO_ZZ = 0._EB
+   CLIP_RHO_ZZ = .FALSE.
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -675,12 +687,13 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          VC1(-3)  = DY(J)  *DZ(K-1)
          VC1( 3)  = DY(J)  *DZ(K+1)
          DO I=1,IBAR
-   
-            RHO_ZZ_MAX = RHOP(I,J,K)
-   
-            IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
+
             IC = CELL_INDEX(I,J,K)
             IF (SOLID(IC)) CYCLE
+   
+            RHO_ZZ_MAX = RHOP(I,J,K)
+            IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
+            CLIP_RHO_ZZ = .TRUE.
             IF (RHO_ZZ(I,J,K,N)<RHO_ZZ_MIN) THEN
                RHO_ZZ_CUT = RHO_ZZ_MIN
                SIGN_FACTOR = 1._EB
@@ -717,6 +730,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
+
+   IF (.NOT.CLIP_RHO_ZZ) CYCLE
+
+   ! Assign excess/deficit RHO_ZZ neighboring cells
    
    DO K=1,KBAR
       DO J=1,JBAR
@@ -728,18 +745,23 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
-! Renormalize RHO_ZZ so that lumped species, ZZ(:,:,:,1:N_TRACKED_SPECIES), sum to 1
+! If nothing has been clipped, return
+
+IF (.NOT.CLIP_RHOMIN .AND. .NOT.CLIP_RHOMAX .AND. .NOT.CLIP_RHO_ZZ) RETURN
+
+! Final check of RHO_ZZ to ensure that ZZ(:,:,:,1:N_TRACKED_SPECIES) sums to 1
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         SUM_RHO_ZZ = SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
          N = MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1)
-         RHO_ZZ(I,J,K,N) = RHO_ZZ(I,J,K,N) + RHOP(I,J,K) - SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
-         IF (RHO_ZZ(I,J,K,N)<0._EB) THEN
-            RHO_ZZ(I,J,K,N) = 0._EB
-            SUM_RHO_ZZ = SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
+         RHO_ZZ_TEST = RHO_ZZ(I,J,K,N) + RHOP(I,J,K) - SUM_RHO_ZZ
+         IF (RHO_ZZ_TEST<0._EB .OR. RHO_ZZ_TEST>RHOP(I,J,K)) THEN  ! Renormalize the original set of RHO_ZZ
             RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHOP(I,J,K) * RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES)/SUM_RHO_ZZ
+         ELSE  ! Absorb mass deficit/excess into largest RHO_ZZ
+            RHO_ZZ(I,J,K,N) = RHO_ZZ_TEST
          ENDIF
       ENDDO
    ENDDO
