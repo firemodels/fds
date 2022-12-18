@@ -9610,8 +9610,8 @@ REAL(FB) :: STIME
 
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 WRITE(LU_HVAC) STIME
-! if variables are added to list below, update corresponding entry made o HVACVALS smv keyword
-!  (search for 'HVACVALS'
+! if variables are added to list below, update corresponding entry made in HVACVALS smv keyword
+!  (search for 'HVACVALS')
 DO N=1,N_DUCTNODES
    IF (DUCTNODE(N)%LEAKAGE) CYCLE
    WRITE(LU_HVAC) REAL(DUCTNODE(N)%TMP,FB), REAL(DUCTNODE(N)%RHO,FB), REAL(DUCTNODE(N)%P,FB)
