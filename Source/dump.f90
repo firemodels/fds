@@ -9595,10 +9595,10 @@ END SUBROUTINE DUMP_PROF
 !> \param T Current simulation time (s)
 !> \param DT Current time step size (s)
 
-SUBROUTINE DUMP_HVAC(T,DT)
+SUBROUTINE DUMP_HVAC(T)
 
 INTEGER :: N
-REAL(EB), INTENT(IN) :: T,DT
+REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
 
 ! N_NODES_OUT N_NODE_VARS N_DUCTS_OUT N_DUCTS_VARS      
