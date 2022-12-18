@@ -126,7 +126,6 @@ PROCESS USFS_Catchpole
 PROCESS USFS_Corsica
 PROCESS USN_Hangars
 PROCESS UWO_Wind_Tunnel
-PROCESS Vegetation
 PROCESS Vettori_Flat_Ceiling
 PROCESS Vettori_Sloped_Ceiling
 PROCESS VTT
