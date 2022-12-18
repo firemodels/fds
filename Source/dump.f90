@@ -9593,7 +9593,6 @@ END SUBROUTINE DUMP_PROF
 
 !> \brief Record HVAC quanties in the file CHID.hvac
 !> \param T Current simulation time (s)
-!> \param DT Current time step size (s)
 
 SUBROUTINE DUMP_HVAC(T)
 
