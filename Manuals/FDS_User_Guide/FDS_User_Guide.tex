@@ -7779,6 +7779,20 @@ The amount expected on the floor is approximately 0.024~kg.
 \end{figure}
 
 
+\subsection{Ember Generation}
+\label{info:ember_generation}
+
+Although in its early stages of development, a rudimentary ember generation algorithm is available for use in FDS.  Lagrangian particle classes may be tagged as ``ember particles'' and thus subject to lofting by a drag force.  Two parameters control the point at which a given particle becomes an ember.  First is the density threshold, controlled by the parameter {\ct EMBER\_DENSITY\_THRESHOLD} on the {\ct PART} line.  As a vegetative particle burns and converts to char its density decreases from that of a woody material with a density of 500-1000 \si{kg/m^3} to char with a density of 50-100 \si{kg/m^3}.  As the wood turns to char its structural integrity diminishes and the drag forces may rip the vegetative element apart.  While the phenomenon of course depends on the force exerted by the gas flow around the particle, we use a velocity threshold as a surrogate to the drag force, since this is more intuitive.  The threshold is controlled by {\ct EMBER\_VELOCITY\_THRESHOLD} on {\ct PART}.  The {\ct EMBER\_PARTICLE} tag should only be applied to particle classes that are initially {\ct STATIC}.  A typical example is given below.
+\begin{lstlisting}
+&PART ID='small branches', STATIC=T, EMBER_PARTICLE=T, EMBER_DENSITY_THRESHOLD=75., EMBER_VELOCITY_THRESHOLD=3.0
+\end{lstlisting}
+
+\paragraph{Ember Removal}
+\label{info:ember_removal}
+
+In some cases, tracking embers may be prohibitively expensive and it may be sufficient simply to remove the particles from the calculation once they reach the ember thresholds.  If this is desired, add {\ct TRACK\_EMBERS=F} to the {\ct PART} line.
+
+
 \newpage
 
 \section{Boundary Fuel Model}
@@ -11014,7 +11028,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK
 % ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
-% ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMLUA, 
+% ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMLUA,
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 
 % ignore keywords that appear on any namelist
@@ -12004,7 +12018,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DISTRIBUTION}                       & Character   & Section~\ref{info:particle_size}                                      &                   & {\ct 'ROSIN...'}      \\ \hline
 {\ct DRAG\_COEFFICIENT(3)}               & Real Array  & Section~\ref{info:particle_drag}                                      &                   &                       \\ \hline
 {\ct DRAG\_LAW}                          & Character   & Section~\ref{info:particle_drag}                                      &                   & {\ct 'SPHERE'}        \\ \hline
-{\ct EVAP\_MODEL}                        & Character   & Section~\ref{info:liquid_droplets}                                    &                   & {\ct 'RANZ-MARSHALL B NUMBER'} \\ \hline
+{\ct EVAP\_MODEL}                        & Character   & Section~\ref{info:liquid_droplets}                              &   & B-number\footnote{\ct 'RANZ-MARSHALL B-NUMBER'} \\ \hline
+{\ct EMBER\_DENSITY\_THRESHOLD}          & Real        & Section~\ref{info:ember_generation}                                   &                   &                       \\ \hline
+{\ct EMBER\_PARTICLE}                    & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct F}               \\ \hline
+{\ct EMBER\_VELOCITY\_THRESHOLD}         & Real        & Section~\ref{info:ember_generation}                                   &                   &                       \\ \hline
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
@@ -12042,11 +12059,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m            & 1000.                 \\ \hline
 {\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
 {\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
+{\ct TRACL\_EMBERS}                      & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct T}               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
 \end{longtable}
-
-% Undocumented: EMBER_DENSITY_THRESHOLD (RJM), EMBER_PARTICLE (RJM), EMBER_VELOCITY_THRESHOLD (RJM), PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR (Simo), PRIMARY_BREAKUP_LENGTH (Simo)
 
 \vspace{\baselineskip}
 
