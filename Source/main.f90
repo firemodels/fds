@@ -4021,11 +4021,19 @@ TNOW = CURRENT_TIME()
 
 IF (T>=HRR_CLOCK(HRR_COUNTER(1))) THEN
    IF (MY_RANK==0) CALL DUMP_HRR(T,DT)
-   IF (MY_RANK==0 .AND. HVAC_SOLVE) CALL DUMP_HVAC(T) ! use HRR_COUNTER for now until HVAC_COUNTER is setup
    HRR_COUNTER(1) = HRR_COUNTER(1) + 1
    Q_DOT_SUM = 0._EB
    M_DOT_SUM = 0._EB
    T_LAST_DUMP_HRR = T
+ENDIF
+
+! Dump out HRR info into CHID_hrr.csv
+
+IF (MY_RANK==0 .AND. HVAC_SOLVE .AND. (N_DUCT_QUANTITY > 0 .OR. N_NODE_QUANTITY > 0)) THEN
+   IF (T>=HVAC_CLOCK(HVAC_COUNTER(1))) THEN
+      CALL DUMP_HVAC(T) 
+      HVAC_COUNTER(1) = HVAC_COUNTER(1) + 1
+   ENDIF
 ENDIF
 
 ! Dump unstructured geometry and boundary element info
