@@ -2289,10 +2289,11 @@ SUBROUTINE INITIALIZE_PRESSURE_ZONES
 
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE,SEARCH_OTHER_MESHES
 TYPE(P_ZONE_TYPE), POINTER :: PZ
-INTEGER :: N,N_OVERLAP,I,J,K,NOM,IC,IZ
+INTEGER :: N,N_OVERLAP,I,J,K,NOM,IC,IZ,IZZ,IW,IOR
 LOGICAL :: FOUND_UNASSIGNED_CELL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_BUFFER
 INTEGER, ALLOCATABLE, DIMENSION(:) :: INTEGER_BUFFER,INTEGER_BUFFER_4
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 
 ! Ensure that all cells have been assigned a pressure zone, even within solids
 
@@ -2422,6 +2423,49 @@ IF (N_MPI_PROCESSES>1 .AND. N_ZONE>0) THEN
    DEALLOCATE(INTEGER_BUFFER)
    DEALLOCATE(INTEGER_BUFFER_4)
 ENDIF
+
+! Ensure that all cells have been assigned a pressure zone, even within solids.
+! Also, compute the volume, number of cells, and cell indices of each pressure zone.
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
+            IZ = M%PRESSURE_ZONE(I,J,K)
+            IF (IZ==0) CYCLE
+            IF (P_ZONE(IZ)%VOLUME<MINIMUM_ZONE_VOLUME) THEN
+               IC = M%CELL_INDEX(I,J,K)
+               M%SOLID(IC) = .TRUE.
+               DO IOR=-3,3
+                  IF (IOR==0) CYCLE
+                  IW = M%WALL_INDEX(IC,IOR)
+                  M%WALL(IW)%BOUNDARY_TYPE = NULL_BOUNDARY
+                  IF (IW>0 .AND. IW<=M%N_EXTERNAL_WALL_CELLS) THEN
+                     BC => M%BOUNDARY_COORD(M%WALL(IW)%BC_INDEX)
+                     M%SOLID(M%CELL_INDEX(BC%II,BC%JJ,BC%KK)) = .TRUE.
+                  ENDIF
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+CALL EXCHANGE_GEOMETRY_INFO
+
+IZ = 0
+DO
+   IZ = IZ + 1
+   IF (IZ>N_ZONE) EXIT
+   IF (P_ZONE(IZ)%VOLUME<MINIMUM_ZONE_VOLUME) THEN
+      DO IZZ=IZ,N_ZONE-1
+         P_ZONE(IZZ) = P_ZONE(IZZ+1)
+      ENDDO
+      N_ZONE = N_ZONE - 1
+      IZ = IZ - 1
+   ENDIF
+ENDDO
 
 END SUBROUTINE INITIALIZE_PRESSURE_ZONES
 
