@@ -1603,7 +1603,7 @@ The temperatures at the front and back surface of a Cartesian slab (or center of
  \frac{-k_{\rm s,1}}{2} \left( \frac{T_{\rm s,1}^{n+1}-T_{\rm s,0}^{n+1}}{\delta r_{\frac{1}{2}}} + \frac{T_{\rm s,1}^{n}-T_{\rm s,0}^{n}}{\delta r_{\frac{1}{2}}} \right)
   =  \left( \dot{q}_{\rm c}''+\dot{q}_{\rm r}'' \right)^{n+\frac{1}{2}}
 \end{equation}
-Note that $T_{\rm s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. Note also that the thermal conductivity, $k_{\rm s,1}$, is that of the first node. The convective heat flux at the mid-point of the time step is
+Note that $T_{\rm s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. Note also that the thermal conductivity, $k_{\rm s,1}$, is that of the first solid cell. The convective heat flux at the mid-point of the time step is
 \begin{equation}
 \label{conv}
   \left( \dot{q}_{\rm c}'' \right)^{n+\frac{1}{2}} = \frac{1}{2} \left( h^n \left(T_{\rm g}^n - T_{\rm s,\frac{1}{2}}^n\right) + h^{n+1} \left(T_{\rm g}^{n+1} - T_{\rm s,\frac{1}{2}}^{n+1} \right) \right)
@@ -1695,6 +1695,24 @@ If $\Delta T_{\rm s}^*$ exceeds a user-specified threshold, $\Delta T_{\max}$, t
    \dt = \dt_{\rm gas} \, 2^{-\lceil \ln \eta / \ln 2 \rceil }  \quad ; \quad \eta = \Delta T_{s}^*  / \Delta T_{\max}
 \end{equation}
 Note that $\lceil x \rceil$ denotes the least integer greater than $x$. To prevent an endless spiral of decreasing solid phase time steps, there is a user-specified limit of the number of subdivisions of the gas phase time step. The default is $2^2=4$.
+
+\subsection*{Dirichlet Temperature Boundaries}
+
+For the purposes of verification, it is sometimes useful to hold the surface temperature of a solid fixed.  In this case, the boundary condition is of Dirichlet type and Eq.~(\ref{bc_front}) defines a constant wall temperature, $T_{\rm w}$,
+\begin{equation}
+\label{T_front_dirichlet}
+  T_{\rm s,\frac{1}{2}} = \frac{T_{\rm s,1}+T_{\rm s,0}}{2} = T_{\rm w}
+\end{equation}
+The ghost cell value at $n+1$ may then be written in terms of the wall temperature and the temperature of the first cell,
+\begin{align}
+\label{T_ghost}
+  T_{\rm s,0}^{n+1} &= - T_{\rm s,1}^{n+1} + 2\, T_{\rm w}
+\end{align}
+Comparing Eq.~(\ref{T_ghost}) with Eq.~(\ref{T0}), it is apparent that
+\begin{align}
+\textct{RFACF2} &= -1 \\
+\textct{QDXKF}  &= 2\, T_{\rm w}
+\end{align}
 
 
 \section{Optional 3-D Solid Phase Heat Transfer}
