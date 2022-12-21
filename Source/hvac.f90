@@ -314,10 +314,10 @@ DO NN=1,N_HVAC_READ
          DU%LENGTH = LENGTH
          DU%REVERSE = REVERSE
          DU%DP_FAN = 0._EB
-         ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          ! Initializing to background/ambient for t=0 outputs
          DU%RHO_D = RHOA
          DU%TMP_D = TMPA
+         ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          DU%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          ALLOCATE(DU%ZZ_OLD(N_TRACKED_SPECIES))
          DU%ZZ_OLD(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
@@ -661,8 +661,13 @@ DO NN=1,N_HVAC_READ
          DU%DIAMETER = -1._EB
          DU%LENGTH = 0.1_EB
          DU%REVERSE = .FALSE.
+         ! Initializing to background/ambient for t=0 outputs
+         DU%RHO_D = RHOA
+         DU%TMP_D = TMPA
          ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          DU%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         ALLOCATE(DU%ZZ_OLD(N_TRACKED_SPECIES))
+         DU%ZZ_OLD(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          IF (LOSS(1,1)==0._EB) LOSS(1,1)=1._EB
          DU%LOSS(1:2) = MAX(0._EB,LOSS(1,1))
          DU%DAMPER = .FALSE.
