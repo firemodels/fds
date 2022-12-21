@@ -19073,26 +19073,6 @@ RETURN
 END SUBROUTINE DEBUG_WAIT
 
 ! -------------------------------------------------------------------------------
-! ---------------------------- GET_GEOM_INDEX -----------------------------------
-
-SUBROUTINE GET_GEOM_INDEX(GEOM_ID, GEOM_INDEX)
-   CHARACTER(LABEL_LENGTH), INTENT(IN) :: GEOM_ID
-   INTEGER, INTENT(OUT) :: GEOM_INDEX
-
-   INTEGER :: I
-   TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
-
-   GEOM_INDEX = -1
-READ_GEOM_LOOP: DO I=1,N_GEOMETRY
-      G=>GEOMETRY(I)
-      IF (TRIM(G%ID)==TRIM(GEOM_ID)) THEN
-        GEOM_INDEX = I
-        RETURN
-      ENDIF
-   ENDDO READ_GEOM_LOOP
-END SUBROUTINE GET_GEOM_INDEX
-
-! -------------------------------------------------------------------------------
 ! ---------------------------- READ_GEOM ----------------------------------------
 
 SUBROUTINE READ_GEOM
