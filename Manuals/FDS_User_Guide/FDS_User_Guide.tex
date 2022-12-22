@@ -2818,7 +2818,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
+\includegraphics[width=.6\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
 \caption[Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_rotbox}
 \end{figure}
@@ -2958,7 +2958,7 @@ Also note that no solid surface is truly adiabatic; thus, the specification of a
 \section{Heat Conduction in Solids}
 \label{info:MATL}
 
-Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make up boundary solid surfaces. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.
+Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components. Heat penetration into the solid is assumed to be largely one-dimensional in the direction normal to the surface. There are some limited cases for which three-dimensional heat conduction is possible; see Section~\ref{info:ht3d}.
 
 \subsection{Structure of Solid Boundaries}
 
@@ -3038,14 +3038,14 @@ There are other back side boundary conditions that can be applied. One is to ass
 
 If the wall is assumed to back up to the room on the other side of the wall and you want FDS to calculate the heat transfer through the wall into the space behind the wall, the attribute {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works if the wall {\ct OBST} is less than or equal to one mesh cell thick, and if there is a non-zero volume of computational domain on the other side of the wall {\ct OBST}. Obviously, if the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side gas cell cannot be found (i.e. the wall {\ct OBST} is greater than one cell thick).  This is the default boundary conditions.
 
-If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_T\_B}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_BACK} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature. 
+If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_T\_B}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_BACK} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
 
-\subsection{Initial and Back Side Temperature}
+\subsection{Initial Solid Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and {\ct TMP\_BACK} to be over-ridden. 
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden.
 
 
 
@@ -3158,6 +3158,17 @@ The default parameters governing the node spacing are appropriate for simple hea
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
+
+
+\subsection{Specified Front and Back Surface Temperature}
+\label{info:dirichlet}
+
+If a solid obstruction is thermally-thick, you typically do not want to specify its surface temperature because you want the surface temperature to establish itself based on the heat flux to, and heat penetration within, the solid. However, there may be situations where you might want to do this. One example is for testing the heat conduction algorithm against analytical solutions for which a specified boundary temperature is typical. An example is as follows: 
+\begin{lstlisting}
+&SURF ID='...', MATL_ID='...', TMP_FRONT=500., TMP_BACK=20., THICKNESS=0.01 /
+\end{lstlisting}
+This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and its back side to 20~$^\circ$C. You need not specify the temperature of both surfaces. If the back side of the obstruction is exposed, be sure to assign another {\ct SURF} to the back with the opposite boundary conditions. If you want to vary the temperatures of front and back with time, use ramps {\ct RAMP\_T} and {\ct RAMP\_TMP\_BACK}.
+
 
 
 \subsection{3-D Heat Conduction}
@@ -4135,6 +4146,9 @@ It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to 
 &BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
 
+
+\newpage
+
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
 
@@ -4491,6 +4505,9 @@ In the first approach, one can specify enough {\ct VOLUME\_FLOW} and {\ct MASS\_
 
 In the second approach, one or more ducts have flows that are not specified, in this case FDS must solve for the pressures at either end of the duct to determine the flow through the duct. As one example, if a tee has three ducts and only one of the ducts has a specified flow, then FDS will use the relative pressure drops along the two other ducts to determine the flow. If no {\ct LOSS} inputs are given, then FDS may not correctly solve for the flow. As another example, losses in the HVAC network limit how quickly flow in the ducts can change over time. If there is a single duct connecting two rooms with no {\ct LOSS} inputs given, then small pressure changes can lead to large changes in duct velocity and increase the risk of a numerical instability. If you specify an HVAC network where flow is being solved for by FDS, then you must provided {\ct LOSS} inputs for each possible flow path. FDS will perform a check at startup and return an error message if it finds insufficient losses have been specified; however, this check may not discover all cases.
 
+
+\newpage
+
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
@@ -4648,7 +4665,7 @@ breach. Its default value is 1~s, meaning that equilibrium is achieved in roughl
 
 
 
-
+\newpage
 
 
 \section{Pressure Boundary Conditions}
@@ -5171,6 +5188,9 @@ By default, duplicate species are considered to be a lumped species and not a pr
 &DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 LUMPED'/
 &DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 DUPLICATE PRIMITIVE'/
 \end{lstlisting}
+
+
+\newpage
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
@@ -6877,6 +6897,8 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 \label{fig:part_path_ramp_jog}
 \end{figure}
 
+
+\newpage
 
 \section{Particle Removal}
 \label{info:particle_removal}
@@ -12592,6 +12614,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TGA\_FINAL\_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 {\ct TGA\_HEATING\_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
+{\ct TMP\_BACK}                                           & Real            & Section~\ref{info:dirichlet}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                                          & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_FRONT}                                     & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
