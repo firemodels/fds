@@ -295,7 +295,6 @@ REAL(EB) :: C_WALE=0.60_EB                     !< Coefficient in turbulence mode
 REAL(EB) :: LAPSE_RATE                         !< Temperature change with height (K/m)
 REAL(EB) :: TEX_ORI(3)                         !< Origin of the texture map for Smokeview (m)
 REAL(EB) :: KAPPA0                             !< Background gas radiative absorption coefficient (1/m)
-REAL(EB) :: ASSUMED_GAS_TEMPERATURE            !< Gas temperature used in solid phase calculations (K)
 REAL(EB) :: PR_ONTH                            !< Prandtl number to the 1/3 power
 REAL(EB) :: MU_AIR_0=1.8E-5_EB                 !< Dynamic Viscosity of Air at 20 C (kg/m/s)
 REAL(EB) :: PR_AIR=0.7_EB                      !< Prandtl number for Air
@@ -448,11 +447,11 @@ REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
 ! Ramping parameters
 
 CHARACTER(LABEL_LENGTH), POINTER, DIMENSION(:) :: RAMP_ID,RAMP_TYPE
-INTEGER :: I_RAMP_AGT,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
+INTEGER :: I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
            I_RAMP_PGF_T,I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
            I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0
 INTEGER, PARAMETER :: TIME_HEAT=-1,TIME_VELO=-2,TIME_TEMP=-3,TIME_EFLUX=-4,TIME_PART=-5,TANH_RAMP=-2,TSQR_RAMP=-1,&
-                      VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8
+                      VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8,TIME_TGF=-9
 
 ! TABLe parameters
 

@@ -3038,19 +3038,14 @@ There are other back side boundary conditions that can be applied. One is to ass
 
 If the wall is assumed to back up to the room on the other side of the wall and you want FDS to calculate the heat transfer through the wall into the space behind the wall, the attribute {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works if the wall {\ct OBST} is less than or equal to one mesh cell thick, and if there is a non-zero volume of computational domain on the other side of the wall {\ct OBST}. Obviously, if the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side gas cell cannot be found (i.e. the wall {\ct OBST} is greater than one cell thick).  This is the default boundary conditions.
 
-If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set.
+If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_T\_B}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_BACK} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature. 
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
 
 \subsection{Initial and Back Side Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures. Also, the back side temperature boundary condition of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. {\ct TMP\_BACK} is not the actual back side surface temperature, but rather the gas temperature to which the back side surface is exposed. This parameter requires that {\ct BACKING='VOID'}. A {\ct RAMP} for {\ct TMP\_BACK} can be specified with {\ct RAMP\_T\_B}.  The backside heat transfer coefficient is computed by a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}).
-
-As an alternative to {\ct TMP\_INNER} one can also use {\ct RAMP\_T\_I} to specify the name of a {\ct RAMP} containing a depth vs. temperature profile for the surface.
-
-Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material properties (via the {\ct MATL\_ID} keyword).
-
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and {\ct TMP\_BACK} to be over-ridden. 
 
 
 
@@ -3160,7 +3155,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX(:)}. This array input has a default of 1000. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
-If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
+If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -3839,7 +3834,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
-\item Set an {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C, default {\ct TMPA}) and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item Set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
@@ -11772,8 +11767,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALIGNMENT\_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct T}           \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct F}           \\ \hline
-{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}       & Real         & Section~\ref{solid_phase_verification}  & $^\circ$C  &                   \\ \hline
-{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP} & Character    & Section~\ref{solid_phase_verification}  &            &                   \\ \hline
 {\ct BNDF\_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & {\ct T}           \\ \hline
 {\ct C\_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 {\ct CFL\_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
@@ -12570,7 +12563,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T\_B}                                          & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
-{\ct RAMP\_T\_I}                                          & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
+{\ct RAMP\_TMP\_GAS\_FRONT}                               & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_V}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_V\_X}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
@@ -12599,10 +12592,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TGA\_FINAL\_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 {\ct TGA\_HEATING\_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
-{\ct TMP\_BACK}                                           & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                                          & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
-{\ct TMP\_INNER(:)}                                       & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_GAS\_FRONT}                                     & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER}                                          & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
