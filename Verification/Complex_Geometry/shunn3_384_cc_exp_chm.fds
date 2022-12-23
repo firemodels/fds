@@ -1,5 +1,5 @@
 &HEAD CHID='shunn3_384_cc_exp_chm', TITLE='Shunn et al. (2012) JCP, Problem 3, Explicit integration of cut-cell region, CHARM' /
-}}}
+
 &MESH IJK=384,1,384, XB=-1,1,-0.05,0.05,-1,1/
 
 &TIME T_END=1./
