@@ -8995,6 +8995,7 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 {\ct DT\_FLUSH}   & {\ct RAMP\_FLUSH}     & File flushing times        \\
 {\ct DT\_GEOM}    & {\ct RAMP\_GEOM}      & Geometry output            \\
 {\ct DT\_HRR}     & {\ct RAMP\_HRR}       & HRR output                 \\
+{\ct DT\_HVAC}    & {\ct RAMP\_HVAC}      & HVAC output                \\
 {\ct DT\_ISOF}    & {\ct RAMP\_ISOF}      & Isosurface output          \\
 {\ct DT\_MASS}    & {\ct RAMP\_MASS}      & Species mass output        \\
 {\ct DT\_PART}    & {\ct RAMP\_PART}      & Particle output            \\
@@ -11028,6 +11029,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK
 % ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
+% ignorenamelistkw: /PART/DEBUG
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 
@@ -11314,6 +11316,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_HRR}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_HVAC}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_ISOF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_MASS}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_PART}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -11340,6 +11343,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RAMP\_DEVC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_FLUSH}                   & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_HRR}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_HVAC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_ISOF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_MASS}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_PART}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
