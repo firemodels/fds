@@ -76,7 +76,7 @@ INTEGER , PARAMETER :: MAX_DUCTS = 20 !< Maximum number of ducts connected to a 
 INTEGER :: IOS !< Used for returning the status of a READ statement
 INTEGER :: IZERO !< Used for returning the status of an ALLOCATE statement
 INTEGER :: N_HVAC_READ !< Counter for number of HVAC inputs that have been read in
-INTEGER :: NS,N,NC,ND,NN
+INTEGER :: N,NC,ND,NN,NS
 INTEGER :: I_AIRCOIL=0 !< AIRCOIL array index
 INTEGER :: I_DUCT=0 !< DUCT array index
 INTEGER :: I_DUCTNODE=0 !< DUCTNODE array index
@@ -389,28 +389,6 @@ DO NN=1,N_HVAC_READ
          IF (N_CELLS > 0) THEN
             HVAC_MASS_TRANSPORT = .TRUE.
             DU%N_CELLS = N_CELLS
-         ELSE
-            IF (HVAC_MASS_TRANSPORT_CELL_L > 0._EB) DU%N_CELLS = MAX(1,INT(DU%LENGTH/HVAC_MASS_TRANSPORT_CELL_L))
-         ENDIF
-         IF (DU%N_CELLS > 0) THEN
-            DU%DX = DU%LENGTH/DU%N_CELLS
-            ALLOCATE(DU%RHO_C(DU%N_CELLS))
-            ALLOCATE(DU%TMP_C(DU%N_CELLS))
-            ALLOCATE(DU%CP_C(DU%N_CELLS))
-            ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
-            ! Initialising as background/ambient here; required for DEVC output at t = 0 s
-            DU%RHO_C = RHOA
-            DU%TMP_C = TMPA
-            DO NC = 1,DU%N_CELLS 
-               DU%ZZ_C(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-            ENDDO
-            ALLOCATE(DU%RHO_C_OLD(DU%N_CELLS))
-            ALLOCATE(DU%TMP_C_OLD(DU%N_CELLS))
-            ALLOCATE(DU%CP_C_OLD(DU%N_CELLS))
-            ALLOCATE(DU%ZZ_C_OLD(DU%N_CELLS,N_TRACKED_SPECIES))
-            DO NC = 1,DU%N_CELLS ! Initialising as background here; required for DEVC output at t = 0 s
-               DU%ZZ_C_OLD(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-            ENDDO
          ENDIF
 
          IF (ANY(WAYPOINTS > -HUGE(1._EB))) THEN
@@ -1638,6 +1616,7 @@ HMT_IF: IF (HVAC_MASS_TRANSPORT) THEN
                   MTOT = MTOT + MFLOW * DU%AREA / DT_MT
                   ZZTOT = ZZTOT + ZZSUM * DU%AREA / DT_MT
                   TGUESS = TGUESS + MFLOW * DU%AREA / DT_MT * DU%TMP_D
+
                   IF (DN%FILTER_INDEX > 0) THEN
                      DN%HMT_FILTER = .TRUE.
                      DN%FILTER_LOADING(:,3) = ZZSUM * DU%AREA / DT_MT * FILTER(DN%FILTER_INDEX)%EFFICIENCY
@@ -1656,6 +1635,7 @@ HMT_IF: IF (HVAC_MASS_TRANSPORT) THEN
                ENDIF
 
                N_UPDATED(DR%NODE_INDEX(NN)) = .TRUE.
+               IF (MTOT==0._EB) CYCLE NODE_LOOP_1
                ZZ_GET = 0._EB
                DN%ZZ(:)  = ZZTOT/MTOT
                ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ(1:N_TRACKED_SPECIES)
@@ -3107,7 +3087,7 @@ END SUBROUTINE COLLAPSE_HVAC_BC
 SUBROUTINE SET_INIT_HVAC
 REAL(EB) :: TNOW !< Current CPU time (s) used in computing length of time spent in HVAC routines.
 REAL(EB) :: XYZ1(3), XYZ2(3)
-INTEGER:: ND,NN,NW
+INTEGER:: ND,NN,NW,NC
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL(),DN2=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 
@@ -3125,31 +3105,55 @@ ENDDO
 
 DO ND=1,N_DUCTS
    DU => DUCT(ND)
-   IF (DU%LENGTH > 0._EB) CYCLE
-   IF (.NOT. DUCTNODE(DU%NODE_INDEX(1))%SPECIFIED_XYZ .OR. .NOT. DUCTNODE(DU%NODE_INDEX(2))%SPECIFIED_XYZ) THEN
-      WRITE(MESSAGE,'(A,A)') 'ERROR: DUCT has no LENGTH and one NODE lacks an XYZ. Duct: ',TRIM(DU%ID)
-      CALL SHUTDOWN(MESSAGE); RETURN      
+   IF (DU%LENGTH < 0._EB) THEN
+      IF (.NOT. DUCTNODE(DU%NODE_INDEX(1))%SPECIFIED_XYZ .OR. .NOT. DUCTNODE(DU%NODE_INDEX(2))%SPECIFIED_XYZ) THEN
+         WRITE(MESSAGE,'(A,A)') 'ERROR: DUCT has no LENGTH and one NODE lacks an XYZ. Duct: ',TRIM(DU%ID)
+         CALL SHUTDOWN(MESSAGE); RETURN      
+      ENDIF
+      DN =>  DUCTNODE(DU%NODE_INDEX(1))
+      DN2 => DUCTNODE(DU%NODE_INDEX(2))
+      IF (DU%N_WAYPOINTS == 0) THEN
+         DU%LENGTH = SQRT((DN%XYZ(1)-DN2%XYZ(1))**2+(DN%XYZ(2)-DN2%XYZ(2))**2+(DN%XYZ(3)-DN2%XYZ(3))**2)
+      ELSE
+         DU%LENGTH = 0._EB
+         DO NW=1,DU%N_WAYPOINTS+1
+            IF (NW==1) THEN
+               XYZ1 = DN%XYZ
+            ELSE
+               XYZ1 = XYZ2
+            ENDIF
+            IF (NW==DU%N_WAYPOINTS+1) THEN
+               XYZ2 = DN2%XYZ
+            ELSE
+               XYZ2(:) = DU%WAYPOINT_XYZ(NW,:)
+            ENDIF
+            DU%LENGTH = DU%LENGTH + SQRT((XYZ1(1)-XYZ2(1))**2+(XYZ1(2)-XYZ2(2))**2+(XYZ1(3)-XYZ2(3))**2)
+         ENDDO
+      ENDIF
    ENDIF
-   DN =>  DUCTNODE(DU%NODE_INDEX(1))
-   DN2 => DUCTNODE(DU%NODE_INDEX(2))
-   IF (DU%N_WAYPOINTS == 0) THEN
-      DU%LENGTH = SQRT((DN%XYZ(1)-DN2%XYZ(1))**2+(DN%XYZ(2)-DN2%XYZ(2))**2+(DN%XYZ(3)-DN2%XYZ(3))**2)
-   ELSE
-      DU%LENGTH = 0._EB
-      DO NW=1,DU%N_WAYPOINTS+1
-         IF (NW==1) THEN
-            XYZ1 = DN%XYZ
-         ELSE
-            XYZ1 = XYZ2
-         ENDIF
-         IF (NW==DU%N_WAYPOINTS+1) THEN
-            XYZ2 = DN2%XYZ
-         ELSE
-            XYZ2(:) = DU%WAYPOINT_XYZ(NW,:)
-         ENDIF
-         DU%LENGTH = DU%LENGTH + SQRT((XYZ1(1)-XYZ2(1))**2+(XYZ1(2)-XYZ2(2))**2+(XYZ1(3)-XYZ2(3))**2)
+   
+   IF (HVAC_MASS_TRANSPORT_CELL_L > 0._EB .AND. .NOT. (DU%LEAKAGE .OR. DU%LOCALIZED_LEAKAGE)) &
+      DU%N_CELLS = MAX(1,INT(DU%LENGTH/HVAC_MASS_TRANSPORT_CELL_L))
+   IF (DU%N_CELLS > 0) THEN
+      DU%DX = DU%LENGTH/DU%N_CELLS
+      ALLOCATE(DU%RHO_C(DU%N_CELLS))
+      ALLOCATE(DU%TMP_C(DU%N_CELLS))
+      ALLOCATE(DU%CP_C(DU%N_CELLS))
+      ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
+      ! Initialising as background/ambient here; required for DEVC output at t = 0 s
+      DU%RHO_C = RHOA
+      DU%TMP_C = TMPA
+      DO NC = 1,DU%N_CELLS 
+         DU%ZZ_C(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
       ENDDO
-   ENDIF
+      ALLOCATE(DU%RHO_C_OLD(DU%N_CELLS))
+      ALLOCATE(DU%TMP_C_OLD(DU%N_CELLS))
+      ALLOCATE(DU%CP_C_OLD(DU%N_CELLS))
+      ALLOCATE(DU%ZZ_C_OLD(DU%N_CELLS,N_TRACKED_SPECIES))
+      DO NC = 1,DU%N_CELLS ! Initialising as background here; required for DEVC output at t = 0 s
+         DU%ZZ_C_OLD(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+      ENDDO
+   ENDIF   
 ENDDO
 
 IF (N_ZONE>0) ALLOCATE(PSUM_TOT(N_ZONE))
@@ -3465,7 +3469,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F
 DUCT_LOOP: DO ND = 1,DUCTRUN(NR)%N_DUCTS
    DU => DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))
    IF (DU%N_CELLS == 0 ) CYCLE DUCT_LOOP
-
    ! Check for zero flow and zero area
    IF (ABS(DU%VEL(NEW))<=TWO_EPSILON_EB .OR. DU%AREA<=TWO_EPSILON_EB) CYCLE DUCT_LOOP
 
@@ -3685,7 +3688,7 @@ END SUBROUTINE SET_GUESS_QFAN
 !> \brief Does the analytic solution when a ductrun consists of only one duct.
 !>
 !> \param DUCTRUN_INDEX Index for the ductrun
-!> \param T Current time (s)
+!> \param T Current time (s)  
 
 SUBROUTINE QFAN_SIMPLE(DUCTRUN_INDEX,T)
 INTEGER, INTENT(IN) :: DUCTRUN_INDEX
@@ -3719,7 +3722,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_ENTHALPY
 LOGICAL, INTENT(IN) :: CHANGE
 INTEGER :: NN,NR,NF,NN3,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),&
            DR_DUCTS(N_DUCTS),DR_DUCTNODES(N_DUCTS),DUCTRUN_MAP(N_DUCTS),DR_INDEX
-LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS)!,MT_PRESENT(N_DUCTS)
+LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS),MT_PRESENT(N_DUCTS)
 REAL(EB) :: C0,ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
@@ -3735,7 +3738,7 @@ DUCT_COUNTER=0
 NODE_COUNTER=0
 FAN_PRESENT=.FALSE.
 NODE_CONNECTED=.FALSE.
-!MT_PRESENT = .FALSE.
+MT_PRESENT = .FALSE.
 NODE_CHECKED=.FALSE.
 
 DUCT%QFAN_INDEX = -1
@@ -3762,7 +3765,7 @@ L1:DO WHILE (NN <= N_DUCTNODES)
       IF (DU%AREA < TWO_EPSILON_EB) CYCLE DL
       DUCT_FOUND = .TRUE.
       DUCT_COUNTER(DN%DUCT_INDEX(ND)) = N_DUCTRUNS
-      !IF (DU%N_CELLS > 0) MT_PRESENT(N_DUCTRUNS)=.TRUE.
+      IF (DU%N_CELLS > 0) MT_PRESENT(N_DUCTRUNS)=.TRUE.
       IF (DU%NODE_INDEX(1)==NN) THEN
          NODE_COUNTER(DU%NODE_INDEX(2)) = N_DUCTRUNS
          NODE_CONNECTED(DU%NODE_INDEX(2)) = .TRUE.
@@ -3948,6 +3951,18 @@ DO NR = 1, N_DUCTRUNS
       DUCTRUN(NR)%N_M_DUCTNODES = 0
       DUCTRUN(NR)%N_M_DUCTS = 0
    ENDIF QFAN_IF
+ENDDO
+
+DO NR=1,N_DUCTRUNS
+   IF (.NOT. MT_PRESENT(NR)) CYCLE
+   DO ND=1,DUCTRUN(NR)%N_DUCTS
+      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
+         WRITE(MESSAGE,'(A,A,A)') &
+            'ERROR: Duct ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID),&
+            ' has N_CELLS=0 and is in a duct run with ducts that have N_CELLS>0.'
+         CALL SHUTDOWN(MESSAGE); RETURN         
+      ENDIF
+   ENDDO
 ENDDO
 
 END SUBROUTINE FIND_DUCTRUNS
