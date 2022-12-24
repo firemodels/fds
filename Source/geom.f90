@@ -22423,14 +22423,7 @@ END SUBROUTINE OUTGEOM
 ! ---------------------------- WRITE_GEOM_ALL ------------------------------------
 
 SUBROUTINE WRITE_GEOM_ALL
-INTEGER :: I
-REAL(EB) :: STIME
-
 CALL WRITE_GEOM(T_BEGIN) ! write out both static and dynamic data at t=T_BEGIN
-DO I = 1, NFRAMES
-   STIME = (T_BEGIN*REAL(NFRAMES-I,EB) + T_END*REAL(I,EB))/REAL(NFRAMES,EB)
-   CALL WRITE_GEOM(STIME) ! write out just dynamic data at t=STIME
-ENDDO
 END SUBROUTINE WRITE_GEOM_ALL
 
 ! ---------------------------- WRITE_GEOM ----------------------------------------
