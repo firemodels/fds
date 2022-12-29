@@ -1391,7 +1391,9 @@ where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecu
 
 Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
 
-
+\section{3D Smoke Output}
+\label{info:smoke16}
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are scaled to 8 bit integers (soot density is converted to an opacity first) then these values are compressed using run length encoding. Repeated integers are replaced by nI where n is the number of repeats and I is the value repeated.  When higher resolution is desired, the SMOKE3D\_16 keyword is used to output these same quantities as 16 bit integers.  FDS outputs the time, the minimum value, valmin,  and maximum value, valmx,  and 16 bit integers scaled between valmin and valmax.  The data is output in files with file extension .s16 rather than .s3d . For now these 16 bit integer values are not compressed.
 
 
 \chapter{Initial Conditions}
@@ -11029,7 +11031,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK
 % ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
-% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/SMOKE3D_16
+% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK
 % ignorenamelistkw: /PART/DEBUG
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
@@ -11836,6 +11838,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SC}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}           \\ \hline
 {\ct SIMULATION\_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & {\ct 'VLES'}      \\ \hline
+{\ct SMOKE3D\_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & {\ct F}           \\ \hline
 {\ct SMOKE\_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & {\ct F}           \\ \hline
 {\ct SOOT\_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
