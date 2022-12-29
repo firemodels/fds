@@ -1393,7 +1393,7 @@ Clipping of density and mass fractions violates mass conservation, so it is pref
 
 \section{3D Smoke Output}
 \label{info:smoke16}
-FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are scaled to 8 bit integers (soot density is converted to an opacity first) then these values are compressed using run length encoding. Repeated integers are replaced by nI where n is the number of repeats and I is the value repeated.  When higher resolution is desired, the SMOKE3D\_16 keyword is used to output these same quantities as 16 bit integers.  FDS outputs the time, the minimum value, valmin,  and maximum value, valmx,  and 16 bit integers scaled between valmin and valmax.  The data is output in files with file extension .s16 rather than .s3d . For now these 16 bit integer values are not compressed.
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by nI where n is the number of repeats and I is the value repeated.  When higher resolution is desired, the \&MISC SMOKE3D\_16 keyword may be used to output these same quantities as 16 bit integers.  For each time frame output, FDS outputs the time, the minimum value, valmin,  the maximum value, valmx,  and 16 bit integers scaled between valmin and valmax.  This data is then output to a file with extension .s16 rather than .s3d . For now these 16 bit integer values are not compressed.
 
 
 \chapter{Initial Conditions}
