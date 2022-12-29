@@ -10964,7 +10964,18 @@ $^2$                 \> Requires the specification of a particle name using {\ct
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities for HVAC systems. In the file type column, D indicates a device output specified with a {\ct DEVC} input, and H indicates a Smokeview output specified with an {\ct HVAC} input.
+
+All HVAC output quantities can be selected with a {\ct DEVC} input and do not require an {\ct XYZ} or {\ct XB}. When using a {\ct DEVC}, quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID}, and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+
+HVAC output quantities beginning with {\ct DUCT} that are not duct cell quantities and output quantities beginning with {\ct NODE} except for {\ct NODE PRESSURE DIFFERENCE} can also be output to the {\ct CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). These are identified in Table~\ref{tab:hvacoutputquantities} as a File Type of H. Smokeview outputs are specified using the {\ct HVAC} namelist. To select duct outputs use {\ct TYPE\_ID='DUCT QUANTITY LIST'}, and for node outputs use {\ct TYPE\_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using {\ct QUANTITY}, and if any quantities require a species also specify {\ct QUANTITY\_SPEC\_ID}. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using {\ct DT\_HVAC} on {\ct DUMP}. For example:
+\begin{lstlisting}
+&HVAC TYPE_ID='DUCT QUANTITY LIST',
+       QUANTITY='DUCT VELOCITY','DUCT LOSS','DUCT VOLUME FRACTION',
+       QUANTITY_SPEC_ID(3)='OXYGEN'/
+\end{lstlisting}
+would output the velocity, flow loss, and the volume fraction of oxygen in all ducts. 
+
 \end{sloppypar}
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
@@ -10980,30 +10991,30 @@ Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities fo
 \hline \hline
 \endhead
 {\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil           &  kW                & D   \\ \hline
-{\ct DUCT DENSITY}                              & Density of the flow in a duct               &  kg/m$^3$          & D   \\ \hline
+{\ct DUCT DENSITY}                              & Density of the flow in a duct               &  kg/m$^3$          & D,H   \\ \hline
 {\ct DUCT CELL DENSITY}                         & Gas density in a duct cell                  &  kg/m$^3$          & D   \\ \hline
 {\ct DUCT CELL MASS FRACTION}                   & Mass fraction of a species in a duct cell   &  kg/kg             & D   \\ \hline
 {\ct DUCT CELL TEMPERATURE}                     & Gas temperature in a duct cell              &  $^\circ$C         & D   \\ \hline
 {\ct DUCT CELL VOLUME FRACTION}                 & Volume fraction of a species in a duct cell &  mol/mol           & D   \\ \hline
-{\ct DUCT ENTHALPY FLOW}                        & Enthalpy flow in a duct                     &  kW                & D   \\ \hline
-{\ct DUCT LOSS}                                 & Total flow loss coefficient for a duct      &                    & D   \\ \hline
-{\ct DUCT MASS FLOW}                            & Mass flow in a duct                         &  kg/s              & D   \\ \hline
-{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct        &  kg/kg             & D   \\ \hline
-{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct           & $^\circ$C          & D   \\ \hline
-{\ct DUCT VELOCITY}                             & Velocity of a duct                          &  m/s               & D   \\ \hline
-{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                   &  m$^3$/s           & D   \\ \hline
-{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct      &  mol/mol           & D   \\ \hline
+{\ct DUCT ENTHALPY FLOW}                        & Enthalpy flow in a duct                     &  kW                & D,H   \\ \hline
+{\ct DUCT LOSS}                                 & Total flow loss coefficient for a duct      &                    & D,H   \\ \hline
+{\ct DUCT MASS FLOW}                            & Mass flow in a duct                         &  kg/s              & D,H   \\ \hline
+{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct        &  kg/kg             & D,H   \\ \hline
+{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct           & $^\circ$C          & D,H   \\ \hline
+{\ct DUCT VELOCITY}                             & Velocity of a duct                          &  m/s               & D,H   \\ \hline
+{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                   &  m$^3$/s           & D,H   \\ \hline
+{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct      &  mol/mol           & D,H   \\ \hline
 {\ct FAN PRESSURE}                              & Pressure output of a fan in a duct          &  Pa                & D   \\ \hline
 {\ct FILTER LOADING}                            & Loading of a species in a filter            &  kg                & D   \\ \hline
 {\ct FILTER LOSS}                               & Flow loss through a filter                  &                    & D   \\ \hline
-{\ct NODE DENSITY}                              & Density of the flow through a node          &  kg/m$^3$          & D   \\ \hline
-{\ct NODE ENTHALPY}                             & Enthalpy of a node                          &  kJ/kg             & D   \\ \hline
-{\ct NODE SENSIBLE ENTHALPY}                    & Sensible Enthalpy of a node                 &  kJ/kg             & D   \\ \hline
-{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node        &  kg/kg             & D   \\ \hline
-{\ct NODE PRESSURE}                             & Pressure of a node                          &       Pa           & D   \\ \hline
+{\ct NODE DENSITY}                              & Density of the flow through a node          &  kg/m$^3$          & D,H   \\ \hline
+{\ct NODE ENTHALPY}                             & Enthalpy of a node                          &  kJ/kg             & D,H   \\ \hline
+{\ct NODE SENSIBLE ENTHALPY}                    & Sensible Enthalpy of a node                 &  kJ/kg             & D,H   \\ \hline
+{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node        &  kg/kg             & D,H   \\ \hline
+{\ct NODE PRESSURE}                             & Pressure of a node                          &       Pa           & D,H   \\ \hline
 {\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes       &       Pa           & D   \\ \hline
-{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node       & $^\circ$C          & D   \\ \hline
-{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node      &  mol/mol           & D   \\ \hline
+{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node       & $^\circ$C          & D,H   \\ \hline
+{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node      &  mol/mol           & D,H   \\ \hline
 \end{longtable}
 
 
@@ -11546,6 +11557,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NETWORK\_ID}             & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
 {\ct NODE\_ID}                & Char.~Doublet & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
 {\ct PERIMETER}               & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
+{\ct QUANTITY}                & Char.~Array   & Sections ~\ref{info:hvacoutputquantities}                                &               &                \\ \hline
+{\ct QUANTITY\_SPEC\_ID}      & Char.~Array   & Sections ~\ref{info:hvacoutputquantities}                                &               &                \\ \hline
 {\ct RAMP\_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan} &               &                \\ \hline
 {\ct RAMP\_LOSS}              & Character     & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &               &                \\ \hline
 {\ct REVERSE}                 & Logical       & Section~\ref{info:HVACduct}                                              &               & {\ct F}  \\ \hline
@@ -13485,6 +13498,29 @@ ENDIF
 
 \fi
 
+\section{FDS HVAC I/O binary format}
+\label{inout:binhvac}
+The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted to the file {\ct CHID.hvac}. These files are written out from {\ct dump.f90} with the following lines:
+\begin{lstlisting}
+	WRITE(LU_HVAC) N_NODE_OUT, N_NODE_QUANTITY, N_DUCT_OUT, N_DUCT_QUANTITY
+	WRITE(LU_HVAC) DUCT_CELL(1:N_DUCT_OUT)
+
+	WRITE(LU_HVAC) TIME
+    DO N=1,N_NODE_OUT
+       WRITE(LU_HVAC) OUTVAL_N(1:N_NODE_QUANTITY)
+    ENDDO
+	DO N=1,N_DUCT_OUT
+	   IF (DUCT(N)%N_CELLS > 0) THEN
+     	  DO N=1,DUCT(N)%N_CELLS
+             WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
+          ENDDO
+       ELSE
+          WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
+       ENDIF
+    ENDDO
+	
+\end{lstlisting}
+where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval. 
 
 \backmatter
 \nopart %To Fix TOC in PDF output.
