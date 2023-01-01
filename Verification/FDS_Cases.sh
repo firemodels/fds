@@ -50,7 +50,6 @@ $QFDS -d Complex_Geometry geom_part_init.fds
 $QFDS -d Complex_Geometry geom_sphere1a.fds
 $QFDS -d Complex_Geometry geom_sphere1c.fds
 $QFDS -d Complex_Geometry geom_sphere1e.fds
-#$QFDS -d Complex_Geometry geom_sphere2.fds
 $QFDS -d Complex_Geometry geom_sphere3b.fds
 $QFDS -d Complex_Geometry geom_sphere3d.fds
 $QFDS -d Complex_Geometry geom_sphere3f.fds
