@@ -41,9 +41,7 @@ surface and center.
 
 &TIME T_END=1000., WALL_INCREMENT=1, DT=0.01 /  
 
-&MISC TMPA = 0, 
-      SOLID_PHASE_ONLY = .TRUE.
-      ASSUMED_GAS_TEMPERATURE = 700/ 
+&MISC TMPA = 0, SOLID_PHASE_ONLY = .TRUE. /
 &RADI RADIATION = .FALSE. /
 
 &DUMP DT_DEVC=10. / 
@@ -62,6 +60,7 @@ surface and center.
 &RAMP ID = 'C_RAMP' T=200, F= 1.00 /
 
 &SURF ID='CART SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='RED'
       STRETCH_FACTOR = 1.0
       MATL_ID='MAT_1'
@@ -69,6 +68,7 @@ surface and center.
       THICKNESS=0.01 / 
 
 &SURF ID='CYL SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='GREEN'
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'CYLINDRICAL'
@@ -77,6 +77,7 @@ surface and center.
       THICKNESS=0.01 / 
 
 &SURF ID='SPH SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='BLUE'
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'SPHERICAL'

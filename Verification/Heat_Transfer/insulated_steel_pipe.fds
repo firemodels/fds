@@ -4,7 +4,7 @@
 
 &TIME T_END=36000., WALL_INCREMENT=1, DT=1.0 /
 
-&MISC TMPA=20., ASSUMED_GAS_TEMPERATURE=480., SOLID_PHASE_ONLY=.TRUE. / 
+&MISC SOLID_PHASE_ONLY=.TRUE. / 
 
 &RADI RADIATION=.FALSE. /
 
@@ -21,6 +21,7 @@
 
 &SURF ID                        = 'WALL'
       MATL_ID                   = 'INSULATION','STEEL','INSULATION'
+      TMP_GAS_FRONT             = 480.
       HEAT_TRANSFER_COEFFICIENT = 10.
       INNER_RADIUS              = 0.01
       GEOMETRY                  = 'CYLINDRICAL'
