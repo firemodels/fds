@@ -32,7 +32,6 @@ disp('vort2d...');                         vort2d
 disp('wall_internal_radiation...');        wall_internal_radiation
 disp('ashrae_7...');                       ashrae_7
 disp('flame_species...');                  flame_species
-disp('EDC_species...');                    EDC_species
 disp('cat_propane_depo...');               cat_propane_depo
 disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
