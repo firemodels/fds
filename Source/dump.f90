@@ -3503,25 +3503,23 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME,GET_DATE,GET_DATE_ISO_8601
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
-CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
+CHARACTER(110) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
 REAL(EB) :: TNOW,CPUTIME
 
 TNOW = CURRENT_TIME()
 
-IF (ICYC==1) WRITE(LU_OUTPUT,100)
+! Write runtime timing diagnostics to the _steps.csv file
 
-IF (ABS(T)<=0.0001) THEN
-   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
-ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
-ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+CALL GET_DATE_ISO_8601(DATE)
+CALL CPU_TIME(CPUTIME)
+IF (ABS(T)<=999._EB) THEN
+   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ELSE
-   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ENDIF
 
-! Simple output without DT for .err file
+! Write abridged output to the .err file
 
 IF (T<=0.0001) THEN
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
@@ -3533,28 +3531,36 @@ ELSE
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
 ENDIF
 
-! Write simple output string to .err file
-
 WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
 
-! Write runtime diagnostics to the steps CSV file.
+! Header for .out file
 
-CALL GET_DATE_ISO_8601(DATE)
-CALL CPU_TIME(CPUTIME)
-IF (ABS(T)<=999._EB) THEN
-   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
-ELSE
-   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
-ENDIF
+IF (ICYC==1) WRITE(LU_OUTPUT,100)
 
-! Write simple output string to .out file if the diagnostics are suppressed.
+! Write abridged output to the .out file
 
 IF (SUPPRESS_DIAGNOSTICS) THEN
+
+   IF (ABS(T)<=0.0001) THEN
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+   ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+   ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+   ELSE
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+   ENDIF
+
    WRITE(LU_OUTPUT,'(A)') TRIM(SIMPLE_OUTPUT)
    RETURN
+
 ENDIF
 
-! Detailed diagnostics
+! Detailed diagnostics to the .out file
 
 CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
@@ -3621,7 +3627,6 @@ WRITE(LU_OUTPUT,*)
 121 FORMAT(6X,' No. of CLIP DT restrictions:  ',I0)
 
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
-
 END SUBROUTINE WRITE_DIAGNOSTICS
 
 
