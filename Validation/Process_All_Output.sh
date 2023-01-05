@@ -7,6 +7,10 @@ PROCESS()
   cd $case
   nout=`ls -l Current_Results/*.out |& grep -v cannot | wc -l`
   nfds=`ls -l Current_Results/*.fds |& grep -v cannot | wc -l`
+  ncfds=`ls -l Current_Results/*cat.fds |& grep -v cannot | wc -l`
+  if [ $ncfds -gt 0 ] ; then
+    nfds=$ncfds
+  fi
   nsuccess=`tail Current_Results/*.out |& grep successfully | wc -l`
   status="***error: $case cases not run"
   if [ $nfds -gt 0 ] && [ $nfds -gt $nout ]; then
