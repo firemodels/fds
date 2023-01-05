@@ -1232,8 +1232,9 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP
 
 ! Mesh NM creates a list of all WALL cells in all other meshes that might be used in either a 1-D or 3-D heat transfer calculation.
-! The list only includes those WALL cells that will need an MPI communication; that is Mesh NM and the other mesh do not share 
-! the same MPI process. The variable WALL_SAVE holds the list of WALL cells.
+! The list only includes those WALL cells that will need to be passed via MPI communication.
+! The variable WALL_SAVE holds the list of WALL cell and surf indices. The WALL_INDEX of the cells in the neighboring
+! mesh are changed to reflect the shortened list.
 
 WALL_SAVE_DIM = 10
 
@@ -1249,7 +1250,13 @@ DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    IF (NOM<1) CYCLE
    ! If the back wall is in another mesh and controlled by another MPI process, create a short list of back indices to exchange
    IF (PROCESS(NOM)/=MY_RANK) THEN
-      IF (COUNT(WALL_SAVE(NOM)%CELL_INDICES(1:WALL_SAVE(NOM)%COUNTER)==WC%BACK_INDEX)>0) CYCLE
+      IF (COUNT(WALL_SAVE(NOM)%CELL_INDICES(1:WALL_SAVE(NOM)%COUNTER)==WC%BACK_INDEX)>0) THEN
+         ! This back wall index is already on the list, so just change it to the short list index, II
+         DO II=1,WALL_SAVE(NOM)%COUNTER
+            IF (WALL_SAVE(NOM)%CELL_INDICES(II)==WC%BACK_INDEX) WC%BACK_INDEX = II
+         ENDDO
+         CYCLE
+      ENDIF
       IF (WALL_SAVE(NOM)%COUNTER==WALL_SAVE_DIM(NOM)) CALL REALLOCATE_WALL_SAVE
       WALL_SAVE(NOM)%COUNTER = WALL_SAVE(NOM)%COUNTER + 1
       WALL_SAVE(NOM)%CELL_INDICES(WALL_SAVE(NOM)%COUNTER) = WC%BACK_INDEX
