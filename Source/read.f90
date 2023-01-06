@@ -4404,7 +4404,7 @@ DO NR=1,N_REACTIONS
    REAC_FUEL_2(NR) = 'null'
    IF (ANY(REAC_FUEL_2==REACTION(NR)%FUEL)) DUPLICATE_FUEL(NR) = .TRUE.
    IF (REACTION(NR)%SIMPLE_CHEMISTRY .AND. DUPLICATE_FUEL(NR)) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REACtion ',NR,' uses simple chemistry and has a duplicate fuel to another reaction.'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REAC ',NR,' uses simple chemistry and has a duplicate fuel to another reaction.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
@@ -14500,7 +14500,7 @@ IF (TRIM(QUANTITY)=='MIXTURE FRACTION') THEN
          ENDIF
       ENDDO
       IF (N_PLUS/=1 .AND. N_MINUS/=2) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Reaction ',NR,' MIXTURE FRACTION requires REAC of the form A + B -> C'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REAC ',NR,' MIXTURE FRACTION requires reaction of the form A + B -> C'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
