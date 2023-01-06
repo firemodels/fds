@@ -540,7 +540,7 @@ TYPE SPECIES_MIXTURE_TYPE
    INTEGER :: CONDENSATION_SMIX_INDEX=-1  !< Species is condensible that condenses into the indexed species
    INTEGER :: EVAPORATION_SMIX_INDEX=-1   !< Species is a condensate that evaporates into the indexed species
    INTEGER :: AGGLOMERATION_INDEX=-1      !< Index of species in the agglomeration arrays
-   LOGICAL :: DEPOSITING=.FALSE.    !< Species is an aerosol species  
+   LOGICAL :: DEPOSITING=.FALSE.    !< Species is an aerosol species
    LOGICAL :: VALID_ATOMS=.TRUE.    !< Species has a chemical formula defined
    LOGICAL :: EVAPORATING=.FALSE.   !< Species is the gas species for a liquid droplet
    LOGICAL :: EXPLICIT_H_F=.FALSE.  !< All subspecies have an explicitly defined H_F
@@ -1020,8 +1020,9 @@ TYPE CC_CUTEDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   CEELEM  ! Cut-Edge connectivities.
    INTEGER,  DIMENSION(MAX_DIM+2)                  ::      IJK  ! [ i j k X2AXIS cetype]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   INDSEG  ! [ntr tr1 tr2 ibod]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::VERT_LIST  ! [VERT_TYPE I J K]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::      DXX  ! [DXX(1,JEC) DXX(2,JEC)]
-   INTEGER, ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:2, -2:2, JEC] Cut-face connected to edge.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:3, -2:2, JEC] Cut-face connected to edge.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ, MU_DUIDXJ ! Unstructured VelGrad components.
    INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE CC_CUTEDGE_TYPE
@@ -1058,7 +1059,7 @@ INTEGER, PARAMETER :: CC_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE CC_CUTFACE_TYPE
    INTEGER :: IWC=0,PRES_ZONE=-1
-   INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
+   INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS ! Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEDGES  ! Cut-Edges. Points to EDGE_LIST.
@@ -1081,7 +1082,7 @@ TYPE CC_CUTFACE_TYPE
                                                        ! Velocities in cut-face of MESHES(NOM).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
    REAL(EB) :: FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  EDGE_LIST ! [CE_TYPE IEC JEC] or [RG_TYPE SIDE LOHI_AXIS]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  EDGE_LIST ! [CE_TYPE IEC JEC] or [RG_TYPE SIDE_LOHI AXIS]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K  ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
@@ -1154,13 +1155,13 @@ INTEGER, PARAMETER :: CC_MAXVERTS_CELL   =3072
 INTEGER, PARAMETER :: CC_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
 
 TYPE CC_CUTCELL_TYPE
-   INTEGER :: NCELL, NFACE_CELL
+   INTEGER :: NCELL=0, NFACE_CELL=0, NFACE_DROPPED=0
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: FACE_LIST ! List of faces, cut-faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: FACE_LIST, FACE_LIST_DROPPED ! List of faces, cut-faces.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
    INTEGER,  ALLOCATABLE, DIMENSION(:)        ::  LINK_LEV ! Level in local Linking Hierarchy tree.
    REAL(EB), ALLOCATABLE, DIMENSION(:)        ::    VOLUME ! Cut-cell volumes.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    XYZCEN ! Cut-cell centroid locaitons.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    XYZCEN ! Cut-cell centroid locations.
    INTEGER,  DIMENSION(MAX_DIM)               ::       IJK ! [ i j k ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RHO, RHOS ! Cut cells densities.
    REAL(EB), ALLOCATABLE, DIMENSION(:)        ::  RSUM,TMP ! Cut cells temperatures.
@@ -1186,7 +1187,7 @@ TYPE CC_CUTCELL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: USE_CC_VOL
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: NOADVANCE
    INTEGER                                    :: N_NOMICC=0
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICC
    REAL(EB):: DIVVOL_BC=0._EB
@@ -1615,7 +1616,7 @@ TYPE DUCT_TYPE
    INTEGER :: DUCTRUN=-1                                  !< Ductrun duct belongs to
    INTEGER :: DUCTRUN_INDEX=-1                            !< Index in ductrun duct belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                          !< Index of duct in ductrun solution matrix
-   INTEGER :: CONNECTIVITY_INDEX=-1                       !< Index of duct connectivity for Smokeview display   
+   INTEGER :: CONNECTIVITY_INDEX=-1                       !< Index of duct connectivity for Smokeview display
    REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
    REAL(EB) :: AREA_OLD                                   !< Prior timestep duct cross sectional area (m2)
    REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
