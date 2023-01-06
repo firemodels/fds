@@ -3164,7 +3164,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \subsection{Specified Front and Back Surface Temperature}
 \label{info:dirichlet}
 
-If a solid obstruction is thermally-thick, you typically do not want to specify its surface temperature because you want the surface temperature to establish itself based on the heat flux to, and heat penetration within, the solid. However, there may be situations where you might want to do this. One example is for testing the heat conduction algorithm against analytical solutions for which a specified boundary temperature is typical. An example is as follows: 
+If a solid obstruction is thermally-thick, you typically do not want to specify its surface temperature because you want the surface temperature to establish itself based on the heat flux to, and heat penetration within, the solid. However, there may be situations where you might want to do this. One example is for testing the heat conduction algorithm against analytical solutions for which a specified boundary temperature is typical. An example is as follows:
 \begin{lstlisting}
 &SURF ID='...', MATL_ID='...', TMP_FRONT=500., TMP_BACK=20., THICKNESS=0.01 /
 \end{lstlisting}
@@ -5327,7 +5327,7 @@ In this case, the fuel species is again predefined.  However, here the heat of c
 See Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 \begin{lstlisting}
 &SPEC ID       = 'MY FUEL'
-       FORMULA = 'C3H8O3N4'/
+      FORMULA  = 'C3H8O3N4'/
 
 &REAC FUEL               = 'MY FUEL'
       HEAT_OF_COMBUSTION = 46124. /
@@ -10991,7 +10991,7 @@ HVAC output quantities beginning with {\ct DUCT} that are not duct cell quantiti
        QUANTITY='DUCT VELOCITY','DUCT LOSS','DUCT VOLUME FRACTION',
        QUANTITY_SPEC_ID(3)='OXYGEN'/
 \end{lstlisting}
-would output the velocity, flow loss, and the volume fraction of oxygen in all ducts. 
+would output the velocity, flow loss, and the volume fraction of oxygen in all ducts.
 
 \end{sloppypar}
 
@@ -13536,9 +13536,9 @@ The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted
           WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
        ENDIF
     ENDDO
-	
+
 \end{lstlisting}
-where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval. 
+where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval.
 
 \backmatter
 \nopart %To Fix TOC in PDF output.
