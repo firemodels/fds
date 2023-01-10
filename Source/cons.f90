@@ -159,6 +159,7 @@ INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the inpu
 
 ! Miscellaneous logical constants
 
+LOGICAL :: HVAC_DEBUG=.FALSE.               !< Output known hvac values to smokeview
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
