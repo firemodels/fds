@@ -24,7 +24,7 @@
 
 &SURF ID                  = 'POOL'
       TMP_INNER           = 20.
-      TMP_BACK            = 20.
+      TMP_GAS_BACK        = 20.
       BACKING             = 'VOID'
       MATL_ID             = 'WATER'
       COLOR               = 'BLUE'

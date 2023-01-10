@@ -159,6 +159,7 @@ INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the inpu
 
 ! Miscellaneous logical constants
 
+LOGICAL :: HVAC_DEBUG=.FALSE.               !< Output known hvac values to smokeview
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
@@ -246,7 +247,7 @@ LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SU
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
 LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that off-gas are present
-LOGICAL :: VOL3D=.FALSE.                            !< Output 3D smoke values using 16 bit integers
+LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -295,7 +296,6 @@ REAL(EB) :: C_WALE=0.60_EB                     !< Coefficient in turbulence mode
 REAL(EB) :: LAPSE_RATE                         !< Temperature change with height (K/m)
 REAL(EB) :: TEX_ORI(3)                         !< Origin of the texture map for Smokeview (m)
 REAL(EB) :: KAPPA0                             !< Background gas radiative absorption coefficient (1/m)
-REAL(EB) :: ASSUMED_GAS_TEMPERATURE            !< Gas temperature used in solid phase calculations (K)
 REAL(EB) :: PR_ONTH                            !< Prandtl number to the 1/3 power
 REAL(EB) :: MU_AIR_0=1.8E-5_EB                 !< Dynamic Viscosity of Air at 20 C (kg/m/s)
 REAL(EB) :: PR_AIR=0.7_EB                      !< Prandtl number for Air
@@ -360,7 +360,6 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The ra
 REAL(EB) :: DT_INITIAL                                      !< Initial time step size (s)
 REAL(EB) :: T_BEGIN                                         !< Beginning time of simulation (s)
 REAL(EB) :: T_END                                           !< Ending time of simulation (s)
-REAL(EB) :: T_END_GEOM
 REAL(EB) :: TIME_SHRINK_FACTOR                              !< Factor to reduce specific heat and total run time
 REAL(EB) :: RELAXATION_FACTOR=1._EB                         !< Factor used to relax normal velocity nudging at immersed boundaries
 REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for MPI messages to be received (s)
@@ -448,11 +447,11 @@ REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
 ! Ramping parameters
 
 CHARACTER(LABEL_LENGTH), POINTER, DIMENSION(:) :: RAMP_ID,RAMP_TYPE
-INTEGER :: I_RAMP_AGT,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
+INTEGER :: I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
            I_RAMP_PGF_T,I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
            I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0
 INTEGER, PARAMETER :: TIME_HEAT=-1,TIME_VELO=-2,TIME_TEMP=-3,TIME_EFLUX=-4,TIME_PART=-5,TANH_RAMP=-2,TSQR_RAMP=-1,&
-                      VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8
+                      VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8,TIME_TGF=-9,TIME_TGB=-10,TIME_TB=-11,N_SURF_RAMPS=11
 
 ! TABLe parameters
 
@@ -535,7 +534,7 @@ CHARACTER(80)                              :: FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE,FN_RESTART
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM, FN_CFACE_GEOM
 CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDF_GEOM,FN_BNDG, &
-                                              FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF,FN_GEOM_TRNF
+                                              FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF
 
 CHARACTER(9) :: FMT_R
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
@@ -646,7 +645,6 @@ LOGICAL :: CC_IBM=.FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
 LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
-LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
 LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
@@ -672,6 +670,7 @@ INTEGER, PARAMETER :: NOD4 = 4
 INTEGER, PARAMETER :: EDG1 = 1
 INTEGER, PARAMETER :: EDG2 = 2
 INTEGER, PARAMETER :: EDG3 = 3
+INTEGER, PARAMETER :: EDG4 = 4
 
 INTEGER :: MAXIMUM_GEOMETRY_ZVALS= 100, MAXIMUM_GEOMETRY_VOLUS=2400,  &
            MAXIMUM_GEOMETRY_FACES=1000, MAXIMUM_GEOMETRY_VERTS=1000,  &

@@ -1232,8 +1232,9 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP
 
 ! Mesh NM creates a list of all WALL cells in all other meshes that might be used in either a 1-D or 3-D heat transfer calculation.
-! The list only includes those WALL cells that will need an MPI communication; that is Mesh NM and the other mesh do not share 
-! the same MPI process. The variable WALL_SAVE holds the list of WALL cells.
+! The list only includes those WALL cells that will need to be passed via MPI communication.
+! The variable WALL_SAVE holds the list of WALL cell and surf indices. The WALL_INDEX of the cells in the neighboring
+! mesh are changed to reflect the shortened list.
 
 WALL_SAVE_DIM = 10
 
@@ -1249,7 +1250,13 @@ DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    IF (NOM<1) CYCLE
    ! If the back wall is in another mesh and controlled by another MPI process, create a short list of back indices to exchange
    IF (PROCESS(NOM)/=MY_RANK) THEN
-      IF (COUNT(WALL_SAVE(NOM)%CELL_INDICES(1:WALL_SAVE(NOM)%COUNTER)==WC%BACK_INDEX)>0) CYCLE
+      IF (COUNT(WALL_SAVE(NOM)%CELL_INDICES(1:WALL_SAVE(NOM)%COUNTER)==WC%BACK_INDEX)>0) THEN
+         ! This back wall index is already on the list, so just change it to the short list index, II
+         DO II=1,WALL_SAVE(NOM)%COUNTER
+            IF (WALL_SAVE(NOM)%CELL_INDICES(II)==WC%BACK_INDEX) WC%BACK_INDEX = II
+         ENDDO
+         CYCLE
+      ENDIF
       IF (WALL_SAVE(NOM)%COUNTER==WALL_SAVE_DIM(NOM)) CALL REALLOCATE_WALL_SAVE
       WALL_SAVE(NOM)%COUNTER = WALL_SAVE(NOM)%COUNTER + 1
       WALL_SAVE(NOM)%CELL_INDICES(WALL_SAVE(NOM)%COUNTER) = WC%BACK_INDEX
@@ -1947,7 +1954,7 @@ DEALLOCATE(REMESH_LAYER)
 
 ! Reset initial values for some reallocated arrays
 
-ONE_D%TMP = SF%TMP_INNER(1)
+ONE_D%TMP = SF%TMP_INNER
 ONE_D%RHO_C_S = 1.E6_EB
 ONE_D%K_S = 0._EB
 DO NN=1,SF%N_MATL
@@ -3439,29 +3446,29 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
    IF (SF%PROFILE==RAMP_PROFILE) THEN
       SELECT CASE(ABS(IOR))
          CASE(1)
-            IF (SF%RAMP_V_X/='null') THEN
+            IF (SF%RAMP(VELO_PROF_X)%ID/='null') THEN
                CALL SHUTDOWN('ERROR: RAMP_V_X assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),SF%RAMP_INDEX(VELO_PROF_Y),TAU=1._EB)
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP_INDEX(VELO_PROF_Z),TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),SF%RAMP(VELO_PROF_Y)%INDEX,TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(2)
-            IF (SF%RAMP_V_Y/='null') THEN
+            IF (SF%RAMP(VELO_PROF_Y)%ID/='null') THEN
                CALL SHUTDOWN('ERROR: RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),SF%RAMP_INDEX(VELO_PROF_X),TAU=1._EB)
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP_INDEX(VELO_PROF_Z),TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),SF%RAMP(VELO_PROF_X)%INDEX,TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(3)
-            IF (SF%RAMP_V_Z/='null') THEN
+            IF (SF%RAMP(VELO_PROF_Z)%ID/='null') THEN
                CALL SHUTDOWN('ERROR: RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),SF%RAMP_INDEX(VELO_PROF_X),TAU=1._EB)
-            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),SF%RAMP_INDEX(VELO_PROF_Y),TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),SF%RAMP(VELO_PROF_X)%INDEX,TAU=1._EB)
+            ONE_D%U_NORMAL_0 = ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),SF%RAMP(VELO_PROF_Y)%INDEX,TAU=1._EB)
       END SELECT
    ENDIF
 
@@ -3508,7 +3515,7 @@ ENDIF
 
 ! Set correct initial value of temperature for RAMP_T
 
-IF (ABS(ONE_D%T_IGN-T_BEGIN) <= SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
+IF (ABS(ONE_D%T_IGN-T_BEGIN) <= SPACING(ONE_D%T_IGN) .AND. SF%RAMP(TIME_TEMP)%INDEX>=1) THEN
    TSI = TT
 ELSE
    TSI = TT - ONE_D%T_IGN
@@ -3517,9 +3524,16 @@ ENDIF
 IF (SF%TMP_FRONT_INITIAL>0._EB) THEN
    ONE_D%TMP_F = SF%TMP_FRONT_INITIAL
 ELSEIF (SF%TMP_FRONT>0._EB) THEN
-   ONE_D%TMP_F = M%TMP_0(BC%KK) + EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_TEMP),TAU=SF%TAU(TIME_TEMP))*(SF%TMP_FRONT-M%TMP_0(BC%KK))
-ELSEIF (SF%RAMP_T_I_INDEX < 0) THEN
+   ONE_D%TMP_F = M%TMP_0(BC%KK) + EVALUATE_RAMP(TSI,SF%RAMP(TIME_TEMP)%INDEX,TAU=SF%RAMP(TIME_TEMP)%TAU)*&
+                 (SF%TMP_FRONT-M%TMP_0(BC%KK))
+ELSE
    ONE_D%TMP_F = M%TMP_0(BC%KK)
+ENDIF
+
+IF (SF%TMP_BACK>0._EB) THEN
+   ONE_D%TMP_B = SF%TMP_BACK
+ELSE
+   ONE_D%TMP_B = SF%TMP_INNER
 ENDIF
 
 ! Reinitialize wall cell outgoing radiation for change in TMP_F
