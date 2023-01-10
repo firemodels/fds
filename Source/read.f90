@@ -13104,7 +13104,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
       ! Create an auto-ignition exclusion zone (AIT) in the cell containing a SPARK
 
-      IF (PROPERTY(DV%PROP_INDEX)%SPARK) THEN
+      IF (PROPERTY(DV%PROP_INDEX)%SPARK .AND. PROCESS(DV%MESH)==MY_RANK) THEN
          M => MESHES(DV%MESH)
          DO NR=1,N_REACTIONS
             RN => REACTION(NR)
