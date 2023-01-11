@@ -4509,10 +4509,14 @@ In the second approach, one or more ducts have flows that are not specified, in 
 
 \newpage
 
-\section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
+\section{Sealed Compartments, Leakage, and Void Spaces}
 \label{info:ZONE}
 
-FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. FDS has an algorithm\footnote{The algorithm to identify pressure zones was introduced in FDS 6.7.6.} that identifies regions within the computational domain that are sealed; that is, are not connected to an {\ct OPEN} boundary. Thus, it is not necessary for you to explicitly declare these regions, or ``pressure zones.'' However, if you desire that a pressure zone be connected to another via a leak path, you need to explicitly declare it.
+All buildings have spaces that are relatively sealed off from the larger interior, like plenum spaces, closed rooms, HVAC ducts, and so on. In reality, these spaces are connected via seams and gaps such that none are perfectly sealed. However in FDS, these spaces are assumed to be perfectly sealed unless you say otherwise. This section introduces the concept of a ``pressure zone'' and how to work with them, in particular how to handle leakage.
+
+These spaces are important because FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. If the computational domain has no sealed void spaces and there is at least one {\ct OPEN} boundary, FDS can assume that the background pressure is simply atmospheric pressure and that it is the same throughout the entire domain. However, if void spaces exist, their background pressures will be different. For example, if a fire starts in a sealed compartment, the background pressure must rise above atmospheric.
+
+FDS has an algorithm that identifies regions within the computational domain that are sealed; that is, are not connected to an {\ct OPEN} boundary. Thus, it is not necessary for you to explicitly declare these regions, or ``pressure zones.'' However, if you desire that a pressure zone be connected to another via a leak path, you need to explicitly declare it. The next section discusses how to do that.
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
@@ -4521,13 +4525,13 @@ A pressure zone can be any region within the computational domain that is separa
 \begin{lstlisting}
 &ZONE XYZ=1.2,3.4,5.6, LEAK_AREA(0)=0.001 /
 \end{lstlisting}
-The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter has been deprecated.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
+The parameter {\ct XYZ} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not}\footnote{Past versions of FDS required you to specify a separate {\ct XYZ} point for each mesh spanned by the pressure zone. This is no longer required.} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
 
 Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
 
-On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line.
+
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
 \label{pressure_rise}
@@ -4657,14 +4661,17 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 \subsection{Breaking Pressure Zones}
 \label{background_pressure}
 
-There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
-called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
-parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps.
+There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps.
 
-A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
-breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
+A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
 
 
+\subsection{Filling Pressure Zones}
+\label{info:filling_zones}
+
+Sometimes a complicated geometry might have relatively small void spaces that are not connected to other parts of the domain or {\ct OPEN} boundaries. Sometimes these spaces are desired; sometimes not. That is, sometimes they are artifacts of the geometry generation software. If you do not want these void spaces within the domain, you can set a parameter called {\ct MINIMUM\_ZONE\_VOLUME} on the {\ct MISC} line. This parameter, which has units of m$^3$, tells FDS to fill in all void spaces less than this minimum volume. By default, its value is 0~m$^3$, meaning that no voids are filled. If you make its value huge, all voids will be filled.  
+
+On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line. This is not the same as setting a high value for {\ct MINIMUM\_ZONE\_VOLUME}. Rather, it tells FDS to simply ignore the void spaces and use the same background pressure throughout the domain.
 
 \newpage
 
@@ -11842,6 +11849,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
+{\ct MINIMUM\_ZONE\_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
 {\ct NEIGHBOR\_SEPARATION\_DISTANCE}                & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}           \\ \hline
