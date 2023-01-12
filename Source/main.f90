@@ -2449,6 +2449,7 @@ FILL_ZONES: IF (MINIMUM_ZONE_VOLUME>TWO_EPSILON_EB) THEN
                IF (P_ZONE(IZ)%VOLUME<MINIMUM_ZONE_VOLUME) THEN
                   IC = M%CELL_INDEX(I,J,K)
                   M%SOLID(IC) = .TRUE.
+                  M%PRESSURE_ZONE(I,J,K) = 0
                   DO IOR=-3,3
                      IF (IOR==0) CYCLE
                      IW = M%WALL_INDEX(IC,IOR)
