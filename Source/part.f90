@@ -2910,7 +2910,8 @@ REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
 INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
-INTEGER :: ARRAY_CASE
+INTEGER :: ARRAY_CASE !< Heat transfer conditions 1=gas only, 2=isothermal wall present, 3=1D wall present
+INTEGER(1), ALLOCATABLE, DIMENSION(:) :: PART_WARNING !< Tracks WARNING messages
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
@@ -2933,6 +2934,9 @@ IF (MESHES(NM)%NLP==0) THEN
    CALL PARTICLE_RUNNING_AVERAGES
    T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
    RETURN
+ELSE
+   ALLOCATE(PART_WARNING(NLP))
+   PART_WARNING(NLP)=0
 ENDIF
 
 ! Working arrays
@@ -3112,6 +3116,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+               DEALLOCATE(PART_WARNING)
                RETURN
             ENDIF
 
@@ -3452,7 +3457,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
+                        IF (.NOT. BTEST(PART_WARNING(IP),1)) THEN
+                           WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
+                           PART_WARNING(IP) = IBSET(PART_WARNING(IP),1)
+                        ENDIF
                      ELSE
                         CYCLE TIME_ITERATION_LOOP
                      ENDIF
@@ -3466,7 +3474,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
+                        IF (.NOT. BTEST(PART_WARNING(IP),2)) THEN
+                           WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
+                           PART_WARNING(IP) = IBSET(PART_WARNING(IP),2)
+                        ENDIF                        
                      ELSE
                      CYCLE TIME_ITERATION_LOOP
                      ENDIF
@@ -3491,7 +3502,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle Tag: ',LP%TAG
+                     IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
+                     ENDIF                        
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
@@ -3504,7 +3518,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle: ',IP
+                     IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle: ',IP
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
+                     ENDIF                        
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
@@ -3587,6 +3604,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    ENDDO PARTICLE_LOOP
 
 ENDDO SPECIES_LOOP
+
+DEALLOCATE(PART_WARNING)
 
 ! Sum up various quantities used in running averages
 
