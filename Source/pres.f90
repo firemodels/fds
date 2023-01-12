@@ -1229,6 +1229,8 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
       ENDDO WALL_LOOP
    ENDIF
 
+   IF (.NOT.ZM%USE_FFT) M%IPS=0
+
 ENDDO ZONE_MESH_LOOP
 
 ! FFT solver will be used for this mesh, no further setup required
