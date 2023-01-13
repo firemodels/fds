@@ -21320,31 +21320,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    NXB_IF: IF (NXB==6 .AND. N_ZVALS==0) THEN
       GEOM_TYPE = BOX_GEOM_TYPE
       CALL CHECK_XB(XB)
-
-      ! Test that high values are larger than low vals in every dimension:
-      IF ( (XB(2)-XB(1)) < GEOMEPS ) THEN
-         XB(1) = XB(1) - GEOM_DEFAULT_THICKNESS/2._EB
-         XB(2) = XB(2) + GEOM_DEFAULT_THICKNESS/2._EB
-         ! WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For BOX GEOM ',TRIM(ID),&
-         !            ' geometry number ',N,' zero thickness found in X direction.'
-         !CALL SHUTDOWN(MESSAGE); RETURN
-      ENDIF
-      IF ( (XB(4)-XB(3)) < GEOMEPS ) THEN
-         XB(3) = XB(3) - GEOM_DEFAULT_THICKNESS/2._EB
-         XB(4) = XB(4) + GEOM_DEFAULT_THICKNESS/2._EB
-         ! WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For BOX GEOM ',TRIM(ID),&
-         !             ' geometry number ',N,' zero thickness found in Y direction.'
-         ! CALL SHUTDOWN(MESSAGE); RETURN
-      ENDIF
-      IF ( (XB(6)-XB(5)) < GEOMEPS ) THEN
-         XB(5) = XB(5) - GEOM_DEFAULT_THICKNESS/2._EB
-         XB(6) = XB(6) + GEOM_DEFAULT_THICKNESS/2._EB
-
-         ! WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For BOX GEOM ',TRIM(ID),&
-         !             ' geometry number ',N,' zero thickness found in Z direction.'
-         ! CALL SHUTDOWN(MESSAGE); RETURN
-      ENDIF
-
       G%XB = XB
 
       ! Reallocate VOLUS, FACES and VERTS:
