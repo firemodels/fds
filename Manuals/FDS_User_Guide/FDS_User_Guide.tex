@@ -1919,17 +1919,17 @@ It is a good idea to inspect the geometry by running either a setup job
 
 \ifcompgeom
 
-\section{Creating Unstructured Solids: The \texorpdfstring{{\ct GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
+\subsection{Creating Unstructured Solids: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 
-The namelist {\ct GEOM}\ describes one or more unstructured closed geometric surfaces that enclose solid portions
+The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions
 of the fluid domain. These surfaces consist of a collection of triangular faces, where each face is built
 from three vertices. The user can assign a specific boundary condition to each of the faces.
 
 \subsection{Basics}
 \label{info:GEOM_Basics}
 
-A simple form of the {\ct GEOM}\ namelist defining an unstructured solid is given by
+A simple form of the {\ct GEOM} namelist defining an unstructured solid is given by
 
 \begin{lstlisting}
 &GEOM ID='UNSTRUCTURED_SOLID'
@@ -1945,9 +1945,9 @@ A simple form of the {\ct GEOM}\ namelist defining an unstructured solid is give
 /
 \end{lstlisting}
 
-\noindent where {\ct ID}\ specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
-{\ct VERTS}\ specifies the ($x_1$,$y_1$,$z_1$, $x_2$,$y_2$,$z_2$, ...) coordinates of the vertices,
-and {\ct FACES}\ specifies a list of triangular faces and the {\ct SURF\_ID}\ that should be
+\noindent where {\ct ID} specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
+{\ct VERTS} specifies the ($x_1$,$y_1$,$z_1$, $x_2$,$y_2$,$z_2$, ...) coordinates of the vertices,
+and {\ct FACES} specifies a list of triangular faces and the {\ct SURF\_ID} that should be
 assigned to each of them.
 
 A triangular face is defined by 3 vertex indices and one boundary condition index: ($v_1$,$v_2$,$v_3$,$b$).
@@ -2120,8 +2120,7 @@ A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDE
               CYLINDER_AXIS=1.,0.,0.,
               CYLINDER_NSEG_AXIS=6,
               CYLINDER_NSEG_THETA=48 /
- \end{lstlisting}
-
+\end{lstlisting}
 where the cylinder is discretized using 6 segments along its axis and 48 segments across its circumference. The keyword {\ct SURF\_ID} can be replaced by {\ct SURF\_IDS='S1','S2','S3'}, where the strings {\ct 'S1','S2','S3'} correspond to the surface IDs of top, sides and bottom surfaces respectively.
 
 
@@ -11411,7 +11410,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \ifcompgeom
 
-\section{\texorpdfstring{{\ct GEOM}}{GEOM} (Unstructured Geometry Parameters)}
+\section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Unstructured geometry parameters ({\ct GEOM} namelist group)]{For more information see Section~\ref{info:GEOM}.}
@@ -11422,7 +11421,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
+\multicolumn{5}{|c|}{{\tt GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
 {\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
@@ -11460,7 +11459,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 % Related to moving geometry:
 %{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-%{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct F}           \\ \hline
+%{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct F}                 \\ \hline
 %{\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 %{\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 %{\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
