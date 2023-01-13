@@ -3114,7 +3114,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             I_BOIL   = INT(T_BOIL_EFF)
 
             IF (H_V < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
+               WRITE(MESSAGE,'(A,A,A,I0,A,I0,A,I0)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID), &
+                  '. Mesh: ',NM,' Particle: ',IP,' Tag: ',LP%TAG
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                DEALLOCATE(PART_WARNING)
                RETURN
@@ -3458,7 +3459,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
                         IF (.NOT. BTEST(PART_WARNING(IP),1)) THEN
-                           WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
+                           WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,' Particle: ',IP,' Tag: ',LP%TAG
                            PART_WARNING(IP) = IBSET(PART_WARNING(IP),1)
                         ENDIF
                      ELSE
@@ -3475,7 +3476,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
                         IF (.NOT. BTEST(PART_WARNING(IP),2)) THEN
-                           WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
+                           WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                            PART_WARNING(IP) = IBSET(PART_WARNING(IP),2)
                         ENDIF                        
                      ELSE
@@ -3503,7 +3504,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
                      IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle Tag: ',LP%TAG
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                         PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
                      ENDIF                        
                   ELSE
@@ -3519,7 +3520,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
                      IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle: ',IP
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                         PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
                      ENDIF                        
                   ELSE
