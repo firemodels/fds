@@ -642,10 +642,8 @@ LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
 LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
 
 LOGICAL :: CC_IBM=.FALSE.
-REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
 LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
-LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 
@@ -725,7 +723,6 @@ INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
 INTEGER :: RAMP_CPU_INDEX=0   !< Ramp index for CPU file time series
 INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
 INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
-INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
 INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
 INTEGER :: RAMP_HVAC_INDEX =0 !< Ramp index for hvac file time series
 INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series

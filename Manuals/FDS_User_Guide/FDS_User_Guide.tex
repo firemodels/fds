@@ -4669,7 +4669,7 @@ A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at 
 \subsection{Filling Pressure Zones}
 \label{info:filling_zones}
 
-Sometimes a complicated geometry might have relatively small void spaces that are not connected to other parts of the domain or {\ct OPEN} boundaries. Sometimes these spaces are desired; sometimes not. That is, sometimes they are artifacts of the geometry generation software. If you do not want these void spaces within the domain, you can set a parameter called {\ct MINIMUM\_ZONE\_VOLUME} on the {\ct MISC} line. This parameter, which has units of m$^3$, tells FDS to fill in all void spaces less than this minimum volume. By default, its value is 0~m$^3$, meaning that no voids are filled. If you make its value huge, all voids will be filled.  
+Sometimes a complicated geometry might have relatively small void spaces that are not connected to other parts of the domain or {\ct OPEN} boundaries. Sometimes these spaces are desired; sometimes not. That is, sometimes they are artifacts of the geometry generation software. If you do not want these void spaces within the domain, you can set a parameter called {\ct MINIMUM\_ZONE\_VOLUME} on the {\ct MISC} line. This parameter, which has units of m$^3$, tells FDS to fill in all void spaces less than this minimum volume. By default, its value is 0~m$^3$, meaning that no voids are filled. If you make its value huge, all voids will be filled.
 
 On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line. This is not the same as setting a high value for {\ct MINIMUM\_ZONE\_VOLUME}. Rather, it tells FDS to simply ignore the void spaces and use the same background pressure throughout the domain.
 
@@ -11062,7 +11062,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignore namelist/keyword combinations
 % ignorenamelistkw: /BNDF/DEBUG
 % ignorenamelistkw: /DEVC/STATISTICS
-% ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK
+% ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE
 % ignorenamelistkw: /HVAC/DEBUG
 % ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE

@@ -7341,21 +7341,6 @@ TNOW2 = CURRENT_TIME()
 
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
 
-! Select divergence cut-cell treatment:
-IF(DIV_RESCALE_FLG==1) THEN
-   CC_CART_VOLAREA= .TRUE.
-   DO IG=1,N_GEOMETRY
-      GEOMETRY(IG)%EXPAND_CUTCELLS=.TRUE.
-   ENDDO
-ENDIF
-! Case of one geometry with expand cutcells defined. Expand cut-cells in all of them.
-DO IG=1,N_GEOMETRY
-   IF(GEOMETRY(IG)%EXPAND_CUTCELLS) THEN
-      CC_CART_VOLAREA= .TRUE.
-      EXIT
-   ENDIF
-ENDDO
-
 ! Plane by plane Evaluation of stesses for IBEDGES, a la OBSTS.
 CC_ONLY_IBEDGES_FLAG=.FALSE.
 THRES_FCT_EP = -1._EB
@@ -7421,7 +7406,6 @@ IF (PERIODIC_TEST == 105) THEN ! Cut-cell definition timings test.
        IF(MY_RANK==0) WRITE(LU_ERR,*) 'CALL number ',ICALL,' to SET_CUTCELLS_3D finished. Max Time=',TDEL,' sec.'
     ENDDO
     WRITE_SET_CUTCELLS_TIMINGS = .TRUE.
-    COMPUTE_CUTCELLS_ONLY =.TRUE.
 ENDIF
 
 ! Write out SET_CUTCELLS_3D loop time:
@@ -7471,11 +7455,6 @@ IF (WRITE_SET_CUTCELLS_TIMINGS) THEN
       WRITE(LU_ERR,*) 'SET_CUTCELLS_3D loop time by process ',MY_RANK,' =',T_CC_USED(SET_CUTCELLS_TIME_INDEX), &
                       ' sec., cut-cells=',N_CUTCELLS_PROC,', cut-faces=',N_INB_CUTFACES_PROC,N_REG_CUTFACES_PROC
    ENDIF
-ENDIF
-
-IF (COMPUTE_CUTCELLS_ONLY) THEN
-   STOP_STATUS = SETUP_ONLY_STOP
-   RETURN
 ENDIF
 
 ! Redefine interpolated external wall_cells inside Geoms: We assume them SOLID_BOUNDARY
