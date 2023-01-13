@@ -7406,7 +7406,6 @@ IF (PERIODIC_TEST == 105) THEN ! Cut-cell definition timings test.
        IF(MY_RANK==0) WRITE(LU_ERR,*) 'CALL number ',ICALL,' to SET_CUTCELLS_3D finished. Max Time=',TDEL,' sec.'
     ENDDO
     WRITE_SET_CUTCELLS_TIMINGS = .TRUE.
-    COMPUTE_CUTCELLS_ONLY =.TRUE.
 ENDIF
 
 ! Write out SET_CUTCELLS_3D loop time:
@@ -7456,11 +7455,6 @@ IF (WRITE_SET_CUTCELLS_TIMINGS) THEN
       WRITE(LU_ERR,*) 'SET_CUTCELLS_3D loop time by process ',MY_RANK,' =',T_CC_USED(SET_CUTCELLS_TIME_INDEX), &
                       ' sec., cut-cells=',N_CUTCELLS_PROC,', cut-faces=',N_INB_CUTFACES_PROC,N_REG_CUTFACES_PROC
    ENDIF
-ENDIF
-
-IF (COMPUTE_CUTCELLS_ONLY) THEN
-   STOP_STATUS = SETUP_ONLY_STOP
-   RETURN
 ENDIF
 
 ! Redefine interpolated external wall_cells inside Geoms: We assume them SOLID_BOUNDARY
