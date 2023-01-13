@@ -784,7 +784,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: GEOM_AREA_SURF
 INTEGER,  ALLOCATABLE, DIMENSION(:) :: GEOM_SURF
 INTEGER :: ICF, SURF_INDEX
 
-LOGICAL :: SNAP_TO_GRID
 LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
 
 REAL(EB):: VERT_AUX(IAXIS:KAXIS)
@@ -999,19 +998,9 @@ IF (GET_CUTCELLS_VERBOSE) THEN
    CALL CPU_TIME(CPUTIME_START_MESH)
 ENDIF
 
-
-! Test if all geometries are SNAP_TO_GRID boxes:
-SNAP_TO_GRID = .TRUE.
-DO IG=1,N_GEOMETRY
-   IF (GEOMETRY(IG)%SNAP_TO_GRID) CYCLE
-   SNAP_TO_GRID = .FALSE.
-ENDDO
-
 ! Allocate BODINT_PLANE for plane intersections on X1AXIS loop:
-IF (.NOT.SNAP_TO_GRID) THEN
-   CALL ALLOC_BODINT_PLANE(BODINT_PLANE,FIRST_CALL_ARG)   ! To be used in SET_CUTCELLS_3D, GET_CARTCELL_CUTFACES.
-   CALL ALLOC_BODINT_PLANE(BODINT_PLANE2,FIRST_CALL_ARG2) ! To be used in GET_IS_SOLID_3D.
-ENDIF
+CALL ALLOC_BODINT_PLANE(BODINT_PLANE,FIRST_CALL_ARG)   ! To be used in SET_CUTCELLS_3D, GET_CARTCELL_CUTFACES.
+CALL ALLOC_BODINT_PLANE(BODINT_PLANE2,FIRST_CALL_ARG2) ! To be used in GET_IS_SOLID_3D.
 
 ! Allocate Intersection variables:
 ALLOCATE(CC_SVAR_CRS(CC_MAXCROSS_X2),CC_IS_CRS(CC_MAXCROSS_X2),CC_SEG_CRS(CC_MAXCROSS_X2))
@@ -1193,12 +1182,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
 
    ! Allocate array for special cells containing geometry intersections:
    ALLOCATE(CELLRT(ISTR:IEND,JSTR:JEND,KSTR:KEND)); CELLRT(:,:,:)=.FALSE.
-
-   SNAP_IF : IF(SNAP_TO_GRID) THEN
-
-      CALL GET_REGULAR_CUTCELLS_BOX
-
-   ELSE
 
    ! Do Loop for different x1 planes:
    X1AXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
@@ -1461,8 +1444,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    CELLRT = .FALSE.
    MESHES(NM)%N_SPCELL_CF = MESHES(NM)%N_SPCELL
    CALL GET_CARTCELL_CUTCELLS(NM)
-
-   ENDIF SNAP_IF
 
    ! Case of terrain, populate GEOM_ZMAX:
    IF (TERRAIN_CASE) THEN
@@ -20479,7 +20460,7 @@ CHARACTER(25) :: COLOR='null'
 
 REAL(EB) :: XBP(IAXIS:KAXIS,NOD1:NOD2),XBP2(IAXIS:KAXIS,NOD1:NOD2),XXX,YYY,ZZZ
 
-LOGICAL :: SNAP_TO_GRID=.FALSE., DONE
+LOGICAL :: DONE
 
 INTEGER :: INOD, ILINE, IERR
 
@@ -20492,7 +20473,7 @@ INTEGER :: GEOM_LINE_SIZE
 NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_FILE,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTRUDE,EXTEND_TERRAIN,FACES,ID,IJK,IS_TERRAIN,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,POLY,&
-                RGB,SNAP_TO_GRID,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
+                RGB,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,TRANSPARENCY,&
                 VERTS,VOLUS,XB,ZMIN,ZVALS,ZVAL_HORIZON
 
@@ -21367,75 +21348,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ! CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
 
-      ! Here all processes have read the GEOM with SNAP_TO_GRID:
-      G%XB_ORIG = XB
-      IF (SNAP_TO_GRID) THEN
-         XBP(IAXIS,NOD1) = XB(1)
-         XBP(IAXIS,NOD2) = XB(2)
-         XBP(JAXIS,NOD1) = XB(3)
-         XBP(JAXIS,NOD2) = XB(4)
-         XBP(KAXIS,NOD1) = XB(5)
-         XBP(KAXIS,NOD2) = XB(6)
-
-         ! Search meshes:
-         XBP2(IAXIS:KAXIS,NOD1) = 1.001_EB*MAX_VAL
-         XBP2(IAXIS:KAXIS,NOD2) =-1.001_EB*MAX_VAL
-         DO INOD=NOD1,NOD2
-            XXX = XBP(IAXIS,INOD)
-            YYY = XBP(JAXIS,INOD)
-            ZZZ = XBP(KAXIS,INOD)
-            DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-               ! X planes:
-               IF(XXX>MESHES(NM)%XS .AND. XXX<MESHES(NM)%XF) THEN
-                  ! Find closest grid plane:
-                  DO I=1,MESHES(NM)%IBAR
-                     IF(XXX < MESHES(NM)%X(I)) THEN
-                        XBP(IAXIS,INOD) = MESHES(NM)%X(I-2+INOD) ! If INOD==1 tale low side face, else take high side.
-                        EXIT
-                     ENDIF
-                  ENDDO
-               ENDIF
-               ! Y planes:
-               IF(YYY>MESHES(NM)%YS .AND. YYY<MESHES(NM)%YF) THEN
-                  ! Find closest grid plane:
-                  DO J=1,MESHES(NM)%JBAR
-                     IF(YYY < MESHES(NM)%Y(J)) THEN
-                        XBP(JAXIS,INOD) = MESHES(NM)%Y(J-2+INOD) ! If INOD==1 tale low side face, else take high side.
-                        EXIT
-                     ENDIF
-                  ENDDO
-               ENDIF
-               ! Z planes:
-               IF(ZZZ>MESHES(NM)%ZS .AND. ZZZ<MESHES(NM)%ZF) THEN
-                  ! Find closest grid plane:
-                  DO K=1,MESHES(NM)%KBAR
-                     IF(ZZZ < MESHES(NM)%Z(K)) THEN
-                        XBP(KAXIS,INOD) = MESHES(NM)%Z(K-2+INOD) ! If INOD==1 tale low side face, else take high side.
-                        EXIT
-                     ENDIF
-                  ENDDO
-               ENDIF
-            ENDDO
-         ENDDO
-         ! At this point in XBP contains the plane snapped values or 1.001*MAX_VAL. We do an All reduce in place for
-         ! the geometry to get the minimum values. After the all reduce if we still have X > MAX_VEL in some location
-         ! we load the XB value for that axis and are left with thickened plane matched Box.
-         XBP2 = XBP
-         IF (N_MPI_PROCESSES > 1) THEN
-            CALL MPI_ALLREDUCE(XBP(1,NOD1),XBP2(1,NOD1),3,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERR)
-            CALL MPI_ALLREDUCE(XBP(1,NOD2),XBP2(1,NOD2),3,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERR)
-         ENDIF
-
-         ! Finally load snapped to grid and thickened XB values back to XB:
-         XB(1:2) = XBP2(IAXIS,NOD1:NOD2)
-         XB(3:4) = XBP2(JAXIS,NOD1:NOD2)
-         XB(5:6) = XBP2(KAXIS,NOD1:NOD2)
-
-         G%SNAP_TO_GRID = .TRUE.
-
-      ENDIF
-
-      G%XB=XB
+      G%XB = XB
 
       ! Reallocate VOLUS, FACES and VERTS:
       N_VOLUS = 6*(IJK(3)-1)*(IJK(2)-1)*(IJK(1)-1)+1 ! NOTE : Number larger than actual value.
@@ -22661,7 +22574,6 @@ SUBROUTINE SET_GEOM_DEFAULTS
    IS_GEOMETRY_DYNAMIC = .FALSE.
    EXTEND_TERRAIN      = .FALSE.
    IS_TERRAIN          = .FALSE.
-   SNAP_TO_GRID        = .FALSE.
    ZVAL_HORIZON    = 1.001_EB*MAX_VAL
    SPHERE_ORIGIN   = 1.001_EB*MAX_VAL
    SPHERE_RADIUS   = 1.001_EB*MAX_VAL
