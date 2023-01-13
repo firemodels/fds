@@ -723,6 +723,7 @@ INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
 INTEGER :: RAMP_CPU_INDEX=0   !< Ramp index for CPU file time series
 INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
 INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
+INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
 INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
 INTEGER :: RAMP_HVAC_INDEX =0 !< Ramp index for hvac file time series
 INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
