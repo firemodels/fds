@@ -126,7 +126,7 @@ $QFDS -d Complex_Geometry rotated_cube_45deg_128_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_stm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_stm.fds
 
-$QFDS -d Complex_Geometry zero_thick_roof.fds
+#$QFDS -d Complex_Geometry zero_thick_roof.fds
 $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
 $QFDS -p 5 -d Complex_Geometry geom_stretched_grid.fds
