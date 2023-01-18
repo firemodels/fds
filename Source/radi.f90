@@ -3555,7 +3555,6 @@ IF (UPDATE_INTENSITY) THEN
       ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
       ONE_D%Q_RAD_IN = 0._EB
       SF  => SURFACE(WALL(IW)%SURF_INDEX)
-      IF (.NOT.SF%INTERNAL_RADIATION) ONE_D%Q_RAD_OUT = 0._EB
    ENDDO
    DO IP=1,NLP
       LP => LAGRANGIAN_PARTICLE(IP)
@@ -3569,7 +3568,6 @@ IF (UPDATE_INTENSITY) THEN
       ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
       ONE_D%Q_RAD_IN = 0._EB
       SF  => SURFACE(CFA%SURF_INDEX)
-      IF (.NOT.SF%INTERNAL_RADIATION) ONE_D%Q_RAD_OUT = 0._EB
    ENDDO
 ENDIF
 
@@ -3876,13 +3874,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                BBF = A_WSGG(ONE_D%TMP_F,MOL_RAT,IBND) ! Temperature coefficient for the jth gray gas in the boundary
             ENDIF                                     ! (use information of the cell adjacent to the boundary)
             SF  => SURFACE(WC%SURF_INDEX)
-            IF (SF%INTERNAL_RADIATION) THEN
-               OUTRAD_W(IW) = BBF*RPI*ONE_D%Q_RAD_OUT
-            ELSE
-               EPS_SIGMA_TMP4 = ONE_D%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
-               ONE_D%Q_RAD_OUT = ONE_D%Q_RAD_OUT + BBF*EPS_SIGMA_TMP4
-               OUTRAD_W(IW) = BBF*RPI*EPS_SIGMA_TMP4
-            ENDIF
+            OUTRAD_W(IW) = BBF*RPI*ONE_D%Q_RAD_OUT
          ENDIF
       ENDDO
 
@@ -3893,13 +3885,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          BC    => BOUNDARY_COORD(CFA%BC_INDEX)
          IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),ONE_D%TMP_F)
          SF => SURFACE(CFA%SURF_INDEX)
-         IF (SF%INTERNAL_RADIATION) THEN
-            OUTRAD_F(ICF) = BBF*RPI*ONE_D%Q_RAD_OUT
-         ELSE
-            EPS_SIGMA_TMP4 = ONE_D%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
-            ONE_D%Q_RAD_OUT = ONE_D%Q_RAD_OUT + BBF*EPS_SIGMA_TMP4
-            OUTRAD_F(ICF) = BBF*RPI*EPS_SIGMA_TMP4
-         ENDIF
+         OUTRAD_F(ICF) = BBF*RPI*ONE_D%Q_RAD_OUT
       ENDDO
 
       ! Compute boundary condition term incoming radiation integral
@@ -4525,7 +4511,6 @@ IF (SOLID_PARTICLES .AND. UPDATE_INTENSITY) THEN
             BC => BOUNDARY_COORD(LP%BC_INDEX)
             ONE_D%Q_RAD_IN = ONE_D%EMISSIVITY*(0.25_EB*UII(BC%IIG,BC%JJG,BC%KKG) + EFLUX)
          ENDIF
-         IF (LPC%SOLID_PARTICLE) ONE_D%Q_RAD_OUT = ONE_D%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
       ENDIF
    ENDDO PARTICLE_LOOP
 ENDIF
