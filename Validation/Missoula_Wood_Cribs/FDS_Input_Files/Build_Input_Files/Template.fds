@@ -1,0 +1,41 @@
+&HEAD CHID=param_chid, TITLE=param1 /
+
+&MESH IJK=100,100,120, XB=-0.5,0.5,-0.5,0.5,-0.2,1.0/
+
+&TIME T_END=0./
+
+
+&SURF ID='WOOD', COLOR='BURLY WOOD 4' /
+
+! sticks aligned with x axis
+&MULT ID='m1'
+      DX0=param_hl,DY0=param_hl,DZ0=param_d    ! DX0=-l/2, DY0=-l/2, DZ0=d
+      DY=param_spb,DZ=param_2b                 ! s=(l-nb)/(n-1), DY=s+b, DZ=2b
+      J_UPPER=param_nm1,K_UPPER=param_Nm1/     ! J_UPPER=n-1, K_UPPER=N-1
+&OBST XB=0,param_l,0,param_b,0,param_b, SURF_ID='WOOD', THICKEN=T, MULT_ID='m1'/
+
+! sticks aligned with y axis
+&MULT ID='m2'
+      DX0=param_hl,DY0=param_hl,DZ0=param_t    ! DX0=-l/2, DY0=-l/2, DZ0=b+d=t
+      DX=param_spb,DZ=param_2b                 ! s=(l-nb)/(n-1), DX=s+b, DZ=2b
+      I_UPPER=param_nm1,K_UPPER=param_Nm1/     ! I_UPPER=n-1, K_UPPER=N-1
+&OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', THICKEN=T, MULT_ID='m2'/
+
+&SURF ID='DISK', COLOR='GRAY 80'/
+
+&GEOM ID='cylinder', SURF_ID='DISK',
+      CYLINDER_LENGTH=0.015,
+      CYLINDER_RADIUS=0.255,
+      CYLINDER_ORIGIN=0,0,-0.0075 ! -0.5*0.015 (half cylinder length)
+      CYLINDER_AXIS=0,0,1,
+      CYLINDER_NSEG_AXIS=1,
+      CYLINDER_NSEG_THETA=32 /
+
+&VENT DB='XMIN', SURF_ID='OPEN'/
+&VENT DB='XMAX', SURF_ID='OPEN'/
+&VENT DB='YMIN', SURF_ID='OPEN'/
+&VENT DB='YMAX', SURF_ID='OPEN'/
+&VENT DB='ZMAX', SURF_ID='OPEN'/
+
+&TAIL/
+
