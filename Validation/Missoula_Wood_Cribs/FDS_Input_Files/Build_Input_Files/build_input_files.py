@@ -9,6 +9,6 @@ import os
 # Build input files: run swaps.py
 os.system('python ../../../../Utilities/Input_File_Tools/swaps.py')
 
-# # Move inpupt files up one level to FDS_Input_Files
-# os.system('mv ./missoula_cribs*.fds ../.')
+# Move inpupt files up one level to FDS_Input_Files
+os.system('mv ./missoula_cribs*.fds ../.')
 
