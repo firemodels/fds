@@ -283,8 +283,13 @@ ENDIF
 IF (MY_RANK==0) THEN
    OPEN(LU_CATF,FILE=FN_CATF,ACTION='WRITE')
    ! Write new header for LU_CATF:
-   WRITE(LU_CATF,'(A)')&
-   "&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='Concatenated : "//TRIM(TITLE)//"', FYI='"//TRIM(FYI)//"' /"
+   IF (LEN_TRIM(FYI)>0) THEN
+      WRITE(LU_CATF,'(A)')&
+      "&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='(Concatenated) "//TRIM(TITLE)//"', FYI='"//TRIM(FYI)//"' /"
+   ELSE
+      WRITE(LU_CATF,'(A)')&
+      "&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='(Concatenated) "//TRIM(TITLE)//"' /"
+   ENDIF
 
    ! Also, inquire if file TRIM(CHID)//'.stop' exists, if so make a TRIM(CHID)//'_cat.stop' with same contents.
    INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
