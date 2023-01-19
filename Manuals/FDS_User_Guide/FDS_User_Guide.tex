@@ -7594,22 +7594,22 @@ To estimate the heat of combustion of the gas phase reaction of fuel vapors gene
 \be
    \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm O_2}}   \quad ; \quad
    \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm CO_2}}  \quad ; \quad
-   W_{\rm fuel} = \frac{12 {\rm x} + y + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
+   W_{\rm fuel} = \frac{12 {\rm x} + {\rm y} + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
 \ee
 \be
-   x' = \nu_{\rm CO_2}  \quad ; \quad
-   z' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
+   {\rm x}' = \nu_{\rm CO_2}  \quad ; \quad
+   {\rm z}' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
 \ee
 The ideal one step gas phase reaction of the Fuel Gas is as follows:
 \be
-   \mathrm{C_{x-x'}H_yO_{z-z'} + \nu_{\rm O_2}' \, O_2} \rightarrow \mathrm{(x-x') \, CO_2 + \frac{y}{2} \, H_2O }  \quad : \quad
-   \mathrm{\nu_{\rm O_2}'} = \frac{2(x-x')+y/2-(z-z')}{2}
+   {\rm C}_{{\rm x}-{\rm x}'}{\rm H}_{\rm y}{\rm O}_{{\rm z}-{\rm z}'} + \nu_{\rm O_2}' \, {\rm O}_2 \rightarrow ({\rm x}-{\rm x}') \, {\rm CO}_2 + \frac{{\rm y}}{2} \, {\rm H_2O}  \quad : \quad
+   \nu_{\rm O_2}' = \frac{2({\rm x}-{\rm x}')+{\rm y}/2-({\rm z}-{\rm z}')}{2}
 \ee
 The heat of combustion of the gas phase reaction (heat release per unit mass fuel gas consumed) can be estimated from the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}:
 \be
-   \mathrm{ \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12(x-x')+y+16(z-z')} } E   \label{Delta_h_pyr}
+   \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12({\rm x}-{\rm x}')+{\rm y}+16({\rm z}-{\rm z}')} E   \label{Delta_h_pyr}
 \ee
-The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately 17,400~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -12000~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
+The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately $17400$~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -$12000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
 \be
    (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm c,eff} =  (1-\nu_{\rm char}) \Delta h_{\rm c} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
 \ee
