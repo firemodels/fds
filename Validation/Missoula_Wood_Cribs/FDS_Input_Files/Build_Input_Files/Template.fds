@@ -2,29 +2,42 @@
 
 &MESH IJK=param_I,param_J,param_K, XB=-param_l,param_l,-param_l,param_l,0,param_m6/
 
-&TIME T_END=100./
+&TIME T_END=400./
+&DUMP DT_DEVC=10./
 
 ! sticks aligned with x axis
+! DX0=-l/2, DY0=-l/2, DZ0=d
+! s=(l-nb)/(n-1), DY=s+b, DZ=2b
+! J_UPPER=n-1, K_UPPER=N/2-1
 &MULT ID='m1'
-      DX0=param_hl,DY0=param_hl,DZ0=param_d    ! DX0=-l/2, DY0=-l/2, DZ0=d
-      DY=param_spb,DZ=param_2b                 ! s=(l-nb)/(n-1), DY=s+b, DZ=2b
-      J_UPPER=param_nm1,K_UPPER=param_N2m1/     ! J_UPPER=n-1, K_UPPER=N/2-1
-&OBST XB=0,param_l,0,param_b,0,param_b, SURF_ID='WOOD', THICKEN=T, MULT_ID='m1'/
+      DX0=param_hl,DY0=param_hl,DZ0=param_d
+      DY=param_spb,DZ=param_2b
+      J_UPPER=param_nm1,K_UPPER=param_N2m1/
+&OBST XB=0,param_l,0,param_b,0,param_b, SURF_ID='WOOD', MULT_ID='m1'/
 
 ! sticks aligned with y axis
+! DX0=-l/2, DY0=-l/2, DZ0=b+d=t
+! s=(l-nb)/(n-1), DX=s+b, DZ=2b
+! I_UPPER=n-1, K_UPPER=N/2-1
 &MULT ID='m2'
-      DX0=param_hl,DY0=param_hl,DZ0=param_t    ! DX0=-l/2, DY0=-l/2, DZ0=b+d=t
-      DX=param_spb,DZ=param_2b                 ! s=(l-nb)/(n-1), DX=s+b, DZ=2b
-      I_UPPER=param_nm1,K_UPPER=param_N2m1/     ! I_UPPER=n-1, K_UPPER=N/2-1
-&OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', THICKEN=T, MULT_ID='m2'/
+      DX0=param_hl,DY0=param_hl,DZ0=param_t
+      DX=param_spb,DZ=param_2b
+      I_UPPER=param_nm1,K_UPPER=param_N2m1/
+&OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', MULT_ID='m2'/
 
 &SURF ID='WOOD'
       COLOR='BURLY WOOD 4'
       MATL_ID='DRY VEGETATION'
       MOISTURE_FRACTION=0.025
       BACKING='INSULATED'
-      EXTERNAL_FLUX=50
+      RAMP_EF='external_flux'
       THICKNESS=param_c /
+
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_m6
+      QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE INTEGRAL', ID='MASS'/
+
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_m6
+      QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE AREA', ID='AREA_SURF'/
 
 &CATF OTHER_FILES='common_params.fds','vegetation_model.fds'/
 
