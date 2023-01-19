@@ -9186,13 +9186,20 @@ where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this s
 
 This feature is usually used in conjunction with {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} above (use two separate {\ct DEVC} lines, each with the same {\ct QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the area of {\ct VENT} or {\ct SURF} of interest. Note that this may differ slightly from what is specified in the input file due to grid snapping for Cartesian geometries or due to the approximations used to represent curvilinear geometries.  Using {\ct SPATIAL\_STATISTIC='AREA'} produces the discrete analog of
 \be \int \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB} or the discrete area of a {\ct SURF}.  Knowing this value is useful for reconstructing the average flux on a surface.
+where $dA$ depends on the coordinates you specify for {\ct XB}.  To compute the surface area of a solid, use {\ct 'SURFACE AREA'}, see below.
 
 \subsubsection{Surface Integral}
 
 For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
 \be \int \phi \; \d A \ee
 Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
+
+\subsubsection{Surface Area}
+
+The solid surface analog of {\ct 'AREA'} is {\ct 'SURFACE AREA'}.  Knowing this value is useful for reconstructing the average flux on a surface, for example.  On the {\ct DEVC} line supply an {\ct XB} that encompasses the surface of interest, use an arbitrary {\ct QUANTITY}, and assign a {\ct SURF\_ID}.
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY=..., SURF_ID='my surf', SPATIAL_STATISTIC='SURFACE AREA', ID='surf area'/
+\end{lstlisting}
 
 \subsubsection{Limiting the Integration}
 
