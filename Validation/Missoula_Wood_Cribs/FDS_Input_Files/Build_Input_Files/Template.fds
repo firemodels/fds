@@ -31,6 +31,7 @@
       MATL_ID='DRY VEGETATION'
       MOISTURE_FRACTION=0.025
       BACKING='INSULATED'
+      EXTERNAL_FLUX=50
       RAMP_EF='external_flux'
       THICKNESS=param_hb /
 
