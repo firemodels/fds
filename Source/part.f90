@@ -184,7 +184,7 @@ OVERALL_INSERT_LOOP: DO
       IF (IN%BULK_DENSITY_FILE=='null') THEN
          CALL INSERT_VOLUMETRIC_PARTICLES
       ELSE
-         IF (.NOT. IN%ALREADY_INSERTED(NM)) THEN 
+         IF (.NOT. IN%ALREADY_INSERTED(NM)) THEN
             ! Build out of blocks
             IN%SHAPE = 'BLOCK'
             LU_VEG_IN = GET_FILE_NUMBER()
@@ -248,7 +248,7 @@ OVERALL_INSERT_LOOP: DO
       DO INIT_INDEX=1,N_INIT
          IF (INITIALIZATION(INIT_INDEX)%INVOKED_BY_SURF) INITIALIZATION(INIT_INDEX)%ALREADY_INSERTED = .TRUE.
       ENDDO
- 
+
    ENDIF
 
    ! Insert particles in ducts
@@ -684,7 +684,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
 
    ALLOCATE(LP_INDEX_LOOKUP(SF%NPPC))
 
-   LPC_LOOP: DO N_LPC=1,N_LPC_MAX   
+   LPC_LOOP: DO N_LPC=1,N_LPC_MAX
       LP_INDEX_LOOKUP = 0
       IF (INSERT_TYPE==1) THEN
          LPC_INDEX = ILPC
@@ -692,7 +692,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          LPC_INDEX = SF%MATL_PART_INDEX(N_LPC)
       ENDIF
       ! Get particle temperature for MATL particle
-      IF (INSERT_TYPE==2) THEN     
+      IF (INSERT_TYPE==2) THEN
 
          IF (ONE_D%PART_MASS(N_LPC) < TWO_EPSILON_EB) CYCLE
          LPC => LAGRANGIAN_PARTICLE_CLASS(SF%MATL_PART_INDEX(N_LPC))
@@ -713,7 +713,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             ENDIF
             TMP_GUESS = TMP_PART
          ENDDO T_SEARCH
-      
+
       ENDIF
 
       ! Loop over all particles for the WALL_INDEX-th cell
@@ -773,7 +773,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
                   BC%X = X(II-1) + DX(II)*REAL(RN,EB)
                   BC%Z = Z(KK-1) + DZ(KK)*REAL(RN2,EB)
                CASE(3)
-                  IF (IOR== 3) THEN 
+                  IF (IOR== 3) THEN
                      BC%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
                      IF (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB)) THEN
                         CALL RANDOM_NUMBER(RN3)
@@ -845,7 +845,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             BC%IIG = IIG
             BC%JJG = JJG
             BC%KKG = KKG
-         ENDIF 
+         ENDIF
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
@@ -856,7 +856,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          IF (INSERT_TYPE==2) MESHES(NM)%BOUNDARY_ONE_D(LP%OD_INDEX)%TMP = TMP_PART
 
          IF (.NOT.LPC%MASSLESS_TRACER .AND. .NOT.LPC%MASSLESS_TARGET) MASS_SUM = MASS_SUM + LP%PWT*LP%MASS
-         
+
       ENDDO PARTICLE_INSERT_LOOP
 
       ! Adjust the particle weighting factors to get the right mass flux
@@ -865,7 +865,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          SELECT CASE (INSERT_TYPE)
             CASE (1) ! PART_ID on SURF
                IF (MASS_SUM > 0._EB) THEN
-                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN                  
+                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
                      DO I=1,SF%NPPC
                         LP => LAGRANGIAN_PARTICLE(LP_INDEX_LOOKUP(I))
                         LP%PWT = LP%PWT * FLOW_RATE*ONE_D%AREA_ADJUST*ONE_D%AREA*SF%DT_INSERT/MASS_SUM
@@ -888,9 +888,9 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
                ENDIF
 
          END SELECT
-      
+
       ENDIF MASS_CHECK
-      
+
    ENDDO LPC_LOOP
 
    IF(ALLOCATED(LP_INDEX_LOOKUP)) DEALLOCATE(LP_INDEX_LOOKUP)
@@ -1446,7 +1446,7 @@ IF (LPC%SOLID_PARTICLE) THEN
          SELECT CASE (LP_SF%GEOMETRY)
          CASE (SURF_CARTESIAN)
                LP_ONE_D%AREA = AREA
-               LPC%LENGTH = SQRT(AREA)               
+               LPC%LENGTH = SQRT(AREA)
                IF (LP_SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,LP_SF%N_LAYERS
                      LP%MASS = LP%MASS + LP_SF%LAYER_THICKNESS(N)*LP_SF%LAYER_DENSITY(N)
@@ -1488,7 +1488,7 @@ IF (LPC%SOLID_PARTICLE) THEN
          SELECT CASE (LP_SF%GEOMETRY)
             CASE (SURF_CARTESIAN)
                LP_ONE_D%AREA = LP_VOLUME/LP_SF%THICKNESS
-               LPC%LENGTH = SQRT(LP_ONE_D%AREA )                              
+               LPC%LENGTH = SQRT(LP_ONE_D%AREA )
                IF (LP_SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,LP_SF%N_LAYERS
                      LP%MASS = LP%MASS + LP_SF%LAYER_THICKNESS(N)*LP_SF%LAYER_DENSITY(N)
@@ -1850,7 +1850,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
             SLIDE_CF  = .FALSE.
             IF (LP%CFACE_INDEX>0) THEN
-           
+
                CFA => CFACE(LP%CFACE_INDEX)
                CFA_BC => BOUNDARY_COORD(CFA%BC_INDEX)
                CFA2 => CFACE(ICF)
@@ -2140,7 +2140,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ENDIF
 
-      ! If the droplet was attached to a solid WALL (BC%IOR/=0), but now it is not, change its course. 
+      ! If the droplet was attached to a solid WALL (BC%IOR/=0), but now it is not, change its course.
       ! If the droplet was
       ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
       ! to the underside or drip off. If the droplet moves off an upward or downward facing horizontal surface (IOR=+-3), reverse
@@ -2449,7 +2449,7 @@ IF (LPC%EMBER_PARTICLE .AND. .NOT.LP%EMBER) THEN
    EMBER_DENSITY = 0._EB
    IF (EMBER_VOLUME>TWO_EPSILON_EB) EMBER_DENSITY = LP%MASS/EMBER_VOLUME
    IF ( EMBER_DENSITY < LPC%EMBER_DENSITY_THRESHOLD .AND. &
-        QREL > LPC%EMBER_VELOCITY_THRESHOLD ) THEN 
+        QREL > LPC%EMBER_VELOCITY_THRESHOLD ) THEN
       IF (LPC%TRACK_EMBERS) THEN
          LP%EMBER = .TRUE.
       ELSE
@@ -2968,7 +2968,7 @@ ENDIF
 
 DO N_LPC=1,N_LAGRANGIAN_CLASSES
    LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
-   IF (LPC%ARRAY_INDEX>0) THEN
+   IF (LPC%ARRAY_INDEX>0 .AND. LPC%LIQUID_DROPLET) THEN
       DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          BP => BOUNDARY_PROPS(WC%BP_INDEX)
@@ -3478,7 +3478,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         IF (.NOT. BTEST(PART_WARNING(IP),2)) THEN
                            WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                            PART_WARNING(IP) = IBSET(PART_WARNING(IP),2)
-                        ENDIF                        
+                        ENDIF
                      ELSE
                      CYCLE TIME_ITERATION_LOOP
                      ENDIF
@@ -3506,7 +3506,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
                         WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                         PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
-                     ENDIF                        
+                     ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
@@ -3522,7 +3522,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
                         WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                         PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
-                     ENDIF                        
+                     ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
@@ -3740,7 +3740,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
          DO ICF = N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
             CFA => CFACE(ICF)
             BP => BOUNDARY_PROPS(CFA%BP_INDEX)
-            BP%WORK2 = 0._EB
+            BP%WORK2 = 0._EB  ! drop area
          ENDDO
 
          PARTICLE_LOOP_3: DO IP=1,NLP
@@ -3768,14 +3768,22 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
          DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             WC => WALL(IW)
             BP => BOUNDARY_PROPS(WC%BP_INDEX)
-            BP%LP_TEMP(LPC%ARRAY_INDEX) = BP%LP_TEMP(LPC%ARRAY_INDEX)/(BP%WORK2+TWO_EPSILON_EB)
-            BP%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,BP%LP_TEMP(LPC%ARRAY_INDEX))
+            IF (BP%WORK2 > 0._EB) THEN
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = BP%LP_TEMP(LPC%ARRAY_INDEX)/BP%WORK2
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,BP%LP_TEMP(LPC%ARRAY_INDEX))
+            ELSE
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
+            ENDIF
          ENDDO
          DO ICF = N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
             CFA => CFACE(ICF)
             BP => BOUNDARY_PROPS(CFA%BP_INDEX)
-            BP%LP_TEMP(LPC%ARRAY_INDEX) = BP%LP_TEMP(LPC%ARRAY_INDEX)/(BP%WORK2+TWO_EPSILON_EB)
-            BP%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,BP%LP_TEMP(LPC%ARRAY_INDEX))
+            IF (BP%WORK2 > 0._EB) THEN
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = BP%LP_TEMP(LPC%ARRAY_INDEX)/BP%WORK2
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,BP%LP_TEMP(LPC%ARRAY_INDEX))
+            ELSE
+               BP%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
+            ENDIF
          ENDDO
 
       ENDIF
