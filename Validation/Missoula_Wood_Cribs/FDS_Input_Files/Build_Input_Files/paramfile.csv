@@ -1,4 +1,4 @@
-Template.fds,param_chid,param1,param_b,param_l,param_d,param_hl,param_spb,param_2b,param_t,param_nm1,param_I,param_J,param_K,param_m6,param_c,param_N2m1
+Template.fds,param_chid,param_title,param_b,param_l,param_d,param_hl,param_spb,param_2b,param_bpd,param_nm1,param_I,param_J,param_K,param_2Nbpd,param_hb,param_hNm1
 missoula_cribs_1.fds,'missoula_cribs_1','Missoula wood cribs b=0.64cm l=6.35cm n=3 N=10',0.0064,0.0635,0.0127,-0.03175,0.02855,0.0128,0.0191,2,40,40,44,0.128,0.0032,4
 missoula_cribs_2.fds,'missoula_cribs_2','Missoula wood cribs b=0.64cm l=6.35cm n=5 N=10',0.0064,0.0635,0.0127,-0.03175,0.014275,0.0128,0.0191,4,40,40,44,0.128,0.0032,4
 missoula_cribs_3.fds,'missoula_cribs_3','Missoula wood cribs b=0.64cm l=6.35cm n=7 N=10',0.0064,0.0635,0.0127,-0.03175,0.009516667,0.0128,0.0191,6,40,40,44,0.128,0.0032,4
