@@ -36,7 +36,7 @@ REAL(EB) :: XB(6),TEXTURE_ORIGIN(3)
 REAL(EB) :: PBX,PBY,PBZ
 REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB,RADIATIVE_FRACTION
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SS_CP,SS_G_F,SS_H,SS_K,SS_MU,SS_D
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SS_CP,SS_G_F,SS_K,SS_MU,SS_D
 REAL(EB) :: SOOT_H_FRACTION_GLOBAL             !< Atom fraction of H in soot
 
 INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED,MAX_LEAK_PATHS,I_DUM(10),IERROR,N_CONE_RAMP=0
@@ -3648,8 +3648,10 @@ ALLOCATE(SS_D(N_SPECIES,0:I_MAX_TEMP),STAT=IZERO)
 SS_D = 0._EB
 ALLOCATE(SS_G_F(N_SPECIES,0:I_MAX_TEMP),STAT=IZERO)
 SS_G_F = 0._EB
-ALLOCATE(SS_H(N_SPECIES,0:I_MAX_TEMP),STAT=IZERO)
-SS_H = 0._EB
+DO N=1,N_SPECIES
+   ALLOCATE(SPECIES(N)%H_G(0:I_MAX_TEMP),STAT=IZERO)
+   SPECIES(N)%H_G = 0._EB
+ENDDO
 ALLOCATE(SS_K(N_SPECIES,0:I_MAX_TEMP),STAT=IZERO)
 SS_K = 0._EB
 ALLOCATE(SS_MU(N_SPECIES,0:I_MAX_TEMP),STAT=IZERO)
@@ -3660,7 +3662,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
    SS%H_F = SS%H_F / SS%MW * 1000._EB ! Convert to J/kg
    SS%H_F_LISTED = SS%H_F_LISTED / SS%MW * 1000._EB ! Convert to J/kg
-   SS_H(N,0) = 0._EB
+   SPECIES(N)%H_G(0) = 0._EB
 
    DO I = 1, I_MAX_TEMP
       CALL CALC_GAS_PROPS(I,N,SS_D(N,I),SS_MU(N,I),SS_K(N,I),SS_CP(N,I),SS_G_F(N,I))
@@ -3677,35 +3679,40 @@ SPEC_LOOP: DO N=1,N_SPECIES
          SS_K(N,0) = SS_K(N,1)
          SS_MU(N,0) = SS_MU(N,1)
       ENDIF
-      SS_H(N,I) = SS_H(N,I-1) + 0.5*(SS_CP(N,I-1)+SS_CP(N,I))
+      SPECIES(N)%H_G(I) = SPECIES(N)%H_G(I-1) + 0.5*(SS_CP(N,I-1)+SS_CP(N,I))
    ENDDO
 
    H_CORR = 0._EB
 
    IF (SS%REFERENCE_ENTHALPY > -1.E21_EB) THEN
       ITMP = INT(SS%REFERENCE_TEMPERATURE)
-      H_REF = SS_H(N,ITMP) + (SS%REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
-      SS_H(N,:) = SS_H(N,:) + SS%REFERENCE_ENTHALPY - H_REF
+      H_REF = SPECIES(N)%H_G(ITMP) + (SS%REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * &
+              (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
+      SPECIES(N)%H_G(:) = SPECIES(N)%H_G(:) + SS%REFERENCE_ENTHALPY - H_REF
       ITMP = INT(H_F_REFERENCE_TEMPERATURE)
-      SS%H_F = SS_H(N,ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
+      SS%H_F = SPECIES(N)%H_G(ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * &
+               (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
    ELSE
       IF (SS%H_F > -1.E21_EB .OR. SS%H_F_LISTED > -1.E21_EB) THEN
       ITMP = INT(H_F_REFERENCE_TEMPERATURE)
-      H_REF = SS_H(N,ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
+      H_REF = SPECIES(N)%H_G(ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * &
+              (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
          IF (SS%H_F > -1.E21_EB) THEN
-            SS_H(N,:) = SS_H(N,:) + SS%H_F - H_REF
+            SPECIES(N)%H_G(:) = SPECIES(N)%H_G(:) + SS%H_F - H_REF
          ELSE
             IF (.NOT. SS%SPECIFIC_HEAT > 0._EB .AND. .NOT. SS%RAMP_CP_INDEX > 0 .AND. .NOT. CONSTANT_SPECIFIC_HEAT_RATIO) THEN
                SS%H_F = SS%H_F_LISTED
-               SS_H(N,:) = SS_H(N,:) + SS%H_F_LISTED - H_REF
+               SPECIES(N)%H_G(:) = SPECIES(N)%H_G(:) + SS%H_F_LISTED - H_REF
             ELSE
                ITMP = INT(H_F_REFERENCE_TEMPERATURE)
-               SS%H_F = SS_H(N,ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
+               SS%H_F = SPECIES(N)%H_G(ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * &
+                        (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
             ENDIF
          ENDIF
       ELSE
          ITMP = INT(H_F_REFERENCE_TEMPERATURE)
-         SS%H_F = SS_H(N,ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
+         SS%H_F = SPECIES(N)%H_G(ITMP) + (H_F_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * &
+                  (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
       ENDIF
    ENDIF
 
@@ -3785,16 +3792,16 @@ SPEC_LOOP: DO N=1,N_SPECIES
 
       ITMP = INT(SS%H_V_REFERENCE_TEMPERATURE)
       H_REF = SS%H_L(ITMP) + (SS%H_V_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS%H_L(ITMP+1)-SS%H_L(ITMP))
-      H_REF_2 = SS_H(N,ITMP) + (SS%H_V_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SS_H(N,ITMP+1)-SS_H(N,ITMP))
+      H_REF_2 = SPECIES(N)%H_G(ITMP) + (SS%H_V_REFERENCE_TEMPERATURE-REAL(ITMP,EB)) * (SPECIES(N)%H_G(ITMP+1)-SPECIES(N)%H_G(ITMP))
       H_CORR = SS%HEAT_OF_VAPORIZATION - (H_REF_2 - H_REF)
 
       SS%H_L = SS%H_L - H_CORR
 
       DO I=1,I_MAX_TEMP
-         SS%H_V(I) = SS_H(N,I) - SS%H_L(I)
+         SS%H_V(I) = SPECIES(N)%H_G(I) - SS%H_L(I)
          SS%C_P_L_BAR(I) = SS%H_L(I) / REAL(I,EB)
       ENDDO
-      SS%H_V(0) = SS_H(N,0) - SS%H_L(0)
+      SS%H_V(0) = SPECIES(N)%H_G(0) - SS%H_L(0)
       SS%C_P_L_BAR(0) = SS%H_L(0)
 
       SS%PR_LIQUID = SS%MU_LIQUID*SS%C_P_L(NINT(TMPA))/SS%K_LIQUID
@@ -3973,7 +3980,6 @@ K_RSQMW_Z(0,:) = K_RSQMW_Z(1,:)
 DEALLOCATE(SS_CP)
 DEALLOCATE(SS_D)
 DEALLOCATE(SS_G_F)
-DEALLOCATE(SS_H)
 DEALLOCATE(SS_K)
 DEALLOCATE(SS_MU)
 
@@ -6185,6 +6191,28 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ENDIF
    IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
 
+   ! Decide which pyrolysis model to use
+
+   IF (BOILING_TEMPERATURE<50000._EB) THEN
+      ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
+      N_REACTIONS = 1
+   ELSEIF (N_REACTIONS > 0 .AND. BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
+      WALL_INCREMENT     = 1  ! Do pyrolysis every time step
+      ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
+      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
+   ELSE
+      ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
+   ENDIF
+
+   ! If oxygen is consumed in the charring process, set a global variable for
+   ! use in calculating the heat release rate based on oxygen consumption
+
+   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
+
+   ! No pyrolysis
+
+   IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+
    ! Pack MATL parameters into the MATERIAL derived type
 
    ALLOCATE(ML%A(N_REACTIONS),STAT=IZERO)
@@ -6238,8 +6266,6 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ALLOCATE(ML%N_T(N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','ML%N_T',IZERO)
    ML%N_T(1:N_REACTIONS)               = N_T(1:N_REACTIONS)
-   ML%NU_PART                          = NU_PART
-   ML%PART_ID                          = PART_ID
    ML%NU_SPEC                          = NU_SPEC
    ML%SPEC_ID                          = SPEC_ID
    ML%RAMP_C_S                         = SPECIFIC_HEAT_RAMP
@@ -6265,34 +6291,15 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ALLOCATE(ML%NU_GAS(N_TRACKED_SPECIES,N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','ML%NU_GAS',IZERO)
    ML%NU_GAS=0._EB
-   ALLOCATE(ML%NU_LPC(N_LAGRANGIAN_CLASSES,N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%NU_LPC',IZERO)
-   ML%NU_LPC=0._EB
-   ALLOCATE(ML%LPC_INDEX(N_LAGRANGIAN_CLASSES,N_REACTIONS),STAT=IZERO)
-   CALL ChkMemErr('READ','ML%LPC_INDEX',IZERO)
-   ML%LPC_INDEX=-1
-
-   ! Decide which pyrolysis model to use
-
-   IF (BOILING_TEMPERATURE<50000._EB) THEN
-      ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
-      ML%N_REACTIONS = 1
-   ELSEIF (N_REACTIONS > 0 .AND. BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
-      WALL_INCREMENT     = 1  ! Do pyrolysis every time step
-      ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
-      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
-   ELSE
-      ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
-   ENDIF
-
-   ! If oxygen is consumed in the charring process, set a global variable for
-   ! use in calculating the heat release rate based on oxygen consumption
-
-   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
-
-   ! No pyrolysis
-
-   IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+   ALLOCATE(ML%NU_GAS_P(N_SPECIES,N_REACTIONS),STAT=IZERO)
+   CALL ChkMemErr('READ','ML%NU_GAS_P',IZERO)
+   ML%NU_GAS_P=0._EB
+   ALLOCATE(ML%N_RESIDUE(N_REACTIONS),STAT=IZERO)
+   CALL ChkMemErr('READ','ML%N_RESIDUE',IZERO)
+   ML%N_RESIDUE = 0  
+   ALLOCATE(ML%N_LPC(N_REACTIONS),STAT=IZERO)
+   CALL ChkMemErr('READ','ML%N_LPC',IZERO)
+   ML%N_LPC=0
 
    ! Conductivity and specific heat temperature ramps
 
@@ -6301,7 +6308,6 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    ! Determine A and E if REFERENCE_TEMPERATURE is specified
 
-   ALLOCATE(ML%N_RESIDUE(ML%N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','ML%N_RESIDUE',IZERO)
    DO NR=1,ML%N_REACTIONS
       IF (ML%TMP_REF(NR) > 0._EB) THEN
@@ -6314,9 +6320,11 @@ READ_MATL_LOOP: DO N=1,N_MATL
          ML%A(NR) = EXP(1._EB)*PEAK_REACTION_RATE*EXP(ML%E(NR)/(R0*ML%TMP_REF(NR)))
       ENDIF
 
-      ML%N_RESIDUE(NR) = 0
       DO NN=1,MAX_MATERIALS
          IF (ML%RESIDUE_MATL_NAME(NN,NR)/='null') ML%N_RESIDUE(NR) = ML%N_RESIDUE(NR) + 1
+      ENDDO
+      DO NN=1,MAX_LPC
+         IF (PART_ID(NN,NR)/='null') ML%N_LPC(NR) = ML%N_LPC(NR) + 1
       ENDDO
    ENDDO
 
@@ -6338,6 +6346,37 @@ READ_MATL_LOOP: DO N=1,N_MATL
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          ML%NU_RESIDUE(NN,NR) = NU_MATL(NN,NR)
+      ENDDO
+   ENDDO
+
+   ALLOCATE(ML%LPC_INDEX(MAXVAL(ML%N_LPC),ML%N_REACTIONS),STAT=IZERO)
+   CALL ChkMemErr('READ','ML%LPC_INDEX',IZERO)
+   ALLOCATE(ML%NU_LPC(MAXVAL(ML%N_LPC),ML%N_REACTIONS),STAT=IZERO)
+   CALL ChkMemErr('READ','ML%NU_LPC',IZERO)
+   ML%NU_LPC = 0._EB
+   DO NR=1,ML%N_REACTIONS
+      DO NN=1,ML%N_LPC(NR)
+         DO NNN=1,N_LAGRANGIAN_CLASSES
+            IF (LAGRANGIAN_PARTICLE_CLASS(NNN)%ID==PART_ID(NN,NR)) THEN
+               IF (LAGRANGIAN_PARTICLE_CLASS(NNN)%MASSLESS_TRACER) THEN
+                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(PART_ID(NN,NR)),&
+                                         ' corresponding to MATL ',TRIM(ML%ID),' cannot be MASSLESS'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               ML%LPC_INDEX(NN,NR) = NNN
+               EXIT
+            ENDIF
+         ENDDO
+         IF (ML%LPC_INDEX(NN,NR)==0) THEN
+            WRITE(MESSAGE,'(5A)') 'ERROR: Particle ', TRIM(PART_ID(NN,NR)),' of ',TRIM(ML%ID),' is not defined.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         ML%NU_LPC(NN,NR) = NU_PART(NN,NR)
+         IF (ML%NU_LPC(NN,NR) <= 0._EB) THEN
+            WRITE(MESSAGE,'(5A)') 'ERROR: Particle ', TRIM(PART_ID(NN,NR)),' of ',TRIM(ML%ID),&
+                                  ' has a NU_PART <= 0.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
       ENDDO
    ENDDO
 
@@ -6414,12 +6453,14 @@ SUBROUTINE PROC_MATL
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM,LINEAR_SYSTEM_SOLVE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_TMP_REF
-INTEGER :: I,N,NN,NLPC,NLPC2,NS,NS2,NR,NR2,Z_INDEX(N_TRACKED_SPECIES,MAX_REACTIONS),IERR,&
-           MATL_MATRIX_SIZE,REAC_COUNTER
-REAL(EB) :: ANS,H_ADJUST,NU_INERT,H_R_CALC(0:I_MAX_TEMP)
+INTEGER :: I,N,NN,NL,NLPC,NS,NS2,NR,NR2,Z_INDEX(N_TRACKED_SPECIES,MAX_REACTIONS),IERR,ITMP,I_GRAD,&
+           MATL_MATRIX_SIZE,REAC_COUNTER,TEMP_COUNTER,TEMP_MATL(N_MATL,MAX_REACTIONS)
+REAL(EB) :: ANS,H_ADJUST,NU_INERT,H_R_CALC(0:I_MAX_TEMP),SUM_NU(N_MATL,MAX_REACTIONS),DTMP,THICKNESS,VOL
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_MATRIX_POINTER
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MATL_COEF_MATRIX
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: MATL_COEF_VECTOR,MATL_SOLUTION_VECTOR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MATL_COEF_VECTOR,MATL_SOLUTION_VECTOR,RHO_H,RHO
+TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
+TYPE(MATERIAL_TYPE), POINTER :: ML2=>NULL()
 
 PROC_MATL_LOOP: DO N=1,N_MATL
 
@@ -6451,6 +6492,12 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                EXIT
             ENDIF
          ENDDO
+         IF (ANY(ABS(ML%NU_GAS)>TWO_EPSILON_EB)) THEN
+            DO NS2=1,N_TRACKED_SPECIES
+               IF (ABS(ML%NU_GAS(NS2,NR)) > TWO_EPSILON_EB) &
+                  ML%NU_GAS_P(:,NR) = ML%NU_GAS_P(:,NR) + ML%NU_GAS(NS2,NR)*SPECIES_MIXTURE(NS2)%MASS_FRACTION(:)
+            ENDDO
+         ENDIF
          ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
          IF (ML%HEAT_OF_COMBUSTION(NS,NR) > 0._EB) THEN
             REAC_DO: DO NR2 = 1,N_REACTIONS
@@ -6465,47 +6512,6 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                                          ' corresponding to MATL ',TRIM(MATL_NAME(N)),' is not a tracked species'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      ENDDO
-   ENDDO
-
-   ! Convert ML%NU_PART(I_ORDINAL,I_REACTION) and ML%PART_ID(I_ORDINAL,I_REACTION) to ML%NU_LPC(I_PARTICLE_CLASS,I_REACTION)
-
-   DO NR=1,ML%N_REACTIONS
-      DO NLPC=1,N_LAGRANGIAN_CLASSES
-         IF (ML%NU_PART(NLPC,NR) < 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' NU_PART must be > 0 for particle class ',&
-                 NLPC, 'of reaction ', NR
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
-         IF (TRIM(ML%PART_ID(NLPC,NR))=='null' .AND. ML%NU_PART(NLPC,NR)>TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires a PART_ID for yield ',&
-                 NLPC, 'of reaction ', NR
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
-         IF (TRIM(ML%PART_ID(NLPC,NR))=='null') EXIT
-
-         DO NLPC2=1,N_LAGRANGIAN_CLASSES
-            IF (TRIM(ML%PART_ID(NLPC,NR))==TRIM(LAGRANGIAN_PARTICLE_CLASS(NLPC2)%ID)) THEN
-               ML%LPC_INDEX(NLPC,NR) = NLPC2
-               ML%NU_LPC(ML%LPC_INDEX(NLPC,NR),NR) = ML%NU_PART(NLPC,NR)
-               EXIT
-            ENDIF
-         ENDDO
-
-         IF (ML%LPC_INDEX(NLPC,NR)==-1) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(ML%PART_ID(NLPC,NR)),&
-                                         ' corresponding to MATL ',TRIM(MATL_NAME(N)),' is not defined'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
-         IF (LAGRANGIAN_PARTICLE_CLASS(NLPC2)%MASSLESS_TRACER) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(ML%PART_ID(NLPC,NR)),&
-                                         ' corresponding to MATL ',TRIM(MATL_NAME(N)),' cannot be MASSLESS'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
       ENDDO
    ENDDO
 
@@ -6525,7 +6531,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          RAMPS(ML%I_RAMP_C_S)%INTERPOLATED_DATA(:) = RAMPS(ML%I_RAMP_C_S)%INTERPOLATED_DATA(:)*1000._EB/TIME_SHRINK_FACTOR
          RAMPS(ML%I_RAMP_C_S)%DEP_VAR_UNITS_CONVERTED = .TRUE.
       ENDIF
-      IF (RAMPS(ML%I_RAMP_C_S)%DEPENDENT_DATA(1) > 10._EB) &
+      IF (RAMPS(ML%I_RAMP_C_S)%DEPENDENT_DATA(1) > 10._EB .AND. MY_RANK==0) &
          WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
       DO I=0,I_MAX_TEMP
          ML%C_S(I)=EVALUATE_RAMP(REAL(I,EB),ML%I_RAMP_C_S)
@@ -6550,19 +6556,35 @@ ENDDO PROC_MATL_LOOP
 ! x could be a SPEC or a MATL; however, here we assume H_SPEC(T) are all correct as changing H_SPEC might impact REAC which has
 ! already adjusted H_SPEC to get the RN%HEAT_OF_COMBUSTION.
 
+TEMP_MATL = 0
+TEMP_COUNTER = 0
+SUM_NU = 0._EB
+
 ! Make sure all reactions have a TMP_REF
+
 DO N=1,N_MATL
    ML=>MATERIAL(N)
    IF (ML%N_REACTIONS==0 .OR. .NOT. ML%ADJUST_H) CYCLE
    DO NR=1,ML%N_REACTIONS
       IF (ML%TMP_REF(NR) < 0._EB) CALL GET_TMP_REF(N,NR)
+      SUM_NU(N,NR) = SUM(ML%NU_LPC(:,NR)) + SUM(ML%NU_GAS(:,NR)) + SUM(ML%NU_RESIDUE(:,NR))
+      IF (SUM_NU(N,NR)-1._EB < -TWO_EPSILON_EB) THEN
+         IF (MY_RANK==0) WRITE(LU_ERR,'(A,A)') 'WARNING: Sum of NU inputs sum to less than 1 for MATL ',TRIM(ML%ID)
+         TEMP_COUNTER = TEMP_COUNTER + 1
+         TEMP_MATL(N,NR) = TEMP_COUNTER
+      ELSEIF (SUM_NU(N,NR) - 1._EB > TWO_EPSILON_EB) THEN
+         WRITE(MESSAGE,'(A,A)') 'WARNING: Sum of NU inputs sum to more than 1 for MATL ',TRIM(ML%ID)
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
    ENDDO
 ENDDO
 
-! Count number of MATL that participate in reactions and built pointer vector for the solution array
+! Count number of MATL that participate in reactions and build pointer vector for the solution array
+
 ALLOCATE(MATL_MATRIX_POINTER(N_MATL))
-MATL_MATRIX_POINTER=0
-MATL_MATRIX_SIZE=0
+MATL_MATRIX_POINTER=TEMP_COUNTER
+MATL_MATRIX_SIZE=TEMP_COUNTER
+
 DO N=1,N_MATL
    ML=>MATERIAL(N)
    IF (ML%N_REACTIONS==0 .OR. .NOT. ML%ADJUST_H) CYCLE
@@ -6578,6 +6600,23 @@ DO N=1,N_MATL
             MATL_MATRIX_POINTER(ML%RESIDUE_MATL_INDEX(NN,NR)) = MATL_MATRIX_SIZE
          ENDIF
       ENDDO
+      IF (ANY(ML%LPC_INDEX(:,NR)>0)) THEN
+         DO NLPC =1,N_LAGRANGIAN_CLASSES
+            IF (ML%LPC_INDEX(NLPC,NR)<=0) CYCLE
+            LPC => LAGRANGIAN_PARTICLE_CLASS(ML%LPC_INDEX(NLPC,NR))
+            IF (LPC%LIQUID_DROPLET) CYCLE
+            ! get material for each layer
+            DO NL=1,SURFACE(LPC%SURF_INDEX)%N_LAYERS
+               DO NN=1,N_MATL
+                  IF (SURFACE(LPC%SURF_INDEX)%LAYER_MATL_FRAC(NL,NN) > 0._EB .AND. MATERIAL(NN)%ADJUST_H) THEN
+                     IF (MATL_MATRIX_POINTER(NN)>0) CYCLE
+                     MATL_MATRIX_SIZE = MATL_MATRIX_SIZE + 1
+                     MATL_MATRIX_POINTER(ML%RESIDUE_MATL_INDEX(NN,NR)) = MATL_MATRIX_SIZE
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
    ENDDO
 ENDDO
 
@@ -6595,11 +6634,11 @@ DO N=1,N_MATL
    IF (MATL_MATRIX_POINTER(N)==0) CYCLE
    DO NR=1,ML%N_REACTIONS
       REAC_COUNTER = REAC_COUNTER + 1
-      ! If there is unaccounted for mass treat it as the same enthalpy as the initial material
-      NU_INERT = 1._EB-SUM(ML%NU_RESIDUE(:,NR))-SUM(ML%NU_GAS(:,NR))
-      MATL_COEF_MATRIX(REAC_COUNTER,MATL_MATRIX_POINTER(N))=1._EB-NU_INERT
+      MATL_COEF_MATRIX(REAC_COUNTER,MATL_MATRIX_POINTER(N))=1._EB
+      IF (TEMP_MATL(N,NR)>0) MATL_COEF_MATRIX(REAC_COUNTER,TEMP_MATL(N,NR))=-(1._EB-SUM_NU(N,NR))
       CALL INTERPOLATE1D_UNIFORM(0,ML%H,ML%TMP_REF(NR),ANS)
-      MATL_COEF_VECTOR(REAC_COUNTER) = -ANS*(1._EB-NU_INERT) - ML%H_R(NR,INT(ML%TMP_REF(NR)))
+      ! If there is unaccounted for mass treat it as the same enthalpy as the initial material
+      MATL_COEF_VECTOR(REAC_COUNTER) = -ANS*(1._EB-SUM_NU(N,NR)) - ML%H_R(NR,INT(ML%TMP_REF(NR)))
       DO NS=1,N_TRACKED_SPECIES
          IF (ABS(ML%NU_GAS(NS,NR))>TWO_EPSILON_EB) THEN
             CALL INTERPOLATE1D_UNIFORM(0,CPBAR_Z(:,NS),ML%TMP_REF(NR),ANS)
@@ -6614,6 +6653,49 @@ DO N=1,N_MATL
             MATL_COEF_VECTOR(REAC_COUNTER) = MATL_COEF_VECTOR(REAC_COUNTER )+ ML%NU_RESIDUE(NN,NR)*ANS
          ENDIF
       ENDDO
+      IF (ANY(ML%LPC_INDEX(:,NR)>0)) THEN
+         DO NLPC =1,N_LAGRANGIAN_CLASSES
+            IF (ML%LPC_INDEX(NLPC,NR)<=0) CYCLE
+            LPC => LAGRANGIAN_PARTICLE_CLASS(ML%LPC_INDEX(NLPC,NR))
+            LIQUID_IF: IF (LPC%LIQUID_DROPLET) THEN
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%H_L,1),SPECIES(LPC%Y_INDEX)%H_L,ML%TMP_REF(NR),ANS)
+               MATL_COEF_VECTOR(REAC_COUNTER) = MATL_COEF_VECTOR(REAC_COUNTER) + ML%NU_LPC(NLPC,NR)*ANS*ML%TMP_REF(NR)
+            ELSE LIQUID_IF
+               SF=>SURFACE(LPC%SURF_INDEX)
+               SELECT CASE(SF%GEOMETRY)
+                  CASE(SURF_CARTESIAN)   ; I_GRAD = 1
+                  CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
+                  CASE(SURF_SPHERICAL)   ; I_GRAD = 3
+               END SELECT
+               ALLOCATE(RHO_H(SF%N_MATL))
+               RHO_H = 0._EB
+               ALLOCATE(RHO(SF%N_MATL))
+               RHO = 0._EB
+               ITMP = MIN(I_MAX_TEMP-1,INT(ML%TMP_REF(NR)))
+               DTMP = ML%TMP_REF(NR)-REAL(ITMP,EB)
+               THICKNESS = SUM(SF%LAYER_THICKNESS)
+               DO I=1,SUM(SF%N_LAYER_CELLS)
+                  VOL = (THICKNESS+SF%INNER_RADIUS-SF%X_S(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-SF%X_S(I))**I_GRAD
+                  MATL_REMESH: DO NN=1,SF%N_MATL
+                     IF (SF%RHO_0(I,NN)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
+                     ML2  => MATERIAL(SF%MATL_INDEX(NN))
+                     ANS = ML2%H(ITMP)+DTMP*(ML2%H(ITMP+1)-ML2%H(ITMP))
+                     RHO_H(NN) = RHO_H(NN) + SF%RHO_0(I,NN) * ANS * VOL
+                     RHO(NN) = RHO(NN) + SF%RHO_0(I,NN) * VOL
+                  ENDDO MATL_REMESH
+               ENDDO
+               RHO_H = RHO_H/RHO
+               RHO = RHO/SUM(RHO)
+               DO NN=1,SF%N_MATL
+                  ML2  => MATERIAL(SF%MATL_INDEX(NN))
+                  MATL_COEF_MATRIX(REAC_COUNTER,MATL_MATRIX_POINTER(SF%MATL_INDEX(NN))) = -ML%NU_LPC(NLPC,NR)*RHO(NN)
+                  MATL_COEF_VECTOR(REAC_COUNTER) = MATL_COEF_VECTOR(REAC_COUNTER )+ ML%NU_LPC(NLPC,NR)*RHO_H(NN)
+               ENDDO
+               DEALLOCATE(RHO_H)
+               DEALLOCATE(RHO)
+            ENDIF LIQUID_IF
+         ENDDO
+      ENDIF
    ENDDO
 ENDDO
 
@@ -7921,7 +8003,8 @@ END SUBROUTINE PROC_SURF_1
 
 SUBROUTINE PROC_SURF_2
 
-INTEGER :: ILPC,N,NN,NNN,NL,NLPC,NR,NS,I_CONE_RAMP=0,N_LIST,N_LIST2,INDEX_LIST(MAX_LPC**2)
+INTEGER :: ILPC,N,NN,NNN,NL,N_LIST,NLPC,NR,NS,I_CONE_RAMP=0
+LOGICAL :: INDEX_LIST(MAX_LPC)
 REAL(EB) :: R_L(0:MAX_LAYERS)
 INTEGER  :: I_FUEL,I_GRAD
 LOGICAL :: BURNING,BLOWING,SUCKING
@@ -8267,40 +8350,28 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    IF (SF%LAYER_DENSITY(1)>0._EB .AND. N_LAGRANGIAN_CLASSES >0) THEN
       N_LIST = 0
-      INDEX_LIST = -1
+      INDEX_LIST = .FALSE.
       DO NN=1,SF%N_MATL
          ML=>MATERIAL(SF%MATL_INDEX(NN))
          DO NR=1,ML%N_REACTIONS
-            DO NLPC=1,N_LAGRANGIAN_CLASSES
-               IF (ML%LPC_INDEX(NLPC,NR) == -1) CYCLE
-               N_LIST = N_LIST + 1
-               INDEX_LIST(N_LIST) = ML%LPC_INDEX(NLPC,NR)
+            DO NLPC=1,ML%N_LPC(NR)
+               IF (INDEX_LIST(ML%LPC_INDEX(NLPC,NR))) EXIT
+                  N_LIST = N_LIST + 1
+                  INDEX_LIST(ML%LPC_INDEX(NLPC,NR)) = .TRUE.
             ENDDO
          ENDDO
       ENDDO
 
-      ! Eliminate multiply counted particles from the list
-
-      N_LIST2 = N_LIST
-      WEED_PART_LIST: DO NN=1,N_LIST
-         DO NNN=1,NN-1
-            IF (INDEX_LIST(NNN)==INDEX_LIST(NN)) THEN
-               INDEX_LIST(NN)  = 0
-               N_LIST2 = N_LIST2-1
-               CYCLE WEED_PART_LIST
-            ENDIF
-         ENDDO
-      ENDDO WEED_PART_LIST
-
-      SF%N_LPC = N_LIST2
+      SF%N_LPC = N_LIST
       ALLOCATE(SF%MATL_PART_INDEX(SF%N_LPC))
 
       NNN = 0
-      DO NN=1,N_LIST
-         IF (INDEX_LIST(NN)/=0) THEN
+      DO NN=1,MAX_LPC
+         IF (INDEX_LIST(NN)) THEN
             NNN = NNN + 1
-            SF%MATL_PART_INDEX(NNN) = INDEX_LIST(NN)
+            SF%MATL_PART_INDEX(NNN) = NN
          ENDIF
+         IF (NNN == N_LIST) EXIT
       ENDDO
 
    ENDIF
