@@ -9110,6 +9110,7 @@ END SUBROUTINE READ_TABL
 
 SUBROUTINE READ_OBST
 
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL,CIRCLE_CELL_INTERSECTION_AREA,SEARCH_OTHER_MESHES
 USE COMPLEX_GEOMETRY, ONLY: INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB,INTERSECT_OBB_AABB,ROTATION_MATRIX
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
@@ -9827,6 +9828,9 @@ ENDDO MESH_LOOP_2
 ! Allocate the number of cells for each mesh that are SOLID or border a boundary
 
 ALLOCATE(CELL_COUNT(NMESHES)) ; CELL_COUNT = 0
+ALLOCATE(CELL_COUNT_REALS(NMESHES)) ; CELL_COUNT_REALS = 0
+ALLOCATE(CELL_COUNT_INTEGERS(NMESHES)) ; CELL_COUNT_INTEGERS = 0
+ALLOCATE(CELL_COUNT_LOGICALS(NMESHES)) ; CELL_COUNT_LOGICALS = 0
 
 ! Go through all meshes, recording which cells are solid
 
@@ -9922,17 +9926,8 @@ MESH_LOOP_3: DO NM=1,NMESHES
 
    ! Store in SOLID which cells are solid and which are not
 
-   ALLOCATE(M%SOLID(0:CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','SOLID',IZERO)
-   M%SOLID = .FALSE.
-   ALLOCATE(M%EXTERIOR(0:CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','EXTERIOR',IZERO)
-   M%EXTERIOR = .FALSE.
-   SOLID=>M%SOLID
-   ALLOCATE(M%OBST_INDEX_C(0:CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','OBST_INDEX_C',IZERO)
-   M%OBST_INDEX_C = 0
-   OBST_INDEX_C=>M%OBST_INDEX_C
+   CALL REALLOCATE_CELL(NM,CELL_COUNT(NM),CELL_COUNT(NM))
+   CELL => M%CELL
 
    ! Make all exterior cells solid
 
@@ -9950,29 +9945,14 @@ MESH_LOOP_3: DO NM=1,NMESHES
       CALL BLOCK_CELL(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N)
    ENDDO
 
-   ! Create arrays to hold cell indices
-
-   ALLOCATE(M%I_CELL(CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','I_CELL',IZERO)
-   M%I_CELL = -1
-   ALLOCATE(M%J_CELL(CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','J_CELL',IZERO)
-   M%J_CELL = -1
-   ALLOCATE(M%K_CELL(CELL_COUNT(NM)),STAT=IZERO)
-   CALL ChkMemErr('READ','K_CELL',IZERO)
-   M%K_CELL = -1
-   I_CELL=>M%I_CELL
-   J_CELL=>M%J_CELL
-   K_CELL=>M%K_CELL
-
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
             IC = CELL_INDEX(I,J,K)
             IF (IC>0) THEN
-               I_CELL(IC) = I
-               J_CELL(IC) = J
-               K_CELL(IC) = K
+               CELL(IC)%I = I
+               CELL(IC)%J = J
+               CELL(IC)%K = K
             ENDIF
          ENDDO
       ENDDO
@@ -10873,24 +10853,24 @@ MESH_LOOP_2: DO NM=1,NMESHES
          IF (I1==I2) THEN
             DO K=K1+1,K2
                DO J=J1+1,J2
-                  IF (.NOT.SOLID(CELL_INDEX(I2+1,J,K))) VT%IOR =  1
-                  IF (.NOT.SOLID(CELL_INDEX(I2  ,J,K))) VT%IOR = -1
+                  IF (.NOT.CELL(CELL_INDEX(I2+1,J,K))%SOLID) VT%IOR =  1
+                  IF (.NOT.CELL(CELL_INDEX(I2  ,J,K))%SOLID) VT%IOR = -1
                ENDDO
             ENDDO
          ENDIF
          IF (J1==J2) THEN
             DO K=K1+1,K2
                DO I=I1+1,I2
-                  IF (.NOT.SOLID(CELL_INDEX(I,J2+1,K))) VT%IOR =  2
-                  IF (.NOT.SOLID(CELL_INDEX(I,J2  ,K))) VT%IOR = -2
+                  IF (.NOT.CELL(CELL_INDEX(I,J2+1,K))%SOLID) VT%IOR =  2
+                  IF (.NOT.CELL(CELL_INDEX(I,J2  ,K))%SOLID) VT%IOR = -2
                ENDDO
             ENDDO
          ENDIF
          IF (K1==K2) THEN
             DO J=J1+1,J2
                DO I=I1+1,I2
-                  IF (.NOT.SOLID(CELL_INDEX(I,J,K2+1))) VT%IOR =  3
-                  IF (.NOT.SOLID(CELL_INDEX(I,J,K2  ))) VT%IOR = -3
+                  IF (.NOT.CELL(CELL_INDEX(I,J,K2+1))%SOLID) VT%IOR =  3
+                  IF (.NOT.CELL(CELL_INDEX(I,J,K2  ))%SOLID) VT%IOR = -3
                ENDDO
             ENDDO
          ENDIF
@@ -11798,7 +11778,7 @@ READ_ZONE_LOOP: DO N=1,N_ZONE
       K_LOOP: DO K=1,M%KBAR
          J_LOOP: DO J=1,M%JBAR
             I_LOOP: DO I=1,M%IBAR
-               IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE I_LOOP
+               IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE I_LOOP
                P_ZONE(N)%X = M%XC(I)
                P_ZONE(N)%Y = M%YC(J)
                P_ZONE(N)%Z = M%ZC(K)
@@ -13023,7 +13003,7 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (J==0) THEN ; JS=1 ; ELSE ; JS=-1 ; ENDIF
          DO I=1,IBAR
             IC1 = CELL_INDEX(I,J+JS,K) ; IC2 = CELL_INDEX(I,J,K+KS)
-            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+            IF (.NOT.CELL(IC1)%SOLID .AND. .NOT.CELL(IC2)%SOLID) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
          ENDDO
       ENDDO
    ENDDO
@@ -13034,7 +13014,7 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (I==0) THEN ; IS=1 ; ELSE ; IS=-1 ; ENDIF
          DO J=1,JBAR
             IC1 = CELL_INDEX(I+IS,J,K) ; IC2 = CELL_INDEX(I,J,K+KS)
-            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+            IF (.NOT.CELL(IC1)%SOLID .AND. .NOT.CELL(IC2)%SOLID) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
          ENDDO
       ENDDO
    ENDDO
@@ -13045,7 +13025,7 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (I==0) THEN ; IS=1 ; ELSE ; IS=-1 ; ENDIF
          DO K=1,KBAR
             IC1 = CELL_INDEX(I+IS,J,K) ; IC2 = CELL_INDEX(I,J+JS,K)
-            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+            IF (.NOT.CELL(IC1)%SOLID .AND. .NOT.CELL(IC2)%SOLID) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
          ENDDO
       ENDDO
    ENDDO

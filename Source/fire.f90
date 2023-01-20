@@ -83,7 +83,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       ILOOP: DO I=1,IBAR
          ! Check to see if a reaction is possible
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+         IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ILOOP
          IF (CC_IBM) THEN
             IF (CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE ILOOP
          ENDIF
@@ -937,7 +937,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
    VCELL = DX(I)*DY(J)*DZ(K)
 
-   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
+   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
 
    NCELL = CUT_CELL(ICC)%NCELL
    JCC_LOOP : DO JCC=1,NCELL
@@ -1013,7 +1013,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
    VCELL = DX(I)*DY(J)*DZ(K)
 
-   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
+   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
 
    NCELL = CUT_CELL(ICC)%NCELL
    DO JCC=1,NCELL
@@ -1148,7 +1148,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
    DO K = 1, KBAR
       DO J = 1, JBAR
          ILOOP: DO I = 1, IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ILOOP
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE ILOOP
             ENDIF

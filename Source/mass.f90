@@ -25,7 +25,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW
 REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,Z_TEMP,F_TEMP
 REAL(EB), PARAMETER :: DUMMY=0._EB
-INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
+INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P
@@ -93,8 +93,9 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       JJG = BC%JJG
       KKG = BC%KKG
       IOR = BC%IOR
+      IC  = CELL_INDEX(II,JJ,KK)
 
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.EXTERIOR(CELL_INDEX(II,JJ,KK))) THEN
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. .NOT.CELL(IC)%SOLID .AND. .NOT.CELL(IC)%EXTERIOR) THEN
          SELECT CASE(IOR)
             CASE( 1); FX(IIG-1,JJG,KKG,N) = 0._EB
             CASE(-1); FX(IIG,JJG,KKG,N)   = 0._EB
@@ -123,7 +124,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                !      ghost          FX/UU(II+1)
                ! ///   II   ///  II+1  |  II+2  | ...
                !                       ^ WALL_INDEX(II+1,+1)
-               IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+               IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II+1,JJ,KK))%WALL_INDEX(+1)>0)) THEN
                   Z_TEMP(0:3,1,1) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
                   U_TEMP(1,1,1) = UU(II+1,JJ,KK)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
@@ -133,35 +134,35 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                !            FX/UU(II-2)     ghost
                ! ... |  II-2  |  II-1  ///   II   ///
                !              ^ WALL_INDEX(II-1,-1)
-               IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+               IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II-1,JJ,KK))%WALL_INDEX(-1)>0)) THEN
                   Z_TEMP(0:3,1,1) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
                   U_TEMP(1,1,1) = UU(II-2,JJ,KK)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
                   FX(II-2,JJ,KK,N) = F_TEMP(1,1,1)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
-               IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+               IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ+1,KK))%WALL_INDEX(+2)>0)) THEN
                   Z_TEMP(1,0:3,1) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
                   U_TEMP(1,1,1) = VV(II,JJ+1,KK)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                   FY(II,JJ+1,KK,N) = F_TEMP(1,1,1)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
-               IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+               IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ-1,KK))%WALL_INDEX(-2)>0)) THEN
                   Z_TEMP(1,0:3,1) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
                   U_TEMP(1,1,1) = VV(II,JJ-2,KK)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                   FY(II,JJ-2,KK,N) = F_TEMP(1,1,1)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
-               IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+               IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK+1))%WALL_INDEX(+3)>0)) THEN
                   Z_TEMP(1,1,0:3) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
                   U_TEMP(1,1,1) = WW(II,JJ,KK+1)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
                   FZ(II,JJ,KK+1,N) = F_TEMP(1,1,1)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
-               IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+               IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK-1))%WALL_INDEX(-3)>0)) THEN
                   Z_TEMP(1,1,0:3) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
                   U_TEMP(1,1,1) = WW(II,JJ,KK-2)
                   CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
@@ -265,7 +266,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
                RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
@@ -320,7 +321,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             RHOS(I,J,K) = SUM(ZZS(I,J,K,1:N_TRACKED_SPECIES))
          ENDDO
       ENDDO
@@ -342,7 +343,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             ZZS(I,J,K,1:N_TOTAL_SCALARS) = ZZS(I,J,K,1:N_TOTAL_SCALARS)/RHOS(I,J,K)
          ENDDO
       ENDDO
@@ -371,7 +372,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
          ENDDO
@@ -385,7 +386,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
@@ -434,7 +435,7 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
                RHS = - DEL_RHO_D_DEL_Z(I,J,K,N) &
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
@@ -495,7 +496,7 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
          ENDDO
       ENDDO
@@ -517,7 +518,7 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             ZZ(I,J,K,1:N_TOTAL_SCALARS) = ZZ(I,J,K,1:N_TOTAL_SCALARS)/RHO(I,J,K)
          ENDDO
       ENDDO
@@ -546,7 +547,7 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
          ENDDO
@@ -560,7 +561,7 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
          ENDDO
       ENDDO
@@ -616,7 +617,7 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (RHOP(I,J,K)>=RHOMIN .AND. RHOP(I,J,K)<=RHOMAX) CYCLE
          IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE
+         IF (CELL(IC)%SOLID) CYCLE
          IF (RHOP(I,J,K)<RHOMIN) THEN
             RHO_CUT = RHOMIN
             SIGN_FACTOR = 1._EB
@@ -636,12 +637,12 @@ DO K=1,KBAR
          VC( 3)  = DX(I)  * VC1( 3)
 
          MASS_C = ABS(RHO_CUT-RHOP(I,J,K))*VC(0)
-         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I-1,J,K)))-RHO_CUT)*VC(-1)
-         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I+1,J,K)))-RHO_CUT)*VC( 1)
-         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J-1,K)))-RHO_CUT)*VC(-2)
-         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J+1,K)))-RHO_CUT)*VC( 2)
-         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K-1)))-RHO_CUT)*VC(-3)
-         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K+1)))-RHO_CUT)*VC( 3)
+         IF (CELL(IC)%WALL_INDEX(-1)==0) MASS_N(-1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I-1,J,K)))-RHO_CUT)*VC(-1)
+         IF (CELL(IC)%WALL_INDEX( 1)==0) MASS_N( 1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I+1,J,K)))-RHO_CUT)*VC( 1)
+         IF (CELL(IC)%WALL_INDEX(-2)==0) MASS_N(-2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J-1,K)))-RHO_CUT)*VC(-2)
+         IF (CELL(IC)%WALL_INDEX( 2)==0) MASS_N( 2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J+1,K)))-RHO_CUT)*VC( 2)
+         IF (CELL(IC)%WALL_INDEX(-3)==0) MASS_N(-3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K-1)))-RHO_CUT)*VC(-3)
+         IF (CELL(IC)%WALL_INDEX( 3)==0) MASS_N( 3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K+1)))-RHO_CUT)*VC( 3)
          SUM_MASS_N = SUM(MASS_N)
          IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
          CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
@@ -690,7 +691,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO I=1,IBAR
 
             IC = CELL_INDEX(I,J,K)
-            IF (SOLID(IC)) CYCLE
+            IF (CELL(IC)%SOLID) CYCLE
    
             RHO_ZZ_MAX = RHOP(I,J,K)
             IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
@@ -712,12 +713,12 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             VC( 3)  = DX(I)  * VC1( 3)
    
             MASS_C = ABS(RHO_ZZ_CUT-RHO_ZZ(I,J,K,N))*VC(0)
-            IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I-1,J,K,N)))-RHO_ZZ_CUT)*VC(-1)
-            IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I+1,J,K,N)))-RHO_ZZ_CUT)*VC( 1)
-            IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J-1,K,N)))-RHO_ZZ_CUT)*VC(-2)
-            IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J+1,K,N)))-RHO_ZZ_CUT)*VC( 2)
-            IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K-1,N)))-RHO_ZZ_CUT)*VC(-3)
-            IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K+1,N)))-RHO_ZZ_CUT)*VC( 3)
+            IF (CELL(IC)%WALL_INDEX(-1)==0) MASS_N(-1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I-1,J,K,N)))-RHO_ZZ_CUT)*VC(-1)
+            IF (CELL(IC)%WALL_INDEX( 1)==0) MASS_N( 1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I+1,J,K,N)))-RHO_ZZ_CUT)*VC( 1)
+            IF (CELL(IC)%WALL_INDEX(-2)==0) MASS_N(-2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J-1,K,N)))-RHO_ZZ_CUT)*VC(-2)
+            IF (CELL(IC)%WALL_INDEX( 2)==0) MASS_N( 2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J+1,K,N)))-RHO_ZZ_CUT)*VC( 2)
+            IF (CELL(IC)%WALL_INDEX(-3)==0) MASS_N(-3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K-1,N)))-RHO_ZZ_CUT)*VC(-3)
+            IF (CELL(IC)%WALL_INDEX( 3)==0) MASS_N( 3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K+1,N)))-RHO_ZZ_CUT)*VC( 3)
             SUM_MASS_N = SUM(MASS_N)
             IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
             CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
@@ -755,7 +756,7 @@ IF (.NOT.CLIP_RHOMIN .AND. .NOT.CLIP_RHOMAX .AND. .NOT.CLIP_RHO_ZZ) RETURN
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
          SUM_RHO_ZZ = SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES))
          N = MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1)
          RHO_ZZ_TEST = RHO_ZZ(I,J,K,N) + RHOP(I,J,K) - SUM_RHO_ZZ
@@ -788,7 +789,7 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
          ZZP(I,J,K,ZETA_INDEX) = MAX(0._EB,MIN(1._EB,ZZP(I,J,K,ZETA_INDEX)))
       ENDDO
    ENDDO

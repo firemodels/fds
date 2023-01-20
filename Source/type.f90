@@ -1816,4 +1816,23 @@ TYPE HVAC_QUANTITY_TYPE
    CHARACTER(LABEL_LENGTH) :: UNITS !< Units for QUANTITY
 END TYPE HVAC_QUANTITY_TYPE
 
+TYPE CELL_TYPE
+   LOGICAL :: SOLID=.FALSE.                            !< Indicates if grid cell is solid or not
+   LOGICAL :: EXTERIOR=.FALSE.                         !< Indicates if the grid cell is outside the mesh
+   INTEGER :: OBST_INDEX=0                             !< Index of obstruction that fills cell (0 if none)
+   INTEGER :: I,J,K                                    !< Indices of cell
+   INTEGER, DIMENSION(12) :: EDGE_INDEX=0              !< Indices of 12 cell edges
+   INTEGER, DIMENSION(-3:3) :: WALL_INDEX=0            !< Indices of 6 adjacent wall cells
+   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0            !< SURF indices of 6 adjacent wall cells
+   INTEGER, DIMENSION(-3:3,1:3) :: THIN_WALL_INDEX=0   !< Indices of 6 adjacent thin wall cells
+   INTEGER, DIMENSION(-3:3,1:3) :: THIN_SURF_INDEX=0   !< SURF indices of 6 adjacent thin wall cells
+   INTEGER, DIMENSION(-3:3,1:3) :: THIN_OBST_INDEX=0   !< OBST indices of 6 adjacent thin wall cells
+   REAL(EB) :: U_EDGE_Y=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+   REAL(EB) :: U_EDGE_Z=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+   REAL(EB) :: V_EDGE_X=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+   REAL(EB) :: V_EDGE_Z=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+   REAL(EB) :: W_EDGE_X=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+   REAL(EB) :: W_EDGE_Y=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
+END TYPE CELL_TYPE
+
 END MODULE TYPES
