@@ -1,6 +1,7 @@
-&HEAD CHID=param_chid, TITLE=param1 /
+&HEAD CHID=param_chid, TITLE=param_title /
 
-&MESH IJK=param_I,param_J,param_K, XB=-param_l,param_l,-param_l,param_l,0,param_m6/
+! 2*N*b + d = mesh zmax XB(6)
+&MESH IJK=param_I,param_J,param_K, XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd/
 
 &TIME T_END=400./
 &DUMP DT_DEVC=10./
@@ -12,17 +13,17 @@
 &MULT ID='m1'
       DX0=param_hl,DY0=param_hl,DZ0=param_d
       DY=param_spb,DZ=param_2b
-      J_UPPER=param_nm1,K_UPPER=param_N2m1/
+      J_UPPER=param_nm1,K_UPPER=param_hNm1/
 &OBST XB=0,param_l,0,param_b,0,param_b, SURF_ID='WOOD', MULT_ID='m1'/
 
 ! sticks aligned with y axis
-! DX0=-l/2, DY0=-l/2, DZ0=b+d=t
+! DX0=-l/2, DY0=-l/2, DZ0=b+d
 ! s=(l-nb)/(n-1), DX=s+b, DZ=2b
 ! I_UPPER=n-1, K_UPPER=N/2-1
 &MULT ID='m2'
-      DX0=param_hl,DY0=param_hl,DZ0=param_t
+      DX0=param_hl,DY0=param_hl,DZ0=param_bpd
       DX=param_spb,DZ=param_2b
-      I_UPPER=param_nm1,K_UPPER=param_N2m1/
+      I_UPPER=param_nm1,K_UPPER=param_hNm1/
 &OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', MULT_ID='m2'/
 
 &SURF ID='WOOD'
@@ -31,12 +32,12 @@
       MOISTURE_FRACTION=0.025
       BACKING='INSULATED'
       RAMP_EF='external_flux'
-      THICKNESS=param_c /
+      THICKNESS=param_hb /
 
-&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_m6
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd
       QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE INTEGRAL', ID='MASS'/
 
-&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_m6
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd
       QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE AREA', ID='AREA_SURF'/
 
 &CATF OTHER_FILES='common_params.fds','vegetation_model.fds'/
