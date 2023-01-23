@@ -1835,4 +1835,25 @@ TYPE CELL_TYPE
    REAL(EB) :: W_EDGE_Y=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
 END TYPE CELL_TYPE
 
+
+TYPE EDGE_TYPE
+   INTEGER :: I=0,J=0,K=0                              !< Indices of the edge
+   INTEGER :: AXIS=0                                   !< Edge axis, 1=x, 2=y, 3=z
+   INTEGER :: CELL_INDEX_MM=0                          !< Index of adjacent cell, (I,J,K)
+   INTEGER :: CELL_INDEX_PM=0                          !< Index of adjacent cell, (I+1,J,K) or (I,J+1,K)
+   INTEGER :: CELL_INDEX_MP=0                          !< Index of adjacent cell, (I,J+1,K) or (I,J,K+1)
+   INTEGER :: CELL_INDEX_PP=0                          !< Index of adjacent cell, (I,J+1,K+1) or (I+1,J,K+1) or (I+1,J+1,K)
+   INTEGER :: NOM_1=0                                  !< Number of Other Mesh, first direction
+   INTEGER :: IIO_1=0                                  !< I index in Other mesh, first direction
+   INTEGER :: JJO_1=0                                  !< J index in Other mesh, first direction
+   INTEGER :: KKO_1=0                                  !< K index in Other mesh, first direction
+   INTEGER :: NOM_2=0                                  !< Number of Other Mesh, second direction
+   INTEGER :: IIO_2=0                                  !< I index in Other mesh, second direction
+   INTEGER :: JJO_2=0                                  !< J index in Other mesh, second direction
+   INTEGER :: KKO_2=0                                  !< K index in Other mesh, second direction
+   REAL(EB), DIMENSION(-2:2) :: OMEGA=-1.E6_EB                !< Vorticity at boundary with one of four orientations
+   REAL(EB), DIMENSION(-2:2) :: TAU=-1.E6_EB                  !< Strain at boundary with one of four orientations
+   REAL(EB), DIMENSION(2) :: EDGE_INTERPOLATION_FACTOR=1._EB  !< Strain at boundary with one of four orientations
+END TYPE EDGE_TYPE
+
 END MODULE TYPES

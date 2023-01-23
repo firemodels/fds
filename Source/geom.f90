@@ -7258,18 +7258,16 @@ END SUBROUTINE INIT_CFACE_CELL
 
 SUBROUTINE GET_REGULAR_CUT_EDGES_BC(NM)
 
-! This routine adds to FDS edge arrays OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR
+! This routine adds to FDS EDGE array
 ! the sum of regular edges that are boundary at least a neighboring CC_CUTCFE face and
 ! one CC_GASPHASE face. 
 
-USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL,REALLOCATE_EDGE
 INTEGER, INTENT(IN) :: NM
 
 ! Local variables:
-INTEGER :: ECOUNT, CC_ECOUNT_RC, CC_ECOUNT_CE, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD, IEC
+INTEGER :: ECOUNT, CC_ECOUNT_RC, CC_ECOUNT_CE, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD, IEC, N1, N2
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CELL_ADDED
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TAU_E_AUX,OME_E_AUX,EDGE_INT_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKE_AUX
 INTEGER :: ICMM,ICPM,ICPP,ICMP
 INTEGER :: IDUM,IOR,IW1,IW2,CELL_COUNT_OLD
 INTEGER, PARAMETER :: IAXIS_WALL_INDS(1:4) = (/ -3, -2, 2, 3 /)
@@ -7548,50 +7546,21 @@ ENDIF
 M%CC_NRCEDGE = CC_ECOUNT_RC
 ALLOCATE(M%CC_RCEDGE(1:CC_ECOUNT_RC))
 
-! Reallocate edge variables OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR:
-IF (ECOUNT > 0) THEN
-   ! N_EDGES_DIM_CC(1:2,NM)
-   N_EDGES_DIM_CC(1,NM) = SIZE(M%IJKE, DIM=2)
-   N_EDGES_DIM_CC(2,NM) = ECOUNT
+! Reallocate EDGE variables
 
-   ! OME_E, TAU_E:
-   ALLOCATE(OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)),TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)))
-   OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)) = M%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(M%OME_E); ALLOCATE(M%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   M%OME_E = -1.E6_EB
-   M%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-
-   TAU_E_AUX(:,:) = M%TAU_E(:,:)
-   DEALLOCATE(M%TAU_E); ALLOCATE(M%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   M%TAU_E = -1.E6_EB
-   M%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(OME_E_AUX, TAU_E_AUX)
-
-   ! IJKE, EDGE_INTERPOLATION_FACTOR:
-   ALLOCATE(IJKE_AUX(16,N_EDGES_DIM_CC(1,NM))); IJKE_AUX(:,:) = M%IJKE(:,:)
-   DEALLOCATE(M%IJKE); ALLOCATE(M%IJKE(16,N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   M%IJKE = 0; M%IJKE(1:16,1:N_EDGES_DIM_CC(1,NM)) = IJKE_AUX(1:16,1:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(IJKE_AUX)
-
-   ALLOCATE(EDGE_INT_AUX(N_EDGES_DIM_CC(1,NM),2));
-   EDGE_INT_AUX(:,:) = M%EDGE_INTERPOLATION_FACTOR(:,:)
-   DEALLOCATE(M%EDGE_INTERPOLATION_FACTOR);
-   ALLOCATE(M%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM),2))
-   M%EDGE_INTERPOLATION_FACTOR = 1._EB
-   M%EDGE_INTERPOLATION_FACTOR(1:N_EDGES_DIM_CC(1,NM),1:2) = EDGE_INT_AUX(1:N_EDGES_DIM_CC(1,NM),1:2)
-   DEALLOCATE(EDGE_INT_AUX)
-ENDIF
+N1 = UBOUND(MESHES(NM)%EDGE,DIM=1)
+N2 = EDGE_COUNT(NM) + ECOUNT
+IF (ECOUNT>0 .AND. N2>N1) CALL REALLOCATE_EDGE(NM,N1,N2)
 
 ! Reallocate CELL variables
 
 CELL_COUNT_OLD = CELL_COUNT(NM)
-
 IF (CCOUNT > 0) CALL REALLOCATE_CELL(NM,CELL_COUNT(NM),CELL_COUNT(NM)+CCOUNT)
+CCOUNT = CELL_COUNT_OLD
 
 ! Finally repeat search process and assign edge and cell values to cut-cell region entities:
 
-ECOUNT = N_EDGES_DIM_CC(1,NM); CC_ECOUNT_RC=0; CC_ECOUNT_CE = 0
-CCOUNT = CELL_COUNT_OLD
+CC_ECOUNT_RC=0; CC_ECOUNT_CE = 0
 
 ! X axis edges:
 DO K=0,KBAR
@@ -7619,10 +7588,8 @@ DO K=0,KBAR
          ENDIF
          IF (DO_EDGE_FLG) THEN ! At least one neighboring cut-face, and one regular face.
             IE = M%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(4) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO KADD=0,1
                   DO JADD=0,1
                      IF(M%CELL_INDEX(I     ,J+JADD,K+KADD)==0) THEN ! Add cell to CELL_INDEX
@@ -7638,11 +7605,14 @@ DO K=0,KBAR
                ICPM = M%CELL_INDEX(I  ,J+1,K  )
                ICPP = M%CELL_INDEX(I  ,J+1,K+1)
                ICMP = M%CELL_INDEX(I  ,J  ,K+1)
-               M%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, IAXIS /)
-               M%IJKE(5,IE) = ICMM
-               M%IJKE(6,IE) = ICPM
-               M%IJKE(7,IE) = ICMP
-               M%IJKE(8,IE) = ICPP
+               M%EDGE(IE)%I = I
+               M%EDGE(IE)%J = J
+               M%EDGE(IE)%K = K
+               M%EDGE(IE)%AXIS = IAXIS
+               M%EDGE(IE)%CELL_INDEX_MM = ICMM
+               M%EDGE(IE)%CELL_INDEX_PM = ICPM
+               M%EDGE(IE)%CELL_INDEX_MP = ICMP
+               M%EDGE(IE)%CELL_INDEX_PP = ICPP
                M%CELL(ICPP)%EDGE_INDEX(1) = IE
                M%CELL(ICMP)%EDGE_INDEX(2) = IE
                M%CELL(ICPM)%EDGE_INDEX(3) = IE
@@ -7679,7 +7649,10 @@ DO K=0,KBAR
             IF (M%ECVAR(I,J,K,CC_EGSC,IAXIS) == CC_GASPHASE) THEN
                CC_ECOUNT_RC = CC_ECOUNT_RC + 1
                ! Add info to CC_RCEDGE:
-               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS:KAXIS+1) = M%IJKE(IAXIS:KAXIS+1,IE)
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS) = M%EDGE(IE)%I
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(JAXIS) = M%EDGE(IE)%J
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS) = M%EDGE(IE)%K
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS+1) = M%EDGE(IE)%AXIS
                M%CC_RCEDGE(CC_ECOUNT_RC)%IE = IE
                ! Note RCEDGE number in ECVAR:
                M%ECVAR(I,J,K,CC_IDCE,IAXIS) = CC_ECOUNT_RC
@@ -7719,10 +7692,8 @@ DO K=0,KBAR
          ENDIF
          IF (DO_EDGE_FLG) THEN ! At least one neighboring cut-face, and one regular face.
             IE = M%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(8) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO KADD=0,1
                   DO IADD=0,1
                      IF(M%CELL_INDEX(I+IADD,J     ,K+KADD)==0) THEN ! Add cell to CELL_INDEX
@@ -7738,11 +7709,14 @@ DO K=0,KBAR
                ICMP = M%CELL_INDEX(I+1,J  ,K  )
                ICPP = M%CELL_INDEX(I+1,J  ,K+1)
                ICPM = M%CELL_INDEX(I  ,J  ,K+1)
-               M%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, JAXIS /)
-               M%IJKE(5,IE) = ICMM
-               M%IJKE(6,IE) = ICPM
-               M%IJKE(7,IE) = ICMP
-               M%IJKE(8,IE) = ICPP
+               M%EDGE(IE)%I = I
+               M%EDGE(IE)%J = J
+               M%EDGE(IE)%K = K
+               M%EDGE(IE)%AXIS = JAXIS
+               M%EDGE(IE)%CELL_INDEX_MM = ICMM
+               M%EDGE(IE)%CELL_INDEX_PM = ICPM
+               M%EDGE(IE)%CELL_INDEX_MP = ICMP
+               M%EDGE(IE)%CELL_INDEX_PP = ICPP
                M%CELL(ICPP)%EDGE_INDEX(5) = IE
                M%CELL(ICPM)%EDGE_INDEX(6) = IE
                M%CELL(ICMP)%EDGE_INDEX(7) = IE
@@ -7779,7 +7753,10 @@ DO K=0,KBAR
             IF (M%ECVAR(I,J,K,CC_EGSC,JAXIS) == CC_GASPHASE) THEN
                CC_ECOUNT_RC = CC_ECOUNT_RC + 1
                ! Add info to CC_RCEDGE:
-               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS:KAXIS+1) = M%IJKE(IAXIS:KAXIS+1,IE)
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS) = M%EDGE(IE)%I
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(JAXIS) = M%EDGE(IE)%J
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS) = M%EDGE(IE)%K
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS+1) = M%EDGE(IE)%AXIS
                M%CC_RCEDGE(CC_ECOUNT_RC)%IE = IE
                ! Note RCEDGE number in ECVAR:
                M%ECVAR(I,J,K,CC_IDCE,JAXIS) = CC_ECOUNT_RC
@@ -7819,10 +7796,8 @@ DO K=1,KBAR
          ENDIF
          IF (DO_EDGE_FLG) THEN ! At least one neighboring cut-face, and one regular face.
             IE = M%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(12) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO JADD=0,1
                   DO IADD=0,1
                      IF(M%CELL_INDEX(I+IADD,J+JADD,K     )==0) THEN ! Add cell to CELL_INDEX
@@ -7838,11 +7813,14 @@ DO K=1,KBAR
                ICPM = M%CELL_INDEX(I+1,J  ,K  )
                ICPP = M%CELL_INDEX(I+1,J+1,K  )
                ICMP = M%CELL_INDEX(I  ,J+1,K  )
-               M%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, KAXIS /)
-               M%IJKE(5,IE) = ICMM
-               M%IJKE(6,IE) = ICPM
-               M%IJKE(7,IE) = ICMP
-               M%IJKE(8,IE) = ICPP
+               M%EDGE(IE)%I = I
+               M%EDGE(IE)%J = J
+               M%EDGE(IE)%K = K
+               M%EDGE(IE)%AXIS = KAXIS
+               M%EDGE(IE)%CELL_INDEX_MM = ICMM
+               M%EDGE(IE)%CELL_INDEX_PM = ICPM
+               M%EDGE(IE)%CELL_INDEX_MP = ICMP
+               M%EDGE(IE)%CELL_INDEX_PP = ICPP
                M%CELL(ICPP)%EDGE_INDEX( 9) = IE
                M%CELL(ICMP)%EDGE_INDEX(10) = IE
                M%CELL(ICPM)%EDGE_INDEX(11) = IE
@@ -7879,7 +7857,10 @@ DO K=1,KBAR
             IF (M%ECVAR(I,J,K,CC_EGSC,KAXIS) == CC_GASPHASE) THEN
                CC_ECOUNT_RC = CC_ECOUNT_RC + 1
                ! Add info to CC_RCEDGE:
-               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS:KAXIS+1) = M%IJKE(IAXIS:KAXIS+1,IE)
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(IAXIS) = M%EDGE(IE)%I
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(JAXIS) = M%EDGE(IE)%J
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS) = M%EDGE(IE)%K
+               M%CC_RCEDGE(CC_ECOUNT_RC)%IJK(KAXIS+1) = M%EDGE(IE)%AXIS
                M%CC_RCEDGE(CC_ECOUNT_RC)%IE = IE
                ! Note RCEDGE number in ECVAR:
                M%ECVAR(I,J,K,CC_IDCE,KAXIS) = CC_ECOUNT_RC
@@ -7897,13 +7878,13 @@ DEALLOCATE(CELL_ADDED)
 
 IF (GET_CUTCELLS_VERBOSE) THEN
    CALL CPU_TIME(CPUTIME)
-   WRITE(LU_SETCC,'(A,F8.3,A,8I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,   &
+   WRITE(LU_SETCC,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,   &
    ' sec. Reg-CC edges for BC : ',CC_ECOUNT_RC,M%CC_NRCEDGE,CC_ECOUNT_CE, &
-   N_EDGES_DIM_CC(1:2,NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
+   EDGE_COUNT(NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
    IF (MY_RANK==0) THEN
-   WRITE(LU_ERR ,'(A,F8.3,A,8I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,    &
+   WRITE(LU_ERR ,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,    &
    ' sec. Reg-CC edges for BC : ',CC_ECOUNT_RC,M%CC_NRCEDGE,CC_ECOUNT_CE, &
-   N_EDGES_DIM_CC(1:2,NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
+   EDGE_COUNT(NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
    ENDIF
    ! DO I=1,M%CC_NRCEDGE
    !    WRITE(LU_ERR,*) 'IE,I,J,K,IAXIS=',M%CC_RCEDGE(I)%IE,M%CC_RCEDGE(I)%IJK(IAXIS:KAXIS+1)
@@ -7942,18 +7923,16 @@ END SUBROUTINE GET_REGULAR_CUT_EDGES_BC
 
 SUBROUTINE GET_SOLID_CUTCELL_EDGES_BC(NM)
 
-! This routine adds to FDS edge arrays OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR
+! This routine adds to FDS EDGE array
 ! the sum of regular edges that are boundary at least a neighboring CC_CUTCFE face and
 ! one CC_SOLID face. 
 
-USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL,REALLOCATE_EDGE
 INTEGER, INTENT(IN) :: NM
 
 ! Local variables:
-INTEGER :: ECOUNT, CC_ECOUNT, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD, CELL_COUNT_OLD
+INTEGER :: ECOUNT, CC_ECOUNT, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD, CELL_COUNT_OLD, N1, N2
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CELL_ADDED
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TAU_E_AUX,OME_E_AUX,EDGE_INT_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKE_AUX
 INTEGER :: ICMM,ICPM,ICPP,ICMP
 INTEGER :: IDUM,IOR,IW1,IW2
 INTEGER, PARAMETER :: IAXIS_WALL_INDS(1:4) = (/ -3, -2, 2, 3 /)
@@ -7987,7 +7966,7 @@ ENDIF
 
 ALLOCATE(CELL_ADDED(0:IBP1,0:JBP1,0:KBP1)); CELL_ADDED = .FALSE.
 
-! Now count added edge number for mesh N_EDGES_DIM_CC(2,NM)
+! Now count added edge number for EDGE and CELL
 
 ECOUNT = 0; CC_ECOUNT=0
 CCOUNT = 0;
@@ -8247,50 +8226,21 @@ ENDIF
 MESHES(NM)%CC_NIBEDGE = CC_ECOUNT
 ALLOCATE(MESHES(NM)%CC_IBEDGE(1:CC_ECOUNT))
 
-! Reallocate edge variables OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR:
-! N_EDGES_DIM_CC(1:2,NM)
-N_EDGES_DIM_CC(1,NM) = SIZE(MESHES(NM)%IJKE, DIM=2)
-N_EDGES_DIM_CC(2,NM) = ECOUNT
-IF (ECOUNT > 0) THEN
+! Reallocate EDGE variables 
 
-   ! OME_E, TAU_E:
-   ALLOCATE(OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)),TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)))
-   OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)) = MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(MESHES(NM)%OME_E); ALLOCATE(MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%OME_E = -1.E6_EB
-   MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-
-   TAU_E_AUX(:,:) = MESHES(NM)%TAU_E(:,:)
-   DEALLOCATE(MESHES(NM)%TAU_E); ALLOCATE(MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%TAU_E = -1.E6_EB
-   MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(OME_E_AUX, TAU_E_AUX)
-
-   ! IJKE, EDGE_INTERPOLATION_FACTOR:
-   ALLOCATE(IJKE_AUX(16,N_EDGES_DIM_CC(1,NM))); IJKE_AUX(:,:) = MESHES(NM)%IJKE(:,:)
-   DEALLOCATE(MESHES(NM)%IJKE); ALLOCATE(MESHES(NM)%IJKE(16,N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%IJKE = 0; MESHES(NM)%IJKE(1:16,1:N_EDGES_DIM_CC(1,NM)) = IJKE_AUX(1:16,1:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(IJKE_AUX)
-
-   ALLOCATE(EDGE_INT_AUX(N_EDGES_DIM_CC(1,NM),2));
-   EDGE_INT_AUX(:,:) = MESHES(NM)%EDGE_INTERPOLATION_FACTOR(:,:)
-   DEALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR);
-   ALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM),2))
-   MESHES(NM)%EDGE_INTERPOLATION_FACTOR = 1._EB
-   MESHES(NM)%EDGE_INTERPOLATION_FACTOR(1:N_EDGES_DIM_CC(1,NM),1:2) = EDGE_INT_AUX(1:N_EDGES_DIM_CC(1,NM),1:2)
-   DEALLOCATE(EDGE_INT_AUX)
-ENDIF
+N1 = UBOUND(MESHES(NM)%EDGE,DIM=1)
+N2 = EDGE_COUNT(NM) + ECOUNT
+IF (ECOUNT>0 .AND. N2>N1) CALL REALLOCATE_EDGE(NM,N1,N2)
 
 ! Reallocate derived type array CELL which contains SOLID, OBST_INDEX, WALL_INDEX, EDGE_INDEX, EXTERIOR, I, J, K:
 
 CELL_COUNT_OLD = CELL_COUNT(NM)
-
 IF (CCOUNT > 0) CALL REALLOCATE_CELL(NM,CELL_COUNT(NM),CELL_COUNT(NM)+CCOUNT)
+CCOUNT = CELL_COUNT_OLD
 
 ! Finally repeat search process and assign edge and cell values to cut-cell region entities:
 
-ECOUNT = N_EDGES_DIM_CC(1,NM); CC_ECOUNT=0
-CCOUNT = CELL_COUNT_OLD
+CC_ECOUNT=0
 
 ! X axis edges:
 DO K=0,KBAR
@@ -8327,10 +8277,8 @@ DO K=0,KBAR
          ENDIF
          IF (N_CC>0 .AND. N_RG>0) THEN ! At least one neighboring cut-cell, and two regular cells, NEW edge to force.
             IE = MESHES(NM)%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(4) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO KADD=0,1
                   DO JADD=0,1
                      IF(MESHES(NM)%CELL_INDEX(I     ,J+JADD,K+KADD)==0) THEN ! Add cell to CELL_INDEX
@@ -8346,11 +8294,14 @@ DO K=0,KBAR
                ICPM = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
                ICPP = MESHES(NM)%CELL_INDEX(I  ,J+1,K+1)
                ICMP = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, IAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
+               MESHES(NM)%EDGE(IE)%I = I
+               MESHES(NM)%EDGE(IE)%J = J
+               MESHES(NM)%EDGE(IE)%K = K
+               MESHES(NM)%EDGE(IE)%AXIS = IAXIS
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MM = ICMM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PM = ICPM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MP = ICMP
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PP = ICPP
                MESHES(NM)%CELL(ICPP)%EDGE_INDEX(1) = IE
                MESHES(NM)%CELL(ICMP)%EDGE_INDEX(2) = IE
                MESHES(NM)%CELL(ICPM)%EDGE_INDEX(3) = IE
@@ -8388,7 +8339,10 @@ DO K=0,KBAR
             CC_ECOUNT = CC_ECOUNT + 1
 
             ! Add info to CC_IBEDGE:
-            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS) = MESHES(NM)%EDGE(IE)%I
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(JAXIS) = MESHES(NM)%EDGE(IE)%J
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS) = MESHES(NM)%EDGE(IE)%K
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS+1) = MESHES(NM)%EDGE(IE)%AXIS
             MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IE = IE
 
          ENDIF
@@ -8431,10 +8385,8 @@ DO K=0,KBAR
          ENDIF
          IF (N_CC>0 .AND. N_RG>0) THEN ! At least one neighboring cut-cell, and two regular cells.
             IE = MESHES(NM)%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(8) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO KADD=0,1
                   DO IADD=0,1
                      IF(MESHES(NM)%CELL_INDEX(I+IADD,J     ,K+KADD)==0) THEN ! Add cell to CELL_INDEX
@@ -8450,11 +8402,14 @@ DO K=0,KBAR
                ICMP = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
                ICPP = MESHES(NM)%CELL_INDEX(I+1,J  ,K+1)
                ICPM = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, JAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
+               MESHES(NM)%EDGE(IE)%I = I
+               MESHES(NM)%EDGE(IE)%J = J
+               MESHES(NM)%EDGE(IE)%K = K
+               MESHES(NM)%EDGE(IE)%AXIS = JAXIS
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MM = ICMM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PM = ICPM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MP = ICMP
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PP = ICPP
                MESHES(NM)%CELL(ICPP)%EDGE_INDEX(5) = IE
                MESHES(NM)%CELL(ICPM)%EDGE_INDEX(6) = IE
                MESHES(NM)%CELL(ICMP)%EDGE_INDEX(7) = IE
@@ -8492,7 +8447,10 @@ DO K=0,KBAR
             CC_ECOUNT = CC_ECOUNT + 1
 
             ! Add info to CC_IBEDGE:
-            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS) = MESHES(NM)%EDGE(IE)%I
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(JAXIS) = MESHES(NM)%EDGE(IE)%J
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS) = MESHES(NM)%EDGE(IE)%K
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS+1) = MESHES(NM)%EDGE(IE)%AXIS
             MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IE = IE
 
          ENDIF
@@ -8534,10 +8492,8 @@ DO K=1,KBAR
          ENDIF
          IF (N_CC>0 .AND. N_RG>0) THEN ! At least one neighboring cut-cell, and two regular cells.
             IE = MESHES(NM)%CELL(CELL_INDEX(I,J,K))%EDGE_INDEX(12) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
             IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
+               EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1 ; IE = EDGE_COUNT(NM)
                DO JADD=0,1
                   DO IADD=0,1
                      IF(MESHES(NM)%CELL_INDEX(I+IADD,J+JADD,K     )==0) THEN ! Add cell to CELL_INDEX
@@ -8553,11 +8509,14 @@ DO K=1,KBAR
                ICPM = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
                ICPP = MESHES(NM)%CELL_INDEX(I+1,J+1,K  )
                ICMP = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, KAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
+               MESHES(NM)%EDGE(IE)%I = I
+               MESHES(NM)%EDGE(IE)%J = J
+               MESHES(NM)%EDGE(IE)%K = K
+               MESHES(NM)%EDGE(IE)%AXIS = KAXIS
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MM = ICMM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PM = ICPM
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_MP = ICMP
+               MESHES(NM)%EDGE(IE)%CELL_INDEX_PP = ICPP
                MESHES(NM)%CELL(ICPP)%EDGE_INDEX( 9) = IE
                MESHES(NM)%CELL(ICMP)%EDGE_INDEX(10) = IE
                MESHES(NM)%CELL(ICPM)%EDGE_INDEX(11) = IE
@@ -8595,7 +8554,10 @@ DO K=1,KBAR
             CC_ECOUNT = CC_ECOUNT + 1
 
             ! Add info to CC_IBEDGE:
-            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(IAXIS) = MESHES(NM)%EDGE(IE)%I
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(JAXIS) = MESHES(NM)%EDGE(IE)%J
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS) = MESHES(NM)%EDGE(IE)%K
+            MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IJK(KAXIS+1) = MESHES(NM)%EDGE(IE)%AXIS
             MESHES(NM)%CC_IBEDGE(CC_ECOUNT)%IE = IE
 
          ENDIF
@@ -8607,13 +8569,13 @@ DEALLOCATE(CELL_ADDED)
 
 IF (GET_CUTCELLS_VERBOSE) THEN
    CALL CPU_TIME(CPUTIME)
-   WRITE(LU_SETCC,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   WRITE(LU_SETCC,'(A,F8.3,A,6I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
    ' sec. Sol-CC edges for BC : ', &
-   CC_ECOUNT,MESHES(NM)%CC_NIBEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
+   CC_ECOUNT,MESHES(NM)%CC_NIBEDGE,EDGE_COUNT(NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
    IF (MY_RANK==0) THEN
-   WRITE(LU_ERR ,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   WRITE(LU_ERR ,'(A,F8.3,A,6I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
    ' sec. Sol-CC edges for BC : ', &
-   CC_ECOUNT,MESHES(NM)%CC_NIBEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
+   CC_ECOUNT,MESHES(NM)%CC_NIBEDGE,EDGE_COUNT(NM),CELL_COUNT_OLD,CELL_COUNT(NM),CCOUNT,'. '
    ENDIF
    ! DO I=1,MESHES(NM)%CC_NRCEDGE
    !    WRITE(LU_ERR,*) 'IE,I,J,K,IAXIS=',MESHES(NM)%CC_RCEDGE(I)%IE,MESHES(NM)%CC_RCEDGE(I)%IJK(IAXIS:KAXIS+1)

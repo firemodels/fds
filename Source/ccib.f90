@@ -4153,7 +4153,8 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
 
-      ! Exchange Velocity at end of PREDICTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
+      ! Exchange Velocity at end of PREDICTOR: To be used in RCEDGEs estimation of OMEGA and TAU at next substep.
+
       IF (CODE==3 .AND. M3%NICF_S(1)>0) THEN
          NQT2 = 4
          LL   = 0
@@ -4357,7 +4358,8 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
 
-      ! Exchange Velocity and Pressure at end of CORRECTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
+      ! Exchange Velocity and Pressure at end of CORRECTOR: To be used in RCEDGEs estimation of OMEGA and TAU next substep.
+
       IF (CODE==6 .AND. M3%NICF_S(1)>0) THEN
          NQT2 = 4
          LL   = 0
@@ -7463,12 +7465,10 @@ IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
 ENDIF
 
 ! Redefine wall_cells inside Geoms: This is done before EDGE info as edges with WALL_CELL type NULL_BOUNDARY will be taken
-! care of by GEOM edges. Note EDGE_INDEX will be reassigned the IBEDGE position in OME_E, TAU_E arrays for velocity flux to
+! care of by GEOM edges. Note EDGE_INDEX will be reassigned the IBEDGE position in OMEGA, TAU arrays for velocity flux to
 ! be computed correctly.
 
 CALL BLOCK_CC_SOLID_EXTWALLCELLS(FIRST_CALL)
-
-ALLOCATE(N_EDGES_DIM_CC(1:2,1:NMESHES)); N_EDGES_DIM_CC = 0
 
 ! Reallocate and populate FDS edge and cell topology variables
 
@@ -13345,10 +13345,10 @@ IF(CE%IJK(X2AXIS)<0 .OR. CE%IJK(X2AXIS)>X2BAR) RETURN
 IF(CE%IJK(X3AXIS)<0 .OR. CE%IJK(X3AXIS)>X3BAR) RETURN
 
 IE     = CE%IE
-II     = IJKE( 1,IE)
-JJ     = IJKE( 2,IE)
-KK     = IJKE( 3,IE)
-IEC    = IJKE( 4,IE) ! IEC is the edges X1AXIS
+II     = EDGE(IE)%I
+JJ     = EDGE(IE)%J
+KK     = EDGE(IE)%K
+IEC    = EDGE(IE)%AXIS
 
 ! We Keep viscosity outside of JEDGE loop for the moment.
 SELECT CASE(IEC)
@@ -13385,7 +13385,7 @@ DO JEDGE=1,CE%NEDGE
    ENDDO
 ENDDO
 
-! For TAU_E OMG_E on the whole cartesian edge use value of JEDGE=1. Note this would be changed when each cut-edge
+! For TAU OMGGA on the whole cartesian edge use value of JEDGE=1. Note this would be changed when each cut-edge
 ! contributes to corresponfing cut-faces forces (completely unstructured momentum).
 JEDGE=1
 SIGN_LOOP_2: DO I_SGN=-1,1,2
@@ -13397,8 +13397,8 @@ SIGN_LOOP_2: DO I_SGN=-1,1,2
       ICDO_SGN = I_SGN*ICDO
          DUIDXJ_USE(ICDO)=    CE%DUIDXJ(ICDO_SGN,JEDGE)
       MU_DUIDXJ_USE(ICDO)= CE%MU_DUIDXJ(ICDO_SGN,JEDGE)
-      OME_E(ICD_SGN,IE) = DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-      TAU_E(ICD_SGN,IE) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+      EDGE(IE)%OMEGA(ICD_SGN) = DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+      EDGE(IE)%TAU(ICD_SGN)   = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
    ENDDO ORIENTATION_LOOP_2
 ENDDO SIGN_LOOP_2
 
@@ -13411,11 +13411,11 @@ INTEGER :: IOE
 REAL(EB):: VEL_GAS(-2:2),XB_IB(-2:2),MU_RC,DEL_RC
 LOGICAL :: IOEFLG
 
-IE = CC_EDGE%IE
-II     = IJKE( 1,IE)
-JJ     = IJKE( 2,IE)
-KK     = IJKE( 3,IE)
-IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
+IE  = CC_EDGE%IE
+II  = EDGE(IE)%I
+JJ  = EDGE(IE)%J
+KK  = EDGE(IE)%K
+IEC = EDGE(IE)%AXIS
 
 VEL_GAS(-2:2) = 0._EB; XB_IB(-2:2) = 0._EB
 ORIENTATION_LOOP: DO IS=1,3
@@ -13549,32 +13549,12 @@ SIGN_LOOP_2: DO I_SGN=-1,1,2
       ICDO_SGN = I_SGN*ICDO
          DUIDXJ_USE(ICDO)=   CC_EDGE%DUIDXJ(ICDO_SGN)
       MU_DUIDXJ_USE(ICDO)= CC_EDGE%MU_DUIDXJ(ICDO_SGN)
-      OME_E(ICD_SGN,IE) = DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-      TAU_E(ICD_SGN,IE) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+      EDGE(IE)%OMEGA(ICD_SGN) = DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+      EDGE(IE)%TAU(ICD_SGN)   = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
 
    ENDDO ORIENTATION_LOOP_2
 ENDDO SIGN_LOOP_2
 
-! II     = IJKE( 1,IE)
-! JJ     = IJKE( 2,IE)
-! KK     = IJKE( 3,IE)
-! IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
-! IF(II==0 .AND. JJ==2 .AND. KK==1 .AND. IEC==JAXIS) THEN
-!    WRITE(LU_ERR,*) 'TAU_E=',II,JJ,KK,IEC, TAU_E((/-2,-1,1,2/),IE)
-! ENDIF
-
-! WRITE(LU_ERR,*) 'RCE DUDZ=',IEDGE,II,JJ,KK,CC_EDGE%DUIDXJ((/-1,1/)),':',(UU(II,JJ,KK+1)-UU(II,JJ,KK))/DZN(KK),',',UU(II,JJ,KK)
-! WRITE(LU_ERR,*) 'RCE DWDX=',IEDGE,II,JJ,KK,CC_EDGE%DUIDXJ((/-2,2/)),':',(WW(II+1,JJ,KK)-WW(II,JJ,KK))/DXN(II)
-! WRITE(LU_ERR,*) 'RCE O=',IEDGE,II,JJ,KK,OME_E((/-2,-1,1,2/),IE),':',&
-!                 (UU(II,JJ,KK+1)-UU(II,JJ,KK))/DZN(KK)-(WW(II+1,JJ,KK)-WW(II,JJ,KK))/DXN(II)
-! MU_RC = 0.25_EB*(MU(II,JJ,KK)+MU(II+1,JJ,KK)+MU(II+1,JJ,KK+1)+MU(II,JJ,KK+1))
-! WRITE(LU_ERR,*) 'RCE T=',IEDGE,II,JJ,KK,TAU_E((/-2,-1,1,2/),IE),':',&
-!                 MU_RC*((UU(II,JJ,KK+1)-UU(II,JJ,KK))/DZN(KK)+(WW(II+1,JJ,KK)-WW(II,JJ,KK))/DXN(II))
-! OME_E((/-2,-1,1,2/),IE) = (UU(II,JJ,KK+1)-UU(II,JJ,KK))/DZN(KK)-(WW(II+1,JJ,KK)-WW(II,JJ,KK))/DXN(II)
-! TAU_E((/-2,-1,1,2/),IE) = MU_RC*((UU(II,JJ,KK+1)-UU(II,JJ,KK))/DZN(KK)+(WW(II+1,JJ,KK)-WW(II,JJ,KK))/DXN(II))
-! ENDIF
-
-RETURN
 END SUBROUTINE CC_RCEDGE_TAU_OMG
 
 SUBROUTINE CC_EDGE_TAU_OMG
@@ -13592,15 +13572,15 @@ VLG(-2:2)=0._EB; NUV(-2:2)=0._EB; RGH(-2:2)=0._EB; UTA(-2:2)=0._EB
 ! Set these to zero for now:
 VEL_T = 0._EB; SRGH = 0._EB
 
-IE = CC_EDGE%IE
-II = IJKE( 1,IE)
-JJ = IJKE( 2,IE)
-KK = IJKE( 3,IE)
-IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
-ICMM   = IJKE( 5,IE)
-ICPM   = IJKE( 6,IE)
-ICMP   = IJKE( 7,IE)
-ICPP   = IJKE( 8,IE)
+IE   = CC_EDGE%IE
+II   = EDGE(IE)%I
+JJ   = EDGE(IE)%J
+KK   = EDGE(IE)%K
+IEC  = EDGE(IE)%AXIS
+ICMM = EDGE(IE)%CELL_INDEX_MM
+ICPM = EDGE(IE)%CELL_INDEX_PM
+ICMP = EDGE(IE)%CELL_INDEX_MP
+ICPP = EDGE(IE)%CELL_INDEX_PP
 
 ! Get the velocity components at the appropriate cell faces
 
@@ -14100,7 +14080,7 @@ ORIENTATION_LOOP: DO IS=1,3
          CASE (WALL_MODEL_BC)
             NU = MU_FACE/RHO_FACE
             CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SURFACE(SURF_INDEX)%ROUGHNESS,DXN_STRM_UB,VEL_GAS-VEL_T)
-            ! Finally OME_E, TAU_E:
+            ! Finally OMEGA, TAU:
             ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
             ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
             IF (.NOT.CORNER_EDGE) VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
@@ -14283,30 +14263,11 @@ SIGN_LOOP_2: DO I_SGN=-1,1,2
             DUIDXJ_USE(ICDO) = 0._EB
          MU_DUIDXJ_USE(ICDO) = 0._EB
       ENDIF
-      OME_E(ICD_SGN,IE) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-      TAU_E(ICD_SGN,IE) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+      EDGE(IE)%OMEGA(ICD_SGN) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+      EDGE(IE)%TAU(ICD_SGN)   = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
    ENDDO ORIENTATION_LOOP_2
 ENDDO SIGN_LOOP_2
 
-! !IF(NM==2 .AND. II==8 .AND. JJ==9 .AND. KK==10 .AND. IEC==KAXIS) THEN
-! IF(NM==1 .AND. II==0 .AND. JJ==6 .AND. KK==2 .AND. IEC==JAXIS) THEN
-! IF(NM==2 .AND. II==8 .AND. JJ==9 .AND. KK==8 .AND. IEC==JAXIS) THEN
-! IF(NM==1 .AND. IEC==JAXIS .AND. II==41 .AND. JJ==20 .AND. KK==32) THEN
-!    WRITE(LU_ERR,*) ' '
-!    WRITE(LU_ERR,*) 'IBEDGE      =',IEDGE,PREDICTOR,II,JJ,KK
-!    WRITE(LU_ERR,*) 'IBEDGE OME_EP=',OMEV_EP((/-2,-1,1,2/)) !,OME_B
-!    WRITE(LU_ERR,*) 'IBEDGE TAU_EP=',TAUV_EP((/-2,-1,1,2/)) !,TAU_B,MU_DUDXN
-!    WRITE(LU_ERR,*) 'IBEDGE OME_E=',OME_E((/-2,-1,1,2/),CC_EDGE%IE) !,OME_B
-!    WRITE(LU_ERR,*) 'IBEDGE TAU_E=',TAU_E((/-2,-1,1,2/),CC_EDGE%IE) !,TAU_B,MU_DUDXN
-!    WRITE(LU_ERR,*) 'IBEDGE VLGAS=',VLG((/-2,-1,1,2/))
-!    WRITE(LU_ERR,*) 'IBEDGE NU   =',NUV((/-2,-1,1,2/))
-!    WRITE(LU_ERR,*) 'IBEDGE RGH  =',RGH((/-2,-1,1,2/))
-!    WRITE(LU_ERR,*) 'IBEDGE UTAU =',UTA((/-2,-1,1,2/))
-!    WRITE(LU_ERR,*) 'IBEDGE EC_B =',EC_B((/-2,-1,1,2/))
-!    WRITE(LU_ERR,*) 'IBEDGE EC_EP=',EC_EP((/-2,-1,1,2/))
-! ENDIF
-
-RETURN
 END SUBROUTINE CC_EDGE_TAU_OMG
 
 ! SUBROUTINE GET_QUAD_VEL(DF,DE,UF,UE,UB,USTR_2)
@@ -16427,11 +16388,11 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! CC_RCEDGE(IEDGE)%EDGE_IN_MESH(-2:2)             = .TRUE.  ! Always true for RCEDGES, no need to mesh_cc_exchange variables.
       CC_RCEDGE(IEDGE)%INT_NPE                          = 0       ! Required to avoid segfault in comm.
 
-      IE = MESHES(NM)%CC_RCEDGE(IEDGE)%IE
-      II     = IJKE( 1,IE)
-      JJ     = IJKE( 2,IE)
-      KK     = IJKE( 3,IE)
-      IEC    = IJKE( 4,IE) ! IEC is the edges X1AXIS
+      IE  = MESHES(NM)%CC_RCEDGE(IEDGE)%IE
+      II  = EDGE(IE)%I
+      JJ  = EDGE(IE)%J
+      KK  = EDGE(IE)%K
+      IEC = EDGE(IE)%AXIS
 
       ! First: Loop over all possible face orientations of edge to define XB_IB, SURF_INDEX, PROCESS_EDGE_ORIENTATION:
       ORIENTATION_LOOP_RC_1: DO IS=1,3
@@ -16603,11 +16564,11 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2)             = .FALSE. ! If true, no need to mesh_cc_exchange variables.
       CC_IBEDGE(IEDGE)%INT_NPE                        = 0 ! Required to avoid segfault in comm.
 
-      IE = MESHES(NM)%CC_IBEDGE(IEDGE)%IE
-      II     = IJKE( 1,IE)
-      JJ     = IJKE( 2,IE)
-      KK     = IJKE( 3,IE)
-      IEC    = IJKE( 4,IE) ! IEC is the edges X1AXIS
+      IE  = MESHES(NM)%CC_IBEDGE(IEDGE)%IE
+      II  = EDGE(IE)%I
+      JJ  = EDGE(IE)%J
+      KK  = EDGE(IE)%K
+      IEC = EDGE(IE)%AXIS
 
       ! First: Loop over all possible face orientations of edge to define XB_IB, SURF_INDEX, PROCESS_EDGE_ORIENTATION:
       ORIENTATION_LOOP_1: DO IS=1,3

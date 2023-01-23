@@ -965,7 +965,7 @@ END SUBROUTINE INITIALIZE_MESH_VARIABLES_1
 
 SUBROUTINE INITIALIZE_MESH_VARIABLES_2(NM)
 
-USE MEMORY_FUNCTIONS, ONLY: PACK_WALL,PACK_THIN_WALL
+USE MEMORY_FUNCTIONS, ONLY: PACK_WALL,PACK_THIN_WALL,REALLOCATE_EDGE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT,LES_FILTER_WIDTH_FUNCTION
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE CONTROL_VARIABLES
@@ -1438,18 +1438,7 @@ DO N=1,M%N_OBST
    N_EDGES_DIM = N_EDGES_DIM + 4*(IPTS*JPTS+IPTS*KPTS+JPTS*KPTS)
 ENDDO
 
-ALLOCATE(M%IJKE(16,N_EDGES_DIM),STAT=IZERO)
-CALL ChkMemErr('INIT','IJKE',IZERO)
-M%IJKE  = 0
-ALLOCATE(M%OME_E(-2:2,0:N_EDGES_DIM),STAT=IZERO)
-CALL ChkMemErr('INIT','OME_E',IZERO)
-M%OME_E = 0._EB
-ALLOCATE(M%TAU_E(-2:2,0:N_EDGES_DIM),STAT=IZERO)
-CALL ChkMemErr('INIT','TAU_E',IZERO)
-M%TAU_E = 0._EB
-ALLOCATE(M%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM,2),STAT=IZERO)
-CALL ChkMemErr('INIT','EDGE_INTERPOLATION_FACTOR',IZERO)
-M%EDGE_INTERPOLATION_FACTOR = 1._EB
+CALL REALLOCATE_EDGE(NM,N_EDGES_DIM,N_EDGES_DIM)
 
 ! Allocate array to hold character strings for Smokeview file
 
@@ -1510,7 +1499,7 @@ SUBROUTINE INITIALIZE_EDGES
 
 ! Set up edge arrays for velocity boundary conditions
 
-M%N_EDGES = 0
+EDGE_COUNT(NM) = 0
 
 ! Arguments for DEFINE_EDGE(I,J,K,IOR,IEC,NM,OBST_INDEX)
 
@@ -1580,6 +1569,7 @@ INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
 INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,OBST_INDEX,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
 REAL(EB) :: XI,YJ,ZK
 TYPE (MESH_TYPE), POINTER :: MM
+TYPE (EDGE_TYPE), POINTER :: ED
 
 IF (OBST_INDEX>0) OB=>M%OBSTRUCTION(OBST_INDEX)
 
@@ -1671,9 +1661,11 @@ SELECT CASE(IEC)
 END SELECT
 
 IF (IE==0) THEN
-   M%N_EDGES = M%N_EDGES + 1
-   IE = M%N_EDGES
+   EDGE_COUNT(NM) = EDGE_COUNT(NM) + 1
+   IE = EDGE_COUNT(NM)
 ENDIF
+
+ED => M%EDGE(IE)
 
 ! Determine the wall index of the adjacent wall tile
 
@@ -1691,14 +1683,12 @@ IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ENDIF
 ENDIF
 
-! Fill up array IJKE with edge parameters
+! Fill up EDGE array
 
-M%IJKE(1,IE) = II
-M%IJKE(2,IE) = JJ
-M%IJKE(3,IE) = KK
-M%IJKE(4,IE) = IEC
-
-! Fill in EDGE_INDEX and the rest of IJKE
+ED%I = II
+ED%J = JJ
+ED%K = KK
+ED%AXIS = IEC
 
 EDGE_DIRECTION_2: SELECT CASE(IEC)
 
@@ -1707,10 +1697,10 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       ICPM = M%CELL_INDEX(II,JJ+1,KK)
       ICPP = M%CELL_INDEX(II,JJ+1,KK+1)
       ICMP = M%CELL_INDEX(II,JJ,KK+1)
-      M%IJKE(5,IE) = ICMM
-      M%IJKE(6,IE) = ICPM
-      M%IJKE(7,IE) = ICMP
-      M%IJKE(8,IE) = ICPP
+      ED%CELL_INDEX_MM = ICMM
+      ED%CELL_INDEX_PM = ICPM
+      ED%CELL_INDEX_MP = ICMP
+      ED%CELL_INDEX_PP = ICPP
       M%CELL(ICPP)%EDGE_INDEX(1) = IE
       M%CELL(ICMP)%EDGE_INDEX(2) = IE
       M%CELL(ICPM)%EDGE_INDEX(3) = IE
@@ -1718,25 +1708,25 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE(2)
-               IF (IOR>0) M%IJKE( 9,IE) = -NOM
-               IF (IOR<0) M%IJKE( 9,IE) =  NOM
-               M%IJKE(10,IE) = IIO
-               M%IJKE(11,IE) = JJO
+               IF (IOR>0) ED%NOM_1 = -NOM
+               IF (IOR<0) ED%NOM_1 =  NOM
+               ED%IIO_1 = IIO
+               ED%JJO_1 = JJO
                MM => MESHES(NOM)
                ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((M%Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
                KKO = MAX(1,FLOOR(ZK))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = ZK-KKO
-               M%IJKE(12,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(1) = ZK-KKO
+               ED%KKO_1 = KKO
             CASE(3)
-               IF (IOR>0) M%IJKE(13,IE) = -NOM
-               IF (IOR<0) M%IJKE(13,IE) =  NOM
-               M%IJKE(14,IE) = IIO
+               IF (IOR>0) ED%NOM_2 = -NOM
+               IF (IOR<0) ED%NOM_2 =  NOM
+               ED%IIO_2 = IIO
                MM => MESHES(NOM)
                YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((M%Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
                JJO = MAX(1,FLOOR(YJ))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
-               M%IJKE(15,IE) = JJO
-               M%IJKE(16,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(2) = YJ-JJO
+               ED%JJO_2 = JJO
+               ED%KKO_2 = KKO
          END SELECT
       ENDIF
 
@@ -1745,10 +1735,10 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       ICMP = M%CELL_INDEX(II+1,JJ,KK)
       ICPP = M%CELL_INDEX(II+1,JJ,KK+1)
       ICPM = M%CELL_INDEX(II,JJ,KK+1)
-      M%IJKE(5,IE) = ICMM
-      M%IJKE(6,IE) = ICPM
-      M%IJKE(7,IE) = ICMP
-      M%IJKE(8,IE) = ICPP
+      ED%CELL_INDEX_MM = ICMM
+      ED%CELL_INDEX_PM = ICPM
+      ED%CELL_INDEX_MP = ICMP
+      ED%CELL_INDEX_PP = ICPP
       M%CELL(ICPP)%EDGE_INDEX(5) = IE
       M%CELL(ICPM)%EDGE_INDEX(6) = IE
       M%CELL(ICMP)%EDGE_INDEX(7) = IE
@@ -1756,25 +1746,25 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE( 1)
-               IF (IOR>0) M%IJKE(13,IE) = -NOM
-               IF (IOR<0) M%IJKE(13,IE) =  NOM
-               M%IJKE(14,IE) = IIO
-               M%IJKE(15,IE) = JJO
+               IF (IOR>0) ED%NOM_2 = -NOM
+               IF (IOR<0) ED%NOM_2 =  NOM
+               ED%IIO_2 = IIO
+               ED%JJO_2 = JJO
                MM => MESHES(NOM)
                ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((M%Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
                KKO = MAX(1,FLOOR(ZK))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-               M%IJKE(16,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(2) = ZK-KKO
+               ED%KKO_2 = KKO
             CASE( 3)
-               IF (IOR>0) M%IJKE( 9,IE) = -NOM
-               IF (IOR<0) M%IJKE( 9,IE) =  NOM
+               IF (IOR>0) ED%NOM_1 = -NOM
+               IF (IOR<0) ED%NOM_1 =  NOM
                MM => MESHES(NOM)
                XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((M%X(II)-MM%XS)*MM%RDXINT))+1._EB )
                IIO = MAX(1,FLOOR(XI))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-               M%IJKE(10,IE) = IIO
-               M%IJKE(11,IE) = JJO
-               M%IJKE(12,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(1) = XI-IIO
+               ED%IIO_1 = IIO
+               ED%JJO_1 = JJO
+               ED%KKO_1 = KKO
          END SELECT
       ENDIF
 
@@ -1783,10 +1773,10 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       ICPM = M%CELL_INDEX(II+1,JJ,KK)
       ICPP = M%CELL_INDEX(II+1,JJ+1,KK)
       ICMP = M%CELL_INDEX(II,JJ+1,KK)
-      M%IJKE(5,IE) = ICMM
-      M%IJKE(6,IE) = ICPM
-      M%IJKE(7,IE) = ICMP
-      M%IJKE(8,IE) = ICPP
+      ED%CELL_INDEX_MM = ICMM
+      ED%CELL_INDEX_PM = ICPM
+      ED%CELL_INDEX_MP = ICMP
+      ED%CELL_INDEX_PP = ICPP
       M%CELL(ICPP)%EDGE_INDEX( 9) = IE
       M%CELL(ICMP)%EDGE_INDEX(10) = IE
       M%CELL(ICPM)%EDGE_INDEX(11) = IE
@@ -1794,25 +1784,25 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE( 1)
-               IF (IOR>0) M%IJKE( 9,IE) = -NOM
-               IF (IOR<0) M%IJKE( 9,IE) =  NOM
-               M%IJKE(10,IE) = IIO
+               IF (IOR>0) ED%NOM_1 = -NOM
+               IF (IOR<0) ED%NOM_1 =  NOM
+               ED%IIO_1 = IIO
                MM => MESHES(NOM)
                YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((M%Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
                JJO = MAX(1,FLOOR(YJ))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
-               M%IJKE(11,IE) = JJO
-               M%IJKE(12,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(1) = YJ-JJO
+               ED%JJO_1 = JJO
+               ED%KKO_1 = KKO
             CASE( 2)
-               IF (IOR>0) M%IJKE(13,IE) = -NOM
-               IF (IOR<0) M%IJKE(13,IE) =  NOM
+               IF (IOR>0) ED%NOM_2 = -NOM
+               IF (IOR<0) ED%NOM_2 =  NOM
                MM => MESHES(NOM)
                XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((M%X(II)-MM%XS)*MM%RDXINT))+1._EB )
                IIO = MAX(1,FLOOR(XI))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = XI-IIO
-               M%IJKE(14,IE) = IIO
-               M%IJKE(15,IE) = JJO
-               M%IJKE(16,IE) = KKO
+               ED%EDGE_INTERPOLATION_FACTOR(2) = XI-IIO
+               ED%IIO_2 = IIO
+               ED%JJO_2 = JJO
+               ED%KKO_2 = KKO
          END SELECT
       ENDIF
 

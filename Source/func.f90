@@ -770,6 +770,9 @@ END SUBROUTINE REALLOCATE_P_ZONE
 
 
 !> \brief Allocate or reallocate the derived type array CELL
+!> \param NM Mesh index
+!> \param N1 Current upper bound of the array CELL
+!> \param N2 New upper bound of the array CELL
 
 SUBROUTINE REALLOCATE_CELL(NM,N1,N2)
 
@@ -825,6 +828,30 @@ CALL MOVE_ALLOC(LOGICAL_DUMMY,M%CELL_LOGICALS)
 CELL_COUNT_LOGICALS(NM) = LC
 
 END SUBROUTINE REALLOCATE_CELL
+
+
+!> \brief Allocate or reallocate the derived type array EDGE
+!> \param NM Mesh index
+!> \param N1 Current upper bound of the array EDGE
+!> \param N2 New upper bound of the array EDGE
+
+SUBROUTINE REALLOCATE_EDGE(NM,N1,N2)
+
+TYPE(EDGE_TYPE), ALLOCATABLE, DIMENSION(:) :: EDGE_DUMMY
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: NM,N1,N2
+
+M => MESHES(NM)
+
+IF (.NOT.ALLOCATED(M%EDGE)) ALLOCATE(M%EDGE(0:N1))
+
+IF (N1==N2) RETURN
+
+ALLOCATE(EDGE_DUMMY(0:N2))
+EDGE_DUMMY(0:N1) = M%EDGE(0:N1)
+CALL MOVE_ALLOC(EDGE_DUMMY,M%EDGE)
+
+END SUBROUTINE REALLOCATE_EDGE
 
 
 !> \brief Allocate principal boundary arrays
