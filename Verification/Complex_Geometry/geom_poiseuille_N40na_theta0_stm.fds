@@ -1,9 +1,9 @@
 &HEAD CHID='geom_poiseuille_N40na_theta0_stm', TITLE='Poiseuille flow in 2D, GEOM channel at 0 degree slope respect to mesh. Mesh not aligned case.' /
 
 # 40 cells in channel height (from 0 to 1): Domain shifted up by 1/11*DZ10:
-&MESH IJK=10,1,48, XB=0,10,-.5,.5,-0.109090909090909,1.090909090909091 /
+&MESH IJK=4,1,48, XB=3,7,-.5,.5,-0.109090909090909,1.090909090909091 /
 
-&TIME T_END=100.0 / needs to be roughtly (.5*H)^2/VISCOSITY (here H=1)
+&TIME T_END=70.0 / needs to be roughtly (.5*H)^2/VISCOSITY (here H=1)
 &DUMP NFRAMES=100, SIG_FIGS=6, SIG_FIGS_EXP=4 /
 
 &MISC SIMULATION_MODE='DNS', NOISE=.FALSE., CCVOL_LINK=0. /
