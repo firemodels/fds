@@ -5,6 +5,7 @@
 
 &TIME T_END=400./
 &DUMP DT_DEVC=10./
+&MISC P_INF=102680., TMPA=0., SIMULATION_MODE='LES'/ humidity set in vegetation_model.fds
 
 ! sticks aligned with x axis
 ! DX0=-l/2, DY0=-l/2, DZ0=d
@@ -26,12 +27,13 @@
       I_UPPER=param_nm1,K_UPPER=param_hNm1/
 &OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', MULT_ID='m2'/
 
+! external flux roughly based on Figure 10 from Hamins et al. CST, 1994.
 &SURF ID='WOOD'
       COLOR='BURLY WOOD 4'
       MATL_ID='DRY VEGETATION'
       MOISTURE_FRACTION=0.025
       BACKING='INSULATED'
-      EXTERNAL_FLUX=50
+      EXTERNAL_FLUX=20
       RAMP_EF='external_flux'
       THICKNESS=param_hb /
 
