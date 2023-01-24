@@ -968,7 +968,7 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 
 \put(  0,380){\usebox{\mygraph}}
 \put(100,380){\usebox{\myfinegraph}}
-\put(230,410){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+\put(230,410){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell and each coarse cell only sees fine cells from one mesh.}}
 
 \put(  0,270){\usebox{\mygraph}}
 \put( 80,290){\usebox{\myfinegraph}}
@@ -6089,7 +6089,7 @@ Condensation can occur in both gas cells and on wall cells. The heat transfer to
 
 {\ct RADI} is the namelist group that contains parameters related to the radiation solver. There can be only one {\ct RADI} line in the input file.
 
-An important quantity in fire science is the fraction of the fire's heat release rate released in the form of thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of the fire size, flame temperature, and the chemical composition of the fuel and combustion products. The flame temperature, as opposed to the average cell temperature, is not reliably calculated in a large scale fire simulation because the flame sheet is not well-resolved on a relatively coarse numerical grid. Thus, the source term in the radiation transport equation (RTE), because of its $T^4$ dependence, cannot be reliably calculated. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation.  By default, the {\ct RADIATIVE\_FRACTION} is set to a specific value that is based on the reaction's {\ct FUEL} for an LES calculation, and it is set to zero for DNS, in which case the amount of energy radiated by the fire is predicted rather than prescribed. Table~\ref{tab:chi_r} lists the default radiative fraction for some common pure fuels. Many of these values are based on measurements performed on relatively small flames by Tewarson~\cite{SFPE:Tewarson}. These values may change with increasing fire size; thus, the measurements cited by Beyler~\cite{Beyler2:SFPE} may be more appropriate for larger fires. If in doubt, select the value that is appropriate for your fire. There is no single value of radiative fraction for a given fuel.
+An important quantity in fire science is the fraction of the fire's heat release rate released in the form of thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of the fire size, flame temperature, and the chemical composition of the fuel and combustion products. The flame temperature, as opposed to the average cell temperature, is not reliably calculated in a large scale fire simulation because the flame sheet is not well-resolved on a relatively coarse numerical grid. Thus, the source term in the radiation transport equation (RTE), because of its $T^4$ dependence, cannot be reliably calculated. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation.  By default, the {\ct RADIATIVE\_FRACTION} is set to a specific value that is based on the reaction's {\ct FUEL} for an LES calculation, and it is set to zero for DNS, in which case the amount of energy radiated by the fire is predicted rather than prescribed. Table~\ref{tab:chi_r} lists the default radiative fraction for some common pure fuels. Many of these values are based on measurements performed on relatively small flames by Tewarson~\cite{SFPE:Tewarson}. These values may change with increasing fire size; thus, the measurements cited by Beyler~\cite{Beyler2:SFPE} may be more appropriate for larger fires. If in doubt, select the value that is appropriate for your fire. There is no single value of radiative fraction for a given fuel.
 
 \vspace{\baselineskip}
 
@@ -6129,7 +6129,7 @@ All other species        & 0.35             &                                   
 \subsection{Radiation Option 1. No Radiation Transport}
 \label{info:radiation_off}
 
-It is possible to turn off the RTE solver (saving roughly 20 \% in CPU time) by adding the statement {\ct RADIATION=F} to the {\ct RADI} line.  If burning is taking place and radiation is turned off, then the total heat release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is an input on the {\ct REAC} or {\ct COMB} line. Default values for various pure fuels are listed in Table~\ref{tab:chi_r}. With {\ct RADIATION} set to {\ct F}, the radiated energy from a fire simply disappears from the computational domain. For fire simulations or any scenario with temperature increases of hundreds of degrees Celsius, it is not recommended that you turn off the radiation transport. This feature is used mainly for diagnostic purposes or when the changes in temperature are relatively small.
+It is possible to turn off the RTE solver (saving roughly 20 \% in CPU time) by adding the statement {\ct RADIATION=F} to the {\ct RADI} line.  If burning is taking place and radiation is turned off, then the total heat release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is an input on the {\ct REAC} line. Default values for various pure fuels are listed in Table~\ref{tab:chi_r}. With {\ct RADIATION} set to {\ct F}, the radiated energy from a fire simply disappears from the computational domain. For fire simulations or any scenario with temperature increases of hundreds of degrees Celsius, it is not recommended that you turn off the radiation transport. This feature is used mainly for diagnostic purposes or when the changes in temperature are relatively small.
 
 \subsection{Radiation Option 2. Optically-Thin Limit; Specified Radiative Fraction}
 
@@ -7594,22 +7594,22 @@ To estimate the heat of combustion of the gas phase reaction of fuel vapors gene
 \be
    \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm O_2}}   \quad ; \quad
    \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm CO_2}}  \quad ; \quad
-   W_{\rm fuel} = \frac{12 {\rm x} + y + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
+   W_{\rm fuel} = \frac{12 {\rm x} + {\rm y} + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
 \ee
 \be
-   x' = \nu_{\rm CO_2}  \quad ; \quad
-   z' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
+   {\rm x}' = \nu_{\rm CO_2}  \quad ; \quad
+   {\rm z}' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
 \ee
 The ideal one step gas phase reaction of the Fuel Gas is as follows:
 \be
-   \mathrm{C_{x-x'}H_yO_{z-z'} + \nu_{\rm O_2}' \, O_2} \rightarrow \mathrm{(x-x') \, CO_2 + \frac{y}{2} \, H_2O }  \quad : \quad
-   \mathrm{\nu_{\rm O_2}'} = \frac{2(x-x')+y/2-(z-z')}{2}
+   {\rm C}_{{\rm x}-{\rm x}'}{\rm H}_{\rm y}{\rm O}_{{\rm z}-{\rm z}'} + \nu_{\rm O_2}' \, {\rm O}_2 \rightarrow ({\rm x}-{\rm x}') \, {\rm CO}_2 + \frac{{\rm y}}{2} \, {\rm H_2O}  \quad : \quad
+   \nu_{\rm O_2}' = \frac{2({\rm x}-{\rm x}')+{\rm y}/2-({\rm z}-{\rm z}')}{2}
 \ee
 The heat of combustion of the gas phase reaction (heat release per unit mass fuel gas consumed) can be estimated from the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}:
 \be
-   \mathrm{ \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12(x-x')+y+16(z-z')} } E   \label{Delta_h_pyr}
+   \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12({\rm x}-{\rm x}')+{\rm y}+16({\rm z}-{\rm z}')} E   \label{Delta_h_pyr}
 \ee
-The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately 17,400~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -12000~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
+The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately $17400$~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -$12000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
 \be
    (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm c,eff} =  (1-\nu_{\rm char}) \Delta h_{\rm c} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
 \ee
@@ -9186,13 +9186,20 @@ where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this s
 
 This feature is usually used in conjunction with {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} above (use two separate {\ct DEVC} lines, each with the same {\ct QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the area of {\ct VENT} or {\ct SURF} of interest. Note that this may differ slightly from what is specified in the input file due to grid snapping for Cartesian geometries or due to the approximations used to represent curvilinear geometries.  Using {\ct SPATIAL\_STATISTIC='AREA'} produces the discrete analog of
 \be \int \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB} or the discrete area of a {\ct SURF}.  Knowing this value is useful for reconstructing the average flux on a surface.
+where $dA$ depends on the coordinates you specify for {\ct XB}.  To compute the surface area of a solid, use {\ct 'SURFACE AREA'}, see below.
 
 \subsubsection{Surface Integral}
 
 For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
 \be \int \phi \; \d A \ee
 Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
+
+\subsubsection{Surface Area}
+
+The solid surface analog of {\ct 'AREA'} is {\ct 'SURFACE AREA'}.  Knowing this value is useful for reconstructing the average flux on a surface, for example.  On the {\ct DEVC} line supply an {\ct XB} that encompasses the surface of interest, use an arbitrary {\ct QUANTITY}, and assign a {\ct SURF\_ID}.
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY=..., SURF_ID='my surf', SPATIAL_STATISTIC='SURFACE AREA', ID='surf area'/
+\end{lstlisting}
 
 \subsubsection{Limiting the Integration}
 

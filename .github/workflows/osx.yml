@@ -27,9 +27,9 @@ env:
   # update urls for oneapi and openmpi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
   # https://open-mpi.org/software/ompi/
-  MACOS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18865/m_BaseKit_p_2022.3.0.8743_offline.dmg
+  MACOS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19080/m_BaseKit_p_2023.0.0.25441_offline.dmg
   MACOS_BASEKIT_COMPONENTS: intel.oneapi.mac.mkl.devel
-  MACOS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18866/m_HPCKit_p_2022.3.0.8685_offline.dmg
+  MACOS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19086/m_HPCKit_p_2023.0.0.25440_offline.dmg
   MACOS_HPCKIT_COMPONENTS: intel.oneapi.mac.cpp-compiler:intel.oneapi.mac.ifort-compiler
   OPENMPI_URL: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz
 
