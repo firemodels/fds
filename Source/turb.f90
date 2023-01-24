@@ -412,8 +412,8 @@ DO K=0,KBP1
       DO I=0,IBAR
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
-         V_EDGE_X(IC) = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
-         W_EDGE_X(IC) = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
+         CELL(IC)%V_EDGE_X = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
+         CELL(IC)%W_EDGE_X = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
       ENDDO
    ENDDO
 ENDDO
@@ -423,8 +423,8 @@ DO K=0,KBP1
       DO I=0,IBP1
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
-         U_EDGE_Y(IC) = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
-         W_EDGE_Y(IC) = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
+         CELL(IC)%U_EDGE_Y = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
+         CELL(IC)%W_EDGE_Y = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
       ENDDO
    ENDDO
 ENDDO
@@ -434,8 +434,8 @@ DO K=0,KBAR
       DO I=0,IBP1
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
-         U_EDGE_Z(IC) = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
-         V_EDGE_Z(IC) = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
+         CELL(IC)%U_EDGE_Z = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
+         CELL(IC)%V_EDGE_Z = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
       ENDDO
    ENDDO
 ENDDO
