@@ -480,7 +480,6 @@ IF (CHECK_VN .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KP(I,J,K)/(CP(I,J,K)*RHOP(I,J,K)))
          ENDDO
       ENDDO
@@ -593,7 +592,6 @@ CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
          ENDDO
       ENDDO
@@ -611,7 +609,6 @@ IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             IPZ = PRESSURE_ZONE(I,J,K)
             RTRM(I,J,K) = GM1OG*R_PBAR(K,IPZ)
             DP(I,J,K)   = RTRM(I,J,K)*DP(I,J,K)
@@ -626,7 +623,6 @@ ELSE
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
@@ -684,7 +680,6 @@ IF (STRATIFICATION) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
