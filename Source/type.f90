@@ -678,6 +678,7 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Tracked mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_P    !< Primitive mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE_P !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R         !< Heat of Reaction (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)

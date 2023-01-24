@@ -2968,16 +2968,19 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       Q_DOT_S_PPP    = Q_DOT_S_PPP - RHO_DOT*H_R  ! Tech Guide: q_dot_s'''
       M_DOT_S_PPP(N) = M_DOT_S_PPP(N) - RHO_DOT   ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
       TMP_G = TMP(IIG,JJG,KKG)
-      DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
-         M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
-         M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
-      ENDDO
+      ! Tech Guide: m_dot_gamma'''
+      M_DOT_G_PPP_ACTUAL(:) = M_DOT_G_PPP_ACTUAL(:) + ML%NU_GAS(:,J)*RHO_DOT
+      M_DOT_G_PPP_ADJUST(:) = M_DOT_G_PPP_ACTUAL(:) * ML%ADJUST_BURN_RATE(:,J)
+      !DO NS=1,N_TRACKED_SPECIES  
+      !   M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
+      !   M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
+      !ENDDO
       DO NS=1,N_SPECIES
          IF (ABS(ML%NU_GAS_P(NS,J)) < TWO_EPSILON_EB) CYCLE
          CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_S,H_S_B)
          CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_G,H_S)
          IF (ML%NU_GAS_P(NS,J) > 0._EB) THEN
-            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS_P(NS,J)*RHO_DOT*(H_S-H_S_B)
+            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE_P(NS,J)*ML%NU_GAS_P(NS,J)*RHO_DOT*(H_S-H_S_B)
          ELSE
             Q_DOT_S_PPP = Q_DOT_S_PPP - ML%NU_GAS_P(NS,J)*RHO_DOT*(H_S-H_S_B)
          ENDIF
