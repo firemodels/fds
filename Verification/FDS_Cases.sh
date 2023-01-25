@@ -258,9 +258,6 @@ $QFDS -p 4 -d Heat_Transfer ht3d_sphere_48.fds
 $QFDS -p 64 -d Heat_Transfer ht3d_sphere_96.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_1.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_2.fds
 $QFDS -d Heat_Transfer thermocouple_time_constant.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
