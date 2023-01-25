@@ -24,8 +24,8 @@ USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
-INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,ICF
-REAL(EB) :: TRM1,TRM2,TRM3,TRM4,H_OTHER,TNOW, &
+INTEGER :: I,J,K,IW,IOR,NOM,ICF
+REAL(EB) :: TRM1,TRM2,TRM3,TRM4,TNOW, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY,H0
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
@@ -62,7 +62,7 @@ ENDIF
 ! of boundary condition at x, y and z boundaries. See Crayfishpak
 ! manual for details.
 
-!$OMP DO PRIVATE(IW,WC,EWC,BC,ONE_D,I,J,K,IOR,NOM,H_OTHER,IIO,JJO,KKO,N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI) &
+!$OMP DO PRIVATE(IW,WC,EWC,BC,ONE_D,I,J,K,IOR,NOM,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI) &
 !$OMP&   PRIVATE(TIME_RAMP_FACTOR,P_EXTERNAL,VEL_EDDY,ICF,H0)
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
@@ -104,58 +104,42 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          ! last computed pressures in the ghost and adjacent gas cells.
 
          SELECT CASE(IOR)
-            CASE( 1)
-               BXS(J,K) = 0.5_EB*(HP(0,J,K)+HP(1,J,K)) + WALL_WORK1(IW)
-            CASE(-1)
-               BXF(J,K) = 0.5_EB*(HP(IBAR,J,K)+HP(IBP1,J,K)) + WALL_WORK1(IW)
-            CASE( 2)
-               BYS(I,K) = 0.5_EB*(HP(I,0,K)+HP(I,1,K)) + WALL_WORK1(IW)
-            CASE(-2)
-               BYF(I,K) = 0.5_EB*(HP(I,JBAR,K)+HP(I,JBP1,K)) + WALL_WORK1(IW)
-            CASE( 3)
-               BZS(I,J) = 0.5_EB*(HP(I,J,0)+HP(I,J,1)) + WALL_WORK1(IW)
-            CASE(-3)
-               BZF(I,J) = 0.5_EB*(HP(I,J,KBAR)+HP(I,J,KBP1)) + WALL_WORK1(IW)
+            CASE( 1) ; BXS(J,K) = 0.5_EB*(HP(0,J,K)   +HP(1,J,K))    + WALL_WORK1(IW)
+            CASE(-1) ; BXF(J,K) = 0.5_EB*(HP(IBAR,J,K)+HP(IBP1,J,K)) + WALL_WORK1(IW)
+            CASE( 2) ; BYS(I,K) = 0.5_EB*(HP(I,0,K)   +HP(I,1,K))    + WALL_WORK1(IW)
+            CASE(-2) ; BYF(I,K) = 0.5_EB*(HP(I,JBAR,K)+HP(I,JBP1,K)) + WALL_WORK1(IW)
+            CASE( 3) ; BZS(I,J) = 0.5_EB*(HP(I,J,0)   +HP(I,J,1))    + WALL_WORK1(IW)
+            CASE(-3) ; BZF(I,J) = 0.5_EB*(HP(I,J,KBAR)+HP(I,J,KBP1)) + WALL_WORK1(IW)
          END SELECT
 
       ENDIF NOT_OPEN
 
       ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
+      ! HP from the neighboring mesh NOM has already been copied to the external cells of mesh NM in NO_FLUX.
 
       INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
 
-         NOM     = EWC%NOM
-         H_OTHER = 0._EB
-         DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-            DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-               DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                  IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
-                  IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
-               ENDDO
-            ENDDO
-         ENDDO
-         N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
-         H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
+         NOM = EWC%NOM
 
          SELECT CASE(IOR)
             CASE( 1)
                DX_OTHER = MESHES(NOM)%DX(EWC%IIO_MIN)
-               BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
+               BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*HP(0,J,K))/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
             CASE(-1)
                DX_OTHER = MESHES(NOM)%DX(EWC%IIO_MIN)
-               BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER) + WALL_WORK1(IW)
+               BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*HP(IBP1,J,K))/(DX(IBAR)+DX_OTHER) + WALL_WORK1(IW)
             CASE( 2)
                DY_OTHER = MESHES(NOM)%DY(EWC%JJO_MIN)
-               BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER) + WALL_WORK1(IW)
+               BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*HP(I,0,K))/(DY(1)+DY_OTHER) + WALL_WORK1(IW)
             CASE(-2)
                DY_OTHER = MESHES(NOM)%DY(EWC%JJO_MIN)
-               BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER) + WALL_WORK1(IW)
+               BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*HP(I,JBP1,K))/(DY(JBAR)+DY_OTHER) + WALL_WORK1(IW)
             CASE( 3)
                DZ_OTHER = MESHES(NOM)%DZ(EWC%KKO_MIN)
-               BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER) + WALL_WORK1(IW)
+               BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*HP(I,J,0))/(DZ(1)+DZ_OTHER) + WALL_WORK1(IW)
             CASE(-3)
                DZ_OTHER = MESHES(NOM)%DZ(EWC%KKO_MIN)
-               BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
+               BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*HP(I,J,KBP1))/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
          END SELECT
 
       ENDIF INTERPOLATED_ONLY
@@ -175,6 +159,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
 
          ! Synthetic eddy method for OPEN inflow boundaries
+
          VEL_EDDY = 0._EB
          IF (VT%N_EDDY>0) THEN
             SELECT CASE(ABS(VT%IOR))
