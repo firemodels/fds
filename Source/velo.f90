@@ -1829,12 +1829,12 @@ LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM
-INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN, &
+INTEGER :: NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE,&
            UPWIND_BOUNDARY,INFLOW_BOUNDARY,CORNER_EDGE
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -1868,29 +1868,6 @@ ELSE
    ZZP => ZZ
 ENDIF
 
-! Set the boundary velocity place holder to some large negative number
-
-IF (CORRECTOR) THEN
-   U_Y => WORK1
-   U_Z => WORK2
-   V_X => WORK3
-   V_Z => WORK4
-   W_X => WORK5
-   W_Y => WORK6
-   U_Y = -1.E6_EB
-   U_Z = -1.E6_EB
-   V_X = -1.E6_EB
-   V_Z = -1.E6_EB
-   W_X = -1.E6_EB
-   W_Y = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%U_EDGE_Y = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%U_EDGE_Z = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%V_EDGE_X = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%V_EDGE_Z = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%W_EDGE_X = -1.E6_EB
-   CELL(1:CELL_COUNT(NM))%W_EDGE_Y = -1.E6_EB
-ENDIF
-
 ! Loop over all cell edges and determine the appropriate velocity BCs
 
 EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
@@ -1899,6 +1876,9 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
    ED%OMEGA    = -1.E6_EB
    ED%TAU      = -1.E6_EB
+   ED%U_AVG    = -1.E6_EB
+   ED%V_AVG    = -1.E6_EB
+   ED%W_AVG    = -1.E6_EB
    INTERPOLATED_EDGE = .FALSE.
 
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
@@ -2466,9 +2446,9 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
-                    W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%W_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
-                    V_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%V_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
             CASE(2)
@@ -2478,9 +2458,9 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
-                    U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%U_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
-                    W_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%W_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
             CASE(3)
@@ -2490,9 +2470,9 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                IF (JJ==JBAR .AND. IOR==-2) UU(II,JJ+1,KK) = VEL_GHOST
                IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
-                    V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%V_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
-                    U_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                    ED%U_AVG = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
          END SELECT
@@ -2547,25 +2527,6 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
    ENDDO SIGN_LOOP_2
 
 ENDDO EDGE_LOOP
-
-! Store cell edge velocity averages of the velocity components for use in Smokeview only
-
-IF (CORRECTOR) THEN
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            IC = CELL_INDEX(I,J,K)
-            IF (IC==0) CYCLE
-            IF (U_Y(I,J,K)>-1.E5_EB) CELL(IC)%U_EDGE_Y = U_Y(I,J,K)
-            IF (U_Z(I,J,K)>-1.E5_EB) CELL(IC)%U_EDGE_Z = U_Z(I,J,K)
-            IF (V_X(I,J,K)>-1.E5_EB) CELL(IC)%V_EDGE_X = V_X(I,J,K)
-            IF (V_Z(I,J,K)>-1.E5_EB) CELL(IC)%V_EDGE_Z = V_Z(I,J,K)
-            IF (W_X(I,J,K)>-1.E5_EB) CELL(IC)%W_EDGE_X = W_X(I,J,K)
-            IF (W_Y(I,J,K)>-1.E5_EB) CELL(IC)%W_EDGE_Y = W_Y(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
 
 T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 

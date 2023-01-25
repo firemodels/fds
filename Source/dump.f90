@@ -5903,87 +5903,54 @@ END FUNCTION CORNER_VALUE
 
 REAL(EB) FUNCTION FACE_VALUE()
 
-REAL(EB) :: AA(0:1,0:1),WGT(0:1,0:1)
-INTEGER :: II,JJ,KK,IIM,JJM,KKM,ICX,ICY,ICZ
-LOGICAL :: SET(0:1,0:1)
+REAL(EB) :: AA(0:1,0:1)
+INTEGER :: IE,ICMM,ICMP,ICPM
 
 SELECT CASE(OUTPUT_QUANTITY(IND)%IOR)
    CASE(1) ; AA(0:1,0:1) = QUANTITY(I,J:J+1,K:K+1)
    CASE(2) ; AA(0:1,0:1) = QUANTITY(I:I+1,J,K:K+1)
    CASE(3) ; AA(0:1,0:1) = QUANTITY(I:I+1,J:J+1,K)
 END SELECT
-WGT  = 0.25_EB
-IC = CELL_INDEX(I,J,K)
-IF (IC>0) THEN
-   SET = .FALSE.
+ICMM = CELL_INDEX(I,J,K)
+IF (ICMM>0) THEN
    SELECT CASE(IND)
       CASE(6)
-         DO KK=0,1
-            DO JJ=0,1
-               IF (C(I,J+JJ,K+KK)==1 .AND.  C(I+1,J+JJ,K+KK)==1) THEN
-                  JJM = MOD(JJ+1,2)
-                  KKM = MOD(KK+1,2)
-                  ICY = CELL_INDEX(I,J,K+KK)
-                  ICZ = CELL_INDEX(I,J+JJ,K)
-                  IF (CELL(ICY)%U_EDGE_Y>-1.E5_EB .AND.  .NOT.SET(JJ,KK)) THEN
-                     AA(JJ,KK) = 2._EB*CELL(ICY)%U_EDGE_Y - AA(JJM,KK)
-                     SET(JJ,KK) = .TRUE.
-                  ENDIF
-                  IF (CELL(ICZ)%U_EDGE_Z>-1.E5_EB .AND.  .NOT.SET(JJ,KK)) THEN
-                     AA(JJ,KK) = 2._EB*CELL(ICZ)%U_EDGE_Z - AA(JJ,KKM)
-                     SET(JJ,KK) = .TRUE.
-                  ENDIF
-                  IF (.NOT.SET(JJ,KK)) WGT(JJ,KK) = 0._EB
-               ENDIF
-            ENDDO
-         ENDDO
+         ICPM = CELL_INDEX(I,J+1,K)
+         ICMP = CELL_INDEX(I,J,K+1)
+         IE = CELL(ICMM)%EDGE_INDEX(8)
+         IF (EDGE(IE)%U_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%U_AVG ; AA(0,1)=EDGE(IE)%U_AVG ; ENDIF
+         IE = CELL(ICMM)%EDGE_INDEX(12)
+         IF (EDGE(IE)%U_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%U_AVG ; AA(1,0)=EDGE(IE)%U_AVG ; ENDIF
+         IE = CELL(ICPM)%EDGE_INDEX(8)
+         IF (EDGE(IE)%U_AVG>-1.E5_EB) THEN ; AA(1,0)=EDGE(IE)%U_AVG ; AA(1,1)=EDGE(IE)%U_AVG ; ENDIF
+         IE = CELL(ICMP)%EDGE_INDEX(12)
+         IF (EDGE(IE)%U_AVG>-1.E5_EB) THEN ; AA(0,1)=EDGE(IE)%U_AVG ; AA(1,1)=EDGE(IE)%U_AVG ; ENDIF
       CASE(7)
-         DO KK=0,1
-            DO II=0,1
-               IF (C(I+II,J,K+KK)==1 .AND.  C(I+II,J+1,K+KK)==1) THEN
-                  IIM = MOD(II+1,2)
-                  KKM = MOD(KK+1,2)
-                  ICX = CELL_INDEX(I,J,K+KK)
-                  ICZ = CELL_INDEX(I+II,J,K)
-                  IF (CELL(ICX)%V_EDGE_X>-1.E5_EB .AND.  .NOT.SET(II,KK)) THEN
-                     AA(II,KK) = 2._EB*CELL(ICX)%V_EDGE_X - AA(IIM,KK)
-                     SET(II,KK) = .TRUE.
-                  ENDIF
-                  IF (CELL(ICZ)%V_EDGE_Z>-1.E5_EB .AND.  .NOT.SET(II,KK)) THEN
-                     AA(II,KK) = 2._EB*CELL(ICZ)%V_EDGE_Z - AA(II,KKM)
-                     SET(II,KK) = .TRUE.
-                  ENDIF
-                  IF (.NOT.SET(II,KK)) WGT(II,KK) = 0._EB
-               ENDIF
-            ENDDO
-         ENDDO
+         ICPM = CELL_INDEX(I+1,J,K)
+         ICMP = CELL_INDEX(I,J,K+1)
+         IE = CELL(ICMM)%EDGE_INDEX(4)
+         IF (EDGE(IE)%V_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%V_AVG ; AA(0,1)=EDGE(IE)%V_AVG ; ENDIF
+         IE = CELL(ICMM)%EDGE_INDEX(12)
+         IF (EDGE(IE)%V_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%V_AVG ; AA(1,0)=EDGE(IE)%V_AVG ; ENDIF
+         IE = CELL(ICPM)%EDGE_INDEX(4)
+         IF (EDGE(IE)%V_AVG>-1.E5_EB) THEN ; AA(1,0)=EDGE(IE)%V_AVG ; AA(1,1)=EDGE(IE)%V_AVG ; ENDIF
+         IE = CELL(ICMP)%EDGE_INDEX(12)
+         IF (EDGE(IE)%V_AVG>-1.E5_EB) THEN ; AA(0,1)=EDGE(IE)%V_AVG ; AA(1,1)=EDGE(IE)%V_AVG ; ENDIF
       CASE(8)
-         DO JJ=0,1
-            DO II=0,1
-               IF (C(I+II,J+JJ,K)==1 .AND.  C(I+II,J+JJ,K+1)==1) THEN
-                  IIM = MOD(II+1,2)
-                  JJM = MOD(JJ+1,2)
-                  ICX = CELL_INDEX(I,J+JJ,K)
-                  ICY = CELL_INDEX(I+II,J,K)
-                  IF (CELL(ICX)%W_EDGE_X>-1.E5_EB .AND.  .NOT.SET(II,JJ)) THEN
-                     AA(II,JJ) = 2._EB*CELL(ICX)%W_EDGE_X - AA(IIM,JJ)
-                     SET(II,JJ) = .TRUE.
-                  ENDIF
-                  IF (CELL(ICY)%W_EDGE_Y>-1.E5_EB .AND.  .NOT.SET(II,JJ)) THEN
-                     AA(II,JJ) = 2._EB*CELL(ICY)%W_EDGE_Y - AA(II,JJM)
-                     SET(II,JJ) = .TRUE.
-                  ENDIF
-                  IF (.NOT.SET(II,JJ)) WGT(II,JJ) = 0._EB
-               ENDIF
-            ENDDO
-         ENDDO
+         ICPM = CELL_INDEX(I+1,J,K)
+         ICMP = CELL_INDEX(I,J+1,K)
+         IE = CELL(ICMM)%EDGE_INDEX(4)
+         IF (EDGE(IE)%W_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%W_AVG ; AA(0,1)=EDGE(IE)%W_AVG ; ENDIF
+         IE = CELL(ICMM)%EDGE_INDEX(8)
+         IF (EDGE(IE)%W_AVG>-1.E5_EB) THEN ; AA(0,0)=EDGE(IE)%W_AVG ; AA(1,0)=EDGE(IE)%W_AVG ; ENDIF
+         IE = CELL(ICPM)%EDGE_INDEX(4)
+         IF (EDGE(IE)%W_AVG>-1.E5_EB) THEN ; AA(1,0)=EDGE(IE)%W_AVG ; AA(1,1)=EDGE(IE)%W_AVG ; ENDIF
+         IE = CELL(ICMP)%EDGE_INDEX(8)
+         IF (EDGE(IE)%W_AVG>-1.E5_EB) THEN ; AA(0,1)=EDGE(IE)%W_AVG ; AA(1,1)=EDGE(IE)%W_AVG ; ENDIF
    END SELECT
 ENDIF
-IF (SUM(WGT)>0._EB) THEN
-   FACE_VALUE = SUM(AA*WGT)/SUM(WGT)
-ELSE
-   FACE_VALUE = OUTPUT_QUANTITY(IND)%AMBIENT_VALUE
-ENDIF
+
+FACE_VALUE = 0.25_EB*SUM(AA)
 
 END FUNCTION FACE_VALUE
 
