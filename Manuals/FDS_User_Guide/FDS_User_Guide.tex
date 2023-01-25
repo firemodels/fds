@@ -856,13 +856,18 @@ In some special circumstances it may be necessary to control the final time step
 \subsection{Steady-State Applications}
 \label{info:steady_state}
 
-Occasionally, there are applications in which only the steady-state solution (in a time-averaged sense) is desired. However, the time necessary to
-heat the walls to steady-state can make the cost of the calculation prohibitive. In these situations, if you specify a
-{\ct TIME\_SHRINK\_FACTOR} of, say, 10, the specific heats of the various materials is reduced by a factor of 10, speeding up the heating
-of these materials roughly by 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
+Occasionally, there are applications in which only the steady-state solution (in a time-averaged sense) is desired. In a time-dependent code such as FDS, reaching steady-state
+requires that the simulation be run long enough that a steady-state flow field and gas temperature field develops and that steady-state temperature profiles develop in solid surfaces. Developing steady-state temperature 
+profiles can take a long time as the surface must be heated up in-depth. This can make the cost of the calculation prohibitive. Given steady-state boundary conditions, the time it takes a surface to
+heat up is proportional to its specific heat. Therefore, under steady conditions, this time can be accelerated by reducing the specific heat. So that the {\ct SPECIFIC\_HEAT} inputs on {\ct MATL} 
+can remain the same but still provide a means to reduce the heating time of a surface, the {\ct MISC} input of {\ct TIME\_SHRINK\_FACTOR} can be used. The {\ct SPECIFIC\_HEAT} inputs on {\ct MATL} are reduced by this factor.
+For a {\ct TIME\_SHRINK\_FACTOR} of 10, the specific heats of the various materials is reduced by a factor of 10. This speeds up the heating
+of solid materials roughly by a factor of 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
 warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured.
 
-Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='TIME'} or a device or control function with a {\ct DELAY} will have those values adjusted by the value of {\ct TIME\_SHRINK\_FACTOR}.  For example if a 10~s {\ct DELAY} is specified for a {\ct CTRL} input with a {\ct TIME\_SHRINK\_FACTOR} of 10, then FDS will adjust the {\ct DELAY} to 1~s.
+{\ct TIME\_SHRINK\_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
+
+Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='TIME'} or a device or control function with a {\ct DELAY} will have those values adjusted by the value of {\ct TIME\_SHRINK\_FACTOR}.  For example if a 10~s {\ct DELAY} is specified for a {\ct CTRL} input with a {\ct TIME\_SHRINK\_FACTOR} of 10, then FDS will adjust the {\ct DELAY} to 1~s. However, use of time based device or control functions that change the simulation implies a non-steady scenario where the use of {\ct TIME\_SHRINK\_FACTOR} may no longer be appropriate.
 
 \newpage
 

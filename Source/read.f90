@@ -6196,27 +6196,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ENDIF
    IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
 
-   ! Decide which pyrolysis model to use
-
-   IF (BOILING_TEMPERATURE<50000._EB) THEN
-      ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
-      N_REACTIONS = 1
-   ELSEIF (N_REACTIONS > 0 .AND. BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
-      WALL_INCREMENT     = 1  ! Do pyrolysis every time step
-      ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
-      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
-   ELSE
-      ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
-   ENDIF
-
-   ! If oxygen is consumed in the charring process, set a global variable for
-   ! use in calculating the heat release rate based on oxygen consumption
-
-   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
-
-   ! No pyrolysis
-
-   IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+   IF (BOILING_TEMPERATURE<50000._EB) N_REACTIONS = 1
 
    ! Pack MATL parameters into the MATERIAL derived type
 
@@ -6308,6 +6288,27 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ALLOCATE(ML%N_LPC(N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','ML%N_LPC',IZERO)
    ML%N_LPC=0
+
+   ! Decide which pyrolysis model to use
+
+   IF (BOILING_TEMPERATURE<50000._EB) THEN
+      ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
+   ELSEIF (N_REACTIONS > 0 .AND. BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
+      WALL_INCREMENT     = 1  ! Do pyrolysis every time step
+      ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
+      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
+   ELSE
+      ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
+   ENDIF
+
+   ! No pyrolysis
+
+   IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+
+   ! If oxygen is consumed in the charring process, set a global variable for
+   ! use in calculating the heat release rate based on oxygen consumption
+
+   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
 
    ! Conductivity and specific heat temperature ramps
 
@@ -6597,9 +6598,7 @@ DO N=1,N_MATL
       ENDIF
    ENDDO
 ENDDO
-WRITE(*,*) SUM_NU
-WRITE(*,*) TEMP_COUNTER
-WRITE(*,*) TEMP_MATL
+
 ! Count number of MATL that participate in reactions and build pointer vector for the solution array
 
 ALLOCATE(MATL_MATRIX_POINTER(N_MATL))
