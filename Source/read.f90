@@ -6520,7 +6520,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                   IF (ABS(ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR)-1._EB) > TWO_EPSILON_EB) THEN
                      DO NS2=1,N_SPECIES
                         IF (SPECIES_MIXTURE(NS)%MASS_FRACTION(NS2) > 0._EB) &
-                           ML%ADJUST_BURN_RATE(NS2,NR) = ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR)
+                           ML%ADJUST_BURN_RATE_P(NS2,NR) = ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR)
                      ENDDO
                   ENDIF
                   EXIT REAC_DO
