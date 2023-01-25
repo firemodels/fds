@@ -7,7 +7,7 @@
 close all
 clear all
 
-datdir = '../../Verification/Heat_Transfer/';
+datdir = '../../../out/Convection/';
 pltdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 chid = {'Pohlhausen_Pr_p5','Pohlhausen_Pr_1','Pohlhausen_Pr_2'};
