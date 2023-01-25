@@ -373,7 +373,7 @@ SUBROUTINE TWOD_SOBOROT_UMD(NM)
 ! Used for PERIODIC_TEST==12,13
 !-------------------------------------------------------------------------------
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,IOR,II,JJ,KK,IW,IC
+INTEGER :: I,J,K,IOR,II,JJ,KK,IW
 REAL(EB), PARAMETER :: USCAL = 1._EB     ! scale velocity (m/s)
 REAL(EB), PARAMETER :: WSCAL = 1._EB     ! scale velocity (m/s)
 REAL(EB), PARAMETER :: XCLOC = 0._EB     ! Center of vortex, x (m)
@@ -401,41 +401,6 @@ DO K=-0,KBP1
       DO I=0,IBP1
          W(I,J,K) = -WSCAL*(XC(I)-XCLOC)
          WS(I,J,K) = W(I,J,K)
-      ENDDO
-   ENDDO
-ENDDO
-
-! fill ghost values for smokeview
-
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBAR
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         CELL(IC)%V_EDGE_X = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
-         CELL(IC)%W_EDGE_X = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=0,KBP1
-   DO J=0,JBAR
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         CELL(IC)%U_EDGE_Y = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
-         CELL(IC)%W_EDGE_Y = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=0,KBAR
-   DO J=0,JBP1
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         CELL(IC)%U_EDGE_Z = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
-         CELL(IC)%V_EDGE_Z = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
       ENDDO
    ENDDO
 ENDDO

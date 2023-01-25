@@ -1816,6 +1816,7 @@ TYPE HVAC_QUANTITY_TYPE
    CHARACTER(LABEL_LENGTH) :: UNITS !< Units for QUANTITY
 END TYPE HVAC_QUANTITY_TYPE
 
+
 TYPE CELL_TYPE
    LOGICAL :: SOLID=.FALSE.                            !< Indicates if grid cell is solid or not
    LOGICAL :: EXTERIOR=.FALSE.                         !< Indicates if the grid cell is outside the mesh
@@ -1827,12 +1828,6 @@ TYPE CELL_TYPE
    INTEGER, DIMENSION(-3:3,1:3) :: THIN_WALL_INDEX=0   !< Indices of 6 adjacent thin wall cells
    INTEGER, DIMENSION(-3:3,1:3) :: THIN_SURF_INDEX=0   !< SURF indices of 6 adjacent thin wall cells
    INTEGER, DIMENSION(-3:3,1:3) :: THIN_OBST_INDEX=0   !< OBST indices of 6 adjacent thin wall cells
-   REAL(EB) :: U_EDGE_Y=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
-   REAL(EB) :: U_EDGE_Z=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
-   REAL(EB) :: V_EDGE_X=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
-   REAL(EB) :: V_EDGE_Z=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
-   REAL(EB) :: W_EDGE_X=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
-   REAL(EB) :: W_EDGE_Y=-1.E6_EB                       !< Stored velocity component at edge of mesh (m/s)
 END TYPE CELL_TYPE
 
 
@@ -1854,6 +1849,9 @@ TYPE EDGE_TYPE
    REAL(EB), DIMENSION(-2:2) :: OMEGA=-1.E6_EB                !< Vorticity at boundary with one of four orientations
    REAL(EB), DIMENSION(-2:2) :: TAU=-1.E6_EB                  !< Strain at boundary with one of four orientations
    REAL(EB), DIMENSION(2) :: EDGE_INTERPOLATION_FACTOR=1._EB  !< Strain at boundary with one of four orientations
+   REAL(EB) :: U_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
+   REAL(EB) :: V_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
+   REAL(EB) :: W_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
 END TYPE EDGE_TYPE
 
 END MODULE TYPES
