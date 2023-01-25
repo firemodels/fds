@@ -5,6 +5,12 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
+# FORCED CONVECTION BOUNDARY LAYER SOLUTION
+
+$QFDS $DEBUG -I -p 16 $QUEUE -d $INDIR Pohlhausen_Pr_1.fds
+$QFDS $DEBUG -I -p 16 $QUEUE -d $INDIR Pohlhausen_Pr_2.fds
+$QFDS $DEBUG -I -p 16 $QUEUE -d $INDIR Pohlhausen_Pr_p5.fds
+
 # FORCED CONVECTION OVER A FLAT PLATE
 
 $QFDS $DEBUG -I $QUEUE -d $INDIR forced_conv_flat_plate_u0p1_25cm.fds
