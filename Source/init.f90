@@ -377,6 +377,18 @@ M%D     = 0._EB
 M%DS    = 0._EB
 M%Q     = 0._EB
 
+! Calculate LES filter width
+
+ALLOCATE(M%LES_FILTER_WIDTH(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) ; CALL ChkMemErr('INIT','LES_FILTER_WIDTH',IZERO)
+
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         M%LES_FILTER_WIDTH(I,J,K) = LES_FILTER_WIDTH_FUNCTION(M%DX(I),M%DY(J),M%DZ(K))
+      ENDDO
+   ENDDO
+ENDDO
+
 ! Viscosity
 
 ZZ_GET(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
@@ -389,7 +401,7 @@ SELECT CASE(TURB_MODEL)
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               DELTA = LES_FILTER_WIDTH_FUNCTION(M%DX(I),M%DY(J),M%DZ(K))
+               DELTA = M%LES_FILTER_WIDTH(I,J,K)
                M%CSD2(I,J,K) = (CS*DELTA)**2
             ENDDO
          ENDDO
