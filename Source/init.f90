@@ -929,27 +929,6 @@ OBST_SHAPE_IF: IF (OBST_SHAPE_AREA_ADJUST) THEN
 
 ENDIF OBST_SHAPE_IF
 
-! Initialize gas densities for 3D pyrolysis
-
-IF (SOLID_MT3D) THEN
-   ! store mass production rate for tracked species
-   ALLOCATE(M%M_DOT_G_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('INIT','M_DOT_G_PPP_S',IZERO)
-   M%M_DOT_G_PPP_S = 0._EB
-   ! initialize gas phase mass densities
-   ALLOCATE(M%RHO_ZZ_G_S(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('INIT','RHO_ZZ_G_S',IZERO)
-   M%RHO_ZZ_G_S = 0._EB
-ENDIF
-
-! Store old velocity components for special output quantities
-
-IF (STORE_OLD_VELOCITY) THEN
-   ALLOCATE(M%U_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','U_OLD',IZERO)
-   ALLOCATE(M%V_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','V_OLD',IZERO)
-   ALLOCATE(M%W_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','W_OLD',IZERO)
-ENDIF
-
 ! Reset ghost cell values of cell centered velocity for use in computing viscosity (must be done after INIT_WALL_CELL)
 
 DO IW=1,M%N_EXTERNAL_WALL_CELLS

@@ -26,7 +26,6 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DS      !< Divergence estimate next time step, \f$D_{ijk}^*\f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H       !< \f$ \tilde{p}_{ijk}/\rho_{ijk} + |\mathbf{u}|^2_{ijk}/2 \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: HS      !< H estimated at next time step
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_PRIME !< Experimental pressure correction
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KRES    !< Resolved kinetic energy, \f$ |\mathbf{u}|^2_{ijk}/2 \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk}+F_{{\rm B},x,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY     !< Momentum equation flux terms, \f$ F_{{\rm A},y,ijk}+F_{{\rm B},y,ijk} \f$
@@ -47,16 +46,12 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UII     !< Integrated intensity, \f$ U_{ijk}=\sum_{l=1}^N I_{ijk}^l\delta\Omega^l\f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RSUM    !< \f$ R_0 \sum_\alpha Z_{\alpha,ijk}/W_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE!< Source terms in the expression for the divergence
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_OLD   !< Value of \f$ u_{ijk} \f$ at the previous time step, used for output only
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V_OLD   !< Value of \f$ v_{ijk} \f$ at the previous time step, used for output only
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W_OLD   !< Value of \f$ w_{ijk} \f$ at the previous time step, used for output only
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2    !< \f$ C_s \Delta^2 \f$ in Smagorinsky turbulence expression
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT  !< Number of chemistry sub-iterations
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME    !< Mixing-controlled combustion reaction time (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE !< Strain rate \f$ |S|_{ijk} \f$ (1/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX     !< \f$ \max D_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_DOT_PPP_S !< Heat release rate per unit volume in 3D pyrolysis model
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP_FLAME   !< Flame temperature (K) (experimental)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PP_RESIDUAL !< Pressure Poisson residual (debug)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ               !< Lumped species, current time step, \f$ Z_{\alpha,ijk}^n \f$
@@ -72,8 +67,6 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_RAD     !< Average radius for a certain droplet type
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_AREA    !< Average area for a certain droplet type
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_PPP        !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_G_PPP_S    !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$, 3D solid
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO_ZZ_G_S
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FX
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FY
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FZ
@@ -335,13 +328,12 @@ USE MESH_VARIABLES
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: &
-   U,V,W,US,VS,WS,DDDT,D,DS,H,HS,H_PRIME,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,RHO,RHOS, &
-   MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE,U_OLD,V_OLD,W_OLD, &
-   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,TMP_FLAME,PP_RESIDUAL
+   U,V,W,US,VS,WS,DDDT,D,DS,H,HS,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,RHO,RHOS, &
+   MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE, &
+   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,PP_RESIDUAL
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                          SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
-                                         Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA, &
-                                         M_DOT_PPP,M_DOT_G_PPP_S,RHO_ZZ_G_S, &
+                                         Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA,M_DOT_PPP, &
                                          ADV_FX,ADV_FY,ADV_FZ,DIF_FX,DIF_FY,DIF_FZ,DIF_FXS,DIF_FYS,DIF_FZS
 REAL(EB), POINTER :: POIS_PTB,POIS_ERR
 REAL(EB), POINTER, DIMENSION(:) :: SAVE1,SAVE2,WORK
@@ -480,7 +472,6 @@ D=>M%D
 DS=>M%DS
 H=>M%H
 HS=>M%HS
-H_PRIME=>M%H_PRIME
 KRES=>M%KRES
 FVX=>M%FVX
 FVY=>M%FVY
@@ -501,14 +492,11 @@ MIX_TIME=>M%MIX_TIME
 Q=>M%Q
 Q_REAC=>M%Q_REAC
 Q_DOT_PPP_S=>M%Q_DOT_PPP_S
-M_DOT_G_PPP_S=>M%M_DOT_G_PPP_S
-RHO_ZZ_G_S=>M%RHO_ZZ_G_S
 CHI_R => M%CHI_R
 QR=>M%QR
 QR_W=>M%QR_W
 KAPPA_GAS=>M%KAPPA_GAS
 UII=>M%UII
-TMP_FLAME=>M%TMP_FLAME
 PP_RESIDUAL=>M%PP_RESIDUAL
 M_DOT_PPP=>M%M_DOT_PPP
 AVG_DROP_DEN=>M%AVG_DROP_DEN
@@ -615,9 +603,6 @@ TURB_WORK9=>M%TURB_WORK9
 TURB_WORK10=>M%TURB_WORK10
 CCVELDIV=>M%CCVELDIV
 CARTVELDIV=>M%CARTVELDIV
-U_OLD=>M%U_OLD
-V_OLD=>M%V_OLD
-W_OLD=>M%W_OLD
 WALL_WORK1=>M%WALL_WORK1
 WALL_WORK2=>M%WALL_WORK2
 FACE_WORK1=>M%FACE_WORK1
