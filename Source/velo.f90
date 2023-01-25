@@ -1391,33 +1391,33 @@ RFODT = RELAXATION_FACTOR/DT
 IF (PREDICTOR) HP => H
 IF (CORRECTOR) HP => HS
 
-! Exchange H at interpolated boundaries
+! Fill in exterior cells of mesh NM with values of HP from mesh NOM
 
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      EWC=>EXTERNAL_WALL(IW)
-      NOM =EWC%NOM
-      IF (NOM==0) CYCLE
-      IF (PREDICTOR) THEN
-         OM_HP=>OMESH(NOM)%H
-      ELSE
-         OM_HP=>OMESH(NOM)%HS
-      ENDIF
-      BC => BOUNDARY_COORD(WC%BC_INDEX)
-      II = BC%II
-      JJ = BC%JJ
-      KK = BC%KK
-      H_OTHER = 0._EB
-      DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-         DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-            DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-               H_OTHER = H_OTHER + OM_HP(IIO,JJO,KKO)
-            ENDDO
+DO IW=1,N_EXTERNAL_WALL_CELLS
+   EWC=>EXTERNAL_WALL(IW)
+   NOM =EWC%NOM
+   IF (NOM==0) CYCLE
+   WC=>WALL(IW)
+   IF (PREDICTOR) THEN
+      OM_HP=>OMESH(NOM)%H
+   ELSE
+      OM_HP=>OMESH(NOM)%HS
+   ENDIF
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   II = BC%II
+   JJ = BC%JJ
+   KK = BC%KK
+   H_OTHER = 0._EB
+   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+            H_OTHER = H_OTHER + OM_HP(IIO,JJO,KKO)
          ENDDO
       ENDDO
-      N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
-      HP(II,JJ,KK)  = H_OTHER/REAL(N_INT_CELLS,EB)
    ENDDO
+   N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
+   HP(II,JJ,KK)  = H_OTHER/REAL(N_INT_CELLS,EB)
+ENDDO
 
 ! Set FVX, FVY and FVZ to drive velocity components at solid boundaries within obstructions towards zero
 
