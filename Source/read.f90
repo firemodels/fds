@@ -6489,7 +6489,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    DO NR=1,ML%N_REACTIONS
       DO NS=1,MAX_SPECIES
 
-         IF (TRIM(ML%SPEC_ID(NS,NR))=='null' .AND. ML%NU_SPEC(NS,NR)>TWO_EPSILON_EB) THEN
+         IF (TRIM(ML%SPEC_ID(NS,NR))=='null' .AND. ABS(ML%NU_SPEC(NS,NR))>TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires a SPEC_ID for yield ',&
                  NS, 'of reaction ', NR
             CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -6506,12 +6506,6 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                EXIT
             ENDIF
          ENDDO
-         IF (ANY(ABS(ML%NU_GAS)>TWO_EPSILON_EB)) THEN
-            DO NS2=1,N_TRACKED_SPECIES
-               IF (ABS(ML%NU_GAS(NS2,NR)) > TWO_EPSILON_EB) &
-                  ML%NU_GAS_P(:,NR) = ML%NU_GAS_P(:,NR) + ML%NU_GAS(NS2,NR)*SPECIES_MIXTURE(NS2)%MASS_FRACTION(:)
-            ENDDO
-         ENDIF
          ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
          IF (ML%HEAT_OF_COMBUSTION(NS,NR) > 0._EB) THEN
             REAC_DO: DO NR2 = 1,N_REACTIONS
@@ -6533,6 +6527,12 @@ PROC_MATL_LOOP: DO N=1,N_MATL
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
+      IF (ANY(ABS(ML%NU_GAS(:,NR))>TWO_EPSILON_EB)) THEN
+         DO NS=1,N_TRACKED_SPECIES
+            IF (ABS(ML%NU_GAS(NS,NR)) > TWO_EPSILON_EB) &
+               ML%NU_GAS_P(:,NR) = ML%NU_GAS_P(:,NR) + ML%NU_GAS(NS,NR)*SPECIES_MIXTURE(NS)%MASS_FRACTION(:)
+         ENDDO
+      ENDIF
    ENDDO
 
    ! If RAMPs are present, populate arrays for C_S and K_S
