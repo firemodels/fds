@@ -2517,16 +2517,14 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 
 In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~\si{\degree C} and a constant specific heat of 1~\si{kJ/(kg.K)}. Gas~2 has an initial temperature of 20~\si{\degree C} and a constant specific heat of 10~\si{kJ/(kg.K)}. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
 \be \int h_{\rm s} \, \rho \bu \cdot \d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot \d\bS \ee
-where $Z_\alpha$ is the mass fraction of species $\alpha$.  The plot at left in Fig.~\ref{energy_budget_dns} shows the convective and diffusive enthalpy fluxes at steady state. The quantities are of opposite sign because both quantities are evaluated as source terms in the energy budget.
-
-Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
+where $Z_\alpha$ is the mass fraction of species $\alpha$. Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
 \be \int \nabla \cdot \bu \; \d V \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
-The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
+Figure~\ref{energy_budget_dns} shows the resulting integrated divergence or net volume flow.
 
 \begin{figure}[ht]
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
+\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
-\caption[The \textct{energy\_budget\_dns} test case]{(Left) Equality of convective and diffusive enthalpy flux at steady state. (Right) The integrated divergence or net volume flow.}
+\caption[The \textct{energy\_budget\_dns} test case]{The integrated divergence or net volume flow.}
 \label{energy_budget_dns}
 \end{figure}
 
