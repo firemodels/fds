@@ -6308,7 +6308,13 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! If oxygen is consumed in the charring process, set a global variable for
    ! use in calculating the heat release rate based on oxygen consumption
 
-   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
+   IF (N_REACTIONS > 0 .AND. NU_O2_CHAR(1)>0._EB) THEN
+      IF (O2_INDEX <= 0) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),', NU_O2_CHAR set but OXYGEN is not a defined species.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+      CHAR_OXIDATION = .TRUE.
+   ENDIF
 
    ! Conductivity and specific heat temperature ramps
 
@@ -6513,7 +6519,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                   ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR) = ML%HEAT_OF_COMBUSTION(NS,NR) / REACTION(NR2)%HOC_COMPLETE
                   IF (ABS(ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR)-1._EB) > TWO_EPSILON_EB) THEN
                      DO NS2=1,N_SPECIES
-                        IF (SPECIES_MIXTURE(NS)%MASS_FRACTION(NS2) > 0._EB) &
+                        IF (SPECIES_MIXTURE(Z_INDEX(NS,NR))%MASS_FRACTION(NS2) > 0._EB) &
                            ML%ADJUST_BURN_RATE_P(NS2,NR) = ML%ADJUST_BURN_RATE(Z_INDEX(NS,NR),NR)
                      ENDDO
                   ENDIF
