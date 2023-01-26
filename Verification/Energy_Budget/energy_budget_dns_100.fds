@@ -1,6 +1,6 @@
 &HEAD CHID='energy_budget_dns_100', TITLE='test of variable cp' /
 
-&TIME T_END=3. /
+&TIME T_END=2. /
 
 &MISC STRATIFICATION=.FALSE., SIMULATION_MODE='DNS', GVEC=0,0,0 /
 
