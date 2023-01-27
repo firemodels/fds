@@ -400,13 +400,9 @@ MPI and OpenMP can be used together. For example, 4 MPI processes can be assigne
 
 To start an FDS simulation, you can either use a third-party graphical user interface (GUI) or you can invoke the computer's command prompt and type a one-line command, as described in the following sections.
 
-\subsubsection{MS Windows}
+\subsubsection{Single Computer Running MS Windows}
 
-The files needed to run an FDS simulation on a single Windows computer or across a Windows domain network are bundled in with the FDS download. There is no need to install MPI or any redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. If you are not on a domain network, you can still run FDS locally, and instructions are given below.
-
-Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Next, decide if you want to run the job solely on your own computer or on multiple computers on the network.
-
-If you decide you want to run the case solely on your own computer, and suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
+Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
 \begin{lstlisting}
 fds_local -p 4 -o 2 job_name.fds
 \end{lstlisting}
@@ -416,15 +412,11 @@ The progress of the simulation is indicated by diagnostic output that is written
 \begin{lstlisting}
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
-Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. However, we do not recommend this because of complications associated with the {\ct mpiexec} program.
 
-Also, you can automatically set the number of OpenMP threads via the command:
-\begin{lstlisting}
-set OMP_NUM_THREADS=N
-\end{lstlisting}
-where {\ct N} is the number of OpenMP threads to assign to each MPI process for all jobs launched during that particular session. You can change {\ct OMP\_NUM\_THREADS} permanently by changing the system environment variable of the same name.
 
-If you wish to run FDS on more than one computer, do the following:
+\subsubsection{Multiple Computers Running MS Windows}
+
+The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. 
 \begin{enumerate}
 \item The first time you run a job, you must provide your domain name and password by issuing this command:
 
@@ -448,14 +440,16 @@ If you wish to run FDS on more than one computer, do the following:
 
 \item Within the command prompt, {\ct cd} to the working directory. At the command prompt, type:
 
-   {\ct mpiexec -wdir <working directory> -machine hosts.txt fds job\_name.fds}
+   {\ct mpiexec -wdir <working directory> -machinefile hosts.txt fds job\_name.fds}
 
-   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. Add the argument
+   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. 
+   
+   If you want to use more than one OpenMP thread per MPI process, add the argument
 
-   {\ct -env OMP\_NUM\_THREADS <OpenMP threads>}
+   {\ct mpiexec ... -env OMP\_NUM\_THREADS <threads> fds\_openmp job\_name.fds}
 
-   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
-
+   If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency. 
+   
 \item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
 \item For more options, consult {\em Intel® MPI Library Developer Reference for Windows* OS, Developer Reference, Version: 2021.5 (or later), Global Hydra Options}.
 \end{enumerate}
