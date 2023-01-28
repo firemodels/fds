@@ -7,6 +7,12 @@
 This chapter contains a brief description of the experiments that were used for model validation. Only enough detail is included here to provide a general understanding of the model simulations. Anyone wishing to use the experimental measurements for validation ought to consult the cited test reports or other publications for a comprehensive description.
 
 
+\section{Aalto Wood Experiments}
+\label{Aalto_Woods_Description}
+
+Rinta-Paavola et al. developed a material model for Norway spruce and Scots pine woods to predict char front progress and heat release in burning timber~\cite{Rinta-Paavola:2022}. The material models are calibrated using temperature, mass loss rate and heat release rate measurements of wood specimens in a cone calorimeter. The model is intended for a number of different fire scenarios, such as fully developed fire with only little oxygen in the compartment, or the decay period after flaming with exposed char still smoldering. Cone calorimeter measurements were conducted in multiple conditions to replicate these scenarios. The estimated material models are able to predict the experiments in the scale of cone calorimeter.
+
+
 \section{ArupFire Tunnel Fire Experiments}
 \label{ArupFire_Tunnel_Fire_Description}
 
@@ -276,7 +282,7 @@ The roof of the test compartment was made of 20~cm thick reinforced aerated conc
 
 Ventilation was provided at one end of the compartment through a full-width, variable height opening. Lightweight concrete blocks were used to construct temporary walls to reduce the ventilation from fully open to an eighth of the available area.
 
-The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was constructed of 1~m long and 5~cm square cross section sticks of Western Hemlock softwood ( density 400~kg/m$^3$), dried to 10~\% moisture content. The sticks were stacked with 5~cm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. The rear-most three cribs at the back of the compartment were ignited simultaneously. Temperatures were measured along crib lines 2 (back), 6 (middle) and 10 (front), using 3~mm thermocouples placed 300~mm below the ceiling. The average of three thermocouples at the same longitudial position is used for model validation.
+The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was constructed of 1~m long and 5~cm square cross section sticks of Western Hemlock softwood (density 400~kg/m$^3$), dried to 10~\% moisture content. The sticks were stacked with 5~cm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. The rear-most three cribs at the back of the compartment were ignited simultaneously. Temperatures were measured along crib lines 2 (back), 6 (middle) and 10 (front), using 3~mm thermocouples placed 300~mm below the ceiling. The average of three thermocouples at the same longitudial position is used for model validation.
 
 \begin{table}[ht]
 \begin{center}
@@ -293,7 +299,7 @@ Relative Ventilation Area       & 1/1 & 1/1 & 1/2 & 1/2 & 1/4 & 1/8 \\ \hline
 
 \subsubsection{Modeling Notes}
 
-The fire spread on wood cribs is modeled as a combination of simple and complex pyrolysis models. The unresolved surface area of the wood cribs is compensated using a area multiplicator input parameter. Modeling is reported in~\cite{Janardhan:FSJ2021}.
+The fire spread on wood cribs is modeled as a combination of simple and complex pyrolysis models. The unresolved surface area of the wood cribs is compensated using an area multiplicator input parameter. Modeling is reported in~\cite{Janardhan:FSJ2021}.
 
 
 \section{Cable Response to Live Fire -- CAROLFIRE}
@@ -807,7 +813,7 @@ where $\rho_\infty$, $c_p$, and $T_\infty$ are the ambient density, specific hea
 \section{Insulation Material Fire Resistance Tests}
 \label{Insulation_Materials_Description}
 
-Paudel et al.~\cite{Paudel:2020} studied small-scale fire resistance tests for 30 different types of stone wool insulation varying in density, thickness, and organic content. During each test, a 60~cm square sample of insulation covered by a 1~mm thick steel plate was mounted to the opening of a small combustion chamber. Thus, one side of the sample was exposed to ambient ($ T_\infty $) conditions, and the other side was attached to the steel plate whose temperature followed the ISO 834 standard fire curve,
+Paudel et al.~\cite{Paudel:2021} studied small-scale fire resistance tests for 30 different types of stone wool insulation varying in density, thickness, and organic content. During each test, a 60~cm square sample of insulation covered by a 1~mm thick steel plate was mounted to the opening of a small combustion chamber. Thus, one side of the sample was exposed to ambient ($ T_\infty $) conditions, and the other side was attached to the steel plate whose temperature followed the ISO 834 standard fire curve,
 \begin{equation}
    T_\textrm{h}(t) = T_\infty + 345 \, \textrm{log}_{10}(8t + 1)
    \label{eq:isocurve}
@@ -816,7 +822,7 @@ with time, $t$, in minutes and exposure temperature, $T_{\textrm{h}}$, in $^\cir
 
 \subsubsection{Modeling Notes}
 
-The numerical simulation is explained in Ref.~\cite{Paudel:2020}. Because detailed kinetic properties of the material are currently not available, the chemical decomposition parameters ($A$, $E_{\textrm{a}}$ and $n$) were optimized based on the cold-side measured temperatures. Unlike in Ref.~\cite{Paudel:2020}, the optimized values in the simulation are constant, $A=0.0028$~s$^{-1}$, $E_{\textrm{a}}=21700$~J/mol, and $n=0.71$. The optimization used a Monte Carlo method of 1000 Latin hypercube samples, where the sampling range was 0.001 to 1000~s$^{-1}$ for $A$, $1\times10^4$ to $1\times10^5$~J/mol for $E_{\textrm{a}}$, and 0.1 to 1 for $n$.
+The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detailed kinetic properties of the material are currently not available, the chemical decomposition parameters ($A$, $E_{\textrm{a}}$ and $n$) were optimized based on the cold-side measured temperatures. Unlike in Ref.~\cite{Paudel:2021}, the optimized values in the simulation are constant, $A=0.0028$~s$^{-1}$, $E_{\textrm{a}}=21700$~J/mol, and $n=0.71$. The optimization used a Monte Carlo method of 1000 Latin hypercube samples, where the sampling range was 0.001 to 1000~s$^{-1}$ for $A$, $1\times10^4$ to $1\times10^5$~J/mol for $E_{\textrm{a}}$, and 0.1 to 1 for $n$.
 
 
 
@@ -901,6 +907,8 @@ Dimensions for each scale are summarized in Tables \ref{JH_FRA_instrumentation_t
 %\end{figure}
 
 %\FloatBarrier
+
+
 
 
 
@@ -1699,7 +1707,11 @@ The simulations are performed with a spatial resolution of 4~cm. The enclosures 
 \begin{equation}
     \dot{V} = C \, A \, \left( \frac{2 \Delta p}{\rho_0} \right)^{0.5} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{0.1} \label{leak_eq}
 \end{equation}
-The discharge coefficient, $C=0.61$, is recommended by the manufacturer of the calibrated fan used for determining the leakage area, $A$. The extra pressure term in the expression represents a weak relationship between the discharge coefficient and the pressure rise. The pressure exponent of 0.6 best fits the leakage data. The reference pressure, $\Delta p_{\rm ref}$, is taken as 1~Pa to maintain unit consistency.
+The discharge coefficient, $C=0.61$, is recommended by the manufacturer of the calibrated fan used for determining the leakage area, $A$. The extra pressure term in the expression represents a weak relationship between the discharge coefficient and the pressure rise. The pressure exponent of 0.6 best fits the leakage data. The reference pressure, $\Delta p_{\rm ref}$, is taken as 1~Pa to maintain unit consistency. The measured leakage is applied using four ``patches,'' two above the neutral plane and two below. Because there is no way to determine the exact distribution of the leakage, the specification of the leakage area to the upper and lower patches is based on roughly matching the gas concentrations early in the simulation when the enclosure is well-ventilated. There is still considerable uncertainty in the leakge distribution and the amount of leakage because during the experiments the gaps and seams of the enclosures tended to open up as the gases within heated.
+
+The combustion of natural gas (assumed to be methane) within the enclosures is modeled using the two-step simple chemistry algorithm. That is, the first reaction converts methane to CO, soot, and water vapor, and the second step converts the CO and soot to CO$_2$, assuming enough oxygen is present following the first reaction. By default, two-thirds of the carbon atoms in the fuel molecule are converted to CO in the first step; the rest to soot.
+
+Extinction is modeled using the ``Extinction 1'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 540~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 540~$^\circ$C is reported in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
 
 \FloatBarrier
@@ -1909,6 +1921,42 @@ A series of tests were performed as part of an effort to develop a gauge capable
 	\end{center}
 	\label{tab:NIST_SDG}
 \end{table}
+
+
+\section{NIST Structure Separation Experiments}
+\label{NIST_Structure_Separation_Description}
+
+Maranghides et al.~\cite{Maranghides:TN2161,Maranghides:TN2235} have developed a series of tests designed to understand safe structure separation distances for sheds, fences, and other combustible materials, with and without wind, in the wildland-urban interface (WUI).
+
+\subsubsection{Verification Tests}
+
+Prior to modeling heat fluxes to surfaces with attached flames or modeling ignition of siding material, a relatively simple test was carried out to record heat fluxes from a know fire source to targets in the proximity to the flame.  The 8 MW NFRL calibration burner \cite{Bryant:NISTSP1007} (see Fig.~\ref{NFRL_8MW_calibration_burner}) is positioned on a raised platform under the medium scale hood in NFRL.  Three heat flux gauge towers are positioned 1, 2, and 3 m from the burner edge (or 2, 3, and 4 m from the burner center).  Figure~\ref{NIST_SSE_Verification_Setup} shows a photograph from \cite{Maranghides:TN2235} (courtesy Matt Hoehler).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{../../../cad/NIST_Calibration_Burners/NIST_8MW_assembly_drawing}
+\caption[NFRL 8 MW calibration burner assembly drawing]{NFRL 8 MW calibration burner assembly drawing produced by NIST SURF student Louis Serrano Torres.  Units in inches.}
+\label{NFRL_8MW_calibration_burner}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{FIGURES/NIST_Structure_Separation/SSE_Verification_Exp_Setup}
+\caption[Structure Separation Verification setup]{Structure Separation Verification setup showing natural gas burner and heat flux gauge positions.}
+\label{NIST_SSE_Verification_Setup}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The burner is roughly 1 m $\times$ 1.5 m with 802 fuel ports 1/8th inch in diameter (see Fig.~\ref{NFRL_8MW_calibration_burner}).  The FDS model of the burner is built from particles (see Fig.~\ref{FDS_NFRL_8MW_particle_burner}).  Each particle has a radius set to give a spherical area equivalent to a 1/8th inch diameter fuel port.  The time ramp in the FDS simulation is compressed by a factor of 10.  The ``gauge heat flux'' is recorded in an orientation pointing toward the burner ($+x$ direction).  The burner flow baffle plates are made from thin {\ct OBST}.  Fictitious manifolds are made from thickened {\ct OBST}.  The number of radiation angles in increased to 400.  The radiation path length is set to 2 m.  Ambient conditions are taken from historical weather data for the day of the experiment.  The natural gas composition is taken from NFRL records on the day.  A radiant fraction of 0.25 is prescribed, which is both consistent with a methane flame with additional ethane and the heat flux data farthest from the fire source under the assumption of a point source model.  The burner has a $D^*$ of approximately 2.2.  As a baseline, a grid resolution of 5 cm provides a $D^*/\Delta x = 44$.  Reasonably high resolution may be necessary if near-flame heat flux values are of interest.  However, we also provide FDS results for 10 cm resolution.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.5\textwidth]{FIGURES/NIST_Structure_Separation/nfrl_burner_particles}
+\caption[FDS particle model of NFRL 8 MW burner]{Image of the FDS particle model for the 8 MW NFRL burner.}
+\label{FDS_NFRL_8MW_particle_burner}
+\end{figure}
+
 
 \section{NIST Vent Study}
 \label{NIST_Vent_Description}
