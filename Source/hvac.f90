@@ -2535,7 +2535,7 @@ IF (CHANGE) THEN
       DO ND = 1, N_DUCTS
          DU => DUCT(ND)
          IF (NODE_COUNTER(DU%NODE_INDEX(1)) /= NODE_COUNTER(DU%NODE_INDEX(2))) THEN
-            CHANGE = .TRUE.
+            CHANGE2 = .TRUE.
             COUNTER = MIN(NODE_COUNTER(DU%NODE_INDEX(1)),NODE_COUNTER(DU%NODE_INDEX(2)))
             DUCT_COUNTER(ND) = COUNTER
             NODE_COUNTER(DU%NODE_INDEX(1)) = COUNTER
@@ -2560,7 +2560,7 @@ IF (CHANGE) THEN
                ENDIF
             ENDDO
             IF (COUNTER /= COUNTER2) THEN
-               CHANGE = .TRUE.
+               CHANGE2 = .TRUE.
                DO NN = 1, P_ZONE(NZ)%N_DUCTNODES
                   NODE_COUNTER(P_ZONE(NZ)%NODE_INDEX(NN)) = COUNTER
                ENDDO
