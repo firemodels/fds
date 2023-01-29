@@ -832,24 +832,15 @@ The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detail
 
 Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen compartment fire tests consisting of fourteen unique configurations and three repeated tests.
 Tests were conducted at three scales including full-scale, half-scale, and quarter-scale. 
-The baseline full-scale compartment design was based on a standard size National Fire Protection Agency (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
-The initiating fire was a propane burner in the back-left corner of the compartment. 
+The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
+The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
 The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. 
-The lining material thickness was kept the same at each scalle to preserve the burning duration.
-
-A total of five permutations of the compartment design were evaluated.
-The first two scenarios used a specified heat release rate with inert boundaries.
-Two heat release rate stages were included in the baseline configuration (non-combustible door configuration), including 5 minutes at a pre-flashover level (full-scale 320 kW) and 5 minutes at a post-flashover level (full-scale 640 kW).
-The second scenario, the non-combustible door-window configuration, added a window at the center of the east wall to evaluate the impact of additional ventilation on the scaling approach.
-The post-flashover level was increased to ensure flashover with the additional air flow (full-scale 720 kW).
-
-The other scenarios included cases where the heat release rate was dependent on thermal feedback with the fire environment.
-Scenarios three and four replaced parts of the inert wall and ceiling material in the non-combustible door configuration with combustible linings.
-Two different combustible materials were used: plywood and a fiber-reinforced plastic (FRP).
-The last scenario used a kerosene-type jet fuel, JP-5, in the same geometric configuration as the non-combustible door configuration but replaced the propane burner with a liquid pool fire.
+The lining material thickness was kept the same at each scale to preserve the burning duration.
+Six tests used combustible lining with either CPS plywood of a fiber-reinforced plastic (FRP).
 
 Table \ref{JH_FRA_Matrix} provides a summary of the experiments. 
 Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
+The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_instrumentation_fig}. 
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Rail Car Experiments]{Summary of JH/FRA Rail Car Experiments.~\cite{Hodges:FRA22}}
@@ -878,99 +869,44 @@ No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &          
 \label{JH_FRA_Matrix}
 \end{table}
 
-The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_instrumentation_fig}. 
-Dimensions for each scale are summarized in Tables \ref{JH_FRA_instrumentation_tab1}-\ref{JH_FRA_instrumentation_tab4}.
-
 \begin{figure}[h!]
 \includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation1}
 \includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation2} \\
-\caption[Instrumentation plan from compartment fire experiments]{Instrumentation plan from compartment fire experiments (left) plan view (right) front view).}
+\caption[Instrumentation plan from compartment fire experiments]{Instrumentation plan from compartment fire experiments (left) plan view (right) front view). Dimensions are in meters and correspond to the full-scale compartment.}
 \label{JH_FRA_instrumentation_fig}
 \end{figure}
 
-\begin{table}[h!]
-\begin{center}
-\caption[Dimensions for instrumentation schematic]{Dimensions for instrumentation schematic~\cite{Hodges:FRA22}.} \label{JH_FRA_instrumentation_tab1}
-\begin{tabular}{|l|c|c|c|c|c|} \hline
-Scale   & \si{W_1}     & \si{W_2}     & \si{H_1}     & \si{H_2}    & \si{H_3}  \\
-        & \si{\m}      & \si{\m}      & \si{\m}      & \si{\m}     & \si{\m}   \\
-\hline \hline
-Full    & 0.30  &  0.91   & 0.91    & 0.61   & 0.30    \\ \hline
-Half    & 0.15  &  0.46   & 0.46    & 0.30   & 0.15    \\ \hline
-Quarter & 0.08  &  0.23   & 0.23    & 0.15   & 0.08    \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[h!]
-\begin{center}
-\caption[Thermocouple tree heights]{Thermocouple tree heights~\cite{Hodges:FRA22}.} \label{JH_FRA_instrumentation_tab2}
-\begin{tabular}{|l|c|c|c|c|c|c|} \hline
-Scale   & \si{TC 1}     & \si{TC 2}     & \si{TC 3}     & \si{TC 4}    & \si{TC 5}   & \si{TC 6}   \\
-        & \si{\m}       & \si{\m}       & \si{\m}       & \si{\m}      & \si{\m}     & \si{\m}     \\
-\hline \hline
-Full    & 2.08  &  1.68   & 1.52    & 1.37   & 1.22   & 0.91   \\ \hline
-Half    & 1.04  &  0.84   & 0.76    & 0.69   & 0.61   & 0.46   \\ \hline
-Quarter & 0.52  &  0.42   & 0.38    & 0.34   & 0.30   & 0.23   \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[h!]
-\begin{center}
-\caption[Ventilation velocity heights]{Ventilation velocity heights~\cite{Hodges:FRA22}.} \label{JH_FRA_instrumentation_tab3}
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|} \hline
-Scale   & \si{Door 1}     & \si{Door 2}     & \si{Door 3}     & \si{Door 4}    & \si{Door 5}   & \si{Door 6}  & \si{Window 1}    & \si{Window 2}   \\
-        & \si{\m}       & \si{\m}       & \si{\m}       & \si{\m}      & \si{\m}     & \si{\m}      & \si{\m}    & \si{\m} \\
-\hline \hline
-Full    & 0.168 &  0.505   & 0.842  & 1.179   & 1.516   & 1.853   & 1.372    & 1.525 \\ \hline
-Half    & 0.084 &  0.253   & 0.421  & 0.590   & 0.758   & 0.927   & 0.686    & 0.762 \\ \hline
-Quarter & 0.042 &  0.126   & 0.211  & 0.295   & 0.379   & 0.463   & 0.343    & 0.381 \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[h!]
-\begin{center}
-\caption[Heat flux heights]{Heat flux heights~\cite{Hodges:FRA22}.} \label{JH_FRA_instrumentation_tab4}
-\begin{tabular}{|l|c|c|c|c|} \hline
-Scale   & \si{Ceiling}     & \si{Wall}     & \si{Burner}     & \si{Floor}   \\
-        & \si{\m}       & \si{\m}       & \si{\m}       & \si{\m}    \\
-\hline \hline
-Full    & 2.44 &  1.83   & 0.813  & 0.000 \\ \hline
-Half    & 1.22 &  0.92   & 0.407  & 0.000 \\ \hline
-Quarter & 0.61 &  0.46   & 0.203  & 0.000 \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
 \FloatBarrier
 
-\subsubsection{Modeling Notes}
+%\subsubsection{Modeling Notes}
 
-The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model. The model input parameters used in simulating these experiments are summarized in Table \ref{JH_FRA_Properties}. Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}. The cone calorimeter data used as a reference for the scaling-based pyrolysis model is the 50~\si{kW/m^2} curve provided in Figure~\ref{JH_FRA_plywood_cone}.
+%The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
+%The model input parameters used in simulating these experiments are summarized in Table \ref{JH_FRA_Properties}.
+%Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+%The cone calorimeter data used as a reference for the scaling-based pyrolysis model is the 50 \si{kW/m^2} curve provided in Figure \ref{JH_FRA_plywood_cone}.
 
-\begin{table}[h!]
-\begin{center}
-\caption[Parameters for JH/FRA simulations]{Parameters for JH/FRA simulations~\cite{Hodges:FRA22}.} \label{JH_FRA_Properties}
-\begin{tabular}{|l|c|c|c|c|c|} \hline
-        & $\rho$               & $c_p$                        & $k$                & $T_{ign}$       & $\Delta$  \\
-Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{^{$\circ$}}C   & \si{mm} \\
-\hline \hline
-Plywood  &  625  &  3.13   & 0.295  & 287  & 7.2     \\ \hline
-FRP      &       &         &        &      &         \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+%\begin{table}[h!]
+%\begin{center}
+%\caption[Parameters for JH/FRA simulations]{Parameters for JH/FRA simulations~\cite{Hodges:FRA22}.} \label{JH_FRA_Properties}
+%\begin{tabular}{|l|c|c|c|c|c|} \hline
+%        & $\rho$               & $c_p$                        & $k$                & $T_{ign}$       & $\Delta$  \\
+%Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{^{$\circ$}}C   & \si{mm} \\
+%\hline \hline
+%Plywood  &  625  &  3.13   & 0.295  & 287  & 7.2     \\ \hline
+%FRP      &       &         &        &      &         \\ \hline
+%\end{tabular}
+%\end{center}
+%\end{table}
 
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=3in]{FIGURES/JH_FRA/JH_FRA_plywood_cone}
-\caption[Plywood heat release rate per unit area]{Plywood heat release rate per unit area.}
-\label{JH_FRA_plywood_cone}
-\end{figure}
+%\begin{figure}[p]
+%\includegraphics[width=\textwidth]{FIGURES/JH_FRA/JH_FRA_plywood_cone}
+%\caption[Plywood heat release rate per unit area]{Plywood heat release rate per unit area.}
+%\label{JH_FRA_plywood_cone}
+%\end{figure}
 
-\FloatBarrier
+%\FloatBarrier
+
+
 
 
 
