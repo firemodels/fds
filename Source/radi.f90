@@ -3949,6 +3949,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
          ANGLE_LOOP: DO N = NSTART,NEND,NSTEP  ! Sweep through control angles
 
+            CELL_ILW = -HUGE(EB)
+
             ! Boundary conditions: Intensities leaving the boundaries.
 
             !$OMP PARALLEL DO PRIVATE(WC,BC,BR,ONE_D,IOR,II,JJ,KK,LL,NOM,VT) SCHEDULE(GUIDED)
@@ -3988,6 +3990,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IL(II,JJ,KK) = IL(II,JJ,KK)/REAL(EXTERNAL_WALL(IW)%NIC_MAX-EXTERNAL_WALL(IW)%NIC_MIN+1,EB)
                      CASE DEFAULT ! solid wall
                         BR%BAND(IBND)%ILW(N) = OUTRAD_W(IW) + RPI*(1._EB-ONE_D%EMISSIVITY)*INRAD_W(IW)
+                        IC = CELL_INDEX(BC%IIG,BC%JJG,BC%KKG)
+                        CELL_ILW(IC,ABS(IOR)) = BR%BAND(IBND)%ILW(N)
                   END SELECT
                ELSEIF (CYLINDRICAL) THEN
                   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP1
@@ -4050,8 +4054,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                J = 1
                CKLOOP: DO K=KSTART,KEND,KSTEP
                   CILOOP: DO I=ISTART,IEND,ISTEP
-                     IC = CELL_INDEX(I,J,K)
-                     IF (CELL(IC)%SOLID) CYCLE CILOOP
                      ILXU = IL(I-ISTEP,J,K)
                      ILYU = IL(I,J-JSTEP,K)
                      ILZU = IL(I,J,K-KSTEP)
@@ -4071,22 +4073,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AZ  = DX(I)  * RP*DPHI0         * ABS(DLZ(N))
                      IF (MODULO(N,NRP(1))==1) AYD = 0._EB  ! Zero out the terms involving symmetric overhang
                      IF (MODULO(N,NRP(1))==0) AYU = 0._EB
+                     IC = CELL_INDEX(I,J,K)
                      IF (IC/=0) THEN
-                        WC => WALL(CELL(IC)%WALL_INDEX(-ISTEP))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILXU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                        WC => WALL(CELL(IC)%WALL_INDEX(-JSTEP*2))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILYU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                        WC => WALL(CELL(IC)%WALL_INDEX(-KSTEP*3))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILZU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
+                        IF (CELL(IC)%SOLID) CYCLE CILOOP
+                        IF (CELL_ILW(IC,1)>-1.E6_EB) ILXU = CELL_ILW(IC,1)
+                        IF (CELL_ILW(IC,2)>-1.E6_EB) ILYU = CELL_ILW(IC,2)
+                        IF (CELL_ILW(IC,3)>-1.E6_EB) ILZU = CELL_ILW(IC,3)
                      ENDIF
                      AIU_SUM = AXU*ILXU + AYU*ILYU + AZ*ILZU
                      A_SUM = AXD + AYD + AZ
@@ -4102,24 +4094,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                J = 1
                K2LOOP: DO K=KSTART,KEND,KSTEP
                   I2LOOP: DO I=ISTART,IEND,ISTEP
-                     IC = CELL_INDEX(I,J,K)
-                     IF (CELL(IC)%SOLID) CYCLE I2LOOP
                      ILXU  = IL(I-ISTEP,J,K)
                      ILZU  = IL(I,J,K-KSTEP)
                      VC  = DX(I) * DZ(K)
                      AX  =         DZ(K) * ABS(DLX(N))
                      AZ  = DX(I)         * ABS(DLZ(N))
+                     IC = CELL_INDEX(I,J,K)
                      IF (IC/=0) THEN
-                        WC => WALL(CELL(IC)%WALL_INDEX(-ISTEP))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILXU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                        WC => WALL(CELL(IC)%WALL_INDEX(-KSTEP*3))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILZU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
+                        IF (CELL(IC)%SOLID) CYCLE I2LOOP
+                        IF (CELL_ILW(IC,1)>-1.E6_EB) ILXU = CELL_ILW(IC,1)
+                        IF (CELL_ILW(IC,3)>-1.E6_EB) ILZU = CELL_ILW(IC,3)
                      ENDIF
                      AIU_SUM = AX*ILXU + AZ*ILZU
                      A_SUM = AX + AZ
@@ -4169,31 +4153,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AX  = DY(J) * DZ(K) * ABS(DLX(N))
                      VC1 = DY(J) * DZ(K)
                      AZ1 = DY(J) * ABS(DLZ(N))
-                     IC = CELL_INDEX(I,J,K)
-                     IF (CELL(IC)%SOLID) CYCLE SLICE_LOOP
                      ILXU  = IL(I-ISTEP,J,K)
                      ILYU  = IL(I,J-JSTEP,K)
                      ILZU  = IL(I,J,K-KSTEP)
+                     IC = CELL_INDEX(I,J,K)
+                     IF (IC/=0) THEN
+                        IF (CELL(IC)%SOLID) CYCLE SLICE_LOOP
+                        IF (CELL_ILW(IC,1)>-1.E6_EB) ILXU = CELL_ILW(IC,1)
+                        IF (CELL_ILW(IC,2)>-1.E6_EB) ILYU = CELL_ILW(IC,2)
+                        IF (CELL_ILW(IC,3)>-1.E6_EB) ILZU = CELL_ILW(IC,3)
+                     ENDIF
                      VC  = DX(I) * VC1
                      AY  = DX(I) * AY1
                      AZ  = DX(I) * AZ1
-                     IF (IC/=0) THEN
-                        WC => WALL(CELL(IC)%WALL_INDEX(-ISTEP))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILXU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                        WC => WALL(CELL(IC)%WALL_INDEX(-JSTEP*2))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILYU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                        WC => WALL(CELL(IC)%WALL_INDEX(-KSTEP*3))
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-                           BR => BOUNDARY_RADIA(WC%BR_INDEX)
-                           ILZU = BR%BAND(IBND)%ILW(N)
-                        ENDIF
-                     ENDIF
                      IF (CC_IBM) THEN
                         IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) CYCLE SLICE_LOOP
                         AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
