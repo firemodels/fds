@@ -6674,7 +6674,7 @@ The domain is defined on a square of length ($L=2$ m), with periodicity prescrib
 % Figure:
 
 
-Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
 
 
 % Figure Shunn_CC:
@@ -6682,7 +6682,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_chm_mms_convergence.pdf}
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
-\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
+\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
 \end{figure}
 
 
@@ -6788,17 +6788,17 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 \centering
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_stm_mms_convergence.pdf}
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
 \end{figure}
 
 % Figures for accuracy 27deg:
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
 \end{figure}
 
-Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,320\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
 
 Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference.
 The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
@@ -6808,7 +6808,7 @@ For the $\&$OBSTs and grid aligned stress method where the momentum equations ar
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
 \end{figure}
 
 
