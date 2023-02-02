@@ -5548,6 +5548,10 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
    TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
    ITM  = INT(TT)
    ITM1 = NINT(ABS(TT-ITM)*100)
+   IF (ITM1==100) THEN
+      ITM = ITM+1
+      ITM1 = 0
+   ENDIF
    WRITE(FN_PL3D(NM),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q'
    WRITE(FN_PL3D(NM+NMESHES),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q.bnd'
    IF (N_STRINGS+17>N_STRINGS_MAX) THEN
