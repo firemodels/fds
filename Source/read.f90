@@ -7650,8 +7650,8 @@ ENDDO READ_SURF_LOOP
 
 IF ((ANY(SURFACE%THERMAL_BC_INDEX==CONVECTIVE_FLUX_BC) .OR. ANY(SURFACE%THERMAL_BC_INDEX==NET_FLUX_BC)) .AND. &
     ANY(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
-   WRITE(MESSAGE,'(A,A)') 'WARNING: Using liquid droplets with ADIABATIC, NET_HEAT_FLUX, or CONVECTIVE_HEAT_FLUX ',&
-                           'specified on a SURF can lead to instabilities if droplets can hit the surface.'
+   WRITE(MESSAGE,'(A,A,A)') 'WARNING: Droplet heat transfer is not predicted when a droplet is on a SURF with a specified ',&
+                            'ADIABATIC, NET_HEAT_FLUX, or CONVECTIVE_HEAT_FLUX.'
    IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
