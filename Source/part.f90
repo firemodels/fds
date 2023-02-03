@@ -2914,6 +2914,7 @@ INTEGER :: ARRAY_CASE !< Heat transfer conditions 1=gas only, 2=isothermal wall 
 INTEGER(1), ALLOCATABLE, DIMENSION(:) :: PART_WARNING !< Tracks WARNING messages
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
+LOGICAL :: SF_FIXED
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D,LP_ONE_D
@@ -3067,17 +3068,20 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       IF (.NOT.LPC%LIQUID_DROPLET)  CYCLE PARTICLE_LOOP
 
       LP_ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
+      SF_FIXED = .FALSE.
 
       IF (LP%WALL_INDEX>0) THEN
          WC => WALL(LP%WALL_INDEX)
          ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
          BP => BOUNDARY_PROPS(WC%BP_INDEX)
          SF => SURFACE(WC%SURF_INDEX)
+         IF (SF%THERMAL_BC_INDEX == CONVECTIVE_FLUX_BC .OR. SF%THERMAL_BC_INDEX == NET_FLUX_BC) SF_FIXED=.TRUE.
       ELSEIF (LP%CFACE_INDEX>0) THEN
          CFA => CFACE(LP%CFACE_INDEX)
          ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
          BP => BOUNDARY_PROPS(CFA%BP_INDEX)
          SF => SURFACE(CFA%SURF_INDEX)
+         IF (SF%THERMAL_BC_INDEX == CONVECTIVE_FLUX_BC .OR. SF%THERMAL_BC_INDEX == NET_FLUX_BC) SF_FIXED=.TRUE.
       ENDIF
 
       ! Determine the current coordinates of the particle
@@ -3152,7 +3156,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
 
-            SOLID_OR_GAS_PHASE_1: IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+            SOLID_OR_GAS_PHASE_1: IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
                SELECT CASE(ABS(BC%IOR))
                   CASE(1)
                      VEL = SQRT(V2**2+W2**2)
@@ -3233,7 +3237,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Y_GAS_A = Y_GAS
                Y_DROP_A = Y_DROP
 
-               SOLID_OR_GAS_PHASE_2: IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+               SOLID_OR_GAS_PHASE_2: IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
 
                   CALL GET_FILM_PROPERTIES(1,PLATE_FILM_FAC,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET, &
                                            PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),TMP_FILM,MU_FILM,&
@@ -3444,7 +3448,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_DROP_NEW = T_BOIL_EFF
                ENDIF EVAP_ALL
 
-               IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) TMP_WALL_NEW=TMP_WALL-Q_CON_WALL/MCBAR
+               IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) &
+                  TMP_WALL_NEW=TMP_WALL-Q_CON_WALL/MCBAR
                M_DROP = M_DROP - M_VAP
 
                ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different
@@ -3543,7 +3548,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                RHO_INTERIM(II,JJ,KK) = M_GAS_NEW*RVC
                ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES) = ZZ_GET2(1:N_TRACKED_SPECIES)
                TMP_INTERIM(II,JJ,KK) = TMP_G_NEW
-               IF (BC%IOR/=0) BP%WORK1 = TMP_WALL_NEW
+               IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) BP%WORK1 = TMP_WALL_NEW
 
                ! Compute contribution to the divergence
 
@@ -3694,7 +3699,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
 
          ! Compute Mass Per Unit Area (MPUA) for a liquid droplet stuck to a solid surface
 
-         IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+         IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
             IF (LP%WALL_INDEX>0) THEN
                WC => WALL(LP%WALL_INDEX)
                ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
@@ -3760,7 +3765,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
             BC => BOUNDARY_COORD(LP%BC_INDEX)
             LP_ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
 
-            IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+            IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
                IF (LP%WALL_INDEX>0) THEN
                   WC => WALL(LP%WALL_INDEX)
                   BP => BOUNDARY_PROPS(WC%BP_INDEX)
