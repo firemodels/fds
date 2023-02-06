@@ -2517,16 +2517,14 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 
 In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~\si{\degree C} and a constant specific heat of 1~\si{kJ/(kg.K)}. Gas~2 has an initial temperature of 20~\si{\degree C} and a constant specific heat of 10~\si{kJ/(kg.K)}. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
 \be \int h_{\rm s} \, \rho \bu \cdot \d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot \d\bS \ee
-where $Z_\alpha$ is the mass fraction of species $\alpha$.  The plot at left in Fig.~\ref{energy_budget_dns} shows the convective and diffusive enthalpy fluxes at steady state. The quantities are of opposite sign because both quantities are evaluated as source terms in the energy budget.
-
-Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
+where $Z_\alpha$ is the mass fraction of species $\alpha$. Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
 \be \int \nabla \cdot \bu \; \d V \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
-The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
+Figure~\ref{energy_budget_dns} shows the resulting integrated divergence or net volume flow.
 
 \begin{figure}[ht]
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
+\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
-\caption[The \textct{energy\_budget\_dns} test case]{(Left) Equality of convective and diffusive enthalpy flux at steady state. (Right) The integrated divergence or net volume flow.}
+\caption[The \textct{energy\_budget\_dns} test case]{The integrated divergence or net volume flow.}
 \label{energy_budget_dns}
 \end{figure}
 
@@ -5681,14 +5679,15 @@ This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} con
 \subsection{Case 6}
 \label{water_evaporation_6}
 
-This case tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. A box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K. All walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
+This pair of cases tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. In both cases, a box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K.
+
+In case 6, all walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
 \begin{eqnarray*}
 \Delta E &=& m_{\rm w} \, c_{\rm w} \, (T_{{\rm w},0}-T_{\rm g,f}) \\[.1in]
 \Delta H &=& m_{\rm g,0} \, c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm g,0} ) + m_{\rm d} \Big( c_{\rm l} \, (T_{\rm b}-T_{\rm d,0}) + c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm b}) + h_v  \Big) \\[.1in]
 \Delta p &=& \frac{R}{W \, V} \left( m_{\rm g,f} \, T_{\rm g,f} - m_{\rm g,0} \, T_{\rm g,0} \right) \quad ; \quad R = 8.314 \; \hbox{J/mol/K}
 \end{eqnarray*}
 The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pressure increase is 34.6~kPa.
-
 
 \begin{figure}[h!]
 \noindent
@@ -5698,6 +5697,15 @@ The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pres
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_6}]{Output of \textct{water\_evaporation} case 6.}
 \label{water_evaporation_6_plots}
+\end{figure}
+
+In case 6a, the floor is also set to adiabatic. For a fixed heat flux surface, FDS does not compute heat transfer between droplets and the surface as this can lead to instabilities. In this case the drops fall to the floor and begin evaporating in the hot gas without transferring heat to the walls. The internal energy of the box should change an equal and opposite amount as the enthalpy change to the droplets. The drops form a cold layer at the bottom as heat is transferred from the gas to the droplets. This temperature stratification means this case would take a very long time to reach equilibrium. For verification purposes the case is run long enough to capture the initial high rates of heat transfer until the gas around the droplets is in near equilibrium with the droplets.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_6a}
+	\caption[Sample case \textct{water\_evaporation\_6a}]{Output of \textct{water\_evaporation\_6a} test case.}
+	\label{water_evaporation_6a_plot}
 \end{figure}
 
 \subsection{Case 7}
@@ -6682,7 +6690,7 @@ The domain is defined on a square of length ($L=2$ m), with periodicity prescrib
 % Figure:
 
 
-Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
 
 
 % Figure Shunn_CC:
@@ -6690,7 +6698,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_chm_mms_convergence.pdf}
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
-\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
+\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
 \end{figure}
 
 
@@ -6796,17 +6804,17 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 \centering
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_stm_mms_convergence.pdf}
 \includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
 \end{figure}
 
 % Figures for accuracy 27deg:
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
 \end{figure}
 
-Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,320\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
 
 Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference.
 The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
@@ -6816,7 +6824,7 @@ For the $\&$OBSTs and grid aligned stress method where the momentum equations ar
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
 \end{figure}
 
 

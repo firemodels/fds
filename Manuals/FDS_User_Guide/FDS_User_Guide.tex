@@ -400,13 +400,9 @@ MPI and OpenMP can be used together. For example, 4 MPI processes can be assigne
 
 To start an FDS simulation, you can either use a third-party graphical user interface (GUI) or you can invoke the computer's command prompt and type a one-line command, as described in the following sections.
 
-\subsubsection{MS Windows}
+\subsubsection{Single Computer Running MS Windows}
 
-The files needed to run an FDS simulation on a single Windows computer or across a Windows domain network are bundled in with the FDS download. There is no need to install MPI or any redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. If you are not on a domain network, you can still run FDS locally, and instructions are given below.
-
-Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Next, decide if you want to run the job solely on your own computer or on multiple computers on the network.
-
-If you decide you want to run the case solely on your own computer, and suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
+Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
 \begin{lstlisting}
 fds_local -p 4 -o 2 job_name.fds
 \end{lstlisting}
@@ -416,15 +412,11 @@ The progress of the simulation is indicated by diagnostic output that is written
 \begin{lstlisting}
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
-Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. However, we do not recommend this because of complications associated with the {\ct mpiexec} program.
 
-Also, you can automatically set the number of OpenMP threads via the command:
-\begin{lstlisting}
-set OMP_NUM_THREADS=N
-\end{lstlisting}
-where {\ct N} is the number of OpenMP threads to assign to each MPI process for all jobs launched during that particular session. You can change {\ct OMP\_NUM\_THREADS} permanently by changing the system environment variable of the same name.
 
-If you wish to run FDS on more than one computer, do the following:
+\subsubsection{Multiple Computers Running MS Windows}
+
+The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. 
 \begin{enumerate}
 \item The first time you run a job, you must provide your domain name and password by issuing this command:
 
@@ -448,14 +440,16 @@ If you wish to run FDS on more than one computer, do the following:
 
 \item Within the command prompt, {\ct cd} to the working directory. At the command prompt, type:
 
-   {\ct mpiexec -wdir <working directory> -machine hosts.txt fds job\_name.fds}
+   {\ct mpiexec -wdir <working directory> -machinefile hosts.txt fds job\_name.fds}
 
-   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. Add the argument
+   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. 
+   
+   If you want to use more than one OpenMP thread per MPI process, add the argument
 
-   {\ct -env OMP\_NUM\_THREADS <OpenMP threads>}
+   {\ct mpiexec ... -env OMP\_NUM\_THREADS <threads> fds\_openmp job\_name.fds}
 
-   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
-
+   If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency. 
+   
 \item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
 \item For more options, consult {\em Intel® MPI Library Developer Reference for Windows* OS, Developer Reference, Version: 2021.5 (or later), Global Hydra Options}.
 \end{enumerate}
@@ -2931,7 +2925,7 @@ If you want to specify the convective heat transfer coefficient, you can set it 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since NET\_HEAT\_FLUX combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. IF you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}.
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since NET\_HEAT\_FLUX combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. IF you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}. If a droplet lands surface with a specfied heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -2955,7 +2949,7 @@ A common boundary condition for diagnostic simulations is to force all surfaces 
 \end{lstlisting}
 Note that {\ct TMP\_FRONT\_INITIAL} sets the initial temperature of the surface and has few other uses except for this particular application. If the surface is not {\ct ADIABATIC} and it has material properties, use {\ct TMP\_INNER} to set the surface and interior temperature.
 
-Also note that no solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only. Actual fire simulations can develop numerical instabilities if {\ct ADIABATIC} surfaces are used because the wall temperature and radiation fields are not updated simultaneously.
+Also note that no solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only. Actual fire simulations can develop numerical instabilities if {\ct ADIABATIC} surfaces are used because the wall temperature and radiation fields are not updated simultaneously. If a droplet lands on an {\ct ADIABATIC} surface, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the adiabatic condition which are then likely to result in runtime errors or numerical instabilities.
 
 
 \newpage
@@ -3850,7 +3844,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
-\item Set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item Set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
@@ -6764,7 +6758,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \end{description}
 Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
-In some cases, you may need to begin a simulation with a large number of particles, such as with a wildland fire simulation. In this situation, the initialization stage may take a long time as the memory for storing particles is expanded by only 50 particles at a time. It is possible to override this by setting {\ct NEW\_PARTICLE\_INCREMENT} on the {\ct PART} line. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory.
+By default, FDS initially allocates space for 50 particles per mesh. If more particles are needed, the arrays are expanded by  {\ct NEW\_PARTICLE\_INCREMENT}, an integer set on the {\ct PART} line. Its default value is 1000. In most cases, this should be enough. However, for cases with a very large number of particles, such as a wildland fire simulation, you might want to increase this value to save on the reallocation time. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory.
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -12094,7 +12088,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
-{\ct NEW\_PARTICLE\_INCREMENT}           & Integer     & Section~\ref{info:controlling_droplets}                               &                   & 50                    \\ \hline
+{\ct NEW\_PARTICLE\_INCREMENT}           & Integer     & Section~\ref{info:controlling_droplets}                               &                   & 1000                  \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline

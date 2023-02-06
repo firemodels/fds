@@ -59,7 +59,7 @@ SUBROUTINE COMBUSTION_GENERAL(T,DT)
 ! Generic combustion routine for multi-step reactions
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
-                              GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE,LES_FILTER_WIDTH_FUNCTION
+                              GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC, CC_GASPHASE
 INTEGER :: I,J,K,NS,NR,IW,N,CHEM_SUBIT_TMP
 REAL(EB), INTENT(IN) :: T,DT
@@ -83,7 +83,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       ILOOP: DO I=1,IBAR
          ! Check to see if a reaction is possible
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+         IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ILOOP
          IF (CC_IBM) THEN
             IF (CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE ILOOP
          ENDIF
@@ -106,7 +106,7 @@ DO K=1,KBAR
          CALL COMBUSTION_MODEL( T,DT,ZZ_GET,Q(I,J,K),MIX_TIME(I,J,K),CHI_R(I,J,K),&
                                 CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
                                 TMP(I,J,K),RHO(I,J,K),MU(I,J,K),&
-                                LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K)),DX(I)*DY(J)*DZ(K),IIC=I,JJC=J,KKC=K )
+                                LES_FILTER_WIDTH(I,J,K),DX(I)*DY(J)*DZ(K),IIC=I,JJC=J,KKC=K )
          !***************************************************************************************
          IF (OUTPUT_CHEM_IT) CHEM_SUBIT(I,J,K) = CHEM_SUBIT_TMP
          IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
@@ -891,7 +891,7 @@ END SUBROUTINE GET_FLAME_TEMPERATURE
 SUBROUTINE CC_COMBUSTION(T,DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
-                              GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE,LES_FILTER_WIDTH_FUNCTION
+                              GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC,CC_GASPHASE
 
 REAL(EB), INTENT(IN) :: T, DT
@@ -937,7 +937,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
    VCELL = DX(I)*DY(J)*DZ(K)
 
-   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
+   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
 
    NCELL = CUT_CELL(ICC)%NCELL
    JCC_LOOP : DO JCC=1,NCELL
@@ -968,8 +968,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
                              CUT_CELL(ICC)%CHI_R(JCC),&
                              CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
                              CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),MU(I,J,K),&
-                             LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K)),&
-                             CUT_CELL(ICC)%VOLUME(JCC))
+                             LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC))
       !***************************************************************************************
       IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
           CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)
@@ -1013,7 +1012,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
    VCELL = DX(I)*DY(J)*DZ(K)
 
-   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
+   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
 
    NCELL = CUT_CELL(ICC)%NCELL
    DO JCC=1,NCELL
@@ -1148,7 +1147,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
    DO K = 1, KBAR
       DO J = 1, JBAR
          ILOOP: DO I = 1, IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ILOOP
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE ILOOP
             ENDIF

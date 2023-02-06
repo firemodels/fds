@@ -42,9 +42,6 @@ $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -p 4 -d Complex_Geometry geom_particle_cascade_2.fds
 $QFDS -d Complex_Geometry geom_simple.fds
-#$QFDS -d Complex_Geometry geom_azim.fds
-#$QFDS -d Complex_Geometry geom_elev.fds
-#$QFDS -d Complex_Geometry geom_scale.fds
 $QFDS -d Complex_Geometry geom_obst.fds
 $QFDS -d Complex_Geometry geom_part_init.fds
 $QFDS -d Complex_Geometry geom_sphere1a.fds
@@ -79,12 +76,12 @@ $QFDS -d Complex_Geometry shunn3_32_cc_exp_chm.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_chm.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_chm.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_chm.fds
-$QFDS -d Complex_Geometry shunn3_384_cc_exp_chm.fds
+$QFDS -o 2 -d Complex_Geometry shunn3_320_cc_exp_chm.fds
 $QFDS -d Complex_Geometry shunn3_32_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
+$QFDS -o 2 -d Complex_Geometry shunn3_320_cc_exp_gdv.fds
 
 $QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0_stm.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0_stm.fds
@@ -113,18 +110,18 @@ $QFDS -d Complex_Geometry rotated_cube_0deg_128_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_128_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_obs.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_stm.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_320_stm.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_320_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_64_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_128_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_stm.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_stm.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_320_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_64_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_128_stm.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_stm.fds
-$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_stm.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_320_stm.fds
 
 #$QFDS -d Complex_Geometry zero_thick_roof.fds
 $QFDS -d Complex_Geometry cone_1mesh.fds
@@ -258,9 +255,6 @@ $QFDS -p 4 -d Heat_Transfer ht3d_sphere_48.fds
 $QFDS -p 64 -d Heat_Transfer ht3d_sphere_96.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_1.fds
-$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_2.fds
 $QFDS -d Heat_Transfer thermocouple_time_constant.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
@@ -605,6 +599,7 @@ $QFDS -d Sprinklers_and_Sprays water_evaporation_4.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4_np100.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_5.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
+$QFDS -d Sprinklers_and_Sprays water_evaporation_6a.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_7.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_8.fds
 $QFDS -d Sprinklers_and_Sprays water_fuel_sprays.fds

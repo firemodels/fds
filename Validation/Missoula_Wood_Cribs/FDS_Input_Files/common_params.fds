@@ -15,7 +15,6 @@
 &VENT DB='YMAX', SURF_ID='OPEN'/
 &VENT DB='ZMAX', SURF_ID='OPEN'/
 
-! external flux roughly based on Figure 10 from Hamins et al. CST, 1994.
 &RAMP ID='external_flux', T=0,  F=1/
 &RAMP ID='external_flux', T=175,F=1/
 &RAMP ID='external_flux', T=200,F=0/

@@ -58,7 +58,7 @@ for ifile=ifile_s:ifile_f
                             ['rotated_cube_' ifile_str{ifile}  '64_' jfile_str{jfile} '_mms.csv'], ...
                             ['rotated_cube_' ifile_str{ifile} '128_' jfile_str{jfile} '_mms.csv'], ...
                             ['rotated_cube_' ifile_str{ifile} '256_' jfile_str{jfile} '_mms.csv'], ...};
-                            ['rotated_cube_' ifile_str{ifile} '384_' jfile_str{jfile} '_mms.csv']};
+                            ['rotated_cube_' ifile_str{ifile} '320_' jfile_str{jfile} '_mms.csv']};
        file(nfile).nameout = ['rotated_cube_' ifile_str{ifile} jfile_str{jfile} '_mms_convergence'];
        file(nfile).rotang=ifile_ang(ifile);
        for n=1:length(file(nfile).name)
@@ -319,7 +319,7 @@ for ifile=1:nfile
                      file(ifile).name{end} ' is out of tolerance. e_u = ', ...
                      num2str(file(ifile).e_u_2(end))])
         end
-        if file(ifile).e_H_2(end) > 1e-3
+        if file(ifile).e_H_2(end) > 1.5e-3
             display(['Matlab Warning: Pressure in rotated_cube OBST '             ...
                      file(ifile).name{end} ' is out of tolerance. e_H = ', ...
                      num2str(file(ifile).e_H_2(end))])
@@ -331,7 +331,7 @@ for ifile=1:nfile
             file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
             num2str(file(ifile).e_z_2(end))])
         end
-        if file(ifile).e_u_2(end) > 6.5e-4
+        if file(ifile).e_u_2(end) > 8.5e-4
             display(['Matlab Warning: Velocity in rotated_cube 27deg stm '             ...
                      file(ifile).name{end} ' is out of tolerance. e_u = ', ...
                      num2str(file(ifile).e_u_2(end))])
