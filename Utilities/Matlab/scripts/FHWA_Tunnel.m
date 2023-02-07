@@ -94,10 +94,10 @@ for k=1:11 % Experiments
    plot([5.5 5.5],[0 15],'k--')
    plot([0.0 15.],[setpoint(k)/60 setpoint(k)/60],'k:')
 
-   xticks(pos)
-   xticklabels({'1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.5','9.5','10.5','11.5'})
+  %xticks(pos)
+  %xticklabels({'1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.5','9.5','10.5','11.5'})
    ax = gca;
-   ax.XAxis.FontSize = 7;
+   ax.XAxis.FontSize = 16;
    ax.YAxis.FontSize = 16;
    xlabel('Position (m)','FontSize',16,'Interpreter',Font_Interpreter)
    ylabel('Time (min)','FontSize',16,'Interpreter',Font_Interpreter)
