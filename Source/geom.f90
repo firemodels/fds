@@ -6977,11 +6977,13 @@ INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, IIV(3), JJV(3), KKV(3
            II, JJ, KK, III, JJJ, KKK, ICFACE, ICFF, IOR
 REAL(EB):: XP(IAXIS:KAXIS),RDIR(IAXIS:KAXIS),V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS),DIST,DIST2
 LOGICAL :: IS_INTERSECT=.FALSE., BACK_CFACE_FOUND=.FALSE.
+TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (CFACE_TYPE), POINTER :: CFA
 
 M => MESHES(NM)
+SF=> SURFACE(SURF_INDEX)
 
 STAGE_FLG_BRANCH : SELECT CASE(STAGE_FLG)
 
@@ -7008,10 +7010,10 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
       CFA%VEL_ERR_NEW=CUT_FACE(ICF)%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
       ! Check if fire spreads radially over this surface type
-      IF (SURFACE(SURF_INDEX)%FIRE_SPREAD_RATE>0._EB) THEN
-         ONE_D%T_IGN = T_BEGIN + SQRT((BC%X-SURFACE(SURF_INDEX)%XYZ(1))**2 + &
-                                      (BC%Y-SURFACE(SURF_INDEX)%XYZ(2))**2 + &
-                                      (BC%Z-SURFACE(SURF_INDEX)%XYZ(3))**2)/SURFACE(SURF_INDEX)%FIRE_SPREAD_RATE
+      IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
+         ONE_D%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
+                                      (BC%Y-SF%XYZ(2))**2 + &
+                                      (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
       ENDIF
 
       ! Normal to cut-face:
@@ -7086,22 +7088,24 @@ CASE(INTEGER_THREE)
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
       CFA%TMP_G = TMP_0(CUT_FACE(ICF)%IJK(KAXIS))
-      IF (SURFACE(SURF_INDEX)%TMP_FRONT > 0._EB) THEN
-         ONE_D%TMP_F = SURFACE(SURF_INDEX)%TMP_FRONT
+      IF (SF%TMP_FRONT > 0._EB) THEN
+         ONE_D%TMP_F = SF%TMP_FRONT
       ELSE
          ONE_D%TMP_F = CFA%TMP_G
       ENDIF
+
       ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
       CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       ONE_D%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
-
+      ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
+      ONE_D%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
       ! Assign normal velocity to CFACE from SURF input:
-      ONE_D%U_NORMAL_0 = SURFACE(SURF_INDEX)%VEL
+      ONE_D%U_NORMAL_0 = SF%VEL
       ! Vegetation T_IGN setup:
-      ONE_D%T_IGN      = SURFACE(SURF_INDEX)%T_IGN
+      ONE_D%T_IGN      = SF%T_IGN
 
       ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
-      IF (SURFACE(SURF_INDEX)%BACKING==EXPOSED .AND. SURFACE(SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+      IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
          IG  = CUT_FACE(ICF)%BODTRI(1,IFACE)
          TRI = CUT_FACE(ICF)%BODTRI(2,IFACE)
          XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /)
@@ -7260,7 +7264,7 @@ SUBROUTINE GET_REGULAR_CUT_EDGES_BC(NM)
 
 ! This routine adds to FDS EDGE array
 ! the sum of regular edges that are boundary at least a neighboring CC_CUTCFE face and
-! one CC_GASPHASE face. 
+! one CC_GASPHASE face.
 
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL,REALLOCATE_EDGE
 INTEGER, INTENT(IN) :: NM
@@ -7925,7 +7929,7 @@ SUBROUTINE GET_SOLID_CUTCELL_EDGES_BC(NM)
 
 ! This routine adds to FDS EDGE array
 ! the sum of regular edges that are boundary at least a neighboring CC_CUTCFE face and
-! one CC_SOLID face. 
+! one CC_SOLID face.
 
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CELL,REALLOCATE_EDGE
 INTEGER, INTENT(IN) :: NM
@@ -8226,7 +8230,7 @@ ENDIF
 MESHES(NM)%CC_NIBEDGE = CC_ECOUNT
 ALLOCATE(MESHES(NM)%CC_IBEDGE(1:CC_ECOUNT))
 
-! Reallocate EDGE variables 
+! Reallocate EDGE variables
 
 N1 = UBOUND(MESHES(NM)%EDGE,DIM=1)
 N2 = EDGE_COUNT(NM) + ECOUNT
