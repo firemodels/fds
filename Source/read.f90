@@ -7014,7 +7014,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             END SELECT
          ENDIF
 
-         IF (THICKNESS(NL) < 0._EB) EXIT LAYER_LOOP_2
+         IF (.NOT.HT3D .AND. THICKNESS(NL) < 0._EB) EXIT LAYER_LOOP_2
 
          ! Determine the density of the non-MOISTURE material components
 

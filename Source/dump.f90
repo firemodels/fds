@@ -2946,19 +2946,21 @@ SURFLOOP: DO N=0,N_SURF
       ENDDO
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
-         WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
+         IF (SF%HT_DIM==1) WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
          ENDDO
       ENDDO
-      WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SF%SURFACE_DENSITY, ' kg/m2'
       IF (SF%LAYER_DIVIDE<=SF%N_LAYERS) &
       WRITE(LU_OUTPUT,'(A,F5.2,A)')     '     Reaction products considered from the first ',SF%LAYER_DIVIDE, ' layers.'
-      WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Node, Layer, Coordinates(m):'
-      DO I=0,SF%N_CELLS_INI
-         WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
-      ENDDO
+      IF (SF%HT_DIM==1) THEN
+         WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SF%SURFACE_DENSITY, ' kg/m2'
+         WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Node, Layer, Coordinates(m):'
+         DO I=0,SF%N_CELLS_INI
+            WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
+         ENDDO
+      ENDIF
       IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
          IF (SF%BACKING==INSULATED) WRITE(LU_OUTPUT,'(A)') '     Insulated Backing'
@@ -9836,7 +9838,7 @@ WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (TWO_D)       AREA_F = AREA_F/DY(BC%JJG)
    IF (CYLINDRICAL) AREA_F = AREA_F*2._EB*PI
    DO N=1,N_TRACKED_SPECIES
-      M_DOT(N,NM) = M_DOT(N,NM) + ONE_D%M_DOT_G_PP_ADJUST(N)*AREA_F*ONE_D%AREA_ADJUST
+      M_DOT(N,NM) = M_DOT(N,NM) + ONE_D%M_DOT_G_PP_ADJUST(N)*AREA_F
    ENDDO
 ENDDO WALL_LOOP2
 
