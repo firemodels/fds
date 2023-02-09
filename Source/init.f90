@@ -1951,7 +1951,7 @@ SUBROUTINE INITIALIZE_HT3D_WALL_CELLS(NM)
 
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,IW,IW2,ITW,ITW2,NWP,NWP2,I2,IWA,DM,IOR,NOM
+INTEGER :: I,IW,IW2,ITW,ITW2,NWP,NWP2,I2,IWA,DM,IOR,NOM,II,JJ,KK,NN,IC
 LOGICAL :: IOR_AVOID(-3:3)
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,XX1,XX2,YY1,YY2,ZZ1,ZZ2,PRIMARY_VOLUME,OVERLAP_VOLUME,DXX,DYY,DZZ,WEIGHT_FACTOR,&
             SUM_WGT(3),XX,YY,ZZ
@@ -1968,7 +1968,8 @@ REAL(EB), PARAMETER :: TOL=0.0001_EB
 
 M => MESHES(NM)
 
-! Loop over all 3-D wall cells, and for each interior node, find wall or thin wall cells in the other two coordinate directions
+! Loop over all 3-D wall cells, and for each interior node, find wall or thin wall cells in the other two "alternate" 
+! coordinate directions
 
 PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
@@ -1980,6 +1981,9 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    BC => M%BOUNDARY_COORD(WC%BC_INDEX)
    ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
    NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
+
+   ! Allocate variables that hold information about the wall cells in the two alternate directions
+
    ALLOCATE(M%BOUNDARY_THR_D(WC%TD_INDEX)%NODE(NWP))
    THR_D => M%BOUNDARY_THR_D(WC%TD_INDEX)
    DO I=1,NWP
@@ -1993,7 +1997,10 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    X1=BC%X1 ; X2=BC%X2 ; Y1=BC%Y1 ; Y2=BC%Y2 ; Z1=BC%Z1 ; Z2=BC%Z2
 
-   PRIMARY_NODE_LOOP: DO I=1,NWP  ! Loop over nodes of primary wall cell
+   ! Loop over nodes of primary wall cell. For each internal "node", search for
+   ! the two alternate wall cells whose 1-D paths intersect the node.
+
+   PRIMARY_NODE_LOOP: DO I=1,NWP
 
       SELECT CASE(BC%IOR)  
          CASE( 1) ; X1=BC%X2-ONE_D%X(I)   ; X2=BC%X2-ONE_D%X(I-1)
@@ -2007,8 +2014,22 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       IOR_AVOID = .FALSE.
       IOR_AVOID(BC%IOR) = .TRUE. ; IOR_AVOID(-BC%IOR) = .TRUE.
       THR_D%NODE(I)%ALTERNATE_WALL_COUNT = 0
+
+      ! Save the mesh number and indices of the mesh cell (II,JJ,KK) in which the center of the solid node is located
+
       XX = 0.5_EB*(X1+X2) ; YY = 0.5_EB*(Y1+Y2) ; ZZ = 0.5_EB*(Z1+Z2)
-      CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,THR_D%NODE(I)%MESH_NUMBER,THR_D%NODE(I)%I,THR_D%NODE(I)%J,THR_D%NODE(I)%K)
+      CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NN,II,JJ,KK)
+      IF (NN>0) THEN
+         IC = MESHES(NN)%CELL_INDEX(II,JJ,KK)
+         IF (MESHES(NN)%CELL(IC)%SOLID) THEN
+            THR_D%NODE(I)%I = II
+            THR_D%NODE(I)%J = JJ
+            THR_D%NODE(I)%K = KK
+            THR_D%NODE(I)%MESH_NUMBER = NN
+         ENDIF
+      ENDIF
+
+      ! Loop over wall cells searching for the "alternate" wall cells whose 1-D path intersects
 
       ALTERNATE_WALL_LOOP: DO IW2=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS  ! Loop over potential alternate wall cells
          CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NM,WALL_INDEX=IW2)
@@ -2028,8 +2049,10 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
          ENDDO ALTERNATE_WALL_LOOP_2D
       ENDDO OTHER_MESH_LOOP
 
+      ! Renormalize weighting factors of the alternate, intersecting 1-D heat conduction paths
+
       IF (THR_D%NODE(I)%ALTERNATE_WALL_COUNT>0 .AND. &
-         ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN  ! Renormalize weighting factors
+         ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN
          SUM_WGT = 0._EB
          DO IWA=1,THR_D%NODE(I)%ALTERNATE_WALL_COUNT
             IOR = THR_D%NODE(I)%ALTERNATE_WALL_IOR(IWA)
