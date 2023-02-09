@@ -1,6 +1,14 @@
 # Lower ignitor:
-#&INIT ID='LowIgnitor', XB=-1.11,-1.05,.0,.06,.24,.30, HRRPUV=30000., RAMP_Q='IGN_RAMP' /
-#&RAMP ID='IGN_RAMP', T=20. , F=1., DEVC_ID='TP1'/
-#&RAMP ID='IGN_RAMP', T=700., F=1./
-#&RAMP ID='IGN_RAMP', T=1200., F=0./
-&COMB AIT_EXCLUSION_ZONE(1:6,1)=-1.08,-1.02,-0.03,0.03,.27,.33 /
+&PROP ID='spark', SPARK=T/
+# 1 Spark device
+#&DEVC ID='LowIgnitor', XYZ=-1.05,0.0,0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+
+# 8 Spark devices:
+&DEVC ID='LowIgnitor', XYZ=-1.081, -0.031, 0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.0605,-0.031, 0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.081, -0.0105,0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.0605,-0.0105,0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.081,  0.0105,0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.0605, 0.0105,0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.081,  0.031, 0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
+&DEVC ID='LowIgnitor', XYZ=-1.0605, 0.031, 0.30, QUANTITY='TIME', SETPOINT=0, PROP_ID='spark' /
