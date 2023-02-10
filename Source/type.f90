@@ -483,7 +483,8 @@ TYPE SPECIES_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V       !< Heat of vaporization as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L     !< Liquid specific heat as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L_BAR !< Average liquid specific heat as a function of temperture
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_L       !< Heat of liquification as a function of temperature
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_L       !< Entalpy of liquid as a function of temperature
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_G       !< Entalpy of gas as a function of temperature
 
 END TYPE SPECIES_TYPE
 
@@ -658,6 +659,7 @@ TYPE MATERIAL_TYPE
    INTEGER :: I_RAMP_K_S=-1                             !< Index of conductivity RAMP
    INTEGER :: I_RAMP_C_S=-1                             !< Index of specific heat RAMP
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LPC         !< Number of particle classes
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
@@ -674,9 +676,10 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: BETA_CHAR     !< Constant used in char oxidation model
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEATING_RATE  !< Heating rate (K/s) used in calculation of kinetic constants
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
-   REAL(EB), DIMENSION(MAX_LPC,MAX_REACTIONS) :: NU_PART !< Mass stoichiometric coefficient that dictates fraction of mass to parts
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Tracked mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_P    !< Primitive mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE_P !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_R         !< Heat of Reaction (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)
@@ -690,7 +693,6 @@ TYPE MATERIAL_TYPE
    LOGICAL :: ADJUST_H = .TRUE.
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: SPEC_ID
-   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LPC,MAX_REACTIONS) :: PART_ID
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
 END TYPE MATERIAL_TYPE
 

@@ -2969,22 +2969,22 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       Q_DOT_S_PPP    = Q_DOT_S_PPP - RHO_DOT*H_R  ! Tech Guide: q_dot_s'''
       M_DOT_S_PPP(N) = M_DOT_S_PPP(N) - RHO_DOT   ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
       TMP_G = TMP(IIG,JJG,KKG)
-      DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
-         M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
-         M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
-         ZZ_GET=0._EB
-         ZZ_GET(NS)=1._EB
-         CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_S)
-         CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
-         IF (ML%NU_GAS(NS,J) > 0._EB) THEN
-            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT*(H_S-H_S_B)
+      ! Tech Guide: m_dot_gamma'''
+      M_DOT_G_PPP_ACTUAL(:) = M_DOT_G_PPP_ACTUAL(:) + ML%NU_GAS(:,J)*RHO_DOT
+      M_DOT_G_PPP_ADJUST(:) = M_DOT_G_PPP_ADJUST(:) + ML%NU_GAS(:,J)*RHO_DOT * ML%ADJUST_BURN_RATE(:,J)
+      DO NS=1,N_SPECIES
+         IF (ABS(ML%NU_GAS_P(NS,J)) < TWO_EPSILON_EB) CYCLE
+         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_S,H_S_B)
+         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_G,H_S)
+         IF (ML%NU_GAS_P(NS,J) > 0._EB) THEN
+            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE_P(NS,J)*ML%NU_GAS_P(NS,J)*RHO_DOT*(H_S-H_S_B)
          ELSE
-            Q_DOT_S_PPP = Q_DOT_S_PPP - ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT*(H_S-H_S_B)
+            Q_DOT_S_PPP = Q_DOT_S_PPP - ML%NU_GAS_P(NS,J)*RHO_DOT*(H_S-H_S_B)
          ENDIF
       ENDDO
 
       IF (ANY(ML%NU_LPC(:,J)>0._EB)) THEN
-         DO NP=1,N_LAGRANGIAN_CLASSES
+         DO NP=1,ML%N_LPC(J)
             IF (ML%NU_LPC(NP,J)<=0._EB) CYCLE
             DO NP2=1,SF%N_LPC
                IF (SF%MATL_PART_INDEX(NP2)==NP) THEN
@@ -2998,11 +2998,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       ! If there is char oxidation, save the HRR per unit volume generated
 
       IF (ML%NU_O2_CHAR(J)>0._EB) THEN
-         IF (SIMPLE_CHEMISTRY) THEN
-            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(1)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
-         ELSE
-            Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(O2_INDEX)*H_R/ML%NU_O2_CHAR(J))
-         ENDIF
+         Q_DOT_O2_PPP = ML%NU_GAS_P(O2_INDEX,J)*RHO_DOT*H_R/ML%NU_O2_CHAR(J)
       ENDIF
 
    ENDDO REACTION_LOOP

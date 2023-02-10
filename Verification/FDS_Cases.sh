@@ -418,6 +418,8 @@ $QFDS -d Pyrolysis matl_e_cons_4.fds
 $QFDS -d Pyrolysis matl_e_cons_5.fds
 $QFDS -d Pyrolysis matl_e_cons_6.fds
 $QFDS -d Pyrolysis matl_e_cons_7.fds
+$QFDS -d Pyrolysis matl_e_cons_8.fds
+$QFDS -d Pyrolysis matl_e_cons_9.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
