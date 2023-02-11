@@ -6599,7 +6599,7 @@ DO N=1,N_MATL
          TEMP_COUNTER = TEMP_COUNTER + 1
          TEMP_MATL(N,NR) = TEMP_COUNTER
       ELSEIF (SUM_NU(N,NR) - 1._EB > TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,A)') 'WARNING: Sum of NU inputs sum to more than 1 for MATL ',TRIM(ML%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Sum of NU inputs sum to more than 1 for MATL ',TRIM(ML%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
