@@ -1,12 +1,12 @@
 &HEAD CHID='char_oxidation_1', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=40 / 
+&TIME T_END=40 /
 
-&MESH IJK=10,10,30 XB=-0.5,0.5,-0.5,0.5,0,3.0 /
+&MESH IJK=10,10,45, XB=-0.5,0.5,-0.5,0.5,0,4.5 /
 
 &REAC FUEL='FUEL VAPOR'
       O          = 2.2
-      C          = 1.1 
+      C          = 1.1
       H          = 6.2 /
 
 &SPEC ID='WATER VAPOR' /
@@ -56,15 +56,15 @@
       SPECIFIC_HEAT_RAMP = 'c_v' /
 
 &PART ID='foliage part'
-      SAMPLING_FACTOR=1 
-      SURF_ID='foliage' 
+      SAMPLING_FACTOR=1
+      SURF_ID='foliage'
       DRAG_COEFFICIENT=2.8
-      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS' 
-      STATIC=.TRUE. 
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC=.TRUE.
       COLOR='BROWN' /
 
 &INIT ID                   = 'foliage part',
-      PART_ID              = 'foliage part' 
+      PART_ID              = 'foliage part'
       XB                   = -0.3, 0.1,-0.2, 0.2,0.2,0.4
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
@@ -79,7 +79,7 @@
 &VENT MB='YMAX',SURF_ID='OPEN' /
 &VENT MB='ZMIN',SURF_ID='OPEN' /
 &VENT MB='ZMAX',SURF_ID='OPEN' /
- 
+
 &DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', SPATIAL_STATISTIC='VOLUME INTEGRAL'  /
 
 &TAIL /
