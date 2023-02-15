@@ -3275,8 +3275,6 @@ ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
 
 ONE_D%RDN    = RDN
 ONE_D%AREA   = AW
-ONE_D%U_NORMAL   = 0._EB
-ONE_D%U_NORMAL_S = 0._EB
 
 ! If the simulation is only a TGA analysis, get the wall index
 

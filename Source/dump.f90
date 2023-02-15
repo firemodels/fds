@@ -10370,6 +10370,7 @@ I_2 = 0._EB
 I_3 = 0._EB
 I_4 = 0._EB
 DO K=K_LO,K_HI
+   IF (CELL(CELL_INDEX(II,JJ,K))%SOLID) CYCLE
    I_1 = I_1 + DZ(K)*TMP(II,JJ,K)
    I_2 = I_2 + DZ(K)/TMP(II,JJ,K)
    I_4 = I_4 + DZ(K)
