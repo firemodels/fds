@@ -140,8 +140,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: TRACK_EMBERS=.TRUE.                    !< Flag indicating if flying embers are tracked or removed immediately
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
-   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_PROP1_TYPE=.TRUE.     !< This particle requires basic variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROP2_TYPE=.FALSE.    !< This particle requires additional variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.FALSE.    !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
    LOGICAL :: DEBUG=.FALSE.                          !< Flag indicating if known quantities are output for smokeviewe debugging
 
@@ -192,18 +193,12 @@ END TYPE BOUNDARY_COORD_TYPE
 
 TYPE BOUNDARY_ONE_D_TYPE
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: SMALLEST_CELL_SIZE  !< Minimum cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_MASS           !< Accumulated mass of particles waiting to be injected (kg/m2)
@@ -214,11 +209,43 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
+   INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
+   INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
+
+END TYPE BOUNDARY_ONE_D_TYPE
+
+
+!> \brief Variables associated with a WALL boundary cell that allows 3D heat transfer
+
+TYPE BOUNDARY_THR_D_TYPE
+
+   TYPE(INTERNAL_NODE_TYPE), ALLOCATABLE, DIMENSION(:) :: NODE
+
+END TYPE BOUNDARY_THR_D_TYPE
+
+
+TYPE INTERNAL_NODE_TYPE
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH,&
+                                         ALTERNATE_WALL_TYPE,ALTERNATE_WALL_IOR
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT
+   INTEGER :: ALTERNATE_WALL_COUNT=0
+   INTEGER :: I=-1,J=-1,K=-1,MESH_NUMBER=-1
+END TYPE INTERNAL_NODE_TYPE
+
+
+TYPE BOUNDARY_PROP1_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
+
+   INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER :: NODE_INDEX=0     !< HVAC node index associated with surface
    INTEGER :: N_SUBSTEPS=1     !< Number of substeps in the 1-D conduction/reaction update
-   INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
-   INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
 
    REAL(EB) :: AREA=0._EB            !< Face area (m2)
    REAL(EB) :: HEAT_TRANS_COEF=0._EB !< Heat transfer coefficient (W/m2/K)
@@ -252,30 +279,12 @@ TYPE BOUNDARY_ONE_D_TYPE
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
-END TYPE BOUNDARY_ONE_D_TYPE
-
-
-!> \brief Variables associated with a WALL boundary cell that allows 3D heat transfer
-
-TYPE BOUNDARY_THR_D_TYPE
-
-   TYPE(INTERNAL_NODE_TYPE), ALLOCATABLE, DIMENSION(:) :: NODE
-
-END TYPE BOUNDARY_THR_D_TYPE
-
-
-TYPE INTERNAL_NODE_TYPE
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH,&
-                                         ALTERNATE_WALL_TYPE,ALTERNATE_WALL_IOR
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT
-   INTEGER :: ALTERNATE_WALL_COUNT=0
-   INTEGER :: I=-1,J=-1,K=-1,MESH_NUMBER=-1
-END TYPE INTERNAL_NODE_TYPE
+END TYPE BOUNDARY_PROP1_TYPE
 
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 
-TYPE BOUNDARY_PROPS_TYPE
+TYPE BOUNDARY_PROP2_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
@@ -292,7 +301,7 @@ TYPE BOUNDARY_PROPS_TYPE
 
    INTEGER  :: SURF_INDEX=-1         !< Surface index
 
-END TYPE BOUNDARY_PROPS_TYPE
+END TYPE BOUNDARY_PROP2_TYPE
 
 
 !> \brief Angular radiation intensities associated with a WALL, CFACE, or LAGRANGIAN_PARTICLE
@@ -310,7 +319,8 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
-   INTEGER :: BP_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: P1_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: P2_INDEX=0             !< Variables devoted to surface properties
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
@@ -341,6 +351,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: DY=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: DZ=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: C_DRAG=0._EB        !< Drag coefficient
+   REAL(EB) :: RADIUS=0._EB        !< Radius (m)
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
@@ -358,7 +369,8 @@ TYPE WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
-   INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPS
+   INTEGER :: P1_INDEX=0              !< Index within the array BOUNDARY_PROP1
+   INTEGER :: P2_INDEX=0              !< Index within the array BOUNDARY_PROP2
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
@@ -407,6 +419,7 @@ TYPE THIN_WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
+   INTEGER :: P1_INDEX=0              !< Index within the array BOUNDARY_PROP1
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
    INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
@@ -811,8 +824,9 @@ TYPE SURFACE_TYPE
    INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
    LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
-   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_PROP1_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROP2_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.FALSE.    !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_THR_D_TYPE=.FALSE.    !< This surface requires in-depth 3-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
@@ -1129,7 +1143,8 @@ TYPE CFACE_TYPE
    INTEGER :: CFACE_INDEX=0              !< Index of itself -- used to determine if the CFACE cell has been assigned
    INTEGER :: BC_INDEX=0                 !< Derived type carrying coordinate variables
    INTEGER :: OD_INDEX=0                 !< Derived type carrying 1-D solid info
-   INTEGER :: BP_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: P1_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: P2_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: VENT_INDEX=0

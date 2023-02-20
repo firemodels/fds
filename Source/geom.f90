@@ -169,7 +169,7 @@ INTEGER, SAVE :: CC_MAX_NNODS, CC_MAX_NSGLS, CC_MAX_NSEGS, CC_MAX_NTRIS, CC_DELT
 
 TYPE(BODINT_PLANE_TYPE) :: BODINT_PLANE, BODINT_PLANE2
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC,WC_BC
-TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D,WC_ONE_D
+TYPE(BOUNDARY_PROP1_TYPE), POINTER :: P1,WC_P1
 
 REAL(EB), PARAMETER :: GAMMA_MULT = 1._EB
 INTEGER,  PARAMETER :: DELTA_TBIN = 200, DELTA_SEGBIN = 50
@@ -3699,7 +3699,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WC=>WALL(IW)
       EWC=>EXTERNAL_WALL(IW)
       BC=>BOUNDARY_COORD(WC%BC_INDEX)
-      ONE_D=>BOUNDARY_ONE_D(WC%OD_INDEX)
+      P1=>BOUNDARY_PROP1(WC%P1_INDEX)
       IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
                 WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_1
 
@@ -3771,7 +3771,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ! 2. other mesh face and size of cartesian faces the same -> areas match.
          ! 3. Left the case of fine mesh face with OMESH face coarse.
          NOFC = EWC%NIC_MAX - EWC%NIC_MIN + 1
-         IF ( (NOFC > 1) .OR. (ABS(ONE_D%AREA-AREA_CRT) < GEOMEPS) )THEN
+         IF ( (NOFC > 1) .OR. (ABS(P1%AREA-AREA_CRT) < GEOMEPS) )THEN
             IF(ABS(AREA_NM-AREA_NOM) > GEOMEPS) THEN
                WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: MESH=',NM,', CUT_FACE=',ICF,' does not match OMESH=',&
                                NOM,', with CUT_FACEs,CRT_FACEs=',N_CF,N_CRT,', area difference=',&
@@ -6991,9 +6991,9 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 
    CALL ALLOCATE_STORAGE(NM,SURF_INDEX=SURF_INDEX,CFACE_INDEX=CFACE_INDEX)
 
-   CFA   => M%CFACE(CFACE_INDEX)
-   BC    => M%BOUNDARY_COORD(CFA%BC_INDEX)
-   ONE_D => M%BOUNDARY_ONE_D(CFA%OD_INDEX)
+   CFA  => M%CFACE(CFACE_INDEX)
+   BC   => M%BOUNDARY_COORD(CFA%BC_INDEX)
+   P1   => M%BOUNDARY_PROP1(CFA%P1_INDEX)
 
    CFA%SURF_INDEX = SURF_INDEX
 
@@ -7011,7 +7011,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 
       ! Check if fire spreads radially over this surface type
       IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
-         ONE_D%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
+         P1%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
                                       (BC%Y-SF%XYZ(2))**2 + &
                                       (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
       ENDIF
@@ -7060,7 +7060,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
       ENDIF
    ENDIF INS_INB_COND_1
 
-   ONE_D%AREA = CUT_FACE(ICF)%AREA(IFACE) ! Init to CFACE AREA.
+   P1%AREA = CUT_FACE(ICF)%AREA(IFACE) ! Init to CFACE AREA.
 
 CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
 
@@ -7071,9 +7071,9 @@ CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
 
 CASE(INTEGER_THREE)
 
-   CFA   => M%CFACE(CFACE_INDEX)
-   BC    => M%BOUNDARY_COORD(CFA%BC_INDEX)
-   ONE_D => M%BOUNDARY_ONE_D(CFA%OD_INDEX)
+   CFA => M%CFACE(CFACE_INDEX)
+   BC  => M%BOUNDARY_COORD(CFA%BC_INDEX)
+   P1  => M%BOUNDARY_PROP1(CFA%P1_INDEX)
 
    INS_INB_COND_3 : IF (IS_INB) THEN
 
@@ -7089,20 +7089,20 @@ CASE(INTEGER_THREE)
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
       CFA%TMP_G = TMP_0(CUT_FACE(ICF)%IJK(KAXIS))
       IF (SF%TMP_FRONT > 0._EB) THEN
-         ONE_D%TMP_F = SF%TMP_FRONT
+         P1%TMP_F = SF%TMP_FRONT
       ELSE
-         ONE_D%TMP_F = CFA%TMP_G
+         P1%TMP_F = CFA%TMP_G
       ENDIF
 
-      ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
+      P1%RHO_F = CUT_CELL(ICC)%RHO(JCC)
       CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
-      ONE_D%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
+      P1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
-      ONE_D%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*ONE_D%TMP_F**4
+      P1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*P1%TMP_F**4
       ! Assign normal velocity to CFACE from SURF input:
-      ONE_D%U_NORMAL_0 = SF%VEL
+      P1%U_NORMAL_0 = SF%VEL
       ! Vegetation T_IGN setup:
-      ONE_D%T_IGN      = SF%T_IGN
+      P1%T_IGN      = SF%T_IGN
 
       ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
       IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
@@ -7228,24 +7228,24 @@ CASE(INTEGER_THREE)
       IF (PRESENT(IW)) THEN
          WC => M%WALL(IW)
          IOR = M%BOUNDARY_COORD(WC%BC_INDEX)%IOR
-         WC_ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
+         WC_P1 => M%BOUNDARY_PROP1(WC%P1_INDEX)
          WC_BC => M%BOUNDARY_COORD(WC%BC_INDEX)
          ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
          CFA%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
-         ONE_D%TMP_F = WC_ONE_D%TMP_F
-         ONE_D%RHO_F = WC_ONE_D%RHO_F
+         P1%TMP_F = WC_P1%TMP_F
+         P1%RHO_F = WC_P1%RHO_F
          CFA%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
-         ONE_D%ZZ_F(1:N_TOTAL_SCALARS) = WC_ONE_D%ZZ_F(1:N_TOTAL_SCALARS)
+         P1%ZZ_F(1:N_TOTAL_SCALARS) = WC_P1%ZZ_F(1:N_TOTAL_SCALARS)
 
          ! Assign normal velocity to CFACE from wall cell:
-         ONE_D%U_NORMAL_0 = WC_ONE_D%U_NORMAL_0
+         P1%U_NORMAL_0 = WC_P1%U_NORMAL_0
 
          ! Here downscale velocity:
-         IF (IFACE==CUT_FACE(ICF)%NFACE) WC_ONE_D%U_NORMAL_0 = &
-         WC_ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC_ONE_D%AREA
+         IF (IFACE==CUT_FACE(ICF)%NFACE) WC_P1%U_NORMAL_0 = &
+         WC_P1%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC_P1%AREA
 
          ! Vegetation T_IGN setup:
-         ONE_D%T_IGN      = WC_ONE_D%T_IGN
+         P1%T_IGN      = WC_P1%T_IGN
          ! Back wall cells:
          CFA%BACK_MESH  = WC%BACK_MESH
          CFA%BACK_INDEX = WC%BACK_INDEX
