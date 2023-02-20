@@ -2154,7 +2154,7 @@ REAL(EB) :: TNOW !< Current CPU time (s) used in computing length of time spent 
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (CFACE_TYPE), POINTER :: CFA
-TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+TYPE (BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 
 TNOW=CURRENT_TIME()
@@ -2191,10 +2191,10 @@ ENDIF
 
 WALL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    SF => SURFACE(WC%SURF_INDEX)
-   NODE_INDEX => ONE_D%NODE_INDEX
+   NODE_INDEX => B1%NODE_INDEX
    VENT_INDEX => WC%VENT_INDEX
    ! Reset indices to zero in case of adding an OSBT
    NODE_INDEX = 0
@@ -2203,10 +2203,10 @@ ENDDO WALL_LOOP
 
 CFACE_LOOP: DO ICF=N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
    CFA => CFACE(ICF)
-   ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
+   B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
    BC => BOUNDARY_COORD(CFA%BC_INDEX)
    SF => SURFACE(CFA%SURF_INDEX)
-   NODE_INDEX => ONE_D%NODE_INDEX
+   NODE_INDEX => B1%NODE_INDEX
    VENT_INDEX => CFA%VENT_INDEX
    ! Reset indices to zero in case of adding an OSBT
    NODE_INDEX = 0
@@ -2230,10 +2230,10 @@ ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
    II = BC%IIG
    JJ = BC%JJG
    KK = BC%KKG
-   AREA = ONE_D%AREA
-   IF (ONE_D%PRESSURE_ZONE /= NODE_ZONE(NODE_INDEX,NM)) THEN
+   AREA = B1%AREA
+   IF (B1%PRESSURE_ZONE /= NODE_ZONE(NODE_INDEX,NM)) THEN
       IF (NODE_ZONE(NODE_INDEX,NM) == 0) THEN
-         NODE_ZONE(NODE_INDEX,NM) = ONE_D%PRESSURE_ZONE
+         NODE_ZONE(NODE_INDEX,NM) = B1%PRESSURE_ZONE
       ELSE
          WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NODE_INDEX)%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
@@ -2278,52 +2278,52 @@ ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
    IF (HVAC_LOCAL_PRESSURE) THEN
       SELECT CASE (IOR)
          CASE DEFAULT
-            P_AVE = PBARP(KK,ONE_D%PRESSURE_ZONE)
+            P_AVE = PBARP(KK,B1%PRESSURE_ZONE)
          CASE (3)
-            P_AVE = 0.5_EB*(PBARP(KK-1,ONE_D%PRESSURE_ZONE)+PBARP(KK,ONE_D%PRESSURE_ZONE))
+            P_AVE = 0.5_EB*(PBARP(KK-1,B1%PRESSURE_ZONE)+PBARP(KK,B1%PRESSURE_ZONE))
          CASE (-3)
-            P_AVE = 0.5_EB*(PBARP(KK,ONE_D%PRESSURE_ZONE)+PBARP(KK+1,ONE_D%PRESSURE_ZONE))
+            P_AVE = 0.5_EB*(PBARP(KK,B1%PRESSURE_ZONE)+PBARP(KK+1,B1%PRESSURE_ZONE))
       END SELECT
       NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
    ELSE
       SELECT CASE (IOR)
          CASE (1)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                       0.5_EB*(UP(II-1,JJ,KK)+ONE_D%U_NORMAL)**2 * &
-                                       SIGN(1._EB,UP(II-1,JJ,KK)+ONE_D%U_NORMAL))* AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(UP(II-1,JJ,KK)+B1%U_NORMAL)**2 * &
+                                       SIGN(1._EB,UP(II-1,JJ,KK)+B1%U_NORMAL))* AREA
          CASE(-1)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                       0.5_EB*(UP(II,JJ,KK)-ONE_D%U_NORMAL)**2  * &
-                                       SIGN(1._EB,UP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(UP(II,JJ,KK)-B1%U_NORMAL)**2  * &
+                                       SIGN(1._EB,UP(II,JJ,KK)-B1%U_NORMAL))*AREA
          CASE (2)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                       0.5_EB*(VP(II,JJ-1,KK)+ONE_D%U_NORMAL)**2 * &
-                                       SIGN(1._EB,VP(II,JJ-1,KK)+ONE_D%U_NORMAL))*AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(VP(II,JJ-1,KK)+B1%U_NORMAL)**2 * &
+                                       SIGN(1._EB,VP(II,JJ-1,KK)+B1%U_NORMAL))*AREA
          CASE(-2)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                       0.5_EB*(VP(II,JJ,KK)-ONE_D%U_NORMAL)**2 * &
-                                       SIGN(1._EB,VP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(VP(II,JJ,KK)-B1%U_NORMAL)**2 * &
+                                       SIGN(1._EB,VP(II,JJ,KK)-B1%U_NORMAL))*AREA
          CASE (3)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                       0.5_EB*(WP(II,JJ,KK-1)+ONE_D%U_NORMAL)**2 * &
-                                       SIGN(1._EB,WP(II,JJ,KK-1)+ONE_D%U_NORMAL))*AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(WP(II,JJ,KK-1)+B1%U_NORMAL)**2 * &
+                                       SIGN(1._EB,WP(II,JJ,KK-1)+B1%U_NORMAL))*AREA
          CASE (-3)
             NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
-                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                       0.5_EB*(WP(II,JJ,KK)-ONE_D%U_NORMAL)**2 * &
-                                       SIGN(1._EB,WP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+                                       (PBARP(KK,B1%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(WP(II,JJ,KK)-B1%U_NORMAL)**2 * &
+                                       SIGN(1._EB,WP(II,JJ,KK)-B1%U_NORMAL))*AREA
       END SELECT
    ENDIF
 
 ELSE ZONE_LEAK_IF
 
-   IF (ALL(SF%LEAK_PATH/=ONE_D%PRESSURE_ZONE)) RETURN
-   IF (SF%LEAK_PATH(1) == ONE_D%PRESSURE_ZONE) THEN
+   IF (ALL(SF%LEAK_PATH/=B1%PRESSURE_ZONE)) RETURN
+   IF (SF%LEAK_PATH(1) == B1%PRESSURE_ZONE) THEN
       IZ1 = SF%LEAK_PATH(1)
       IZ2 = SF%LEAK_PATH(2)
       NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(1)
@@ -2332,12 +2332,12 @@ ELSE ZONE_LEAK_IF
       IZ2 = SF%LEAK_PATH(1)
       NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(2)
    ENDIF
-   IF (NODE_ZONE(NODE_INDEX,NM) == 0) NODE_ZONE(NODE_INDEX,NM) = ONE_D%PRESSURE_ZONE
+   IF (NODE_ZONE(NODE_INDEX,NM) == 0) NODE_ZONE(NODE_INDEX,NM) = B1%PRESSURE_ZONE
    IOR = BC%IOR
    II = BC%IIG
    JJ = BC%JJG
    KK = BC%KKG
-   AREA = ONE_D%AREA
+   AREA = B1%AREA
 
    NODE_AREA(NODE_INDEX,NM) = NODE_AREA(NODE_INDEX,NM) + AREA
    NODE_RHO(NODE_INDEX,NM) = NODE_RHO(NODE_INDEX,NM) + AREA/RHOP(II,JJ,KK)
@@ -2351,13 +2351,13 @@ ELSE ZONE_LEAK_IF
 
    SELECT CASE (IOR)
       CASE (3)
-         P_AVE = 0.5_EB*(PBARP(KK-1,ONE_D%PRESSURE_ZONE)+PBARP(KK,ONE_D%PRESSURE_ZONE))
+         P_AVE = 0.5_EB*(PBARP(KK-1,B1%PRESSURE_ZONE)+PBARP(KK,B1%PRESSURE_ZONE))
          NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK-1)*AREA
       CASE (-3)
-         P_AVE = 0.5_EB*(PBARP(KK,ONE_D%PRESSURE_ZONE)+PBARP(KK+1,ONE_D%PRESSURE_ZONE))
+         P_AVE = 0.5_EB*(PBARP(KK,B1%PRESSURE_ZONE)+PBARP(KK+1,B1%PRESSURE_ZONE))
          NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK)*AREA
       CASE DEFAULT
-         P_AVE = PBARP(KK,ONE_D%PRESSURE_ZONE)
+         P_AVE = PBARP(KK,B1%PRESSURE_ZONE)
          NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
    END SELECT
    NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + P_AVE*AREA
