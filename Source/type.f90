@@ -319,8 +319,8 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
-   INTEGER :: P1_INDEX=0             !< Variables devoted to surface properties
-   INTEGER :: P2_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: B1_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: B2_INDEX=0             !< Variables devoted to surface properties
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
@@ -369,8 +369,8 @@ TYPE WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
-   INTEGER :: P1_INDEX=0              !< Index within the array BOUNDARY_PROP1
-   INTEGER :: P2_INDEX=0              !< Index within the array BOUNDARY_PROP2
+   INTEGER :: B1_INDEX=0              !< Index within the array BOUNDARY_PROP1
+   INTEGER :: B2_INDEX=0              !< Index within the array BOUNDARY_PROP2
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
@@ -419,7 +419,7 @@ TYPE THIN_WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
-   INTEGER :: P1_INDEX=0              !< Index within the array BOUNDARY_PROP1
+   INTEGER :: B1_INDEX=0              !< Index within the array BOUNDARY_PROP1
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
    INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
@@ -1143,8 +1143,8 @@ TYPE CFACE_TYPE
    INTEGER :: CFACE_INDEX=0              !< Index of itself -- used to determine if the CFACE cell has been assigned
    INTEGER :: BC_INDEX=0                 !< Derived type carrying coordinate variables
    INTEGER :: OD_INDEX=0                 !< Derived type carrying 1-D solid info
-   INTEGER :: P1_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
-   INTEGER :: P2_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: B1_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: B2_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: VENT_INDEX=0
