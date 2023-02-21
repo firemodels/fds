@@ -9313,7 +9313,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
-      ID       = 'null'
+      WRITE(ID,'(A,I0)') 'OBST-',NN
       MULT_ID  = 'null'
       SURF_ID  = 'null'
       SURF_IDS = 'null'
@@ -9684,18 +9684,23 @@ MESH_LOOP: DO NM=1,NMESHES
                EMBEDDED = .FALSE.
                EMBED_LOOP: DO NNN=1,N-1
                   OB2=>OBSTRUCTION(NNN)
-                  IF (OB%I1>OB2%I1 .AND. OB%I2<OB2%I2 .AND. &
-                      OB%J1>OB2%J1 .AND. OB%J2<OB2%J2 .AND. &
-                      OB%K1>OB2%K1 .AND. OB%K2<OB2%K2) THEN
+                  IF (OB%I1>=OB2%I1 .AND. OB%I2<=OB2%I2 .AND. &
+                      OB%J1>=OB2%J1 .AND. OB%J2<=OB2%J2 .AND. &
+                      OB%K1>=OB2%K1 .AND. OB%K2<=OB2%K2) THEN
                      EMBEDDED = .TRUE.
                      EXIT EMBED_LOOP
                   ENDIF
                ENDDO EMBED_LOOP
 
-               IF (EMBEDDED .AND. DEVC_ID=='null' .AND. REMOVABLE .AND. CTRL_ID=='null' ) THEN
-                  N = N-1
-                  N_OBST= N_OBST-1
-                  CYCLE I_MULT_LOOP
+               IF (EMBEDDED) THEN
+                  IF (DEVC_ID=='null' .AND. REMOVABLE .AND. CTRL_ID=='null' ) THEN
+                     N = N-1
+                     N_OBST= N_OBST-1
+                     CYCLE I_MULT_LOOP
+                  ELSEIF ((DEVC_ID/='null'.OR.CTRL_ID/='null') .AND. (OB2%DEVC_ID/='null'.OR.OB2%CTRL_ID/='null')) THEN
+                     WRITE(MESSAGE,'(4A)')  'ERROR: ',TRIM(ID),' is embedded within ',TRIM(OB2%ID)
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  ENDIF
                ENDIF
 
                ! Check if the SURF IDs exist
