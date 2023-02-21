@@ -416,7 +416,7 @@ fds_local ... job_name.fds > job_name.err
 
 \subsubsection{Multiple Computers Running MS Windows}
 
-The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. 
+The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 \begin{enumerate}
 \item The first time you run a job, you must provide your domain name and password by issuing this command:
 
@@ -442,14 +442,14 @@ The following procedure is intended for a Windows domain network; that is, a net
 
    {\ct mpiexec -wdir <working directory> -machinefile hosts.txt fds job\_name.fds}
 
-   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. 
-   
+   where {\ct <working directory>} is the full path name of the directory from which the command was invoked.
+
    If you want to use more than one OpenMP thread per MPI process, add the argument
 
    {\ct mpiexec ... -env OMP\_NUM\_THREADS <threads> fds\_openmp job\_name.fds}
 
-   If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency. 
-   
+   If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
+
 \item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
 \item For more options, consult {\em Intel® MPI Library Developer Reference for Windows* OS, Developer Reference, Version: 2021.5 (or later), Global Hydra Options}.
 \end{enumerate}
@@ -851,9 +851,9 @@ In some special circumstances it may be necessary to control the final time step
 \label{info:steady_state}
 
 Occasionally, there are applications in which only the steady-state solution (in a time-averaged sense) is desired. In a time-dependent code such as FDS, reaching steady-state
-requires that the simulation be run long enough that a steady-state flow field and gas temperature field develops and that steady-state temperature profiles develop in solid surfaces. Developing steady-state temperature 
+requires that the simulation be run long enough that a steady-state flow field and gas temperature field develops and that steady-state temperature profiles develop in solid surfaces. Developing steady-state temperature
 profiles can take a long time as the surface must be heated up in-depth. This can make the cost of the calculation prohibitive. Given steady-state boundary conditions, the time it takes a surface to
-heat up is proportional to its specific heat. Therefore, under steady conditions, this time can be accelerated by reducing the specific heat. So that the {\ct SPECIFIC\_HEAT} inputs on {\ct MATL} 
+heat up is proportional to its specific heat. Therefore, under steady conditions, this time can be accelerated by reducing the specific heat. So that the {\ct SPECIFIC\_HEAT} inputs on {\ct MATL}
 can remain the same but still provide a means to reduce the heating time of a surface, the {\ct MISC} input of {\ct TIME\_SHRINK\_FACTOR} can be used. The {\ct SPECIFIC\_HEAT} inputs on {\ct MATL} are reduced by this factor.
 For a {\ct TIME\_SHRINK\_FACTOR} of 10, the specific heats of the various materials is reduced by a factor of 10. This speeds up the heating
 of solid materials roughly by a factor of 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
@@ -1091,26 +1091,12 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\chapter{Global Simulation Parameters}
+\chapter{Numerical Considerations}
 \label{info:MISC}
 
-{\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). They are typically global in extent, like the ambient temperature. For example, the input line
-\begin{lstlisting}
-&MISC TMPA=25. /
-\end{lstlisting}
-sets the ambient temperature at 25~$^\circ$C. The following sections describe the various miscellaneous parameters.
+This chapter describes various numerical parameters; that is, parameters that control how the governing equations are solved. Most of these parameters are specified on the {\ct MISC} line and for most large-scale fire simulations, their default values are recommended. {\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). 
 
 It is good practice to use only one {\ct MISC} line in the data file.  Using multiple {\ct MISC} lines is possible, but be careful about not over writing a parameter.  The last parameter read will take precedence.
-
-\section{Ambient Conditions}
-\label{info:MISC_Basics}
-
-You can set the ambient temperature and pressure using the following parameters:
-\begin{description}
-\item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
-\item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
-\end{description}
-
 
 \section{Simulation Mode}
 \label{Sim_Mode}
@@ -1129,11 +1115,11 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \label{tbl:SIMULATION_MODE}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
-{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 1            & 2             & 3              \\ \hline
-{\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
-{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
+Key Parameter                          & Section                        & {\ct 'DNS'}   & {\ct 'LES'}    & {\ct 'VLES'}      & {\ct 'SVLES'}    \\ \hline \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
+{\ct CHECK\_VN}                        & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
+{\ct FLUX\_LIMITER}                    & \ref{info:flux_limiters}       & {\ct 'CHARM'} & {\ct 'CHARM'}  & {\ct 'SUPERBEE'}  & {\ct 'SUPERBEE'} \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1151,34 +1137,6 @@ Between job stops and restarts, major changes cannot be made in the calculation 
 
 
 
-
-
-
-
-\section{Gravity}
-\label{info:GVEC}
-
-By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
-
-There are a few special applications where you might want to vary the gravity vector as a function of time or as a function of the first spatial coordinate, $x$. For example, on board space craft, small motions can cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity. For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the {\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.}, which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX}, {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of {\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
-\begin{lstlisting}
-&MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
-
-&RAMP ID='x-ramp', X=  0., F=0.0 /
-&RAMP ID='x-ramp', X= 50., F=0.0 /
-&RAMP ID='x-ramp', X= 51., F=-0.49 /
-&RAMP ID='x-ramp', X=100., F=-0.49 /
-
-&RAMP ID='z-ramp', X=  0., F=-9.81 /
-&RAMP ID='z-ramp', X= 50., F=-9.81 /
-&RAMP ID='z-ramp', X= 51., F=-9.80 /
-&RAMP ID='z-ramp', X=100., F=-9.80 /
-\end{lstlisting}
-Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly. The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$, respectively. To check your math, the square root of the sum of the squares of the gravity components ought to equal 9.81. Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
-To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
-lines with a {\ct T}.
-
-Note that in a case with sprinklers, changing {\ct GVEC} will change how droplets move in the gas but not how droplets move on solid sufaces. On solid surfaces droplet movement will always consider down to be the negative-z direction.
 
 
 
@@ -1390,9 +1348,7 @@ where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecu
 
 Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
 
-\section{3D Smoke Output}
-\label{info:smoke16}
-FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by nI where n is the number of repeats and I is the value repeated.  When higher resolution is desired, set SMOKE3D\_16=T on the \&MISC namelist to output these quantities as 16 bit integers.  For each time frame output, FDS then outputs the time, the minimum value, valmin,  the maximum value, valmx,  and 16 bit integers scaled between valmin and valmax.  This data is then output to a file with extension .s16 rather than .s3d . These 16 bit integer values are not compressed.
+
 
 \chapter{Initial Conditions}
 \label{info:INIT}
@@ -1421,10 +1377,16 @@ where {\ct XB} indicates a rectangular volume within the domain where the initia
 \end{itemize}
 
 
-\section{Temperature}
+\section{Temperature and Pressure}
 \label{info:init_temperature}
+\label{info:MISC_Basics}
 
-To modify the local initial temperature, add lines of the form,
+You can set the ambient temperature and pressure using the following parameters on the {\ct MISC} line:
+\begin{description}
+\item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
+\item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
+\end{description}
+To modify the local initial temperature in certain regions of the domain, add lines of the form,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
@@ -1493,6 +1455,33 @@ If multiple meshes are involved, enter the number of the first {\ct .csv} file o
 &CSVF UVWFILE='CHID_uvw_t1_m1' /
 \end{lstlisting}
 and FDS will read {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+
+
+\section{Gravity}
+\label{info:GVEC}
+
+By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
+
+There are a few special applications where you might want to vary the gravity vector as a function of time or as a function of the first spatial coordinate, $x$. For example, on board space craft, small motions can cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity. For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the {\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.}, which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX}, {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of {\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
+\begin{lstlisting}
+&MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
+
+&RAMP ID='x-ramp', X=  0., F=0.0 /
+&RAMP ID='x-ramp', X= 50., F=0.0 /
+&RAMP ID='x-ramp', X= 51., F=-0.49 /
+&RAMP ID='x-ramp', X=100., F=-0.49 /
+
+&RAMP ID='z-ramp', X=  0., F=-9.81 /
+&RAMP ID='z-ramp', X= 50., F=-9.81 /
+&RAMP ID='z-ramp', X= 51., F=-9.80 /
+&RAMP ID='z-ramp', X=100., F=-9.80 /
+\end{lstlisting}
+Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly. The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$, respectively. To check your math, the square root of the sum of the squares of the gravity components ought to equal 9.81. Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
+To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
+lines with a {\ct T}.
+
+Note that in a case with sprinklers, changing {\ct GVEC} will change how droplets move in the gas but not how droplets move on solid surfaces. On solid surfaces droplet movement will always consider down to be the negative-z direction.
+
 
 
 
@@ -2297,17 +2286,13 @@ In cases where geometries have very large numbers of nodes and surface triangles
 Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). If an {\ct ID} is not provided, the name of the binary file will be  {\ct CHID\_N\_GEOM.bingeom}, where {\ct N\_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.
 
 Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
-{\small
 \begin{lstlisting}
 &GEOM ID='chair',
       SURF_ID='woodSID','apholsterySID',
       BINARY_FILE='DiningRoom_chair.bingeom',
-      MOVE_ID='ChairMove'
-/
+      MOVE_ID='ChairMove' /
 \end{lstlisting}
-}
-
-\noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
+where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
@@ -2317,67 +2302,30 @@ Terrains can also be read and written in binary format, and in this case only th
 
 \fi
 
+\newpage
+
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:VENT}
 
-Whereas the {\ct OBST} group is used to specify obstructions within the
-computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes
-adjacent to obstructions or external walls. Note that the label {\ct VENT} is used for historical reasons -- this group of parameters has
-evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain.
+Whereas the {\ct OBST} group is used to specify obstructions within the computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes adjacent to obstructions or external walls. Note that the label {\ct VENT} is used for historical reasons---this group of parameters has evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain. See Section~\ref{info:Velocity_BC} for a discussion of ventilation strategies that employ the {\ct VENT} parameters.
 
 \subsection{Basics}
-
 \label{info:VENT_Basics}
 
-The vents are chosen in a similar manner to the obstructions, with the sextuplet {\ct XB} denoting a plane abutting a solid surface. Two of the six coordinates must be the same, denoting a plane as opposed to a solid. Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a given wall cell, FDS will output a warning message and ignore redundant {\ct VENT} lines.
+Vents are specified in a similar manner to obstructions, with the sextuplet {\ct XB} denoting a plane abutting a solid surface. Two of the six coordinates must be the same, denoting a plane as opposed to a solid. Note that only one {\ct VENT} may be specified for any given solid surface. If {\ct VENT}s overlap , FDS will output a warning message and ignore redundant {\ct VENT} lines.
 
-The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
-{\ct VENT} can be used to model components of the ventilation system in
-a building, like a diffuser or a return.
-In these cases, the {\ct VENT} coordinates form a plane on a
-solid surface forming the boundary of the duct.
-No holes need to be created through the solid; it is
-assumed that air is pushed out of or sucked into duct work within the
-wall. Less literally, a {\ct VENT} is used simply as a means of applying
-a particular boundary condition to a rectangular patch on a solid surface.
-A fire, for example, is usually created by first generating a solid
-obstruction via an {\ct OBST} line, and then specifying a {\ct VENT}
-somewhere on one of the faces of the solid with a {\ct SURF\_ID}
-with the characteristics of the thermal and combustion properties of the fuel.
-For example, the lines
-
+The term {\ct VENT} is somewhat misleading. Taken literally, a {\ct VENT} can be used to model components of the ventilation system in a building, like a diffuser or a return. In these cases, the {\ct VENT} coordinates form a plane on a solid surface forming the boundary of the duct. No holes need to be created through the solid; it is assumed that air is pushed out of or sucked into duct work within the wall. Less literally, a {\ct VENT} is used simply as a means of applying a particular boundary condition to a rectangular patch on a solid surface. A fire, for example, is usually created by first generating a solid obstruction via an {\ct OBST} line, and then specifying a {\ct VENT} somewhere on one of the faces of the solid with a {\ct SURF\_ID} with the characteristics of the thermal and combustion properties of the fuel. For example, the lines
 \begin{lstlisting}
 &OBST XB=0.0,5.0,2.0,3.0,0.0,4.0, SURF_ID='big block' /
 &VENT XB=1.0,2.0,2.0,2.0,1.0,3.0, SURF_ID='hot patch' /
 \end{lstlisting}
+specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the underlying obstruction.
 
-\noindent
-specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with
-a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter
-surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary
-conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the
-underlying obstruction.
+A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Also, a {\ct VENT} derives its orientation by having a solid cell on one side and a gas cell on the other. Do not extend a {\ct VENT} to have multiple orientations.
 
-A {\ct VENT} must always be attached to a solid obstruction. See
-Section~\ref{info:Velocity_BC} for instructions on specifying different types of fans that allow gases to flow through.
+An easy way to specify an entire external wall is to replace {\ct XB} with {\ct MB} (Mesh Boundary), a character string whose value is one of the following: {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or {\ct 'ZMIN'} denoting the planes $x=\hbox{\ct XMAX}$, $x=\hbox{\ct XMIN}$, $y=\hbox{\ct YMAX}$, $y=\hbox{\ct YMIN}$, $z=\hbox{\ct ZMAX}$ or $z=\hbox{\ct ZMIN}$, respectively. Like an obstruction, the boundary condition index of a vent is specified with {\ct SURF\_ID}, indicating which of the listed {\ct SURF} lines to apply. If the default boundary condition is desired, then {\ct SURF\_ID} need not be set.
 
-An easy way to specify an entire external wall is to replace {\ct XB} with
-{\ct MB} (Mesh Boundary), a character string whose value is one of the following:
-{\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
-{\ct 'ZMIN'} denoting the planes $x=\hbox{\ct XMAX}$, $x=\hbox{\ct XMIN}$,
-$y=\hbox{\ct YMAX}$, $y=\hbox{\ct YMIN}$, $z=\hbox{\ct ZMAX}$
-or $z=\hbox{\ct ZMIN}$, respectively. Like an obstruction, the boundary condition index of a vent is specified
-with {\ct SURF\_ID}, indicating which of the listed {\ct SURF} lines to
-apply. If the default boundary condition is desired, then {\ct SURF\_ID} need not be set.
-
-Be careful when using the {\ct MB} shortcut when doing a multiple mesh
-simulation; that is, when more than one rectangular mesh is used. The
-plane designated by the character string {\ct MB} may be mistakenly applied to more than one
-mesh, possibly leading to confusion about whether a plane is a solid
-wall or an open boundary. Check the geometry in Smokeview to assure that
-the {\ct VENT}s are properly specified. Use color as much as
-possible to double-check the set-up.  More detail on color in
-Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=T} on the {\ct VENT} line causes the {\ct VENT} to be drawn as an outline in Smokeview.
+Be careful when using the {\ct MB} shortcut when doing a multiple mesh simulation; that is, when more than one rectangular mesh is used. The plane designated by the character string {\ct MB} may be mistakenly applied to more than one mesh, possibly leading to confusion about whether a plane is a solid wall or an open boundary. Check the geometry in Smokeview to assure that the {\ct VENT}s are properly specified. Use color as much as possible to double-check the set-up.  More detail on color in Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=T} on the {\ct VENT} line causes the {\ct VENT} to be drawn as an outline in Smokeview.
 
 A safer option for multi-mesh calculations might be to use {\ct DB} (Domain Boundary), which takes the same options as {\ct MB} but applies the {\ct SURF\_ID} to the domain boundary.
 
@@ -2489,7 +2437,7 @@ the problem, but it is more likely that if there is an error message about orien
 the {\ct VENT} is buried within a solid obstruction, in which case the program cannot determine
 the direction in which the {\ct VENT} is facing.
 
-
+\newpage
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}
@@ -2573,7 +2521,7 @@ Assuming that a JPEG file called {\ct paneling.jpg} exists in the working direct
 applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
 
 
-
+\newpage
 
 \section{Repeated Objects: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
 \label{info:MULT}
@@ -3944,7 +3892,7 @@ The value of $T_{\rm ref}$ used for a reaction is the value specified by the {\c
 
 This process of adjusting enthalpies can be skipped by setting {\ct ADJUST\_H=F} on a {\ct MATL} line. This should be done when material reactions do not represent actual chemical reactions. If no {\ct HEAT\_OF\_REACTION} is specified for a {\ct MATL} with a reaction then {\ct ADJUST\_H=F} will be set. Note that this means if a reaction has {\ct HEAT\_OF\_REACTION} that is actually zero, and enthalpy adjustment is desired, then set {\ct HEAT\_OF\_REACTION} to 0 in the input file for that reaction.
 
-If the sum of the yields is less than 1, then for the purpose of solving for the $H_{\rm adj}$ values, FDS will assume that the missing mass is a material with the same specific heat as the original material. 
+If the sum of the yields is less than 1, then for the purpose of solving for the $H_{\rm adj}$ values, FDS will assume that the missing mass is a material with the same specific heat as the original material.
 
 \chapter{Ventilation}
 
@@ -9469,6 +9417,7 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
+\label{info:smoke16}
 
 When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
@@ -9476,6 +9425,8 @@ When you do a fire simulation, FDS automatically creates two output files that a
 &SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
+
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  When higher resolution is desired, set {\ct SMOKE3D\_16=T} on the {\ct MISC} line to output these quantities as 16 bit integers.  For each time frame, FDS then outputs the time, the minimum value, the maximum value, and 16 bit integers scaled between the minimum and maximum value.  This data is then output to a file with extension {\ct .s16} rather than {\ct .s3d} . These 16 bit integer values are not compressed.
 
 \newpage
 
