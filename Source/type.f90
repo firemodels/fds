@@ -458,7 +458,8 @@ TYPE SPECIES_TYPE
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
    LOGICAL ::  AGGLOMERATING=.FALSE.              !< Can form a particle or aerosol
-   LOGICAL ::  EXPLICIT_H_F=.FALSE.               !< Heat of Formation is explicitly specified
+   LOGICAL ::  EXPLICIT_H_F=.FALSE.               !< Heat of formation is explicitly specified
+   LOGICAL ::  EXPLICIT_G_F=.FALSE.               !< Gibbs energy is explicitly specified
    LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
 
    CHARACTER(LABEL_LENGTH) :: ID                  !< Species name
@@ -476,15 +477,17 @@ TYPE SPECIES_TYPE
    INTEGER :: RAMP_CP_L_INDEX=-1                  !< Index of liquid specific heat ramp
    INTEGER :: RAMP_K_INDEX=-1                     !< Index of conductivity ramp
    INTEGER :: RAMP_MU_INDEX=-1                    !< Index of viscosity ramp
-   INTEGER :: RAMP_D_INDEX=-1                     !< Index of diffusivity heat ramp
-   INTEGER :: RADCAL_INDEX=-1                     !< Index of nearest species with RADCAL properties
-   INTEGER :: RAMP_G_F_INDEX=-1
-   INTEGER :: AWM_INDEX=-1
+   INTEGER :: RAMP_D_INDEX=-1                     !< Index of diffusivity ramp
+   INTEGER :: RADCAL_INDEX=-1                     !< Index of of species used for RADCAL properties
+   INTEGER :: RAMP_G_F_INDEX=-1                   !< Index of Gibbs energy ramp
+   INTEGER :: PROP_INDEX=-1                       !< Index of species in THERMO_DAT
+   INTEGER :: AWM_INDEX=-1                        !< Index of species in wall deposition arrays
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V       !< Heat of vaporization as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L     !< Liquid specific heat as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L_BAR !< Average liquid specific heat as a function of temperture
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_L       !< Entalpy of liquid as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_G       !< Entalpy of gas as a function of temperature
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: G_F       !< Gibbs energy of gas as a function of temperature
 
 END TYPE SPECIES_TYPE
 
@@ -546,6 +549,7 @@ TYPE SPECIES_MIXTURE_TYPE
    LOGICAL :: VALID_ATOMS=.TRUE.    !< Species has a chemical formula defined
    LOGICAL :: EVAPORATING=.FALSE.   !< Species is the gas species for a liquid droplet
    LOGICAL :: EXPLICIT_H_F=.FALSE.  !< All subspecies have an explicitly defined H_F
+   LOGICAL :: EXPLICIT_G_F=.FALSE.   !< All subspecies have an explicitly defined G_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
 
@@ -574,6 +578,7 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_ID_READ!< Holding array for third body efficiencies
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'  !< User comment
    CHARACTER(FORMULA_LENGTH) :: EQUATION    !< Reaction equation
    CHARACTER(LABEL_LENGTH) :: FWD_ID        !< ID of forward reaction
@@ -617,6 +622,8 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S_READ        !< Holding array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
@@ -633,6 +640,7 @@ TYPE REACTION_TYPE
    LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
    LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
+   LOGICAL :: THIRD_BODY_EFF=.FALSE.        !< Indicator of non-unity catalyst effect
    TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
    INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
 END TYPE REACTION_TYPE
