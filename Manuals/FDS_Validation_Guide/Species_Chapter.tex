@@ -814,8 +814,7 @@ Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests f
 \subsection{NIST/NRC Experiments}
 \label{Smoke Concentration}
 
-For the simulations of the NIST/NRC tests, the smoke yield is specified as one of the test parameters.
-The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer.
+The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer. The experiments are divided into two. Figure~\ref{smoke_closed} displays the results of the experiments in which the compartment door was closed. Figure~\ref{smoke_open} displays the results of the experiments in which the compartment door was open. The results are significantly different---the simulations of the closed door experiments predict smoke concentrations that are more than twice that of the experiments. The reason for this is that FDS has not accounted for the agglomeration and deposition of the smoke on the walls, something that is far more important when the compartment is not well-ventilated.
 
 \newpage
 
@@ -830,13 +829,12 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, Tests 1, 2, 4, 7, 8, 10, 13, 16]{NIST/NRC experiments, smoke concentration, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\caption[NIST/NRC experiments, smoke concentration, closed door experiments]{NIST/NRC experiments, smoke concentration, closed door experiments.}
+\label{smoke_closed}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_17_Smoke} &
- \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Smoke} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Smoke} &
@@ -844,7 +842,8 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, Tests 3, 5, 9, 14, 15, 17, 18]{NIST/NRC experiments, smoke concentration, Tests 3, 5, 9, 14, 15, 17, 18.}
+\caption[NIST/NRC experiments, smoke concentration, open door experiements]{NIST/NRC experiments, smoke concentration, open door experiments.}
+\label{smoke_open}
 \end{figure}
 
 
