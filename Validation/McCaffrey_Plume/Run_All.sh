@@ -5,6 +5,12 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
+$QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_14_kW_5.fds
+$QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_22_kW_5.fds
+$QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_33_kW_5.fds
+$QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_45_kW_5.fds
+$QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_57_kW_5.fds
+
 $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_14_kW_11.fds
 $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_22_kW_11.fds
 $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_33_kW_11.fds
