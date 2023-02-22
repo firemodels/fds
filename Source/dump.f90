@@ -2680,6 +2680,12 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (SM%EXPLICIT_G_F) THEN
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  ' Gibbs Energy Amb. (kJ/mol), ',ITMP,' K: ', G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                  500 K: ', G_F_Z( 500,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                 1000 K: ', G_F_Z(1000,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                 1500 K: ', G_F_Z(1500,N)
+   ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)

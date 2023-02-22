@@ -11,7 +11,7 @@
 
 VPATH = ../Source
 
-# set compiler type 
+# set compiler type
 
 I_IFORT=ifort
 ifdef INTEL_IFORT
@@ -111,7 +111,7 @@ endif
 endif # OS test
 endif # MKLROOT test
 
-obj_mpi = prec.o cons.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
+obj_mpi = prec.o cons.o tmop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
           pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
           wall.o fire.o velo.o pres.o init.o dump.o read.o divg.o main.o
 
@@ -214,7 +214,7 @@ impi_intel_win_openmp_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 # Linux Intel Fortran Compiler and Intel MPI
- 
+
 impi_intel_linux : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux : FCOMPL = mpiifort
@@ -261,7 +261,7 @@ impi_intel_linux_openmp_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # OSX Intel Fortran and Open MPI
- 
+
 ompi_intel_osx : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 ompi_intel_osx : LFLAGS = -static-intel
@@ -360,9 +360,10 @@ ompi_gnu_osx_dv : setup $(obj_mpi)
 prec.o :
 imkl.o :
 cons.o : prec.o
+tmop.o : prec.o cons.o
 devc.o : prec.o
 type.o : prec.o cons.o imkl.o
-data.o : prec.o func.o cons.o
+data.o : prec.o func.o cons.o tmop.o
 rcal.o : func.o prec.o cons.o
 mesh.o : prec.o type.o
 func.o : prec.o cons.o type.o mesh.o devc.o
@@ -385,9 +386,9 @@ velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o ccib.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o geom.o ccib.o imkl.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o radi.o pois.o data.o pres.o geom.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o data.o radi.o soot.o geom.o ccib.o fire.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o tmop.o
 divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o tmop.o
 
 prec.obj :
 imkl.obj :
@@ -413,7 +414,7 @@ hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj ccib.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj ccib.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj radi.obj
-velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj ccib.obj 
+velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj ccib.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj geom.obj ccib.obj imkl.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj pois.obj data.obj pres.obj geom.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj turb.obj data.obj radi.obj soot.obj geom.obj ccib.obj fire.obj

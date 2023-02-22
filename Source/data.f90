@@ -2172,11 +2172,11 @@ SELECT CASE (TD%POLY)
       ENDDO
       CP = TD%A(1,B)/TE**2 + TD%A(2,B)/TE + TD%A(3,B) + TD%A(4,B)*TE + TD%A(5,B)*TE**2 + TD%A(6,B)*TE**3 + TD%A(7,B)*TE**4
       CP = CP * RCON
-      H =  -TD%A(1,B)/TE + TD%A(2,B)*LOG(TE)*TE + TD%A(3,B)*TE + 0.5_EB*TD%A(4,B)*TE**2 + ONTH*TD%A(5,B)*TE**3 + &
+      H =  -TD%A(1,B)/TE + TD%A(2,B)*LOG(TE) + TD%A(3,B)*TE + 0.5_EB*TD%A(4,B)*TE**2 + ONTH*TD%A(5,B)*TE**3 + &
            0.25_EB*TD%A(6,B)*TE**4 + 0.2_EB*TD%A(7,B)*TE**5 + TD%B(1,B)
-      S =  -0.5_EB*TD%A(1,B)/TE**2 - TD%A(2,B)/TE + TD%A(3,B)*LOG(TE) + TD%A(4,B) + 0.5_EB*TD%A(5,B)*TE**2 + &
+      S =  -0.5_EB*TD%A(1,B)/TE**2 - TD%A(2,B)/TE + TD%A(3,B)*LOG(TE) + TD%A(4,B)*TE + 0.5_EB*TD%A(5,B)*TE**2 + &
            ONTH*TD%A(6,B)*TE**3 + 0.25_EB*TD%A(7,B)*TE**4 + TD%B(2,B)
-      G_F = (H - TE * S)*R0*0.001_EB
+      G_F = (H - TE * S)*R0*1.E-6_EB !R0 kmol to mol and G_F J to kJ
    CASE ('NASA7')
       TE = MIN(MAXVAL(TD%T),MAX(TD%T(1),TE))
       DO B=1,TD%BANDS
@@ -2187,7 +2187,7 @@ SELECT CASE (TD%POLY)
       H =  TD%A(1,B)*TE + 0.5_EB*TD%A(2,B)*TE**2 + ONTH*TD%A(3,B)*TE**3 + 0.25_EB*TD%A(4,B)*TE**4 + &
            0.2_EB*TD%A(5,B)*TE**5 + TD%B(1,B)
       S =  TD%A(1,B)*LOG(TE) + TD%A(2,B)*TE + 0.5_EB*TD%A(3,B)*TE**2 + ONTH*TD%A(4,B)*TE**3 + 0.25_EB*TD%A(5,B)*TE**4 + TD%B(2,B)
-      G_F = (H - TE * S)*R0*0.001_EB
+      G_F = (H - TE * S)*R0*1.E-6_EB
    CASE ('MOSKVA')
       TE = MIN(TD%T(2),MAX(TD%T(1),TE))
       CP= (TD%A(1,1) + TD%A(2,1)*TE**0.25_EB + TD%A(3,1)*TE + TD%A(4,1)*LOG(TE))*1000._EB
