@@ -647,13 +647,13 @@ MAIN_LOOP: DO
          CALL DIVERGENCE_PART_1(T,DT,NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
-      ! Update global pressure matrices after zone connections
-
-      IF ((ICYC==1 .OR. ICYC_RESTART==1) .AND. FIRST_PASS) CALL GLOBAL_MATRIX_REASSIGN
-
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
 
       IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
+
+      ! Update global pressure matrices after zone connections
+
+      IF ((ICYC==1 .OR. ICYC_RESTART==1) .AND. FIRST_PASS) CALL GLOBAL_MATRIX_REASSIGN
 
       ! Finish the divergence calculation
 
@@ -839,10 +839,6 @@ MAIN_LOOP: DO
       CALL DIVERGENCE_PART_1(T,DT,NM)
    ENDDO
 
-   ! Update global pressure matrices after zone connections
-
-   CALL GLOBAL_MATRIX_REASSIGN
-
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
 
    IF (RTE_SOURCE_CORRECTION) CALL CALCULATE_RTE_SOURCE_CORRECTION_FACTOR
@@ -850,6 +846,10 @@ MAIN_LOOP: DO
    ! Exchange global pressure zone information
 
    IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
+
+   ! Update global pressure matrices after zone connections
+
+   CALL GLOBAL_MATRIX_REASSIGN
 
    ! Exchange mass loss information for OBSTs abutting interpolated boundaries
 
