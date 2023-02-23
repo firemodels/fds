@@ -393,9 +393,10 @@ main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o w
 prec.obj :
 imkl.obj :
 cons.obj : prec.obj
+tmop.o : prec.obj cons.obj
 devc.obj : prec.obj
 type.obj : prec.obj cons.obj imkl.obj
-data.obj : prec.obj func.obj cons.obj
+data.obj : prec.obj func.obj cons.obj tmop.o
 rcal.obj : func.obj prec.obj cons.obj
 mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
@@ -418,9 +419,9 @@ velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj ccib.o
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj geom.obj ccib.obj imkl.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj pois.obj data.obj pres.obj geom.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj turb.obj data.obj radi.obj soot.obj geom.obj ccib.obj fire.obj
-read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj hvac.obj data.obj geom.obj mass.obj soot.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj hvac.obj data.obj geom.obj mass.obj soot.obj tmop.o
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj ccib.obj
-main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj data.obj geom.obj ccib.obj soot.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj data.obj geom.obj ccib.obj soot.obj tmop.o
 
 #*** Clean Target to remove Object and Module files ***
 
