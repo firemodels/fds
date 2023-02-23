@@ -2206,25 +2206,25 @@ ELSE
    SUPPRESS_DIAGNOSTICS = .FALSE.
 ENDIF
 
-DT_BNDF      = -1._EB                  ; RAMP_BNDF    = 'null'
-DT_CPU       =  HUGE(EB)               ; RAMP_CPU     = 'null'
-DT_CTRL      = -1._EB                  ; RAMP_CTRL    = 'null'
-DT_DEVC      = -1._EB                  ; RAMP_DEVC    = 'null'
-DT_FLUSH     = -1._EB                  ; RAMP_FLUSH   = 'null'
-DT_GEOM      =  HUGE(EB)               ; RAMP_GEOM    = 'null'
-DT_HRR       = -1._EB                  ; RAMP_HRR     = 'null'
-DT_HVAC      = -1._EB                  ; RAMP_HVAC    = 'null'
-DT_ISOF      = -1._EB                  ; RAMP_ISOF    = 'null'
-DT_MASS      = -1._EB                  ; RAMP_MASS    = 'null'
-DT_PART      = -1._EB                  ; RAMP_PART    = 'null'
-DT_PL3D      =  HUGE(EB)               ; RAMP_PL3D    = 'null'
-DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null'
-DT_RADF      =  HUGE(EB)               ; RAMP_RADF    = 'null'
-DT_RESTART   =  HUGE(EB)               ; RAMP_RESTART = 'null'
-DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null'
-DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null'
-DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null'
-DT_UVW       =  HUGE(EB)               ; RAMP_UVW     = 'null'
+DT_BNDF      = -1._EB                  ; RAMP_BNDF    = 'null' ; DT_BNDF_SPECIFIED    = DT_BNDF
+DT_CPU       =  HUGE(EB)               ; RAMP_CPU     = 'null' ; DT_CPU_SPECIFIED     = DT_CPU
+DT_CTRL      = -1._EB                  ; RAMP_CTRL    = 'null' ; DT_CTRL_SPECIFIED    = DT_CTRL
+DT_DEVC      = -1._EB                  ; RAMP_DEVC    = 'null' ; DT_DEVC_SPECIFIED    = DT_DEVC
+DT_FLUSH     = -1._EB                  ; RAMP_FLUSH   = 'null' ; DT_FLUSH_SPECIFIED   = DT_FLUSH
+DT_GEOM      =  HUGE(EB)               ; RAMP_GEOM    = 'null' ; DT_GEOM_SPECIFIED    = DT_GEOM
+DT_HRR       = -1._EB                  ; RAMP_HRR     = 'null' ; DT_HRR_SPECIFIED     = DT_HRR
+DT_HVAC      = -1._EB                  ; RAMP_HVAC    = 'null' ; DT_HVAC_SPECIFIED    = DT_HVAC
+DT_ISOF      = -1._EB                  ; RAMP_ISOF    = 'null' ; DT_ISOF_SPECIFIED    = DT_ISOF
+DT_MASS      = -1._EB                  ; RAMP_MASS    = 'null' ; DT_MASS_SPECIFIED    = DT_MASS
+DT_PART      = -1._EB                  ; RAMP_PART    = 'null' ; DT_PART_SPECIFIED    = DT_PART
+DT_PL3D      =  HUGE(EB)               ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
+DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null' ; DT_PROF_SPECIFIED    = DT_PROF
+DT_RADF      =  HUGE(EB)               ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
+DT_RESTART   =  HUGE(EB)               ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
+DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null' ; DT_SLCF_SPECIFIED    = DT_SLCF
+DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null' ; DT_SL3D_SPECIFIED    = DT_SL3D
+DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null' ; DT_SMOKE3D_SPECIFIED = DT_SMOKE3D
+DT_UVW       =  HUGE(EB)               ; RAMP_UVW     = 'null' ; DT_UVW_SPECIFIED     = DT_UVW
 
 ! Read the DUMP line
 
@@ -2236,6 +2236,28 @@ DUMP_LOOP: DO
    24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with DUMP line') ; RETURN ; ENDIF
 ENDDO DUMP_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+
+! Keep track of whether the output timing intervals are specified by the user or not
+
+IF (DT_BNDF_SPECIFIED   /= DT_BNDF)    THEN ; DT_BNDF_SPECIFIED   = DT_BNDF    ; ELSE ; DT_BNDF_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_CPU_SPECIFIED    /= DT_CPU)     THEN ; DT_CPU_SPECIFIED    = DT_CPU     ; ELSE ; DT_CPU_SPECIFIED    = -1._EB ; ENDIF
+IF (DT_CTRL_SPECIFIED   /= DT_CTRL)    THEN ; DT_CTRL_SPECIFIED   = DT_CTRL    ; ELSE ; DT_CTRL_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_DEVC_SPECIFIED   /= DT_DEVC)    THEN ; DT_DEVC_SPECIFIED   = DT_DEVC    ; ELSE ; DT_DEVC_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_FLUSH_SPECIFIED  /= DT_FLUSH)   THEN ; DT_FLUSH_SPECIFIED  = DT_FLUSH   ; ELSE ; DT_FLUSH_SPECIFIED  = -1._EB ; ENDIF
+IF (DT_GEOM_SPECIFIED   /= DT_GEOM)    THEN ; DT_GEOM_SPECIFIED   = DT_GEOM    ; ELSE ; DT_GEOM_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_HRR_SPECIFIED    /= DT_HRR)     THEN ; DT_HRR_SPECIFIED    = DT_HRR     ; ELSE ; DT_HRR_SPECIFIED    = -1._EB ; ENDIF
+IF (DT_HVAC_SPECIFIED   /= DT_HVAC)    THEN ; DT_HVAC_SPECIFIED   = DT_HVAC    ; ELSE ; DT_HVAC_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_ISOF_SPECIFIED   /= DT_ISOF)    THEN ; DT_ISOF_SPECIFIED   = DT_ISOF    ; ELSE ; DT_ISOF_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_MASS_SPECIFIED   /= DT_MASS)    THEN ; DT_MASS_SPECIFIED   = DT_MASS    ; ELSE ; DT_MASS_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_PART_SPECIFIED   /= DT_PART)    THEN ; DT_PART_SPECIFIED   = DT_PART    ; ELSE ; DT_PART_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_PL3D_SPECIFIED   /= DT_PL3D)    THEN ; DT_PL3D_SPECIFIED   = DT_PL3D    ; ELSE ; DT_PL3D_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_PROF_SPECIFIED   /= DT_PROF)    THEN ; DT_PROF_SPECIFIED   = DT_PROF    ; ELSE ; DT_PROF_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_RADF_SPECIFIED   /= DT_RADF)    THEN ; DT_RADF_SPECIFIED   = DT_RADF    ; ELSE ; DT_RADF_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_RESTART_SPECIFIED/= DT_RESTART) THEN ; DT_RESTART_SPECIFIED= DT_RESTART ; ELSE ; DT_RESTART_SPECIFIED= -1._EB ; ENDIF
+IF (DT_SLCF_SPECIFIED   /= DT_SLCF)    THEN ; DT_SLCF_SPECIFIED   = DT_SLCF    ; ELSE ; DT_SLCF_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_SL3D_SPECIFIED   /= DT_SL3D)    THEN ; DT_SL3D_SPECIFIED   = DT_SL3D    ; ELSE ; DT_SL3D_SPECIFIED   = -1._EB ; ENDIF
+IF (DT_SMOKE3D_SPECIFIED/= DT_SMOKE3D) THEN ; DT_SMOKE3D_SPECIFIED= DT_SMOKE3D ; ELSE ; DT_SMOKE3D_SPECIFIED= -1._EB ; ENDIF
+IF (DT_UVW_SPECIFIED    /= DT_UVW)     THEN ; DT_UVW_SPECIFIED    = DT_UVW     ; ELSE ; DT_UVW_SPECIFIED    = -1._EB ; ENDIF
 
 ! Timing RAMPs
 
