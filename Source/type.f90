@@ -319,7 +319,6 @@ END TYPE BOUNDARY_RADIA_TYPE
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
-   INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
    INTEGER :: B1_INDEX=0             !< Variables devoted to surface properties
