@@ -637,6 +637,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair 
    INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air

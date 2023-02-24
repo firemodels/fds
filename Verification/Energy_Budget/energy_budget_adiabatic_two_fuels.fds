@@ -1,30 +1,30 @@
-&HEAD CHID='energy_budget_adiabatic_two_fuels', TITLE='Test energy balance'  /    
+&HEAD CHID='energy_budget_adiabatic_two_fuels', TITLE='Test energy balance'  /
 
-&MESH IJK=20,20,10, XB=0.0,10.0,0.0,10.0,0.0,5.0 /  
+&MESH IJK=20,20,10, XB=0.0,10.0,0.0,10.0,0.0,5.0 /
 &DUMP DT_HRR=10. /
 &TIME T_END=600. /
 
 &RADI RADIATION=.FALSE. /
 &MISC SUPPRESSION=.FALSE./
 &VENT XB= 0.0, 1.0,0.0,1.0,5.0,5.0, SURF_ID='OPEN'/
-&VENT XB=10.0,10.0,0.0,2.0,0.0,2.0, SURF_ID='OPEN'/ 
+&VENT XB=10.0,10.0,0.0,2.0,0.0,2.0, SURF_ID='OPEN'/
 
 &SURF ID = 'Adiabatic Wall', ADIABATIC=.TRUE., DEFAULT=.TRUE./
-&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) =	0.022901, RAMP_MF(1)='poly' 
+&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) =	0.022901, RAMP_MF(1)='poly'
                     SPEC_ID(2)='WOOD',         MASS_FLUX(2) =	0.036585, RAMP_MF(2)='wood' /
 
 &VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
 
-&RAMP ID='poly'	 T=       	0	 F=       	0	 / 
-&RAMP ID='poly'	 T=       	50	 F=       	.50	 /        
-&RAMP ID='poly'	 T=       	100	 F=       	1	 / 
-&RAMP ID='poly'	 T=       	600	 F=       	1	 /      
+&RAMP ID='poly'	 T=       	0	 F=       	0	 /
+&RAMP ID='poly'	 T=       	50	 F=       	.50	 /
+&RAMP ID='poly'	 T=       	100	 F=       	1	 /
+&RAMP ID='poly'	 T=       	600	 F=       	1	 /
 
-&RAMP ID='wood'	 T=       	0	 F=       	0	 /       
-&RAMP ID='wood'	 T=       	50	 F=       	.50	 /        
-&RAMP ID='wood'	 T=       	100	 F=       	1	 /        
-&RAMP ID='wood'	 T=       	600	 F=       	1	 /        
-      
+&RAMP ID='wood'	 T=       	0	 F=       	0	 /
+&RAMP ID='wood'	 T=       	50	 F=       	.50	 /
+&RAMP ID='wood'	 T=       	100	 F=       	1	 /
+&RAMP ID='wood'	 T=       	600	 F=       	1	 /
+
 &SPEC ID = 'POLYURETHANE', FORMULA = 'C25H42O6N2' /
 &SPEC ID = 'WOOD', FORMULA = 'CH1.7O0.74N0.002' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
@@ -40,31 +40,31 @@
       BACKGROUND=.TRUE. /
 
 &SPEC ID = 'PRODUCTS_1',
-      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.79113,
+      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.74412,
       SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.166587,
-      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 20.71987,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.60253,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.40121 /
+      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 21.,
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.089296,
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.7511 /
 
 &SPEC ID = 'PRODUCTS_2',
-      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.964679,
-      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003655,
-      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.848241,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.035184,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.838558 /
+      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.97925,
+      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003651,
+      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.85,
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.031929,
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.840884 /
 
 &REAC ID = 'plastic',
       FUEL = 'POLYURETHANE',
       HEAT_OF_COMBUSTION=26200,
       RADIATIVE_FRACTION=0.0,
       SPEC_ID_NU = 'POLYURETHANE','AIR','PRODUCTS_1'
-      NU=-1,-27.23436,1 /
+      NU=-1,-27.32741,1 /
 
 &REAC ID = 'wood'
       FUEL = 'WOOD',
       HEAT_OF_COMBUSTION=16400,
       RADIATIVE_FRACTION=0.0,
       SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
-      NU=-1,-1.02063,1 /
+      NU=-1,-1.021246 /
 
 &TAIL /

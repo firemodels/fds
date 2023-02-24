@@ -4949,7 +4949,7 @@ If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_
 \subsection{Pre-Defined Gas and Liquid Properties}
 \label{gas_species_props}
 
-Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties from 0 K to 5000 K.
+Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these species you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties.
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|l|}
 \caption[Pre-defined gas and liquid species]{Pre-defined gas and liquid species~\cite{Reid:1}}
@@ -5147,6 +5147,9 @@ By default, duplicate species are considered to be a lumped species and not a pr
 &DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 DUPLICATE PRIMITIVE'/
 \end{lstlisting}
 
+\subsection{Soot}
+\label{info:SOOT}
+The predefined species of {\ct SOOT'} is all carbon. To specify soot that contains other atoms, use {\ct FORMULA}. If new thermophysical properties are not specified, define the {\ct FORMULA} to keep the molecular weigh near 12~g/mol, i.e {\ct FORMULA='C0.86H1.7} rather than {\ct FORMULA='C10H20}.
 
 \newpage
 
@@ -5258,7 +5261,6 @@ label the {\ct REAC} line if more than one reactions are specified.
 simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied. This parameter is a global parameter which can also be defined on {\ct COMB}. Note that only one soot species is defined when simple chemistry is used; therefore, if {\ct SOOT\_H\_FRACTION} is defined multiple times then the last {\ct REAC} value specified will be applied to all reactions.
 \item[{\ct HCN\_YIELD}] The fraction of fuel mass converted into hydrogen cyanide, $y_{\HCN}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied and the fuel contains nitrogen. (Default 0.)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
@@ -5358,7 +5360,7 @@ The simple version of the input file specifies the combustion parameters as foll
 \begin{lstlisting}
 &REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
 \end{lstlisting}
-For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms Soot with no additional hydrogen ({\ct SOOT\_H\_FRACTION=0}). To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
+For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms. To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/propane_flame_2reac}
@@ -5601,7 +5603,7 @@ The choice of fuel in this example, PVC, is not defined in Table~\ref{tab:gasspe
 &SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = T /
 &SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = T /
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = T /
-&SPEC ID = 'SOOT',FORMULA='C',  LUMPED_COMPONENT_ONLY = T /
+&SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = T /
 \end{lstlisting}
 For the oxidizer and products, which are both composed of multiple primitive species, {\ct SPEC} lines are needed to define the composition of the lumped species. You can define the {\ct SPEC} using either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. If Eq.~(\ref{eq:PVC_reac2}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
 \begin{lstlisting}
@@ -5653,7 +5655,7 @@ In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and
 &SPEC ID='WATER VAPOR',       MASS_FRACTION_0=0.0 /
 &SPEC ID='CARBON MONOXIDE',   MASS_FRACTION_0=0.0 /
 &SPEC ID='CARBON DIOXIDE',    MASS_FRACTION_0=0.0 /
-&SPEC ID='SOOT', FORMULA='C', MASS_FRACTION_0=0.0 /
+&SPEC ID='SOOT',              MASS_FRACTION_0=0.0 /
 
 &REAC ID='R1'
       FUEL='PROPANE'
@@ -5683,13 +5685,13 @@ Note that in this reaction scheme, the extinction model is applied to the first 
 
 There may be times when your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
-1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.234364\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(19.791134\; CO_2 + 0.166587 \; CO + 20.719873 \; H_2O + 5.602533\; C_{0.9}H_{0.1} + 103.40121 \; N_2)}}_\text{Products\_1}
+1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.32741\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
+1\,\underbrace{\mathrm{(19.74412\; CO_2 + 0.166587 \; CO + 21 \; H_2O + 5.089296\; C_{1} + 103.7511 \; N_2)}}_\text{Products\_1}
 \end{multline}
 and the reaction for wood with a soot yield of $y_{\rm s}$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
-1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.020627\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(0.964679\; CO_2 + 0.003655 \; CO + 0.848241 \; H_2O + 0.035184\; C_{0.9}H_{0.1} + 3.838558 \; N_2)}}_\text{Products\_2}
+1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.021246\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
+1\,\underbrace{\mathrm{(0.97925\; CO_2 + 0.003651 \; CO + 0.85 \; H_2O + 0.031929\; C_{0.9}H_{0.1} + 3.840884 \; N_2)}}_\text{Products\_2}
 \end{multline}
 Similar to example in Section~\ref{info:Complex_Fuel}, we will use the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
 \begin{lstlisting}
@@ -5710,18 +5712,18 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
       BACKGROUND=T /
 
 &SPEC ID = 'PRODUCTS_1',
-      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.79113,
+      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.74412,
       SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.166587,
-      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 20.71987,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.60253,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.40121 /
+      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 21.,
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.089296,
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.7111 /
 
 &SPEC ID = 'PRODUCTS_2',
-      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.964679,
-      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003655,
-      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.848241,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.035184,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.838558 /
+      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.97925,
+      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003651,
+      SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.85,
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.031929,
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.840884 /
 \end{lstlisting}
 Once we have constructed the lumped species, we can define the {\ct REAC} lines.
 \begin{lstlisting}
@@ -5729,13 +5731,13 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
       FUEL = 'POLYURETHANE',
       HEAT_OF_COMBUSTION=26200,
       SPEC_ID_NU = 'POLYURETHANE','AIR','PRODUCTS_1'
-      NU=-1,-27.23436,1 /
+      NU=-1,-27.32741,1 /
 
 &REAC ID = 'wood'
       FUEL = 'WOOD',
       HEAT_OF_COMBUSTION=16400,
       SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
-      NU=-1,-1.02063,1 /
+      NU=-1,-1.021246,1 /
 \end{lstlisting}
 In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
 \begin{lstlisting}
@@ -5949,13 +5951,13 @@ The parameter {\ct THERMOPHORETIC\_DIAMETER} can be used to define a particle di
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
-The {\ct propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.05. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
+The {\ct propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.0544. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
 \begin{multline}\label{eq:PROPANE_depo}
-1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.81308 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow \\
-1 \; \underbrace{\mathrm{(18.10631 \; N_2 \, + \, 2.81813 \; CO_2 \,+ \, 3.98990\; H_2O)}}_\text{Products} \,+\,
-\,0.20201 \; \underbrace{\mathrm{C_{0.9}H_{0.1}}}_\text{Soot}
+1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow \\
+1 \; \underbrace{\mathrm{(18.10631 \; N_2 \, + \, 2.8 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
+\,0.2 \; \underbrace{\mathrm{C_{1}}_\text{Soot}
 \end{multline}
-Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.05 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=T} on the {\ct SPEC} line.
+Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.0544 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=T} on the {\ct SPEC} line.
 \begin{lstlisting}
 &SPEC ID = 'PROPANE' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = T /
@@ -5970,7 +5972,7 @@ If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the st
 &SPEC ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
       VOLUME_FRACTION = 3.7619,1., BACKGROUND = T /
 &SPEC ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
-      VOLUME_FRACTION = 18.10631,2.81813,3.98990 /
+      VOLUME_FRACTION = 18.05712,2.8,4.0 /
 \end{lstlisting}
 
 \noindent
@@ -5979,7 +5981,7 @@ The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewa
 \begin{lstlisting}
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
-      NU=-1.,-4.81308,1,0.20208/
+      NU=-1.,-4.8,1.,0.2/
 \end{lstlisting}
 
 \noindent
@@ -11130,7 +11132,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
 {\ct ODE\_SOLVER}                                    & Character  & Section~\ref{info:chem_integration}          &           &                      \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}                   & Real       & Section~\ref{info:chem_integration}          &           & 1.0 E-6              \\ \hline
-{\ct SOOT\_H\_FRACTION}                              & Real       & Section~\ref{info:simple_chemistry}          &           & 0.1                  \\ \hline
 {\ct SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & {\ct T}              \\ \hline
 {\ct TAU\_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline

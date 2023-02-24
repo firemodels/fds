@@ -3256,6 +3256,11 @@ DO WHILE (I <= LEN1)
    NAME_FOUND = .FALSE.
    DO NS=1,N_TRACKED_SPECIES
       IF(TRIM(SPECIES_MIXTURE(NS)%ID)==TRIM(FORMULA) .OR. TRIM(SPECIES_MIXTURE(NS)%FORMULA)==TRIM(FORMULA)) THEN
+         IF (NAME_FOUND) THEN
+            WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Species number ',SPEC_PTR+1,&
+                                          ' in the EQUATION shares the same FORMULA with another species.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
          NAME_FOUND=.TRUE.
          RN%SPEC_ID_NU_READ(SPEC_PTR+1) = SPECIES_MIXTURE(NS)%ID
       ENDIF
