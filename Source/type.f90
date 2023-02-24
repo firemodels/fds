@@ -367,7 +367,6 @@ TYPE WALL_TYPE
    REAL(EB) :: V_DEP=0._EB            !< Deposition velocity (m/s)
    REAL(EB) :: VEL_ERR_NEW=0._EB      !< Velocity mismatch at mesh or solid boundary (m/s)
 
-   INTEGER :: WALL_INDEX=0            !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
