@@ -10,7 +10,9 @@ The case is meant as a teaching tool and to test functionality.
 
 &DUMP NFRAMES=3000, DT_HRR=5., DT_DEVC=5. /
 
-&REAC FUEL='POLYURETHANE', FORMULA='C6.3H7.1N1.0O2.1', SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=22700. /
+&SPEC ID='POLYURETHANE',FORMULA='C6.3H7.1N1.0O2.1',SPECIFIC_HEAT=1.5/
+
+&REAC FUEL='POLYURETHANE', SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=22700. /
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -20,7 +22,7 @@ The case is meant as a teaching tool and to test functionality.
       NU_SPEC               = 1.
       SPEC_ID               = 'POLYURETHANE'
       REFERENCE_TEMPERATURE = 250.
-      HEAT_OF_REACTION      = 500.  
+      HEAT_OF_REACTION      = 500.
       HEAT_OF_COMBUSTION    = 16000. /
 
 &MATL ID                    = 'FOAM'
@@ -62,7 +64,7 @@ The case is meant as a teaching tool and to test functionality.
 &SURF ID='ignitor', TMP_FRONT=1000., EMISSIVITY=1., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
 &INIT XB=2.4,2.7,4.1,4.4,0.60,0.70, PART_ID='ignitor particle', N_PARTICLES_PER_CELL=1, CELL_CENTERED=T /
 
-&VENT XB=1,4,0,0,0,2, SURF_ID='OPEN' /  
+&VENT XB=1,4,0,0,0,2, SURF_ID='OPEN' /
 
 &BNDF QUANTITY='RADIATIVE HEAT FLUX' /
 &BNDF QUANTITY='CONVECTIVE HEAT FLUX' /

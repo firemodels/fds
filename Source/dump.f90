@@ -2614,12 +2614,12 @@ SPEC_LOOP: DO N=1,N_SPECIES
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)             ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)             ',SS%MW*P_INF/(TMPA*R0)
    IF (SS%EXPLICIT_H_F) THEN
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'           Enthalpy of Formation (J/kg) ',SS%H_F
+      WRITE(LU_OUTPUT,'(A,ES10.3)')'           Enthalpy of Formation (J/kg) ',SS%H_F
    ELSE
       IF (SS%LISTED) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'           Enthalpy of Formation (J/kg) ',SS%H_F_LISTED
+         WRITE(LU_OUTPUT,'(A,ES10.3)')'           Enthalpy of Formation (J/kg) ',SS%H_F_LISTED
       ELSE
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
+         WRITE(LU_OUTPUT,'(A,ES10.3)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
       ENDIF
    ENDIF
 ENDDO SPEC_LOOP
@@ -2636,7 +2636,7 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES9.2)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -2645,74 +2645,84 @@ DO N=1,N_TRACKED_SPECIES
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
    CALL GET_VISCOSITY(ZZ_GET,MU_Z,TMPA)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_Z
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_Z
    CALL GET_VISCOSITY(ZZ_GET,MU_Z,500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                  500 K: ', MU_Z
    CALL GET_VISCOSITY(ZZ_GET,MU_Z,1000._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1000 K: ', MU_Z
    CALL GET_VISCOSITY(ZZ_GET,MU_Z,1500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,2000._EB)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', MU_Z
    CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,TMPA)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_Z
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_Z
    CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                  500 K: ', K_Z
    CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1000._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1000 K: ', K_Z
    CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,2000._EB)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', K_Z
    CALL GET_ENTHALPY(ZZ_GET,H_Z,TMPA)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', H_Z
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', H_Z
    CALL GET_ENTHALPY(ZZ_GET,H_Z,500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', H_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                  500 K: ', H_Z
    CALL GET_ENTHALPY(ZZ_GET,H_Z,1000._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', H_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1000 K: ', H_Z
    CALL GET_ENTHALPY(ZZ_GET,H_Z,1500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', H_Z
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,2000._EB)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', H_Z
    CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,TMPA)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_ZN
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_ZN
    CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_ZN
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                  500 K: ', CP_ZN
    CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1000._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_ZN
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1000 K: ', CP_ZN
    CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1500._EB)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_ZN
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient, ',ITMP,' K: ', D_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,2000._EB)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', CP_ZN
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '   Diff. Coeff. (m^2/s) Ambient, ',ITMP,' K: ', D_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                  500 K: ', D_Z( 500,N)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1000 K: ', D_Z(1000,N)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', D_Z(1500,N)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', D_Z(2000,N)
    IF (SM%EXPLICIT_G_F) THEN
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  ' Gibbs Energy Amb. (kJ/mol), ',ITMP,' K: ', G_F_Z(ITMP,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                  500 K: ', G_F_Z( 500,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                 1000 K: ', G_F_Z(1000,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '                                 1500 K: ', G_F_Z(1500,N)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  ' Gibbs Energy Amb. (kJ/mol), ',ITMP,' K: ', G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '                                  500 K: ', G_F_Z( 500,N)
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '                                 1000 K: ', G_F_Z(1000,N)
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '                                 1500 K: ', G_F_Z(1500,N)
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '                                 2000 K: ', G_F_Z(2000,N)
    ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
       ITMP = MIN(NINT(SS%TMP_MELT),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Enthalpy (J/kg)     Melt ',ITMP,' K: ', &
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '   Liq. Enthalpy (J/kg)     Melt ',ITMP,' K: ', &
          SS%C_P_L_BAR(ITMP)*SS%TMP_MELT
       ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', &
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                                 ',ITMP,' K: ', &
          SS%C_P_L_BAR(ITMP)*0.5_EB*(SS%TMP_V+SS%TMP_MELT)
       ITMP = MIN(NINT(SS%TMP_V),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', &
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                            Boil ',ITMP,' K: ', &
          SS%C_P_L_BAR(ITMP)*SS%TMP_V
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
       ITMP = MIN(NINT(SS%TMP_MELT),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Spec. Heat (J/kg/K) Melt ',ITMP,' K: ', SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '   Liq. Spec. Heat (J/kg/K) Melt ',ITMP,' K: ', SS%C_P_L(ITMP)
       ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                                 ',ITMP,' K: ', SS%C_P_L(ITMP)
       ITMP = MIN(NINT(SS%TMP_V),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                            Boil ',ITMP,' K: ', SS%C_P_L(ITMP)
       WRITE(LU_OUTPUT,'(A)') ' '
       ITMP = MIN(NINT(SS%TMP_MELT),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Heat of Vapor. (J/kg)    Melt ',ITMP,' K: ', SS%H_V(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '   Heat of Vapor. (J/kg)    Melt ',ITMP,' K: ', SS%H_V(ITMP)
       ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%H_V(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                                 ',ITMP,' K: ', SS%H_V(ITMP)
       ITMP = MIN(NINT(SS%TMP_V),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%H_V(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '                            Boil ',ITMP,' K: ', SS%H_V(ITMP)
    ENDIF
 ENDDO
 
@@ -2858,20 +2868,20 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,F8.3)') '     Emissivity:                               ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)') '     Density (kg/m3):                          ',ML%RHO_S
    ITMP = NINT(TMPA)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Specific Heat (kJ/kg/K) Ambient, ',ITMP,' K: ',ML%C_S(ITMP)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%C_S(350)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%C_S(500)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%C_S(800)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '     Specific Heat (kJ/kg/K) Ambient, ',ITMP,' K: ',ML%C_S(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       350 K: ', ML%C_S(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%C_S(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%C_S(800)*0.001_EB
 
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Therm. Cond. (W/m/K) Ambient,    ',ITMP,' K: ', ML%K_S(ITMP)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%K_S(350)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%K_S(500)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%K_S(800)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '     Therm. Cond. (W/m/K) Ambient,    ',ITMP,' K: ', ML%K_S(ITMP)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       350 K: ', ML%K_S(350)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%K_S(500)
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%K_S(800)
 
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Enthalpy (kJ/kg) Ambient,        ',ITMP,' K: ',ML%H(ITMP)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       350 K: ', ML%H(350)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       500 K: ', ML%H(500)*0.001_EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                       800 K: ', ML%H(800)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '     Enthalpy (kJ/kg) Ambient,        ',ITMP,' K: ',ML%H(ITMP)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       350 K: ', ML%H(350)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%H(500)*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
@@ -2889,18 +2899,18 @@ MATL_LOOP: DO N=1,N_MATL
          DO NS = 1,N_TRACKED_SPECIES
             WRITE(LU_OUTPUT,'(A,A,A,F6.3)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
          ENDDO
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s):                     ',ML%A(NR)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol):                   ',ML%E(NR)/1000.
+         WRITE(LU_OUTPUT,'(A,ES10.3)')'        A (1/s):                     ',ML%A(NR)
+         WRITE(LU_OUTPUT,'(A,ES10.3)')'        E (J/mol):                   ',ML%E(NR)/1000.
          IF (ML%TMP_REF(NR) <= TWO_EPSILON_EB) THEN
             ITMP = INT(TMPA)
-            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
          ELSE
             ITMP = NINT(ML%TMP_REF(NR))
-            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
             ITMP = MAX(0,NINT(ML%TMP_REF(NR)-ML%PYROLYSIS_RANGE(NR)*0.5_EB))
-            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
             ITMP = NINT(ML%TMP_REF(NR)+ML%PYROLYSIS_RANGE(NR)*0.5_EB)
-            WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
+            WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '                             ',ITMP,' K: ',ML%H_R(NR,ITMP)/1000._EB
          ENDIF
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S:                          ',ML%N_S(NR)
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T:                          ',ML%N_T(NR)
@@ -2918,7 +2928,7 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
+      WRITE(LU_OUTPUT,'(A,ES10.3)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
    ENDIF
 
 ENDDO MATL_LOOP
@@ -2979,24 +2989,24 @@ SURFLOOP: DO N=0,N_SURF
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
    IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)')  '     Normal Velocity (m/s)      ', SF%VEL
-   IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
-   IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flow     (m^3/s)    ', SF%VOLUME_FLOW
+   IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES10.3)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
+   IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES10.3)') '     Volume Flow     (m^3/s)    ', SF%VOLUME_FLOW
 
    IF (SF%HRRPUA>0._EB .AND. .NOT.SF%VEG_LSET_SPREAD) &
       WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
    DO NN=1,N_TRACKED_SPECIES
       IF (SF%MASS_FRACTION(NN)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(5X,A,A,8X,F6.3)') &
           TRIM(SPECIES_MIXTURE(NN)%ID),' Mass Fraction',SF%MASS_FRACTION(NN)
-      IF (ABS(SF%MASS_FLUX(NN))>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(5X,A,A,2X,ES9.2)') &
+      IF (ABS(SF%MASS_FLUX(NN))>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(5X,A,A,2X,ES10.3)') &
           TRIM(SPECIES_MIXTURE(NN)%ID),' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
    ENDDO
 
-   IF (ABS(SF%CONV_LENGTH - 1._EB)>SPACING(1._EB)) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
+   IF (ABS(SF%CONV_LENGTH - 1._EB)>SPACING(1._EB)) WRITE(LU_OUTPUT,'(A,ES10.3)') '     Convection length scale (m) ', SF%CONV_LENGTH
 
    IF (SF%VEG_LSET_SPREAD) THEN
       WRITE(LU_OUTPUT,'(A)')        '     Level Set Fire Spread Model'
       IF (SF%VEG_LSET_IGNITE_T<1.E6_EB) &
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
+      WRITE(LU_OUTPUT,'(A,ES10.3)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Burn Duration (s)           ', SF%BURN_DURATION
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Rate of Spread, ROS_00 (m/s)', SF%VEG_LSET_ROS_00
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Packing Ratio               ', SF%VEG_LSET_BETA
