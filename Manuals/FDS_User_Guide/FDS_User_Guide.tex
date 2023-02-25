@@ -5686,12 +5686,12 @@ Note that in this reaction scheme, the extinction model is applied to the first 
 There may be times when your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.32741\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(19.74412\; CO_2 + 0.166587 \; CO + 21 \; H_2O + 5.089296\; C_{1} + 103.7511 \; N_2)}}_\text{Products\_1}
+1\,\underbrace{\mathrm{(19.74412\; CO_2 + 0.16659 \; CO + 21 \; H_2O + 5.08930\; C + 103.7511 \; N_2)}}_\text{Products\_1}
 \end{multline}
 and the reaction for wood with a soot yield of $y_{\rm s}$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
 1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.021246\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(0.97925\; CO_2 + 0.003651 \; CO + 0.85 \; H_2O + 0.031929\; C_{0.9}H_{0.1} + 3.840884 \; N_2)}}_\text{Products\_2}
+1\,\underbrace{\mathrm{(0.964384141\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.03196\; C + 3.84076 \; N_2)}}_\text{Products\_2}
 \end{multline}
 Similar to example in Section~\ref{info:Complex_Fuel}, we will use the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
 \begin{lstlisting}
@@ -5713,17 +5713,17 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
 
 &SPEC ID = 'PRODUCTS_1',
       SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.74412,
-      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.166587,
+      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) =  0.16659,
       SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 21.,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.089296,
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) =  5.08930,
       SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.7111 /
 
 &SPEC ID = 'PRODUCTS_2',
-      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.97925,
-      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003651,
+      SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.96438,
+      SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.00365,
       SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.85,
-      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.031929,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.840884 /
+      SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.03196,
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.84076 /
 \end{lstlisting}
 Once we have constructed the lumped species, we can define the {\ct REAC} lines.
 \begin{lstlisting}
@@ -5737,7 +5737,7 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
       FUEL = 'WOOD',
       HEAT_OF_COMBUSTION=16400,
       SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
-      NU=-1,-1.021246,1 /
+      NU=-1,-1.02121,1 /
 \end{lstlisting}
 In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
 \begin{lstlisting}
@@ -5955,7 +5955,7 @@ The {\ct propane\_flame\_deposition} example shows how to define a reaction that
 \begin{multline}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow \\
 1 \; \underbrace{\mathrm{(18.10631 \; N_2 \, + \, 2.8 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
-\,0.2 \; \underbrace{\mathrm{C_{1}}_\text{Soot}
+\,0.2 \; \underbrace{\mathrm{C}_\text{Soot}
 \end{multline}
 Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.0544 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=T} on the {\ct SPEC} line.
 \begin{lstlisting}
@@ -5970,9 +5970,9 @@ If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the st
 
 \begin{lstlisting}
 &SPEC ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
-      VOLUME_FRACTION = 3.7619,1., BACKGROUND = T /
+      VOLUME_FRACTION = 3.76,1., BACKGROUND = T /
 &SPEC ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
-      VOLUME_FRACTION = 18.05712,2.8,4.0 /
+      VOLUME_FRACTION = 18.10978,2.81643,4.0 /
 \end{lstlisting}
 
 \noindent
@@ -5981,7 +5981,7 @@ The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewa
 \begin{lstlisting}
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
-      NU=-1.,-4.8,1.,0.2/
+      NU=-1.,-4.81643,1.,0.18357/
 \end{lstlisting}
 
 \noindent
