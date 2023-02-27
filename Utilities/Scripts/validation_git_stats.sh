@@ -7,7 +7,7 @@
 MAKEGITENTRY(){
 DIR=$1
 gitrevisions=$TEMPDIR/gitrevisions.$$
-cat $FIREMODELS/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
+cat $FIREMODELS_ROOT/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
@@ -39,7 +39,7 @@ CURRENT_DIR=`pwd`
 #determine repo root 
 SCRIPTDIR=`dirname "$(readlink -f "$0")"`
 cd $SCRIPTDIR/../../..
-FIREMODELS=`pwd`
+FIREMODELS_ROOT=`pwd`
 cd $CURDIR
 
 TEMPDIR=$HOME/temp
@@ -47,7 +47,7 @@ if [ ! -d $TEMPDIR ]; then
    mkdir $TEMPDIR
 fi
 
-export FIREMODELS
+export FIREMODELS_ROOT
 
 # the following is kept so older versions of firebot won't crash (ie firebot's that call this script using the -r parameter)
 while getopts 'r:' OPTION
@@ -60,10 +60,10 @@ esac
 done
 shift $(($OPTIND-1))
 
-cd $FIREMODELS/fds/Utilities/Scripts
+cd $FIREMODELS_ROOT/fds/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics
-OUTPUT_TEX_FILE=$FIREMODELS/fds/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
+OUTPUT_TEX_FILE=$FIREMODELS_ROOT/fds/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
 
 # Table header
 echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
@@ -77,7 +77,7 @@ echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >
 echo "\endhead" >> $OUTPUT_TEX_FILE
 
 # Table body
-maketable=$FIREMODELS/fds/Validation/Process_All_Output.sh
+maketable=$FIREMODELS_ROOT/fds/Validation/Process_All_Output.sh
 CASELIST=$TEMPDIR/temp.out.$$
 TABLE_ENTRIES=$TEMPDIR/temp2.out.$$
 grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' | awk '{if(NR>1)print}'> $CASELIST
