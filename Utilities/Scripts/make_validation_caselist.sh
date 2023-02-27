@@ -5,7 +5,7 @@ MAKEGITENTRY(){
 DIR=$1
 gitrevisions=/tmp/gitrevisions.$$
 
-cat $GIT_ROOT/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
+cat $FIREMODELS_ROOT/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
