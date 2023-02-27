@@ -333,6 +333,10 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
+   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
+
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -387,6 +391,9 @@ TYPE WALL_TYPE
    INTEGER :: JD21_INDEX=0
    INTEGER :: JD22_INDEX=0
    INTEGER :: CUT_FACE_INDEX=0
+   INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
 END TYPE WALL_TYPE
 
@@ -416,7 +423,6 @@ END TYPE EXTERNAL_WALL_TYPE
 
 TYPE THIN_WALL_TYPE
 
-   INTEGER :: THIN_WALL_INDEX=0       !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
@@ -428,6 +434,9 @@ TYPE THIN_WALL_TYPE
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+   INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
 END TYPE THIN_WALL_TYPE
 
@@ -1154,6 +1163,9 @@ TYPE CFACE_TYPE
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11
    INTEGER :: CUT_FACE_IND2=-11
+   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
    REAL(EB) :: AREA=0._EB
    REAL(EB) :: NVEC(3)=0._EB
    REAL(EB) :: VEL_ERR_NEW=0._EB
