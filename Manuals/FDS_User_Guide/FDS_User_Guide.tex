@@ -2873,7 +2873,7 @@ If you want to specify the convective heat transfer coefficient, you can set it 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since NET\_HEAT\_FLUX combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. IF you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}. If a droplet lands surface with a specfied heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since {\ct NET\_HEAT\_FLUX} combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. If you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}. If a droplet lands surface with a specfied heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -2924,8 +2924,7 @@ Material layers and components are specified on the {\ct SURF} line via the arra
 \end{lstlisting}
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
-When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined, and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
-calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
+When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the solid. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
 Mixtures of solid materials within the same layer can be defined using the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same two indices as the {\ct MATL\_ID} keyword. For example, if the brick layer contains some additional water, the input could look like this:
 \begin{lstlisting}
@@ -2979,11 +2978,9 @@ The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allo
 \subsection{Back Side Boundary Conditions}
 \label{info:BACKING}
 
-The layers of a solid boundary are listed in order from the surface. By default, if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, then it is assumed to back up to an air gap at ambient temperature. For example, a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
+There are several options for defining the back surface boundary condition for a solid, thermally-thick obstruction. The default, {\ct BACKING='EXPOSED' on the {\ct SURF} line}, assumes that the back side of the solid is exposed to the thermal environment behind the solid. FDS calculates the heat transfer through the solid into the space behind the wall and vis versa.
 
-There are other back side boundary conditions that can be applied. One is to assume that the wall backs up to an insulated material in which case no heat is lost to the backing material. The expression {\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition means that you  do not have to specify properties of the inner insulating material because it is assumed to be perfectly insulated.
-
-If the wall is assumed to back up to the room on the other side of the wall and you want FDS to calculate the heat transfer through the wall into the space behind the wall, the attribute {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works if the wall {\ct OBST} is less than or equal to one mesh cell thick, and if there is a non-zero volume of computational domain on the other side of the wall {\ct OBST}. Obviously, if the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side gas cell cannot be found (i.e. the wall {\ct OBST} is greater than one cell thick).  This is the default boundary conditions.
+An alternative back side boundary condition, {\ct BACKING='INSULATED'}, assumes that the solid backs up to a perfectly insulated material, in which case no heat is lost to the back side. Use of this condition means that you do not have to specify properties of the inner insulating material because it is assumed to be perfectly insulated.
 
 If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_TMP\_GAS\_BACK}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_BACK} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
 
@@ -2999,33 +2996,23 @@ By default, the initial temperature of the solid material is set to ambient ({\c
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
 
-If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
-
+If an {\ct OBST} does not border the edge of the computational domain, FDS calculates the heat transfer through the specified solid {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction. The first layer listed is applied to the exposed front face and the last layer to the opposite face. Take, for example, a {\ct SURF} line that is applied to a solid {\ct OBST}. On the $-x$ side of the {\ct OBST}, layer~1 is {\ct MATERIAL A}, layer~2 is {\ct MATERIAL B}, and layer~3 is {\ct MATERIAL A}.  On the $+x$ side the {\ct SURF} is applied in the same manner.
 \begin{lstlisting}
-&OBST XB=0.1,0.2,...., SURF_ID='SYMMETRIC'/
 &SURF ID                 = 'SYMMETRIC'
       COLOR              = 'ANTIQUE WHITE'
       BACKING            = 'EXPOSED'
       MATL_ID(1:3,1)     = 'MATERIAL A','MATERIAL B','MATERIAL A'
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
-
-For example, take the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
-
+Now consider the {\ct SURF} definition below. On the $-x$ side of the {\ct OBST}, layer~1 is {\ct MATERIAL A}, layer~2 is {\ct MATERIAL B}, and layer~3 is {\ct MATERIAL C}.  On the $+x$ side, the {\ct SURF} is applied in the same manner, layer~1 is {\ct MATERIAL A}, layer~2 is {\ct MATERIAL B}, and layer~3 is {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer but this is not possible.
 \begin{lstlisting}
-&OBST XB=0.1,0.2,...., SURF_ID='NON-SYMMETRIC'/
 &SURF ID                 = 'NON-SYMMETRIC'
       COLOR              = 'ANTIQUE WHITE'
       BACKING            = 'EXPOSED'
       MATL_ID(1:3,1)     = 'MATERIAL A','MATERIAL B','MATERIAL C'
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
-
-Therefore, if you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
-obstruction, you should be careful of how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can
-be applied to both sides. However, if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply
-one to each side. For example, a hollow box column that is made of steel and covered on the outside by a layer of insulation
-material and a layer of plastic on top of the insulation material, would have to be described with two {\ct SURF} lines like the following:
+Therefore, you should be careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However, if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material, would have to be described with two {\ct SURF} lines like the following:
 \begin{lstlisting}
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
@@ -3039,16 +3026,9 @@ material and a layer of plastic on top of the insulation material, would have to
       MATL_ID(1:3,1)     = 'STEEL','INSULATION','PLASTIC'
       THICKNESS(1:3)     = 0.0063,0.036,0.002 /
 \end{lstlisting}
-If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
-then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
-{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labeled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
-two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface.
-You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labeled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
-vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material
-{\ct 'STEEL'} would not generate any fuel vapors.
+If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines, then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter {\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labeled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface. You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labeled {\ct 'COLUMN INTERIOR'} to indicate that no fuel vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material {\ct 'STEEL'} would not generate any fuel vapors.
 
-By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
-layers for other surfaces.
+By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of layers for other surfaces.
 
 \subsection{Specified Internal Heat Source}
 
@@ -4326,15 +4306,9 @@ Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  
 
 \subsubsection{Jet Fans}
 
-Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
-If you just want to blow gases in a particular direction, create an
-obstruction {\ct OBST}, at least one cell thick, and apply to it {\ct VENT} lines that are
-associated with a simple HVAC system.
-This allows hot, smokey gases to pass through the
-obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds} which places a louvered fan (blowing diagonally down) near a fire (see Fig.~\ref{fig:Jet_Fan}).
+Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan. If you just want to blow gases in a particular direction, create an obstruction {\ct OBST}, at least one cell thick, and apply to it {\ct VENT} lines that are associated with a simple HVAC system. This allows hot, smokey gases to pass through the obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds} which places a louvered fan (blowing diagonally down) near a fire (see Fig.~\ref{fig:Jet_Fan}).
 
-You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
-a short passageway that draws gases in one side and expels them out the other. The obstruction representing the fan can be positioned about halfway along the passage (if a louvered fan is being used, place the fan at the end of the passage).
+You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form a short passageway that draws gases in one side and expels them out the other. The obstruction representing the fan can be positioned about halfway along the passage (if a louvered fan is being used, place the fan at the end of the passage).
 
 \begin{figure}[ht!]
 \begin{center}

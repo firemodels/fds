@@ -1195,8 +1195,6 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             EXIT FIND_BACK_WALL_CELL
          ENDIF
 
-         IF (SF%HT_DIM==1 .AND. ITER==2) CYCLE WALL_LOOP  ! 1-D heat transfer allowed only in 0 or 1 cells
-
          SELECT CASE(IOR)  ! New cell indices as we march deeper into the obstruction
             CASE(-1) ; II=II+1
             CASE( 1) ; II=II-1
