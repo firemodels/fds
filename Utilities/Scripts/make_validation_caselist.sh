@@ -4,7 +4,8 @@
 MAKEGITENTRY(){
 DIR=$1
 gitrevisions=/tmp/gitrevisions.$$
-cat $FIREMODELS/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
+
+cat $GIT_ROOT/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
@@ -12,17 +13,6 @@ if [ "$gitrev" != "" ] ; then
   if [ "$gitdate" == "" ]; then
     gitdate="undefined"
     gitdate2=2000000000
-    if [ -e ~/FDS-SMV ]; then
-      CUR_DIR=`pwd`
-      cd ~/FDS-SMV
-      gitrevshort=`echo $gitrev | awk -F - '{print $4}' | sed 's/^.\{1\}//'`
-      gitdateold=`git show -s --format=%aD $gitrevshort 2> /dev/null | head -1 | awk '{print $3,$2",",$4}'`
-      if [ "$gitdateold" != "" ]; then
-        gitdate=$gitdateold
-        gitdate2=`git show -s --format=%at $gitrevshort | head -1 | awk '{print $1}'`
-      fi
-      cd $CUR_DIR
-    fi
   else
     gitdate2=`git show -s --format=%at $gitrevshort | head -1 | awk '{print $1}'`
   fi
@@ -33,24 +23,25 @@ rm $gitrevisions
 
 
 CURRENT_DIR=`pwd`
-if [ "$FIREMODELS" == "" ] ; then
-   FIREMODELS=~/FDS-SMVfork
-fi
-export FIREMODELS
+SCRIPTDIR=`dirname "$(readlink -f "$0")"`
+cd $SCRIPTDIR/../../..
+FIREMODELS_ROOT=`pwd`
+export FIREMODELS_ROOT
+cd $CURRENT_DIR
 
 while getopts 'r:' OPTION
 do
 case $OPTION  in
   r)
-   FIREMODELS="$OPTARG"
+   FIREMODELS_ROOT="$OPTARG"
    ;;
 esac
 done
 shift $(($OPTIND-1))
 
-cd $FIREMODELS/fds/Utilities/Scripts
+cd $FIREMODELS_ROOT/fds/Utilities/Scripts
 
-makelist=$FIREMODELS/fds/Validation/Process_All_Output.sh
+makelist=$FIREMODELS_ROOT/fds/Validation/Process_All_Output.sh
 CASELIST=/tmp/temp.out.$$
 TABLE_ENTRIES=/tmp/temp2.out.$$
 grep PROCESS $makelist | awk 'BEGIN { FS = " " } ; { print $2 }' | awk '{if(NR>1)print}'> $CASELIST
