@@ -29,7 +29,7 @@ The gas species is mixture fraction fuel.
       MATL_ID              = 'FOAM'
       THICKNESS            = 0.1
       BURN_AWAY            = .TRUE.
-      BACKING              = 'EXPOSED' /
+      BACKING              = 'VOID' /
 
 &SPEC ID='NITROGEN',BACKGROUND=.TRUE./
 &SPEC ID='OXYGEN'/

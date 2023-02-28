@@ -41,6 +41,7 @@ The case is meant as a teaching tool and to test functionality.
 
 &SURF ID             = 'UPHOLSTERY'
       FYI            = 'Properties completely fabricated'
+      BACKING        = 'VOID'
       COLOR          = 'PURPLE'
       BURN_AWAY      = .TRUE.
       MATL_ID(1:2,1) = 'FABRIC','FOAM'

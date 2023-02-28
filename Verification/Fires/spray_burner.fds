@@ -31,7 +31,6 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 &SURF ID        = 'STEEL SHEET'
       COLOR     = 'BLACK'
       MATL_ID   = 'STEEL'
-      BACKING   = 'EXPOSED'
       THICKNESS = 0.003 /
 
 &SURF ID        = 'GYPSUM BOARD'
