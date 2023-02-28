@@ -594,7 +594,6 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_ID_READ!< Holding array for third body efficiencies
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'  !< User comment
    CHARACTER(FORMULA_LENGTH) :: EQUATION    !< Reaction equation
-   CHARACTER(LABEL_LENGTH) :: FWD_ID        !< ID of forward reaction
    REAL(EB) :: C                            !< Number of carbon atoms in the fuel molecule (SIMPLE_CHEMISTRY)
    REAL(EB) :: H                            !< Number of hydrogen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
    REAL(EB) :: N                            !< Number of nitrogen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
@@ -645,16 +644,17 @@ TYPE REACTION_TYPE
    INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
+   INTEGER :: N_THIRD                       !< Number of third body non-unity efficiency species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
    INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction
+   INTEGER :: REVERSE_INDEX=-1              !< Index of original reaction for a reverse reaction
    LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
    LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
    LOGICAL :: FAST_CHEMISTRY=.FALSE.        !< Indicator of fast reaction
    LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
-   LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
-   LOGICAL :: THIRD_BODY_EFF=.FALSE.        !< Indicator of non-unity catalyst effect
+   LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of third body reaction
    TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
    INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
 END TYPE REACTION_TYPE

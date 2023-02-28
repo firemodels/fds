@@ -2187,7 +2187,7 @@ SELECT CASE (TD%POLY)
       H =  TD%A(1,B)*TE + 0.5_EB*TD%A(2,B)*TE**2 + ONTH*TD%A(3,B)*TE**3 + 0.25_EB*TD%A(4,B)*TE**4 + &
            0.2_EB*TD%A(5,B)*TE**5 + TD%B(1,B)
       S =  TD%A(1,B)*LOG(TE) + TD%A(2,B)*TE + 0.5_EB*TD%A(3,B)*TE**2 + ONTH*TD%A(4,B)*TE**3 + 0.25_EB*TD%A(5,B)*TE**4 + TD%B(2,B)
-      G_F = (H - TE * S)*R0*1.E-6_EB
+      G_F = (H - TE * S)*R0*1.E-6_EB !R0 kmol to mol and G_F J to kJ
    CASE ('MOSKVA')
       TE = MIN(TD%T(2),MAX(TD%T(1),TE))
       CP= (TD%A(1,1) + TD%A(2,1)*TE**0.25_EB + TD%A(3,1)*TE + TD%A(4,1)*LOG(TE))*1000._EB

@@ -4173,8 +4173,8 @@ REAL(EB) :: E_TMP=0._EB,S_TMP=0._EB,ATOM_COUNTS(118),MW_FUEL=0._EB,H_F=0._EB,PR_
 LOGICAL :: L_TMP,CHECK_ATOM_BALANCE,REVERSE,THIRD_BODY
 TYPE(REACTION_TYPE), POINTER, DIMENSION(:) :: REAC_TEMP
 REAL(EB), DIMENSION(6,MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE
-NAMELIST /REAC/ A,AIT_EXCLUSION_ZONE,AUTO_IGNITION_TEMPERATURE,C,CHECK_ATOM_BALANCE,CO_YIELD,CRITICAL_FLAME_TEMPERATURE,&
-                E,EPUMO2,EQUATION,FORMULA,FUEL,&
+NAMELIST /REAC/ A,AIT_EXCLUSION_ZONE,AUTO_IGNITION_TEMPERATURE,C,CHECK_ATOM_BALANCE,CO_YIELD,&
+                CRITICAL_FLAME_TEMPERATURE,E,EPUMO2,EQUATION,FORMULA,FUEL,&
                 FUEL_C_TO_CO_FRACTION,FUEL_H_TO_H2_FRACTION,FUEL_N_TO_HCN_FRACTION,&
                 FUEL_RADCAL_ID,FYI,H,HCN_YIELD,HEAT_OF_COMBUSTION,HOC_COMPLETE,&
                 ID,IDEAL,LOWER_OXYGEN_LIMIT,N,N_S,N_SIMPLE_CHEMISTRY_REACTIONS,N_T,NU,O,PRIORITY,RADIATIVE_FRACTION,&
@@ -4296,10 +4296,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
    IF (A > 0._EB .OR.  E > 0._EB) SUPPRESSION = .FALSE.
 
-   IF ((A > 0._EB .OR. E > 0._EB) .AND. (SPEC_ID_N_S(1)=='null' .OR. N_S(1) < -998._EB)) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. SPEC_ID_N_S and N_S arrays must be defined.'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
    IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. TRIM(SPEC_ID_NU(1))=='null' .AND. TRIM(EQUATION)=='null') THEN
       WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. SPEC_ID_NU and NU arrays or EQUATION must be defined.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -4386,15 +4382,24 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       RN%N_SPEC = NS2
-      DO NS=1,MAX_SPECIES
-         IF (THIRD_EFF_ID(NS)/='null') THEN
-            IF (THIRD_EFF(NS) < 0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. THIRD_EFF values must be >= 0.'
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+      IF (RN%THIRD_BODY) THEN
+         RN%N_THIRD = 0
+         DO NS=1,MAX_SPECIES
+            IF (THIRD_EFF_ID(NS)/='null') THEN
+               IF (THIRD_EFF(NS) < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. THIRD_EFF values must be >= 0.'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               RN%N_THIRD = RN%N_THIRD + 1
             ENDIF
-            RN%THIRD_BODY_EFF = .TRUE.
+         ENDDO
+         IF (RN%N_THIRD > 0) THEN
+            ALLOCATE(RN%THIRD_EFF_READ(RN%N_THIRD))
+            RN%THIRD_EFF_READ(1:RN%N_THIRD) = THIRD_EFF(1:RN%N_THIRD)
+            ALLOCATE(RN%THIRD_EFF_ID_READ(RN%N_THIRD))
+            RN%THIRD_EFF_ID_READ(1:RN%N_THIRD) = THIRD_EFF_ID(1:RN%N_THIRD)
          ENDIF
-      ENDDO
+      ENDIF
 
       IF (RN%N_SPEC > 0) THEN
          ALLOCATE(RN%N_S_READ(RN%N_SPEC))
@@ -4460,9 +4465,10 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       N_REVERSE = N_REVERSE + 1
       RN2 => REACTION(N_REACTIONS + N_REVERSE + NEW_REAC)
       RN2 = RN
-      RN2%NU_READ = -1*RN%NU_READ
+      RN2%NU_READ = -1._EB*RN2%NU_READ
       RN2%REVERSE =REVERSE
-      RN2%ID = RN2%ID//'R'
+      RN2%ID = TRIM(RN2%ID)//'_R'
+      RN2%REVERSE_INDEX = NR
    ENDIF
 ENDDO REAC_READ_LOOP
 
@@ -4541,7 +4547,7 @@ END SUBROUTINE READ_REAC
 
 SUBROUTINE PROC_REAC_1
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION, SHUTDOWN_ATOM
-REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
+REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118),NU_Y(N_SPECIES)
 INTEGER :: NS,NS2,NR
 LOGICAL :: NAME_FOUND,SKIP_ATOM_BALANCE
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -4611,10 +4617,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. RN%FUEL=='null') THEN
       FIND_FUEL: DO NS=1,RN%N_SMIX
-         IF (.NOT. RN%REVERSE .AND. RN%NU_READ(NS)<0._EB) THEN
-            RN%FUEL = RN%SPEC_ID_NU_READ(NS)
-            EXIT FIND_FUEL
-         ELSEIF (RN%REVERSE .AND. RN%NU_READ(NS)>0._EB) THEN
+         IF (RN%NU_READ(NS)<0._EB) THEN
             RN%FUEL = RN%SPEC_ID_NU_READ(NS)
             EXIT FIND_FUEL
          ENDIF
@@ -4640,14 +4643,16 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Transfer SPEC_ID_NU, SPEC_ID_N, NU, and N_S that were indexed by the order they were read in
    ! to now be indexed by the SMIX or SPEC index
+   NU_Y = 0._EB
    DO NS=1,RN%N_SMIX
       IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE
       NAME_FOUND = .FALSE.
       DO NS2=1,N_TRACKED_SPECIES
          IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
             RN%SPEC_ID_NU(NS2) = RN%SPEC_ID_NU_READ(NS)
-            RN%NU(NS2)      = RN%NU_READ(NS)
+            RN%NU(NS2)      = RN%NU(NS2) + RN%NU_READ(NS)
             NAME_FOUND = .TRUE.
+            NU_Y(:) = NU_Y(:) + RN%NU_READ(NS) * SPECIES_MIXTURE(NS2)%VOLUME_FRACTION(:)
             EXIT
          ENDIF
       ENDDO
@@ -4656,6 +4661,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                                        ' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
+   ENDDO
+
+   ! Set RN%N_S=1 for reactant species
+   DO NS=1,N_SPECIES
+      IF (NU_Y(NS) < 0._EB) RN%N_S(NS)=1._EB
    ENDDO
 
    ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
@@ -4691,9 +4701,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       DO NS2=1,N_SPECIES
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%SPEC_ID_N_S(NS2) = RN%SPEC_ID_N_S_READ(NS)
-            RN%N_S(NS2)       = RN%N_S_READ(NS)
-            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2)) ! FDS Tech Guide, Eq. (5.46), product term
-            RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS2)
+            RN%N_S(NS2)         = RN%N_S_READ(NS)
             NAME_FOUND = .TRUE.
             EXIT
          ENDIF
@@ -4704,8 +4712,15 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
-   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.49)
-   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.46)
+
+   DO NS=1,N_SPECIES
+      IF (RN%N_S(NS) < -998._EB .OR. NU_Y(NS) > 0._EB) CYCLE
+      RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS)%MW)**(-RN%N_S(NS)) ! FDS Tech Guide, Eq. (5.37), product term
+      RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS)
+   ENDDO
+
+   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.40)
+   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.37)
 
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate for FAST_CHEMISTRY (this will get removed when we overhaul combustion)
    ! Fictitious Arrhenius rate is dC_F/dt = -1E10*C_F*C_A
@@ -4778,25 +4793,24 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    ! Set THIRD_BODY efficiencies
-   IF (RN%THIRD_BODY_EFF) THEN
+   IF (RN%N_THIRD>0) THEN
       ALLOCATE(RN%THIRD_EFF(N_SPECIES))
       RN%THIRD_EFF = 1._EB
-      THIRD1: DO NS=1,MAX_SPECIES
-         IF (RN%THIRD_EFF_ID_READ(NS)=='null') EXIT THIRD1
+      DO NS=1,RN%N_THIRD
          NAME_FOUND = .FALSE.
-         THIRD2: DO NS2 = 1,N_SPECIES
+         THIRD1: DO NS2 = 1,N_SPECIES
             IF (RN%THIRD_EFF_ID_READ(NS)==SPECIES(NS2)%ID) THEN
                NAME_FOUND=.TRUE.
                RN%THIRD_EFF(NS2) = RN%THIRD_EFF_READ(NS)
-               EXIT THIRD2
+               EXIT THIRD1
             ENDIF
-         ENDDO THIRD2
+         ENDDO THIRD1
          IF (.NOT. NAME_FOUND) THEN
             WRITE(MESSAGE,'(A,I0,A,A,A)') &
                'ERROR: Problem with REAC ',NR,'. THIRD_EFF primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      ENDDO THIRD1
+      ENDDO
    ENDIF
 
 ENDDO REAC_LOOP
@@ -5000,7 +5014,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
       ALLOCATE(RN%DELTA_G(0:I_MAX_TEMP))
       DO J=0,I_MAX_TEMP
-         RN%DELTA_G(J) = 1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU) ! convert from kJ/mol to J/kmol
+         RN%DELTA_G(J) = -1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU)/R0 ! kJ/mol -> J/kmol which is used for R0
       ENDDO
    ENDIF
 

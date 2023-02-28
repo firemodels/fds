@@ -731,7 +731,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             IF (RN%THIRD_BODY) THEN
                CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
                MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
-               IF (RN%THIRD_BODY_EFF) THEN
+               IF (RN%N_THIRD > 0) THEN
                   X_Y_SUM = 0._EB
                   DO NS=1,N_SPECIES
                      X_Y(NS) = YY_PRIMITIVE(NS)/SPECIES(NS)%MW
@@ -744,7 +744,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
                ENDIF
             ENDIF
             IF(RN%REVERSE) THEN ! compute equilibrium constant
-               DZ_F = DZ_F*EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/(R0*TMP_0))
+               DZ_F = DZ_F*EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
             Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC

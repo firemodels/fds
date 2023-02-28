@@ -2752,7 +2752,7 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',NR
       ENDIF
                       WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
-      IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+      IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(REACTION(RN%REVERSE_INDEX)%ID)
    ENDIF
 
    WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
@@ -2789,14 +2789,23 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
       WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
       WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
-   ENDIF
-   IF (.NOT.RN%FAST_CHEMISTRY) THEN
       WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
       DO NN=1,N_SPECIES
          IF (RN%N_S(NN) <=-998._EB) CYCLE
          WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%N_S(NN)
       ENDDO
       IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
+      IF (RN%THIRD_BODY) THEN
+         WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
+         IF (ANY(ABS(RN%THIRD_EFF-1._EB)>TWO_EPSILON_EB)) THEN
+            WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
+            WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
+            DO NN=1,N_SPECIES
+               IF (ABS(RN%THIRD_EFF(NN)-1._EB)>TWO_EPSILON_EB) &
+                  WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%THIRD_EFF(NN)
+            ENDDO
+         ENDIF
+      ENDIF
    ENDIF
 
    WRITE(LU_OUTPUT,'(/6X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
