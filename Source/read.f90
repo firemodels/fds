@@ -3760,8 +3760,9 @@ SPEC_LOOP: DO N=1,N_SPECIES
       IF (SS%K_LIQUID < 0._EB) SS%K_LIQUID = K_LIQUID
       IF (SS%BETA_LIQUID < 0._EB) SS%BETA_LIQUID = BETA_LIQUID
 
-      IF (CP_TEMP < 0._EB .AND. SS%SPECIFIC_HEAT_LIQUID < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a SPECIFIC_HEAT_LIQUID.'
+      IF (CP_TEMP < 0._EB .AND. SS%SPECIFIC_HEAT_LIQUID < 0._EB .AND. SS%RAMP_CP_L_INDEX < 0) THEN
+         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a SPECIFIC_HEAT_LIQUID or ',&
+            ' a RAMP_CP_L.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%TMP_MELT < 0._EB) THEN
