@@ -211,6 +211,9 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
    INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
+   INTEGER :: N_LAYERS=0       !< Number of material layers
+   INTEGER :: N_MATL=0         !< Number of materials
+   INTEGER :: N_LPC=0          !< Number of Lagrangian Particle Classes
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
@@ -316,7 +319,6 @@ END TYPE BOUNDARY_RADIA_TYPE
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
-   INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
    INTEGER :: B1_INDEX=0             !< Variables devoted to surface properties
@@ -331,6 +333,10 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
+   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
+
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -365,7 +371,6 @@ TYPE WALL_TYPE
    REAL(EB) :: V_DEP=0._EB            !< Deposition velocity (m/s)
    REAL(EB) :: VEL_ERR_NEW=0._EB      !< Velocity mismatch at mesh or solid boundary (m/s)
 
-   INTEGER :: WALL_INDEX=0            !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
@@ -386,6 +391,9 @@ TYPE WALL_TYPE
    INTEGER :: JD21_INDEX=0
    INTEGER :: JD22_INDEX=0
    INTEGER :: CUT_FACE_INDEX=0
+   INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
 END TYPE WALL_TYPE
 
@@ -415,7 +423,6 @@ END TYPE EXTERNAL_WALL_TYPE
 
 TYPE THIN_WALL_TYPE
 
-   INTEGER :: THIN_WALL_INDEX=0       !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
@@ -427,6 +434,9 @@ TYPE THIN_WALL_TYPE
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+   INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
 END TYPE THIN_WALL_TYPE
 
@@ -1153,6 +1163,9 @@ TYPE CFACE_TYPE
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11
    INTEGER :: CUT_FACE_IND2=-11
+   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
    REAL(EB) :: AREA=0._EB
    REAL(EB) :: NVEC(3)=0._EB
    REAL(EB) :: VEL_ERR_NEW=0._EB

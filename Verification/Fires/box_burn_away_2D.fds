@@ -30,7 +30,7 @@ The gas species is mixture fraction fuel.
       MATL_ID              = 'FOAM'
       THICKNESS            = 0.1
       BURN_AWAY            = .TRUE.
-      BACKING              = 'EXPOSED' /
+      BACKING              = 'VOID' /
 
 &REAC FUEL='METHANE',AUTO_IGNITION_TEMPERATURE=15000. /
 

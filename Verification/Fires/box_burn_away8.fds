@@ -26,7 +26,7 @@ The gas species here is mixture fraction fuel, burning rate specified.
       THICKNESS            = 0.1
       BURN_AWAY            = .TRUE.
       MLRPUA               = 0.0733333
-      BACKING              = 'EXPOSED' /
+      BACKING              = 'VOID' /
 
 &REAC FUEL='ETHYLENE'
       FYI='C_2 H_4'

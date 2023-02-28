@@ -4237,7 +4237,7 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 \section{Heat Conduction across Mesh Boundaries (\texorpdfstring{\textct{back\_wall\_test}}{back\_wall\_test})}
 \label{back_wall_test}
 
-In this example, a unit cube made of 0.5~cm thick steel has several of its sides aligned with mesh interfaces. There is a solid cube centered inside the box with a fixed temperature of 500~$^\circ$C. The objective of the test is to ensure that the heat conduction through the steel and across the mesh boundaries is computed properly. In the left hand plot of Fig.~\ref{back_wall_test_fig}, the net radiative heat flux to the interior surface of the box matches the net radiative heat flux from the external surface in steady state. In the right hand plot, the external surface temperature of two sides of the box are compared. One side is a zero cell thick obstruction; the other side is a one cell thick obstruction. Since the sides are all assumed to be 0.5~cm thick, the fact that the obstruction is either zero or one cell thick should not matter and the temperatures should match exactly.
+In this example, a hollow cube whose walls are either zero, one, or two cells thick contains a solid cube centered inside with a fixed temperature of 500~$^\circ$C. The objective of the test is to ensure that the heat conduction through the steel and across the mesh boundaries is computed properly when each wall has a specified {\ct THICKNESS} of 5~cm. In the left hand plot of Fig.~\ref{back_wall_test_fig}, the net radiative heat flux to the interior surface of the box matches the net radiative heat flux from the external surface in steady state. In the right hand plot, the external surface temperature of two sides of the box are compared. One side is a zero cell thick obstruction; the other side is a two cell thick obstruction. Since the sides all have a specified {\ct THICKNESS} of 0.5~cm, the fact that the obstruction is either zero, one, or two cells thick should not matter and the temperatures should match exactly.
 
 \begin{figure}[ht]
 \noindent
@@ -4245,7 +4245,7 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_flux} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_temp}
 \end{tabular*}
-\caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or one cell thick.}
+\caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or two cells thick.}
 \label{back_wall_test_fig}
 \end{figure}
 
@@ -6307,7 +6307,7 @@ In the simplest configuration of a static uniform wind field ({\ct LEVEL\_SET\_M
   \item {\ct LS\_ellipse\_5ms\_30deg.fds}: a \SI[per-mode=symbol]{5}{\meter\per\second} wind from the west and a \SI{30}{\degree} slope oriented to the northeast.
 \end{itemize}
 
-The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{1}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}. 
+The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{1}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}.
 
 The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. The relative errors between the FDS cases and the empirical model are shown in Figure~\ref{fig:level_set_ellipse_error}.
 
