@@ -1781,7 +1781,7 @@ END SELECT
 
 ! Set mass and energy fluxes to zero prior to time sub-iteration
 
-B1%HEAT_TRANS_COEF = 0._EB
+!B1%HEAT_TRANS_COEF = 0._EB
 B1%Q_CON_F = 0._EB
 IF (SF%INTERNAL_RADIATION) Q_RAD_OUT_OLD = B1%Q_RAD_OUT
 B1%Q_RAD_OUT = 0._EB
@@ -2655,7 +2655,7 @@ SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,IOR,RH
                      Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B_NUMBER,LAYER_INDEX,SOLID_CELL_INDEX,&
                      R_DROP,LPU,LPV,LPW)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_VISCOSITY,GET_PARTICLE_ENTHALPY,&
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_VISCOSITY,GET_PARTICLE_ENTHALPY,GET_SPECIFIC_HEAT,&
                               GET_MASS_FRACTION_ALL,GET_EQUIL_DATA,GET_SENSIBLE_ENTHALPY,GET_Y_SURF,GET_FILM_PROPERTIES
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 USE TURBULENCE, ONLY: RAYLEIGH_HEAT_FLUX_MODEL,RAYLEIGH_MASS_FLUX_MODEL
@@ -2674,8 +2674,8 @@ INTEGER :: N,NN,NNN,J,NS,SMIX_INDEX(N_MATS),NWP,NP,NP2,ITMP
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
-            D_FILM,H_MASS,RE_L,SHERWOOD,MFLUX,MU_FILM,MU_AIR,SC_FILM,U_TANG,TMP_FILM,TMP_G,U2,V2,W2,VEL,&
-            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_Y_GAS,SUM_Y_SV,&
+            D_FILM,H_MASS,RE_L,SHERWOOD,MFLUX,MU_FILM,SC_FILM,TMP_FILM,TMP_G,U2,V2,W2,VEL,&
+            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_Y_GAS,SUM_Y_SV,NU_O2_CHAR,Y_O2_S,&
             SUM_Y_SV_SMIX(N_TRACKED_SPECIES),X_L_SUM,RHO_DOT_EXTRA,MFLUX_MAX,RHO_FILM,CP_FILM,PR_FILM,K_FILM,EVAP_FILM_FAC
 LOGICAL :: LIQUID(N_MATS),SPEC_ID_ALREADY_USED(N_MATS),DO_EVAPORATION
 
@@ -2931,28 +2931,35 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
             RHO_DOT = MIN(REACTION_RATE,RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
-         CASE (PYROLYSIS_VEGETATION)
+         CASE (PYROLYSIS_SURFACE_OXIDATION)
 
-            ! Tech Guide: r_alpha,beta (1/s)
-            REACTION_RATE = ML%A(J)*(RHO_S(N))**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
-            ! power term
-            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
-            ! Oxidation reaction?
-            IF ( (ML%NU_O2_CHAR(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-               ! Get oxygen mass fraction
-               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
-               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-               CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
-               U_TANG = SQRT(2._EB*KRES(IIG,JJG,KKG))
-               IF (PRESENT(R_DROP)) THEN
-                  LENGTH_SCALE = 2._EB*R_DROP
-               ELSE
-                  LENGTH_SCALE = SF%CONV_LENGTH
-               ENDIF
-               RE_L   = RHO(IIG,JJG,KKG)*U_TANG*LENGTH_SCALE/MU_AIR
-               REACTION_RATE = REACTION_RATE * RHO(IIG,JJG,KKG)*Y_O2*(4._EB/LENGTH_SCALE) * &
-                               (1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(ML%NU_O2_CHAR(J))
-            ENDIF
+            ! Reaction rate in kg/m2/s 
+            REACTION_RATE = ML%A(J)*EXP(-ML%E(J)/(R0*TMP_S))
+            
+            ! Estimate surface oxygen concentration from mass transport
+            TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
+            ! Get oxygen mass fraction
+            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+            CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
+            ! Mass transfer coefficient
+            H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
+            ! Mass stoichiometric coefficient for oxygen
+            NU_O2_CHAR = ABS(ML%NU_GAS_P(O2_INDEX,J))
+            Y_O2_S = (SQRT(4._EB*REACTION_RATE/H_MASS*Y_O2+(REACTION_RATE*NU_O2_CHAR/H_MASS)**2._EB + &
+               2._EB*REACTION_RATE*NU_O2_CHAR/H_MASS+1._EB)-REACTION_RATE*NU_O2_CHAR/H_MASS-1) / &
+               (2._EB*REACTION_RATE/H_MASS)
+         
+            LENGTH_SCALE = SF%INNER_RADIUS + SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
+            ! Adjust LENGTH_SCALE to 1/(surface-to-volume ratio)
+            SELECT CASE(SF%GEOMETRY)
+               CASE(SURF_SPHERICAL)
+                  LENGTH_SCALE = LENGTH_SCALE/3._EB
+               CASE DEFAULT
+                  LENGTH_SCALE = LENGTH_SCALE/2._EB
+            END SELECT              
+
+            REACTION_RATE = Y_O2_S/LENGTH_SCALE*REACTION_RATE
             REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
             RHO_DOT = MIN(REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
@@ -3011,8 +3018,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       ! If there is char oxidation, save the HRR per unit volume generated
 
-      IF (ML%NU_O2_CHAR(J)>0._EB) THEN
-         Q_DOT_O2_PPP = ML%NU_GAS_P(O2_INDEX,J)*RHO_DOT*H_R/ML%NU_O2_CHAR(J)
+      IF (ML%N_O2(J)>0._EB) THEN
+         Q_DOT_O2_PPP = Q_DOT_O2_PPP - RHO_DOT*H_R
       ENDIF
 
    ENDDO REACTION_LOOP

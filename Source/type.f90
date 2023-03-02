@@ -695,8 +695,6 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_T           !< Optional exponent for temperature in reaction expression
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_O2          !< Optional exponent for oxygen term in reaction expression
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: GAS_DIFFUSION_DEPTH !< Length scale used in char oxidation calculation (m)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_O2_CHAR    !< Mass stoichiometric coefficient for oxygen in char reaaction
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BETA_CHAR     !< Constant used in char oxidation model
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEATING_RATE  !< Heating rate (K/s) used in calculation of kinetic constants
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Tracked mass stoichiometric coefficient for solid to gas conversion
