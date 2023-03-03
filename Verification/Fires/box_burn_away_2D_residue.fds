@@ -40,7 +40,7 @@ The gas species is mixture fraction fuel.
       THICKNESS            = 0.1
       STRETCH_FACTOR       = 1.0
       BURN_AWAY            = .TRUE.
-      BACKING              = 'EXPOSED' / 
+      BACKING              = 'VOID' / 
 
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=15000. /
 

@@ -28,7 +28,7 @@ The gas species here is additional SPEC.
       MATL_ID              = 'FOAM'
       THICKNESS            = 0.1
       BURN_AWAY            = .TRUE.
-      BACKING              = 'EXPOSED' /
+      BACKING              = 'VOID' /
 
 &DUMP SMOKE3D = .FALSE. 
       DT_HRR = 0.01

@@ -1237,7 +1237,7 @@ This section presents the rate of spread for simulations of crown fires. For a d
 
 This section presents the rate of spread for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
 
-For each case, three simulations are performed---one using Lagrangian particles to represent the vegetation, one using the Boundary Fuel Model (BFM), and the other using Rothermel-Albini fuel models in a level set fire spread simulation.
+For each case, we perform simulations with three different fuel models---one using Lagrangian particles to represent the vegetation, one using the Boundary Fuel Model (BFM), and the other using Rothermel-Albini fuel models in a level set fire spread simulation.  For each fuel model, we also run at three different grid resolutions, as indicated in the plots in Fig.~\ref{CSIRO}.  The Lagrangian particle and Boundary Fuel Model require higher grid resolution $\delta x = [1, 0.5, 0.25]$ m.  The level set simulations are designed for relatively coarse grids, in this case we run at $\delta x = [20, 10, 5]$ m.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

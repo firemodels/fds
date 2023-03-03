@@ -4,7 +4,10 @@ The speed of the equilibriation is governed by the PRESSURE_RELAX_TIME.
 
 &HEAD CHID='restart_ulmat', TITLE='Test of opening pressure ZONEs' /
 
-&MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
+! &MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
+
+&MULT ID='m1', DX=5,DY=5, I_UPPER=1,J_UPPER=1/
+&MESH IJK=25,25,12, XB=0.0,5.0,0.0,5.0,0.0,2.4, MULT_ID='m1' /
 
 &TIME T_END=30., DT=0.05 /
 
