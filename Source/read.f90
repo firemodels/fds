@@ -4098,7 +4098,7 @@ SUBROUTINE READ_COMB
 NAMELIST /COMB/ CHECK_REALIZABILITY,COMPUTE_ADIABATIC_FLAME_TEMPERATURE,EXTINCTION_MODEL,&
                 FIXED_MIX_TIME,FREE_BURN_TEMPERATURE,&
                 INITIAL_UNMIXED_FRACTION,MAX_CHEMISTRY_SUBSTEPS,N_FIXED_CHEMISTRY_SUBSTEPS,&
-                ODE_SOLVER,RICHARDSON_ERROR_TOLERANCE,SUPPRESSION,TAU_CHEM,TAU_FLAME
+                ODE_SOLVER,RICHARDSON_ERROR_TOLERANCE,SUPPRESSION,TAU_CHEM,TAU_FLAME,ZZ_MIN_GLOBAL
 
 ODE_SOLVER         = 'null'
 
@@ -4666,7 +4666,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Set RN%N_S=1 for reactant species
    DO NS=1,N_SPECIES
-      IF (NU_Y(NS) < 0._EB) RN%N_S(NS)=1._EB
+      IF (NU_Y(NS) < 0._EB) RN%N_S(NS)=-NU_Y(NS)
    ENDDO
 
    ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
@@ -4702,7 +4702,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       DO NS2=1,N_SPECIES
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%SPEC_ID_N_S(NS2) = RN%SPEC_ID_N_S_READ(NS)
-            RN%N_S(NS2)         = RN%N_S_READ(NS)
+            IF (RN%N_S(NS2) < -998._EB) THEN
+               RN%N_S(NS2) = RN%N_S_READ(NS)
+            ELSE
+               RN%N_S(NS2) = RN%N_S(NS2) + RN%N_S_READ(NS)
+            ENDIF
             NAME_FOUND = .TRUE.
             EXIT
          ENDIF

@@ -2797,7 +2797,7 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
       IF (RN%THIRD_BODY) THEN
          WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
-         IF (ANY(ABS(RN%THIRD_EFF-1._EB)>TWO_EPSILON_EB)) THEN
+         IF (RN%N_THIRD > 0) THEN
             WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
             WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
             DO NN=1,N_SPECIES
