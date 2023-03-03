@@ -3635,12 +3635,15 @@ IF (ICYC==1) WRITE(LU_OUTPUT,100)
 IF (SUPPRESS_DIAGNOSTICS) THEN
 
    IF (ABS(T)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
          ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
    ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
          ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
    ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
+      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+   ELSEIF (ABS(T)>0.01 .AND. ABS(T)<=0.1) THEN
       WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
          ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
    ELSE
@@ -3663,8 +3666,10 @@ ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
    WRITE(LU_OUTPUT,151) DT,T
 ELSEIF (ABS(T)>0.001 .AND. ABS(T) <=0.01) THEN
    WRITE(LU_OUTPUT,152) DT,T
-ELSE
+ELSEIF (ABS(T)>0.01 .AND. ABS(T) <=0.1) THEN
    WRITE(LU_OUTPUT,153) DT,T
+ELSE
+   WRITE(LU_OUTPUT,253) DT,T
 ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
@@ -3705,10 +3710,11 @@ ENDDO
 WRITE(LU_OUTPUT,*)
 
 100 FORMAT(/' Run Time Diagnostics'/)
-150 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.5,' s')
-151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
-152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
-153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
+150 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.6,' s')
+151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.5,' s')
+152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
+153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
+253 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
 154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
