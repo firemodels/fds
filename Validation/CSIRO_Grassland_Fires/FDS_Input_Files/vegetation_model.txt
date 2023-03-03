@@ -18,11 +18,9 @@
       DENSITY               = 300.
       CONDUCTIVITY          = 0.052
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      N_S                   = 0.
-      NU_O2_CHAR            = 1.65
-      BETA_CHAR             = 0.2
-      A                     = 430.
-      E                     = 74800.
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000. 
       SPEC_ID               = 'PRODUCTS','AIR'
       NU_SPEC               = 8.13,-7.17
       MATL_ID               = 'ASH'
