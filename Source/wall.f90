@@ -1259,8 +1259,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
       ! Calculate smoothed incident heat flux if cone scaling is applied
-      IF (SF%REFERENCE_HEAT_FLUX > 0._EB) THEN
-         TSI = MIN(T-T_BEGIN+DT, SF%REFERENCE_HEAT_FLUX_TIME_INTERVAL+DT)
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. B1%T_IGN <=T) THEN
+         TSI = MIN(T-B1%T_IGN+DT, SF%REFERENCE_HEAT_FLUX_TIME_INTERVAL+DT)
          B1%Q_IN_SMOOTH = (B1%Q_IN_SMOOTH *(TSI-DT) + DT*(B1%Q_CON_F+B1%Q_RAD_IN))/TSI
       ENDIF
 
@@ -1282,7 +1282,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
 
-      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR) THEN
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) THEN
          RP => RAMPS(SF%RAMP(TIME_HEAT)%INDEX)               
          IF (SF%EMISSIVITY > 0._EB) THEN
             B1%T_SCALE = B1%T_SCALE + DT * MAX(0._EB,B1%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
@@ -1303,7 +1303,13 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
             IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1) THEN
-               IF (PREDICTOR) B1%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-B1%Q_SCALE)/DT*SF%MASS_FLUX(N)
+               IF (PREDICTOR) THEN
+                  IF (B1%T_IGN <=T) THEN
+                     B1%M_DOT_G_PP_ACTUAL(N) = (Q_NEW-B1%Q_SCALE)/DT*SF%MASS_FLUX(N)
+                  ELSE
+                     B1%M_DOT_G_PP_ACTUAL(N) = 0._EB
+                  ENDIF
+               ENDIF
             ELSE
                B1%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%RAMP(N)%INDEX,TAU=SF%RAMP(N)%TAU)*SF%MASS_FLUX(N)
             ENDIF
@@ -1312,7 +1318,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          MFT = MFT + B1%M_DOT_G_PP_ADJUST(N)
       ENDDO SUM_MASSFLUX_LOOP
       
-      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR) B1%Q_SCALE = Q_NEW
+      IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) B1%Q_SCALE = Q_NEW
 
       ! Apply user-specified mass flux variation
 
