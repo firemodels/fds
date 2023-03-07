@@ -52,7 +52,6 @@
       DENSITY               = 300.
       CONDUCTIVITY          = 0.052
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      NU_O2_CHAR            = 1.65
       N_O2                  = 1.
       REFERENCE_TEMPERATURE = 460.
       HEATING_RATE          = 10

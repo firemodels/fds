@@ -1,6 +1,6 @@
 &HEAD CHID='char_oxidation_2', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=10, DT=0.001, WALL_INCREMENT=1 /
+&TIME T_END=30, DT=0.001, WALL_INCREMENT=1 /
 
 &MISC TMPA=800./
 &CLIP MAXIMUM_TEMPERATURE=5000 /
@@ -71,11 +71,9 @@
       DENSITY            = 300.
       CONDUCTIVITY       = 50.052
       SPECIFIC_HEAT      = 1.0
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800.
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000.
       SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
       NU_SPEC            = -1.65,2.63
       MATL_ID            = 'ASH'

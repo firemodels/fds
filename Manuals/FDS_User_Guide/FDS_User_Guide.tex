@@ -2823,7 +2823,7 @@ In an LES calculation, the convective heat transfer coefficient, $h$, is based o
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} , \frac{2L}{\delta n}\right)   \label{q_con}
 \ee
 where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D<<\delta n$ and so the equation for $h$ becomes:
-\be h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right).
+\be h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right). \label{h_particles}
 \ee
 
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
@@ -3311,9 +3311,9 @@ Finally, if you desire that the burning stop if the surface temperature drops be
 
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}.
+FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model was developed on heat fluxes ranging from 25-75 kW/m$^2$; however, by default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
 
-An example of this is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
+An example demonstrating the scaling behavior is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
 
 \begin{lstlisting}
 &MATL ID='SAMPLE', CONDUCTIVITY=100, DENSITY=1000, SPECIFIC_HEAT=1, EMISSIVITY=1/
@@ -7330,11 +7330,9 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}.
-
 \subsection{Solid Phase}
 
-The solid-phase thermal degradation process for generic vegetation consists of three reactions (note that the stoichiometric coefficients are mass-based):
+The solid-phase thermal degradation process for generic vegetation are typically modeled with three reactions (note that the stoichiometric coefficients are mass-based)~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}:
 
 \vspace{\baselineskip}
 
@@ -7353,12 +7351,13 @@ The solid-phase thermal degradation process for generic vegetation consists of t
  \label{char_reaction}
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with {\ct MOISTURE\_FRACTION} on the {\ct SURF} line. $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis, specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized, specified by {\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties. $\nu_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation, specified by {\ct NU\_MATL} on the {\ct MATL} line describing the char.
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with {\ct MOISTURE\_FRACTION} on the {\ct SURF} line. $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis, specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized. $\nu_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation, specified by {\ct NU\_MATL} on the {\ct MATL} line describing the char.
 
-It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. A discussion of the composition of the Char and Fuel Gas is given in Section~\ref{veg_pyrolysis_gas_phase}.
+It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. In general, it is assumed that char may be comprised of more than pure carbon and is defined as $\mathrm{C_{x'}O_{z'}A}$ in Eq.~\ref{char_chemistry}. In the specific case where char is composed of pure carbon which reacts completely with CO$_2$ then $\nu_{\rm O_2,char}=2.67$ and $\nu_{\rm ash}=0$. A full discussion of the composition of the Char and Fuel Gas is given in Section~\ref{veg_pyrolysis_gas_phase}.
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
+ \label{lumped_char_reaction}
  {\rm Char} + \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} \, {\rm Air} \rightarrow \left( 1+ \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} - \nu_{\rm ash} \right) \, {\rm Products} + \nu_{\rm ash} \, {\rm Ash}
 \ee
 In the input file, this reaction is specified by the following parameters on the {\ct MATL} line that defines the char:
@@ -7370,22 +7369,30 @@ In the input file, this reaction is specified by the following parameters on the
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.15,-7.17 /
 \end{lstlisting}
-What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly.
+What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly. If O$_2$ is not explicitly tracked FDS will infer $\nu_{\rm O_2,char}$ in Eq.~\ref{lumped_char_reaction} from the mass fraction of O$_2$ in the reactant (e.g. Air). Assuming $Y_{{\rm O_2},\infty}=0.23$, this example implies $\nu_{\rm O_2,char}=1.65$, which is a common value used for vegetative material~\cite{Porterie:2006}. An oxygen mass fraction of 0.23 is usually a good approximation for Air when converting between the lumped species and oxygen stoichiometric coefficients. The actual mass fractions of the components of a lumped species can always be confirmed by checking the {\ct CHID.out} file.
 
 In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
 \be
    \rho_{\rm s} = \rho_{\rm s,dry} + \rho_{\rm s,H_2O} + \rho_{\rm s,char} + \rho_{\rm s,ash}
 \ee
-The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, and char oxidation are:
+The reaction rates for evaporation of H$_2$O and pyrolysis of the dry vegetation are:
 \begin{eqnarray}
   r_{\rm H_2O} &=& \rho_{\rm s, H_2O}  \; A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
-  r_{\rm pyr}  &=& \rho_{\rm s,dry}    \; A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)   \\[.1in]
-  r_{\rm char} &=& \rho_{\rm s,char}^0 \; A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
-  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} } \label{r_char}
+  r_{\rm pyr}  &=& \rho_{\rm s,dry}    \; A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)
 \end{eqnarray}
-where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. 
 
-The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 500~kg/(m$^3 \cdot$s) is applied to $r_{\rm char}$.
+In the case of char the surface oxidation rate is determined by~\cite{Boonmee:2005}:
+\be
+r_{\rm char} = Y_{\rm O_2,surf} \, \sigma \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \label{r_char}
+\ee
+This model is invoked by setting {\ct SURFACE\_OXIDATION\_MODEL} to {\ct T} on the {\ct MATL} line. Use of this model automatically assumes the reaction is zeroth order for the solid phase density ({\ct N\_S=0}) and first order for the oxygen mass fraction ({\ct N\_O2=1}), and FDS will override any values provided by the user. Suggested kinetic constants are given in Table~\ref{tab:veg_kinetics}. The reaction rate depends on the surface area to volume ratio of the solid, $\sigma$. It also depends on the oxygen mass fraction at the material surface, $Y_{\rm O_2,surf}$. This is determined from a mass conservation approach which assumes the oxygen consumed by the reaction must be supplied by transport to the surface from the oxygen in the surrounding gas ($Y_{\rm O_2,\infty}$). This produces the following balance between transport and kinetics~\cite{Turns:1996}:
+\begin{eqnarray}
+  h_m \, \ln(B+1) &=& Y_{\rm O_2,surf} \, \sigma \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \\[.1in]
+  B  &=& \frac{Y_{\rm O_2,\infty} - Y_{\rm O_2,surf}}{\nu_{\rm O_2,char}+Y_{\rm O_2,surf}}
+\end{eqnarray}
+The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, and so consideration should be given when using the {\ct SURFACE\_OXIDATION\_MODEL}.
+
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation pyrolysis constants.}
@@ -7402,9 +7409,8 @@ $A_{\rm H_2O}$          & 600,000 $\sqrt{K}$/s          & Porterie et al.~\cite{
 $E_{\rm H_2O}$          & 48,200 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $A_{\rm pyr}$           & 36,300 s$^{-1}$               & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $E_{\rm pyr}$           & 60,300 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
-$A_{\rm char}$          & 430  m/s                      & Porterie et al.~\cite{Porterie:2006}        \\ \hline
-$E_{\rm char}$          & 74,800 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
-$\beta_{\rm char}$      & 0.2                           & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$A_{\rm char}$          & 465  kg/m$^2$/s               & Boonmee and Quintiere~\cite{Boonmee:2005}  \\ \hline
+$E_{\rm char}$          & 68,000 J/mol                  & Boonmee and Quintiere~\cite{Boonmee:2005}  \\ \hline
 $\nu_{\rm O_2,char}$    & 1.65                          & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $\nu_{\rm char}$        & 0.25                          & Assumption                                  \\ \hline
 $\nu_{\rm ash}$         & 0.04                          & Assumption                                  \\ \hline
@@ -7415,6 +7421,8 @@ $\Delta h_{\rm H_2O}$   & 2,259 kJ/kg                   & Porterie et al.~\cite{
 \end{tabular}
 \end{center}
 \end{table}
+
+
 The equation governing the temperature of the thermally-thick solid is
 \be
 \label{eq:Tv_thermally_thick}
@@ -7452,7 +7460,7 @@ The rate of change for the components of the vegetative mass during thermal degr
 \end{eqnarray}
 Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $r_{\rm H_2O}$, $(1-\nu_{\rm char}) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \nu_{\rm ash}) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, r_{\rm char}$.
 
-Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the specification of the parameter {\ct NU\_O2\_CHAR} on the {\ct MATL} line for char indicates that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
+Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the special surface oxidation model is invoked by setting {\ct SURFACE\_OXIDATION\_MODEL} to {\ct T} on the {\ct MATL} line. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
 
 \begin{figure}[ht]
 \begin{lstlisting}
@@ -7483,11 +7491,9 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       DENSITY  = 300.
       CONDUCTIVITY = 0.05
       SPECIFIC_HEAT_RAMP = '...'
-      N_S = 0.
-      NU_O2_CHAR = 1.65
-      BETA_CHAR = 0.2
-      A = 430.
-      E = 74800.
+      SURFACE_OXIDATION_MODEL = T
+      A = 465.
+      E = 68000.
       MATL_ID = 'ASH'
       NU_MATL = 0.10
       SPEC_ID = 'PRODUCTS','AIR'
@@ -7511,7 +7517,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 To estimate the heat of combustion of the gas phase reaction of fuel vapors generated by the pyrolysis of vegetation, the decomposition reaction given in Eqs.~(\ref{pyr_reac}) and (\ref{char_reaction}) is written as an equivalent set of reactions assuming that the Dry Vegetation is given by the effective formula C$_{\rm x}$H$_{\rm y}$O$_{\rm z}$A, where A represents the inorganic components that eventually form the Ash.
 \begin{eqnarray}
    \underbrace{\mathrm{C_xH_yO_zA \; (s)}}_{\rm Dry\ Vegetation} &\rightarrow& \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\mathrm{C_{x-x'}H_yO_{z-z'} \; (g)}}_{\rm Fuel\ Gas} \\
-   \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\mathrm{\nu_{\rm O_2} O_2 \; (g)}}_{\rm Oxygen} &\rightarrow& \underbrace{\mathrm{\nu_{\rm CO_2} \, CO_2 \; (g)}}_{\rm Carbon\ Dioxide} \; + \; \underbrace{\mathrm{A \; (s)}}_{\rm Ash}
+   \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\mathrm{\nu_{\rm O_2} O_2 \; (g)}}_{\rm Oxygen} &\rightarrow& \underbrace{\mathrm{\nu_{\rm CO_2} \, CO_2 \; (g)}}_{\rm Carbon\ Dioxide} \; + \; \underbrace{\mathrm{A \; (s)}}_{\rm Ash} \label{char_chemistry}
 \end{eqnarray}
 \be
    \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm O_2}}   \quad ; \quad
@@ -11651,7 +11657,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADJUST\_H}                     & Logical         & Section~\ref{solid_phase_energy_conservation}       &                   & {\ct T}       \\ \hline
 {\ct ALLOW\_SHRINKING}              & Logical         & Section~\ref{info:shrink_swell}       &                   & {\ct T}       \\ \hline
 {\ct ALLOW\_SWELLING}               & Logical         & Section~\ref{info:shrink_swell}       &                   & {\ct T}       \\ \hline
-{\ct BETA\_CHAR(:)}                 & Real Array      & Section~\ref{vegetation_model}        & kg/kg             & 0.2           \\ \hline
 {\ct BOILING\_TEMPERATURE}          & Real            & Section~\ref{info:liquid_fuels}       & $^\circ$C         & 5000.         \\ \hline
 {\ct CONDUCTIVITY}                  & Real            & Section~\ref{info:thermal_properties} & \si{W/(m.K)}      & 0.            \\ \hline
 {\ct CONDUCTIVITY\_RAMP}            & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
@@ -11671,7 +11676,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_S(:)}                       & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.            \\ \hline
 {\ct N\_T(:)}                       & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct NU\_MATL(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
-{\ct NU\_O2\_CHAR(:)}               & Real Array      & Section~\ref{vegetation_model}        & kg/kg             & 0.            \\ \hline
 {\ct NU\_PART(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct NU\_SPEC(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct PART\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
@@ -11684,6 +11688,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.            \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
+{\ct SURFACE\_OXIDATION\_MODEL}     & Logical         & Section~\ref{vegetation_model}        &                   & {\ct F}       \\ \hline
 \end{longtable}
 
 % Undocumented: COLOR, REFRACTIVE_INDEX, RGB
@@ -12516,8 +12521,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_TRANSFER\_COEFFICIENT}                         & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(:,:)}                                       & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MAXIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct MINIMUM\_BURNOUT\_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
+{\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         & 0                       \\ \hline
 {\ct MLRPUA }                                             & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
