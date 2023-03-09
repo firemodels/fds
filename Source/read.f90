@@ -6262,7 +6262,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
             N_T(1)              = -0.5_EB
             SPEC_ID(1,1)        = 'WATER VAPOR'
             NU_SPEC(1,1)        = 1._EB
-            HEAT_OF_REACTION(1) = 2259._EB
+            HEAT_OF_REACTION(1) = 2295._EB
             MOISTURE_INDEX      = N
          CASE('AIR')
             ID               = 'AIR'
