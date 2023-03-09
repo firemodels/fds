@@ -1,6 +1,6 @@
-../../../../../Build/impi_intel_linux_64/fds_impi_intel_linux_64 simple_panel_fire.fds 
+../../../../../Build/impi_intel_linux/fds_impi_intel_linux simple_panel_fire.fds 
 %ANSYS% -b nolist -j simple_panel_fire_ansys -i read_geometry_fire.ans
-../../intel_linux_64/fds2ftmi_linux_64 simple_panel_fire 0.05 2 0 600 2 0 1 simple_panel_fire_to_ansys 
+../../intel_linux/fds2ftmi_linux simple_panel_fire 0.05 2 0 600 2 0 1 simple_panel_fire_to_ansys 
 %ANSYS% -b nolist -j simple_panel_fire_ansys -i run_simple_panel_fire.ans 
 %ANSYS% -b nolist -j simple_panel_fire_ansys -i plot_fire.ans 
 export DISPLAY=localhost:0.0 #
