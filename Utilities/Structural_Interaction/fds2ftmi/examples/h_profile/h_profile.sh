@@ -1,6 +1,6 @@
-../../../../../Build/impi_intel_linux_64/fds_impi_intel_linux_64 h_profile.fds 
+../../../../../Build/impi_intel_linux/fds_impi_intel_linux h_profile.fds 
 %ANSYS% -b nolist -j h_profile_T_ansys -i read_geometry_h_profile.ans
-../../intel_linux_64/fds2ftmi_linux_64 h_profile 0.05 2 0 30 2 10 0 1 h_profile_to_ansys 
+../../intel_linux/fds2ftmi_linux h_profile 0.05 2 0 30 2 10 0 1 h_profile_to_ansys 
 %ANSYS% -b nolist -j h_profile_T_ansys -i run_h_profile_T.ans
 %ANSYS% -b nolist -j h_profile_M_ansys -i run_h_profile_M.ans 
 %ANSYS% -b nolist -j h_profile_M_ansys -i plot_h_profile.ans 
