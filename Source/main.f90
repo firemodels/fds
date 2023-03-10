@@ -2080,19 +2080,13 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL ADJUST_HT3D_WALL_CELLS(NM)
 ENDDO
 
-! Exchange WALL_SEND_BUFFER%N_ITEMS and WALL_RECV_BUFFER%N_ITEMS
-! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_SEND_BUFFER%N_ITEMS
-! Number of wall cells in Mesh NM that are sent to Mesh NOM.
-! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_RECV_BUFFER%N_ITEMS
-! Number of wall cells in Mesh NM that are received from Mesh NOM.
+! Current mesh sends to neighboring meshes the number of WALL and THIN_WALL cells that it expects to be SENT
 
 CALL POST_RECEIVES(8)
 CALL MESH_EXCHANGE(8)
 
-! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_SEND_BUFFER%ITEM_INDEX(:)
-! Array of wall cell indices in Mesh NM that need to be sent to Mesh NOM.
-! DEFINITION MESHES(NM)%OMESH(NOM)%WALL_SEND_BUFFER%SURF_INDEX(:)
-! Array of wall SURF indices that correspond to the wall indices sent from NM to NOM
+! Allocate WALL_SEND_BUFFER and THIN_WALL_SEND_BUFFER for each neighboring mesh.
+! These derived types hold the information that is to be sent.
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO NOM=1,NMESHES
@@ -2105,8 +2099,8 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 ENDDO
 
-! Mesh NM sends MESHES(NM)%OMESH(NOM)%WALL_CELL_INDICES_RECV to Mesh NOM where it is received into
-! MESHES(NOM)%OMESH(NM)%WALL_CELL_INDICES_SEND
+! Each mesh sends its neighbors an array of WALL and THIN_WALL indices (ITEM_INDEX) that it expects to be SENT, 
+! along with the SURF_INDEX for each WALL or THIN_WALL.
 
 CALL POST_RECEIVES(9)
 CALL MESH_EXCHANGE(9)
@@ -2127,7 +2121,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ALLOCATE(OS%LOGICALS(OS%N_LOGICALS_DIM))
 ENDDO
 
-! Set up storage arrays to send and receive WALL variables from neighboring meshes.
+! Allocate arrays to hold real, integer and logical variables for the WALL_SEND_BUFFER
 
 MESH_LOOP_1A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
@@ -2148,7 +2142,7 @@ MESH_LOOP_1A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO MESH_LOOP_1B
 ENDDO MESH_LOOP_1A
 
-! Set up storage arrays to send and receive THIN_WALL variables from neighboring meshes.
+! Allocate arrays to hold real, integer and logical variables for the THIN_WALL_SEND_BUFFER
 
 MESH_LOOP_3A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
@@ -2169,19 +2163,18 @@ MESH_LOOP_3A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO MESH_LOOP_3B
 ENDDO MESH_LOOP_3A
 
-! Mesh NM sends M(NM)%OM(NOM)%WALL_SEND_BUFFER%N_REALS_DIM, etc, to M(NOM)%OM(NM)%WALL_RECV_BUFFER%N_REALS_DIM
+! Each mesh sends its neighbors the size of the real, integer, and logical buffer arrays
 
 CALL POST_RECEIVES(19)
 CALL MESH_EXCHANGE(19)
 
-! Mesh NM sets up WALL cells that it receives from neighbors
+! Each mesh (NM) sets up WALL cells that it expects to receive from its neighbors (NOM)
 
 MESH_LOOP_2A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
    MESH_LOOP_2B: DO NOM=1,NMESHES
       IF (PROCESS(NM)==PROCESS(NOM)) CYCLE MESH_LOOP_2B
-      M3 => M%OMESH(NOM)
-      OS => M3%WALL_RECV_BUFFER
+      OS => M%OMESH(NOM)%WALL_RECV_BUFFER
       IF (OS%N_ITEMS==0) CYCLE MESH_LOOP_2B
       CALL ALLOCATE_BOUNDARY_TYPES(NOM,50)
       ALLOCATE(OS%REALS(OS%N_REALS_DIM))
@@ -2193,12 +2186,13 @@ MESH_LOOP_2A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO MESH_LOOP_2B
 ENDDO MESH_LOOP_2A
 
+! Each mesh (NM) sets up THIN_WALL cells that it expects to receive from its neighbors (NOM)
+
 MESH_LOOP_4A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
    MESH_LOOP_4B: DO NOM=1,NMESHES
       IF (PROCESS(NM)==PROCESS(NOM)) CYCLE MESH_LOOP_4B
-      M3 => M%OMESH(NOM)
-      OS => M3%THIN_WALL_RECV_BUFFER
+      OS => M%OMESH(NOM)%THIN_WALL_RECV_BUFFER
       IF (OS%N_ITEMS==0) CYCLE MESH_LOOP_4B
       CALL ALLOCATE_BOUNDARY_TYPES(NOM,50)
       ALLOCATE(OS%REALS(OS%N_REALS_DIM))
@@ -2214,12 +2208,12 @@ ENDDO MESH_LOOP_4A
 
 CALL STOP_CHECK(1)
 
-! Set up persistent SEND and RECV calls for MPI communication of WALL cells
+! Set up persistent SEND and RECV calls for MPI communication of WALL and THIN_WALL buffer arrays
 
 CALL POST_RECEIVES(10)
 CALL MESH_EXCHANGE(10)
 
-! Exchange WALL cells
+! Exchange WALL and THIN_WALL cells
 
 CALL MESH_EXCHANGE(6)
 

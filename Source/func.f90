@@ -1656,8 +1656,8 @@ END SUBROUTINE PACK_CFACE
 !> \param RC Real counter
 !> \param OS STORAGE_ARRAY name
 !> \param BC_INDEX Index of the BOUNDARY_COORD array
-!> \param UNPACK_IT Logical indicating whether the data is to be packed into the 1-D array or unpacked from it
-!> \param Optional flag signifying that only a variable count is to be done; no packing
+!> \param UNPACK_IT Flag indicating whether the data is to be packed into the 1-D array or unpacked from it
+!> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
 
 SUBROUTINE PACK_BOUNDARY_COORD(NM,IC,RC,OS,BC_INDEX,UNPACK_IT,COUNT_ONLY)
 
@@ -1695,11 +1695,10 @@ END SUBROUTINE PACK_BOUNDARY_COORD
 !> \param NM Mesh index
 !> \param IC Integer counter
 !> \param RC Real counter
-!> \param LC Logical counter
 !> \param OS STORAGE_ARRAY name
 !> \param OD_INDEX Index of the BOUNDARY_ONE_D array
-!> \param UNPACK_IT Logical indicating whether the data is to be packed into the 1-D array or unpacked from it
-!> \param Optional flag signifying that only a variable count is to be done; no packing
+!> \param UNPACK_IT Flag indicating whether the data is to be packed into the 1-D array or unpacked from it
+!> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
 
 SUBROUTINE PACK_BOUNDARY_ONE_D(NM,IC,RC,OS,OD_INDEX,UNPACK_IT,COUNT_ONLY)
 
@@ -1844,8 +1843,8 @@ END SUBROUTINE INITIALIZE_BOUNDARY_PROP1
 !> \param LC Logical counter
 !> \param OS STORAGE_ARRAY name
 !> \param B1_INDEX Index of the BOUNDARY_PROP1 array
-!> \param UNPACK_IT Logical indicating whether the data is to be packed into the 1-D array or unpacked from it
-!> \param Optional flag signifying that only a variable count is to be done; no packing
+!> \param UNPACK_IT Flag indicating whether the data is to be packed into the 1-D array or unpacked from it
+!> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
 
 SUBROUTINE PACK_BOUNDARY_PROP1(NM,IC,RC,LC,OS,B1_INDEX,UNPACK_IT,COUNT_ONLY)
 
@@ -1934,8 +1933,8 @@ END SUBROUTINE PACK_BOUNDARY_PROP1
 !> \param RC Real Counter
 !> \param OS Storage array
 !> \param B2_INDEX Index within BOUNDARY_PROP2 array
-!> \param UNPACK_IT Logical indicating whether to pack or unpack
-!> \param Optional flag signifying that only a variable count is to be done; no packing
+!> \param UNPACK_IT Flag indicating whether to pack or unpack
+!> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
 
 SUBROUTINE PACK_BOUNDARY_PROP2(NM,IC,RC,OS,B2_INDEX,UNPACK_IT,COUNT_ONLY)
 
@@ -1984,8 +1983,8 @@ END SUBROUTINE PACK_BOUNDARY_PROP2
 !> \param RC Real Counter
 !> \param OS Storage array
 !> \param BR_INDEX Index within BOUNDARY_RADIA array
-!> \param UNPACK_IT Logical indicating whether to pack or unpack
-!> \param Optional flag signifying that only a variable count is to be done; no packing
+!> \param UNPACK_IT Flag indicating whether to pack or unpack
+!> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
 
 SUBROUTINE PACK_BOUNDARY_RADIA(NM,RC,OS,BR_INDEX,UNPACK_IT,COUNT_ONLY)
 
@@ -5300,7 +5299,7 @@ END SUBROUTINE COMPUTE_WIND_COMPONENTS
 !> \param Y_GAS Mass fraction of the liquid vapors in the gas cell
 !> \param ZZ_INDEX Array of tracked species indicies for the evaporating liquids
 !> \param TMP_S Temperature of the surface (K)
-!> \param TMP_G Temprature of the gas cell (K)
+!> \param TMP_GAS Temperature of the gas cell (K)
 !> \param ZZ_GAS Trakced species mass fractions in the gas cell
 !> \param PB Film pressure (Pa)
 !> \param TMP_FILM Film temperature (K)
