@@ -1145,7 +1145,7 @@ By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent visc
 \begin{equation}
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
 \end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using {\ct LES\_FILTER\_TYPE='MAX'} on {\ct MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$.
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using {\ct LES\_FILTER\_TYPE='MAX'} on {\ct MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{1/3}$. You may also choose a constant filter width by setting {\ct FIXED\_LES\_FILTER\_WIDTH} on the {\ct MISC} line, in meters. This is not a recommended thing to do in practice, but may be useful for convergence studies and other diagnostic tests.
 
 Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
 \be
@@ -7378,7 +7378,7 @@ The reaction rates for evaporation of H$_2$O and pyrolysis of the dry vegetation
   r_{\rm H_2O} &=& \rho_{\rm s, H_2O}  \; A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
   r_{\rm pyr}  &=& \rho_{\rm s,dry}    \; A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)
 \end{eqnarray}
-where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. 
+where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}.
 
 In the case of char the surface oxidation rate is determined by~\cite{Boonmee:2005}:
 \be
@@ -11763,6 +11763,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct FIXED\_LES\_FILTER\_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
 {\ct GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
