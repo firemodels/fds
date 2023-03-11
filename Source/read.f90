@@ -3459,6 +3459,7 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          ELSE
             NN = FINDLOC(SPECIES_MIXTURE%ID,RN%FUEL,1)
             FUEL_MW = SPECIES_MIXTURE(NN)%MW
+            RN%FUEL_SMIX_INDEX=NN
          ENDIF
          CALL SET_SPEC_DEFAULT
          ID                 = RN%SPEC_ID_NU_READ(3)
@@ -3527,6 +3528,7 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          ELSE
             NN = FINDLOC(SPECIES_MIXTURE%ID,RN%FUEL,1)
             FUEL_MW = SPECIES_MIXTURE(NN)%MW
+            RN%FUEL_SMIX_INDEX=NN
          ENDIF
 
          ! Setup intermediate producs
@@ -3590,8 +3592,9 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          RN%PROD_SMIX_INDEX = N
 
          ! Setup final producs
-         N = N + 1
          RN2=>REACTION(REACTION(NR)%PAIR_INDEX)
+         RN2%FUEL_SMIX_INDEX = N
+         N = N + 1
          CALL SET_SPEC_DEFAULT
          ID                 = RN2%SPEC_ID_NU_READ(3)
          SUFFIX = LEN(TRIM(RN%SPEC_ID_NU_READ(3)))
@@ -4463,6 +4466,11 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          REACTION(NR)%SPEC_ID_NU_READ(3)  = RN2%FUEL
          RN2%SPEC_ID_NU_READ(1) = RN2%FUEL
          RN2%SPEC_ID_NU_READ(2) = 'AIR'
+         IF (RN%ID=='null') THEN
+            RN2%ID='null'
+         ELSE
+            RN2%ID=TRIM(RN%ID)//'_2'
+         ENDIF
       ENDIF
    ENDIF SIMPLE_IF
    
