@@ -4629,20 +4629,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
    ENDIF
 
-   IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. RN%FUEL=='null') THEN
-      FIND_FUEL: DO NS=1,RN%N_SMIX
-         IF (RN%NU_READ(NS)<0._EB) THEN
-            RN%FUEL = RN%SPEC_ID_NU_READ(NS)
-            EXIT FIND_FUEL
-         ENDIF
-      ENDDO FIND_FUEL
-   ENDIF
-
-   IF (TRIM(RN%FUEL)=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. FUEL must be defined'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
-
    ! Allocate the arrays that are going to carry the mixture stoichiometry to the rest of the code
 
    ALLOCATE(RN%SPEC_ID_NU(1:N_TRACKED_SPECIES))
@@ -4679,24 +4665,28 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDDO
 
+   IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. RN%FUEL=='null') THEN
+      FIND_FUEL: DO NS=1,N_TRACKED_SPECIES
+         IF (RN%NU(NS)<-TWO_EPSILON_EB) THEN
+            RN%FUEL = SPECIES_MIXTURE(NS)%ID
+            RN%FUEL_SMIX_INDEX = NS
+            EXIT FIND_FUEL
+         ENDIF
+      ENDDO FIND_FUEL
+   ENDIF
+
+   IF (TRIM(RN%FUEL)=='null') THEN
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. FUEL must be defined'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
    ! Set RN%N_S = NU for reactant species
    DO NS=1,N_SPECIES
       IF (NU_Y(NS) < 0._EB) RN%N_S(NS)=-NU_Y(NS)
    ENDDO
 
-   ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
-   DO NS2=1,N_TRACKED_SPECIES
-      IF (ABS(RN%NU(NS2))<TWO_EPSILON_EB) CYCLE
-      IF (SPECIES_MIXTURE(NS2)%ID==RN%FUEL) THEN
-         RN%FUEL_SMIX_INDEX = NS2
-         RN%NU = -RN%NU/RN%NU(NS2)
-      ENDIF
-   ENDDO
-
-   IF (RN%FUEL_SMIX_INDEX < 0) THEN
-         WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel species ',TRIM(RN%FUEL),' not found.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
+   ! Normalize the stoichiometric coefficients by that of the fuel.
+   RN%NU = -RN%NU/RN%NU(RN%FUEL_SMIX_INDEX)
 
    ! Find AIR index
 
@@ -4717,6 +4707,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       DO NS2=1,N_SPECIES
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%N_S(NS2) = RN%N_S_READ(NS)
+            IF (ABS(RN%N_S(NS2)) < TWO_EPSILON_EB) RN%N_S(NS2) = -999._EB
             NAME_FOUND = .TRUE.
             EXIT
          ENDIF
@@ -4822,7 +4813,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDDO THIRD1
          IF (.NOT. NAME_FOUND) THEN
             WRITE(MESSAGE,'(A,I0,A,A,A)') &
-               'ERROR: Problem with REAC ',NR,'. THIRD_EFF primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
+               'ERROR: Problem with REAC ',NR,'. THIRD_EFF primitive species ',TRIM(RN%THIRD_EFF_ID_READ(NS)),' not found.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
