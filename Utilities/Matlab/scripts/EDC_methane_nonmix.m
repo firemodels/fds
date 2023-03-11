@@ -178,7 +178,7 @@ dP=[dP;dP;dP;dP;dP;dP];
 %------------------------------------------------
 yff(:,1) = tspan;
 
-header1 = {'Time','O2','CH4','CO2','H2O'};
+header1 = {'Time','CH4','O2','CO2','H2O'};
 filename1 = '../../Verification/Species/reactionrate_EDC_1step_CH4_nonmix_spec.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
