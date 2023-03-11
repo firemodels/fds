@@ -4669,14 +4669,23 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDDO
 
-   IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. RN%FUEL=='null') THEN
-      FIND_FUEL: DO NS=1,N_TRACKED_SPECIES
-         IF (RN%NU(NS)<-TWO_EPSILON_EB) THEN
-            RN%FUEL = SPECIES_MIXTURE(NS)%ID
-            RN%FUEL_SMIX_INDEX = NS
-            EXIT FIND_FUEL
-         ENDIF
-      ENDDO FIND_FUEL
+   IF (.NOT. RN%SIMPLE_CHEMISTRY) THEN
+      IF (RN%FUEL=='null') THEN
+         FIND_FUEL: DO NS=1,N_TRACKED_SPECIES
+            IF (RN%NU(NS)<-TWO_EPSILON_EB) THEN
+               RN%FUEL = SPECIES_MIXTURE(NS)%ID
+               RN%FUEL_SMIX_INDEX = NS
+               EXIT FIND_FUEL
+            ENDIF
+         ENDDO FIND_FUEL
+      ELSE
+         FIND_FUEL2: DO NS=1,N_TRACKED_SPECIES
+            IF (RN%FUEL== SPECIES_MIXTURE(NS)%ID) THEN
+               RN%FUEL_SMIX_INDEX = NS
+               EXIT FIND_FUEL2
+            ENDIF
+         ENDDO FIND_FUEL2
+      ENDIF
    ENDIF
 
    IF (TRIM(RN%FUEL)=='null') THEN
