@@ -36,7 +36,7 @@ gas is nitrogen. The heat transfer is purely radiative in the gas phase and cond
 &OBST XB=-0.40, 0.40,-0.40, 0.40,-0.40, 0.40, SURF_ID='HOT' / 
 
 &OBST XB=-0.55,-0.50,-0.50, 0.50,-0.50, 0.50 / 
-&OBST XB= 0.50, 0.60,-0.50, 0.50,-0.50, 0.50 / 
+&OBST XB= 0.50, 0.55,-0.50, 0.50,-0.50, 0.50 / 
 &OBST XB=-0.50, 0.50,-0.55,-0.50,-0.50, 0.50 / 
 &OBST XB=-0.50, 0.50, 0.50, 0.50,-0.50, 0.50 / 
 &OBST XB=-0.50, 0.50,-0.50, 0.50,-0.50,-0.50 / 
@@ -52,9 +52,9 @@ gas is nitrogen. The heat transfer is purely radiative in the gas phase and cond
 &BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
 
 &DEVC XYZ=0.49,0.00,0.00, QUANTITY='RADIATIVE HEAT FLUX', ID='Flux_in', IOR=-1 /
-&DEVC XYZ=0.61,0.00,0.00, QUANTITY='RADIATIVE HEAT FLUX', ID='Flux_out', IOR=1, CONVERSION_FACTOR=-1. /
+&DEVC XYZ=0.56,0.00,0.00, QUANTITY='RADIATIVE HEAT FLUX', ID='Flux_out', IOR=1, CONVERSION_FACTOR=-1. /
 
-&DEVC XYZ=0.61,0.00,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thicker', IOR=1  /
+&DEVC XYZ=0.56,0.00,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thicker', IOR=1  /
 &DEVC XYZ=-.56,0.00,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thick'  , IOR=-1 /
 &DEVC XYZ=0.00,0.51,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thin'   , IOR=2  /
 
