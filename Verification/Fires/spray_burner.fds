@@ -9,7 +9,6 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 
 &REAC FUEL='N-HEPTANE'
       CO_YIELD=0.0
-      SOOT_H_FRACTION=0.1
       SOOT_YIELD=0.015 /
 
 &MATL ID                 = 'STEEL'

@@ -4313,19 +4313,6 @@ H_S_OUT = DOT_PRODUCT(H_SENS_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)+(TMPG-REAL(ITMP,E
 
 END SUBROUTINE GET_SENSIBLE_ENTHALPY
 
-
-SUBROUTINE GET_GIBBS_FREE_ENERGY(G_F_OUT,NU_IN,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG,NU_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: G_F_OUT
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-G_F_OUT = 1.E6_EB*DOT_PRODUCT(G_F_Z(ITMP,1:N_TRACKED_SPECIES),NU_IN) ! convert from kJ/mol to J/kmol
-
-END SUBROUTINE GET_GIBBS_FREE_ENERGY
-
-
 !> \brief Get average specific heat of the gas mixture up to a specified temperature
 !> \param Z_IN Array of lumped species mass fractions
 !> \param CPBAR_OUT Average specific heat of the mixture (J/kg/K)
