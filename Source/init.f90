@@ -960,12 +960,13 @@ SUBROUTINE INITIALIZE_MESH_VARIABLES_2(NM)
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_EDGE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
+USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 USE CONTROL_VARIABLES
 INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IERR,IPZ,NOM,ITER,IZERO,IIG,JJG,KKG,ICF,NSLICE,ITW,IEC,ITW2
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),VC,RTRM,CP,XXC,YYC,ZZC
 INTEGER :: IBP1,JBP1,KBP1,IBAR,JBAR,KBAR
-REAL(EB) :: XS,XF,YS,YF,ZS,ZF
+REAL(EB) :: XS,XF,YS,YF,ZS,ZF,THICKNESS
 TYPE (MESH_TYPE), POINTER :: M,M4
 TYPE (OMESH_TYPE), POINTER :: M3
 TYPE (WALL_TYPE), POINTER :: WC
@@ -1132,82 +1133,80 @@ ENDDO
 WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    WC => M%WALL(IW)
+   SF => SURFACE(WC%SURF_INDEX)
+   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK .OR. SF%BACKING/=EXPOSED) CYCLE WALL_LOOP
    BC => M%BOUNDARY_COORD(WC%BC_INDEX)
-
-   II  = BC%II
-   JJ  = BC%JJ
-   KK  = BC%KK
    IIG = BC%IIG
    JJG = BC%JJG
    KKG = BC%KKG
    ICG = M%CELL_INDEX(IIG,JJG,KKG)
    IF (M%CELL(ICG)%SOLID) CYCLE WALL_LOOP
+   II  = BC%II
+   JJ  = BC%JJ
+   KK  = BC%KK
    IOR = BC%IOR
+   NOM = NM
+   OM => MESHES(NOM)
+   ITER = 0
 
-   ! Search for 0 or 1 cell thick HT1D solids that abut mesh boundary and have EXPOSED back boundary condition.
+   FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell on the other side of the obstruction
 
-   SF => SURFACE(WC%SURF_INDEX)
+      ITER = ITER + 1
 
-   IF_THERM_THICK_EXPOSED: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. SF%BACKING==EXPOSED) THEN ! search for the back side
-
-      NOM = NM
-      OM => MESHES(NOM)
-      ITER = 0
-
-      FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell on the other side of the obstruction
-
-         ITER = ITER + 1
-
-         IF (II==0 .OR. II==OM%IBP1 .OR. JJ==0 .OR. JJ==OM%JBP1 .OR. KK==0 .OR. KK==OM%KBP1) THEN
-            XXC=OM%XC(II) ; YYC=OM%YC(JJ) ; ZZC=OM%ZC(KK)
-            IF (II==0)       XXC = OM%X(II)   - MESH_SEPARATION_DISTANCE
-            IF (II==OM%IBP1) XXC = OM%X(II-1) + MESH_SEPARATION_DISTANCE
-            IF (JJ==0)       YYC = OM%Y(JJ)   - MESH_SEPARATION_DISTANCE
-            IF (JJ==OM%JBP1) YYC = OM%Y(JJ-1) + MESH_SEPARATION_DISTANCE
-            IF (KK==0)       ZZC = OM%Z(KK)   - MESH_SEPARATION_DISTANCE
-            IF (KK==OM%KBP1) ZZC = OM%Z(KK-1) + MESH_SEPARATION_DISTANCE
-            CALL SEARCH_OTHER_MESHES(XXC,YYC,ZZC,NOM,II,JJ,KK)
-            IF (NOM==0) THEN
-               IF (SF%HT_DIM>1) THEN
-                  WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' is HT3D and cannot extend beyond the computational domain'
-                  STOP_STATUS = SETUP_STOP
-                  RETURN
-               ENDIF
-               CYCLE WALL_LOOP
+      IF (II==0 .OR. II==OM%IBP1 .OR. JJ==0 .OR. JJ==OM%JBP1 .OR. KK==0 .OR. KK==OM%KBP1) THEN
+         XXC=OM%XC(II) ; YYC=OM%YC(JJ) ; ZZC=OM%ZC(KK)
+         IF (II==0)       XXC = OM%X(II)   - MESH_SEPARATION_DISTANCE
+         IF (II==OM%IBP1) XXC = OM%X(II-1) + MESH_SEPARATION_DISTANCE
+         IF (JJ==0)       YYC = OM%Y(JJ)   - MESH_SEPARATION_DISTANCE
+         IF (JJ==OM%JBP1) YYC = OM%Y(JJ-1) + MESH_SEPARATION_DISTANCE
+         IF (KK==0)       ZZC = OM%Z(KK)   - MESH_SEPARATION_DISTANCE
+         IF (KK==OM%KBP1) ZZC = OM%Z(KK-1) + MESH_SEPARATION_DISTANCE
+         CALL SEARCH_OTHER_MESHES(XXC,YYC,ZZC,NOM,II,JJ,KK)
+         IF (NOM==0) THEN
+            IF (SF%HT_DIM>1) THEN
+               WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' is HT3D and cannot extend beyond the computational domain'
+               STOP_STATUS = SETUP_STOP
+               RETURN
             ENDIF
-            OM => MESHES(NOM)
+            CYCLE WALL_LOOP
          ENDIF
-         IC = OM%CELL_INDEX(II,JJ,KK)
-         IF (.NOT.OM%CELL(IC)%SOLID .AND. OM%CELL(IC)%WALL_INDEX(IOR)>0) THEN ! the back wall face is found
-            WC%BACK_INDEX = OM%CELL(IC)%WALL_INDEX(IOR)
-            WC%BACK_MESH  = NOM
-            WC%BACK_SURF  = OM%CELL(IC)%SURF_INDEX(IOR)
-            IF (SF%HT_DIM>1 .AND. .NOT.SF%NORMAL_DIRECTION_ONLY) THEN
-               ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
-               SELECT CASE(IOR)
-                  CASE( 1) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%X - OM%X(II))
-                  CASE(-1) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%X - OM%X(II-1))
-                  CASE( 2) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%Y - OM%Y(JJ))
-                  CASE(-2) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%Y - OM%Y(JJ-1))
-                  CASE( 3) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%Z - OM%Z(KK))
-                  CASE(-3) ; ONE_D%LAYER_THICKNESS(1) = ABS(BC%Z - OM%Z(KK-1))
-               END SELECT
-            ENDIF
-            EXIT FIND_BACK_WALL_CELL
-         ENDIF
+         IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NOM)) CYCLE WALL_LOOP  ! If NOM not controlled by current MPI process, abandon search
+         OM => MESHES(NOM)
+      ENDIF
 
-         SELECT CASE(IOR)  ! New cell indices as we march deeper into the obstruction
-            CASE(-1) ; II=II+1
-            CASE( 1) ; II=II-1
-            CASE(-2) ; JJ=JJ+1
-            CASE( 2) ; JJ=JJ-1
-            CASE(-3) ; KK=KK+1
-            CASE( 3) ; KK=KK-1
-         END SELECT
+      ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
+      SELECT CASE(IOR)
+         CASE( 1) ; THICKNESS = ABS(BC%X - OM%X(II))
+         CASE(-1) ; THICKNESS = ABS(BC%X - OM%X(II-1))
+         CASE( 2) ; THICKNESS = ABS(BC%Y - OM%Y(JJ))
+         CASE(-2) ; THICKNESS = ABS(BC%Y - OM%Y(JJ-1))
+         CASE( 3) ; THICKNESS = ABS(BC%Z - OM%Z(KK))
+         CASE(-3) ; THICKNESS = ABS(BC%Z - OM%Z(KK-1))
+      END SELECT
 
-      ENDDO FIND_BACK_WALL_CELL
+      IC = OM%CELL_INDEX(II,JJ,KK)
+      IF (.NOT.OM%CELL(IC)%SOLID .AND. OM%CELL(IC)%WALL_INDEX(IOR)>0) THEN ! the back wall face is found
+         WC%BACK_INDEX = OM%CELL(IC)%WALL_INDEX(IOR)
+         WC%BACK_MESH  = NOM
+         WC%BACK_SURF  = OM%CELL(IC)%SURF_INDEX(IOR)
+         IF (SF%HT_DIM>1 .AND. .NOT.SF%NORMAL_DIRECTION_ONLY) ONE_D%LAYER_THICKNESS(1) = THICKNESS
+         EXIT FIND_BACK_WALL_CELL
+      ENDIF
 
-   ENDIF IF_THERM_THICK_EXPOSED
+      ! If 1-D solid and the user-specified thickness is less than the current thickness, abandon the search for back-wall cell
+
+      IF (SF%HT_DIM==1 .AND. THICKNESS>SUM(SF%LAYER_THICKNESS)) CYCLE WALL_LOOP
+
+      SELECT CASE(IOR)  ! New cell indices as we march deeper into the obstruction
+         CASE(-1) ; II=II+1
+         CASE( 1) ; II=II-1
+         CASE(-2) ; JJ=JJ+1
+         CASE( 2) ; JJ=JJ-1
+         CASE(-3) ; KK=KK+1
+         CASE( 3) ; KK=KK-1
+      END SELECT
+
+   ENDDO FIND_BACK_WALL_CELL
 
 ENDDO WALL_LOOP
 
