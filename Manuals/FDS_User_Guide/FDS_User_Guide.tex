@@ -5924,7 +5924,7 @@ The {\ct propane\_flame\_deposition} example shows how to define a reaction that
 \begin{multline}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow \\
 1 \; \underbrace{\mathrm{(18.10631 \; N_2 \, + \, 2.8 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
-\,0.2 \; \underbrace{\mathrm{C}_\text{Soot}
+\,0.2 \; \underbrace{\mathrm{C}_\text{Soot}}
 \end{multline}
 Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.0544 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=T} on the {\ct SPEC} line.
 \begin{lstlisting}
