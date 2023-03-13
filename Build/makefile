@@ -360,7 +360,7 @@ ompi_gnu_osx_dv : setup $(obj_mpi)
 prec.o :
 imkl.o :
 cons.o : prec.o
-prop.o : prec.o cons.o func.o
+prop.o : prec.o
 devc.o : prec.o
 type.o : prec.o cons.o imkl.o
 data.o : prec.o func.o cons.o prop.o
@@ -393,7 +393,7 @@ main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o w
 prec.obj :
 imkl.obj :
 cons.obj : prec.obj
-prop.obj : prec.obj cons.obj func.obj
+prop.obj : prec.obj
 devc.obj : prec.obj
 type.obj : prec.obj cons.obj imkl.obj
 data.obj : prec.obj func.obj cons.obj prop.obj
