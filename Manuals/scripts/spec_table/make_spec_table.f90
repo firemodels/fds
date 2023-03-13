@@ -1,14 +1,18 @@
-!>brief Predefined gas and liquid thermophysical properties
+PROGRAM MAKE_SPEC_TABLE
 
-MODULE THERMO_PROPS
-USE PRECISION_PARAMETERS
 IMPLICIT NONE
+
+INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)    !< Precision of "Eight Byte" reals
+INTEGER, PARAMETER :: LABEL_LENGTH=60                !< Maximum length of most labels
+INTEGER, PARAMETER :: FORMULA_LENGTH=255             !< Maximum length of chemical formulae
+INTEGER :: I
+CHARACTER(1) :: LIQUID,GIBBS
 
 TYPE THERMO_DATA_TYPE
    CHARACTER(FORMULA_LENGTH):: FORMULA='null' !< Chemical formula of species
-   CHARACTER(LABEL_LENGTH):: NAME='null'      !< Chemical name f species
-   CHARACTER(LABEL_LENGTH):: POLY='null'      !< Type of polynomial fit for data
-   CHARACTER(LABEL_LENGTH):: RADCAL_ID='null' !< Species to use for RADCAL properties
+   CHARACTER(LABEL_LENGTH):: NAME=''          !< Chemical name f species
+   CHARACTER(LABEL_LENGTH):: POLY=''          !< Type of polynomial fit for data
+   CHARACTER(LABEL_LENGTH):: RADCAL_ID=''     !< Species to use for RADCAL properties
    INTEGER :: BANDS=0                         !< Number of temperature bands in gas data
    REAL(EB) :: H_F=0._EB                      !< Gas heat of formation (kJ/kg)
    REAL(EB) :: PR=0._EB                       !< Gas Prandtl number
@@ -36,35 +40,54 @@ TYPE THERMO_DATA_TYPE
 END TYPE THERMO_DATA_TYPE
 
 TYPE(THERMO_DATA_TYPE), TARGET:: THERMO_DATA(-1:367)
+TYPE(THERMO_DATA_TYPE), POINTER :: TD=>NULL()
 
-CONTAINS
+CALL DEFINE_THERMO_PROPS
 
-!> \brief Finds the index of a species name in the list of available thermodynamic data
-!> \param NAME Name of species being found
-!> \param IND Index in array of thermodynamics data. -1 means not found
-!> \param EXPLICIT_G_F Flag indicating species has a predefined G_F curve
+OPEN(555,FILE="../../FDS_User_Guide/spec_table.tex")
 
-SUBROUTINE GET_PROP_INDEX(NAME,IND,EXPLICIT_G_F)
-USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-INTEGER, INTENT(OUT) :: IND
-LOGICAL, OPTIONAL :: EXPLICIT_G_F
-CHARACTER(LABEL_LENGTH), INTENT(IN) :: NAME
-INTEGER :: I
+WRITE(555,'(A)') "\scriptsize"
+WRITE(555,'(A)') "\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|c|c|l|}"
+WRITE(555,'(A,A)') "\caption[Pre-defined gas and liquid species]{Pre-defined gas and liquid species~",&
+                   "\cite{NASA_TM_4513,NASA_TP_211556,NASA_TR_132,NIST_JANAF,Incropera:1,Faghri,Hardy:1,Martinez:1}}"
+WRITE(555,'(A)') "\label{tab:gas_species}\\"
+WRITE(555,'(A)') "\hline"
+WRITE(555,'(A,A)') "Species & Chemical         & Temp. Range & $\Delta \mathrm{H}_{\mathrm{f}}$ & $\sigma$ & $\epsilon/k$   &",&
+   " Liquid   & Gibbs  &  Pr  & RadCal                     \\"
+WRITE(555,'(A,A)') "        & Formula          & (K)         & (kJ/mol)                         & (\AA)    & (K)            &",&
+   "          &        &      & Surrogate                  \\"
+WRITE(555,'(A)') "\hline \hline"
+WRITE(555,'(A)') "\endfirsthead"
+WRITE(555,'(A)') "\caption[]{Optional gas and liquid species (continued).}\\"
+WRITE(555,'(A)') "\hline"
+WRITE(555,'(A,A)') "Species & Formula          & Temp. Range & $\Delta \mathrm{H}_{\mathrm{f}}$ & $\sigma$ & $\epsilon/k$   &",&
+   " Liquid   & Gibbs  &  Pr  & RadCal                     \\"
+WRITE(555,'(A,A)') "        &                  & (K)         & (kJ/mol)                         & (\AA)    & (K)            &",&
+   "          &        &      & Surrogate                  \\"
+WRITE(555,'(A)') "\hline \hline"
+WRITE(555,'(A)') "\endhead"
 
-IND = -1
-
-DO I = 1,SIZE(THERMO_DATA)-2
-   IF (THERMO_DATA(I)%NAME == NAME) THEN
-      IND = I
-      EXIT
+DO I=1,367
+   TD=>THERMO_DATA(I)
+   IF (TD%LIQUID) THEN
+      LIQUID = 'Y'
+   ELSE
+      LIQUID = ''
    ENDIF
+   IF (TD%POLY=='NASA7' .OR. TD%POLY=='NASA9') THEN
+      GIBBS = 'Y'
+   ELSE
+      GIBBS = ''
+   ENDIF
+   WRITE(555,'(4A,2(F7.2,A),F8.2,A,F6.3,A,F9.2,5A,F5.2,3A)') TRIM(TD%NAME),'&',TRIM(TD%FORMULA),'&',INT(TD%T_L(1)),' -',&
+                    INT(MAXVAL(TD%T_L)),'&',TD%H_F,'&',TD%SIGMA,'&',TD%EPSOK,'&',LIQUID,'&',GIBBS,'&',TD%PR,'&',TRIM(TD%RADCAL_ID),"\\ \hline"
 ENDDO
 
-IF (PRESENT(EXPLICIT_G_F) .AND. (THERMO_DATA(IND)%POLY=='NASA9' .OR. THERMO_DATA(IND)%POLY=='NASA7')) EXPLICIT_G_F = .TRUE.
+WRITE(555,'(A)') "\end{longtable}"
 
-END SUBROUTINE GET_PROP_INDEX
+CLOSE(555)
 
-!> \brief Builds THERMO_DATA array holding thermophysical data
+CONTAINS
 
 SUBROUTINE DEFINE_THERMO_PROPS
 ! 
@@ -81,7 +104,7 @@ SUBROUTINE DEFINE_THERMO_PROPS
 !
 ! Sources for Pr data are:
 ! airliquide.com = airliquide.com
-! Bergman = Bergman, Lavine, Incropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
+! Bergman = Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
 ! Faghri = Faghri&Zhang Transport Phenomena in Multiphase Systems
 ! Hardy = Hardy, Hylton, McKnight, ORNL Correlations for Thermal Flowmeters
 ! Martinez = Martinez, Termodinamica basica y aplicada, 1992
@@ -7558,4 +7581,4 @@ THERMO_DATA(367)%BETA      = 0.00114_EB !1/K
 
 END SUBROUTINE DEFINE_THERMO_PROPS
 
-END MODULE THERMO_PROPS
+END PROGRAM MAKE_SPEC_TABLE

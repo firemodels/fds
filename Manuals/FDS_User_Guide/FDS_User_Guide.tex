@@ -602,7 +602,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
     \item a sudden change in the heat release rate
     \item the use of {\ct ADIABATIC} as a solid phase boundary condition. This parameter should only be used for testing because no solid material has a thermal conductivity of zero. Using this parameter can cause unphysical fluctuations at the solid-gas interface.
     \item the removal or creation of an obstruction, like the opening or closing of a door
-    \item a high (>100 g/mol) molecular weight fuel molecule that is not in the FDS database, Table~\ref{tab:gasspecies}. In such cases, reduce the molecular weight but maintain the atom ratios or define the fuel specific heat on {\ct SPEC}. See Section~\ref{user_defined_gas_species_props} for details.
+    \item a high (>100 g/mol) molecular weight fuel molecule that is not in the FDS database, Appendix~\ref{info:predefined_species}. In such cases, reduce the molecular weight but maintain the atom ratios or define the fuel specific heat on {\ct SPEC}. See Section~\ref{user_defined_gas_species_props} for details.
     \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Section~\ref{info:PRES} for details.
     \end{itemize}
     There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
@@ -3604,7 +3604,7 @@ For a liquid fuel, the thermal properties are similar to those of a solid materi
 \end{lstlisting}
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model. The {\ct ABSORPTION\_COEFFICIENT} denotes the absorption in depth of thermal radiation into the liquid. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate can be significant.
 
-In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model. If the liquid has multiple components, like gasoline or kerosene, you can furnish an individual {\ct MATL} line for each component. For practical reasons, in such cases you might still want to assume only one gas phase fuel species; thus, each {\ct MATL} line would contain the same {\ct SPEC\_ID}. If this is the case, provide the liquid component molecular weights, {\ct MW}, with units of g/mol on the {\ct MATL} lines. These unique molecular weights are used when computing the evaporation rates of the individual liquid components.
+In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Appendix~\ref{info:predefined_species}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model. If the liquid has multiple components, like gasoline or kerosene, you can furnish an individual {\ct MATL} line for each component. For practical reasons, in such cases you might still want to assume only one gas phase fuel species; thus, each {\ct MATL} line would contain the same {\ct SPEC\_ID}. If this is the case, provide the liquid component molecular weights, {\ct MW}, with units of g/mol on the {\ct MATL} lines. These unique molecular weights are used when computing the evaporation rates of the individual liquid components.
 
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
@@ -4890,7 +4890,7 @@ Each {\ct SPEC} line should include at the very least the name of the species vi
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=T /
 \end{lstlisting}
-The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling_fig}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=T} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
+The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling_fig}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Appendix~\ref{info:predefined_species}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=T} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 
 \begin{figure}[ht]
 \begin{center}
@@ -4923,7 +4923,7 @@ Gases and liquids whose properties are tabulated within FDS are listed in Append
 \subsection{User-Defined Gas and Liquid Properties}
 \label{user_defined_gas_species_props}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermo-physical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used. The molecular weight will be computed by FDS if a chemical formula is specified. If the species is participating in a reaction, and it is not the fuel species, then a reference enthalpy  also be specified, see Section~\ref{info:Enthalpy}.  The remaining thermo-physical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
+If the gas species is not included in Appendix~\ref{info:predefined_species}, then you must specify its thermo-physical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Appendix~\ref{info:predefined_species}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used. The molecular weight will be computed by FDS if a chemical formula is specified. If the species is participating in a reaction, and it is not the fuel species, then a reference enthalpy  also be specified, see Section~\ref{info:Enthalpy}.  The remaining thermo-physical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
 
 If conductivity, viscosity, or diffusivity are not specified they will be computed assuming the Lennard-Jones parameters for nitrogen and the specified molecular weight of the species. See Section~\ref{info:Enthalpy} for the assumptions made if no specific heat or reference enthalpy are specified.
 
@@ -4980,13 +4980,13 @@ The dynamic viscosity of the gas species can be specified in one of three ways: 
 \subsubsection{Radiative Properties}
 \label{info:radiative_spec_props}
 
-Species that can absorb and emit thermal radiation are defined via the parameter {\ct RADCAL\_ID} on the {\ct SPEC} line.  Some of the predefined species have this parameter already defined as shown in Table~\ref{tab:gasspecies}.  There are, however, many other species which are absorbing.  For absorbing species not listed in Table~\ref{tab:gasspecies}, {\ct RADCAL\_ID} can be used to identify a RadCal~\cite{RadCal} species to serve as a surrogate. For example:
+Species that can absorb and emit thermal radiation are defined via the parameter {\ct RADCAL\_ID} on the {\ct SPEC} line.  Some of the predefined species have this parameter already defined as shown in Appendix~\ref{info:predefined_species}.  There are, however, many other species which are absorbing.  For absorbing species not listed in Appendix~\ref{info:predefined_species}, {\ct RADCAL\_ID} can be used to identify a RadCal~\cite{RadCal} species to serve as a surrogate. For example:
 \begin{lstlisting}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{lstlisting}
 would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
 
-Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
+Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Appendix~\ref{info:predefined_species} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
 \subsubsection{Gibbs Energy}
 \label{info:gibbs_energy}
@@ -4995,7 +4995,7 @@ If a reverse chemical reaction is specified using {\ct REVERSE=T} on a {\ct REAC
 
 \subsubsection{Liquids}
 
-The only instance where detailed liquid properties are needed is when defining a liquid droplet for a species not listed in Table~\ref{tab:gasspecies}. The necessary properties are described in Section~\ref{thermal_part_props}.
+The only instance where detailed liquid properties are needed is when defining a liquid droplet for a species not listed in Appendix~\ref{info:predefined_species}. The necessary properties are described in Section~\ref{thermal_part_props}.
 
 \subsubsection{Prandtl Number}
 
@@ -5018,7 +5018,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 2', ID='Device 2'/
 \end{lstlisting}
-define two duplicate species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$ (note specifying one or more properties for a duplicate species will override the default properties).  The {\ct ID} for each duplicate species can then be used in the remainder of the input file.  In this example, the {\ct LUMPED\_COMPONENT\_ONLY} was given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for a duplicate species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  Also note that this feature can only be used to duplicate a predefined species (i.e. a species listed in Table~\ref{tab:gasspecies}).
+define two duplicate species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$ (note specifying one or more properties for a duplicate species will override the default properties).  The {\ct ID} for each duplicate species can then be used in the remainder of the input file.  In this example, the {\ct LUMPED\_COMPONENT\_ONLY} was given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for a duplicate species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  Also note that this feature can only be used to duplicate a predefined species (i.e. a species listed in Appendix~\ref{info:predefined_species}).
 
 In the above example, the two {\ct DEVC} lines refer to the {\ct ID}s of the duplicate species.  If instead the primitive species {\ct ID} was used, then the output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
 \begin{lstlisting}
@@ -5050,7 +5050,7 @@ By default, duplicate species are considered to be a lumped species and not a pr
 
 \subsection{Soot}
 \label{info:SOOT}
-The predefined species of {\ct SOOT'} is all carbon. To specify soot that contains other atoms, use {\ct FORMULA}. If new thermophysical properties are not specified, define the {\ct FORMULA} to keep the molecular weigh near 12~g/mol, i.e {\ct FORMULA='C0.86H1.7} rather than {\ct FORMULA='C10H20}.
+The predefined species of {\ct SOOT'} is defined with with {\ct FORMULA='C'}. To specify soot that contains other atoms, use {\ct FORMULA}. If new thermophysical properties are not specified, define the {\ct FORMULA} to keep the molecular weight near 12~g/mol, i.e {\ct FORMULA='C0.86H1.7'} rather than {\ct FORMULA='C10H20'}.
 
 \newpage
 
@@ -5155,7 +5155,7 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. The {\ct FUEL} species must be either a predefined species or defined on a {\ct SPEC} input. Table~\ref{tab:gasspecies} provides a listing of the available predefined species. If the {\ct FUEL} is in the table, then FDS will use the predefined thermophysical properties and chemical formula for the fuel. See Section~\ref{info:primitive} for details on specifying a user-defined species.
+\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. The {\ct FUEL} species must be either a predefined species or defined on a {\ct SPEC} input. Appendix~\ref{info:predefined_species} provides a listing of the available predefined species. If the {\ct FUEL} is in the table, then FDS will use the predefined thermophysical properties and chemical formula for the fuel. See Section~\ref{info:primitive} for details on specifying a user-defined species.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line if more than one reactions are specified.
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon monoxide, $y_{\CO}$. Note that this parameter is only appropriate when the
@@ -5176,7 +5176,7 @@ A few sample {\ct REAC} lines are given here.
 \begin{lstlisting}
 &REAC FUEL = 'METHANE' /
 \end{lstlisting}
-In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
+In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
 \begin{lstlisting}
 &REAC FUEL               = 'PROPANE'
       SOOT_YIELD         = 0.01
@@ -5201,7 +5201,7 @@ Multiple simple chemistry reactions can be defined. Each new reaction will requi
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
+The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Appendix~\ref{info:predefined_species}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Appendix~\ref{info:predefined_species}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 
@@ -5495,7 +5495,7 @@ Since it is assumed that all of the Cl is converted to HCL, the remainder of the
 1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \; O_2 + 1.53 \;(3.76) \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(HCl +  H_2O + 0.14 \; CO + 0.96 \; CO_2 + 0.90\; C + 1.53\; (3.76) \, N_2)}}_\text{Products}
 \end{multline}
-The choice of fuel in this example, PVC, is not defined in Table~\ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not have an explicit transport equation is a {\ct LUMPED\_COMPONENT\_ONLY}.
+The choice of fuel in this example, PVC, is not defined in Appendix~\ref{info:predefined_species}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not have an explicit transport equation is a {\ct LUMPED\_COMPONENT\_ONLY}.
 \begin{lstlisting}
 &SPEC ID = 'PVC', FORMULA = 'C2H3Cl' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = T /
@@ -5584,7 +5584,7 @@ Note that in this reaction scheme, the extinction model is applied to the first 
 \label{info:multi-reac}
 \label{energy_budget_adiabatic_two_fuels}
 
-There may be times when your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
+There may be times when your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Appendix~\ref{info:predefined_species}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.32741\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(19.74412\; CO_2 + 0.16659 \; CO + 21 \; H_2O + 5.08930\; C + 103.7511 \; N_2)}}_\text{Products\_1}
@@ -6187,13 +6187,13 @@ By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{R
 \subsection{Thermal Properties}
 \label{thermal_part_props}
 
-The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
+The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
 
 Heat transfer and evaporation from liquid droplets to the gas uses correlations for the heat and mass transfer coefficients. These can instead be respectively specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS} and {\ct MASS\_TRANSFER\_COEFFICIENT} on the {\ct PART} line.
 
 \subsubsection{Known Liquid/Gas Species}
 
-If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
+If the {\ct SPEC\_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
 \begin{lstlisting}
 &SPEC ID='WATER VAPOR' /
 &PART ID='water droplets', SPEC_ID='WATER VAPOR', ... /
@@ -6202,7 +6202,7 @@ There might be other optional parameters listed on the {\ct PART} line, but thes
 
 \subsubsection{Unknown Liquid/Gas Species}
 
-If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
+If the {\ct SPEC\_ID} is not listed in Appendix~\ref{info:predefined_species} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
 \item[{\ct DENSITY\_LIQUID}] (kg/m$^3$).
 \item[{\ct SPECIFIC\_HEAT\_LIQUID}] (\si{kJ/(kg.K})). If the specific heat of the liquid is a function of temperature, use {\ct RAMP\_CP\_L} to provide the function $c_p(T)$.
@@ -6231,7 +6231,7 @@ Note that only one gas species can be used in the droplet evaporation model beca
 
 If the liquid droplets burn, the {\ct SPEC\_ID} on the {\ct PART} line should designate the {\ct FUEL} on the {\ct REAC} line. Depending on the combustion model, you may not need to create a separate {\ct SPEC} line. Fuel droplets will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line. The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}. The {\ct HEAT\_OF\_COMBUSTION} can be specified on the {\ct PART} line, or the {\ct REAC} line, or it will be calculated automatically by FDS. If it is specified on the {\ct PART} line, the burning rate will be adjusted to account for the difference between the heats of combustion of this particular droplet and the other fuels in the model. If you let FDS calculate the heat of combustion automatically, run the model for a few time steps and look for the ``Heat of Combustion'' listed in the {\ct CHID.out} file. Use this value to specify the flow rate from the nozzle to achieve your desired heat release rate.
 
-If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Table~\ref{tab:gasspecies} and the column labelled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
+If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Appendix~\ref{info:predefined_species} and the column labelled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
 
 Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=F} to the {\ct MISC} line. An alternate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
 
@@ -12251,7 +12251,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-5             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
 {\ct REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & {\ct F}           \\ \hline
-{\ct SOOT\_H\_FRACTION}                   & Real           & Section~\ref{info:simple_chemistry}          &                   & 0.1               \\ \hline
 {\ct SOOT\_YIELD}                         & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0.0               \\ \hline
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
@@ -13426,16 +13425,16 @@ where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a du
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
+
 \appendix
 
 \chapter{Predefined Species}
-\label{info:predefined species}
+\label{info:predefined_species}
 
 This appendix lists all predefined species in FDS. If a species name ends in 'p' or 'm', this indicates the positive or negative charge state of that species. If a species ends in 's', this indicates the excited state of that species. This is typically written with a '*' as in CH$^*$. A 'Y in the Liquid column indicates that liquid properties are predefined, and a 'Y' in the Gibbs column indicates that Gibbs energy data is predefined. 
 
 \begin{landscape}
-	\captionof{table}[Summary of verification cases]{Summary of verification cases.} \label{summary_table}
-	\IfFileExists{spec_table.tex}{\input{spec_table.tex}{\typeout{Error: Missing file spec_table.tex}}
+	\IfFileExists{spec_table.tex}{\input{spec_table.tex}}{\typeout{Error: Missing file spec\_table.tex}}
 \end{landscape}
 
 
