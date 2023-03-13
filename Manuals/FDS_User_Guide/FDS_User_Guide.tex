@@ -4918,75 +4918,7 @@ If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_
 \subsection{Pre-Defined Gas and Liquid Properties}
 \label{gas_species_props}
 
-Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these species you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties.
-
-\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|l|}
-\caption[Pre-defined gas and liquid species]{Pre-defined gas and liquid species~\cite{Reid:1}}
-\label{tab:gasspecies}\\
-\hline
-Species &   Mol.~Wt.            & Chemical         & $\sigma$ & $\epsilon/k$   & Liquid   &  Pr  & RadCal                     \\
-        &   (g/mol)             & Formula          & (\AA)    & (K)            &          &      & Surrogate                  \\
-\hline \hline
-\endfirsthead
-\caption[]{Optional gas and liquid species (continued).}\\
-\hline
-Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   & Liquid   &  Pr  & RadCal                     \\
-        &   (g/mol)             &                  & (\AA)    & (K)            &          &      & Surrogate                  \\
-\hline \hline
-\endhead
-{\ct ACETONE}            & 58.07914   & C$_3$H$_6$O      & 4.6      & 560.2    &  Y       & 0.87 &  {\ct MMA}                 \\ \hline
-{\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &          & 0.78 &  {\ct PROPYLENE}           \\ \hline
-{\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y       & 0.71 &  {\ct MMA}                 \\ \hline
-{\ct AMMONIA}            & 17.03052  & NH$_3$            & 2.9      & 558.3    &  Y       & 0.87 &                            \\ \hline
-{\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y       & 0.67 &                            \\ \hline
-{\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y       & 1.50 &  {\ct TOLUENE}             \\ \hline
-{\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y       & 0.83 &  {\ct PROPANE}             \\ \hline
-{\ct CARBON}             & 12.0107    & C                & 2.94     & 74.8     &          &       &                            \\ \hline
-{\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &          & 0.75 &  {\ct CARBON DIOXIDE}      \\ \hline
-{\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y       & 0.73 &  {\ct CARBON MONOXIDE}     \\ \hline
-{\ct CHLORINE}           & 70.906     & Cl$_2$           & 4.217    & 316.0    &  Y       & 0.75 &                            \\ \hline
-{\ct DODECANE}           & 170.33484  & C$_{12}$H$_{26}$ & 4.701    & 205.78   &  Y       &      &  {\ct N-HEPTANE}           \\ \hline
-{\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y       & 0.84 &  {\ct ETHANE}              \\ \hline
-{\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y       & 0.84 &  {\ct METHANOL}            \\ \hline
-{\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y       & 0.83 &  {\ct ETHYLENE}            \\ \hline
-{\ct FORMALDEHYDE}       & 30.025980  & CH$_2$O          & 3.626    & 481.8    &  Y       &      &  {\ct METHANOL}            \\ \hline
-{\ct HELIUM}             & 4.002602   & He               & 2.551    & 10.22    &  Y       & 0.68 &                            \\ \hline
-{\ct HYDROGEN}           & 2.015880   & H$_2$            & 2.827    & 59.7     &  Y       & 0.69 &                            \\ \hline
-{\ct HYDROGEN ATOM}      & 1.007940   & H                & 2.31     & 123.6    &          &      &                            \\ \hline
-{\ct HYDROGEN BROMIDE}   & 80.911940  & HBr              & 3.353    & 449.0    &  Y       & 0.69 &                            \\ \hline
-{\ct HYDROGEN CHLORIDE}  & 36.460940  & HCl              & 3.339    & 344.7    &  Y       & 0.75 &                            \\ \hline
-{\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &      &                            \\ \hline
-{\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       & 0.71 &                            \\ \hline
-{\ct HYDROGEN PEROXIDE}  & 34.014680  & H$_2$O$_2$       & 3.02     & 106.5    &  Y       &      &                            \\ \hline
-{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$S           & 3.623    & 301.1    &  Y       &      &                            \\ \hline
-{\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &      &                            \\ \hline
-{\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &      &                            \\ \hline
-{\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &      &  {\ct METHANOL}            \\ \hline
-{\ct LJ AIR}             & 28.854760  &                  & 3.711    & 78.6     &          &      &                            \\ \hline
-{\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       & 0.70 &  {\ct METHANE}             \\ \hline
-{\ct METHANOL}           & 32.041860  & CH$_3$OH         & 3.626    & 481.8    &  Y       & 0.95 &  {\ct METHANOL}            \\ \hline
-{\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &  Y       &      &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       & 0.83  &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y       & 0.64 &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-PENTANE}          & 72.148780  & C$_5$H$_{12}$    & 5.784    & 341.1   &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
-{\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y       & 0.74 &                            \\ \hline
-{\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y       & 0.71 &                            \\ \hline
-{\ct NITROGEN ATOM}      & 14.006700  & N                & 2.66     & 92.1     &          & 0.71 &                            \\ \hline
-{\ct NITROGEN DIOXIDE}   & 46.05500   & NO$_2$           & 3.992    & 204.88   &  Y       & 6.10 &                            \\ \hline
-{\ct NITROUS OXIDE}      & 44.012800  & N$_2$O           & 3.828    & 232.4    &  Y       & 0.74 &                            \\ \hline
-{\ct OXYGEN}             & 31.998800  & O$_2$            & 3.467    & 106.7    &  Y       & 0.71 &                            \\ \hline
-{\ct OXYGEN ATOM}        & 15.999400  & O                & 2.66     & 92.1     &          &      &                            \\ \hline
-{\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y       & 0.80 &  {\ct PROPANE}             \\ \hline
-{\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y       & 0.82 &  {\ct PROPYLENE}           \\ \hline
-{\ct SOOT}               & 10.910420  & C$_{0.9}$H$_{0.1}$ & 3.798    & 71.4     &          &      &  {\ct SOOT}                \\ \hline
-{\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y       & 0.91 &                            \\ \hline
-{\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          & 0.77 &                            \\ \hline
-{\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &      &  {\ct TOLUENE}             \\ \hline
-{\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y       & 1.00 &  {\ct WATER VAPOR}         \\ \hline
-{\ct XENON}              & 131.293    & Xe               & 4.047    & 231.0    &  Y       & 0.64 &                            \\ \hline
-\end{longtable}
-
+Gases and liquids whose properties are tabulated within FDS are listed in Appendix~\ref{info:predefined_species}. The physical properties of these species are known and do not need to be specified. When using one of these species you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties.
 
 \subsection{User-Defined Gas and Liquid Properties}
 \label{user_defined_gas_species_props}
@@ -5519,7 +5451,7 @@ FDS assumes the following reaction:
 \end{lstlisting}
 
 \noindent
-The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
+The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a negative value for {\ct NU}. There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
 \item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 0.00001)
@@ -5771,7 +5703,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures. A specific finite-rate reaction will only be computed if all species consumed or otherwise required (third-body or catalyst) in the reaction are present with a mass fraction greater than {\ct ZZ\_MIN\_GLOBAL} specified on {\&COMB}. The default value is 1.E-10 which is generally adequate. An exception might be for detailed chemistry where equations involving free-radicals are used.
 
 \subsubsection{Single Step Reaction}
 
@@ -5798,7 +5730,7 @@ k = A \, T^{N_{T}} \, {\rm e}^{-E_a/RT}
 \begin{description}
 \item[$A$] is the pre-exponential factor [\,((\si{mol/cm^3})$^{1-n}$)/s\,], where $n=\sum N_{S,\alpha}$ is the \emph{order} of the reaction,
 \item[$E_a$] is the activation energy [\,\si{J/mol}\,],
-\item[$N_{S,\alpha}$] is an array containing the concentration exponents (default 1),
+\item[$N_{S,\alpha}$] is an array containing the concentration exponents (default values are the stoichiometric coefficients),
 \item[$N_T$] is the temperature exponent (default 0, meaning no temperature dependence),
 \item[$R$] is the universal gas constant, 8.314~J/(mol$\cdot$K).
 \end{description}
@@ -5863,12 +5795,13 @@ As discussed previously (Section~\ref{info:heat_of_combustion}), energy release 
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
-In some cases, only the forward rate parameters will be known for a reversible reaction and the reverse rate paremeters must be obtained from equilibrium.  This can be achieved by adding a {\ct FWD\_ID} and {\ct REVERSE=T} on the {\ct REAC} line for the reverse reaction.  FDS will compute the reverse rate constant using the change in Gibbs free energy of the reaction.  Below is an example (taken from \cite{Jones_Lindstedt:1988}) for hydrogen combustion with oxygen and the corresponding reverse water vapor dissociation reaction.
+In some cases, only the forward rate parameters will be known for a reversible reaction and the reverse rate paremeters must be obtained from equilibrium.  This can be achieved by adding {\ct REVERSE=T} on the {\ct REAC} line. FDS will create a reverse reaction where the {\ct NU} values are set to {\ct -NU} for the forward reaction. The reverse rate constant will be determined using the change in Gibbs free energy of the reaction. The {\ct ID} for the reverse reaction will be the {\ct ID} of the forward reaction with {\ct \_R} appended. Below is an example (taken from \cite{Jones_Lindstedt:1988}) for hydrogen combustion with oxygen and the corresponding reverse water vapor dissociation reaction. In this case the reverse reaction {\ct ID} would be {\ct R1\_R}.
 \begin{align}\label{eq:h2_comb_to_water}
 \mathrm{H_2 + 0.5 \, O_2} &\leftrightharpoons  \mathrm{H_2O}
 \end{align}
 \begin{lstlisting}
 &REAC ID = 'R1'
+      REVERSE = T
       FUEL = 'HYDROGEN'
       A = 0.85e16
       E = 167360.
@@ -5878,25 +5811,23 @@ In some cases, only the forward rate parameters will be known for a reversible r
       NU= -1,-0.5,1
       N_S = 0.25,1.5
       N_T = -1 /
-
-&REAC ID = 'R2'
-      RADIATIVE_FRACTION=0.0
-      FUEL = 'WATER VAPOR'
-      SPEC_ID_NU='WATER VAPOR','OXYGEN','HYDROGEN'
-      NU= -1,0.5,1
-      REVERSE=T
-      FWD_ID = 'R1' /
 \end{lstlisting}
 
-\subsection{Catalysts}
+\subsection{Third Body Reactions}
+\label{info:third_body}
 
-Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
+Some reactions require collision with a third body (any other molecule) to activate the reaction. Reactions of this type are often write in textbooks as
 \begin{equation}\label{eq:third_body}
 \mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
 \end{equation}
-This type of reaction is specified by adding {\ct THIRD\_BODY=T} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.
+This type of reaction is specified by adding {\ct THIRD\_BODY=T} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined. In some third body reactions one or more gas species may be more or less effective as a collision species. Any species with a non-unity collision efficiency can be listed using {\ct THIRD\_EFF\_ID(N)} and {\ct THIRD\_EFF(N)} to define the collision efficiencies of specific species.
+\subsection{Catalysts}
 
-
+Some reactions require the presence of a specific molecule to stabilize the reaction rather than any species as in a third body reaction. An example is given below:
+\begin{equation}\label{eq:catalyst}
+	\mathrm{a \, X + b \, Y + \, Z \rightarrow X_aY_b + Z }
+\end{equation}
+A catalyst can be specified by listing the catalyst species twice in {\ct SPEC\_ID\_NU} and giving the {\ct NU} values for each side of the equation. The reaction will move forward in FDS using the net {\ct NU} and the default value for {\ct NU\_S} will be the left-hand side stoichiometric coefficient. For a reverse reaction, the value or {\ct NU\_S} for the catalyst will be the right-hand side stoichiometric coefficient. 
 
 \subsection{Chemical Time Integration}
 \label{info:chem_integration}
@@ -11110,6 +11041,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & {\ct T}              \\ \hline
 {\ct TAU\_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
+{\ct ZZ\_MIN\_GLOBAL}                                & Real       & Section~\ref{info:finite}                     &           & 1.E-10               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -12324,6 +12256,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct THIRD\_BODY}                         & Logical        & Section~\ref{info:finite}                    &                   & {\ct F}           \\ \hline
+{\ct THIRD\_EFF(:)}                       & Real Array     & Section~\ref{info:third_body}                &                   &                   \\ \hline
+{\ct THIRD\_EFF\_ID(:)}                   & Char.~Array    & Section~\ref{info:third_body}                &                   &                   \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -13491,5 +13425,18 @@ where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a du
 \nopart %To Fix TOC in PDF output.
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+\appendix
+
+\chapter{Predefined Species}
+\label{info:predefined species}
+
+This appendix lists all predefined species in FDS. If a species name ends in 'p' or 'm', this indicates the positive or negative charge state of that species. If a species ends in 's', this indicates the excited state of that species. This is typically written with a '*' as in CH$^*$. A 'Y in the Liquid column indicates that liquid properties are predefined, and a 'Y' in the Gibbs column indicates that Gibbs energy data is predefined. 
+
+\begin{landscape}
+	\captionof{table}[Summary of verification cases]{Summary of verification cases.} \label{summary_table}
+	\IfFileExists{spec_table.tex}{\input{spec_table.tex}{\typeout{Error: Missing file spec_table.tex}}
+\end{landscape}
+
 
 \end{document}

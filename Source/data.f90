@@ -2199,493 +2199,65 @@ END SELECT
 END SUBROUTINE THERMO_TABLE_GAS
 
 
-SUBROUTINE THERMO_TABLE_LIQUID(I_TMP,CP,H_V,T_REF,T_MELT,T_BOIL,SPEC_ID,FUEL,DENSITY,MU,K,BETA)
+SUBROUTINE THERMO_TABLE_LIQUID(I_TMP,CP,H_V,T_REF,T_MELT,T_BOIL,SPEC_INDEX,FUEL,DENSITY,MU,K,BETA)
 !CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
 !The tabulated data in the tables have been curve fit
 !For each species CP is first computed in kJ/mol/K and then converted to J/kg/K
-CHARACTER(LABEL_LENGTH), INTENT(IN) ::SPEC_ID
-INTEGER, INTENT(IN) :: I_TMP
+INTEGER, INTENT(IN) :: I_TMP,SPEC_INDEX
 REAL(EB), INTENT(INOUT) :: CP,H_V,T_REF,T_MELT,T_BOIL,DENSITY,MU,K,BETA
-REAL(EB) :: T
+REAL(EB) :: TE
+INTEGER :: B
 LOGICAL,INTENT(OUT) :: FUEL
-
-FUEL = .FALSE.
+TYPE (THERMO_DATA_TYPE), POINTER :: TD=>NULL()
 
 !Default to water properteis
-BETA = 0.000889_EB !1/K (H2O)
-MU = 0.00089_EB !Ns/m^2 (H2O)
-K = 0.6 !W/m/K (H2O)
 
-SELECT CASE (SPEC_ID)
-   CASE('ACETONE') !JPCRD 6
-      T = MIN(331.6_EB,MAX(180.3_EB,REAL(I_TMP,EB)))*0.01_EB
-      IF (T<180.3_EB) THEN
-         CP = (30.9466_EB-22.1705_EB*T+9.34675_EB*T**2-1.24165_EB*T**3)*8314.472_EB/58.07914_EB !J/kg
-      ELSE
-         CP = (-23.6004_EB+40.7683_EB*T-14.8605_EB*T**2+1.86185_EB*T**3)*8314.472_EB/58.07914_EB !J/kg
-      ENDIF
-      H_V = 538919.8256_EB !J/kg
-      T_REF = 329.3_EB !K
-      T_MELT = 178.7_EB !K
-      T_BOIL = 329.3_EB !K
-      DENSITY = 791._EB !kg/m^3
-      MU = 0.000316_EB !N.s/m^2
-      K = 0.180_EB !W/m/K
-      FUEL = .TRUE.
-      BETA = 0.00148_EB !1/K
-   !CASE('ACETYLENE') sublimation
-   CASE('ACROLEIN')
-      T = MIN(340._EB,MAX(290._EB,REAL(I_TMP,EB)))
-      CP = 4.17143_EB*T+762._EB !J/kg/K
-      H_V = 663470.8757_EB !J/kg
-      T_REF = 186.15_EB !K
-      T_MELT = 186.15_EB !K
-      T_BOIL = 330._EB !K
-      DENSITY = 846._EB !kg/m^3
-   CASE('AMMONIA')
-      T = MIN(298.15_EB,MAX(200._EB,REAL(I_TMP,EB)))
-      CP = 0.0286941_EB*T**2 - 8.6568_EB*T + 4903.55_EB
-      H_V = 1374003.847211_EB !J/kg
-      T_REF = 239.8_EB !K
-      T_MELT = 194.95_EB !K
-      T_BOIL = 239.8_EB !K
-      DENSITY = 730._EB !kg/m^3
-      MU = 138E-6_EB  !N.s/m^2
-      K = 0.521_EB !W/m/K
-      BETA = 0.00250_EB !1/K
-   CASE('ARGON')
-      CP = 1110._EB !J/kg/K
-      H_V = 164230.3215_EB !J/kg
-      T_REF = 83.8_EB !K
-      T_MELT = 83.8_EB !K
-      T_BOIL = 87.29_EB !K
-      DENSITY = 1430._EB !kg/m^3
-      K = 0.123_EB !W/m/K
-      MU = 0.000252_EB !N.s/m^2
-      BETA = 0.011_EB !1/K
-   CASE('BENZENE')  !NASA/TP-2002-211556
-      T = MIN(500._EB,MAX(REAL(I_TMP,EB),278.68_EB))
-      CP = -2291003.94_EB*T**(-2)+36920.5816_EB/T-182.0019971_EB+0.2634137216_EB*T+0.000974258592_EB*T**2 &
-         -0.00000330790915_EB*T**3+0.000000002888191394_EB*T**4
-      CP = CP * 8314.472_EB / 78.11184_EB !J/kg/K
-      H_V = 477460.8131_EB !J/kg
-      T_REF = 278.64_EB !K
-      T_MELT = 278.64_EB !K
-      T_BOIL = 353.3_EB !K
-      DENSITY= 876.50_EB !kg/m^3
-      MU = 0.00601_EB  !N.s/m^2
-      K = 0.167_EB !W/m/K
-      BETA = 0.00114_EB !1/K
-      FUEL = .TRUE.
-   CASE('BUTANE')
-      T = MIN(240._EB,MAX(100._EB,REAL(I_TMP,EB)))
-      CP = 1.00177E-04_EB*T**3 - 5.23290E-02_EB*T**2 + 1.08908E+01_EB*T + 1.17542E+03_EB!J/kg/K
-      H_V = 440269.1313_EB !J/kg
-      T_REF = 136._EB !K
-      T_MELT = 136._EB !K
-      T_BOIL = 272.66_EB !K
-      DENSITY = 600._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.117_EB !W/m/K
-      MU = 0.000228_EB  !N.s/m^2
-      BETA = 0.00207_EB !1/K
-   !CASE('CARBON DIOXIDE') sublimation
-   CASE('CARBON MONOXIDE')
-      T = MIN(85._EB,MAX(65._EB,REAL(I_TMP,EB)))
-      CP = 2.94_EB*T+1.9319E3_EB !J/kg/K
-      H_V = 374327.1563_EB !J/kg
-      T_REF = 67.95_EB !K
-      T_MELT = 67.95_EB !K
-      T_BOIL = 81.63_EB !K
-      DENSITY = 788.6_EB !kg/m^3
-   CASE('CHLORINE')
-      T = MIN(230._EB,MAX(180._EB,REAL(I_TMP,EB)))
-      CP = -0.0025_EB*T**2+0.747857_EB*T+891.314_EB !J/kg
-      H_V = 287790._EB !J/kg
-      T_REF = 238.55_EB !K
-      T_MELT = 172.17_EB !K
-      T_BOIL = 238.55_EB !K
-      DENSITY = 1565.5_EB !kg/m^3
-      MU = 0.000343_EB  !N.s/m^2
-      K = 0.190_EB !W/m/K
-      BETA = 0.00219_EB !1/K
-   CASE('DODECANE')
-      T = MIN(480._EB,MAX(270._EB,REAL(I_TMP,EB)))
-      CP = 8.26087E-03_EB*T**2-2.17962E+00_EB*T+2.12506E+03_EB !J/kg/K
-      H_V = 201955.2082_EB !J/kg
-      T_REF = 489.2_EB !K
-      T_MELT = 263.5_EB !K
-      T_BOIL = 489.2_EB !K
-      DENSITY = 750._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.140_EB !W/m/K
-      MU = 0.00134_EB !N.s/m^2
-      BETA = 0.00114_EB !1/K (Octane)
-   CASE('ETHANE')
-      T = MIN(240._EB,MAX(100._EB,REAL(I_TMP,EB)))
-      CP = 1.08053E-04_EB*T**3 - 2.27232E-02_EB*T**2 + 1.55254E+00_EB*T + 2.24672E+03_EB !J/kg/K
-      H_V = 577854.0716_EB !J/kg
-      T_REF = 100._EB !K
-      T_MELT = 100._EB !K
-      T_BOIL = 184.32_EB !K
-      DENSITY = 546._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.167_EB !W/m/K
-      MU = 0.000163_EB !N.s/m^2
-      BETA = 0.00114_EB !1/K (butane)
-   CASE('ETHANOL') !NASA/TP-2002-211556
-      T = MIN(390._EB,MAX(REAL(I_TMP,EB),159._EB))
-      CP = 450111.594_EB*T**(-2)-10208.2899_EB/T+101.426678_EB-0.387467261_EB*T+0.000712139261_EB*T**2 &
-         -0.000000185707145_EB*T**3+0.000000000203762257_EB*T**4
-      CP = CP * 8314.472_EB / 46.06844_EB !J/kg/K
-      H_V = 1075147.11328518_EB !J/kg
-      T_REF = 159.0_EB !K
-      T_MELT = 159.0_EB !K
-      T_BOIL = 351.5_EB !K
-      DENSITY = 790._EB !kg/m^3
-      FUEL = .TRUE.
-      MU = 0.001095_EB  !N.s/m^2
-      K = 0.203_EB !W/m/K
-      BETA = 0.00118_EB !1/K
-   CASE('ETHYLENE')
-      T = MIN(170._EB,MAX(110._EB,REAL(I_TMP,EB)))
-      CP = -8.88178E-16_EB*T**3 + 2.28571E-02_EB*T**2 - 7.40000E+00_EB*T + 2.99329E+03_EB !J/kg/K
-      H_V = 871622.6364_EB !J/kg
-      T_REF = 103.8_EB !K
-      T_MELT = 103.8_EB !K
-      T_BOIL = 169.38_EB !K
-      DENSITY = 569._EB !kg/m^3
-      FUEL = .TRUE.
-      MU = 0.000038_EB  !N.s/m^2
-      K = 0.2568_EB !W/m/K
-      BETA = 0.00114_EB !1/K (butane)
-   CASE('FORMALDEHYDE')
-      CP = 1180._EB !J/kg/K
-      H_V = 809299.1469_EB !J/kg
-      T_REF = 236._EB !K
-      T_MELT = 181._EB !K
-      T_BOIL = 254._EB !K
-      DENSITY = 812._EB !kg/m^3
-   CASE('HELIUM')
-      T = MIN(4.22_EB,MAX(1.4_EB,REAL(I_TMP,EB)))
-      CP = 5.62684E-01_EB*T**3 - 4.40229E+00_EB*T**2 + 1.17485E+01_EB*T - 8.45057E+00_EB!kJ/kg/K
-      CP = CP*1000._EB !J/kg/K
-      H_V = 20754._EB !J/kg
-      T_REF = 0._EB !K
-      T_MELT = 0._EB !K
-      T_BOIL = 4.22_EB !K
-      DENSITY = 125._EB !kg/m^3
-      K = 0.0272 !W/m/K
-      MU = 0.00000357_EB !N.s/m^2
-      BETA = 0.0818_EB !1/K
-   CASE('HYDROGEN')
-      T = MIN(21._EB,MAX(14._EB,REAL(I_TMP,EB)))
-      CP = 445._EB*T+405._EB !J/kg/K
-      H_V = 404754.6321_EB !J/kg
-      T_REF = 14._EB !K
-      T_MELT = 14._EB !K
-      T_BOIL = 20.28_EB !K
-      DENSITY = 71._EB !kg/m^3
-      K = 0.1185_EB !W/m/K
-      MU = 0.0000131_EB !N.s/m^2
-      BETA = 0.0209_EB !1/K
-   CASE('HYDROGEN BROMIDE')
-      T = MIN(205._EB,MAX(190._EB,REAL(I_TMP,EB)))
-      CP = 0.52_EB*T+635.3!J/kg/K
-      H_V = 278499.9834_EB !J/kg
-      T_REF = 186.1_EB !K
-      T_MELT = 186.1_EB !K
-      T_BOIL = 206.35_EB !K
-      DENSITY = 2140._EB !kg/m^3
-   CASE('HYDROGEN CHLORIDE')
-      T = MIN(185._EB,MAX(160._EB,REAL(I_TMP,EB)))
-      CP = 0.925714_EB*T+1442.65!J/kg/K
-      H_V = 464812.7099_EB !J/kg
-      T_REF = 161.15_EB !K
-      T_MELT = 161.15_EB !K
-      T_BOIL = 188.05_EB !K
-      DENSITY = 1191._EB !kg/m^3
-      MU = 0.000067_EB  !N.s/m^2
-      K = 0.231_EB !W/m/K
-      BETA = 0.00709_EB !1/K
-   CASE('HYDROGEN CYANIDE')
-      T = MIN(85._EB,MAX(70._EB,REAL(I_TMP,EB)))
-      CP = 2.94_EB*T+1931.9_EB!J/kg/K
-      H_V = 967993.1926_EB !J/kg
-      T_REF = 260._EB !K
-      T_MELT = 260._EB !K
-      T_BOIL = 298.85_EB !K
-      DENSITY = 689._EB !kg/m^3
-      MU = 0.000188_EB !N.s/m^2
-      K = 0.243_EB !W/m/K
-      BETA = 0.0222_EB !1/K
-   CASE('HYDROGEN FLUORIDE')
-      T = MIN(290._EB,MAX(200._EB,REAL(I_TMP,EB)))
-      CP = -6.21601E-06_EB*T**3 + 3.62354E-02_EB*T**2 - 1.23566E+01_EB*T + 3.22662E+03_EB!J/kg/K
-      H_V = 460008.5869_EB !J/kg
-      T_REF = 190._EB !K
-      T_MELT = 190._EB !K
-      T_BOIL = 292.5_EB !K
-      DENSITY = 991._EB !kg/m^3
-   CASE('HYDROGEN PEROXIDE')
-      T = MIN(350._EB,MAX(290._EB,REAL(I_TMP,EB)))
-      CP = 2.1107_EB*T+783.43!J/kg/K
-      H_V = 1387000._EB !J/kg
-      T_REF = 423.3_EB !K
-      T_MELT = 272.72_EB !K
-      T_BOIL = 423.3_EB !K
-      DENSITY = 1450._EB !kg/m^3
-      MU = 0.001189_EB !N.s/m^2
-      K = 0.363_EB !W/m/K
-      BETA = 0.00225_EB !1/K
-   CASE('HYDROGEN SULFIDE')
-      T = MIN(190._EB,MAX(210._EB,REAL(I_TMP,EB)))
-      CP = 1866.8_EB+0.64_EB*T !J/kg/K
-      H_V = 607378.682710089_EB !J/kg
-      T_REF = 200._EB !K
-      T_MELT = 190.85_EB !K
-      T_BOIL = 212.87_EB !K
-      DENSITY = 1360._EB !kg/m^3
-   CASE('ISOPROPANOL')
-      T = MIN(430._EB,MAX(190._EB,REAL(I_TMP,EB)))
-      CP = -2.34629E-04_EB*T**3 + 2.35666E-01_EB*T**2 - 6.55874E+01_EB*T + 7.42454E+03_EB!J/kg/K
-      H_V = 882038.0541_EB !J/kg
-      T_REF = 185._EB !K
-      T_MELT = 185._EB !K
-      T_BOIL = 370.57_EB !K
-      DENSITY = 785._EB !kg/m^3
-      FUEL = .TRUE.
-      MU = 0.00194_EB !N.s/m^2
-      K = 0.178_EB !W/m/K
-      BETA = 0.00113_EB !1/K
-   CASE('METHANE')
-      T = MIN(140._EB,MAX(100._EB,REAL(I_TMP,EB)))
-      CP = 2.33333E-03_EB*T**3 - 6.75000E-01_EB*T**2 + 7.17167E+01_EB*T + 6.17400E+02_EB !J/kg/K
-      H_V = 537767.9796_EB !J/kg
-      T_REF = 90.6_EB !K
-      T_MELT = 90.6_EB !K
-      T_BOIL = 111.63_EB !K
-      DENSITY = 422._EB !kg/m^3
-      K = 0.189_EB !W/m/K
-      MU = 0.000118_EB !N.s/m^2
-   CASE('METHANOL')  !NASA/TP-2002-211556
-      T = MIN(500._EB,MAX(REAL(I_TMP,EB),278.68_EB))
-      CP = -1302004.763_EB*T**(-2)+31669.8418_EB/T-303.1242152_EB+1.60223113_EB*T-0.00459450734_EB*T**2+&
-         0.00000699017831_EB*T**3-0.00000000420738895_EB*T**4
-      CP = CP * 8314.472_EB / 32.04186_EB !J/kg/K
-      H_V = 1324775.99580504_EB !J/kg
-      T_REF = 176.6_EB !K
-      T_MELT = 176.6_EB !K
-      T_BOIL = 337.7_EB !K
-      DENSITY = 792._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.212_EB !W/m/K
-      MU = 0.00056_EB !N.s/m^2
-      BETA = 0.00115_EB !1/K
-   CASE('N-DECANE') ! JPCRD 6
-      T = MIN(462.4_EB,MAX(247._EB,REAL(I_TMP,EB)))*0.01_EB
-      IF (T < 314._EB) THEN
-         CP = (83.3283_EB-51.0491_EB*T+17.0127_EB*T**2-1.6806_EB*T**3)*8314.472_EB/142.2817_EB !J/kg/K
-      ELSE
-         CP = (35.5264_EB-5.37839_EB*T+2.46788_EB*T**2-0.136562_EB*T**3)*8314.472_EB/142.2817_EB !J/kg/K
-      ENDIF
-      H_V = 360552.3916 !J/kg
-      T_REF = 447.2 !K
-      T_MELT = 243.3 !K
-      T_BOIL = 447.2 !K
-      DENSITY = 730._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.147_EB !W/m/K
-      MU = 0.000859_EB !N.s/m^2
-      BETA = 0.00108_EB !1/K
-   CASE('N-HEPTANE') !NASA/TP-2002-211556
-      T = MIN(380.0007_EB,MAX(REAL(I_TMP,EB),182.58_EB))
-      CP = 1759947.367_EB*T**(-2)-37493.9679_EB/T+396.30649_EB-2.117827431_EB*T+0.00682824867_EB*T**2 &
-           -0.00001131862116_EB*T**3+0.00000000773686013_EB*T**4
-      CP = CP * 8314.472_EB / 100.20194_EB !J/kg/K
-      H_V = 441630.258757732_EB !J/kg
-      T_REF = 182.58_EB !K
-      T_MELT = 182.58_EB !K
-      T_BOIL = 371.50_EB !K
-      DENSITY = 684._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.140_EB !W/m/K
-      MU = 0.000376_EB !N.s/m^2
-      BETA = 0.00124_EB !1/K
-   CASE('N-HEXANE') !NASA/TP-2002-211556
-      T = MIN(300.0007_EB,MAX(REAL(I_TMP,EB),177.86_EB))
-      CP = 7721016.13_EB*T**(-2)-224929.8616_EB/T+2717.090647_EB-16.98251992_EB*T+0.0590721518_EB*T**2 &
-         -0.0001074528475_EB*T**3+0.0000000802423827_EB*T**4
-      CP = CP * 8314.472_EB / 86.17536_EB !J/kg/K
-      H_V = 444304.310724934_EB !J/kg
-      T_REF = 178.1_EB !K
-      T_MELT = 178.1_EB !K
-      T_BOIL = 342.44_EB !K
-      DENSITY = 659._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.124_EB !W/m/K
-      MU = 0.000297_EB !N.s/m^2
-      BETA = 0.00138_EB !1/K
-   CASE('N-PENTANE') ! JPCRD 6
-      T = MIN(390._EB,MAX(REAL(I_TMP,EB),150._EB))
-      CP =2454.7_EB-6.8347_EB*T+0.025884_EB*T**2-0.000015115_EB*T**3
-      H_V = 370582.470209505_EB !J/kg
-      T_REF = 298.15_EB !K
-      T_MELT = 143.35_EB !K
-      T_BOIL = 309.25_EB !K
-      DENSITY = 621._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.148_EB !W/m/K
-      MU = 0.000245_EB !N.s/m^2
-      BETA = 0.00163_EB !1/K
-   CASE('N-OCTANE') !NASA/TP-2002-211556
-      T = MIN(400.0007_EB,MAX(REAL(I_TMP,EB),216.37_EB))
-      CP = -16833148.26_EB*T**(-2)+353261.508_EB/T-2967.857531_EB+13.16703807_EB*T-0.0318682241_EB*T**2+&
-         0.0000407574801_EB*T**3-0.00000002153277285_EB*T**4
-      CP = CP * 8314.472_EB / 112.21264_EB !J/kg/K
-      H_V = 422688.947366284_EB !J/kg
-      T_REF = 216.3_EB !K
-      T_MELT = 216.3_EB !K
-      T_BOIL = 398.44_EB !K
-      DENSITY = 703._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.147_EB !W/m/K
-      MU = 0.00051_EB !N.s/m^2
-      BETA = 0.00114_EB !1/K
-   CASE('NITRIC OXIDE')
-      T = MIN(122._EB,MAX(110._EB,REAL(I_TMP,EB)))
-      CP =  54.38_EB*T - 3926.9_EB!J/kg/K
-      H_V = 460000._EB !J/kg
-      T_REF = 110._EB !K
-      T_MELT = 110._EB !K
-      T_BOIL = 122._EB !K
-      DENSITY = 1270._EB !kg/m^3
-   CASE('NITROGEN')
-      T = MIN(90._EB,MAX(65._EB,REAL(I_TMP,EB)))
-      CP = 1.72593E-02_EB*T**3 - 3.93206E+00_EB*T**2 + 3.01689E+02_EB*T - 5.75359E+03_EB !J/kg/K
-      H_V = 212890.8484_EB !J/kg
-      T_REF = 63.3_EB !K
-      T_MELT = 63.3_EB !K
-      T_BOIL = 77.35_EB !K
-      DENSITY = 807._EB !kg/m^3
-      MU = 0.000158_EB !N.s/m^2
-      K = 0.139 !W/m/K
-      BETA = 0.00753_EB !1/K
-   CASE('NITROGEN DIOXIDE')
-      T = MIN(340._EB,MAX(290._EB,REAL(I_TMP,EB)))
-      CP = 3.16667E-02_EB*T**2 - 1.12464E+01_EB*T + 3.13744E+03_EB!J/kg/K
-      H_V = 517409.8052_EB !J/kg
-      T_REF = 262._EB !K
-      T_MELT = 262._EB !K
-      T_BOIL = 294.15_EB !K
-      DENSITY = 1448._EB !kg/m^3
-      K = 0.121_EB !W/m/K
-      MU = 0.042 !N.s/m^2
-   CASE('NITROUS OXIDE')
-      T = MIN(184.67_EB,MAX(182.29_EB,REAL(I_TMP,EB)))
-      CP = 187.7_EB+8.5_EB*T !J/kg/K
-      H_V = 376140._EB !J/kg
-      T_REF = 182.29_EB !K
-      T_MELT = 182.29_EB !K
-      T_BOIL = 184.67_EB !K
-      DENSITY = 1266._EB !kg/m^3
-      K = 0.146_EB !W/m/K
-      MU = 0.00045 !N.s/m^2
-   CASE('OXYGEN')
-      T = MIN(100._EB,MAX(60._EB,REAL(I_TMP,EB)))
-      CP = 8.33333E-04_EB*T**3 - 1.42143E-01_EB*T**2 + 8.10952E+00_EB*T + 1.50911E+03_EB!J/kg/K
-      H_V = 213000._EB !J/kg
-      T_REF = 54.8_EB !K
-      T_MELT = 54.8_EB !K
-      T_BOIL = 90.19_EB !K
-      DENSITY = 1140._EB !kg/m^3
-      K = 0.151_EB !W/m/K
-      MU = 0.000188 !N.s/m^2
-      BETA = 0.00954_EB !1/K
-   CASE('PROPANE')
-      T = MIN(270._EB,MAX(90._EB,REAL(I_TMP,EB)))
-      CP = 7.05233E-05_EB*T**3 - 2.26153E-02_EB*T**2 + 3.85475E+00_EB*T + 1.69008E+03_EB!J/kg/K
-      H_V = 552422.9873 !J/kg
-      T_REF = 86._EB !K
-      T_MELT = 86._EB !K
-      T_BOIL = 231.25_EB !K
-      DENSITY = 590._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.129_EB !W/m/K
-      MU = 0.000197_EB  !N.s/m^2
-      BETA = 0.004_EB !1/K
-   CASE('PROPYLENE')
-      T = MIN(280._EB,MAX(90._EB,REAL(I_TMP,EB)))
-      CP = -6.71250E-05_EB*T**3 + 5.75614E-02_EB*T**2 - 1.29825E+01_EB*T + 2.94746E+03_EB !J/kg/K
-      H_V = 575811.5686_EB !J/kg
-      T_REF = 88._EB !K
-      T_MELT = 88._EB !K
-      T_BOIL = 225.41_EB !K
-      DENSITY = 609._EB !kg/m^3
-      FUEL = .TRUE.
-      MU = 0.00009_EB  !N.s/m^2
-      BETA = 0.004_EB !1/K (propane)
-   CASE('SULFUR DIOXIDE')
-      CP = 1359.14286_EB !J/kg/K
-      H_V = 389370._EB !J/kg
-      T_REF = 197.15_EB !K
-      T_MELT = 197.15_EB !K
-      T_BOIL = 263.05_EB !K
-      DENSITY = 1434._EB !kg/m^3
-      MU = 0.000257_EB  !N.s/m^2
-      K = 0.196_EB !W/m/K
-      BETA = 0.00212_EB !1/K
-   !CASE('SULFUR HEXAFLUORIDE') sublimation
-   CASE('TOLUENE') !NASA/TP-2002-211556
-      T = MIN(500.0007_EB,MAX(REAL(I_TMP,EB),178.15_EB))
-      CP = -3713549.51_EB*T**(-2)+77725.2903_EB/T-631.226986_EB+2.724391982_EB*T-0.00610353508_EB*T**2+&
-         0.0000070224219_EB*T**3-0.00000000311371568_EB*T**4
-      CP = CP * 8314.472_EB / 92.13842_EB !J/kg/K
-      H_V = 491861.689063827_EB !J/kg
-      T_REF = 178.1_EB !K
-      T_MELT = 178.1_EB !K
-      T_BOIL = 383.8_EB !K
-      DENSITY = 867._EB !kg/m^3
-      FUEL = .TRUE.
-      K = 0.151_EB !W/m/K
-      MU = 0.000550_EB  !N.s/m^2
-      BETA = 0.00108_EB !1/K
-   CASE('WATER VAPOR') !NASA/TP-2002-211556
-      T = MIN(600.0007_EB,MAX(REAL(I_TMP,EB),273.15_EB))
-      IF (T<373.1507_EB) THEN
-         CP = 1326371304_EB*T**(-2)-24482953.88_EB/T+187942.8776_EB-767.899505_EB*T+1.761556813_EB*T**2 &
-            -0.002151167128_EB*T**3+0.000001092570813_EB*T**4
-      ELSE
-         CP = 1263631001_EB*T**(-2)-16803802.49_EB/T+92782.3479_EB-272.237395_EB*T+0.447924376_EB*T**2 &
-            -0.000391939743_EB*T**3+0.0000001425743266_EB*T**4
-      ENDIF
-      CP = CP * 8314.472_EB / 18.01528_EB !J/kg/K
-      H_V = 2500792.3981106_EB !J/kg
-      T_REF = 273.15_EB !K
-      T_MELT = 273.15_EB !K
-      T_BOIL = 373.15_EB !K
-      DENSITY = 1000._EB !kg/m^3
-      BETA = 0.000889_EB !1/K
-      MU = 0.00089_EB !Ns/m^2
-      K = 0.609 !W/m/K
-   CASE('XENON') !JPCRD6
-      CP = 340000._EB !J/kg/K
-      H_V = 160023.7636_EB !J/kg
-      T_REF = 165.01_EB !K
-      T_MELT = 161.40_EB !K
-      T_BOIL = 165.01_EB !K
-      DENSITY = 2879.8_EB !kg/m^3 JPCRD 59
-      BETA = 0.002372042_EB !1/K JPCRD 59
-      MU = 0.0004727_EB !Ns/m^2 JPCRD 59
-      K = 0.07165 !W/m/K JPCRD 59
-   CASE DEFAULT
-      CP = -1._EB
-      H_V = -1._EB
-      T_REF = -1._EB
-      DENSITY=-1._EB
-      T_MELT = -1._EB
-      T_BOIL = -1._EB
-END SELECT
+IF (SPEC_INDEX < 0) THEN
+   FUEL = .FALSE.
+   BETA = 0.000889_EB !1/K (H2O)
+   MU = 0.00089_EB !Ns/m^2 (H2O)
+   K = 0.6 !W/m/K (H2O)
+   CP = -1._EB
+   H_V = -1._EB
+   T_REF = -1._EB
+   DENSITY=-1._EB
+   T_MELT = -1._EB
+   T_BOIL = -1._EB
+   RETURN
+ENDIF
+
+TD => THERMO_DATA(SPEC_INDEX)
+
+IF(TD%LIQUID) THEN
+   TE = MIN(MAXVAL(TD%T_L),MAX(TD%T_L(1),REAL(I_TMP,EB)))
+   DO B=1,TD%BANDS
+      IF (TE<=TD%T_L(B+1)) EXIT
+   ENDDO
+   TE      = TE * TD%T_UNIT
+   CP      = TD%A_L(1,B)/TE**2 + TD%A_L(2,B)/TE + TD%A_L(3,B) + TD%A_L(4,B)*TE + TD%A_L(5,B)*TE**2 + &
+               TD%A_L(6,B)*TE**3 + TD%A_L(7,B)*TE**4
+   CP      = CP * TD%CP_UNIT
+   H_V     = TD%H_V
+   T_REF   = TD%T_REF
+   T_MELT  = TD%T_MELT
+   T_BOIL  = TD%T_BOIL
+   DENSITY = TD%DENSITY
+   FUEL    = TD%FUEL
+   BETA    = TD%BETA
+   MU      = TD%MU
+   K       = TD%K
+ELSE
+   FUEL = .FALSE.
+   BETA = 0.000889_EB !1/K (H2O)
+   MU = 0.00089_EB !Ns/m^2 (H2O)
+   K = 0.6 !W/m/K (H2O)
+   CP = -1._EB
+   H_V = -1._EB
+   T_REF = -1._EB
+   DENSITY=-1._EB
+   T_MELT = -1._EB
+   T_BOIL = -1._EB
+ENDIF
 
 END SUBROUTINE THERMO_TABLE_LIQUID
 
