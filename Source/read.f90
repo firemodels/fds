@@ -9840,7 +9840,7 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDDO EMBED_LOOP
 
                IF (EMBEDDED) THEN
-                  IF (DEVC_ID=='null' .AND. REMOVABLE .AND. CTRL_ID=='null' ) THEN
+                  IF (DEVC_ID=='null' .AND. CTRL_ID=='null' .AND. PERMIT_HOLE .AND. REMOVABLE) THEN
                      N = N-1
                      N_OBST= N_OBST-1
                      CYCLE I_MULT_LOOP
