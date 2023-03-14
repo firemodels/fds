@@ -4991,7 +4991,7 @@ Species molecular mass also affects the spectrum: a heavier species of a given m
 \subsubsection{Gibbs Energy}
 \label{info:gibbs_energy}
 
-If a reverse chemical reaction is specified using {\ct REVERSE=T} on a {\ct REAC} input, FDS will use the forward reaction kinetics, specified by {\ct FWD\_ID} on the same {\ct REAC} line, along with the equilibrium values of the reaction to determine the value of the rate constant for the reverse reaction.  The equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.  An example reverse reaction is provided in Sec.~\ref{info:finite} on finite rate kinetics.
+If a reverse chemical reaction is specified using {\ct REVERSE=T} on a {\ct REAC} input, the equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.  An example reverse reaction is provided in Sec.~\ref{info:finite} on finite rate kinetics.
 
 \subsubsection{Liquids}
 
@@ -5795,7 +5795,7 @@ As discussed previously (Section~\ref{info:heat_of_combustion}), energy release 
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
-In some cases, only the forward rate parameters will be known for a reversible reaction and the reverse rate paremeters must be obtained from equilibrium.  This can be achieved by adding {\ct REVERSE=T} on the {\ct REAC} line. FDS will create a reverse reaction where the {\ct NU} values are set to {\ct -NU} for the forward reaction. The reverse rate constant will be determined using the change in Gibbs free energy of the reaction. The {\ct ID} for the reverse reaction will be the {\ct ID} of the forward reaction with {\ct \_R} appended. Below is an example (taken from \cite{Jones_Lindstedt:1988}) for hydrogen combustion with oxygen and the corresponding reverse water vapor dissociation reaction. In this case the reverse reaction {\ct ID} would be {\ct R1\_R}.
+In some cases, only the forward rate parameters will be known for a reversible reaction, and the reverse rate paremeters must be obtained from equilibrium.  This can be achieved by adding {\ct REVERSE=T} on the {\ct REAC} line. FDS will create a reverse reaction where the {\ct NU} values for the reverse reaction are set to {\ct -NU} for the forward reaction. The reverse rate constant will be determined using the change in Gibbs free energy of the reaction. The {\ct ID} for the reverse reaction will be the {\ct ID} of the forward reaction with {\ct \_R} appended. Below is an example (taken from \cite{Jones_Lindstedt:1988}) for hydrogen combustion with oxygen and the corresponding reverse water vapor dissociation reaction. In this case the reverse reaction {\ct ID} would be {\ct R1\_R}.
 \begin{align}\label{eq:h2_comb_to_water}
 \mathrm{H_2 + 0.5 \, O_2} &\leftrightharpoons  \mathrm{H_2O}
 \end{align}
@@ -12234,7 +12234,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FUEL\_H\_TO\_H2\_FRACTION}           & Real           & Section~\ref{info:two-step_simple_chemistry} &                   &  0                \\ \hline
 {\ct FUEL\_N\_TO\_HCN\_FRACTION}          & Real           & Section~\ref{info:two-step_simple_chemistry} &                   &  1/5              \\ \hline
 {\ct FUEL\_RADCAL\_ID}                    & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
-{\ct FWD\_ID}                             & Character      & Section~\ref{info:eqbm_reac}                 &                   &                   \\ \hline
 {\ct HCN\_YIELD}                          & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real           & Section~\ref{info:heat_of_combustion}        & kJ/kg             &                   \\ \hline
 {\ct HOC\_COMPLETE}                       & Real           & Section~\ref{info:hoc_complete}              & kJ/kg             &                   \\ \hline
