@@ -6840,7 +6840,7 @@ REAL(EB) :: H_TC,TMP_TC,RE_D,NUSSELT,VEL,K_G,MU_G,DROPLET_COOLING,&
             EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,R_DN,SGN,Y_ALL(N_SPECIES),H_S,D_Z_N(0:I_MAX_TEMP),&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,XHAT,ZHAT,BBF,GAMMA_LOC,VC,VOL,PHI,GAS_PHASE_OUTPUT_CC,&
-            GAS_PHASE_OUTPUT_CFA,CFACE_AREA,VELOCITY_COMPONENT(1:3),TMP_F,R_D,MW
+            GAS_PHASE_OUTPUT_CFA,CFACE_AREA,VELOCITY_COMPONENT(1:3),TMP_F,R_D,MW,VAL,WGT
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,IP,JP,KP,FED_ACTIVITY,IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,&
            ICC,JCC,NCELL,AXIS,ICF,NFACE,JCF,JCC_LO,JCC_HI,PDPA_FORMULA
 REAL(FB) :: RN
@@ -7738,6 +7738,33 @@ IND_SELECT: SELECT CASE(IND)
 
       PDPA_IF: IF ( (PY%PDPA_START<=T .AND. T<=PY%PDPA_END) .OR. .NOT.PY%PDPA_INTEGRATE ) THEN
 
+         PDPA_EXPON_SELECT: SELECT CASE(PY%QUANTITY)
+            ! see user guide table: output quantities available for PDPA
+            CASE DEFAULT;                  PDPA_FORMULA = 1
+            CASE('ENTHALPY');              PDPA_FORMULA = 2
+            CASE('PARTICLE FLUX X');       PDPA_FORMULA = 2
+            CASE('PARTICLE FLUX Y');       PDPA_FORMULA = 2
+            CASE('PARTICLE FLUX Z');       PDPA_FORMULA = 2
+            CASE('U-VELOCITY');            PDPA_FORMULA = 1
+            CASE('V-VELOCITY');            PDPA_FORMULA = 1
+            CASE('W-VELOCITY');            PDPA_FORMULA = 1
+            CASE('VELOCITY');              PDPA_FORMULA = 1
+            CASE('TEMPERATURE');           PDPA_FORMULA = 1
+            CASE('MASS CONCENTRATION');    PDPA_FORMULA = 2
+            CASE('NUMBER CONCENTRATION');  PDPA_FORMULA = 2
+         END SELECT PDPA_EXPON_SELECT
+
+         SELECT CASE(PDPA_FORMULA)
+            CASE(1)
+               IF (PY%PDPA_M-PY%PDPA_N==0) THEN
+                  EXPON = 1._EB
+               ELSE
+                  EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
+               ENDIF
+            CASE(2)
+               EXPON = 1._EB
+         END SELECT
+
          IF (.NOT.PY%PDPA_INTEGRATE) THEN
             DV%PDPA_NUMER = 0._EB
             DV%PDPA_DENOM = 0._EB
@@ -7759,12 +7786,8 @@ IND_SELECT: SELECT CASE(IND)
             ENDIF
             ! see Table 20.1 in FDS User Guide
             PDPA_QUANTITY_SELECT: SELECT CASE(PY%QUANTITY)
-               CASE DEFAULT ! DIAMETER
-                  PHI = 1._EB
-                  PDPA_FORMULA = 1
-               CASE('ENTHALPY')
-                  PHI = 0._EB
-                  PDPA_FORMULA = 2
+               CASE DEFAULT;                  PHI = 1._EB
+               CASE('ENTHALPY');              PHI = 0._EB
                   IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
                                                 SPECIES(LPC%Y_INDEX)%C_P_L_BAR,TMP_F,CPBAR)
@@ -7782,59 +7805,38 @@ IND_SELECT: SELECT CASE(IND)
                         PHI = 0.001_EB*SURFACE_DENSITY(NM,3,LAGRANGIAN_PARTICLE_INDEX=I) * VOL ! kJ
                      ENDIF
                   ENDIF
-               CASE('PARTICLE FLUX X')
-                  PHI = LPC%FTPR*R_D**3*LP%U
-                  PDPA_FORMULA = 2
-               CASE('PARTICLE FLUX Y')
-                  PHI = LPC%FTPR*R_D**3*LP%V
-                  PDPA_FORMULA = 2
-               CASE('PARTICLE FLUX Z')
-                  PHI = LPC%FTPR*R_D**3*LP%W
-                  PDPA_FORMULA = 2
-               CASE ('U-VELOCITY')
-                  PHI = LP%U
-                  PDPA_FORMULA = 1
-               CASE('V-VELOCITY')
-                  PHI = LP%V
-                  PDPA_FORMULA = 1
-               CASE('W-VELOCITY')
-                  PHI = LP%W
-                  PDPA_FORMULA = 1
-               CASE('VELOCITY')
-                  PHI = SQRT(LP%U**2 + LP%V**2 + LP%W**2)
-                  PDPA_FORMULA = 1
-               CASE('TEMPERATURE')
-                  PDPA_FORMULA = 1
-                  PHI = TMP_F - TMPM
-               CASE('MASS CONCENTRATION')
-                  PHI = LPC%FTPR*R_D**3
-                  PDPA_FORMULA = 2
-               CASE('NUMBER CONCENTRATION')
-                  PHI = 1._EB
-                  PDPA_FORMULA = 2
+               CASE('PARTICLE FLUX X');       PHI = LPC%FTPR*R_D**3*LP%U
+               CASE('PARTICLE FLUX Y');       PHI = LPC%FTPR*R_D**3*LP%V
+               CASE('PARTICLE FLUX Z');       PHI = LPC%FTPR*R_D**3*LP%W
+               CASE('U-VELOCITY');            PHI = LP%U
+               CASE('V-VELOCITY');            PHI = LP%V
+               CASE('W-VELOCITY');            PHI = LP%W
+               CASE('VELOCITY');              PHI = SQRT(LP%U**2 + LP%V**2 + LP%W**2)
+               CASE('TEMPERATURE');           PHI = TMP_F - TMPM
+               CASE('MASS CONCENTRATION');    PHI = LPC%FTPR*R_D**3
+               CASE('NUMBER CONCENTRATION');  PHI = 1._EB
             END SELECT PDPA_QUANTITY_SELECT
 
             SELECT CASE(PDPA_FORMULA)
                CASE(1)
-                  IF (PY%PDPA_M-PY%PDPA_N==0) THEN
-                     EXPON = 1._EB
-                  ELSE
-                     EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
-                  ENDIF
                   DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*R_D)**PY%PDPA_M * PHI
                   DV%PDPA_DENOM = DV%PDPA_DENOM + LP%PWT*(2._EB*R_D)**PY%PDPA_N
+                  VAL = (2._EB*R_D)**PY%PDPA_M * PHI
+                  WGT = LP%PWT*R_D**PY%PDPA_N
                CASE(2)
-                  EXPON = 1._EB
                   DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*PHI
                   IF (PY%PDPA_NORMALIZE) THEN
                      DV%PDPA_DENOM = FOTHPI*PY%PDPA_RADIUS**3
                   ELSE
                      DV%PDPA_DENOM = 1._EB
                   ENDIF
+                  VAL = PHI
+                  WGT = LP%PWT/DV%PDPA_DENOM
             END SELECT
 
-            IF (PY%HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%HISTOGRAM_NBINS,PY%HISTOGRAM_LIMITS,DV%HISTOGRAM_COUNTS,&
-                                              (2._EB*R_D)**PY%PDPA_M * PHI,LP%PWT*R_D**PY%PDPA_N)
+            ! IF (PY%HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%HISTOGRAM_NBINS,PY%HISTOGRAM_LIMITS,DV%HISTOGRAM_COUNTS,&
+            !                                   (2._EB*R_D)**PY%PDPA_M * PHI,LP%PWT*R_D**PY%PDPA_N)
+            IF (PY%HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%HISTOGRAM_NBINS,PY%HISTOGRAM_LIMITS,DV%HISTOGRAM_COUNTS,VAL,WGT)
 
          ENDDO PDPA_PARTICLE_LOOP
 
