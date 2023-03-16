@@ -351,9 +351,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: V=0._EB             !< \f$ y \f$ velocity component of particle (m/s)
    REAL(EB) :: W=0._EB             !< \f$ z \f$ velocity component of particle (m/s)
    REAL(EB) :: PWT=1._EB           !< Weight factor of particle; i.e. the number of real particles it represents
-   REAL(EB) :: ACCEL_X=0._EB       !< Contribution to acceleration of gas in \f$ x \f$ direction (m/s2)
-   REAL(EB) :: ACCEL_Y=0._EB       !< Contribution to acceleration of gas in \f$ y \f$ direction (m/s2)
-   REAL(EB) :: ACCEL_Z=0._EB       !< Contribution to acceleration of gas in \f$ z \f$ direction (m/s2)
    REAL(EB) :: RE=0._EB            !< Reynolds number based on particle diameter
    REAL(EB) :: MASS=0._EB          !< Particle mass (kg)
    REAL(EB) :: T_INSERT=0._EB      !< Time when particle was inserted (s)

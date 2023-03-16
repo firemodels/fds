@@ -172,6 +172,7 @@ LOGICAL :: CORRECTOR                        !< The second half of the second-ord
 LOGICAL :: INITIALIZATION_PHASE=.TRUE.      !< The set-up phase before the time-stepping loop
 LOGICAL :: APPEND=.FALSE.                   !< For a RESTARTed calculation, APPEND the exising output files
 LOGICAL :: PARTICLE_FILE=.FALSE.            !< Indicates the existence of Lagrangian particles
+LOGICAL :: PARTICLE_DRAG=.FALSE.            !< Indicates there are particles that drag the gas
 LOGICAL :: RESTART=.FALSE.                  !< Indicates if a former calculation is to be RESTARTed
 LOGICAL :: SUPPRESSION=.TRUE.               !< Indicates if gas-phase combustion extinction is modeled
 LOGICAL :: ACCUMULATE_WATER=.FALSE.         !< Indicates that integrated liquid outputs are specified
@@ -586,7 +587,7 @@ LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_P
 INTEGER :: MAXIMUM_PARTICLES,N_LAGRANGIAN_CLASSES,N_LP_ARRAY_INDICES=0
 REAL(EB) :: CNF_CUTOFF=0.005_EB
 LOGICAL :: PL3D_PARTICLE_FLUX=.FALSE.,SLCF_PARTICLE_FLUX=.FALSE.,DEVC_PARTICLE_FLUX=.FALSE.
-LOGICAL :: OMESH_PARTICLES=.FALSE.,EXCHANGE_INSERTED_PARTICLES=.FALSE.
+LOGICAL :: MPI_PARTICLE_EXCHANGE=.FALSE.,EXCHANGE_INSERTED_PARTICLES=.FALSE.
 
 INTEGER :: MOMENTUM_INTERPOLATION_METHOD=0
 

@@ -33,6 +33,9 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_B   !< Momentum equation flux terms, \f$ F_{{\rm B},x,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY_B   !< Momentum equation flux terms, \f$ F_{{\rm B},y,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ_B   !< Momentum equation flux terms, \f$ F_{{\rm B},z,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_D   !< Particle drag
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY_D   !< Particle drag
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ_D   !< Particle drag
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHO     !< Density (kg/m3) at current time step, \f$ \rho_{ijk}^n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHOS    !< Density (kg/m3) at next time step, \f$ \rho_{ijk}^* \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU      !< Turbulent viscosity (kg/m/s), \f$ \mu_{{\rm t},ijk} \f$
@@ -333,7 +336,7 @@ USE MESH_VARIABLES
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: &
-   U,V,W,US,VS,WS,DDDT,D,DS,H,HS,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,RHO,RHOS, &
+   U,V,W,US,VS,WS,DDDT,D,DS,H,HS,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,FVX_D,FVY_D,FVZ_D,RHO,RHOS, &
    MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE, &
    CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,PP_RESIDUAL,LES_FILTER_WIDTH
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
@@ -487,6 +490,9 @@ FVZ=>M%FVZ
 FVX_B=>M%FVX_B
 FVY_B=>M%FVY_B
 FVZ_B=>M%FVZ_B
+FVX_D=>M%FVX_D
+FVY_D=>M%FVY_D
+FVZ_D=>M%FVZ_D
 RHO=>M%RHO
 RHOS=>M%RHOS
 TMP=>M%TMP
