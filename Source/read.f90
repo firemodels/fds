@@ -5480,6 +5480,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Determine the number of slots to create in the particle evaporation and radiation arrays
 
    IF (LPC%LIQUID_DROPLET .OR. LPC%SOLID_PARTICLE) THEN
+      PARTICLE_DRAG = .TRUE.
       N_LP_ARRAY_INDICES = N_LP_ARRAY_INDICES + 1
       LPC%ARRAY_INDEX =  N_LP_ARRAY_INDICES
       LPC%RUNNING_AVERAGE_FACTOR = RUNNING_AVERAGE_FACTOR
@@ -5684,7 +5685,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
    ! Set the flag to do particle exchanges between meshes
 
-   OMESH_PARTICLES=.TRUE.
+   IF (NMESHES>1) MPI_PARTICLE_EXCHANGE=.TRUE.
 
    ! Only process DROPLETs
 
