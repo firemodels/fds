@@ -7738,7 +7738,12 @@ IND_SELECT: SELECT CASE(IND)
 
       PDPA_IF: IF ( (PY%PDPA_START<=T .AND. T<=PY%PDPA_END) .OR. .NOT.PY%PDPA_INTEGRATE ) THEN
 
-         PDPA_EXPON_SELECT: SELECT CASE(PY%QUANTITY)
+         IF (.NOT.PY%PDPA_INTEGRATE) THEN
+            DV%PDPA_NUMER = 0._EB
+            DV%PDPA_DENOM = 0._EB
+         ENDIF
+
+         PDPA_FORMULA_SELECT: SELECT CASE(PY%QUANTITY)
             ! see user guide table: output quantities available for PDPA
             CASE DEFAULT;                  PDPA_FORMULA = 1
             CASE('ENTHALPY');              PDPA_FORMULA = 2
@@ -7752,7 +7757,7 @@ IND_SELECT: SELECT CASE(IND)
             CASE('TEMPERATURE');           PDPA_FORMULA = 1
             CASE('MASS CONCENTRATION');    PDPA_FORMULA = 2
             CASE('NUMBER CONCENTRATION');  PDPA_FORMULA = 2
-         END SELECT PDPA_EXPON_SELECT
+         END SELECT PDPA_FORMULA_SELECT
 
          SELECT CASE(PDPA_FORMULA)
             CASE(1)
@@ -7769,11 +7774,6 @@ IND_SELECT: SELECT CASE(IND)
                   DV%PDPA_DENOM = 1._EB
                ENDIF
          END SELECT
-
-         IF (.NOT.PY%PDPA_INTEGRATE) THEN
-            DV%PDPA_NUMER = 0._EB
-            DV%PDPA_DENOM = 0._EB
-         ENDIF
 
          PDPA_PARTICLE_LOOP: DO I=1,NLP
             LP=>LAGRANGIAN_PARTICLE(I)
