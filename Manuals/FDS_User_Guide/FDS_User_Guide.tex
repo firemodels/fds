@@ -6163,7 +6163,7 @@ To account for subgrid-scale turbulent motions, add {\ct TURBULENT\_DISPERSION=T
 {\ct TURBULENT\_DISPERSION=T} may also be used with massive particles.  In this case, a random walk model is not used; instead, the fluid velocity used in the drag calculation is augmented with a fluctuating component that is taken from an estimate of the subgrid kinetic energy.  Details of the formulation are discussed in the FDS Technical Reference Guide \cite{FDS_Math_Guide}.
 
 
-\clearpage
+\newpage
 
 \section{Liquid Droplets}
 \label{info:liquid_droplets}
@@ -6361,7 +6361,7 @@ WARNING Delta TMP_G. Mesh: 5 Particle: 3245
 This means that during the temperature update of a particular grid cell in Mesh~5, the droplet whose index is 3245 caused the cell gas temperature ({\ct TMP\_G}) to change too rapidly. If you only see a few of these messages, it is not a problem given how many droplets and time steps there are. However, if you see these messages persistently, you might want to increase the {\ct PARTICLES\_PER\_SECOND} to reduce the likelihood that a single droplet will make such a dramatic change in a single time step.
 
 
-\clearpage
+\newpage
 
 \section{Solid Particles}
 \label{info:PART_SURF}
@@ -6592,7 +6592,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
-\clearpage
+\newpage
 
 \section{Particle Insertion}
 \label{info:controlling_droplets}
@@ -9391,8 +9391,18 @@ records the integrated mass flux of {\em all} particles passing through the give
 \label{bucket_test_4_fig}
 \end{figure}
 
+The quantities {\ct 'PARTICLE DRAG FORCE X'},  {\ct 'PARTICLE DRAG FORCE Y'}, and {\ct 'PARTICLE DRAG FORCE Z'} report the drag force components exerted by all particles on the gas, in units of N/m$^3$. For example,
+\begin{lstlisting}
+&DEVC XB=..., ID='...', QUANTITY='PARTICLE DRAG FORCE Z', 
+      SPATIAL_STATISTIC='VOLUME INTEGRAL'  /
+\end{lstlisting}
+reports the vertical component of the drag force exerted by all particles within the volume specified by {\ct XB} in units of N.
+
+The quantity {\ct 'PARTICLE RADIATION LOSS'} reports the net energy emitted and absorbed from a given grid cell by all particles within it, in units of kW/m$^3$. A positive value indicates that emission is greater than absorption.n
+
 
 \subsection{Coloring Particles and Droplets in Smokeview}
+\label{particle_colors}
 
 The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
 \\
@@ -9405,8 +9415,6 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 {\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
-{\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (\si{m/s^2}) \\
-{\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
 {\ct 'PARTICLE BULK DENSITY'} (\si{kg/m^3}) \\
 {\ct 'PARTICLE HEAT TRANSFER COEFFICIENT'} (\si{W/m^2/K}) \\
@@ -10538,7 +10546,7 @@ For those output quantities that require a species name via {\ct SPEC\_ID}, the 
 The {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. All output quantity names ought to be in single quotes.
 
 
-\clearpage
+\newpage
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
 \caption[Gas phase output quantities]{Gas phase output quantities.}
@@ -10660,7 +10668,7 @@ $^6$                  \> Requires {\ct REAC\_ID}. \\
 
 \end{tabbing}
 
-\clearpage
+\newpage
 
 \section{Solid Phase Output Quantities}
 \label{info:solidoutputquantities}
@@ -10680,14 +10688,14 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \hline \hline
 \endhead
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C          & B,D          \\ \hline
-{\ct AMPUA}$^2$                                 & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
-{\ct AMPUA\_Z}$^1$                              & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct AMPUA}$^2$                                 & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
+{\ct AMPUA\_Z}$^1$                              & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
 {\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
-{\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$           & B,D          \\ \hline
-{\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$           & B,D          \\ \hline
+{\ct CPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kW/m$^2$           & B,D          \\ \hline
+{\ct CPUA\_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kW/m$^2$           & B,D          \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s                & B,D          \\ \hline
 {\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s                & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
@@ -10703,8 +10711,8 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D            \\ \hline
 {\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
-{\ct MPUA}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
-{\ct MPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^2$           & B,D          \\ \hline
+{\ct MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
+{\ct MPUA\_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s                & B,D          \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
@@ -10740,7 +10748,7 @@ $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
 \end{tabbing}
 
 
-\clearpage
+\newpage
 
 \section{Device, Control, and Other Miscellaneous Output Quantities}
 \label{info:deviceoutputquantities}
@@ -10790,7 +10798,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \end{longtable}
 
 
-\clearpage
+\newpage
 
 \section{Droplet and Particle Output Quantities}
 \label{info:particleoutputquantities}
@@ -10815,27 +10823,30 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 {\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m            & D,I,P,S      \\ \hline
 {\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
-{\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                    &                   & D,P,S        \\ \hline
-{\ct MPUV}$^2$                                  & Section~\ref{info:part_output}                    & kg/m$^3$          & D,P,S        \\ \hline
-{\ct MPUV\_Z}$^1$                               & Section~\ref{info:part_output}                    & kg/m$^3$          & D,P,S        \\ \hline
-{\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                    & s                 & PA           \\ \hline
-{\ct PARTICLE BULK DENSITY}                     & Section~\ref{info:part_output}                    & kg/(m$^3$)        & PA           \\ \hline
-{\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                    & $\mu$m            & PA           \\ \hline
-{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
-{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
-{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                    & \si{kg/(m$^2$.s)} & P,S          \\ \hline
-{\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                    & kg                & PA           \\ \hline
-{\ct PARTICLE PHASE}                            & Section~\ref{info:part_output}                    &                   & PA           \\ \hline
-{\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
-{\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                    & $^\circ$C         & PA           \\ \hline
-{\ct PARTICLE U}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
-{\ct PARTICLE V}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
-{\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
-{\ct PARTICLE W}                                & Section~\ref{info:part_output}                    & m/s               & PA           \\ \hline
-{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{info:part_output}                    &                   & PA           \\ \hline
-{\ct PARTICLE X}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
-{\ct PARTICLE Y}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
-{\ct PARTICLE Z}                                & Section~\ref{info:part_output}                    & m                 & PA           \\ \hline
+{\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
+{\ct MPUV}$^2$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+{\ct MPUV\_Z}$^1$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+{\ct PARTICLE AGE}                              & Section~\ref{particle_colors}                     & s                 & PA           \\ \hline
+{\ct PARTICLE BULK DENSITY}                     & Section~\ref{particle_colors}                     & kg/(m$^3$)        & PA           \\ \hline
+{\ct PARTICLE DIAMETER}                         & Section~\ref{particle_colors}                     & $\mu$m            & PA           \\ \hline
+{\ct PARTICLE DRAG FORCE X}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
+{\ct PARTICLE DRAG FORCE Y}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
+{\ct PARTICLE DRAG FORCE Z}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
+{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE MASS}                             & Section~\ref{particle_colors}                     & kg                & PA           \\ \hline
+{\ct PARTICLE PHASE}                            & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
+{\ct PARTICLE RADIATION LOSS}                   & Section~\ref{bucket_test_4}                       & kW/m$^3$          & D,I,P,S      \\ \hline
+{\ct PARTICLE TEMPERATURE}                      & Section~\ref{particle_colors}                     & $^\circ$C         & PA           \\ \hline
+{\ct PARTICLE U}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+{\ct PARTICLE V}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+{\ct PARTICLE VELOCITY}                         & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+{\ct PARTICLE W}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
+{\ct PARTICLE X}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
+{\ct PARTICLE Y}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
+{\ct PARTICLE Z}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
 {\ct PDPA}                                      & Droplet statistics, Section~\ref{PDPA}            &                   & D            \\ \hline
 {\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
 {\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
@@ -10850,7 +10861,6 @@ $^2$                 \> Requires the specification of a particle name using {\ct
 \end{tabbing}
 
 
-\clearpage
 
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
