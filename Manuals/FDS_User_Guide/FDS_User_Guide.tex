@@ -796,13 +796,32 @@ The namelist group {\ct \&CATF} allows for the inclusion of input information fr
 \end{lstlisting}
 adds the contents of the two listed files into the current input file. Up to 20 files can be listed on one {\ct CATF} line, and multiple {\ct CATF} lines can be included in the input file. After reading the input file, FDS creates a new input file, {\ct CHID\_cat.fds}, and then runs the case.
 
+\section{Protecting Old Cases}
+\label{info:OVERWRITE}
+
+When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=F} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
+
+\section{Stopping and Restarting Calculations}
+\label{info:restart}
+
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=T} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you will also need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation. To restart this job from where it left off, add {\ct RESTART=T} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct F} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+
+There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
+It is also possible to use the new control function feature (see Sec.~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
+
+Between job stops and restarts, major changes cannot be made in the calculation like adding or removing vents and obstructions. The changes are limited to those parameters that do not instantly alter the existing flow field. For example, it is possible to change the output frequency of data sent to the heat release rate ({\ct *\_hrr.csv}) or device ({\ct *\_devc.csv}) files, or even slice file output.  The new frequency is set on the {\ct DUMP} line (see Table \ref{tbl:DUMP} for a complete list of output frequencies).  If no frequency is set on the new run, the frequency from the previous run is maintained.  However, this is not true of {\ct DT\_RESTART}; if no {\ct DT\_RESTART} is present for the new run, then no restart files will be written (this prevents overwrites of old restart files).
+
+Since the restart capability has been used infrequently by the developers, it should be considered a fragile construct. Examine the output to ensure that no sudden or unexpected events occur during the stop and restart.
+
+
+
 
 \chapter{Setting the Bounds of Time and Space}
 
 This chapter describes global input parameters that affect the general scope of the simulation, like the simulation time and the size and extent of the computational domain. Essentially, these parameters establish the spatial and temporal coordinate systems that are used by all other components of the simulation, which is why these parameters are usually listed at the top of the input file and why they are described here first.
 
 
-\section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
+\section{Naming the Job}
 \label{info:HEAD}
 
 The first thing to do when setting up an input file is to give the job a name.  The name of the job is important because often a project involves numerous simulations in which case the names of the individual simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains two parameters, as in this example:
@@ -815,7 +834,7 @@ The first thing to do when setting up an input file is to give the job a name.  
 \end{description}
 
 
-\section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}
+\section{Simulation Time}
 \label{info:TIME}
 
 {\ct TIME} is the name of a group of parameters that define the time duration of the simulation and the initial time step used to advance the solution of the discretized equations.
@@ -865,7 +884,7 @@ Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='T
 
 \newpage
 
-\section{Computational Meshes: The \texorpdfstring{{\tt MESH}}{MESH} Namelist Group (Table \ref{tbl:MESH})}
+\section{Computational Meshes}
 \label{info:MESH}
 
 All FDS calculations must be performed within a domain that is made up of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells}, the number of which depends on the desired resolution of the flow dynamics. {\ct MESH} is the namelist group that defines the computational domain.
@@ -1014,7 +1033,7 @@ Experiment with different mesh configurations using relatively coarse mesh cells
 
 
 
-\subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
+\subsection{Mesh Stretching}
 \label{info:TRNX}
 
 By default the mesh cells that fill the computational domain are uniform in size. However, it is possible to specify that the cells be non-uniform in one or two\footnote{If you are stretching the mesh in two coordinate directions, limit the number of cells to approximately 1~million. The Poisson solver that is used for two-coordinate stretching exhibits floating point overflow errors during the initialization phase when very large meshes are used. If you require more than a million cells, consider using multiple meshes instead of one large mesh.}
@@ -1123,18 +1142,6 @@ Key Parameter                          & Section                        & {\ct '
 \end{tabular}
 \end{table}
 
-
-\section{Stopping and Restarting Calculations}
-\label{info:restart}
-
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=T} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you will also need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation. To restart this job from where it left off, add {\ct RESTART=T} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct F} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
-
-There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
-It is also possible to use the new control function feature (see Sec.~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
-
-Between job stops and restarts, major changes cannot be made in the calculation like adding or removing vents and obstructions. The changes are limited to those parameters that do not instantly alter the existing flow field. For example, it is possible to change the output frequency of data sent to the heat release rate ({\ct *\_hrr.csv}) or device ({\ct *\_devc.csv}) files, or even slice file output.  The new frequency is set on the {\ct DUMP} line (see Table \ref{tbl:DUMP} for a complete list of output frequencies).  If no frequency is set on the new run, the frequency from the previous run is maintained.  However, this is not true of {\ct DT\_RESTART}; if no {\ct DT\_RESTART} is present for the new run, then no restart files will be written (this prevents overwrites of old restart files).
-
-Since the restart capability has been used infrequently by the developers, it should be considered a fragile construct. Examine the output to ensure that no sudden or unexpected events occur during the stop and restart.
 
 
 
@@ -1300,26 +1307,12 @@ MP5                                 & {\ct 'MP5'}  \\ \hline
 \end{table}
 
 
-\section{Background Noise}
-\label{info:NOISE}
-
-FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=F} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
 
 
 
-\section{Protecting Old Cases}
-\label{info:OVERWRITE}
-
-When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=F} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
-
-\section{Turning off the Flow Field}
-\label{info:freeze_velocity}
-
-For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
 
-
-\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
+\section{Limiting the Bounds of Key Variables}
 \label{info:CLIP}
 
 The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
@@ -1427,6 +1420,13 @@ ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
 
 \section{Velocity Field}
 \label{info:velo_restart}
+
+\subsection{Default Initial Velocity Field}
+\label{info:NOISE}
+
+FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=F} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
+
+\subsection{User-Specified Initial Velocity Field}
 \label{info:CSVF}
 
 It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain. The flow field is stored in a comma-separated value (.csv) file.  You have the option of creating this file using FDS or creating your own.  To generate the file with FDS, specify the time interval between outputs using {\ct DT\_UVW} or a set of discrete times using {\ct RAMP\_UVW} on the {\ct DUMP} line. For example, if you want to write the velocity field every 10 minutes, add the following:
@@ -1453,6 +1453,14 @@ If multiple meshes are involved, enter the number of the first {\ct .csv} file o
 &CSVF UVWFILE='CHID_uvw_t1_m1' /
 \end{lstlisting}
 and FDS will read {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+
+
+\subsection{Turning off the Flow Field}
+\label{info:freeze_velocity}
+
+For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
+
+
 
 
 \section{Gravity}
@@ -1772,7 +1780,7 @@ and vent describing its thermal properties. A fire is just one type of
 boundary condition. This chapter describes how to build the model.
 
 
-\section{Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
+\section{Specifying Boundary Conditions}
 \label{info:SURF}
 
 Before describing how to build up the geometry, it is first necessary to explain how to describe what these bounding surfaces
@@ -1799,7 +1807,7 @@ set {\ct DEFAULT=T} on the {\ct SURF} line.
 
 
 
-\section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
+\section{Creating Rectilinear Obstructions}
 \label{info:OBST}
 
 The namelist group {\ct OBST} contains parameters used to define obstructions. The entire geometry of the model is made up entirely of rectangular solids, each one introduced on a single line in the input file.
@@ -1879,7 +1887,7 @@ Obstructions are typically drawn as solids in Smokeview. To draw an outline repr
 
 
 
-\subsection{Creating Holes in Obstructions: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
+\subsection{Creating Holes in Obstructions}
 \label{info:HOLE}
 
 The {\ct HOLE} namelist group defines parameters that carve a hole out of an existing obstruction or set of obstructions. To do this, add lines of the form
@@ -1905,7 +1913,9 @@ It is a good idea to inspect the geometry by running either a setup job
 
 \ifcompgeom
 
-\subsection{Creating Unstructured Solids: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
+\newpage
+
+\section{Creating Unstructured Geometry}
 \label{info:GEOM}
 
 The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions
@@ -2302,7 +2312,7 @@ Terrains can also be read and written in binary format, and in this case only th
 
 \newpage
 
-\section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
+\section{Applying Surface Properties}
 \label{info:VENT}
 
 Whereas the {\ct OBST} group is used to specify obstructions within the computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes adjacent to obstructions or external walls. Note that the label {\ct VENT} is used for historical reasons---this group of parameters has evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain. See Section~\ref{info:Velocity_BC} for a discussion of ventilation strategies that employ the {\ct VENT} parameters.
@@ -4075,7 +4085,7 @@ It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to 
 
 \newpage
 
-\section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
+\section{HVAC Systems}
 \label{info:HVAC}
 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
@@ -7987,7 +7997,7 @@ All devices must have a specified {\ct QUANTITY}.  Some special devices (Section
 
 
 
-\section{Special Device Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
+\section{Special Device Properties}
 \label{info:PROP}
 
 Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the {\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every {\ct DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called {\ct PROP} to store the relevant parameters. Each {\ct PROP} line is identified by a unique {\ct ID}, and invoked by a {\ct DEVC} line by the string {\ct PROP\_ID}. The best way to describe the {\ct PROP} group is to list the various special devices and their properties.
