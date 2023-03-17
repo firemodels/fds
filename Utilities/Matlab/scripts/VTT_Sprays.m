@@ -66,7 +66,7 @@ hold on
 plot(L1.data(:,fds40velox),-L1.data(:,fds40velo),'k-');
 plot(L2.data(:,fds40velox),-L2.data(:,fds40velo),'b-');
 plot(L4.data(:,fds40velox),-L4.data(:,fds40velo),'r-');
-axis([ -0.3 0.3 0 7]);
+axis([ -0.3 0.3 0 10]);
 set(gca,'XTick',[-.3:.1:.3]);
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -160,7 +160,7 @@ hold on
 plot(L1.data(:,fds62velox),-L1.data(:,fds62velo),'k-');
 plot(L2.data(:,fds62velox),-L2.data(:,fds62velo),'b-');
 plot(L4.data(:,fds62velox),-L4.data(:,fds62velo),'r-');
-axis([ -0.3 0.3 0 7]);
+axis([ -0.3 0.3 0 10]);
 set(gca,'XTick',[-.3:.1:.3]);
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
