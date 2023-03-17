@@ -79,8 +79,8 @@ DO I=1,367
    ELSE
       GIBBS = ''
    ENDIF
-   WRITE(555,'(4A,2(F7.2,A),F8.2,A,F6.3,A,F9.2,5A,F5.2,3A)') TRIM(TD%NAME),'&',TRIM(TD%FORMULA),'&',INT(TD%T_L(1)),' -',&
-                    INT(MAXVAL(TD%T_L)),'&',TD%H_F,'&',TD%SIGMA,'&',TD%EPSOK,'&',LIQUID,'&',GIBBS,'&',TD%PR,'&',TRIM(TD%RADCAL_ID),"\\ \hline"
+   WRITE(555,'(4A,2(I0,A),F8.2,A,F6.3,A,F9.2,5A,F5.2,3A)') TRIM(TD%NAME),'&',TRIM(TD%FORMULA),'&',INT(TD%T(1)),' -',&
+                    INT(MAXVAL(TD%T)),'&',TD%H_F,'&',TD%SIGMA,'&',TD%EPSOK,'&',LIQUID,'&',GIBBS,'&',TD%PR,'&',TRIM(TD%RADCAL_ID),"\\ \hline"
 ENDDO
 
 WRITE(555,'(A)') "\end{longtable}"
