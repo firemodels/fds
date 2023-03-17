@@ -1110,234 +1110,6 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\chapter{Numerical Considerations}
-\label{info:MISC}
-
-This chapter describes various numerical parameters; that is, parameters that control how the governing equations are solved. Most of these parameters are specified on the {\ct MISC} line and for most large-scale fire simulations, their default values are recommended. {\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}).
-
-It is good practice to use only one {\ct MISC} line in the data file.  Using multiple {\ct MISC} lines is possible, but be careful about not over writing a parameter.  The last parameter read will take precedence.
-
-\section{Simulation Mode}
-\label{Sim_Mode}
-
-There are four basic modes of operation in FDS: {\ct 'DNS'} (Direct Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
-\begin{lstlisting}
-&MISC ..., SIMULATION_MODE='DNS' /
-\end{lstlisting}
-indicates a direct numerical simulation. The default value is {\ct 'VLES'}.
-
-Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
-
-\begin{table}[ht]
-\centering
-\caption{Parameters effected by {\ct SIMULATION\_MODE}.}
-\label{tbl:SIMULATION_MODE}
-\begin{tabular}{|l|c|c|c|c|c|}
-\hline
-Key Parameter                          & Section                        & {\ct 'DNS'}   & {\ct 'LES'}    & {\ct 'VLES'}      & {\ct 'SVLES'}    \\ \hline \hline
-{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
-{\ct CHECK\_VN}                        & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
-{\ct FLUX\_LIMITER}                    & \ref{info:flux_limiters}       & {\ct 'CHARM'} & {\ct 'CHARM'}  & {\ct 'SUPERBEE'}  & {\ct 'SUPERBEE'} \\ \hline
-{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
-\end{tabular}
-\end{table}
-
-
-
-
-\section{Large Eddy Simulation Parameters}
-\label{info:LES}
-
-By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent viscosity,
-\begin{equation}
-(\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
-\end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using {\ct LES\_FILTER\_TYPE='MAX'} on {\ct MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{1/3}$. You may also choose a constant filter width by setting {\ct FIXED\_LES\_FILTER\_WIDTH} on the {\ct MISC} line, in meters. This is not a recommended thing to do in practice, but may be useful for convergence studies and other diagnostic tests.
-
-Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
-\be
-   k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
-   \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
-\ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
-
-\begin{table}[ht]
-\caption[Turbulence model options]{Turbulence model options.}
-\label{turb_table}
-\centering
-\begin{tabular}{|lll|}
-\hline
-{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
-{\ct 'CONSTANT SMAGORINSKY'}    & Constant-coefficient Smagorinsky \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
-{\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
-{\ct 'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
-{\ct 'VREMAN'}                  & Vreman's eddy viscosity \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
-{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
-\end{tabular}
-\end{table}
-
-\subsubsection*{Near-Wall Turbulence Model}
-
-By default, FDS uses the WALE model of Nicoud and Ducros \cite{Nicoud:1999} for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near a wall.  The WALE model has the advantage that the eddy viscosity tends to zero at the correct rate as you approach the wall where the no slip condition applies.
-
-As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct SURF} line.
-
-For diagnostic purposes, or in cases where neither of the other wall models above is appropriate, it is possible to set a constant value of the near wall kinematic eddy viscosity for a given {\ct SURF} using {\ct NEAR\_WALL\_EDDY\_VISCOSITY}.
-
-Note that the near-wall turbulence model sets the eddy viscosity, $\mu_\mathrm{t}$, near the wall, \emph{not} the wall stress, $\tau_\mathrm{w}$.  The wall stress depends on the choice of wall function, as discussed in Sec.~\ref{info:WALL_MODEL}.
-
-
-\section{Numerical Stability Parameters}
-\label{info:Stability_Constraints}
-
-FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
-
-\subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
-\label{info:CFL}
-
-The well-known CFL constraint given by
-\begin{equation}
-\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\Delta} < 1
-\end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell width, $\Delta$, within one time step, $\delta t$. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\Delta$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for the purpose of taking time steps ten times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly ten times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
-
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
-\vskip\baselineskip
-\noindent
-{\ct CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector, despite the numerical code this is less restrictive than 1 or 2)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
-    \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (DNS and LES defaults, most restrictive, corresponds to $L_1$ norm of velocity vector)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
-    \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
-    \end{equation}
-{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
-    \end{equation}
-The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
-
-Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
-\begin{equation}
-\label{eqn_dtmassrestrict}
-\delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
-\end{equation}
-We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes
-\be
-\label{eqn_divstability}
-\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
-  = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
-\ee
-Equation~(\ref{eqn_divstability}) adds the effect of thermal expansion to the CFL constraint.  Further, note that the dot product implies summation over the subscripts $i$, which provides incentive for using the $L_1$ norm of the velocity vector as in {\ct CFL\_VELOCITY\_NORM=1}.
-
-\paragraph{Handling cells with large aspect ratios}
-
-In LES, it is usually better to use cubic cells to accurately capture turbulence.  However, there are situations where elongated or pancake shaped cells become necessary for computational efficiency, usually in either tunnel or atmospheric flow applications.  As the cell aspect ratio increases, the choice of velocity norm for the time step restriction becomes more important.  Numerical experiments have shown that beyond an aspect ratio of about 4:1, using {\ct CFL\_VELOCITY\_NORM=1} is required to avoid unphysical oscillations in the ambient temperature.  Thus, if not explicitly stated in the FDS input file, beyond a maximum cell aspect ratio of 4:1 FDS will automatically switch the stability check to use {\ct CFL\_VELOCITY\_NORM=1}.  The velocity norm used by FDS is reported in the output file ({\ct CHID.out}).
-
-\paragraph{Time step restrictions to avoid clipping}
-
-If the CFL constraint is not sufficient to maintain realizable mass fractions ($0 \le Z_\alpha \le 1$) then FDS will attempt to redistribute mass to the neighboring cells, as discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  If this fails, then a 10\% time step restriction will be applied and the mass transport equations will be reiterated.  Controlling the number of time step restrictions is discussed in Sec.~\ref{info:CLIP}.
-
-
-\subsection{The Von Neumann Constraint}
-\label{info:VN}
-
-The Von Neumann constraint is given by
-\begin{equation}
-\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
-\end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
-
-We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
-\begin{equation}
-u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
-\end{equation}
-Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.  The VN constraint is checked by default in all simulation modes.  It may be turned off by setting {\ct CHECK\_VN=F} on {\ct MISC}.
-
-
-
-\subsection{Stability of particle transport}
-\label{info:PART_Stability}
-
-The movement of Lagrangian particles over the course of a time step is calculated using an analytical solution and remains stable regardless of the time step used by the flow solver. However, if the particle moves over the width of several grid cells in a single time step, the momentum transferred between the particle and the gas cannot be allocated properly to all of the affected cells. To overcome this problem, FDS subdivides the gas phase time step based on each particle's velocity. For example, if the particle travels across two cells in a single gas phase time step, then its trajectory is calculated by subdividing the time step into two.
-
-In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step of the flow solver according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Because very fast nozzle velocities can cause extremely small time steps and hence very long run times, the {\ct PARTICLE\_CFL} constraint is set to {\ct F} by default.  Setting {\ct PARTICLE\_CFL} to {\ct T} on the {\ct MISC} line activates this constraint.
-
-
-
-
-\subsection{Heat Transfer Constraint}
-\label{info:HT}
-
-Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
-
-
-
-
-
-\section{Flux Limiters}
-\label{info:flux_limiters}
-
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default {\ct SIMULATION\_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
-
-\begin{lstlisting}
-&MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
-\end{lstlisting}
-
-\begin{table}[ht]
-\caption[Flux limiter options]{Flux limiter options.}
-\label{tab:flux_limiters}
-\centering
-\begin{tabular}{|l|l|}
-\hline
-Scheme                              & {\ct FLUX\_LIMITER} \\
-\hline
-Central differencing                & {\ct 'CENTRAL'}  \\
-Godunov                             & {\ct 'GODUNOV'}  \\
-Superbee (VLES, SVLES default)      & {\ct 'SUPERBEE'}  \\
-MINMOD                              & {\ct 'MINMOD'}  \\
-CHARM (DNS, LES default)            & {\ct 'CHARM'}  \\
-MP5                                 & {\ct 'MP5'}  \\ \hline
-\end{tabular}
-\end{table}
-
-
-
-
-
-
-
-\section{Limiting the Bounds of Key Variables}
-\label{info:CLIP}
-
-The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
-
-\subsection{Temperature}
-\label{info:CLIP:temp}
-
-The gas temperature is not solved for directly. Rather, the gas density and species mass fractions determine the gas temperature via the equation of state. Nevertheless, the calculation of the temperature of liquid droplets and solid obstructions do make use of temperature bounds. The default bounds are
-\be
-   \min \left( T_\infty , T_{\rm m} \right) - 10 < T < 2727 \quad ^\circ {\rm C}
-\ee
-where $T_\infty$ is the user-specified ambient temperature and $T_{\rm m}$ is the melting temperature of water. These bounds are widened by user-specified temperatures, like an initial solid or droplet temperature. To set your own bounds, use {\ct MINIMUM\_TEMPERATURE} and/or {\ct MAXIMUM\_TEMPERATURE} on the {\ct CLIP} line.
-
-One other consideration related to high temperatures is that FDS uses tabulated gas and solid property data up to a temperature of 5000~K. If for some reason you expect higher temperatures, set the integer parameter {\ct I\_MAX\_TEMP} on the {\ct MISC} line. This sets the upper dimension of many property arrays. Even though this parameter is an integer, it can be thought of as a maximum temperature in units of K. Note that temperature-dependent properties like specific heat at temperatures above 5000~K remain fixed, but integrated quantities like enthalpy take into account the higher temperature.
-
-\subsection{Density}
-\label{info:CLIP:dens}
-
-The density of the gas has a natural lower bound of zero, but if the density in a cell decreases to nearly zero, the temperature would then increase to an extremely high value due to the equation of state. Thus, by default, the density is kept within the following range:
-\be
-   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}}
-\ee
-where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify {\ct MINIMUM\_DENSITY} and/or {\ct MAXIMUM\_DENSITY} on the {\ct CLIP} line in units of kg/m$^3$.
-
-Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
 
 
 
@@ -1491,318 +1263,21 @@ Note that in a case with sprinklers, changing {\ct GVEC} will change how droplet
 
 
 
-\chapter{Pressure}
-\label{info:PRES}
 
-Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
 
-A unique feature of FDS, which distinguishes it from other CFD models, is that it employs a low Mach number approximation of the Navier-Stokes equations. For low speed flow simulations, it can be assumed that sound waves and pressure disturbances travel infinitely fast, rather than at the speed of sound, which is approximately 340~m/s at ambient temperature and pressure. Typical compartment fires induce flows of a few tens of meters per second, much less than the sound speed. However, for a simulation of a fire within a 1000~m tunnel, say, the propagation time of disturbances is a few seconds. If the tunnel has forced flow at one end and an opening at the other, it would take a few seconds for the pressure pulse from the fan to reach the opposite end. However, in the low Mach number formulation, the pulse reaches the other end instantaneously.
+\chapter{Model Geometry}
 
-In FDS, the pressure, $p(\bx,t)$, a function of space and time, is decomposed into a ``background'' component, $\overline{p}(z,t)$, and a perturbation, $\tp(\bx,t)$. The background pressure is a function only of time and the vertical spatial coordinate, $z$, which accounts for the ambient stratification of the atmosphere. For a typical compartment fire simulation that is open to the atmosphere, $\overline{p}$ is essentially constant. The perturbation pressure drives the fire-induced flow field.
-
-The equation for $\tp$ is an elliptic partial differential equation (PDE) that is formed by taking the divergence of the momentum equation, which contains the forcing term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
-\be
-   \nabla \cdot \left( \frac{1}{\rho} \right) \nabla \tp = \; \cdots
-\ee
-The discretized form of this PDE, that is, its approximation on a numerical grid, is a linear system of equations, $\mathbf{A} \mathbf{\tp} = \mathbf{b}$, where $\mathbf{A}$ is a sparse (i.e. mostly zeros) matrix, $\mathbf{\tp}$ is a vector whose number of elements equals the number of grid cells in the computational domain, and $\mathbf{b}$ is a vector representing the various discretized terms of the momentum equation. The CPU and memory requirements necessary to solve this huge system of equations could easily dwarf all other parts of the simulation. There are two remedies to this problem. First, the pressure field is solved within each individual mesh of the domain, and the individual pressure fields are ``stitched'' together using multiple iterations of the solver. Second, the matrix $\mathbf{A}$, representing the operator $\nabla \cdot (1/\rho) \nabla$ is simplified by replacing the variable density $\rho(\bx,t)$ by its ambient value so that the matrix $\mathbf{A}$ need not be recomputed at each time step, and a very fast and efficient solver using fast Fourier transforms (FFT) can be used.
-
-In the next two sections, these simplifications of the Poisson equation will be discussed, along with parameters that you might need to set to increase the accuracy of the solution for certain applications.
-
-
-\section{Accuracy of the Pressure Solver}
-\label{pressure_solver}
-
-For a single mesh, the solution of the simplified (i.e. separable) form of the Poisson equation for the pressure can be solved relatively quickly and accurately (i.e. to machine precision) using an FFT-based solver. However, for multiple meshes of varying grid resolution and configuration, it is not possible to use the fast solver for the global solution of the Poisson equation. Instead, the fast solver is employed mesh by mesh in parallel, and the pressure field on each mesh is forced to match at the mesh boundaries through repeated solves on the individual meshes. It is prohibitively time-consuming to iterate the global pressure solution to the same level of accuracy as the local pressure solutions. The inaccuracy of the global pressure solution is manifested in a slight mismatch in the normal component of velocity at the mesh boundaries. An error tolerance is specified for this mismatch in velocity. These small errors in the normal component of velocity also appear within an individual mesh at solid, internal boundaries. The fast, FFT-based solver can only enforce exact no-flux conditions at exterior boundaries of the mesh.
-
-If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
-
-To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_POISSON} to {\ct T} on the {\ct PRES} line, instructing FDS to check that the left-hand and right-hand sides of the Poisson equation are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file. Note that this verifies the accuracy of the {\em local}, not the global, pressure solution. To check the accuracy of the global pressure solution, see Section~\ref{tunnel_demo}.
-
-It is possible for the pressure interation scheme to seem ``stuck''---the solution convergence rate may slow dramatically and further iterations are only consuming cpu resources without improving the solution.  You can tell FDS to break out of these situations prior to hitting the maximum number of interations by setting {\ct SUSPEND\_PRESSURE\_ITERATIONS=T} on the {\ct PRES} line.  FDS will then suspend the pressure iterations if the error does not drop below {\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value.
-
-
-\subsection{Optional Pressure Solvers}
-\label{optional_pressure_solver}
-
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
-\begin{description}
-\item[{\ct SOLVER='ULMAT'}]  This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
-
-With the {\ct ULMAT} solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
-
-The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use should be limited to meshes of at most 150,000 cells. This number depends on the amount of random access memory (RAM) that you can devote to each MPI process, and you might want to experiment with larger meshes if you have, say, tens of gigabytes of RAM per MPI process.
-
-\item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
-
-The {\ct GLMAT} solver is used mainly for testing and diagnostics. Because it solves the pressure over the entire computational domain, it is limited to about 1~million cells total unless your computer has an extraordinary amount of RAM.
-
-\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that (1) it does not allow for internal sealed regions within the domain, (2) it is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
-\end{description}
-Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
-
-
-\begin{landscape}
-\begin{table}[h]
-\begin{threeparttable}
-\centering
-\caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
-\begin{tabular}{lcccccccc}
-\toprule
-\multicolumn{1}{c}{} & \multicolumn{4}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
-\cmidrule(rl){2-5} \cmidrule(rl){6-8}
-\textbf{Solver} & \textbf{Refinement}$^1$ & \textbf{Stretching} & \textbf{Add/Remove}$^2$ & \textbf{Zones} & \textbf{Velocity @ Mesh}$^3$ & \textbf{Velocity @ Solid}$^4$ & \textbf{Inseparability}$^5$ \\
-\midrule
-\rowcolor{lavender}
-FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
-ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
-\rowcolor{lavender}
-GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
-UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
-% \rowcolor{lavender}
-% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
-% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-    \small
-    \item Notes:
-    \begin{itemize}
-        \item[$^1$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
-        \item[$^2$] ``Add/Remove'' refers to the ability of the solver to handle changes in geometry during the course of the simulation, either by adding or removing {\ct OBST} or {\ct GEOM} via {\ct CTRL} functions.
-        \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
-        \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
-        \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
-        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
-    \end{itemize}
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-\end{landscape}
-
-
-\subsection{Example Case: Pressure\_Solver/duct\_flow}
-\label{duct_flow}
-
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the {\ct 'UGLMAT'} solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
-\begin{lstlisting}
-&PRES SOLVER='UGLMAT' /
-\end{lstlisting}
-As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient depends on the problem and the required error tolerance.  In this particular case, the {\ct 'UGLMAT'} case runs about 25 \% faster than the default FFT case, and it is more accurate. The reason is that a tight tolerance has been specified and the FFT solver is forced to iterate tens or hundreds of times per time step. When run with default error tolerances, the {\ct 'FFT'} solver is faster, but less accurate, than the alternative solvers.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow}
-\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow_iterations}
-\end{center}
-\caption[Results of the {\ct duct\_flow} test case]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
-\label{duct_flow_fig}
-\end{figure}
-
-
-\subsection{Example Case: Pressure\_Solver/dancing\_eddies}
-\label{dancing_eddies}
-
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the {\ct 'UGLMAT'} solver is threaded, whereas currently the {\ct 'FFT'} solver (FDS default) is not.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
-\end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the {\ct 'UGLMAT'} solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
-\label{dancing_eddies_figure}
-\end{figure}
-
-The case called {\ct dancing\_eddies\_tight} is rerun without the special pressure preconditioner. Figure~\ref{dancing_eddies_precon} shows the reduction in the number of pressure iterations (left) and the CPU time (right).
-
-\begin{figure}[ht]
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_precon}
-\caption[Pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for preconditioned and non-preconditioned pressure solvers.}
-\label{dancing_eddies_precon}
-\end{figure}
-
-
-
-\section{Baroclinic Vorticity}
-\label{baroclinic_torque}
-
-The second challenge in solving the Poisson equation for pressure is that the matrix of the linear system of equations that is formed when discretizing it does not have constant coefficients because the density, $\rho(\bx,t)$, changes with each new time step. To get around this problem, the pressure term in the momentum equation is decomposed as follows:
-\be
-   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right) \label{p_decomp}
-\ee
-which leads to a Poisson equation that can be solved efficiently:
-\be
-   \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots  \label{sepeq}
-\ee
-The superscript $n$ represents the time step. The superscript $k$ indicates that this equation is solved multiple times per time step, and $k$ indicates the iteration number. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
-\be
-  \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|  \label{pressure_error}
-\ee
-drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
-
-The lagged pressure term on the right hand side of Eq.~(\ref{sepeq}) is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=F} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
-
-
-
-\subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
-\label{helium_2d_isothermal}
-
-This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
-
-\begin{figure}[ht]
-\noindent
-\begin{minipage}{1.1in}
-\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d_isothermal}
-\end{minipage}
-\hfill
-\begin{minipage}{5.5in}
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-&HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
-&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=T /
-&TIME T_END=5.0 /
-&MISC SIMULATION_MODE='DNS' /
-&RADI RADIATION=F /
-&SPEC ID='HELIUM'  /
-&SURF ID='HELIUM', VEL=-0.673, SPEC_ID(1)='HELIUM',MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
-&VENT MB='XMAX' ,SURF_ID='OPEN' /
-&VENT MB='ZMAX' ,SURF_ID='OPEN' /
-&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
-&DUMP PLOT3D_QUANTITY(1)='PRESSURE',
-            PLOT3D_QUANTITY(5)='MASS FRACTION',PLOT3D_SPEC_ID(5)='HELIUM' /
-&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=T /
-&SLCF PBY=0.000,QUANTITY='VOLUME FRACTION', SPEC_ID='HELIUM' /
-&TAIL /
-\end{lstlisting}
-\end{minipage}
-\caption[Snapshot of the {\ct helium\_2d\_isothermal} test case]{Simulation of a helium plume.}
-\label{helium_plume}
-\end{figure}
-
-
-
-
-
-
-\section{Pressure Considerations in Long Tunnels}
-\label{tunnel_solver}
-\label{tunnel_demo}
-\label{tunnel_demo_glmat}
-
-A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
-\begin{enumerate}
-\item If (1) the tunnel is made up of multiple meshes that abut end to end, (2) there are no other meshes outside of the tunnel, (3) there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
-\item You can increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10 in most cases; 20 when the {\ct TUNNEL\_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the {\ct MAX\_PRESSURE\_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
-\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
-\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct T}
-\item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$~s$^{-2}$. A good value to try would be 1/5 to 1/10 of the default value.
-\item Set {\ct SOLVER='GLMAT'} on the {\ct PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or {\ct 'UGLMAT'} to do what {\ct 'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the {\ct TUNNEL\_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
-\end{enumerate}
-Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver with the {\ct TUNNEL\_PRECONDITIONER} set to {\ct T}; the second uses the {\ct 'GLMAT'} solver. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These files are generated by setting {\ct VELOCITY\_ERROR\_FILE=T} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. A description of each column is as follows:
-\begin{description}
-\item[\ct Time:] Simulation time (s)
-\item[\ct Time Step:] The index of the time step
-\item[\ct Iteration:] The index of the pressure iteration within the time step. Note that for a single time step, there are two series of pressure iterations, one for the predictor phase, and one for the corrector.
-\item[\ct Total:] The cumulative index of pressure iterations for the entire simulation
-\item[\ct Mesh:] The mesh where the maximum velocity error occurs
-\item[\ct I,J,K:] Cell indices where the maximum velocity error occurs
-\item[\ct Velocity Error:] The maximum absolute value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries
-\item[\ct Mesh,I,J,K:] The mesh and cell indices where the maximum pressure error occurs
-\item[\ct Pressure Error:] The quantity shown in Eq.~(\ref{pressure_error}) in units of s$^{-2}$
-\end{description}
-Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two cases over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above. Note that the simulation using the {\ct 'GLMAT'} solver has no velocity error in this case because it solves the Poisson equation directly over the entire domain, not mesh by mesh. However, this simulation still requires iterations of the pressure solver to drive the solution closer to the true solution of the inseparable Poisson equation.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity} &
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure} \\
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_velocity} &
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_pressure}
-\end{tabular*}
-\caption[Convergence test for the {\ct tunnel\_demo} test cases]{Reduction in velocity and pressure error due to iteration of the pressure solver. The top two plots are the result of the FFT-based solver; the lower two {\ct 'GLMAT'}.}
-\label{tunnel_demo_fig}
-\end{figure}
-
-\FloatBarrier
-
-\subsubsection{Special Case: Pressure Drop in Long Tunnels}
-\label{sec:tunnel_pressure_drop}
-
-This section describes a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide~\cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here the flow is forced from a {\ct VENT} and the axial pressure profile is formed from planar averages {\ct DEVC}s.  The tunnel is 1.6~km (approximately 1~mi) long with a square cross-section 10~m by 10~m for Cases A, B, C, and D.  The cross section for Case E is 12.8~m in width by 5~m in height, giving a hydraulic diameter of 7.2~m. Air is forced from the entrance at 2, 4, or 10~m/s for sand-grain roughness heights of 0.0001, 0.01, or 0.1~m.  Two grid resolutions are used, with 10 or 20 uniform cells spanning the tunnel height.  Streamwise grid resolution is twice the wall-normal resolution.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation~\cite{MYO}.  FDS results for the 10 and 20 vertical cell cases are also shown along with the maximum relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
-
-\begin{table}[!ht]
-\input{SCRIPT_FIGURES/tunnel_pressure_drop}
-\end{table}
-
-\begin{figure}[!ht]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_a} &
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_b} \\
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_c} &
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d} \\
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_e} &
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_fire}
-\end{tabular*}
-\caption[The {\ct tunnel\_pressure\_drop} cases]{Tunnel pressure drop for cases listed in Table \ref{tab:tunnel_pressure_drop}.}
-\label{fig:tunnel_pressure_drop}
-\end{figure}
-
-While reasonable grid resolution is important, the wall models in FDS are capable of giving the correct mean wall stress even at rather coarse resolution.  For example, the $y^+$ for Case C with 10 cells is, in fact, 5000 (this is the location of the middle of the first grid cell divided by the roughness height). Also, note that a roughness of 0.1~mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
-
-The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressure drop in Tunnel~B (2~m/s flow speed, 0.1~m wall roughness) which now contains a hypothetical 60~MW fire at its midpoint. The grid resolution in the vertical direction is listed in the legend of the plots. For this case, the pressure is evaluated at mid-height along the tunnel centerline. The relatively rapid drop in pressure at the open end of the tunnel ($x=1600$~m) is due to the fact that the pressure is assumed to be ambient at an open boundary.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\chapter{Building the Model}
-
-A considerable amount of work in setting up a calculation lies in specifying the
-geometry of the space to be modeled and applying boundary conditions
-to the solid surfaces. The geometry is described in terms
-of rectangular obstructions that can heat up, burn, conduct heat, etc.;
-and vents from which air or fuel can be
-either injected into, or drawn from, the flow domain.
-A boundary condition needs to be assigned to each obstruction
-and vent describing its thermal properties. A fire is just one type of
-boundary condition. This chapter describes how to build the model.
+A considerable amount of work in setting up a calculation lies in specifying the geometry of the space to be modeled and applying boundary conditions to the solid surfaces. The geometry is described in terms of rectangular obstructions that can heat up, burn, conduct heat, etc.; and vents from which air or fuel can be either injected into, or drawn from, the flow domain. A boundary condition needs to be assigned to each obstruction and vent describing its thermal properties. A fire is just one type of boundary condition. This chapter describes how to build the model.
 
 
 \section{Specifying Boundary Conditions}
 \label{info:SURF}
 
-Before describing how to build up the geometry, it is first necessary to explain how to describe what these bounding surfaces
-consist of. {\ct SURF} is the namelist group that defines
-the structure of all solid surfaces or openings within or
-bounding the flow domain. Boundary conditions for obstructions and vents are
-prescribed by referencing the appropriate {\ct SURF} line(s) whose
-parameters are described in this section.
+Before describing how to build up the geometry, it is first necessary to explain how to describe what these bounding surfaces consist of. {\ct SURF} is the namelist group that defines the structure of all solid surfaces or openings within or bounding the flow domain. Boundary conditions for obstructions and vents are prescribed by referencing the appropriate {\ct SURF} line(s) whose parameters are described in this section.
 
-The default boundary condition for all solid surfaces is that of a smooth
-inert wall with the surface temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. Do not confuse this with a surface for which heat transfer does not occur (this is an adiabatic surface which will change in temperature to maintain zero heat transfer, refer to Section~\ref{info:adiabatic}). To maintain the surface temperature at {\ct TMPA} when exposed to a gas temperature, which may be above or below {\ct TMPA}, FDS calculates the required heat transfer coefficient, and hence the heat transfer between the surface and the gas phase. You can think of {\ct INERT} as the ultimate ambient temperature heat sink; such as a water-cooled panel.
+The default boundary condition for all solid surfaces is that of a smooth inert wall with the surface temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. Do not confuse this with a surface for which heat transfer does not occur (this is an adiabatic surface which will change in temperature to maintain zero heat transfer, refer to Section~\ref{info:adiabatic}). To maintain the surface temperature at {\ct TMPA} when exposed to a gas temperature, which may be above or below {\ct TMPA}, FDS calculates the required heat transfer coefficient, and hence the heat transfer between the surface and the gas phase. You can think of {\ct INERT} as the ultimate ambient temperature heat sink; such as a water-cooled panel.
 
-If only this boundary condition is needed, there is no need to add any {\ct SURF} lines
-to the input file. If additional boundary conditions are desired,
-they are to be listed one boundary condition at a time.
-Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
-allow references to it by an obstruction or vent. Thus, on each
-{\ct OBST} and {\ct VENT} line that are to be described below, the character string {\ct SURF\_ID='...'}
-indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
-condition parameters. If a particular {\ct SURF} line is to be applied
-as the default boundary condition,
-set {\ct DEFAULT=T} on the {\ct SURF} line.
+If only this boundary condition is needed, there is no need to add any {\ct SURF} lines to the input file. If additional boundary conditions are desired, they are to be listed one boundary condition at a time. Each {\ct SURF} line consists of an identification string {\ct ID='...'} to allow references to it by an obstruction or vent. Thus, on each {\ct OBST} and {\ct VENT} line that are to be described below, the character string {\ct SURF\_ID='...'} indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary condition parameters. If a particular {\ct SURF} line is to be applied as the default boundary condition, set {\ct DEFAULT=T} on the {\ct SURF} line.
 
 
 
@@ -2779,7 +2254,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 \end{figure}
 
 
-\chapter{Fire and Thermal Boundary Conditions}
+\chapter{Thermal Boundary Conditions}
 
 This chapter describes how to specify the thermal properties of solid objects.
 
@@ -3198,13 +2673,13 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
 
 
 
-\newpage
 
-\section{Simple Pyrolysis Models}
+
+\chapter{Fire and Pyrolysis}
 
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely on the availability of material properties and the appropriateness of the underlying pyrolysis model. Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details. It should also be noted that the user has to use only one pyrolysis model at a time.
 
-\subsection{A Gas Burner with a Specified Heat Release Rate}
+\section{Specified Heat Release Rate}
 \label{multiple_reac_hrrpua}
 \label{info:gas_burner}
 
@@ -3281,7 +2756,7 @@ If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware th
 
 If the obstruction or vent with the pyrolysis model represents an object that has more complex shape than a rectangular box, or if the mesh resolution does not allow resolving the real surface area, you can add parameter {\ct AREA\_MULTIPLIER} on the {\ct SURF} line to manually adjust the burning rate with a constant factor. Default value is 1.0. This factor will also affect the rate of heat transfer between the object and gas phase.
 
-\subsection{Solid Fuels that Burn at a Specified Rate}
+\subsection{Thermally-Thick Solids that Burn at a Specified Rate}
 \label{info:specified_burning}
 
 Real objects, like furnishings, office equipment, and so on, are often difficult to describe via the {\ct SURF} and {\ct MATL} parameters. Sometimes the only information about a given object is its bulk thermal properties, its ``ignition'' temperature, and its subsequent burning rate as a function of time from ignition. For this situation, add lines similar to the following:
@@ -3321,7 +2796,10 @@ Finally, if you desire that the burning stop if the surface temperature drops be
 
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occuring during an FDS simulation. This model is invoked by setting {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled timestep where the scaled timestep is the FDS timestep adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantenous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model was developed on heat fluxes ranging from 25-75 kW/m$^2$; however, by default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
+\subsection{Scaling the Burning Rate by the Heat Flux}
+\label{info:scaled_burning}
+
+FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occurring during an FDS simulation. This model is invoked by specifying a {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled time step where the scaled time step is the FDS time step adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantaneous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model was developed on heat fluxes ranging from 25~kW/m$^2$ to 75~kW/m$^2$; however, by default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
 
 An example demonstrating the scaling behavior is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
 
@@ -8829,6 +8307,506 @@ It should be noted that devices are updated sequentially in the order that they 
 
 
 
+\chapter{Numerical Considerations}
+\label{info:MISC}
+
+This chapter describes various numerical parameters; that is, parameters that control how the governing equations are solved. Most of these parameters are specified on the {\ct MISC} line and for most large-scale fire simulations, their default values are recommended. {\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}).
+
+It is good practice to use only one {\ct MISC} line in the data file.  Using multiple {\ct MISC} lines is possible, but be careful about not over writing a parameter.  The last parameter read will take precedence.
+
+\section{Simulation Mode}
+\label{Sim_Mode}
+
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direct Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+\begin{lstlisting}
+&MISC ..., SIMULATION_MODE='DNS' /
+\end{lstlisting}
+indicates a direct numerical simulation. The default value is {\ct 'VLES'}.
+
+Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
+
+\begin{table}[ht]
+\centering
+\caption{Parameters effected by {\ct SIMULATION\_MODE}.}
+\label{tbl:SIMULATION_MODE}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Key Parameter                          & Section                        & {\ct 'DNS'}   & {\ct 'LES'}    & {\ct 'VLES'}      & {\ct 'SVLES'}    \\ \hline \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
+{\ct CHECK\_VN}                        & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
+{\ct FLUX\_LIMITER}                    & \ref{info:flux_limiters}       & {\ct 'CHARM'} & {\ct 'CHARM'}  & {\ct 'SUPERBEE'}  & {\ct 'SUPERBEE'} \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+
+\section{Large Eddy Simulation Parameters}
+\label{info:LES}
+
+By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent viscosity,
+\begin{equation}
+(\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
+\end{equation}
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using {\ct LES\_FILTER\_TYPE='MAX'} on {\ct MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{1/3}$. You may also choose a constant filter width by setting {\ct FIXED\_LES\_FILTER\_WIDTH} on the {\ct MISC} line, in meters. This is not a recommended thing to do in practice, but may be useful for convergence studies and other diagnostic tests.
+
+Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
+\be
+   k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
+   \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
+\ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+
+\begin{table}[ht]
+\caption[Turbulence model options]{Turbulence model options.}
+\label{turb_table}
+\centering
+\begin{tabular}{|lll|}
+\hline
+{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
+{\ct 'CONSTANT SMAGORINSKY'}    & Constant-coefficient Smagorinsky \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
+{\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
+{\ct 'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
+{\ct 'VREMAN'}                  & Vreman's eddy viscosity \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
+{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Near-Wall Turbulence Model}
+
+By default, FDS uses the WALE model of Nicoud and Ducros \cite{Nicoud:1999} for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near a wall.  The WALE model has the advantage that the eddy viscosity tends to zero at the correct rate as you approach the wall where the no slip condition applies.
+
+As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct SURF} line.
+
+For diagnostic purposes, or in cases where neither of the other wall models above is appropriate, it is possible to set a constant value of the near wall kinematic eddy viscosity for a given {\ct SURF} using {\ct NEAR\_WALL\_EDDY\_VISCOSITY}.
+
+Note that the near-wall turbulence model sets the eddy viscosity, $\mu_\mathrm{t}$, near the wall, \emph{not} the wall stress, $\tau_\mathrm{w}$.  The wall stress depends on the choice of wall function, as discussed in Sec.~\ref{info:WALL_MODEL}.
+
+
+\section{Numerical Stability Parameters}
+\label{info:Stability_Constraints}
+
+FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
+
+\subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+\label{info:CFL}
+
+The well-known CFL constraint given by
+\begin{equation}
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\Delta} < 1
+\end{equation}
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell width, $\Delta$, within one time step, $\delta t$. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\Delta$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for the purpose of taking time steps ten times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly ten times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
+
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
+\vskip\baselineskip
+\noindent
+{\ct CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector, despite the numerical code this is less restrictive than 1 or 2)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
+    \end{equation}
+{\ct CFL\_VELOCITY\_NORM=1} (DNS and LES defaults, most restrictive, corresponds to $L_1$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
+    \end{equation}
+{\ct CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
+    \end{equation}
+{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \end{equation}
+The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
+
+Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+\begin{equation}
+\label{eqn_dtmassrestrict}
+\delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
+\end{equation}
+We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes
+\be
+\label{eqn_divstability}
+\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
+  = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
+\ee
+Equation~(\ref{eqn_divstability}) adds the effect of thermal expansion to the CFL constraint.  Further, note that the dot product implies summation over the subscripts $i$, which provides incentive for using the $L_1$ norm of the velocity vector as in {\ct CFL\_VELOCITY\_NORM=1}.
+
+\paragraph{Handling cells with large aspect ratios}
+
+In LES, it is usually better to use cubic cells to accurately capture turbulence.  However, there are situations where elongated or pancake shaped cells become necessary for computational efficiency, usually in either tunnel or atmospheric flow applications.  As the cell aspect ratio increases, the choice of velocity norm for the time step restriction becomes more important.  Numerical experiments have shown that beyond an aspect ratio of about 4:1, using {\ct CFL\_VELOCITY\_NORM=1} is required to avoid unphysical oscillations in the ambient temperature.  Thus, if not explicitly stated in the FDS input file, beyond a maximum cell aspect ratio of 4:1 FDS will automatically switch the stability check to use {\ct CFL\_VELOCITY\_NORM=1}.  The velocity norm used by FDS is reported in the output file ({\ct CHID.out}).
+
+\paragraph{Time step restrictions to avoid clipping}
+
+If the CFL constraint is not sufficient to maintain realizable mass fractions ($0 \le Z_\alpha \le 1$) then FDS will attempt to redistribute mass to the neighboring cells, as discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  If this fails, then a 10\% time step restriction will be applied and the mass transport equations will be reiterated.  Controlling the number of time step restrictions is discussed in Sec.~\ref{info:CLIP}.
+
+
+\subsection{The Von Neumann Constraint}
+\label{info:VN}
+
+The Von Neumann constraint is given by
+\begin{equation}
+\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
+\end{equation}
+The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+
+We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
+\begin{equation}
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+\end{equation}
+Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.  The VN constraint is checked by default in all simulation modes.  It may be turned off by setting {\ct CHECK\_VN=F} on {\ct MISC}.
+
+
+
+\subsection{Stability of particle transport}
+\label{info:PART_Stability}
+
+The movement of Lagrangian particles over the course of a time step is calculated using an analytical solution and remains stable regardless of the time step used by the flow solver. However, if the particle moves over the width of several grid cells in a single time step, the momentum transferred between the particle and the gas cannot be allocated properly to all of the affected cells. To overcome this problem, FDS subdivides the gas phase time step based on each particle's velocity. For example, if the particle travels across two cells in a single gas phase time step, then its trajectory is calculated by subdividing the time step into two.
+
+In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step of the flow solver according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Because very fast nozzle velocities can cause extremely small time steps and hence very long run times, the {\ct PARTICLE\_CFL} constraint is set to {\ct F} by default.  Setting {\ct PARTICLE\_CFL} to {\ct T} on the {\ct MISC} line activates this constraint.
+
+
+
+
+\subsection{Heat Transfer Constraint}
+\label{info:HT}
+
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
+
+
+
+
+
+\section{Flux Limiters}
+\label{info:flux_limiters}
+
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default {\ct SIMULATION\_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
+
+\begin{lstlisting}
+&MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
+\end{lstlisting}
+
+\begin{table}[ht]
+\caption[Flux limiter options]{Flux limiter options.}
+\label{tab:flux_limiters}
+\centering
+\begin{tabular}{|l|l|}
+\hline
+Scheme                              & {\ct FLUX\_LIMITER} \\
+\hline
+Central differencing                & {\ct 'CENTRAL'}  \\
+Godunov                             & {\ct 'GODUNOV'}  \\
+Superbee (VLES, SVLES default)      & {\ct 'SUPERBEE'}  \\
+MINMOD                              & {\ct 'MINMOD'}  \\
+CHARM (DNS, LES default)            & {\ct 'CHARM'}  \\
+MP5                                 & {\ct 'MP5'}  \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+\section{Limiting the Bounds of Key Variables}
+\label{info:CLIP}
+
+The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
+
+\subsection{Temperature}
+\label{info:CLIP:temp}
+
+The gas temperature is not solved for directly. Rather, the gas density and species mass fractions determine the gas temperature via the equation of state. Nevertheless, the calculation of the temperature of liquid droplets and solid obstructions do make use of temperature bounds. The default bounds are
+\be
+   \min \left( T_\infty , T_{\rm m} \right) - 10 < T < 2727 \quad ^\circ {\rm C}
+\ee
+where $T_\infty$ is the user-specified ambient temperature and $T_{\rm m}$ is the melting temperature of water. These bounds are widened by user-specified temperatures, like an initial solid or droplet temperature. To set your own bounds, use {\ct MINIMUM\_TEMPERATURE} and/or {\ct MAXIMUM\_TEMPERATURE} on the {\ct CLIP} line.
+
+One other consideration related to high temperatures is that FDS uses tabulated gas and solid property data up to a temperature of 5000~K. If for some reason you expect higher temperatures, set the integer parameter {\ct I\_MAX\_TEMP} on the {\ct MISC} line. This sets the upper dimension of many property arrays. Even though this parameter is an integer, it can be thought of as a maximum temperature in units of K. Note that temperature-dependent properties like specific heat at temperatures above 5000~K remain fixed, but integrated quantities like enthalpy take into account the higher temperature.
+
+\subsection{Density}
+\label{info:CLIP:dens}
+
+The density of the gas has a natural lower bound of zero, but if the density in a cell decreases to nearly zero, the temperature would then increase to an extremely high value due to the equation of state. Thus, by default, the density is kept within the following range:
+\be
+   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}}
+\ee
+where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify {\ct MINIMUM\_DENSITY} and/or {\ct MAXIMUM\_DENSITY} on the {\ct CLIP} line in units of kg/m$^3$.
+
+Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
+
+
+
+\chapter{Pressure}
+\label{info:PRES}
+
+Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
+
+A unique feature of FDS, which distinguishes it from other CFD models, is that it employs a low Mach number approximation of the Navier-Stokes equations. For low speed flow simulations, it can be assumed that sound waves and pressure disturbances travel infinitely fast, rather than at the speed of sound, which is approximately 340~m/s at ambient temperature and pressure. Typical compartment fires induce flows of a few tens of meters per second, much less than the sound speed. However, for a simulation of a fire within a 1000~m tunnel, say, the propagation time of disturbances is a few seconds. If the tunnel has forced flow at one end and an opening at the other, it would take a few seconds for the pressure pulse from the fan to reach the opposite end. However, in the low Mach number formulation, the pulse reaches the other end instantaneously.
+
+In FDS, the pressure, $p(\bx,t)$, a function of space and time, is decomposed into a ``background'' component, $\overline{p}(z,t)$, and a perturbation, $\tp(\bx,t)$. The background pressure is a function only of time and the vertical spatial coordinate, $z$, which accounts for the ambient stratification of the atmosphere. For a typical compartment fire simulation that is open to the atmosphere, $\overline{p}$ is essentially constant. The perturbation pressure drives the fire-induced flow field.
+
+The equation for $\tp$ is an elliptic partial differential equation (PDE) that is formed by taking the divergence of the momentum equation, which contains the forcing term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
+\be
+   \nabla \cdot \left( \frac{1}{\rho} \right) \nabla \tp = \; \cdots
+\ee
+The discretized form of this PDE, that is, its approximation on a numerical grid, is a linear system of equations, $\mathbf{A} \mathbf{\tp} = \mathbf{b}$, where $\mathbf{A}$ is a sparse (i.e. mostly zeros) matrix, $\mathbf{\tp}$ is a vector whose number of elements equals the number of grid cells in the computational domain, and $\mathbf{b}$ is a vector representing the various discretized terms of the momentum equation. The CPU and memory requirements necessary to solve this huge system of equations could easily dwarf all other parts of the simulation. There are two remedies to this problem. First, the pressure field is solved within each individual mesh of the domain, and the individual pressure fields are ``stitched'' together using multiple iterations of the solver. Second, the matrix $\mathbf{A}$, representing the operator $\nabla \cdot (1/\rho) \nabla$ is simplified by replacing the variable density $\rho(\bx,t)$ by its ambient value so that the matrix $\mathbf{A}$ need not be recomputed at each time step, and a very fast and efficient solver using fast Fourier transforms (FFT) can be used.
+
+In the next two sections, these simplifications of the Poisson equation will be discussed, along with parameters that you might need to set to increase the accuracy of the solution for certain applications.
+
+
+\section{Accuracy of the Pressure Solver}
+\label{pressure_solver}
+
+For a single mesh, the solution of the simplified (i.e. separable) form of the Poisson equation for the pressure can be solved relatively quickly and accurately (i.e. to machine precision) using an FFT-based solver. However, for multiple meshes of varying grid resolution and configuration, it is not possible to use the fast solver for the global solution of the Poisson equation. Instead, the fast solver is employed mesh by mesh in parallel, and the pressure field on each mesh is forced to match at the mesh boundaries through repeated solves on the individual meshes. It is prohibitively time-consuming to iterate the global pressure solution to the same level of accuracy as the local pressure solutions. The inaccuracy of the global pressure solution is manifested in a slight mismatch in the normal component of velocity at the mesh boundaries. An error tolerance is specified for this mismatch in velocity. These small errors in the normal component of velocity also appear within an individual mesh at solid, internal boundaries. The fast, FFT-based solver can only enforce exact no-flux conditions at exterior boundaries of the mesh.
+
+If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
+
+To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_POISSON} to {\ct T} on the {\ct PRES} line, instructing FDS to check that the left-hand and right-hand sides of the Poisson equation are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file. Note that this verifies the accuracy of the {\em local}, not the global, pressure solution. To check the accuracy of the global pressure solution, see Section~\ref{tunnel_demo}.
+
+It is possible for the pressure interation scheme to seem ``stuck''---the solution convergence rate may slow dramatically and further iterations are only consuming cpu resources without improving the solution.  You can tell FDS to break out of these situations prior to hitting the maximum number of interations by setting {\ct SUSPEND\_PRESSURE\_ITERATIONS=T} on the {\ct PRES} line.  FDS will then suspend the pressure iterations if the error does not drop below {\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value.
+
+
+\subsection{Optional Pressure Solvers}
+\label{optional_pressure_solver}
+
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
+\begin{description}
+\item[{\ct SOLVER='ULMAT'}]  This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
+
+With the {\ct ULMAT} solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
+
+The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use should be limited to meshes of at most 150,000 cells. This number depends on the amount of random access memory (RAM) that you can devote to each MPI process, and you might want to experiment with larger meshes if you have, say, tens of gigabytes of RAM per MPI process.
+
+\item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
+
+The {\ct GLMAT} solver is used mainly for testing and diagnostics. Because it solves the pressure over the entire computational domain, it is limited to about 1~million cells total unless your computer has an extraordinary amount of RAM.
+
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that (1) it does not allow for internal sealed regions within the domain, (2) it is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
+\end{description}
+Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
+
+
+\begin{landscape}
+\begin{table}[h]
+\begin{threeparttable}
+\centering
+\caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
+\begin{tabular}{lcccccccc}
+\toprule
+\multicolumn{1}{c}{} & \multicolumn{4}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
+\cmidrule(rl){2-5} \cmidrule(rl){6-8}
+\textbf{Solver} & \textbf{Refinement}$^1$ & \textbf{Stretching} & \textbf{Add/Remove}$^2$ & \textbf{Zones} & \textbf{Velocity @ Mesh}$^3$ & \textbf{Velocity @ Solid}$^4$ & \textbf{Inseparability}$^5$ \\
+\midrule
+\rowcolor{lavender}
+FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
+ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
+\rowcolor{lavender}
+GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
+UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
+% \rowcolor{lavender}
+% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
+% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+    \small
+    \item Notes:
+    \begin{itemize}
+        \item[$^1$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
+        \item[$^2$] ``Add/Remove'' refers to the ability of the solver to handle changes in geometry during the course of the simulation, either by adding or removing {\ct OBST} or {\ct GEOM} via {\ct CTRL} functions.
+        \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
+        \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
+        \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
+    \end{itemize}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\end{landscape}
+
+
+\subsection{Example Case: Pressure\_Solver/duct\_flow}
+\label{duct_flow}
+
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the {\ct 'UGLMAT'} solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+\begin{lstlisting}
+&PRES SOLVER='UGLMAT' /
+\end{lstlisting}
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient depends on the problem and the required error tolerance.  In this particular case, the {\ct 'UGLMAT'} case runs about 25 \% faster than the default FFT case, and it is more accurate. The reason is that a tight tolerance has been specified and the FFT solver is forced to iterate tens or hundreds of times per time step. When run with default error tolerances, the {\ct 'FFT'} solver is faster, but less accurate, than the alternative solvers.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow}
+\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow_iterations}
+\end{center}
+\caption[Results of the {\ct duct\_flow} test case]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
+\label{duct_flow_fig}
+\end{figure}
+
+
+\subsection{Example Case: Pressure\_Solver/dancing\_eddies}
+\label{dancing_eddies}
+
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the {\ct 'UGLMAT'} solver is threaded, whereas currently the {\ct 'FFT'} solver (FDS default) is not.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
+\end{center}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the {\ct 'UGLMAT'} solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\label{dancing_eddies_figure}
+\end{figure}
+
+The case called {\ct dancing\_eddies\_tight} is rerun without the special pressure preconditioner. Figure~\ref{dancing_eddies_precon} shows the reduction in the number of pressure iterations (left) and the CPU time (right).
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_precon}
+\caption[Pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for preconditioned and non-preconditioned pressure solvers.}
+\label{dancing_eddies_precon}
+\end{figure}
+
+
+
+\section{Baroclinic Vorticity}
+\label{baroclinic_torque}
+
+The second challenge in solving the Poisson equation for pressure is that the matrix of the linear system of equations that is formed when discretizing it does not have constant coefficients because the density, $\rho(\bx,t)$, changes with each new time step. To get around this problem, the pressure term in the momentum equation is decomposed as follows:
+\be
+   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right) \label{p_decomp}
+\ee
+which leads to a Poisson equation that can be solved efficiently:
+\be
+   \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots  \label{sepeq}
+\ee
+The superscript $n$ represents the time step. The superscript $k$ indicates that this equation is solved multiple times per time step, and $k$ indicates the iteration number. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
+\be
+  \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|  \label{pressure_error}
+\ee
+drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
+
+The lagged pressure term on the right hand side of Eq.~(\ref{sepeq}) is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=F} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
+
+
+
+\subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
+\label{helium_2d_isothermal}
+
+This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
+
+\begin{figure}[ht]
+\noindent
+\begin{minipage}{1.1in}
+\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d_isothermal}
+\end{minipage}
+\hfill
+\begin{minipage}{5.5in}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+&HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
+&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=T /
+&TIME T_END=5.0 /
+&MISC SIMULATION_MODE='DNS' /
+&RADI RADIATION=F /
+&SPEC ID='HELIUM'  /
+&SURF ID='HELIUM', VEL=-0.673, SPEC_ID(1)='HELIUM',MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
+&VENT MB='XMAX' ,SURF_ID='OPEN' /
+&VENT MB='ZMAX' ,SURF_ID='OPEN' /
+&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
+&DUMP PLOT3D_QUANTITY(1)='PRESSURE',
+            PLOT3D_QUANTITY(5)='MASS FRACTION',PLOT3D_SPEC_ID(5)='HELIUM' /
+&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=T /
+&SLCF PBY=0.000,QUANTITY='VOLUME FRACTION', SPEC_ID='HELIUM' /
+&TAIL /
+\end{lstlisting}
+\end{minipage}
+\caption[Snapshot of the {\ct helium\_2d\_isothermal} test case]{Simulation of a helium plume.}
+\label{helium_plume}
+\end{figure}
+
+
+
+
+
+
+\section{Pressure Considerations in Long Tunnels}
+\label{tunnel_solver}
+\label{tunnel_demo}
+\label{tunnel_demo_glmat}
+
+A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
+\begin{enumerate}
+\item If (1) the tunnel is made up of multiple meshes that abut end to end, (2) there are no other meshes outside of the tunnel, (3) there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item You can increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10 in most cases; 20 when the {\ct TUNNEL\_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the {\ct MAX\_PRESSURE\_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
+\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
+\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct T}
+\item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$~s$^{-2}$. A good value to try would be 1/5 to 1/10 of the default value.
+\item Set {\ct SOLVER='GLMAT'} on the {\ct PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or {\ct 'UGLMAT'} to do what {\ct 'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the {\ct TUNNEL\_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
+\end{enumerate}
+Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver with the {\ct TUNNEL\_PRECONDITIONER} set to {\ct T}; the second uses the {\ct 'GLMAT'} solver. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These files are generated by setting {\ct VELOCITY\_ERROR\_FILE=T} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. A description of each column is as follows:
+\begin{description}
+\item[\ct Time:] Simulation time (s)
+\item[\ct Time Step:] The index of the time step
+\item[\ct Iteration:] The index of the pressure iteration within the time step. Note that for a single time step, there are two series of pressure iterations, one for the predictor phase, and one for the corrector.
+\item[\ct Total:] The cumulative index of pressure iterations for the entire simulation
+\item[\ct Mesh:] The mesh where the maximum velocity error occurs
+\item[\ct I,J,K:] Cell indices where the maximum velocity error occurs
+\item[\ct Velocity Error:] The maximum absolute value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries
+\item[\ct Mesh,I,J,K:] The mesh and cell indices where the maximum pressure error occurs
+\item[\ct Pressure Error:] The quantity shown in Eq.~(\ref{pressure_error}) in units of s$^{-2}$
+\end{description}
+Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two cases over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above. Note that the simulation using the {\ct 'GLMAT'} solver has no velocity error in this case because it solves the Poisson equation directly over the entire domain, not mesh by mesh. However, this simulation still requires iterations of the pressure solver to drive the solution closer to the true solution of the inseparable Poisson equation.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_velocity} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_pressure}
+\end{tabular*}
+\caption[Convergence test for the {\ct tunnel\_demo} test cases]{Reduction in velocity and pressure error due to iteration of the pressure solver. The top two plots are the result of the FFT-based solver; the lower two {\ct 'GLMAT'}.}
+\label{tunnel_demo_fig}
+\end{figure}
+
+\FloatBarrier
+
+\subsubsection{Special Case: Pressure Drop in Long Tunnels}
+\label{sec:tunnel_pressure_drop}
+
+This section describes a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide~\cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here the flow is forced from a {\ct VENT} and the axial pressure profile is formed from planar averages {\ct DEVC}s.  The tunnel is 1.6~km (approximately 1~mi) long with a square cross-section 10~m by 10~m for Cases A, B, C, and D.  The cross section for Case E is 12.8~m in width by 5~m in height, giving a hydraulic diameter of 7.2~m. Air is forced from the entrance at 2, 4, or 10~m/s for sand-grain roughness heights of 0.0001, 0.01, or 0.1~m.  Two grid resolutions are used, with 10 or 20 uniform cells spanning the tunnel height.  Streamwise grid resolution is twice the wall-normal resolution.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation~\cite{MYO}.  FDS results for the 10 and 20 vertical cell cases are also shown along with the maximum relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
+
+\begin{table}[!ht]
+\input{SCRIPT_FIGURES/tunnel_pressure_drop}
+\end{table}
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_a} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_b} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_c} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_e} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_fire}
+\end{tabular*}
+\caption[The {\ct tunnel\_pressure\_drop} cases]{Tunnel pressure drop for cases listed in Table \ref{tab:tunnel_pressure_drop}.}
+\label{fig:tunnel_pressure_drop}
+\end{figure}
+
+While reasonable grid resolution is important, the wall models in FDS are capable of giving the correct mean wall stress even at rather coarse resolution.  For example, the $y^+$ for Case C with 10 cells is, in fact, 5000 (this is the location of the middle of the first grid cell divided by the roughness height). Also, note that a roughness of 0.1~mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
+
+The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressure drop in Tunnel~B (2~m/s flow speed, 0.1~m wall roughness) which now contains a hypothetical 60~MW fire at its midpoint. The grid resolution in the vertical direction is listed in the legend of the plots. For this case, the pressure is evaluated at mid-height along the tunnel centerline. The relatively rapid drop in pressure at the open end of the tunnel ($x=1600$~m) is due to the fact that the pressure is assumed to be ambient at an open boundary.
+
+
+
+
+
+
+
+
 \chapter{Output}
 \label{info:outputdata}
 \label{info:DUMP}
@@ -10726,7 +10704,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:specified_burning}          & kW/m$^2$           & B,D          \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:scaled_burning}             & kW/m$^2$           & B,D          \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D            \\ \hline
 {\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D            \\ \hline
 {\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D            \\ \hline
@@ -12474,11 +12452,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_TRANSFER\_COEFFICIENT}                         & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(:,:)}                                       & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-{\ct MAXIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
+{\ct MAXIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
 {\ct MINIMUM\_BURNOUT\_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
-{\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         & 0                       \\ \hline
-{\ct MLRPUA }                                             & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
+{\ct MLRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
@@ -12510,8 +12488,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V\_X}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Z}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX}                               & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:specified_burning}      & s                   & 10.0                    \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX}                               & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 10.0                    \\ \hline
 {\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
