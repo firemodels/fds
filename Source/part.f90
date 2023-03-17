@@ -1720,6 +1720,12 @@ PARTICLE_LOOP: DO IP=1,NLP
    N_ITER = CEILING(DT/(0.90_EB*DT_CFL))
    DT_P   = DT/REAL(N_ITER,EB)
 
+   ! Initialize drag terms
+
+   LP%ACCEL_X = 0._EB
+   LP%ACCEL_Y = 0._EB
+   LP%ACCEL_Z = 0._EB
+
    ! Save value of IOR to determine if the particle hit any surface during the time step
 
    IOR_ORIGINAL = BC%IOR
@@ -2593,6 +2599,10 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
 ENDIF PARTICLE_NON_STATIC_IF
 
 ! Distribute particle drag onto the mesh
+
+LP%ACCEL_X = LP%ACCEL_X + ACCEL_X
+LP%ACCEL_Y = LP%ACCEL_Y + ACCEL_Y
+LP%ACCEL_Z = LP%ACCEL_Z + ACCEL_Z
 
 FVX_D(IIG_OLD-1,JJY  ,KKZ  ) = FVX_D(IIG_OLD-1,JJY  ,KKZ  ) - ACCEL_X*(1-X_WGT2)*(1.-Y_WGT)*(1.-Z_WGT)
 FVX_D(IIG_OLD  ,JJY  ,KKZ  ) = FVX_D(IIG_OLD  ,JJY  ,KKZ  ) - ACCEL_X*(  X_WGT2)*(1.-Y_WGT)*(1.-Z_WGT)

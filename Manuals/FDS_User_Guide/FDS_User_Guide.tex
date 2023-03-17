@@ -9391,13 +9391,6 @@ records the integrated mass flux of {\em all} particles passing through the give
 \label{bucket_test_4_fig}
 \end{figure}
 
-The quantities {\ct 'PARTICLE DRAG FORCE X'},  {\ct 'PARTICLE DRAG FORCE Y'}, and {\ct 'PARTICLE DRAG FORCE Z'} report the drag force components exerted by all particles on the gas, in units of N/m$^3$. For example,
-\begin{lstlisting}
-&DEVC XB=..., ID='...', QUANTITY='PARTICLE DRAG FORCE Z', 
-      SPATIAL_STATISTIC='VOLUME INTEGRAL'  /
-\end{lstlisting}
-reports the vertical component of the drag force exerted by all particles within the volume specified by {\ct XB} in units of N.
-
 The quantity {\ct 'PARTICLE RADIATION LOSS'} reports the net energy emitted and absorbed from a given grid cell by all particles within it, in units of kW/m$^3$. A positive value indicates that emission is greater than absorption.n
 
 
@@ -9415,6 +9408,8 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 {\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (\si{m/s^2}) \\
+{\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
 {\ct 'PARTICLE BULK DENSITY'} (\si{kg/m^3}) \\
 {\ct 'PARTICLE HEAT TRANSFER COEFFICIENT'} (\si{W/m^2/K}) \\
@@ -10826,15 +10821,20 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 {\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
 {\ct MPUV}$^2$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
 {\ct MPUV\_Z}$^1$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+{\ct PARTICLE ACCEL X}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
+{\ct PARTICLE ACCEL Y}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
+{\ct PARTICLE ACCEL Z}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{particle_colors}                     & s                 & PA           \\ \hline
 {\ct PARTICLE BULK DENSITY}                     & Section~\ref{particle_colors}                     & kg/(m$^3$)        & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{particle_colors}                     & $\mu$m            & PA           \\ \hline
-{\ct PARTICLE DRAG FORCE X}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
-{\ct PARTICLE DRAG FORCE Y}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
-{\ct PARTICLE DRAG FORCE Z}                     & Section~\ref{bucket_test_4}                       & N/m$^3$           & D,P,S        \\ \hline
+{\ct PARTICLE DRAG COEFFICIENT}$^2$             & Section~\ref{particle_colors}                     &                   & PA          \\ \hline
+{\ct PARTICLE DRAG FORCE X}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
+{\ct PARTICLE DRAG FORCE Y}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
+{\ct PARTICLE DRAG FORCE Z}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
 {\ct PARTICLE FLUX X}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
 {\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
 {\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE HEAT TRANSFER COEFFICIENT}$^2$    & Section~\ref{particle_colors}                     & W/(m$^2$/K}       & PA          \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{particle_colors}                     & kg                & PA           \\ \hline
 {\ct PARTICLE PHASE}                            & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & Section~\ref{bucket_test_4}                       & kW/m$^3$          & D,I,P,S      \\ \hline

@@ -359,6 +359,9 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: DZ=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: C_DRAG=0._EB        !< Drag coefficient
    REAL(EB) :: RADIUS=0._EB        !< Radius (m)
+   REAL(EB) :: ACCEL_X=0._EB       !< Acceleration in x direction (m/s2)
+   REAL(EB) :: ACCEL_Y=0._EB       !< Acceleration in y direction (m/s2)
+   REAL(EB) :: ACCEL_Z=0._EB       !< Acceleration in z direction (m/s2)
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
