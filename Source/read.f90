@@ -5047,7 +5047,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
       ALLOCATE(RN%DELTA_G(0:I_MAX_TEMP))
       DO J=0,I_MAX_TEMP
-         RN%DELTA_G(J) = -1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU*RN%NU_FUEL_0)/R0 ! kJ/mol -> J/kmol which is used for R0
+         ! kJ/mol -> J/kmol which is used for R0
+         RN%DELTA_G(J) = -1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU*RN%NU_FUEL_0)/R0
       ENDDO
    ENDIF
 
