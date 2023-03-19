@@ -641,6 +641,8 @@ TYPE REACTION_TYPE
    REAL(EB) :: S=0._EB                      !< Stoichiometric coefficient for MIXTURE FRACTION output
    REAL(EB) :: N_T=0._EB                    !< Temperature exponent in reaction expression
    REAL(EB) :: CHI_R                        !< Radiative fraction
+   REAL(EB) :: C0_EXP=0._EB                 !< Exponent for C0 factor in reverse equilibirium constant
+   REAL(EB) :: NU_FUEL_0                    !< Original fuel NU needed for G_F calculations
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU              !< Array of stoichiometric coefficients for lumped species equation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_READ         !< Holding array of stoichiometric coefficients
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SPECIES      !< Array of stoichiometric coefficients for primitive species equation

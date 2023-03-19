@@ -4710,6 +4710,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    ! Normalize the stoichiometric coefficients by that of the fuel.
+   RN%NU_FUEL_0 = -RN%NU(RN%FUEL_SMIX_INDEX)
    RN%NU = -RN%NU/RN%NU(RN%FUEL_SMIX_INDEX)
 
    ! Find AIR index
@@ -4744,7 +4745,9 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    DO NS=1,N_SPECIES
-      IF (RN%N_S(NS) < -998._EB .OR. NU_Y(NS) > 0._EB) CYCLE
+      RN%C0_EXP = RN%C0_EXP + NU_Y(NS)
+      IF (RN%N_S(NS) < -998._EB) CYCLE
+      IF (NU_Y(NS) > 0._EB) CYCLE
       RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS)%MW)**(-RN%N_S(NS)) ! FDS Tech Guide, Eq. (5.37), product term
       RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS)
    ENDDO
@@ -5044,7 +5047,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
       ALLOCATE(RN%DELTA_G(0:I_MAX_TEMP))
       DO J=0,I_MAX_TEMP
-         RN%DELTA_G(J) = -1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU)/R0 ! kJ/mol -> J/kmol which is used for R0
+         ! kJ/mol -> J/kmol which is used for R0
+         RN%DELTA_G(J) = -1.E6_EB*DOT_PRODUCT(G_F_Z(J,1:N_TRACKED_SPECIES),RN%NU*RN%NU_FUEL_0)/R0
       ENDDO
    ENDIF
 

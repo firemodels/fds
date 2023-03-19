@@ -724,6 +724,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB .AND. YY_PRIMITIVE(NS) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
             ENDDO
+            MW = -1._EB
             DZ_F = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0)) ! dZ/dt, FDS Tech Guide, Eq. (5.38)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB) DZ_F = YY_PRIMITIVE(NS)**RN%N_S(NS)*DZ_F
@@ -744,7 +745,11 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
                ENDIF
             ENDIF
             IF(RN%REVERSE) THEN ! compute equilibrium constant
-               DZ_F = DZ_F*EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)
+               IF (MW < 0._EB) THEN
+                  CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
+                  MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
+               ENDIF
+               DZ_F = DZ_F*EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)*MOLPCM3**RN%C0_EXP
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
             Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
