@@ -311,7 +311,7 @@ At low pressures, it is common to see so-called \emph{third body} reactions.  Th
 \begin{equation}\label{eq:third_body}
 \mathrm{A} + \mathrm{B} + \mathrm{M} \rightarrow \mathrm{C} + \mathrm{M}
 \end{equation}
-The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$.
+The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$. Some molecules may be more or less efficient as a collision species. This non-unity effect may be specified in the input file. If non-unity species are present, then the concentration of M is taken as the sum of all the individual species concentrations times their weighting factor (if all species have a weighting factor of 1, then the result is $C_{\si{M}}$).
 
 \subsubsection{Equilibrium Chemistry}
 
@@ -319,17 +319,18 @@ Consider the reversible chemical reaction
 
 \be
 a \, \mathrm{A} + b \, \mathrm{B} \overset{r_1}{\underset{r_2}{\leftrightharpoons}} c \, \mathrm{C} + d \, \mathrm{D}
+\label{eq:reverse}
 \ee
 
 \noindent At equilibrium, the forward and reverse reaction rates are equal, $r_{1} = r_{2}$.  The rate constants for each direction are the $k$s in Eq.~(\ref{eq:generic_rate}).  The equilibrium constant is defined as $K \equiv k_{1}/k_{2}$.  The equilibrium constant is computed via
 \be
-K(T) = \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
+K(T) = C_{\si{M}}^{\nu_n} \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
 \ee
-where
-\be
+where $\nu_n$ is the net reaction order (for Eq.~\ref{eq:reverse} $\nu_n = a + b - c - d$) and
+\be                                                               
 G_{\mathrm{rxn}}^\circ = \frac{d}{a} G_\mathrm{D}^\circ + \frac{c}{a} G_\mathrm{C}^\circ - \frac{b}{a} G_\mathrm{B}^\circ - G_\mathrm{A}^\circ
 \ee
-Note that the Gibbs free energy is tabulated for species in the FDS database as a function of temperature.  New species may be added with specified Gibbs free energy.
+Note that the Gibbs free energy as a function of temperature is defined for any FDS database that uses NASA polynomials.  Gibbs free energy can be specified for user defined species.
 
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
