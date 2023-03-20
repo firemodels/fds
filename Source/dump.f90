@@ -6254,7 +6254,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                K_DEVICE_CELL_LOOP: DO K=SDV%K1,SDV%K2
                   J_DEVICE_CELL_LOOP: DO J=SDV%J1,SDV%J2
                      I_DEVICE_CELL_LOOP: DO I=SDV%I1,SDV%I2
-                        IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE I_DEVICE_CELL_LOOP
+                        IF (CELL(CELL_INDEX(I,J,K))%SOLID .AND. &
+                           OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%CELL_POSITION/=CELL_FACE) CYCLE I_DEVICE_CELL_LOOP
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         CFACE_AREA = 0._EB
                         CC_IBM_IF: IF (CC_IBM) THEN
