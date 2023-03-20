@@ -1414,6 +1414,7 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: RADIUS           !< Radius of initialization region, like a cone (m)
    REAL(EB) :: DIAMETER=-1._EB  !< Diameter of liquid droplets specified on an INIT line (m)
    REAL(EB) :: PARTICLE_WEIGHT_FACTOR !< Multiplicative factor for particles specified on the INIT line
+   REAL(EB) :: BULK_DENSITY_FACTOR !< Multiplicative factor for values read in from BULK_DENSITY_FILE
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
