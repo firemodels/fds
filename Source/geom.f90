@@ -311,7 +311,7 @@ INTEGER, PARAMETER :: INT_RHO0_IND=1, INT_WCEN_IND=3
 INTEGER, SAVE ::      NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WCEN.
 
 ! Max numbers of link attempts for small faces and cut-cells:
-INTEGER, PARAMETER :: N_LINK_ATTMP = 50
+INTEGER, PARAMETER :: N_LINK_ATTMP = 1, N_LINK_ATTMP_F=50
 
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
@@ -342,7 +342,7 @@ PUBLIC :: BLOCK_CC_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETU
           CC_DIVERGENCE_PART_1_TIME_INDEX,CC_END_STEP_TIME_INDEX,CC_TARGET_VELOCITY_TIME_INDEX,&
           CC_NO_FLUX_TIME_INDEX,CC_COMPUTE_VELOCITY_ERROR_TIME_INDEX,MIN_VOL_FACTOR,&
           NQT2C,N_CUTCELLS_PROC,NGUARD,N_INB_CUTFACES_PROC,N_INT_CVARS,N_INT_CCVARS,N_REG_CUTFACES_PROC,&
-          N_INT_FVARS,N_LINK_ATTMP,N_SET_CUTCELLS_3D_CALLS,NUNKH_TOT,UNKH_IND,NUNKH_LOCAL,NUNKH_TOTAL, NM_START, &
+          N_INT_FVARS,N_LINK_ATTMP_F,N_SET_CUTCELLS_3D_CALLS,NUNKH_TOT,UNKH_IND,NUNKH_LOCAL,NUNKH_TOTAL, NM_START, &
           N_REQ11,N_REQ12,N_REQ112,N_REQ13,REQ11,REQ112,REQ12,REQ13, &
           NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H, &
           JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, POINT_IN_POLYGON,SEARCH_OTHER_MESHES_FACE,&
@@ -754,7 +754,7 @@ REAL(EB):: SLEN_GEOM, AREA_GEOM, VOLUME_GEOM, SLEN_IBCC, SLEN, DV(MAX_DIM), XYZC
            DM_XYZCEN(MAX_DIM), CCGP_XYZCEN(MAX_DIM), DM_XYZCEN_AUX(MAX_DIM), CCGP_XYZCEN_AUX(MAX_DIM)
 INTEGER :: SEG(NOD1:NOD2), NEDGE, IEDGE, IFACE, IG
 
-INTEGER :: NCUTFACE_INB, ICC1, ICC2, NCELL, IGC, ICF2, JCF2, JCF, FTYPE, ILH
+INTEGER :: NCUTFACE_INB, ICC1, ICC2, NCELL, IGC, ICF2, JCF2, JCF, FTYPE, ILH, CELL_BLOCK_IOR
 REAL(EB):: CF_AREA_INB=0._EB, CF_INXAREA_INB=0._EB, CF_INXSQAREA_INB=0._EB, &
            CF_JNYSQAREA_INB=0._EB, CF_KNZSQAREA_INB=0._EB, CF_AREA_INB_AUX=0._EB, ACRT
 REAL(EB):: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
@@ -764,9 +764,8 @@ REAL(EB):: MIN_CC_VOL, MAX_CC_VOL, MIN_ALPHA_CV, MAX_ALPHA_CV
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH, CC_COMPUTE_MESH_AUX
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
 
-INTEGER :: IW,II,JJ,IIF,JJF,KKF,IIOF,JJOF,KKOF,LOHIF,IOR,CT,NCFACE_CUTCELL,NFACE_CELL,X1AXIS2,SIDE,ICC,JCC,ICFC,IFC
+INTEGER :: IW,II,JJ,IIF,JJF,KKF,IIOF,JJOF,KKOF,LOHIF,IOR,CT,NCFACE_CUTCELL,NFACE_CELL,AX,SIDE,ICC,JCC,ICFC,IFC
 TYPE(MESH_TYPE),  POINTER :: M, M2
-!TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -1029,109 +1028,13 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CYCLE ! Don't do OMESHES for PERIODIC_TEST==105
 
    CALL POINT_TO_MESH(NM)
-
+   M => MESHES(NM)
    ! Mesh sizes:
    NXB=IBAR
    NYB=JBAR
    NZB=KBAR
 
-   ! X direction bounds:
-   ILO_FACE = 0                    ! Low mesh boundary face index.
-   IHI_FACE = IBAR                 ! High mesh boundary face index.
-   ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
-   IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
-   ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
-   IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
-
-   ! Y direction bounds:
-   JLO_FACE = 0                    ! Low mesh boundary face index.
-   JHI_FACE = JBAR                 ! High mesh boundary face index.
-   JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
-   JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
-   JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
-   JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
-
-   ! Z direction bounds:
-   KLO_FACE = 0                    ! Low mesh boundary face index.
-   KHI_FACE = KBAR                 ! High mesh boundary face index.
-   KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
-   KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
-   KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
-   KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
-
-   ! Define grid arrays for this mesh:
-   ! Populate position and cell size arrays: Uniform grid implementation.
-   ! X direction:
-   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL(ILO_CELL-1:IHI_CELL+1) = DX(ILO_CELL-1:IHI_CELL+1)
-   DO IGC=2,NGUARD
-      DXCELL(ILO_CELL-IGC)=DXCELL(ILO_CELL-IGC+1)
-      DXCELL(IHI_CELL+IGC)=DXCELL(IHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE(ILO_FACE:IHI_FACE)= DXN(ILO_FACE:IHI_FACE)
-   DO IGC=1,NGUARD
-      DXFACE(ILO_FACE-IGC)=DXFACE(ILO_FACE-IGC+1)
-      DXFACE(IHI_FACE+IGC)=DXFACE(ILO_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
-   XCELL(ILO_CELL-1:IHI_CELL+1) = XC(ILO_CELL-1:IHI_CELL+1)
-   DO IGC=2,NGUARD
-      XCELL(ILO_CELL-IGC)=XCELL(ILO_CELL-IGC+1)-DXFACE(ILO_FACE-IGC+1)
-      XCELL(IHI_CELL+IGC)=XCELL(IHI_CELL+IGC-1)+DXFACE(IHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(XFACE(ISTR:IEND));  XFACE = 1._EB/GEOMEPS ! Initialize huge.
-   XFACE(ILO_FACE:IHI_FACE) = X(ILO_FACE:IHI_FACE)
-   DO IGC=1,NGUARD
-      XFACE(ILO_FACE-IGC)=XFACE(ILO_FACE-IGC+1)-DXCELL(ILO_CELL-IGC)
-      XFACE(IHI_FACE+IGC)=XFACE(IHI_FACE+IGC-1)+DXCELL(IHI_CELL+IGC)
-   ENDDO
-
-   ! Y direction:
-   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL(JLO_CELL-1:JHI_CELL+1)= DY(JLO_CELL-1:JHI_CELL+1)
-   DO IGC=2,NGUARD
-      DYCELL(JLO_CELL-IGC)=DYCELL(JLO_CELL-IGC+1)
-      DYCELL(JHI_CELL+IGC)=DYCELL(JHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE(JLO_FACE:JHI_FACE)= DYN(JLO_FACE:JHI_FACE)
-   DO IGC=1,NGUARD
-      DYFACE(JLO_FACE-IGC)=DYFACE(JLO_FACE-IGC+1)
-      DYFACE(JHI_FACE+IGC)=DYFACE(JHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
-   YCELL(JLO_CELL-1:JHI_CELL+1) = YC(JLO_CELL-1:JHI_CELL+1)
-   DO IGC=2,NGUARD
-      YCELL(JLO_CELL-IGC)=YCELL(JLO_CELL-IGC+1)-DYFACE(JLO_FACE-IGC+1)
-      YCELL(JHI_CELL+IGC)=YCELL(JHI_CELL+IGC-1)+DYFACE(JHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(YFACE(JSTR:JEND));  YFACE = 1._EB/GEOMEPS ! Initialize huge.
-   YFACE(JLO_FACE:JHI_FACE) = Y(JLO_FACE:JHI_FACE)
-   DO IGC=1,NGUARD
-      YFACE(JLO_FACE-IGC)=YFACE(JLO_FACE-IGC+1)-DYCELL(JLO_CELL-IGC)
-      YFACE(JHI_FACE+IGC)=YFACE(JHI_FACE+IGC-1)+DYCELL(JHI_CELL+IGC)
-   ENDDO
-
-   ! Z direction:
-   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL(KLO_CELL-1:KHI_CELL+1)= DZ(KLO_CELL-1:KHI_CELL+1)
-   DO IGC=2,NGUARD
-      DZCELL(KLO_CELL-IGC)=DZCELL(KLO_CELL-IGC+1)
-      DZCELL(KHI_CELL+IGC)=DZCELL(KHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE(KLO_FACE:KHI_FACE)= DZN(KLO_FACE:KHI_FACE)
-   DO IGC=1,NGUARD
-      DZFACE(KLO_FACE-IGC)=DZFACE(KLO_FACE-IGC+1)
-      DZFACE(KHI_FACE+IGC)=DZFACE(KHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
-   ZCELL(KLO_CELL-1:KHI_CELL+1) = ZC(KLO_CELL-1:KHI_CELL+1)
-   DO IGC=2,NGUARD
-      ZCELL(KLO_CELL-IGC)=ZCELL(KLO_CELL-IGC+1)-DZFACE(KLO_FACE-IGC+1)
-      ZCELL(KHI_CELL+IGC)=ZCELL(KHI_CELL+IGC-1)+DZFACE(KHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(ZFACE(KSTR:KEND));  ZFACE = 1._EB/GEOMEPS ! Initialize huge.
-   ZFACE(KLO_FACE:KHI_FACE) = Z(KLO_FACE:KHI_FACE)
-   DO IGC=1,NGUARD
-      ZFACE(KLO_FACE-IGC)=ZFACE(KLO_FACE-IGC+1)-DZCELL(KLO_CELL-IGC)
-      ZFACE(KHI_FACE+IGC)=ZFACE(KHI_FACE+IGC-1)+DZCELL(KHI_CELL+IGC)
-   ENDDO
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
 
    ! Initialize CC_IBM arrays for mesh NM:
    ! Vertices:
@@ -1485,11 +1388,35 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       ! Here Block all cells that have volume less (or equal) than the first largest cell found.
       DO ICC1=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
          CC=>MESHES(NM)%CUT_CELL(ICC1); IF(CC%NCELL<2) CYCLE
-         I=MAXLOC(CC%VOLUME(1:CC%NCELL),DIM=1)
-         DO J=1,CC%NCELL
-            IF(J==I) CYCLE
+         ! Find if any GEOMETRY related to CC_INBOUNDARY faces has CELL_BLOCK_IOR>0:
+         CELL_BLOCK_IOR=0
+         NCELL_LOOP_1 : DO J=1,CC%NCELL
+            DO I=2,CC%CCELEM(1,J)+1
+               IF(CC%FACE_LIST(1,CC%CCELEM(I,J))==CC_FTYPE_CFINB) THEN
+                  ICF=CC%FACE_LIST(4,CC%CCELEM(I,J)); JCF=CC%FACE_LIST(5,CC%CCELEM(I,J))
+                  IG=MESHES(NM)%CUT_FACE(ICF)%BODTRI(1,JCF)
+                  IF(IG>0) THEN
+                     IF (ABS(GEOMETRY(IG)%CELL_BLOCK_IOR)>0) THEN
+                        CELL_BLOCK_IOR = GEOMETRY(IG)%CELL_BLOCK_IOR
+                        EXIT NCELL_LOOP_1
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDDO
+         ENDDO NCELL_LOOP_1
+         SELECT CASE(CELL_BLOCK_IOR)
+         CASE(-IAXIS); I=MAXLOC(CC%XYZCEN(IAXIS,1:CC%NCELL),DIM=1)
+         CASE( IAXIS); I=MINLOC(CC%XYZCEN(IAXIS,1:CC%NCELL),DIM=1)
+         CASE(-JAXIS); I=MAXLOC(CC%XYZCEN(JAXIS,1:CC%NCELL),DIM=1)
+         CASE( JAXIS); I=MINLOC(CC%XYZCEN(JAXIS,1:CC%NCELL),DIM=1)
+         CASE(-KAXIS); I=MAXLOC(CC%XYZCEN(KAXIS,1:CC%NCELL),DIM=1)
+         CASE( KAXIS); I=MINLOC(CC%XYZCEN(KAXIS,1:CC%NCELL),DIM=1)
+         CASE DEFAULT; I=MAXLOC(CC%VOLUME(1:CC%NCELL),DIM=1)
+         END SELECT
+         NCELL_LOOP_2 : DO J=1,CC%NCELL
+            IF(J==I) CYCLE NCELL_LOOP_2
             CC%NOADVANCE(J)=.TRUE.
-         ENDDO
+         ENDDO NCELL_LOOP_2
       ENDDO
    ENDIF
 
@@ -1501,26 +1428,28 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! Block cut-cells whose volume factor is less than MIN_VOL_FACTOR, or remain unlinked:
    CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,SUM_CCELL)
 
+   ! Block any cells that contain only one gas cut-face (cavity type cut-cells):
+   K = 0
+   DO ICC1=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
+      CC=>MESHES(NM)%CUT_CELL(ICC1)
+      DO J=1,CC%NCELL
+         SUM_FACE=0
+         DO I=2,CC%CCELEM(1,J)
+            IF(CC%FACE_LIST(1,CC%CCELEM(I,J))==CC_FTYPE_CFGAS) SUM_FACE=SUM_FACE+1
+         ENDDO
+         IF(SUM_FACE>1) CYCLE
+         CC%NOADVANCE(J)=.TRUE.
+         K=K+1
+      ENDDO
+   ENDDO
+   I= 0 ; IF(K>0) CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,I)
+   SUM_CCELL = SUM_CCELL + I
+
    IF(SUM_CCELL>0) THEN ! Rebuild incidences and cell linking information:
       CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=2)
       CALL GET_CELL_LINK_INFO(NM)
    ENDIF
-
-   ! Face centered positions and cell sizes:
-   IF (ALLOCATED(XFACE)) DEALLOCATE(XFACE)
-   IF (ALLOCATED(YFACE)) DEALLOCATE(YFACE)
-   IF (ALLOCATED(ZFACE)) DEALLOCATE(ZFACE)
-   IF (ALLOCATED(DXFACE)) DEALLOCATE(DXFACE)
-   IF (ALLOCATED(DYFACE)) DEALLOCATE(DYFACE)
-   IF (ALLOCATED(DZFACE)) DEALLOCATE(DZFACE)
-
-   ! Cell centered positions and cell sizes:
-   IF (ALLOCATED(XCELL)) DEALLOCATE(XCELL)
-   IF (ALLOCATED(YCELL)) DEALLOCATE(YCELL)
-   IF (ALLOCATED(ZCELL)) DEALLOCATE(ZCELL)
-   IF (ALLOCATED(DXCELL)) DEALLOCATE(DXCELL)
-   IF (ALLOCATED(DYCELL)) DEALLOCATE(DYCELL)
-   IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
    IF (ALLOCATED(CELLRT)) DEALLOCATE(CELLRT)
 ENDDO MAIN_MESH_LOOP
 
@@ -1530,171 +1459,8 @@ CALL DEALLOCATE_BODINT_PLANE(BODINT_PLANE2)
 ! Deallocate Intersection variables:
 DEALLOCATE(CC_SVAR_CRS,CC_IS_CRS,CC_SEG_CRS,CC_BDNUM_CRS,CC_BDNUM_CRS_AUX,CC_IS_CRS2,CC_SEG_TAN)
 
-! This loop is to block cut-cells on fine side grids for which coarse grid cut-cells have been blocked.
-MAIN_MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-
-   CALL POINT_TO_MESH(NM)
-   M => MESHES(NM)
-
-   ! Set all fine side cut-cells in cells next to external boundaries which have SOLID coarse mesh faces
-   ! to CC%NOADVANCE(J)=.TRUE. and block them.
-   EXT_WALL_LOOP : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
-      EWC=>EXTERNAL_WALL(IW)
-      BC =>BOUNDARY_COORD(WC%BC_INDEX)
-      II  = BC%II; JJ  = BC%JJ; KK  = BC%KK; IOR = BC%IOR; X1AXIS=ABS(IOR)
-      NOM = EWC%NOM
-      M2 => MESHES(NOM)
-      IIF=II; JJF=JJ; KKF=KK
-      SELECT CASE(IOR)
-      CASE(-IAXIS); IIF=IIF-1;
-      CASE(-JAXIS); JJF=JJF-1;
-      CASE(-KAXIS); KKF=KKF-1;
-      END SELECT
-      IF (EWC%AREA_RATIO<0.9_EB) THEN
-
-         ! Check if other mesh boundary face set to SOLID and current mesh face set to .NOT.SOLID:
-         IIOF=EWC%IIO_MIN; JJOF=EWC%JJO_MIN; KKOF=EWC%KKO_MIN; LOHIF=HIGH_IND
-         SELECT CASE(IOR)
-         CASE(-IAXIS); IIOF=IIOF-1; LOHIF=LOW_IND
-         CASE(-JAXIS); JJOF=JJOF-1; LOHIF=LOW_IND
-         CASE(-KAXIS); KKOF=KKOF-1; LOHIF=LOW_IND
-         END SELECT
-         IF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_SOLID) CYCLE EXT_WALL_LOOP ! No need to do anything.
-         IF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_SOLID) THEN ! Coarse side face is solid.
-            ! Set II,JJ,KK fine cells next to this EWC for blocking.
-            IF(M%CCVAR(II,JJ,KK,CC_CGSC)==CC_GASPHASE) THEN
-               ! Insert cut-cell in this location, set to Block.
-               CT = 6;
-               NCFACE_CUTCELL = CT + 1
-               NCELL          = 1
-               NFACE_CELL     = CT
-               ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
-               ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
-               ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M%DX(II)*M%DY(JJ)*M%DZ(KK)
-               ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M%XC(II),M%YC(JJ),M%ZC(KK) /)
-               ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .TRUE.
-               ! Add one by one regular and gas cut faces:
-               CT = 1; CCELEM(1,1) = 0
-               DO X1AXIS2=IAXIS,KAXIS
-                  DO SIDE=LOW_IND,HIGH_IND
-                     ICFC=M%FCVAR(II+ADDI(SIDE,X1AXIS2),JJ+ADDJ(SIDE,X1AXIS2),KK+ADDK(SIDE,X1AXIS2),CC_IDCF,X1AXIS2);
-                     IF(ICFC>0) THEN
-                        FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, X1AXIS2,ICFC, 1, CC_UNDEFINED /)
-                        CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
-                     ELSEIF(M%FCVAR(II+ADDI(SIDE,X1AXIS2),JJ+ADDJ(SIDE,X1AXIS2),KK+ADDK(SIDE,X1AXIS2),CC_FGSC,X1AXIS2) == &
-                        CC_GASPHASE) THEN
-                        FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, X1AXIS2,   0, 0, CC_UNDEFINED /)
-                        CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
-                     ENDIF
-                  ENDDO
-               ENDDO
-               ! Insert cut_cell:
-               CALL INSERT_CUT_CELL(NM,II,JJ,KK,ICC); M => MESHES(NM)
-               CALL NEW_CELL_ALLOC(NM,ICC,NCELL,NFACE_CELL,NCFACE_CUTCELL)
-               M%CUT_CELL(ICC)%NCELL      = NCELL
-               M%CUT_CELL(ICC)%NFACE_CELL = NFACE_CELL
-               CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M%CUT_CELL(ICC)%CCELEM)
-               CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M%CUT_CELL(ICC)%FACE_LIST)
-               CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M%CUT_CELL(ICC)%VOLUME)
-               CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M%CUT_CELL(ICC)%XYZCEN)
-               CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M%CUT_CELL(ICC)%NOADVANCE)
-            ELSEIF(M%CCVAR(II,JJ,KK,CC_CGSC)==CC_CUTCFE) THEN
-               ! Find face in IIF,JFF,JJF,X1AXIS location and set the owner cell to block.
-               ICC=M%CCVAR(II,JJ,KK,CC_IDCC); CC=> M%CUT_CELL(ICC)
-               JCC_LOOP : DO JCC=1,CC%NCELL
-                  DO IFC=2,CC%CCELEM(1,JCC)+1
-                     IFACE  = CC%CCELEM(IFC,JCC)
-                     IF( (CC%FACE_LIST(1,IFACE)==CC_FTYPE_RCGAS .OR. CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFGAS) .AND. &
-                        CC%FACE_LIST(2,IFACE)==LOHIF .AND. CC%FACE_LIST(3,IFACE)==X1AXIS ) THEN
-                        CC%NOADVANCE(JCC)=.TRUE.
-                        CYCLE JCC_LOOP
-                     ENDIF
-                  ENDDO
-               ENDDO JCC_LOOP
-            ENDIF
-         !ELSEIF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_CUTCFE) THEN
-         ! Coarse side is a cut-face in the boundary.
-         ENDIF
-      ELSEIF((EWC%IIO_MAX-EWC%IIO_MIN+1)*(EWC%JJO_MAX-EWC%JJO_MIN+1)*(EWC%KKO_MAX-EWC%KKO_MIN+1)>1) THEN
-
-         IF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_SOLID) THEN ! Coarse side face is solid.
-            ! If needed, block ghost cells of the other mesh which has finer cells.
-            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                     IIOF=IIO; JJOF=JJO; KKOF=KKO; IOGC=IIO; JOGC=JJO; KOGC=KKO; LOHIF=LOW_IND
-                     SELECT CASE(IOR)
-                     CASE( IAXIS); IOGC=IOGC+1;
-                     CASE(-IAXIS); IIOF= IIO-1; LOHIF=HIGH_IND
-                     CASE( JAXIS); JOGC=JOGC+1;
-                     CASE(-JAXIS); JJOF= JJO-1; LOHIF=HIGH_IND
-                     CASE( KAXIS); KOGC=KOGC+1;
-                     CASE(-KAXIS); KKOF= KKO-1; LOHIF=HIGH_IND
-                     END SELECT
-                     IF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_SOLID) CYCLE ! No need to do anything.
-
-                     ! Set IOGC,JOGC,KOGC fine cells next to this EWC for blocking.
-                     IF(M2%CCVAR(IOGC,JOGC,KOGC,CC_CGSC)==CC_GASPHASE) THEN
-                        ! Insert cut-cell in this location, set to Block.
-                        CT = 6;
-                        NCFACE_CUTCELL = CT + 1
-                        NCELL          = 1
-                        NFACE_CELL     = CT
-                        ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
-                        ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
-                        ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M2%DX(IOGC)*M2%DY(JOGC)*M2%DZ(KOGC)
-                        ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M2%XC(IOGC),M2%YC(JOGC),M2%ZC(KOGC) /)
-                        ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .TRUE.
-                        ! Add one by one regular and gas cut faces:
-                        CT = 1; CCELEM(1,1) = 0
-                        DO X1AXIS2=IAXIS,KAXIS
-                           DO SIDE=LOW_IND,HIGH_IND
-                           ICFC=M2%FCVAR(IOGC+ADDI(SIDE,X1AXIS2),JOGC+ADDJ(SIDE,X1AXIS2),KOGC+ADDK(SIDE,X1AXIS2),CC_IDCF,X1AXIS2);
-                           IF(ICFC>0) THEN
-                              FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, X1AXIS2,ICFC, 1, CC_UNDEFINED /)
-                              CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
-                              ELSEIF( &
-                              M2%FCVAR(IOGC+ADDI(SIDE,X1AXIS2),JOGC+ADDJ(SIDE,X1AXIS2),KOGC+ADDK(SIDE,X1AXIS2),CC_FGSC,X1AXIS2)&
-                              == CC_GASPHASE) THEN
-                              FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, X1AXIS2,   0, 0, CC_UNDEFINED /)
-                              CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
-                           ENDIF
-                           ENDDO
-                        ENDDO
-                        ! Insert cut_cell:
-                        CALL INSERT_CUT_CELL(NOM,IOGC,JOGC,KOGC,ICC); M2 => MESHES(NOM)
-                        CALL NEW_CELL_ALLOC(NOM,ICC,NCELL,NFACE_CELL,NCFACE_CUTCELL)
-                        M2%CUT_CELL(ICC)%NCELL      = NCELL
-                        M2%CUT_CELL(ICC)%NFACE_CELL = NFACE_CELL
-                        CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M2%CUT_CELL(ICC)%CCELEM)
-                        CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M2%CUT_CELL(ICC)%FACE_LIST)
-                        CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M2%CUT_CELL(ICC)%VOLUME)
-                        CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M2%CUT_CELL(ICC)%XYZCEN)
-                        CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M2%CUT_CELL(ICC)%NOADVANCE)
-                     ELSEIF(M2%CCVAR(IOGC,JOGC,KOGC,CC_CGSC)==CC_CUTCFE) THEN
-                        ! Find face in IIF,JFF,JJF,X1AXIS location and set the owner cell to block.
-                        ICC=M2%CCVAR(IOGC,JOGC,KOGC,CC_IDCC); CC=> M2%CUT_CELL(ICC)
-                        JCC_LOOP_2 : DO JCC=1,CC%NCELL
-                           DO IFC=2,CC%CCELEM(1,JCC)+1
-                              IFACE  = CC%CCELEM(IFC,JCC)
-                              IF( (CC%FACE_LIST(1,IFACE)==CC_FTYPE_RCGAS .OR. CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFGAS) .AND. &
-                                   CC%FACE_LIST(2,IFACE)==LOHIF .AND. CC%FACE_LIST(3,IFACE)==X1AXIS ) THEN
-                                 CC%NOADVANCE(JCC)=.TRUE.
-                                 CYCLE JCC_LOOP_2
-                              ENDIF
-                           ENDDO
-                        ENDDO JCC_LOOP_2
-                     ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
-         !ELSEIF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_CUTCFE) THEN
-         ! Coarse side is a cut-face in the boundary.
-         ENDIF
-      ENDIF
-   ENDDO EXT_WALL_LOOP
-ENDDO MAIN_MESH_LOOP_2
+! Call tag boundary cut-cells for blocking in refinement interfaces:
+CALL TAG_CC_BLOCKING_REFINEMENT
 
 ! WRITE A file per process and mesh with the NOADVANCE cut-cells:
 ! DO NM=1,NMESHES
@@ -1721,104 +1487,8 @@ MAIN_MESH_LOOP_3 : DO NM=1,NMESHES
 
    CALL POINT_TO_MESH(NM)
    M => MESHES(NM)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
 
-   ! X direction bounds:
-   ILO_FACE = 0                    ! Low mesh boundary face index.
-   IHI_FACE = M%IBAR               ! High mesh boundary face index.
-   ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
-   IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
-   ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
-   IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
-
-   ! Y direction bounds:
-   JLO_FACE = 0                    ! Low mesh boundary face index.
-   JHI_FACE = M%JBAR               ! High mesh boundary face index.
-   JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
-   JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
-   JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
-   JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
-
-   ! Z direction bounds:
-   KLO_FACE = 0                    ! Low mesh boundary face index.
-   KHI_FACE = M%KBAR               ! High mesh boundary face index.
-   KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
-   KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
-   KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
-   KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
-
-   ! Define grid arrays for this mesh:
-   ! Populate position and cell size arrays: Uniform grid implementation.
-   ! X direction:
-   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL(ILO_CELL-1:IHI_CELL+1) = M%DX(ILO_CELL-1:IHI_CELL+1)
-   DO IGC=2,NGUARD
-      DXCELL(ILO_CELL-IGC)=DXCELL(ILO_CELL-IGC+1)
-      DXCELL(IHI_CELL+IGC)=DXCELL(IHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE(ILO_FACE:IHI_FACE)= M%DXN(ILO_FACE:IHI_FACE)
-   DO IGC=1,NGUARD
-      DXFACE(ILO_FACE-IGC)=DXFACE(ILO_FACE-IGC+1)
-      DXFACE(IHI_FACE+IGC)=DXFACE(ILO_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
-   XCELL(ILO_CELL-1:IHI_CELL+1) = M%XC(ILO_CELL-1:IHI_CELL+1)
-   DO IGC=2,NGUARD
-      XCELL(ILO_CELL-IGC)=XCELL(ILO_CELL-IGC+1)-DXFACE(ILO_FACE-IGC+1)
-      XCELL(IHI_CELL+IGC)=XCELL(IHI_CELL+IGC-1)+DXFACE(IHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(XFACE(ISTR:IEND));  XFACE = 1._EB/GEOMEPS ! Initialize huge.
-   XFACE(ILO_FACE:IHI_FACE) = M%X(ILO_FACE:IHI_FACE)
-   DO IGC=1,NGUARD
-      XFACE(ILO_FACE-IGC)=XFACE(ILO_FACE-IGC+1)-DXCELL(ILO_CELL-IGC)
-      XFACE(IHI_FACE+IGC)=XFACE(IHI_FACE+IGC-1)+DXCELL(IHI_CELL+IGC)
-   ENDDO
-
-   ! Y direction:
-   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL(JLO_CELL-1:JHI_CELL+1)= M%DY(JLO_CELL-1:JHI_CELL+1)
-   DO IGC=2,NGUARD
-      DYCELL(JLO_CELL-IGC)=DYCELL(JLO_CELL-IGC+1)
-      DYCELL(JHI_CELL+IGC)=DYCELL(JHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE(JLO_FACE:JHI_FACE)= M%DYN(JLO_FACE:JHI_FACE)
-   DO IGC=1,NGUARD
-      DYFACE(JLO_FACE-IGC)=DYFACE(JLO_FACE-IGC+1)
-      DYFACE(JHI_FACE+IGC)=DYFACE(JHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
-   YCELL(JLO_CELL-1:JHI_CELL+1) = M%YC(JLO_CELL-1:JHI_CELL+1)
-   DO IGC=2,NGUARD
-      YCELL(JLO_CELL-IGC)=YCELL(JLO_CELL-IGC+1)-DYFACE(JLO_FACE-IGC+1)
-      YCELL(JHI_CELL+IGC)=YCELL(JHI_CELL+IGC-1)+DYFACE(JHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(YFACE(JSTR:JEND));  YFACE = 1._EB/GEOMEPS ! Initialize huge.
-   YFACE(JLO_FACE:JHI_FACE) = M%Y(JLO_FACE:JHI_FACE)
-   DO IGC=1,NGUARD
-      YFACE(JLO_FACE-IGC)=YFACE(JLO_FACE-IGC+1)-DYCELL(JLO_CELL-IGC)
-      YFACE(JHI_FACE+IGC)=YFACE(JHI_FACE+IGC-1)+DYCELL(JHI_CELL+IGC)
-   ENDDO
-
-   ! Z direction:
-   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL(KLO_CELL-1:KHI_CELL+1)= M%DZ(KLO_CELL-1:KHI_CELL+1)
-   DO IGC=2,NGUARD
-      DZCELL(KLO_CELL-IGC)=DZCELL(KLO_CELL-IGC+1)
-      DZCELL(KHI_CELL+IGC)=DZCELL(KHI_CELL+IGC-1)
-   ENDDO
-   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE(KLO_FACE:KHI_FACE)= M%DZN(KLO_FACE:KHI_FACE)
-   DO IGC=1,NGUARD
-      DZFACE(KLO_FACE-IGC)=DZFACE(KLO_FACE-IGC+1)
-      DZFACE(KHI_FACE+IGC)=DZFACE(KHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
-   ZCELL(KLO_CELL-1:KHI_CELL+1) = M%ZC(KLO_CELL-1:KHI_CELL+1)
-   DO IGC=2,NGUARD
-      ZCELL(KLO_CELL-IGC)=ZCELL(KLO_CELL-IGC+1)-DZFACE(KLO_FACE-IGC+1)
-      ZCELL(KHI_CELL+IGC)=ZCELL(KHI_CELL+IGC-1)+DZFACE(KHI_FACE+IGC-1)
-   ENDDO
-   ALLOCATE(ZFACE(KSTR:KEND));  ZFACE = 1._EB/GEOMEPS ! Initialize huge.
-   ZFACE(KLO_FACE:KHI_FACE) = M%Z(KLO_FACE:KHI_FACE)
-   DO IGC=1,NGUARD
-      ZFACE(KLO_FACE-IGC)=ZFACE(KLO_FACE-IGC+1)-DZCELL(KLO_CELL-IGC)
-      ZFACE(KHI_FACE+IGC)=ZFACE(KHI_FACE+IGC-1)+DZCELL(KHI_CELL+IGC)
-   ENDDO
    CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=1)
 
    ! Here: 1,2. Define Linking information for cut-cells.
@@ -1938,21 +1608,7 @@ MAIN_MESH_LOOP_3 : DO NM=1,NMESHES
       END SELECT
    ENDDO
 
-   ! Face centered positions and cell sizes:
-   IF (ALLOCATED(XFACE)) DEALLOCATE(XFACE)
-   IF (ALLOCATED(YFACE)) DEALLOCATE(YFACE)
-   IF (ALLOCATED(ZFACE)) DEALLOCATE(ZFACE)
-   IF (ALLOCATED(DXFACE)) DEALLOCATE(DXFACE)
-   IF (ALLOCATED(DYFACE)) DEALLOCATE(DYFACE)
-   IF (ALLOCATED(DZFACE)) DEALLOCATE(DZFACE)
-
-   ! Cell centered positions and cell sizes:
-   IF (ALLOCATED(XCELL)) DEALLOCATE(XCELL)
-   IF (ALLOCATED(YCELL)) DEALLOCATE(YCELL)
-   IF (ALLOCATED(ZCELL)) DEALLOCATE(ZCELL)
-   IF (ALLOCATED(DXCELL)) DEALLOCATE(DXCELL)
-   IF (ALLOCATED(DYCELL)) DEALLOCATE(DYCELL)
-   IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
 
    ! Deallocate Gasphase cut-faces and cut-cells inside Connecting meshes:
    IF (PROCESS(NM)/=MY_RANK) THEN
@@ -2346,6 +2002,696 @@ RETURN
 
 CONTAINS
 
+SUBROUTINE DEFINE_XYZFACE_CELL(ALLOC_FLG)
+
+LOGICAL, INTENT(IN) :: ALLOC_FLG
+
+IF (ALLOC_FLG) THEN
+
+   ! X direction bounds:
+   ILO_FACE = 0                    ! Low mesh boundary face index.
+   IHI_FACE = M%IBAR               ! High mesh boundary face index.
+   ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
+   IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
+   ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
+   IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
+
+   ! Y direction bounds:
+   JLO_FACE = 0                    ! Low mesh boundary face index.
+   JHI_FACE = M%JBAR               ! High mesh boundary face index.
+   JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
+   JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
+   JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
+   JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
+
+   ! Z direction bounds:
+   KLO_FACE = 0                    ! Low mesh boundary face index.
+   KHI_FACE = M%KBAR               ! High mesh boundary face index.
+   KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
+   KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
+   KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
+   KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
+
+   ! Define grid arrays for this mesh:
+   ! Populate position and cell size arrays: Uniform grid implementation.
+   ! X direction:
+   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL(ILO_CELL-1:IHI_CELL+1) = M%DX(ILO_CELL-1:IHI_CELL+1)
+   DO IGC=2,NGUARD
+      DXCELL(ILO_CELL-IGC)=DXCELL(ILO_CELL-IGC+1)
+      DXCELL(IHI_CELL+IGC)=DXCELL(IHI_CELL+IGC-1)
+   ENDDO
+   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE(ILO_FACE:IHI_FACE)= M%DXN(ILO_FACE:IHI_FACE)
+   DO IGC=1,NGUARD
+      DXFACE(ILO_FACE-IGC)=DXFACE(ILO_FACE-IGC+1)
+      DXFACE(IHI_FACE+IGC)=DXFACE(ILO_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
+   XCELL(ILO_CELL-1:IHI_CELL+1) = M%XC(ILO_CELL-1:IHI_CELL+1)
+   DO IGC=2,NGUARD
+      XCELL(ILO_CELL-IGC)=XCELL(ILO_CELL-IGC+1)-DXFACE(ILO_FACE-IGC+1)
+      XCELL(IHI_CELL+IGC)=XCELL(IHI_CELL+IGC-1)+DXFACE(IHI_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(XFACE(ISTR:IEND));  XFACE = 1._EB/GEOMEPS ! Initialize huge.
+   XFACE(ILO_FACE:IHI_FACE) = M%X(ILO_FACE:IHI_FACE)
+   DO IGC=1,NGUARD
+      XFACE(ILO_FACE-IGC)=XFACE(ILO_FACE-IGC+1)-DXCELL(ILO_CELL-IGC)
+      XFACE(IHI_FACE+IGC)=XFACE(IHI_FACE+IGC-1)+DXCELL(IHI_CELL+IGC)
+   ENDDO
+
+   ! Y direction:
+   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL(JLO_CELL-1:JHI_CELL+1)= M%DY(JLO_CELL-1:JHI_CELL+1)
+   DO IGC=2,NGUARD
+      DYCELL(JLO_CELL-IGC)=DYCELL(JLO_CELL-IGC+1)
+      DYCELL(JHI_CELL+IGC)=DYCELL(JHI_CELL+IGC-1)
+   ENDDO
+   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE(JLO_FACE:JHI_FACE)= M%DYN(JLO_FACE:JHI_FACE)
+   DO IGC=1,NGUARD
+      DYFACE(JLO_FACE-IGC)=DYFACE(JLO_FACE-IGC+1)
+      DYFACE(JHI_FACE+IGC)=DYFACE(JHI_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
+   YCELL(JLO_CELL-1:JHI_CELL+1) = M%YC(JLO_CELL-1:JHI_CELL+1)
+   DO IGC=2,NGUARD
+      YCELL(JLO_CELL-IGC)=YCELL(JLO_CELL-IGC+1)-DYFACE(JLO_FACE-IGC+1)
+      YCELL(JHI_CELL+IGC)=YCELL(JHI_CELL+IGC-1)+DYFACE(JHI_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(YFACE(JSTR:JEND));  YFACE = 1._EB/GEOMEPS ! Initialize huge.
+   YFACE(JLO_FACE:JHI_FACE) = M%Y(JLO_FACE:JHI_FACE)
+   DO IGC=1,NGUARD
+      YFACE(JLO_FACE-IGC)=YFACE(JLO_FACE-IGC+1)-DYCELL(JLO_CELL-IGC)
+      YFACE(JHI_FACE+IGC)=YFACE(JHI_FACE+IGC-1)+DYCELL(JHI_CELL+IGC)
+   ENDDO
+
+   ! Z direction:
+   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL(KLO_CELL-1:KHI_CELL+1)= M%DZ(KLO_CELL-1:KHI_CELL+1)
+   DO IGC=2,NGUARD
+      DZCELL(KLO_CELL-IGC)=DZCELL(KLO_CELL-IGC+1)
+      DZCELL(KHI_CELL+IGC)=DZCELL(KHI_CELL+IGC-1)
+   ENDDO
+   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE(KLO_FACE:KHI_FACE)= M%DZN(KLO_FACE:KHI_FACE)
+   DO IGC=1,NGUARD
+      DZFACE(KLO_FACE-IGC)=DZFACE(KLO_FACE-IGC+1)
+      DZFACE(KHI_FACE+IGC)=DZFACE(KHI_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
+   ZCELL(KLO_CELL-1:KHI_CELL+1) = M%ZC(KLO_CELL-1:KHI_CELL+1)
+   DO IGC=2,NGUARD
+      ZCELL(KLO_CELL-IGC)=ZCELL(KLO_CELL-IGC+1)-DZFACE(KLO_FACE-IGC+1)
+      ZCELL(KHI_CELL+IGC)=ZCELL(KHI_CELL+IGC-1)+DZFACE(KHI_FACE+IGC-1)
+   ENDDO
+   ALLOCATE(ZFACE(KSTR:KEND));  ZFACE = 1._EB/GEOMEPS ! Initialize huge.
+   ZFACE(KLO_FACE:KHI_FACE) = M%Z(KLO_FACE:KHI_FACE)
+   DO IGC=1,NGUARD
+      ZFACE(KLO_FACE-IGC)=ZFACE(KLO_FACE-IGC+1)-DZCELL(KLO_CELL-IGC)
+      ZFACE(KHI_FACE+IGC)=ZFACE(KHI_FACE+IGC-1)+DZCELL(KHI_CELL+IGC)
+   ENDDO
+
+ELSE
+
+   ! Face centered positions and cell sizes:
+   IF (ALLOCATED(XFACE)) DEALLOCATE(XFACE)
+   IF (ALLOCATED(YFACE)) DEALLOCATE(YFACE)
+   IF (ALLOCATED(ZFACE)) DEALLOCATE(ZFACE)
+   IF (ALLOCATED(DXFACE)) DEALLOCATE(DXFACE)
+   IF (ALLOCATED(DYFACE)) DEALLOCATE(DYFACE)
+   IF (ALLOCATED(DZFACE)) DEALLOCATE(DZFACE)
+
+   ! Cell centered positions and cell sizes:
+   IF (ALLOCATED(XCELL)) DEALLOCATE(XCELL)
+   IF (ALLOCATED(YCELL)) DEALLOCATE(YCELL)
+   IF (ALLOCATED(ZCELL)) DEALLOCATE(ZCELL)
+   IF (ALLOCATED(DXCELL)) DEALLOCATE(DXCELL)
+   IF (ALLOCATED(DYCELL)) DEALLOCATE(DYCELL)
+   IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
+
+ENDIF
+
+RETURN
+END SUBROUTINE DEFINE_XYZFACE_CELL
+
+
+SUBROUTINE TAG_CC_BLOCKING_REFINEMENT
+
+
+LOGICAL, PARAMETER :: DO_RAY_TRACING=.TRUE.
+INTEGER :: DUM,II1,JJ1,KK1,IIO1,JJO1,KKO1,IIO2,JJO2,KKO2,IIG,JJG,KKG,IIOG,JJOG,KKOG
+
+IF ( DO_RAY_TRACING) THEN
+
+   ! This loop is to block cut-cells on fine side grids for which coarse grid cut-cells have been blocked.
+   MAIN_MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+      CALL POINT_TO_MESH(NM)
+      M => MESHES(NM)
+
+      ! Set all fine side cut-cells in cells next to external boundaries which have SOLID coarse mesh faces
+      ! to CC%NOADVANCE(J)=.TRUE. and block them.
+      EXT_WALL_LOOP_1 : DO IW=1,M%N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP_1
+         EWC=>EXTERNAL_WALL(IW)
+         BC =>BOUNDARY_COORD(WC%BC_INDEX)
+         IIG = BC%IIG;JJG = BC%JJG;KKG = BC%KKG;
+         II  = BC%II; JJ  = BC%JJ; KK  = BC%KK; IOR = BC%IOR; X1AXIS=ABS(IOR)
+         NOM = EWC%NOM
+         M2 => MESHES(NOM)
+         IIF=II; JJF=JJ; KKF=KK
+         SELECT CASE(IOR)
+         CASE(-IAXIS); IIF=IIF-1;
+         CASE(-JAXIS); JJF=JJF-1;
+         CASE(-KAXIS); KKF=KKF-1;
+         END SELECT
+         IF (EWC%AREA_RATIO<0.9_EB) THEN
+
+            ! This face is smaller than the OMESH face. Find if omesh cells under both IIG,JJG,KKG, and II,JJ,KK cells
+            ! are of type CC_CUTCFE and test if these small size cells have centroids within the SOLID.
+            IIO = EWC%IIO_MIN; JJO = EWC%JJO_MIN; KKO = EWC%KKO_MIN
+            IIOG= EWC%IIO_MIN; JJOG= EWC%JJO_MIN; KKOG= EWC%KKO_MIN
+            SELECT CASE(IOR)
+            CASE( IAXIS); IIOG=IIO+1
+            CASE(-IAXIS); IIOG=IIO-1
+            CASE( JAXIS); JJOG=JJO+1
+            CASE(-JAXIS); JJOG=JJO-1
+            CASE( KAXIS); KKOG=KKO+1
+            CASE(-KAXIS); KKOG=KKO-1
+            END SELECT
+
+            ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
+            DO DUM=1,2
+               IF(DUM==1) THEN; II1 =  II; JJ1 =  JJ; KK1 =  KK; IIO1= IIO; JJO1= JJO; KKO1= KKO
+               ELSE;            II1 = IIG; JJ1 = JJG; KK1 = KKG; IIO1=IIOG; JJO1=JJOG; KKO1=KKOG
+               ENDIF
+               CALL TAG_BLOCK_CELL(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1,FINE_CELL=.TRUE.)
+            ENDDO
+
+            ! Test for cut/reg-cells in corner respect to OMESH undelying cell if needed:
+            IIO = EWC%IIO_MIN; JJO = EWC%JJO_MIN; KKO = EWC%KKO_MIN
+            IIOG= EWC%IIO_MIN; JJOG= EWC%JJO_MIN; KKOG= EWC%KKO_MIN
+            SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               IF(KKG>1 .AND. KKG<M%KBAR) CYCLE EXT_WALL_LOOP_1
+               IF(KKG==1) THEN; KKO = EWC%KKO_MIN-1; KK=BC%KK-1
+               ELSE;            KKO = EWC%KKO_MIN+1; KK=BC%KK+1
+               ENDIF
+               KKOG= KKO; KKG=KK; IIOG=IIOG + SIGN(1,IOR)
+            CASE(JAXIS)
+               IF(IIG>1 .AND. IIG<M%IBAR) CYCLE EXT_WALL_LOOP_1
+               IF(IIG==1) THEN; IIO = EWC%IIO_MIN-1; II=BC%II-1
+               ELSE;            IIO = EWC%IIO_MIN+1; II=BC%II+1
+               ENDIF
+               IIOG= IIO; IIG=II; JJOG=JJOG + SIGN(1,IOR)
+            CASE(KAXIS)
+               IF(JJG>1 .AND. JJG<M%JBAR) CYCLE EXT_WALL_LOOP_1
+               IF(JJG==1) THEN; JJO = EWC%JJO_MIN-1; JJ=BC%JJ-1
+               ELSE;            JJO = EWC%JJO_MIN+1; JJ=BC%JJ+1
+               ENDIF
+               JJOG= JJO; JJG=JJ; KKOG=KKOG + SIGN(1,IOR)
+            END SELECT
+            ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
+            DO DUM=1,2
+               IF(DUM==1) THEN; II1 =  II; JJ1 =  JJ; KK1 =  KK; IIO1= IIO; JJO1= JJO; KKO1= KKO
+               ELSE;            II1 = IIG; JJ1 = JJG; KK1 = KKG; IIO1=IIOG; JJO1=JJOG; KKO1=KKOG
+               ENDIF
+               CALL TAG_BLOCK_CELL(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1,FINE_CELL=.TRUE.)
+            ENDDO
+
+         ELSEIF((EWC%IIO_MAX-EWC%IIO_MIN+1)*(EWC%JJO_MAX-EWC%JJO_MIN+1)*(EWC%KKO_MAX-EWC%KKO_MIN+1)>1) THEN
+
+            ! If needed, block ghost cells of the other mesh which has finer cells.
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     IIOG=IIO; JJOG=JJO; KKOG=KKO; II=BC%II; JJ=BC%JJ; KK=BC%KK; IIG=BC%IIG; JJG=BC%JJG; KKG=BC%KKG
+                     SELECT CASE(IOR)
+                     CASE( IAXIS); IIOG=IIO+1
+                     CASE(-IAXIS); IIOG=IIO-1
+                     CASE( JAXIS); JJOG=JJO+1
+                     CASE(-JAXIS); JJOG=JJO-1
+                     CASE( KAXIS); KKOG=KKO+1
+                     CASE(-KAXIS); KKOG=KKO-1
+                     END SELECT
+                     DO DUM=1,2
+                        IF(DUM==1) THEN; II1 =  II; JJ1 =  JJ; KK1 =  KK; IIO1= IIO; JJO1= JJO; KKO1= KKO
+                        ELSE;            II1 = IIG; JJ1 = JJG; KK1 = KKG; IIO1=IIOG; JJO1=JJOG; KKO1=KKOG
+                        ENDIF
+                        CALL TAG_BLOCK_CELL(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1,FINE_CELL=.FALSE.)
+                     ENDDO
+
+                     ! Test for OMESH cut/reg-cells in corner respect to this mesh undelying cell if needed:
+                     IIO2=IIO; JJO2=JJO; KKO2=KKO
+                     SELECT CASE(X1AXIS)
+                     CASE(IAXIS)
+                        IF(KKOG>1 .AND. KKOG<M2%KBAR) CYCLE
+                        IF(KKOG==1) THEN; KKO2 = KKO-1; KK=BC%KK-1
+                        ELSE;             KKO2 = KKO+1; KK=BC%KK+1
+                        ENDIF
+                        KKOG= KKO2; KKG=KK
+                     CASE(JAXIS)
+                        IF(IIOG>1 .AND. IIOG<M2%IBAR) CYCLE
+                        IF(IIOG==1) THEN; IIO2 = IIO-1; II=BC%II-1
+                        ELSE;             IIO2 = IIO+1; II=BC%II+1
+                        ENDIF
+                        IIOG= IIO2; IIG=II
+                     CASE(KAXIS)
+                        IF(JJOG>1 .AND. JJOG<M2%JBAR) CYCLE
+                        IF(JJOG==1) THEN; JJO2 = JJO-1; JJ=BC%JJ-1
+                        ELSE;             JJO2 = JJO+1; JJ=BC%JJ+1
+                        ENDIF
+                        JJOG= JJO2; JJG=JJ
+                     END SELECT
+                     ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
+                     DO DUM=1,2
+                        IF(DUM==1) THEN; II1 =  II; JJ1 =  JJ; KK1 =  KK; IIO1=IIO2; JJO1=JJO2; KKO1=KKO2
+                        ELSE;            II1 = IIG; JJ1 = JJG; KK1 = KKG; IIO1=IIOG; JJO1=JJOG; KKO1=KKOG
+                        ENDIF
+                        CALL TAG_BLOCK_CELL(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1,FINE_CELL=.FALSE.)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO EXT_WALL_LOOP_1
+   ENDDO MAIN_MESH_LOOP_1
+
+ELSE
+
+   ! This loop is to block cut-cells on fine side grids for which coarse grid cut-cells have been blocked.
+   MAIN_MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+      CALL POINT_TO_MESH(NM)
+      M => MESHES(NM)
+
+      ! Set all fine side cut-cells in cells next to external boundaries which have SOLID coarse mesh faces
+      ! to CC%NOADVANCE(J)=.TRUE. and block them.
+      EXT_WALL_LOOP : DO IW=1,M%N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
+         EWC=>EXTERNAL_WALL(IW)
+         BC =>BOUNDARY_COORD(WC%BC_INDEX)
+         II  = BC%II; JJ  = BC%JJ; KK  = BC%KK; IOR = BC%IOR; X1AXIS=ABS(IOR)
+         NOM = EWC%NOM
+         M2 => MESHES(NOM)
+         IIF=II; JJF=JJ; KKF=KK
+         SELECT CASE(IOR)
+         CASE(-IAXIS); IIF=IIF-1;
+         CASE(-JAXIS); JJF=JJF-1;
+         CASE(-KAXIS); KKF=KKF-1;
+         END SELECT
+         IF (EWC%AREA_RATIO<0.9_EB) THEN
+
+            ! Check if other mesh boundary face set to SOLID and current mesh face set to .NOT.SOLID:
+            IIOF=EWC%IIO_MIN; JJOF=EWC%JJO_MIN; KKOF=EWC%KKO_MIN; LOHIF=HIGH_IND
+            SELECT CASE(IOR)
+            CASE(-IAXIS); IIOF=IIOF-1; LOHIF=LOW_IND
+            CASE(-JAXIS); JJOF=JJOF-1; LOHIF=LOW_IND
+            CASE(-KAXIS); KKOF=KKOF-1; LOHIF=LOW_IND
+            END SELECT
+            IF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_SOLID) CYCLE EXT_WALL_LOOP ! No need to do anything.
+            IF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_SOLID) THEN ! Coarse side face is solid.
+               ! Set II,JJ,KK fine cells next to this EWC for blocking.
+               IF(M%CCVAR(II,JJ,KK,CC_CGSC)==CC_GASPHASE) THEN
+                  ! Insert cut-cell in this location, set to Block.
+                  CT = 6;
+                  NCFACE_CUTCELL = CT + 1
+                  NCELL          = 1
+                  NFACE_CELL     = CT
+                  ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
+                  ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
+                  ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M%DX(II)*M%DY(JJ)*M%DZ(KK)
+                  ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M%XC(II),M%YC(JJ),M%ZC(KK) /)
+                  ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .TRUE.
+                  ! Add one by one regular and gas cut faces:
+                  CT = 1; CCELEM(1,1) = 0
+                  DO AX=IAXIS,KAXIS
+                     DO SIDE=LOW_IND,HIGH_IND
+                        ICFC=M%FCVAR(II+ADDI(SIDE,AX),JJ+ADDJ(SIDE,AX),KK+ADDK(SIDE,AX),CC_IDCF,AX);
+                        IF(ICFC>0) THEN
+                           FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, AX,ICFC, 1, CC_UNDEFINED /)
+                           CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+                        ELSEIF(M%FCVAR(II+ADDI(SIDE,AX),JJ+ADDJ(SIDE,AX),KK+ADDK(SIDE,AX),CC_FGSC,AX) == &
+                           CC_GASPHASE) THEN
+                           FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, AX,   0, 0, CC_UNDEFINED /)
+                           CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+                        ENDIF
+                     ENDDO
+                  ENDDO
+                  ! Insert cut_cell:
+                  CALL INSERT_CUT_CELL(NM,II,JJ,KK,ICC); M => MESHES(NM)
+                  CALL NEW_CELL_ALLOC(NM,ICC,NCELL,NFACE_CELL,NCFACE_CUTCELL)
+                  M%CUT_CELL(ICC)%NCELL      = NCELL
+                  M%CUT_CELL(ICC)%NFACE_CELL = NFACE_CELL
+                  CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M%CUT_CELL(ICC)%CCELEM)
+                  CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M%CUT_CELL(ICC)%FACE_LIST)
+                  CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M%CUT_CELL(ICC)%VOLUME)
+                  CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M%CUT_CELL(ICC)%XYZCEN)
+                  CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M%CUT_CELL(ICC)%NOADVANCE)
+               ELSEIF(M%CCVAR(II,JJ,KK,CC_CGSC)==CC_CUTCFE) THEN
+                  ! Find face in IIF,JFF,JJF,X1AXIS location and set the owner cell to block.
+                  ICC=M%CCVAR(II,JJ,KK,CC_IDCC); CC=> M%CUT_CELL(ICC)
+                  JCC_LOOP_1 : DO JCC=1,CC%NCELL
+                     DO IFC=2,CC%CCELEM(1,JCC)+1
+                        IFACE  = CC%CCELEM(IFC,JCC)
+                        IF( (CC%FACE_LIST(1,IFACE)==CC_FTYPE_RCGAS .OR. CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFGAS) .AND. &
+                           CC%FACE_LIST(2,IFACE)==LOHIF .AND. CC%FACE_LIST(3,IFACE)==X1AXIS ) THEN
+                           CC%NOADVANCE(JCC)=.TRUE.
+                           CYCLE JCC_LOOP_1
+                        ENDIF
+                     ENDDO
+                  ENDDO JCC_LOOP_1
+               ENDIF
+            !ELSEIF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_CUTCFE) THEN
+            ! Coarse side is a cut-face in the boundary.
+            ENDIF
+         ELSEIF((EWC%IIO_MAX-EWC%IIO_MIN+1)*(EWC%JJO_MAX-EWC%JJO_MIN+1)*(EWC%KKO_MAX-EWC%KKO_MIN+1)>1) THEN
+
+            IF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_SOLID) THEN ! Coarse side face is solid.
+               ! If needed, block ghost cells of the other mesh which has finer cells.
+               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                        IIOF=IIO; JJOF=JJO; KKOF=KKO; IOGC=IIO; JOGC=JJO; KOGC=KKO; LOHIF=LOW_IND
+                        SELECT CASE(IOR)
+                        CASE( IAXIS); IOGC=IOGC+1;
+                        CASE(-IAXIS); IIOF= IIO-1; LOHIF=HIGH_IND
+                        CASE( JAXIS); JOGC=JOGC+1;
+                        CASE(-JAXIS); JJOF= JJO-1; LOHIF=HIGH_IND
+                        CASE( KAXIS); KOGC=KOGC+1;
+                        CASE(-KAXIS); KKOF= KKO-1; LOHIF=HIGH_IND
+                        END SELECT
+                        IF(M2%FCVAR(IIOF,JJOF,KKOF,CC_CGSC,X1AXIS)==CC_SOLID) CYCLE ! No need to do anything.
+
+                        ! Set IOGC,JOGC,KOGC fine cells next to this EWC for blocking.
+                        IF(M2%CCVAR(IOGC,JOGC,KOGC,CC_CGSC)==CC_GASPHASE) THEN
+                           ! Insert cut-cell in this location, set to Block.
+                           CT = 6;
+                           NCFACE_CUTCELL = CT + 1
+                           NCELL          = 1
+                           NFACE_CELL     = CT
+                           ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
+                           ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
+                           ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M2%DX(IOGC)*M2%DY(JOGC)*M2%DZ(KOGC)
+                           ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M2%XC(IOGC),M2%YC(JOGC),M2%ZC(KOGC) /)
+                           ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .TRUE.
+                           ! Add one by one regular and gas cut faces:
+                           CT = 1; CCELEM(1,1) = 0
+                           DO AX=IAXIS,KAXIS
+                              DO SIDE=LOW_IND,HIGH_IND; ICFC=&
+                              M2%FCVAR(IOGC+ADDI(SIDE,AX),JOGC+ADDJ(SIDE,AX),KOGC+ADDK(SIDE,AX),CC_IDCF,AX);
+                              IF(ICFC>0) THEN
+                                 FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, AX,ICFC, 1, CC_UNDEFINED /)
+                                 CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+                                 ELSEIF( &
+                                 M2%FCVAR(IOGC+ADDI(SIDE,AX),JOGC+ADDJ(SIDE,AX),KOGC+ADDK(SIDE,AX),CC_FGSC,AX)&
+                                 == CC_GASPHASE) THEN
+                                 FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, AX,   0, 0, CC_UNDEFINED /)
+                                 CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+                              ENDIF
+                              ENDDO
+                           ENDDO
+                           ! Insert cut_cell:
+                           CALL INSERT_CUT_CELL(NOM,IOGC,JOGC,KOGC,ICC); M2 => MESHES(NOM)
+                           CALL NEW_CELL_ALLOC(NOM,ICC,NCELL,NFACE_CELL,NCFACE_CUTCELL)
+                           M2%CUT_CELL(ICC)%NCELL      = NCELL
+                           M2%CUT_CELL(ICC)%NFACE_CELL = NFACE_CELL
+                           CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M2%CUT_CELL(ICC)%CCELEM)
+                           CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M2%CUT_CELL(ICC)%FACE_LIST)
+                           CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M2%CUT_CELL(ICC)%VOLUME)
+                           CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M2%CUT_CELL(ICC)%XYZCEN)
+                           CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M2%CUT_CELL(ICC)%NOADVANCE)
+                        ELSEIF(M2%CCVAR(IOGC,JOGC,KOGC,CC_CGSC)==CC_CUTCFE) THEN
+                           ! Find face in IIF,JFF,JJF,X1AXIS location and set the owner cell to block.
+                           ICC=M2%CCVAR(IOGC,JOGC,KOGC,CC_IDCC); CC=> M2%CUT_CELL(ICC)
+                           JCC_LOOP_3 : DO JCC=1,CC%NCELL
+                              DO IFC=2,CC%CCELEM(1,JCC)+1
+                                 IFACE  = CC%CCELEM(IFC,JCC)
+                                 IF( (CC%FACE_LIST(1,IFACE)==CC_FTYPE_RCGAS .OR. CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFGAS) .AND. &
+                                    CC%FACE_LIST(2,IFACE)==LOHIF .AND. CC%FACE_LIST(3,IFACE)==X1AXIS ) THEN
+                                    CC%NOADVANCE(JCC)=.TRUE.
+                                    CYCLE JCC_LOOP_3
+                                 ENDIF
+                              ENDDO
+                           ENDDO JCC_LOOP_3
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            !ELSEIF(M%FCVAR(IIF,JJF,KKF,CC_CGSC,X1AXIS)==CC_CUTCFE) THEN
+            ! Coarse side is a cut-face in the boundary.
+            ENDIF
+         ENDIF
+      ENDDO EXT_WALL_LOOP
+   ENDDO MAIN_MESH_LOOP_2
+
+ENDIF
+RETURN
+END SUBROUTINE TAG_CC_BLOCKING_REFINEMENT
+
+SUBROUTINE TAG_BLOCK_CELL(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1,FINE_CELL)
+
+INTEGER, INTENT(IN) :: NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1
+LOGICAL, INTENT(IN) :: FINE_CELL
+TYPE(MESH_TYPE), POINTER :: M,M2
+M =>MESHES( NM)
+M2=>MESHES(NOM)
+
+IF (FINE_CELL) THEN
+
+   ICC2 = M2%CCVAR(IIO1,JJO1,KKO1,CC_IDCC); ICC = 0
+   IF ( ICC2 > 0 ) THEN ! There are cut-cells in omesh cartesian cell.
+      IF(M%CCVAR(II1,JJ1,KK1,CC_CGSC)==CC_GASPHASE) THEN
+      ! Insert cut-cell is this location:
+      CT = 6;
+      NCFACE_CUTCELL = CT + 1
+      NCELL          = 1
+      NFACE_CELL     = CT
+      ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
+      ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
+      ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M%DX(II1)*M%DY(JJ1)*M%DZ(KK1)
+      ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M%XC(II1),M%YC(JJ1),M%ZC(KK1) /)
+      ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .FALSE.
+      ! Add one by one regular and gas cut faces:
+      CT = 1; CCELEM(1,1) = 0
+      DO AX=IAXIS,KAXIS
+         DO SIDE=LOW_IND,HIGH_IND
+            ICFC=M%FCVAR(II1+ADDI(SIDE,AX),JJ1+ADDJ(SIDE,AX),KK1+ADDK(SIDE,AX),CC_IDCF,AX);
+            IF(ICFC>0) THEN
+               FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, AX,ICFC, 1, CC_UNDEFINED /)
+               CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+            ELSEIF(M%FCVAR(II1+ADDI(SIDE,AX),JJ1+ADDJ(SIDE,AX),KK1+ADDK(SIDE,AX),CC_FGSC,AX) == &
+               CC_GASPHASE) THEN
+               FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, AX,   0, 0, CC_UNDEFINED /)
+               CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+            ENDIF
+         ENDDO
+      ENDDO
+      ! Insert cut_cell:
+      CALL INSERT_CUT_CELL(NM,II1,JJ1,KK1,ICC); M => MESHES(NM)
+      CALL NEW_CELL_ALLOC(NM,ICC,NCELL,NFACE_CELL,NCFACE_CUTCELL)
+      M%CUT_CELL(ICC)%NCELL      = NCELL
+      M%CUT_CELL(ICC)%NFACE_CELL = NFACE_CELL
+      CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M%CUT_CELL(ICC)%CCELEM)
+      CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M%CUT_CELL(ICC)%FACE_LIST)
+      CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M%CUT_CELL(ICC)%VOLUME)
+      CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M%CUT_CELL(ICC)%XYZCEN)
+      CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M%CUT_CELL(ICC)%NOADVANCE)
+      ELSEIF(M%CCVAR(II1,JJ1,KK1,CC_IDCC)>0) THEN
+      ICC = M%CCVAR(II1,JJ1,KK1,CC_IDCC)
+      ENDIF
+      ! Here Test if cut-cells in II,KK,KK are blocked or not in IIO,JJO,KKO:
+      IF(ICC>0) CALL TEST_CC_FOR_BLOCKING(NM,ICC,NOM,IIO1,JJO1,KKO1,ICC2)
+   ENDIF
+
+ELSE
+
+   ICC = M%CCVAR(II1,JJ1,KK1,CC_IDCC); ICC2 = 0
+   IF(ICC>0) THEN
+      ! Set IOGC,JOGC,KOGC fine cells next to this EWC for blocking.
+      IF(M2%CCVAR(IIO1,JJO1,KKO1,CC_CGSC)==CC_GASPHASE) THEN
+      ! Insert cut-cell in this location, set to Block.
+      CT = 6;
+      NCFACE_CUTCELL = CT + 1
+      NCELL          = 1
+      NFACE_CELL     = CT
+      ALLOCATE(CCELEM(1:NCFACE_CUTCELL,1:NCELL));           CCELEM    = CC_UNDEFINED
+      ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
+      ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M2%DX(IIO1)*M2%DY(JJO1)*M2%DZ(KKO1)
+      ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M2%XC(IIO1),M2%YC(JJO1),M2%ZC(KKO1) /)
+      ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = .FALSE.
+      ! Add one by one regular and gas cut faces:
+      CT = 1; CCELEM(1,1) = 0
+      DO AX=IAXIS,KAXIS
+         DO SIDE=LOW_IND,HIGH_IND; ICFC=&
+            M2%FCVAR(IIO1+ADDI(SIDE,AX),JJO1+ADDJ(SIDE,AX),KKO1+ADDK(SIDE,AX),CC_IDCF,AX);
+         IF(ICFC>0) THEN
+            FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_CFGAS, SIDE, AX,ICFC, 1, CC_UNDEFINED /)
+            CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+            ELSEIF( &
+            M2%FCVAR(IIO1+ADDI(SIDE,AX),JJO1+ADDJ(SIDE,AX),KKO1+ADDK(SIDE,AX),CC_FGSC,AX)&
+            == CC_GASPHASE) THEN
+            FACE_LIST(1:CC_NPARAM_CCFACE,CT) = (/ CC_FTYPE_RCGAS, SIDE, AX,   0, 0, CC_UNDEFINED /)
+            CCELEM(1,1) = CCELEM(1,1) + 1; CCELEM(CCELEM(1,1)+1,1) = CT; CT=CT+1
+         ENDIF
+         ENDDO
+      ENDDO
+      ! Insert cut_cell:
+      CALL INSERT_CUT_CELL(NOM,IIO1,JJO1,KKO1,ICC2); M2 => MESHES(NOM)
+      CALL NEW_CELL_ALLOC(NOM,ICC2,NCELL,NFACE_CELL,NCFACE_CUTCELL)
+      M2%CUT_CELL(ICC2)%NCELL      = NCELL
+      M2%CUT_CELL(ICC2)%NFACE_CELL = NFACE_CELL
+      CALL MOVE_ALLOC(FROM=CCELEM   ,TO=M2%CUT_CELL(ICC2)%CCELEM)
+      CALL MOVE_ALLOC(FROM=FACE_LIST,TO=M2%CUT_CELL(ICC2)%FACE_LIST)
+      CALL MOVE_ALLOC(FROM=VOLUME   ,TO=M2%CUT_CELL(ICC2)%VOLUME)
+      CALL MOVE_ALLOC(FROM=XYZCEN   ,TO=M2%CUT_CELL(ICC2)%XYZCEN)
+      CALL MOVE_ALLOC(FROM=NOADVANCE,TO=M2%CUT_CELL(ICC2)%NOADVANCE)
+      ELSEIF(M2%CCVAR(IIO1,JJO1,KKO1,CC_IDCC)>0) THEN
+      ICC2 = M2%CCVAR(IIO1,JJO1,KKO1,CC_IDCC)
+      ENDIF
+      ! Here Test if cut-cells in IIO,JJO,KKO are blocked or not in II,JJ,KK:
+      IF(ICC2>0) CALL TEST_CC_FOR_BLOCKING(NOM,ICC2,NM,II1,JJ1,KK1,ICC)
+   ENDIF
+
+ENDIF
+
+
+END SUBROUTINE TAG_BLOCK_CELL
+
+SUBROUTINE TEST_CC_FOR_BLOCKING(NM,ICC,NOM,IIO1,JJO1,KKO1,ICC2)
+
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+
+INTEGER, INTENT(IN) :: NM,ICC,NOM,IIO1,JJO1,KKO1,ICC2
+
+INTEGER :: JCC,FC_FOUND,FC_TYPE,INBFC,INBFC_LOC,VERT_CUTFACE,NVERT,X1AXIS,X2AXIS,X3AXIS,NCROSS,DIRRAY
+TYPE(MESH_TYPE), POINTER :: M,M2
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC,CC2
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF2
+INTEGER, PARAMETER :: EAST=1,WEST=2,FRONT=3,BACK=4,SOUTH=5,NORTH=6
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CFELEM
+REAL(EB):: XYZCEN(MAX_DIM),NVEC(MAX_DIM),P0(MAX_DIM),A,B,C,D,XYZ_P(MAX_DIM),PTCEN(IAXIS:JAXIS),I_SGN,X1F
+LOGICAL :: IN_CFACE,BLOCK_CELL
+
+M =>MESHES( NM)
+M2=>MESHES(NOM)
+
+INBFC=M2%CCVAR(IIO1,JJO1,KKO1,CC_IDCF); IF(INBFC<1) RETURN ! No CC_INBOUNDARY faces in this cartesian cell.
+
+CC =>M%CUT_CELL( ICC)
+CC2=>M2%CUT_CELL(ICC2)
+CF2=>M2%CUT_FACE(INBFC)
+VERT_CUTFACE = SIZE(CF2%CFELEM, DIM=1); ALLOCATE(CFELEM(1:VERT_CUTFACE))
+NVERT        = SIZE(CF2%XYZVERT,DIM=2)
+! For each cut-cell in CC, test if its centroid Xc is in the SOLID region of CC2:
+! We do this by finding a direction to a Cartesian face type CC_GASPHASE or CC_SOLID and intersection point XE,
+FC_FOUND=0; FC_TYPE=CC_UNDEFINED; DIRRAY=CC_UNDEFINED
+! Then counting INBOUNDARY cut-face intersections from XE point to Xc.
+SELECT CASE(M2%FCVAR(IIO1-1,JJO1,KKO1,CC_FGSC,IAXIS))
+CASE(CC_GASPHASE)
+FC_FOUND=WEST; FC_TYPE =CC_GASPHASE; DIRRAY=IAXIS
+IF(IIO1==0) THEN; X1F=M2%X(IIO1)-M2%DX(IIO1); ELSE; X1F=M2%X(IIO1-1); ENDIF
+CASE(CC_SOLID   )
+FC_FOUND=WEST; FC_TYPE =CC_SOLID;    DIRRAY=IAXIS
+IF(IIO1==0) THEN; X1F=M2%X(IIO1)-M2%DX(IIO1); ELSE; X1F=M2%X(IIO1-1); ENDIF
+END SELECT
+IF(FC_FOUND<1) THEN
+   SELECT CASE(M2%FCVAR(IIO1  ,JJO1,KKO1,CC_FGSC,IAXIS))
+   CASE(CC_GASPHASE)
+   FC_FOUND=EAST; FC_TYPE =CC_GASPHASE; DIRRAY=-IAXIS
+   IF(IIO1==M2%IBP1) THEN; X1F=M2%X(IIO1-1)+M2%DX(IIO1); ELSE; X1F=M2%X(IIO1); ENDIF
+   CASE(CC_SOLID   )
+   FC_FOUND=EAST; FC_TYPE =CC_SOLID;    DIRRAY=-IAXIS
+   IF(IIO1==M2%IBP1) THEN; X1F=M2%X(IIO1-1)+M2%DX(IIO1); ELSE; X1F=M2%X(IIO1); ENDIF
+   END SELECT
+ENDIF
+IF(FC_FOUND<1) THEN
+   SELECT CASE(M2%FCVAR(IIO1,JJO1-1,KKO1,CC_FGSC,JAXIS))
+   CASE(CC_GASPHASE)
+   FC_FOUND=FRONT; FC_TYPE =CC_GASPHASE; DIRRAY=JAXIS
+   IF(JJO1==0) THEN; X1F=M2%Y(JJO1)-M2%DY(JJO1); ELSE; X1F=M2%Y(JJO1-1); ENDIF
+   CASE(CC_SOLID   )
+   FC_FOUND=FRONT; FC_TYPE =CC_SOLID;    DIRRAY=JAXIS
+   IF(JJO1==0) THEN; X1F=M2%Y(JJO1)-M2%DY(JJO1); ELSE; X1F=M2%Y(JJO1-1); ENDIF
+   END SELECT
+ENDIF
+IF(FC_FOUND<1) THEN
+   SELECT CASE(M2%FCVAR(IIO1,JJO1  ,KKO1,CC_FGSC,JAXIS))
+   CASE(CC_GASPHASE)
+   FC_FOUND=BACK; FC_TYPE =CC_GASPHASE; DIRRAY=-JAXIS
+   IF(JJO1==M2%JBP1) THEN; X1F=M2%Y(JJO1-1)+M2%DY(JJO1); ELSE; X1F=M2%Y(JJO1); ENDIF
+   CASE(CC_SOLID   )
+   FC_FOUND=BACK; FC_TYPE =CC_SOLID;    DIRRAY=-JAXIS
+   IF(JJO1==M2%JBP1) THEN; X1F=M2%Y(JJO1-1)+M2%DY(JJO1); ELSE; X1F=M2%Y(JJO1); ENDIF
+   END SELECT
+ENDIF
+IF(FC_FOUND<1) THEN
+   SELECT CASE(M2%FCVAR(IIO1,JJO1,KKO1-1,CC_FGSC,KAXIS))
+   CASE(CC_GASPHASE)
+   FC_FOUND=SOUTH; FC_TYPE =CC_GASPHASE; DIRRAY=KAXIS
+   IF(KKO1==0) THEN; X1F=M2%Z(KKO1)-M2%DZ(KKO1); ELSE; X1F=M2%Z(KKO1-1); ENDIF
+   CASE(CC_SOLID   )
+   FC_FOUND=SOUTH; FC_TYPE =CC_SOLID;    DIRRAY=KAXIS
+   IF(KKO1==0) THEN; X1F=M2%Z(KKO1)-M2%DZ(KKO1); ELSE; X1F=M2%Z(KKO1-1); ENDIF
+   END SELECT
+ENDIF
+IF(FC_FOUND<1) THEN
+   SELECT CASE(M2%FCVAR(IIO1,JJO1,KKO1  ,CC_FGSC,KAXIS))
+   CASE(CC_GASPHASE)
+   FC_FOUND=NORTH; FC_TYPE =CC_GASPHASE; DIRRAY=-KAXIS
+   IF(KKO1==M2%KBP1) THEN; X1F=M2%Z(KKO1-1)+M2%DZ(KKO1); ELSE; X1F=M2%Z(KKO1); ENDIF
+   CASE(CC_SOLID   )
+   FC_FOUND=NORTH; FC_TYPE =CC_SOLID;    DIRRAY=-KAXIS
+   IF(KKO1==M2%KBP1) THEN; X1F=M2%Z(KKO1-1)+M2%DZ(KKO1); ELSE; X1F=M2%Z(KKO1); ENDIF
+   END SELECT
+ENDIF
+
+IF(FC_FOUND<1) RETURN ! Here or before we can switch to a point in polygon test whithin JCC_LOOP.
+
+SELECT CASE(ABS(DIRRAY))
+CASE(IAXIS); X1AXIS = IAXIS; X2AXIS = JAXIS; X3AXIS = KAXIS
+CASE(JAXIS); X1AXIS = JAXIS; X2AXIS = KAXIS; X3AXIS = IAXIS
+CASE(KAXIS); X1AXIS = KAXIS; X2AXIS = IAXIS; X3AXIS = JAXIS
+END SELECT
+
+JCC_LOOP : DO JCC=1,CC%NCELL
+   XYZCEN(IAXIS:KAXIS) = CC%XYZCEN(IAXIS:KAXIS,JCC)
+   NCROSS=0;
+   IF(FC_TYPE==CC_SOLID   ) BLOCK_CELL=.TRUE.
+   IF(FC_TYPE==CC_GASPHASE) BLOCK_CELL=.FALSE.
+   ! Here do ray-tracing from FC_FOUND to centroid location for this cut cell, use point in poly to note the
+   ! intersections with CC_INBOUNDARY cut-faces:
+   INBFC_LOC_LOOP : DO INBFC_LOC=1,CF2%NFACE
+      ! Normal, max normal component, define plane X2AXIS,X3AXIS to do search:
+      CFELEM(1:VERT_CUTFACE)  = CF2%CFELEM(1:VERT_CUTFACE,INBFC_LOC)
+      CALL CROSS_PRODUCT(NVEC(IAXIS:KAXIS),CF2%XYZVERT(IAXIS:KAXIS,CFELEM(2))-CF2%XYZCEN(IAXIS:KAXIS,INBFC_LOC),&
+                                           CF2%XYZVERT(IAXIS:KAXIS,CFELEM(3))-CF2%XYZCEN(IAXIS:KAXIS,INBFC_LOC))
+      IF (NORM2(NVEC)<TWO_EPSILON_EB) CYCLE INBFC_LOC_LOOP; NVEC = NVEC/NORM2(NVEC)
+      ! Plane equation for INBOUNDARY cut-face plane:
+      P0(IAXIS:KAXIS) = CF2%XYZVERT(IAXIS:KAXIS,CFELEM(2))
+      A = NVEC(IAXIS)
+      B = NVEC(JAXIS)
+      C = NVEC(KAXIS)
+      D = -(A*P0(IAXIS) + B*P0(JAXIS) + C*P0(KAXIS))
+      PTCEN(IAXIS:JAXIS) = XYZCEN( (/ X2AXIS, X3AXIS /) )
+      I_SGN = SIGN(1._EB,NVEC(X1AXIS))
+      CALL POINT_IN_POLYGON(PTCEN,VERT_CUTFACE,CFELEM,NVERT,X2AXIS,X3AXIS,CF2%XYZVERT,IN_CFACE,IS_CONVEX=.TRUE.,I_SGN=I_SGN)
+      IF (IN_CFACE) THEN
+         IF( ABS(NVEC(X1AXIS))<TWO_EPSILON_EB ) CYCLE INBFC_LOC_LOOP
+         XYZ_P(X1AXIS) = -1._EB/NVEC(X1AXIS)*(NVEC(X2AXIS)*PTCEN(IAXIS)+NVEC(X3AXIS)*PTCEN(JAXIS)+D)
+         IF(SIGN(1,DIRRAY)<0) THEN ! Crossing not between face and cut-cell centroid.
+            IF(XYZ_P(X1AXIS)<XYZCEN(X1AXIS)-GEOMEPS) CYCLE INBFC_LOC_LOOP
+            IF(XYZ_P(X1AXIS)>X1F           +GEOMEPS) CYCLE INBFC_LOC_LOOP
+         ELSE
+            IF(XYZ_P(X1AXIS)<X1F           -GEOMEPS) CYCLE INBFC_LOC_LOOP
+            IF(XYZ_P(X1AXIS)>XYZCEN(X1AXIS)+GEOMEPS) CYCLE INBFC_LOC_LOOP
+         ENDIF
+         NCROSS = NCROSS + 1  ! Add crossing between face and cut-cell centroid.
+         BLOCK_CELL=.NOT.BLOCK_CELL
+      ENDIF
+   ENDDO INBFC_LOC_LOOP
+   ! Here set no ADVANCE if BLOCK_CELL=T:
+   IF(BLOCK_CELL) CC%NOADVANCE(JCC)=.TRUE.
+ENDDO JCC_LOOP
+
+RETURN
+END SUBROUTINE TEST_CC_FOR_BLOCKING
+
 
 SUBROUTINE GET_CC_FACE_CELL_LIST_INFO(NM,PHASE)
 
@@ -2356,18 +2702,6 @@ INTEGER, INTENT(IN) :: PHASE
 INTEGER :: ICC,JCC,IFC,IFACE,ICF1,ICF2,JCF,ICE,JCE,IIE,JJE,KKE,IIF,JJF,KKF,X1AXIS,EAXIS,IEDG_LOC,IEDGE
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
 M=>MESHES(NM)
-
-! Allocate Cut-face CELL_LIST if needed:
-! DO ICF=1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
-!    CF => M%CUT_FACE(ICF)
-!    IF(.NOT.ALLOCATED(CF%CELL_LIST)) THEN
-!       ALLOCATE(CF%CELL_LIST(4,HIGH_IND,CF%NFACE)); CF%CELL_LIST = CC_UNDEFINED
-!    ENDIF
-!    IF(.NOT.ALLOCATED(CF%XCENLOW)) THEN
-!       ALLOCATE(CF%XCENLOW(IAXIS:KAXIS,CF%NFACE)); CF%XCENLOW   = 0._EB
-!       ALLOCATE(CF%XCENHIGH(IAXIS:KAXIS,CF%NFACE)); CF%XCENHIGH = 0._EB
-!    ENDIF
-! ENDDO
 
 ! FACE-CELL incidence:
 CUT_CELL_LOOP : DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
@@ -4259,7 +4593,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
 
          ! Here add cut or regular faces to every face on this wall cell:
-         ! This requires defining the sets of cut and refular faces within the area od each cut or
+         ! This requires defining the sets of cut and regular faces within the area of each cut or
          ! regular face. Option : Use POINT_IN_POLYGON with centroids. To do.
 
       ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
@@ -7771,24 +8105,24 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
    ENDDO ICC_LOOP_2
 
    ! Then fuse cut-cell unknowns if several ccs in one Cartesian cell and one of them has CUT_CELL(ICC)%UNKZ(JCC)>0:
-   IF(.NOT. ONE_UNKH_PER_CUTCELL) THEN
-      DO ICC=1,M%N_CUTCELL_MESH
-         CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-         ! Don't attempt to link cut-cells inside an OBST:
-         IF ( M%CELL(M%CELL_INDEX(I,J,K))%SOLID ) CYCLE
-         ! Cases with more than one cut-cell: define UNKZ of all cells to be the one of first cut-cell with UNKZ > 0:
-         DO JCC=1,CC%NCELL; IF(CC%UNKZ(JCC)>0) EXIT; ENDDO
-         JCC_LNK = JCC
-         IF (JCC_LNK <= CC%NCELL) THEN
-            DO JCC=1,CC%NCELL
-               IF ( CC%NOADVANCE(JCC) .OR. JCC==JCC_LNK ) CYCLE
-               CC%UNKZ(JCC)               = CC%UNKZ(JCC_LNK)
-               CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_CUTCFE, I, J, K, JCC_LNK /)
-               CC%LINK_LEV(JCC)           = CC%LINK_LEV(JCC_LNK) - 1
-            ENDDO
-         ENDIF
-      ENDDO
-   ENDIF
+   ! IF(.NOT. ONE_UNKH_PER_CUTCELL) THEN
+   !    DO ICC=1,M%N_CUTCELL_MESH
+   !       CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+   !       ! Don't attempt to link cut-cells inside an OBST:
+   !       IF ( M%CELL(M%CELL_INDEX(I,J,K))%SOLID ) CYCLE
+   !       ! Cases with more than one cut-cell: define UNKZ of all cells to be the one of first cut-cell with UNKZ > 0:
+   !       DO JCC=1,CC%NCELL; IF(CC%UNKZ(JCC)>0) EXIT; ENDDO
+   !       JCC_LNK = JCC
+   !       IF (JCC_LNK <= CC%NCELL) THEN
+   !          DO JCC=1,CC%NCELL
+   !             IF ( CC%NOADVANCE(JCC) .OR. JCC==JCC_LNK ) CYCLE
+   !             CC%UNKZ(JCC)               = CC%UNKZ(JCC_LNK)
+   !             CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_CUTCFE, I, J, K, JCC_LNK /)
+   !             CC%LINK_LEV(JCC)           = CC%LINK_LEV(JCC_LNK) - 1
+   !          ENDDO
+   !       ENDIF
+   !    ENDDO
+   ! ENDIF
 
    IF (QUITLINK_FLG) EXIT LINK_LOOP
 
@@ -21351,7 +21685,7 @@ INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLU
            N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_SURF_ID2,N_POLY_VERTS,&
            MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,FIRST_FACE_INDEX,I1,I2,I3,I4,&
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
-           X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3)
+           X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3),CELL_BLOCK_IOR
 
 LOGICAL :: AUTO_TEXTURE,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM,LOGTEST
 REAL(EB), POINTER, DIMENSION(:) :: V1,V2,V3,V4
@@ -21392,7 +21726,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: GEOM_LINE,GEOM_LINE2
 INTEGER, PARAMETER :: DELTA_GEOM_LINE=1000
 INTEGER :: GEOM_LINE_SIZE
 
-NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_FILE,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
+NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_FILE,CELL_BLOCK_IOR,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTRUDE,EXTEND_TERRAIN,FACES,ID,IJK,IS_TERRAIN,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,POLY,&
                 RGB,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
@@ -21468,6 +21802,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    IF (COLOR/='null') THEN
       CALL COLOR2RGB(RGB,COLOR)
    ENDIF
+   G%CELL_BLOCK_IOR = CELL_BLOCK_IOR
    G%RGB = RGB
    G%TRANSPARENCY = TRANSPARENCY
    N_VERTS=0
@@ -23491,6 +23826,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    READ_BINARY = .FALSE.
    BINARY_FILE = 'null'
    RGB=-1
+   CELL_BLOCK_IOR=0
 
 END SUBROUTINE SET_GEOM_DEFAULTS
 
