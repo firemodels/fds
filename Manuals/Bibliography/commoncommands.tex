@@ -144,6 +144,11 @@
 \setlength{\cftfignumwidth}{0.45in}         % Width of figure number and space before figure caption in the list of figures
 \setlength{\cfttabnumwidth}{0.45in}         % Width of table number and space before table caption in the list of tables
 
+\makeatletter
+\setlength{\@fptop}{0pt}                    % Figures on separate pages pushed to the top
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+
 \newcommand{\authortitlesigs}
 {
 \begin{flushright}
