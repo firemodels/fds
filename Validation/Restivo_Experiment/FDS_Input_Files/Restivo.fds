@@ -1,8 +1,9 @@
 &HEAD CHID='Restivo', TITLE='Restivo Forced Convection Study, h=2.243' /
 
-&MESH IJK=144,48,48, XB=0.0,9.0,0.0,3.0,0.0,3.0, TRNZ_ID='trnz' /
+&MESH IJK=144,48,48, XB=0.0,3.0,0.0,3.0,0.0,3.0, TRNZ_ID='trnz', MULT_ID='mesh' /
+&MULT ID='mesh', DX=3, I_UPPER=2 /
 
-&MISC SIMULATION_MODE='SVLES' /
+&RADI RADIATION=F /
 
 &TRNZ ID='trnz', IDERIV=1, CC=0.0, PC=0.5 /
 &TRNZ ID='trnz', IDERIV=1, CC=3.0, PC=0.5 /
@@ -13,7 +14,7 @@
 
 &TIME T_END=900. /
 
-&SURF ID='INLET',VEL=-0.455 /
+&SURF ID='INLET',VEL=-0.455, NO_SLIP=T, COLOR='BROWN' /
 &VENT XB=0.0, 0.0, 0.0, 3.0, 2.832, 3.0, SURF_ID='INLET' /
 &VENT XB=9.0, 9.0, 0.0, 3.0, 0.0,  0.48, SURF_ID='OPEN' /
 
