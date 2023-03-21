@@ -5343,7 +5343,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ENDIF
    LPC%KILL_RADIUS                      = 0.5_EB*KILL_DIAMETER*1.E-6
    IF (LPC%LIQUID_DROPLET) THEN !Set KILL_RADIUS for SURF_ID in PROC_PART
-      IF (LPC%KILL_RADIUS<0._EB) THEN
+      IF (CNF_RAMP_ID=='null' .AND. LPC%DIAMETER < 0._EB) THEN
+         WRITE(MESSAGE,'(A,A)') 'Liquid droplet needs a DIAMETER or CNF_RAMP_ID for particle class: ',LPC%ID
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+      IF (LPC%KILL_RADIUS<0._EB .AND. CNF_RAMP_ID=='null') THEN
          IF (MONODISPERSE) THEN         ! Kill if volume of droplet <= 0.005*volume of droplet with DIAMETER or MINIMUM_DIAMETER
             LPC%KILL_RADIUS             = (0.005_EB*(0.5_EB*LPC%DIAMETER)**3)**ONTH
          ELSE
@@ -5713,6 +5717,27 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ENDDO REAC_DO
    ENDIF
 
+   IF (LPC%CNF_RAMP_INDEX > 0) THEN
+      LPC%MINIMUM_DIAMETER = RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(1)
+      !IF (LPC%MINIMUM_DIAMETER < 0.1_EB) THEN
+      !   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART ID ',TRIM(LPC%ID),'. Minimum diameter in CNF ramp must be > 0.1 micron.'
+      !   CALL SHUTDOWN(MESSAGE) ; RETURN
+      !ENDIF
+      LPC%KILL_RADIUS      = (0.005_EB*(0.5_EB*LPC%MINIMUM_DIAMETER)**3)**ONTH
+      DO NN = 1,RAMPS(LPC%CNF_RAMP_INDEX)%NUMBER_DATA_POINTS
+         IF (RAMPS(LPC%CNF_RAMP_INDEX)%DEPENDENT_DATA(NN) > 0.5_EB) THEN
+            IF (NN==1) THEN
+               LPC%DIAMETER = RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(NN)
+            ELSE
+               LPC%DIAMETER = RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(NN-1) + &
+                            (RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(NN) - RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(NN-1)) * &
+                            (0.5_EB                                        - RAMPS(LPC%CNF_RAMP_INDEX)%DEPENDENT_DATA(NN-1)) / &
+                            (RAMPS(LPC%CNF_RAMP_INDEX)%DEPENDENT_DATA(NN)  - RAMPS(LPC%CNF_RAMP_INDEX)%DEPENDENT_DATA(NN-1))
+            ENDIF
+            EXIT
+         ENDIF
+      ENDDO
+   ENDIF
 ENDDO PART_LOOP
 
 END SUBROUTINE PROC_PART
@@ -7238,6 +7263,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       MINIMUM_LAYER_THICKNESS = 1.E-12_EB
       TGA_SURF_INDEX = N
       INITIAL_RADIATION_ITERATIONS = 0
+      RADIATION = .FALSE.
    ENDIF
 
    ! Level set vegetation fire spread specific
@@ -8233,13 +8259,15 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Determine if surface has internal radiation
 
    SF%INTERNAL_RADIATION = .FALSE.
-   DO NL=1,SF%N_LAYERS
-      IF (SF%KAPPA_S(NL)>0._EB) SF%INTERNAL_RADIATION = .TRUE.
-      DO NN =1,SF%N_LAYER_MATL(NL)
-         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-         IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+   IF (RADIATION) THEN
+      DO NL=1,SF%N_LAYERS
+         IF (SF%KAPPA_S(NL)>0._EB) SF%INTERNAL_RADIATION = .TRUE.
+         DO NN =1,SF%N_LAYER_MATL(NL)
+            ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+            IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+         ENDDO
       ENDDO
-   ENDDO
+   ENDIF
 
    ! Internal radiation only allowed for Cartesian geometry
 
