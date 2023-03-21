@@ -7131,6 +7131,8 @@ The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper 
 
 FDS effectively creats a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
 
+Additionaly, the {\ct BULK\_DENSITY\_FILE} can be scaled using a {\ct BULK\_DENSITY\_FACTOR}. The value of this input, also provided on the {\ct INIT} line, will be multiplied by all values in the {\ct BULK\_DENSITY\_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same {\ct BULK\_DENSITY\_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
+
 \subsection{Firebrands}
 \label{info:firebrands}
 \label{dragon_5a}
@@ -11489,6 +11491,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
+{\ct BULK\_DENSITY\_FACTOR}       & Real              & Section~\ref{bulk_density_file}               &                & 1.            \\ \hline
 {\ct BULK\_DENSITY\_FILE}         & Character         & Section~\ref{bulk_density_file}               &                &               \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct F} \\ \hline
 {\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
