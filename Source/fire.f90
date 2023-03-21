@@ -739,7 +739,8 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB .AND. YY_PRIMITIVE(NS) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
             ENDDO
-            IF (DZ_F0(I) < 0._EB) DZ_F0(I) = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0)) ! dZ/dt, FDS Tech Guide, Eq. (5.38)
+            ! dZ/dt, FDS Tech Guide, Eq. (5.38)
+            IF (DZ_F0(I) < 0._EB) DZ_F0(I) = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0))
             DZ_F = DZ_F0(I)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB) DZ_F = YY_PRIMITIVE(NS)**RN%N_S(NS)*DZ_F
