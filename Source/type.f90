@@ -601,7 +601,6 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
    CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
-   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_ID_READ!< Holding array for third body efficiencies
@@ -649,15 +648,20 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S_READ        !< Holding array of species exponents
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F_FR !< Finite rate species mol. weight times stoich. coef. over fuel MW
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Species indices for N_S
    INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
    INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
    INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
+   INTEGER :: N_SMIX_FR                     !< Number of participating lumped species in reaction equation
+   INTEGER :: N_SPEC_READ                   !< Number of primitive species with N_S read
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: N_THIRD                       !< Number of third body non-unity efficiency species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry

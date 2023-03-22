@@ -4392,7 +4392,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             EXIT
          ENDIF
       ENDDO
-      RN%N_SPEC = NS2
+      RN%N_SPEC_READ = NS2
       IF (RN%THIRD_BODY) THEN
          RN%N_THIRD = 0
          DO NS=1,MAX_SPECIES
@@ -4412,12 +4412,12 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDIF
 
-      IF (RN%N_SPEC > 0) THEN
-         ALLOCATE(RN%N_S_READ(RN%N_SPEC))
-         RN%N_S_READ(1:RN%N_SPEC) = N_S(1:RN%N_SPEC)
-         ALLOCATE(RN%SPEC_ID_N_S_READ(RN%N_SPEC))
+      IF (RN%N_SPEC_READ > 0) THEN
+         ALLOCATE(RN%N_S_READ(RN%N_SPEC_READ))
+         RN%N_S_READ(1:RN%N_SPEC_READ) = N_S(1:RN%N_SPEC_READ)
+         ALLOCATE(RN%SPEC_ID_N_S_READ(RN%N_SPEC_READ))
          RN%SPEC_ID_N_S_READ = 'null'
-         RN%SPEC_ID_N_S_READ(1:RN%N_SPEC)=SPEC_ID_N_S(1:RN%N_SPEC)
+         RN%SPEC_ID_N_S_READ(1:RN%N_SPEC_READ)=SPEC_ID_N_S(1:RN%N_SPEC_READ)
       ENDIF
       ALLOCATE(RN%NU_READ(RN%N_SMIX))
       RN%NU_READ(1:RN%N_SMIX) = NU(1:RN%N_SMIX)
@@ -4426,7 +4426,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       RN%SPEC_ID_NU_READ(1:RN%N_SMIX)=SPEC_ID_NU(1:RN%N_SMIX)
    ELSE SIMPLE_IF
       RN%N_SMIX = 3
-      RN%N_SPEC = 0
+      RN%N_SPEC_READ = 0
       ALLOCATE(RN%NU_READ(RN%N_SMIX))
       ALLOCATE(RN%SPEC_ID_NU_READ(RN%N_SMIX))
       PROD_COUNTER = PROD_COUNTER + 1
@@ -4646,13 +4646,9 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Allocate the arrays that are going to carry the mixture stoichiometry to the rest of the code
 
-   ALLOCATE(RN%SPEC_ID_NU(1:N_TRACKED_SPECIES))
    ALLOCATE(RN%NU(1:N_TRACKED_SPECIES))
    ALLOCATE(RN%NU_MW_O_MW_F(1:N_TRACKED_SPECIES))
-   ALLOCATE(RN%N_S(1:N_SPECIES))
-   RN%SPEC_ID_NU  = 'null'
    RN%NU          = 0._EB
-   RN%N_S         = -999._EB
 
    ! Transfer SPEC_ID_NU, SPEC_ID_N, NU, and N_S that were indexed by the order they were read in
    ! to now be indexed by the SMIX or SPEC index
@@ -4663,13 +4659,12 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       DO NS2=1,N_TRACKED_SPECIES
          IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
             NAME_FOUND = .TRUE.
+            RN%NU(NS2) = RN%NU(NS2) + RN%NU_READ(NS)
             IF (RN%NU_READ(NS)<0._EB) THEN
                NU_Y(:) = NU_Y(:) + RN%NU_READ(NS) * SPECIES_MIXTURE(NS2)%VOLUME_FRACTION(:)
             ELSE
                IF (RN%NU(NS2) >=0._EB) NU_Y(:) = NU_Y(:) + RN%NU_READ(NS) * SPECIES_MIXTURE(NS2)%VOLUME_FRACTION(:)
             ENDIF
-            RN%SPEC_ID_NU(NS2) = RN%SPEC_ID_NU_READ(NS)
-            RN%NU(NS2)      = RN%NU(NS2) + RN%NU_READ(NS)
             EXIT
          ENDIF
       ENDDO
@@ -4679,6 +4674,13 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
+
+   RN%N_SMIX_FR = 0._EB
+   DO NS=1,N_TRACKED_SPECIES
+      IF (ABS(RN%NU(NS)) > TWO_EPSILON_EB) RN%N_SMIX_FR = RN%N_SMIX_FR + 1
+   ENDDO
+   ALLOCATE(RN%NU_MW_O_MW_F_FR(RN%N_SMIX_FR))
+   ALLOCATE(RN%NU_INDEX(RN%N_SMIX_FR))
 
    IF (.NOT. RN%SIMPLE_CHEMISTRY) THEN
       IF (RN%FUEL=='null') THEN
@@ -4704,9 +4706,49 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
+   RN%C0_EXP = SUM(NU_Y)
+
    ! Set RN%N_S = NU for reactant species
    DO NS=1,N_SPECIES
-      IF (NU_Y(NS) < 0._EB) RN%N_S(NS)=-NU_Y(NS)
+      IF (NU_Y(NS) < 0._EB) THEN
+         NU_Y(NS) = -NU_Y(NS)
+      ELSE
+         NU_Y(NS) = 0._EB
+      ENDIF
+   ENDDO
+
+   DO NS=1,RN%N_SPEC_READ
+      IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
+      NAME_FOUND = .FALSE.
+      DO NS2=1,N_SPECIES
+         IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
+            NU_Y(NS2) = RN%N_S_READ(NS)
+            NAME_FOUND = .TRUE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF (.NOT. NAME_FOUND) THEN
+         WRITE(MESSAGE,'(A,I0,A,A,A)') &
+            'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+   ENDDO
+
+   RN%N_SPEC=0
+   DO NS=1,N_SPECIES
+      IF (ABS(NU_Y(NS)) > TWO_EPSILON_EB) RN%N_SPEC = RN%N_SPEC + 1
+   ENDDO
+
+   ALLOCATE(RN%N_S_INDEX(RN%N_SPEC))
+   ALLOCATE(RN%N_S(RN%N_SPEC))
+
+   NS2 = 0
+   DO NS=1,N_SPECIES
+      IF (ABS(NU_Y(NS)) > TWO_EPSILON_EB) THEN
+         NS2 = NS2 + 1
+         RN%N_S_INDEX(NS2) = NS
+         RN%N_S(NS2) = NU_Y(NS)
+      ENDIF
    ENDDO
 
    ! Normalize the stoichiometric coefficients by that of the fuel.
@@ -4725,31 +4767,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
 
    RN%RHO_EXPONENT = 0._EB
-   DO NS=1,RN%N_SPEC
-      IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
-      IF (RN%A_PRIME < 0._EB) CYCLE
-      NAME_FOUND = .FALSE.
-      DO NS2=1,N_SPECIES
-         IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
-            RN%N_S(NS2) = RN%N_S_READ(NS)
-            IF (ABS(RN%N_S(NS2)) < TWO_EPSILON_EB) RN%N_S(NS2) = -999._EB
-            NAME_FOUND = .TRUE.
-            EXIT
-         ENDIF
-      ENDDO
-      IF (.NOT. NAME_FOUND) THEN
-         WRITE(MESSAGE,'(A,I0,A,A,A)') &
-            'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-   ENDDO
 
-   DO NS=1,N_SPECIES
-      RN%C0_EXP = RN%C0_EXP + NU_Y(NS)
-      IF (RN%N_S(NS) < -998._EB) CYCLE
-      IF (NU_Y(NS) > 0._EB) CYCLE
-      RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS)%MW)**(-RN%N_S(NS)) ! FDS Tech Guide, Eq. (5.37), product term
-      RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS)
+   DO NS=1,RN%N_SPEC
+      ! FDS Tech Guide, Eq. (5.37), product term
+      RN%A_PRIME      = RN%A_PRIME * (1000._EB*SPECIES(RN%N_S_INDEX(NS))%MW)**(-RN%N_S(NS))
+      RN%RHO_EXPONENT = RN%RHO_EXPONENT + RN%N_S(NS)
    ENDDO
 
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.40)
@@ -4823,6 +4845,15 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          RN%S = -RN%NU_MW_O_MW_F(NS)
       ENDIF
       IF (RN%NU(NS) > 0._EB) RN%PROD_SMIX_INDEX = NS
+   ENDDO
+
+   NS2 = 0
+   DO NS=1,N_TRACKED_SPECIES
+      IF (ABS(RN%NU_MW_O_MW_F(NS)) > TWO_EPSILON_EB) THEN
+         NS2 = NS2 + 1
+         RN%NU_INDEX(NS2) = NS
+         RN%NU_MW_O_MW_F_FR(NS2) = RN%NU_MW_O_MW_F(NS)
+      ENDIF
    ENDDO
 
    ! Set THIRD_BODY efficiencies
@@ -5720,7 +5751,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (LPC%CNF_RAMP_INDEX > 0) THEN
       LPC%MINIMUM_DIAMETER = RAMPS(LPC%CNF_RAMP_INDEX)%INDEPENDENT_DATA(1)
       IF (LPC%MINIMUM_DIAMETER < 0.1_EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART ID ',TRIM(LPC%ID),'. Minimum diameter in CNF ramp must be > 0.1 micron.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART ID ',TRIM(LPC%ID),'. Minimum diameter in CNF ramp must be >= 0.1 micron.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       LPC%KILL_RADIUS      = (0.005_EB*(0.5_EB*LPC%MINIMUM_DIAMETER)**3)**ONTH

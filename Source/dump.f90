@@ -2790,9 +2790,8 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
       WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
       WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
-      DO NN=1,N_SPECIES
-         IF (RN%N_S(NN) <=-998._EB) CYCLE
-         WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%N_S(NN)
+      DO NN=1,RN%N_SPEC
+         WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(RN%N_S_INDEX(NN))%ID,RN%N_S(NN)
       ENDDO
       IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
       IF (RN%THIRD_BODY) THEN
