@@ -1883,7 +1883,7 @@ INTEGER :: IIO,JJO,KKO,NOM,IW,ICFO,JCFO
 REAL(EB):: H_OTHER,DA_OTHER,DX_OTHER,DY_OTHER,DZ_OTHER,A_FACE
 
 ! Dummy assignment.
-I=NM
+I=NM; IDX=DT
 
 IF (PREDICTOR) THEN
    UU => U
@@ -2165,36 +2165,10 @@ CFACE_LOOP_1 : DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTWALL_CFACE_CELLS+N_INTERNAL_
          ELSE
             H0 = 0.5_EB*(U0**2+V0**2+W0**2)
          ENDIF
+         IF (OPEN_WIND_BOUNDARY) &
+         H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
 
          CFA_B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-         IF (OPEN_WIND_BOUNDARY) THEN
-            IF(GRADH_ON_CARTESIAN) THEN
-               SELECT CASE(IOR)
-               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               END SELECT
-            ELSE
-               IDX = 0._EB
-               DO JFACE=1,NFACE
-                  IDX = IDX + CUT_FACE(IFACE)%AREA(JFACE)/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE) - &
-                                                           CUT_FACE(IFACE)%XCENLOW( ABS(IOR),JFACE))
-               ENDDO
-               IDX = IDX / SUM(CUT_FACE(IFACE)%AREA(1:NFACE))
-               SELECT CASE(IOR)
-               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*IDX)*(U_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*IDX)*(U_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*IDX)*(V_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*IDX)*(V_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*IDX)*(W_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*IDX)*(W_WIND(K) + VEL_EDDY - CUT_FACE(IFACE)%VEL_CF)
-               END SELECT
-            ENDIF
-         ENDIF
-
          SELECT CASE(IOR)
             CASE( 1)
                IF (UU(0,J,K)<0._EB) THEN
