@@ -391,7 +391,7 @@ REAL(EB) :: INITIAL_UNMIXED_FRACTION=1._EB                          !< Initial a
 REAL(EB) :: RICHARDSON_ERROR_TOLERANCE=1.E-6_EB                     !< Error tolerance in Richardson extrapolation
 REAL(EB) :: H_F_REFERENCE_TEMPERATURE=25._EB                        !< Heat of formation reference temperature (C->K)
 REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperature above which fuel and oxygen burn freely (C->K)
-REAL(EB) :: FINITE_RATE_MIN_TEMP=-273.15                            !< When FR is present, min temperature to compute combustion (C->K)
+REAL(EB) :: FINITE_RATE_MIN_TEMP=-273.15                            !< When FR is present, min temp. to compute combustion (C->K)
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
 
