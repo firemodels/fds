@@ -6164,70 +6164,76 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE DEFAULT SOLID_STATS_SELECT
 
-               WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-                  WC => WALL(IW)
-                  IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE WALL_CELL_LOOP
-                  BC => BOUNDARY_COORD(WC%BC_INDEX)
-                  IF (DV%IOR/=0 .AND. DV%IOR/=BC%IOR) CYCLE WALL_CELL_LOOP
-                  SURF_INDEX = WC%SURF_INDEX
-                  IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE WALL_CELL_LOOP
-                  B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-                  X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
+               IF (DV%PART_CLASS_INDEX==0) THEN
 
-                  ! Ensure WALL CELL is within DEVICE integration limits, but give DN tolerance in the IOR direction
+                  WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+                     WC => WALL(IW)
+                     IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE WALL_CELL_LOOP
+                     BC => BOUNDARY_COORD(WC%BC_INDEX)
+                     IF (DV%IOR/=0 .AND. DV%IOR/=BC%IOR) CYCLE WALL_CELL_LOOP
+                     SURF_INDEX = WC%SURF_INDEX
+                     IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE WALL_CELL_LOOP
+                     B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+                     X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
 
-                  EPS_X1 = MICRON; EPS_X2 = MICRON
-                  EPS_Y1 = MICRON; EPS_Y2 = MICRON
-                  EPS_Z1 = MICRON; EPS_Z2 = MICRON
-                  IF (DV%IOR/=0) THEN
-                     SELECT CASE(DV%IOR)
-                        CASE( 1); EPS_X1 = 1._EB/B1%RDN
-                        CASE(-1); EPS_X2 = 1._EB/B1%RDN
-                        CASE( 2); EPS_Y1 = 1._EB/B1%RDN
-                        CASE(-2); EPS_Y2 = 1._EB/B1%RDN
-                        CASE( 3); EPS_Z1 = 1._EB/B1%RDN
-                        CASE(-3); EPS_Z2 = 1._EB/B1%RDN
-                     END SELECT
-                  ENDIF
-                  IF (X_CENTER<SDV%X1-EPS_X1 .OR. X_CENTER>SDV%X2+EPS_X2 .OR. &
-                      Y_CENTER<SDV%Y1-EPS_Y1 .OR. Y_CENTER>SDV%Y2+EPS_Y2 .OR. &
-                      Z_CENTER<SDV%Z1-EPS_Z1 .OR. Z_CENTER>SDV%Z2+EPS_Z2) CYCLE WALL_CELL_LOOP
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                             OPT_WALL_INDEX=IW,OPT_DEVC_INDEX=N,OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
-                  CALL SELECT_SPATIAL_STATISTIC(OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
-               ENDDO WALL_CELL_LOOP
+                     ! Ensure WALL CELL is within DEVICE integration limits, but give DN tolerance in the IOR direction
 
-               CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-                  CFA => CFACE(ICF)
-                  IF (CFA%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. CFA%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE CFACE_LOOP
-                  SURF_INDEX = CFA%SURF_INDEX
-                  IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE CFACE_LOOP
-                  BC => BOUNDARY_COORD(CFA%BC_INDEX)
-                  B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-                  X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
-                  IF (X_CENTER<SDV%X1-MICRON .OR. X_CENTER>SDV%X2+MICRON .OR. &
-                      Y_CENTER<SDV%Y1-MICRON .OR. Y_CENTER>SDV%Y2+MICRON .OR. &
-                      Z_CENTER<SDV%Z1-MICRON .OR. Z_CENTER>SDV%Z2+MICRON) CYCLE CFACE_LOOP
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                             OPT_CFACE_INDEX=ICF,OPT_DEVC_INDEX=N)
-                  CALL SELECT_SPATIAL_STATISTIC
-               ENDDO CFACE_LOOP
+                     EPS_X1 = MICRON; EPS_X2 = MICRON
+                     EPS_Y1 = MICRON; EPS_Y2 = MICRON
+                     EPS_Z1 = MICRON; EPS_Z2 = MICRON
+                     IF (DV%IOR/=0) THEN
+                        SELECT CASE(DV%IOR)
+                           CASE( 1); EPS_X1 = 1._EB/B1%RDN
+                           CASE(-1); EPS_X2 = 1._EB/B1%RDN
+                           CASE( 2); EPS_Y1 = 1._EB/B1%RDN
+                           CASE(-2); EPS_Y2 = 1._EB/B1%RDN
+                           CASE( 3); EPS_Z1 = 1._EB/B1%RDN
+                           CASE(-3); EPS_Z2 = 1._EB/B1%RDN
+                        END SELECT
+                     ENDIF
+                     IF (X_CENTER<SDV%X1-EPS_X1 .OR. X_CENTER>SDV%X2+EPS_X2 .OR. &
+                         Y_CENTER<SDV%Y1-EPS_Y1 .OR. Y_CENTER>SDV%Y2+EPS_Y2 .OR. &
+                         Z_CENTER<SDV%Z1-EPS_Z1 .OR. Z_CENTER>SDV%Z2+EPS_Z2) CYCLE WALL_CELL_LOOP
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                OPT_WALL_INDEX=IW,OPT_DEVC_INDEX=N,OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
+                     CALL SELECT_SPATIAL_STATISTIC(OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
+                  ENDDO WALL_CELL_LOOP
 
-               PARTICLE_LOOP: DO IP=1,NLP
-                  LP=>LAGRANGIAN_PARTICLE(IP)
-                  IF (LP%CLASS_INDEX/=DV%PART_CLASS_INDEX) CYCLE PARTICLE_LOOP
-                  LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-                  SURF_INDEX = LPC%SURF_INDEX
-                  BC => BOUNDARY_COORD(LP%BC_INDEX)
-                  B1 => BOUNDARY_PROP1(LP%B1_INDEX)
-                  X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
-                  IF (X_CENTER<SDV%X1-MICRON .OR. X_CENTER>SDV%X2+MICRON .OR. &
-                      Y_CENTER<SDV%Y1-MICRON .OR. Y_CENTER>SDV%Y2+MICRON .OR. &
-                      Z_CENTER<SDV%Z1-MICRON .OR. Z_CENTER>SDV%Z2+MICRON) CYCLE PARTICLE_LOOP
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                             OPT_LP_INDEX=IP,OPT_DEVC_INDEX=N)
-                  CALL SELECT_SPATIAL_STATISTIC(OPT_LP_INDEX=IP)
-               ENDDO PARTICLE_LOOP
+                  CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+                     CFA => CFACE(ICF)
+                     IF (CFA%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. CFA%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE CFACE_LOOP
+                     SURF_INDEX = CFA%SURF_INDEX
+                     IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE CFACE_LOOP
+                     BC => BOUNDARY_COORD(CFA%BC_INDEX)
+                     B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+                     X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
+                     IF (X_CENTER<SDV%X1-MICRON .OR. X_CENTER>SDV%X2+MICRON .OR. &
+                         Y_CENTER<SDV%Y1-MICRON .OR. Y_CENTER>SDV%Y2+MICRON .OR. &
+                         Z_CENTER<SDV%Z1-MICRON .OR. Z_CENTER>SDV%Z2+MICRON) CYCLE CFACE_LOOP
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                OPT_CFACE_INDEX=ICF,OPT_DEVC_INDEX=N)
+                     CALL SELECT_SPATIAL_STATISTIC
+                  ENDDO CFACE_LOOP
+
+               ELSE
+
+                  PARTICLE_LOOP: DO IP=1,NLP
+                     LP=>LAGRANGIAN_PARTICLE(IP)
+                     IF (LP%CLASS_INDEX/=DV%PART_CLASS_INDEX) CYCLE PARTICLE_LOOP
+                     LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+                     SURF_INDEX = LPC%SURF_INDEX
+                     BC => BOUNDARY_COORD(LP%BC_INDEX)
+                     B1 => BOUNDARY_PROP1(LP%B1_INDEX)
+                     X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
+                     IF (X_CENTER<SDV%X1-MICRON .OR. X_CENTER>SDV%X2+MICRON .OR. &
+                         Y_CENTER<SDV%Y1-MICRON .OR. Y_CENTER>SDV%Y2+MICRON .OR. &
+                         Z_CENTER<SDV%Z1-MICRON .OR. Z_CENTER>SDV%Z2+MICRON) CYCLE PARTICLE_LOOP
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                OPT_LP_INDEX=IP,OPT_DEVC_INDEX=N)
+                     CALL SELECT_SPATIAL_STATISTIC(OPT_LP_INDEX=IP)
+                  ENDDO PARTICLE_LOOP
+
+               ENDIF
 
          END SELECT SOLID_STATS_SELECT
 
