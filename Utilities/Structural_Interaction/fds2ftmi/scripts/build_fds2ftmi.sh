@@ -3,7 +3,7 @@
 # Firebot variables
 FIREBOT_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
 FDS2FTMI_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi
-OUTPUT_DIR=/home/jgs/FDS-SMV/Utilities/Structural_Interaction/fds2ftmi/scripts/output
+OUTPUT_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts/output
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 
@@ -35,7 +35,7 @@ sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_GITROOT/Build/intel_linux_db
+   cd $FDS_GITROOT/Build/impi_intel_linux_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -43,8 +43,8 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_GITROOT/Build/intel_linux_db
-   if [ -e "fds_intel_linux_db" ]
+   cd $FDS_GITROOT/Build/impi_intel_linux_db
+   if [ -e "fds_impi_intel_linux_db" ]
    then
       stage2a_success=true
    else
@@ -67,7 +67,7 @@ check_compile_fds_db()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_GITROOT/Build/intel_linux
+   cd $FDS_GITROOT/Build/impi_intel_linux
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -75,8 +75,8 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_GITROOT/Build/intel_linux
-   if [ -e "fds_intel_linux" ]
+   cd $FDS_GITROOT/Build/impi_intel_linux
+   if [ -e "fds_impi_intel_linux" ]
    then
       stage4a_success=true
    else
