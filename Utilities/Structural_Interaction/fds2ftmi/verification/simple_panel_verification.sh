@@ -1,4 +1,4 @@
-##../../../../Build/impi_intel_linux/fds_impi_intel_linux simple_panel.fds 
+../../../../Build/impi_intel_linux/fds_impi_intel_linux simple_panel.fds 
 cd ..
 cd intel_linux
 echo Y | ./make_fds2ftmi.sh
