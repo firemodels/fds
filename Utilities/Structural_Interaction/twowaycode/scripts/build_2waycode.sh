@@ -19,7 +19,7 @@ cd $TWOWAY_DIR/examples/simply_beam
 rm *.csv 
 
 # Get Git Hash
-GIT_HASH=$(shell git describe --long --dirty)
+GIT_HASH=$(shell git describe --abbrev=7 --long --dirty)
 echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide

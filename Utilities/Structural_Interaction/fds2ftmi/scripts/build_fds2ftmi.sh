@@ -21,7 +21,7 @@ cd $FDS2FTMI_DIR/examples/h_profile
 rm *.csv 
 
 # Get Git Hash
-GIT_HASH=$(shell git describe --long)
+GIT_HASH=$(shell git describe --abbrev=7 --long)
 echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide
