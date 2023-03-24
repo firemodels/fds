@@ -16,7 +16,7 @@ clean_build=1
 
 # Build FDS Verification Guide
 
-gitrevision=`git describe --long --dirty`
+gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err

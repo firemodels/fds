@@ -7,7 +7,7 @@ set ERROR_LOG=%OUTPUT_DIR%/errors
 set WARNING_LOG=%OUTPUT_DIR%/warnings
 
 :: Get Git Hash
-for /f "delims=" %%i in ('git describe --long --dirty') do set GIT_HASH=%%i 
+for /f "delims=" %%i in ('git describe --abbrev=7 --long --dirty') do set GIT_HASH=%%i 
 echo %GIT_HASH%
 
 :: Clean outputs
