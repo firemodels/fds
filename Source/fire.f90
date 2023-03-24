@@ -998,6 +998,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
       ! Drop if cut-cell is very small compared to Cartesian cells:
       IF ( ABS(CUT_CELL(ICC)%VOLUME(JCC)/VCELL) <  1.E-12_EB ) CYCLE JCC_LOOP
+      IF (.NOT.ALL(RN_FAST) .AND. CUT_CELL(ICC)%TMP(JCC) < FINITE_RATE_MIN_TEMP) CYCLE JCC_LOOP
 
       CUT_CELL(ICC)%CHI_R(JCC)    = 0._EB
       ZZ_GET = CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC)
