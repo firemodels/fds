@@ -4,7 +4,6 @@ MODULE FIRE
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
-USE FAST_REAC_VARS
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE SOOT_ROUTINES, ONLY: SOOT_SURFACE_OXIDATION
@@ -33,8 +32,18 @@ CALL POINT_TO_MESH(NM)
 Q     = 0._EB
 CHI_R = 0._EB
 
+IF (CC_IBM) THEN
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         CUT_CELL(ICC)%Q(JCC)=0._EB
+      ENDDO
+   ENDDO
+ENDIF
+
+IF (N_REACTIONS==0) RETURN
+
 IF (N_REACTIONS>0) THEN
-   IF (.NOT.ALL(RN_FAST)) THEN
+   IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) THEN
       ALLOCATE(DZ_F0(N_REACTIONS))
       ALLOCATE(KG(N_REACTIONS))
    ENDIF
@@ -47,14 +56,7 @@ CALL COMBUSTION_GENERAL(T,DT)
 ! Combustion in cut-cells:
 ! Time used for combustion in cut-cells is added to GEOM timing T_USED(14) in CC_COMBUSTION.
 
-IF (CC_IBM) THEN
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      DO JCC=1,CUT_CELL(ICC)%NCELL
-         CUT_CELL(ICC)%Q(JCC)=0._EB
-      ENDDO
-   ENDDO
-   CALL CC_COMBUSTION(T,DT,NM)
-ENDIF
+IF (CC_IBM) CALL CC_COMBUSTION(T,DT,NM)
 
 ! Soot oxidation routine
 
@@ -101,7 +103,7 @@ DO K=1,KBAR
          IF (CC_IBM) THEN
             IF (CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) CYCLE ILOOP
          ENDIF
-         IF (.NOT.ALL(RN_FAST) .AND. TMP(I,J,K) < FINITE_RATE_MIN_TEMP) CYCLE ILOOP
+         IF (.NOT.ALL(REACTION%FAST_CHEMISTRY) .AND. TMP(I,J,K) < FINITE_RATE_MIN_TEMP) CYCLE ILOOP
          ZZ_GET = ZZ(I,J,K,1:N_TRACKED_SPECIES)
          IF (CHECK_REALIZABILITY) THEN
             REALIZABLE=IS_REALIZABLE(ZZ_GET)
@@ -601,7 +603,7 @@ CALL GET_REALIZABLE_MF(ZZ_HAT)
 ! Do the infinite rate (fast chemistry) reactions either in parallel (PRIORITY=1 for all) or serially (PRIORITY>1 for some)
 
 Q_REAC_LOC(:) = 0._EB
-IF (ANY(RN_FAST)) THEN
+IF (ANY(REACTION%FAST_CHEMISTRY)) THEN
    DO PTY = 1,MAX_PRIORITY
       CALL REACTION_RATE(DZZ,ZZ_HAT,DT_LOC,RHO_HAT,TMP_IN,INFINITELY_FAST,Q_REAC_OUT,NO_REACTIONS,PRIORITY=PTY)
       ZZ_HAT = ZZ_HAT + DZZ
@@ -611,7 +613,7 @@ ENDIF
 
 ! Do all finite rate reactions in parallel
 
-IF (.NOT.ALL(RN_FAST)) THEN
+IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) THEN
    CALL REACTION_RATE(DZZ,ZZ_HAT,DT_LOC,RHO_HAT,TMP_IN,FINITE_RATE,Q_REAC_OUT,NO_REACTIONS)
    IF (NO_REACTIONS) RETURN
    ZZ_HAT = ZZ_HAT + DZZ
@@ -744,54 +746,55 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
          YY_PRIMITIVE(1) = -2._EB
          MW = -1._EB
          REACTION_LOOP_2: DO I=1,N_REACTIONS
-            IF (RN_FAST(I)) CYCLE REACTION_LOOP_2
-            IF (ZZ_TMP(RN_FUEL_SMIX_INDEX(I)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
-            IF (RN_AIR_SMIX_INDEX(I) > -1) THEN
-               IF (ZZ_TMP(RN_AIR_SMIX_INDEX(I)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2 ! no expected air
+            RN => REACTION(I)
+            IF (RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP_2
+            IF (ZZ_TMP(RN%FUEL_SMIX_INDEX) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
+            IF (RN%AIR_SMIX_INDEX > -1) THEN
+               IF (ZZ_TMP(RN%AIR_SMIX_INDEX) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2 ! no expected air
             ENDIF
             NO_REACTIONS = .FALSE.
             IF (YY_PRIMITIVE(1) < -1._EB) CALL GET_MASS_FRACTION_ALL(ZZ_TMP,YY_PRIMITIVE)
-            DO NS=1,RN_N_SPEC(I)
-               IF(YY_PRIMITIVE(RN_N_S_I(NS,I)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
+            DO NS=1,RN%N_SPEC
+               IF(YY_PRIMITIVE(RN%N_S_INDEX(NS)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
             ENDDO
             ! dZ/dt, FDS Tech Guide, Eq. (5.38)
-            IF (DZ_F0(I) < 0._EB) DZ_F0(I) = RN_A(I)*RHO_0**RN_RHO_E(I)*TMP_0**RN_N_T(I)*EXP(-RN_E(I)*RRTMP0)
+            IF (DZ_F0(I) < 0._EB) DZ_F0(I) = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E*RRTMP0)
             DZ_F = DZ_F0(I)
-            DO NS=1,RN_N_SPEC(I)
-               DZ_F = YY_PRIMITIVE(RN_N_S_I(NS,I))**RN_N_S(NS,I)*DZ_F
+            DO NS=1,RN%N_SPEC
+               DZ_F = YY_PRIMITIVE(RN%N_S_INDEX(NS))**RN%N_S(NS)*DZ_F
             ENDDO
-            IF (RN_THIRD(I)) THEN
+            IF (RN%THIRD_BODY) THEN
                IF (MW < 0._EB) THEN
                   CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
                   MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
                ENDIF
-               IF (RN_N_THIRD(I) > 0) THEN
+               IF (RN%N_THIRD > 0) THEN
                   X_Y_SUM = 0._EB
                   DO NS=1,N_SPECIES
                      X_Y(NS) = YY_PRIMITIVE(NS)/SPECIES(NS)%MW
                      X_Y_SUM = X_Y_SUM + X_Y(NS)
-                     X_Y(NS) = X_Y(NS)*RN_THIRD_EFF(NS,I)
+                     X_Y(NS) = X_Y(NS)*RN%THIRD_EFF(NS)
                   ENDDO
                   DZ_F = DZ_F * MOLPCM3 * SUM(X_Y)/X_Y_SUM
                ELSE
                   DZ_F = DZ_F * MOLPCM3
                ENDIF
             ENDIF
-            IF(RN_REVERSE(I)) THEN ! compute equilibrium constant
+            IF(RN%REVERSE) THEN ! compute equilibrium constant
                IF (KG(I) < 0._EB) THEN
                   IF (MW < 0._EB) THEN
                      CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
                      MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
                   ENDIF
-                  KG(I) = EXP(RN_DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)),I)/TMP_0)*MOLPCM3**RN_C0_EXP(I)
+                  KG(I) = EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)*MOLPCM3**RN%C0_EXP
                ENDIF
                DZ_F = DZ_F*KG(I)
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
-            Q_REAC_TMP(I) = RN_HEAT_OF_COMBUSTION(I) * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
+            Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
             DZ_F = DZ_F*DT_LOC
-            DO NS=1,RN_N_NU(I)
-               DZZ(RN_NU_I(NS,I)) = DZZ(RN_NU_I(NS,I)) + RN_NU(NS,I)*DZ_F
+            DO NS=1,RN%N_SMIX_FR
+               DZZ(RN%NU_INDEX(NS)) = DZZ(RN%NU_INDEX(NS)) + RN%NU_MW_O_MW_F_FR(NS)*DZ_F
             ENDDO
          ENDDO REACTION_LOOP_2
          IF (NO_REACTIONS) RETURN
@@ -998,7 +1001,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
       ! Drop if cut-cell is very small compared to Cartesian cells:
       IF ( ABS(CUT_CELL(ICC)%VOLUME(JCC)/VCELL) <  1.E-12_EB ) CYCLE JCC_LOOP
-      IF (.NOT.ALL(RN_FAST) .AND. CUT_CELL(ICC)%TMP(JCC) < FINITE_RATE_MIN_TEMP) CYCLE JCC_LOOP
+      IF (.NOT.ALL(REACTION%FAST_CHEMISTRY) .AND. CUT_CELL(ICC)%TMP(JCC) < FINITE_RATE_MIN_TEMP) CYCLE JCC_LOOP
 
       CUT_CELL(ICC)%CHI_R(JCC)    = 0._EB
       ZZ_GET = CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC)
