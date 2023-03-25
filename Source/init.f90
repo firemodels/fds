@@ -1657,6 +1657,21 @@ IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ENDIF
 ENDIF
 
+! Identify EDGEs that lie at the external edge of the mesh
+
+IF ( (II==0    .AND. KK==0   ) .OR. &
+     (II==0    .AND. KK==KBAR) .OR. &
+     (II==IBAR .AND. KK==0   ) .OR. &
+     (II==IBAR .AND. KK==KBAR) .OR. &
+     (II==0    .AND. JJ==0   ) .OR. &
+     (II==0    .AND. JJ==JBAR) .OR. &
+     (II==IBAR .AND. JJ==0   ) .OR. &
+     (II==IBAR .AND. JJ==JBAR) .OR. &
+     (JJ==0    .AND. KK==0   ) .OR. &
+     (JJ==0    .AND. KK==KBAR) .OR. &
+     (JJ==JBAR .AND. KK==0   ) .OR. &
+     (JJ==JBAR .AND. KK==KBAR) ) ED%EXTERNAL=.TRUE.
+
 ! Fill up EDGE array
 
 ED%I = II
