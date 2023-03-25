@@ -1889,6 +1889,7 @@ TYPE EDGE_TYPE
    REAL(EB) :: U_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
    REAL(EB) :: V_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
    REAL(EB) :: W_AVG=-1.E6_EB                                 !< Stored velocity component at edge (m/s)
+   LOGICAL :: EXTERNAL=.FALSE.                                !< Edge is at the edge of the mesh
 END TYPE EDGE_TYPE
 
 END MODULE TYPES
