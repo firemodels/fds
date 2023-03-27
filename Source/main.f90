@@ -2511,8 +2511,9 @@ DO WHILE (ANY(SETUP_PRESSURE_ZONES_INDEX==0))
             OM => MESHES(NOM)
             IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. M%PRESSURE_ZONE(IIG,JJG,KKG)>=0 .AND. &
                OM%PRESSURE_ZONE(IIO,JJO,KKO)>=0 .AND. M%PRESSURE_ZONE(IIG,JJG,KKG)/=OM%PRESSURE_ZONE(IIO,JJO,KKO)) THEN
-               WRITE(LU_ERR,'(A,I0,A,I0,A,I0,A,I0)') 'ERROR: ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' meets ZONE ',&
-                  M%PRESSURE_ZONE(IIG,JJG,KKG),' at the boundary of MESH ',NOM,' and MESH ',NM
+               WRITE(LU_ERR,'(10(A,I0),A)') 'ERROR: ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' meets ZONE ',&
+                  M%PRESSURE_ZONE(IIG,JJG,KKG),' at the boundary of MESH ',NOM,' (',IIO,',',JJO,',',KKO,') and MESH ',&
+                  NM,' (',IIG,',',JJG,',',KKG,')'
                STOP_STATUS = SETUP_STOP
                EXIT MESH_LOOP
             ENDIF
