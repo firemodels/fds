@@ -1838,8 +1838,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (VENTS_TYPE), POINTER :: VT
-TYPE (WALL_TYPE), POINTER :: WCM,WCP
-TYPE (BOUNDARY_PROP1_TYPE), POINTER :: WCM_B1,WCP_B1
+TYPE (WALL_TYPE), POINTER :: WCM,WCP,WCX
+TYPE (BOUNDARY_PROP1_TYPE), POINTER :: WCM_B1,WCP_B1,WCX_B1
 TYPE (EDGE_TYPE), POINTER :: ED
 
 IF (SOLID_PHASE_ONLY) RETURN
@@ -2236,108 +2236,105 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             ! Check for HVAC tangential velocity
 
             HVAC_TANGENTIAL = .FALSE.
-            IF (IWM>0 .AND. IWP>0) THEN
-               IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
-                  IF (WCM%VENT_INDEX>0) THEN
-                     VT=>VENTS(WCM%VENT_INDEX)
-                     IF (ALL(VT%UVW > -1.E12_EB) .AND. VT%NODE_INDEX > 0) HVAC_TANGENTIAL = .TRUE.
-                  ENDIF
+            IF (WCM%VENT_INDEX>0 .OR. WCP%VENT_INDEX>0) THEN
+               IF (WCM%VENT_INDEX>0) THEN
+                  WCX => WCM
+               ELSE
+                  WCX => WCP
+               ENDIF
+               VT => VENTS(WCX%VENT_INDEX)
+               WCX_B1 => BOUNDARY_PROP1(WCX%B1_INDEX)
+               IF (VT%NODE_INDEX>0 .AND. WCX_B1%U_NORMAL_S<0._EB) THEN
+                  VELOCITY_BC_INDEX = NO_SLIP_BC
+                  IF (ALL(VT%UVW>-1.E12_EB)) HVAC_TANGENTIAL = .TRUE.  ! User-specified tangential components of velocity
                ENDIF
             ENDIF
 
             ! Determine if there is a tangential velocity component
 
-            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. .NOT.HVAC_TANGENTIAL) THEN
+            IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. .NOT.HVAC_TANGENTIAL) THEN
+
                VEL_T = 0._EB
-            ELSE VEL_T_IF
+
+            ELSEIF (HVAC_TANGENTIAL) THEN
+
+               VEL_T = 0._EB
+               SELECT CASE(IEC) ! edge orientation
+                  CASE (1)
+                     IF (ICD==1) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                     IF (ICD==2) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                  CASE (2)
+                     IF (ICD==1) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                     IF (ICD==2) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                  CASE (3)
+                     IF (ICD==1) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                     IF (ICD==2) VEL_T = ABS(WCX_B1%U_NORMAL_S/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+               END SELECT
+
+            ELSE
+
+               PROFILE_FACTOR = 1._EB
                IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
                   TSI = T
                ELSE
                   TSI=T-SF%T_IGN
                ENDIF
-               PROFILE_FACTOR = 1._EB
-               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S) > 0._EB) HVAC_TANGENTIAL = .FALSE.
-               IF (HVAC_TANGENTIAL) THEN
-                  VEL_T = 0._EB
-                  IEC_SELECT: SELECT CASE(IEC) ! edge orientation
-                     CASE (1)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
-                     CASE (2)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
-                     CASE (3)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
-                  END SELECT IEC_SELECT
-               ELSE
-                  IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
-                     PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
-                  IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
-                  RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
-                  IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
-                  IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
-               ENDIF
-            ENDIF VEL_T_IF
+               IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
+                  PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
+               IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
+               RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
+               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
+               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
+
+            ENDIF
 
             ! Choose the appropriate boundary condition to apply
 
-            HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
+            BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
-               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-               ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+               CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
-            ELSE HVAC_IF
+                  VEL_GHOST = VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-               BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
+               CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                  CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
+                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                     VEL_GHOST = VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+               CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
-                  CASE (NO_SLIP_BC) BOUNDARY_CONDITION
+                  ITMP = MIN(I_MAX_TEMP,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                  MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
+                  RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
 
-                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
 
-                  CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
+                  ! SLIP_COEF = -1, no slip,   VEL_GHOST = 2*VEL_T - VEL_GAS
+                  ! SLIP_COEF =  0, half-slip, VEL_GHOST = VEL_T
+                  ! SLIP_COEF =  1, free slip, VEL_GHOST = VEL_GAS
 
-                     ITMP = MIN(I_MAX_TEMP,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                     MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
-                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                  IF ((IWM==0.OR.IWP==0) .AND. .NOT.ED%EXTERNAL) SLIP_COEF = 0._EB  ! Corner
+                  VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                     CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
+               CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
 
-                     ! SLIP_COEF = -1, no slip,   VEL_GHOST = 2*VEL_T - VEL_GAS
-                     ! SLIP_COEF =  0, half-slip, VEL_GHOST = VEL_T
-                     ! SLIP_COEF =  1, free slip, VEL_GHOST = VEL_GAS
+                  RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                  VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
+                  VEL_GHOST = VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
+                                       SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                     IF ((IWM==0.OR.IWP==0) .AND. .NOT.ED%EXTERNAL) SLIP_COEF = 0._EB  ! Corner
-                     VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
-                  CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
-
-                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
-                     VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
-                     VEL_GHOST = VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
-                                          SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
-               END SELECT BOUNDARY_CONDITION
-
-            ENDIF HVAC_IF
+            END SELECT BOUNDARY_CONDITION
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
 
