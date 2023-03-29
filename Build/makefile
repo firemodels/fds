@@ -170,6 +170,15 @@ impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
+impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_vt : MPIINCLUDE = "$(IMPI_INCLUDE)"
+impi_intel_win_vt : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) /Zi /D "TBB_USE_THREADING_TOOLS"
+impi_intel_win_vt : FCOMPL = $(I_IFORT)
+impi_intel_win_vt : obj = fds_impi_intel_win_vt
+impi_intel_win_vt : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+
+
 impi_intel_win_openmp : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_openmp : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_openmp : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
