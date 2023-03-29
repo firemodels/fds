@@ -440,9 +440,15 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
 
          ENDDO RICH_EX_LOOP
 
-         ZZ_MIXED   = (4._EB*A4-A2)*ONTH ! FDS Tech Guide (E.7)
-         Q_REAC_SUB = (4._EB*Q_REAC_4-Q_REAC_2)*ONTH
-         ZETA       = (4._EB*ZETA_4-ZETA_2)*ONTH
+         IF (NO_REACTION) THEN
+            ZZ_MIXED = A1
+            Q_REAC_SUB = 0._EB
+            ZETA = ZETA_1
+         ELSE
+            ZZ_MIXED   = (4._EB*A4-A2)*ONTH ! FDS Tech Guide (E.7)
+            Q_REAC_SUB = (4._EB*Q_REAC_4-Q_REAC_2)*ONTH
+            ZETA       = (4._EB*ZETA_4-ZETA_2)*ONTH
+         ENDIF
          ZETA_0     = ZETA
 
    END SELECT INTEGRATOR_SELECT
