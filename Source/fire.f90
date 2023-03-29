@@ -440,7 +440,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
 
          ENDDO RICH_EX_LOOP
 
-         IF (NO_REACTION) THEN
+         IF (NO_REACTIONS) THEN
             ZZ_MIXED = A1
             Q_REAC_SUB = 0._EB
             ZETA = ZETA_1
