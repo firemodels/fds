@@ -653,7 +653,8 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Species indices for N_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: REACTANT_INDEX   !< Lumped species indices of reactants
    INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
    INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
@@ -661,6 +662,7 @@ TYPE REACTION_TYPE
    INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
    INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
    INTEGER :: N_SMIX_FR                     !< Number of participating lumped species in reaction equation
+   INTEGER :: N_SMIX_R                      !< Number of reactant lumped species in reaction equation
    INTEGER :: N_SPEC_READ                   !< Number of primitive species with N_S read
    INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
    INTEGER :: N_THIRD                       !< Number of third body non-unity efficiency species in reaction equation

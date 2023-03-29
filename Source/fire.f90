@@ -51,12 +51,7 @@ ENDIF
 
 ! Call combustion ODE solver
 
-CALL COMBUSTION_GENERAL(T,DT)
-
-! Combustion in cut-cells:
-! Time used for combustion in cut-cells is added to GEOM timing T_USED(14) in CC_COMBUSTION.
-
-IF (CC_IBM) CALL CC_COMBUSTION(T,DT,NM)
+CALL COMBUSTION_GENERAL(T,DT,NM)
 
 ! Soot oxidation routine
 
@@ -70,17 +65,18 @@ T_USED(10)=T_USED(10)+CURRENT_TIME()-TNOW
 END SUBROUTINE COMBUSTION
 
 
-SUBROUTINE COMBUSTION_GENERAL(T,DT)
+SUBROUTINE COMBUSTION_GENERAL(T,DT,NM)
 
 ! Generic combustion routine for multi-step reactions
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
                               GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC, CC_GASPHASE
-INTEGER :: I,J,K,NS,NR,IW,N,CHEM_SUBIT_TMP
+INTEGER :: I,J,K,NS,NR,IW,N,CHEM_SUBIT_TMP, ICC, JCC, NCELL
 REAL(EB), INTENT(IN) :: T,DT
+INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),DZZ(1:N_TRACKED_SPECIES),CP,H_S_N,&
-            REAC_SOURCE_TERM_TMP(N_TRACKED_SPECIES),Q_REAC_TMP(N_REACTIONS),RSUM_LOC
+            REAC_SOURCE_TERM_TMP(N_TRACKED_SPECIES),Q_REAC_TMP(N_REACTIONS),RSUM_LOC,VCELL
 LOGICAL :: Q_EXISTS
 TYPE (REACTION_TYPE), POINTER :: RN
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -93,6 +89,13 @@ Q_EXISTS =  .FALSE.
 IF (REAC_SOURCE_CHECK) THEN
    REAC_SOURCE_TERM=0._EB
    Q_REAC=0._EB
+   IF (CC_IBM) THEN
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         DO JCC=1,CUT_CELL(ICC)%NCELL
+            CUT_CELL(ICC)%Q_REAC(:,JCC) = 0._EB
+         ENDDO
+      ENDDO
+   ENDIF
 ENDIF
 
 DO K=1,KBAR
@@ -156,16 +159,119 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-IF (.NOT.Q_EXISTS) RETURN
+IF (Q_EXISTS) THEN
+   ! Set Q in the ghost cell, just for better visualization.
+   DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE
+      BC => BOUNDARY_COORD(WC%BC_INDEX)
+      Q(BC%II,BC%JJ,BC%KK) = Q(BC%IIG,BC%JJG,BC%KKG)
+   ENDDO
+ENDIF
 
-! Set Q in the ghost cell, just for better visualization.
+CC_IBM_IF: IF (CC_IBM) THEN
+   ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I     = CUT_CELL(ICC)%IJK(IAXIS)
+      J     = CUT_CELL(ICC)%IJK(JAXIS)
+      K     = CUT_CELL(ICC)%IJK(KAXIS)
 
-DO IW=1,N_EXTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE
-   BC => BOUNDARY_COORD(WC%BC_INDEX)
-   Q(BC%II,BC%JJ,BC%KK) = Q(BC%IIG,BC%JJG,BC%KKG)
-ENDDO
+      VCELL = DX(I)*DY(J)*DZ(K)
+
+      IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
+
+      NCELL = CUT_CELL(ICC)%NCELL
+      JCC_LOOP : DO JCC=1,NCELL
+
+         ! Drop if cut-cell is very small compared to Cartesian cells:
+         IF ( ABS(CUT_CELL(ICC)%VOLUME(JCC)/VCELL) <  1.E-12_EB ) CYCLE JCC_LOOP
+         IF (.NOT.ALL(REACTION%FAST_CHEMISTRY) .AND. CUT_CELL(ICC)%TMP(JCC) < FINITE_RATE_MIN_TEMP) CYCLE JCC_LOOP
+
+         CUT_CELL(ICC)%CHI_R(JCC)    = 0._EB
+         ZZ_GET = CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC)
+
+         IF (CHECK_REALIZABILITY) THEN
+            REALIZABLE=IS_REALIZABLE(ZZ_GET)
+            IF (.NOT.REALIZABLE) THEN
+               WRITE(LU_ERR,*) I,J,K
+               WRITE(LU_ERR,*) ZZ_GET
+               WRITE(LU_ERR,*) SUM(ZZ_GET)
+               WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions input to COMBUSTION_MODEL'
+               STOP_STATUS=REALIZABILITY_STOP
+            ENDIF
+         ENDIF
+         CALL CHECK_REACTION
+         IF (.NOT.DO_REACTION) CYCLE ICC_LOOP ! Check whether any reactions are possible.
+
+         DZZ = ZZ_GET ! store old ZZ for divergence term
+         !***************************************************************************************
+         ! Call combustion integration routine for CUT_CELL(ICC)%XX(JCC)
+         CALL COMBUSTION_MODEL( T,DT,ZZ_GET,CUT_CELL(ICC)%Q(JCC),CUT_CELL(ICC)%MIX_TIME(JCC),&
+                                CUT_CELL(ICC)%CHI_R(JCC),&
+                                CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
+                                CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),MU(I,J,K),&
+                                LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC))
+         !***************************************************************************************
+         IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
+             CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)
+             CUT_CELL(ICC)%Q_REAC(1:N_REACTIONS,JCC)=Q_REAC_TMP(1:N_REACTIONS)
+         ENDIF
+
+         IF (CHECK_REALIZABILITY) THEN
+            REALIZABLE=IS_REALIZABLE(ZZ_GET)
+            IF (.NOT.REALIZABLE) THEN
+               WRITE(LU_ERR,*) ZZ_GET,SUM(ZZ_GET)
+               WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions after COMBUSTION_MODEL'
+               STOP_STATUS=REALIZABILITY_STOP
+            ENDIF
+         ENDIF
+
+         DZZ = ZZ_GET - DZZ
+
+         ! Update RSUM and ZZ
+         DZZ_IF2: IF ( ANY(ABS(DZZ) > TWO_EPSILON_EB) ) THEN
+            IF (ABS(CUT_CELL(ICC)%Q(JCC)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
+            ! Divergence term
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,CUT_CELL(ICC)%TMP(JCC))
+            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,CUT_CELL(ICC)%RSUM(JCC))
+            DO N=1,N_TRACKED_SPECIES
+               SM => SPECIES_MIXTURE(N)
+               CALL GET_SENSIBLE_ENTHALPY_Z(N,CUT_CELL(ICC)%TMP(JCC),H_S_N)
+               CUT_CELL(ICC)%D_SOURCE(JCC) = CUT_CELL(ICC)%D_SOURCE(JCC) + &
+               ( SM%RCON/CUT_CELL(ICC)%RSUM(JCC) - H_S_N/(CP*CUT_CELL(ICC)%TMP(JCC)) )*DZZ(N)/DT
+               CUT_CELL(ICC)%M_DOT_PPP(N,JCC) = CUT_CELL(ICC)%M_DOT_PPP(N,JCC) + &
+               CUT_CELL(ICC)%RHO(JCC)*DZZ(N)/DT
+            ENDDO
+         ENDIF DZZ_IF2
+      ENDDO JCC_LOOP
+   ENDDO ICC_LOOP
+
+   ! This volume refactoring is needed for RADIATION_FVM (CHI_R, Q) and plotting slices:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I     = CUT_CELL(ICC)%IJK(IAXIS)
+      J     = CUT_CELL(ICC)%IJK(JAXIS)
+      K     = CUT_CELL(ICC)%IJK(KAXIS)
+
+      VCELL = DX(I)*DY(J)*DZ(K)
+
+      IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
+
+      NCELL = CUT_CELL(ICC)%NCELL
+      DO JCC=1,NCELL
+         Q(I,J,K) = Q(I,J,K)+CUT_CELL(ICC)%Q(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+         CHI_R(I,J,K) = CHI_R(I,J,K) + CUT_CELL(ICC)%CHI_R(JCC)*CUT_CELL(ICC)%Q(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+      ENDDO
+      IF(ABS(Q(I,J,K)) > TWO_EPSILON_EB) THEN
+         CHI_R(I,J,K) = CHI_R(I,J,K)/Q(I,J,K)
+      ELSE
+         CHI_R(I,J,K) = 0._EB
+         DO JCC=1,NCELL
+            CHI_R(I,J,K) = CHI_R(I,J,K) + CUT_CELL(ICC)%CHI_R(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+         ENDDO
+         CHI_R(I,J,K) = CHI_R(I,J,K)/VCELL
+      ENDIF
+      Q(I,J,K) = Q(I,J,K)/VCELL
+   ENDDO
+ENDIF CC_IBM_IF
 
 CONTAINS
 
@@ -180,8 +286,8 @@ DO_REACTION = .FALSE.
 REACTION_LOOP: DO NR=1,N_REACTIONS
    RN=>REACTION(NR)
    REACTANTS_PRESENT = .TRUE.
-   DO NS=1,N_TRACKED_SPECIES
-      IF ( RN%NU(NS) < -TWO_EPSILON_EB .AND. ZZ_GET(NS) < ZZ_MIN_GLOBAL ) THEN
+   DO NS=1,RN%N_SMIX_R
+      IF (ZZ_GET(RN%REACTANT_INDEX(NS)) < ZZ_MIN_GLOBAL ) THEN
          REACTANTS_PRESENT = .FALSE.
          EXIT
       ENDIF
@@ -941,179 +1047,6 @@ DO WHILE (ABS(H_REL_ERROR)>ERROR_TOL)
 ENDDO
 
 END SUBROUTINE GET_FLAME_TEMPERATURE
-
-
-! ---------------------------- CC_COMBUSTION ------------------------------
-
-SUBROUTINE CC_COMBUSTION(T,DT,NM)
-
-USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
-                              GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE
-USE COMPLEX_GEOMETRY, ONLY : CC_CGSC,CC_GASPHASE
-
-REAL(EB), INTENT(IN) :: T, DT
-INTEGER, INTENT(IN) :: NM
-
-INTEGER  :: I,J,K,ICC,JCC,NCELL,NS,NR,N,CHEM_SUBIT_TMP
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),DZZ(1:N_TRACKED_SPECIES),CP,H_S_N,&
-            REAC_SOURCE_TERM_TMP(N_TRACKED_SPECIES),Q_REAC_TMP(N_REACTIONS),VCELL
-LOGICAL  :: Q_EXISTS_CC
-TYPE (REACTION_TYPE), POINTER :: RN
-TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-LOGICAL  :: DO_REACTION,REALIZABLE
-LOGICAL :: Q_EXISTS
-
-! Set to zero Reaction, Radiation sources of heat and thermodynamic div:
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (CCVAR(I,J,K,CC_CGSC) == CC_GASPHASE) CYCLE
-         Q(I,J,K) = 0._EB
-         QR(I,J,K)= 0._EB
-         CHI_R(I,J,K) = 0._EB
-      ENDDO
-   ENDDO
-ENDDO
-
-! Now do COMBUSTION_GENERAL for cut-cells.
-Q_EXISTS_CC   = .FALSE.
-
-IF (REAC_SOURCE_CHECK) THEN
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      DO JCC=1,CUT_CELL(ICC)%NCELL
-         CUT_CELL(ICC)%Q_REAC(:,JCC) = 0._EB
-      ENDDO
-   ENDDO
-ENDIF
-
-ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-   I     = CUT_CELL(ICC)%IJK(IAXIS)
-   J     = CUT_CELL(ICC)%IJK(JAXIS)
-   K     = CUT_CELL(ICC)%IJK(KAXIS)
-
-   VCELL = DX(I)*DY(J)*DZ(K)
-
-   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ICC_LOOP ! Cycle in case Cartesian cell inside OBSTS.
-
-   NCELL = CUT_CELL(ICC)%NCELL
-   JCC_LOOP : DO JCC=1,NCELL
-
-      ! Drop if cut-cell is very small compared to Cartesian cells:
-      IF ( ABS(CUT_CELL(ICC)%VOLUME(JCC)/VCELL) <  1.E-12_EB ) CYCLE JCC_LOOP
-      IF (.NOT.ALL(REACTION%FAST_CHEMISTRY) .AND. CUT_CELL(ICC)%TMP(JCC) < FINITE_RATE_MIN_TEMP) CYCLE JCC_LOOP
-
-      CUT_CELL(ICC)%CHI_R(JCC)    = 0._EB
-      ZZ_GET = CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC)
-
-      IF (CHECK_REALIZABILITY) THEN
-         REALIZABLE=IS_REALIZABLE(ZZ_GET)
-         IF (.NOT.REALIZABLE) THEN
-            WRITE(LU_ERR,*) I,J,K
-            WRITE(LU_ERR,*) ZZ_GET
-            WRITE(LU_ERR,*) SUM(ZZ_GET)
-            WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions input to COMBUSTION_MODEL'
-            STOP_STATUS=REALIZABILITY_STOP
-         ENDIF
-      ENDIF
-      CALL CCCHECK_REACTION
-      IF (.NOT.DO_REACTION) CYCLE ICC_LOOP ! Check whether any reactions are possible.
-
-      DZZ = ZZ_GET ! store old ZZ for divergence term
-      !***************************************************************************************
-      ! Call combustion integration routine for CUT_CELL(ICC)%XX(JCC)
-      CALL COMBUSTION_MODEL( T,DT,ZZ_GET,CUT_CELL(ICC)%Q(JCC),CUT_CELL(ICC)%MIX_TIME(JCC),&
-                             CUT_CELL(ICC)%CHI_R(JCC),&
-                             CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
-                             CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),MU(I,J,K),&
-                             LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC))
-      !***************************************************************************************
-      IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
-          CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)
-          CUT_CELL(ICC)%Q_REAC(1:N_REACTIONS,JCC)=Q_REAC_TMP(1:N_REACTIONS)
-      ENDIF
-
-      IF (CHECK_REALIZABILITY) THEN
-         REALIZABLE=IS_REALIZABLE(ZZ_GET)
-         IF (.NOT.REALIZABLE) THEN
-            WRITE(LU_ERR,*) ZZ_GET,SUM(ZZ_GET)
-            WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions after COMBUSTION_MODEL'
-            STOP_STATUS=REALIZABILITY_STOP
-         ENDIF
-      ENDIF
-
-      DZZ = ZZ_GET - DZZ
-
-      ! Update RSUM and ZZ
-      DZZ_IF: IF ( ANY(ABS(DZZ) > TWO_EPSILON_EB) ) THEN
-         IF (ABS(CUT_CELL(ICC)%Q(JCC)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
-         ! Divergence term
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,CUT_CELL(ICC)%TMP(JCC))
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,CUT_CELL(ICC)%RSUM(JCC))
-         DO N=1,N_TRACKED_SPECIES
-            SM => SPECIES_MIXTURE(N)
-            CALL GET_SENSIBLE_ENTHALPY_Z(N,CUT_CELL(ICC)%TMP(JCC),H_S_N)
-            CUT_CELL(ICC)%D_SOURCE(JCC) = CUT_CELL(ICC)%D_SOURCE(JCC) + &
-            ( SM%RCON/CUT_CELL(ICC)%RSUM(JCC) - H_S_N/(CP*CUT_CELL(ICC)%TMP(JCC)) )*DZZ(N)/DT
-            CUT_CELL(ICC)%M_DOT_PPP(N,JCC) = CUT_CELL(ICC)%M_DOT_PPP(N,JCC) + &
-            CUT_CELL(ICC)%RHO(JCC)*DZZ(N)/DT
-         ENDDO
-      ENDIF DZZ_IF
-   ENDDO JCC_LOOP
-ENDDO ICC_LOOP
-
-! This volume refactoring is needed for RADIATION_FVM (CHI_R, Q) and plotting slices:
-DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-   I     = CUT_CELL(ICC)%IJK(IAXIS)
-   J     = CUT_CELL(ICC)%IJK(JAXIS)
-   K     = CUT_CELL(ICC)%IJK(KAXIS)
-
-   VCELL = DX(I)*DY(J)*DZ(K)
-
-   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
-
-   NCELL = CUT_CELL(ICC)%NCELL
-   DO JCC=1,NCELL
-      Q(I,J,K) = Q(I,J,K)+CUT_CELL(ICC)%Q(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-      CHI_R(I,J,K) = CHI_R(I,J,K) + CUT_CELL(ICC)%CHI_R(JCC)*CUT_CELL(ICC)%Q(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-   ENDDO
-   IF(ABS(Q(I,J,K)) > TWO_EPSILON_EB) THEN
-      CHI_R(I,J,K) = CHI_R(I,J,K)/Q(I,J,K)
-   ELSE
-      CHI_R(I,J,K) = 0._EB
-      DO JCC=1,NCELL
-         CHI_R(I,J,K) = CHI_R(I,J,K) + CUT_CELL(ICC)%CHI_R(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-      ENDDO
-      CHI_R(I,J,K) = CHI_R(I,J,K)/VCELL
-   ENDIF
-   Q(I,J,K) = Q(I,J,K)/VCELL
-ENDDO
-
-CONTAINS
-
-SUBROUTINE CCCHECK_REACTION
-
-! Check whether any reactions are possible.
-
-LOGICAL :: REACTANTS_PRESENT
-
-DO_REACTION = .FALSE.
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN=>REACTION(NR)
-   REACTANTS_PRESENT = .TRUE.
-   DO NS=1,N_TRACKED_SPECIES
-      IF ( RN%NU(NS) < -TWO_EPSILON_EB .AND. ZZ_GET(NS) < ZZ_MIN_GLOBAL ) THEN
-         REACTANTS_PRESENT = .FALSE.
-         EXIT
-      ENDIF
-   ENDDO
-   DO_REACTION = REACTANTS_PRESENT
-   IF (DO_REACTION) EXIT REACTION_LOOP
-ENDDO REACTION_LOOP
-
-END SUBROUTINE CCCHECK_REACTION
-
-END SUBROUTINE CC_COMBUSTION
 
 
 SUBROUTINE COMBUSTION_BC(NM)
