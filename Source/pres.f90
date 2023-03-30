@@ -2932,8 +2932,8 @@ INTEGER :: IERR
 ! INTEGER :: ICC, IERR
 
 IF (CC_IBM) CALL_FOR_GLMAT = .TRUE.
-IF (FREEZE_VELOCITY) RETURN ! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FREEZE_VELOCITY=.TRUE.
-IF (SOLID_PHASE_ONLY) RETURN
+! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FREEZE_VELOCITY=.TRUE.
+IF (FREEZE_VELOCITY .OR. SOLID_PHASE_ONLY .OR. NUNKH_TOTAL==0) RETURN
 TNOW=CURRENT_TIME()
 
 ! Solve:
@@ -3870,6 +3870,8 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MB_FACTOR
 INTEGER :: IERR
 #endif
 
+NUNKH_TOTAL = sum(NUNKH_TOT(1:NMESHES)); IF(NUNKH_TOTAL==0) RETURN
+
 ! Define parameters:
 NRHS   = 1
 MAXFCT = 1
@@ -3916,24 +3918,28 @@ ERROR     = 0 ! initialize error flag
 ! Each MPI process builds its local set of rows.
 ! Matrix blocks defined on CRS distributed format.
 ! Total number of nonzeros for JD_MAT_H, D_MAT_H:
-TOT_NNZ_H = sum( NNZ_D_MAT_H(1:NUNKH_LOCAL) )
+TOT_NNZ_H = 1; IF(NUNKH_LOCAL>0) TOT_NNZ_H = sum( NNZ_D_MAT_H(1:NUNKH_LOCAL) )
 
 ! Allocate A_H IA_H and JA_H matrices, considering all matrix coefficients:
-ALLOCATE ( A_H(TOT_NNZ_H) , IA_H(NUNKH_LOCAL+1) , JA_H(TOT_NNZ_H) )
-
+ALLOCATE ( A_H(TOT_NNZ_H) , IA_H(MAX(NUNKH_LOCAL,1)+1) , JA_H(TOT_NNZ_H) )
 ! Store upper triangular part of symmetric D_MAT_H in CSR format:
-INNZ = 0
-DO IROW=1,NUNKH_LOCAL
-   IA_H(IROW) = INNZ + 1
-   DO JCOL=1,NNZ_D_MAT_H(IROW)
-      IF ( JD_MAT_H(JCOL,IROW) < UNKH_IND(NM_START)+IROW ) CYCLE ! Only upper Triangular part.
-      INNZ = INNZ + 1
-      A_H(INNZ)  =  D_MAT_H(JCOL,IROW)
-      JA_H(INNZ) = JD_MAT_H(JCOL,IROW)
+IF(NUNKH_LOCAL>0) THEN
+   INNZ = 0
+   DO IROW=1,NUNKH_LOCAL
+      IA_H(IROW) = INNZ + 1
+      DO JCOL=1,NNZ_D_MAT_H(IROW)
+         IF ( JD_MAT_H(JCOL,IROW) < UNKH_IND(NM_START)+IROW ) CYCLE ! Only upper Triangular part.
+         INNZ = INNZ + 1
+         A_H(INNZ)  =  D_MAT_H(JCOL,IROW)
+         JA_H(INNZ) = JD_MAT_H(JCOL,IROW)
+      ENDDO
    ENDDO
-ENDDO
-IA_H(NUNKH_LOCAL+1) = INNZ + 1
-
+   IA_H(NUNKH_LOCAL+1) = INNZ + 1
+ELSE
+   A_H       = 0._EB
+   IA_H(1:2) = (/1,2/)
+   JA_H(1)   = UNKH_IND(NM_START) + 1
+ENDIF
 
 ! OPEN(unit=20,file="IJKUNKH_H_UGLMAT.txt",action="write",status="replace")
 ! DO K=1,KBAR
@@ -3962,7 +3968,7 @@ IA_H(NUNKH_LOCAL+1) = INNZ + 1
 ! Here each process defines de beginning and end rows in global numeration, for the equations
 ! it has assembled:
 IPARM(41) = UNKH_IND(NM_START) + 1
-IPARM(42) = UNKH_IND(NM_START) + NUNKH_LOCAL
+IPARM(42) = UNKH_IND(NM_START) + MAX(NUNKH_LOCAL,1)
 
 IF ( H_MATRIX_INDEFINITE ) THEN
    MTYPE  = -2 ! symmetric indefinite
@@ -3970,11 +3976,8 @@ ELSE ! positive definite
    MTYPE  =  2
 ENDIF
 
-ALLOCATE( X_H(NUNKH_LOCAL) , F_H(NUNKH_LOCAL) ) ! JUST ZERO FOR NOW.
-F_H(:) = 0._EB
-X_H(:) = 0._EB
-
-NUNKH_TOTAL = sum(NUNKH_TOT(1:NMESHES))
+ALLOCATE( X_H(MAX(NUNKH_LOCAL,1)) , F_H(MAX(NUNKH_LOCAL,1)) ) ! JUST ZERO FOR NOW.
+F_H(:) = 0._EB; X_H(:) = 0._EB
 
 ALLOCATE(PT_H(64))
 
@@ -5340,8 +5343,7 @@ INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR, MSGLVL
 INTEGER :: PERM(1)
 #endif
 
-IF (SOLID_PHASE_ONLY) RETURN
-IF (FREEZE_VELOCITY)  RETURN
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY .OR. NUNKH_TOTAL==0) RETURN
 
 ! Solve:
 NRHS   =  1
