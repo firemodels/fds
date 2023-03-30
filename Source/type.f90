@@ -1098,9 +1098,9 @@ TYPE CC_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEDGES  ! Cut-Edges. Points to EDGE_LIST.
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA  ! Cut-faces areas.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA,AREA_ADJUST ! Cut-faces areas.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED,BLK_TAG
    INTEGER,  ALLOCATABLE, DIMENSION(:)             ::  LINK_LEV ! Level in local Face Linking Hierarchy.
    !Integrals to be used in cut-cell volume and centroid computations.
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
@@ -1266,6 +1266,17 @@ TYPE CC_RCFACE_TYPE
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
 END TYPE CC_RCFACE_TYPE
+
+TYPE CC_INBCF_IJCF_TYPE
+   INTEGER :: NWFACE=0
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NEW_ICFINB,NEW_JCFINB
+END TYPE
+TYPE CC_INBCF_AREA_TYPE
+   INTEGER :: NCELL=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AINB,NEW_AINB
+   INTEGER,  ALLOCATABLE, DIMENSION(:) :: SURF_INDEX
+   TYPE(CC_INBCF_IJCF_TYPE), ALLOCATABLE, DIMENSION(:) :: IJCF
+END TYPE
 
 TYPE CSVF_TYPE
     CHARACTER(255) :: UVWFILE
