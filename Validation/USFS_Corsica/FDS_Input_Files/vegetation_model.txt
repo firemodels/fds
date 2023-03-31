@@ -6,8 +6,8 @@
       DENSITY               = 500.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 36300.
-      E                     = 60300.
+      A                     = 1040.
+      E                     = 61041.
       NU_SPEC               = 0.75
       SPEC_ID               = 'FUEL VAPOR'
       NU_MATL               = 0.25
