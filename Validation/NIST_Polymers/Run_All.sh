@@ -8,5 +8,6 @@ source $SVNROOT/Validation/Common_Run_All.sh
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_Gasification_Test_R3.fds
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_Gasification_Test_R4.fds
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_Gasification_Test_R5.fds
+$QFDS $DEBUG $QUEUE -d $INDIR NIST_TGA_10K.fds
 
 echo FDS cases submitted
