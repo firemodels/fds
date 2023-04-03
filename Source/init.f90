@@ -428,7 +428,7 @@ ENDDO
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%NODE_ID/='null') CYCLE
+   IF ((IN%NODE_ID/='null') .OR. (IN%PART_INDEX>0)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -476,7 +476,7 @@ ENDIF
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%NODE_ID/='null') CYCLE
+   IF ((IN%NODE_ID/='null') .OR. (IN%PART_INDEX>0)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1

@@ -11552,6 +11552,17 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       ENDIF
    ENDIF
 
+   ! Check if domain information is provided for particle INIT
+   IF (PART_ID/='null') THEN
+      IF (ALL(ABS(XB)== 1e6) .AND. ALL(XYZ == -1e6) .AND. DB=='null' .AND. &
+         (TRIM(PATH_RAMP(1))=='null' .OR. TRIM(PATH_RAMP(2))=='null' .OR. TRIM(PATH_RAMP(3))=='null')) THEN
+            WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
+            '. XYZ, XB, DB, or PATH_RAMP must be specified with PART_ID'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         !ENDIF
+      ENDIF
+   ENDIF
+
    ! Check if domain boundary has been set as the INIT volume
 
    IF (DB/='null') THEN
