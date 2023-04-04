@@ -1118,7 +1118,7 @@ There are a number of special output quantities that provide local measures of g
 
 Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the first of the overlapping regions that takes precedence (i.e., first come first server), including default conditions. That is, it is not possible to overwrite the initial conditions specified by the first {\ct INIT} line (either explicitly or implicitly) with the initial conditions explicitly defined by the second {\ct INIT} line.
 
 \section{Gas Species}
 \label{info:init_species}
