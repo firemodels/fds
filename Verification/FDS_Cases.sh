@@ -505,6 +505,7 @@ $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
 $QFDS -d Species FED_FIC_SMIX.fds
 $QFDS -d Species FED_CO_HCN.fds
+$QFDS -d Species FED_moving.fds
 $QFDS -d Species mass_flux_comparison.fds
 $QFDS -d Species methane_flame_simple.fds
 $QFDS -d Species methane_flame_simple_2.fds
