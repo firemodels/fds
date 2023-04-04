@@ -9941,15 +9941,12 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDIF
                ENDDO EMBED_LOOP
 
-               IF (EMBEDDED) THEN
-                  IF (DEVC_ID=='null' .AND. CTRL_ID=='null' .AND. PERMIT_HOLE .AND. REMOVABLE) THEN
-                     N = N-1
-                     N_OBST= N_OBST-1
-                     CYCLE I_MULT_LOOP
-                  ELSEIF ((DEVC_ID/='null'.OR.CTRL_ID/='null') .AND. (OB2%DEVC_ID/='null'.OR.OB2%CTRL_ID/='null')) THEN
-                     WRITE(MESSAGE,'(4A)')  'ERROR: ',TRIM(ID),' is embedded within ',TRIM(OB2%ID)
-                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                  ENDIF
+               ! Remove obstructions that are within another and have no controls or devices
+
+               IF (EMBEDDED .AND. DEVC_ID=='null' .AND. CTRL_ID=='null' .AND. PERMIT_HOLE .AND. REMOVABLE) THEN
+                  N = N-1
+                  N_OBST= N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                ! Check if the SURF IDs exist
