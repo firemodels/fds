@@ -45,6 +45,8 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (RAMPS_TYPE), POINTER :: RP
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
+CHARACTER (LABEL_LENGTH+4) :: INIT1_ID,INIT2_ID
+LOGICAL :: INIT_OVERLAP(N_INIT,N_INIT) !=.FALSE.
 
 IERR = 0
 M => MESHES(NM)
@@ -426,28 +428,51 @@ ENDDO
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
+M%IWORK1=0._EB
+INIT_OVERLAP=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%NODE_ID/='null') CYCLE
+   IF ((IN%NODE_ID/='null')) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
             IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               M%TMP(I,J,K)            = IN%TEMPERATURE
-               M%RHO(I,J,K)            = IN%DENSITY
-               M%RHOS(I,J,K)           = IN%DENSITY
-               M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
-               IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
-               IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
+               IF (M%IWORK1(I,J,K) > 0) THEN
+                  IF (.NOT. INIT_OVERLAP(N,M%IWORK1(I,J,K))) THEN
+                     IF(IN%ID/='null') THEN
+                        WRITE(INIT1_ID,'(A,A)') 'ID ',IN%ID 
+                     ELSE
+                        WRITE(INIT1_ID,'(A,I0)') 'NUM ',N
+                     ENDIF
+                     IF(INITIALIZATION(M%IWORK1(I,J,K))%ID/='null') THEN
+                        WRITE(INIT2_ID,'(A,A)') 'ID ',INITIALIZATION(M%IWORK1(I,J,K))%ID
+                     ELSE
+                        WRITE(INIT2_ID,'(A,I0)') 'NUM ',N
+                     ENDIF
+                     WRITE(LU_ERR,'(A,A,A,A,A,I0,A,A,A)') 'WARNING: INIT ',TRIM(INIT1_ID),' overlaps INIT ',&
+                        TRIM(INIT2_ID),' in Mesh ',NM,'. Non-particle INIT inputs in ',&
+                        TRIM(INIT1_ID),' rejected in overlapping cells.'
+                     INIT_OVERLAP(N,M%IWORK1(I,J,K))=.TRUE.
+                  ENDIF
+               ELSE
+                  M%IWORK1(I,J,K) = N
+                  M%TMP(I,J,K)            = IN%TEMPERATURE
+                  M%RHO(I,J,K)            = IN%DENSITY
+                  M%RHOS(I,J,K)           = IN%DENSITY
+                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
+                  IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
+                  IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
+               ENDIF
             ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDDO
+M%IWORK1=0._EB
 
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
@@ -474,30 +499,52 @@ ENDIF
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
+M%IWORK1=0._EB
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%NODE_ID/='null') CYCLE
+   IF ((IN%NODE_ID/='null')) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
             IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               M%TMP(I,J,K)            = IN%TEMPERATURE
-               M%UII(I,J,K)            = 4._EB*SIGMA*IN%TEMPERATURE**4
-               M%RHO(I,J,K)            = IN%DENSITY
-               M%RHOS(I,J,K)           = IN%DENSITY
-               M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K)  = M%RHO(I,J,K)*M%P_0(K)/P_INF
-               IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
-               IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K)  = M%TMP(I,J,K)*M%P_0(K)/P_INF
-               IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(IN%TEMPERATURE**4)/REAL(UIIDIM,EB)
+               IF (M%IWORK1(I,J,K) > 0) THEN
+                  IF (.NOT. INIT_OVERLAP(N,M%IWORK1(I,J,K))) THEN
+                     IF(IN%ID/='null') THEN
+                        WRITE(INIT1_ID,'(A,A)') 'ID ',IN%ID 
+                     ELSE
+                        WRITE(INIT1_ID,'(A,I0)') 'NUM ',N
+                     ENDIF
+                     IF(INITIALIZATION(M%IWORK1(I,J,K))%ID/='null') THEN
+                        WRITE(INIT2_ID,'(A,A)') 'ID ',INITIALIZATION(M%IWORK1(I,J,K))%ID
+                     ELSE
+                        WRITE(INIT2_ID,'(A,I0)') 'NUM ',N
+                     ENDIF
+                     WRITE(LU_ERR,'(A,A,A,A,A,I0,A,A,A)') 'WARNING: INIT ',TRIM(INIT1_ID),' overlaps INIT ',&
+                        TRIM(INIT2_ID),' in Mesh ',NM,'. Non-particle INIT inputs in ',&
+                        TRIM(INIT1_ID),' rejected in overlapping cells.'
+                     INIT_OVERLAP(N,M%IWORK1(I,J,K))=.TRUE.
+                  ENDIF
+               ELSE
+                  M%IWORK1(I,J,K) = M%IWORK1(I,J,K) + N
+                  M%TMP(I,J,K)            = IN%TEMPERATURE
+                  M%UII(I,J,K)            = 4._EB*SIGMA*IN%TEMPERATURE**4
+                  M%RHO(I,J,K)            = IN%DENSITY
+                  M%RHOS(I,J,K)           = IN%DENSITY
+                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K)  = M%RHO(I,J,K)*M%P_0(K)/P_INF
+                  IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
+                  IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K)  = M%TMP(I,J,K)*M%P_0(K)/P_INF
+                  IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(IN%TEMPERATURE**4)/REAL(UIIDIM,EB)
+               ENDIF
             ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDDO
+M%IWORK1=0._EB
 
 ! General work arrays
 
