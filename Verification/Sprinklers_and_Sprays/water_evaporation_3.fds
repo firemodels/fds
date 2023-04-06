@@ -1,11 +1,11 @@
 Water fog evaporate in a box until saturation
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_3', TITLE='Water Evaporation Test' / 
+&HEAD CHID='water_evaporation_3', TITLE='Water Evaporation Test' /
 
-&MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
+&MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
-&TIME T_END=20.0 DT=0.0025/ 
+&TIME T_END=20.0 DT=0.0025/
 
 &MISC TMPA=500.,GVEC=0,0,0,STRATIFICATION=.FALSE.,HUMIDITY=0.,Y_CO2_INFTY=0./
 
@@ -15,7 +15,7 @@ This case tests conservation of mass and energy.
 
 &SURF ID='WALL', ADIABATIC=.TRUE., COLOR='SILVER' ,DEFAULT=.TRUE./
 
-&INIT PART_ID='water drops',MASS_PER_VOLUME=0.1,N_PARTICLES_PER_CELL=10 /
+&INIT PART_ID='water drops',MASS_PER_VOLUME=0.1,N_PARTICLES_PER_CELL=10,XB=0,1,0,1,0,1 /
 
 &PART ID='water drops',SPEC_ID='WATER VAPOR',STATIC=.TRUE.,QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
       DIAMETER=200.,INITIAL_TEMPERATURE=20.,SAMPLING_FACTOR=5, MONODISPERSE=.TRUE./
