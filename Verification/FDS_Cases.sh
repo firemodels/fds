@@ -311,6 +311,7 @@ $QFDS -d Miscellaneous obst_box_mass_flux.fds
 $QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
 $QFDS -d Miscellaneous devc_interpolation_velocity.fds
 $QFDS -d Miscellaneous devc_interpolation_temperature.fds
+$QFDS -d Miscellaneous init_overlap.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
