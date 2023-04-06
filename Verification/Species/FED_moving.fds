@@ -1,0 +1,82 @@
+&HEAD CHID='FED_moving', TITLE='FED_moving',  /
+
+ All material properties etc. are completely fabricated.
+
+ This is a verification test case for the gas phase DEVC output
+ quantity FED, which calculates the Fractional Effective Dose 
+ (FED) index. This case moves a particle to different locations
+ in the domain which have varying concentrations of toxicants.
+ The expected FED is compared with analytical calculations.
+   
+&TIME T_END=0.4, DT=0.01, /
+&DUMP DT_DEVC=0.05, /
+
+&MESH ID='MESH', IJK= 11, 11, 11, MPI_PROCESS=0, XB= 0., 3., 0., 3., 0., 3.,  /
+&MISC GVEC=0.,0.,0., /
+
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
+&SPEC ID='OXYGEN' /
+&SPEC ID='CARBON DIOXIDE' /
+&SPEC ID='CARBON MONOXIDE' /
+
+&SURF ID='OCCUPANT', ADIABATIC=.TRUE., LENGTH=1., THICKNESS= 0.1, WIDTH=1.  /
+
+&INIT XB=0.,1.,0.,1.,0.,3., SPEC_ID(1:3)='CARBON MONOXIDE','CARBON DIOXIDE','OXYGEN', VOLUME_FRACTION(1:3)=0.1,0.3,0.23/
+&INIT XB=2.,3.,0.,1.,0.,3., SPEC_ID(1:3)='CARBON MONOXIDE','CARBON DIOXIDE','OXYGEN', VOLUME_FRACTION(1:3)=0.0,0.0,0.23/
+&INIT XB=0.,1.,2.,3.,0.,3., SPEC_ID(1:3)='CARBON MONOXIDE','CARBON DIOXIDE','OXYGEN', VOLUME_FRACTION(1:3)=0.2,0.15,0.15/
+&INIT XB=2.,3.,2.,3.,0.,3., SPEC_ID(1:3)='CARBON MONOXIDE','CARBON DIOXIDE','OXYGEN', VOLUME_FRACTION(1:3)=0.0,0.15,0.15/
+
+&INIT ID='Occupant-1', N_PARTICLES=1, PART_ID='Occupant-1', XYZ=0.5,0.5,0.5, PATH_RAMP= 'Occupant-1-X', 'Occupant-1-Y', 'Occupant-1-Z',  /
+&PART ID='Occupant-1', SURF_ID='OCCUPANT',  /
+&DEVC ID='Occupant-1-FED', INIT_ID='Occupant-1', QUANTITY='FED', /
+
+&RAMP ID='Occupant-1-X', T = 0., F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.05, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.051, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.10, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.101, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.15, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.151, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.20, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.201, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.25, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.251, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.300, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.301, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.35, F = 0.5, /
+&RAMP ID='Occupant-1-X', T = 0.351, F = 2.5, /
+&RAMP ID='Occupant-1-X', T = 0.40, F = 2.5, /
+
+&RAMP ID='Occupant-1-Y', T = 0., F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.05, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.051, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.100, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.101, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.150, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.151, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.200, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.201, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.25, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.251, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.300, F = 0.5, /
+&RAMP ID='Occupant-1-Y', T = 0.301, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.350, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.351, F = 2.5, /
+&RAMP ID='Occupant-1-Y', T = 0.400, F = 2.5, /
+
+&RAMP ID='Occupant-1-Z', T = 0., F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.05, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.051, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.100, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.101, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.150, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.151, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.200, F = 0.5, /
+&RAMP ID='Occupant-1-Z', T = 0.201, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.25, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.251, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.300, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.301, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.350, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.351, F = 2.5, /
+&RAMP ID='Occupant-1-Z', T = 0.400, F = 2.5, /

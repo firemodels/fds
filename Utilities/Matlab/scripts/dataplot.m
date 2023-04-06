@@ -266,6 +266,8 @@ for i=2:n_plots
                     Save_Measured_Metric(i,j,1) = inverse_percentile(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'end')
                     Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col)-d1_Initial_Value;
+                elseif strcmp(Metric,'start')
+                    Save_Measured_Metric(i,j,1) = M(indices(1),d1_Dep_Col);
                 % If end_x_y is specified for a plot with multiple curves,
                 % then get the results from curve x only
                 elseif strfind(Metric,'end_')
@@ -413,6 +415,8 @@ for i=2:n_plots
                     Save_Predicted_Metric(i,j,1) = inverse_percentile(M_Ind,M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'end')
                     Save_Predicted_Metric(i,j,1) = M_Dep(end)-d2_Initial_Value;
+                elseif strcmp(Metric,'start')
+                    Save_Predicted_Metric(i,j,1) = M_Dep(1);
                 % If end_x_y is specified for a plot with multiple curves,
                 % then get the results from curve y only
                 elseif strfind(Metric,'end_')
