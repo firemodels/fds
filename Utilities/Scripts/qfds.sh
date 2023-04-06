@@ -461,21 +461,7 @@ fi
 
 CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
 
-# modules loaded when fds was built
-
-if [ "$exe" != "" ]; then  # first look for file that contains the list
-  FDSDIR=$(dirname "$exe")
-  if [ -e $FDSDIR/.fdsinfo ]; then
-    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
-    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
-  fi
-fi
-
-if [[ "$FDS_LOADED_MODULES" != "" ]]; then
-  MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
-else
-  MODULES=$CURRENT_LOADED_MODULES
-fi
+MODULES=$CURRENT_LOADED_MODULES
 
 #*** define number of nodes
 
@@ -780,14 +766,6 @@ if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
 
-EOF
-fi
-
-if [[ "$MODULES" != "" ]]; then
-  cat << EOF >> $scriptfile
-export MODULEPATH=$MODULEPATH
-module purge
-module load $MODULES
 EOF
 fi
 
