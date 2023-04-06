@@ -427,6 +427,37 @@ ENDDO
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
+! Over-ride default ambient species if defined in INIT
+INIT_OVERLAP2=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
+M%IWORK1=0._EB ! Species
+DO N=1,N_INIT
+   IN => INITIALIZATION(N)
+   IF ((IN%NODE_ID/='null')) CYCLE
+   IF (.NOT. (IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
+                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
+                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
+               N2 = M%IWORK1(I,J,K)
+               IF (N2 > 0) THEN
+                  IF (.NOT. INIT_OVERLAP2(N,N2)) THEN
+                     IN2 => INITIALIZATION(N2)
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Species')
+                     INIT_OVERLAP2(N,N2)=.TRUE.
+                  ENDIF
+               ELSE
+                  M%IWORK1(I,J,K) = N
+                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
 ! Over-ride default ambient temperature and density if defined in INIT
 M%IWORK1=0._EB ! Temperature / Density
 INIT_OVERLAP1=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
@@ -462,37 +493,6 @@ DO N=1,N_INIT
    ENDDO
 ENDDO
 
-! Over-ride default ambient species if defined in INIT
-INIT_OVERLAP2=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
-M%IWORK1=0._EB ! Species
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               N2 = M%IWORK1(I,J,K)
-               IF (N2 > 0) THEN
-                  IF (.NOT. INIT_OVERLAP2(N,N2)) THEN
-                     IN2 => INITIALIZATION(N2)
-                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Species')
-                     INIT_OVERLAP2(N,N2)=.TRUE.
-                  ENDIF
-               ELSE
-                  M%IWORK1(I,J,K) = N
-                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
 DO K=1,KBAR
@@ -517,13 +517,10 @@ IF (RADIATION) THEN
 ENDIF
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
-WRITE(*,*) 'TMPA based UIID', 4._EB*SIGMA*TMPA4/REAL(UIIDIM,EB)
-M%IWORK1=0._EB ! Temperature / Density
+M%IWORK1=0._EB ! Radiation intensity and density
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE)) CYCLE
-   WRITE(*,*) 'INIT NUM ', N, 'Based UUID', 4._EB*SIGMA*IN%TEMPERATURE**4, REAL(UIIDIM,EB)
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -539,15 +536,19 @@ DO N=1,N_INIT
                   ENDIF
                ELSE
                   M%IWORK1(I,J,K) = N
-                  M%UII(I,J,K)            = 4._EB*SIGMA*IN%TEMPERATURE**4
-                  IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(IN%TEMPERATURE**4)/REAL(UIIDIM,EB)
+                  M%UII(I,J,K)            = 4._EB*SIGMA*M%TMP(I,J,K)
+                  M%RHO(I,J,K) = P_INF/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+                  M%RHOS(I,J,K) = P_INF/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+                  M%RHO(I,J,K)  = M%RHO(I,J,K)*M%P_0(K)/P_INF
+                  M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
+                  IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(M%TMP(I,J,K)**4)/REAL(UIIDIM,EB)
                ENDIF
             ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDDO
-M%IWORK1=0._EB ! Temperature / Density
+M%IWORK1=0._EB ! Reset work array
 
 ! General work arrays
 
