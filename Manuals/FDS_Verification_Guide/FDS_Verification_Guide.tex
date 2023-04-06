@@ -2769,6 +2769,48 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{figure}
 
 
+\section{Overlapping INIT Regions (\texorpdfstring{\textct{init\_overlap}}{init\_overlap})}
+\label{init_overlap}
+
+Typically, an FDS simulation begins at time $t=0$ with ambient conditions. However, ambient conditions can be changed for rectangular regions of the domain using the namelist keyword {\ct INIT}. If two rectangular regions defined by {\ct INIT} overlap, it is the first of the overlapping regions that takes precedence (i.e., first come first serve) for all commonly defined inputs. That is, it is not possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the initial conditions explicitly defined by the second {\ct INIT} line. This verification case tests the overlap of {\ct INIT} regions. Fig.~\ref{init_overlap_fig1} and Fig.~\ref{init_overlap_fig2} verify the predictions by FDS match the expected conditions.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_D0p42} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_D0p50} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_D0p938} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_D1p19} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_D1p51} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_I6p0} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_I9p9} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_I15p6}
+\end{tabular*}
+\vskip-\baselineskip
+\caption[The overlapping \textct{init\_overlap} test case]{Comparison of initial conditions from FDS compared with expected initial conditions.}
+\label{init_overlap_fig1}
+\end{figure}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_I81p6} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_P0p0} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_P0p3} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_P0p5} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_T020C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_T200C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_T427C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/init_overlap_T700C}
+\end{tabular*}
+\vskip-\baselineskip
+\caption[The overlapping \textct{init\_overlap} test case]{Comparison of initial conditions from FDS compared with expected initial conditions.}
+\label{init_overlap_fig2}
+\end{figure}
+
+\newpage
+
+
 \newpage
 
 \section{Spurious Obstruction Effects (\texorpdfstring{\textct{hole}}{hole})}
