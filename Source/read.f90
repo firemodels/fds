@@ -11551,7 +11551,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    ! Check if domain information is provided for particle INIT
    IF (PART_ID/='null') THEN
-      IF (ALL(ABS(XB)>1.E5_EB) .AND. ALL(XYZ<-1.E5_EB) .AND. DB=='null' .AND. &
+      IF (ALL(ABS(XB)>1.E5_EB) .AND. ALL(XYZ<-1.E5_EB) .AND. DB=='null' .AND. BULK_DENSITY_FILE=='null' .AND. &
          (TRIM(PATH_RAMP(1))=='null' .OR. TRIM(PATH_RAMP(2))=='null' .OR. TRIM(PATH_RAMP(3))=='null')) THEN
             WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
             '. XYZ, XB, DB, or PATH_RAMP must be specified with PART_ID'
