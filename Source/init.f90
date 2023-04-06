@@ -16,7 +16,7 @@ PRIVATE
 
 PUBLIC INITIALIZE_MESH_VARIABLES_1,INITIALIZE_MESH_VARIABLES_2,INITIALIZE_MESH_VARIABLES_3,INITIALIZE_GLOBAL_VARIABLES, &
        OPEN_AND_CLOSE,INITIAL_NOISE,UVW_INIT,INITIALIZE_DEVICES,INITIALIZE_PROFILES,REASSIGN_WALL_CELLS,&
-       ADJUST_HT3D_WALL_CELLS,INITIALIZE_HT3D_WALL_CELLS
+       ADJUST_HT3D_WALL_CELLS,INITIALIZE_HT3D_WALL_CELLS,WARN_USER_OF_INIT_OVERLAP
 
 CONTAINS
 
@@ -29,13 +29,13 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIF
 USE RADCONS, ONLY: UIIDIM
 USE CONTROL_VARIABLES
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS
+INTEGER :: N,N2,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,INTEGRAL,TEMP,ZSW
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
-TYPE (INITIALIZATION_TYPE), POINTER :: IN
+TYPE (INITIALIZATION_TYPE), POINTER :: IN, IN2
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 TYPE (WALL_TYPE), POINTER :: WC
@@ -45,8 +45,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (RAMPS_TYPE), POINTER :: RP
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
-CHARACTER (LABEL_LENGTH+4) :: INIT1_ID,INIT2_ID
-LOGICAL :: INIT_OVERLAP(N_INIT,N_INIT) !=.FALSE.
+LOGICAL :: INIT_OVERLAP1(N_INIT,N_INIT),INIT_OVERLAP2(N_INIT,N_INIT) !=.FALSE.
 
 IERR = 0
 M => MESHES(NM)
@@ -428,41 +427,62 @@ ENDDO
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
-M%IWORK1=0._EB
-INIT_OVERLAP=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
+! Over-ride default ambient species if defined in INIT
+INIT_OVERLAP2=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
+M%IWORK1=0._EB ! Species
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
+   IF (.NOT. (IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
             IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K) > 0) THEN
-                  IF (.NOT. INIT_OVERLAP(N,M%IWORK1(I,J,K))) THEN
-                     IF(IN%ID/='null') THEN
-                        WRITE(INIT1_ID,'(A,A)') 'ID ',IN%ID 
-                     ELSE
-                        WRITE(INIT1_ID,'(A,I0)') 'NUM ',N
-                     ENDIF
-                     IF(INITIALIZATION(M%IWORK1(I,J,K))%ID/='null') THEN
-                        WRITE(INIT2_ID,'(A,A)') 'ID ',INITIALIZATION(M%IWORK1(I,J,K))%ID
-                     ELSE
-                        WRITE(INIT2_ID,'(A,I0)') 'NUM ',N
-                     ENDIF
-                     WRITE(LU_ERR,'(A,A,A,A,A,I0,A,A,A)') 'WARNING: INIT ',TRIM(INIT1_ID),' overlaps INIT ',&
-                        TRIM(INIT2_ID),' in Mesh ',NM,'. Non-particle INIT inputs in ',&
-                        TRIM(INIT1_ID),' rejected in overlapping cells.'
-                     INIT_OVERLAP(N,M%IWORK1(I,J,K))=.TRUE.
+               N2 = M%IWORK1(I,J,K)
+               IF (N2 > 0) THEN
+                  IF (.NOT. INIT_OVERLAP2(N,N2)) THEN
+                     IN2 => INITIALIZATION(N2)
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Species')
+                     INIT_OVERLAP2(N,N2)=.TRUE.
+                  ENDIF
+               ELSE
+                  M%IWORK1(I,J,K) = N
+                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+! Over-ride default ambient temperature and density if defined in INIT
+M%IWORK1=0._EB ! Temperature / Density
+INIT_OVERLAP1=.FALSE. ! Initialized here to false. Purposely not initialized in radiation loop.
+DO N=1,N_INIT
+   IN => INITIALIZATION(N)
+   IF ((IN%NODE_ID/='null')) CYCLE
+   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE)) CYCLE
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
+                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
+                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
+               N2 = M%IWORK1(I,J,K)
+               IF (N2 > 0) THEN
+                  IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
+                     IN2 => INITIALIZATION(N2)
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
+                     INIT_OVERLAP1(N,N2)=.TRUE.
                   ENDIF
                ELSE
                   M%IWORK1(I,J,K) = N
                   M%TMP(I,J,K)            = IN%TEMPERATURE
                   M%RHO(I,J,K)            = IN%DENSITY
                   M%RHOS(I,J,K)           = IN%DENSITY
-                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                   IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
                   IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
                   IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
@@ -472,7 +492,6 @@ DO N=1,N_INIT
       ENDDO
    ENDDO
 ENDDO
-M%IWORK1=0._EB
 
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
@@ -498,8 +517,7 @@ IF (RADIATION) THEN
 ENDIF
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
-
-M%IWORK1=0._EB
+M%IWORK1=0._EB ! Radiation intensity and density
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
@@ -509,42 +527,28 @@ DO N=1,N_INIT
             IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K) > 0) THEN
-                  IF (.NOT. INIT_OVERLAP(N,M%IWORK1(I,J,K))) THEN
-                     IF(IN%ID/='null') THEN
-                        WRITE(INIT1_ID,'(A,A)') 'ID ',IN%ID 
-                     ELSE
-                        WRITE(INIT1_ID,'(A,I0)') 'NUM ',N
-                     ENDIF
-                     IF(INITIALIZATION(M%IWORK1(I,J,K))%ID/='null') THEN
-                        WRITE(INIT2_ID,'(A,A)') 'ID ',INITIALIZATION(M%IWORK1(I,J,K))%ID
-                     ELSE
-                        WRITE(INIT2_ID,'(A,I0)') 'NUM ',N
-                     ENDIF
-                     WRITE(LU_ERR,'(A,A,A,A,A,I0,A,A,A)') 'WARNING: INIT ',TRIM(INIT1_ID),' overlaps INIT ',&
-                        TRIM(INIT2_ID),' in Mesh ',NM,'. Non-particle INIT inputs in ',&
-                        TRIM(INIT1_ID),' rejected in overlapping cells.'
-                     INIT_OVERLAP(N,M%IWORK1(I,J,K))=.TRUE.
+               N2 = M%IWORK1(I,J,K)
+               IF (N2 > 0) THEN
+                  IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
+                     IN2 => INITIALIZATION(N2)
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
+                     INIT_OVERLAP1(N,N2)=.TRUE.
                   ENDIF
                ELSE
-                  M%IWORK1(I,J,K) = M%IWORK1(I,J,K) + N
-                  M%TMP(I,J,K)            = IN%TEMPERATURE
-                  M%UII(I,J,K)            = 4._EB*SIGMA*IN%TEMPERATURE**4
-                  M%RHO(I,J,K)            = IN%DENSITY
-                  M%RHOS(I,J,K)           = IN%DENSITY
-                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K)  = M%RHO(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K)  = M%TMP(I,J,K)*M%P_0(K)/P_INF
-                  IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(IN%TEMPERATURE**4)/REAL(UIIDIM,EB)
+                  M%IWORK1(I,J,K) = N
+                  M%UII(I,J,K)            = 4._EB*SIGMA*M%TMP(I,J,K)
+                  M%RHO(I,J,K) = P_INF/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+                  M%RHOS(I,J,K) = P_INF/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+                  M%RHO(I,J,K)  = M%RHO(I,J,K)*M%P_0(K)/P_INF
+                  M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
+                  IF (RADIATION)    M%UIID(I,J,K,1:UIIDIM) = 4._EB*SIGMA*(M%TMP(I,J,K)**4)/REAL(UIIDIM,EB)
                ENDIF
             ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDDO
-M%IWORK1=0._EB
+M%IWORK1=0._EB ! Reset work array
 
 ! General work arrays
 
@@ -1006,6 +1010,29 @@ ENDDO
 
 END SUBROUTINE INITIALIZE_MESH_VARIABLES_1
 
+SUBROUTINE WARN_USER_OF_INIT_OVERLAP(IN1,IN2,N1,N2,NM,FIELD)
+
+TYPE (INITIALIZATION_TYPE), POINTER :: IN1, IN2
+INTEGER :: N1, N2
+INTEGER, INTENT(IN) :: NM
+CHARACTER (LABEL_LENGTH+4) :: INIT1_ID,INIT2_ID
+CHARACTER (*) :: FIELD
+
+IF(IN1%ID/='null') THEN
+   WRITE(INIT1_ID,'(A,A)') 'ID ',IN1%ID
+ELSE
+   WRITE(INIT1_ID,'(A,I0)') 'NUM ',N1
+ENDIF
+IF(IN2%ID/='null') THEN
+   WRITE(INIT2_ID,'(A,A)') 'ID ',IN2%ID
+ELSE
+   WRITE(INIT2_ID,'(A,I0)') 'NUM ',N2
+ENDIF
+WRITE(LU_ERR,'(A,A,A,A,A,I0,A,A,A,A,A,A,A)') 'WARNING: INIT ',TRIM(INIT1_ID),' overlaps INIT ',&
+   TRIM(INIT2_ID),' in Mesh ',NM,' for ',TRIM(FIELD),'. ',TRIM(FIELD),' INIT inputs in ',&
+   TRIM(INIT1_ID),' rejected in overlapping cells.'
+
+END SUBROUTINE WARN_USER_OF_INIT_OVERLAP
 
 SUBROUTINE INITIALIZE_MESH_VARIABLES_2(NM)
 
