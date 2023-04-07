@@ -14534,7 +14534,7 @@ READ_BNDF_LOOP: DO N=1,N_BNDF
 
    CALL GET_QUANTITY_INDEX(BF%SMOKEVIEW_LABEL,BF%SMOKEVIEW_BAR_LABEL,BF%INDEX,I_DUM(1), &
                            BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,I_DUM(2),I_DUM(3),I_DUM(4),I_DUM(5),'BNDF', &
-                           QUANTITY,'null',SPEC_ID,PART_ID,'null','null','null','null',-1._EB,I_DUM(6))
+                           QUANTITY,'null',SPEC_ID,PART_ID,'null','null','null',MATL_ID,-1._EB,I_DUM(6))
    BF%MATL_ID = MATL_ID
 
    BF%UNITS = OUTPUT_QUANTITY(BF%INDEX)%UNITS
