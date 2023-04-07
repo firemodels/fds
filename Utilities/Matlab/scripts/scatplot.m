@@ -218,9 +218,9 @@ try
                         output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                         output_stats{stat_line,3} = Save_Dataname{i,1};
                         output_stats{stat_line,4} = Save_Metric_Type{i,1};
-                        output_stats{stat_line,5} = Save_Measured_Quantity{i,m,1};
+                        output_stats{stat_line,5} = Save_Measured_Quantity{i,1,1};
                         output_stats{stat_line,6} = single_measured_metric(m);
-                        output_stats{stat_line,7} = Save_Predicted_Quantity{i,m,1};
+                        output_stats{stat_line,7} = Save_Predicted_Quantity{i,1,1};
                         output_stats{stat_line,8} = single_predicted_metric(m);
                         output_stats{stat_line,9} = Save_Dep_Title{i,1};
                         output_stats{stat_line,10} = error_type;
