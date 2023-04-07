@@ -13977,9 +13977,11 @@ ORIENTATION_LOOP: DO IS=1,3
       END SELECT IEC_SELECT
 
       ICF = FCVAR(IIF,JJF,KKF,CC_IDCF,FAXIS)
-      IF ( ALL(CUT_FACE(ICF)%LINK_LEV(1:CUT_FACE(ICF)%NFACE)==0) ) THEN ! Unlinked cut-face.
-          VEL_GAS     = UF
-          DXN_STRM_UB = DF
+      !IF ( ANY(CUT_FACE(ICF)%UNKF(1:CUT_FACE(ICF)%NFACE)==0)) CYCLE ! Cycle if any face has no UNKF (unlinked).
+      !IF ( CUT_FACE(ICF)%ALPHA_CF < 0.05_EB ) CYCLE ! Cycle if cut-face size is less than 0.001 cartesian face.
+      IF ( CUT_FACE(ICF)%ALPHA_CF > CCVOL_LINK ) THEN ! Large cut-face.
+         VEL_GAS     = UF
+         DXN_STRM_UB = DF
       ELSE
           VEL_GAS     = (UF*DF + UE*DE)/(DF+DE)
           DXN_STRM_UB = (DF+DE)
@@ -14008,7 +14010,7 @@ ORIENTATION_LOOP: DO IS=1,3
 
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
-
+      VEL_GHOST = 0._EB
       SELECT CASE(SURFACE(SURF_INDEX)%VELOCITY_BC_INDEX)
          CASE (FREE_SLIP_BC)
             VEL_GHOST = VEL_GAS
@@ -22049,8 +22051,13 @@ INTEGER :: NM,I,J,K,X1AXIS,X2AXIS,X3AXIS,ICF,JCF,LO_UNKZ,HI_UNKZ,IEC,IEDGE,LOHI,
 REAL(EB):: ACRT,CCVOL_THRES
 LOGICAL :: ALL_FLG,CC_LINKED
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
+INTEGER :: ILOC,SIZE_FACE
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: FACE_LIST,FACELAUX
+REAL(EB), ALLOCATABLE,DIMENSION(:)   :: FACE_AREA,FACEARAUX
 
 LOGICAL, PARAMETER :: NO_FACE_LINKING = .FALSE.
+
+SIZE_FACE = 20; ALLOCATE(FACE_LIST(4,SIZE_FACE),FACE_AREA(SIZE_FACE))
 
 ! Define Face Linking:
 ! Important approximation: As we do not compute cut-face volumes from the computational geometry engine (4 times cost),
@@ -22228,7 +22235,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
   ALLOCATE(M%UN_ULNK(COUNT)); M%UN_ULNK = 0._EB
 
 ENDDO MESH_LOOP
-
+DEALLOCATE(FACE_LIST,FACE_AREA)
 
 RETURN
 CONTAINS
@@ -22236,6 +22243,10 @@ CONTAINS
 SUBROUTINE LINK_FACES_TO_NEIGHBORS(ALL_FLG)
 
 LOGICAL, INTENT(IN) :: ALL_FLG
+
+LOGICAL, PARAMETER  :: CANDIDATE_LIST=.TRUE.
+
+IF(.NOT.CANDIDATE_LIST) THEN
 
 ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
    CF => M%CUT_FACE(ICF); IF(CF%STATUS/=CC_GASPHASE) CYCLE ICF_LOOP_2
@@ -22523,7 +22534,6 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                    IF (X2AXIS==IAXIS) THEN ! Edge pointed in X3AXIS=JAXIS direction.
                       X3AXIS = JAXIS; II=I; JJ=J; KK=K; IF(LOHI==LOW_IND) II=I-1
                       IERC   = M%ECVAR(II,JJ,KK,CC_IDCE,X3AXIS); IF(IERC==0) CYCLE KAXIS_IEC_LOOP ! Index in CC_RCEDGE
-                      IF(IERC==0) CYCLE KAXIS_IEC_LOOP
                       !WRITE(LU_ERR,*) 'EDGE=',IERC,II,JJ,KK,X3AXIS,', CF=',I,J,K,X1AXIS
                       IF(LOHI==LOW_IND) THEN ! Indexes of other Cartesian face @ I-1
                          IIO=I-1; JJO=J; KKO=K; OFACE(1:3) = M%CC_RCEDGE(IERC)%FACE_LIST(1:3,-2) ! Z Face in low I
@@ -22633,7 +22643,240 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
 
 ENDDO ICF_LOOP_2
 
+ELSE
+
+ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
+   CF => M%CUT_FACE(ICF); IF(CF%STATUS/=CC_GASPHASE) CYCLE ICF_LOOP_3
+   I  = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
+   SELECT CASE(X1AXIS)
+   CASE(IAXIS)
+
+      ACRT = M%DY(J)*M%DZ(K)
+      IAXIS_JCF_LOOP_2 : DO JCF=1,CF%NFACE
+         IF(CF%UNKF(JCF)<1) THEN ! Loop edges to find next face in X2AXIS, X3AXIS plane:
+            COUNT=0; IIO=0; JJO=0; KKO=0
+            IAXIS_IEC_LOOP_2 : DO IEC=2,CF%CEDGES(1,JCF)+1
+               IEDGE = CF%CEDGES(IEC,JCF)
+               SELECT CASE(CF%EDGE_LIST(1,IEDGE))
+               CASE(CC_ETYPE_RGGAS) ! Cut-faces Regular Gas Edge.
+                  LOHI   = CF%EDGE_LIST(2,IEDGE)
+                  X2AXIS = CF%EDGE_LIST(3,IEDGE)
+                  IF (X2AXIS==JAXIS) THEN ! Edge pointed in X3AXIS=KAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I; JJO=J-1; KKO=K ! Indexes of other Cartesian face @ J-1
+                     ELSE;                   IIO=I; JJO=J+1; KKO=K ! Indexes of other Cartesian face @ J+1
+                     ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE IAXIS_IEC_LOOP_2
+                  ELSEIF(X2AXIS==KAXIS) THEN ! Edge pointed in X3AXIS=JAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I; JJO=J; KKO=K-1 ! Indexes of other Cartesian face @ K-1
+                     ELSE;                   IIO=I; JJO=J; KKO=K+1 ! Indexes of other Cartesian face @ K+1
+                     ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE IAXIS_IEC_LOOP_2
+                  ENDIF
+               CASE(CC_ETYPE_CFGAS) ! Gas cut-edge.
+                  IECE = CF%EDGE_LIST(2,IEDGE)
+                  II=M%CUT_EDGE(IECE)%IJK(IAXIS); JJ=M%CUT_EDGE(IECE)%IJK(JAXIS); KK=M%CUT_EDGE(IECE)%IJK(KAXIS);
+                  X3AXIS = M%CUT_EDGE(IECE)%IJK(KAXIS+1);
+                  IF (X3AXIS==KAXIS) THEN ! X3AXIS==Edge Axis, X2AXIS = JAXIS
+                     IF(JJ==J-1) THEN;   IIO = I; JJO = J-1; KKO = K ! X Face in low J
+                     ELSEIF(JJ==J) THEN; IIO = I; JJO = J+1; KKO = K ! X Face in high J
+                     ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE IAXIS_IEC_LOOP_2
+                  ELSEIF (X3AXIS==JAXIS) THEN ! X2AXIS = KAXIS
+                     IF(KK==K-1) THEN;   IIO = I; JJO = J; KKO = K-1 ! X Face in low K
+                     ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! X Face in high K
+                     ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE IAXIS_IEC_LOOP_2
+                  ENDIF
+               END SELECT
+               IF(COUNT+1>SIZE_FACE) THEN
+                  ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
+                  FACELAUX(1:4,1:SIZE_FACE) = FACE_LIST(1:4,1:SIZE_FACE)
+                  FACEARAUX(1:SIZE_FACE)    = FACE_AREA(1:SIZE_FACE)
+                  CALL MOVE_ALLOC(FROM=FACELAUX,TO=FACE_LIST)
+                  CALL MOVE_ALLOC(FROM=FACEARAUX,TO=FACE_AREA)
+                  SIZE_FACE = SIZE_FACE+20
+               ENDIF
+               IF(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS)>0) THEN ! Underlying cut-face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_CFGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = M%CUT_FACE(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS))%ALPHA_CF*ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_IDRC,X1AXIS)>0) THEN ! RC face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RCGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_CGSC,X1AXIS)==CC_GASPHASE) THEN ! Regular face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RGGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ENDIF
+            ENDDO  IAXIS_IEC_LOOP_2
+            IF(COUNT==0) CYCLE IAXIS_JCF_LOOP_2
+            CALL SET_UNKF_CF
+         ENDIF
+      ENDDO IAXIS_JCF_LOOP_2
+
+   CASE(JAXIS)
+
+      IF (TWO_D) CYCLE ICF_LOOP_3
+      ACRT = M%DX(I)*M%DZ(K)
+      JAXIS_JCF_LOOP_2 : DO JCF=1,CF%NFACE
+         IF(CF%UNKF(JCF)<1) THEN
+            COUNT=0; IIO=0; JJO=0; KKO=0
+            JAXIS_IEC_LOOP_2 : DO IEC=2,CF%CEDGES(1,JCF)+1
+               IEDGE = CF%CEDGES(IEC,JCF)
+               SELECT CASE(CF%EDGE_LIST(1,IEDGE))
+               CASE(CC_ETYPE_RGGAS) ! Cut-faces Regular Gas Edge.
+                  LOHI   = CF%EDGE_LIST(2,IEDGE)
+                  X2AXIS = CF%EDGE_LIST(3,IEDGE)
+                  IF (X2AXIS==IAXIS) THEN ! Edge pointed in X3AXIS=KAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I-1; JJO=J; KKO=K ! Indexes of other Cartesian face @ I-1
+                     ELSE;                   IIO=I+1; JJO=J; KKO=K ! Indexes of other Cartesian face @ I+1
+                     ENDIF; IF(IIO<1 .OR. IIO>M%IBAR) CYCLE JAXIS_IEC_LOOP_2
+                  ELSEIF(X2AXIS==KAXIS) THEN ! Edge pointed in X3AXIS=IAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I; JJO=J; KKO=K-1 ! Indexes of other Cartesian face @ K-1
+                     ELSE;                   IIO=I; JJO=J; KKO=K+1 ! Indexes of other Cartesian face @ K+1
+                     ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE JAXIS_IEC_LOOP_2
+                  ENDIF
+               CASE(CC_ETYPE_CFGAS) ! Gas cut-edge.
+                  IECE = CF%EDGE_LIST(2,IEDGE)
+                  II=M%CUT_EDGE(IECE)%IJK(IAXIS); JJ=M%CUT_EDGE(IECE)%IJK(JAXIS); KK=M%CUT_EDGE(IECE)%IJK(KAXIS);
+                  X3AXIS = M%CUT_EDGE(IECE)%IJK(KAXIS+1);
+                  IF (X3AXIS==KAXIS) THEN ! X3AXIS==Edge Axis, X2AXIS = IAXIS
+                     IF(II==I-1) THEN;   IIO = I-1; JJO = J; KKO = K ! Indexes of other Cartesian face @ I-1
+                     ELSEIF(II==I) THEN; IIO = I+1; JJO = J; KKO = K ! Indexes of other Cartesian face @ I+1
+                     ENDIF; IF(IIO<1 .OR. IIO>M%IBAR) CYCLE JAXIS_IEC_LOOP_2
+                  ELSEIF (X3AXIS==IAXIS) THEN ! X2AXIS = KAXIS
+                     IF(KK==K-1) THEN;   IIO = I; JJO = J; KKO = K-1 ! Indexes of other Cartesian face @ K-1
+                     ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! Indexes of other Cartesian face @ K+1
+                     ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE JAXIS_IEC_LOOP_2
+                  ENDIF
+               END SELECT
+               IF(COUNT+1>SIZE_FACE) THEN
+                  ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
+                  FACELAUX(1:4,1:SIZE_FACE) = FACE_LIST(1:4,1:SIZE_FACE)
+                  FACEARAUX(1:SIZE_FACE)    = FACE_AREA(1:SIZE_FACE)
+                  CALL MOVE_ALLOC(FROM=FACELAUX,TO=FACE_LIST)
+                  CALL MOVE_ALLOC(FROM=FACEARAUX,TO=FACE_AREA)
+                  SIZE_FACE = SIZE_FACE+20
+               ENDIF
+               IF(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS)>0) THEN ! Underlying cut-face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_CFGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = M%CUT_FACE(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS))%ALPHA_CF*ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_IDRC,X1AXIS)>0) THEN ! RC face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RCGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_CGSC,X1AXIS)==CC_GASPHASE) THEN ! Regular face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RGGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ENDIF
+            ENDDO  JAXIS_IEC_LOOP_2
+            IF(COUNT==0) CYCLE JAXIS_JCF_LOOP_2
+            CALL SET_UNKF_CF
+         ENDIF
+      ENDDO JAXIS_JCF_LOOP_2
+
+   CASE(KAXIS)
+
+      ACRT = M%DY(J)*M%DX(I)
+      KAXIS_JCF_LOOP_2 : DO JCF=1,CF%NFACE
+         IF(CF%UNKF(JCF)<1) THEN
+            COUNT=0; IIO=0; JJO=0; KKO=0
+            KAXIS_IEC_LOOP_2 : DO IEC=2,CF%CEDGES(1,JCF)+1
+               IEDGE = CF%CEDGES(IEC,JCF)
+               SELECT CASE(CF%EDGE_LIST(1,IEDGE))
+               CASE(CC_ETYPE_RGGAS) ! Cut-faces Regular Gas Edge.
+                  LOHI   = CF%EDGE_LIST(2,IEDGE)
+                  X2AXIS = CF%EDGE_LIST(3,IEDGE)
+                  IF (X2AXIS==IAXIS) THEN ! Edge pointed in X3AXIS=JAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I-1; JJO=J; KKO=K ! Indexes of other Cartesian face @ I-1
+                     ELSE;                   IIO=I+1; JJO=J; KKO=K ! Indexes of other Cartesian face @ I+1
+                     ENDIF; IF(IIO<1 .OR. IIO>M%IBAR) CYCLE KAXIS_IEC_LOOP_2
+                  ELSEIF(X2AXIS==JAXIS) THEN ! Edge pointed in X3AXIS=IAXIS direction.
+                     IF(LOHI==LOW_IND) THEN; IIO=I; JJO=J-1; KKO=K ! Indexes of other Cartesian face @ J-1
+                     ELSE;                   IIO=I; JJO=J+1; KKO=K ! Indexes of other Cartesian face @ J+1
+                     ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE KAXIS_IEC_LOOP_2
+                  ENDIF
+               CASE(CC_ETYPE_CFGAS) ! Gas cut-edge.
+                  IECE = CF%EDGE_LIST(2,IEDGE)
+                  II=M%CUT_EDGE(IECE)%IJK(IAXIS); JJ=M%CUT_EDGE(IECE)%IJK(JAXIS); KK=M%CUT_EDGE(IECE)%IJK(KAXIS);
+                  X3AXIS = M%CUT_EDGE(IECE)%IJK(KAXIS+1);
+                  IF (X3AXIS==JAXIS) THEN ! X3AXIS==Edge Axis, X2AXIS = IAXIS
+                     IF(II==I-1) THEN;   IIO = I-1; JJO = J; KKO = K ! Indexes of other Cartesian face @ I-1
+                     ELSEIF(II==I) THEN; IIO = I+1; JJO = J; KKO = K ! Indexes of other Cartesian face @ I+1
+                     ENDIF; IF(IIO<1 .OR. IIO>M%IBAR) CYCLE KAXIS_IEC_LOOP_2
+                  ELSEIF (X3AXIS==IAXIS) THEN ! X2AXIS = JAXIS
+                     IF(JJ==J-1) THEN;   IIO = I; JJO = J-1; KKO = K ! Indexes of other Cartesian face @ J-1
+                     ELSEIF(JJ==J) THEN; IIO = I; JJO = J+1; KKO = K ! Indexes of other Cartesian face @ J+1
+                     ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE KAXIS_IEC_LOOP_2
+                  ENDIF
+               END SELECT
+               IF(COUNT+1>SIZE_FACE) THEN
+                  ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
+                  FACELAUX(1:4,1:SIZE_FACE) = FACE_LIST(1:4,1:SIZE_FACE)
+                  FACEARAUX(1:SIZE_FACE)    = FACE_AREA(1:SIZE_FACE)
+                  CALL MOVE_ALLOC(FROM=FACELAUX,TO=FACE_LIST)
+                  CALL MOVE_ALLOC(FROM=FACEARAUX,TO=FACE_AREA)
+                  SIZE_FACE = SIZE_FACE+20
+               ENDIF
+               IF(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS)>0) THEN ! Underlying cut-face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_CFGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = M%CUT_FACE(M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS))%ALPHA_CF*ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_IDRC,X1AXIS)>0) THEN ! RC face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RCGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ELSEIF(M%FCVAR(IIO,JJO,KKO,CC_CGSC,X1AXIS)==CC_GASPHASE) THEN ! Regular face.
+                  COUNT=COUNT+1
+                  FACE_LIST(1:4,COUNT) = (/ CC_FTYPE_RGGAS,IIO,JJO,KKO/)
+                  FACE_AREA(COUNT)     = ACRT
+               ENDIF
+            ENDDO  KAXIS_IEC_LOOP_2
+            IF(COUNT==0) CYCLE KAXIS_JCF_LOOP_2
+            CALL SET_UNKF_CF
+         ENDIF
+      ENDDO  KAXIS_JCF_LOOP_2
+
+   END SELECT
+ENDDO ICF_LOOP_3
+
+ENDIF
+
 END SUBROUTINE LINK_FACES_TO_NEIGHBORS
+
+SUBROUTINE SET_UNKF_CF
+
+! Now define face to link to:
+ILOC = MAXLOC(FACE_AREA(1:COUNT),DIM=1)
+IIO  = FACE_LIST(2,ILOC); JJO = FACE_LIST(3,ILOC); KKO = FACE_LIST(4,ILOC)
+SELECT CASE (FACE_LIST(1,ILOC))
+CASE(CC_FTYPE_RGGAS)
+   IF(M%FCVAR(IIO,JJO,KKO,CC_UNKF,X1AXIS)<1) THEN
+         M%NUNK_F = M%NUNK_F + 1
+         M%FCVAR(IIO,JJO,KKO,CC_UNKF,X1AXIS) = M%NUNK_F
+   ENDIF
+   CF%UNKF(JCF)     = M%FCVAR(IIO,JJO,KKO,CC_UNKF,X1AXIS)
+   CF%LINK_LEV(JCF) = -1
+CASE(CC_FTYPE_RCGAS)
+   OICF = M%FCVAR(IIO,JJO,KKO,CC_IDRC,X1AXIS)
+   IF(M%RC_FACE(OICF)%UNKF<1) THEN
+      M%NUNK_F = M%NUNK_F + 1
+      M%RC_FACE(OICF)%UNKF = M%NUNK_F
+   ENDIF
+   CF%UNKF(JCF)     = M%RC_FACE(OICF)%UNKF
+   CF%LINK_LEV(JCF) = -1
+CASE(CC_FTYPE_CFGAS)
+   OICF = M%FCVAR(IIO,JJO,KKO,CC_IDCF,X1AXIS); OJCF = 1
+   IF(M%CUT_FACE(OICF)%UNKF(OJCF)>0) THEN
+      CF%UNKF(JCF)     = M%CUT_FACE(OICF)%UNKF(OJCF)
+      CF%LINK_LEV(JCF) = M%CUT_FACE(OICF)%LINK_LEV(OJCF) - 1
+   ELSEIF(CF%AREA(JCF)+M%CUT_FACE(OICF)%AREA(OJCF) > CCVOL_LINK * ACRT) THEN
+      M%NUNK_F = M%NUNK_F + 1
+      CF%UNKF(JCF) = M%NUNK_F; M%CUT_FACE(OICF)%UNKF(OJCF) = M%NUNK_F
+      CF%LINK_LEV(JCF) = -1; M%CUT_FACE(OICF)%LINK_LEV(OJCF) = -1
+   ENDIF
+END SELECT
+RETURN
+END SUBROUTINE SET_UNKF_CF
 
 END SUBROUTINE GET_LINKED_FACE_INDEXES_F
 
