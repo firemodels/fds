@@ -192,7 +192,7 @@ try
                     single_predicted_metric = Nonzeros_Predicted_Metric;
                     % Loop over multiple line comparisons and build output_stats cell
                     for m=1:length(single_measured_metric)
-                        
+
                         % Get type of statistics to compute
                         error_type = Save_Quantity{1,i};
 
