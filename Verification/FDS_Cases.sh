@@ -127,6 +127,7 @@ $QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_320_stm.fds
 $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
 $QFDS -p 5 -d Complex_Geometry geom_stretched_grid.fds
+$QFDS -p 3 -d Complex_Geometry thin_object_mass.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
