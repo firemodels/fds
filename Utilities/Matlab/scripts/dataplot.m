@@ -256,6 +256,7 @@ for i=2:n_plots
                     end
                 elseif strcmp(Metric,'all')
                     Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col)-d1_Initial_Value;
+                    Save_Measured_Quantity(i,1:length(indices)) = S1(j);
                 elseif strcmp(Metric,'threshold')
                     Save_Measured_Metric(i,j,1) = max(abs(M(indices,d1_Dep_Col)-d1_Initial_Value));
                 elseif strcmp(Metric,'tolerance')
@@ -405,6 +406,7 @@ for i=2:n_plots
                     end
                 elseif strcmp(Metric,'all')
                     Save_Predicted_Metric(i,j,1:length(indices)) = M_Dep-d2_Initial_Value;
+                    Save_Predicted_Quantity(i,1:length(indices)) = S2(j);
                 elseif strcmp(Metric,'threshold')
                     Save_Predicted_Metric(i,j,1) = min(M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'tolerance')
