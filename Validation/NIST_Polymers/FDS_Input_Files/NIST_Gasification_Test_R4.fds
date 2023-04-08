@@ -4,43 +4,27 @@
 
 &TIME T_END=500., WALL_INCREMENT=1, DT=0.1 /
 
-&SPEC ID='NITROGEN', BACKGROUND=T /
-&SPEC ID='MMA', FORMULA='C5O2H8' /
+&MISC Y_O2_INFTY=0.001 /
 
-&MATL ID            = 'MARINITE'
-      EMISSIVITY    = 0.9
-      DENSITY       = 737.
-      SPECIFIC_HEAT = 1.2
-      CONDUCTIVITY  = 0.12 /
+&MATL ID                = 'Kaowool PM Insulation'
+      DENSITY           = 256.
+      SPECIFIC_HEAT     = 1.07
+      CONDUCTIVITY_RAMP = 'k_kaowool' /
 
-&MATL ID='BLACK PMMA'
-      REFERENCE_TEMPERATURE=370.
-      REFERENCE_RATE=0.0034
-      HEATING_RATE=10
-      EMISSIVITY=0.96
-      ABSORPTION_COEFFICIENT=2870.
-      SPEC_ID='MMA'
-      NU_SPEC=1.
-      HEAT_OF_REACTION=817.
-      DENSITY=1210.
-      CONDUCTIVITY_RAMP='k_PMMA'
-      SPECIFIC_HEAT_RAMP='cp_PMMA' /
+&RAMP ID='k_kaowool', T= 260., F=0.0576 /
+&RAMP ID='k_kaowool', T= 538., F=0.085  /
+&RAMP ID='k_kaowool', T= 816., F=0.125  /
+&RAMP ID='k_kaowool', T=1093., F=0.183  /
 
-&RAMP ID='k_PMMA', T= 20., F=0.160 /
-&RAMP ID='k_PMMA', T=122., F=0.160 /
-&RAMP ID='k_PMMA', T=500., F=0.015 /
-
-&RAMP ID='cp_PMMA', T= 20., F=1.90 /
-&RAMP ID='cp_PMMA', T=122., F=1.90 /
-&RAMP ID='cp_PMMA', T=500., F=3.22 /
+&CATF OTHER_FILES='pmma_properties.txt' /
 
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
       STRETCH_FACTOR=1.
-      HEAT_TRANSFER_COEFFICIENT=10.
+      HEAT_TRANSFER_COEFFICIENT=13.
       EXTERNAL_FLUX=50 
       BACKING='INSULATED'
-      MATL_ID='BLACK PMMA','MARINITE'
+      MATL_ID='BLACK PMMA','Kaowool PM Insulation'
       THICKNESS=0.00565,0.0254 /
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
