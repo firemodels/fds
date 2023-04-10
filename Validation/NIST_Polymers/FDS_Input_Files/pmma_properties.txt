@@ -41,7 +41,7 @@
 &RAMP ID='k_PMMA', T=122., F=0.160 /
 &RAMP ID='k_PMMA', T=500., F=0.015 /
 
-&RAMP ID='cp_PMMA', T= 20., F=1.90 /
+&RAMP ID='cp_PMMA', T= 20., F=1.05 /
 &RAMP ID='cp_PMMA', T=122., F=1.90 /
 &RAMP ID='cp_PMMA', T=500., F=3.22 /
 

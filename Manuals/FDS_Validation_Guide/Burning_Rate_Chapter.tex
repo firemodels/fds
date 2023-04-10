@@ -428,28 +428,32 @@ Combustion Efficiency   &               &          1                        & As
 
 \section{NIST Polymers}
 
-Black PMMA was chosen as the first material to be studied by the MaCFP Condenced Phase Subgroup. Its properties are listed in Table~\ref{NIST_PMMA_Properties}. It is assumed that the solid decomposes via a single reaction whose pre-exponential factor and activation energy are derived directly from the TGA measurement. The thermal properties are taken from Ref.~\cite{Fiola:FSJ2021}.
+Black PMMA was chosen as the first material to be studied by the MaCFP Condenced Phase Subgroup. Its properties are listed in Table~\ref{NIST_PMMA_Properties}. It is assumed that the solid decomposes in two steps~\cite{Fiola:FSJ2021}.
+\begin{eqnarray}
+   \hbox{PMMA}_{\rm melt}   &\to& 0.98 \, \hbox{PMMA}_{\rm int} + 0.02 \, \hbox{MMA}_{\rm gas}  \label{PMMA1of2} \\
+   \hbox{PMMA}_{\rm int}    &\to& 0.002 \, \hbox{Char} +         0.998 \, \hbox{MMA}_{\rm gas}   \label{PMMA2of2}
+\end{eqnarray}
 
 \begin{table}[!h]
-\caption[NIST PMMA properties]{Input parameters for PMMA.}
+\caption[NIST PMMA properties]{Input parameters for PMMA~\cite{Fiola:FSJ2021}.}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|}
 \hline
-Property                    & Units         & Value                                                                                                                                          & Unc.      &  Reference                 \\ \hline \hline
-Density                     & kg/m$^3$      & 1210                                                                                                                                           & 30        &  \cite{Fiola:FSJ2021}      \\ \hline
-Conductivity                & W/m/K         & $\begin{array}{ll} 0.16  & T<395 \; \hbox{K} \\  0.34 - 4.2 \times 10^{-4} \, T  & T>395 \; \hbox{K} \end{array}$                              &           &  \cite{Fiola:FSJ2021}      \\ \hline
-Specific Heat               & kJ/kg/K       & $\begin{array}{ll} -1.39+ 8.33 \times 10^{-3} \, T & T<395 \; \hbox{K} \\ 0.851 + 3.07 \times 10^{-3} \, T & T>395 \; \hbox{K} \end{array}$    &           &  \cite{Fiola:FSJ2021}      \\ \hline
-Emissivity                  &               & 0.96                                                                                                                                           &           &  \cite{Fiola:FSJ2021}      \\ \hline
-Absorption Coef.            & m$^{-1}$      & 2870                                                                                                                                           & 280       &  \cite{Fiola:FSJ2021}      \\ \hline
-Pre-Exp.~Factor             & s$^{-1}$      & $2.85 \times 10^{13}$                                                                                                                          &           &                            \\ \hline
-Activation Energy           & J/mol         & $1.91 \times 10^{5}$                                                                                                                           &           &                            \\ \hline
-Heat of Reaction            & kJ/kg         & 817                                                                                                                                            &           &  \cite{Fiola:FSJ2021}      \\ \hline
+Property                    & Units         & Value                                                                                                                                        & Unc.           \\ \hline \hline
+Density                     & kg/m$^3$      & 1210                                                                                                                                         & 30             \\ \hline
+Conductivity                & W/m/K         & $\begin{array}{ll} 0.16  & T<395 \; \hbox{K} \\  0.34 - 4.2 \times 10^{-4} \, T  & T>395 \; \hbox{K} \end{array}$                            &                \\ \hline
+Specific Heat               & kJ/kg/K       & $\begin{array}{ll} -1.39+ 8.33 \times 10^{-3} \, T & T<395 \; \hbox{K} \\ 0.851 + 3.07 \times 10^{-3} \, T & T>395 \; \hbox{K} \end{array}$  &                \\ \hline
+Emissivity                  &               & 0.96                                                                                                                                         &                \\ \hline
+Absorption Coef.            & m$^{-1}$      & 2870                                                                                                                                         & 280            \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $\begin{array}{ll} 4.95 \times 10^{16} & \hbox{ Step 1} \\ 1.35 \times 10^{11} & \hbox{ Step 2} \end{array}$                                 &                \\ \hline 
+Activation Energy           & J/mol         & $\begin{array}{ll} 1.64 \times 10^{5}  & \hbox{ Step 1} \\ 1.64 \times 10^{5}  & \hbox{ Step 2} \end{array}$                                 &                \\ \hline
+Heat of Reaction            & kJ/kg         & $\begin{array}{ll} 5                   & \hbox{ Step 1} \\ 817                 & \hbox{ Step 2} \end{array}$                                 &                \\ \hline
 \end{tabular}
 \end{center}
 \label{NIST_PMMA_Properties}
 \end{table}
 
-Figure~\ref{NIST_PMMA} displays the results of measurements and simulations of pyrolyzing black PMMA in the TGA (10~K/min), MCC (60~K/min) and DSC (10~K/min). Figure~\ref{NIST_PMMA_Cone} displays results of the Gasification Apparatus (50~kW/m$^2$) and Cone Calorimeter (25~kW/m$^2$).
+Figure~\ref{NIST_PMMA} displays the results of measurements performed at NIST and FDS simulations of pyrolyzing black PMMA in the TGA (10~K/min), MCC (60~K/min) and DSC (10~K/min). Figure~\ref{NIST_PMMA_Cone} displays results of the Gasification Apparatus (50~kW/m$^2$) and Cone Calorimeter (25~kW/m$^2$).
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
