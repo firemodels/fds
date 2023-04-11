@@ -8081,7 +8081,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MESH_LOOP_1
 
-DEALLOCATE( ZZ_CC )
+DEALLOCATE( ZZ_CC, FDS_AREA_GEOM )
 
 ! Populate Linked velocity arrays:
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -22054,6 +22054,7 @@ TYPE(MESH_TYPE), POINTER :: M=>NULL()
 INTEGER :: ILOC,SIZE_FACE
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: FACE_LIST,FACELAUX
 REAL(EB), ALLOCATABLE,DIMENSION(:)   :: FACE_AREA,FACEARAUX
+TYPE(CC_CUTFACE_TYPE),       POINTER :: CF2
 
 LOGICAL, PARAMETER :: NO_FACE_LINKING = .FALSE.
 
@@ -22127,25 +22128,41 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       EXIT LINK_ITER
    ENDDO LINK_ITER
 
-   ! 3. Run by linked CV and link any unlinked faces that share CV with UNKF>0 faces:
-   ! ICC_LOOP : DO ICC=1,M%N_CUTCELL_MESH
-   !    CC=>M%CUT_CELL(ICC)
-   !    DO JCC=1,CC%NCELL
-   !       ! ...
-   !    ENDDO
-   ! ENDDO ICC_LOOP
-
-   ! Finally define UNKF to any small unlinked faces and set their LINK_LEV=0.
+   ! Finally force link small unlinked faces or set their UNKF, LINK_LEV=0.
    DO ICF=1,M%N_CUTFACE_MESH
       CF => M%CUT_FACE(ICF); IF(CF%STATUS/=CC_GASPHASE) CYCLE
       IF(TWO_D .AND. CF%IJK(KAXIS+1)==JAXIS) CYCLE
+      I = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
       DO JCF=1,CF%NFACE
-         IF(CF%UNKF(JCF)<1) THEN
-            CF%UNKF(JCF)     = 0
-            CF%LINK_LEV(JCF) = 0
+         IF(CF%UNKF(JCF)>0) CYCLE
+         NULLIFY(CF2)
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            IF(I>0 .AND. M%FCVAR(I-1,J,K,CC_IDCF,IAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I-1,J,K,CC_IDCF,IAXIS))
+            ELSEIF(I<M%IBAR .AND. M%FCVAR(I+1,J,K,CC_IDCF,IAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I+1,J,K,CC_IDCF,IAXIS))
+            ENDIF
+         CASE(JAXIS)
+            IF(J>0 .AND. M%FCVAR(I,J-1,K,CC_IDCF,JAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I,J-1,K,CC_IDCF,JAXIS))
+            ELSEIF(J<M%JBAR .AND. M%FCVAR(I,J+1,K,CC_IDCF,JAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I,J+1,K,CC_IDCF,JAXIS))
+            ENDIF
+         CASE(KAXIS)
+            IF(K>0 .AND. M%FCVAR(I,J,K-1,CC_IDCF,KAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I,J,K-1,CC_IDCF,KAXIS))
+            ELSEIF(K<M%KBAR .AND. M%FCVAR(I,J,K+1,CC_IDCF,KAXIS)>0) THEN
+               CF2=>M%CUT_FACE(M%FCVAR(I,J,K+1,CC_IDCF,KAXIS))
+            ENDIF
+         END SELECT
+         IF(ASSOCIATED(CF2)) THEN
+            IF(CF2%UNKF(1)>0) THEN; CF%UNKF(JCF)=CF2%UNKF(1); CF%LINK_LEV(JCF)=CF2%LINK_LEV(1)-1; ENDIF
          ENDIF
+         IF(CF%UNKF(JCF)<1) THEN; CF%UNKF(JCF)=0; CF%LINK_LEV(JCF)=0; ENDIF
       ENDDO
    ENDDO
+
 
    ! I = 0; J = 0; K = 0
    ! DO ICF=1,M%N_CUTFACE_MESH
