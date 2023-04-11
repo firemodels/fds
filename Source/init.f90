@@ -529,10 +529,12 @@ DO N=1,N_INIT
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                N2 = M%IWORK1(I,J,K)
                IF (N2 > 0) THEN
-                  IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
-                     IN2 => INITIALIZATION(N2)
-                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
-                     INIT_OVERLAP1(N,N2)=.TRUE.
+                  IF (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE) THEN
+                     IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
+                        IN2 => INITIALIZATION(N2)
+                        CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
+                        INIT_OVERLAP1(N,N2)=.TRUE.
+                     ENDIF
                   ENDIF
                ELSE
                   M%IWORK1(I,J,K) = N
