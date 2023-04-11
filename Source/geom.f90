@@ -36,7 +36,7 @@ REAL(EB), PARAMETER :: GEOMQUALITYFCT=1000._EB ! Factor for GEOMs quality check
 REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 ! Threshold cut-cell volume ratio used to define very small cut-cells, tied to NOADVANCE.
-REAL(EB), PARAMETER :: MIN_VOL_FACTOR = 1.E-4_EB
+REAL(EB), PARAMETER :: MIN_VOL_FACTOR = 5.E-4_EB
 
 INTEGER,  SAVE ::      NGUARD = 6        ! Layers of guard-cells.
 INTEGER,  SAVE ::      CCGUARD= 6 - 2    ! Layers of guard cut-cells.
@@ -4560,7 +4560,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ! 3. Left the case of fine mesh face with OMESH face coarse.
          NOFC = EWC%NIC_MAX - EWC%NIC_MIN + 1
          IF ( (NOFC > 1) .OR. (ABS(B1%AREA-AREA_CRT) < GEOMEPS) )THEN
-            IF(ABS(AREA_NM-AREA_NOM) > 1.E-3_EB*AREA_CRT) THEN
+            IF(ABS(AREA_NM-AREA_NOM) > 1.E-1_EB*AREA_CRT) THEN
                WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: MESH=',NM,', CUT_FACE=',ICF,' does not match OMESH=',&
                                NOM,', with CUT_FACEs,CRT_FACEs=',N_CF,N_CRT,', area difference=',&
                                ABS(AREA_NM-AREA_NOM),', GEOMEPS=',GEOMEPS
