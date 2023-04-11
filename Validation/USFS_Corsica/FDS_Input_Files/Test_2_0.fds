@@ -38,7 +38,11 @@
       COLOR          = 'GREEN'
       SURF_ID        = 'Pine Needles' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
-      STATIC         = .TRUE. /
+      STATIC         = .TRUE.      
+      EMBER_PARTICLE       = T
+      EMBER_DENSITY_THRESHOLD = 70. 
+      EMBER_VELOCITY_THRESHOLD = 0.
+      TRACK_EMBERS         = F /
 
 &INIT PART_ID              = 'Needles'
       XB                   = 0.0,2.0,-0.5,0.5,0,0.055
