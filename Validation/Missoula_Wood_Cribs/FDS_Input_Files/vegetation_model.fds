@@ -27,8 +27,8 @@
       DENSITY = 400.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT_RAMP = 'c_v'
-      A = 36300.
-      E = 60300.
+      A = 1040.
+      E = 61041.
       NU_MATL = 0.25
       MATL_ID = 'CHAR'
       NU_SPEC = 0.74
@@ -45,8 +45,8 @@
       MATL_ID = 'ASH'
       NU_MATL = 0.10
       SPEC_ID = 'CARBON DIOXIDE','OXYGEN'
-      NU_SPEC = 1.375,-0.375
-      HEAT_OF_REACTION= -12000. /
+      NU_SPEC = 2.55,-1.65
+      HEAT_OF_REACTION= -25000. /
 
 &MATL ID = 'ASH'
       DENSITY = 67.
