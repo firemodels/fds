@@ -36,7 +36,8 @@ REAL(EB), PARAMETER :: GEOMQUALITYFCT=1000._EB ! Factor for GEOMs quality check
 REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 ! Threshold cut-cell volume ratio used to define very small cut-cells, tied to NOADVANCE.
-REAL(EB), PARAMETER :: MIN_VOL_FACTOR = 5.E-4_EB
+REAL(EB), PARAMETER :: MIN_VOL_FACTOR   = 5.E-4_EB
+REAL(EB), PARAMETER :: ADIFF_INFO_FACTOR= 1.E-1_EB
 
 INTEGER,  SAVE ::      NGUARD = 6        ! Layers of guard-cells.
 INTEGER,  SAVE ::      CCGUARD= 6 - 2    ! Layers of guard cut-cells.
@@ -313,6 +314,9 @@ INTEGER, SAVE ::      NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WC
 ! Max numbers of link attempts for small faces and cut-cells:
 INTEGER, PARAMETER :: N_LINK_ATTMP = 1, N_LINK_ATTMP_F=50
 
+! Areas per SURF and GEOM:
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FDS_AREA_GEOM
+
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
 
@@ -330,7 +334,7 @@ PUBLIC :: BLOCK_CC_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETU
           FCELL,CC_SOLID,CC_VGSC,CC_CGSC,CC_FGSC,CC_IDCF,CC_UNKZ,CC_GASPHASE,CC_CUTCFE,CC_IDRC,&
           CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_FTYPE_RGGAS, &
           CC_IDCC,CC_IDRA,CC_EGSC,CC_IDCE,CC_INBOUNDARY,CC_UNDEFINED, &
-          CC_NCVARS, CC_UNKH, CC_UNKF, INDEX_UNDEFINED, INIT_CFACE_CELL, NUNKH_LOC, INT_N_EXT_PTS, &
+          CC_NCVARS, CC_UNKH, CC_UNKF, FDS_AREA_GEOM, INDEX_UNDEFINED, INIT_CFACE_CELL, NUNKH_LOC, INT_N_EXT_PTS, &
           INT_P_IND, INT_TMP_IND, INT_VEL_IND, INT_RHO_IND, INT_H_IND, INT_RSUM_IND, INT_MU_IND, INT_MUDNS_IND, INT_RHO0_IND, &
           INT_FV_IND, INT_DHDX_IND, INT_WCEN_IND, INT_VELS_IND, CC_ETYPE_EP, CC_ETYPE_SCINB, CC_FTYPE_SVERT, &
           CC_ETYPE_RCGAS, CC_ETYPE_RGGAS, CC_ETYPE_CFGAS, &
@@ -4069,14 +4073,18 @@ ENDDO MESH_LOOP_2
 ! Third loop, 1. Compute final FDS area integrals by SURF_ID and GEOM.
 !             2. Compute input areas by SURF_ID and GEOM. First sum over GEOM FACES SURF_IDs,
 !                then VENTS input surfaces are assigned to corresponding GEOMs and SURF_IDs if present (VENTs take precedence).
+ALLOCATE(FDS_AREA_GEOM(0:N_SURF,N_GEOMETRY)); FDS_AREA_GEOM = 0._EB
 MESH_LOOP_3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
-
-   ! To DO.
-
+   DO CFACE_INDEX_LOCAL=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+      CFA  => CFACE(CFACE_INDEX_LOCAL)
+      ICF  =  CFA%CUT_FACE_IND1; IFACE=  CFA%CUT_FACE_IND2
+      I    =  CUT_FACE(ICF)%BODTRI(1,IFACE)
+      IF(I>0) FDS_AREA_GEOM(CFA%SURF_INDEX,I) = FDS_AREA_GEOM(CFA%SURF_INDEX,I) + CFA%AREA
+   ENDDO
 ENDDO MESH_LOOP_3
 ! Sum FDS and INPUT areas per SURF_ID and GEOM (all reduce sum):
-! To DO.
+CALL MPI_ALLREDUCE(MPI_IN_PLACE, FDS_AREA_GEOM, (N_SURF+1)*N_GEOMETRY, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
 
 ! Fourth Loop: Assign AREA_ADJUST for CFACEs, and assign BC info to CFACEs:
 MESH_LOOP_4 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -4560,7 +4568,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ! 3. Left the case of fine mesh face with OMESH face coarse.
          NOFC = EWC%NIC_MAX - EWC%NIC_MIN + 1
          IF ( (NOFC > 1) .OR. (ABS(B1%AREA-AREA_CRT) < GEOMEPS) )THEN
-            IF(ABS(AREA_NM-AREA_NOM) > 1.E-1_EB*AREA_CRT) THEN
+            IF(ABS(AREA_NM-AREA_NOM) > ADIFF_INFO_FACTOR*AREA_CRT) THEN
                WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: MESH=',NM,', CUT_FACE=',ICF,' does not match OMESH=',&
                                NOM,', with CUT_FACEs,CRT_FACEs=',N_CF,N_CRT,', area difference=',&
                                ABS(AREA_NM-AREA_NOM),', GEOMEPS=',GEOMEPS
@@ -8630,10 +8638,6 @@ CASE(INTEGER_THREE)
       ICC = CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,IFACE)
       JCC = CUT_FACE(ICF)%CELL_LIST(3,LOW_IND,IFACE)
 
-      ! Here add VOLUME_FLOW case.. etc.
-      ! ...
-      ! To DO.
-
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
       CFA%TMP_G = TMP_0(CUT_FACE(ICF)%IJK(KAXIS))
       IF (SF%TMP_FRONT > 0._EB) THEN
@@ -8649,7 +8653,10 @@ CASE(INTEGER_THREE)
       B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
       ! Assign normal velocity to CFACE from SURF input:
       B1%U_NORMAL_0 = SF%VEL
-      ! Assign nomal velocity from MASS_FLUX_TOTAL :
+      ! Assign normal velocity from VOLUME_FLOW :
+      IBOD =CUT_FACE(ICF)%BODTRI(1,IFACE)
+      IF(IBOD>0 .AND. ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%VOLUME_FLOW / FDS_AREA_GEOM(SURF_INDEX,IBOD)
+      ! Assign normal velocity from MASS_FLUX_TOTAL :
       IF(ABS(SF%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%MASS_FLUX_TOTAL / RHOA * B1%AREA_ADJUST
       ! Vegetation T_IGN setup:
       B1%T_IGN      = SF%T_IGN
