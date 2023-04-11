@@ -521,6 +521,7 @@ M%IWORK1=0._EB ! Radiation intensity and density
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
+   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE .OR. IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -528,15 +529,7 @@ DO N=1,N_INIT
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                N2 = M%IWORK1(I,J,K)
-               IF (N2 > 0) THEN
-                  IF (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE) THEN
-                     IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
-                        IN2 => INITIALIZATION(N2)
-                        CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
-                        INIT_OVERLAP1(N,N2)=.TRUE.
-                     ENDIF
-                  ENDIF
-               ELSE
+               IF (N2 < 1) THEN
                   M%IWORK1(I,J,K) = N
                   M%UII(I,J,K)            = 4._EB*SIGMA*M%TMP(I,J,K)
                   M%RHO(I,J,K) = P_INF/(M%TMP(I,J,K)*M%RSUM(I,J,K))
