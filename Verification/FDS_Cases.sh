@@ -560,7 +560,7 @@ $QFDS -d Species mass_balance_gas_volume.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
 $QFDS -d Species mass_balance_reac_2.fds
 $QFDS -p 3 -d Species favre_test.fds
-$QFDS -p 2 -d  Species 1_step_2_step_compare.fds
+$QFDS -p 2 -d Species 1_step_2_step_compare.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays adiabatic_surf_temp_spray.fds
