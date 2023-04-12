@@ -13997,19 +13997,6 @@ ORIENTATION_LOOP: DO IS=1,3
 
       ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-      ! Determine if the cell edge is an external corner:
-      CORNER_EDGE=.FALSE.
-      N_SOLID_CELLS_ON_EDGE=0
-      SELECT CASE(IEC)
-      CASE(1)
-         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II,JJ:JJ+1,KK:KK+1,CC_CGSC)==CC_SOLID)
-      CASE(2)
-         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ,KK:KK+1,CC_CGSC)==CC_SOLID)
-      CASE(3)
-         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ:JJ+1,KK,CC_CGSC)==CC_SOLID)
-      END SELECT
-      IF (N_SOLID_CELLS_ON_EDGE==1) CORNER_EDGE=.TRUE.
-
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
       VEL_GHOST = 0._EB
@@ -14019,16 +14006,32 @@ ORIENTATION_LOOP: DO IS=1,3
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
          CASE (NO_SLIP_BC)
-            IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+            VEL_GHOST = 2._EB*VEL_T - VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
          CASE (WALL_MODEL_BC)
+
+            ! Determine if the cell edge is an external corner:
+            CORNER_EDGE=.FALSE.
+            N_SOLID_CELLS_ON_EDGE=0
+            SELECT CASE(IEC)
+            CASE(1)
+               N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II,JJ:JJ+1,KK:KK+1,CC_CGSC)==CC_SOLID)
+            CASE(2)
+               N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ,KK:KK+1,CC_CGSC)==CC_SOLID)
+            CASE(3)
+               N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ:JJ+1,KK,CC_CGSC)==CC_SOLID)
+            END SELECT
+            IF (N_SOLID_CELLS_ON_EDGE==1) CORNER_EDGE=.TRUE.
+
             NU = MU_FACE/RHO_FACE
             CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SURFACE(SURF_INDEX)%ROUGHNESS,DXN_STRM_UB,VEL_GAS-VEL_T)
             ! Finally OMEGA, TAU:
-            ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
-            ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
-            IF (.NOT.CORNER_EDGE) VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
+            ! SLIP_COEF = -1, no slip,   VEL_GHOST = 2*VEL_T - VEL_GAS
+            ! SLIP_COEF =  0, half slip, VEL_GHOST = VEL_T
+            ! SLIP_COEF =  1, free slip, VEL_GHOST = VEL_GAS
+            IF (CORNER_EDGE) SLIP_FACTOR = 0 ! corner (done to match VELOCITY_BC)
+            VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
             DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
       END SELECT
