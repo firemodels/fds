@@ -60,7 +60,7 @@
       NU_SPEC               = 2.49,-1.65
       MATL_ID               = 'ASH'
       NU_MATL               = 0.16
-      HEAT_OF_REACTION      = -12000. /
+      HEAT_OF_REACTION      = -25000. /
 
 &MATL ID                    = 'ASH'
       DENSITY               = 67.

@@ -1,6 +1,6 @@
 &HEAD CHID='char_oxidation_2', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=30, DT=0.001, WALL_INCREMENT=1 /
+&TIME T_END=25, DT=0.001, WALL_INCREMENT=1 /
 
 &MISC TMPA=800./
 &CLIP MAXIMUM_TEMPERATURE=5000 /
@@ -59,8 +59,8 @@
       DENSITY            = 500.
       CONDUCTIVITY       = 50.1
       SPECIFIC_HEAT      = 1.0
-      A                  = 36300.
-      E                  = 60300.
+      A                  = 1040.
+      E                  = 61041.
       SPEC_ID            = 'WOOD FUEL VAPOR'
       NU_SPEC            = 0.75
       MATL_ID            = 'CHAR'
@@ -78,7 +78,7 @@
       NU_SPEC            = -1.65,2.63
       MATL_ID            = 'ASH'
       NU_MATL            = 0.02
-      HEAT_OF_REACTION   = -12000. /
+      HEAT_OF_REACTION   = -25000. /
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.

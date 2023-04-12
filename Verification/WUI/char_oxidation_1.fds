@@ -1,6 +1,6 @@
 &HEAD CHID='char_oxidation_1', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=40 /
+&TIME T_END=25 /
 
 &MESH IJK=10,10,45, XB=-0.5,0.5,-0.5,0.5,0,4.5 /
 
@@ -22,8 +22,8 @@
       DENSITY            = 514.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT_RAMP = 'c_v'
-      A                  = 36300.
-      E                  = 60300.
+      A                  = 1040.
+      E                  = 61041.
       MATL_ID            = 'CHAR'
       NU_MATL            = 0.25
       SPEC_ID            = 'FUEL VAPOR'
@@ -46,7 +46,7 @@
       NU_MATL            = 0.04
       NU_SPEC            = 8.16,-7.2
       SPEC_ID            = 'PRODUCTS','AIR'
-      HEAT_OF_REACTION   = -12000. /
+      HEAT_OF_REACTION   = -25000. /
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.
