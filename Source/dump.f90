@@ -2553,29 +2553,51 @@ SELECT CASE (SIM_MODE)
 END SELECT
 IF (SIM_MODE/=DNS_MODE) THEN
    SELECT CASE (TURB_MODEL)
-      CASE(CONSMAG);   WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
-      CASE(DYNSMAG);   WRITE(LU_OUTPUT,'(A)')        '   Eddy Viscosity: Dynamic Smagorinsky Model'
-      CASE(DEARDORFF); WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Deardorff Model (C_DEARDORFF = ',C_DEARDORFF,')'
-      CASE(VREMAN);    WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Vreman Model (C_VREMAN = ',C_VREMAN,')'
-      CASE(WALE);      WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
+      CASE(CONSMAG)
+         WRITE(LU_OUTPUT,'(A,1X,A,F4.2,A)') '   Eddy Viscosity Model:',' Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
+      CASE(DYNSMAG)
+         WRITE(LU_OUTPUT,'(A,1X,A)')        '   Eddy Viscosity Model:',' Dynamic Smagorinsky'
+      CASE(DEARDORFF)
+         WRITE(LU_OUTPUT,'(A,1X,A,F4.2,A)') '   Eddy Viscosity Model:',' Deardorff (C_DEARDORFF = ',C_DEARDORFF,')'
+      CASE(VREMAN)
+         WRITE(LU_OUTPUT,'(A,1X,A,F4.2,A)') '   Eddy Viscosity Model:',' Vreman (C_VREMAN = ',C_VREMAN,')'
+      CASE(WALE)
+         WRITE(LU_OUTPUT,'(A,1X,A,F4.2,A)') '   Eddy Viscosity Model:',' WALE (C_WALE = ',C_WALE,')'
    END SELECT
    DO N=0,N_SURF
       SF=>SURFACE(N)
       IF ( N==DEFAULT_SURF_INDEX .OR. SF%USER_DEFINED .OR. (HVAC_SOLVE .AND. N==HVAC_SURF_INDEX) ) THEN
          SELECT CASE (SF%NEAR_WALL_TURB_MODEL)
             CASE(WALE)
-               WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID),' Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
+               WRITE(LU_OUTPUT,'(A,A,A,1X,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
+                  ' Eddy Viscosity Model:',' WALE (C_WALE = ',C_WALE,')'
             CASE(CONSMAG)
-               WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
-                  ' Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
+               WRITE(LU_OUTPUT,'(A,A,A,1X,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
+                  ' Eddy Viscosity Model:',' Smagorinsky with Van Driest damping (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
             CASE(CONSTANT_EDDY_VISCOSITY)
-               WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
-                  ' Eddy Viscosity: Constant (NU_EDDY = ',SF%NEAR_WALL_EDDY_VISCOSITY,' m^2/s)'
+               WRITE(LU_OUTPUT,'(A,A,A,1X,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
+                  ' Eddy Viscosity Model:',' Constant (NU_EDDY = ',SF%NEAR_WALL_EDDY_VISCOSITY,' m^2/s)'
          END SELECT
       ENDIF
    ENDDO
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
+ENDIF
+
+! Print out pressure solver information
+
+WRITE(LU_OUTPUT,'(//A/)')  ' Pressure solver information'
+SELECT CASE(PRES_FLAG)
+   CASE(FFT_FLAG);    WRITE(LU_OUTPUT,'(3X,A,28X,A)') 'Solver:',    'FFT'
+   CASE(GLMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'GLMAT'
+   CASE(UGLMAT_FLAG); WRITE(LU_OUTPUT,'(3X,A,25X,A)') 'Solver:', 'UGLMAT'
+   CASE(ULMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT'
+END SELECT
+WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Velocity tolerance (m/s):   ',VELOCITY_TOLERANCE
+WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Press eqn res tol (1/s^2):  ',PRESSURE_TOLERANCE
+WRITE(LU_OUTPUT,'(3X,A,8X,I0)')   'Max pressure iterations:    ',MAX_PRESSURE_ITERATIONS
+IF (SUSPEND_PRESSURE_ITERATIONS) THEN
+WRITE(LU_OUTPUT,'(3X,A,F10.2)')   'Iteration suspend factor:   ',ITERATION_SUSPEND_FACTOR
 ENDIF
 
 ! Print out information about background pressure and temperature stratification
