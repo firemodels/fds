@@ -8480,24 +8480,23 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   IF (SF%MASS_FRACTION(NS) > 0._EB .AND. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID)) THEN
                      NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
                      RN => REACTION(NR)
+                     IF (DUPLICATE_FUEL(NR)) THEN
+                        WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses MLRPUA and species ' // &
+                                             TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
                      IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-                           IF (DUPLICATE_FUEL(NR)) THEN
-                           WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and species ' // &
-                                                TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
-                           CALL SHUTDOWN(MESSAGE) ; RETURN
-                        ENDIF
                         SF%ADJUST_BURN_RATE(NS) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1) * &
                                                   REACTION(1)%HOC_COMPLETE/RN%HOC_COMPLETE
-                      ENDIF
-                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS) * SF%MLRPUA
+                     ENDIF
                   ENDIF
                ENDDO
+               SF%MASS_FLUX = SF%MASS_FRACTION * SF%MLRPUA
                IF (SUM(SF%MASS_FLUX) < TWO_EPSILON_EB) THEN
                   WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
                                        ' uses MLRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               SF%MASS_FLUX = SF%MASS_FRACTION * SF%MLRPUA / SUM(SF%MASS_FLUX)
                DO NS=1,N_TRACKED_SPECIES
                   IF (SF%MASS_FLUX(NS) > TWO_EPSILON_EB) SF%RAMP(NS) = SF%RAMP(TIME_HEAT)
                ENDDO
