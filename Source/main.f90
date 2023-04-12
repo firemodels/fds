@@ -326,7 +326,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 ! Init centroid data (i.e. rho,zz) on cut-cells, cut-faces and CFACEs.
-IF (CC_IBM) CALL INIT_CUTCELL_DATA(T_BEGIN,DT)
+IF (CC_IBM) CALL INIT_CUTCELL_DATA(T_BEGIN,DT,FIRST_CALL=.TRUE.)
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TGA_SURF_INDEX>0) CYCLE
@@ -394,7 +394,7 @@ IF (RESTART) THEN
       STOP_STATUS = SETUP_STOP
       IF (MY_RANK==0) WRITE(LU_ERR,*) 'ERROR: RESTART initial time equals T_END'
    ENDIF
-   IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
+   IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT,FIRST_CALL=.FALSE.)  ! Init centroid data (rho,zz) on cut-cells and cut-faces.
    CALL STOP_CHECK(1)
 ENDIF
 
@@ -2102,7 +2102,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 ENDDO
 
-! Each mesh sends its neighbors an array of WALL and THIN_WALL indices (ITEM_INDEX) that it expects to be SENT, 
+! Each mesh sends its neighbors an array of WALL and THIN_WALL indices (ITEM_INDEX) that it expects to be SENT,
 ! along with the SURF_INDEX for each WALL or THIN_WALL.
 
 CALL POST_RECEIVES(9)
@@ -2664,7 +2664,7 @@ RECEIVING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Exchange BACK_WALL information
 
       IF (CODE==8) THEN
-         OS => M3%WALL_SEND_BUFFER 
+         OS => M3%WALL_SEND_BUFFER
          N_REQ=N_REQ+1 ; CALL MPI_IRECV(OS%N_ITEMS,1,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
          OS => M3%THIN_WALL_SEND_BUFFER
          N_REQ=N_REQ+1 ; CALL MPI_IRECV(OS%N_ITEMS,1,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
