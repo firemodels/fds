@@ -3740,6 +3740,19 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 
 
 
+\section{Single Step and Two Step Chemistry Heat of Combustion}
+\label{1_step_2_step}
+
+This verification case checks that single-step and two-step simple chemistry results in the same total heat of combustion. The case consists of two 1 m$^3$ domains with a 20 kW fire in each (defined using {\textct MLRPUA}) that burns for 8.5~s. Each burner is assigned the fuel C$_3$H$_8$ (as a user defined species). In one mesh, single-step chemistry is used, and in the other mesh, two-step chemistry is used. The total heat released in both meshes should be the same as shown in Fig.~\ref{fig:1_step_2_step}.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare}
+	\caption[Result of the 1\_step\_2\_step\_compare test case].Comparison of the heat release rate for single-step an two-step simple chemistry with the 1\_step\_2\_step\_compare test case.}
+	\label{fig:1_step_2_step}
+\end{figure}
+
+
+
 \section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) ) }
 
 The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation due to the combustion gases. The FED value is calculated as
