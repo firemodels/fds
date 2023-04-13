@@ -1409,7 +1409,7 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE INITIALIZE_MESH_DUMPS
 
 SUBROUTINE WRITE_STL_FILE
-   ! Parts of this subroutine use conent from stack overflow
+   ! Parts of this subroutine use content from stack overflow
    ! Original question: https://stackoverflow.com/questions/34144786
    ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
    !character(len=*), parameter :: fname = 'fds.stl'
