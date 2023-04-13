@@ -51,7 +51,7 @@ PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STA
        TIMINGS,FLUSH_GLOBAL_BUFFERS,FLUSH_LOCAL_BUFFERS,READ_RESTART,WRITE_DIAGNOSTICS, &
        WRITE_SMOKEVIEW_FILE,DUMP_MESH_OUTPUTS,UPDATE_GLOBAL_OUTPUTS,DUMP_DEVICES,DUMP_HRR,DUMP_MASS,DUMP_CONTROLS,&
        INITIALIZE_DIAGNOSTIC_FILE,DUMP_RESTART,DUMP_HVAC,&
-       DUMP_UVW,DUMP_GEOM,UPDATE_DEVICES_2,WRITE_DEVC_CTRL_LOG
+       DUMP_UVW,DUMP_GEOM,UPDATE_DEVICES_2,WRITE_DEVC_CTRL_LOG,WRITE_STL_FILE
 
 CONTAINS
 
@@ -507,6 +507,11 @@ ENDIF
 IF (WRITE_DEVC_CTRL) THEN
    LU_DEVC_CTRL = GET_FILE_NUMBER()
    FN_DEVC_CTRL = TRIM(CHID)//'_devc_ctrl_log.csv'
+ENDIF
+
+IF (WRITE_STL) THEN
+   LU_STL = GET_FILE_NUMBER()
+   FN_STL = TRIM(CHID)//'.stl'
 ENDIF
 
 END SUBROUTINE ASSIGN_FILE_NAMES
@@ -1403,6 +1408,123 @@ ENDDO
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE INITIALIZE_MESH_DUMPS
 
+SUBROUTINE WRITE_STL_FILE
+   ! Parts of this subroutine use conent from stack overflow
+   ! Original question: https://stackoverflow.com/questions/34144786
+   ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
+   !character(len=*), parameter :: fname = 'fds.stl'
+   INTEGER :: I,IOS,N,FACES(12, 3)
+   CHARACTER(LEN=80) :: title
+   REAL(FB) :: VERTICES(8,3), XB(6)
+   INTEGER(IB4) :: color(3), one
+   INTEGER(IB32) :: NUM_FACETS
+   
+   title = FN_STL
+    
+   FACES(1,:) = (/1,4,2/)
+   FACES(2,:) = (/2,4,3/)
+   FACES(3,:) = (/1,5,8/)
+   FACES(4,:) = (/1,8,4/)
+   FACES(5,:) = (/5,6,7/)
+   FACES(6,:) = (/5,7,8/)
+   FACES(7,:) = (/6,2,3/)
+   FACES(8,:) = (/6,3,7/)
+   FACES(9,:) = (/3,4,7/)
+   FACES(10,:) = (/4,8,7/)
+   FACES(11,:) = (/1,2,6/)
+   FACES(12,:) = (/1,6,5/)
+   
+   OPEN(UNIT=LU_STL, FILE=title, ACCESS='stream', STATUS='replace', &
+      ACTION='write', IOSTAT=IOS)
+   CALL check(IOS, 'open')
+   WRITE(LU_STL, IOStat=IOS) title
+   CALL check(IOS, 'write title')
+   NUM_FACETS = M%N_OBST*12
+   WRITE(LU_STL, IOStat=IOS) NUM_FACETS
+   CALL check(IOS, 'write number of facets')
+   
+   DO N=1,M%N_OBST
+      OB=>M%OBSTRUCTION(N)
+      XB(:) = (/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/)
+      !color(:) = OB%SURF_INDEX(-1),OB%SURF_INDEX(1),OB%SURF_INDEX(-2),&
+      !OB%SURF_INDEX(2),OB%SURF_INDEX(-3),OB%SURF_INDEX(3)
+      VERTICES = get_vertices(XB)
+    
+      DO I=1,12
+         !CALL write_facet_c(u, &
+         !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
+         CALL write_facet(LU_STL, &
+            VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
+      END DO
+
+   ENDDO
+   CLOSE(LU_STL, IOSTAT=IOS)
+   CALL check(IOS, 'close')
+CONTAINS
+
+   FUNCTION get_vertices(XB)
+      REAL(FB), INTENT(IN) :: XB(6)
+      REAL(FB) :: get_vertices(8,3)
+      get_vertices(1,:) = (/XB(1),XB(3),XB(5)/)
+      get_vertices(2,:) = (/XB(2),XB(3),XB(5)/)
+      get_vertices(3,:) = (/XB(2),XB(4),XB(5)/)
+      get_vertices(4,:) = (/XB(1),XB(4),XB(5)/)
+      get_vertices(5,:) = (/XB(1),XB(3),XB(6)/)
+      get_vertices(6,:) = (/XB(2),XB(3),XB(6)/)
+      get_vertices(7,:) = (/XB(2),XB(4),XB(6)/)
+      get_vertices(8,:) = (/XB(1),XB(4),XB(6)/)
+   END FUNCTION get_vertices
+    
+   SUBROUTINE check(IOS, operation)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: IOS
+      CHARACTER(LEN=*), INTENT(IN) :: operation
+      IF (IOS == 0) RETURN
+      WRITE(*, '(A, I0, 2A)') "Encountered error ", IOS, " while performing ", operation
+      STOP 1
+   END SUBROUTINE check
+
+   SUBROUTINE write_facet(u, vertex1, vertex2, vertex3)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: u
+      REAL(FB), DIMENSION(3), INTENT(IN) :: vertex1, vertex2, vertex3
+      REAL(FB), DIMENSION(3) :: normal
+      INTEGER(IB16), PARAMETER :: zero = 0
+      
+      normal = calc_normal(vertex1, vertex2, vertex3)
+      WRITE(u, IOSTAT=IOS) normal
+      CALL check(IOS, 'write normal')
+      WRITE(u, IOSTAT=IOS) vertex1
+      CALL check(IOS, 'write vertex')
+      WRITE(u, IOSTAT=IOS) vertex2
+      CALL check(IOS, 'write vertex')
+      WRITE(u, IOSTAT=IOS) vertex3
+      CALL check(IOS, 'write vertex')
+      WRITE(u, IOSTAT=IOS) zero
+      CALL check(IOS, 'write zero')
+   END SUBROUTINE write_facet
+
+   FUNCTION calc_normal(vec1, vec2, vec3)
+      IMPLICIT NONE
+      REAL(FB), DIMENSION(3), INTENT(IN) :: vec1, vec2, vec3
+      REAL(FB), DIMENSION(3) :: calc_normal
+      REAL(FB), DIMENSION(3) :: d1, d2
+      d1 = vec2 - vec1
+      d2 = vec3 - vec1
+      calc_normal(1) = d1(2) * d2(3) - d1(3) * d2(2)
+      calc_normal(2) = d1(3) * d2(1) - d1(1) * d2(3)
+      calc_normal(3) = d1(1) * d2(2) - d1(2) * d2(1)
+      calc_normal = calc_normal / norm(calc_normal)
+   END FUNCTION calc_normal
+
+   FUNCTION norm(vec)
+      IMPLICIT NONE
+      REAL(FB), DIMENSION(3), INTENT(IN) :: vec
+      REAL(FB) :: norm
+      norm = sqrt(vec(1)**2 + vec(2)**2 + vec(3)**2)
+   END FUNCTION norm
+
+END SUBROUTINE WRITE_STL_FILE
 
 !> \brief Write information into the Smokeview (.smv) file
 
