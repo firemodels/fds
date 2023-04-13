@@ -1413,7 +1413,7 @@ SUBROUTINE WRITE_STL_FILE
    ! Original question: https://stackoverflow.com/questions/34144786
    ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
    !character(len=*), parameter :: fname = 'fds.stl'
-   INTEGER :: I,IOS,N,FACES(12, 3)
+   INTEGER :: I,IOS,N,NM,FACES(12, 3)
    CHARACTER(LEN=80) :: title
    REAL(FB) :: VERTICES(8,3), XB(6)
    INTEGER(IB4) :: color(3), one
@@ -1439,24 +1439,30 @@ SUBROUTINE WRITE_STL_FILE
    CALL check(IOS, 'open')
    WRITE(LU_STL, IOStat=IOS) title
    CALL check(IOS, 'write title')
-   NUM_FACETS = M%N_OBST*12
+   
+   NUM_FACETS = 0
+   DO NM=1,NMESHES
+      M => MESHES(NM)
+      NUM_FACETS = NUM_FACETS + M%N_OBST*12
+   END DO
    WRITE(LU_STL, IOStat=IOS) NUM_FACETS
    CALL check(IOS, 'write number of facets')
-   
-   DO N=1,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      XB(:) = (/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/)
-      !color(:) = OB%SURF_INDEX(-1),OB%SURF_INDEX(1),OB%SURF_INDEX(-2),&
-      !OB%SURF_INDEX(2),OB%SURF_INDEX(-3),OB%SURF_INDEX(3)
-      VERTICES = get_vertices(XB)
-    
-      DO I=1,12
-         !CALL write_facet_c(u, &
-         !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
-         CALL write_facet(LU_STL, &
-            VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
+   DO NM=1,NMESHES
+      M => MESHES(NM)
+      DO N=1,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         XB(:) = (/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/)
+         !color(:) = OB%SURF_INDEX(-1),OB%SURF_INDEX(1),OB%SURF_INDEX(-2),&
+         !OB%SURF_INDEX(2),OB%SURF_INDEX(-3),OB%SURF_INDEX(3)
+         VERTICES = get_vertices(XB)
+         
+         DO I=1,12
+            !CALL write_facet_c(u, &
+            !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
+            CALL write_facet(LU_STL, &
+               VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
+         END DO
       END DO
-
    ENDDO
    CLOSE(LU_STL, IOSTAT=IOS)
    CALL check(IOS, 'close')
