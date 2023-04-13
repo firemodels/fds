@@ -131,6 +131,15 @@ The Fire Dynamics Simulator, in various forms, has been under development for al
 \item Paul Hart of Swiss Re, GAP Services, and Pravinray Gandhi of Underwriters Laboratories provided useful suggestions about water droplet transport on solid objects.
 \item Fran\c{c}ois Demouge of the Centre Scientifique et Technique du B\^{a}timent (CSTB) in France assisted with implementation of synthetic turbulence inflow boundary conditions.
 \item Max Gould, Summer Undergraduate Research Fellow, assisted in the testing and verification of non-standard boundary treatment methods.
+\item Salah Benkorichi at BB7, UK, helped develop the verification cases for 3D heat transfer.
+\item Daniel Haarhoff of J\"ulich Supercomputing Centre, Germany, helped to implement OpenMP directives and profile the code for FDS v6.
+\item Timo Korhonen of VTT, Finland, was the principle developer of FDS+Evac.
+\item Vivien Lecoustre, while at the University of Maryland, College Park, improved RadCal.
+\item Anna Matala, VTT, Finland, helped develop the 1D pyrolysis model and pyrolysis kinetics parameter estimation methods.
+\item Kristopher Overholt, while a post-doc at NIST, was the prinicipal developer of ``firebot'', the FDS continuous integration framework.
+\item Benjamin Ralph, University of Edinburgh, UK, helped to develop mass transport in the HVAC model.
+\item Topi Sikanen, VTT, Finland, worked on the droplet and evaporation algorithms.
+\item Ben Trettel, The University of Texas at Austin, developed high-order droplet tracking methods and primary droplet breakup models.
 \end{itemize}
 Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
 ``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
@@ -12789,7 +12798,7 @@ If a compiled version of FDS exists for the machine on which the calculation is 
 Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2018 edition). A {\ct makefile} is available in the \href{https://github.com/firemodels/fds/tree/master/Build}{Build directory of the FDS GitHub repository} that contains platform specific options for compilation. Note the following:
 \begin{itemize}
 \item The source code consists entirely of Fortran statements organized into 32 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries. 
+\item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries.
 \end{itemize}
 
 \begin{table}[ht]
