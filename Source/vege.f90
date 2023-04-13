@@ -397,7 +397,7 @@ DO JJG=1,JBAR
 
          ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
 
-         UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
+         UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))  ! Bova et al., Eq. A2
 
          ! Factor 60 converts U from m/s to m/min which is used in elliptical model.
 
@@ -407,7 +407,7 @@ DO JJG=1,JBAR
 
          ! Components of Rothermel wind factor - affects spread rate
 
-         ROTH_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
+         ROTH_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
 
          IF (UMF_MAG>TWO_EPSILON_EB) THEN
             PHI_W_X = ROTH_FACTOR*UMF_X/UMF_MAG
@@ -457,7 +457,7 @@ DO JJG=1,JBAR
 
          ENDIF
 
-         UMF(IIG,JJG) = SQRT(UMF_X**2 + UMF_Y**2)
+         UMF(IIG,JJG) = SQRT(UMF_X**2 + UMF_Y**2)  ! U in Eq. A6, Bova et al.
 
          ! The following two lines convert ATAN2 output to compass system (0 to 2 pi CW from +Y-axis)
 
@@ -471,7 +471,7 @@ DO JJG=1,JBAR
 
       ENDIF IF_ELLIPSE
 
-      IF (SF%VEG_LSET_ROS_00 > 0._EB) ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS_00*(1._EB + PHI_WS(IIG,JJG))
+      IF (SF%VEG_LSET_ROS_00 > 0._EB) ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS_00*(1._EB + PHI_WS(IIG,JJG))  ! Bova et al., Eq. A3
 
    ENDDO
 ENDDO
@@ -757,20 +757,25 @@ FLUX_ILOOP: DO J=1,JBAR
 
          ROS_TMP = ROS_HEAD(I,J)
 
-         ! Mag of wind speed at midflame ht must be in units of m/s here
+         ! Magnitude of wind speed at midflame height must be in units of m/s here
+
          UMF_DUM = UMF(I,J)/60.0_EB
 
-         ! Length to breadth ratio of ellipse based on effective UMF
+         ! Length to breadth ratio of ellipse based on effective UMF (Bova et al., Eq. A6)
+
          LB = 0.936_EB * EXP(0.2566_EB * UMF_DUM) + 0.461_EB * EXP(-0.1548_EB * UMF_DUM) - 0.397_EB
 
          ! Constraint LB max = 8 from Finney 2004
-         LB = MAX(1.0_EB,MIN(LB,8.0_EB))
-         LBD = SQRT(LB**2 - 1.0_EB)
+
+         LB = MAX(1.0_EB,MIN(LB,8.0_EB))  ! (Bova et al., Eq. A7)
 
          ! Head to back ratio based on LB
+
+         LBD = SQRT(LB**2 - 1.0_EB)
          HB = (LB + LBD) / (LB - LBD)
 
          ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards
+
          B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
          B_ELPS2 = B_ELPS**2
          A_ELPS =  B_ELPS / LB
@@ -779,6 +784,7 @@ FLUX_ILOOP: DO J=1,JBAR
 
          ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990
          ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015
+
          AROS  = XSF*COS_THETA - YSF*SIN_THETA
          BROS  = XSF*SIN_THETA + YSF*COS_THETA
          DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
@@ -789,10 +795,10 @@ FLUX_ILOOP: DO J=1,JBAR
             DENOM = 0._EB
          ENDIF
 
-!        This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in
-!        Bova et al. 2015 IJWF 2015
-         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA
-         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA
+         ! This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in Bova et al. 2015 IJWF 2015
+
+         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA  ! Bova et al., Eq. A8
+         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA  ! Bova et al., Eq. A9
 
          ! Project spread rates from slope to horizontal plane
 

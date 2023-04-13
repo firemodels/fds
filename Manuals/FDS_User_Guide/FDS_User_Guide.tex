@@ -7143,6 +7143,8 @@ To invoke the level set feature, you {\em must} set {\ct LEVEL\_SET\_MODE} on th
 \item[{\ct LEVEL\_SET\_MODE=3}] The wind field follows the terrain, but there is no actual fire in the simulation. It is just front-tracking.
 \item[{\ct LEVEL\_SET\_MODE=4}] The wind and fire are fully-coupled. When the fire front arrives at a given surface cell, it burns for a finite duration and with a heat release per unit area provided as part of the fuel model.
 \end{description}
+For Modes 2 through 4, the wind speed and direction that are used in the level set equation are taken from the first grid cell above ground level.
+
 Regardless of the mode, the front propagation is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
 &SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=0., COLOR='RED' /
