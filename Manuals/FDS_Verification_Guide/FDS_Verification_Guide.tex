@@ -2971,7 +2971,7 @@ The results provide an illustration of numerical errors due to both angular reso
 \section{Radiation from a Polygonal Plate (\texorpdfstring{\textct{radiating\_polygon}}{radiating\_polygon}) }
 \label{radiating_polygon}
 
-This example is similar to the one presented in Section~\ref{radiation_in_a_box}, except now the radiating plate is a polygon with sides of even length. The incident radiation heat flux from an $n$-sided polygon with temperature, $T=1000$~$^\circ$, is given by the formula~\cite{Siegel:1}:
+This example is similar to the one presented in Sec.~\ref{radiation_in_a_box}, except now the radiating plate is a polygon with sides of even length. The incident radiation heat flux from an $n$-sided polygon with temperature, $T=1000$~$^\circ$, is given by the formula~\cite{Siegel:1}:
 \be
    \dq_{\rm r}'' = \sigma \, T^4 \, \frac{n \, H}{\pi \, \sqrt{1+H^2}} \; \tan^{-1} \sqrt{\frac{R^2-H^2}{1+H^2}} \quad ; \quad H=\frac{h}{l} \quad ; \quad R=\frac{r}{l}
    \label{plate_view_factor_eq}
@@ -5909,7 +5909,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 \label{HVAC_tee_loss_1}
 \label{HVAC_tee_loss_2}
 
-These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, \textct{HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, \textct{ HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned. In the first case, the two exhaust ducts are expected to have the same losses as in Section~\ref{HVAC_flow_loss} and the duct velocities should be the same (3~m/s, 2~m/s, and 1~m/s). In the second case, the exhaust ducts now function as supply ducts, and the supply duct now functions as an exhaust duct. This means that only the duct with the specified sees the pressure drop imposed by the tee as the other two ducts are now upstream of the tee. Since those ducts do not have any losses other than the node losses of 1, both ducts have the same total loss and see the same pressure drop. In this case the expected flows are 3~m/s, 1.5~m/s, and 1.5~m/s. FDS results are shown in Fig.~\ref{fig_HVAC_node}.
+These two cases use the same geometry as in Sec.~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, \textct{HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, \textct{ HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned. In the first case, the two exhaust ducts are expected to have the same losses as in Sec.~\ref{HVAC_flow_loss} and the duct velocities should be the same (3~m/s, 2~m/s, and 1~m/s). In the second case, the exhaust ducts now function as supply ducts, and the supply duct now functions as an exhaust duct. This means that only the duct with the specified sees the pressure drop imposed by the tee as the other two ducts are now upstream of the tee. Since those ducts do not have any losses other than the node losses of 1, both ducts have the same total loss and see the same pressure drop. In this case the expected flows are 3~m/s, 1.5~m/s, and 1.5~m/s. FDS results are shown in Fig.~\ref{fig_HVAC_node}.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -6259,7 +6259,7 @@ A single \SI{10}{\meter} long duct connects the two compartments. The duct is in
 \label{HVAC_mass_transport_2}
 \label{HVAC_mass_transport_3}
 \label{HVAC_mass_transport_4}
-A sensitivity analysis is carried out to verify that results are not sensitive to differing methods of defining the same duct network. The general arrangement is identical to that of Section~\ref{HVAC_mass_transport}. Test cases \numrange{1}{4} incorporate the use of increasing numbers of \textct{DUCT}s (one, two, four and five respectively) and affiliated \textct{DUCTNODE}s but the number of cells in the discretized duct (\textct{N\_CELLS}), and hence the cell size, remains identical. We look at species \num{1} mass fraction at the downstream \textct{DUCTNODE} and expect to see no variation in the results for the differing number of \textct{DUCT}s. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_x}.
+A sensitivity analysis is carried out to verify that results are not sensitive to differing methods of defining the same duct network. The general arrangement is identical to that of Sec.~\ref{HVAC_mass_transport}. Test cases \numrange{1}{4} incorporate the use of increasing numbers of \textct{DUCT}s (one, two, four and five respectively) and affiliated \textct{DUCTNODE}s but the number of cells in the discretized duct (\textct{N\_CELLS}), and hence the cell size, remains identical. We look at species \num{1} mass fraction at the downstream \textct{DUCTNODE} and expect to see no variation in the results for the differing number of \textct{DUCT}s. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_x}.
 
 \begin{figure}[ht]
 \centering
@@ -6288,7 +6288,7 @@ The two compartments are connected by two ducts, A and B, each being \SI{10}{\me
 
 \subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
 \label{HVAC_mass_transport_conservation_2}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.6 \colon 0.4\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
+The case setup is identical to that of Sec.~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.6 \colon 0.4\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
@@ -6299,7 +6299,7 @@ The case setup is identical to that of Section~\ref{HVAC_mass_transport_conserva
 
 \subsection{Mass conservation 3 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_3}}{HVAC\_mass\_transport\_conservation\_3})}
 \label{HVAC_mass_transport_conservation_3}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} presents the ideal and FDS total masses of species~1 and 2.
+The case setup is identical to that of Sec.~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} presents the ideal and FDS total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
@@ -6721,13 +6721,13 @@ The results of the three tests on this cone problem can be seen on table~\ref{ta
 
 This case is a variation of problem~\ref{sec:saad_temporal_error} for a domain that includes an imposed cut-cell region, where the cut-cells have same geometry as regular cells. The problem allows us to verify the temporal accuracy of our scalar transport implementation for cut-cells. The problem is defined by the advection of a non-reacting mixture of two fluids with different densities (10:1 ratio) in one cartesian direction. Zero diffusivity is prescribed. For the problem definition and temporal error computation details, we refer the reader to problem~\ref{sec:saad_temporal_error}.
 The domain is defined by a mesh containing $N_x=512$ cells in the $x$ direction, where the domain $x=[-1,1]$. Also, four cells are defined in the $y$ direction as required by the FFT Poisson solver. Note that the problem defined is one-dimensional in $x$.
-On this domain, cut-cells with same shape and size of regular cells are defined in the space $x=[-0.5,0.5]$. The test verifies that the implementation details of this cut-cell region does not affect the temporal order of accuracy seen on the default verification case of section~\ref{sec:saad_temporal_error}.
+On this domain, cut-cells with same shape and size of regular cells are defined in the space $x=[-0.5,0.5]$. The test verifies that the implementation details of this cut-cell region does not affect the temporal order of accuracy seen on the default verification case of Sec.~\ref{sec:saad_temporal_error}.
 
 \title{Temporal order of accuracy}
 
 Three cases are defined corresponding to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, and in the cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
 
-Same procedure as explained in section~\ref{sec:saad_temporal_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The bottom figure shows the order $p$ computed point wise in the $x$ direction for explicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in section~\ref{sec:saad_temporal_error}.
+Same procedure as explained in Sec.~\ref{sec:saad_temporal_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The bottom figure shows the order $p$ computed point wise in the $x$ direction for explicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in Sec.~\ref{sec:saad_temporal_error}.
 The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells is \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_l2_norm}\!.
 
 % Figure Saad_CC:
@@ -6746,9 +6746,9 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 
 
 We set to test the manufactured solution test case~\ref{sec:shunn_mms} for scalar transport, including an internal region of the two dimensional domain where cut-cells with same shape and size as regular Cartesian cells are artificially defined. This problem allows us to check the overall accuracy (spatial+temporal) of the cut-cell implementation for scalar transport on the cut-cell region.
-The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in section~\ref{sec:shunn_mms}.
+The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in Sec.~\ref{sec:shunn_mms}.
 
-The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in section~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the base SSPRK2 integration method defined in FDS.
+The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in Sec.~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the base SSPRK2 integration method defined in FDS.
 The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry. See figure~\texttt{fig:smokeview\_fig}.
 
 
@@ -6756,7 +6756,7 @@ The domain is defined on a square of length ($L=2$ m), with periodicity prescrib
 % Figure:
 
 
-Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on Sec.~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on Sec.~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
 
 
 % Figure Shunn_CC:
@@ -7164,7 +7164,7 @@ Three geometry conservation tests can be defined for the polyhedra definition ar
        V_\Omega=\sum_{nm=1}^M {V_{nm}} \: \: ; \: \: V_{nm}=L_{x,nm} L_{y,nm} L_{z,nm}
     \end{equation}
     %
-    where $L_{x,nm}$, $L_{y,nm}$ and $L_{z,nm}$ are the $nm$ mesh sizes in each cartesian direction ($M=1$, $L_{x,1}=3D_B$, $L_{y,1}=3D_B$ and $L_{z,1}=8D_B$ in the cone problem of section~\ref{cone_test}). The discrete volume of the solid can be computed from the triangulation applying the divergence theorem to a field $\mathbf{F}_v=x \mathbf{\hat{i}}$, such that $\nabla \cdot \mathbf{\hat{F}}_v=1$, to the surface triangles:
+    where $L_{x,nm}$, $L_{y,nm}$ and $L_{z,nm}$ are the $nm$ mesh sizes in each cartesian direction ($M=1$, $L_{x,1}=3D_B$, $L_{y,1}=3D_B$ and $L_{z,1}=8D_B$ in the cone problem of Sec.~\ref{cone_test}). The discrete volume of the solid can be computed from the triangulation applying the divergence theorem to a field $\mathbf{F}_v=x \mathbf{\hat{i}}$, such that $\nabla \cdot \mathbf{\hat{F}}_v=1$, to the surface triangles:
     %
     \begin{equation}
       V_B = \int_{\Omega _{B}} \nabla \cdot \mathbf{F}_v \; dV =
@@ -7217,7 +7217,7 @@ Three geometry conservation tests can be defined for the polyhedra definition ar
     \begin{equation}
         \mathbf{x}_\Omega = \frac{1}{V_\Omega} \sum_{nm=1}^M  \mathbf{x}_{nm} V_{nm}
     \end{equation}
-    where $\mathbf{x}_{nm}=\mathbf{x}_{low,nm}+\frac{1}{2} \left( L_{x,nm},L_{y,nm},L_{z,nm} \right)$, where $\mathbf{x}_{low,nm}$ is the vector of low boundary coordinates for mesh $nm$. In the single mesh cone problem (section~\ref{cone_test}) $\mathbf{x}_{low,1}= \left( -1.5D_B,-1.5D_B,-2D_B \right)$.
+    where $\mathbf{x}_{nm}=\mathbf{x}_{low,nm}+\frac{1}{2} \left( L_{x,nm},L_{y,nm},L_{z,nm} \right)$, where $\mathbf{x}_{low,nm}$ is the vector of low boundary coordinates for mesh $nm$. In the single mesh cone problem (Sec.~\ref{cone_test}) $\mathbf{x}_{low,1}= \left( -1.5D_B,-1.5D_B,-2D_B \right)$.
 
     Also, the centroid $\mathbf{x}_B$ of the discretized solid can be computed applying equation~\eqref{eq:xcen} to the surface triangulation $\tau$, in same manner to what was done for cut-faces. From domain and solid the centroid of the $G$ region can be obtained as:
     %
