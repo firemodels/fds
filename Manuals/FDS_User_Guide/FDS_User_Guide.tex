@@ -1614,12 +1614,20 @@ It is particularly efficient in large parallel calculations, where parallel file
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
+
+\subsection{Handling Thin Geometries}
+\label{info:thin_geom}
+
+One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the error.  For example, if you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for you problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+
+
 \subsection{Current GEOM Limitations}
 
 {\color{red} Let's make a good list here for FAQ about geometry limitations.}
 
 \begin{itemize}
 \item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
+\item Thin geometries cannot split cells, one side must be blocked.
 \item You do not apply {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
 \item No VENT implies no HVAC can be applied to a GEOM surface.
 \item You cannot currently impose a tangential velocity.  {\color{red} Need to hook this up I think.}
@@ -9307,6 +9315,8 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 
 {\ct BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF}, or discrete times, {\ct RAMP\_BNDF}, on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=F} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=T} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=T} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
+Applying boundary files to complex geometries can be controlled with the {\ct BNDF\_GEOM} logical on the {\ct GEOM} line.  Note that {\ct BNDF} output for {\ct GEOM} uses face centered values only (node centered is not available; the user need not set {\ct CELL\_CENTERED=T}).
+
 Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
 
 
@@ -11333,6 +11343,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
+{\ct BNDF\_GEOM}       & Logical                & Section~\ref{info:BNDF}            &           &  {\ct T}                 \\ \hline
+{\ct CELL\_BLOCK\_IOR} & Integer                & Section~\ref{info:thin_geom}       &           &  0                       \\ \hline
 {\ct CYLINDER\_LENGTH} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
 {\ct CYLINDER\_RADIUS} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
 {\ct CYLINDER\_ORIGIN} & Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
