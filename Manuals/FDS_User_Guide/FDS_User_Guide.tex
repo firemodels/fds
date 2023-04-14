@@ -1408,6 +1408,8 @@ where the cylinder is discretized using 6 segments along its axis and 48 segment
 
 
 \subsubsection{2D Terrain Elevations}
+\label{info:terrain_geom}
+
 A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 
 \begin{lstlisting}
@@ -1419,7 +1421,7 @@ A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 /
 \end{lstlisting}
 
-\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$  and $(x_{\rm max}, y_{\rm max})$
+\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$ and $(x_{\rm max}, y_{\rm max})$
 and where {\ct ZVALS} defines elevation data in this region.
 {\ct IJK}\ specifies how many vertices occur in this region along each dimension.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
@@ -1432,7 +1434,7 @@ There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
 The optional fields {\ct EXTEND\_TERRAIN} and {\ct ZVAL\_HORIZON} are used in the following form. If the computational domain is set larger than the {\ct XB} defined terrain patch, such that it contains the terrain completely, setting {\ct \ct EXTEND\_TERRAIN=T} allows for the terrain to be extended to the domain boundaries. This can be helpful when trying to reduce boundary effects on a calculation.
 If, additionally, the real number {\ct ZVAL\_HORIZON} is set on the {\ct GEOM} line, this elevation will be used on the domain boundaries when extending the domain.
 As with the blocks and spheres, FDS uses the information provided by these keywords to construct
-vertices and triangular faces.
+vertices and triangular faces.  The bottom elevation of the geometry (used only for visualizaiton purposes in Smokeview) may be set with the parameter {\ct ZMIN}.
 
 Additionally, terrain geometries can be specified defining a triangulation with a convex regular boundary, as seen from the top. This triangulation will represent the terrain of interest and will define the top boundary of a terrain geom. The terrain surface is specified by {\ct VERTS} and {\ct FACES} as in a basic geometry (Sec.~\ref{info:GEOM_Basics}), and the field {\ct IS\_TERRAIN} needs to be set to {\ct T}, such that FDS knows this is a terrain unstructured surface. Surface types per faces are specified in the same manner as in basic geometries. Also, the {\ct EXTEND\_TERRAIN} logic can also be applied.
 
@@ -11352,9 +11354,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_SCALE}   & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct TRANSPARENCY}     & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct VERTS}            & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XB}               & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ZVALS}            & Real                   & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct XB}               & Real Four-Tuplet       & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct ZMIN}             & Real                   & Section~\ref{info:terrain_geom}    &   m       &   0.0                    \\ \hline
+{\ct ZVALS}            & Real array             & Section~\ref{info:terrain_geom}    &   m       &   0.0                    \\ \hline
+{\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:terrain_geom}    &           &                          \\ \hline
 
 % Related to moving geometry:
 %{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
