@@ -39,7 +39,7 @@ Recall from Sec.~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction o
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{\d \bp_0}{\d z} = - \rho_0(z) \, g  \ee
-where $\rho_0$ is the background density and $g=\SI{9.8}{m/s}$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
+where $\rho_0$ is the background density and $g$ is the acceleration due to gravity. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
 \be \bp_0(z) = p_\infty \; \exp \, \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0(z')} \d z' \right)  \label{pstrat} \ee
 where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
 specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
