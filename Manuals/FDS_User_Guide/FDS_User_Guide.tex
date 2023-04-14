@@ -1367,9 +1367,12 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
+{\color{red} Discuss linearization and add image.}
 \subsection{Coloring and Texture Maps}
 
 Coloring and texture maps for immersed geometric objects are specified in the same way as for obstacles. Documentation is located in Section \ref{info:colors}.
+
+{\color{red} Point to verification case.}
 
 \subsection{Self-Generated Geometries}
 
@@ -1608,15 +1611,28 @@ Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case i
 where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
-It is particularly efficient in large parallel calculations, where parallel file systems are used. See sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
+It is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
-\subsection{GEOM Limitations}
+\subsection{Current GEOM Limitations}
 
 {\color{red} Let's make a good list here for FAQ about geometry limitations.}
 
-Currently no control logic is available on {\ct GEOM} namelists.
+\begin{itemize}
+\item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
+\item You do not apply {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
+\item No VENT implies no HVAC can be applied to a GEOM surface.
+\item You cannot currently impose a tangential velocity.  {\color{red} Need to hook this up I think.}
+\item Currently, you cannot do 3D heat transfer.
+\item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to VOID (quietly).  Should throw a warning.
+\item {\ct BURN\_AWAY} is not allowed.
+\item The {\ct HOLE} namelist is not currently connected to {\ct GEOM}.
+\item Subgrid {\ct GEOM} (smaller than a grid cell) are possible, but not recommended currently.
+\item We do not recommend triangular faces that are much smaller than the Cartesian grid cell.
+\item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor.
+\item Be cautious with soot deposition.  See test case with paritcles with non-grid aligned geometries.
+\end{itemize}
 
 \fi
 
