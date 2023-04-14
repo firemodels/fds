@@ -1223,7 +1223,7 @@ It is a good idea to inspect the geometry by running either a setup job
 
 \newpage
 
-\section{Creating Unstructured Geometry}
+\section{Creating Unstructured Geometry (Beta)}
 \label{info:GEOM}
 
 The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions
@@ -1358,7 +1358,7 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
   \label{figure:GEOM_self_intersecting}
 \end{figure}
 
-\subsection{Intersections and interactions}
+\subsection{Intersections}
 
 Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
@@ -1366,8 +1366,6 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
   \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with a solid condition;
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
-
-Currently no control logic is available on {\ct GEOM} namelists.
 
 \subsection{Coloring}
 
@@ -1414,7 +1412,7 @@ One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times th
 \subsubsection{Cylinders}
 \label{info:GEOM_cyls}
 
-A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDER\_ORIGIN}$=(0,0,0)$, axis {\ct CYLINDER\_AXIS}$=(1.,0,0)$, length {\ct CYLINDER\_LENGTH}$=2.$ and radius {\ct CYLINDER\_RADIUS}$=0.5$ is given by
+A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDER\_ORIGIN} $= (0,0,0)$, axis {\ct CYLINDER\_AXIS} $= (1.,0,0)$, length {\ct CYLINDER\_LENGTH} $= 2.$ and radius {\ct CYLINDER\_RADIUS} $= 0.5$ is given by
 
 \begin{lstlisting}
 &GEOM ID='cylinder', SURF_ID='S1',
@@ -1615,6 +1613,11 @@ It is particularly efficient in large parallel calculations, where parallel file
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
+\subsection{GEOM Limitations}
+
+{\color{red} Let's make a good list here for FAQ about geometry limitations.}
+
+Currently no control logic is available on {\ct GEOM} namelists.
 
 \fi
 
