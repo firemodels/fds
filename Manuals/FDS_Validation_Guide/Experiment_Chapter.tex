@@ -38,7 +38,7 @@ The fire source was a natural gas diffusion burner.  The burner surface was hori
 \section{Atmospheric Dispersion Correlations}
 \label{Atmospheric_Dispersion_Description}
 
-A common exercise in atmospheric dispersion modeling is predicting the plume rise height of stack emissions. Stull~\cite{Stull:2000} presents an empirical correlation for plume rise height from a smoke stack in a stable atmospheric boundary layer. Details of the correlation and simulation are found in Section~\ref{Plume_Height_Discussion}.
+A common exercise in atmospheric dispersion modeling is predicting the plume rise height of stack emissions. Stull~\cite{Stull:2000} presents an empirical correlation for plume rise height from a smoke stack in a stable atmospheric boundary layer. Details of the correlation and simulation are found in Sec.~\ref{Plume_Height_Discussion}.
 
 
 
@@ -147,9 +147,9 @@ No.   & Length     & Width     & Ratio   & Speed       & Rate              & Til
 The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
 
 \begin{description}
-\item[Flame Height Results:] Section~\ref{Flame Height} 
-\item[Flame Tilt Results:] Section~\ref{Flame Tilt} 
-\item[Heat Flux Results:] Section~\ref{BGC_GRI_LNG_Fires_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height} 
+\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt} 
+\item[Heat Flux Results:] Sec.~\ref{BGC_GRI_LNG_Fires_Heat_Flux} 
 \end{description}
 
 \FloatBarrier
@@ -340,7 +340,7 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 
 \subsubsection{Modeling Notes}
 
-Two of these experiments were originally simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. These simulations modeled the grass as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
+Two of these experiments were originally simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. These simulations modeled the grass as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 Now these two experiments are also simulated using the Boundary Fuel Model (BFM)~\cite{Perez-Ramirez:FT2017} and the Rothermel-Albini fire spread algorithm~\cite{Rothermel:1972,Albini:1976}. For the experiment labelled Case~C064, fuel index 1 (Short Grass) is used, with a modified moisture fraction of 0.063. For F19, fuel index 3 (Tall Grass) is used, with a modified moisture fraction of 0.058.
 
@@ -1085,8 +1085,8 @@ The values of radiative fraction in the model are based on the measured values r
 The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
 
 \begin{description}
-\item[Flame Length Results:] Section~\ref{Flame Height}
-\item[Heat Flux Results:] Section~\ref{Loughborough_Jet_Fires_Heat_Flux}
+\item[Flame Length Results:] Sec.~\ref{Flame Height}
+\item[Heat Flux Results:] Sec.~\ref{Loughborough_Jet_Fires_Heat_Flux}
 \end{description}
 
 
@@ -1194,7 +1194,7 @@ The 854~m tunnel is divided into 84 equal lengths. Rectangular obstructions appr
 
 The fuel is assumed to be n-heptane with a soot yield of 3.7~\% and CO yield of 1.0~\%~\cite{SFPE:Tewarson}. The heat release rates of the fires are specified as functions of time following the measured curves found in the test report.
 
-The results of the simulations are found in Section~\ref{Memorial_Tunnel_Volume_Flow}.
+The results of the simulations are found in Sec.~\ref{Memorial_Tunnel_Volume_Flow}.
 
 
 \section{Montoir LNG Fires}
@@ -1232,9 +1232,9 @@ The experiments are simulated using the specified fuel burning rates for the sev
 The radiative fraction is assumed to 0.14 based on field estimates and the radiative path length is assumed to be 300~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 300~m. 600 solid angles, rather than the default 100, are used to solve the radiative transport equation. The soot yield is assumed to be 0.01.
 
 \begin{description}
-\item[Flame Height Results:] Section~\ref{Flame Height}
-\item[Flame Tilt Results:] Section~\ref{Flame Tilt}
-\item[Heat Flux Results:] Section~\ref{Montoir_LNG_Fires_Heat_Flux}
+\item[Flame Height Results:] Sec.~\ref{Flame Height}
+\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt}
+\item[Heat Flux Results:] Sec.~\ref{Montoir_LNG_Fires_Heat_Flux}
 \end{description}
 
 \FloatBarrier
@@ -1829,13 +1829,13 @@ Researchers at NIST have conducted measurements on various polymers as part of t
 
 The NIST Pool Fire Experiments include temperature, species concentration, velocity, and heat flux measurements of 30~cm and 100~cm diameter circular liquid fuel fires, and 37~cm gaseous burner fires.
 
-The 30~cm burner is 15~cm deep and has a wall thickness of 1.6~mm. The burner is fitted with legs such that the burner rim is positioned 30~cm above the floor. The bottom of the burner is maintained at a constant temperature by flowing tap water (nominally 20~$^\circ$C) through a 3~cm section on the bottom of the fuel pan. The dimensions of the circular burner are similar to Weckman's methanol experiment described in Section~\ref{Waterloo_Methanol_Description}.
+The 30~cm burner is 15~cm deep and has a wall thickness of 1.6~mm. The burner is fitted with legs such that the burner rim is positioned 30~cm above the floor. The bottom of the burner is maintained at a constant temperature by flowing tap water (nominally 20~$^\circ$C) through a 3~cm section on the bottom of the fuel pan. The dimensions of the circular burner are similar to Weckman's methanol experiment described in Sec.~\ref{Waterloo_Methanol_Description}.
 
 The 100~cm burner is also 15~cm deep, has a wall thickness of 1.6~mm, and is water-cooled.
 
 The 37~cm burner is actually 38~cm in diameter with an effective diameter of 37~cm. It is water cooled, and the surface temperature is maintained at approximately 40~$^\circ$C.  The measured fuel flow rate for the methane fire was 0.69~g/s and its estimated HRR was 34.5~kW. The heat release rates of the two propane fires were 20~kW and 34~kW.
 
-Details and references with regard to the plume temperature measurements are given in Section~\ref{NIST_Pool_Fires_Plume_Temps}. Details on the heat flux measurements are given in Section~\ref{NIST_Pool_Fires_Heat_Flux_Results}. Details on the gas species measurements is given in Section~\ref{sec:NIST_Pool_Fires}. Details on the velocity measuremnts is given in Section~\ref{NIST_Pool_Fires_Velocity}.
+Details and references with regard to the plume temperature measurements are given in Sec.~\ref{NIST_Pool_Fires_Plume_Temps}. Details on the heat flux measurements are given in Sec.~\ref{NIST_Pool_Fires_Heat_Flux_Results}. Details on the gas species measurements is given in Sec.~\ref{sec:NIST_Pool_Fires}. Details on the velocity measuremnts is given in Sec.~\ref{NIST_Pool_Fires_Velocity}.
 
 
 \subsubsection{Modeling Notes}
@@ -2147,9 +2147,9 @@ The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The c
 There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. Also, both wide and narrow-angle radiometer measurements were made at distances ranging from 100~m to 250~m from the pool center, with various inclination angles. For the narrow-angle measurements, FDS chooses the nearest discrete radiation angle to represent the narrow-angle heat flux. At such large distances, it is difficult to ``find'' an angle that emanates from the fire to the location of the device.
 
 \begin{description}
-\item[Flame Height Results:] Section~\ref{Flame Height} 
-\item[Flame Tilt Results:] Section~\ref{Flame Tilt} 
-\item[Heat Flux Results:] Section~\ref{Phoenix_LNG_Fires_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height} 
+\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt} 
+\item[Heat Flux Results:] Sec.~\ref{Phoenix_LNG_Fires_Heat_Flux} 
 \end{description}
 
 \FloatBarrier
@@ -2322,8 +2322,8 @@ The simulations of the 3~m methane fires are done with 10~cm grid resolution in 
 The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire. 
 
 \begin{description}
-\item[Flame Height Results:] Section~\ref{Flame Height} 
-\item[Heat Flux Results:] Section~\ref{Sandia_Methane_Burner_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height} 
+\item[Heat Flux Results:] Sec.~\ref{Sandia_Methane_Burner_Heat_Flux} 
 \end{description}
 
 \FloatBarrier
@@ -2393,7 +2393,7 @@ The FDS simulations of the three BLEVE experiments are performed with 1~m resolu
 Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
 
 \begin{description}
-\item[Heat Flux Results:] Section~\ref{Shell_LNG_Fireballs_Heat_Flux} 
+\item[Heat Flux Results:] Sec.~\ref{Shell_LNG_Fireballs_Heat_Flux} 
 \end{description}
 
 \FloatBarrier
@@ -2473,9 +2473,9 @@ Kermit Smyth et al.~conducted diffusion flame experiments at NIST using a methan
 
 A two-step combustion scheme (a modified version of the mechanism by Andersen et al.~\cite{AndersenJ:1}) is used to simulate the Smyth Slot Burner Experiment.  A 2D DNS calculation is run at two different grid resolutions: 0.250~mm and 0.125~mm.  In the modified mechanism, the hydrocarbon/oxygen reaction to CO is assumed to be infinitely fast (mixed is burnt) to avoid complications of modeling ignition.  The reversible CO to CO$_2$ reaction is modeled with Arrhenius kinetics.  As discussed by Westbrook and Dryer~\cite{Westbrook:1}, the kinetic constants for the reduced CO mechanism may be model dependent.  Here, the Arrhenius constant for the forward CO to CO$_2$ reaction is tuned to match the Smyth experimental data.
 
-A second set of simulations is run at the same two spatial resolutions, but in these cases both the first and second reactions are infinitely fast. However, the first reaction, where fuel is converted to CO and H$_2$O, proceeds before the second, where the CO is converted to CO$_2$. That is, the reactions are run serially rather than in parallel to illustrate that while both reactions are relatively fast compared to the mixing time scale, the first reaction is faster than the second. This assumption breaks down when the mixing time scale drops below approximately $3 \times 10^{-4}$~s, which is on the order of $\delta/s_{\rm L}$, the flame thickness divided by the laminar flame speed. For this reason, a lower limit on the time-scale ({\ct TAU\_CHEM=3E-4}) is imposed. This same modeling strategy is used in the large eddy simulations of the NIST Reduced Scale Enclosure (RSE) experiments of 1994 (Section~\ref{NIST_RSE_1994_Description}), RSE 2007 (Section~\ref{NIST_RSE_2007_Description}), Full-Scale Enclosure (FSE) 2008 (Section~\ref{NIST_FSE_2008_Description}), UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}, and Waterloo Methanol Experiments (Section~\ref{Waterloo_Methanol_Description}). Note that in these LES simulations, the parameter {\ct TAU\_CHEM} is irrelevant---it is only needed when the grid resolution is on the order of 0.1~mm or less.
+A second set of simulations is run at the same two spatial resolutions, but in these cases both the first and second reactions are infinitely fast. However, the first reaction, where fuel is converted to CO and H$_2$O, proceeds before the second, where the CO is converted to CO$_2$. That is, the reactions are run serially rather than in parallel to illustrate that while both reactions are relatively fast compared to the mixing time scale, the first reaction is faster than the second. This assumption breaks down when the mixing time scale drops below approximately $3 \times 10^{-4}$~s, which is on the order of $\delta/s_{\rm L}$, the flame thickness divided by the laminar flame speed. For this reason, a lower limit on the time-scale ({\ct TAU\_CHEM=3E-4}) is imposed. This same modeling strategy is used in the large eddy simulations of the NIST Reduced Scale Enclosure (RSE) experiments of 1994 (Sec.~\ref{NIST_RSE_1994_Description}), RSE 2007 (Sec.~\ref{NIST_RSE_2007_Description}), Full-Scale Enclosure (FSE) 2008 (Sec.~\ref{NIST_FSE_2008_Description}), UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}, and Waterloo Methanol Experiments (Sec.~\ref{Waterloo_Methanol_Description}). Note that in these LES simulations, the parameter {\ct TAU\_CHEM} is irrelevant---it is only needed when the grid resolution is on the order of 0.1~mm or less.
 
-Comparisons of the simulations with measurements can be found in Section~\ref{Smyth_Reactions}.
+Comparisons of the simulations with measurements can be found in Sec.~\ref{Smyth_Reactions}.
 
 
 \section{SP Adiabatic Surface Temperature Experiments}
@@ -3178,7 +3178,7 @@ The U.S. Forest Service and collaborators from the University of New South Wales
 
 \subsubsection{Modeling Notes}
 
-The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
+The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
 
 
 \section{USFS/Corsica Experiments}
@@ -3188,7 +3188,7 @@ Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. 
 
 \subsubsection{Modeling Notes}
 
-The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model} ``Thermal Degradation Model for Vegetation.''
+The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model} ``Thermal Degradation Model for Vegetation.''
 
 The test parameters for these experiments are given in Table~\ref{Corsica_Parameters}.
 
