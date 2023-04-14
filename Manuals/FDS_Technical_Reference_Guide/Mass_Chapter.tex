@@ -201,11 +201,11 @@ We want the total and species mass fluxes between meshes to be the same. Let the
 To enforce this condition, we obtain $\rho_{{\rm w},jk}^{(1)}$ on Mesh 1 and $\rho_{{\rm w},j'k'}^{(2)}$ on Mesh 2 from a flux limiter (see Section \ref{sec_flux_limiters}) once data has been exchanged between meshes.  If both Mesh 1 and Mesh 2 have the same grid resolution, then two layers of ghost cells are exchanged to enable second-order accuracy for advective fluxes.  First-order upwinding is used at refined mesh boundaries.
 
 \paragraph{Diffusive Flux Matching}
-For a mesh boundary without refinement, the exchange of ghost cell information is sufficient to achieve matched diffusive fluxes computed independently by each mesh process.  However, for refined meshes, special treatment is required.  The strategy employed is to compute the fine mesh fluxes and average them for the coarse mesh.  After the scalar transport update the scalar values are exchanged so that the coarse mesh has the necessary fine mesh values to independently compute and average the fine mesh fluxes for matching.  Referring again to Fig.~\ref{fig:meshinterface}, the following relationship is enforced at the mesh refinement boundary:
+For a mesh boundary without refinement, the exchange of ghost cell information is sufficient to achieve matched diffusive fluxes computed independently by each mesh process.  However, for refined meshes, special treatment is required.  The strategy employed is to compute the fine mesh fluxes and average them for the coarse mesh.  After the scalar transport update, the scalar values are exchanged so that the coarse mesh has the necessary fine mesh values to independently compute and average the fine mesh fluxes for matching.  Referring again to Fig.~\ref{fig:meshinterface}, the following relationship is enforced at the mesh refinement boundary:
 \be
 \sum_{j,k} \frac{1}{2}\left[(\rho D_\alpha)_{1,j'k'}^{(2)}+(\rho D_\alpha)_{\mathrm{IBAR},jk}^{(1)}\right] \frac{Z_{\alpha,1,j'k'}^{(2)}-Z_{\alpha,\mathrm{IBAR},jk}^{(1)}}{\dx_{I,jk}^{(1)}} \; \dy_{jk}^{(1)} \, \dz_{jk}^{(1)} = \underbrace{\left[(\rho D_\alpha) \frac{\partial Z_\alpha}{\partial x}\right]_{0,j'k'}^{(2)}}_{\mathrm{computed\;term}} \; \dy_{j'k'}^{(2)} \, \dz_{j'k'}^{(2)}
 \ee
-Note that the value $\smash{Z_{\alpha,1,j'k'}^{(2)}}$ is direct injected from the coarse mesh as a fine mesh ghost cell value (i.e., no interpolation is performed to the fine mesh ghost cell center; this is a first-order approximation).  Similarly, the coarse mesh diffusivity term $\smash{(\rho D_\alpha)_{1,j'k'}^{(2)}}$ is directly injected to the fine mesh ghost cell to compute the average interface value.
+Note that the value $\smash{Z_{\alpha,1,j'k'}^{(2)}}$ is directly injected from the coarse mesh as a fine mesh ghost cell value (i.e., no interpolation is performed to the fine mesh ghost cell center; this is a first-order approximation).  Similarly, the coarse mesh diffusivity term $\smash{(\rho D_\alpha)_{1,j'k'}^{(2)}}$ is directly injected to the fine mesh ghost cell to compute the average interface value.
 
 \subsubsection{Special Topic: Vertical Mesh Coarsening in Atmospheric Flows}
 
@@ -298,7 +298,7 @@ This special treatment of the ghost cell density may be accessed in the source c
 
 \section{The Velocity Divergence}
 
-Because of the low Mach number assumption, the velocity divergence (the rate of volumetric expansion) plays an important role in the overall solution scheme.  In the FDS algorithm, the divergence is a surrogate for the energy equation.  The divergence is factored out of the conservative form of the sensible enthalpy equation (see Appendix~\ref{app_divergence}) and when the divergence constraint is satisfied (enforced by the momentum update and solution of the Poisson equation for pressure) the conservative form of the sensible enthalpy equation is satisfied by construction.
+Because of the low Mach number assumption, the velocity divergence (the rate of volumetric expansion) plays an important role in the overall solution scheme.  In the FDS algorithm, the divergence is a surrogate for the energy equation.  The divergence is factored out of the conservative form of the sensible enthalpy equation (see Appendix~\ref{app_divergence}), and when the divergence constraint is satisfied (enforced by the momentum update and solution of the Poisson equation for pressure) the conservative form of the sensible enthalpy equation is satisfied by construction.
 
 For the $m$th zone, with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
@@ -353,7 +353,7 @@ The sensible enthalpy of the gas is a mass-weighted average of the enthalpies of
 \be
   h_{\rm s} = \sum_\alpha Z_\alpha \, h_{\rm s,\alpha} \quad;\quad  h_{\rm s,\alpha}=\sum_n Y_n \, h_{{\rm s},n}  \quad; \quad h_{{\rm s},n}(T)=\int_{T_0}^T c_{p,n}(T') \, \mbox{d}T'
 \ee
-The values of $h_{{\rm s},n}$ and $c_{p,n}$ for the individual gas species are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}. The values are taken to the nearest degree Kelvin.
+The values of $h_{{\rm s},n}$ and $c_{p,n}$ for the individual gas species are obtained by table lookup from NASA polynomials ~\cite{NASA_TP_211556} or the NIST-JANAF tables~\cite{NIST_JANAF} or  The values are taken to the nearest degree Kelvin.
 
 \subsection{Computing the Background Pressure Rise}
 
@@ -371,12 +371,12 @@ pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone 
 \begin{equation}
 \dod{\bp_m}{t} = \left( \int_{\Omega_m} D \,\d V - \int_{\partial \Omega_m} \bu \cdot \d \bS \right) \Big/ \int_{\Omega_m} P \,\d V  \label{concon2}
 \end{equation}
-Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
-compartment leads to an appropriate decrease in the divergence within the volume.
+Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that supplying or exhausting air or starting a fire within a sealed
+compartment leads to an appropriate change in the divergence within the volume.
 
 \subsection{Combining Pressure Zones}
 
-In the event that a barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the
+In the event that a barrier separating two pressure zones should rupture (e.g., opening a door), Eq.~(\ref{concon2}) is modified so that the pressure in the
 newly connected zones is driven towards an equilibrium pressure:
 \be
   \bp_{\rm eq} = \sum_m \left( \bp_m \int_{\Omega_m} P \, \d V  \right)  \Big/  \sum_m \int_{\Omega_m} P \, \d V \approx \frac{ \sum_m V_m }{ \sum_m (V_m/\bp_m) }

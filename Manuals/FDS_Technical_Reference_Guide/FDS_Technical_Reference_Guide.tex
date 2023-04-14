@@ -107,7 +107,7 @@ Revision:~\gitrevision}}
 
 \chapter{Preface}
 
-This document provides the theoretical basis for the Fire Dynamics Simulator (FDS), following the general framework set forth in the ``Standard Guide for Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}. It is the first of a four volume set of companion documents, referred to collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}. Volumes 2, 3 and 4 describe the model verification, experimental validation, and configuration management, respectively.
+This document provides the theoretical basis for the Fire Dynamics Simulator (FDS), following the general framework set forth in the ``Standard Guide for Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}. This is the first of a four volume set of companion documents, referred to collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}. Volumes 2, 3 and 4 describe the model verification, experimental validation, and configuration management, respectively.
 
 A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide} describes how the FDS software is actually used.
 
@@ -121,24 +121,24 @@ A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users
 
 The development and maintenance of the Fire Dynamics Simulator has been made possible through
 a partnership of public and private organizations, both in the United States and abroad. Following
-is a list of contributors from the various sectors of the fire research, fire protection engineering and
+is a list of contributors from various sectors of the fire research, fire protection engineering and
 fire services communities:
 
 FDS is supported financially via internal funding at both NIST and UL Fire Safety Research Institute. In addition, support has been provided by the following:
 \begin{itemize}
-\item The US Nuclear Regulatory Commission Office of Research has funded key validation experiments, the preparation of the FDS manuals, and the development of various sub-models that are of importance in the area of nuclear power plant safety. Special thanks to Mark Salley, Jason Dreisbach, and David Stroup for their efforts and support.
-\item The US Forest Service has supported the development of sub-models in FDS designed to simulate the spread of fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
+\item The US Nuclear Regulatory Commission Office of Nuclear Regulatory Research funded key validation experiments, the preparation of the FDS manuals, and the development of various sub-models that are of importance in the area of nuclear power plant safety. Special thanks to Mark Salley, Jason Dreisbach, and David Stroup for their efforts and support.
+\item The US Forest Service supported the development of sub-models in FDS designed to simulate the spread of fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
 \item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at characterizing the burning behavior of oil spilled on the open sea or ice. Part of this research led to the development of the ALOFT (A Large Outdoor Fire plume Trajectory) model, a forerunner of FDS. Special thanks to Joe Mullin for his encouragement of the modeling efforts.
 \end{itemize}
 \noindent Prior to 2014, FDS development was supported by VTT, Finland, through the following:
 \begin{itemize}
-\item The Finnish Funding Agency for Technology and Innovation (TEKES) has supported the development of fire and evacuation simulation capabilities.
+\item The Finnish Funding Agency for Technology and Innovation (TEKES) supported the development of fire and evacuation simulation capabilities.
 \item The Finnish State Nuclear Waste Management Fund (VYR) under the national research programmes on nuclear safety.
 \item The European Union through the FP6 and FP7 research projects FIRE PARADOX, TRANSFEU and FIRE-RESIST.
 \end{itemize}
 The following individuals and organizations played a role in the development of the underlying mathematical model of FDS.
 \begin{itemize}
-\item Originally, the basic hydrodynamic solver was designed by Ronald Rehm and Howard Baum with programming help from Darcy Barnett, Dan Lozier and Hai Tang of the Computing and Applied Mathematics Laboratory at NIST, and Dan Corley of the Building and Fire Research Laboratory (BFRL). Jim Sims of CAML developed the original visualization software.
+\item Originally, Ronald Rehm and Howard Baum designed the basic hydrodynamic solver with programming help from Darcy Barnett, Dan Lozier and Hai Tang of the Computing and Applied Mathematics Laboratory at NIST, and Dan Corley of the Building and Fire Research Laboratory (BFRL). Jim Sims of CAML developed the original visualization software.
 \item The direct Poisson solver (CRAYFISHPAK) was written by Roland Sweet of the National Center for Atmospheric Research (NCAR), Boulder, Colorado.
 \item Kuldeep Prasad added the multiple-mesh data structures, paving the way for parallel processing.
 \item Charles Bouldin devised the basic framework of the parallel version of the code.
@@ -151,7 +151,7 @@ The following individuals and organizations played a role in the development of 
 \item The authors would like thank Sean Smith of the University of Utah for insightful discussions on the turbulent combustion model.
 \item Susan Kilian of hhpberlin in Germany has contributed to improvements in the global pressure solver.
 \item Vivien Lecoustre of the University of Maryland contributed to improvements to RadCal.
-\item Benjamin Ralph of the University of Edinburgh contributed to the system curve approach for defining the operation point of a fan.
+\item Benjamin Ralph of the University of Edinburgh contributed to the development of duct mass and energy transport and the system curve approach for defining the operation point of a fan.
 \item Ben Trettel of The University of Texas at Austin contributed to improvements in the particle drag and transport formulation.
 \end{itemize}
 
