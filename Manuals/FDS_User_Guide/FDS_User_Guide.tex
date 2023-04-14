@@ -1368,11 +1368,10 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
 \end{itemize}
 
 {\color{red} Discuss linearization and add image.}
+
 \subsection{Coloring and Texture Maps}
 
-Coloring and texture maps for immersed geometric objects are specified in the same way as for obstacles. Documentation is located in Section \ref{info:colors}.
-
-{\color{red} Point to verification case.}
+Coloring and texture maps for {\ct GEOM} objects are specified in the same way as for {\ct OBST} (see Sec.~\ref{info:colors}).
 
 \subsection{Self-Generated Geometries}
 
@@ -1773,7 +1772,7 @@ the direction in which the {\ct VENT} is facing.
 
 \newpage
 
-\section{Coloring Obstructions, Immersed Geometries, Vents, Surfaces and Meshes}
+\section{Coloring Obstructions, Geometry, Vents, Surfaces, and Meshes}
 \label{info:colors}
 
 It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of your choosing.
@@ -1855,7 +1854,7 @@ Assuming that a JPEG file called {\ct paneling.jpg} exists in the working direct
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
-applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line. 
+applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
 
 For geometries that are spheres, the parameter {\ct TEXTURE\_MAPPING='SPHERICAL'} on the {\ct GEOM} line lets smokeview know to wrap the texture around the sphere rather than to lay it flat from above. The following FDS input lines from the example test case {\ct geom\_texture3a.fds} defines a sphere using the image {\ct sphere\_cover\_03.png} as a texture map (this image is found in the smokeview installation directory). Figure \ref{fig:texturemappedsphere} shows a texture mapped sphere using these input lines along with rectangular texture map that was applied.
 
@@ -11356,12 +11355,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPHERE\_RADIUS}   & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
 {\ct SPHERE\_TYPE}     & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct SURF\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct TEXTURE\_MAPPING} & Character              & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
+{\ct TEXTURE\_MAPPING} & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'RECTANGULAR'}     \\ \hline
 {\ct TEXTURE\_ORIGIN}  & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_SCALE}   & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct TRANSPARENCY}     & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct VERTS}            & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct VOLUS}            & array of Integer Quadruplets & Section~\ref{info:GEOM}      &           &    0                     \\ \hline
 {\ct XB}               & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ZVALS}            & Real                   & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
