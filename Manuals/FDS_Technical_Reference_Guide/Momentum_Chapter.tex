@@ -123,7 +123,7 @@ Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_d
 \section{Models for the Turbulent Viscosity}
 \label{section:turbulent_viscosity}
 
-In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant turbulent Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_{\rm t}$. There are several different options available that are described in this section. The Deardorff model, Section~\ref{sec:deardorff}, is the default. Its selection as the default was based on comparisons with a wide variety of full-scale experiments.
+In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant turbulent Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_{\rm t}$. There are several different options available that are described in this section. The Deardorff model, Sec.~\ref{sec:deardorff}, is the default. Its selection as the default was based on comparisons with a wide variety of full-scale experiments.
 
 \subsection{Constant Coefficient Smagorinsky Model}
 
@@ -217,7 +217,7 @@ averaged at cell centers. For example
 \dod{u}{x} &\approx \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
 \dod{u}{y} &\approx \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right)
 \end{align}
-The divergence is described in Section~\ref{div_discret}.
+The divergence is described in Sec.~\ref{div_discret}.
 
 The thermal conductivity and material diffusivity of the fluid are related to the viscosity by
 \be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_{\rm t}}  \quad ; \quad
@@ -538,13 +538,13 @@ Following is a step by step procedure for advancing the velocity components. Thi
       \bar{u}_I = \bar{u}_0 \equiv \frac{1}{2} \left( u_{I,jk} + u_{0,jk} \right)
    \ee
    for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are possible).
-\item Compute $\bF_{\rm A}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+\item Compute $\bF_{\rm A}(\bar{\mathbf{u}})$ as described in Sec.~\ref{findiffmom}.
 
-\item\label{step3} Add the baroclinic term $\bF(\bar{\mathbf{u}})=\bF_{\rm A}(\bar{\mathbf{u}})+\bF_{\rm B}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+\item\label{step3} Add the baroclinic term $\bF(\bar{\mathbf{u}})=\bF_{\rm A}(\bar{\mathbf{u}})+\bF_{\rm B}(\bar{\mathbf{u}})$ as described in Sec.~\ref{findiffmom}.
 
 \item Compute the normal component of $\bF$ at solid surfaces from Eq.~(\ref{sbc}) or Eq.~(\ref{sbcc}).
 
-\item Solve the Poisson equation for the pressure $\cH$ as described in Section~\ref{PoissonEq}. At the predictor stage:
+\item Solve the Poisson equation for the pressure $\cH$ as described in Sec.~\ref{PoissonEq}. At the predictor stage:
 \be
 \label{eqn_poisson_stg1}
 \nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) - \mathbf{F}(\bar{\mathbf{u}}^n)
@@ -587,7 +587,7 @@ This iterative scheme works well for most multiple mesh configurations, but it i
 \section{Velocity Boundary Conditions}
 \label{info:velocity_bc}
 
-This section describes how the tangential component of velocity is specified at solid surfaces, mesh interfaces, or open boundaries to the outside atmosphere. The normal component of velocity is not specified directly at these boundaries, but rather indirectly via the pressure boundary condition, as described in Section~\ref{PoissonEq}.
+This section describes how the tangential component of velocity is specified at solid surfaces, mesh interfaces, or open boundaries to the outside atmosphere. The normal component of velocity is not specified directly at these boundaries, but rather indirectly via the pressure boundary condition, as described in Sec.~\ref{PoissonEq}.
 
 \subsection{Smooth Walls}
 \label{smooth_wall_model}
@@ -643,7 +643,7 @@ To achieve the correct decay of the Reynolds stresses near a wall, Van Driest~\c
 \label{eqn_vdf}
 \ell_{\rm mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
 \end{equation}
-where $A$ is a dimensionless empirical constant equal to 26.  The term in brackets is referred to as the {\em Van Driest damping function}. In FDS, due to difficulties defining a consistent test filter for use with either the Deardorff or the dynamic Smagorinsky turbulence model near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagorinsky model with Van Driest damping applied to the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  See Section~\ref{smooth_wall_model} for an explanation of terms. The viscosity near the wall is then given by
+where $A$ is a dimensionless empirical constant equal to 26.  The term in brackets is referred to as the {\em Van Driest damping function}. In FDS, due to difficulties defining a consistent test filter for use with either the Deardorff or the dynamic Smagorinsky turbulence model near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagorinsky model with Van Driest damping applied to the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  See Sec.~\ref{smooth_wall_model} for an explanation of terms. The viscosity near the wall is then given by
 \begin{equation}
    \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
 \end{equation}
