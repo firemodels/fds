@@ -4792,7 +4792,7 @@ Case 6 takes case 5 and increases the heat of reaction post-phase change to 1000
 
 Case 7 takes case 4 and removes the reaction from the second material. This is now an underdetermined system where there are two materials and a single reaction. Following the process for case 1, one gets that
 \be
- H_{\rm MATL1,adj} - 0.5 H_{\rm MATL2,adj} =-719.2125~{\rm kJ/kg}   
+ H_{\rm MATL1,adj} - 0.5 H_{\rm MATL2,adj} =-719.2125~{\rm kJ/kg}
 \ee
 
 The minimum matrix solution is $H_{\rm MATL1,adj}$=-575.37~\si{kJ/kg} and  $H_{\rm MATL2,adj}$=287.68~\si{kJ/kg}. It can be shown that this is a minimal solution by taking the norm of the solution vector. This can be expressed in terms of only $H_{\rm MATL1,adj}$ as
@@ -6055,7 +6055,7 @@ The fan pressures that intersect the system curves are 9.03~Pa and 29.0~Pa for t
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/qfan_multi_parallel_vf} &
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/qfan_multi_series_vf} \\
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/qfan_multi_parallel_p} &
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/qfan_multi_series_p}      
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/qfan_multi_series_p}
     \end{tabular*}
     \caption[Results of the \textct{qfan\_multi} case]{Volume flow and fan pressure for the \textct{qfan\_multi}. Left is two fans in parallel, and right is two fans in series. Top is volume flow, and bottom is fan pressure.}
     \label{qfan_multi_fig}
@@ -6439,23 +6439,20 @@ After Firebot is run, the {\ct geom\_positive\_errors.m}\ Matlab script checks t
 of the planned error condition in the {\ct CHID.err}\ file, reporting in cases where the condition
 is not met.
 
+
+\newpage
+
 \section{Simple geometry and properties definitions}
 
 \subsection{geom\_simple.fds}
-Figure \ref{fig:geom_simple} was created using the following GEOM namelist.
-The {\ct VERTS}\ keyword is used to specify 3 vertices and the {\ct FACES}\ keyword
-is used to specify the indices of the triangular face.
 
-{\small
-\begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
-FACES=1,2,3,
-SURF_ID='surf1'/
-\end{verbatim}
-}
+Figure~\ref{fig:geom_simple} was created using the following input. The {\ct VERTS} keyword is used to specify 3 vertices and the {\ct FACES}\ keyword is used to specify the indices of the triangular face.
+\begin{lstlisting}
+&GEOM ID='geom1', VERTS=0.0,0.0,0.0, 1.0,0.5,0.0, 1.0,1.0,1.0,
+      FACES=1,2,3, SURF_ID='surf1' /
+\end{lstlisting}
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_simple.png}
@@ -6467,15 +6464,13 @@ SURF_ID='surf1'/
 
 
 \subsection{geom\_obst.fds}
-Figure \ref{fig:geom_obst} was created using the following GEOM namelist.
-The {\ct XB}\ keyword is used the same way to specify a block as on
-a {\ct OBST}\ or {\ct VENT}\ line.
 
-{\scriptsize
-\begin{verbatim}
-&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,AZIM=90.0,ELEV=30.0 /
-\end{verbatim}
-}
+Figure \ref{fig:geom_obst} was created using the following GEOM feature. The {\ct XB}\ keyword is used the same way to specify a block as on a {\ct OBST}\ or {\ct VENT}\ line.
+\begin{lstlisting}
+&GEOM ID='obst', SURF_ID='surf1', 
+      XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,
+      AZIM=90.0,ELEV=30.0 /
+\end{lstlisting}
 
 \begin{figure}
 \begin{center}
@@ -6487,36 +6482,30 @@ a {\ct OBST}\ or {\ct VENT}\ line.
 \label{fig:geom_obst}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{geom\_sphere1a.fds,...,geom\_sphere3f.fds}
+
 Figure \ref{fig:geom_sphere} was created using {\ct LEVEL=n}\
 in the following GEOM namelist
 where {\ct n}\ ranges from 0 to 5.
-
-{\scriptsize
-\begin{verbatim}
-&GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,N_LEVELS=n,SPHERE_ORIGIN=0.0,0.0,0.0 /
-\end{verbatim}
-}
-
-The {\ct N\_LEVELS}\ keyword is used
-to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result
-in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron .
-{\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the
-sphere produced with {\ct LEVEL=n-1}.
-The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify
-the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
+\begin{lstlisting}
+&GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,
+      N_LEVELS=n,SPHERE_ORIGIN=0.0,0.0,0.0 /
+\end{lstlisting}
+The {\ct N\_LEVELS}\ keyword is used to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron . {\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the sphere produced with {\ct LEVEL=n-1}. The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1a.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1b.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1a.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1b.png}\\
  LEVEL=0&LEVEL=1\\
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1c.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1d.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1c.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1d.png}\\
  LEVEL=2&LEVEL=3\\
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1e.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1f.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1e.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1f.png}\\
  LEVEL=4&LEVEL=5\\
   \end{tabular}
 \end{center}
@@ -6531,14 +6520,14 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3a.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3b.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3a.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3b.png}\\
  N\_LAT=3,N\_LONG=6&N\_LAT=6,N\_LONG=12\\
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3c.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3d.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3c.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3d.png}\\
  N\_LAT=12,N\_LONG=24&N\_LAT=24,N\_LONG=48\\
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3e.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3f.png}\\
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3e.png}&
+ \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3f.png}\\
  N\_LAT=48,N\_LONG=96&N\_LAT=96,N\_LONG=192\\
   \end{tabular}
 \end{center}
@@ -6547,11 +6536,14 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 \label{fig:geom_sphere2a}
 \end{figure}
 
+\FloatBarrier
+
 %\geominput{geom_terrain.fds}
 \subsection{geom\_terrain.fds}
+
 Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[height=2.75in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_terrain.png}
@@ -6561,23 +6553,23 @@ Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 \label{fig:geom_terrain}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{geom\_texture.fds}
+
 Figure \ref{fig:geom_texture} was created using the following SURF and GEOM namelists.
 The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
 file used to texture map the geometric object.
-
-{\small
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='surf1',TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,
                  TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
 
 &GEOM ID='texture',
 VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
 FACES=1,2,3,SURF_ID='surf1'/
-\end{verbatim}
-}
+\end{lstlisting}
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture.png}
@@ -6587,13 +6579,12 @@ FACES=1,2,3,SURF_ID='surf1'/
 \label{fig:geom_texture}
 \end{figure}
 
-\subsection{geom\_texture2.fds}
-Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists.
-The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
-file used to texture map the geometric object. This example has two textures.
+\FloatBarrier
 
-{\small
-\begin{verbatim}
+\subsection{geom\_texture2.fds}
+
+Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists. The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image file used to texture map the geometric object. This example has two textures.
+\begin{lstlisting}
 &SURF ID='surf1' TEXTURE_MAP='nistleft.jpg',
       TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
 &SURF ID='surf2',TEXTURE_MAP='grass.jpg',
@@ -6606,10 +6597,10 @@ FACES=1,2,3,SURF_ID='surf1'/
 &GEOM ID='texture2',
 VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
 FACES=1,2,3,SURF_ID='surf2'/
-\end{verbatim}
-}
+\end{lstlisting}
 
-\begin{figure}
+
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture2.png}
@@ -6619,11 +6610,12 @@ FACES=1,2,3,SURF_ID='surf2'/
 \label{fig:geom_texture2}
 \end{figure}
 
-\subsection{geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
-The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
+\FloatBarrier
 
-{\small
-\begin{verbatim}
+\subsection{geom\_texture3.fds, geom\_texture4.fds}
+
+The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
+\begin{lstlisting}
 &SURF ID='surf1',TEXTURE_MAP='sphere_cover_03.png'COLOR='BLUE',
       TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
 
@@ -6634,16 +6626,12 @@ The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM n
 &GEOM ID='sphere2',SURF_ID='surf3',
       N_LEVELS=3,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.75,0.5,0.5,
       TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
-\end{verbatim}
-}
-
-The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image
-file applied to the geometric object. The {\ct SPHERICAL}\ setting indicates that that the texture map image
-is applied to the object using spherical coordinates.
+\end{lstlisting}
+The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file applied to the geometric object. The {\ct SPHERICAL}\ setting indicates that that the texture map image is applied to the object using spherical coordinates.
 
 
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{cc}
  \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3a.png}&
@@ -6659,6 +6647,9 @@ is applied to the object using spherical coordinates.
 \label{fig:geom_texture3}
 \end{figure}
 
+\FloatBarrier
+
+\newpage
 
 \section{Computational geometry}
 
@@ -6725,7 +6716,7 @@ On this domain, cut-cells with same shape and size of regular cells are defined 
 
 \title{Temporal order of accuracy}
 
-Three cases are defined corresponding to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, and in the cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
+Three cases are defined corresponding to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, and in the cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in \\ {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
 
 Same procedure as explained in Sec.~\ref{sec:saad_temporal_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The bottom figure shows the order $p$ computed point wise in the $x$ direction for explicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in Sec.~\ref{sec:saad_temporal_error}.
 The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells is \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_l2_norm}\!.
@@ -6740,7 +6731,7 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 \end{figure}
 
 
-\subsection{Variable-Density manufactured solution}
+\subsection{Variable-Density Manufactured Solution}
 
 \label{sec:shunn_cc_mms}
 
@@ -6942,7 +6933,9 @@ In case of stress method for cross velocities (STM), the friction factor error $
 %\subsection{Conservation test of isothermal helium plume around sphere}
 
 
-\section{Geometry tests involving heat and mass transfer}
+\newpage
+
+\section{Geometry Tests Involving Heat and Mass Transfer}
 
 
 %\subsection{Conservation tests of heat flux and mass flux specified from sphere surface}
