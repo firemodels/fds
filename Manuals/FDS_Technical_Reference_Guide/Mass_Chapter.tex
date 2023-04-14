@@ -35,7 +35,7 @@ The purpose of decomposing the pressure is that for low Mach number flows, it ca
 \be
    \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state}
 \ee
-Recall from Section~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction of lumped species $\alpha$. The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves that travel at speeds that are much faster than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
+Recall from Sec.~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction of lumped species $\alpha$. The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves that travel at speeds that are much faster than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{\d \bp_0}{\d z} = - \rho_0(z) \, g  \ee
@@ -148,7 +148,7 @@ At a solid boundary, the surface temperature, $T_{\rm w}$, is either specified o
 \be
    k \frac{T_{\rm g} - T_{\rm w}}{\dn/2} = h \; (T_{\rm g}-T_{\rm w})  \label{ebal}
 \ee
-where $\dn/2$ is the distance between the surface and the center of the adjacent gas phase cell. The convective heat transfer coefficient, $h$, is described in Section~\ref{conflux}. For a DNS calculation, the convective heat transfer is determined directly from the computed or specified surface temperature.
+where $\dn/2$ is the distance between the surface and the center of the adjacent gas phase cell. The convective heat transfer coefficient, $h$, is described in Sec.~\ref{conflux}. For a DNS calculation, the convective heat transfer is determined directly from the computed or specified surface temperature.
 
 There is no transfer of mass at a solid boundary; thus, the boundary value for the species mixture $\alpha$ is simply
 \be Z_{\rm \alpha,w} = Z_{\rm \alpha,g} \ee
