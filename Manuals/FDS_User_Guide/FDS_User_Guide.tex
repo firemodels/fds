@@ -1839,7 +1839,30 @@ Assuming that a JPEG file called {\ct paneling.jpg} exists in the working direct
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
-applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
+applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line. For geometries that are spheres, the parameter {\ct TEXTURE\_MAPPING='SPHERICAL'} on the {\ct GEOM} line let's smokeview know to wrap the texture around the sphere rather than to lay it flat. The following lines from the example test case {\ct geom\_texture3a.fds} defines a sphere using the image {\ct sphere\_cover\_03.png} as a texture map (this image is found in the smokeview installation directory). Figure \ref{fig:texturemappedsphere} shows a texture mapped sphere using these lines along with the original texture map.
+
+\begin{lstlisting}
+&SURF ID='surf1'
+      TEXTURE_MAP='sphere_cover_03.png',COLOR='BLUE',
+      TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0,TEXTURE_ORIGIN=0.0,0.0,0.0,
+      TEXTURE_MAPPING='SPHERICAL'/
+&MOVE ID='SPHERE_ROT', AXIS=0.,0.,1., ROTATION_ANGLE=270. /
+&GEOM ID='sphere1',SURF_ID='surf1',SPHERE_RADIUS=0.5,
+N_LAT=25,N_LONG=50,SPHERE_ORIGIN=0.0,0.0,0.0,MOVE_ID='SPHERE_ROT'
+\end{lstlisting}
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{../../../fig/fds/Geometry_Figures/sphere_cover_03}&
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture3a}\\
+texture map&texture mapped sphere
+\end{tabular}
+\end{center}
+\caption{Texture mapped sphere}
+\label{fig:texturemappedsphere}%
+\end{figure}
+
 
 
 \newpage
