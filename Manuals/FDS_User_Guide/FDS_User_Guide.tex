@@ -1368,10 +1368,9 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
 \end{itemize}
 
 {\color{red} Discuss linearization and add image.}
+\subsection{Coloring and Texture Maps}
 
-\subsection{Coloring}
-
-FIXME Colors and texture maps
+Coloring and texture maps for immersed geometric objects are specified in the same way as for obstacles. Documentation is located in Section \ref{info:colors}.
 
 {\color{red} Point to verification case.}
 
@@ -1774,22 +1773,25 @@ the direction in which the {\ct VENT} is facing.
 
 \newpage
 
-\section{Coloring Obstructions, Vents, Surfaces and Meshes}
+\section{Coloring Obstructions, Immersed Geometries, Vents, Surfaces and Meshes}
 \label{info:colors}
 
-It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of a your choosing.
+It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of your choosing.
 
 \subsection{Colors}
 
-Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
+Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions immersed geometries, or vents. For example, the lines:
 \begin{lstlisting}
 &SURF ID='UPHOLSTERY', ..., RGB=0,255,0 /
 &OBST XB=..., COLOR='BLUE' /
+&GEOM GEOM_ID=..., COLOR='BLUE' /
 \end{lstlisting}
-will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
+will color all {\ct UPHOLSTERY} green and this particular obstruction or geometry blue.
+
+Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
 It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line. As the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the geometry.
 
-Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
+Obstructions, geometries and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent, geometry or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
 
 \begin{table}[p]
@@ -1849,11 +1851,36 @@ There are various ways of prescribing the color of various objects within the co
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
 \end{lstlisting}
-Assuming that a JPEG file called {\ct paneling.jpg} exists in the working directory, Smokeview should read it and display the image wherever the paneling is used. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH} and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to the {\ct VENT} or {\ct OBST} line to which a texture map should be applied. For example,
+Assuming that a JPEG file called {\ct paneling.jpg} exists in the working directory, Smokeview loads and displays the image wherever the paneling is used. PNG images may also be used for texture maps. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH} and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to the {\ct VENT} or {\ct OBST} line to which a texture map should be applied. For example,
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
-applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
+applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line. 
+
+For geometries that are spheres, the parameter {\ct TEXTURE\_MAPPING='SPHERICAL'} on the {\ct GEOM} line lets smokeview know to wrap the texture around the sphere rather than to lay it flat from above. The following FDS input lines from the example test case {\ct geom\_texture3a.fds} defines a sphere using the image {\ct sphere\_cover\_03.png} as a texture map (this image is found in the smokeview installation directory). Figure \ref{fig:texturemappedsphere} shows a texture mapped sphere using these input lines along with rectangular texture map that was applied.
+
+\begin{lstlisting}
+&SURF ID='surf1'
+      TEXTURE_MAP='sphere_cover_03.png',COLOR='BLUE',
+      TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0,TEXTURE_ORIGIN=0.0,0.0,0.0,
+      TEXTURE_MAPPING='SPHERICAL'/
+&MOVE ID='SPHERE_ROT', AXIS=0.,0.,1., ROTATION_ANGLE=270. /
+&GEOM ID='sphere1',SURF_ID='surf1',SPHERE_RADIUS=0.5,
+N_LAT=25,N_LONG=50,SPHERE_ORIGIN=0.0,0.0,0.0,MOVE_ID='SPHERE_ROT'
+\end{lstlisting}
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{../../../fig/fds/Geometry_Figures/sphere_cover_03}&
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_texture3a}\\
+texture map&texture mapped sphere
+\end{tabular}
+\end{center}
+\caption[Texture mapped sphere]{Texture mapped sphere.}
+\label{fig:texturemappedsphere}%
+\end{figure}
+
 
 
 \newpage
