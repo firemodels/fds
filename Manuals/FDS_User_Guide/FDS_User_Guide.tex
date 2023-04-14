@@ -1268,7 +1268,7 @@ the {\ct SURF\_ID} parameter. A value greater than 0 designates, through the {\c
 Therefore, in the above example, the first face has an index $b=2$ which corresponds to the {\ct 'INERT'} surf ID, the
 second and third faces have $b=1$ and are of type {\ct 'FIRE'}, and the fourth will be of \textit{default} surface ID.
 
-\subsection{Triangulated surfaces quality} \label{triangulated_surfaces_quality}
+\subsection{Triangulated Surfaces Quality} \label{triangulated_surfaces_quality}
 
 In order for FDS to correctly detect the solid portion of the volume from the rest
 of the fluid domain, some tests are performed at start on the quality of
@@ -1371,10 +1371,9 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
 
 FIXME Colors and texture maps
 
-\subsection{Self-generated geometries}
+\subsection{Self-Generated Geometries}
 
-The {\ct GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
-and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
+The {\ct GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS} and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
 
 \subsubsection{Blocks}
 A {\ct GEOM}\ namelist defining a block is given by
@@ -1426,7 +1425,7 @@ A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDE
 where the cylinder is discretized using 6 segments along its axis and 48 segments across its circumference. The keyword {\ct SURF\_ID} can be replaced by {\ct SURF\_IDS='S1','S2','S3'}, where the strings {\ct 'S1','S2','S3'} correspond to the surface IDs of top, sides and bottom surfaces respectively.
 
 
-\subsubsection{2D Terrain elevations}
+\subsubsection{2D Terrain Elevations}
 A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 
 \begin{lstlisting}
@@ -1455,7 +1454,7 @@ vertices and triangular faces.
 
 Additionally, terrain geometries can be specified defining a triangulation with a convex regular boundary, as seen from the top. This triangulation will represent the terrain of interest and will define the top boundary of a terrain geom. The terrain surface is specified by {\ct VERTS} and {\ct FACES} as in a basic geometry (section~\ref{info:GEOM_Basics}), and the field {\ct IS\_TERRAIN} needs to be set to {\ct TRUE}, such that FDS knows this is a terrain unstructured surface. Surface types per faces are specified in the same manner as in basic geometries. Also, the {\ct EXTEND\_TERRAIN} logic can also be applied.
 
-\subsubsection{Geometries extruded from simple planar polygons}
+\subsubsection{Geometries Extruded From Simple Planar Polygons}
 
 In this case, a geometry can be defined specifying the {\ct VERTS}, connectivity {\ct POLY}, and extrusion distance {\ct EXTRUDE}. For example:
 
@@ -1475,7 +1474,7 @@ EXTRUDE=0.5 /
 The polygon defined by {\ct POLY} must be simple, non degenerate (no segment intersections, no repeated vertices) and all segments must lay on the same plane in three dimensional space. It can have a maximum of 1000 vertices. The value of {\ct EXTRUDE} can be a positive or negative real, but not zero. A single surface ID can be provided, or top, sides and bottom surface IDs through a  {\ct SURF\_IDS} field, in the same manner as the cylinders of section~\ref{info:GEOM_cyls}. Note that the bottom surface in {\ct SURF\_IDS} always refers to the polygon defined in {\ct POLY}, from where the extrusion operation is performed.
 
 
-\subsection{Generating complex geometries}
+\subsection{Generating Complex Geometries}
 
 Generating well-formed complex geometries is a time-consuming and error-prone process.
 Several third-party pre-processing tools are provided by the FDS-SMV community for automatically translating CAD files to {\ct GEOM}\ namelists.
@@ -1593,7 +1592,7 @@ For example, in the following {\ct GEOM}\ namelist,
 \noindent the chair object is translated and rotated using a reference to the {\ct MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
 
 
-\subsection{Reading Geometry node locations and connectivity data from binary}
+\subsection{Reading Geometry Node Locations And Connectivity Data From Binary}
 \label{subsec:readbin}
 
 In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
