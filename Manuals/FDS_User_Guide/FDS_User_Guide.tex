@@ -1226,17 +1226,14 @@ It is a good idea to inspect the geometry by running either a setup job
 \section{Creating Unstructured Geometry (Beta)}
 \label{info:GEOM}
 
-The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions
-of the fluid domain. These surfaces consist of a collection of triangular faces, where each face is built
-from three vertices. The user can assign a specific boundary condition to each of the faces.
+The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions of the fluid domain. These surfaces consist of a collection of triangular faces, where each face is built from three vertices. The user can assign a specific boundary condition to each of the faces.
 
 \subsection{Basics}
 \label{info:GEOM_Basics}
 
-A simple form of the {\ct GEOM} namelist defining an unstructured solid is given by
-
+A simple example of an unstructured solid is given by
 \begin{lstlisting}
-&GEOM ID='UNSTRUCTURED_SOLID'
+&GEOM ID='My Solid'
       SURF_ID='FIRE','INERT'
       VERTS= -1.0, -1.0,  0.0,
               1.0, -1.0,  0.0,
@@ -1245,28 +1242,11 @@ A simple form of the {\ct GEOM} namelist defining an unstructured solid is given
       FACES= 1,3,2, 2,
              1,4,3, 1,
              3,4,2, 1,
-             2,4,1, 0,
-/
+             2,4,1, 0 /
 \end{lstlisting}
+{\ct ID} specifies the name, {\ct 'My Solid'}, {\ct VERTS} specify the coordinates of each vertex ($x_1$,$y_1$,$z_1$; $x_2$,$y_2$,$z_2$, ...), and {\ct FACES} define each triangular face---three vertices and one boundary condition index: ($v_1$,$v_2$,$v_3$,$b$). The vertex indices range from 1 to the number of vertices listed in {\ct VERTS}. The order of the three vertices defines which side of the triangle is outward facing. Observed from the outside, the vertices of each triangle should be ordered counter-clockwise, following the right-hand rule convention.
 
-\noindent where {\ct ID} specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
-{\ct VERTS} specifies the ($x_1$,$y_1$,$z_1$, $x_2$,$y_2$,$z_2$, ...) coordinates of the vertices,
-and {\ct FACES} specifies a list of triangular faces and the {\ct SURF\_ID} that should be
-assigned to each of them.
-
-A triangular face is defined by 3 vertex indices and one boundary condition index: ($v_1$,$v_2$,$v_3$,$b$).
-Each vertex index $(v_i)$ ranges from 1 to the number of vertices found in the {\ct VERTS} parameter.
-The order of the 3 vertex indices in the face defines which side of the triangle is considered facing
-the outside of the solid. Observed from the outside, the vertices of each triangle should always appear
-to have a counter-clockwise winding order, so that their order rotates counter-clockwise around the
-triangle's center and the face normal vector is oriented according to the right-hand rule.
-
-The boundary condition index $b$ ranges from 0 to the number of boundary condition {\ct IDs} found in
-the {\ct SURF\_ID} parameter. A value greater than 0 designates, through the {\ct SURF\_ID} list, which
-{\ct SURF} line (Section~\texttt{info:SURF}) to apply at the selected face. This index $b$ is always defined locally to the
-{\ct GEOM SURF\_ID} surface list. A value equal to 0 applies the \textit{default} boundary condition to the selected face.
-Therefore, in the above example, the first face has an index $b=2$ which corresponds to the {\ct 'INERT'} surf ID, the
-second and third faces have $b=1$ and are of type {\ct 'FIRE'}, and the fourth will be of \textit{default} surface ID.
+The boundary condition index $b$ ranges from 0 to the number of entries in {\ct SURF\_ID}. $b=0$ applies the default boundary condition. In the example above, the first face has an index, $b=2$, which corresponds to {\ct 'INERT'}, the second and third faces have $b=1$ corresponding to {\ct 'FIRE'}, and the fourth corresponds to the default.
 
 \subsection{Triangulated Surfaces Quality} \label{triangulated_surfaces_quality}
 
@@ -2465,7 +2445,7 @@ This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and
 
 
 
-\subsection{3-D Heat Conduction}
+\subsection{3-D Heat Conduction (Beta)}
 \label{info:ht3d}
 \label{ht3d_demo}
 \label{info:mesh_separation}
@@ -12834,6 +12814,7 @@ Both FDS and Smokeview live within a GitHub \emph{organization} called ``firemod
 fds & FDS source code, verification and validation tests, wikis, and documentation \\
 smv & Smokeview source code, integration tests, and documentation \\
 exp & Experimental data repository for FDS validation \\
+fig & Figures used by various manuals \\
 out & FDS output results for validation \\
 bot & Firebot (continuous integration system) source \\
 fds-smv & Web page html source
