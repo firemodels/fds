@@ -1228,7 +1228,20 @@ It is a good idea to inspect the geometry by running either a setup job
 
 The namelist {\ct GEOM} describes one or more unstructured closed geometric surfaces that enclose solid portions of the fluid domain. These surfaces consist of a collection of triangular faces, where each face is built from three vertices. The user can assign a specific boundary condition to each of the faces.
 
-\subsection{Basics}
+\subsection{My First Geometry}
+\label{info:first_geom}
+
+To get you aquainted with the new geometry features, as much as possible, we have tried to allow for {\ct OBST} namelist parameters to be applied to {\ct GEOM}.  Therefore, subject to the limitations listed at the end of this section (see Sec.~\ref{info:geom_limitations}), you should be able to take a case built from {\ct OBST} and simply do a \emph{replace} with {\ct GEOM} to begin using unstructured geometry. For example, if you have a burner build like this
+\begin{lstlisting}
+&OBST XB=-1,1,-1,1,0,0.5, SURF_IDS='FIRE','INERT','INERT' /
+\end{lstlisting}
+You can replace this with
+\begin{lstlisting}
+&GEOM XB=-1,1,-1,1,0,0.5, SURF_IDS='FIRE','INERT','INERT' /
+\end{lstlisting}
+Further, the {\ct GEOM} may be \emph{transformed} using a {\ct MOVE} line as discussed in Sec.~\ref{info:transform_geom}.
+
+\subsection{Unstructured Geometry Basics}
 \label{info:GEOM_Basics}
 
 A simple example of an unstructured solid is given by
@@ -1557,8 +1570,9 @@ Links to these tools can be found at the project home page at https://pages.nist
 
 
 \subsection{Transforming Objects}
-An object may be transformed.
-It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated about {\ct XYZ0}\ using {\ct AZIM}\ and/or {\ct ELEV}.
+\label{info:transform_geom}
+
+A geometry may be transformed. It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated about {\ct XYZ0}\ using {\ct AZIM}\ and/or {\ct ELEV}.
 For example, in the following {\ct GEOM}\ namelist,
 
 {\small
@@ -1604,6 +1618,7 @@ One current limitation of the cutcell algorithm is that a Cartesian cell cannot 
 
 
 \subsection{Current GEOM Limitations}
+\label{info:geom_limitations}
 
 {\color{red} Let's make a good list here for FAQ about geometry limitations.}
 
