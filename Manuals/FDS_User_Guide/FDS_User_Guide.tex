@@ -1367,9 +1367,9 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
-\subsection{Coloring}
+\subsection{Coloring and Texture Maps}
 
-FIXME Colors and texture maps
+Coloring and texture maps for immersed geometric objects is specified in the same way as for obstacles. Documentation may be found in Section \ref{info:colors}.
 
 \subsection{Self-Generated Geometries}
 
@@ -1757,22 +1757,25 @@ the direction in which the {\ct VENT} is facing.
 
 \newpage
 
-\section{Coloring Obstructions, Vents, Surfaces and Meshes}
+\section{Coloring Obstructions, Immersed Geometries, Vents, Surfaces and Meshes}
 \label{info:colors}
 
-It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of a your choosing.
+It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of your choosing.
 
 \subsection{Colors}
 
-Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
+Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions immersed geometries, or vents. For example, the lines:
 \begin{lstlisting}
 &SURF ID='UPHOLSTERY', ..., RGB=0,255,0 /
 &OBST XB=..., COLOR='BLUE' /
+&GEOM GEOM_ID=..., COLOR='BLUE' /
 \end{lstlisting}
-will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
+will color all {\ct UPHOLSTERY} green and this particular obstruction or geometry blue.
+
+Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
 It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line. As the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the geometry.
 
-Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
+Obstructions, geometries and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent, geometry or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
 
 \begin{table}[p]
