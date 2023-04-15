@@ -25,8 +25,9 @@ INTEGER :: LU_DB_CCIB
 
 ! Forcing and Inseparable pressure residual computation parameters:
 LOGICAL, PARAMETER :: GRADH_ON_CARTESIAN = .FALSE.
-REAL(EB), PARAMETER:: A_THRESH_FORCING   = 0.05_EB
-REAL(EB), PARAMETER:: V_THRESH_INSPRES   = 0.005_EB
+REAL(EB), PARAMETER:: A_THRESH_FORCING     = 0.05_EB
+REAL(EB), PARAMETER:: STM_THRESH_EXTRP     = 0.005_EB
+REAL(EB), PARAMETER:: V_THRESH_INSPRES     = 0.005_EB
 
 ! Local integers:
 INTEGER, SAVE :: ILO_CELL,IHI_CELL,JLO_CELL,JHI_CELL,KLO_CELL,KHI_CELL
@@ -14048,8 +14049,13 @@ ORIENTATION_LOOP: DO IS=1,3
       ! UTA(ICD_SGN)=U_TAU
 
       ! Extrapolation coefficients for the IBEDGE:
-      EC_B(ICD_SGN) = (DEL_EP + ABS(XB_IB))/DEL_EP
-      EC_EP(ICD_SGN)= 1._EB - EC_B(ICD_SGN)
+      IF(DEL_EP > STM_THRESH_EXTRP*DE) THEN
+         EC_B(ICD_SGN) = (DEL_EP + ABS(XB_IB))/DEL_EP
+         EC_EP(ICD_SGN)= 1._EB - EC_B(ICD_SGN)
+      ELSE
+         EC_B(ICD_SGN) = 1._EB
+         EC_EP(ICD_SGN)= 0._EB
+      ENDIF
 
       ! If needed re-interpolate stress and duidxj to RC EDGE:
       IEC_SELECT_2: SELECT CASE(IEC)
