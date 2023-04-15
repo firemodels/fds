@@ -6353,8 +6353,8 @@ The left compartment is initialized with a temperature of \SI{100}{\degreeCelsiu
 This chapter deals with verification cases which are specific to solving problems related to wildland and Wildland-Urban Interface (WUI) fires. Currently, some relevant verification tests can also be found in other sections (light blue links refer to the User's Guide):
 \begin{itemize}
   \item Convective heating in vegetation: Figure~\ref{UG-ground_vegetation_conv};
-  \item Radiation attenuation by vegetation: Figure~\ref{fig_radiation_gas-veg_consistency} and Figure~\ref{UG-ground_vegetation_radi};
-  \item Mass and energy conservation in burning vegetation: Figure~\ref{UG-char_oxidation_2_fig} and Figure~\ref{UG-pine_needles_fig}.
+  \item Radiation attenuation by vegetation: Figures~\ref{fig_radiation_gas-veg_consistency} and \ref{UG-ground_vegetation_radi};
+  \item Mass and energy conservation in burning vegetation: Figures~\ref{UG-char_oxidation_2_fig} and \ref{UG-pine_needles_fig}.
 \end{itemize}
 
 \section{Level Set Model}
@@ -6384,7 +6384,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
  \includegraphics[height=2.2in]{SCRIPT_FIGURES/level_set_ellipse_30deg.pdf}\\
 \end{tabular}
 \end{center}
- \caption{Expected versus predicted shape of fire front after a period of \SI{10}{\second}. The cases on the left are for zero slope, and those on the right have \SI{30}{\degree} slope oriented to the northeast.}
+ \caption[Level set fire front ellipse shape]{Expected versus predicted shape of fire front after a period of \SI{10}{\second}. The cases on the left are for zero slope, and those on the right have \SI{30}{\degree} slope oriented to the northeast.}
 \label{fig:level_set_ellipse}
 \end{figure}
 
@@ -6394,7 +6394,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
  \includegraphics[height=2.2in]{SCRIPT_FIGURES/level_set_ellipse_error.pdf}
 \end{tabular}
 \end{center}
- \caption{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
+ \caption[Level set fire front ellipse error]{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
 \label{fig:level_set_ellipse_error}
 \end{figure}
 
@@ -6402,18 +6402,18 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 
 \ifcompgeom
 
-\chapter{Unstructured Geometry}
+\chapter{Unstructured Geometry (Beta)}
 
 This section describes some of the test cases used to verify that FDS and Smokeview are computing
 and visualizing unstructured geometric objects correctly. Also here , the behavior of the different
 algorithms used to include unstructured geometries whithin FDS is tested. Several test cases that showcase
-and test the use of the \&GEOM line are presented, followed by accuracy and conservation tests.
+and test the use of the {\ct GEOM} line are presented, followed by accuracy and conservation tests.
 
 
 \section{Verification of setup checks on broken geometries}
 
 This subsection describes some of the test cases used to verify that FDS correctly enforces on geometries
-the quality rules described in Section \texttt{User Guide : Triangulated Surfaces quality}.
+the quality rules.
 
 The following verification cases contain specific broken geometries in an otherwise correctly
 formatted FDS input file:
@@ -6431,12 +6431,14 @@ formatted FDS input file:
 To allow Firebot to consider the test successful if it catches the error condition,
 each of the above input files contain the following parameter in the {\ct MISC}\ line:
 
-{\ct POSITIVE\_ERROR\_TEST = .TRUE.}\
+\begin{lstlisting}
+&MISC POSITIVE_ERROR_TEST = T
+\end{lstlisting}
 
-The effect of this parameter is replacing the {\ct ERROR}\ label of the message with a {\ct SUCCESS}\ label.
+The effect of this parameter is replacing the {\ct ERROR} label of the message with a {\ct SUCCESS}\ label.
 
-After Firebot is run, the {\ct geom\_positive\_errors.m}\ Matlab script checks the existence
-of the planned error condition in the {\ct CHID.err}\ file, reporting in cases where the condition
+After Firebot is run, the {\ct geom\_positive\_errors.m} Matlab script checks the existence
+of the planned error condition in the {\ct CHID.err} file, reporting in cases where the condition
 is not met.
 
 
@@ -6455,17 +6457,17 @@ Figure~\ref{fig:geom_simple} was created using the following input. The {\ct VER
 \begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_simple.png}
+ \includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_simple.png}
   \end{tabular}
 \end{center}
- \caption{A triangle created using 3 vertices and 1 face. Case: geom\_simple}
+ \caption[Simple triangulated geometry]{A triangle created using 3 vertices and 1 face. Case: {\ct geom\_simple}}
 \label{fig:geom_simple}
 \end{figure}
 
 
 \subsection{geom\_obst.fds}
 
-Figure \ref{fig:geom_obst} was created using the following GEOM feature. The {\ct XB}\ keyword is used the same way to specify a block as on a {\ct OBST}\ or {\ct VENT}\ line.
+Figure \ref{fig:geom_obst} was created using the following {\ct GEOM} feature. The {\ct XB}\ keyword is used the same way to specify a block as on a {\ct OBST}\ or {\ct VENT}\ line.
 \begin{lstlisting}
 &GEOM ID='obst', SURF_ID='surf1', 
       XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,
@@ -6475,25 +6477,25 @@ Figure \ref{fig:geom_obst} was created using the following GEOM feature. The {\c
 \begin{figure}
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[height=2.75in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_obst.png}
+ \includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_obst.png}
   \end{tabular}
 \end{center}
- \caption{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
+ \caption[Block geometry using {\ct XB}]{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
 \label{fig:geom_obst}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{geom\_sphere1a.fds,...,geom\_sphere3f.fds}
+\subsection{Self-generated Sphere Geometry}
 
 Figure \ref{fig:geom_sphere} was created using {\ct LEVEL=n}\
-in the following GEOM namelist
+in the following {\ct GEOM} namelist
 where {\ct n}\ ranges from 0 to 5.
 \begin{lstlisting}
 &GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,
       N_LEVELS=n,SPHERE_ORIGIN=0.0,0.0,0.0 /
 \end{lstlisting}
-The {\ct N\_LEVELS}\ keyword is used to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron . {\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the sphere produced with {\ct LEVEL=n-1}. The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
+The {\ct N\_LEVELS}\ keyword is used to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron . {\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the sphere produced with {\ct LEVEL=n-1}. The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify the size and location of the sphere.  This discretization technique should result in equilateral triangles at each recursion level.
 
 \begin{figure}
 \begin{center}
@@ -6509,7 +6511,7 @@ The {\ct N\_LEVELS}\ keyword is used to specify the resolution of the sphere, la
  LEVEL=4&LEVEL=5\\
   \end{tabular}
 \end{center}
- \caption{Recursive sphere discretizations.  A sphere at a given level is
+ \caption[Recursive sphere discretization]{Recursive sphere discretization.  A sphere at a given level is
  obtained by splitting each triangle from the previous level into four parts and renormalizing added vertices. Cases: geom\_sphere1a.fds,...,geom\_sphere1f.fds}
 \label{fig:geom_sphere}
 \end{figure}
@@ -6531,15 +6533,13 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
  N\_LAT=48,N\_LONG=96&N\_LAT=96,N\_LONG=192\\
   \end{tabular}
 \end{center}
- \caption{Latitude/Longitude sphere discretizations.  Spheres are
- split in longitudinal (east/west) and latitudinal (north/south) directions using the {\ct N\_LAT}\ and {\ct N\_LONG} keywords. Cases: geom\_sphere3a.fds,...,geom\_sphere3f.fds}
+\caption[Latitude/longitude sphere discretization]{Latitude/longitude sphere discretization.  Spheres are split in longitudinal (east/west) and latitudinal (north/south) directions using the {\ct N\_LAT}\ and {\ct N\_LONG} keywords. Cases: {\ct geom\_sphere3a.fds,...,geom\_sphere3f.fds}}
 \label{fig:geom_sphere2a}
 \end{figure}
 
 \FloatBarrier
 
-%\geominput{geom_terrain.fds}
-\subsection{geom\_terrain.fds}
+\subsection{Generating digital elevation maps, {\ct gridgeom\_terrain.fds}}
 
 Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 
@@ -6549,13 +6549,13 @@ Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
  \includegraphics[height=2.75in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_terrain.png}
   \end{tabular}
 \end{center}
- \caption{Elevations are defined on a rectangular array of grid points using the {\ct ZVALUES}\ keyword.  Case: gridgeom\_terrain.fds}
+ \caption[Defining digital elevation maps using {\ct ZVALS}]{Elevations are defined on a rectangular array of grid points using the {\ct ZVALS}\ keyword.  Case: {\ct gridgeom\_terrain.fds}}
 \label{fig:geom_terrain}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{geom\_texture.fds}
+\subsection{Adding texture maps, {\ct geom\_texture.fds}}
 
 Figure \ref{fig:geom_texture} was created using the following SURF and GEOM namelists.
 The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
@@ -6575,13 +6575,13 @@ FACES=1,2,3,SURF_ID='surf1'/
  \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture.png}
   \end{tabular}
 \end{center}
- \caption{A texture is applied to a triangle. Case: geom\_texture.fds}
+ \caption[Applying a texture map to a {\ct GEOM} surface]{A texture is applied to a triangle. Case: {\ct geom\_texture.fds}}
 \label{fig:geom_texture}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{geom\_texture2.fds}
+\subsection{Adding multiple texture maps, {\ct geom\_texture2.fds}}
 
 Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists. The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image file used to texture map the geometric object. This example has two textures.
 \begin{lstlisting}
@@ -6606,13 +6606,13 @@ FACES=1,2,3,SURF_ID='surf2'/
  \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture2.png}
   \end{tabular}
 \end{center}
- \caption{Two texture maps are applied to two separate triangles.  Case: geom\_texture2.fds}
+ \caption[Applying multiple texture maps to a {\ct GEOM} surface]{Two texture maps are applied to two separate triangles.  Case: {\ct geom\_texture2.fds}}
 \label{fig:geom_texture2}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{geom\_texture3.fds, geom\_texture4.fds}
+\subsection{Adding texture maps with different methods, {\ct geom\_texture*.fds}}
 
 The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
 \begin{lstlisting}
@@ -6641,9 +6641,9 @@ The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file ap
  lat/long discretization&recursive discretization
   \end{tabular}
 \end{center}
- \caption{Texture maps applied to spheres discretized using two different methods.
+ \caption[Applying texture maps to a {\ct GEOM} surface, different methods]{Texture maps applied to spheres discretized using two different methods.
  The two sphere on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
- The two spheres on the right are discretized recursively starting with an icosahedron ( 20 sided polyhedron).  Texture maps applied to the top two sphere have 8 segments. Texture map applied to the bottom two spheres have 5 segments.  Cases: geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
+ The two spheres on the right are discretized recursively starting with an icosahedron (20 sided polyhedron).  Texture maps applied to the top two sphere have 8 segments. Texture map applied to the bottom two spheres have 5 segments.  Cases: {\ct geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}}
 \label{fig:geom_texture3}
 \end{figure}
 
@@ -6672,7 +6672,7 @@ A center column of cartesian cells and corresponding cut-cells is shown in figur
       \put(-30,185){$\leftarrow$  pierced cell}
       \put(-30,90){$\leftarrow$  split cells}
       \put(-30,40){$\leftarrow$ aligned face}
-      \caption{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
+      \caption[Generating polyhedral cutcells around an immersed cone]{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
     \label{Fig:cone_cut_cells}
 \end{figure}
 
@@ -6683,22 +6683,23 @@ The results of the three tests on this cone problem can be seen on table~\ref{ta
 
 %
 \begin{table}[h]
-  \begin{tabular}{c|c|c}
+  \centering
+  \begin{tabular}[\textwidth]{c|c|c}
     \hline \hline
       $A_{B,\tau}$ & $A_{B,CF}$ & $\frac{|A_{B,\tau}-A_{B,CF} |}{A_{B,\tau}}$ \\ \hline
-       \texttt{0.7104E+01} & \texttt{0.7104E+01} & \texttt{0.6252E-15} \\
+       {0.7104E+01} & {0.7104E+01} & {0.6252E-15} \\
     \hline \hline
       $V_{GB}$ & $V_{GRC}$ & $\frac{|V_{GB}-V_{GRC}|}{V_{GB}}$ \\  \hline
-      \texttt{0.7096E+02} & \texttt{0.7096E+02} & \texttt{0.2212E-14} \\
+      {0.7096E+02} & {0.7096E+02} & {0.2212E-14} \\
     \hline \hline
     $\mathbf{x}_{GB}$ & $\mathbf{x}_{GRC}$ & $|\mathbf{x}_{GB}-\mathbf{x}_{GRC}|_\infty$ \\
     \hline \hline
-    \texttt{(-0.306E-6,0.586E-6,0.202E+1)} &
-    \texttt{(-0.306E-6,0.586E-6,0.202E+1)} &
-    \texttt{0.1856E-15} \\
+    {(-0.306E-6,0.586E-6,0.202E+1)} &
+    {(-0.306E-6,0.586E-6,0.202E+1)} &
+    {0.1856E-15} \\
     \hline
   \end{tabular}
-  \caption{Computation results for conservation tests on polyhedrons defined on immersed cone problem.}
+  \caption[Conservation tests for polyhedra]{Results for conservation tests on polyhedra defined on immersed cone problem.}
   \label{tab:cone_res}
 \end{table}
 %
@@ -6724,9 +6725,9 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 % Figure Saad_CC:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_Z.pdf}
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_rho.pdf}
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_temporal_order_rho.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_Z.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_rho.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_temporal_order_rho.pdf}
 \caption[The {\ct saad CC} temporal order test case]{Temporal order for a variable-density projection on domain including cut-cell region.  (Upper-left) Initial and final field for mixture fraction, explicit time integration on cut-cells.  (Upper-right) Initial and final field for density, explicit time integration on cut-cells.  (Bottom) $p$ computed pointwise for density at final time, explicit integration on cut-cells. Fluctuations are due to degenerate points in the formula for $p$.}\label{fig:saad_cc_temporal_order}
 \end{figure}
 
@@ -6753,8 +6754,8 @@ Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the
 % Figure Shunn_CC:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_chm_mms_convergence.pdf}
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_chm_mms_convergence.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
 \caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
 \end{figure}
 
@@ -6792,7 +6793,7 @@ which is similar on velocities and pressure to the functions given in reference~
 %
 which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside.
 
- The MMS sources $\mathbf{fe_v'}$ and $fe_Z'$ are computed analytically as functions of $(\mathbf{x'},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. See the Matlab script \texttt{Utilities/Matlab/scripts/source\_mms\_rotcube.m} in the fds repository for said sources derivations.
+The MMS sources $\mathbf{fe_v'}$ and $fe_Z'$ are computed analytically as functions of $(\mathbf{x'},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. See the Matlab script \texttt{Utilities/Matlab/scripts/source\_mms\_rotcube.m} in the fds repository for said sources derivations.
 
 
 
@@ -6803,7 +6804,7 @@ We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to t
       \centering
       \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
        width=0.6\linewidth]{../../../fig/fds/Geometry_Figures/RotCube_ManuSolnSketch.png}
-      \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
+      \caption[Reference frame for a rotated immersed body]{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
     \label{Fig:ManuSoln}
 \end{figure}
 %
@@ -6858,17 +6859,20 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 
 % Figures rotcube_cc 0deg:
 \begin{figure}[ht]
-\centering
-\includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_stm_mms_convergence.pdf}
-\includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_convergence.pdf}
+\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+\includegraphics[trim = 5mm 0mm 5mm 0mm, clip, height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_stm_mms_convergence.pdf}
+\includegraphics[trim = 5mm 0mm 5mm 0mm, clip, height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_convergence.pdf}
+\end{tabular*}
+\end{center}
 \caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. (Left) Stress method, (Right) square defined by $\&$OBST.}\label{fig:rotcube_cc_0deg_accuracy_order}
 \end{figure}
 
 % Figures for accuracy 27deg:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_stm_mms_convergence.pdf}
-\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_stm_mms_convergence.pdf}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
 \end{figure}
 
 Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,320\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
@@ -6880,7 +6884,7 @@ For the $\&$OBSTs and grid aligned stress method where the momentum equations ar
 % Figures for accuracy 45deg:
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_stm_mms_convergence.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_stm_mms_convergence.pdf}
 \caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_45deg_accuracy_order}
 \end{figure}
 
@@ -6909,23 +6913,23 @@ which can be used to compute the simulation error in $f$, as a function of the m
       \centering
       \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
        width=0.75\linewidth]{../../../fig/fds/Geometry_Figures/Poiseuille_cc_Sketch.png}
-      \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
+      \caption[Poiseuille flow between two unstructured geometries]{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
     \label{Fig:PoiseSketch}
 \end{figure}
 %
 We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
 
-In case of stress method for cross velocities (STM), the friction factor error $|f-f_{an}|$ convergence can be seen in figures~\ref{Fig:PoiseConvg2}a,b.
+In case of stress method for cross velocities (STM), the friction factor error $|f-f_{an}|$ convergence can be seen in Figs.~\ref{Fig:PoiseConvg2}a,b.
 %
 % figure
 \begin{figure}[h]
-      \centering
-      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a_stm.pdf}
-      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na_stm.pdf}
-      \caption{Poiseuille flow created by two geometries, STM for cross velocities: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$.}
-      \label{Fig:PoiseConvg2}
+\centering
+\begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+\includegraphics[trim = 5mm 0mm 5mm 0mm, clip,height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a_stm.pdf}
+\includegraphics[trim = 5mm 0mm 5mm 0mm, clip,height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na_stm.pdf}
+\end{tabular*}
+\caption[Poiseuille flow convergence with unstructured geometry]{Poiseuille flow created by two geometries, STM for cross velocities: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$.}
+\label{Fig:PoiseConvg2}
 \end{figure}
 %
 
@@ -6949,8 +6953,8 @@ In case of stress method for cross velocities (STM), the friction factor error $
 
 A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is centered in a box that is 4~m on a side with a surface temperature of 0~K. The emissivity of all surfaces is 1, and there is no convective heat transfer to or from any surface. The heat flux from the hot sphere to the nearest cold wall surface 1~m away is expected to be $\sigma T^4/4=5.065$~kW/m$^2$. The results are shown in Fig.~\ref{sphere_radiate_fig}.
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.png}
-\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.pdf}
+\includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.png}
+\includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.pdf}
 \caption[The {\ct sphere\_radiate} test case]{Left: a radiating hot sphere. Right: heat flux to the nearest wall surface.}
 \label{sphere_radiate_fig}
 \end{figure}
@@ -6966,18 +6970,18 @@ A hollow sphere with an inner radius of 1~m has a small cube within it that is b
 as shown in Fig.~\ref{sphere_leak_fig}.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_leak.pdf}
+\includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_leak.pdf}
 \caption[The {\ct sphere\_leak} test case]{Pressure rise in a leaking sphere.}
 \label{sphere_leak_fig}
 \end{figure}
 
-\subsection{Restart Function}
+\section{Restart Function}
 \label{geom_restart}
 
-In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
+In this test, a {\ct GEOM} cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}
 \caption[The {\ct geom\_restart} test case]{Test of restart functionality for complex geometry.}
 \label{fig:geom_restart}
 \end{figure}
