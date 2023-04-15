@@ -14,10 +14,10 @@
 \chapter{Unstructured Geometry}
 
 
-\section{Scalar Transport discretization for Complex geometry}
+\section{Scalar Transport Discretization for Complex geometry}
 
 
-\subsection{Multispecies mass balance equations}
+\subsection{Multispecies Mass Balance Equations}
 
 Consider a set of gaseous, reacting  chemical species $\alpha=1,\dots,N$ flowing on a given spatial domain $\Omega \in \mathbb{R}^n, \; n=2,3$, with boundary $\partial \Omega$, paramaterized by an Eulerian reference frame $N$. These species are transported on a given point $\mathbf{x}$ in space with velocity $\mathbf{u}_\alpha(\mathbf{x},t)$ respect to $N$, and a mass weighted average velocity $\mathbf{u}(\mathbf{x},t)$
 %
@@ -49,14 +49,14 @@ Noting that $ \rho_\alpha = \rho Y_\alpha$, and using equation~\eqref{eq:vdiff} 
 \end{equation}
 %
 
-We see from these equations that the evolution of these species can be considered as a function of the mixture $\rho$ and average $\mathbf{u}$, and written as such, depending on the other species through equations~\eqref{eq:veldens}, and through the mass conservation statement on reactive sources
+We see from these equations that the evolution of these species can be considered as a function of the mixture $\rho$ and average $\mathbf{u}$, and written as such, depending on the other species through Eqs.~\eqref{eq:veldens}, and through the mass conservation statement on reactive sources
 %
 \begin{equation}
   \sum\limits_{\alpha=1}^{N} \dot{m}_\alpha'''(\mathbf{x},t) = 0
 \end{equation}
 %
 
-In equation~\eqref{eq:bal2}, the following convective and diffusive fluxes per unit time and area are found:
+In Eq.~\eqref{eq:bal2}, the following convective and diffusive fluxes per unit time and area are found:
 %
 \begin{eqnarray}
   \mathbf{J_{c \alpha}} &=& \rho Y_\alpha  \mathbf{u} \label{eq:jc} \\
@@ -71,7 +71,7 @@ The definition of diffusion velocities $\mathbf{V}_\alpha$ is a central componen
 %
 where $D_\alpha$ is the binary diffusivity coefficient respect to the background species.
 
-Using this last expression in equation~\eqref{eq:bal2} we arrive to the basic form of the species balance equations based on mass fractions, and used in FDS
+Using this last expression in Eq.~\eqref{eq:bal2} we arrive to the basic form of the species balance equations based on mass fractions, and used in FDS
 %
 \begin{equation}
    \frac{\partial \rho Y_\alpha}{ \partial t} + \nabla \cdot ( \rho Y_\alpha  \mathbf{u} ) = \nabla \cdot ( \rho D_\alpha \boldsymbol{\nabla} Y_\alpha ) + \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal3}
@@ -85,11 +85,11 @@ A spatially discretized version of the previous equations in a domain divided in
 \left[ \mathbf{M} \right] \frac{\partial}{\partial t} \left\{ \mathbf{\rho Y_\alpha} \right\}  = \left\{ \mathbf{F_{adv \alpha}} \right\} + \left\{ \mathbf{F_{diff \alpha}} \right\} + \left\{  \mathbf{\dot{m}_\alpha'''} \right\} +  \left\{ \mathbf{F_{BC \alpha}} \right\} \; , \; \alpha=1,\dots,N \label{eq:discbal3}
 \end{equation}
 %
-where the vector $\left\{ \mathbf{\rho Y_\alpha} \right\}$ of size $n_{tot}$ is the vector of unknowns (assuming one unknown per computational cell), $\left[ \mathbf{M} \right]$ is the systems mass matrix, and $\left\{ \mathbf{F_{adv \alpha}} \right\}$, $\left\{ \mathbf{F_{diff \alpha}} \right\}$, $\left\{  \mathbf{\dot{m}_\alpha'''} \right\}$, $\left\{ \mathbf{F_{BC \alpha}} \right\}$ are vectors due to advection, diffusion, reaction and boundary conditions. Note that  $\left\{ \mathbf{F_{adv \alpha}} \right\}$, $\left\{ \mathbf{F_{diff \alpha}} \right\}$ are function of the equations unknowns $\rho Y_\alpha$. 
+where the vector $\left\{ \mathbf{\rho Y_\alpha} \right\}$ of size $n_{tot}$ is the vector of unknowns (assuming one unknown per computational cell), $\left[ \mathbf{M} \right]$ is the systems mass matrix, and $\left\{ \mathbf{F_{adv \alpha}} \right\}$, $\left\{ \mathbf{F_{diff \alpha}} \right\}$, $\left\{  \mathbf{\dot{m}_\alpha'''} \right\}$, $\left\{ \mathbf{F_{BC \alpha}} \right\}$ are vectors due to advection, diffusion, reaction and boundary conditions. Note that  $\left\{ \mathbf{F_{adv \alpha}} \right\}$, and $\left\{ \mathbf{F_{diff \alpha}} \right\}$ are function of the equations unknowns $\rho Y_\alpha$. 
 
-\subsection{Finite Volume method on staggered grid in 2D}
+\subsection{Finite Volume Method on Staggered Grid in 2D}
 
-The finite volume discretization (FV) starts by considering the integral form of equation~\eqref{eq:bal3} over a cell control volume $\Omega_{ii}$. For
+The finite volume discretization (FV) starts by considering the integral form of Eq.~\eqref{eq:bal3} over a cell control volume $\Omega_{ii}$. For
 cell $ii$ individualized by the index pair $(i,j)$ we have
 %
 \begin{equation}
@@ -109,7 +109,7 @@ where $V_{i,j}$ is the volume of cell $(i,j)$. These cell averaged quantities (d
  for diffusion flux spatial derivatives and interpolation on the advective term, will lead to identical discretization matrices (they will vary up to a volume factor) on uniform cartesian grids. The difference between these two numerical discretization methods arises from the source $\dot{m}_\alpha''' $, which for a given cell is the cell centroid value $\dot{m}'''_{\alpha (i,j)}$ in FD, and it is the cell average $ \widetilde{ \dot{m}_\alpha''' }_{i,j}$ in FV. To discretize both diffusive and advective terms in equation~\eqref{eq:intconvdiff}, we make use of the divergence theorem. In the following we drop the tildes to simplify the notation, keeping in mind that using FV, quantities will always be cell or face averaged where it corresponds.
 
 
-\subsection{FV discretization in Cut-Cells} \label{sec:cc}
+\subsection{FV Discretization in Cut-Cells} \label{sec:cc}
 
 The treatment of irregular gas phase Eulerian grid faces and cells that remain after the inclusion of immersed bodies is described in this section.
 We assume (see Fig.~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has been successful in defining the following:
@@ -136,7 +136,7 @@ We assume (see Fig.~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has b
 	\label{Fig:FVdiscCC}
 \end{figure}
 %
-\subsection{CC discretization of Diffusive term}  \label{sec:CCdiff}
+\subsection{CC Discretization of Diffusive Term}  \label{sec:CCdiff}
 
 Consider the FV discretization of the diffusive term (equation~\eqref{eq:intconvdiff}) on cut-cell $ii$ in Fig.~\ref{Fig:FVdiscCC}b. We have
 %
@@ -148,12 +148,12 @@ Consider the FV discretization of the diffusive term (equation~\eqref{eq:intconv
 %
 The $nf_c=6$ faces that compose the boundary of the cut-cell can be divided in:
 
-\subsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} faces connecting a cut-cell with a regular cell:}
+\subsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} Faces Connecting a Cut-Cell with a Regular Cell:}
 The treatment of these is as done in regular cartesian faces, with the caveat that the diffusive flux computation now involves the cut-cell centroid location (i.e. to compute spatial derivatives of $Y_\alpha$ and interpolation of $\rho D_\alpha$ in equation~\eqref{eq:discfvdiffcc}).
 
-\subsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{cut-faces}:}
+\subsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{Cut-Faces}:}
 
-In order to compute the discrete term of equation~\eqref{eq:discfvdiffcc} on these faces, the factor $\rho D_\alpha$ needs to be interpolated from cell centroids to the face centroid and the spatial derivative of $Y_\alpha$ computed at the face centroid. The use of face centroids is required to maintain spatial accuracy when going from the left to right hand side of~\eqref{eq:discfvdiffcc} in difference FV methods. To maintain accuracy of the overall cut cell method, interpolation and differentiation to the cut-face centroid must also be sufficiently accurate.
+In order to compute the discrete term of Eq.~\eqref{eq:discfvdiffcc} on these faces, the factor $\rho D_\alpha$ needs to be interpolated from cell centroids to the face centroid and the spatial derivative of $Y_\alpha$ computed at the face centroid. The use of face centroids is required to maintain spatial accuracy when going from the left to right hand side of Eq.~\eqref{eq:discfvdiffcc} in difference FV methods. To maintain accuracy of the overall cut cell method, interpolation and differentiation to the cut-face centroid must also be sufficiently accurate.
 
 The following discussion is fairly general, in the sense that it is agnostic to the interpolation methods employed (Lagrange polynomials, isoparametric, least squares, etc.).
 Consider a stencil of points $e=1,...,ne$, where the scalar $Y_\alpha$ is assumed defined (i.e. cell centroids). Then for a location of interest $ck$ (i.e. the centroid of \texttt{GASPHASE} cut-face $k=3,6$), interpolation and derivatives of $Y_\alpha$ at $ck$ can be obtained as
@@ -200,7 +200,7 @@ where
    \phi_1(\xi) = \frac{1}{2} \left(1 - \xi \right) \; ; \; \phi_2(\xi) = \frac{1}{2} \left(1 + \xi \right)
 \end{equation}
 %
-We assume the value of the parameter where the cut-face lies known $\xi_p$, corresponding to the face and centroid segment intersection $\mathbf{x}_p$. From equation~\eqref{eq:xxi} with $\mathbf{x}=x\hat{\mathbf{i}}+y\hat{\mathbf{j}}$, we have
+We assume the value of the parameter where the cut-face lies known $\xi_p$, corresponding to the face and centroid segment intersection $\mathbf{x}_p$. From Eq.~\eqref{eq:xxi} with $\mathbf{x}=x\hat{\mathbf{i}}+y\hat{\mathbf{j}}$, we have
 %
 \begin{eqnarray}
    \frac{\partial \xi}{\partial x} = \frac{2}{(x_{ii}-x_{jj})} \; ; \;  \frac{\partial \xi}{\partial y} = \frac{2}{(y_{ii}-y_{jj})}
@@ -230,10 +230,10 @@ Note that, an assumption of approximation of the cut-face centroid location by p
 \end{equation}
 %
 
-Similar expressions would be found for a \texttt{GASPHASE} cut-face normal to the $x$ direction. 
+Similar expressions are found for a \texttt{GASPHASE} cut-face normal to the $x$ direction. 
 
 
-\subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
+\subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{Cut-Faces}:}
 
 % Here define how we treat CFACEs Boundary Conditions.
 Consider \texttt{INBOUNDARY} cut-face $k=\mathbf{1}$ in Fig.~\ref{Fig:FVdiscCC}b. If a Neumann boundary condition is specified in such a face, the term
@@ -253,7 +253,7 @@ In case a Dirichlet boundary condition is specified in boundary face $k=1$ the n
 where the value of $Y_{Ec1}$ is the cell value, and $h$ is taken as half the cell volume divided by surface boundary area on the cell. Note that, as discussed later in Sec.~\ref{sec:exscl}, when small cells are linked to neighboring cells these quantities refer to the control volume of linked cells.
 
 
-\subsection{CC discretization of Advective term}
+\subsection{CC Discretization of Advective Term}
 
 We study the discretization of the advective term for the six faces of cell $ii$ in Fig.~\ref{Fig:FVdiscCC}b:
 %
@@ -277,7 +277,7 @@ Then, a flux limited spatial interpolation of the form~\eqref{eq:interpqfluid} f
 %
 where $e=1,...,ne$ refers to a suitable flux limited stencil of \texttt{GASPHASE} cell centroids. The $\overline{\phi}_e$ are the flux limited interpolation functions  related to said centroids.
 
-\subsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} faces connecting a cut-cell with a regular cell:}
+\subsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} Faces Connecting a Cut-Cell with a Regular Cell:}
 The treatment of these is as described in the previous section, with the caveat that the advective flux computation for $\rho Y_\alpha$ may now involves a four point stencil ($e=1,...,4$) spatial flux matched interpolation to the face. Consider the situations depicted in Fig.~\ref{Fig:FVFlxLimCC} for a regular face $RC$ connecting regular cell and cut-cell. In the left figure both extreme interpolation points of the stencil have associated species densities $\rho Y_{\alpha 1}$ and $\rho Y_{\alpha 4}$, as at least one cut-cell or regular cells are defined at those locations. In the right figure the lower extreme position of the stencil (cell S) lies completely within the \texttt{SOLID} phase, and it takes the value of the inner cell $\rho Y_{\alpha 2}$, rendering the interpolation to RC of Godunov type. Note also the loss of accuracy on the flux limited interpolation described in Sec.~\ref{sec_flux_limiters} due to cut-cell centroids making the stencil not uniformly spaced.
  
 \begin{figure}[h]
@@ -290,7 +290,7 @@ The treatment of these is as described in the previous section, with the caveat 
 	\label{Fig:FVFlxLimCC}
 \end{figure}
 
-\subsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{cut-faces}:}
+\subsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{Cut-Faces}:}
 
 For \texttt{GASPHASE} cut-face $k=3$ in Fig.~\ref{Fig:FVdiscCC}b, the advective term corresponding to cell $jj$ is
 %
@@ -301,7 +301,7 @@ For \texttt{GASPHASE} cut-face $k=3$ in Fig.~\ref{Fig:FVdiscCC}b, the advective 
 where the average face normal velocity $\mathbf{u}_k \cdot \hat{\mathbf{n}}_{jj,k} $ (i.e. approximated by the face centroid value) is assumed known. The quantity $\overline{[\rho Y_\alpha]}_k$ is obtained by flux limited interpolation to the face in similar manner as described previously. The flux component for cut-cell $ii$ is naturally opposite in sign to what is computed for cell $jj$.
 
 
-\subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
+\subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{Cut-Faces}:}
 
 The treatment of advective terms in boundary cut-faces is similar as described before. Consider a normal velocity $\mathbf{u}_1=v_n \hat{\mathbf{n}}_{ii,1}$ (into solid region) imposed at the boundary in \texttt{INBOUNDARY} cut-face k = 1 in Fig.~\ref{Fig:FVdiscCC}b. The advective component is in this case:
 %
@@ -311,16 +311,16 @@ The treatment of advective terms in boundary cut-faces is similar as described b
 and the value of $\overline{[\rho Y_\alpha]}_1=\rho Y_{\alpha ii}$ if $v_n > 0$, or $\overline{[\rho Y_\alpha]}_1=\rho \gamma_{ii,1}$ prescribed otherwise.
 
 
-\subsection{Unsteady evolution: Explicit time integration for scalars} \label{sec:exscl}
+\subsection{Unsteady Evolution: Explicit Time Integration for Scalars} \label{sec:exscl}
 
 It is well known that cut-cell methods pose a significant time constraint when used with explicit time integration methods.
-This is so because, inevitably for general problems there will arise \texttt{GASPHASE} cut-cells whose small-size will penalize
-severely the time step. We recall that each cell on the \texttt{GASPHASE}, including cut-cells, needs to meet CFL and Von Neuman stability constraints. Several different ways have been proposed in the literature to deal with this problem, i.e. cell merging, mixing or linking methods. In general, these lead to ad hoc selection procedures for surrounding cells, having to deal with many special cases, and in some cases potential solution deterioration close to the boundary.
+This is because it is inevitable that for general problems there will arise \texttt{GASPHASE} cut-cells whose small-size will severely penalize
+the time step. We recall that each cell on the \texttt{GASPHASE}, including cut-cells, needs to meet CFL and Von Neuman stability constraints. Several different ways have been proposed in the literature to deal with this problem, i.e., cell merging, mixing or linking methods. In general, these lead to ad hoc selection procedures for surrounding cells, having to deal with many special cases, and in some cases potential solution deterioration close to the boundary.
 
 We use a simple and robust procedure to address this problem. Within the scheme for numeration of scalar cell unknowns, a test is performed on cut-cells. If the cut-cell volume is less than the threshold volume $V_{thr}= c_{thr} V_{cart}$, where $V_{cart}$ is the local Cartesian cell volume and $c_{thr}<1$ is a threshold factor, the unknown number this cell takes is the one of an adjacent cell which has a volume larger than $V_{thr}$. This mathematically defines a single control volume of the two linked cells. Cell volumes are added in building the mass matrix for the FV discretization, and fluxes and matrix terms are added with their corresponding signs. Note that, flux quantities corresponding to the common face of these two cells effectively cancel on the single equation for the set.
 Alternatively, if after a number of cell numbering iterations an unlinked small cell persists in the mesh, this small cell is blocked and its corresponding cartesian cell tagged as solid.
 
-\section{Momentum time marching and Immersed Boundaries}
+\section{Momentum Time Marching and Immersed Boundaries}
 
 \subsection{Momentum-Pressure Coupling}
 
@@ -331,17 +331,17 @@ As a first approximation, consider the Newtonian flow problem defined by the fol
          \nabla \cdot \mathbf{u} (\mathbf{x},t) & = & \left(\nabla \cdot \mathbf{u} \right)^{th} \label{eq:LowMachDiv}
 \end{eqnarray}
 %
-where equation~\eqref{eq:LowMachMom} in the momentum equation, $\mathbf{u}(\mathbf{x},t)$ is the spatial velocity field, $\mathbf{F}(\mathbf{u},\mathbf{x},t)$ is a vector containing convective, diffusive and possibly other force terms, and $H(\mathbf{x},t)$ is a potential scalar field (physically the head field in this case, commonly called pressure). For sake of argument here, to represent the low Mach approximation employed in FDS, it suffices to consider a specified divergence field $\left(\nabla \cdot \mathbf{u} \right)^{th} (\mathbf{x},t)$ (thermodynamic divergence). This divergence field in the thermally buoyant flow model used in FDS is a proxy for the energy equation.
+where equation~\eqref{eq:LowMachMom} in the momentum equation, $\mathbf{u}(\mathbf{x},t)$ is the spatial velocity field, $\mathbf{F}(\mathbf{u},\mathbf{x},t)$ is a vector containing convective, diffusive and possibly other force terms, and $H(\mathbf{x},t)$ is a potential scalar field (physically the head field in this case, commonly called pressure). For sake of argument here, to represent the low Mach number approximation employed in FDS, it suffices to consider a specified divergence field $\left(\nabla \cdot \mathbf{u} \right)^{th} (\mathbf{x},t)$ (thermodynamic divergence). This divergence field in the thermally buoyant flow model used in FDS is a proxy for the energy equation.
 The domain $\Omega - \sum{\Omega_i}$ represents the fluid region, and boundary conditions are prescribed for $\mathbf{u}(\mathbf{x},t)$ on $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$.
 
-Classical fractional step methods for time integration of incompressible or low Mach flow are based on two operations: First, momentum transport to obtain intermediate velocities, and second, projection of velocities into divergence free space. Consider the Forward Euler update of the governing equations from $t_n$ to $t_{n+1}=t_n + \Delta t$ of the form: Given $ \mathbf{u}^n=\mathbf{u}(\mathbf{x},t_n)$, $\nabla \cdot \mathbf{u}^{n+1} = \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$ known
+Classical fractional step methods for time integration of incompressible or low Mach number flow are based on two operations: First, momentum transport to obtain intermediate velocities, and second, projection of velocities into divergence free space. Consider the Forward Euler update of the governing equations from $t_n$ to $t_{n+1}=t_n + \Delta t$ of the form: Given $ \mathbf{u}^n=\mathbf{u}(\mathbf{x},t_n)$, $\nabla \cdot \mathbf{u}^{n+1} = \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$ known
 %
 \begin{eqnarray}
   \frac{\mathbf{u}^{n+1}-\mathbf{u}^{n}}{\Delta t} &=& - \left[ \mathbf{F}^n +  \boldsymbol{\nabla} H^n \right] \label{eq:LowMachMomEu}\\
   \nabla \cdot \mathbf{u}^{n+1} &=& \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th} \label{eq:LowMachDivEu}
 \end{eqnarray}
 %
-where as time has been discretized, $\mathbf{u}^{n+1}$ represents a numerical approximation to the solution in~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} at time $t_{n+1}$. As the potential field $H(\mathbf{x},t)$ does not have a time evolution equation, it is assumed responsible of enforcing the divergence condition and used on the projection step. Taking the divergence of equation~\eqref{eq:LowMachMomEu} and considering  the constraint~\eqref{eq:LowMachDivEu}, the two steps of the method are
+where as time has been discretized, $\mathbf{u}^{n+1}$ represents a numerical approximation to the solution in Eqs.~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} at time $t_{n+1}$. As the potential field $H(\mathbf{x},t)$ does not have a time evolution equation, it is assumed responsible of enforcing the divergence condition and used on the projection step. Taking the divergence of equation~\eqref{eq:LowMachMomEu} and considering  the constraint Eq.~\eqref{eq:LowMachDivEu}, the two steps of the method are
 %
 \begin{enumerate}
   \item Solve Poisson equation for $H^n$:
@@ -359,26 +359,26 @@ where as time has been discretized, $\mathbf{u}^{n+1}$ represents a numerical ap
    The term $\hat{\mathbf{u}}^{n+1}=\mathbf{u}^{n} - \Delta t \mathbf{F}^n$ is known as intermediate velocity, and is a non matching divergence approximation to $\mathbf{u}^{n+1}$ (i.e. $\nabla \cdot \hat{\mathbf{u}}^{n+1} \neq \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$).
 \end{enumerate}
 %
-Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no boundary condition is required for $H(\mathbf{x},t)$, a consequence of the projection scheme is that boundary conditions are required on the Poisson equation of step~\eqref{it:FSPoisson}. For explicit methods and stationary \textit{solid} boundaries, the corresponding boundary condition is \textit{homogeneous} Neumann for $H^n$, $\partial H^n / \partial x_n =0$ in $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$ (i.e.~\cite{Perot:1993}).
+Although in the original problem, Eqs.~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv}, no boundary condition is required for $H(\mathbf{x},t)$, a consequence of the projection scheme is that boundary conditions are required on the Poisson equation of step Eq.~\eqref{it:FSPoisson}. For explicit methods and stationary \textit{solid} boundaries, the corresponding boundary condition is \textit{homogeneous} Neumann for $H^n$, $\partial H^n / \partial x_n =0$ in $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$ (i.e.~\cite{Perot:1993}).
 
 
-The next component of the scheme involves approximating velocity boundary conditions for immersed solid boundaries. In FDS, velocity field components are staggered in cartesian or cut faces. 
-For complex geometry the projection scheme defined above is applied in the unstructured mesh composed by cut-cells and regular gas cells. Therefore the Poisson equation is discretized in an unstructured grid and solved by matrix direct solvers, either by FDS mesh or globally. The projection step to obtain final velocities involves grid cell sizes in regular faces and centroid to centroid distance in cut-faces.
+The next component of the scheme involves approximating velocity boundary conditions for immersed solid boundaries. In FDS, velocity field components are staggered on cartesian or cut faces. 
+For complex geometry the projection scheme defined above is applied in the unstructured mesh composed by cut-cells and regular gas cells. Therefore, the Poisson equation is discretized in an unstructured grid and solved by matrix direct solvers, either by FDS mesh or globally. The projection step to obtain final velocities involves grid cell sizes in regular faces and centroid to centroid distance in cut-faces.
 
-On the other hand, cross velocities and tangent stresses and vorticity emanating from the immersed boundary are defined in cartesian faces being intersected by the geometry surface and surrounding cartesian edges. We use a wall modeled stress imposition method (STM) to this end described next.
+Cross velocities and tangent stresses and vorticity emanating from the immersed boundary are defined on cartesian faces being intersected by the geometry surface and surrounding cartesian edges. We use a wall modeled stress imposition method (STM) to this end described next.
  
-\subsection{Stress Method: Tangential velocities estimated through Cartesian stresses}
+\subsection{Stress Method: Tangential Velocities Estimated Through Cartesian Stresses}
 
-In the discrete momentum equations~\eqref{eq:LowMachMomEu}, the expression for $\mathbf{F^n}$ is:
+In the discrete momentum equations, Eq.~\eqref{eq:LowMachMomEu}, the expression for $\mathbf{F^n}$ is:
 %
 \begin{equation}
    \mathbf{F}^n = -\left[ \mathbf{u} \times \boldsymbol{\omega} + \tilde{p} \nabla \left( \frac{1}{\rho} \right) 
    + \frac{1}{\rho} \left[ (\rho-\rho_0) \mathbf{g} + \nabla \cdot \tau \right]  \right]^n \label{eqn:momfn}
 \end{equation} 
 %
-I this Sec. we are interested in the divergence of deviatoric stress $ \nabla \cdot \tau$ term, its discretization and shear stress values at the boundary.
+In this section we are interested in the divergence of deviatoric stress $ \nabla \cdot \tau$ term, its discretization and shear stress values at the boundary.
 
-\subsubsection{Wall modeled shear stress for grid aligned solid}
+\subsubsection{Wall Modeled Shear Stress for Grid Aligned Solid}
 
 % figure
 \begin{figure}[h]
@@ -405,9 +405,9 @@ A simple wall model representation in this case is given by a function $u^+ = f(
   u_\tau = \sqrt{\frac{\tau_w}{\rho}}; \; \; \; y^+ = \frac{ y}{\delta_v}; \; \; \; \delta_v = \frac{\nu}{u_\tau}; \; \; \; u^+ = \frac{u}{u_\tau}
 \end{equation}
 %
-Here $\tau_w$ is the stress at the wall point $B$; $\rho,\nu$ are the density and molecular kinematic viscosity. The quantity $\delta_v$ is the near wall viscous length scale. The functional model used has been described in Sec.~\ref{info:velocity_bc}, and corresponds to a zero pressure gradient equilibrium turbulent boundary layer (\textit{log-law}). As this function is non-linear, $y^+, \tau_w, u_\tau, \delta_v$ are computed to convergence trough fixed point iteration. 
+Here $\tau_w$ is the stress at the wall point $B$; $\rho$ and $\nu$ are the density and molecular kinematic viscosity. The quantity $\delta_v$ is the near wall viscous length scale. The functional model used has been described in Sec.~\ref{info:velocity_bc}, and corresponds to a zero pressure gradient equilibrium turbulent boundary layer (\textit{log-law}). As this function is non-linear, $y^+$, $\tau_w$, $u_\tau$, and $\delta_v$ are computed to convergence through fixed point iteration. 
 
-Referring to Fig.~\ref{Fig:Strss}, and considering the expression for the wall stress $\tau_w = \rho \nu \left( \frac{\partial u}{\partial y} \right)_{y=0}$ and a known velocity value $u_e^n$ initialize:
+Referring to Fig.~\ref{Fig:Strss}, and considering the expression for the wall stress $\tau_w = \rho \nu \left( \frac{\partial u}{\partial y} \right)_{y=0}$ and a known velocity value $u_e^n$, initialize:
 %
 \begin{itemize}
    \item compute $\tau_w^0 = \rho \nu \frac{2 |u_e^n|}{\Delta y}$
@@ -416,7 +416,7 @@ Referring to Fig.~\ref{Fig:Strss}, and considering the expression for the wall s
    \item compute $y^{+,0} = \frac{\Delta y}{2 \delta_v^0}$
 \end{itemize}
 %
-If a direct numerical simulation (DNS) is performed, this is all we need to compute the wall stress (its definition). For wall modeled large eddy simulation (LES), for $k=1,2,..$ up to desired convergence do:
+If a direct numerical simulation (DNS) is performed, this is all that is needed to compute the wall stress (its definition). For wall modeled large eddy simulation (LES), for $k=1,2,..$ up to desired convergence do:
 %
 \begin{enumerate}
    \item compute $y^{+,k} = \frac{\Delta y}{2 \delta_v^{k-1}}$
@@ -426,10 +426,10 @@ If a direct numerical simulation (DNS) is performed, this is all we need to comp
    \item compute $\delta_v^k = \nu/u_\tau^k$
 \end{enumerate}
 %
-where  $\kappa \simeq 0.41$, $Br \simeq 5.2$ are the log law constants. Once the stress at the wall $\tau_w$ is computed, it is used in the right hand side definition of the momentum equations to evolve the velocity flow variable $u_e^n \rightarrow u_e^{n+1}$. This velocity component
+where  $\kappa \simeq 0.41$ and $Br \simeq 5.2$ are the log law constants. Once the stress at the wall $\tau_w$ is computed, it is used in the right hand side definition of the momentum equations to evolve the velocity flow variable $u_e^n \rightarrow u_e^{n+1}$. This velocity component
 off the wall is integrated in time in the same manner as the rest of the discrete velocities, having to obey CFL and viscous constraints for stability.
 
-\subsubsection{Non grid aligned surfaces: Gradient estimation in Cartesian directions}
+\subsubsection{Non Grid Aligned Surfaces: Gradient Estimation in Cartesian Directions}
 
 When the solid surface is not aligned with the fluid mesh, velocity gradients and cartesian shear stress components are computed in the body surface and then are interpolated or extrapolated to surrounding cartesian grid edges. In general, the approach taken is similar to what is presented in references~\cite{Lundquist:2010,MaLiu:2017}, but in our case, sampling points for the different cartesian gradient components are defined in the cartesian instead of wall normal directions.
 In Fig.~\ref{Fig:STMgraphs}a, we define inside-boundary (IB) edges as edges contained completely in the solid but adjacent to the boundary. Adjacency is defined as having one of the edge connected cartesian faces being intersected by the solid boundary. We also define regular-cut face (RC) edges as edges completely defined in the gas phase, but adjacent to the boundary. Edges defined as IB or RC will receive vorticity and shear stress components extrapolated or interpolated from values estimated in the boundary through a wall model and gas phase values. The procedure might require an external gas phase edge (EP), also depicted in the figure.
@@ -446,7 +446,7 @@ In Fig.~\ref{Fig:STMgraphs}a, we define inside-boundary (IB) edges as edges cont
 \end{figure}
 %
 
-For each cartesian face containing IB, RC edges, shear stress components are modified to account for the presence of the boundary.We assume the average location $B$ of the boundary is known in each direction for each cartesian face containing cut-faces. In the following, al variables are assumed at time level $n$. In the case of $x$-face (i,j,k) in the figure, $\tau_{xy,IB}$ and $\tau_{xy,RC}$ are redefined as described in the following:
+For each cartesian face containing IB and RC edges, shear stress components are modified to account for the presence of the boundary.We assume the average location $B$ of the boundary is known in each direction for each cartesian face containing cut-faces. In the following, al variables are assumed at time level $n$. In the case of $x$-face (i,j,k) in the figure, $\tau_{xy,IB}$ and $\tau_{xy,RC}$ are redefined as described in the following:
 %
 \begin{enumerate}
     \item For each RC edge compute the gas finite difference estimation of the cross velocity derivatives $\partial u_i/\partial x_j$ and $\partial u_j/\partial x_i$. In Fig.~\ref{Fig:STMgraphs}b, $\frac{\partial u}{\partial y} \simeq 2 \frac{u_E-u_F}{\Delta_y + \Delta_{RC}}$, where $u_E=u_{i,j+1,k}$ and $u_F$ is the cut-face velocity, and $\frac{\partial v}{\partial x} \simeq \frac{v_{i+1,j,k}-v_{i,j,k}}{\Delta_x}$. Note that the distance to the wall $\Delta_{RC}$ is being used to compute the finite difference in the cut-face and $y$ direction. Also interpolating the dynamic viscosity to the RC edge, estimate $\mu_{RC} \frac{\partial u}{\partial y}$ and $\mu_{RC} \frac{\partial v}{\partial x}$. \label{point1}
@@ -460,9 +460,9 @@ For each cartesian face containing IB, RC edges, shear stress components are mod
 
 Finally, all RC and IB edges are assigned a vorticity and shear stress using the computed gradients $\partial u_i/\partial x_j$ and components $\mu \partial u_i/\partial x_j$. The computed vorticity and stresses are used in the construction of the force vector $\mathbf{F}^n$ of equation~\eqref{eqn:momfn} and used in the projection equations~\eqref{it:FSPoisson}-\eqref{it:FSProject}.
 
-\section{Energy equation, thermodynamic divergence}
+\section{Energy Equation, Thermodynamic Divergence}
 
-\subsection{Divergence constraint}
+\subsection{Divergence Constraint}
 
 Starting from the sensible enthalpy evolution equation, the divergence of the velocity field can be factored as:
 %
@@ -474,13 +474,13 @@ Starting from the sensible enthalpy evolution equation, the divergence of the ve
     &+& \frac{1}{\rho} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left[ \dot{m}_\alpha''' - \nabla \cdot \mathbf{J}_\alpha - \mathbf{u} \cdot \nabla (\rho Y_\alpha) \right] \label{eq:divth}
 \end{eqnarray}
 %
-we call this divergence expression the thermodynamic divergence $( \nabla \cdot \mathbf{u} )^{th}$. The projection scheme for velocities enforces on each cell of the spatial discretization this final divergence on the discrete velocity field.
-Next, we look at the finite volume discretization of the non-conservative advection terms involving the velocity $\mathbf{u}$, in the right hand side of equation~\eqref{eq:divth}.
+we call this divergence expression the thermodynamic divergence $( \nabla \cdot \mathbf{u} )^{th}$. The projection scheme for velocities enforces this final divergence on the discrete velocity field in each cell of the spatial discretization .
+Next, we look at the finite volume discretization of the non-conservative advection terms involving the velocity $\mathbf{u}$, in the right hand side of Eq.~\eqref{eq:divth}.
 
 We will use the finite volume version of the previous equation to obtain the volume integrated target thermodynamic divergence on each cut cell volume, and to recompute the thermodynamic divergence on regular gas phase cells adjacent to cut-cells.
 
 
-\subsection{FV discretization of scalar advection terms $\mathbf{u} \cdot \nabla (\phi)$}
+\subsection{FV Discretization of Scalar Advection Terms $\mathbf{u} \cdot \nabla (\phi)$}
 
 Consider the the equality
 %
@@ -503,11 +503,11 @@ Assuming a flux limited interpolation of the scalar $\phi$ at the cell boundarie
     [\phi]_{ii} \sum_{k=1}^{nf_c} \mathbf{u}_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:flxlim2}
 \end{equation}
 %
-Here the overline states that the cell-centered scalar quantity $\phi \in \{\rho h_s, \rho Y_\alpha\}$ has been interpolated to the cell faces using a flux limited interpolation scheme. The overline in $\overline{\mathbf{u} \cdot \nabla(\phi)}$, states that this term is computed consistently with the flux limited interpolation adopted. Also, $V_{ii}$ is the volume of cell $ii$, and $A_k$ is the area of a face $k=1,...,nf_c$ of the given cell. This last equation is the finite volume counterpart of equation (B.12) of the FDS technical reference guide.
+Here the overline states that the cell-centered scalar quantity $\phi \in \{\rho h_s, \rho Y_\alpha\}$ has been interpolated to the cell faces using a flux limited interpolation scheme. The overline in $\overline{\mathbf{u} \cdot \nabla(\phi)}$, states that this term is computed consistent with the flux limited interpolation adopted. Also, $V_{ii}$ is the volume of cell $ii$, and $A_k$ is the area of a face $k=1,...,nf_c$ of the given cell. This last equation is the finite volume counterpart of Eq.~(B.12).
 
-\subsection{Discrete thermodynamic divergence expression}
+\subsection{Discrete Thermodynamic Divergence Expression}
 
-For cut-cell $ii$ the corresponding discrete volume integrated expression is:
+For cut-cell $ii$, the corresponding discrete volume integrated expression is:
 %
 \begin{eqnarray}
     ( \nabla \cdot \mathbf{u} )_{ii}^{th} \; V_{ii} &=&
@@ -524,16 +524,16 @@ For cut-cell $ii$ the corresponding discrete volume integrated expression is:
 %
 where the overline terms refer to flux limited interpolation of corresponding scalars, terms defined with subscript $ii$ refer to cell defined quantities, and the scalar diffusive flux $\mathbf{J}_\alpha=- \rho D_\alpha \nabla Y_\alpha$. Also, the vertical velocity $w_{ii}$ \textit{has been interpolated} to the cut-cell centroid.
 
-\subsection{Computing diffusive heat flux in FV form:}
+\subsection{Computing Diffusive Heat Flux in FV Form:}
 
-Given the species diffusion model adopted the diffusive heat flux vector field is $\dot{\mathbf{q}}_{d,\alpha}''=-h_s \rho D_\alpha \nabla(Y_\alpha)$. The integral of its divergence over a cell $ii$ is:
+Given the species diffusion model adopted, the diffusive heat flux vector field is $\dot{\mathbf{q}}_{d,\alpha}''=-h_s \rho D_\alpha \nabla(Y_\alpha)$. The integral of its divergence over a cell $ii$ is:
 \begin{equation}
     \int_{\Omega_{ii}} {\nabla \cdot \left(-h_{s,\alpha} \rho D_\alpha \nabla(Y_\alpha) \right)} d\Omega = \sum_{k=1}^{nf_c} \left(-h_{s,\alpha} \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k}  \: A_k
 \end{equation}
 where $\left(-h_s \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k}$ is the mean heat flux defined on boundary surface $k$ of cell $ii$.
 
 
-\subsection{Computing heat conduction flux in FV form:}
+\subsection{Computing Heat Conduction Flux in FV Form:}
 
 
 The heat conduction flux vector of the mixture is defined as $\dot{\mathbf{q}}_{kT}''= -k \nabla(T)$, where $k$ is the mixture conductivity. The integral of its divergence over a cell $ii$ is computed similarly as in the previous section:
