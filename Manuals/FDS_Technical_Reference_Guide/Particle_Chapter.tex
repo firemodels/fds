@@ -6,8 +6,8 @@
 \label{chapter:lagrangian_particles}
 
 Lagrangian particles are used to represent a wide variety of objects that cannot be resolved on
-the numerical grid. Liquid droplets are the most common example. This chapter outlines the treatment of the transport, size
-distribution, and mass, momentum and energy transfer to and from Lagrangian particles.  The formulation presented here closely follows the dispersed discrete-element formulation presented in \cite{Crowe:1}.
+the numerical grid. Liquid droplets are the most common example. This chapter outlines the treatment of the transport; size
+distribution; and mass, momentum and energy transfer to and from Lagrangian particles.  The formulation presented here closely follows the dispersed discrete-element formulation presented in \cite{Crowe:1}.
 
 \section{Particle Transport in the Gas Phase}
 
@@ -109,7 +109,7 @@ The cumulative volume distribution for a liquid spray is represented by a combin
    \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
    1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D > D_{\rm v,0.5})
    \end{array} \right.  \ee
-where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.48, respectively.\footnote{The Rosin-Rammler and log-normal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
+where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.48, respectively.\footnote{The Rosin-Rammler and log-normal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using tabulated input data.
 
 The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual has yielded a correlation for the median droplet diameter~\cite{Yu:2}
 \be
@@ -228,7 +228,7 @@ An analogous relationship exists for the heat transfer coefficient~\cite{Sazhin:
 \ee
 where $\NU_0$ is the low mass flux Nusselt number, $\NU$ is the Nusselt number with blowing, $k$ is the thermal conductivity of the gas, and $\PR$ is the molecular Prandtl number, $\PR=\mu_{\rm f} \, c_{\rm p,f}/k_{\rm f}$, with properties evaluated at the film temperature, $T_{\rm f} = T_{\rm s} + \frac{1}{3}(T_{\rm g}-T_{\rm s})$.
 
-In cases where the droplet is actually a portion of the liquid film attached to a solid surface, half of the droplet mass is heated or cooled by the solid surface and half is heated or cooled by the gas.
+In cases where the droplet is actually a portion of the liquid film attached to a solid surface, the surface area of the drop used for heat and mass transfer is calculated using the drop mass, drop density, and film  thickness. 
 
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is defined as a source term for the given mesh cell, any heat transfer to a solid is stored as a convective term, and the net effect of heat transfer and mass addition to the gas is defined as a divergence. The mass and divergence terms are discussed in the sections that follow.
