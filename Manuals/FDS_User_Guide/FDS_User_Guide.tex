@@ -1231,7 +1231,7 @@ The namelist {\ct GEOM} describes one or more unstructured closed geometric surf
 \subsection{My First Geometry}
 \label{info:first_geom}
 
-To get you aquainted with the new geometry features, as much as possible, we have tried to allow for {\ct OBST} namelist parameters to be applied to {\ct GEOM}.  Therefore, subject to the limitations listed at the end of this section (see Sec.~\ref{info:geom_limitations}), you should be able to take a case built from {\ct OBST} and simply do a \emph{replace} with {\ct GEOM} to begin using unstructured geometry. For example, if you have a burner build like this
+To get you aquainted with the new geometry features, as much as possible, we have tried to allow for {\ct OBST} namelist parameters to be applied to {\ct GEOM}.  Therefore, subject to the limitations listed at the end of this section (see Sec.~\ref{info:geom_limitations}), you should be able to take a case built from {\ct OBST} and simply do a \emph{replace} with {\ct GEOM} to begin using unstructured geometry. For example, if you have a burner built like this
 \begin{lstlisting}
 &OBST XB=-1,1,-1,1,0,0.5, SURF_IDS='FIRE','INERT','INERT' /
 \end{lstlisting}
@@ -1356,11 +1356,21 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
 \begin{itemize}
-  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with a solid condition;
+  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with solid;
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
-{\color{red} Discuss linearization and add image.}
+When a geometry intersects with another geometry or obstruction, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to descern in the general case, and so for now we employ a linearization that generates the approximate vertices and edges to close the volume.  An example for two intersecting sphere is shown below in Fig.~\ref{figure:intersecting_spheres}.
+
+\begin{figure}
+  \centering
+  \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+  \includegraphics[width=.4\textwidth]{../../../fig/fds/Geometry_Figures/spheres_intersection_input.png} &
+  \includegraphics[width=.4\textwidth]{../../../fig/fds/Geometry_Figures/spheres_intersection_cfaces.png}
+  \end{tabular*}
+  \caption[Linearization at intersections: sphere example]{Linearization at intersections: sphere example. (Left) Two intersecting spheres as input to FDS. (Right) The final linearized geometry without hanging vertices.}
+  \label{figure:intersecting_spheres}
+\end{figure}
 
 \subsection{Coloring and Texture Maps}
 
@@ -1387,7 +1397,7 @@ For example, {\ct IJK=8,6,4} would split the block into 8 parts along the $x$ di
 6 parts along the $y$ dimension and 4 parts along the $z$ dimension.
 By default, blocks are discretized so that the block faces are consistent in size with the grid resolution.
 
-The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all the generated faces.
+The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all the generated faces.  Similar to {\ct OBST}, you can also use {\ct SURF\_IDS} and {\ct SURF\_ID6} lists to specify surface conditions (see Sec.~\ref{info:OBST_Basics}).
 
 \subsubsection{Spheres}
 A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
@@ -1480,95 +1490,6 @@ These tools should always enforce quality checks on the triangulated surfaces an
 Links to these tools can be found at the project home page at https://pages.nist.gov/fds-smv/ under ``Third-Party Tools and Training''.
 
 
-
-%\subsection{Defining Surfaces}
-%
-%\subsubsection{General Surfaces}
-%
-%Unstructured geometric surfaces are defined using the {\ct GEOM}\ namelist.
-%These surfaces consist of a collection of triangular faces where each face consists of three vertices.
-%A simple form of the {\ct GEOM}\ namelist defining one triangular face is given by
-%
-%\begin{lstlisting}
-%&GEOM ID='triangle'
-%      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,
-%      FACES=1,2,3
-%/
-%\end{lstlisting}
-%
-%\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
-%{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
-%face. Each index ranges from 1 to the number of vertices found on this {\ct GEOM}\ line.
-%
-%One may also define particular kinds of geometric objects,  blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
-%and a 2D surface using {\ct ZVALS}.
-%FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
-%
-%\subsubsection{Blocks}
-%A {\ct GEOM}\ namelist defining a block is given by
-%
-%\begin{lstlisting}
-%&GEOM ID='block'
-%      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-%\end{lstlisting}
-%
-%\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
-%The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VENT}\ line.
-%A block may be discretized into many parts by
-%specifying the {\ct IJK} parameter.  For example, {\ct IJK=8,6,4} would split the block
-%into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
-%the $z$ dimension. By default, blocks are discretized
-%so that the block faces are consistent in size with the grid resolution.
-%
-%\subsubsection{Spheres}
-%A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
-%
-%\begin{lstlisting}
-%&GEOM ID='sphere'
-%      SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
-%\end{lstlisting}
-%
-%\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
-%One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
-%
-%\subsubsection{2D Surfaces}
-%A {\ct GEOM}\ namelist defining a 2D surface is given by
-%
-%\begin{lstlisting}
-%&GEOM ID='terrain'
-%      IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
-%\end{lstlisting}
-%
-%\noindent where {\ct XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\ct ZVALS}.
-%{\ct IJK}\ specifies how many vertices occur in this region along each dimension in this region.
-%In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
-%The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
-%The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
-%The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
-%Similarly, the last row contains
-%{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
-%There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
-%As with the blocks and spheres, FDS uses the information
-%provided by these keywords to construct
-%vertices and triangular faces.
-
-%\subsection{Defining Solids}
-%Unstructured geometric solids are also defined using the {\ct GEOM}\ namelist.
-%These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
-%A simple form of the {\ct GEOM}\ namelist defining one tetrahedron is given by
-%
-%\begin{lstlisting}
-%&GEOM ID='tetrahedron'
-%      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,  1.0,1.0,1.0,
-%      VOLUS=1,2,3,4
-%/
-%\end{lstlisting}
-%
-%\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
-%{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
-%tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct GEOM}\ line.
-
-
 \subsection{Transforming Objects}
 \label{info:transform_geom}
 
@@ -1608,35 +1529,53 @@ Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
-Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
+Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
 
 \subsection{Handling Thin Geometries}
 \label{info:thin_geom}
 
-One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the error.  For example, if you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for you problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the error.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+
+
+\begin{figure}
+  \centering
+  \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c@{\extracolsep{\fill}}c}
+  \includegraphics[width=.3\textwidth]{../../../fig/fds/Geometry_Figures/thin_object_bothsides.png} &
+  \includegraphics[width=.3\textwidth]{../../../fig/fds/Geometry_Figures/thin_object_CELL_BLOCK_IOR_3.png} &
+  \includegraphics[width=.3\textwidth]{../../../fig/fds/Geometry_Figures/thin_object_CELL_BLOCK_IOR_m3.png}
+  \end{tabular*}
+  \caption[Handling thin geometry with cell blocking]{Handling thin geometry: (left) Cell blocking on either side; (center) {\ct CELL\_BLOCK\_IOR} = +3; (right) {\ct CELL\_BLOCK\_IOR} = -3.}
+  \label{figure:thin_geometry}
+\end{figure}
 
 
 \subsection{Current GEOM Limitations}
 \label{info:geom_limitations}
 
-{\color{red} Let's make a good list here for FAQ about geometry limitations.}
-
 \begin{itemize}
 \item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
-\item Thin geometries cannot split cells, one side must be blocked.
-\item You do not apply {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
-\item No VENT implies no HVAC can be applied to a GEOM surface.
-\item You cannot currently impose a tangential velocity.  {\color{red} Need to hook this up I think.}
-\item Currently, you cannot do 3D heat transfer.
-\item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to VOID (quietly).  Should throw a warning.
+\item Thin geometries cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
+\item You do not apply a {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
+\item No VENT implies HVAC cannot be applied to a GEOM surface.  This is high on the priority list and should be available in the next maintenance release.
+\item You cannot currently impose a tangential velocity.  This should be available in the next maintenance release.
+\item Currently, you cannot do 3D heat transfer with complex geometry.
+\item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to VOID (quietly).
 \item {\ct BURN\_AWAY} is not allowed.
 \item The {\ct HOLE} namelist is not currently connected to {\ct GEOM}.
 \item Subgrid {\ct GEOM} (smaller than a grid cell) are possible, but not recommended currently.
 \item We do not recommend triangular faces that are much smaller than the Cartesian grid cell.
 \item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor.
-\item Be cautious with soot deposition.  See test case with paritcles with non-grid aligned geometries.
+\item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not yet undergone thorough testing.
 \end{itemize}
+
+\subsection{The Big Picture, Run Time, and Accuracy}
+
+\paragraph{Big picture} The long-term goal for complex geometry in FDS is to allow for relatively seemless workflow with Building Information Management (BIM) models and complex CAD geometries.  However, the past several years have been spent developing a formulation that is conservative and stable.  In so doing, for the time being we have had to abandon the immersed boundary method and move to a cut cell scheme that requires an unstructured pressure solver (ULMAT; see Sec.~\ref{pressure_solver}).
+
+\paragraph{Run time} When using complex geometry you may notice slower runtimes for two reasons.  First, the setup time will be noticeably slower, especially if you are not importing geometry from binary (see Sec.~\ref{subsec:readbin}).  This is inevitable, because identifying and processing cutcells is time-consuming.  Second, the use of ULMAT, while more accurate at solid boundaries, is slower than the FFT pressure solver (per iteration).  Further, ULMAT gets progressively slower as the size of the mesh increases.  Therefore, for larger cases using ULMAT it is important to break the domain up into meshes with less than 150,000 cells (roughly $53^3$).
+
+\paragraph{Accuracy} The rationale for using curvilinear geometry should be that the accuracy of the Cartesian geometry is not sufficient.  For example, you may have a sloped ceiling or some detail of a room that requires higher fidelity.  When higher accuracy is required, this usually also means that better grid resolution is required.  Keep the fidelity of the geometry and the Cartesian grid consistent with each other.  Do not expect a highly detailed geometry to give improved results if the Cartesian grid is disproportionately coarse.
 
 \fi
 
