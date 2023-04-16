@@ -21,7 +21,7 @@
 &VENT MB='YMAX', SURF_ID='MIRROR' /
 &VENT MB='ZMAX', SURF_ID='MIRROR' /
 
-&SURF ID='IGN FIRE', HRRPUA=275., COLOR='RED', RAMP_Q='fireramp' /
+&SURF ID='IGN FIRE', HRRPUA=500., COLOR='RED', RAMP_Q='fireramp' /
 &RAMP ID='fireramp', T= 0., F=0. /
 &RAMP ID='fireramp', T= 2., F=1. /
 &RAMP ID='fireramp', T=30., F=1. /
@@ -32,7 +32,7 @@
 
 &SURF ID                      = 'Ground Vegetation'
       DEFAULT                 = .TRUE.
-      MINIMUM_BURNOUT_TIME    = 30.
+      MINIMUM_BURNOUT_TIME    = 20.
       MATL_ID(1,1)            = 'GENERIC VEGETATION'
       MATL_ID(2,1)            = 'Soil'
       MOISTURE_FRACTION(1)    = 0.05
@@ -41,7 +41,6 @@
       THICKNESS(1:2)          = 0.06,0.1 /
 
 &SURF ID                   = 'Generic Foliage'
-      MINIMUM_BURNOUT_TIME = 30.
       MATL_ID              = 'GENERIC VEGETATION'
       MOISTURE_FRACTION    = 1.0 
       SURFACE_VOLUME_RATIO = 4000.
