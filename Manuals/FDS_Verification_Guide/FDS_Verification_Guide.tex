@@ -6422,10 +6422,7 @@ formatted FDS input file:
   \item {\ct geom\_bad\_inconsistent\_normals.fds}: a cube with only one face normal inverted;
   \item {\ct geom\_bad\_inverted\_normals.fds}: a cube with all face normals inverted;
   \item {\ct geom\_bad\_non\_manifold\_edge.fds}: a cube and a box sharing the same non manifold edge;
-  \item {\ct geom\_bad\_non\_manifold\_vert.fds}: two cubes sharing the same non manifold vertex; % FIXME currently not enforced
   \item {\ct geom\_bad\_open\_surface.fds}: a cube missing one face, that is an open surface;
-  \item {\ct geom\_bad\_self\_intersection.fds}: a cube whose faces were extruded to obtain a simple self-intersection;
-  \item {\ct geom\_bad\_intersection.fds}: two intersecting cubes. % FIXME remove when boolean ops available
 \end{itemize}
 
 To allow Firebot to consider the test successful if it catches the error condition,
@@ -6446,12 +6443,12 @@ is not met.
 
 \section{Simple geometry and properties definitions}
 
-\subsection{geom\_simple.fds}
+\subsection{Simple Geometry}
 
-Figure~\ref{fig:geom_simple} was created using the following input. The {\ct VERTS} keyword is used to specify 3 vertices and the {\ct FACES}\ keyword is used to specify the indices of the triangular face.
+Figure~\ref{fig:geom_simple} was created using the following input. The {\ct VERTS} keyword is used to specify 3 vertices and the {\ct FACES}\ keyword is used to specify the indices of the triangular face and the {\ct SURF\_ID} the face has.
 \begin{lstlisting}
 &GEOM ID='geom1', VERTS=0.0,0.0,0.0, 1.0,0.5,0.0, 1.0,1.0,1.0,
-      FACES=1,2,3, SURF_ID='surf1' /
+      FACES=1,2,3,1 SURF_ID='surf1' /
 \end{lstlisting}
 
 \begin{figure}[!ht]
@@ -6460,18 +6457,17 @@ Figure~\ref{fig:geom_simple} was created using the following input. The {\ct VER
  \includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_simple.png}
   \end{tabular}
 \end{center}
- \caption[Simple triangulated geometry]{A triangle created using 3 vertices and 1 face. Case: {\ct geom\_simple}}
+ \caption[Simple triangulated geometry]{A triangle created using 3 vertices and 1 face. Case: {\ct geom\_simple.fds}}}
 \label{fig:geom_simple}
 \end{figure}
 
 
-\subsection{geom\_obst.fds}
+\subsection{Cuboid Obstacle}
 
-Figure \ref{fig:geom_obst} was created using the following {\ct GEOM} feature. The {\ct XB}\ keyword is used the same way to specify a block as on a {\ct OBST}\ or {\ct VENT}\ line.
+Figure \ref{fig:geom_obst} was created using the following {\ct MOVE} and {\ct GEOM} features. The {\ct XB}\ keyword is used the same way to specify a block as on a {\ct OBST}\ or {\ct VENT}\ line.
 \begin{lstlisting}
-&GEOM ID='obst', SURF_ID='surf1', 
-      XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,
-      AZIM=90.0,ELEV=30.0 /
+&MOVE ID='RotOBST', AXIS=0.,0.5,-0.866, ROTATION_ANGLE=90 /
+&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2, MOVE_ID='RotOBST' /
 \end{lstlisting}
 
 \begin{figure}
@@ -6480,7 +6476,7 @@ Figure \ref{fig:geom_obst} was created using the following {\ct GEOM} feature. T
  \includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_obst.png}
   \end{tabular}
 \end{center}
- \caption[Block geometry using {\ct XB}]{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
+ \caption[Block geometry using {\ct XB}]{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: {\ct geom\_obst.fds}}
 \label{fig:geom_obst}
 \end{figure}
 
@@ -6512,7 +6508,7 @@ The {\ct N\_LEVELS}\ keyword is used to specify the resolution of the sphere, la
   \end{tabular}
 \end{center}
  \caption[Recursive sphere discretization]{Recursive sphere discretization.  A sphere at a given level is
- obtained by splitting each triangle from the previous level into four parts and renormalizing added vertices. Cases: geom\_sphere1a.fds,...,geom\_sphere1f.fds}
+ obtained by splitting each triangle from the previous level into four parts and renormalizing added vertices. Cases: {\ct geom\_sphere1a.fds},...,{\ct geom\_sphere1f.fds}}
 \label{fig:geom_sphere}
 \end{figure}
 
@@ -6539,9 +6535,9 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 
 \FloatBarrier
 
-\subsection{Generating digital elevation maps, {\ct gridgeom\_terrain.fds}}
+\subsection{Terrain from Digital Elevation Map}
 
-Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
+The terrain of Fig.~\ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword for {\ct \&GEOM}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -6555,9 +6551,9 @@ Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 
 \FloatBarrier
 
-\subsection{Adding texture maps, {\ct geom\_texture.fds}}
+\subsection{Adding Texture Map}
 
-Figure \ref{fig:geom_texture} was created using the following SURF and GEOM namelists.
+Figure \ref{fig:geom_texture} was created using the following {\ct SURF} and {\ct GEOM} namelists.
 The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
 file used to texture map the geometric object.
 \begin{lstlisting}
@@ -6566,7 +6562,7 @@ file used to texture map the geometric object.
 
 &GEOM ID='texture',
 VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
-FACES=1,2,3,SURF_ID='surf1'/
+FACES=1,2,3,1, SURF_ID='surf1'/
 \end{lstlisting}
 
 \begin{figure}[!ht]
@@ -6581,9 +6577,9 @@ FACES=1,2,3,SURF_ID='surf1'/
 
 \FloatBarrier
 
-\subsection{Adding multiple texture maps, {\ct geom\_texture2.fds}}
+\subsection{Adding Multiple Texture Maps}
 
-Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists. The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image file used to texture map the geometric object. This example has two textures.
+Figure \ref{fig:geom_texture2} was created using the following {\ct SURF} and {\ct GEOM} namelists. The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image file used to texture map the geometric object. This example has two textures.
 \begin{lstlisting}
 &SURF ID='surf1' TEXTURE_MAP='nistleft.jpg',
       TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
@@ -6592,11 +6588,11 @@ Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM nam
 
 &GEOM ID='texture',
 VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
-FACES=1,2,3,SURF_ID='surf1'/
+FACES=1,2,3,1 SURF_ID='surf1'/
 
 &GEOM ID='texture2',
 VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
-FACES=1,2,3,SURF_ID='surf2'/
+FACES=1,2,3,1 SURF_ID='surf2'/
 \end{lstlisting}
 
 
@@ -6612,9 +6608,9 @@ FACES=1,2,3,SURF_ID='surf2'/
 
 \FloatBarrier
 
-\subsection{Adding texture maps with different methods, {\ct geom\_texture*.fds}}
+\subsection{Adding Texture Maps with Different Methods}
 
-The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
+The spheres in Figure \ref{fig:geom_texture3} were created using {\ct SURF} and {\ct GEOM} namelists similar to the following.
 \begin{lstlisting}
 &SURF ID='surf1',TEXTURE_MAP='sphere_cover_03.png'COLOR='BLUE',
       TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
@@ -6630,7 +6626,6 @@ The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM n
 The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file applied to the geometric object. The {\ct SPHERICAL}\ setting indicates that that the texture map image is applied to the object using spherical coordinates.
 
 
-
 \begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{cc}
@@ -6642,7 +6637,7 @@ The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file ap
   \end{tabular}
 \end{center}
  \caption[Applying texture maps to a {\ct GEOM} surface, different methods]{Texture maps applied to spheres discretized using two different methods.
- The two sphere on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
+ The two spheres on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
  The two spheres on the right are discretized recursively starting with an icosahedron (20 sided polyhedron).  Texture maps applied to the top two sphere have 8 segments. Texture map applied to the bottom two spheres have 5 segments.  Cases: {\ct geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}}
 \label{fig:geom_texture3}
 \end{figure}
@@ -6651,13 +6646,13 @@ The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file ap
 
 \newpage
 
-\section{Computational geometry}
+\section{Computational Geometry}
 
-\subsection{Cut-cell definition around immersed cone: split cells, piercing and alignment}
+\subsection{Cut-cell Definition Around Immersed Cone: Split Cells, Piercing and Alignment}
 \label{cone_test}
-We test the computational geometry algorithm on its treatment of degenerate cases~\cite{Berger:2017}, namely, split cells within a cartesian cell, cartesian cell piercing, and body surface-grid alignment. These cases are expected to be found in general. A cone of base diameter $D_B$ and height $H=4D_B$ is placed centered in a Cartesian domain of size $x=[-1.5D_B:1.5D_B]$, $y=[-1.5D_B:1.5D_B]$, $z=[-2D_B:6D_B]$, as shown in figure~\ref{Fig:cone_cut_cells}a. The cone is composed of 316 vertices and 628 triangles. A single Cartesian mesh is used with $n_x=5$, $n_y=5$ and $n_z=12$ cells in each corresponding direction.
+We test the computational geometry algorithm on its treatment of degenerate cases~\cite{Berger:2017}, namely, split cells within a cartesian cell, cartesian cell piercing, and body surface-grid alignment. A cone of base diameter $D_B$ and height $H=4D_B$ is placed centered in a Cartesian domain of size $x=[-1.5D_B:1.5D_B]$, $y=[-1.5D_B:1.5D_B]$, $z=[-2D_B:6D_B]$, as shown in figure~\ref{Fig:cone_cut_cells}a. The cone is composed of 316 vertices and 628 triangles. A single Cartesian mesh is used with $n_x=5$, $n_y=5$ and $n_z=12$ cells in each corresponding direction.
 
-A center column of cartesian cells and corresponding cut-cells is shown in figure~\ref{Fig:cone_cut_cells}b. The proposed method correctly defines cut-faces and polyhedrons in three situations, namely: Solid piercing a cartesian cell, split cut-cells, and cells defined from the cone base aligned with grid plane $z=0$.
+A center column of cartesian cells and corresponding cut-cells is shown in Fig.~\ref{Fig:cone_cut_cells}b. FDS correctly defines cut-faces and polyhedrons in three situations, namely: Solid piercing a cartesian cell, split cut-cells, and cells defined from the cone base aligned with grid plane $z=0$.
 
 
  %Figure:
@@ -6672,15 +6667,14 @@ A center column of cartesian cells and corresponding cut-cells is shown in figur
       \put(-30,185){$\leftarrow$  pierced cell}
       \put(-30,90){$\leftarrow$  split cells}
       \put(-30,40){$\leftarrow$ aligned face}
-      \caption[Generating polyhedral cutcells around an immersed cone]{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
+      \caption[Generating polyhedral cutcells around an immersed cone]{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells of which one is kept in numerical simulations, other are blocked; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
     \label{Fig:cone_cut_cells}
 \end{figure}
 
 
 Three integral conservation tests are defined for a completely immersed geometry problem. These are namely, relative difference of areas computed from the surface triangulation or from the computed boundary cut-faces $|A_{B,\tau}-A_{B,CF}|/A_{B,\tau}$; relative difference of $G$ region volumes computed from the body triangulation and from the cut-cells and $G$ region regular cells $|V_{GB}-V_{GRC}|/V_{GB}$; and finally, difference on the $G$ region centroid computed from body centroid or cut-cells and $G$ cells centroids $|\mathbf{x}_{GB}-\mathbf{x}_{GRC}|_\infty$. See Appendix~\ref{info:constests} for a formal definition of these tests.
 
-The results of the three tests on this cone problem can be seen on table~\ref{tab:cone_res}. We note that cone area and $G$ region volume computed either through the solid triangulation or through the polyhedra produced by the method match up to relative values of $10^{-15}$, commensurate with the floating point tolerance $\epsilon=10^{-12}L_z$ used. In practice, this level of correspondence guarantees conservation as far as the volume mesh is concerned. The centroid of the $G$ region computed through the two different avenues matches up to $10^{-16}D_B$, and is an excellent integral test of the proposed method to compute both cut-face and cut-cell centroids. Note that centroids along $x$ and $y$ direction are not zero, due to the asymmetry of the geometry triangulation employed.
-
+The results of the three tests on this cone problem can be seen on table~\ref{tab:cone_res}. We note that cone area and $G$ region volume computed either through the solid triangulation or through the polyhedra produced by the method match up to relative values of $10^{-15}$, commensurate with the floating point tolerance $\epsilon=10^{-12}L_z$ used. The centroid of the $G$ region computed through the two different avenues matches up to $10^{-16}D_B$, and is an excellent integral test of the proposed method to compute both cut-face and cut-cell centroids. Note that centroids along $x$ and $y$ direction are not zero, due to the asymmetry of the geometry triangulation employed. Given that the numerical scheme for momentum and scalars integration is defined for one cut-cell per cartesian cell, the cut-cell with largest volume is kept and others are blocked as solid.
 %
 \begin{table}[h]
   \centering
@@ -6705,19 +6699,19 @@ The results of the three tests on this cone problem can be seen on table~\ref{ta
 %
 
 
-\section{Cut-cell method for scalar transport - Stress Method}
+\section{Cut-cell Method for Scalar Transport - Stress Method}
 
-\subsection{Temporal Error analysis for variable density projection}
+\subsection{Temporal Error Analysis for Variable Density Projection}
 
 \label{sec:saad_cc_temporal_error}
 
 This case is a variation of problem~\ref{sec:saad_temporal_error} for a domain that includes an imposed cut-cell region, where the cut-cells have same geometry as regular cells. The problem allows us to verify the temporal accuracy of our scalar transport implementation for cut-cells. The problem is defined by the advection of a non-reacting mixture of two fluids with different densities (10:1 ratio) in one cartesian direction. Zero diffusivity is prescribed. For the problem definition and temporal error computation details, we refer the reader to problem~\ref{sec:saad_temporal_error}.
-The domain is defined by a mesh containing $N_x=512$ cells in the $x$ direction, where the domain $x=[-1,1]$. Also, four cells are defined in the $y$ direction as required by the FFT Poisson solver. Note that the problem defined is one-dimensional in $x$.
+The domain is defined by a mesh containing $N_x=512$ cells in the $x$ direction, where the domain $x=[-1,1]$. Note that the problem defined is one-dimensional in $x$.
 On this domain, cut-cells with same shape and size of regular cells are defined in the space $x=[-0.5,0.5]$. The test verifies that the implementation details of this cut-cell region does not affect the temporal order of accuracy seen on the default verification case of Sec.~\ref{sec:saad_temporal_error}.
 
-\title{Temporal order of accuracy}
+\title{Temporal Order of Accuracy}
 
-Three cases are defined corresponding to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, and in the cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in \\ {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
+Three cases are defined corresponding to default FDS DNS mode in cells not covered by cut-cells, and in the cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in \\ {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
 
 Same procedure as explained in Sec.~\ref{sec:saad_temporal_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The bottom figure shows the order $p$ computed point wise in the $x$ direction for explicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in Sec.~\ref{sec:saad_temporal_error}.
 The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells is \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_l2_norm}\!.
@@ -6737,18 +6731,14 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 \label{sec:shunn_cc_mms}
 
 
-We set to test the manufactured solution test case~\ref{sec:shunn_mms} for scalar transport, including an internal region of the two dimensional domain where cut-cells with same shape and size as regular Cartesian cells are artificially defined. This problem allows us to check the overall accuracy (spatial+temporal) of the cut-cell implementation for scalar transport on the cut-cell region.
+We test the manufactured solution test case~\ref{sec:shunn_mms} for scalar transport, including an internal region of the two dimensional domain where cut-cells with same shape and size as regular Cartesian cells are artificially defined. This problem allows us to check the overall accuracy (spatial+temporal) of the cut-cell implementation for scalar transport on the cut-cell region.
 The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in Sec.~\ref{sec:shunn_mms}.
 
-The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in Sec.~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the base SSPRK2 integration method defined in FDS.
-The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry. See figure~\texttt{fig:smokeview\_fig}.
+The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in Sec.~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the time integration method defined in FDS.
+The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry. 
 
 
-% Plot of a slice of temperature on the whole domain with the cut-cell edges showing the cut-cell region:
-% Figure:
-
-
-Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on Sec.~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and the DNS default CHARM limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when CHARM interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on Sec.~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on Sec.~\ref{sec:shunn_mms}, are solved using the {\ct GODUNOV} flux limiter and the DNS default {\ct CHARM} limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when {\ct CHARM} interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the {\ct GODUNOV} flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on Sec.~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
 
 
 % Figure Shunn_CC:
@@ -6756,11 +6746,11 @@ Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the
 \centering
 \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_chm_mms_convergence.pdf}
 \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
-\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Two flux limiting options for scalar advection are used: CHARM and Godunov.  (Left) Convergence for explicit scalar time integration and CHARM flux limiter for advection.  (Right) Convergence for explicit scalar time integration and Godunov flux limiter. }\label{fig:shunn_cc_accuracy_order}
+\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Two flux limiting options for scalar advection are used: {\ct CHARM} and {\ct GODUNOV}.  (Left) Convergence for explicit scalar time integration and {\ct CHARM} flux limiter for advection.  (Right) Convergence for explicit scalar time integration and {\ct GODUNOV} flux limiter. }\label{fig:shunn_cc_accuracy_order}
 \end{figure}
 
 
-\subsection{Stress method on manufactured solution around rotated cube}
+\subsection{Stress Method on Manufactured Solution Around Rotated Cube}
 
 \label{sec:rotcube_cc_mms}
 
@@ -6774,7 +6764,7 @@ Consider the solution of the following constant density, incompressible flow, mo
 %
 which are extended by the manufactured solution (MMS) sources $\mathbf{fe_v}(\mathbf{u},p)$ and $fe_Z(\mathbf{u},Z)$ respectively. The vectors $\mathbf{F_v}=-\mu \nabla^2(\mathbf{u}) + \nabla \cdot \left( \rho \mathbf{u} \otimes \mathbf{u} \right)$ and $F_z= \nabla \cdot \left( \rho Z \mathbf{u} - \rho D_z \nabla Z \right) $ contain the corresponding advection and diffusion operators.
 
-Now, consider in figure~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ and a manufactured solution defined on the fluid region $\Omega - \Omega_1$ of the form:
+Now, consider in Fig.~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ and a manufactured solution defined on the fluid region $\Omega - \Omega_1$ of the form:
 %
 \begin{eqnarray}
    u'(\mathbf{x}_{Bp}',t) &=& -\sin(t) \; \sin(kx')^2 \; \sin(2ky') \label{eq:upmf} \\
@@ -6784,18 +6774,15 @@ Now, consider in figure~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ an
                                                                                    \left( 1-\cos(2k(y'-\frac{\pi}{2})) \right) - 1 \right] + Z_{mean} \label{eq:qmf}
 \end{eqnarray}
 %
-which is similar on velocities and pressure to the functions given in reference~\cite{E:CMS2003}.  These functions imply zero initial conditions, a divergence free velocity field and the following
+which is similar on velocities and pressure to the functions given in Ref.~\cite{E:CMS2003}.  These functions imply zero initial conditions, a divergence free velocity field and the following
 %
 \begin{equation}
    u'(\mathbf{x}',t)=v'(\mathbf{x}',t)=0, \; \; \frac{\partial p}{\partial n} = \frac{\partial Z}{\partial n}=0, \; \;
    for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
 \end{equation}
 %
-which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside.
-
-The MMS sources $\mathbf{fe_v'}$ and $fe_Z'$ are computed analytically as functions of $(\mathbf{x'},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. See the Matlab script \texttt{Utilities/Matlab/scripts/source\_mms\_rotcube.m} in the fds repository for said sources derivations.
-
-
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$.
+The MMS sources $\mathbf{fe_v'}$ and $fe_Z'$ are computed analytically as functions of $(\mathbf{x'},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. See the Matlab script \texttt{Utilities/Matlab/scripts/source\_mms\_rotcube.m} in the FDS repository for said sources derivations.
 
 We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis.
 %
@@ -6875,11 +6862,11 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 \caption[The {\ct Rotated Cube CC} accuracy order test case]{$27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,320\}$ points in each direction. Stress method.}\label{fig:rotcube_cc_27deg_accuracy_order}
 \end{figure}
 
-Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,320\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,320\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with the stress method for shear stress imposition. The cases with zero inclination were also run with the {\ct \&OBST} functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
 
 Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference.
-The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
-For the $\&$OBSTs and grid aligned stress method where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). For the stress method and inclined cases the spatial accuracy is higher than $\mathcal{O}(\Delta x)$. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
+The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for {\ct OBST} in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
+For {\ct OBST} and grid aligned stress method where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). For the stress method and inclined cases the spatial accuracy is higher than $\mathcal{O}(\Delta x)$. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
 
 % Figures for accuracy 45deg:
 \begin{figure}[ht]
@@ -6890,7 +6877,7 @@ For the $\&$OBSTs and grid aligned stress method where the momentum equations ar
 
 
 
-\subsection{Poiseuille flow in channel created by two GEOMs}
+\subsection{Poiseuille Flow in Channel Created by Two GEOMs}
 
 \label{sec:poiseuille_cc}
 
@@ -6919,7 +6906,7 @@ which can be used to compute the simulation error in $f$, as a function of the m
 %
 We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
 
-In case of stress method for cross velocities (STM), the friction factor error $|f-f_{an}|$ convergence can be seen in Figs.~\ref{Fig:PoiseConvg2}a,b.
+For stress method for cross velocities (STM) and unlinked cut-cells, the friction factor error $|f-f_{an}|$ convergence can be seen in Figs.~\ref{Fig:PoiseConvg2}a,b.
 %
 % figure
 \begin{figure}[h]
@@ -6933,20 +6920,9 @@ In case of stress method for cross velocities (STM), the friction factor error $
 \end{figure}
 %
 
-
-%\subsection{Conservation test of isothermal helium plume around sphere}
-
-
 \newpage
 
 \section{Geometry Tests Involving Heat and Mass Transfer}
-
-
-%\subsection{Conservation tests of heat flux and mass flux specified from sphere surface}
-
-%\subsection{Flow around heated curved pipe or something like that}
-%\subsection{Consistency test for OBST and GEOM of flow around heated cubes}
-
 
 \subsection{Radiating Sphere}
 \label{sphere_radiate}
@@ -6959,6 +6935,7 @@ A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is cente
 \label{sphere_radiate_fig}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Leaking Sphere}
 \label{sphere_leak}
@@ -6985,9 +6962,6 @@ In this test, a {\ct GEOM} cube is heated from below by a surface at a fixed tem
 \caption[The {\ct geom\_restart} test case]{Test of restart functionality for complex geometry.}
 \label{fig:geom_restart}
 \end{figure}
-
-
-%\section{Geometry tests involving fire}
 
 \fi
 
