@@ -45,7 +45,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (RAMPS_TYPE), POINTER :: RP
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
-LOGICAL :: INIT_OVERLAP1(N_INIT,N_INIT),INIT_OVERLAP2(N_INIT,N_INIT) !=.FALSE.
+LOGICAL :: INIT_OVERLAP1, INIT_OVERLAP2
 
 IERR = 0
 M => MESHES(NM)
@@ -442,10 +442,10 @@ DO N=1,N_INIT
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                N2 = M%IWORK1(I,J,K)
                IF (N2 > 0) THEN
-                  IF (.NOT. INIT_OVERLAP2(N,N2)) THEN
+                  IF (.NOT. INIT_OVERLAP2) THEN
                      IN2 => INITIALIZATION(N2)
-                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Species')
-                     INIT_OVERLAP2(N,N2)=.TRUE.
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2,N,N2,NM,'Species')
+                     INIT_OVERLAP2=.TRUE.
                   ENDIF
                ELSE
                   M%IWORK1(I,J,K) = N
@@ -473,10 +473,10 @@ DO N=1,N_INIT
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                N2 = M%IWORK1(I,J,K)
                IF (N2 > 0) THEN
-                  IF (.NOT. INIT_OVERLAP1(N,N2)) THEN
+                  IF (.NOT. INIT_OVERLAP1) THEN
                      IN2 => INITIALIZATION(N2)
-                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2, N, N2, NM, 'Temperature or Density')
-                     INIT_OVERLAP1(N,N2)=.TRUE.
+                     CALL WARN_USER_OF_INIT_OVERLAP(IN,IN2,N,N2,NM,'Temperature or Density')
+                     INIT_OVERLAP1=.TRUE.
                   ENDIF
                ELSE
                   M%IWORK1(I,J,K) = N
