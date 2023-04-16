@@ -6414,7 +6414,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \chapter{Unstructured Geometry (Beta)}
 
 This section describes some of the test cases used to verify that FDS and Smokeview are computing
-and visualizing unstructured geometric objects correctly. Also here , the behavior of the different
+and visualizing unstructured geometric objects correctly. Also here, the behavior of the different
 algorithms used to include unstructured geometries whithin FDS is tested. Several test cases that showcase
 and test the use of the {\ct GEOM} line are presented, followed by accuracy and conservation tests.
 
@@ -6596,12 +6596,12 @@ Figure \ref{fig:geom_texture2} was created using the following {\ct SURF} and {\
       TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='GREEN' /
 
 &GEOM ID='texture',
-VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
-FACES=1,2,3,1 SURF_ID='surf1'/
+      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+      FACES=1,2,3,1 SURF_ID='surf1'/
 
 &GEOM ID='texture2',
-VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
-FACES=1,2,3,1 SURF_ID='surf2'/
+      VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
+      FACES=1,2,3,1 SURF_ID='surf2'/
 \end{lstlisting}
 
 
@@ -6637,13 +6637,13 @@ The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image file ap
 
 \begin{figure}[!ht]
 \begin{center}
-\begin{tabular}{cc}
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3a.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3b.png}\\
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4a.png}&
- \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4b.png}\\
+\begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+ \includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3a.png}&
+ \includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3b.png}\\
+ \includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4a.png}&
+ \includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4b.png}\\
  lat/long discretization&recursive discretization
-  \end{tabular}
+\end{tabular*}
 \end{center}
  \caption[Applying texture maps to a {\ct GEOM} surface, different methods]{Texture maps applied to spheres discretized using two different methods.
  The two spheres on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
