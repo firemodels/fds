@@ -4769,7 +4769,7 @@ We consider the contracting volume model applied to a spherical baking soda (NaH
 \section{Conservation of Pyrolyzed Energy (\texorpdfstring{\textct{matl\_e\_cons}}{matl\_e\_cons})}
 \label{matl_e_cons}
 
-Nine simple test cases are created to verify the process of ensuring the {\ct MATL} reactions conserve energy. Each case is a cube 1~m on a side with 4 grid cells in each dimension. One or more materials and gas species are defined. All materials are defined with a density of 1~\si{kg/m^3}. All species are defined with a molecular weight of 1000~\si{g/mol}. This is done for convenience as it means that the heat of formation in \si{kJ/mol} is the same numerical values as the enthalpy in \si{kJ/kg}. For each material that is defined, a single wall cell {\ct VENT} is defined with a {\ct SURF} such that the wall cell contains 1~kg of material. The {\ct WALL ENTHALPY} is output for each wall cell.
+Nine simple test cases are created to verify the process of ensuring the {\ct MATL} reactions conserve energy. Each case is a cube 1~m on a side with 4 grid cells in each dimension. One or more materials and gas species are defined. All materials are defined with a density of 1~\si{kg/m^3}. All species are defined with a molecular weight of 1000~\si{g/mol}. This is done for convenience as it means that the heat of formation in \si{kJ/mol} is the same numerical values as the enthalpy in \si{kJ/kg}. For each material that is defined, a single wall cell {\ct VENT} is defined with a {\ct SURF} such that the wall cell contains 1~kg of material. The {\ct WALL ENTHALPY} is output for each wall cell. The cases are explained below with results shown in Figs.~\ref{fig:matl_e_cons1} and ~\ref{fig:matl_e_cons2}.
 
 In case 1, there is a single species is given a heat of formation of 0~\si{kJ/mol}. A single material is defined with a specific heat of 0.5~\si{kJ/kg/K} and a reaction that produces the gas species with a heat of reaction of 1000~\si{kJ/kg} at a reference temperature of 300~$^\circ$C with a pyrolysis range of 40~K.  This gives:
 
@@ -4818,13 +4818,21 @@ Case 9 takes case 1 and produces a particle of a second material with the same s
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_3} &
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_4} \\
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_5} &
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_6} \\
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_7} &
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_8} \\
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_9}
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_6} 
     \end{tabular*}
-    \caption[The \textct{matl\_e\_cons} test cases]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases }
-    \label{fig_matl_e_cons}
+    \caption[The \textct{matl\_e\_cons} test cases 1-6]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases 1-6.}
+    \label{fig:matl_e_cons1}
+\end{figure}
+
+\begin{figure}[p]
+	\noindent
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_7} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_8} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_9}
+	\end{tabular*}
+	\caption[The \textct{matl\_e\_cons} test cases 1-6]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases 7-9.}
+	\label{fig:matl_e_cons2}
 \end{figure}
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
