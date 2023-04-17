@@ -2636,12 +2636,12 @@ SPEC_LOOP: DO N=1,N_SPECIES
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)             ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)             ',SS%MW*P_INF/(TMPA*R0)
    IF (SS%EXPLICIT_H_F) THEN
-      WRITE(LU_OUTPUT,'(A,ES10.3)')'           Enthalpy of Formation (J/kg) ',SS%H_F
+      WRITE(LU_OUTPUT,'(A,ES10.3)')  '           Enthalpy of Formation (J/kg) ',SS%H_F
    ELSE
-      IF (SS%LISTED) THEN
-         WRITE(LU_OUTPUT,'(A,ES10.3)')'           Enthalpy of Formation (J/kg) ',SS%H_F_LISTED
+      IF (SS%LISTED .AND. SS%H_F_LISTED > -1.E21_EB) THEN
+         WRITE(LU_OUTPUT,'(A,ES10.3)') '           Enthalpy of Formation (J/kg) ',SS%H_F_LISTED
       ELSE
-         WRITE(LU_OUTPUT,'(A,ES10.3)')'   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
+         WRITE(LU_OUTPUT,'(A,ES10.3)') '   Assumed Enthalpy of Formation (J/kg) ',SS%H_F
       ENDIF
    ENDIF
 ENDDO SPEC_LOOP
