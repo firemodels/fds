@@ -4279,6 +4279,8 @@ The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed o
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies.
 
+Also note that if a predefined species name is used and any enthalpy related input in this section is specified for that species, FDS will not use the predefined enthalpy of formation.
+
 \subsubsection{Viscosity}
 
 The dynamic viscosity of the gas species can be specified in one of three ways:  it can be defined as a constant using {\ct VISCOSITY}, it can be defined as a temperature vs. viscosity ramp  using {\ct RAMP\_MU}, or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for nitrogen.
