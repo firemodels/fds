@@ -8660,7 +8660,11 @@ CASE(INTEGER_THREE)
       CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
-      IF (RADIATION) B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
+      IF (RADIATION) THEN
+         B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
+      ELSE
+         B1%Q_RAD_OUT = 0._EB
+      ENDIF
       ! Assign normal velocity to CFACE from SURF input:
       B1%U_NORMAL_0 = SF%VEL
       ! Assign normal velocity from VOLUME_FLOW :
