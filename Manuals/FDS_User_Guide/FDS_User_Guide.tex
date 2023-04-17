@@ -566,7 +566,7 @@ It is also possible to control the stop time and the dumping of restart files by
 
 \chapter{User Support}
 
-It is not unusual over the course of a project to run into various problems, some related to FDS, some related to your computer. FDS is an CPU and memory intensive calculation that can push your computer's processor and memory to its limits. In fact, there are no hardwired bounds within FDS that prevent you from starting a calculation that is too large for your hardware. Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require weeks or months to complete. It is difficult to predict at the start of a simulation just how long and how much memory will be required. Learn how to monitor the resource usage of your computer. Start with small calculations and build your way up.
+It is not unusual over the course of a project to run into various problems, some related to FDS, some related to your computer. FDS is a CPU and memory intensive simulation software that can push your computer's processor and memory to its limits. In fact, there are no hardwired bounds within FDS that prevent you from starting a calculation that is too large for your hardware. Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require weeks or months to complete. It is difficult to predict at the start of a simulation just how long and how much memory will be required. Learn how to monitor the resource usage of your computer. Start with small calculations and build your way up.
 
 Although many features in FDS are fairly mature, there are many that are not. FDS is used for practical engineering applications, but also for research in fire and combustion. As you become more familiar with the software, you will inevitably run into areas that are of current research interest. Indeed, burning a roomful of ordinary furniture is one of the most challenging applications of the model. So be patient, and learn to dissect a given scenario into its constitutive parts. For example, do not attempt to simulate a fire spreading through an entire floor of a building unless you have simulated the burning of the various combustibles with relatively small calculations.
 
@@ -750,6 +750,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
 {\ct DEVC}  & Device Parameters            & \ref{info:DEVC} & \ref{tbl:DEVC}  \\ \hline
 {\ct DUMP}  & Output Parameters            & \ref{info:DUMP} & \ref{tbl:DUMP}  \\ \hline
+{\ct GEOM} & Unstructured Geometry  &  \ref{info:GEOM} & \ref{tbl:GEOM}  \\ \hline
 {\ct HEAD}  & Input File Header            & \ref{info:HEAD} & \ref{tbl:HEAD}  \\ \hline
 {\ct HOLE}  & Obstruction Cutout           & \ref{info:HOLE} & \ref{tbl:HOLE}  \\ \hline
 {\ct HVAC}  & Heating, Vent., Air Cond.    & \ref{info:HVAC} & \ref{tbl:HVAC}  \\ \hline
@@ -783,7 +784,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 \end{table}
 
 
-\section{Concatenating input files}
+\section{Concatenating Input Files}
 \label{info:CATF}
 
 The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. The input line:
@@ -1553,10 +1554,11 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 
 \begin{itemize}
 \item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
+\item The {\ct MULT} construct cannot currently be applied to geometries.
 \item Thin geometries and corners cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
 \item You do not apply a {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied face by face via {\ct SURF\_ID}.
 \item No {\ct VENT} implies {\ct HVAC} cannot be applied to a {\ct GEOM} surface.  This is high on the priority list and should be available in the next maintenance release.
-\item You cannot currently impose a tangential velocity.  This is also a development priority.
+\item You cannot currently impose a tangential velocity in geometries. {\ct NO\_SLIP} conditions assume a zero tangential velocity. Allowing this capability is also a development priority.
 \item Currently, you cannot do 3D heat transfer with complex geometry.
 \item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to {\ct VOID} (quietly).
 \item {\ct BURN\_AWAY} is not allowed.
