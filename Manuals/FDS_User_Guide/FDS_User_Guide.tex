@@ -1354,8 +1354,8 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
 \begin{itemize}
-  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a boolean operation uniting the objects, respecting the boundary conditions of the surfaces. 
-When a geometry intersects with another geometry, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to descern in the general case, and we employ a linearization that generates the approximate boundary faces within the cell from edges defined on its cartesian faces.  An example for two intersecting sphere is shown below in Fig.~\ref{figure:intersecting_spheres}. If the geometry is too complex, this operation can fail. In such a case the cell will be left void. The user is recommended to apply geometry unions in their preprocessor of choice if possible. 
+  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS attempts to perform a boolean operation uniting the objects, respecting the boundary conditions of the surfaces. 
+When a geometry intersects with another geometry, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to discern in the general case, and we employ a linearization that generates the approximate boundary faces within the cell from edges defined on its cartesian faces.  An example for two intersecting spheres is shown below in Fig.~\ref{figure:intersecting_spheres}. If the geometry is too complex, this operation can fail. In such a case the cell will be left void. The user is recommended to apply geometry unions in their preprocessor of choice if possible. 
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
@@ -1500,13 +1500,13 @@ A geometry may be translated, rotated and scaled. For example, in the following 
 &GEOM ID='chair'
       SURF_ID='woodSID','apholsterySID',
       VERTS=X1,Y1,Z1,...,XM,YM,ZM,
-      FACES=F1_1,F1_2,F1_3,F1_SID...,FN_1,FN_2,FN_3,F2_SID
+      FACES=F1_1,F1_2,F1_3,F1_SID,...,FN_1,FN_2,FN_3,FN_SID
       MOVE_ID='ChairMove'
 /
 \end{lstlisting}
 }
 
-\noindent the chair object is translated and rotated using a reference to the {\ct MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
+\noindent the {\ct chair} object is translated and rotated using a reference to the {\ct MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
 
 
 \subsection{Reading Geometry Node Locations And Connectivity Data From Binary}
@@ -1530,10 +1530,10 @@ If a different name than the default is used, it can be specified in the field {
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
 
-\subsection{Handling Thin Geometries}
+\subsection{Handling Split Cells and Thin Geometries}
 \label{info:thin_geom}
 
-One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+One current limitation of the unstructured geometry algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a cell is split by a thin geometry, FDS will fill in the smaller of the two disjoint volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currently, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
 
 
 \begin{figure}
@@ -1543,7 +1543,7 @@ One current limitation of the cutcell algorithm is that a Cartesian cell cannot 
   \includegraphics[width=.3\textwidth]{../../../fig/fds/Geometry_Figures/thin_object_CELL_BLOCK_IOR_3.png} &
   \includegraphics[width=.3\textwidth]{../../../fig/fds/Geometry_Figures/thin_object_CELL_BLOCK_IOR_m3.png}
   \end{tabular*}
-  \caption[Handling thin geometry with cell blocking]{Handling thin geometry: (left) Cell blocking on either side; (center) {\ct CELL\_BLOCK\_IOR} = +3; (right) {\ct CELL\_BLOCK\_IOR} = -3.}
+  \caption[Handling thin geometry with cell blocking]{Handling thin geometry: (left) Cell blocking on either side; (center) {\ct CELL\_BLOCK\_IOR= 3} ; (right) {\ct CELL\_BLOCK\_IOR=-3} .}
   \label{figure:thin_geometry}
 \end{figure}
 
@@ -1554,16 +1554,16 @@ One current limitation of the cutcell algorithm is that a Cartesian cell cannot 
 \begin{itemize}
 \item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
 \item Thin geometries and corners cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
-\item You do not apply a {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
-\item No VENT implies HVAC cannot be applied to a GEOM surface.  This is high on the priority list and should be available in the next maintenance release.
+\item You do not apply a {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied face by face via {\ct SURF\_ID}.
+\item No {\ct VENT} implies {\ct HVAC} cannot be applied to a {\ct GEOM} surface.  This is high on the priority list and should be available in the next maintenance release.
 \item You cannot currently impose a tangential velocity.  This is also a development priority.
 \item Currently, you cannot do 3D heat transfer with complex geometry.
 \item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to {\ct VOID} (quietly).
 \item {\ct BURN\_AWAY} is not allowed.
 \item The {\ct HOLE} namelist is not currently connected to {\ct GEOM}.
-\item Subgrid {\ct GEOM} (smaller than a grid cell) are possible, but not recommended currently. Similarly, gaps should be defined over a cell size thick. These still require testing and are a development priority.
+\item Subgrid geometries (smaller than a grid cell) are possible, but not recommended currently. Similarly, gaps should be defined over a cell size thick. These still require testing and are a development priority.
 \item We do not recommend triangular faces that are much smaller than the Cartesian grid cell.
-\item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor.
+\item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor. They will behave as pellets, not droplets.
 \item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not yet undergone thorough testing.
 \end{itemize}
 
