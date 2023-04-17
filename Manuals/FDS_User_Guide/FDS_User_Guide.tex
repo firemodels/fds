@@ -1279,9 +1279,7 @@ The following conditions are enforced by FDS on the collection of vertices and f
 \item The vertex orderings for the faces shall be chosen so that adjacent faces
 have outward consistent normals, as illustrated in Figure \ref{figure:GEOM_oriented_surface}.
 
-\item Each {\ct GEOM}\ namelist may define one or more distinct volumes (\textit{unconnected} volumes) that should never mutually intersect or self-intersect. See an example of a bad intersecting geometry in Figure \ref{figure:GEOM_self_intersecting}.
-
-\item An upper limit is set to the number of triangles for each {\ct MESH} cell; this condition reasonably limits the complexity of the discretization that can currently be elaborated by the immersed boundary method solver.
+\item Each {\ct GEOM}\ namelist may define one or more distinct volumes (\textit{unconnected} volumes) that should not mutually intersect or self-intersect. See an example of a bad intersecting geometry in Figure \ref{figure:GEOM_self_intersecting}.
 
 \end{enumerate}
 
@@ -1356,11 +1354,11 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
 \begin{itemize}
-  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with solid;
+  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a boolean operation uniting the objects, respecting the boundary conditions of the surfaces. 
+When a geometry intersects with another geometry, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to descern in the general case, and we employ a linearization that generates the approximate boundary faces within the cell from edges defined on its cartesian faces.  An example for two intersecting sphere is shown below in Fig.~\ref{figure:intersecting_spheres}. If the geometry is too complex, this operation can fail. In such a case the cell will be left void. The user is recommended to apply geometry unions in their preprocessor of choice if possible. 
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
-When a geometry intersects with another geometry or obstruction, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to descern in the general case, and so for now we employ a linearization that generates the approximate vertices and edges to close the volume.  An example for two intersecting sphere is shown below in Fig.~\ref{figure:intersecting_spheres}.
 
 \begin{figure}
   \centering
@@ -1395,7 +1393,6 @@ The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VEN
 A block may be refined into many parts by specifying the {\ct IJK} parameter.
 For example, {\ct IJK=8,6,4} would split the block into 8 parts along the $x$ dimension,
 6 parts along the $y$ dimension and 4 parts along the $z$ dimension.
-By default, blocks are discretized so that the block faces are consistent in size with the grid resolution.
 
 The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all the generated faces.  Similar to {\ct OBST}, you can also use {\ct SURF\_IDS} and {\ct SURF\_ID6} lists to specify surface conditions (see Sec.~\ref{info:OBST_Basics}).
 
@@ -1459,7 +1456,7 @@ If, additionally, the real number {\ct ZVAL\_HORIZON} is set on the {\ct GEOM} l
 As with the blocks and spheres, FDS uses the information provided by these keywords to construct
 vertices and triangular faces.  The bottom elevation of the geometry (used only for visualizaiton purposes in Smokeview) may be set with the parameter {\ct ZMIN}.
 
-Additionally, terrain geometries can be specified defining a triangulation with a convex regular boundary, as seen from the top. This triangulation will represent the terrain of interest and will define the top boundary of a terrain geom. The terrain surface is specified by {\ct VERTS} and {\ct FACES} as in a basic geometry (Sec.~\ref{info:GEOM_Basics}), and the field {\ct IS\_TERRAIN} needs to be set to {\ct T}, such that FDS knows this is a terrain unstructured surface. Surface types per faces are specified in the same manner as in basic geometries. Also, the {\ct EXTEND\_TERRAIN} logic can also be applied.
+Additionally, terrain geometries can be specified defining a triangulation with a convex regular boundary, as seen from the top. This triangulation will represent the terrain of interest and will define the top boundary of a terrain {\ct GEOM}. The terrain surface is specified by {\ct VERTS} and {\ct FACES} as in a basic geometry (Sec.~\ref{info:GEOM_Basics}), and the field {\ct IS\_TERRAIN} needs to be set to {\ct T}, such that FDS knows this is a terrain unstructured surface. Surface types per faces are specified in the same manner as in basic geometries. Also, the {\ct EXTEND\_TERRAIN} logic can also be applied.
 
 \subsubsection{Geometries Extruded From Simple Planar Polygons}
 
@@ -1493,8 +1490,7 @@ Links to these tools can be found at the project home page at https://pages.nist
 \subsection{Transforming Objects}
 \label{info:transform_geom}
 
-A geometry may be transformed. It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated about {\ct XYZ0}\ using {\ct AZIM}\ and/or {\ct ELEV}.
-For example, in the following {\ct GEOM}\ namelist,
+A geometry may be translated, rotated and scaled. For example, in the following {\ct GEOM}\ namelist,
 
 {\small
 \begin{lstlisting}
@@ -1535,7 +1531,7 @@ Terrains can also be read and written in binary format, and in this case only th
 \subsection{Handling Thin Geometries}
 \label{info:thin_geom}
 
-One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the error.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+One current limitation of the cutcell algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a thin geometry splits a cell, FDS will fill in the smaller of the two volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currenly, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
 
 
 \begin{figure}
@@ -1555,15 +1551,15 @@ One current limitation of the cutcell algorithm is that a Cartesian cell cannot 
 
 \begin{itemize}
 \item Currently no control logic is available on {\ct GEOM} namelists.  That is, you cannot currently add or remove a {\ct GEOM}.
-\item Thin geometries cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
+\item Thin geometries and corners cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
 \item You do not apply a {\ct VENT} to a {\ct GEOM}.  Surface properties must be applied via {\ct SURF\_ID}.
 \item No VENT implies HVAC cannot be applied to a GEOM surface.  This is high on the priority list and should be available in the next maintenance release.
-\item You cannot currently impose a tangential velocity.  This should be available in the next maintenance release.
+\item You cannot currently impose a tangential velocity.  This is also a development priority.
 \item Currently, you cannot do 3D heat transfer with complex geometry.
-\item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to VOID (quietly).
+\item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to {\ct VOID} (quietly).
 \item {\ct BURN\_AWAY} is not allowed.
 \item The {\ct HOLE} namelist is not currently connected to {\ct GEOM}.
-\item Subgrid {\ct GEOM} (smaller than a grid cell) are possible, but not recommended currently.
+\item Subgrid {\ct GEOM} (smaller than a grid cell) are possible, but not recommended currently. Similarly, gaps should be defined over a cell size thick. These still require testing and are a development priority.
 \item We do not recommend triangular faces that are much smaller than the Cartesian grid cell.
 \item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor.
 \item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not yet undergone thorough testing.
@@ -4282,6 +4278,8 @@ If no input for specific specific heat is provided, then the specific heat of th
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies.
+
+Also note that if a predefined species name is used and any enthalpy related input in this section is specified for that species, FDS will not use the predefined enthalpy of formation.
 
 \subsubsection{Viscosity}
 
