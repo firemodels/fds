@@ -3569,7 +3569,7 @@ ENDIF
 
 ! Reinitialize wall cell outgoing radiation for change in TMP_F
 
-B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
+IF (RADIATION) B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
 
 ! Record original boundary condition index for exterior wall cells that might get covered up
 
