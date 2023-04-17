@@ -22,7 +22,7 @@ The Radiative Transport Equation (RTE) for an absorbing, emitting, and scatterin
  }_{\textrm{In-scattering term}}
 \label{RTEbasic}
 \end{align}
-where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength, $\la$; $\bs$ is the direction vector of the intensity; and $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption and scattering coefficients, respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles. The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in Section~\ref{droplet-radiation}.
+where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength, $\la$; $\bs$ is the direction vector of the intensity; and $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption and scattering coefficients, respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles. The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in Sec.~\ref{droplet-radiation}.
 
 In practical simulations, the spectral dependence of the RTE cannot be resolved accurately. Instead, the radiation spectrum is divided into a relatively small number of bands and a separate RTE is derived for each band. For instance, the band specific RTE for a non-scattering gas is
 \be
@@ -43,7 +43,7 @@ where $I_{{\rm b},n}$ is the fraction of the blackbody radiation at temperature 
 \be
    I_{{\rm b},n}(\bx) = F_n(\la_{\rm min},\la_{\rm max}) \, \sigma \, T(\bx)^4/\pi
 \ee
-and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}. The measurement of the absorption coefficients, $\kappa_n$, is discussed in Appendix~\ref{absorption_coefficients}.
+and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}. The calculation of the absorption coefficients, $\kappa_n$, is discussed in Appendix~\ref{absorption_coefficients}.
 
 Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one absorption coefficient ($N=1$) and the source term is given by the blackbody radiation intensity \cite{Ludwig:NASA}
 \be
@@ -456,7 +456,7 @@ where
 \begin{tabbing}
 $I_{ijk}^l$ \hspace{1in}  \=  radiant intensity in direction $l$ \\
 $I_m^l$                   \>  radiant intensity at cell face $m$ \\
-$I_{b,ijk}$               \>  radiant blackbody Intensity in cell \\
+$I_{b,ijk}$               \>  radiant blackbody intensity in cell \\
 $\delta \Omega^l$         \>  solid angle corresponding to direction $l$ \\
 $V_{ijk}$                 \>  volume of cell $ijk$ \\
 $A_m$                     \>  area of cell face $m$ \\
@@ -673,7 +673,7 @@ where $m_{\rm p}$ is the mass of the droplet and $\rho_{\rm p}(\bx)$ is the tota
 
 \section{Absorption by Large, Non-Scattering Particles}
 
-FDS uses Lagrangian particles to represent objects that are not resolvable on the numerical grid, but are still relatively large compared to liquid droplets. For example, vegetation is modeled as a collection of large, opaque, non-scattering particles. For more discussion of the radiation absorption by large particles, see Section~\ref{rad_part_absorb}.
+FDS uses Lagrangian particles to represent objects that are not resolvable on the numerical grid, but are still relatively large compared to liquid droplets. For example, vegetation is modeled as a collection of large, opaque, non-scattering particles. For more discussion of the radiation absorption by large particles, see Sec.~\ref{rad_part_absorb}.
 
 
 

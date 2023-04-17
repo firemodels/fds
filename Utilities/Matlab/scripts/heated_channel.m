@@ -132,15 +132,15 @@ for i = [1,2,3,4]
     end
 
     switch i
-        case 1; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p10,'omitnan') )/mean(Tp_mean_Pr0p10,'omitnan');
-        case 2; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p71,'omitnan') )/mean(Tp_mean_Pr0p71,'omitnan');
-        case 3; err(i) = abs( mean(up)-mean(up_mean,'omitnan')        )/mean(up_mean,'omitnan');
-        case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan');
+        case 1; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p10,'omitnan') )/mean(Tp_mean_Pr0p10,'omitnan')
+        case 2; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p71,'omitnan') )/mean(Tp_mean_Pr0p71,'omitnan')
+        case 3; err(i) = abs( mean(up)-mean(up_mean,'omitnan')        )/mean(up_mean,'omitnan')
+        case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan')
     end
 
-    % if err(i)>0.2
-    %     disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
-    % end
+    if err(i)>0.5
+        disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
+    end
 
 end
 

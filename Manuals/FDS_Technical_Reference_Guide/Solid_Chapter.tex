@@ -25,19 +25,19 @@ FDS offers the user these options for cases where the obstruction surface is not
   \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x} \left( k_{\rm s} \dod{T_{\rm s}}{x} \right) + \dq_{\rm s}'''
   \label{1dheat}
 \ee
-Section~\ref{matcoefs} describes the component-averaged material properties, $k_{\rm s}$ and $\rho_{\rm s} c_{\rm s}$. The source term, $\dq_{\rm s}'''$,
+Sec.~\ref{matcoefs} describes the component-averaged material properties, $k_{\rm s}$ and $\rho_{\rm s} c_{\rm s}$. The source term, $\dq_{\rm s}'''$,
 consists of chemical reactions and radiative absorption:
 \be
   \label{eq:solid_energy_source_term}
   \dq_{\rm s}'''=\dq_{\rm s,c}'''+\dq_{\rm s,r}'''
 \ee
-Section~\ref{pyrosection} describes the term $\dq_{\rm s,c}'''$, which is essentially the heat production (loss) rate given by the  pyrolysis models for different types of solid and liquid fuels. Section~\ref{inradsection} describes the term $\dq_{\rm s,r}'''$, the radiative absorption and emission in depth.
+Sec.~\ref{pyrosection} describes the term $\dq_{\rm s,c}'''$, which is essentially the heat production (loss) rate given by the  pyrolysis models for different types of solid and liquid fuels. Sec.~\ref{inradsection} describes the term $\dq_{\rm s,r}'''$, the radiative absorption and emission in depth.
 
 The boundary condition on the front surface of a solid obstruction is
 \be
  -k_{\rm s}\frac{\partial T_{\rm s}}{\partial x}(0,t) = \dot{q}_{\rm c}''+ \dot{q}_{\rm r}''
 \ee
-where $\dot{q}_{\rm c}''$ is the convective and $\dot{q}_{\rm r}''$ the radiative flux. If the radiation is assumed to penetrate in depth, the surface radiation term, $\dot{q}_{\rm r}''$, is set to 0. Section~\ref{conflux} describes the convective heat transfer to the solid surface.
+where $\dot{q}_{\rm c}''$ is the convective and $\dot{q}_{\rm r}''$ the radiative flux. If the radiation is assumed to penetrate in depth, the surface radiation term, $\dot{q}_{\rm r}''$, is set to 0. Sec.~\ref{conflux} describes the convective heat transfer to the solid surface.
 
 On the back surface, there are two possible boundary conditions: (1) if the back surface is assumed to be open either to an ambient void or to another part of the computational domain, the back side boundary condition is similar to that of the front side, or (2) if the back side is assumed to be perfectly insulated, an adiabatic condition is used
 \be
@@ -150,7 +150,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.  This model has been validated for low Reynolds number heated channel flow \cite{Park:2012} and has been used in a model to predict upper layer temperature in airplane cargo compartments \cite{Oztekin:FM2012}.
 
-Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on the law of the wall with a semi-log fit connecting the limits of the viscous and log regions (see Section~\ref{info:velocity_bc}).
+Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on the law of the wall with a semi-log fit connecting the limits of the viscous and log regions (see Sec.~\ref{info:velocity_bc}).
 
 By analogy to the near-wall model for velocity, the non-dimensional temperature is defined as
 \begin{equation}
@@ -280,31 +280,6 @@ where $T_{\mathrm{g}}$ is the gas temperature in the first off-wall grid cell an
 T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 + h^n \, T_{\mathrm{g}}^n + 2 \, k_{\mathrm{s}}^n \, T_{\mathrm{s}}^n/\delta }{ 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 + h^n + 2 \, k_{\mathrm{s}}^n / \delta}
 \end{equation}
 
-\subsubsection*{Surface Heat Flux Internal Wall Model}
-
-In Eqs.~(\ref{eq:discflux}) and (\ref{eq:tmpwall}), the conductive heat flux into the wall is presumed to be resolved by a length scale, $\delta$.  In the 3D heat transfer model this length scale is \emph{not} taken to be the 3D cell spacing normal to the wall---the required 3D grid resolution would make the model intractable.  Instead, an internal wall model is employed.  To be consistent with the resolution of the 1D heat conduction model, the thermal penetration depth is taken to be
-\begin{equation}
-\label{eq:pendepth}
-\delta = \sqrt{\frac{ \tau \; k_{\mathrm{s}}}{\rho_{\mathrm{s}} c_{\mathrm{s}}}}
-\end{equation}
-where $\tau$ is a somewhat arbitrary time scale set to unity.
-
-% An alternate model for the thermal penetration depth that does not rely on an arbitrary time scale is
-% \begin{equation}
-% \label{eq:pendepth2}
-% \delta = \left( \frac{\rho_{\mathrm{s}} \alpha_{\mathrm{s}}^3}{\dot{q}_w''} \right)^{1/3}
-% \end{equation}
-% where $\alpha_{\mathrm{s}} = k_{\mathrm{s}}/( \rho_{\mathrm{s}} c_{\mathrm{s}} )$.  Equation (\ref{eq:pendepth2}) is iterative since $\dot{q}_w''$ depends on $\delta$ (but convergence is very fast).  This length scale tends to be smaller than the depth given by Eq.~(\ref{eq:pendepth}).  The appropriate choice of length scale may be problem dependent.  Determining robust guidelines for grid independence of solid phase calculations is still an open area of research.  Presently, Eq.~(\ref{eq:pendepth2}) must be implemented at the source code level (there is no user hook).
-
-\subsubsection*{Internal Radiation}
-\label{sec:radiation}
-
-The \emph{absorption coefficient} of the solid is denoted $\kappa_{\mathrm{s}}$.  If $\delta \times \kappa_{\mathrm{s}} \gg 1$, the material may be considered ``optically thick'' \cite{Modest:2003}.  This applies to many problems in pyrolysis.  The optically thick approximation implies a ``radiative conductivity'',
-\begin{equation}
-\label{eq:krad}
-k_{\mathrm{r}} = \frac{16 n_{\mathrm{s}}^2 \sigma T_{\mathrm{s}}^3}{3 \kappa_{\mathrm{s}}} \,\mbox{,}
-\end{equation}
-which may simply be added to the material conductivity in the solver. Note that increasing the solid conductivity reduces the surface temperature, per Eq.~(\ref{eq:fluxcontinuity}), consistent with the notion that the radiation is not absorbed at the surface. Here, $n_{\mathrm{s}}$ is the material refractive index and $\sigma$ is the Stefan-Boltzmann constant.
 
 
 \newpage
@@ -320,7 +295,7 @@ Often the intent of a fire simulation is merely to predict the transport of smok
 \be
    \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H_{\si{c}}}
 \ee
-Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the gas phase heat of combustion, $\Delta H_{\si{c}}$. The mass flux of fuel from the surface to the gas, $\dm_{\rm f}''$, can then be computed. A special subset of this approach is where the user also specifies a heat of combustion, density, and thickness for the burning material. If the default simple chemistry model described in Section~\ref{sec:simplechemistry}, with its single combustion reaction, is being used and there are multiple materials burning, one or more materials might have a different heat of combustion, $\Delta H_{\si{c}{\rm ,solid}}$, than the gas-phase combustion reaction. To account for this, FDS adjusts $\dm_{\rm f}''$ so that the solid phase has the appropriate mass loss rate, $\dm_{\rm f,solid}''$.
+Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the gas phase heat of combustion, $\Delta H_{\si{c}}$. The mass flux of fuel from the surface to the gas, $\dm_{\rm f}''$, can then be computed. A special subset of this approach is where the user also specifies a heat of combustion, density, and thickness for the burning material. If the default simple chemistry model described in Sec.~\ref{sec:simplechemistry}, with its single combustion reaction, is being used and there are multiple materials burning, one or more materials might have a different heat of combustion, $\Delta H_{\si{c}{\rm ,solid}}$, than the gas-phase combustion reaction. To account for this, FDS adjusts $\dm_{\rm f}''$ so that the solid phase has the appropriate mass loss rate, $\dm_{\rm f,solid}''$.
 \be
 \dm_{\rm f,solid}'' = \dm_{\rm f}'' \frac{\Delta H_{\si{c}}}{\Delta H_{\si{c}{\rm ,solid}}}
 \ee
