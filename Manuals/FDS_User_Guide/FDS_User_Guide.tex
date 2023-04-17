@@ -1379,6 +1379,7 @@ Coloring and texture maps for {\ct GEOM} objects are specified in the same way a
 The {\ct GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS} and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
 
 \subsubsection{Blocks}
+\label{info:geomobst}
 A {\ct GEOM}\ namelist defining a block is given by
 
 \begin{lstlisting}
@@ -1397,6 +1398,7 @@ For example, {\ct IJK=8,6,4} would split the block into 8 parts along the $x$ di
 The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all the generated faces.  Similar to {\ct OBST}, you can also use {\ct SURF\_IDS} and {\ct SURF\_ID6} lists to specify surface conditions (see Sec.~\ref{info:OBST_Basics}).
 
 \subsubsection{Spheres}
+\label{info:geomsphere}
 A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
 \begin{lstlisting}
@@ -1459,7 +1461,7 @@ vertices and triangular faces.  The bottom elevation of the geometry (used only 
 Additionally, terrain geometries can be specified defining a triangulation with a convex regular boundary, as seen from the top. This triangulation will represent the terrain of interest and will define the top boundary of a terrain {\ct GEOM}. The terrain surface is specified by {\ct VERTS} and {\ct FACES} as in a basic geometry (Sec.~\ref{info:GEOM_Basics}), and the field {\ct IS\_TERRAIN} needs to be set to {\ct T}, such that FDS knows this is a terrain unstructured surface. Surface types per faces are specified in the same manner as in basic geometries. Also, the {\ct EXTEND\_TERRAIN} logic can also be applied.
 
 \subsubsection{Geometries Extruded From Simple Planar Polygons}
-
+\label{info:extrpolys}
 In this case, a geometry can be defined specifying the {\ct VERTS}, connectivity {\ct POLY}, and extrusion distance {\ct EXTRUDE}. For example:
 
 \begin{lstlisting}
@@ -11276,44 +11278,43 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\tt GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
+{\ct BINARY\_FILE}     & Character              & Section~\ref{subsec:readbin}            &           &  {\ct 'null'}            \\ \hline
 {\ct BNDF\_GEOM}       & Logical                & Section~\ref{info:BNDF}            &           &  {\ct T}                 \\ \hline
 {\ct CELL\_BLOCK\_IOR} & Integer                & Section~\ref{info:thin_geom}       &           &  0                       \\ \hline
 {\ct COLOR}            & Character              & Section~\ref{info:colors}          &           &  {\ct 'null'}            \\ \hline
-{\ct CYLINDER\_LENGTH} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct CYLINDER\_RADIUS} & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct CYLINDER\_ORIGIN} & Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct CYLINDER\_AXIS}   & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct CYLINDER\_NSEG\_AXIS} & Integer            & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct CYLINDER\_NSEG\_THETA}& Integer            & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct EXTEND\_TERRAIN}  & Logical                & Section~\ref{info:GEOM}            &           &  {\ct F}                 \\ \hline
-{\ct EXTRUDE}          & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct FACES}            & array of Integer Triplets  & Section~\ref{info:GEOM}        &           &                          \\ \hline
+{\ct CYLINDER\_LENGTH} & Real                   & Section~\ref{info:GEOM_cyls}            &   m       &                          \\ \hline
+{\ct CYLINDER\_RADIUS} & Real                   & Section~\ref{info:GEOM_cyls}            &   m       &                          \\ \hline
+{\ct CYLINDER\_ORIGIN} & Real Triplet           & Section~\ref{info:GEOM_cyls}            &   m       &                          \\ \hline
+{\ct CYLINDER\_AXIS}   & Real Triplet           & Section~\ref{info:GEOM_cyls}            &           &                          \\ \hline
+{\ct CYLINDER\_NSEG\_AXIS} & Integer            & Section~\ref{info:GEOM_cyls}            &           &                          \\ \hline
+{\ct CYLINDER\_NSEG\_THETA}& Integer            & Section~\ref{info:GEOM_cyls}            &           &                          \\ \hline
+{\ct EXTEND\_TERRAIN}  & Logical                & Section~\ref{info:terrain_geom}            &           &  {\ct F}                 \\ \hline
+{\ct EXTRUDE}          & Real                   & Section~\ref{info:extrpolys}            &   m       &                          \\ \hline
+{\ct FACES}            & Array of Integer Triplets  & Section~\ref{info:GEOM}        &           &                          \\ \hline
 {\ct ID}               & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'geom'\_\#}        \\ \hline
-{\ct IJK}              & Integer Triplet        & Section~\ref{info:GEOM}            &           &  0,0,0                   \\ \hline
-{\ct IS\_TERRAIN}      & Logical                & Section~\ref{info:GEOM}            &           &  {\ct F}                 \\ \hline
-{\ct MATL\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct MOVE\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
-{\ct N\_LAT}           & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct N\_LEVELS}        & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct N\_LONG}          & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct POLY}             & array of Integers      & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct IJK}              & Integer Triplet        & Section~\ref{info:geomobst}            &           &  0,0,0                   \\ \hline
+{\ct IS\_TERRAIN}      & Logical                & Section~\ref{info:terrain_geom}            &           &  {\ct F}                 \\ \hline
+{\ct MOVE\_ID}         & Character              & Section~\ref{info:transform_geom}            &           &  {\ct 'null'}            \\ \hline
+{\ct N\_LAT}           & Integer                & Section~\ref{info:geomsphere}            &           &   0                      \\ \hline
+{\ct N\_LEVELS}        & Integer                & Section~\ref{info:geomsphere}            &           &   0                      \\ \hline
+{\ct N\_LONG}          & Integer                & Section~\ref{info:geomsphere}            &           &   0                      \\ \hline
+{\ct POLY}             & Integer Array      & Section~\ref{info:extrpolys}            &           &                          \\ \hline
 {\ct RGB(3)}           & Integer Triplet        & Section~\ref{info:colors}          &           &                          \\ \hline
-{\ct SPHERE\_ORIGIN}   & Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct SPHERE\_RADIUS}   & Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct SPHERE\_TYPE}     & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct SPHERE\_ORIGIN}   & Real Triplet           & Section~\ref{info:geomsphere}            &   m       &                          \\ \hline
+{\ct SPHERE\_RADIUS}   & Real                   & Section~\ref{info:geomsphere}            &   m       &                          \\ \hline
+{\ct SPHERE\_TYPE}     & Integer                & Section~\ref{info:geomsphere}            &           &                          \\ \hline
 {\ct SURF\_ID}         & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct SURF\_ID6(6)}     & Character Sextuplet    & Section~\ref{info:OBST_Basics}     &           &                          \\ \hline
 {\ct SURF\_IDS(3)}     & Character Triplet      & Section~\ref{info:OBST_Basics}     &           &                          \\ \hline
-{\ct TEXTURE\_MAPPING} & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'RECTANGULAR'}     \\ \hline
-{\ct TEXTURE\_ORIGIN}  & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
-{\ct TEXTURE\_SCALE}   & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct TRANSPARENCY}     & Real                   & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct VERTS}            & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct XB(4)}            & Real Fourtuplet        & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct TEXTURE\_MAPPING} & Character              & Section~\ref{info:texture_map}            &           &  {\ct 'RECTANGULAR'}     \\ \hline
+{\ct TEXTURE\_ORIGIN}  & Real Triplet           & Section~\ref{info:texture_map}            &   m       &   0.0,0.0,0.0            \\ \hline
+{\ct TEXTURE\_SCALE}   & Real                   & Section~\ref{info:texture_map}            &           &   1.0                    \\ \hline
+{\ct TRANSPARENCY}     & Real                   & Section~\ref{info:colors}            &           &   1.0                    \\ \hline
+{\ct VERTS}            & Array of Real Triplets & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct XB(6)}            & Real Array        & Section~\ref{info:geomobst}            &   m       &                          \\ \hline
 {\ct ZMIN}             & Real                   & Section~\ref{info:terrain_geom}    &   m       &                          \\ \hline
-{\ct ZVALS}            & Real array             & Section~\ref{info:terrain_geom}    &   m       &                          \\ \hline
-{\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:terrain_geom}    &           &                          \\ \hline
+{\ct ZVALS}            & Real Array             & Section~\ref{info:terrain_geom}    &   m       &                          \\ \hline
+{\ct ZVAL\_HORIZON}    & Real                   & Section~\ref{info:terrain_geom}    &    m      &                          \\ \hline
 
 % Related to moving geometry:
 %{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
@@ -12807,7 +12808,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
-{\ct ccib.f90}   & Complex computational geometry engine \\ \hline
+{\ct ccib.f90}   & Complex geometry physics routines \\ \hline
 {\ct cons.f90}   & Global arrays and constants \\ \hline
 {\ct ctrl.f90}   & Definitions and routines for control functions \\ \hline
 {\ct data.f90}   & Data for output quantities and thermophysical properties\\ \hline
@@ -12816,7 +12817,7 @@ File Name  & Description  \\ \hline \hline
 {\ct dump.f90}   & Output data dumps into files \\ \hline
 {\ct fire.f90}   & Combustion routines \\ \hline
 {\ct func.f90}   & Global functions and subroutines \\ \hline
-{\ct geom.f90}   & Complex geometry physics routines \\ \hline
+{\ct geom.f90}   & Complex computational geometry engine \\ \hline
 {\ct gsmv.f90}   & Complex geometry visualization routines \\ \hline
 {\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
 {\ct imkl.f90}   & Bindings for the Intel MKL library \\ \hline
