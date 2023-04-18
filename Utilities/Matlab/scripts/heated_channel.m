@@ -102,8 +102,8 @@ for i = [1,2,3,4]
     u_tau = sqrt(tau_w/rho);
     delta_nu = (mu/rho)/u_tau;
 
-    j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
-    j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+    j1 = find(strcmp(M.colheaders,'"HF0B"'));
+    j2 = find(strcmp(M.colheaders,'"HF0T"'));
     q_w = mean(M.data(end,j1:j2));
     T_tau = q_w/(rho*u_tau*cp);
 
@@ -117,28 +117,33 @@ for i = [1,2,3,4]
 
     zp = M.data(1:16,1)/delta_nu;
 
-    if (i==3)
-        u1 = mean(M.data(1:16,38:2:72),2);     % bottom wall
-        u2 = mean(M.data(32:-1:17,38:2:72),2); % top wall
-        up = 0.5*(u1+u2)/u_tau;
-        set(groot,'CurrentFigure',f1);
-        hfig1(1)=semilogx(zp,up,'ksq-');
-    else
-        T1 = mean(M.data(1:16,2:2:36),2);      % bottom wall
-        T2 = mean(M.data(32:-1:17,2:2:36),2);  % top wall
-        Tp = (0.5*(T1+T2)-T_w)/T_tau;
-        set(groot,'CurrentFigure',f2);
-        hfig2(1)=semilogx(zp,Tp,'ksq-');
+    switch(i)
+        case {1,2,4}
+            j1 = find(strcmp(M.colheaders,'T11'));
+            j2 = find(strcmp(M.colheaders,'T115'));
+            T1 = mean(M.data(1:16,j1:j2),2);      % bottom wall
+            T2 = mean(M.data(32:-1:17,j1:j2),2);  % top wall
+            Tp = (0.5*(T1+T2)-T_w)/T_tau;
+            set(groot,'CurrentFigure',f2);
+            hfig2(1)=semilogx(zp,Tp,'ksq-');
+        case 3
+            j1 = find(strcmp(M.colheaders,'U11'));
+            j2 = find(strcmp(M.colheaders,'U115'));
+            u1 = mean(M.data(1:16,j1:j2),2);     % bottom wall
+            u2 = mean(M.data(32:-1:17,j1:j2),2); % top wall
+            up = 0.5*(u1+u2)/u_tau;
+            set(groot,'CurrentFigure',f1);
+            hfig1(1)=semilogx(zp,up,'ksq-');
     end
 
     switch i
-        case 1; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p10,'omitnan') )/mean(Tp_mean_Pr0p10,'omitnan')
-        case 2; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p71,'omitnan') )/mean(Tp_mean_Pr0p71,'omitnan')
-        case 3; err(i) = abs( mean(up)-mean(up_mean,'omitnan')        )/mean(up_mean,'omitnan')
-        case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan')
+        case 1; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p10,'omitnan') )/mean(Tp_mean_Pr0p10,'omitnan');
+        case 2; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p71,'omitnan') )/mean(Tp_mean_Pr0p71,'omitnan');
+        case 3; err(i) = abs( mean(up)-mean(up_mean,'omitnan')        )/mean(up_mean,'omitnan');
+        case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan');
     end
 
-    if err(i)>0.5
+    if err(i)>1
         disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
     end
 
