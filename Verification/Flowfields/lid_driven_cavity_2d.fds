@@ -1,4 +1,4 @@
-&HEAD TITLE='lid_driven_cavity_2d', TITLE='Lid-driven cavity flow' / /
+&HEAD TITLE='lid_driven_cavity_2d', TITLE='Lid-driven cavity flow' / 
 
 &MESH IJK=32,1,32, XB=0,1,-.5,.5,0,1/
 

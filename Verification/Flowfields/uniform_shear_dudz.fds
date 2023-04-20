@@ -1,4 +1,4 @@
-&HEAD CHID='uniform_shear_dudz', TITLE='Uniform shear flow test of stress output' / /
+&HEAD CHID='uniform_shear_dudz', TITLE='Uniform shear flow test of stress output' / 
 
 &MESH IJK=16,16,16, XB=0,1,0,1,0,1/
 

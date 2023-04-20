@@ -14,7 +14,7 @@ Mesh 6: Matrix prevents swelling
 &MESH IJK = 3,3,4, XB = 5.0,5.3,-0.15,0.15,0,0.4 /  Mesh 5
 &MESH IJK = 3,3,4, XB = 6.0,6.3,-0.15,0.15,0,0.4 /  Mesh 6
 
-&TIME T_END=15. DT = 0.1 /
+&TIME T_END=15., DT = 0.1 /
 
 &MISC SOLID_PHASE_ONLY=.TRUE.,HUMIDITY=0., Y_O2_INFTY=0.01, Y_CO2_INFTY=0. /
 

@@ -66,13 +66,13 @@
         HEAT_TRANSFER_COEFFICIENT    = 0.
 	RAMP_T 	   = 'T_RAMP' /
 
-&RAMP ID = 'T_RAMP' T = 0.,    F = 0. /
-&RAMP ID = 'T_RAMP' T = 2400., F = 1.0 /
+&RAMP ID = 'T_RAMP', T = 0.,    F = 0. /
+&RAMP ID = 'T_RAMP', T = 2400., F = 1.0 /
 
-24000	= 2 K/min
-9600	= 5 K/min
-4800	= 10 K/min
-2400	= 20 K/min
+24000	= 2 K per min
+9600	= 5 K per min
+4800	= 10 K per min
+2400	= 20 K per min
 
 &DEVC XYZ = 0.0,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY' /
 &DEVC XYZ = 0.0,0.0,1.0,IOR = -3, QUANTITY = 'WALL TEMPERATURE' /

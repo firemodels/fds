@@ -1,4 +1,4 @@
-&HEAD CHID='obst_cylinder_mass_flux', TITLE='Test of MULT/OBST cylinder exact mass flux'/
+&HEAD CHID='obst_cylinder_mass_flux', TITLE='Test of MULT-OBST cylinder exact mass flux'/
 
 &MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
 
@@ -6,9 +6,9 @@
 
 &SPEC ID='HELIUM'/
 
-&SURF ID='top',    MASS_FLUX(1)=1.2732395447351626, SPEC_ID(1)='HELIUM', COLOR='GRAY',   RAMP_MF(1)='he ramp'/ 0.01 kg/s
-&SURF ID='side',   MASS_FLUX(1)=0.3183098861837907, SPEC_ID(1)='HELIUM', COLOR='ORANGE', RAMP_MF(1)='he ramp'/ 0.02 kg/s
-&SURF ID='bottom', MASS_FLUX(1)=3.8197186342054880, SPEC_ID(1)='HELIUM', COLOR='BLACK',  RAMP_MF(1)='he ramp'/ 0.03 kg/s
+&SURF ID='top',    MASS_FLUX(1)=1.2732395447351626, SPEC_ID(1)='HELIUM', COLOR='GRAY',   RAMP_MF(1)='he ramp'/ 0.01 kg per s
+&SURF ID='side',   MASS_FLUX(1)=0.3183098861837907, SPEC_ID(1)='HELIUM', COLOR='ORANGE', RAMP_MF(1)='he ramp'/ 0.02 kg per s
+&SURF ID='bottom', MASS_FLUX(1)=3.8197186342054880, SPEC_ID(1)='HELIUM', COLOR='BLACK',  RAMP_MF(1)='he ramp'/ 0.03 kg per s
 
 &RAMP ID='he ramp', T=0,    F=0/
 &RAMP ID='he ramp', T=0.01, F=1/

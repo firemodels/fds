@@ -4,10 +4,10 @@
 
 &MISC NOISE=F /
 
-&MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&MESH IJK=10,10,10 XB=2.0,3.0,0.0,1.0,0.0,1.0 /
-&MESH IJK=10,10,10 XB=4.0,5.0,0.0,1.0,0.0,1.0 /
-&MESH IJK=10,10,10 XB=6.0,7.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10, XB=2.0,3.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10, XB=4.0,5.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10, XB=6.0,7.0,0.0,1.0,0.0,1.0 /
 
 &SPEC ID='NITROGEN', SPECIFIC_HEAT=1., BACKGROUND=T /
 
@@ -62,11 +62,11 @@
 &PART ID='cylinder'  SURF_ID='cylinder'  STATIC=.TRUE.  /
 &PART ID='plate'     SURF_ID='plate'     STATIC=.TRUE.  /
 
-&INIT ID = 'ball',     PART_ID = 'ball',     XYZ = 0.45,0.45,0.45   N_PARTICLES = 1 /
-&INIT ID = 'cylinder', PART_ID = 'cylinder', XYZ = 2.45,0.45,0.45   N_PARTICLES = 1 /
-&INIT ID = 'plate',    PART_ID = 'plate',    XYZ = 4.45,0.45,0.45   N_PARTICLES = 1 /
+&INIT ID = 'ball',     PART_ID = 'ball',     XYZ = 0.45,0.45,0.45,   N_PARTICLES = 1 /
+&INIT ID = 'cylinder', PART_ID = 'cylinder', XYZ = 2.45,0.45,0.45,   N_PARTICLES = 1 /
+&INIT ID = 'plate',    PART_ID = 'plate',    XYZ = 4.45,0.45,0.45,   N_PARTICLES = 1 /
 
-&OBST ID = 'plate_o'   SURF_ID = 'plate_o'   XB = 6.5,6.5,0.4,0.5,0.4,0.5 /
+&OBST ID = 'plate_o',  SURF_ID = 'plate_o',  XB = 6.5,6.5,0.4,0.5,0.4,0.5 /
 
 &MATL ID                 = 'material'
       EMISSIVITY         = 1.0
@@ -93,7 +93,7 @@ Plate object output
 &DEVC ID='T_plate',   INIT_ID='plate', QUANTITY='WALL TEMPERATURE' /
 &DEVC ID='T_plate_o', XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL TEMPERATURE' /
 
-&SLCF PBY = 0.5 QUANTITY = 'PARTICLE RADIATION LOSS' /
-&SLCF PBY = 0.5 QUANTITY = 'TEMPERATURE' CELL_CENTERED=T /
+&SLCF PBY = 0.5, QUANTITY = 'PARTICLE RADIATION LOSS' /
+&SLCF PBY = 0.5, QUANTITY = 'TEMPERATURE' CELL_CENTERED=T /
 
 &TAIL /
