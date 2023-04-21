@@ -15,15 +15,15 @@
 
 &VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
 
-&RAMP ID='poly'	 T=               0,     F=           0.   /
-&RAMP ID='poly'	 T=              50,     F=            .50 /
-&RAMP ID='poly'	 T=             100,     F=           1.   /
-&RAMP ID='poly'	 T=             600,     F=           1.   /
+&RAMP ID='poly'	 T=       	0	 F=       	0	 /
+&RAMP ID='poly'	 T=       	50	 F=       	.50	 /
+&RAMP ID='poly'	 T=       	100	 F=       	1	 /
+&RAMP ID='poly'	 T=       	600	 F=       	1	 /
 
-&RAMP ID='wood'	 T=               0,     F=           0.   /
-&RAMP ID='wood'	 T=              50,     F=            .50 /
-&RAMP ID='wood'	 T=             100,     F=           1.   /
-&RAMP ID='wood'	 T=             600,     F=           1.   /
+&RAMP ID='wood'	 T=       	0	 F=       	0	 /
+&RAMP ID='wood'	 T=       	50	 F=       	.50	 /
+&RAMP ID='wood'	 T=       	100	 F=       	1	 /
+&RAMP ID='wood'	 T=       	600	 F=       	1	 /
 
 &SPEC ID = 'POLYURETHANE', FORMULA = 'C25H42O6N2' /
 &SPEC ID = 'WOOD', FORMULA = 'CH1.7O0.74N0.002' /

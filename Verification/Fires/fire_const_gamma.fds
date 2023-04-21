@@ -1,4 +1,4 @@
-&HEAD CHID='fire_const_gamma', TITLE='simple fire test with constant cp:cv ratio' /
+&HEAD CHID='fire_const_gamma', TITLE='simple fire test with constant cp/cv' /
 
 &MESH IJK=16,16,32, XB=-2,2,-2,2,0,8 /
 

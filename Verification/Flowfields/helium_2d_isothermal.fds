@@ -3,7 +3,7 @@ This tests DNS and axial symmetry.
 
 &HEAD CHID='helium_2d_isothermal', TITLE='Axisymmetric Helium Plume' /
 
-&MESH IJK=72,1,144, XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
+&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 
 &TIME T_END=2.0 /
 

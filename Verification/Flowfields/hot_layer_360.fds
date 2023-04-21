@@ -13,7 +13,7 @@
 &RAMP ID='k_ramp', T=20, F=1. /
 &RAMP ID='k_ramp', T=1000, F=4.34299846494 / in Howard Baum's solution it is assumed that rho*k = rho_0*k_0
 
-&INIT XB=-.5,.5,-.5,.5,0,1, TEMPERATURE=899.45 / gives T_h over T_0 = 1172.6 K over 293.15 K = 4 as in Howard's notes
+&INIT XB=-.5,.5,-.5,.5,0,1, TEMPERATURE=899.45 / gives T_h/T_0 = 1172.6 K/293.15 K = 4 as in Howard's notes
 
 &SURF ID='cold wall', TMP_FRONT=20., COLOR='GRAY' /
 

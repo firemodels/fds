@@ -5,7 +5,7 @@ Test pressure iteration routine for flow through a duct across meshes
 &MESH IJK=16,16,16, XB=-.2,3.0,-.2,3.0,-.2,3.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=3.2, DY=3.2, DZ=3.2, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
-MESH IJK=32,32,32, XB=-.2,6.2,-.2,6.2,-.2,6.2 
+MESH IJK=32,32,32, XB=-.2,6.2,-.2,6.2,-.2,6.2 /
 
 &RADI RADIATION=.FALSE. /
 &TIME T_END=60.0 /

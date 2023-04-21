@@ -10,7 +10,7 @@
 &RADI RADIATION=.FALSE. /
 
 ! 1000 mesh cells of size 0.400x0.400x0.400 m
-&MESH ID='Domain' IJK=10,10,10, XB=-2.000,2.000,-2.000,2.000,0.000,4.000 /
+&MESH ID='Domain' IJK=10,10,10 XB=-2.000,2.000,-2.000,2.000,0.000,4.000 /
 ! 1 surf_id, 8 vertices, 12 faces
 &GEOM ID='Cube_inconsistent_normals' SURF_ID='INERT'
       VERTS=

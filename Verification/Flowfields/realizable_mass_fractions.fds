@@ -7,7 +7,7 @@
 &REAC FUEL='METHANE'/
 
 &SURF ID='burner',
-      FYI='500 kW per m2 burner',
+      FYI='500 kW/m2 burner',
       COLOR='RED',
       HRRPUA=500.0/
 

@@ -1,4 +1,4 @@
-&HEAD CHID = 'particle_offgas_1' TITLE = 'Test lower and upper temperature limit remains at 20 C' /
+&HEAD CHID = 'particle_offgas_1' TITLE = 'Test lower/upper temperature limit remains at 20 C' /
 
 &MESH IJK=20,20,20, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 

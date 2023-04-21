@@ -1,4 +1,4 @@
-&HEAD CHID='helium_1d_const_gamma', TITLE='Test helium-air mass transport with constant cp over cv'/
+&HEAD CHID='helium_1d_const_gamma', TITLE='Test helium-air mass transport with constant cp/cv'/
 
 &MESH IJK=16,16,32, XB=-2,2,-2,2,0,8/
 
