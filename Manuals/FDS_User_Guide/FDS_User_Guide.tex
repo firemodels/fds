@@ -4693,12 +4693,13 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 \subsection{Piloted Ignition}
 \label{info:ignition}
 
-By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
+By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur. 
 
 The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on the {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
+You can control the turning on and off of an exclusion zone using either {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(N)} or {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(N)} where {\ct N} refers to the index of the listed exclusion zones. If there is only one exclusion zone, you need not add an index. If the status of the specified device or controller is true, the exclusion zone is in effect.
 
 An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed. For example, you can initialize a series of particles with a controlled mass flux of fuel:
 \begin{lstlisting}
@@ -12219,6 +12220,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline

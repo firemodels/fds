@@ -594,6 +594,9 @@ TYPE AIT_EXCLUSION_ZONE_TYPE
    REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
    INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+   INTEGER :: CTRL_INDEX=0   !< Index of control controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller controlling the status of the zone
 END TYPE AIT_EXCLUSION_ZONE_TYPE
 
 
