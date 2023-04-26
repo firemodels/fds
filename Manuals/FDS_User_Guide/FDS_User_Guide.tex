@@ -2296,9 +2296,7 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 \subsection{Initial Solid Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden.
-
-
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden. One can also specify an initial temperature profile using {\ct RAMP\_T\_I} where the {\ct T} value of the ramp is the depth~(m) from the face, and the {\ct F} value is temperature at that depth. {\ct RAMP\_T\_I} profile cannot be used with 3D heat transfer.
 
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
@@ -12482,6 +12480,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_I}                                          & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_BACK}                                     & Character       & Section~\ref{info:dirichlet}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_BACK}                                & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_FRONT}                               & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
@@ -12518,7 +12517,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_FRONT}                                     & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
-{\ct TMP\_INNER}                                          & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
