@@ -12348,6 +12348,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    ! Special cases
 
    IF (QUANTITY=='TRANSMISSION') QUANTITY2 = 'PATHLENGTH'
+   IF (QUANTITY=='FIRE DEPTH'.AND.(SETPOINT-1.E20_EB)<TWO_EPSILON_EB) SETPOINT = MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
 
    ! Check to see if a domain boundary has been set
 
@@ -12575,7 +12576,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ! Check if there are any devices with specified XB that do not fall within a mesh.
 
       IF (XB(1)>-1.E5_EB) THEN
-         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
+         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION' .AND. QUANTITY/='FIRE DEPTH') CALL CHECK_XB(XB)
          BAD = .TRUE.
          CHECK_MESH_LOOP: DO NM=1,NMESHES
             M=>MESHES(NM)
@@ -13761,23 +13762,25 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ENDIF
          DV%LOWEST_MESH = NOM
 
-      CASE ('TRANSMISSION','PATH OBSCURATION')
+      CASE ('TRANSMISSION','PATH OBSCURATION','FIRE DEPTH')
 
          IF (DV%MESH>0) THEN
             M  => MESHES(DV%MESH)
-            IF (DV%PROP_INDEX>0) THEN
-               IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1) THEN
-                  IF (SOOT_INDEX<1) THEN
+            IF (DV%QUANTITY(1) .NE. 'FIRE DEPTH') THEN
+               IF (DV%PROP_INDEX>0) THEN
+                  IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1) THEN
+                     IF (SOOT_INDEX<1) THEN
+                        WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ELSE
+                        PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
+                     ENDIF
+                  ENDIF
+               ELSE
+                  IF (SOOT_INDEX <=0) THEN
                      WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ELSE
-                     PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
                   ENDIF
-               ENDIF
-            ELSE
-               IF (SOOT_INDEX <=0) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
             IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX>0) DV%Y_INDEX = PROPERTY(DV%PROP_INDEX)%Y_INDEX
