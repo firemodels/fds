@@ -1613,6 +1613,9 @@ IF (LP%OD_INDEX>0) THEN
          ENDIF
          B1%TMP_F = LP_ONE_D%TMP(1)
       ENDIF
+   ELSE
+      LP_ONE_D%TMP = TMPA
+      B1%TMP_F = LP_ONE_D%TMP(1)
    ENDIF
 ELSE
    IF (LPC%TMP_INITIAL>0._EB) THEN
