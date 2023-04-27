@@ -7638,6 +7638,16 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 \label{aspiration_detector_fig}
 \end{figure}
 
+\subsection{Fire Depth}
+\label{info:fire_depth}
+In some cases it may be useful to output a characterstic depth of the fire along a certain path. For example, this parameter is important in the case of simulating spreading fires such as wildland fires. There a number of ways in which the depth of a fire might be defined, but a simple choice is to use logic similar to beam detectors and to calculate the length of the beam which traverses regions with a volumetric heat release greater than a threshold value. This quantity of {\ct 'FIRE DEPTH'} can be written as:
+\begin{equation}
+  \hbox{Fire Depth}  = \sum_{i=1}^N {C_i\, \Delta x_i} \; \; ; \; \; 
+  C_i  = \left\{ \begin{array}{cl}
+           0 & \dot{q}_i''' \le \dot{q}_{\rm thresh}''' \\
+           1 & \dot{q}_i''' > \dot{q}_{\rm thresh}''' \end{array} \right.\\
+\end{equation}
+As with the beam detectors, $i$ is a mesh cell along the path of the beam and $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam. The threshold value, $\dot{q}_{\rm thresh}'''$, is applied by setting {\ct SETPOINT} on the {\ct DEVC} line in units of kW/m$^3$. If this value is not provided, the default is the threshold for rendering HRRPUV as described in Section~\ref{info:SMOKE3D}.
 
 
 \section{Basic Control Logic}
@@ -10745,6 +10755,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 {\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct FIRE DEPTH}                                & Section~\ref{info:fire_depth}                 & m              & D            \\ \hline
 {\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
