@@ -4,8 +4,6 @@
 
 This chapter contains a series of validation exercises where the aim is to {\em predict} the burning and spread rate of the fire. Most of the simulations included in the previous chapters involved a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a specified heat flux or as a free burn.
 
-
-
 \section{FAA Polymers}\label{sec_FAA_Polymers}
 
 The U.S.~Federal Aviation Administration (FAA) has studied various plastics that are commonly used aboard commercial aircraft.
@@ -1280,7 +1278,205 @@ Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spre
 \label{UMD_SBI_HRR}
 \end{figure}
 
+\clearpage
 
+\section{Scaling Pyrolysis}\label{sec_Scaling Pyrolysis}
+
+FDS has a scaling-based pyrolysis model which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface.
+This section evaluates the performance of FDS in scaling the buring rate using this model.
+These cases include cone calorimeter experiments conducted at multiple heat transfer levels. 
+
+Each case is modeled using the solid phase only solver in FDS.
+Control functions are used to increase the thermal exposure after ignition based on the estimated flame heat flux.
+
+\subsection{JH/FRA Experiments}\label{sec_JH_FRA_Materials}
+
+Table ~\ref{Properties_JH_FRA_Materials} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
+
+\begin{table}[!h]
+\caption[Properties of JH/FRA Materials]{Properties of JH/FRA Materials ~\cite{Luo:FRA2019}.}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+Property            &     Acrylic     &     Balsa Composite   &  Plywood Composite    &     Plywood     &     PC Blend  &  Phenolic Resin FRP & PVC Blend  & Vinyl Ester Resin FRP \\ \hline
+Conductivity        &  4.6455         &     11.2317           &  11.2317              &     0.295       &     0.8948      &  6.4815         &  5.4886      &  0.6926 \\ \hline
+Density             &  1178           &     630               &  630                  &     625         &     1320        &  1846           &  1314        &  1600  \\ \hline
+Emissivity          &  0.8812         &     0.9378            &  0.9378               &     1.0         &     0.9253      &  0.8883         &  0.8804      &  0.8945   \\ \hline
+Specific Heat       &  1.1585         &     0.6233            &  0.6233               &     3.131       &     0.6658      &  1.615          &  0.8054      & 2.6303 \\ \hline
+Thickness           &  0.0045         &     0.0127            &  0.0127               &     0.0072      &     0.0045      &  0.00327        &  0.00327     & 0.0045 \\ \hline
+Ignition Temperaure &  211.4          &     285.5             &  462.6                &     307.8       &     432.1       &  421.5          &  444.3       & 552.8 \\ \hline
+Reference Heat Flux &  83.7           &     74.3              &  76.0                 &     79.1        &     75.1        &  73.0           &  76.1        & 73.8 \\ \hline
+\end{tabular}
+\label{Properties_JH_FRA_Materials}
+\end{table}
+
+The results of the simulations are shown on the following pages.
+
+\begin{figure}[h!]
+\includegraphics[height=2.5in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_cps_balsa_facesheet_cone_all} \\
+\includegraphics[height=2.5in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_cps_plywood_facesheet_cone_all} \\
+\includegraphics[height=2.5in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_plywood_cone_all}
+\caption[Heat release rate per unit area of JH/FRA materials using scaling model, cellulosic materials]
+{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of cellulosic materials.}
+\label{JH_FRA_HRR_cellulosic}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_phenolic_resin_fiberglass_composi_all} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_vinyl_ester_resin_frp_cone_all} \\
+\end{tabular*}
+\caption[Heat release rate per unit area of JH/FRA materials using scaling model, FRP materials]
+{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of FRP materials.}
+\label{JH_FRA_HRR_frp}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_acrylic_cone_all} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_pc_blend_cone_all} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_materials_pvc_blend_cone_all}
+\end{tabular*}
+\caption[Heat release rate per unit area of JH/FRA materials using scaling model, non FRP polymers]
+{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of non FRP polymers.}
+\label{JH_FRA_HRR_polymers}
+\end{figure}
+
+\clearpage
+
+\subsection{JH/NIJ Experiments}\label{sec_JH_NIJ_Materials}
+
+Table ~\ref{Properties_JH_NIJ_Materials} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
+
+\begin{table}[!h]
+\caption[Properties of JH/NIJ Materials]{Properties of JH/NIJ Materials ~\cite{Lattimer:NIJ19}.}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|}
+\hline
+Property            &     Black PMMA     &     Cardboard   &  FRP        &   MDF       &   OSB       &  White Pine   &   White Spruce  \\ \hline
+Conductivity        &  0.1171            &   0.232         &  0.3901     &   0.3073    &   0.3835    &  0.3121       &   0.2428        \\ \hline
+Density             &  1154              &   128           &  1897       &   688       &   573       &  499          &   430           \\ \hline
+Emissivity          &  0.9495            &   0.9278        &  0.95       &   0.988     &   0.9266    &  0.9035       &   0.9009        \\ \hline
+Specific Heat       &  1.5214            &   0.6889        &  1.4121     &   0.4037    &   0.6301    &  0.5963       &   1.104         \\ \hline
+Thickness           &  0.0092            &   0.0041        &  0.0127     &   0.0192    &   0.0161    &  0.0191       &   0.03722       \\ \hline
+Ignition Temperaure &                    &                 &             &             &             &               &  \\ \hline
+Reference Heat Flux &                    &                 &             &             &             &               &  \\ \hline
+\end{tabular}
+\label{Properties_JH_NIJ_Materials}
+\end{table}
+
+The results of the simulations are shown on the following pages.
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_mdf_cone_all} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_osb_cone_all} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_whitePine_cone_all} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_whiteSpruce_cone_all} \\
+\caption[Heat release rate per unit area of JH/NIJ materials using scaling model, cellulosic materials]
+{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of cellulosic materials.}
+\label{JH_NIJ_HRR_cellulosic}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_BlackPMMA_cone_all} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_cardboard_cone_all} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_NIJ/JH_NIJ_materials_frp_cone_all} & \\
+\caption[Heat release rate per unit area of JH/NIJ materials using scaling model, other materials]
+{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of other materials.}
+\label{JH_NIJ_HRR_other}
+\end{figure}
+
+\clearpage
+
+\section{Compartment Fires}\label{sec_Compartment_Fires}
+
+This section evaluates the performance of FDS in predicting the growth of a fire in an enclosure for well characterized materials.
+Measurements and predictions of HRR in each test configuration are compared.
+
+In the U.S., the NFPA 286 room-corner test is the common standard large scale test used to measure the contribution of interior finish materials on fire growth and regulate the use of interior finish in certain building occupancies.
+The room is 2.4 m wide by 3.6 m long by 2.4 m high, and has a doorway 2 m (79.5 in) in height and 0.78 m (37.5 in) in width.
+The lining materials are installed on ceiling and walls. A propane gas burner measuring 0.3 m x 0.3 m is placed in one of the back corners, in contact with the walls.
+The HRR for the burner is 40 kW for 5 minutes, and then 160 kW for 10 minutes.
+
+Many of these cases are in the NFPA 286/ISO 9705 room-corner configuration (or a modification thereof).
+
+\subsection{JH/FRA Reduced Scale Compartment Experiments}\label{sec_JH_FRA_Scaled_Compartments}
+
+The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to intermediate-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
+The following pages compare FDS predictions of room-corner testing of scaled compartments.
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_03_hrr}
+\caption[JH/FRA experiments, HRR, 1:4 scale plywood half lining configuration]{JH/FRA experiments, HRR, 1:4 scale plywood half lining configuration.}
+\label{JH_FRA_plywood_01}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_03A_hrr}
+\caption[JH/FRA experiments, HRR, 1:4 scale plywood full lining configuration]{JH/FRA experiments, HRR, 1:4 scale plywood full lining configuration.}
+\label{JH_FRA_plywood_01A}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_04_hrr}
+\caption[JH/FRA experiments, HRR, 1:4 scale FRP lining configuration]{JH/FRA experiments, HRR, 1:4 scale FRP lining configuration.}
+\label{JH_FRA_FRP_01}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_13_hrr}
+\caption[JH/FRA experiments, HRR, 1:2 scale plywood half lining configuration]{JH/FRA experiments, HRR, 1:2 scale plywood half lining configuration.}
+\label{JH_FRA_plywood_02}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_14_hrr}
+\caption[JH/FRA experiments, HRR, 1:1 scale FRP lining configuration]{JH/FRA experiments, HRR, 1:2 scale FRP lining configuration.}
+\label{JH_FRA_FRP_02}
+\end{figure}
+
+\clearpage
+
+\subsection{JH/FRA NFPA 286 Compartment Experiments}\label{sec_JH_FRA_NFPA286_Compartments}
+
+The Federal Railroad Administration (FRA) in the U.S. sponsored a series NFPA 286 enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
+The following pages compare FDS predictions of room-corner testing of full-scale compartments.
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_acrylic_hrr}
+\caption[JH/FRA NFPA 286 experiments, HRR, Acrylic lining configuration]{JH/FRA NFPA 286 experiments, HRR, Acrylic lining configuration.}
+\label{JH_FRA_acrylic}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_cps_balsa_hrr}
+\caption[JH/FRA NFPA 286 experiments, HRR, Balsa Composite lining configuration]{JH/FRA NFPA 286 experiments, HRR, Balsa Composite lining configuration.}
+\label{JH_FRA_balsa}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_cps_plywood_hrr}
+\caption[JH/FRA NFPA 286 experiments, HRR, Plywood Composite lining configuration]{JH/FRA NFPA 286 experiments, HRR, Plywood Composite lining configuration.}
+\label{JH_FRA_plywood}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_phenolic_resin_fiberglass_composite_hrr}
+\caption[JH/FRA NFPA 286 experiments, HRR, Phenolic Resin FRP lining configuration]{JH/FRA NFPA 286 experiments, HRR, Phenolic Resin FRP lining configuration.}
+\label{JH_FRA_phenolic}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_vinyl_ester_resin_frp_hrr}
+\caption[JH/FRA NFPA 286 experiments, HRR, Vinyl Ester Resin FRP lining configuration]{JH/FRA NFPA 286 experiments, HRR, Vinyl Ester Resin FRP lining configuration.}
+\label{JH_FRA_vinyl}
+\end{figure}
 
 \clearpage
 
