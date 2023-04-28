@@ -11,7 +11,7 @@ clear all
 plot_style
 
 % Gather FDS results
-dataDir = [pwd, '/../../Verification/HVAC/'];
+dataDir = ['/github/fds/Verification/HVAC/'];
 fileName = {'HVAC_mass_transport_conv_0020','HVAC_mass_transport_conv_0040',...
     'HVAC_mass_transport_conv_0080','HVAC_mass_transport_conv_0160',...
     'HVAC_mass_transport_conv_0320'};
@@ -21,6 +21,7 @@ dx_array = {1/20,1/40,1/80,1/160,1/320};
 
 % Exit if data doesn't exist
 for i=1:length(fileName)
+    display([dataDir,fileName{i},'.fds'])
     if ~exist([dataDir,fileName{i},'.fds'],'file')
         display(['Error: File ' fileName{i} ' does not exist. Skipping case.'])
         return
