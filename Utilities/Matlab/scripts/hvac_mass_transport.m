@@ -11,7 +11,7 @@ clear all
 plot_style
 
 % Gather FDS results
-dataDir = ['/github/fds/Verification/HVAC/'];
+dataDir = [pwd, '/../../Verification/HVAC/'];
 fileName = {'HVAC_mass_transport_conv_0020','HVAC_mass_transport_conv_0040',...
     'HVAC_mass_transport_conv_0080','HVAC_mass_transport_conv_0160',...
     'HVAC_mass_transport_conv_0320'};
