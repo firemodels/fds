@@ -1,4 +1,4 @@
-&HEAD CHID='JH_FRA_compartment_12', TITLE='FRA 1:2 Compartment Door Only Inert'/
+&HEAD CHID='JH_FRA_compartment_12', TITLE='FRA 1:2 Compartment Door and Window Inert'/
 &TIME T_END=960.0, /
 &MISC TMPA=27, /
 &DUMP DT_DEVC=10, DT_HRR=10, SIG_FIGS=4, SIG_FIGS_EXP=2 /
