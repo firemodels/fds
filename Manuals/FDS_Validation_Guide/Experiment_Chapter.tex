@@ -827,88 +827,129 @@ The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detail
 
 
 
-%\section{JH/FRA Rail Car Experiments}
-%\label{JH_FRA_Description}
+\section{JH/FRA Rail Car Experiments}
+\label{JH_FRA_Description}
 
-%Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen compartment fire tests consisting of fourteen unique configurations and three repeated tests.
-%Tests were conducted at three scales including full-scale, half-scale, and quarter-scale. 
-%The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
-%The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
-%The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. 
-%The lining material thickness was kept the same at each scale to preserve the burning duration.
-%Six tests used combustible lining with either CPS plywood of a fiber-reinforced plastic (FRP).
+The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to large-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
 
-%Table \ref{JH_FRA_Matrix} provides a summary of the experiments. 
-%Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
-%The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_instrumentation_fig}. 
-%
-%\begin{table}[!htb]
-%\caption[Summary of JH/FRA Rail Car Experiments]{Summary of JH/FRA Rail Car Experiments.~\cite{Hodges:FRA22}}
-%\begin{center}
-%\begin{tabular}{|c|c|c|c|c|c|c|}
-%\hline
-%Test & Scale   & Lining   &  Initiating & Peak       & Ventilation   & Fuel Type \\
-%No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &           \\ \hline \hline
-%1    & Quarter & NC       & 20/40       & 20/40      & Door          & Propane   \\ \hline
-%2    & Quarter & NC       & 20/45/50    & 20/45/50   & Door + Window & Propane   \\ \hline
-%3    & Quarter & Plywood  & 40          & 113        & Door          & Propane   \\ \hline
-%4    & Quarter & FRP      & 40          & 87         & Door          & Propane   \\ \hline
-%5    & Quarter & NC       & -           & 60         & Door          & JP-5      \\ \hline
-%6    & Half    & NC       & 80/160      & 80/160     & Door          & Propane   \\ \hline
-%7    & Half    & NC       & 80/160/200  & 80/160/200 & Door + Window & Propane   \\ \hline
-%8    & Half    & Plywood  & 160         & 466        & Door          & Propane   \\ \hline
-%9    & Half    & FRP      & 160         & 400        & Door          & Propane   \\ \hline
-%10   & Half    & NC       & -           & 110        & Door          & JP-5      \\ \hline
-%11   & Full    & NC       & 720/1,430   & 720/1,430  & Door          & Propane   \\ \hline
-%12   & Full    & NC       & 720/1,610   & 720/1,610  & Door + Window & Propane   \\ \hline
-%13   & Full    & Plywood  & 1,430       & 5,500      & Door          & Propane   \\ \hline
-%14   & Full    & FRP      & 1,430       & 4,500      & Door          & Propane   \\ \hline
-%
-%\end{tabular}
-%\end{center}
-%\label{JH_FRA_Matrix}
-%\end{table}
-%
-%\begin{figure}[h!]
-%\includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation1}
-%\includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation2} \\
-%\caption[Instrumentation plan from compartment fire experiments]{Instrumentation plan from compartment fire experiments (left) plan view (right) front view). Dimensions are in meters and correspond to the full-scale compartment.}
-%\label{JH_FRA_instrumentation_fig}
-%\end{figure}
+Luo, Kraft, DiDomizio, McKinnon, Hodges, Yazdani, and Lattimer ~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials. 
+Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested. 
+A set of 7 materials were identified for bench-scale and full-scale testing.
+Each material was tested in a TGA  in nitrogen and air environments, a cone calorimeter at three heat fluxes in accordance with ASTM E1354, radiant panel testing in accordance with ASTM E162, and room-corner testing in accordance with NFPA 286.
+The 7 materials included in this test series are summarized in Table \ref{JH_FRA_materials_table}.
+Optimized material properties for modeling these materials were subsequently presented by Yang, Hodges, Rippe, Kraft, and Lattimer in ~\cite{Yang:FRA20}.
+Data from cone calorimeter and NFPA 286 experiments from these materials are used in validating the scaling-based pyrolysis model. Note that two of the NFPA 286 experiments are not included in the validation (samples 1 and 5) due to significant material deformation and detachment occuring during testing.
 
-%\FloatBarrier
+\begin{table}[!htb]
+\caption[Summary of JH/FRA Materials]{Summary of JH/FRA Rail Car Experiments.~\cite{Luo:FRA2019}}
+\begin{center}
+\begin{tabular}{|c|c|p{4in}|}
+\hline
+Sample & Identifying Name & Description and End-Use \\ \hline \hline
+Sample 1    & PVC Blend             & Opaque thermoplastic material, nominally 3.81 mm thick, used for seat backs, wall panels, window masks, partitions, and ceiling panels. \\ \hline
+Sample 2    & Plywood Composite     & Composite material consisting of a layer of plywood sandwiched between layers of aluminum, nominally 12.7 mm thick, used for wall panels, ceiling panels, and closets. \\ \hline
+Sample 3    & Balsa Composite       & Composite material consisting of a layer of balsa wood sandwiched between layers of aluminum, nominally 15.9 mm thick, used for wall panels, ceiling panels, and closets.  \\ \hline
+Sample 4    & Acrylic               & Translucent thermoplastic material 4.5 mm thick, used for light fixtures.  \\ \hline
+Sample 5    & PC Blend              & Opaque thermoplastic material, nominally 4.75 mm thick, used for seat backs, wall panels, window masks, partitions, and ceiling panels. \\ \hline
+Sample 6    & Vinyl Ester Resin FRP & Fiberglass material, nominally 7.0 mm thick, used for wall lining, window masks, and seat components. \\ \hline
+Sample 7    & Phenolic Resin FRP    & Fiberglass material, nominally 3.27 mm thick, used for wall lining. \\ \hline
+\end{tabular}
+\end{center}
+\label{JH_FRA_materials_table}
+\end{table}
 
-%\subsubsection{Modeling Notes}
+In a follow-up study, Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire tests consisting of fourteen unique configurations and three repeated tests.
+Tests were conducted at three scales including full-scale, half-scale, and quarter-scale. 
+The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
+The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
+The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. 
+The lining material thickness was kept the same at each scale to preserve the burning duration.
 
-%The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
-%The model input parameters used in simulating these experiments are summarized in Table \ref{JH_FRA_Properties}.
-%Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
-%The cone calorimeter data used as a reference for the scaling-based pyrolysis model is the 50 \si{kW/m^2} curve provided in Figure \ref{JH_FRA_plywood_cone}.
+Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm).
+A reduced fraction of the surfaces were covered in the combustible lining cases to control the peak HRR from the testing.
+The first lining configuration covered a 2.44 m x 2.44 m section on the back wall, left wall, and ceiling closest to the fire.
+This configuration was used for all FRP experiments, and for one plywood experiment at the quarter scale.
+The second lining configuration covered a 1.22 m wide x 2.44 m tall section on the left and back walls nearest the burner, and a 1.22 m x 1.22 m section on the ceiling above the burner.
+This configuration was used in quarter, half, and full-scale plywood experiments.
+The two lining configurations are shown in Figure ~\ref{JH_FRA_lining_fig}.
+Note the lining coverage numbers are provided for the full-scale and were geometrically scalled down in the half and quarter scales.
 
-%\begin{table}[h!]
-%\begin{center}
-%\caption[Parameters for JH/FRA simulations]{Parameters for JH/FRA simulations~\cite{Hodges:FRA22}.} \label{JH_FRA_Properties}
-%\begin{tabular}{|l|c|c|c|c|c|} \hline
-%        & $\rho$               & $c_p$                        & $k$                & $T_{ign}$       & $\Delta$  \\
-%Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{^{$\circ$}}C   & \si{mm} \\
-%\hline \hline
-%Plywood  &  625  &  3.13   & 0.295  & 287  & 7.2     \\ \hline
-%FRP      &       &         &        &      &         \\ \hline
-%\end{tabular}
-%\end{center}
-%\end{table}
+Table \ref{JH_FRA_Matrix} provides a summary of the experiments. 
+Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
+The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_lining_fig} and Figure ~\ref{JH_FRA_instrumentation_fig}. 
 
-%\begin{figure}[p]
-%\includegraphics[width=\textwidth]{FIGURES/JH_FRA/JH_FRA_plywood_cone}
-%\caption[Plywood heat release rate per unit area]{Plywood heat release rate per unit area.}
-%\label{JH_FRA_plywood_cone}
-%\end{figure}
+Data from these experiments are used in validating the thermal environment (HGL Temperature and Depth, heat flux to the surface), velocity through the ventilation, and fire growth (HRR).
+The tests with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7.0 mm thickness but a 3.5 mm thickness was used in this study).
 
-%\FloatBarrier
+\begin{table}[!htb]
+\caption[Summary of JH/FRA Rail Car Experiments]{Summary of JH/FRA Rail Car Experiments.~\cite{Hodges:FRA22}}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Test & Scale   & Lining   &  Initiating & Peak       & Ventilation   & Fuel Type \\
+No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &           \\ \hline \hline
+1    & Quarter & NC       & 20/40       & 20/40      & Door          & Propane   \\ \hline
+2    & Quarter & NC       & 20/45/50    & 20/45/50   & Door + Window & Propane   \\ \hline
+3    & Quarter & Plywood  & 40          & 113        & Door          & Propane   \\ \hline
+3A    & Quarter & Plywood Full  & 40          & 246        & Door          & Propane   \\ \hline
+4    & Quarter & FRP      & 40          & 87         & Door          & Propane   \\ \hline
+5    & Quarter & NC       & -           & 60         & Door          & JP-5      \\ \hline
+6    & Half    & NC       & 80/160      & 80/160     & Door          & Propane   \\ \hline
+7    & Half    & NC       & 80/160/200  & 80/160/200 & Door + Window & Propane   \\ \hline
+8    & Half    & Plywood  & 160         & 466        & Door          & Propane   \\ \hline
+9    & Half    & FRP      & 160         & 400        & Door          & Propane   \\ \hline
+10   & Half    & NC       & -           & 110        & Door          & JP-5      \\ \hline
+11   & Full    & NC       & 720/1,430   & 720/1,430  & Door          & Propane   \\ \hline
+12   & Full    & NC       & 720/1,610   & 720/1,610  & Door + Window & Propane   \\ \hline
+13   & Full    & Plywood  & 1,430       & 5,500      & Door          & Propane   \\ \hline
+14   & Full    & FRP      & 1,430       & 4,500      & Door          & Propane   \\ \hline
+
+\end{tabular}
+\end{center}
+\label{JH_FRA_Matrix}
+\end{table}
+
+\begin{figure}[h!]
+\includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation3}
+\includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation1} \\
+\caption[Combustible lining configuration in scaled compartment fire experiments]{Combustible lining configuration in scaled compartment fire experiments (left) lining configuration 1 (right) lining configuration 2. Dimensions are in meters and correspond to the full-scale compartment.}
+\label{JH_FRA_lining_fig}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[width=0.49\textwidth]{FIGURES/JH_FRA/JH_FRA_instrumentation2}
+\caption[Instrumentation plan from compartment fire experiments]{Instrumentation plan from compartment fire experiments, front view. Dimensions are in meters and correspond to the full-scale compartment.}
+\label{JH_FRA_instrumentation_fig}
+\end{figure}
+
+\FloatBarrier
+
+\subsubsection{Modeling Notes}
+
+The simulations are performed with a spatial resolution of 2~cm for the quarter-scale, 4~cm for the half scale, and 8~cm for the fullscale.
+
+The combustion reaction is assumed to be propane using the simple chemistry single-step combustion model.
+Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
+
+The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
+The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_FRA_Materials}.
+Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+
+Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used.
+The test plan and report indicate a 6.35 mm thickness of plywood, but the total energy consumed during the test and the duration of the peak indicates a 12.7 mm thickness of plywood was more plausible.
+The full-scale plywood is modeled with a 12.7 mm thickness.
+
+\FloatBarrier
+
+\section{JH/NIJ Materials}
+\label{JH_NIJ_Description}
 
 
-
-
+The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}.
+The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization.
+TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials.
+The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB).
+The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
 
 
