@@ -4691,7 +4691,7 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 \subsection{Piloted Ignition}
 \label{info:ignition}
 
-By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur. 
+By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
 The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on the {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
 \begin{lstlisting}
@@ -7550,7 +7550,7 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The ``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
-Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
+Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview (Sec.~\ref{info:SMOKE3D}). Use the following lines:
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, SPEC_ID='MY SMOKE', COLOR='RED' /
@@ -7645,7 +7645,7 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 \label{info:fire_depth}
 In some cases it may be useful to output a characterstic depth of the fire along a certain path. For example, this parameter is important in the case of simulating spreading fires such as wildland fires. There a number of ways in which the depth of a fire might be defined, but a simple choice is to use logic similar to beam detectors and to calculate the length of the beam which traverses regions with a volumetric heat release greater than a threshold value. This quantity of {\ct 'FIRE DEPTH'} can be written as:
 \begin{equation}
-  \hbox{Fire Depth}  = \sum_{i=1}^N {C_i\, \Delta x_i} \; \; ; \; \; 
+  \hbox{Fire Depth}  = \sum_{i=1}^N {C_i\, \Delta x_i} \; \; ; \; \;
   C_i  = \left\{ \begin{array}{cl}
            0 & \dot{q}_i''' \le \dot{q}_{\rm thresh}''' \\
            1 & \dot{q}_i''' > \dot{q}_{\rm thresh}''' \end{array} \right.\\
@@ -9312,7 +9312,13 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 \label{info:SMOKE3D}
 \label{info:smoke16}
 
-When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
+For any simulation involving combustion, FDS automatically creates three output files that are rendered by Smokeview as realistic looking smoke, fire, and/or hot gas. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'}, the {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume), and the {\ct TEMPERATURE} of the gases. These quantities are rendered as semi-transparent slices that give you the illusion of looking through smoke or fire. The greater the value of the quantity, the darker the slices will appear en masse. For {\ct HRRPUV}, the lowest value rendered is:
+\be
+   \dot{q}_{\min}'' = \min( 200,20/\dx ) \quad \hbox{kW/m}^3
+\ee
+where $\dx$ is the grid cell size.
+
+You have the option of rendering the {\ct DENSITY} of any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
