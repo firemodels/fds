@@ -514,7 +514,7 @@ There are two basic approaches to assessing the efficiency or {\em scalability} 
 \be
    E_{\rm w} = \frac{t_1}{t_N}
 \ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 432 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
 
 The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
 \be
@@ -1355,8 +1355,8 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
 \begin{itemize}
-  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS attempts to perform a boolean operation uniting the objects, respecting the boundary conditions of the surfaces. 
-When a geometry intersects with another geometry, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to discern in the general case, and we employ a linearization that generates the approximate boundary faces within the cell from edges defined on its cartesian faces.  An example for two intersecting spheres is shown below in Fig.~\ref{figure:intersecting_spheres}. If the geometry is too complex, this operation can fail. In such a case the cell will be left void. The user is recommended to apply geometry unions in their preprocessor of choice if possible. 
+  \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS attempts to perform a boolean operation uniting the objects, respecting the boundary conditions of the surfaces.
+When a geometry intersects with another geometry, the vertices and edges defining that intersection have not been input by the user.  The exact intersection may be very complicated to discern in the general case, and we employ a linearization that generates the approximate boundary faces within the cell from edges defined on its cartesian faces.  An example for two intersecting spheres is shown below in Fig.~\ref{figure:intersecting_spheres}. If the geometry is too complex, this operation can fail. In such a case the cell will be left void. The user is recommended to apply geometry unions in their preprocessor of choice if possible.
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
 \end{itemize}
 
@@ -2296,9 +2296,7 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 \subsection{Initial Solid Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden.
-
-
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden. One can also specify an initial temperature profile using {\ct RAMP\_T\_I} where the {\ct T} value of the ramp is the depth~(m) from the face, and the {\ct F} value is temperature at that depth. {\ct RAMP\_T\_I} profile cannot be used with 3D heat transfer.
 
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
@@ -4571,7 +4569,7 @@ A simple demonstration of two-step simple chemistry is given by the example case
 \end{eqnarray}
 The simple version of the input file specifies the combustion parameters as follows:
 \begin{lstlisting}
-&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
+&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
 \end{lstlisting}
 For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms. To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
 \begin{figure}[!ht]
@@ -4699,6 +4697,7 @@ The value of AIT may need to be lowered for cases where the grid size is greater
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
+You can control the turning on and off of an exclusion zone using either {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(N)} or {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(N)} where {\ct N} refers to the index of the listed exclusion zones. If there is only one exclusion zone, you need not add an index. If the status of the specified device or controller is true, the exclusion zone is in effect.
 
 An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed. For example, you can initialize a series of particles with a controlled mass flux of fuel:
 \begin{lstlisting}
@@ -4873,7 +4872,6 @@ In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and
 &REAC ID='R1'
       FUEL='PROPANE'
       SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT'
-      SOOT_H_FRACTION=0.
       NU=-1,-3,2,4,1 /
 &REAC ID='R2'
       FUEL='CARBON MONOXIDE'
@@ -7241,6 +7239,11 @@ In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited dir
 \label{level_set_fuel_model_1_fig}
 \end{figure}
 
+\subsection{Ember Ignition}
+\label{info:Ember_Ignition}
+
+If an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_POWER\_SIGMA}, whose default value is 0.001~kW.
+
 
 \subsection{Using Mapping Software}
 \label{info:earth}
@@ -7547,7 +7550,7 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The ``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
-Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
+Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview (Sec.~\ref{info:SMOKE3D}). Use the following lines:
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, SPEC_ID='MY SMOKE', COLOR='RED' /
@@ -7638,6 +7641,16 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 \label{aspiration_detector_fig}
 \end{figure}
 
+\subsection{Fire Depth}
+\label{info:fire_depth}
+In some cases it may be useful to output a characterstic depth of the fire along a certain path. For example, this parameter is important in the case of simulating spreading fires such as wildland fires. There a number of ways in which the depth of a fire might be defined, but a simple choice is to use logic similar to beam detectors and to calculate the length of the beam which traverses regions with a volumetric heat release greater than a threshold value. This quantity of {\ct 'FIRE DEPTH'} can be written as:
+\begin{equation}
+  \hbox{Fire Depth}  = \sum_{i=1}^N {C_i\, \Delta x_i} \; \; ; \; \;
+  C_i  = \left\{ \begin{array}{cl}
+           0 & \dot{q}_i''' \le \dot{q}_{\rm thresh}''' \\
+           1 & \dot{q}_i''' > \dot{q}_{\rm thresh}''' \end{array} \right.\\
+\end{equation}
+As with the beam detectors, $i$ is a mesh cell along the path of the beam and $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam. The threshold value, $\dot{q}_{\rm thresh}'''$, is applied by setting {\ct SETPOINT} on the {\ct DEVC} line in units of kW/m$^3$. If this value is not provided, the default is the threshold for rendering HRRPUV as described in Section~\ref{info:SMOKE3D}.
 
 
 \section{Basic Control Logic}
@@ -9303,7 +9316,13 @@ Stereolithography (STL) is a commonly used file format in computer-aided design 
 \label{info:SMOKE3D}
 \label{info:smoke16}
 
-When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
+For any simulation involving combustion, FDS automatically creates three output files that are rendered by Smokeview as realistic looking smoke, fire, and/or hot gas. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'}, the {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume), and the {\ct TEMPERATURE} of the gases. These quantities are rendered as semi-transparent slices that give you the illusion of looking through smoke or fire. The greater the value of the quantity, the darker the slices will appear en masse. For {\ct HRRPUV}, the lowest value rendered is:
+\be
+   \dot{q}_{\min}'' = \min( 200,20/\dx ) \quad \hbox{kW/m}^3
+\ee
+where $\dx$ is the grid cell size.
+
+You have the option of rendering the {\ct DENSITY} of any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
@@ -10749,6 +10768,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 {\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct FIRE DEPTH}                                & Section~\ref{info:fire_depth}                 & m              & D            \\ \hline
 {\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
@@ -12224,6 +12244,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -12424,6 +12446,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT\_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct E\_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
 {\ct EMBER\_GENERATION\_HEIGHT(2)}                        & Real            & Section~\ref{info:particle_flux}          & m                   &                         \\ \hline
+{\ct EMBER\_POWER\_MEAN}                                  & Real            & Section~\ref{info:Ember_Ignition}         & kW                  &                         \\ \hline
+{\ct EMBER\_POWER\_SIGMA}                                 & Real            & Section~\ref{info:Ember_Ignition}         & kW                  & 0.001                   \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                                      & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
@@ -12484,6 +12508,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_I}                                          & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_BACK}                                     & Character       & Section~\ref{info:dirichlet}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_BACK}                                & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_FRONT}                               & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
@@ -12520,7 +12545,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_FRONT}                                     & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
-{\ct TMP\_INNER}                                          & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline

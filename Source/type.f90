@@ -594,6 +594,9 @@ TYPE AIT_EXCLUSION_ZONE_TYPE
    REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
    INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+   INTEGER :: CTRL_INDEX=0   !< Index of control controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller controlling the status of the zone
 END TYPE AIT_EXCLUSION_ZONE_TYPE
 
 
@@ -821,6 +824,8 @@ TYPE SURFACE_TYPE
    REAL(EB) :: NUSSELT_C1=-1._EB
    REAL(EB) :: NUSSELT_C2=-1._EB
    REAL(EB) :: NUSSELT_M=-1._EB
+   REAL(EB) :: EMBER_POWER_MEAN=-1._EB
+   REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -831,7 +836,7 @@ TYPE SURFACE_TYPE
    REAL(EB), DIMENSION(2) :: VEL_T,EMBER_GENERATION_HEIGHT=-1._EB
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
-              PART_INDEX,PROP_INDEX=-1
+              PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0

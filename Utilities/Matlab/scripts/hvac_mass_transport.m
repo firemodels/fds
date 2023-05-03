@@ -21,6 +21,7 @@ dx_array = {1/20,1/40,1/80,1/160,1/320};
 
 % Exit if data doesn't exist
 for i=1:length(fileName)
+    display([dataDir,fileName{i},'.fds'])
     if ~exist([dataDir,fileName{i},'.fds'],'file')
         display(['Error: File ' fileName{i} ' does not exist. Skipping case.'])
         return
