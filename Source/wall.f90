@@ -2008,16 +2008,23 @@ IF (SF%SPECIFIED_HEAT_SOURCE) Q_S(1:NWP) = Q_S(1:NWP)+SF%INTERNAL_HEAT_SOURCE(LA
 ! Add special convection term for Boundary Fuel Model
 
 IF (SF%BOUNDARY_FUEL_MODEL) THEN
-   HTCF = 0._EB
+   B1%HEAT_TRANS_COEF = 0._EB
    HTCB = 0._EB
    Q_CON_F = 0._EB
    Q_CON_B = 0._EB
+   N = 0
    DO I=1,NWP
-      IF (SF%PACKING_RATIO(LAYER_INDEX(I))<0._EB) CYCLE
+      IF (SF%SURFACE_VOLUME_RATIO(LAYER_INDEX(I))<=0._EB) CYCLE
       DTMP = TMP(BC%IIG,BC%JJG,BC%KKG) - ONE_D%TMP(I)
-      DEL_DOT_Q_SC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)*DTMP
+      HTCF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)
+      DEL_DOT_Q_SC = HTCF*DTMP      
       Q_S(I) = Q_S(I) + SF%SURFACE_VOLUME_RATIO(LAYER_INDEX(I))*SF%PACKING_RATIO(LAYER_INDEX(I))*DEL_DOT_Q_SC
+      ! Track average h_c for computing h_m in SURFACE_OXIDATION_MODEL
+      B1%HEAT_TRANS_COEF = B1%HEAT_TRANS_COEF + HTCF
+      N = N + 1
    ENDDO
+   B1%HEAT_TRANS_COEF = B1%HEAT_TRANS_COEF/REAL(N,EB)
+   HTCF = 0._EB
 ENDIF
 
 ! Calculate internal radiation for Cartesian geometry only
@@ -2602,7 +2609,7 @@ ENDDO SUB_TIMESTEP_LOOP
 
 B1%Q_CON_F = B1%Q_CON_F / DT_BC
 IF (RADIATION .AND. .NOT. SF%INTERNAL_RADIATION) B1%Q_RAD_OUT = B1%Q_RAD_OUT / DT_BC * SIGMA * B1%EMISSIVITY
-B1%HEAT_TRANS_COEF = HTCF
+IF (.NOT. SF%BOUNDARY_FUEL_MODEL) B1%HEAT_TRANS_COEF = HTCF
 
 ! If any gas massflux or particle mass flux is non-zero or the surface temperature exceeds the ignition temperature,
 ! set the ignition time
@@ -2951,17 +2958,22 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                2._EB*REACTION_RATE*NU_O2_CHAR/H_MASS+1._EB)-REACTION_RATE*NU_O2_CHAR/H_MASS-1) / &
                (2._EB*REACTION_RATE/H_MASS)
          
-            LENGTH_SCALE = SF%INNER_RADIUS + SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
-            ! Adjust LENGTH_SCALE to 1/(surface-to-volume ratio)
-            SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_SPHERICAL)
-                  LENGTH_SCALE = LENGTH_SCALE/3._EB
-               CASE DEFAULT
-                  LENGTH_SCALE = LENGTH_SCALE/2._EB
-            END SELECT              
+            ! Compute LENGTH_SCALE: 1/(surface-to-volume ratio)
+            IF (SF%BOUNDARY_FUEL_MODEL) THEN
+               LENGTH_SCALE = 1._EB/(SF%SURFACE_VOLUME_RATIO(LAYER_INDEX)*SF%PACKING_RATIO(LAYER_INDEX))
+            ELSE
+               LENGTH_SCALE = SF%INNER_RADIUS + SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))         
+               SELECT CASE(SF%GEOMETRY)
+                  CASE(SURF_SPHERICAL)
+                     LENGTH_SCALE = LENGTH_SCALE/3._EB
+                  CASE DEFAULT
+                     LENGTH_SCALE = LENGTH_SCALE/2._EB
+               END SELECT
+            ENDIF              
 
             REACTION_RATE = Y_O2_S/LENGTH_SCALE*REACTION_RATE
             REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
+            REACTION_RATE = MAX(REACTION_RATE,0._EB)
             RHO_DOT = MIN(REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
       END SELECT
