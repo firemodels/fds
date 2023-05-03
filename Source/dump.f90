@@ -27,6 +27,7 @@ INTEGER :: N_DEVC_FILES
 CHARACTER(80) :: TCFORM
 LOGICAL :: EX,DRY,OPN,FROM_BNDF=.FALSE.
 
+TYPE (GEOMETRY_TYPE), POINTER :: G=>NULL()
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
@@ -1413,9 +1414,10 @@ SUBROUTINE WRITE_STL_FILE
    ! Original question: https://stackoverflow.com/questions/34144786
    ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
    !character(len=*), parameter :: fname = 'fds.stl'
-   INTEGER :: I,IOS,N,NM,FACES(12, 3)
+   INTEGER :: I,IOS,N,NM,FACES(12, 3),GEOM_VERTICES_IDS(1,3)
    CHARACTER(LEN=80) :: title
    REAL(FB) :: VERTICES(8,3), XB(6)
+   REAL(FB) :: GEOM_VERTICES(3,3)
    INTEGER(IB4) :: color(3), one
    INTEGER(IB32) :: NUM_FACETS
    
@@ -1445,6 +1447,12 @@ SUBROUTINE WRITE_STL_FILE
       M => MESHES(NM)
       NUM_FACETS = NUM_FACETS + M%N_OBST*12
    END DO
+   
+   DO I= 1,N_GEOMETRY
+      G=>GEOMETRY(I)
+      NUM_FACETS = NUM_FACETS + G%N_FACES
+   END DO
+   
    WRITE(LU_STL, IOStat=IOS) NUM_FACETS
    CALL check(IOS, 'write number of facets')
    DO NM=1,NMESHES
@@ -1464,6 +1472,18 @@ SUBROUTINE WRITE_STL_FILE
          END DO
       END DO
    ENDDO
+   
+   DO I= 1,N_GEOMETRY
+      G=>GEOMETRY(I)
+      DO N=1,G%N_FACES
+         GEOM_VERTICES_IDS(1,:) = G%FACES((N-1)*3+1:(N-1)*3 + 3)
+         GEOM_VERTICES(1,:) = G%VERTS((GEOM_VERTICES_IDS(1,1)-1)*3+1:(GEOM_VERTICES_IDS(1,1)-1)*3+3)
+         GEOM_VERTICES(2,:) = G%VERTS((GEOM_VERTICES_IDS(1,2)-1)*3+1:(GEOM_VERTICES_IDS(1,2)-1)*3+3)
+         GEOM_VERTICES(3,:) = G%VERTS((GEOM_VERTICES_IDS(1,3)-1)*3+1:(GEOM_VERTICES_IDS(1,3)-1)*3+3)
+         CALL write_facet(LU_STL, GEOM_VERTICES(1,:), GEOM_VERTICES(2,:), GEOM_VERTICES(3,:))
+      ENDDO
+   ENDDO
+   
    CLOSE(LU_STL, IOSTAT=IOS)
    CALL check(IOS, 'close')
 CONTAINS
