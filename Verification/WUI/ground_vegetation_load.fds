@@ -1,6 +1,6 @@
 &HEAD CHID='ground_vegetation_load', TITLE='Comparison of boundary models' /
 
-&TIME T_END=180. /
+&TIME T_END=30. /
 
 &MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,0.0,1.0 /
 &MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,1.5,2.5 /
@@ -17,9 +17,7 @@
 
 &VENT SURF_ID='GROUND', XB=0.0,3.0,-0.5,0.5,1.5,1.5 /
 
- WIND SPEED=1. /
-
-&SURF ID='HOT', TMP_FRONT=800., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
+&SURF ID='HOT', TMP_FRONT=1000., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
 
 &MATL ID = 'SOIL'
       CONDUCTIVITY = 0.25             
@@ -75,25 +73,32 @@
       DENSITY            = 400.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT      = 1.5
-      A                  = 36300.
-      E                  = 60300.
+      A                  = 1040.
+      E                  = 61041.
       MATL_ID            = 'Char' 
       NU_MATL            = 0.25
       SPEC_ID            = 'WOOD FUEL VAPOR'
       NU_SPEC            = 0.75
       HEAT_OF_REACTION   = 711. /
  
-&MATL ID                 = 'Char'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.05
-      SPECIFIC_HEAT      = 1.4 /
+&MATL ID                    = 'Char'
+      DENSITY               = 300.
+      CONDUCTIVITY          = 0.052
+      SPECIFIC_HEAT         = 1.5
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000. 
+      SPEC_ID               = 'PRODUCTS','AIR'
+      NU_SPEC               = 8.17,-7.17
+      HEAT_OF_REACTION      = -25000. /
 
-&DUMP DT_HRR=1, DT_PROF=5. /
+&DUMP DT_HRR=1, DT_PROF=5./
 
 &DEVC ID='HRR 1',  XB=0.0,3.0,-0.5,0.5,0.0,1.0, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
 &DEVC ID='HRR 2',  XB=0.0,3.0,-0.5,0.5,1.5,2.5, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
-&DEVC ID='Mass 1', XB=0.0,3.0,-0.5,0.5,0.0,1.0, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL', CONVERSION_FACTOR=5.79E-5 /
-&DEVC ID='Mass 2', XB=0.0,3.0,-0.5,0.5,1.5,2.5, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL', CONVERSION_FACTOR=5.79E-5 /
+
+&DEVC ID='Mass 1', XB=1.0,2.0,-0.5,0.5,0.0,0.0, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'/
+&DEVC ID='Mass 2', XB=1.0,2.0,-0.5,0.5,1.5,1.575, PART_ID='Blade of Grass', QUANTITY='MASS FLUX', SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'/
 
 &SLCF PBY= 0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBY= 0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
