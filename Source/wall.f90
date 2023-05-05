@@ -748,7 +748,7 @@ END SUBROUTINE THERMAL_BC
 
 !> \brief Transfer heat from one 3-D sweep dirction to the other two.
 !> \param NM Mesh index
-!> \details Sweep over all 3D wall cells and look for those that are not oriented in the current sweep direction. 
+!> \details Sweep over all 3D wall cells and look for those that are not oriented in the current sweep direction.
 !> Copy the updated temperatures of the sweep direction to the non-sweep directions.
 
 SUBROUTINE HT3D_TEMPERATURE_EXCHANGE(NM)
@@ -1284,7 +1284,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
 
       IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) THEN
-         RP => RAMPS(SF%RAMP(TIME_HEAT)%INDEX)               
+         RP => RAMPS(SF%RAMP(TIME_HEAT)%INDEX)
          IF (SF%EMISSIVITY > 0._EB) THEN
             B1%T_SCALE = B1%T_SCALE + DT * MAX(0._EB,B1%Q_IN_SMOOTH) / (SF%REFERENCE_HEAT_FLUX * SF%EMISSIVITY)
          ELSE
@@ -1318,7 +1318,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ENDIF
          MFT = MFT + B1%M_DOT_G_PP_ADJUST(N)
       ENDDO SUM_MASSFLUX_LOOP
-      
+
       IF (SF%REFERENCE_HEAT_FLUX > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) B1%Q_SCALE = Q_NEW
 
       ! Apply user-specified mass flux variation
@@ -2015,9 +2015,13 @@ IF (SF%BOUNDARY_FUEL_MODEL) THEN
    N = 0
    DO I=1,NWP
       IF (SF%SURFACE_VOLUME_RATIO(LAYER_INDEX(I))<=0._EB) CYCLE
-      DTMP = TMP(BC%IIG,BC%JJG,BC%KKG) - ONE_D%TMP(I)
-      HTCF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)
-      DEL_DOT_Q_SC = HTCF*DTMP      
+      DTMP = B1%TMP_G - ONE_D%TMP(I)
+      IF (PRESENT(WALL_INDEX)) THEN
+         HTCF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)
+      ELSEIF(PRESENT(CFACE_INDEX)) THEN
+         HTCF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,CFACE_INDEX_IN=CFACE_INDEX)
+      ENDIF
+      DEL_DOT_Q_SC = HTCF*DTMP
       Q_S(I) = Q_S(I) + SF%SURFACE_VOLUME_RATIO(LAYER_INDEX(I))*SF%PACKING_RATIO(LAYER_INDEX(I))*DEL_DOT_Q_SC
       ! Track average h_c for computing h_m in SURFACE_OXIDATION_MODEL
       B1%HEAT_TRANS_COEF = B1%HEAT_TRANS_COEF + HTCF
@@ -2342,7 +2346,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          B1%TMP_F        = MIN(TMPMAX,MAX(TMPMIN,TMP_GAS_BACK))
          B1%TMP_B        = MIN(TMPMAX,MAX(TMPMIN,TMP_GAS_BACK))
          B1%Q_CON_F        = 0._EB
-         B1%Q_RAD_OUT      = 0._EB         
+         B1%Q_RAD_OUT      = 0._EB
          B1%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
          B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
          ONE_D%M_DOT_S_PP(1:ONE_D%N_MATL) = 0._EB
@@ -2402,7 +2406,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,TMP_S(1:N_CELLS))
-         
+
          DO I=1,NWP_NEW
             VOL = (THICKNESS+SF%INNER_RADIUS-X_S_NEW(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-X_S_NEW(I))**I_GRAD
             TMP_S(I) = TMP_S(I) / VOL
@@ -2941,9 +2945,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
          CASE (PYROLYSIS_SURFACE_OXIDATION)
 
-            ! Reaction rate in kg/m2/s 
+            ! Reaction rate in kg/m2/s
             REACTION_RATE = ML%A(J)*EXP(-ML%E(J)/(R0*TMP_S))
-            
+
             ! Estimate surface oxygen concentration from mass transport
             TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
             ! Get oxygen mass fraction
@@ -2957,19 +2961,19 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             Y_O2_S = (SQRT(4._EB*REACTION_RATE/H_MASS*Y_O2+(REACTION_RATE*NU_O2_CHAR/H_MASS)**2._EB + &
                2._EB*REACTION_RATE*NU_O2_CHAR/H_MASS+1._EB)-REACTION_RATE*NU_O2_CHAR/H_MASS-1) / &
                (2._EB*REACTION_RATE/H_MASS)
-         
+
             ! Compute LENGTH_SCALE: 1/(surface-to-volume ratio)
             IF (SF%BOUNDARY_FUEL_MODEL) THEN
                LENGTH_SCALE = 1._EB/(SF%SURFACE_VOLUME_RATIO(LAYER_INDEX)*SF%PACKING_RATIO(LAYER_INDEX))
             ELSE
-               LENGTH_SCALE = SF%INNER_RADIUS + SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))         
+               LENGTH_SCALE = SF%INNER_RADIUS + SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
                SELECT CASE(SF%GEOMETRY)
                   CASE(SURF_SPHERICAL)
                      LENGTH_SCALE = LENGTH_SCALE/3._EB
                   CASE DEFAULT
                      LENGTH_SCALE = LENGTH_SCALE/2._EB
                END SELECT
-            ENDIF              
+            ENDIF
 
             REACTION_RATE = Y_O2_S/LENGTH_SCALE*REACTION_RATE
             REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
@@ -3184,19 +3188,19 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
          SURF_GEOMETRY = SFX%GEOMETRY
       ENDIF
       ! Check if custom Nusselt correlation is defined
-      IF (ANY((/SFX%NUSSELT_C0,SFX%NUSSELT_C1,SFX%NUSSELT_C2,SFX%NUSSELT_M/)>0._EB)) THEN 
+      IF (ANY((/SFX%NUSSELT_C0,SFX%NUSSELT_C1,SFX%NUSSELT_C2,SFX%NUSSELT_M/)>0._EB)) THEN
          CALL FORCED_CONVECTION_MODEL(NUSSELT_FORCED,RE,PR_ONTH,SURF_GEOMETRY,&
             SFX%NUSSELT_C0,SFX%NUSSELT_C1,SFX%NUSSELT_C2,SFX%NUSSELT_M)
-         
+
       ELSE
          CALL FORCED_CONVECTION_MODEL(NUSSELT_FORCED,RE,PR_ONTH,SURF_GEOMETRY)
       ENDIF
       RA = GR*PR_AIR
       CALL NATURAL_CONVECTION_MODEL(NUSSELT_FREE,RA,SURF_INDEX_IN,SFX%GEOMETRY,BCX%IOR)
       IF (PRESENT(PARTICLE_INDEX_IN)) THEN
-         HEAT_TRANSFER_COEFFICIENT = MAX(NUSSELT_FORCED,NUSSELT_FREE)*K_G/CONV_LENGTH 
+         HEAT_TRANSFER_COEFFICIENT = MAX(NUSSELT_FORCED,NUSSELT_FREE)*K_G/CONV_LENGTH
       ELSE
-         HEAT_TRANSFER_COEFFICIENT = MAX(NUSSELT_FORCED,NUSSELT_FREE,2._EB*CONV_LENGTH/DN)*K_G/CONV_LENGTH 
+         HEAT_TRANSFER_COEFFICIENT = MAX(NUSSELT_FORCED,NUSSELT_FREE,2._EB*CONV_LENGTH/DN)*K_G/CONV_LENGTH
       ENDIF
    CASE(LOGLAW_HTC_MODEL)
       CALL GET_SPECIFIC_HEAT(ZZ_G,CP_G,TMP_FILM)
