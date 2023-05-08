@@ -8667,7 +8667,23 @@ The case called {\ct dancing\_eddies\_tight} is rerun without the special pressu
 \label{dancing_eddies_precon}
 \end{figure}
 
+\FloatBarrier
 
+\subsection{Example Case: Random Obstructions}
+\label{random_obstructions_fft}
+
+In this example, many different types of obstructions are randomly positioned within a domain split into 16 meshes. Some of the obstructions are created or removed at certain times. Sources of heat are added to move the gases about. The grid cell size is 0.025~m and the default normal velocity error tolerance is half that, or 0.0125~m. Figure~\ref{random_obstructions_fft_fig} displays the maximum error and the number of iterations of the pressure solver. The spikes in the number of iterations correspond to the creation or removal of obstructions. More iterations are necessary to drive down the error when a sudden change occurs in the flow field.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/random_obstructions_fft_error}
+\includegraphics[width=3in]{SCRIPT_FIGURES/random_obstructions_fft_iterations}
+\caption[Pressure iterations in the {\ct random\_obstructions}]{The number of pressure iterations (left) and maximum velocity error (right).}
+\label{random_obstructions_fft_fig}
+\end{figure}
+
+
+
+\newpage
 
 \section{Baroclinic Vorticity}
 \label{baroclinic_torque}
@@ -8727,7 +8743,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 
 
-
+\newpage
 
 \section{Pressure Considerations in Long Tunnels}
 \label{tunnel_solver}
