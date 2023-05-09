@@ -13471,58 +13471,79 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
 File extension  & Short Description   & Reference Section    \\ \hline
 
 % for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
-% if you wish not to document a file extneion found in an FDS run directory add the line %ignoreext xxx
+% if you wish to not document a file extension add the line %ignoreext xxx
 
 %fdsext be
-{\ct be}  &          &    \\ \hline
+{\ct be}  &   geometry for geometry boundary file       &    \\ \hline
+
 %fdsext bf
 {\ct bf}  &    boundary file      &    \\ \hline
-%fdsext binfo
-{\ct binfo}  &          &    \\ \hline
+
 %fdsext bingeom
 {\ct bingeom}  &  binary geometry file        &    \\ \hline
+
 %fdsext bnd
 {\ct bnd}  &  bound file        &    \\ \hline
+
 %fdsext csv
 {\ct csv}  & spreadsheet file         &    \\ \hline
-%fdsext end
-{\ct end}  &   endian file       &    \\ \hline
+
 %fdsext fds
 {\ct fds}  & FDS input file         &    \\ \hline
+
 %fdsext gbf
 {\ct gbf}  &      geometry boundary file    &    \\ \hline
+
 %fdsext gcf
-{\ct gcf}  &          &    \\ \hline
+{\ct gcf}  & cface geometry file         &    \\ \hline
+
 %smvext ini
 {\ct ini}  &   smokeview configuration file       &    \\ \hline
+
 %fdsext ge
-{\ct ge}  &          &    \\ \hline
+{\ct ge}  &     geometry file     &    \\ \hline
+
 %fdsext ge2
-{\ct ge2}  &          &    \\ \hline
+{\ct ge2}  &     geometry file     &    \\ \hline
+
 %fdsext gsf
 {\ct gsf}  &    geometry slice file      &    \\ \hline
+
 %fdsext out
-{\ct out}  &     output file     &    \\ \hline
+{\ct out}  &     FDS output file     &    \\ \hline
+
 %fdsext s3d
-{\ct s3d}  &    3d smoke file      &    \\ \hline
+{\ct s3d}  &    3D smoke file      &    \\ \hline
+
 %fdsext sf
 {\ct sf}  &   slice file       &    \\ \hline
+
 %fdsext sinfo
-{\ct sinfo}  &          &    \\ \hline
+{\ct sinfo}  &    slice parameter file name      &    \\ \hline
+
 %fdsext smv
 {\ct smv}  &      smokeview file    &    \\ \hline
+
 %smvext ssf
 {\ct ssf}  &     smokeview script file     &    \\ \hline
+
 %fdsext sz
 {\ct sz}  &    size file      &    \\ \hline
+
+%fdsext ter
+{\ct ter}  &   terrain geometry file       &    \\ \hline
+
 %fdsext txt
 {\ct txt}  &   text file       &    \\ \hline
+
 \end{tabular}
 \end{center}
 \end{table}
 
 
 % file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
+%ignoreext binfo
+%ignoreext end
 %ignoreext err
 %ignoreext log
 %ignoreext qlog
