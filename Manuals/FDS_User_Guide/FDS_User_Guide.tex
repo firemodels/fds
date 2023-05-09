@@ -13468,13 +13468,7 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
 \label{tbl:fileextensions}
 \begin{tabular}{|c|l|c|}
 \hline
-File extension  & Short Description   & Reference Section    \\ \hline
-
-%fdsext gbnd
-%fdsext iso
-%fdsext prt5
-%fdsext q
-%fdsext restart
+File extension  & Short Description   & Reference    \\ \hline \hline
 
 % for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
 % if you wish to not document a file extension add the line %ignoreext xxx
@@ -13486,7 +13480,8 @@ File extension  & Short Description   & Reference Section    \\ \hline
 {\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
 
 %fdsext bnd
-{\ct .bnd}  & bound files &  Smokeview Users Guide  \\ \hline
+{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - minimum and maximum at each time step where file can be
+a boundary (.bf) file, particle (.prt5) file or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
 
 %fdsext csv
 {\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
@@ -13496,23 +13491,40 @@ File extension  & Short Description   & Reference Section    \\ \hline
 
 %fdsext be
 %fdsext gbf
-{\ct .be, .gbf}  &    geometry boundary files &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
+{\ct .be, .gbf}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain the data, .be files contain the geometry or location of the data.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
+
+%fdsext gbnd
+{\ct .prt5.gbnd}  &  bound file for all particle files&    \\ \hline
 
 %fdsext gcf
-{\ct .gcf}  & cface geometry files &    \\ \hline
+{\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
 
 %smvext ini
 {\ct .ini}  & smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
 
 %fdsext ge
 %fdsext ge2
-{\ct .ge, .ge2}  & geometry files & Section \ref{out:GEOMETRY} \\ \hline
+{\ct .ge, .ge2}  & \parbox{3.0in}{geometry files. The .ge files contain vertices and faces.
+The .ge2 files also indicate which geom each face belongs too.
+smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
 
 %fdsext gsf
 {\ct .gsf}  & geometry slice files &    \\ \hline
 
+%fdsext iso
+{\ct .iso}  &  isosurface files& Section \ref{out:GEOMETRY_ISO}   \\ \hline
+
 %fdsext out
 {\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
+
+%fdsext prt5
+{\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
+
+%fdsext q
+{\ct .q}  &  Plot3D files& Section \ref{out:PL3D}   \\ \hline
+
+%fdsext restart
+{\ct .restart}  & FDS restart files & Section \ref{info:restart}   \\ \hline
 
 %fdsext s3d
 {\ct .s3d}  & 3D smoke files & Section \ref{out:SMOKE3D}   \\ \hline
@@ -13521,13 +13533,13 @@ File extension  & Short Description   & Reference Section    \\ \hline
 {\ct .sf}  & slice files &  Section \ref{out:SLCF}  \\ \hline
 
 %fdsext sinfo
-{\ct .sinfo}  & slice parameter files &  Smokeview Users Guide  \\ \hline
+{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
 
 %fdsext smv
 {\ct .smv}  & smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
 
 %smvext ssf
-{\ct .ssf}  & smokeview script files &   Smokeview Users Guide Chapter 9 \\ \hline
+{\ct .ssf}  & \parbox{3.0in}{smokeview script files - contains smokeview script command used to run smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
 
 %fdsext sz
 {\ct .sz}  & \parbox{3.0in}{size files - contains sizes
@@ -13537,7 +13549,7 @@ for each data frame used by Smokeview to allocate memory..} & \\ \hline
 {\ct .ter}  & terrain data files & Section \ref{out:TERRAIN_DATA}   \\ \hline
 
 %fdsext txt
-{\ct .txt}  &   fds git revision &    \\ \hline
+{\ct .txt}  & FDS git revision &    \\ \hline
 
 \end{tabular}
 \end{center}
