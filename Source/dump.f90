@@ -1409,19 +1409,23 @@ ENDDO
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE INITIALIZE_MESH_DUMPS
 
+
 SUBROUTINE WRITE_STL_FILE
    ! Parts of this subroutine use content from stack overflow
    ! Original question: https://stackoverflow.com/questions/34144786
    ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
    !character(len=*), parameter :: fname = 'fds.stl'
    INTEGER :: I,IOS,N,NM,FACES(12, 3),GEOM_VERTICES_IDS(1,3)
-   CHARACTER(LEN=80) :: title
+   CHARACTER(LEN=80) :: TITLE
    REAL(FB) :: VERTICES(8,3), XB(6)
    REAL(FB) :: GEOM_VERTICES(3,3)
-   INTEGER(IB4) :: color(3), one
+   INTEGER(IB4) :: COLOR(3), ONE
    INTEGER(IB32) :: NUM_FACETS
+
+   COLOR = (/0,0,0/)
+   ONE   = 1
    
-   title = FN_STL
+   TITLE = FN_STL
     
    FACES(1,:) = (/1,4,2/)
    FACES(2,:) = (/2,4,3/)
@@ -1436,11 +1440,11 @@ SUBROUTINE WRITE_STL_FILE
    FACES(11,:) = (/1,2,6/)
    FACES(12,:) = (/1,6,5/)
    
-   OPEN(UNIT=LU_STL, FILE=title, ACCESS='stream', STATUS='replace', &
+   OPEN(UNIT=LU_STL, FILE=TITLE, ACCESS='stream', STATUS='replace', &
       ACTION='write', IOSTAT=IOS)
-   CALL check(IOS, 'open')
-   WRITE(LU_STL, IOStat=IOS) title
-   CALL check(IOS, 'write title')
+   CALL CHECK(IOS, 'open')
+   WRITE(LU_STL, IOStat=IOS) TITLE
+   CALL CHECK(IOS, 'write title')
    
    NUM_FACETS = 0
    DO NM=1,NMESHES
@@ -1454,20 +1458,20 @@ SUBROUTINE WRITE_STL_FILE
    END DO
    
    WRITE(LU_STL, IOStat=IOS) NUM_FACETS
-   CALL check(IOS, 'write number of facets')
+   CALL CHECK(IOS, 'write number of facets')
    DO NM=1,NMESHES
       M => MESHES(NM)
       DO N=1,M%N_OBST
          OB=>M%OBSTRUCTION(N)
          XB(:) = (/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/)
-         !color(:) = OB%SURF_INDEX(-1),OB%SURF_INDEX(1),OB%SURF_INDEX(-2),&
+         !COLOR(:) = OB%SURF_INDEX(-1),OB%SURF_INDEX(1),OB%SURF_INDEX(-2),&
          !OB%SURF_INDEX(2),OB%SURF_INDEX(-3),OB%SURF_INDEX(3)
          VERTICES = get_vertices(XB)
          
          DO I=1,12
-            !CALL write_facet_c(u, &
+            !CALL write_facet_c(U, &
             !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
-            CALL write_facet(LU_STL, &
+            CALL WRITE_FACET(LU_STL, &
                VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
          END DO
       END DO
@@ -1480,75 +1484,76 @@ SUBROUTINE WRITE_STL_FILE
          GEOM_VERTICES(1,:) = G%VERTS((GEOM_VERTICES_IDS(1,1)-1)*3+1:(GEOM_VERTICES_IDS(1,1)-1)*3+3)
          GEOM_VERTICES(2,:) = G%VERTS((GEOM_VERTICES_IDS(1,2)-1)*3+1:(GEOM_VERTICES_IDS(1,2)-1)*3+3)
          GEOM_VERTICES(3,:) = G%VERTS((GEOM_VERTICES_IDS(1,3)-1)*3+1:(GEOM_VERTICES_IDS(1,3)-1)*3+3)
-         CALL write_facet(LU_STL, GEOM_VERTICES(1,:), GEOM_VERTICES(2,:), GEOM_VERTICES(3,:))
+         CALL WRITE_FACET(LU_STL, GEOM_VERTICES(1,:), GEOM_VERTICES(2,:), GEOM_VERTICES(3,:))
       ENDDO
    ENDDO
    
    CLOSE(LU_STL, IOSTAT=IOS)
-   CALL check(IOS, 'close')
+   CALL CHECK(IOS, 'close')
+
 CONTAINS
 
-   FUNCTION get_vertices(XB)
+   FUNCTION GET_VERTICES(XB)
       REAL(FB), INTENT(IN) :: XB(6)
-      REAL(FB) :: get_vertices(8,3)
-      get_vertices(1,:) = (/XB(1),XB(3),XB(5)/)
-      get_vertices(2,:) = (/XB(2),XB(3),XB(5)/)
-      get_vertices(3,:) = (/XB(2),XB(4),XB(5)/)
-      get_vertices(4,:) = (/XB(1),XB(4),XB(5)/)
-      get_vertices(5,:) = (/XB(1),XB(3),XB(6)/)
-      get_vertices(6,:) = (/XB(2),XB(3),XB(6)/)
-      get_vertices(7,:) = (/XB(2),XB(4),XB(6)/)
-      get_vertices(8,:) = (/XB(1),XB(4),XB(6)/)
-   END FUNCTION get_vertices
+      REAL(FB) :: GET_VERTICES(8,3)
+      GET_VERTICES(1,:) = (/XB(1),XB(3),XB(5)/)
+      GET_VERTICES(2,:) = (/XB(2),XB(3),XB(5)/)
+      GET_VERTICES(3,:) = (/XB(2),XB(4),XB(5)/)
+      GET_VERTICES(4,:) = (/XB(1),XB(4),XB(5)/)
+      GET_VERTICES(5,:) = (/XB(1),XB(3),XB(6)/)
+      GET_VERTICES(6,:) = (/XB(2),XB(3),XB(6)/)
+      GET_VERTICES(7,:) = (/XB(2),XB(4),XB(6)/)
+      GET_VERTICES(8,:) = (/XB(1),XB(4),XB(6)/)
+   END FUNCTION GET_VERTICES
     
-   SUBROUTINE check(IOS, operation)
+   SUBROUTINE CHECK(IOS, OPERATION)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: IOS
-      CHARACTER(LEN=*), INTENT(IN) :: operation
+      CHARACTER(LEN=*), INTENT(IN) :: OPERATION
       IF (IOS == 0) RETURN
-      WRITE(*, '(A, I0, 2A)') "Encountered error ", IOS, " while performing ", operation
+      WRITE(LU_ERR, '(A, I0, 2A)') "Encountered error ", IOS, " while performing ", OPERATION
       STOP 1
-   END SUBROUTINE check
+   END SUBROUTINE CHECK
 
-   SUBROUTINE write_facet(u, vertex1, vertex2, vertex3)
+   SUBROUTINE WRITE_FACET(U, VERTEX1, VERTEX2, VERTEX3)
       IMPLICIT NONE
-      INTEGER, INTENT(IN) :: u
-      REAL(FB), DIMENSION(3), INTENT(IN) :: vertex1, vertex2, vertex3
-      REAL(FB), DIMENSION(3) :: normal
-      INTEGER(IB16), PARAMETER :: zero = 0
-      
-      normal = calc_normal(vertex1, vertex2, vertex3)
-      WRITE(u, IOSTAT=IOS) normal
-      CALL check(IOS, 'write normal')
-      WRITE(u, IOSTAT=IOS) vertex1
-      CALL check(IOS, 'write vertex')
-      WRITE(u, IOSTAT=IOS) vertex2
-      CALL check(IOS, 'write vertex')
-      WRITE(u, IOSTAT=IOS) vertex3
-      CALL check(IOS, 'write vertex')
-      WRITE(u, IOSTAT=IOS) zero
-      CALL check(IOS, 'write zero')
-   END SUBROUTINE write_facet
+      INTEGER, INTENT(IN) :: U
+      REAL(FB), DIMENSION(3), INTENT(IN) :: VERTEX1, VERTEX2, VERTEX3
+      REAL(FB), DIMENSION(3) :: NORMAL
+      INTEGER(IB16), PARAMETER :: ZERO = 0
 
-   FUNCTION calc_normal(vec1, vec2, vec3)
-      IMPLICIT NONE
-      REAL(FB), DIMENSION(3), INTENT(IN) :: vec1, vec2, vec3
-      REAL(FB), DIMENSION(3) :: calc_normal
-      REAL(FB), DIMENSION(3) :: d1, d2
-      d1 = vec2 - vec1
-      d2 = vec3 - vec1
-      calc_normal(1) = d1(2) * d2(3) - d1(3) * d2(2)
-      calc_normal(2) = d1(3) * d2(1) - d1(1) * d2(3)
-      calc_normal(3) = d1(1) * d2(2) - d1(2) * d2(1)
-      calc_normal = calc_normal / norm(calc_normal)
-   END FUNCTION calc_normal
+      NORMAL = CALC_NORMAL(VERTEX1, VERTEX2, VERTEX3)
+      WRITE(U, IOSTAT=IOS) NORMAL
+      CALL CHECK(IOS, 'WRITE NORMAL')
+      WRITE(U, IOSTAT=IOS) VERTEX1
+      CALL CHECK(IOS, 'WRITE VERTEX')
+      WRITE(U, IOSTAT=IOS) VERTEX2
+      CALL CHECK(IOS, 'WRITE VERTEX')
+      WRITE(U, IOSTAT=IOS) VERTEX3
+      CALL CHECK(IOS, 'WRITE VERTEX')
+      WRITE(U, IOSTAT=IOS) ZERO
+      CALL CHECK(IOS, 'WRITE ZERO')
+   END SUBROUTINE WRITE_FACET
 
-   FUNCTION norm(vec)
+   FUNCTION CALC_NORMAL(VEC1, VEC2, VEC3)
       IMPLICIT NONE
-      REAL(FB), DIMENSION(3), INTENT(IN) :: vec
-      REAL(FB) :: norm
-      norm = sqrt(vec(1)**2 + vec(2)**2 + vec(3)**2)
-   END FUNCTION norm
+      REAL(FB), DIMENSION(3), INTENT(IN) :: VEC1, VEC2, VEC3
+      REAL(FB), DIMENSION(3) :: CALC_NORMAL
+      REAL(FB), DIMENSION(3) :: D1, D2
+      D1 = VEC2 - VEC1
+      D2 = VEC3 - VEC1
+      CALC_NORMAL(1) = D1(2) * D2(3) - D1(3) * D2(2)
+      CALC_NORMAL(2) = D1(3) * D2(1) - D1(1) * D2(3)
+      CALC_NORMAL(3) = D1(1) * D2(2) - D1(2) * D2(1)
+      CALC_NORMAL = CALC_NORMAL / NORM(CALC_NORMAL)
+   END FUNCTION CALC_NORMAL
+
+   FUNCTION NORM(VEC)
+      IMPLICIT NONE
+      REAL(FB), DIMENSION(3), INTENT(IN) :: VEC
+      REAL(FB) :: NORM
+      NORM = SQRT(VEC(1)**2 + VEC(2)**2 + VEC(3)**2)
+   END FUNCTION NORM
 
 END SUBROUTINE WRITE_STL_FILE
 
