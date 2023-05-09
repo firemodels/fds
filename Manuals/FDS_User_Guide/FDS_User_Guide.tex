@@ -13458,6 +13458,98 @@ The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted
 \end{lstlisting}
 where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval.
 
+\section{File Extension Glossary}
+Table~\ref{tbl:fileextensions} provides a quick reference to file extensions used by FDS and Smokeview.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{File Extension Reference Table}
+\label{tbl:fileextensions}
+\begin{tabular}{|c|l|c|}
+\hline
+File extension  & Short Description   & Reference Section    \\ \hline
+
+% for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
+% if you wish to not document a file extension add the line %ignoreext xxx
+
+%fdsext be
+{\ct be}  &   geometry for geometry boundary file       &    \\ \hline
+
+%fdsext bf
+{\ct bf}  &    boundary file      &    \\ \hline
+
+%fdsext bingeom
+{\ct bingeom}  &  binary geometry file        &    \\ \hline
+
+%fdsext bnd
+{\ct bnd}  &  bound file        &    \\ \hline
+
+%fdsext csv
+{\ct csv}  & spreadsheet file         &    \\ \hline
+
+%fdsext fds
+{\ct fds}  & FDS input file         &    \\ \hline
+
+%fdsext gbf
+{\ct gbf}  &      geometry boundary file    &    \\ \hline
+
+%fdsext gcf
+{\ct gcf}  & cface geometry file         &    \\ \hline
+
+%smvext ini
+{\ct ini}  &   smokeview configuration file       &    \\ \hline
+
+%fdsext ge
+{\ct ge}  &     geometry file     &    \\ \hline
+
+%fdsext ge2
+{\ct ge2}  &     geometry file     &    \\ \hline
+
+%fdsext gsf
+{\ct gsf}  &    geometry slice file      &    \\ \hline
+
+%fdsext out
+{\ct out}  &     FDS output file     &    \\ \hline
+
+%fdsext s3d
+{\ct s3d}  &    3D smoke file      &    \\ \hline
+
+%fdsext sf
+{\ct sf}  &   slice file       &    \\ \hline
+
+%fdsext sinfo
+{\ct sinfo}  &    slice parameter file name      &    \\ \hline
+
+%fdsext smv
+{\ct smv}  &      smokeview file    &    \\ \hline
+
+%smvext ssf
+{\ct ssf}  &     smokeview script file     &    \\ \hline
+
+%fdsext sz
+{\ct sz}  &    size file      &    \\ \hline
+
+%fdsext ter
+{\ct ter}  &   terrain geometry file       &    \\ \hline
+
+%fdsext txt
+{\ct txt}  &   text file       &    \\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+% file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
+%ignoreext binfo
+%ignoreext end
+%ignoreext err
+%ignoreext log
+%ignoreext qlog
+%ignoreext slog
+
+
 %\backmatter
 \nopart %To Fix TOC in PDF output.
 
