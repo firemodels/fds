@@ -14362,6 +14362,10 @@ MESH_LOOP: DO NM=1,NMESHES
 
          IF (OUTPUT_QUANTITY(SL%INDEX)%INTEGRATED_PARTICLES) SLCF_PARTICLE_FLUX = .TRUE.
 
+         ! Determine if this is a 3D slice
+
+         IF (SL%I1/=SL%I2 .AND. SL%J1/=SL%J2 .AND. SL%K1/=SL%K2) SL%THREE_D = .TRUE.
+
          ! For terrain slices, AGL=above ground level
 
          IF (ITER == 1 .AND. AGL_SLICE > -1._EB) THEN
