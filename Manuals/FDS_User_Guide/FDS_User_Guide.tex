@@ -13458,6 +13458,9 @@ The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted
 \end{lstlisting}
 where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval.
 
+
+
+
 \section{File Extension Glossary}
 Table~\ref{tbl:fileextensions} provides a quick reference to file extensions used by FDS and Smokeview.
 
@@ -13471,7 +13474,9 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
 File extension  & Short Description   & Reference    \\ \hline \hline
 
 % for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
-% if you wish to not document a file extension add the line %ignoreext xxx
+% The script {\tt check_exts.sh} in the bot repo uses this information to determine which
+% file extensions are documented.
+% If you wish to not document a file extension add the line %ignoreext xxx
 
 %fdsext bf
 {\ct .bf}  & boundary files & Section \ref{out:BNDF}   \\ \hline
@@ -13480,8 +13485,8 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 {\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
 
 %fdsext bnd
-{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - minimum and maximum at each time step where file can be
-a boundary (.bf) file, particle (.prt5) file or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
+{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - these files contain minimum and maximum values for each time step where file can be
+a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
 
 %fdsext csv
 {\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
@@ -13491,22 +13496,20 @@ a boundary (.bf) file, particle (.prt5) file or slice (.sf) file.} &  Smokeview 
 
 %fdsext be
 %fdsext gbf
-{\ct .be, .gbf}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain the data, .be files contain the geometry or location of the data.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
-
-%fdsext gbnd
-{\ct .prt5.gbnd}  &  bound file for all particle files&    \\ \hline
+{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS, 
+.be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
 
 %fdsext gcf
 {\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
 
 %smvext ini
-{\ct .ini}  & smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
+{\ct .ini}  & Smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
 
 %fdsext ge
 %fdsext ge2
 {\ct .ge, .ge2}  & \parbox{3.0in}{geometry files. The .ge files contain vertices and faces.
 The .ge2 files also indicate which geom each face belongs too.
-smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
+Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
 
 %fdsext gsf
 {\ct .gsf}  & geometry slice files &    \\ \hline
@@ -13516,6 +13519,11 @@ smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY}
 
 %fdsext out
 {\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
+
+%fdsext gbnd
+{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
+Smokeview computes the min and max bound over all particle files and outputs them to the
+file casename.prt5.gbnd file.}&    \\ \hline
 
 %fdsext prt5
 {\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
@@ -13533,23 +13541,24 @@ smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY}
 {\ct .sf}  & slice files &  Section \ref{out:SLCF}  \\ \hline
 
 %fdsext sinfo
-{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
+{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer grid coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
 
 %fdsext smv
-{\ct .smv}  & smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
+{\ct .smv}  & Smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
 
 %smvext ssf
-{\ct .ssf}  & \parbox{3.0in}{smokeview script files - contains smokeview script command used to run smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
+{\ct .ssf}  & \parbox{3.0in}{Smokeview script files - contains Smokeview script command used to run Smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
 
 %fdsext sz
-{\ct .sz}  & \parbox{3.0in}{size files - contains sizes
-for each data frame used by Smokeview to allocate memory..} & \\ \hline
+{\ct .sz}  & \parbox{3.0in}{size files - contains size parameters
+for each data frame, used by Smokeview to allocate memory.} & \\ \hline
 
 %fdsext ter
-{\ct .ter}  & terrain data files & Section \ref{out:TERRAIN_DATA}   \\ \hline
+{\ct .ter}  & \parbox{3.0in}{terrain data files -
+contains geometry information Smokview uses to draw the terrain} & Section \ref{out:TERRAIN_DATA}   \\ \hline
 
 %fdsext txt
-{\ct .txt}  & FDS git revision &    \\ \hline
+{\ct \_git.txt}  & \parbox{3.0in}{The file casename\_git.txt contains the git revision of the FDS executable used to run the case.} &    \\ \hline
 
 \end{tabular}
 \end{center}
