@@ -13485,8 +13485,8 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 {\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
 
 %fdsext bnd
-{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - minimum and maximum at each time step where file can be
-a boundary (.bf) file, particle (.prt5) file or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
+{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - these files contain minimum and maximum values for each time step where file can be
+a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
 
 %fdsext csv
 {\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
@@ -13496,11 +13496,8 @@ a boundary (.bf) file, particle (.prt5) file or slice (.sf) file.} &  Smokeview 
 
 %fdsext be
 %fdsext gbf
-{\ct .be, .gbf}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS, .be files contain the geometry or location of the data.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
-
-%fdsext gbnd
-{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
-Smokeview computes the bounds over all particle files and outputs them to the file casename.prt5.gbnd file.}&    \\ \hline
+{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS, 
+.be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
 
 %fdsext gcf
 {\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
@@ -13522,6 +13519,11 @@ Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY}
 
 %fdsext out
 {\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
+
+%fdsext gbnd
+{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
+Smokeview computes the min and max bound over all particle files and outputs them to the
+file casename.prt5.gbnd file.}&    \\ \hline
 
 %fdsext prt5
 {\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
@@ -13548,7 +13550,7 @@ Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY}
 {\ct .ssf}  & \parbox{3.0in}{Smokeview script files - contains Smokeview script command used to run Smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
 
 %fdsext sz
-{\ct .sz}  & \parbox{3.0in}{size files - contains size info
+{\ct .sz}  & \parbox{3.0in}{size files - contains size parameters
 for each data frame, used by Smokeview to allocate memory.} & \\ \hline
 
 %fdsext ter
@@ -13556,7 +13558,7 @@ for each data frame, used by Smokeview to allocate memory.} & \\ \hline
 contains geometry information Smokview uses to draw the terrain} & Section \ref{out:TERRAIN_DATA}   \\ \hline
 
 %fdsext txt
-{\ct .txt}  & FDS git revision &    \\ \hline
+{\ct \_git.txt}  & \parbox{3.0in}{The file casename\_git.txt contains the git revision of the FDS executable used to run the case.} &    \\ \hline
 
 \end{tabular}
 \end{center}
