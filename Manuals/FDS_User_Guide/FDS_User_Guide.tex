@@ -7005,14 +7005,7 @@ To invoke this {\em Boundary Fuel Model}, create a {\ct SURF} line similar to th
       MASS_PER_VOLUME(1) = 5.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct MASS\_PER\_VOLUME} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct MASS\_PER\_VOLUME}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
-\begin{lstlisting}
-&MATL ID = 'AIR'
-      DENSITY = 1.2
-      CONDUCTIVITY = 0.026
-      SPECIFIC_HEAT = 1.01 /
-\end{lstlisting}
-The same is true for water---if you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add the {\ct MATL} line for {\ct 'MOISTURE'}.
+The presence of the parameter {\ct MASS\_PER\_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being {\ct Soil}. If you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'}.
 
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
@@ -7052,12 +7045,10 @@ For the purpose of comparing the two methods of representing ground vegetation, 
 \subsection{Combustible Load}
 \label{ground_vegetation_load}
 
-In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, ash yield, $y_{\rm ash}=0.02$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of mass evaporated is
 \be
-   m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+   (1+M) \, m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}y_{\rm ash}) \, A = 0.32835 \; \hbox{kg}
 \ee
-Notice that the moisture fraction is not used to determine the combustible load---the mass per volume represents the dry fuel load.
-
 Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
 
 \begin{figure}[ht]
@@ -13462,6 +13453,127 @@ The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted
 
 \end{lstlisting}
 where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval.
+
+
+
+
+\section{File Extension Glossary}
+Table~\ref{tbl:fileextensions} provides a quick reference to file extensions used by FDS and Smokeview.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{File Extension Reference Table}
+\label{tbl:fileextensions}
+\begin{tabular}{|c|l|c|}
+\hline
+File extension  & Short Description   & Reference    \\ \hline \hline
+
+% for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
+% The script {\tt check_exts.sh} in the bot repo uses this information to determine which
+% file extensions are documented.
+% If you wish to not document a file extension add the line %ignoreext xxx
+
+%fdsext bf
+{\ct .bf}  & boundary files & Section \ref{out:BNDF}   \\ \hline
+
+%fdsext bingeom
+{\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
+
+%fdsext bnd
+{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - these files contain minimum and maximum values for each time step where file can be
+a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
+
+%fdsext csv
+{\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
+
+%fdsext fds
+{\ct .fds}  & FDS input files & Part \ref{info:inputfilecreation}   \\ \hline
+
+%fdsext be
+%fdsext gbf
+{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS,
+.be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
+
+%fdsext gcf
+{\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
+
+%smvext ini
+{\ct .ini}  & Smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
+
+%fdsext ge
+%fdsext ge2
+{\ct .ge, .ge2}  & \parbox{3.0in}{geometry files. The .ge files contain vertices and faces.
+The .ge2 files also indicate which geom each face belongs too.
+Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
+
+%fdsext gsf
+{\ct .gsf}  & geometry slice files &    \\ \hline
+
+%fdsext iso
+{\ct .iso}  &  isosurface files& Section \ref{out:GEOMETRY_ISO}   \\ \hline
+
+%fdsext out
+{\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
+
+%fdsext gbnd
+{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
+Smokeview computes the min and max bound over all particle files and outputs them to the
+file casename.prt5.gbnd file.}&    \\ \hline
+
+%fdsext prt5
+{\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
+
+%fdsext q
+{\ct .q}  &  Plot3D files& Section \ref{out:PL3D}   \\ \hline
+
+%fdsext restart
+{\ct .restart}  & FDS restart files & Section \ref{info:restart}   \\ \hline
+
+%fdsext s3d
+{\ct .s3d}  & 3D smoke files & Section \ref{out:SMOKE3D}   \\ \hline
+
+%fdsext sf
+{\ct .sf}  & slice files &  Section \ref{out:SLCF}  \\ \hline
+
+%fdsext sinfo
+{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer grid coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
+
+%fdsext smv
+{\ct .smv}  & Smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
+
+%smvext ssf
+{\ct .ssf}  & \parbox{3.0in}{Smokeview script files - contains Smokeview script command used to run Smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
+
+%fdsext sz
+{\ct .sz}  & \parbox{3.0in}{size files - contains size parameters
+for each data frame, used by Smokeview to allocate memory.} & \\ \hline
+
+%fdsext ter
+{\ct .ter}  & \parbox{3.0in}{terrain data files -
+contains geometry information Smokview uses to draw the terrain} & Section \ref{out:TERRAIN_DATA}   \\ \hline
+
+%fdsext txt
+{\ct \_git.txt}  & \parbox{3.0in}{The file casename\_git.txt contains the git revision of the FDS executable used to run the case.} &    \\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+% file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
+%ignoreext bat
+%ignoreext binfo
+%ignoreext end
+%ignoreext err
+%ignoreext log
+%ignoreext qlog
+%ignoreext serr
+%ignoreext slog
+%ignoreext smvlog
+%ignoreext xxx
+
+
 
 %\backmatter
 \nopart %To Fix TOC in PDF output.
