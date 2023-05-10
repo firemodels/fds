@@ -81,18 +81,26 @@
       NU_SPEC            = 0.75
       HEAT_OF_REACTION   = 711. /
  
-&MATL ID                    = 'Char'
-      DENSITY               = 300.
-      CONDUCTIVITY          = 0.052
-      SPECIFIC_HEAT         = 1.5
+&MATL ID                 = 'Char'
+      ALLOW_SHRINKING    = F
+      DENSITY            = 300.
+      CONDUCTIVITY       = 50.052
+      SPECIFIC_HEAT      = 1.0
       SURFACE_OXIDATION_MODEL = T
       A                  = 465.
-      E                  = 68000. 
-      SPEC_ID               = 'PRODUCTS','AIR'
-      NU_SPEC               = 8.17,-7.17
-      HEAT_OF_REACTION      = -25000. /
+      E                  = 68000.
+      SPEC_ID            = 'AIR','PRODUCTS'
+      NU_SPEC            = -7.17,8.15
+      MATL_ID            = 'ASH'
+      NU_MATL            = 0.02
+      HEAT_OF_REACTION   = -25000. /
 
-&DUMP DT_HRR=1, DT_PROF=5./
+&MATL ID            = 'ASH'
+      DENSITY       = 67.
+      CONDUCTIVITY  = 50.1
+      SPECIFIC_HEAT = 1.0 /
+
+&DUMP DT_HRR=1, DT_PROF=5.0 /
 
 &DEVC ID='HRR 1',  XB=0.0,3.0,-0.5,0.5,0.0,1.0, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
 &DEVC ID='HRR 2',  XB=0.0,3.0,-0.5,0.5,1.5,2.5, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
@@ -108,12 +116,11 @@
 &BNDF QUANTITY='GAUGE HEAT FLUX', CELL_CENTERED=.TRUE. /
 &BNDF QUANTITY='BURNING RATE', CELL_CENTERED=.TRUE. /
 
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='TEMPERATURE' /
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='DENSITY' /
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='Dry Grass' /
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='MOISTURE' /
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='AIR' /
-&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='Char' /
+&PROF XYZ=1.06,0.001,0.0, IOR=3, QUANTITY='TEMPERATURE' /
+&PROF XYZ=1.06,0.001,0.0, IOR=3, QUANTITY='DENSITY' /
+&PROF XYZ=1.06,0.001,0.0, IOR=3, QUANTITY='Dry Grass' /
+&PROF XYZ=1.06,0.001,0.0, IOR=3, QUANTITY='MOISTURE' /
+&PROF XYZ=1.06,0.001,0.0, IOR=3, QUANTITY='Char' /
 
 &TAIL /
 

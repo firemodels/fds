@@ -6349,10 +6349,9 @@ N_MATL_READ = N_MATL
 
 ! Add reserved materials if necessary
 
-N_MATL_RESERVED = 2
+N_MATL_RESERVED = 1
 ALLOCATE(SEARCH_PHRASE(N_MATL_RESERVED)) ; ALLOCATE(MATL_NAME_RESERVED(N_MATL_RESERVED))
 SEARCH_PHRASE(1) = 'MOISTURE_FRACTION' ; MATL_NAME_RESERVED(1) = 'MOISTURE'
-SEARCH_PHRASE(2) = 'MASS_PER_VOLUME'   ; MATL_NAME_RESERVED(2) = 'AIR'
 
 DO NN=1,N_MATL_RESERVED
    CALL SEARCH_INPUT_FILE(LU_INPUT,TRIM(SEARCH_PHRASE(NN)),FOUND)
@@ -6402,11 +6401,6 @@ READ_MATL_LOOP: DO N=1,N_MATL
             NU_SPEC(1,1)        = 1._EB
             HEAT_OF_REACTION(1) = 2295._EB
             MOISTURE_INDEX      = N
-         CASE('AIR')
-            ID               = 'AIR'
-            DENSITY          = 1.2_EB
-            CONDUCTIVITY     = 0.0026_EB  ! Artificially low value to retain the same diffusivity
-            SPECIFIC_HEAT    = 0.1_EB     ! Artificially low value because AIR does not absorb heat in the BOUNDARY_FUEL_MODEL
       END SELECT
    ENDIF
 
@@ -7076,7 +7070,7 @@ REAL(EB) :: TAU_Q,TAU_V,TAU_T,TAU_MF(MAX_SPECIES),HRRPUA,MLRPUA,TEXTURE_WIDTH,TE
             MASS_FRACTION(MAX_SPECIES),MASS_TRANSFER_COEFFICIENT,NUSSELT_C0,NUSSELT_C1,NUSSELT_C2,NUSSELT_M,&
             PARTICLE_SURFACE_DENSITY,&
             MOISTURE_FRACTION(MAX_LAYERS),SURFACE_VOLUME_RATIO(MAX_LAYERS),MASS_PER_VOLUME(MAX_LAYERS),SHAPE_FACTOR,&
-            SUM_D,RHO_DRY,X_AIR,&
+            SUM_D,&
             DRAG_COEFFICIENT,MINIMUM_BURNOUT_TIME,DELTA_TMP_MAX,BURN_DURATION,&
             REFERENCE_HEAT_FLUX,REFERENCE_HEAT_FLUX_TIME_INTERVAL,MINIMUM_SCALING_HEAT_FLUX,MAXIMUM_SCALING_HEAT_FLUX,&
             AREA_MULTIPLIER,Z_0,PARTICLE_EXTRACTION_VELOCITY,RENODE_DELTA_T(MAX_LAYERS),NEAR_WALL_EDDY_VISCOSITY
@@ -7261,9 +7255,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
       ! Determine convective heat transfer coefficient based on element, not surface geometry
 
-      IF (ANY(MASS_PER_VOLUME>0._EB) .AND. SURFACE_VOLUME_RATIO(1)>TWO_EPSILON_EB) THEN
+      IF (ANY(MASS_PER_VOLUME>0._EB) .AND. SURFACE_VOLUME_RATIO(1)>TWO_EPSILON_EB) &
          CONVECTION_LENGTH_SCALE = 4._EB/SURFACE_VOLUME_RATIO(1)
-      ENDIF
+
+      ! Loop over layers and make adjustments to specified densities and moisture content
 
       LAYER_LOOP_2: DO NL=1,MAX_LAYERS
 
@@ -7279,41 +7274,45 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
          IF (.NOT.HT3D .AND. THICKNESS(NL) < 0._EB) EXIT LAYER_LOOP_2
 
-         ! Determine the density of the non-MOISTURE material components
+         ! If MOISTURE is added and this is NOT the Boundary Fuel Model, create adjustment to density of dry fuel component
 
-         SUM_D = 0._EB
-         DO NN=1,MAX_MATERIALS
-            IF (MATL_ID(NL,NN) == 'null') EXIT
-            DO NNN=1,N_MATL
-               IF (MATL_ID(NL,NN)==MATERIAL(NNN)%ID) EXIT
-            ENDDO
-            IF (MOISTURE_FRACTION(NL)>TWO_EPSILON_EB .AND.  MATL_MASS_FRACTION(NL,NN)>TWO_EPSILON_EB) THEN
+         IF (MOISTURE_FRACTION(NL)>TWO_EPSILON_EB .AND. MASS_PER_VOLUME(NL)<TWO_EPSILON_EB) THEN
+            DO NN=1,MAX_MATERIALS
+               IF (MATL_ID(NL,NN) == 'null') EXIT
+               IF (MATL_MASS_FRACTION(NL,NN)<TWO_EPSILON_EB) EXIT
+               DO NNN=1,N_MATL
+                  IF (MATL_ID(NL,NN)==MATERIAL(NNN)%ID) EXIT
+               ENDDO
                IF (MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S < 1._EB) THEN
                   SF%DENSITY_ADJUST_FACTOR(NL,NN) = 1._EB / &
-                                                   (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
+                     (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
                ELSE
                   WRITE(MESSAGE,'(3A)') 'ERROR: MOISTURE_FRACTION on SURF ',TRIM(SF%ID),' exceeds theoretical limit.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-            ENDIF
-            SUM_D = SUM_D + MATL_MASS_FRACTION(NL,NN)/(SF%DENSITY_ADJUST_FACTOR(NL,NN)*MATERIAL(NNN)%RHO_S)
-         ENDDO
-         RHO_DRY = 1._EB/SUM_D
-         SF%PACKING_RATIO(NL) = MASS_PER_VOLUME(NL)/RHO_DRY
-
-         ! Add AIR as a material component
-
-         IF (SF%PACKING_RATIO(NL)>TWO_EPSILON_EB) THEN
-            SF%BOUNDARY_FUEL_MODEL = .TRUE.
-            SF%KAPPA_S(NL) = SHAPE_FACTOR*SF%PACKING_RATIO(NL)*SURFACE_VOLUME_RATIO(NL)
-            X_AIR = 1._EB - SF%PACKING_RATIO(NL)
-            MATL_ID(NL,NN) = 'AIR'
-            MATL_MASS_FRACTION(NL,NN) = X_AIR*1.2_EB/(X_AIR*1.2_EB + (1._EB-X_AIR)*RHO_DRY)
-            MATL_MASS_FRACTION(NL,1:NN-1) = MATL_MASS_FRACTION(NL,1:NN-1)*(1._EB-MATL_MASS_FRACTION(NL,NN))
-            NN = NN+1
+            ENDDO
          ENDIF
 
-         IF (MOISTURE_FRACTION(NL)>0._EB) THEN  ! Add MOISTURE
+         ! If the user has specified a MASS_PER_VOLUME of this layer, invoke the Boundary Fuel Model
+
+         IF (MASS_PER_VOLUME(NL)>TWO_EPSILON_EB) THEN
+            SF%BOUNDARY_FUEL_MODEL = .TRUE.
+            SUM_D = 0._EB
+            DO NN=1,MAX_MATERIALS
+               IF (MATL_ID(NL,NN) == 'null') EXIT
+               DO NNN=1,N_MATL
+                  IF (MATL_ID(NL,NN)==MATERIAL(NNN)%ID) EXIT
+               ENDDO
+               SUM_D = SUM_D + MATL_MASS_FRACTION(NL,NN)/MATERIAL(NNN)%RHO_S
+            ENDDO
+            SF%PACKING_RATIO(NL) = MASS_PER_VOLUME(NL)*SUM_D
+            SF%KAPPA_S(NL) = SHAPE_FACTOR*SF%PACKING_RATIO(NL)*SURFACE_VOLUME_RATIO(NL)
+            SF%DENSITY_ADJUST_FACTOR(NL,1:NN-1) = SF%PACKING_RATIO(NL)
+         ENDIF
+
+         ! If the user has specified a MOISTURE_FRACTION for this layer, add a new material component and adjust other MFs
+
+         IF (MOISTURE_FRACTION(NL)>0._EB) THEN
             MATL_ID(NL,NN) = 'MOISTURE'
             MATL_MASS_FRACTION(NL,NN) = MOISTURE_FRACTION(NL)/(1._EB+MOISTURE_FRACTION(NL))
             MATL_MASS_FRACTION(NL,1:NN-1) = MATL_MASS_FRACTION(NL,1:NN-1)*(1._EB-MATL_MASS_FRACTION(NL,NN))
@@ -8843,13 +8842,11 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    ! layer.
 
    DO IL=1,SF%N_LAYERS
-      DO NN=1,SF%N_LAYER_MATL(IL)
-         DO N=1,SF%N_MATL
-            IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) THEN
+      DO N=1,SF%N_MATL
+         SF%RHO_S(IL,N) = MATERIAL(SF%MATL_INDEX(N))%RHO_S
+         DO NN=1,SF%N_LAYER_MATL(IL)
+            IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) &
                SF%RHO_S(IL,N) = MATERIAL(SF%MATL_INDEX(N))%RHO_S*SF%DENSITY_ADJUST_FACTOR(IL,NN)
-            ELSE
-               SF%RHO_S(IL,N) = MATERIAL(SF%MATL_INDEX(N))%RHO_S
-            ENDIF
          ENDDO
       ENDDO
    ENDDO
