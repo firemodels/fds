@@ -12664,6 +12664,10 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       BAD = .TRUE.
       MESH_LOOP: DO NM=1,NMESHES
          M=>MESHES(NM)
+         IF (DB/='null') THEN
+            BAD = .FALSE.
+            EXIT MESH_LOOP
+         ENDIF
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
             IF (ABS(XYZ(1)-M%XS)<TWO_EPSILON_EB .AND. SPATIAL_STATISTIC/='INTERPOLATION') THEN
                IF (IOR==-1) THEN
