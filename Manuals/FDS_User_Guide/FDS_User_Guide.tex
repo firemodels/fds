@@ -8459,41 +8459,79 @@ ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
 
 FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=F} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
 
-\subsection{User-Specified Initial Velocity Field}
-\label{info:CSVF}
-
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain. The flow field is stored in a comma-separated value (.csv) file.  You have the option of creating this file using FDS or creating your own.  To generate the file with FDS, specify the time interval between outputs using {\ct DT\_UVW} or a set of discrete times using {\ct RAMP\_UVW} on the {\ct DUMP} line. For example, if you want to write the velocity field every 10 minutes, add the following:
-\begin{lstlisting}
-&DUMP DT_UVW=600 /
-\end{lstlisting}
-FDS will then write {\ct CHID\_uvw\_t{\it N}\_m{\it M}.csv} for each time, {\ct N}, and mesh, {\ct M}. The format for this file is
-\begin{lstlisting}
-  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
-  DO K=KMIN,KMAX
-   DO J=JMIN,JMAX
-    DO I=IMIN,IMAX
-     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
-    ENDDO
-   ENDDO
-  ENDDO
-\end{lstlisting}
-You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
-\begin{lstlisting}
-&CSVF UVWFILE='my_velocity_field.csv' /
-\end{lstlisting}
-If multiple meshes are involved, enter the number of the first {\ct .csv} file only.  FDS will increment the mesh number (the integer adjacent to the ``{\ct m}'') to the total number of meshes.  For example, if you had 16 meshes you can use
-\begin{lstlisting}
-&CSVF UVWFILE='CHID_uvw_t1_m1' /
-\end{lstlisting}
-and FDS will read {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
-
-
 \subsection{Turning off the Flow Field}
 \label{info:freeze_velocity}
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
 
+\section{Nonuniform Initial Fields: Velocity, Temperature, Species}
+\label{info:CSVF}
+
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain.  This section discusses how this may be done for velocity, temperature, and tracked species.
+
+The fields are stored in a comma-separated value (.csv) files.  You have the option of creating thes files using FDS or on your own.  To generate the file(s) with FDS, specify the time interval between outputs using {\ct DT\_UVW}, {\ct DT\_TMP}, and {\ct DT\_SPEC}, for velocity, temperature, and species, respectively, on the {\ct DUMP} line.  For example, if you want to write the velocity, temperature, species fields every 10 minutes, add the following:
+\begin{lstlisting}
+&DUMP DT_UVW=600, DT_TMP=600, DT_SPEC=600 /
+\end{lstlisting}
+FDS will then write {\ct CHID\_uvw\_t{\it N}\_m{\it M}.csv}, etc., for each time, {\it N}, and mesh, {\it M}.
+
+\subsection*{Velocity format}
+The format of the files is very simple.  They are ASCII formatted files, comma-separated, with double-presicion real numbers.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, {\ct IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K) ! units are m/s
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Temperature format}
+Similarly, for temperature, except temperature is a scalar stored at the cell center.  Hence {\ct IMIN} will usually be 1.  Note that units are in K.
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_TMP,*) TMP(I,J,K) ! units are K
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Species format}
+Tracked species are written out as a comma-separed list with each cell as a row in the file.  Similar to temperture, species mass fractions are scalars that live at the cell centers.
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     ! FMT is comma-separated
+     ! units are mass fraction
+     WRITE(LU_SPEC,FMT) ( ZZ(I,J,K,N), N=1,N_TRACKED_SPECIES )
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Reading the Fields}
+
+You may read in the 3-D fields using a {\ct CSVF} line.  Only one {\ct CSVF} line is allowed.  For example:
+\begin{lstlisting}
+&CSVF UVWFILE ='my_velocity_field.csv',
+      TMPFILE ='my_temperature_field.csv'
+      SPECFILE='my_species_field.csv' /
+\end{lstlisting}
+If multiple meshes are involved, enter the name of the first {\ct .csv} file only.  The file must end in ``{\ct 1.csv}''.  FDS will increment the mesh number to the total number of meshes.  For example, if you had 16 meshes you can use
+\begin{lstlisting}
+&CSVF UVWFILE ='CHID_uvw_t1_m1.csv',
+      TMPFILE ='CHID_tmp_t1_m1.csv',
+      SPECFILE='CHID_spec_t1_m1.csv' /
+\end{lstlisting}
+and FDS will read, for example, {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).
 
 
 \section{Gravity}
@@ -11075,10 +11113,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
 \hline \hline
 \endhead
-{\ct UVWFILE}         & Character      & Section~\ref{info:velo_restart}      &            &         \\ \hline
+{\ct SPECFILE}        & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
+{\ct TMPFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
+{\ct UVWFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
 \end{longtable}
 
-% Undocumented: CSVFILE (Glenn), PER_MESH (deprecated) defaults to T
 
 \vspace{\baselineskip}
 
