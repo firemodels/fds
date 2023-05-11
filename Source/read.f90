@@ -7315,6 +7315,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
             SF%PACKING_RATIO(NL) = MASS_PER_VOLUME(NL)*SUM_D
             SF%KAPPA_S(NL) = SHAPE_FACTOR*SF%PACKING_RATIO(NL)*SURFACE_VOLUME_RATIO(NL)
             SF%DENSITY_ADJUST_FACTOR(NL,1:NN-1) = SF%PACKING_RATIO(NL)
+            EMISSIVITY      = 1._EB
+            EMISSIVITY_BACK = 1._EB
          ENDIF
 
          ! If the user has specified a MOISTURE_FRACTION for this layer, add a new material component and adjust other MFs
