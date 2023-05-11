@@ -641,8 +641,6 @@ REAL(EB) :: CPU_TIME_START                          !< CPU_TIME when FDS starts
 INTEGER :: OPENMP_AVAILABLE_THREADS = 1         !< OpenMP parameter
 LOGICAL :: USE_OPENMP               = .FALSE.   !< OpenMP parameter
 
-INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files
-
 INTEGER :: N_FACE=0,N_GEOM=0
 
 LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
