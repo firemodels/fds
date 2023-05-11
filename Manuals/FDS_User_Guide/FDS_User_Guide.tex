@@ -7005,14 +7005,7 @@ To invoke this {\em Boundary Fuel Model}, create a {\ct SURF} line similar to th
       MASS_PER_VOLUME(1) = 5.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct MASS\_PER\_VOLUME} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct MASS\_PER\_VOLUME}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
-\begin{lstlisting}
-&MATL ID = 'AIR'
-      DENSITY = 1.2
-      CONDUCTIVITY = 0.026
-      SPECIFIC_HEAT = 1.01 /
-\end{lstlisting}
-The same is true for water---if you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add the {\ct MATL} line for {\ct 'MOISTURE'}.
+The presence of the parameter {\ct MASS\_PER\_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being {\ct Soil}. If you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'}.
 
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
@@ -7052,12 +7045,10 @@ For the purpose of comparing the two methods of representing ground vegetation, 
 \subsection{Combustible Load}
 \label{ground_vegetation_load}
 
-In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, ash yield, $y_{\rm ash}=0.02$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of mass evaporated is
 \be
-   m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+   (1+M) \, m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}y_{\rm ash}) \, A = 0.32835 \; \hbox{kg}
 \ee
-Notice that the moisture fraction is not used to determine the combustible load---the mass per volume represents the dry fuel load.
-
 Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
 
 \begin{figure}[ht]
@@ -13496,7 +13487,7 @@ a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guid
 
 %fdsext be
 %fdsext gbf
-{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS, 
+{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS,
 .be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
 
 %fdsext gcf
