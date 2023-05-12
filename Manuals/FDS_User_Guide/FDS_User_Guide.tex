@@ -746,11 +746,11 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 {\ct CATF}  & Concatenate Input Files      & \ref{info:CATF} & \ref{tbl:CATF}  \\ \hline
 {\ct CLIP}  & Clipping Parameters          & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct COMB}  & Combustion Parameters        & \ref{info:COMB} & \ref{tbl:COMB}  \\ \hline
-{\ct CSVF}  & Velocity Input File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
+{\ct CSVF}  & Initialization File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
 {\ct DEVC}  & Device Parameters            & \ref{info:DEVC} & \ref{tbl:DEVC}  \\ \hline
 {\ct DUMP}  & Output Parameters            & \ref{info:DUMP} & \ref{tbl:DUMP}  \\ \hline
-{\ct GEOM} & Unstructured Geometry  &  \ref{info:GEOM} & \ref{tbl:GEOM}  \\ \hline
+{\ct GEOM}  & Unstructured Geometry        & \ref{info:GEOM} & \ref{tbl:GEOM}  \\ \hline
 {\ct HEAD}  & Input File Header            & \ref{info:HEAD} & \ref{tbl:HEAD}  \\ \hline
 {\ct HOLE}  & Obstruction Cutout           & \ref{info:HOLE} & \ref{tbl:HOLE}  \\ \hline
 {\ct HVAC}  & Heating, Vent., Air Cond.    & \ref{info:HVAC} & \ref{tbl:HVAC}  \\ \hline
@@ -8470,14 +8470,14 @@ For certain types of diagnostic tests, it is useful to turn off the velocity fie
 
 It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain.  This section discusses how this may be done for velocity, temperature, and tracked species.
 
-The fields are stored in a comma-separated value (.csv) files.  You have the option of creating thes files using FDS or on your own.  To generate the file(s) with FDS, specify the time interval between outputs using {\ct DT\_UVW}, {\ct DT\_TMP}, and {\ct DT\_SPEC}, for velocity, temperature, and species, respectively, on the {\ct DUMP} line.  For example, if you want to write the velocity, temperature, species fields every 10 minutes, add the following:
+The fields are stored in a comma-separated value (.csv) files.  You have the option of creating thes files using FDS or on your own.  To generate the file(s) with FDS, specify the time interval between outputs using {\ct DT\_UVW}, {\ct DT\_TMP}, and {\ct DT\_SPEC}, for velocity, temperature, and species, respectively, on the {\ct DUMP} line; you may also use {\ct RAMP\_***} (see Sec.~\ref{info:DT_DUMP}).  For example, if you want to write the velocity, temperature, species fields every 10 minutes, add the following:
 \begin{lstlisting}
 &DUMP DT_UVW=600, DT_TMP=600, DT_SPEC=600 /
 \end{lstlisting}
 FDS will then write {\ct CHID\_uvw\_t{\it N}\_m{\it M}.csv}, etc., for each time, {\it N}, and mesh, {\it M}.
 
 \subsection*{Velocity format}
-The format of the files is very simple.  They are ASCII formatted files, comma-separated, with double-presicion real numbers.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, {\ct IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
+The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-presicion real data.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, {\ct IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -8917,6 +8917,8 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 {\ct DT\_SLCF}    & {\ct RAMP\_SLCF}      & Slice files                \\
 {\ct DT\_SL3D}    & {\ct RAMP\_SL3D}      & Slice 3D files             \\
 {\ct DT\_SMOKE3D} & {\ct RAMP\_SMOKE3D}   & Smoke 3D files             \\
+{\ct DT\_SPEC}    & {\ct RAMP\_SPEC}      & Species field output       \\
+{\ct DT\_TMP}     & {\ct RAMP\_TMP}       & Temperature field output   \\
 {\ct DT\_UVW}     & {\ct RAMP\_UVW}       & Velocity field output      \\
 \hline
 \end{tabular}
@@ -11105,12 +11107,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 \caption[Comma separated velocity files ({\ct CSVF} namelist group)]{For more information see Section~\ref{info:CSVF}.}
 \label{tbl:CSVF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
 \hline \hline
 \endhead
 {\ct SPECFILE}        & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
@@ -11285,7 +11287,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SPEC}                      & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
+{\ct DT\_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
+{\ct DT\_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
 {\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
@@ -11312,6 +11316,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SPEC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_TMP}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
