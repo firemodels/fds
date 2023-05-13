@@ -61,7 +61,7 @@ def getColors():
     colors = colors/255
     return colors
 
-def runModel(outdir, outfile, mpiProcesses, fdsdir, printLiveOutput=False):
+def runModel(outdir, outfile, mpiProcesses, fdsdir, fdscmd, printLiveOutput=False):
     ''' This function will run fds with an input file
     '''
     my_env = os.environ.copy()
@@ -69,7 +69,7 @@ def runModel(outdir, outfile, mpiProcesses, fdsdir, printLiveOutput=False):
     my_env['PATH'] = fdsdir + ';' + my_env['I_MPI_ROOT'] + ';' + my_env["PATH"]
     my_env['OMP_NUM_THREADS'] = '1'
     
-    process = subprocess.Popen("fds %s >& log.err"%(outfile), cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL)
+    process = subprocess.Popen("%s %s >& log.err"%(fdscmd, outfile), cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL)
     
     out, err = process.communicate()
     errcode = process.returncode   
@@ -366,7 +366,7 @@ def findFds():
     error out.
     '''
     fdsDir = os.getenv('FDSDIR')
-    if fdsDir is not None: return fdsDir
+    if fdsDir is not None: return fdsDir, 'fds'
     print("Warning FDSDIR environmental variable not set. Trying to find FDS in path.")
     checklist = ['fds', 'fds_ompi_gnu_linux']
     for check in checklist:
@@ -374,13 +374,13 @@ def findFds():
         if fdsPath is not None:
             fdsDir = os.sep.join(fdsPath.split(os.sep)[:-1]) + os.sep
             print("FDS found in %s"%(fdsDir))
-            return fdsDir
+            return fdsDir, check
     print("Warning FDS not found")
         
 
 if __name__ == "__main__":
     
-    fdsdir = findFds()
+    fdsdir, fdscmd = findFds()
     
     specificationFile = "scaling_pyrolysis_cone_cases.csv"
     figoutdir = "figures"
@@ -526,7 +526,7 @@ if __name__ == "__main__":
             with open("%s%s%s.fds"%(workingDir, os.sep, chid), 'w') as f:
                 f.write(txt)
             
-            runModel(workingDir, chid+".fds", 1, fdsdir, printLiveOutput=False)
+            runModel(workingDir, chid+".fds", 1, fdsdir, fdscmd, printLiveOutput=False)
             data = load_csv(workingDir, chid)
             
             Tigns = []
@@ -557,7 +557,7 @@ if __name__ == "__main__":
                                tend, fluxes)
         with open("%s%s%s.fds"%(workingDir, os.sep, chid), 'w') as f:
             f.write(txt)
-        runModel(workingDir, chid+".fds", 1, fdsdir, printLiveOutput=False)
+        runModel(workingDir, chid+".fds", 1, fdsdir, fdscmd, printLiveOutput=False)
         data = load_csv(workingDir, chid)
         
         # Plot results
