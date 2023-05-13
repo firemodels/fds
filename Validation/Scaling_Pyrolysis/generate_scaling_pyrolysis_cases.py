@@ -84,11 +84,11 @@ def plotResults_exp(data, exp_data, fluxes, validationTimeColumns, validationHrr
     colors = getColors()
     tMax = 0
     for i, flux in enumerate(fluxes):
-        scaling = data['"HRRPUA-%02d"'%(flux)].values 
-        try:
-            plt.plot(exp_data[validationTimeColumns[i]].values/60, exp_data[validationHrrpuaColumns[i]], '-', linewidth=lw, label='exp', color=colors[i])
-        except:
+        scaling = data['"HRRPUA-%02d"'%(flux)].values
+        if type(exp_data) is dict:
             plt.plot(exp_data[validationTimeColumns[i]]/60, exp_data[validationHrrpuaColumns[i]], '-', linewidth=lw, label='exp', color=colors[i])
+        else:
+            plt.plot(exp_data[validationTimeColumns[i]].values/60, exp_data[validationHrrpuaColumns[i]].values, '-', linewidth=lw, label='exp', color=colors[i])
         plt.plot(time.values/60, scaling, '--', linewidth=lw, label='Scaling-%02d'%(flux), color=colors[i])
         try:
             tMax = max([np.nanmax(exp_data[validationTimeColumns[i]].values/60), np.nanmax(time.values/60), tMax])
