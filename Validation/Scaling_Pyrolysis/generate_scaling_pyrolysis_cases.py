@@ -69,7 +69,7 @@ def runModel(outdir, outfile, mpiProcesses, fdsdir, fdscmd, printLiveOutput=Fals
     my_env['PATH'] = fdsdir + ';' + my_env['I_MPI_ROOT'] + ';' + my_env["PATH"]
     my_env['OMP_NUM_THREADS'] = '1'
     
-    process = subprocess.Popen("%s %s >& log.err"%(fdscmd, outfile), cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL)
+    process = subprocess.Popen([fdscmd, outfile, ">&", "log.err"], cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL)
     
     out, err = process.communicate()
     errcode = process.returncode   
