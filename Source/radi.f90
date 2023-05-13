@@ -315,7 +315,7 @@ DATA (CPLXREF_FUEL( 94,J), J=1,3) / 10.0_EB, 1.45_EB, 8.24E-04_EB /
 
 END MODULE SPECDATA
 
-MODULE WSGG_ARRAYS   
+MODULE WSGG_ARRAYS
 USE PRECISION_PARAMETERS
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WSGG_B1_ARRAY,WSGG_B2_ARRAY,WSGG_D_ARRAY
@@ -1151,7 +1151,6 @@ SUBROUTINE MIEV0( XX, CREFIN, PERFCT, MIMCUT, ANYANG, NUMANG, XMU, &
 !  ZETN            RICATTI-BESSEL FUNCTION  ZETA-SUB-N OF ARGUMENT XX
 ! ----------------------------------------------------------------------
 !
-IMPLICIT  NONE
 !
 ! ----------------------------------------------------------------------
 ! --------  I / O SPECIFICATIONS FOR SUBROUTINE MIEV0  -----------------
@@ -1642,8 +1641,6 @@ SUBROUTINE LPCOEF( NTRM, NMOM, IPOLZN, MOMDIM, CALCMO, NPQUAN, A, B, PMOM )
 !      MAXMOM      MAX. NO. OF NON-ZERO MOMENTS
 !      NUMMOM      NUMBER OF NON-ZERO MOMENTS
 !      RECIP(K)    1 / K
-
-IMPLICIT  NONE
 
 !     .. PARAMETERS ..
 
@@ -3354,7 +3351,7 @@ MAKE_WSGG_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. WSGG_MODEL) THEN
    WSGG_C_ARRAY(4,2,0:4) = (/ -0.5055995_EB,  0.4579559_EB, -0.2616436_EB,  0.0764841_EB, -0.0079084_EB /)
    WSGG_C_ARRAY(4,3,0:4) = (/  0.2317509_EB, -0.1656759_EB,  0.1052608_EB, -0.0321935_EB,  0.0033870_EB /)
    WSGG_C_ARRAY(4,4,0:4) = (/ -0.0375491_EB,  0.0229520_EB, -0.0160047_EB,  0.0050463_EB, -0.0005364_EB /)
-   
+
    WSGG_KAPPAP1_ARRAY(1:5) = (/ 3.388079E-2_EB, 4.544269E-1_EB, 4.680226_EB, 1.038439E2_EB, 0._EB /)
 
    WSGG_KAPPAP2_ARRAY(1:5) = (/ 7.703541E-2_EB, 8.242941E-1_EB, 6.854761_EB, 6.593653E1_EB, 0._EB /)
@@ -3537,7 +3534,7 @@ ENDIF
 
 IF (RAD_ITER==RADIATION_ITERATIONS) RAD_CALL_COUNTER  = RAD_CALL_COUNTER + 1
 
-! If there is a user-specified HRRPUV on an INIT line, and there are multiple iterations of the radiation solver, 
+! If there is a user-specified HRRPUV on an INIT line, and there are multiple iterations of the radiation solver,
 ! subtract off the HRRPUV from Q, leaving just the chemical HRR.
 
 IF (INIT_HRRPUV .AND. RAD_ITER>1) CALL ADD_VOLUMETRIC_HEAT_SOURCE(2)
@@ -4757,4 +4754,4 @@ END MODULE RAD
 
 
 
-   
+

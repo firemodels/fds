@@ -217,6 +217,8 @@ LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
 LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distribution of HRR per unit volume
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
+LOGICAL :: TMP_RESTART=.FALSE.              !< Initialize temperature field with values from a file
+LOGICAL :: SPEC_RESTART=.FALSE.             !< Initialize tracked species field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
 LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
@@ -640,8 +642,6 @@ REAL(EB) :: CPU_TIME_START                          !< CPU_TIME when FDS starts
 INTEGER :: OPENMP_AVAILABLE_THREADS = 1         !< OpenMP parameter
 LOGICAL :: USE_OPENMP               = .FALSE.   !< OpenMP parameter
 
-INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files
-
 INTEGER :: N_FACE=0,N_GEOM=0
 
 LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
@@ -726,12 +726,12 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 INTEGER :: RAMP_BNDF_INDEX=0  !< Ramp index for boundary file time series
 INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
-INTEGER :: RAMP_CPU_INDEX=0   !< Ramp index for CPU file time series
+INTEGER :: RAMP_CPU_INDEX =0  !< Ramp index for CPU file time series
 INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
 INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
 INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
 INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
-INTEGER :: RAMP_HVAC_INDEX =0 !< Ramp index for hvac file time series
+INTEGER :: RAMP_HVAC_INDEX=0  !< Ramp index for hvac file time series
 INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
 INTEGER :: RAMP_MASS_INDEX=0  !< Ramp index for mass file time series
 INTEGER :: RAMP_PART_INDEX=0  !< Ramp index for particle file time series
@@ -743,21 +743,24 @@ INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
 INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
 INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
 INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
+INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
+INTEGER :: RAMP_SPEC_INDEX=0  !< Ramp index for species file time series
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,HVAC_CLOCK,&
                                        ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
-                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK
+                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK ,TMP_CLOCK ,SPEC_CLOCK
 INTEGER, ALLOCATABLE, DIMENSION(:) :: BNDF_COUNTER, CPU_COUNTER,CTRL_COUNTER,DEVC_COUNTER,FLSH_COUNTER,GEOM_COUNTER, HRR_COUNTER,&
                                       HVAC_COUNTER,ISOF_COUNTER,MASS_COUNTER,PART_COUNTER,PL3D_COUNTER,PROF_COUNTER,RADF_COUNTER,&
-                                      RSRT_COUNTER,SLCF_COUNTER,SL3D_COUNTER,SM3D_COUNTER,UVW_COUNTER
+                                      RSRT_COUNTER,SLCF_COUNTER,SL3D_COUNTER,SM3D_COUNTER,UVW_COUNTER ,TMP_COUNTER ,SPEC_COUNTER
 REAL(EB) :: TURB_INIT_CLOCK=-1.E10_EB
 REAL(EB) :: MMS_TIMER=1.E10_EB
 REAL(EB) :: DT_SLCF,DT_BNDF,DT_DEVC,DT_PL3D,DT_PART,DT_RESTART,DT_ISOF,DT_HRR,DT_HVAC,DT_MASS,DT_PROF,DT_CTRL,&
-            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_SMOKE3D,DT_UVW
-REAL(EB) :: DT_SLCF_SPECIFIED=-1._EB ,DT_BNDF_SPECIFIED=-1._EB   ,DT_DEVC_SPECIFIED=-1._EB,DT_PL3D_SPECIFIED=-1._EB,&
-            DT_PART_SPECIFIED=-1._EB ,DT_RESTART_SPECIFIED=-1._EB,DT_ISOF_SPECIFIED=-1._EB,DT_HRR_SPECIFIED=-1._EB,&
-            DT_HVAC_SPECIFIED=-1._EB ,DT_MASS_SPECIFIED=-1._EB   ,DT_PROF_SPECIFIED=-1._EB,DT_CTRL_SPECIFIED=-1._EB,&
-            DT_FLUSH_SPECIFIED=-1._EB,DT_SL3D_SPECIFIED=-1._EB   ,DT_GEOM_SPECIFIED=-1._EB,DT_CPU_SPECIFIED=-1._EB,&
-            DT_RADF_SPECIFIED=-1._EB ,DT_SMOKE3D_SPECIFIED=-1._EB,DT_UVW_SPECIFIED=-1._EB
+            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_SMOKE3D,DT_UVW ,DT_TMP,DT_SPEC
+REAL(EB) :: DT_SLCF_SPECIFIED =-1._EB,DT_BNDF_SPECIFIED   =-1._EB,DT_DEVC_SPECIFIED=-1._EB,DT_PL3D_SPECIFIED=-1._EB,&
+            DT_PART_SPECIFIED =-1._EB,DT_RESTART_SPECIFIED=-1._EB,DT_ISOF_SPECIFIED=-1._EB,DT_HRR_SPECIFIED =-1._EB,&
+            DT_HVAC_SPECIFIED =-1._EB,DT_MASS_SPECIFIED   =-1._EB,DT_PROF_SPECIFIED=-1._EB,DT_CTRL_SPECIFIED=-1._EB,&
+            DT_FLUSH_SPECIFIED=-1._EB,DT_SL3D_SPECIFIED   =-1._EB,DT_GEOM_SPECIFIED=-1._EB,DT_CPU_SPECIFIED =-1._EB,&
+            DT_RADF_SPECIFIED =-1._EB,DT_SMOKE3D_SPECIFIED=-1._EB,DT_UVW_SPECIFIED =-1._EB,DT_TMP_SPECIFIED =-1._EB,&
+            DT_SPEC_SPECIFIED =-1._EB
 
 END MODULE OUTPUT_CLOCKS
 
