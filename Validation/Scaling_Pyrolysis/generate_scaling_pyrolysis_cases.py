@@ -82,19 +82,18 @@ def plotResults_exp(data, exp_data, fluxes, validationTimeColumns, validationHrr
     fig = plt.figure(figsize=(12,8))
     time = data['Time']
     colors = getColors()
-    tMax = 0
+    tMax = 5
     for i, flux in enumerate(fluxes):
         scaling = data['"HRRPUA-%02d"'%(flux)].values
         if type(exp_data) is dict:
             plt.plot(exp_data[validationTimeColumns[i]]/60, exp_data[validationHrrpuaColumns[i]], '-', linewidth=lw, label='exp', color=colors[i])
+            ind = np.where(exp_data[validationHrrpuaColumns[i]] > 0)[-1]
+            tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[i]][ind])/60])
         else:
             plt.plot(exp_data[validationTimeColumns[i]].values/60, exp_data[validationHrrpuaColumns[i]].values, '-', linewidth=lw, label='exp', color=colors[i])
+            ind = np.where(exp_data[validationHrrpuaColumns[i]].values > 0)[-1]
+            tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[i]].values[ind])/60])
         plt.plot(time.values/60, scaling, '--', linewidth=lw, label='Scaling-%02d'%(flux), color=colors[i])
-        try:
-            tMax = max([np.nanmax(exp_data[validationTimeColumns[i]].values/60), np.nanmax(time.values/60), tMax])
-        except:
-            tMax = max([np.nanmax(exp_data[validationTimeColumns[i]]/60), np.nanmax(time.values/60), tMax])
-    tMax = max([tMax, 10])
     tMax = np.ceil(tMax/5)*5
     plt.xlabel('Time (min)', fontsize=fs)
     plt.ylabel('HRRPUA (kW/m2)', fontsize=fs)
