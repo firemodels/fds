@@ -289,7 +289,7 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
         tempOutput = '.FALSE.'
     
     txt = "&HEAD CHID='%s', /\n"%(chid)
-    txt = txt+"&TIME DT=1., T_END=%0.1f\n"%(tend)
+    txt = txt+"&TIME DT=1., T_END=%0.1f /\n"%(tend)
     txt = txt+"&DUMP DT_CTRL=%0.1f, DT_DEVC=%0.1f, DT_HRR=%0.1f, SIG_FIGS=4, SIG_FIGS_EXP=2, /\n"%(DT_DEVC, DT_DEVC, DT_DEVC)
     txt = txt+"&MISC SOLID_PHASE_ONLY=.TRUE., TMPA=27., /\n"
     txt = txt+"&MESH ID='MESH', IJK=3,3,3, XB=0.,0.3,0.,0.3,0.,0.3, /\n"
