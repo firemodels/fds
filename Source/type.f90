@@ -475,7 +475,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ATOMS(118)=0._EB                   !< Atom count for molecular formula
    REAL(EB) :: MEAN_DIAMETER=1.E-6_EB             !< Diameter for aerosol (m)
    REAL(EB) :: CONDUCTIVITY_SOLID                 !< Thermal conductivity of solid (W/m/K)
-   REAL(EB) :: DENSITY_SOLID                      !< Densith of solid (kg/m3)
+   REAL(EB) :: DENSITY_SOLID                      !< Density of solid (kg/m3)
    REAL(EB) :: BETA_LIQUID                        !< Coefficient of thermal expansion of the liquid (1/K)
    REAL(EB) :: MU_LIQUID                          !< Viscosity of the liquid (kg/m/s)
    REAL(EB) :: K_LIQUID                           !< Conductivity of the liquid (W/m/K)
