@@ -185,13 +185,12 @@ Over the course of a time step of the gas phase solver, the droplets in a given 
 \frac{\d T_{\rm g}}{\d t} & = \frac{1}{m_{\rm g} \, c_{\rm g}}  \left[A_{\rm p} \, h_{\rm g}  \, (T_{\rm p}-T_{\rm g}) - \frac{\d m_{\rm p}}{\d t} \; (h_{\rm \alpha,p}-h_{\rm \alpha,g}) \right]  \label{droplet_gas_temp}   \\[0.2in]
 \frac{\d T_{\rm s}}{\d t} & = -\frac{A_{\rm p} \, h_{\rm s}}{m_{\rm s} \, c_{\rm s}} (T_{\rm s}-T_{\rm p})  \label{droplet_solid_temp}
 \end{align}
-The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel) with a heat of vaporization $h_{\rm v}$ and mass $m_{\rm p}$. If the droplet is attached to a solid surface, it forms a fraction of the thin liquid layer. $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $\rho_{\rm f}$ is the particle film density, $c_{\rm p}$ is the liquid specific heat, $c_{\rm g}$ is the gas specific heat, $h_{\rm g}$ is the heat transfer coefficient between the droplet and the gas, $h_{\rm s}$ is the heat transfer coefficient between the droplet and the solid, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), $h_{\rm \alpha,p}$ is the vapor specific enthalpy at the particle temperature, and $h_{\rm \alpha,g}$ is the vapor specific enthalpy at the gas temperature. The surface area of the droplet depends on whether it is airborne or forms part of the solid surface film layer:
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel) with a heat of vaporization $h_{\rm v}$ and mass $m_{\rm p}$. The mass transfer coefficient, $h_{\rm m}$, is discussed below; $\rho_{\rm g}$ is the gas density; $\rho_{\rm f}$ is the particle film density; $c_{\rm p}$ is the liquid specific heat; $c_{\rm g}$ is the gas specific heat; $h_{\rm g}$ is the heat transfer coefficient between the droplet and the gas; $h_{\rm s}$ is the heat transfer coefficient between the droplet and the solid; $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})); $h_{\rm \alpha,p}$ is the vapor specific enthalpy at the particle temperature; and $h_{\rm \alpha,g}$ is the vapor specific enthalpy at the gas temperature. The surface area of the droplet depends on whether it is airborne or forms part of the solid surface film layer:
 \be
-   A_{\rm p} = \left\{ \begin{array}{ll} 4 \pi r_{\rm p}^2                 & \hbox{airborn droplet} \\
+   A_{\rm p} = \left\{ \begin{array}{ll} 4 \pi r_{\rm p}^2                 & \hbox{airborne droplet} \\
                                            m_{\rm p}/(\delta \rho_{\rm p}) & \hbox{surface film} \end{array} \right.  \label{area_p}
 \ee
-where $\delta$ is the thickness of the liquid layer on the solid surface.
-Equation~(\ref{droplet_solid_temp}) applies only if the droplet is attached to a solid surface in which case the droplet makes up a fraction of the thin film layer with the area given in Eq.~(\ref{area_p}) exposed to the gas and the same area exposed to the solid. In that same equation, $m_{\rm s}$ is the mass of the surface layer of the solid, and $c_{\rm s}$ is the solid specific heat.
+where $\delta$ is the thickness of the liquid layer on the solid surface. Equation~(\ref{droplet_solid_temp}) applies only if the droplet is attached to a solid surface in which case the droplet makes up a fraction of the thin film layer with the area given in Eq.~(\ref{area_p}) exposed to the gas and the same area exposed to the solid. The term $m_{\rm s}$ in Eq.~(\ref{droplet_solid_temp}) is the mass of the surface layer of the solid, and $c_{\rm s}$ is the solid specific heat.
 
 The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
@@ -199,15 +198,15 @@ The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
 where $X_{\alpha,\ell}$ is the equilibrium vapor {\em volume} fraction, $W_{\alpha}$ is the molecular weight of the gaseous species $\alpha$, $W_{\rm a}$ is the molecular weight of air, $R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
 
-Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Sazhin:2006}:
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Sazhin:2006,Incropera:1}:
 \be
    h_{\rm m} = \frac{\SH \, D_{\rm \ell g}}{L} \, \frac{B_M}{Y_{\alpha,\ell} - Y_{\rm \alpha, g}} \quad ; \quad B_M = \frac{Y_{\alpha,\ell} - Y_{\rm \alpha, g}}{1-Y_{\alpha,\ell}}  \label{eq:h_m_vap}\ee
 \be
    \SH = \frac{\ln(1+B_M)}{B_M} {\SH}_0
    \quad ; \quad
    {\SH}_0 = \left\{ \begin{array}{ll}
-     2 + 0.6   \, \RE_D^\ha           \, \SC^\ot & \hbox{airborne droplet} \\
-         0.037 \, \RE_L^{\frac{4}{5}} \, \SC^\ot & \hbox{surface film}
+     2 + 0.6    \, \RE_D^\ha           \, \SC^\ot & \hbox{airborne droplet} \\
+         0.0296 \, \RE_L^{\frac{4}{5}} \, \SC^\ot & \hbox{surface film}
    \end{array} \right.
    \label{eq:B_M_vap}
 \ee
@@ -220,15 +219,15 @@ An analogous relationship exists for the heat transfer coefficient between the d
    \NU = \frac{\ln(1+B_M)}{B_M} {\NU}_0
    \quad ; \quad
    \NU_0 = \left\{ \begin{array}{ll}
-     2 + 0.6   \, \RE_D^\ha           \, \PR^\ot & \hbox{airborne droplet} \\
-         0.037 \, \RE_L^{\frac{4}{5}} \, \PR^\ot & \hbox{surface film}
+     2 + 0.6    \, \RE_D^\ha           \, \PR^\ot & \hbox{airborne droplet} \\
+         0.0296 \, \RE_L^{\frac{4}{5}} \, \PR^\ot & \hbox{surface film}
    \end{array} \right.
 \ee
 where $\NU_0$ is the low mass flux Nusselt number, $\NU$ is the Nusselt number with blowing, $k_{\rm g}$ is the thermal conductivity of the gas, and $\PR$ is the molecular Prandtl number, $\PR=\mu_{\rm f} \, c_{\rm p,f}/k_{\rm f}$, with properties evaluated at the film temperature, $T_{\rm f} = T_{\rm s} + \frac{1}{3}(T_{\rm g}-T_{\rm s})$. The length scale, $L$, is the diameter, $D$, of the droplet if airborne, and 1~m if the droplet forms a liquid surface layer.
 
 The heat transfer coefficient between the droplet and a solid surface, $h_{\rm s}$, is either a user-specified constant or an empirical function~\cite{Incropera:1}:
 \be
-   h_{\rm s} = 0.037 \, \RE_L^{\frac{4}{5}} \, \PR^\ot \; \frac{ k_{\rm p} }{L}  \quad ; \quad \RE_L = \frac{ \rho_{\rm p} \| \bu_{\rm p} \| L}{ \mu_{\rm p} }
+   h_{\rm s} = 0.0296 \, \RE_L^{\frac{4}{5}} \, \PR^\ot \; \frac{ k_{\rm p} }{L}  \quad ; \quad \RE_L = \frac{ \rho_{\rm p} \| \bu_{\rm p} \| L}{ \mu_{\rm p} }
 \ee
 The velocity of the surface liquid, $\| \bu_{\rm p} \|$, is taken as the user-specified constant droplet speed on either a horizontal or vertical surface. The length, $L$, is taken as 1~m.
 
