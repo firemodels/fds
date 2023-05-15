@@ -2840,6 +2840,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_FILM_PROPERTIES, GET_MASS_FRACTION,GET_AVERAG
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
+USE TURBULENCE, ONLY: FORCED_CONVECTION_MODEL
 
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
@@ -3335,7 +3336,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ARRAY_CASE = 2
                   ENDIF
 
-                  ! Compute heat transfer coefficient between droplet/film and solid wall, H_WALL
+                  ! Compute heat transfer coefficient between liquid film and solid wall, H_WALL
 
                   IF (LPC%HEAT_TRANSFER_COEFFICIENT_SOLID<0._EB .AND. ARRAY_CASE>1) THEN
                      LENGTH = 1._EB
@@ -3343,8 +3344,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         CASE(0:2) ;  VEL_LIQUID = LPC%VERTICAL_VELOCITY
                         CASE(3)   ;  VEL_LIQUID = LPC%HORIZONTAL_VELOCITY
                      END SELECT
-                     RE_LIQUID = MAX(5.E5_EB,SS%DENSITY_LIQUID*VEL_LIQUID*LENGTH/SS%MU_LIQUID)
-                     NUSSELT_LIQUID = 0.037_EB*RE_LIQUID**0.8_EB*SS%PR_LIQUID**ONTH
+                     RE_LIQUID = SS%DENSITY_LIQUID*VEL_LIQUID*LENGTH/SS%MU_LIQUID
+                     CALL FORCED_CONVECTION_MODEL(NUSSELT_LIQUID,RE_LIQUID,SS%PR_LIQUID**ONTH,SURF_CARTESIAN)
                      H_WALL = NUSSELT_LIQUID*SS%K_LIQUID/LENGTH
                   ELSEIF (ARRAY_CASE>1) THEN
                      H_WALL = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
@@ -3356,24 +3357,24 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
 
                   LENGTH   = 1._EB
-                  RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_FILM)
-                  NUSSELT  = (0.037_EB*RE_L**0.8_EB-871._EB)*PR_FILM**ONTH
-                  H_HEAT   = MAX(2._EB,NUSSELT)*K_FILM/LENGTH
+                  RE_L     = RHO_G*VEL*LENGTH/MU_FILM
+                  CALL FORCED_CONVECTION_MODEL(NUSSELT,RE_L,PR_FILM**ONTH,SURF_CARTESIAN)
+                  H_HEAT   = NUSSELT*K_FILM/LENGTH
 
                   ! Compute mass transfer coefficient
 
                   IF (Y_DROP<=Y_GAS) THEN
                      H_MASS = 0._EB
                   ELSE
-                     SHERWOOD = (0.037_EB*RE_L**0.8_EB-871._EB)*SC_FILM**ONTH
+                     CALL FORCED_CONVECTION_MODEL(SHERWOOD,RE_L,SC_FILM**ONTH,SURF_CARTESIAN)
                      !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
                      SELECT CASE(LPC%EVAP_MODEL)
                         CASE(RM_NO_B)
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH
+                           H_MASS   = SHERWOOD*D_FILM/LENGTH
                         CASE(RM_B,RM_LEWIS_B) !Sazhin M0 - M1
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_B1%B_NUMBER)/LP_B1%B_NUMBER
+                           H_MASS   = SHERWOOD*D_FILM/LENGTH*LOG(1._EB+LP_B1%B_NUMBER)/LP_B1%B_NUMBER
                         CASE(RM_FL_LEWIS_B) !Sazhin M2
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+LP_B1%B_NUMBER)/ &
+                           H_MASS   = SHERWOOD*D_FILM/LENGTH*LOG(1._EB+LP_B1%B_NUMBER)/ &
                                      (LP_B1%B_NUMBER*F_B(LP_B1%B_NUMBER))
                      END SELECT
                   ENDIF
