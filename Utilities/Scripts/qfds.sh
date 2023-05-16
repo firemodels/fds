@@ -110,7 +110,7 @@ function usage {
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
-  echo " -w time - walltime, where time is dd-hh:mm:ss [default: $walltime]"
+  echo " -w time - maximum run time, where time is dd-hh:mm:ss [default: $walltime]"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo " -z   - use --hint=nomultithread on srun line"
@@ -222,6 +222,7 @@ benchmark=no
 showinput=0
 exe=
 SMVZIP=
+walltime=99-99:99:99
 
 if [ $# -lt 1 ]; then
   usage
@@ -402,12 +403,6 @@ else
     filebase[$i]=$in$arg
     files[$i]=$in$arg.fds
   done
-fi
-
-#*** parse options
-
-if [ "$walltime" == "" ]; then
-  walltime=99-99:99:99
 fi
 
 #*** define executable
