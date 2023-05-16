@@ -110,7 +110,7 @@ function usage {
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
+  echo " -w time - walltime, where time is dd-hh:mm:ss [default: $walltime]"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo " -z   - use --hint=nomultithread on srun line"
@@ -705,10 +705,8 @@ fi
 
 #*** Set walltime parameter only if walltime is specified as input argument
 
-walltimestring_pbs=
 walltimestring_slurm=
 if [ "$walltime" != "" ]; then
-  walltimestring_pbs="-l walltime=$walltime"
   walltimestring_slurm="--time=$walltime"
 fi
 
