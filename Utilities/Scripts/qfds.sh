@@ -696,7 +696,7 @@ stop_fds_if_requested
 
 #*** setup for SLURM
 
-QSUB="sbatch -p $queue --ignore-pbs"
+QSUB="sbatch -p $queue"
 if [ "$use_intel_mpi" == "1" ]; then
    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node --mpi=pmi2"
 else
