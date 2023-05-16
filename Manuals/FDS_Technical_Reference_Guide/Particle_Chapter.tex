@@ -227,9 +227,9 @@ where $\NU_0$ is the low mass flux Nusselt number, $\NU$ is the Nusselt number w
 
 The heat transfer coefficient between the droplet and a solid surface, $h_{\rm s}$, is either a user-specified constant or an empirical function~\cite{Incropera:1}:
 \be
-   h_{\rm s} = 0.0296 \, \RE_L^{\frac{4}{5}} \, \PR^\ot \; \frac{ k_{\rm p} }{L}  \quad ; \quad \RE_L = \frac{ \rho_{\rm p} \| \bu_{\rm p} \| L}{ \mu_{\rm p} }
+   h_{\rm s} = \max \left( 100 \, , \, 0.0296 \, \RE_L^{\frac{4}{5}} \, \PR^\ot \; \frac{ k_{\rm p} }{L} \right)  \quad ; \quad \RE_L = \frac{ \rho_{\rm p} \| \bu_{\rm p} \| L}{ \mu_{\rm p} }
 \ee
-The velocity of the surface liquid, $\| \bu_{\rm p} \|$, is taken as the user-specified constant droplet speed on either a horizontal or vertical surface. The length, $L$, is taken as 1~m.
+The velocity of the surface liquid, $\| \bu_{\rm p} \|$, is taken as the user-specified constant droplet speed on either a horizontal or vertical surface. The length, $L$, is taken as 1~m. The minimum value of 100~W/(m$^2 \cdot$K) is an order of magnitude estimate for cases where the user has specified a very low droplet velocity on the solid surface.
 
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is defined as a source term for the given mesh cell, any heat transfer to a solid is stored as a convective term, and the net effect of heat transfer and mass addition to the gas is defined as a divergence. The mass and divergence terms are discussed in the sections that follow.
