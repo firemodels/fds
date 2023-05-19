@@ -308,11 +308,11 @@ Note that $a$ is an empirical constant that is dependent on the material propert
 
 There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or cartesian coordinate system.
 
-It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation equation. For a grid cell with indices $ijk$, the source term is:
+Particles interact with the radiation field through an additional sink term in the radiative transfer equation. For a grid cell with indices $ijk$, the integrated radiant intensity is reduced at rate
 \be \label{eq:qr}
-   \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right)
+   (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right)
 \ee
-where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
+where the summation is over all the particles within the cell. For individual intensity equations, see Eq.~\ref{RTEspray}. The effective absorption coefficient for a single particle is given by
 \be
    \kappa_{\rm p} = \frac{\epsilon_{\rm p} \, A_{\rm p}}{4 \, \dx \, \dy \, \dz}
 \ee
