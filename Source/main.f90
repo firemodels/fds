@@ -117,7 +117,7 @@ CALL READ_DATA(DT)
 CALL STOP_CHECK(1)
 
 IF (MY_RANK==0) THEN
-   CALL WRITE_SUMMARY_INFO(LU_ERR)
+   CALL WRITE_SUMMARY_INFO(LU_ERR,.TRUE.)
    WRITE(LU_ERR,'(/A,A)')     ' Job TITLE        : ',TRIM(TITLE)
    WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
    IF (VERBOSE) CALL VERBOSE_PRINTOUT('Completed reading of input file')

@@ -2504,7 +2504,7 @@ OUT_FILE_OPENED = .TRUE.
 
 ! Write out the input parameters to output file (unit 6)
 
-CALL WRITE_SUMMARY_INFO(LU_OUTPUT)
+CALL WRITE_SUMMARY_INFO(LU_OUTPUT,.TRUE.)
 
 WRITE(LU_OUTPUT,'(/A,A)')     ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
