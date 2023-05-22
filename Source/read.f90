@@ -196,7 +196,7 @@ CALL GET_INPUT_FILE
 
 IF (FN_INPUT(1:1)==' ') THEN
    IF (MY_RANK==0) THEN
-      CALL WRITE_SUMMARY_INFO(LU_ERR)
+      CALL WRITE_SUMMARY_INFO(LU_ERR,.FALSE.)
       WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
    ENDIF
    STOP ! this routine is only called before MPI is initialized so safe to STOP here
