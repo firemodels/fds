@@ -601,8 +601,8 @@ END TYPE AIT_EXCLUSION_ZONE_TYPE
 
 
 TYPE REACTION_TYPE
-   CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
-   CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
+   CHARACTER(LABEL_LENGTH) :: FUEL='null' !< Name of reaction fuel species
+   CHARACTER(LABEL_LENGTH) :: ID='null'   !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
