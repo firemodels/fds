@@ -2239,7 +2239,6 @@ DO IM = 1,NMESHES
    M%W=M%W-MEANW
 ENDDO
 
-
 ! handle boundaries and I=0,J=0,K=0 cells for each mesh
 
 MESH_LOOP_2: DO IM = 1,NMESHES
@@ -3289,7 +3288,6 @@ SUBROUTINE fourier_f2003(data3,nn,ndim,isign,iform,work)
 END SUBROUTINE fourier_f2003
 
 END MODULE TURBULENCE
-
 
 
 MODULE MANUFACTURED_SOLUTIONS

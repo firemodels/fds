@@ -81,12 +81,6 @@
       MASS_PER_VOLUME      = 4.0
       DRY                  = T /
 
-&MATL ID               = 'AIR'
-      DENSITY          = 1.2
-      CONDUCTIVITY     = 0.0026
-      SPECIFIC_HEAT    = 0.1
-      EMISSIVITY       = 0.0001 /
-
 &MATL ID                 = 'Dry Grass'
       DENSITY            = 400.
       CONDUCTIVITY       = 0.1

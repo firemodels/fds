@@ -475,7 +475,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ATOMS(118)=0._EB                   !< Atom count for molecular formula
    REAL(EB) :: MEAN_DIAMETER=1.E-6_EB             !< Diameter for aerosol (m)
    REAL(EB) :: CONDUCTIVITY_SOLID                 !< Thermal conductivity of solid (W/m/K)
-   REAL(EB) :: DENSITY_SOLID                      !< Densith of solid (kg/m3)
+   REAL(EB) :: DENSITY_SOLID                      !< Density of solid (kg/m3)
    REAL(EB) :: BETA_LIQUID                        !< Coefficient of thermal expansion of the liquid (1/K)
    REAL(EB) :: MU_LIQUID                          !< Viscosity of the liquid (kg/m/s)
    REAL(EB) :: K_LIQUID                           !< Conductivity of the liquid (W/m/K)
@@ -594,12 +594,15 @@ TYPE AIT_EXCLUSION_ZONE_TYPE
    REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
    INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+   INTEGER :: CTRL_INDEX=0   !< Index of control controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller controlling the status of the zone
 END TYPE AIT_EXCLUSION_ZONE_TYPE
 
 
 TYPE REACTION_TYPE
-   CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
-   CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
+   CHARACTER(LABEL_LENGTH) :: FUEL='null' !< Name of reaction fuel species
+   CHARACTER(LABEL_LENGTH) :: ID='null'   !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
@@ -821,6 +824,8 @@ TYPE SURFACE_TYPE
    REAL(EB) :: NUSSELT_C1=-1._EB
    REAL(EB) :: NUSSELT_C2=-1._EB
    REAL(EB) :: NUSSELT_M=-1._EB
+   REAL(EB) :: EMBER_POWER_MEAN=-1._EB
+   REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -831,7 +836,7 @@ TYPE SURFACE_TYPE
    REAL(EB), DIMENSION(2) :: VEL_T,EMBER_GENERATION_HEIGHT=-1._EB
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
-              PART_INDEX,PROP_INDEX=-1
+              PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
@@ -1279,7 +1284,7 @@ TYPE CC_INBCF_AREA_TYPE
 END TYPE
 
 TYPE CSVF_TYPE
-    CHARACTER(255) :: UVWFILE
+    CHARACTER(255) :: UVWFILE,TMPFILE,SPECFILE
 END TYPE CSVF_TYPE
 
 TYPE(CSVF_TYPE), ALLOCATABLE, DIMENSION(:) :: CSVFINFO
@@ -1350,7 +1355,7 @@ TYPE SLICE_TYPE
    REAL(FB), DIMENSION(2) :: MINMAX
    REAL(FB) :: RLE_MIN, RLE_MAX
    REAL(EB):: AGL_SLICE
-   LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,FACE_CENTERED=.FALSE.,RLE=.FALSE.,DEBUG=.FALSE.
+   LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,RLE=.FALSE.,DEBUG=.FALSE.,THREE_D=.FALSE.
    CHARACTER(LABEL_LENGTH) :: SLICETYPE='STRUCTURED',SMOKEVIEW_LABEL
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,ID='null',MATL_ID='null'
 END TYPE SLICE_TYPE

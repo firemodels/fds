@@ -1,0 +1,33 @@
+&HEAD CHID='csvf_restart', TITLE='Example of initializing flow field with CSVF'/
+
+! &MESH IJK=10,10,10, XB=-1,1,-1,1,0,2/
+
+&MULT ID='m1', DX=1,DY=1,DZ=1, I_UPPER=1,J_UPPER=1,K_UPPER=1/ 8 mesh
+&MESH IJK=5,5,5, XB=-1,0,-1,0,0,1, MULT_ID='m1'/
+
+&TIME T_END=10/
+
+&DUMP DT_UVW=10, DT_TMP=10, DT_SPEC=10 /
+
+CSVF UVWFILE='csvf_restart_uvw_t1_m1.csv',
+      TMPFILE='csvf_restart_tmp_t1_m1.csv',
+      SPECFILE='csvf_restart_spec_t1_m1.csv'/
+
+&PRES SOLVER='UGLMAT'/
+
+&REAC FUEL='METHANE'/
+
+&SURF ID='burner', HRRPUA=100, COLOR='RED'/
+&OBST XB=-.4,.4,-.4,.4,0,.2, SURF_IDS='burner','INERT','INERT'/ 
+
+&VENT MB='XMIN', SURF_ID='OPEN'/
+&VENT MB='XMAX', SURF_ID='OPEN'/
+&VENT MB='YMIN', SURF_ID='OPEN'/
+&VENT MB='YMAX', SURF_ID='OPEN'/
+&VENT MB='ZMIN', SURF_ID='OPEN'/
+&VENT MB='ZMAX', SURF_ID='OPEN'/
+
+&SLCF PBY=0.1, QUANTITY='VELOCITY', VECTOR=T/
+&SLCF PBY=0.1, QUANTITY='TEMPERATURE', CELL_CENTERED=T/
+
+&TAIL/

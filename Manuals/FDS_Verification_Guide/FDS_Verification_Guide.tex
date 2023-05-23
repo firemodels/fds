@@ -4433,14 +4433,16 @@ In a second case, a steel plate that is 1.76~m long, 0.58~m wide, and 0.02~m thi
 \subsection{Mass Conservation in a 3-D Solid (\texorpdfstring{\textct{ht3d\_mass\_conservation}}{ht3d\_mass\_conservation})}
 \label{ht3d_mass_conservation}
 
-Three abutting solids, one of which is thin, have a density of $\rho_{\rm s}=400$~kg/m$^3$, moisture mass fraction $Y_{\rm m}=0.05$, and total volume $V=0.0106$~m$^3$. When exposed to hot plates of 1000~$^\circ$C, it is expected that $\rho_{\rm s} Y_{\rm m} V=0.212$~kg should be evaporated. Figure~\ref{fig:ht3d_mass_conservation} displays the evaporated mass as a function of time.
+Three abutting solids, one of which is thin, have a density of $\rho_{\rm s}=400$~kg/m$^3$, moisture mass fraction $Y_{\rm m}=0.05$, and total volume $V=0.0106$~m$^3$. When exposed to hot plates of 1000~$^\circ$C, it is expected that $\rho_{\rm s} Y_{\rm m} V=0.212$~kg should be evaporated. The left plot of Fig.~\ref{fig:ht3d_mass_conservation} displays the evaporated mass as a function of time.
 
 \begin{figure}[ht]
-\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_mass_conservation}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_mass_conservation_2}
 \caption[The \textct{ht3d\_mass\_conservation} test case]{Evaporated moisture mass from a collection of solids.}
 \label{fig:ht3d_mass_conservation}
 \end{figure}
+
+In this case, the moisture is not explicitly modeled; that is, ``wet wood'' undergoes a single reaction becoming ``dry wood'' and water vapor. A variation of the case is to mix moisture and dry wood together and allow the mositure to evaporate. To mimic the conditions of the first case, the density of the dry wood is set to 387.76~kg/m$^3$ and the moisture 1000~kg/m$^3$. The same mass of water vapor should be produced, as shown in the right plot of Fig.~\ref{fig:ht3d_mass_conservation}, but the time histories of the two cases are not the same because the thermal properties of the combination of two material components in the second case are different than that of the single component of the first case.
 
 \FloatBarrier
 

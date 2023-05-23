@@ -746,11 +746,11 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 {\ct CATF}  & Concatenate Input Files      & \ref{info:CATF} & \ref{tbl:CATF}  \\ \hline
 {\ct CLIP}  & Clipping Parameters          & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct COMB}  & Combustion Parameters        & \ref{info:COMB} & \ref{tbl:COMB}  \\ \hline
-{\ct CSVF}  & Velocity Input File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
+{\ct CSVF}  & Initialization File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
 {\ct DEVC}  & Device Parameters            & \ref{info:DEVC} & \ref{tbl:DEVC}  \\ \hline
 {\ct DUMP}  & Output Parameters            & \ref{info:DUMP} & \ref{tbl:DUMP}  \\ \hline
-{\ct GEOM} & Unstructured Geometry  &  \ref{info:GEOM} & \ref{tbl:GEOM}  \\ \hline
+{\ct GEOM}  & Unstructured Geometry        & \ref{info:GEOM} & \ref{tbl:GEOM}  \\ \hline
 {\ct HEAD}  & Input File Header            & \ref{info:HEAD} & \ref{tbl:HEAD}  \\ \hline
 {\ct HOLE}  & Obstruction Cutout           & \ref{info:HOLE} & \ref{tbl:HOLE}  \\ \hline
 {\ct HVAC}  & Heating, Vent., Air Cond.    & \ref{info:HVAC} & \ref{tbl:HVAC}  \\ \hline
@@ -2296,9 +2296,7 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 \subsection{Initial Solid Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden.
-
-
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. Note that setting this temperature causes {\ct TMP\_FRONT} and/or {\ct TMP\_BACK} to be over-ridden. One can also specify an initial temperature profile using {\ct RAMP\_T\_I} where the {\ct T} value of the ramp is the depth~(m) from the face, and the {\ct F} value is temperature at that depth. {\ct RAMP\_T\_I} profile cannot be used with 3D heat transfer.
 
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
@@ -4571,7 +4569,7 @@ A simple demonstration of two-step simple chemistry is given by the example case
 \end{eqnarray}
 The simple version of the input file specifies the combustion parameters as follows:
 \begin{lstlisting}
-&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
+&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
 \end{lstlisting}
 For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms. To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
 \begin{figure}[!ht]
@@ -4699,6 +4697,7 @@ The value of AIT may need to be lowered for cases where the grid size is greater
 \begin{lstlisting}
 &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
 \end{lstlisting}
+You can control the turning on and off of an exclusion zone using either {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(N)} or {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(N)} where {\ct N} refers to the index of the listed exclusion zones. If there is only one exclusion zone, you need not add an index. If the status of the specified device or controller is true, the exclusion zone is in effect.
 
 An alternative to the ignition zone method is to specify a ``pilot fuel'' with a low AIT.  In cells where the pilot fuel is present and the local cell temperature is above the AIT specified for the specific pilot fuel reaction, combustion is allowed to proceed. For example, you can initialize a series of particles with a controlled mass flux of fuel:
 \begin{lstlisting}
@@ -4873,7 +4872,6 @@ In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and
 &REAC ID='R1'
       FUEL='PROPANE'
       SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT'
-      SOOT_H_FRACTION=0.
       NU=-1,-3,2,4,1 /
 &REAC ID='R2'
       FUEL='CARBON MONOXIDE'
@@ -6101,7 +6099,7 @@ When a liquid\footnote{Solid particles do not stick to solid surfaces by default
 
 When a liquid droplet hits a solid surface, it is assumed to form a thin film that is assumed to be no less than 0.00001~m thick. This value, {\ct MINIMUM\_FILM\_THICKNESS} (m), can be changed on the {\ct MISC} line. The diameter of the droplet, once it strikes a solid surface, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line in units of $\mu$m.
 
-The heat transfer coefficient between the solid and liquid is constant by default and specified by the {\ct PART} parameter {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}. Its default value is 300~W/(m$^2 \cdot$K). To turn on an experimental model that calculates this coefficient dynamically, just set its value to some negative number, say -1.
+The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K. 
 
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=T} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
@@ -7007,14 +7005,7 @@ To invoke this {\em Boundary Fuel Model}, create a {\ct SURF} line similar to th
       MASS_PER_VOLUME(1) = 5.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct MASS\_PER\_VOLUME} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct MASS\_PER\_VOLUME}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
-\begin{lstlisting}
-&MATL ID = 'AIR'
-      DENSITY = 1.2
-      CONDUCTIVITY = 0.026
-      SPECIFIC_HEAT = 1.01 /
-\end{lstlisting}
-The same is true for water---if you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add the {\ct MATL} line for {\ct 'MOISTURE'}.
+The presence of the parameter {\ct MASS\_PER\_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being {\ct Soil}. If you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'}.
 
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
@@ -7054,12 +7045,10 @@ For the purpose of comparing the two methods of representing ground vegetation, 
 \subsection{Combustible Load}
 \label{ground_vegetation_load}
 
-In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, ash yield, $y_{\rm ash}=0.02$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of mass evaporated is
 \be
-   m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+   (1+M) \, m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}y_{\rm ash}) \, A = 0.32835 \; \hbox{kg}
 \ee
-Notice that the moisture fraction is not used to determine the combustible load---the mass per volume represents the dry fuel load.
-
 Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
 
 \begin{figure}[ht]
@@ -7086,7 +7075,7 @@ In this next example, ground vegetation with the same properties as the previous
 
 In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are {\ct MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient, $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$, and the expected heat flux to the floor is:
 \be
-   \dq'' = \sigma (T_{\rm c}^4-T_{\rm f}^4) \, {\rm e}^{- 2 \kappa \delta} = 10.7 \; \hbox{kW/m}^2
+   \dq'' = \sigma (T_{\rm c}^4-T_{\rm f}^4) \, {\rm e}^{- 2 \kappa \delta} = 11.66 \; \hbox{kW/m}^2
 \ee
 The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy a single layer of grid cells; thus, the radiation absorption calculation for particles is not expected to be accurate.
 
@@ -7240,6 +7229,11 @@ In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited dir
 \caption[No wind level set test case]{Level set test case for Fuel Model 1.}
 \label{level_set_fuel_model_1_fig}
 \end{figure}
+
+\subsection{Ember Ignition}
+\label{info:Ember_Ignition}
+
+If an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_POWER\_SIGMA}, whose default value is 0.001~kW.
 
 
 \subsection{Using Mapping Software}
@@ -7547,7 +7541,7 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The ``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
-Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
+Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview (Sec.~\ref{info:SMOKE3D}). Use the following lines:
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, SPEC_ID='MY SMOKE', COLOR='RED' /
@@ -7638,6 +7632,16 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 \label{aspiration_detector_fig}
 \end{figure}
 
+\subsection{Fire Depth}
+\label{info:fire_depth}
+In some cases it may be useful to output a characterstic depth of the fire along a certain path. For example, this parameter is important in the case of simulating spreading fires such as wildland fires. There a number of ways in which the depth of a fire might be defined, but a simple choice is to use logic similar to beam detectors and to calculate the length of the beam which traverses regions with a volumetric heat release greater than a threshold value. This quantity of {\ct 'FIRE DEPTH'} can be written as:
+\begin{equation}
+  \hbox{Fire Depth}  = \sum_{i=1}^N {C_i\, \Delta x_i} \; \; ; \; \;
+  C_i  = \left\{ \begin{array}{cl}
+           0 & \dot{q}_i''' \le \dot{q}_{\rm thresh}''' \\
+           1 & \dot{q}_i''' > \dot{q}_{\rm thresh}''' \end{array} \right.\\
+\end{equation}
+As with the beam detectors, $i$ is a mesh cell along the path of the beam and $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam. The threshold value, $\dot{q}_{\rm thresh}'''$, is applied by setting {\ct SETPOINT} on the {\ct DEVC} line in units of kW/m$^3$. If this value is not provided, the default is the threshold for rendering HRRPUV as described in Section~\ref{info:SMOKE3D}.
 
 
 \section{Basic Control Logic}
@@ -8455,41 +8459,79 @@ ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
 
 FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=F} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
 
-\subsection{User-Specified Initial Velocity Field}
-\label{info:CSVF}
-
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain. The flow field is stored in a comma-separated value (.csv) file.  You have the option of creating this file using FDS or creating your own.  To generate the file with FDS, specify the time interval between outputs using {\ct DT\_UVW} or a set of discrete times using {\ct RAMP\_UVW} on the {\ct DUMP} line. For example, if you want to write the velocity field every 10 minutes, add the following:
-\begin{lstlisting}
-&DUMP DT_UVW=600 /
-\end{lstlisting}
-FDS will then write {\ct CHID\_uvw\_t{\it N}\_m{\it M}.csv} for each time, {\ct N}, and mesh, {\ct M}. The format for this file is
-\begin{lstlisting}
-  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
-  DO K=KMIN,KMAX
-   DO J=JMIN,JMAX
-    DO I=IMIN,IMAX
-     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
-    ENDDO
-   ENDDO
-  ENDDO
-\end{lstlisting}
-You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
-\begin{lstlisting}
-&CSVF UVWFILE='my_velocity_field.csv' /
-\end{lstlisting}
-If multiple meshes are involved, enter the number of the first {\ct .csv} file only.  FDS will increment the mesh number (the integer adjacent to the ``{\ct m}'') to the total number of meshes.  For example, if you had 16 meshes you can use
-\begin{lstlisting}
-&CSVF UVWFILE='CHID_uvw_t1_m1' /
-\end{lstlisting}
-and FDS will read {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
-
-
 \subsection{Turning off the Flow Field}
 \label{info:freeze_velocity}
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
 
+\section{Nonuniform Initial Fields: Velocity, Temperature, Species}
+\label{info:CSVF}
+
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain.  This section discusses how this may be done for velocity, temperature, and tracked species.
+
+The fields are stored in a comma-separated value (.csv) files.  You have the option of creating thes files using FDS or on your own.  To generate the file(s) with FDS, specify the time interval between outputs using {\ct DT\_UVW}, {\ct DT\_TMP}, and {\ct DT\_SPEC}, for velocity, temperature, and species, respectively, on the {\ct DUMP} line; you may also use {\ct RAMP\_***} (see Sec.~\ref{info:DT_DUMP}).  For example, if you want to write the velocity, temperature, species fields every 10 minutes, add the following:
+\begin{lstlisting}
+&DUMP DT_UVW=600, DT_TMP=600, DT_SPEC=600 /
+\end{lstlisting}
+FDS will then write {\ct CHID\_uvw\_t{\it N}\_m{\it M}.csv}, etc., for each time, {\it N}, and mesh, {\it M}.
+
+\subsection*{Velocity format}
+The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-presicion real data.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, {\ct IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K) ! units are m/s
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Temperature format}
+Similarly, for temperature, except temperature is a scalar stored at the cell center.  Hence {\ct IMIN} will usually be 1.  Note that units are in K.
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_TMP,*) TMP(I,J,K) ! units are K
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Species format}
+Tracked species are written out as a comma-separed list with each cell as a row in the file.  Similar to temperture, species mass fractions are scalars that live at the cell centers.
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     ! FMT is comma-separated
+     ! units are mass fraction
+     WRITE(LU_SPEC,FMT) ( ZZ(I,J,K,N), N=1,N_TRACKED_SPECIES )
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+
+\subsection*{Reading the Fields}
+
+You may read in the 3-D fields using a {\ct CSVF} line.  Only one {\ct CSVF} line is allowed.  For example:
+\begin{lstlisting}
+&CSVF UVWFILE ='my_velocity_field.csv',
+      TMPFILE ='my_temperature_field.csv'
+      SPECFILE='my_species_field.csv' /
+\end{lstlisting}
+If multiple meshes are involved, enter the name of the first {\ct .csv} file only.  The file must end in ``{\ct 1.csv}''.  FDS will increment the mesh number to the total number of meshes.  For example, if you had 16 meshes you can use
+\begin{lstlisting}
+&CSVF UVWFILE ='CHID_uvw_t1_m1.csv',
+      TMPFILE ='CHID_tmp_t1_m1.csv',
+      SPECFILE='CHID_spec_t1_m1.csv' /
+\end{lstlisting}
+and FDS will read, for example, {\ct CHID\_uvw\_t1\_m1.csv} through {\ct CHID\_uvw\_t1\_m16.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).
 
 
 \section{Gravity}
@@ -8654,7 +8696,23 @@ The case called {\ct dancing\_eddies\_tight} is rerun without the special pressu
 \label{dancing_eddies_precon}
 \end{figure}
 
+\FloatBarrier
 
+\subsection{Example Case: Random Obstructions}
+\label{random_obstructions_fft}
+
+In this example, many different types of obstructions are randomly positioned within a domain split into 16 meshes. Some of the obstructions are created or removed at certain times. Sources of heat are added to move the gases about. The grid cell size is 0.025~m and the default normal velocity error tolerance is half that, or 0.0125~m. Figure~\ref{random_obstructions_fft_fig} displays the maximum error and the number of iterations of the pressure solver. The spikes in the number of iterations correspond to the creation or removal of obstructions. More iterations are necessary to drive down the error when a sudden change occurs in the flow field.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/random_obstructions_fft_error}
+\includegraphics[width=3in]{SCRIPT_FIGURES/random_obstructions_fft_iterations}
+\caption[Pressure iterations in the {\ct random\_obstructions}]{The number of pressure iterations (left) and maximum velocity error (right).}
+\label{random_obstructions_fft_fig}
+\end{figure}
+
+
+
+\newpage
 
 \section{Baroclinic Vorticity}
 \label{baroclinic_torque}
@@ -8714,7 +8772,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 
 
-
+\newpage
 
 \section{Pressure Considerations in Long Tunnels}
 \label{tunnel_solver}
@@ -8859,6 +8917,8 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 {\ct DT\_SLCF}    & {\ct RAMP\_SLCF}      & Slice files                \\
 {\ct DT\_SL3D}    & {\ct RAMP\_SL3D}      & Slice 3D files             \\
 {\ct DT\_SMOKE3D} & {\ct RAMP\_SMOKE3D}   & Smoke 3D files             \\
+{\ct DT\_SPEC}    & {\ct RAMP\_SPEC}      & Species field output       \\
+{\ct DT\_TMP}     & {\ct RAMP\_TMP}       & Temperature field output   \\
 {\ct DT\_UVW}     & {\ct RAMP\_UVW}       & Velocity field output      \\
 \hline
 \end{tabular}
@@ -9299,7 +9359,13 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 \label{info:SMOKE3D}
 \label{info:smoke16}
 
-When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
+For any simulation involving combustion, FDS automatically creates three output files that are rendered by Smokeview as realistic looking smoke, fire, and/or hot gas. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'}, the {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume), and the {\ct TEMPERATURE} of the gases. These quantities are rendered as semi-transparent slices that give you the illusion of looking through smoke or fire. The greater the value of the quantity, the darker the slices will appear en masse. For {\ct HRRPUV}, the lowest value rendered is:
+\be
+   \dot{q}_{\min}'' = \min( 200,20/\dx ) \quad \hbox{kW/m}^3
+\ee
+where $\dx$ is the grid cell size.
+
+You have the option of rendering the {\ct DENSITY} of any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
@@ -10745,6 +10811,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 {\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct FIRE DEPTH}                                & Section~\ref{info:fire_depth}                 & m              & D            \\ \hline
 {\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
@@ -11040,18 +11107,19 @@ properties be specified as well. Simply prescribing as many properties as possib
 \caption[Comma separated velocity files ({\ct CSVF} namelist group)]{For more information see Section~\ref{info:CSVF}.}
 \label{tbl:CSVF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
 \hline \hline
 \endhead
-{\ct UVWFILE}         & Character      & Section~\ref{info:velo_restart}      &            &         \\ \hline
+{\ct SPECFILE}        & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
+{\ct TMPFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
+{\ct UVWFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
 \end{longtable}
 
-% Undocumented: CSVFILE (Glenn), PER_MESH (deprecated) defaults to T
 
 \vspace{\baselineskip}
 
@@ -11219,7 +11287,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SPEC}                      & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
+{\ct DT\_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
+{\ct DT\_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
 {\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
@@ -11246,6 +11316,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SPEC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_TMP}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
@@ -12219,6 +12291,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -12419,6 +12493,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT\_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct E\_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
 {\ct EMBER\_GENERATION\_HEIGHT(2)}                        & Real            & Section~\ref{info:particle_flux}          & m                   &                         \\ \hline
+{\ct EMBER\_POWER\_MEAN}                                  & Real            & Section~\ref{info:Ember_Ignition}         & kW                  &                         \\ \hline
+{\ct EMBER\_POWER\_SIGMA}                                 & Real            & Section~\ref{info:Ember_Ignition}         & kW                  & 0.001                   \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                                      & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
@@ -12479,6 +12555,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_I}                                          & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_BACK}                                     & Character       & Section~\ref{info:dirichlet}              &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_BACK}                                & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct RAMP\_TMP\_GAS\_FRONT}                               & Character       & Section~\ref{info:BACKING}                &                     &                         \\ \hline
@@ -12515,7 +12592,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_FRONT\_INITIAL}                                 & Real            & Section~\ref{info:adiabatic}              & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_FRONT}                                     & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
 {\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
-{\ct TMP\_INNER}                                          & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
@@ -13416,6 +13493,127 @@ The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted
 
 \end{lstlisting}
 where {\ct DUCT\_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each {\ct DT\_HVAC} output interval.
+
+
+
+
+\section{File Extension Glossary}
+Table~\ref{tbl:fileextensions} provides a quick reference to file extensions used by FDS and Smokeview.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{File Extension Reference Table}
+\label{tbl:fileextensions}
+\begin{tabular}{|c|l|c|}
+\hline
+File extension  & Short Description   & Reference    \\ \hline \hline
+
+% for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
+% The script {\tt check_exts.sh} in the bot repo uses this information to determine which
+% file extensions are documented.
+% If you wish to not document a file extension add the line %ignoreext xxx
+
+%fdsext bf
+{\ct .bf}  & boundary files & Section \ref{out:BNDF}   \\ \hline
+
+%fdsext bingeom
+{\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
+
+%fdsext bnd
+{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - these files contain minimum and maximum values for each time step where file can be
+a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
+
+%fdsext csv
+{\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
+
+%fdsext fds
+{\ct .fds}  & FDS input files & Part \ref{info:inputfilecreation}   \\ \hline
+
+%fdsext be
+%fdsext gbf
+{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS,
+.be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
+
+%fdsext gcf
+{\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
+
+%smvext ini
+{\ct .ini}  & Smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
+
+%fdsext ge
+%fdsext ge2
+{\ct .ge, .ge2}  & \parbox{3.0in}{geometry files. The .ge files contain vertices and faces.
+The .ge2 files also indicate which geom each face belongs too.
+Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
+
+%fdsext gsf
+{\ct .gsf}  & geometry slice files &    \\ \hline
+
+%fdsext iso
+{\ct .iso}  &  isosurface files& Section \ref{out:GEOMETRY_ISO}   \\ \hline
+
+%fdsext out
+{\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
+
+%fdsext gbnd
+{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
+Smokeview computes the min and max bound over all particle files and outputs them to the
+file casename.prt5.gbnd file.}&    \\ \hline
+
+%fdsext prt5
+{\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
+
+%fdsext q
+{\ct .q}  &  Plot3D files& Section \ref{out:PL3D}   \\ \hline
+
+%fdsext restart
+{\ct .restart}  & FDS restart files & Section \ref{info:restart}   \\ \hline
+
+%fdsext s3d
+{\ct .s3d}  & 3D smoke files & Section \ref{out:SMOKE3D}   \\ \hline
+
+%fdsext sf
+{\ct .sf}  & slice files &  Section \ref{out:SLCF}  \\ \hline
+
+%fdsext sinfo
+{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer grid coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
+
+%fdsext smv
+{\ct .smv}  & Smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
+
+%smvext ssf
+{\ct .ssf}  & \parbox{3.0in}{Smokeview script files - contains Smokeview script command used to run Smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
+
+%fdsext sz
+{\ct .sz}  & \parbox{3.0in}{size files - contains size parameters
+for each data frame, used by Smokeview to allocate memory.} & \\ \hline
+
+%fdsext ter
+{\ct .ter}  & \parbox{3.0in}{terrain data files -
+contains geometry information Smokview uses to draw the terrain} & Section \ref{out:TERRAIN_DATA}   \\ \hline
+
+%fdsext txt
+{\ct \_git.txt}  & \parbox{3.0in}{The file casename\_git.txt contains the git revision of the FDS executable used to run the case.} &    \\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+% file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
+%ignoreext bat
+%ignoreext binfo
+%ignoreext end
+%ignoreext err
+%ignoreext log
+%ignoreext qlog
+%ignoreext serr
+%ignoreext slog
+%ignoreext smvlog
+%ignoreext xxx
+
+
 
 %\backmatter
 \nopart %To Fix TOC in PDF output.

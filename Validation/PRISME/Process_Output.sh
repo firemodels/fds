@@ -7,5 +7,5 @@ DDIR=Current_Results
 WDIR=$PDIR/$DIR
 cp $DDIR/*devc.csv $WDIR
 cp $DDIR/*git.txt $WDIR
-cp $DDIR/PRS*hrr.csv $WDIR
+cp $DDIR/PR*hrr.csv $WDIR
 

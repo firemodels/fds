@@ -28,4 +28,6 @@ $QFDS $DEBUG $QUEUE -d $INDIR PRS_SI_D5.fds
 $QFDS $DEBUG $QUEUE -d $INDIR PRS_SI_D6a.fds
 $QFDS $DEBUG $QUEUE -d $INDIR PRS_SI_D6.fds
 
+$QFDS $DEBUG $QUEUE -p 16 -d $INDIR PR2_FES_PA2a.fds
+
 echo FDS cases submitted

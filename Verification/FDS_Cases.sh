@@ -249,6 +249,7 @@ $QFDS -d Heat_Transfer ht3d_energy_conservation_2.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_3.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation.fds
+$QFDS -d Heat_Transfer ht3d_mass_conservation_2.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_network.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_sphere_24.fds
@@ -354,6 +355,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
+$QFDS -p 16 -d Pressure_Solver random_obstructions_fft.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 
@@ -502,6 +504,7 @@ $QFDS -d Restart geom_restart_base_case.fds
 $QFDS -d Restart clocks_restart_a.fds
 $QFDS -d Restart clocks_restart_base_case.fds
 $QFDS -p 4 -d Restart restart_ulmat_a.fds
+$QFDS -p 8 -d Restart csvf_restart_a.fds
 
 $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
