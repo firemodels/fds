@@ -321,17 +321,17 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 
 The radiant heat flux vector $\dbq_{\rm r}''$ is defined
 \be \dbq_{\rm r}''(\bx) = \int_{4\pi} \;  I(\bx,\bs) \, \bs \; \d \Omega   \ee
-The gas phase contribution to the radiative loss term in the energy equation is (under the gray gas assumption)
+The interaction between the electromagneric radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
 \be -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs) \, \d \Omega  \label{net_emission}
 \ee
-For N bands, the gas phase contribution to the radiative loss term in the energy equation is
+This term then appears as a gas phase loss term in the radiation transfer equation. For N bands, the contribution to the radiative source term in the energy equation is
 \be
 -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) = \sum_{n=1}^N  \kappa(\bx) \, U_n(\bx) \, -4 \pi B_n(\bx) \quad
 ; \quad U_n(\bx) = \int_{4\pi} \, I_n(\bx,\bs) \, \d \Omega  \label{net_emission_Nbands}
 \ee
-In words, the net radiant energy gained by a grid cell is the difference between that which is absorbed and that which is emitted.
+In words, the net thermal energy gained by a grid cell from the radiation field is the difference between that which is absorbed and that which is emitted.
 
 \subsection{Correction of the Emission Source Term}
 

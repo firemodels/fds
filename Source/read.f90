@@ -196,7 +196,7 @@ CALL GET_INPUT_FILE
 
 IF (FN_INPUT(1:1)==' ') THEN
    IF (MY_RANK==0) THEN
-      CALL WRITE_SUMMARY_INFO(LU_ERR)
+      CALL WRITE_SUMMARY_INFO(LU_ERR,.FALSE.)
       WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
    ENDIF
    STOP ! this routine is only called before MPI is initialized so safe to STOP here
@@ -5641,7 +5641,7 @@ EVAP_MODEL               = 'RANZ-MARSHALL B-NUMBER'
 INITIAL_TEMPERATURE      = -TMPM - 1._EB
 MASS_TRANSFER_COEFFICIENT = -1._EB   ! kg/m2/s
 HEAT_TRANSFER_COEFFICIENT_GAS = -1._EB   ! W/m2/K
-HEAT_TRANSFER_COEFFICIENT_SOLID = 300._EB   ! W/m2/K
+HEAT_TRANSFER_COEFFICIENT_SOLID = -1._EB ! W/m2/K
 HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
 DIAMETER                 = -1._EB
 MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, sets the largest particle generated when using a size distribution

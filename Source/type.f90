@@ -475,7 +475,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ATOMS(118)=0._EB                   !< Atom count for molecular formula
    REAL(EB) :: MEAN_DIAMETER=1.E-6_EB             !< Diameter for aerosol (m)
    REAL(EB) :: CONDUCTIVITY_SOLID                 !< Thermal conductivity of solid (W/m/K)
-   REAL(EB) :: DENSITY_SOLID                      !< Densith of solid (kg/m3)
+   REAL(EB) :: DENSITY_SOLID                      !< Density of solid (kg/m3)
    REAL(EB) :: BETA_LIQUID                        !< Coefficient of thermal expansion of the liquid (1/K)
    REAL(EB) :: MU_LIQUID                          !< Viscosity of the liquid (kg/m/s)
    REAL(EB) :: K_LIQUID                           !< Conductivity of the liquid (W/m/K)
@@ -601,8 +601,8 @@ END TYPE AIT_EXCLUSION_ZONE_TYPE
 
 
 TYPE REACTION_TYPE
-   CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
-   CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
+   CHARACTER(LABEL_LENGTH) :: FUEL='null' !< Name of reaction fuel species
+   CHARACTER(LABEL_LENGTH) :: ID='null'   !< Identifer of reaction
    CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
