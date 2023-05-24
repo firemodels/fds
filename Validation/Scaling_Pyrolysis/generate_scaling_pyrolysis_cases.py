@@ -521,19 +521,19 @@ def plotMaterialExtraction(x, y, f, label, diff=None, axmin=None, axmax=None, lo
     cinds = {25:0, 50:1, 75:2}
     
     
-    
+    mew = 3
     if diff is not None:
         cases = np.array(list(set(diff)))
         for j in range(0, len(f)):
             caseInd = np.where(cases == diff[j])[0][0]
             #c = 0 if diff[j] > 0 else 1
-            ax.scatter(x[j], y[j], marker=markers[caseInd], s=100, color=colors2[caseInd])
+            ax.scatter(x[j], y[j], marker=markers[caseInd], s=100, facecolors='none', edgecolors=colors2[caseInd], linewidths=mew)
         customMarkers = []
         for caseInd, case in enumerate(cases):
             if labelName is None:
-                customMarkers.append(Line2D([0],[0],marker=markers[caseInd], color='w', markerfacecolor=colors2[caseInd], label=case, markersize=15))
+                customMarkers.append(Line2D([0],[0],marker=markers[caseInd], color='w', markeredgecolor=colors2[caseInd], markerfacecolor='w', label=case, markersize=15, markeredgewidth=mew))
             else:
-                customMarkers.append(Line2D([0],[0],marker=markers[caseInd], color='w', markerfacecolor=colors2[caseInd], label=labelName[case], markersize=15))
+                customMarkers.append(Line2D([0],[0],marker=markers[caseInd], color='w', markeredgecolor=colors2[caseInd], markerfacecolor='w', label=labelName[case], markersize=15, markeredgewidth=mew))
         
         #minFlux = -50
         #maxFlux = 50
@@ -1031,7 +1031,7 @@ if __name__ == "__main__":
         
         
         
-        i = 3
+        i = 2
         label = labels[i]
         axmax = axmaxes[i]
         u = uncertainties[i]
