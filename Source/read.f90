@@ -4483,10 +4483,10 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          REACTION(NR)%SPEC_ID_NU_READ(3)  = RN2%FUEL
          RN2%SPEC_ID_NU_READ(1) = RN2%FUEL
          RN2%SPEC_ID_NU_READ(2) = 'AIR'
-         IF (RN%ID=='null') THEN
+         IF (REACTION(NR)%ID=='null') THEN
             RN2%ID='null'
          ELSE
-            RN2%ID=TRIM(RN%ID)//'_2'
+            RN2%ID=TRIM(REACTION(NR)%ID)//'_2'
          ENDIF
       ENDIF
    ENDIF SIMPLE_IF
