@@ -798,7 +798,7 @@ adds the contents of the two listed files into the current input file. Up to 20 
 
 When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=F} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
 
-\section{Stopping and Restarting Calculations}
+\section{Stopping and Restarting Calculations ({\tt .restart})}
 \label{info:restart}
 
 An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=T} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you will also need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation. To restart this job from where it left off, add {\ct RESTART=T} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct F} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
@@ -12931,7 +12931,7 @@ File Name  & Description  \\ \hline \hline
 
 The output from the code consists of the file {\ct CHID.out}, plus various data files that are described below. Most of these output files are written out by the subroutines within {\ct dump.f90}, and can easily be modified to accommodate various plotting packages.
 
-\section{Diagnostic Output}
+\section{Diagnostic Output ({\tt .out})}
 \label{out:file}
 
 The file {\ct CHID.out} contains diagnostic output, including an accounting of various important quantities, including CPU usage. Typically, diagnostic information is printed out every 100 time steps as follows:
@@ -12952,9 +12952,9 @@ The {\ct Time Step} indicates the total number of iterations. The date and time 
 
 Following the completion of a successful run, a summary of the CPU usage per subroutine is listed in the file called {\ct CHID\_cpu.csv} (Section~\ref{out:CPU}). This is useful in determining where most of the computational effort is being placed.
 
-\section{Heat Release Rate and Related Quantities}
-
+\section{Heat Release Rate and Related Quantities ({\tt \_hrr.csv})}
 \label{out:hrr}
+
 The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
 called {\ct CHID\_hrr.csv}. The format of the file is as follows
 \begin{lstlisting}
@@ -12964,11 +12964,11 @@ T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ...
 T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...
             .
             .
- \end{lstlisting}
+\end{lstlisting}
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you. The background pressure is discussed in Section~\ref{info:ZONE}.
 
 
-\section{Device Output Data}
+\section{Device Output Data ({\tt \_devc.csv})}
 \label{out:DEVC}
 
 Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma delimited format in a file called {\ct CHID\_devc.csv}. The format of the file is as follows:
@@ -13042,7 +13042,7 @@ The total mass of the various gas species at any instant in time is reported in 
 You must specifically ask that this file be generated, as it can potentially cost a fair amount of CPU time to generate. Set {\ct MASS\_FILE=T} on the {\ct DUMP} line to create this output file.
 
 
-\section{Slice Files}
+\section{Slice Files ({\tt .sf})}
 \label{out:SLCF}
 
 The slice files defined under the namelist group {\ct SLCF} are named {\ct CHID\_$n$.sf} ($n$=01,02...), and are written out unformatted, unless otherwise directed. These files are written out from {\ct dump.f90} with the following lines:
@@ -13062,7 +13062,7 @@ WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
 
 There is a short Fortran 90 program provided, called {\ct fds2ascii.f90}, that can convert slice files into text files that can be read into a variety of graphics packages. The program combines multiple slice files corresponding to the same ``slice'' of the computational domain, time-averages the data, and writes the values into one file, consisting of a line of numbers for each node. Each line contains the physical coordinates of the node, and the time-averaged quantities corresponding to that node. In particular, the graphics package Tecplot reads this file and produces contour, streamline and/or vector plots. See Section~\ref{info:fds2ascii} for more details about the program {\ct fds2ascii}.
 
-\section{Plot3D Data}
+\section{Plot3D Data ({\tt .xyz,.q})}
 \label{out:PL3D}
 
 Quantities over the entire mesh can be output in a format used by the graphics package Plot3D. The Plot3D data sets are single precision (32 bit reals), whole and unformatted. Note that there is blanking, that is, blocked out data points are not plotted. If the statement {\ct WRITE\_XYZ=T} is included on the {\ct DUMP} line, then the mesh data is written out to a file called {\ct CHID.xyz}
@@ -13086,7 +13086,7 @@ The five channels {\ct N=1,5} are by default the temperature ($^\circ$C), the $u
 Smokeview can display the Plot3D data. In addition, the Plot3D data sets can be read into some other graphics programs that accept the data format. This particular format is very convenient, and recognized by a number of graphics packages.
 
 
-\section{Boundary Files}
+\section{Boundary Files ({\tt .bf})}
 \label{out:BNDF}
 
 The boundary files defined under the namelist group {\ct BNDF} are named {\ct CHID\_$n$.bf} ($n$=0001,0002...), and are written out unformatted. These files are written out from {\ct dump.f90} with the following lines:
@@ -13110,7 +13110,7 @@ WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
 only program available to view the boundary files.
 
-\section{Particle Data}
+\section{Particle Data ({\tt .prt5})}
 \label{out:PART}
 
 Coordinates and specified quantities related to tracer particles, sprinkler droplets, and other Lagrangian particles are written
@@ -13165,7 +13165,7 @@ WRITE(LU_PROF) T,NWP+1,(X_S(I),I=0,NWP),(Q(I),I=0,NWP)
 \end{lstlisting}
 After the time {\ct T}, the number of node points is given and then the node coordinates. These are written out at every time step because the wall thickness and the local solid phase mesh may change over time due to the solid phase reactions. Array {\ct Q} contains the values of the output quantity, which may be wall temperature, density or component density.
 
-\section{3-D Smoke Files}
+\section{3-D Smoke Files ({\tt .s3d})}
 \label{out:SMOKE3D}
 
 3-D smoke files contain alpha values used by Smokeview to draw semi-transparent planes representing smoke and fire. FDS outputs 3-D smoke data at fixed time intervals.  A {\em pseudo-code} representation of the 3-D smoke file is given by:
@@ -13182,7 +13182,7 @@ The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine
 
 
 
-\section{Geometry, Isosurface Files}
+\section{Geometry, Isosurface Files ({\tt .iso})}
 \label{out:GEOMETRY_ISO}
 
 Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
@@ -13216,9 +13216,10 @@ ELSE IF (GEOM_TYPE.EQ.1) THEN
   ! dynamic time step
   WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
 ENDIF
-              .
-              .
 \end{lstlisting}
+
+\noindent where:
+
 \begin{itemize}
 \item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
 \item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
@@ -13235,7 +13236,7 @@ ENDIF
 \item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry.
 \end{itemize}
 
-\section{Geometry Data Files}
+\section{Geometry Data Files ({\tt .be})}
 \label{out:GEOMETRY_DATA}
 
 The geometry data file contains a description of data values computed by FDS on an immersed
@@ -13267,7 +13268,7 @@ The data values written out in this file correspond to the geometry written out 
 \end{itemize}
 
 
-\section{Terrain Data Files}
+\section{Terrain Data Files ({\tt .ter})}
 \label{out:TERRAIN_DATA}
 
 For simulations involving outdoor terrain, files of the form {\ct CHID\_NM.ter} are created for each mesh with some terrain cutting through. The write statements are:
@@ -13283,11 +13284,11 @@ WRITE(LU_TERRAIN(NM)) ((Z_TERRAIN(I,J),J=0,M%JBAR),I=0,M%IBAR)
 
 \ifcompgeom
 
-\section{FDS GEOM I/O binary format}
+\section{FDS GEOM I/O binary format ({\tt .bingeom})}
 \label{inout:bingeom}
 
 The binary format for geometries read by FDS as described in section~\ref{subsec:readbin} is the following. Binary files read by the FDS released precompiled bundles must have \textit{little endian} endianness.
-%
+
 \begin{lstlisting}
 
 WRITE(LU_BINGEOM) GEOM_TYPE
@@ -13299,7 +13300,7 @@ WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
 
 \end{lstlisting}
 
-where:
+\noindent where:
 
 \begin{itemize}
   \item {\ct GEOM\_TYPE} Integer equal to 1 for CAD geometries, and 2 for terrains (top surfaces only). All FDS analytical geometries, including extruded POLYs, are written to binary as general CAD geometries.
@@ -13311,7 +13312,7 @@ where:
 \end{itemize}
 
 
-\subsection{SMV Unstructured Geometry}
+\section{Unstructured Geometry ({\tt .ge})}
 \label{out:GEOMETRY}
 
 Immersed geometric objects are stored for SMV reading using a file format described below.
@@ -13366,7 +13367,7 @@ ENDIF
 \end{itemize}
 
 
-\subsection{Unstructured Data}
+\section{Unstructured Data}
 
 \label{out:GEOMETRYDATA}
 
@@ -13545,13 +13546,12 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 {\ct .bf}        & Boundary files                              & Section \ref{out:BNDF}                              \\ \hline
 {\ct .bingeom}   & Binary geometry files                       & Section \ref{inout:bingeom}                         \\ \hline
 {\ct .bnd}       & Min/Max Bound files                         & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
-{\ct .csv}       & Device files                                & Section \ref{out:DEVC}                              \\ \hline
 {\ct .fds}       & FDS input files                             & FDS User's Guide Part \ref{info:inputfilecreation}  \\ \hline
 {\ct .gbf}       & Geometry boundary files                     & Section \ref{out:GEOMETRY_DATA}                     \\ \hline
-{\ct .gcf}       & Cface geometry files                        &                                                     \\ \hline
+{\ct .gcf}       & Cface geometry files                        & Undocumented                                        \\ \hline
 {\ct .ge}        & Geometry vertices and faces                 & Section \ref{out:GEOMETRY}                          \\ \hline
-{\ct .ge2}       & Geometry face properties                    & Section \ref{out:GEOMETRY}                          \\ \hline
-{\ct .gsf}       & Geometry slice files                        &                                                     \\ \hline
+{\ct .ge2}       & Geometry face properties                    & Undocumented                                        \\ \hline
+{\ct .gsf}       & Geometry slice files                        & Undocumented                                        \\ \hline
 {\ct .ini}       & Smokeview configuration files               & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
 {\ct .iso}       & Isosurface files                            & Section \ref{out:GEOMETRY_ISO}                      \\ \hline
 {\ct .out}       & FDS output log files                        & Section \ref{out:file}                              \\ \hline
@@ -13564,9 +13564,13 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 {\ct .sinfo}     & Slice parameter files                       & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
 {\ct .smv}       & Smokeview files                             & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
 {\ct .ssf}       & Smokeview script files                      & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .stop}      & If present, stops a simulation gracefully   & Section \ref{info:restart}                          \\ \hline
 {\ct .sz}        & Size files for Smokeview memory allocation  &                                                     \\ \hline
 {\ct .ter}       & Terrain data files                          & Section \ref{out:TERRAIN_DATA}                      \\ \hline
+{\ct .xyz}       & Plot3D mesh files                           & Section \ref{out:PL3D}                              \\ \hline
+{\ct \_devc.csv} & Device files                                & Section \ref{out:DEVC}                              \\ \hline
 {\ct \_git.txt}  & Git revision                                &                                                     \\ \hline
+{\ct \_hrr.csv}  & Heat Release Rate files                     & Section \ref{out:hrr}                               \\ \hline
 
 \end{tabular}
 \end{center}
