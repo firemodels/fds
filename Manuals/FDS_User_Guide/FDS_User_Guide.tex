@@ -6099,7 +6099,7 @@ When a liquid\footnote{Solid particles do not stick to solid surfaces by default
 
 When a liquid droplet hits a solid surface, it is assumed to form a thin film that is assumed to be no less than 0.00001~m thick. This value, {\ct MINIMUM\_FILM\_THICKNESS} (m), can be changed on the {\ct MISC} line. The diameter of the droplet, once it strikes a solid surface, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line in units of $\mu$m.
 
-The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K. 
+The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K.
 
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=T} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
@@ -13515,86 +13515,58 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 % If you wish to not document a file extension add the line %ignoreext xxx
 
 %fdsext bf
-{\ct .bf}  & boundary files & Section \ref{out:BNDF}   \\ \hline
-
 %fdsext bingeom
-{\ct .bingeom}  & binary geometry files &  Section \ref{inout:bingeom}  \\ \hline
-
 %fdsext bnd
-{\ct .file.bnd}  & \parbox[c]{3.0in}{bound files - these files contain minimum and maximum values for each time step where file can be
-a boundary (.bf), particle (.prt5) or slice (.sf) file.} &  Smokeview Users Guide  \\ \hline
-
 %fdsext csv
-{\ct .csv}  & spreadsheet/device files & Section \ref{out:DEVC}   \\ \hline
-
 %fdsext fds
-{\ct .fds}  & FDS input files & Part \ref{info:inputfilecreation}   \\ \hline
-
 %fdsext be
 %fdsext gbf
-{\ct .gbf, .be}  & \parbox[c]{3.0in}{geometry boundary files.  .gbf files contain data computed by FDS,
-.be files contain the geometry or location of the data in the .gbf file.} &  Section \ref{out:GEOMETRY_DATA}  \\ \hline
-
 %fdsext gcf
-{\ct .gcf}  & \parbox{3.0in}{cface geometry files - vertices and faces used by FDS} &    \\ \hline
-
 %smvext ini
-{\ct .ini}  & Smokeview configuration files & Smokeview Users Guide Appendix D.3  \\ \hline
-
 %fdsext ge
 %fdsext ge2
-{\ct .ge, .ge2}  & \parbox{3.0in}{geometry files. The .ge files contain vertices and faces.
-The .ge2 files also indicate which geom each face belongs too.
-Smokeview uses geom properties when drawing faces.} & Section \ref{out:GEOMETRY} \\ \hline
-
 %fdsext gsf
-{\ct .gsf}  & geometry slice files &    \\ \hline
-
 %fdsext iso
-{\ct .iso}  &  isosurface files& Section \ref{out:GEOMETRY_ISO}   \\ \hline
-
 %fdsext out
-{\ct .out}  & FDS output files & Section \ref{out:file}   \\ \hline
-
 %fdsext gbnd
-{\ct .prt5.gbnd}  &  \parbox[c]{3.0in}{bound file for all particle files.
-Smokeview computes the min and max bound over all particle files and outputs them to the
-file casename.prt5.gbnd file.}&    \\ \hline
-
 %fdsext prt5
-{\ct .prt5}  & particle files & Section \ref{out:PART}   \\ \hline
-
 %fdsext q
-{\ct .q}  &  Plot3D files& Section \ref{out:PL3D}   \\ \hline
-
 %fdsext restart
-{\ct .restart}  & FDS restart files & Section \ref{info:restart}   \\ \hline
-
 %fdsext s3d
-{\ct .s3d}  & 3D smoke files & Section \ref{out:SMOKE3D}   \\ \hline
-
 %fdsext sf
-{\ct .sf}  & slice files &  Section \ref{out:SLCF}  \\ \hline
-
 %fdsext sinfo
-{\ct .sinfo}  & \parbox{3.0in}{slice parameter files - contains integer grid coordinates for the slice file} &  Smokeview Users Guide  \\ \hline
-
 %fdsext smv
-{\ct .smv}  & Smokeview files & Smokeview Users Guide Appendix D.4   \\ \hline
-
 %smvext ssf
-{\ct .ssf}  & \parbox{3.0in}{Smokeview script files - contains Smokeview script command used to run Smokeview in batch mode} &   Smokeview Users Guide Chapter 9 \\ \hline
-
 %fdsext sz
-{\ct .sz}  & \parbox{3.0in}{size files - contains size parameters
-for each data frame, used by Smokeview to allocate memory.} & \\ \hline
-
 %fdsext ter
-{\ct .ter}  & \parbox{3.0in}{terrain data files -
-contains geometry information Smokview uses to draw the terrain} & Section \ref{out:TERRAIN_DATA}   \\ \hline
-
 %fdsext txt
-{\ct \_git.txt}  & \parbox{3.0in}{The file casename\_git.txt contains the git revision of the FDS executable used to run the case.} &    \\ \hline
+
+{\ct .be}        & Position of data in {\ct .gbf} file         & Section \ref{out:GEOMETRY_DATA}                     \\ \hline
+{\ct .bf}        & Boundary files                              & Section \ref{out:BNDF}                              \\ \hline
+{\ct .bingeom}   & Binary geometry files                       & Section \ref{inout:bingeom}                         \\ \hline
+{\ct .bnd}       & Min/Max Bound files                         & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .csv}       & Device files                                & Section \ref{out:DEVC}                              \\ \hline
+{\ct .fds}       & FDS input files                             & FDS User's Guide Part \ref{info:inputfilecreation}  \\ \hline
+{\ct .gbf}       & Geometry boundary files                     & Section \ref{out:GEOMETRY_DATA}                     \\ \hline
+{\ct .gcf}       & Cface geometry files                        &                                                     \\ \hline
+{\ct .ge}        & Geometry vertices and faces                 & Section \ref{out:GEOMETRY}                          \\ \hline
+{\ct .ge2}       & Geometry face properties                    & Section \ref{out:GEOMETRY}                          \\ \hline
+{\ct .gsf}       & Geometry slice files                        &                                                     \\ \hline
+{\ct .ini}       & Smokeview configuration files               & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .iso}       & Isosurface files                            & Section \ref{out:GEOMETRY_ISO}                      \\ \hline
+{\ct .out}       & FDS output log files                        & Section \ref{out:file}                              \\ \hline
+{\ct .prt5.gbnd} & Global bounds of all particle files         &                                                     \\ \hline
+{\ct .prt5}      & Particle files                              & Section \ref{out:PART}                              \\ \hline
+{\ct .q}         & Plot3D files                                & Section \ref{out:PL3D}                              \\ \hline
+{\ct .restart}   & FDS restart files                           & Section \ref{info:restart}                          \\ \hline
+{\ct .s3d}       & 3D smoke files                              & Section \ref{out:SMOKE3D}                           \\ \hline
+{\ct .sf}        & Slice files                                 & Section \ref{out:SLCF}                              \\ \hline
+{\ct .sinfo}     & Slice parameter files                       & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .smv}       & Smokeview files                             & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .ssf}       & Smokeview script files                      & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
+{\ct .sz}        & Size files for Smokeview memory allocation  &                                                     \\ \hline
+{\ct .ter}       & Terrain data files                          & Section \ref{out:TERRAIN_DATA}                      \\ \hline
+{\ct \_git.txt}  & Git revision                                &                                                     \\ \hline
 
 \end{tabular}
 \end{center}
