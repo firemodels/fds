@@ -535,6 +535,7 @@ INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
 REAL(EB), POINTER, DIMENSION(:) :: RDXNP
 TYPE (MESH_TYPE), POINTER :: M
+LOGICAL :: SINGULAR_CASE
 
 TNOW=CURRENT_TIME()
 
@@ -637,10 +638,20 @@ ELSE  ! MPI process 0 receives matrix components and solves tri-diagonal linear 
       TP_DD(I) = TP_DD(I) - RR*TP_AA(I-1)
       TP_CC(I) = TP_CC(I) - RR*TP_CC(I-1)
    ENDDO TRIDIAGONAL_SOLVER_1
-   TP_CC(TUNNEL_NXP)  = TP_CC(TUNNEL_NXP)/TP_DD(TUNNEL_NXP)
+   IF (ABS(TP_DD(TUNNEL_NXP))>TWO_EPSILON_EB) THEN
+      TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP)/TP_DD(TUNNEL_NXP)
+      SINGULAR_CASE = .FALSE.
+   ELSE  ! Singular matrix when both sides of tunnel have Neumann BC
+      TP_CC(TUNNEL_NXP) = 1._EB
+      SINGULAR_CASE = .TRUE.
+   ENDIF
    TRIDIAGONAL_SOLVER_2: DO I=TUNNEL_NXP-1,1,-1
       TP_CC(I) = (TP_CC(I) - TP_AA(I)*TP_CC(I+1))/TP_DD(I)
    ENDDO TRIDIAGONAL_SOLVER_2
+
+   ! In the SINGULAR_CASE, the solution is unique up to a constant. Set the constant so that the average value is zero.
+
+   IF (SINGULAR_CASE) TP_CC(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP) - SUM(TP_CC(1:TUNNEL_NXP))/REAL(TUNNEL_NXP,EB)
 
 ENDIF
 
