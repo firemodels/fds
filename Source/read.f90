@@ -5958,6 +5958,10 @@ READ_PROP_LOOP: DO N=0,N_PROP
    ELSE
       PY%SPRAY_PATTERN_INDEX = 0
    ENDIF
+   IF (ABS(SPRAY_ANGLE(1,1)-SPRAY_ANGLE(2,1))<TWO_EPSILON_EB .OR. ABS(SPRAY_ANGLE(1,2)-SPRAY_ANGLE(2,2))<TWO_EPSILON_EB) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: The two values for SPRAY_ANGLE cannot be the same.'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
    PY%SPRAY_ANGLE = SPRAY_ANGLE*DEG2RAD
    IF(ANY(PY%SPRAY_ANGLE(1:2,2)<0)) PY%SPRAY_ANGLE(1:2,2)=PY%SPRAY_ANGLE(1:2,1)
    SPRAY_PATTERN_MU=SPRAY_PATTERN_MU*DEG2RAD
@@ -6187,7 +6191,7 @@ SPEC_ID                  = 'null'
 SPRAY_ANGLE(1,1)           = 60._EB      ! degrees
 SPRAY_ANGLE(2,1)           = 75._EB      ! degrees
 SPRAY_ANGLE(1,2)           = -999._EB      ! degrees
-SPRAY_ANGLE(2,2)           = -999._EB      ! degrees
+SPRAY_ANGLE(2,2)           = -998._EB      ! degrees
 SPRAY_PATTERN_TABLE      = 'null'
 SPRAY_PATTERN_SHAPE      = 'GAUSSIAN'
 SPRAY_PATTERN_MU         = -1._EB
