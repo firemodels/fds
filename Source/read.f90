@@ -3942,6 +3942,13 @@ G_F_Z = 0._EB
 
 SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
    SM => SPECIES_MIXTURE(N)
+   IF (SM%EVAPORATING) THEN
+      IF (.NOT. ALLOCATED(SPECIES(SM%SINGLE_SPEC_INDEX)%C_P_L)) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SM%ID),&
+                                    ' is used for a liquid particle and does not have liquid properties.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+   ENDIF
    D_TMP_Z  = -1._EB
    MU_TMP_Z = -1._EB
    K_TMP_Z  = -1._EB
