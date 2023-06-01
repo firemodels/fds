@@ -974,6 +974,48 @@ The materials studied in this work included black poly(methyl methacrylate) (PMM
 The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
 
+\section{Lattimer Tilted Wall}
+\label{Lattimer_Tilted_Wall_Description}
+
+Lattimer with Fire Science Solutions measured the heat flux and gas temperatures from a propane fire against to a tilted wall.
+The experiments were sponsored by Fire Science Solutions, LLC. and were conducted at Virginia Tech in Blacksburg, VA.
+The wall was 1.5~m high and 0.90~m wide, with the sand burner centered on the wall.
+All experiments used a square sand burner with a side length of 0.30~m.
+The fires ranged in size from 20~kW to 75~kW.
+Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall.
+The wall was tilted through a linear actuator attached the the back of the mounting frame.
+The majority of tests moved the wall during exposure to evaluate the impacts on flame separation.
+A picture of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}.
+A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
+
+\begin{table}[!htb]
+\caption[Summary of JH/FRA Rail Car Experiments]{Summary of Lattimer Tilted Wall Experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Test & HRR  & Angles    & Delay Before Movement & Movement Time Between Angles & Delay at Each Angle & Test Duration \\
+No.  & (kW) & (degrees) & (s)                   & (s)                          & (s)                 & (s)           \\ \hline \hline
+1    & 35   & 0-67      & 75                    & 24                           & 0                   & 155           \\ \hline
+2    & 50   & 0-67      & 75                    & 23                           & 0                   & 130           \\ \hline
+3    & 75   & 0-67      & 75                    & 23                           & 0                   & 145           \\ \hline
+4    & 50   & 0, 11, 23, 35, 49, 67  & 255      & 4                            & 296                 & 1800          \\ \hline
+5    & 20   & 0, 10, 20 &                       &                              &                     &               \\ \hline
+\end{tabular}
+\end{center}
+\label{Lattimer_Tilted_Wall_tab}
+\end{table}
+
+\begin{figure}[h!]
+\includegraphics[width=0.98\textwidth]{FIGURES/Lattimer_Tilted_Wall/lattimer_tilted_wall_apparatus}
+\caption[Lattimer tilted wall apparatus]{Lattimer tilted wall apparatus.}
+\label{Lattimer_Tilted_Wall_fig}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The main case from this study used at this time is case 4 since the wall was held at each angle for close to 5 minutes.
+Each of these tilt angles are simulated neglecting the time history before arriving at the angle.
+The other cases are simulated at the start and end angles since the wall was held at that point for at least 30 seconds.
 
 
 \section{LEMTA Spray Test for Radiation Attenuation}
