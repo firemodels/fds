@@ -285,7 +285,23 @@ def estimateExposureFlux(coneExposure, representativeHRRPUA):
     surface heat transfer coefficient of 15 W/m2-K and a fixed
     gas phase radiative fraction of 0.35.
     '''
-    exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
+    #exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
+    #exposureFlux = 73.5*(representativeHRRPUA**0.045) - 50 + coneExposure
+    
+    #exposureFlux = 15+0.0175*representativeHRRPUA + coneExposure # Linear 15 to 50
+    exposureFlux = min([15+0.02*representativeHRRPUA, 25]) + coneExposure # Linear 15 to 50
+    
+    #exposureFlux = coneExposure + 35
+    #exposureFlux = 2.4183 * (representativeHRRPUA**(0.3837)) + coneExposure # flame volume with Tinf 900 K, h=15, kf based on Lf
+    #exposureFlux = 1.4694 * (representativeHRRPUA**(0.4496)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    
+    #exposureFlux = 0.7738 * (representativeHRRPUA**(0.6123)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    #exposureFlux = 0.9723 * (representativeHRRPUA**(0.5404)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    #exposureFlux = 1.0341 * (representativeHRRPUA**(0.5127)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    #exposureFlux = 0.9444 * (representativeHRRPUA**(0.5517)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    #exposureFlux = 1.0537 * (representativeHRRPUA**(0.5031)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    #exposureFlux = 1.1607 * (representativeHRRPUA**(0.4461)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
+    
     return exposureFlux
 
 def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
@@ -320,7 +336,7 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
     if calculateDevcDt:
         NFRAMES = 1200/1.
         DT_DEVC = tend/NFRAMES
-        
+    if ignitionMode == 'Time': Tign = 20
     txt = "&HEAD CHID='%s', /\n"%(chid)
     txt = txt+"&TIME DT=1., T_END=%0.1f /\n"%(tend)
     txt = txt+"&DUMP DT_CTRL=%0.1f, DT_DEVC=%0.1f, DT_HRR=%0.1f, SIG_FIGS=4, SIG_FIGS_EXP=2, /\n"%(DT_DEVC, DT_DEVC, DT_DEVC)
@@ -439,22 +455,24 @@ def findFds():
   
 def calculateUncertainty(x, y):
     sigma_e = 0.075
-    if np.var(np.log(y / x)) - (sigma_e**2) < 0:
+    mask = np.logical_and(~np.isnan(np.array(x, dtype=float)),
+                          ~np.isnan(np.array(y, dtype=float)))
+    if np.var(np.log(y[mask] / x[mask])) - (sigma_e**2) < 0:
         sigma_m = sigma_e
     else:
-        sigma_m = (np.var(np.log(y / x)) - (sigma_e**2))**0.5
+        sigma_m = (np.var(np.log(y[mask] / x[mask])) - (sigma_e**2))**0.5
     #sigma_m2 = np.var(np.log(y / x)) / 2
-    sigma_m = np.max([sigma_m, sigma_e])
-    delta = np.exp(np.mean(np.log(y / x)) + (sigma_m**2)/2 - (sigma_e**2)/2)
+    sigma_m = np.nanmax([sigma_m, sigma_e])
+    delta = np.exp(np.mean(np.log(y[mask] / x[mask])) + (sigma_m**2)/2 - (sigma_e**2)/2)
     return delta, sigma_m, sigma_e, np.log(y/x)
 
 def calculateUncertaintyBounds(flatx, flaty, flatFlux, split=False):
-    d2 = pd.DataFrame(np.array([flatx, flaty, flatFlux]).T, columns=['exp','mod','flux'])
-    d2[d2 == 0] = np.nan
+    d = pd.DataFrame(np.array([flatx, flaty, flatFlux]).T, columns=['exp','mod','flux'])
+    d[d == 0] = np.nan
     #d2[d2 < 0] = np.nan
-    mask = np.logical_and(~np.isnan(np.array(d2.values[:,0], dtype=float)),
-                          ~np.isnan(np.array(d2.values[:,1], dtype=float)))
-    d = d2.loc[mask]
+    mask = np.logical_and(~np.isnan(np.array(d.values[:,0], dtype=float)),
+                          ~np.isnan(np.array(d.values[:,1], dtype=float)))
+    d2 = d.loc[mask]
     if split:
         uniqueFluxes = np.unique(flatFlux)
         delta = dict()
@@ -469,7 +487,7 @@ def calculateUncertaintyBounds(flatx, flaty, flatFlux, split=False):
     else:
         (x, y) = (np.array(d['exp'].values, dtype=float), np.array(d['mod'].values, dtype=float))
         delta, sigma_m, sigma_e, points = calculateUncertainty(x, y)
-        num_points = x.shape[0]
+        num_points = d2.shape[0]
     return delta, sigma_m, sigma_e, num_points, points
 
 def getNewColors():
@@ -524,6 +542,7 @@ def plotMaterialExtraction(x, y, f, label, diff=None, axmin=None, axmax=None, lo
     mew = 3
     if diff is not None:
         cases = np.array(list(set(diff)))
+        cases.sort()
         for j in range(0, len(f)):
             caseInd = np.where(cases == diff[j])[0][0]
             #c = 0 if diff[j] > 0 else 1
@@ -641,6 +660,29 @@ def getNormalStats(delta, sigma_m):
     
     return mu, var
 
+def preprocessConeData(time, hrrpua, truncateTime=False, truncateBelow=10, 
+                       energyThreshold=0.01, filterWidth=101):
+    if truncateTime is not False:  hrrpua[time > truncateTime, :] = 0
+    if truncateBelow is not False: hrrpua[hrrpua < truncateBelow] = 0
+    NT = int(1+np.ceil(time.max())/0.1)
+    time_interp = np.linspace(0, np.ceil(time.max()), NT)
+    hrrpuas_interp = np.interp(time_interp, time, hrrpua)
+    fil = np.ones(filterWidth)/filterWidth
+    hrrpuas_interp_filtered = np.convolve(hrrpuas_interp, fil, mode='same')
+    
+    inds = np.where(~np.isnan(hrrpuas_interp_filtered))
+    totalEnergy = np.trapz(hrrpuas_interp_filtered[inds], time_interp[inds])
+    
+    totalEnergy2 = 0
+    ind2 = 1
+    while totalEnergy2 < energyThreshold * totalEnergy:
+        ind2 = ind2 + 1
+        totalEnergy2 = np.trapz(hrrpuas_interp_filtered[:ind2], time_interp[:ind2])
+    tign = time_interp[ind2-1]
+    hrrpuas_interp_filtered[time_interp < tign] = 0
+    return time_interp, hrrpuas_interp_filtered
+
+
 if __name__ == "__main__":
     
     fdsdir, fdscmd = findFds()
@@ -673,7 +715,7 @@ if __name__ == "__main__":
     uncertainty['MaterialClass'] = []
     
     runSimulations = True
-    showStats = False
+    showStats = True
     closePlots = False
     
     for i in range(1, specificationFile.shape[0]):
@@ -700,6 +742,7 @@ if __name__ == "__main__":
         density = specificationFile.iloc[i]['Density']
         emissivity = specificationFile.iloc[i]['Emissivity']
         thickness = specificationFile.iloc[i]['Thickness']
+        preprocess = specificationFile.iloc[i]['Preprocess']
         
         resultDir = specificationFile.iloc[i]['ResultDir'].replace('\\\\','\\').replace('"','')
         if os.path.exists(resultDir) is not True: os.mkdir(resultDir)
@@ -773,6 +816,9 @@ if __name__ == "__main__":
             # Identify time to ignition
             HRRs = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceHrrpuaColumn].values
             times = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceTimeColumn].values
+        if preprocess != '':
+            times, HRRs = preprocessConeData(times, HRRs)
+        
         #targetTimes, HRRs_interp = interpolateExperimentalData(times, HRRs, targetDt=15, filterWidth=False)
         tign, times_trimmed, hrrs_trimmed = findLimits(times, HRRs)
             
@@ -783,9 +829,16 @@ if __name__ == "__main__":
             if multipleFiles:
                 HRRs_v = exp_data[hrrpuaColumn]
                 times_v = exp_data[timeColumn]
+                if preprocess != '':
+                    times_v, HRRs_v = preprocessConeData(times_v, HRRs_v)
+                    exp_data[hrrpuaColumn] = HRRs_v
+                    exp_data[timeColumn] = times_v
             else:
                 HRRs_v = exp_data.loc[~np.isnan(exp_data[timeColumn]),hrrpuaColumn].values
                 times_v = exp_data.loc[~np.isnan(exp_data[timeColumn]),timeColumn].values
+                if preprocess != '':
+                    times_v2, HRRs_v2 = preprocessConeData(times_v, HRRs_v)
+                    exp_data[hrrpuaColumn].values[:times_v.shape[0]] = np.interp(times_v, times_v2, HRRs_v2)
             tign_v = findIgnitionTime(times_v, HRRs_v)
             tigns[fluxes[ii]] = tign_v
         
@@ -933,6 +986,32 @@ if __name__ == "__main__":
     material_data = material_output_data.T
     
     
+    uncertainty['MaterialClass2'] = [x if (('Others' not in x) and ('Composites' not in x)) else 'Others & Composites' for x in uncertainty['MaterialClass']]
+    uncertainty['series2'] = [x if (('JH' not in x)) else 'JH' for x in uncertainty['series']]
+    
+    uncertainties = [60, 180, 300, 't_peak', 'peak']
+    for u in uncertainties:
+        outDict = dict()
+        x = np.array(uncertainty[u]['EXP'])
+        y = np.array(uncertainty[u]['MOD'])
+        f = np.array(uncertainty['flux'])
+        diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
+        delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=False)
+        
+        outDict['series'] = uncertainty['series2']
+        outDict['material'] = uncertainty['material']
+        outDict['MaterialClass'] = uncertainty['MaterialClass']
+        outDict['f'] = f
+        outDict['delta'] = uncertainty['delta']
+        outDict['direction'] = diff2
+        outDict['x'] = x
+        outDict['y'] = y
+        outDict['points'] = points
+        outDf = pd.DataFrame(outDict)
+        outDf.to_csv('statistics_point_data_%s_summary.csv'%(u))
+        
+
+    
     if showStats:
         axmin, axmax = (1e1, 1e4)
         
@@ -965,21 +1044,13 @@ if __name__ == "__main__":
                     fname = os.path.join(figoutdir, 'statistics_nolog_direction_%s.png'%(label))
                 plt.savefig(fname, dpi=300)
                 plt.close()
-                
-                
-                
-                print(label, "\tBias\tSigma_m")
-                delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=False)
-                print("Total\t\t%0.4f\t%0.4f"%(delta, sigma_m))
-                delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
-                print("Lower\t\t%0.4f\t%0.4f"%(delta[-1], sigma_m[-1]))
-                print("Upper\t\t%0.4f\t%0.4f"%(delta[1], sigma_m[1]))
         
         
         
         cases = np.array(uncertainty['case'])
         uncertainties = [60, 't_peak', 'peak']
         labels = ['60s Avg', 'Time to Peak', 'Peak']
+        labelNames = {'Mixtures' : 'Mixtures', 'Polymers' : 'Polymers', 'Wood-Based' : 'Wood-Based', 'Others' : 'Others'}
         
         for loglog in [False, True]:
             if loglog:
@@ -995,7 +1066,7 @@ if __name__ == "__main__":
                 x = np.array(uncertainty[u]['EXP'])
                 y = np.array(uncertainty[u]['MOD'])
                 f = np.array(uncertainty['flux'])
-                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['MaterialClass'], axmin=axmin, axmax=axmax, loglog=loglog)
+                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['MaterialClass'], axmin=axmin, axmax=axmax, loglog=loglog, labelName=labelNames)
                 if loglog:
                     fname = os.path.join(figoutdir, 'statistics_loglog_matclass_%s.png'%(label))
                 else:
@@ -1006,6 +1077,9 @@ if __name__ == "__main__":
         cases = np.array(uncertainty['case'])
         uncertainties = [60, 't_peak', 'peak']
         labels = ['60s Avg', 'Time to Peak', 'Peak']
+        labelNames = {}
+        for case in list(np.unique(uncertainty['series2'])):
+            labelNames[case] = case.replace('_', ' ')
         
         for loglog in [False, True]:
             if loglog:
@@ -1021,7 +1095,7 @@ if __name__ == "__main__":
                 x = np.array(uncertainty[u]['EXP'])
                 y = np.array(uncertainty[u]['MOD'])
                 f = np.array(uncertainty['flux'])
-                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['series2'], axmin=axmin, axmax=axmax, loglog=loglog)
+                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['series2'], axmin=axmin, axmax=axmax, loglog=loglog, labelName=labelNames)
                 if loglog:
                     fname = os.path.join(figoutdir, 'statistics_loglog_series_%s.png'%(label))
                 else:
@@ -1086,11 +1160,7 @@ if __name__ == "__main__":
         plt.grid()
         plt.savefig(os.path.join(figoutdir, 'statistics_sigma_m_with_hrrpua.png'), dpi=300)
         
-        
-        uncertainty['MaterialClass2'] = [x if (('Others' not in x) and ('Composites' not in x)) else 'Others & Composites' for x in uncertainty['MaterialClass']]
-        uncertainty['series2'] = [x if (('JH' not in x)) else 'JH' for x in uncertainty['series']]
-        
-        
+        statTxt = "Deviation by Scaling up/down\n"
         print("Deviation by scaling up/down")
         cases = np.array(uncertainty['case'])
         uncertainties = [60, 'peak']
@@ -1105,8 +1175,10 @@ if __name__ == "__main__":
             y = np.array(uncertainty[u]['MOD'])
             
             print(label.ljust(30), "\tN\t\tBias\tSigma_m")
+            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m\n"
             tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
             print("%s\t%0d\t\t%0.4f\t\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m))
+            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m)
             delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
             for s in np.unique(diff2):
                 mn1, var1 = getNormalStats(delta[s], sigma_m[s])
@@ -1118,11 +1190,15 @@ if __name__ == "__main__":
                 #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
                 
                 print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p))
+                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p)
                 
             print("\n")
-            
-            
         
+        with open('statistics_summary_updown.csv', 'w') as f:
+            f.write(statTxt)
+        
+            
+        statTxt = "Deviation by series\n"
         print("Deviation by series")
         uncertainties = [60, 'peak']
         labels = ['60s Avg', 'Peak']
@@ -1136,9 +1212,11 @@ if __name__ == "__main__":
             x = np.array(uncertainty[u]['EXP'])
             y = np.array(uncertainty[u]['MOD'])
             
-            print(label.ljust(30), "\tN\tBias\tSigma_m")
+            print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
+            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
             tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
-            print("%s\t%0d\t\t%0.4f\t\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m))
+            print("%s\t%0d\t\t%0.4f\t\t%0.4f\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5))
+            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5)
             delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
             
             for s in np.unique(diff2):
@@ -1150,12 +1228,16 @@ if __name__ == "__main__":
                 stat, p = scipy.stats.levene(points[s], tpoints, center='mean')
                 #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
                 
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p))
-                
+                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f,%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
+                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p)
                 
             print("\n")
         
+        with open('statistics_summary_series.csv', 'w') as f:
+            f.write(statTxt)
+        
         print("Deviation by material class")
+        statTxt = "Deviation by material class\n"
         uncertainties = [60, 'peak']
         labels = ['60s Avg', 'Peak']
         #diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
@@ -1168,9 +1250,11 @@ if __name__ == "__main__":
             x = np.array(uncertainty[u]['EXP'])
             y = np.array(uncertainty[u]['MOD'])
             
-            print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tP-value")
+            print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
+            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
             tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
-            print("%s\t%04d\t%0.4f\t\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m))
+            print("%s\t%04d\t%0.4f\t\t%0.4f\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5))
+            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f\t%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5)
             delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
             
             for s in np.unique(diff2):
@@ -1182,12 +1266,16 @@ if __name__ == "__main__":
                 stat, p = scipy.stats.levene(points[s], tpoints, center='mean')
                 #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
                 
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p))
+                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
+                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], np.var(points[s])**0.5, sigma_m[s], p)
                 
             print("\n")
     
-        
+        with open('statistics_summary_materials.csv', 'w') as f:
+            f.write(statTxt)
+            
         print("Deviation by series and material class")
+        statTxt = "Deviation by series and material class\n"
         uncertainties = [60, 'peak']
         labels = ['60s Avg', 'Peak']
         diff2 = [u1 + u2 for u1, u2 in zip(uncertainty['series2'], uncertainty['MaterialClass'])]
@@ -1207,9 +1295,11 @@ if __name__ == "__main__":
             delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
             
             for j in np.unique(diff3):
-                print(label.ljust(sep), "\tN\t\tBias\t\tSigma_m")
+                print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
+                statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
                 mn2, var2 = getNormalStats(tdelta[j], tsigma_m[j])
-                print("%s\t%04d\t%0.4f\t\t%0.4f"%(j.ljust(sep), tnum_points[j], tdelta[j], tsigma_m[j]))
+                print("%s\t%04d\t%0.4f\t\t%0.4f\t%0.4f"%(j.ljust(sep), tnum_points[j], tdelta[j], tsigma_m[j], np.var(tpoints[j])**0.5))
+                statTxt = statTxt + "%s,%0d,%0.4f,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points[j], tdelta[j], tsigma_m[j], np.var(tpoints[j])**0.5)
                 tpoint_test = tpoints[j]
                 for s in np.unique(diff2):
                 
@@ -1218,8 +1308,8 @@ if __name__ == "__main__":
                         mn2, var2 = getNormalStats(tdelta[j], tsigma_m[j])
                         N2 = tnum_points[j]
                         stat, p = scipy.stats.levene(points[s], tpoint_test, center='mean')
-                        print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f"%(l.ljust(sep), num_points[s], delta[s], sigma_m[s], p))
-                        
+                        print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f\t%0.4f"%(l.ljust(sep), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
+                        statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p)
                         
                     #mn1, var1 = getNormalStats(delta[s], sigma_m[s])
                     #N1 = num_points[s]
@@ -1230,7 +1320,8 @@ if __name__ == "__main__":
                 
                 
                 print("\n")
-    
+            with open('statistics_summary_series_and_materials.csv', 'w') as f:
+                f.write(statTxt)
     
     '''
     def buildLatexTable(series, material_data):
