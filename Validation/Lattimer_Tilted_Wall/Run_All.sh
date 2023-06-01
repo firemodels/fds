@@ -9,8 +9,7 @@ $QFDS $DEBUG $QUEUE -d $INDIR Lattimer_20_kW_0_degree_coarse.fds
 $QFDS $DEBUG $QUEUE -d $INDIR Lattimer_20_kW_0_degree.fds
 $QFDS $DEBUG -p 27 $QUEUE -d $INDIR Lattimer_20_kW_0_degree_fine.fds
 
-#$QFDS $DEBUG $QUEUE -d $INDIR Lattimer_20_kW_0_degree_ibm.fds
-#$QFDS $DEBUG $QUEUE -d $INDIR Lattimer_20_kW_10_degree_ibm.fds
-#$QFDS $DEBUG $QUEUE -d $INDIR Lattimer_20_kW_20_degree_ibm.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR Lattimer_50_kW_00_degree_fine.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR Lattimer_50_kW_35_degree_fine.fds
 
 echo FDS cases submitted
