@@ -1218,6 +1218,7 @@ TYPE CC_CUTCELL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: UNKH,UNKZ ! Unknown number for pressure H, and scalars.
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RTRM,R_H_G,RHO_0,WVEL,DDDTVOL
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: DELTA_RHO,DELTA_RHO_ZZ
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
