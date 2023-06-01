@@ -59,8 +59,10 @@ for i=1:16 % hrr loop
         k = find(hrr>f*Qdot_line,1);
         if (k>1) 
             L(j) = z(k-1)+dz*(f*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
-        else
+        elseif (k==1)
             L(j) = dz*f*Qdot(i)/hrr(k);
+        else
+            L(j) = 0.;
         end
         
     end % resolution loop

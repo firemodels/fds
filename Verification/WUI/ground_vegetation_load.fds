@@ -1,6 +1,6 @@
 &HEAD CHID='ground_vegetation_load', TITLE='Comparison of boundary models' /
 
-&TIME T_END=30. /
+&TIME T_END=50. /
 
 &MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,0.0,1.0 /
 &MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,1.5,2.5 /
@@ -20,8 +20,8 @@
 &SURF ID='HOT', TMP_FRONT=1000., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
 
 &MATL ID = 'SOIL'
-      CONDUCTIVITY = 0.25             
-      SPECIFIC_HEAT = 2.                   
+      CONDUCTIVITY = 0.25
+      SPECIFIC_HEAT = 2.
       DENSITY = 1300. /
 
 &SURF ID = 'GROUND'
@@ -30,12 +30,12 @@
       THICKNESS = 0.1 /
 
 &SURF ID = 'GRASS'
-      MATL_ID = 'Dry Grass','SOIL' 
+      MATL_ID = 'Dry Grass','SOIL'
       MOISTURE_FRACTION(1) = 0.1
       MASS_PER_VOLUME(1) = 4.
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
-      SURFACE_VOLUME_RATIO(1) = 3092. 
+      SURFACE_VOLUME_RATIO(1) = 3092.
       THICKNESS(1:2) = 0.075,0.1 /
 
 &SURF ID = 'Blade of Grass'
@@ -75,16 +75,15 @@
       SPECIFIC_HEAT      = 1.5
       A                  = 1040.
       E                  = 61041.
-      MATL_ID            = 'Char' 
+      MATL_ID            = 'Char'
       NU_MATL            = 0.25
       SPEC_ID            = 'WOOD FUEL VAPOR'
       NU_SPEC            = 0.75
       HEAT_OF_REACTION   = 711. /
- 
+
 &MATL ID                 = 'Char'
-      ALLOW_SHRINKING    = F
       DENSITY            = 300.
-      CONDUCTIVITY       = 50.052
+      CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT      = 1.0
       SURFACE_OXIDATION_MODEL = T
       A                  = 465.
@@ -97,7 +96,7 @@
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.
-      CONDUCTIVITY  = 50.1
+      CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 1.0 /
 
 &DUMP DT_HRR=1, DT_PROF=5.0 /

@@ -5813,10 +5813,12 @@ WRITE(LU,'(A,A)')      ' Compiler         : ',TRIM(COMPVER_PP)
 WRITE(LU,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
 
 IF (INPUT_FILE_INCLUDED) THEN
-                         WRITE(LU,'(A,I6)')  ' MPI Enabled;    Number of MPI Processes:  ',N_MPI_PROCESSES
-   IF (.NOT. USE_OPENMP) WRITE(LU,'(A)')     ' OpenMP Disabled'
-   IF (USE_OPENMP)       WRITE(LU,'(A,I6)')  ' OpenMP Enabled; Number of OpenMP Threads: ',OPENMP_AVAILABLE_THREADS
+   WRITE(LU,'(A,I6)')  ' MPI Enabled;    Number of MPI Processes:  ',N_MPI_PROCESSES
+ELSE
+   WRITE(LU,'(A)')     ' MPI not initialized'
 ENDIF
+IF (.NOT. USE_OPENMP) WRITE(LU,'(A)')     ' OpenMP Disabled'
+IF (USE_OPENMP)       WRITE(LU,'(A,I6)')  ' OpenMP Enabled; Number of OpenMP Threads: ',OPENMP_AVAILABLE_THREADS
 
 CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
 CALL MPI_GET_VERSION(MPIVERSION,MPISUBVERSION,IERR)
