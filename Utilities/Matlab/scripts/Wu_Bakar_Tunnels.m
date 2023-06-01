@@ -74,7 +74,7 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 loglog(Qstar(1,:),Vstar(1,:),'kd'); hold on
 loglog(Qstar(2,:),Vstar(2,:),'rs'); hold on
 loglog(Qstar(3,:),Vstar(3,:),'m^'); hold on
-loglog(Qstar(4,:),Vstar(4,:),'c*'); hold on
+loglog(Qstar(4,:),Vstar(4,:),'cp'); hold on
 loglog(Qstar(5,:),Vstar(5,:),'go'); hold on
 loglog(Qcorr,Vcorr,'k-'); hold on
 set(gca,'FontName',Font_Name)
@@ -100,5 +100,53 @@ set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,'Wu_Bakar_Critical_Velocity'])
+
+clear Qstar Vstar
+
+Qstar(1,:) = [0.108	0.216	0.539	0.754	0.862	1.078	1.616	2.155];
+Qstar(2,:) = [0.041	0.082	0.205	0.288	0.329	0.411	0.616	0.822];
+Qstar(3,:) = [0.021	0.041	0.103	0.144	0.164	0.205	0.308	0.41];
+Qstar(4,:) = [0.01	0.02	0.05	0.07	0.08	0.1	0.15    1000];
+Qstar(5,:) = [0.046	0.093	0.232	0.325	0.372	0.465	0.67	0.929];
+
+Vstar(1,:) = [0.333	0.356	0.372	0.372	0.372	0.372	0.372	0.372];
+Vstar(2,:) = [0.248	0.309	0.354	0.379	0.382	0.382	0.382	0.382];
+Vstar(3,:) = [0.203	0.251	0.298	0.319	0.325	0.332	0.344	0.359];
+Vstar(4,:) = [0.162	0.192	0.241	0.259	0.27	0.284	0.313	1000];
+Vstar(5,:) = [0.288	0.353	0.393	0.393	0.393	0.393	0.393	0.393];
+
+% Plot Wu and Bakar data along with Qcorr vs Vcorr (Wu and Bakar, Fig. 4)
+
+hold off
+
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+loglog(Qstar(1,:),Vstar(1,:),'d','MarkerFaceColor','k','MarkerEdgeColor','k'); hold on
+loglog(Qstar(2,:),Vstar(2,:),'s','MarkerFaceColor','r','MarkerEdgeColor','r'); hold on
+loglog(Qstar(3,:),Vstar(3,:),'^','MarkerFaceColor','m','MarkerEdgeColor','m'); hold on
+loglog(Qstar(4,:),Vstar(4,:),'p','MarkerFaceColor','c','MarkerEdgeColor','c'); hold on
+loglog(Qstar(5,:),Vstar(5,:),'o','MarkerFaceColor','g','MarkerEdgeColor','g'); hold on
+loglog(Qcorr,Vcorr,'k-'); hold on
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+axis([0.001 10 0.1 1.0])
+set(gca,'xticklabel',arrayfun(@(x) num2str(x),get(gca,'xtick'),'un',0))
+set(gca,'yticklabel',arrayfun(@(y) num2str(y),get(gca,'ytick'),'un',0))
+xlabel('Heat Release Rate, $Q^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Critical Velocity, $V^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+h = legend({'Tunnel A','Tunnel B','Tunnel C','Tunnel D','Tunnel E','Correlation'}, 'Location', 'NorthWest');
+set(h,'Interpreter',Font_Interpreter)
+
+% Make the pdf figure
+
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf',[pltdir,'Wu_Bakar_Critical_Velocity_Exp_Data'])
+
+hold off
+
 
 display('Wu_Bakar_Tunnels completed successfully')
