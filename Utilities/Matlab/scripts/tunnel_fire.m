@@ -36,7 +36,7 @@ Max_Dep = 40.;
 Title_Position = [0.05 0.90];
 X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
 Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
-text(X_Title_Position,Y_Title_Position,'1600 m Tunnel, 60 MW Fire','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
+text(X_Title_Position,Y_Title_Position,'1600 m Tunnel, 50 MW Fire','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
 
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 xlabel('Distance (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
