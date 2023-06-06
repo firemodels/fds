@@ -50,8 +50,6 @@ Plot_Width_2    = 6.15;
 Plot_Height_2   = 1.0;
 Plot_X_2        = 0.3;
 Plot_Y_2        = 0.1;
-Paper_Width_2   = 6.5;
-Paper_Height_2  = 1.3;
 
 % Make contour plots of centerline tunnel temperature for 17 experiments and 19 individual times.
 % Also, make a contour plot for each experiment showing a single temperature contour as a function of position and time.
@@ -105,12 +103,12 @@ for k=1:17 % Experiments
       a = get(gca,'XTickLabel');  
       set(gca,'XTickLabel',a,'fontsize',7)
       set(gca,'TickLength',[0 0])
-      xticks(pos)
-      xticklabels({'','','','','','','','','','','','','','',''})
-     %xticklabels({'214','213','211','209','208','207','307','306','305','F','304','303','302','301','202'})
+      xticks([0 100 200 300 400 500 600 700 800 854]);
+      xticklabels({'0','100','200','300','400','500','600','700','800','854'})
+      xlabel('Tunnel Length (m)','FontSize',7,'Interpreter',Font_Interpreter)
       ylabel('Height (m)','FontSize',7,'Interpreter',Font_Interpreter)
       set(gca,'Units',Plot_Units)
-      set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+      set(gca,'Position',[Plot_X_2 (Plot_Y_2+0.1) Plot_Width_2 Plot_Height_2])
       set(gca,'FontName',Font_Name)
       axis([0 854 0 8])
       text(10,7.2,['Test ',test{k}],'Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
@@ -123,7 +121,7 @@ for k=1:17 % Experiments
 
       set(gcf,'Units',Paper_Units);
       set(gcf,'PaperUnits',Paper_Units);
-      set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+      set(gcf,'PaperSize',[Paper_Width Paper_Height+0.2]);
       set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
       print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_T_',num2str(times{k}(i))])
 
@@ -177,7 +175,6 @@ for k=1:17 % Experiments
    xticks(pos)
   %xticklabels({'214','213','211','209','208','207','307','306','305','F','304','303','302','301','202'})
    xticklabels({'','','','','','','','','','','','','','',''})
-  %xtickangle(45)
    ylabel('Time (min)','FontSize',7,'Interpreter',Font_Interpreter)
    set(gca,'Units',Plot_Units)
    set(gca,'Position',[Plot_X_2 Plot_Y_2 Plot_Width_2 Plot_Height_2])
@@ -191,8 +188,8 @@ for k=1:17 % Experiments
 
    set(gcf,'Units',Paper_Units);
    set(gcf,'PaperUnits',Paper_Units);
-   set(gcf,'PaperSize',[Paper_Width_2 Paper_Height_2]);
-   set(gcf,'Position',[0 0 Paper_Width_2 Paper_Height_2]);
+   set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+   set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
    print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_tvT'])
 
    hold off
