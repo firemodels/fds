@@ -644,11 +644,19 @@ The radiative fraction has been predicted rather than specified in all simulatio
 \section{FM/FPRF Data Center Experiments}
 \label{FM_FPRF_Datacenter_Description}
 
-The Fire Protection Research Foundation funded a series of large scale tests of smoke detection in high airflow data centers as part of a research project on behalf of the NFPA~75 and NFPA~76 Technical Committees~\cite{FM_Datacenter_Rpt}. The tests consisted of a data center mockup that was 4.9~m high, 4.9~m wide, and 7.3~m deep. The mockup was divided into a 0.9~m tall subfloor with air supplied via a natural vent opening on one short wall, a 0.9~m tall ceiling plenum with air removed via a mechanical vent opening on one short wall, two 2~m tall by 0.6~m wide by 5.3~m long enclosed cold aisles located along the outer walls, and a 3.1~m tall hot aisle.  Flow from the subfloor to the cold aisles occurred through grated floor tiles, flow from the cold aisles to the hot aisle was through two rows of empty equipment cabinets with perforated metal doors, and flow from the hot aisle to the ceiling plenum was through perforated metal ceiling tiles.
+The Fire Protection Research Foundation funded a series of large-scale experiments involving smoke detection in high airflow data centers as part of a research project on behalf of the NFPA~75 and NFPA~76 Technical Committees~\cite{FM_Datacenter_Rpt}. The test enclosure consisted of a data center mockup that was 4.9~m high, 4.8~m wide, and 7.3~m deep (Fig.~\ref{ServerRackSim_Sketch}). The mockup was divided into a 0.9~m tall subfloor with air supplied via a natural vent opening on one short wall, a 0.9~m tall ceiling plenum with air removed via a mechanical vent opening on one short wall, two 2~m tall by 0.6~m wide by 5.3~m long enclosed cold aisles located along the outer walls, and a 3.1~m tall hot aisle. Flow from the subfloor to the cold aisles occurred through grated floor tiles, flow from the cold aisles to the hot aisle was through two rows of empty equipment cabinets with perforated metal doors, and flow from the hot aisle to the ceiling plenum was through perforated metal ceiling tiles.
 
-Two groups of tests were performed. The first group of tests used a sonic anemometer to map the flow field in the facility for a flow of 78 air changes per hour (ACH) and 265~ACH. Additional measurements were made of the pressure drops through the floor and ceiling tiles. The second group of tests measured smoke detection response to a variety of detectors from a range of typical smoke sources plus propylene (used for its ease of characterization and repeatability).
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/FM_FPRF_Datacenter/ServerRackSim}
+\caption[Sketch of the FM/FPRF enclosure]{Sketch of the FM/FPRF enclosure.}
+\label{ServerRackSim_Sketch}
+\end{figure}
 
-The FDS model of the facility makes use of the screen drag model for Lagrangian particles to model the pressure losses through the various metal meshes and grates present in the mockup. The FDS model also uses the specified leakage location model to model leakage through the seams of floor and ceiling tiles. The actual leakage area was not measured during the test. Instead the area was estimated using the reduction in the FM measured pressure drop from to the manufacturer's reported pressure drop to compute a leakage flow. A description of the process used to create the FDS model and the test uncertainties can be found in a companion report documenting modeling of the tests with FDS 6.0.0~\cite{FDS_Datacenter_Rpt}.
+Two sets of experiments were performed. The first made use of a sonic anemometer to map the flow field resulting from 78 air changes per hour (ACH) and 265~ACH. Additional measurements were made of the pressure drops through the floor and ceiling tiles. The second set of experiments measured smoke detection response to a variety of detectors from a range of typical smoke sources plus propylene (used for its ease of characterization and repeatability).
+
+\subsubsection{Modeling Notes}
+
+The FDS model of the facility makes use of the particle screen drag model to create the pressure losses through the various metal meshes and grates. The FDS model also uses the specified leakage location model to model leakage through the seams of floor and ceiling tiles. The actual leakage area was not measured. Instead the area was estimated using the measured pressure drop compared to the manufacturer's reported pressure drop. A description of the process used to create the FDS model and the test uncertainties can be found in a companion report documenting modeling of the tests with FDS 6.0.0~\cite{FDS_Datacenter_Rpt}.
 
 
 \section{FM Parallel Panel Experiments}
@@ -2045,7 +2053,7 @@ Prior to modeling heat fluxes to surfaces with attached flames or modeling ignit
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=.75\textwidth]{../../../cad/NIST_Calibration_Burners/NIST_8MW_assembly_drawing}
+\includegraphics[width=.75\textwidth]{../../../cad/Case_Studies/NIST_Calibration_Burners/NIST_8MW_assembly_drawing}
 \caption[NFRL 8 MW calibration burner assembly drawing]{NFRL 8 MW calibration burner assembly drawing produced by NIST SURF student Louis Serrano Torres.  Units in inches.}
 \label{NFRL_8MW_calibration_burner}
 \end{figure}
