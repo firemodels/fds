@@ -8820,7 +8820,7 @@ CASE(INTEGER_THREE)
       IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
          IG  = CUT_FACE(ICF)%BODTRI(1,IFACE)
          TRI = CUT_FACE(ICF)%BODTRI(2,IFACE)
-         XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /)
+         XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
          RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
          TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
             IF (IWSEL==TRI) CYCLE
@@ -8832,7 +8832,7 @@ CASE(INTEGER_THREE)
 
             ! Fast triangle discard method: To do.
 
-            ! Search for intersection point:
+            ! Search for intersection point in POS(IAXIS:KAXIS):
             CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
 
             IF (IS_INTERSECT) EXIT TRI_LOOP
@@ -8841,7 +8841,8 @@ CASE(INTEGER_THREE)
 
          IF (IS_INTERSECT) THEN
 
-            ! WRITE(LU_ERR,*) CFACE_INDEX,', intersect=',XP(:),RDIR(:),POS(IAXIS:KAXIS)
+            ! Check that distance is less than SF%THICKNESS:
+            IF(NORM2(XP-POS) > SF%THICKNESS) RETURN ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
 
             ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
             ! Find indexes and mesh of cell containing intersection point:
