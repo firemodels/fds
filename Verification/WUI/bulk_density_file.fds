@@ -26,7 +26,7 @@
 &PART ID = 'foliage part', SURF_ID = 'foliage surf', DRAG_LAW='CYLINDER', 
 STATIC=T, QUANTITIES='PARTICLE BULK DENSITY'/
 
-&INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='../../../cad/Binary_Bulk_Density_File/canopy_foliage.bdf'/
+&INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='../../../cad/Case_Studies/Binary_Bulk_Density_File/canopy_foliage.bdf'/
 
 &DEVC ID='number of voxels', XYZ=5,5,5, QUANTITY='NUMBER OF PARTICLES'/
 &DEVC ID='number of particles', XB=0,50,0,50,0,30, QUANTITY='PARTICLE WEIGHTING FACTOR', PART_ID='foliage part', SPATIAL_STATISTIC='SUM'/
