@@ -2976,7 +2976,7 @@ SURFLOOP: DO N=0,N_SURF
          IF (SF%HT_DIM==1) WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
-            WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
+            WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%MATL_ID(NL,NN)),', Mass fraction: ',SF%MATL_MASS_FRACTION(NL,NN)
          ENDDO
       ENDDO
       IF (SF%LAYER_DIVIDE<=SF%N_LAYERS) &
