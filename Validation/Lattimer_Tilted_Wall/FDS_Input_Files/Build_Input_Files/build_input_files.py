@@ -23,10 +23,11 @@ names  = [x.split(',')[0] for x in lines[1:]]
 hrrs   = [float(x.split(',')[1]) for x in lines[1:]]
 angles = [float(x.split(',')[2].replace('\n','')) for x in lines[1:]]
 
-hght_list = [x / 100 for x in range(5, 95, 10)]  #board height
+hght_list = [x / 100 for x in range(15, 140, 15)]  #board height
 
+xs = [-x * np.sin(np.deg2rad(11)) for x in hght_list]
+zs = [x - (x * (1 - np.cos(np.deg2rad(11)))) for x in hght_list]
 hrrpuas = [x/(0.3*0.3) for x in hrrs]
-#hrrpua = 555
 
 templateFile = lines[0].split(',')[0]
 with open(templateFile, 'r') as f:
@@ -36,7 +37,7 @@ for name, hrrpua, angle in zip(names, hrrpuas, angles):
     fileText = str(baseText)
     fileText = fileText.replace('ROTATION_ANGLE','ROTATION_ANGLE=%0.1f'%(angle))
     fileText = fileText.replace('HRRPUA','HRRPUA=%0.1f'%(hrrpua))
-    fileText = fileText.replace('CHID','CHID=%s'%(name.replace('.fds','')))
+    fileText = fileText.replace('CHID',"CHID='%s'"%(name.replace('.fds','')))
     device_lines = generate_device_lines(angle, hght_list)
     fileText = fileText + '\n'.join(device_lines)
     
