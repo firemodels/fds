@@ -285,23 +285,7 @@ def estimateExposureFlux(coneExposure, representativeHRRPUA):
     surface heat transfer coefficient of 15 W/m2-K and a fixed
     gas phase radiative fraction of 0.35.
     '''
-    #exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
-    #exposureFlux = 73.5*(representativeHRRPUA**0.045) - 50 + coneExposure
-    
-    #exposureFlux = 15+0.0175*representativeHRRPUA + coneExposure # Linear 15 to 50
-    exposureFlux = min([15+0.02*representativeHRRPUA, 25]) + coneExposure # Linear 15 to 50
-    
-    #exposureFlux = coneExposure + 35
-    #exposureFlux = 2.4183 * (representativeHRRPUA**(0.3837)) + coneExposure # flame volume with Tinf 900 K, h=15, kf based on Lf
-    #exposureFlux = 1.4694 * (representativeHRRPUA**(0.4496)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    
-    #exposureFlux = 0.7738 * (representativeHRRPUA**(0.6123)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 0.9723 * (representativeHRRPUA**(0.5404)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.0341 * (representativeHRRPUA**(0.5127)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 0.9444 * (representativeHRRPUA**(0.5517)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.0537 * (representativeHRRPUA**(0.5031)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.1607 * (representativeHRRPUA**(0.4461)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    
+    exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
     return exposureFlux
 
 def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
@@ -715,8 +699,8 @@ if __name__ == "__main__":
     uncertainty['MaterialClass'] = []
     
     runSimulations = True
-    showStats = True
-    closePlots = False
+    showStats = False
+    closePlots = True
     
     for i in range(1, specificationFile.shape[0]):
         
@@ -1029,7 +1013,7 @@ if __name__ == "__main__":
                 axmaxes = [5e3, 5e3, 5e3, 1e4, 5e3]
             else:
                 axmin = 0
-                axmaxes = [2500, 2000, 1500, 10000, 3000]
+                axmaxes = [750, 2000, 1500, 10000, 3000]
             for i in range(0, len(uncertainties)):
                 label = labels[i]
                 axmax = axmaxes[i]
@@ -1058,7 +1042,7 @@ if __name__ == "__main__":
                 axmaxes = [5e3, 1e4, 5e3]
             else:
                 axmin = 0
-                axmaxes = [2500, 10000, 3000]
+                axmaxes = [750, 10000, 3000]
             for i in range(0, len(uncertainties)):
                 label = labels[i]
                 axmax = axmaxes[i]
@@ -1105,7 +1089,7 @@ if __name__ == "__main__":
         
         
         
-        i = 2
+        i = 0
         label = labels[i]
         axmax = axmaxes[i]
         u = uncertainties[i]
@@ -1122,6 +1106,7 @@ if __name__ == "__main__":
         #outputs['sigma_m']['all'] = sigma_m
         #outputs['count']['all'] = len(x)
         hrrpua_thresholds = np.logspace(1,4, num=100)
+        output_points = dict()
         for j in hrrpua_thresholds: #[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000]:
             x2 = x[x > j]
             y2 = y[x > j]
@@ -1130,6 +1115,7 @@ if __name__ == "__main__":
             outputs['delta'][j] = delta
             outputs['sigma_m'][j] = sigma_m
             outputs['count'][j] = len(x2)
+            output_points[np.round(j,decimals=1)] = points
         outputs2 = pd.DataFrame(outputs)
         
         ind = np.where(outputs2['sigma_m'] == outputs2['sigma_m'].min())[0][0]
@@ -1148,16 +1134,17 @@ if __name__ == "__main__":
         plt.figure(figsize=(10, 6))
         #plt.scatter(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', s=30, color=colors[0])
         plt.plot(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', color=colors[0], linewidth=3)
-        app_label = "$\mathrm{\sigma_{m}}=%0.2f - (%0.1fE-4) q''_{peak}$"%(sigma_m_at_max*1.05, -1e4*slope)
+        app_label = "$\mathrm{\sigma_{m}}=%0.2f - (%0.1fE-4) q''_{60s,peak}$"%(sigma_m_at_max*1.05, -1e4*slope)
         plt.plot(hrrpua_thresholds, sigma_e, '--', label='$\mathrm{\sigma_{e}}$', color=colors[2], linewidth=3)
         plt.plot(hrrpua_thresholds, approx, label=app_label, linewidth=3, color=colors[1])
-        plt.xlabel('Peak HRRPUA ($\mathrm{kW/m^{2}}$)', fontsize=fs)
+        plt.xlabel('60s Avg Peak HRRPUA ($\mathrm{kW/m^{2}}$)', fontsize=fs)
         plt.ylabel('$\mathrm{\sigma}$', fontsize=fs)
-        plt.ylim(0.07, 0.18)
+        plt.ylim(0.07, 0.16)
         plt.xlim(0, 1000)
         plt.tick_params(labelsize=fs)
         plt.legend(fontsize=fs)
         plt.grid()
+        plt.tight_layout()
         plt.savefig(os.path.join(figoutdir, 'statistics_sigma_m_with_hrrpua.png'), dpi=300)
         
         statTxt = "Deviation by Scaling up/down\n"
