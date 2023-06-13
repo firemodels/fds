@@ -1038,6 +1038,63 @@ if __name__ == "__main__":
     material_output_data = pd.DataFrame(material_output_data)
     material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
     
+    tmp = material_output_data.T
+    tmp['MaterialClass'] = [x[0] for x in tmp.index]
+    tmp['Material'] = [x[2] for x in tmp.index]
+    tmp['Series'] = [x[1] for x in tmp.index]
+    series = [x[1] for x in tmp.index]
+    unique_series = list(set(series))
+    start = True
+    for s in unique_series:
+        tmp2 = tmp.loc[[True if s in x else False for x in series]]
+        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
+        for m in uniqueMaterialClass:
+            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
+            tmp4 = tmp3.sort_values('Material')
+            if start:
+                out2 = tmp4
+                start = False
+            else:
+                out2 = out2.append(tmp4)
+    
+    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
+    out2_vals = np.array(out2.values[:, :7], dtype=float)
+    
+    series = ''
+    matClass = ''
+    texout = ''
+    for iiii in range(0, out2.shape[0]):
+        if out2['Series'].iloc[iiii] == series:
+            if out2['MaterialClass'].iloc[iiii] == matClass:
+                pass
+            else:
+                matClass = out2['MaterialClass'].iloc[iiii]
+                texout = texout + '\n' + matClass + '\n'
+        else:
+            series = out2['Series'].iloc[iiii]
+            matClass = out2['MaterialClass'].iloc[iiii]
+            texout = texout + '\n' + series + ' & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\\\ \n'
+            texout = texout + 'Material & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\\\ \\hline \n'
+            texout = texout + '\n' + matClass + '\n'
+        material = out2['Material'].iloc[iiii]
+        if '-' in material: material = material.split('-')[0]
+        if '(' in material: material = material.split('(')[0]
+        while '__' in material: material = material.replace('__', '_')
+        material.replace('_', ' ')
+        cond = out2_vals[iiii, 0]
+        dens = out2_vals[iiii, 1]
+        emis = out2_vals[iiii, 2]
+        spec = out2_vals[iiii, 3]
+        thic = out2_vals[iiii, 4]
+        Tign = out2_vals[iiii, 5]
+        qref = out2_vals[iiii, 6]
+        texout = texout + material + ' & %0.2f & %0.0f & %0.2f & %0.2f & '%(cond, dens, emis, spec)
+        texout = texout + '%0.2f & %0.1f & %0.1f \\\\ \\hline \n'%(thic*1000, Tign, qref)
+    
+    with open('material_output_data_latex.tex', 'w') as f:
+        f.write(texout)
+    out2.to_csv('material_output_data_latex.csv', float_format='%.1f')
+    
     material_data = material_output_data.T
     
     
