@@ -701,7 +701,7 @@ if __name__ == "__main__":
     runSimulations = True
     showStats = False
     closePlots = True
-    
+    outTxt = ''
     for i in range(1, specificationFile.shape[0]):
         
         # Check for run code
@@ -839,6 +839,7 @@ if __name__ == "__main__":
         
         # Set chid
         chid = series + '_' + material.replace(' ','_')+"_cone"
+        chid = chid.replace('%','')
         if len(chid) > 50:
             chid = chid[:50]
         
@@ -922,6 +923,23 @@ if __name__ == "__main__":
                 expTime = exp_data[tc].values
                 expHRR = exp_data[hc].values
             
+            expHRR = np.round(expHRR, decimals=1)
+            expTime2 = [expTime[0]]
+            expHRR2 = [expHRR[0]]
+            
+            for iiii in range(1, len(expTime)):
+                if expHRR[iiii] == expHRR2[-1]:
+                    pass
+                else:
+                    expHRR2.append(expHRR[iiii-1])
+                    expTime2.append(expTime[iiii-1])
+                    expHRR2.append(expHRR[iiii])
+                    expTime2.append(expTime[iiii])
+            
+            
+            exp_out = pd.DataFrame(np.array([expTime2, np.round(expHRR2, decimals=1)]).T, columns=['Time','HRR'])
+            exp_out.to_csv("..//..//..//exp//Scaling_Pyrolysis//%s_%02d.csv"%(material.replace('%',''),flux), index=False)
+            
             uncertainty['peak']['EXP'].append(np.nanmax(expHRR))
             uncertainty['peak']['MOD'].append(np.nanmax(scaling))
             
@@ -955,17 +973,70 @@ if __name__ == "__main__":
         
         #if material_output_data[series] is False:
         #    material_output_data[series] = defaultdict(bool)
-        material_output_data[(series,material)] = defaultdict(bool)
-        material_output_data[(series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
-        material_output_data[(series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
-        material_output_data[(series,material)]['Emissivity\n(-)'] = emissivity
-        material_output_data[(series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
-        material_output_data[(series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
-        material_output_data[(series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
-        material_output_data[(series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        material_output_data[(materialClass,series,material)] = defaultdict(bool)
+        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
+        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
+        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
+        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
+        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
+        material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
+        material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
         
+        '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        lineColors = ['k','r','g','m','c']
+        materialClassDict = dict()
+        materialClassDict['Wood-Based'] = dict()
+        materialClassDict['Wood-Based']['marker'] = '>'
+        materialClassDict['Wood-Based']['color'] = 'b'
+        materialClassDict['Polymers'] = dict()
+        materialClassDict['Polymers']['marker'] = '^'
+        materialClassDict['Polymers']['color'] = 'r'
+        materialClassDict['Mixtures'] = dict()
+        materialClassDict['Mixtures']['marker'] = 'v'
+        materialClassDict['Mixtures']['color'] = 'g'
+        materialClassDict['Others'] = dict()
+        materialClassDict['Others']['marker'] = 'o'
+        materialClassDict['Others']['color'] = 'm'
+        
+        tMax = 5
+        qMax = 0
+        for iiii, flux in enumerate(validationFluxes):
+            scaling = data['"HRRPUA-%02d"'%(flux)].values
+            if type(exp_data) is dict:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]] > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]][ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]])*1.1])
+            else:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]].values > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]].values[ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]].values)*1.1])
+            qMax = max([qMax, np.nanmax(scaling)*1.1])
+        tMax = np.ceil(tMax/5)*5
+        qMax = np.ceil(qMax/10)*10
+        
+        for iii, flux in enumerate(validationFluxes):
+            lc = lineColors[iii]
+            if iii == 0:
+                switchId = 'd'
+            else:
+                switchId = 'f'
+            materialMarker = materialClassDict[materialClass]['marker']
+            materialColor = materialClassDict[materialClass]['color']
+            matlabelname = material
+            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+            matlabelname = matlabelname.replace('_','\_')
+            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + '%s_%02d.csv"'%(material,flux) + ","
+            outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
+            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
+            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
+    
+    with open('scaling_dataplot_out.csv', 'w') as f:
+        f.write(outTxt)
     material_output_data = pd.DataFrame(material_output_data)
-    material_output_data.to_csv('material_output_data.csv')
+    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
     
     material_data = material_output_data.T
     
@@ -993,7 +1064,9 @@ if __name__ == "__main__":
         outDict['points'] = points
         outDf = pd.DataFrame(outDict)
         outDf.to_csv('statistics_point_data_%s_summary.csv'%(u))
-        
+    
+    #for i in range(1, specificationFile.shape[0]):
+    #    dataName
 
     
     if showStats:
