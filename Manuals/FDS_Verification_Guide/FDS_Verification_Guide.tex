@@ -3227,6 +3227,31 @@ The comparison of FDS and the exact solution is shown in Fig.~\ref{radiation_gas
 \label{radiation_gas_panel_plot}
 \end{figure}
 
+\section{Radiation in Angled Geometry (\texorpdfstring{\textct{net\_rad\_1000}}{net\_rad\_1000}) }
+\label{net_rad_1000}
+
+This verification case evaluates the radiation predicted between two angled surfaces using two approaches.
+The first approach uses a stair-stepping approach to represent the angled wall with rectilinear geometry.
+The second approach uses the cut-cell geometry for one wall.
+
+Figure~\ref{net_rad_1000_obst} shows the model performance with the stair-stepping approach.
+Figure~\ref{net_rad_1000_cface} shows the model performance with the cut-cell geometry approach.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/net_rad_1000_diag_obst}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/net_rad_1000_wall_obst}
+\caption[The \textct{net\_rad\_1000} case]{Angled geometry radiation verification, stair-stepping approach \emph{Left}: Diagonal wall.  \emph{Right}: Flat wall.}
+\label{net_rad_1000_obst}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/net_rad_1000_diag_cface}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/net_rad_1000_wall_cface}
+\caption[The \textct{net\_rad\_1000} case]{Angled geometry radiation verification, cut-cell approach \emph{Left}: Diagonal wall.  \emph{Right}: Flat wall.}
+\label{net_rad_1000_cface}
+\end{figure}
 
 
 \chapter{Species and Combustion}
