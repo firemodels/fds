@@ -8841,8 +8841,9 @@ CASE(INTEGER_THREE)
 
          IF (IS_INTERSECT) THEN
 
-            ! Check that distance is less than SF%THICKNESS:
-            IF(NORM2(XP-POS) > SF%THICKNESS) RETURN ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+            ! Check that distance is less than cell diagonal size:
+            ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+            IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
 
             ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
             ! Find indexes and mesh of cell containing intersection point:
@@ -20735,7 +20736,7 @@ DO K=KLO,KHI
          NUM_FACE     = NFACE_CELL
          CTVAL2       = 0
          MAXSEG       = MAXVAL(FACE_CELL(1,1:NFACE_CELL))
-         THRES        = (MAXSEG*NFACE_CELL)**2
+         THRES        = HUGE(1); IF(REAL(MAXSEG*NFACE_CELL,EB)**2<REAL(THRES,EB)) THRES=(MAXSEG*NFACE_CELL)**2
          CYCLE_CELL   = .FALSE.
          ! Now double infinite loops:
          INF_LOOP1 : DO
@@ -20925,8 +20926,13 @@ DO K=KLO,KHI
                        FACE_LIST(1:CC_NPARAM_CCFACE,NFACE_CELL) = (/ CC_FTYPE_CFINB,0,0,IDCF, NIBFACE,CC_UNDEFINED /)
                     ENDDO SIDE_LOOP
                 ENDDO AXIS_LOOP
-                MESHES(NM)%CUT_FACE(IDCF)%NFACE = NIBFACE
-                MESHES(NM)%CUT_FACE(IDCF)%XYZVERT(IAXIS:KAXIS,1:NVERT_CELL) = XYZVERT(IAXIS:KAXIS,1:NVERT_CELL)
+                IF(NIBFACE==0) THEN
+                   MESHES(NM)%CUT_FACE(IDCF)%STATUS = CC_SOLID
+                   MESHES(NM)%CCVAR(I,J,K,CC_IDCF)  = CC_UNDEFINED
+                ELSE
+                   MESHES(NM)%CUT_FACE(IDCF)%NFACE  = NIBFACE
+                   MESHES(NM)%CUT_FACE(IDCF)%XYZVERT(IAXIS:KAXIS,1:NVERT_CELL) = XYZVERT(IAXIS:KAXIS,1:NVERT_CELL)
+                ENDIF
             ENDIF IDCF_COND
 
             ! Now define a coarse cut-cell (no INBOUNDARY cut-faces):
