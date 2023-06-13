@@ -8841,8 +8841,9 @@ CASE(INTEGER_THREE)
 
          IF (IS_INTERSECT) THEN
 
-            ! Check that distance is less than SF%THICKNESS:
-            IF(NORM2(XP-POS) > SF%THICKNESS) RETURN ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+            ! Check that distance is less than cell diagonal size:
+            ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+            IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
 
             ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
             ! Find indexes and mesh of cell containing intersection point:
