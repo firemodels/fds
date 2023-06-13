@@ -495,6 +495,8 @@ $QFDS -d Radiation thermocouples.fds
 $QFDS -d Radiation TC_heating.fds
 $QFDS -d Radiation TC_view_factor.fds
 $QFDS -d Radiation wall_internal_radiation.fds
+$QFDS -d Radiation net_rad_1000_cgeom.fds
+$QFDS -d Radiation net_rad_1000_obst.fds
 
 $QFDS -p 4 -d Restart device_restart_a.fds
 $QFDS -p 4 -d Restart device_restart_base_case.fds
