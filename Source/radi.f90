@@ -4175,7 +4175,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            CFA => CFACE(ICF)
                            IF (REAL(ISTEP,EB)*CFA%NVEC(IAXIS)>0._EB) THEN
                               BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
-                              AFX      = ABS(CFA%NVEC(IAXIS))*CFA%AREA/(DY(J)*DZ(K))
+                              AFX      = ABS(CFA%NVEC(IAXIS))*CFA%AREA/(DY(J)*DZ(K))*RAD_CFACE(ICR)%INT_FACTOR(IFA)
                               AFX_AUX  = AFX_AUX  + AFX
                               ILXU_AUX = ILXU_AUX + BR%BAND(IBND)%ILW(N)*AFX
                            ENDIF
@@ -4188,7 +4188,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            CFA => CFACE(ICF)
                            IF (REAL(JSTEP,EB)*CFA%NVEC(JAXIS)>0._EB) THEN
                               BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
-                              AFY      = ABS(CFA%NVEC(JAXIS))*CFA%AREA/(DX(I)*DZ(K))
+                              AFY      = ABS(CFA%NVEC(JAXIS))*CFA%AREA/(DX(I)*DZ(K))*RAD_CFACE(ICR)%INT_FACTOR(IFA)
                               AFY_AUX  = AFY_AUX  + AFY
                               ILYU_AUX = ILYU_AUX + BR%BAND(IBND)%ILW(N)*AFY
                            ENDIF
@@ -4201,7 +4201,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            CFA => CFACE(ICF)
                            IF (REAL(KSTEP,EB)*CFA%NVEC(KAXIS)>0._EB) THEN
                               BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
-                              AFZ      = ABS(CFA%NVEC(KAXIS))*CFA%AREA/(DX(I)*DY(J))
+                              AFZ      = ABS(CFA%NVEC(KAXIS))*CFA%AREA/(DX(I)*DY(J))*RAD_CFACE(ICR)%INT_FACTOR(IFA)
                               AFZ_AUX  = AFZ_AUX  + AFZ
                               ILZU_AUX = ILZU_AUX + BR%BAND(IBND)%ILW(N)*AFZ
                            ENDIF
@@ -4316,7 +4316,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      JJ =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(3,IFA); IF(JJ<1) JJ=1; IF(JJ>JBAR) JJ=JBAR
                      KK =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(4,IFA); IF(KK<1) KK=1; IF(KK>KBAR) KK=KBAR
                      X1 =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(5,IFA)
-                     IL_F(ICF) = IL_F(ICF) + IL(II,JJ,KK)*CFACE(ICF)%NVEC(X1)**2
+                     IL_F(ICF) = IL_F(ICF) + IL(II,JJ,KK)*CFACE(ICF)%NVEC(X1)**2*RAD_CFACE(ICR)%INT_FACTOR(IFA)
                   ENDDO RCFACE_LOOP
                ENDDO RAD_CFACE_DO
 
