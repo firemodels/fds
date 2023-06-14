@@ -241,7 +241,8 @@ def findIgnitionTime(times, HRRs, energyCutoff1=0.001):
     tign = times[ind1]
     return tign
 
-def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
+def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False,
+                                hrrThresh=1., numPoints=10000):
     ''' This function interpolates the experimental data to a
     fixed time interval.
     '''
@@ -288,7 +289,7 @@ def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
     '''
     
     reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
-    while np.max(abs(reconstructedHRR - HRRs)) > 1:
+    while (np.max(abs(reconstructedHRR - HRRs)) > hrrThresh) and (targetTimes.shape[0] < numPoints):
         ind = np.argmax(abs(reconstructedHRR - HRRs))
         t_diff = times[ind]
         q_diff = HRRs[ind]
@@ -299,7 +300,7 @@ def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
         targetHRRs = targetHRRs[np.argsort(targetTimes)]
         targetTimes = np.sort(targetTimes)
         reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
-    
+    print('%d, %0.2f'%(targetTimes.shape[0], np.max(abs(reconstructedHRR - HRRs))))
     return targetTimes, targetHRRs
 
 def getRepresentativeHrrpua(HRRPUA, time, factor=0.5):
@@ -704,7 +705,7 @@ if __name__ == "__main__":
     showStats = False
     closePlots = True
     outTxt = ''
-    for i in range(1, specificationFile.shape[0]):
+    for i in [17]: #range(1, specificationFile.shape[0]):
         
         # Check for run code
         code = specificationFile.iloc[i]['Code']
@@ -804,11 +805,22 @@ if __name__ == "__main__":
             times = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceTimeColumn].values
         if preprocess != '':
             times, HRRs = preprocessConeData(times, HRRs)
-        
-        times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=30, filterWidth=False)
+        targetDt = 30000
+        #times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False)
+        times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=50)
         tign, times_trimmed, hrrs_trimmed = findLimits(times2, HRRs2)
         
-        #plt.plot(times, HRRs); plt.plot(times2, HRRs2)
+        #plt.figure(figsize=(12, 6))
+        #plt.plot(times/60, HRRs, label='N=%0d'%(times.shape[0]))
+        #for numPoints in [50]:
+        #    times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=numPoints)
+        #    plt.plot(times2/60, HRRs2, label='N=%0d'%(times2.shape[0]))
+        #plt.legend(fontsize=16, bbox_to_anchor=(1.2,1.0), loc='upper right')
+        #plt.xlabel('Time (min)', fontsize=16)
+        #plt.ylabel('HRRPUA (kW/m2)', fontsize=16)
+        #plt.tick_params(labelsize=16)
+        #plt.grid()
+        #plt.tight_layout()
         #assert False, "Stopped"
         
         tigns = dict()
