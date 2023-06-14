@@ -258,11 +258,51 @@ def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
     tmax = np.round(times.max()/dt)*dt
     tmin = np.round(times.min()/dt)*dt
     targetTimes = np.linspace(tmin, tmax, int((tmax-tmin)/dt + 1))
-    HRRs = np.interp(targetTimes, times, HRRs)
+    targetHRRs = np.interp(targetTimes, times, HRRs)
     
-    return targetTimes, HRRs
+    t_peak = times[np.argmax(HRRs)]
+    q_peak = np.nanmax(HRRs)
+    
+    
+    targetTimes = np.append(targetTimes, t_peak)
+    targetHRRs = np.append(targetHRRs, q_peak)
+    
+    targetHRRs = targetHRRs[np.argsort(targetTimes)]
+    targetTimes = np.sort(targetTimes)
+    
+    '''
+    totalEnergy = np.trapz(HRRs, times)
+    totalEnergy2 = np.trapz(targetHRRs, targetTimes)
+    
+    
+    while abs(1-(totalEnergy/totalEnergy2)) > 0.01:
+        targetDt = targetDt*0.9
+        targetTimes = np.linspace(tmin, tmax, int((tmax-tmin)/targetDt + 1))
+        targetHRRs = np.interp(targetTimes, times, HRRs)
+        targetTimes = np.append(targetTimes, t_peak)
+        targetHRRs = np.append(targetHRRs, q_peak)
+        
+        targetHRRs = targetHRRs[np.argsort(targetTimes)]
+        targetTimes = np.sort(targetTimes)
+        totalEnergy2 = np.trapz(targetHRRs, targetTimes)
+    '''
+    
+    reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
+    while np.max(abs(reconstructedHRR - HRRs)) > 1:
+        ind = np.argmax(abs(reconstructedHRR - HRRs))
+        t_diff = times[ind]
+        q_diff = HRRs[ind]
+        
+        targetTimes = np.append(targetTimes, t_diff)
+        targetHRRs = np.append(targetHRRs, q_diff)
+        
+        targetHRRs = targetHRRs[np.argsort(targetTimes)]
+        targetTimes = np.sort(targetTimes)
+        reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
+    
+    return targetTimes, targetHRRs
 
-def getRepresentativeHrrpua(HRRPUA, factor=0.5):
+def getRepresentativeHrrpua(HRRPUA, time, factor=0.5):
     ''' This function calculates a representative HRRPUA for use
     in estimating the flame heat flux. HRR contains a time series
     of HRRPUA data from a cone calorimeter experiment. All data
@@ -273,7 +313,13 @@ def getRepresentativeHrrpua(HRRPUA, factor=0.5):
     is arbitrary but provides reasonable agreement on the cases
     evaluated here.
     '''
-    representativeHRRPUA = HRRPUA[HRRPUA > HRRPUA.max()*factor].mean()
+    dts = time[1:]-time[:-1]
+    dt = np.min(dts[np.nonzero(dts)])
+    tmin = time.min()
+    tmax = time.max()
+    time_i = np.linspace(tmin, tmax, int((tmax-tmin)/dt + 1))
+    hrrpua_i = np.interp(time_i, time, HRRPUA)
+    representativeHRRPUA = hrrpua_i[hrrpua_i > HRRPUA.max()*factor].mean()
     return representativeHRRPUA
 
 def estimateExposureFlux(coneExposure, representativeHRRPUA):
@@ -312,7 +358,7 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
         4. All samples are assumed to have 0.5in / 12.7 mm of ceramic
            fiber insulation behind them.
     '''
-    hrrpua_ref = getRepresentativeHrrpua(hrrpua)
+    hrrpua_ref = getRepresentativeHrrpua(hrrpua, time)
     qref = estimateExposureFlux(coneExposure, hrrpua_ref)
     
     tempOutput = '.TRUE.' if outputTemperature else '.FALSE.'
@@ -331,9 +377,14 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
     #txt = txt+"&MATL ID='BACKING', CONDUCTIVITY=0.2, DENSITY=585., EMISSIVITY=1., SPECIFIC_HEAT=0.8, /\n"
     txt = txt+"&MATL ID='SAMPLE', CONDUCTIVITY=%0.4f, DENSITY=%0.1f, EMISSIVITY=%0.4f, SPECIFIC_HEAT=%0.4f, /\n"%(k, rho, e, cp)
     
+    prevTime=-1e6
     for i in range(0, len(time)):
-        txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.4f, /\n"%(time[i]-time[0], hrrpua[i])
-    
+        if (time[i]-prevTime) < 0.0001:
+            #txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.1f, /\n"%(time[i]-time[0]+0.0001, hrrpua[i])
+            pass
+        else:
+            txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.1f, /\n"%(time[i]-time[0], hrrpua[i])
+        prevTime = time[i]
     y = -0.05
     for i, hf in enumerate(HFs):
         hf_ign = estimateHrrpua(coneExposure, hrrpua_ref, hf)
@@ -587,55 +638,6 @@ def plotMaterialExtraction(x, y, f, label, diff=None, axmin=None, axmax=None, lo
     plt.tight_layout()
     return fig, sigma_m, delta
 
-def computeAnova(delta, sigma_m, num_points):
-    means = dict()
-    stds = dict()
-    nums = dict()
-    
-    for key in list(sigma_m.keys()):
-        means[key] = 1/delta[key]
-        stds[key] = (sigma_m[key]**2)*(means[key]**2)
-        nums[key] = num_points[key]
-    
-    overallMean = np.mean([float(x) for x in means.values()])
-    
-    # Calculate the between groups SSD across full set
-    BSSD = 0
-    for key in list(sigma_m.keys()):
-        BSSD += nums[key]*(means[key] - overallMean)**2
-    
-    # Between groups degrees of freedom is one less than number of groups
-    BDOF = len(means.keys())-1
-    
-    # Between goups mean square value is SSD divided by DOF
-    BMSV = SSD/BDOF
-    
-    # Within groups SSD
-    ISSD = 0
-    for key in list(sigma_m.keys()):
-        ISSD += nums[key]*(stds[key]**2)
-    
-    # In groups DOF is number of groups x (number of samples in group - 1)
-    IDOF = dict()
-    for key in list(sigma_m.keys()):
-        IDOF[key] = len(means.keys())*(nums[key]-1)
-    
-    # In groups MSV is SSD / DOF
-    IMSV = dict()
-    for key in list(sigma_m.keys()):
-        IMSV[key] = ISSD/IDOF[key]
-        
-    # F ratio
-    Fratio = dict()
-    for key in list(sigma_m.keys()):
-        Fratio[key] = BMSV/IMSV[key]
-    
-    # F threshold
-    Fthresh = dict()
-    for key in list(sigma_m.keys()):
-        Fthresh[key] = scipy.stats.f.ppf(0.05, IDOF[key], BDOF)
-    
-    return Fratio, Fthresh
 
 def getNormalStats(delta, sigma_m):
     mu = 1/delta
@@ -803,9 +805,12 @@ if __name__ == "__main__":
         if preprocess != '':
             times, HRRs = preprocessConeData(times, HRRs)
         
-        #targetTimes, HRRs_interp = interpolateExperimentalData(times, HRRs, targetDt=15, filterWidth=False)
-        tign, times_trimmed, hrrs_trimmed = findLimits(times, HRRs)
-            
+        times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=30, filterWidth=False)
+        tign, times_trimmed, hrrs_trimmed = findLimits(times2, HRRs2)
+        
+        #plt.plot(times, HRRs); plt.plot(times2, HRRs2)
+        #assert False, "Stopped"
+        
         tigns = dict()
         for ii in range(0, len(validationTimeColumns)):
             timeColumn = validationTimeColumns[ii]
@@ -829,12 +834,12 @@ if __name__ == "__main__":
         # Calculate reference heat flux
         # If the trimmed HRR curve fails, use the full curve and print a warning
         try:
-            hrrpua_ref = getRepresentativeHrrpua(hrrs_trimmed)
+            hrrpua_ref = getRepresentativeHrrpua(hrrs_trimmed, times_trimmed)
         except:
-            hrrpua_ref = getRepresentativeHrrpua(HRRs)
+            hrrpua_ref = getRepresentativeHrrpua(HRRs2, times2)
             print("Warning: Failed to get representative HRRPUA for material %s on trimmed data. Using full HRR curve."%(material))
-            hrrs_trimmed = HRRs
-            times_trimmed = times
+            hrrs_trimmed = HRRs2
+            times_trimmed = times2
         qref = estimateExposureFlux(coneExposure, hrrpua_ref)
         
         # Set chid
@@ -982,6 +987,8 @@ if __name__ == "__main__":
         material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
         material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
         material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        
+        #assert False, "Stopped"
         
         '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
         lineColors = ['k','r','g','m','c']
