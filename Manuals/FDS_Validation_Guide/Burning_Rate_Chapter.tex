@@ -1316,7 +1316,7 @@ Approximately half of the materials are polymers, with the remaining half split 
 \begin{table}[!h]
 \caption[Summary of Materials]{Summary of Materials}
 \centering
-\begin{tabular}{|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\begin{tabular}{|l|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
 \hline
 Dataset & Mixtures & Others & Polymers & Woods & Total \\ \hline
 Aalto Woods    & - & - & - & 2 & 2 \\ \hline
@@ -1344,13 +1344,13 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of Aalto Woods Materials, wood-based materials]{Properties of Aalto Woods Materials, wood-based materials ~\cite{Rinta-Paavola:2022}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Pine  & 0.10 & 493 & 0.90 & 0.91 & 20.00 & 417.4 & 59.1 \\ \hline 
-Spruce  & 0.06 & 408 & 0.90 & 0.91 & 20.00 & 437.3 & 58.5 \\ \hline 
+Pine  & 0.10 & 493 & 0.90 & 0.91 & 20.0 & 417.4 & 59.1 \\ \hline 
+Spruce  & 0.06 & 408 & 0.90 & 0.91 & 20.0 & 437.3 & 58.5 \\ \hline 
 \end{tabular}
 \label{Properties_Aalto_Woods_Materials_woods}
 \end{table}
@@ -1359,8 +1359,8 @@ The results of the simulations are shown on the following pages.
 
 \begin{figure}[!htbp]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/Aalto_Woods_Pine_(flaming)_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/Aalto_Woods_Spruce_(flaming)_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/Aalto_Woods_Pine_(flaming)_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/Aalto_Woods_Spruce_(flaming)_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of Aalto Woods materials using scaling model, cellulosic materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of cellulosic materials.}
@@ -1380,14 +1380,14 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of FAA Polymers Materials]{Properties of FAA Polymers Materials ~\cite{Stoliarov:CF2009,Stoliarov:FM2012}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-PC  & 0.22 & 1180 & 0.90 & 1.90 & 6.00 & 463.8 & 105.9 \\ \hline 
-PEEK  & 0.28 & 1300 & 0.90 & 2.05 & 3.90 & 564.8 & 99.5 \\ \hline 
-PVC  & 0.17 & 1430 & 0.90 & 1.55 & 6.00 & 406.4 & 101.8 \\ \hline 
+PC  & 0.22 & 1180 & 0.90 & 1.90 & 6.0 & 463.8 & 105.9 \\ \hline 
+PEEK  & 0.28 & 1300 & 0.90 & 2.05 & 3.9 & 564.8 & 99.5 \\ \hline 
+PVC  & 0.17 & 1430 & 0.90 & 1.55 & 6.0 & 406.4 & 101.8 \\ \hline 
 \end{tabular}
 \label{Properties_FAA_Polymers_Materials_polymers}
 \end{table}
@@ -1396,9 +1396,9 @@ The results of the simulations are shown on the following pages.
 
 \begin{figure}[!htbp]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PC_(6mm)_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PEEK_(6mm)_cone_all} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PVC_(6mm)_cone_all}}
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PC_(6mm)_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PEEK_(6mm)_cone_all} \\
+\multicolumn{2}{c}{\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FAA_Polymers_PVC_(6mm)_cone_all}}
 \end{tabular*}
 \caption[Heat release rate per unit area of FAA Polymers materials using scaling model]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials.}
@@ -1417,19 +1417,19 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of FPL Materials, wood-based materials]{Properties of FPL Materials, wood-based materials ~\cite{FPL:Fire_Database}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Hardboard  & 0.16 & 972 & 1.00 & 1.25 & 7.25 & 381.6 & 80.2 \\ \hline 
-Lumber Redoak  & 0.17 & 775 & 1.00 & 2.40 & 19.75 & 389.0 & 76.1 \\ \hline 
-OSB  & 0.12 & 754 & 1.00 & 1.58 & 11.50 & 376.6 & 77.4 \\ \hline 
-Plywood Douglas Fir  & 0.11 & 482 & 1.00 & 2.72 & 11.75 & 370.3 & 74.9 \\ \hline 
-Plywood FRT Douglas Fir  & 0.11 & 604 & 1.00 & 2.72 & 12.50 & 385.5 & 73.8 \\ \hline 
-Plywood FRT Southern Pine  & 0.30 & 700 & 1.00 & 1.00 & 11.25 & 420.2 & 73.8 \\ \hline 
-Plywood Oak  & 0.17 & 502 & 1.00 & 2.40 & 12.70 & 405.7 & 75.5 \\ \hline 
-Waferboard  & 0.12 & 712 & 1.00 & 1.58 & 13.00 & 373.3 & 76.7 \\ \hline 
+Hardboard  & 0.16 & 972 & 1.00 & 1.25 & 7.3 & 381.6 & 80.2 \\ \hline 
+Lumber Redoak  & 0.17 & 775 & 1.00 & 2.40 & 19.8 & 389.0 & 76.1 \\ \hline 
+OSB  & 0.12 & 754 & 1.00 & 1.58 & 11.5 & 376.6 & 77.4 \\ \hline 
+Plywood Douglas Fir  & 0.11 & 482 & 1.00 & 2.72 & 11.8 & 370.3 & 74.9 \\ \hline 
+Plywood FRT Douglas Fir  & 0.11 & 604 & 1.00 & 2.72 & 12.5 & 385.5 & 73.8 \\ \hline 
+Plywood FRT Southern Pine  & 0.30 & 700 & 1.00 & 1.00 & 11.3 & 420.2 & 73.8 \\ \hline 
+Plywood Oak  & 0.17 & 502 & 1.00 & 2.40 & 12.7 & 405.7 & 75.5 \\ \hline 
+Waferboard  & 0.12 & 712 & 1.00 & 1.58 & 13.0 & 373.3 & 76.7 \\ \hline 
 \end{tabular}
 \label{Properties_FPL_Wood_Materials_woods}
 \end{table}
@@ -1438,14 +1438,14 @@ The results of the simulations are shown on the following pages.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Hardboard_(6mm)_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Lumber_Redoak_(20mm)_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_OSB_(12mm)_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_Douglas_Fir_(12mm)_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_FRT_Douglas_Fir_(12mm)_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_Oak_(13mm)_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_FRT_Southern_Pine_(11mm)_con_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Waferboard_(13mm)_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Hardboard_(6mm)_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Lumber_Redoak_(20mm)_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_OSB_(12mm)_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_Douglas_Fir_(12mm)_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_FRT_Douglas_Fir_(12mm)_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_Oak_(13mm)_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Plywood_FRT_Southern_Pine_(11mm)_con_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FPL_Materials_Waferboard_(13mm)_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FPL materials using scaling model]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of cellulosic materials.}
@@ -1470,25 +1470,25 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of FSRI/NIJ Materials, mixture and layered materials]{Properties of FSRI/NIJ Materials, mixture and layered materials ~\cite{McKinnon:FSRI2023_Data}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FRP Panel & 0.39 & 1555 & 1.00 & 1.41 & 2.02 & 362.4 & 84.0 \\ \hline 
-Overstuffed Chair Assembly & 0.20 & 80 & 1.00 & 1.00 & 19.87 & 450.6 & 83.2 \\ \hline 
-Overstuffed Chair Polyester Batting & 0.20 & 26 & 1.00 & 2.00 & 44.45 & 624.4 & 80.4 \\ \hline 
-Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.60 & 415.8 & 84.9 \\ \hline 
+FRP Panel & 0.39 & 1555 & 1.00 & 1.41 & 2.0 & 362.4 & 84.0 \\ \hline 
+Overstuffed Chair Assembly & 0.20 & 80 & 1.00 & 1.00 & 19.9 & 450.6 & 83.2 \\ \hline 
+Overstuffed Chair Polyester Batting & 0.20 & 26 & 1.00 & 2.00 & 44.5 & 624.4 & 80.4 \\ \hline 
+Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.6 & 415.8 & 84.9 \\ \hline 
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_mixtures}
 \end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_FRP_Panel_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Assembly_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Polyester_Batting_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Polyurethane_Foam_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_FRP_Panel_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Assembly_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Polyester_Batting_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Overstuffed_Chair_Polyurethane_Foam_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, mixtures and layered materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of mixtures and layered materials.}
@@ -1501,38 +1501,38 @@ Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.60 & 415.8 & 
 \begin{table}[!h]
 \caption[Properties of FSRI/NIJ Materials, other materials]{Properties of FSRI/NIJ Materials, other materials ~\cite{McKinnon:FSRI2023_Data}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Asphalt Shingle & 0.08 & 1219 & 1.00 & 1.01 & 2.53 & 421.6 & 82.4 \\ \hline 
-Cotton Raw & 0.20 & 31 & 1.00 & 1.00 & 23.82 & 453.9 & 57.7 \\ \hline 
-Cotton Rug & 0.07 & 263 & 1.00 & 1.56 & 5.32 & 439.1 & 81.8 \\ \hline 
-EPDM Membrane & 0.14 & 1200 & 1.00 & 1.46 & 6.01 & 477.1 & 80.9 \\ \hline 
-FDNY LDF & 0.20 & 224 & 1.00 & 1.00 & 12.09 & 405.7 & 76.1 \\ \hline 
-Lightweight Gypsum Wallboard & 0.13 & 494 & 1.00 & 3.00 & 12.57 & 397.2 & 75.8 \\ \hline 
-Polyolefin Carpet Low Pile & 0.06 & 214 & 1.00 & 1.35 & 5.99 & 439.3 & 83.2 \\ \hline 
-Roof Felt & 0.06 & 726 & 1.00 & 1.74 & 0.86 & 407.7 & 83.4 \\ \hline 
-Rubber Band & 0.20 & 88 & 1.00 & 1.00 & 24.17 & 456.8 & 82.8 \\ \hline 
-Rubber Foam Pipe Insulation & 0.04 & 52 & 1.00 & 1.47 & 13.00 & 427.3 & 77.0 \\ \hline 
-Rug Pad & 0.05 & 176 & 1.00 & 1.10 & 4.60 & 448.3 & 79.4 \\ \hline 
-Wool Rug & 0.06 & 226 & 1.00 & 1.33 & 16.48 & 562.3 & 78.1 \\ \hline 
-XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.46 & 481.7 & 84.2 \\ \hline 
+Asphalt Shingle & 0.08 & 1219 & 1.00 & 1.01 & 2.5& 421.6 & 82.4 \\ \hline 
+Cotton Raw & 0.20 & 31 & 1.00 & 1.00 & 23.8 & 453.9 & 57.7 \\ \hline 
+Cotton Rug & 0.07 & 263 & 1.00 & 1.56 & 5.3 & 439.1 & 81.8 \\ \hline 
+EPDM Membrane & 0.14 & 1200 & 1.00 & 1.46 & 6.0 & 477.1 & 80.9 \\ \hline 
+FDNY LDF & 0.20 & 224 & 1.00 & 1.00 & 12.1 & 405.7 & 76.1 \\ \hline 
+Lightweight Gypsum Wallboard & 0.13 & 494 & 1.00 & 3.00 & 12.6 & 397.2 & 75.8 \\ \hline 
+Polyolefin Carpet Low Pile & 0.06 & 214 & 1.00 & 1.35 & 6.0 & 439.3 & 83.2 \\ \hline 
+Roof Felt & 0.06 & 726 & 1.00 & 1.74 & 0.9 & 407.7 & 83.4 \\ \hline 
+Rubber Band & 0.20 & 88 & 1.00 & 1.00 & 24.2 & 456.8 & 82.8 \\ \hline 
+Rubber Foam Pipe Insulation & 0.04 & 52 & 1.00 & 1.47 & 13.0 & 427.3 & 77.0 \\ \hline 
+Rug Pad & 0.05 & 176 & 1.00 & 1.10 & 4.6 & 448.3 & 79.4 \\ \hline 
+Wool Rug & 0.06 & 226 & 1.00 & 1.33 & 16.5 & 562.3 & 78.1 \\ \hline 
+XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.5 & 481.7 & 84.2 \\ \hline 
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_others}
 \end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Asphalt_Shingle_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Cotton_Raw_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Cotton_Rug_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_EPDM_Membrane_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_FDNY_LDF_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Lightweight_Gypsum_Wallboard_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyolefin_Carpet_Low_Pile_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Roof_Felt_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Asphalt_Shingle_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Cotton_Raw_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Cotton_Rug_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_EPDM_Membrane_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_FDNY_LDF_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Lightweight_Gypsum_Wallboard_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyolefin_Carpet_Low_Pile_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Roof_Felt_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, other materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of other materials (1/2).}
@@ -1541,11 +1541,11 @@ XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.46 & 481.7 & 84.2 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rubber_Band_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rubber_Foam_Pipe_Insulation_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rug_Pad_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Wool_Rug_cone_all} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_XPS_Foam_Board_cone_all}}
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rubber_Band_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rubber_Foam_Pipe_Insulation_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rug_Pad_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Wool_Rug_cone_all} \\
+\multicolumn{2}{c}{\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_XPS_Foam_Board_cone_all}}
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, other materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of other materials (2/2).}
@@ -1557,49 +1557,49 @@ XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.46 & 481.7 & 84.2 \\ \hline
 \begin{table}[!h]
 \caption[Properties of FSRI/NIJ Materials, polymer materials]{Properties of FSRI/NIJ Materials, polymer materials ~\cite{McKinnon:FSRI2023_Data}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Black PMMA & 0.15 & 1182 & 1.00 & 1.48 & 8.36 & 371.3 & 85.5 \\ \hline 
-HDPE & 0.30 & 971 & 1.00 & 1.92 & 3.06 & 437.4 & 88.7 \\ \hline 
-LDPE & 0.22 & 927 & 1.00 & 2.60 & 3.06 & 381.6 & 89.2 \\ \hline 
-Memory Foam Carpet Pad & 0.04 & 134 & 1.00 & 1.87 & 12.65 & 424.0 & 85.2 \\ \hline 
-Nylon & 0.15 & 1070 & 1.00 & 1.84 & 3.10 & 466.5 & 85.6 \\ \hline 
-Nylon Carpet High Pile & 0.06 & 188 & 1.00 & 1.53 & 13.83 & 621.1 & 81.0 \\ \hline 
-PC & 0.18 & 1220 & 1.00 & 1.26 & 5.40 & 581.3 & 80.9 \\ \hline 
-PE Foam Pipe Insulation & 0.06 & 35 & 1.00 & 2.58 & 10.89 & 461.5 & 82.2 \\ \hline 
-PET & 0.19 & 1401 & 1.00 & 1.17 & 6.65 & 432.8 & 83.4 \\ \hline 
-PETG & 0.16 & 1314 & 1.00 & 1.25 & 2.62 & 459.2 & 88.5 \\ \hline 
-PMMA & 0.15 & 1182 & 1.00 & 1.48 & 14.26 & 358.7 & 86.2 \\ \hline 
-PP & 0.15 & 887 & 1.00 & 1.92 & 3.04 & 410.6 & 89.1 \\ \hline 
-PVC & 0.14 & 1388 & 1.00 & 1.08 & 3.12 & 543.1 & 76.1 \\ \hline 
-Plastic Laminate Countertop & 0.20 & 756 & 1.00 & 1.00 & 39.63 & 452.9 & 74.5 \\ \hline 
-PlasticA & 0.20 & 1072 & 1.00 & 1.00 & 3.05 & 431.7 & 86.7 \\ \hline 
-PlasticB & 0.13 & 1067 & 1.00 & 1.35 & 2.92 & 432.7 & 86.4 \\ \hline 
-PlasticC & 0.12 & 1058 & 1.00 & 1.36 & 2.86 & 433.9 & 86.5 \\ \hline 
-Polyester Bed Skirt & 0.02 & 432 & 1.00 & 1.61 & 0.72 & 468.4 & 79.6 \\ \hline 
-Polyester Microfiber Sheet & 0.02 & 457 & 1.00 & 2.08 & 5.00 & 471.6 & 80.1 \\ \hline 
-Polyisocyanurate Foam Board & 0.20 & 34 & 1.00 & 1.00 & 23.18 & 295.3 & 76.7 \\ \hline 
-Rebond Foam Carpet Pad & 0.04 & 86 & 1.00 & 1.82 & 9.07 & 423.4 & 85.2 \\ \hline 
-Vinyl Plank Flooring & 0.07 & 664 & 1.00 & 1.35 & 2.32 & 358.2 & 80.5 \\ \hline 
-Vinyl Siding & 0.10 & 1377 & 1.00 & 1.10 & 1.03 & 465.5 & 77.2 \\ \hline 
-Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.52 & 364.7 & 76.4 \\ \hline 
+Black PMMA & 0.15 & 1182 & 1.00 & 1.48 & 8.4 & 371.3 & 85.5 \\ \hline 
+HDPE & 0.30 & 971 & 1.00 & 1.92 & 3.1 & 437.4 & 88.7 \\ \hline 
+LDPE & 0.22 & 927 & 1.00 & 2.60 & 3.1 & 381.6 & 89.2 \\ \hline 
+Memory Foam Carpet Pad & 0.04 & 134 & 1.00 & 1.87 & 12.7 & 424.0 & 85.2 \\ \hline 
+Nylon & 0.15 & 1070 & 1.00 & 1.84 & 3.1 & 466.5 & 85.6 \\ \hline 
+Nylon Carpet High Pile & 0.06 & 188 & 1.00 & 1.53 & 13.8 & 621.1 & 81.0 \\ \hline 
+PC & 0.18 & 1220 & 1.00 & 1.26 & 5.4 & 581.3 & 80.9 \\ \hline 
+PE Foam Pipe Insulation & 0.06 & 35 & 1.00 & 2.58 & 10.9 & 461.5 & 82.2 \\ \hline 
+PET & 0.19 & 1401 & 1.00 & 1.17 & 6.7 & 432.8 & 83.4 \\ \hline 
+PETG & 0.16 & 1314 & 1.00 & 1.25 & 2.6 & 459.2 & 88.5 \\ \hline 
+PMMA & 0.15 & 1182 & 1.00 & 1.48 & 14.3 & 358.7 & 86.2 \\ \hline 
+PP & 0.15 & 887 & 1.00 & 1.92 & 3.0 & 410.6 & 89.1 \\ \hline 
+PVC & 0.14 & 1388 & 1.00 & 1.08 & 3.1 & 543.1 & 76.1 \\ \hline 
+Plastic Laminate Countertop & 0.20 & 756 & 1.00 & 1.00 & 39.6 & 452.9 & 74.5 \\ \hline 
+PlasticA & 0.20 & 1072 & 1.00 & 1.00 & 3.1 & 431.7 & 86.7 \\ \hline 
+PlasticB & 0.13 & 1067 & 1.00 & 1.35 & 2.9 & 432.7 & 86.4 \\ \hline 
+PlasticC & 0.12 & 1058 & 1.00 & 1.36 & 2.9 & 433.9 & 86.5 \\ \hline 
+Polyester Bed Skirt & 0.02 & 432 & 1.00 & 1.61 & 0.7 & 468.4 & 79.6 \\ \hline 
+Polyester Microfiber Sheet & 0.02 & 457 & 1.00 & 2.08 & 5.0 & 471.6 & 80.1 \\ \hline 
+Polyisocyanurate Foam Board & 0.20 & 34 & 1.00 & 1.00 & 23.2 & 295.3 & 76.7 \\ \hline 
+Rebond Foam Carpet Pad & 0.04 & 86 & 1.00 & 1.82 & 9.1 & 423.4 & 85.2 \\ \hline 
+Vinyl Plank Flooring & 0.07 & 664 & 1.00 & 1.35 & 2.3 & 358.2 & 80.5 \\ \hline 
+Vinyl Siding & 0.10 & 1377 & 1.00 & 1.10 & 1.0 & 465.5 & 77.2 \\ \hline 
+Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.5 & 364.7 & 76.4 \\ \hline 
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_polymers}
 \end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Black_PMMA_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_HDPE_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_LDPE_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Memory_Foam_Carpet_Pad_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Nylon_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Nylon_Carpet_High_Pile_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PC_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PE_Foam_Pipe_Insulation_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Black_PMMA_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_HDPE_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_LDPE_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Memory_Foam_Carpet_Pad_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Nylon_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Nylon_Carpet_High_Pile_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PC_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PE_Foam_Pipe_Insulation_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (1/3).}
@@ -1608,14 +1608,14 @@ Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.52 & 364.7 & 76.4 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PET_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PETG_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PMMA_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PP_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PVC_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Plastic_Laminate_Countertop_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticA_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticB_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PET_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PETG_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PMMA_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PP_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PVC_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Plastic_Laminate_Countertop_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticA_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticB_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (2/3).}
@@ -1624,14 +1624,14 @@ Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.52 & 364.7 & 76.4 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticC_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyester_Bed_Skirt_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyester_Microfiber_Sheet_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyisocyanurate_Foam_Board_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rebond_Foam_Carpet_Pad_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Plank_Flooring_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Siding_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Tile_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_PlasticC_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyester_Bed_Skirt_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyester_Microfiber_Sheet_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Polyisocyanurate_Foam_Board_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Rebond_Foam_Carpet_Pad_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Plank_Flooring_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Siding_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Vinyl_Tile_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (3/3).}
@@ -1643,36 +1643,36 @@ Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.52 & 364.7 & 76.4 \\ \hline
 \begin{table}[!h]
 \caption[Properties of FSRI/NIJ Materials, wood-based materials]{Properties of FSRI/NIJ Materials, wood-based materials ~\cite{McKinnon:FSRI2023_Data}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Basswood Panel & 0.10 & 404 & 1.00 & 1.55 & 19.08 & 429.2 & 77.0 \\ \hline 
-Composite Deck Board & 0.23 & 1103 & 1.00 & 1.56 & 13.11 & 368.6 & 83.2 \\ \hline 
-Engineered Flooring & 0.13 & 815 & 1.00 & 1.60 & 8.65 & 399.6 & 78.9 \\ \hline 
-Engineered Wood Furniture & 0.20 & 803 & 1.00 & 1.00 & 13.74 & 395.6 & 78.7 \\ \hline 
-Eucalyptus Flooring & 0.18 & 1025 & 1.00 & 1.67 & 14.15 & 384.7 & 78.5 \\ \hline 
-Luan Panel & 0.07 & 345 & 1.00 & 1.58 & 5.03 & 434.5 & 77.6 \\ \hline 
-MDF & 0.12 & 737 & 1.00 & 1.28 & 19.41 & 420.7 & 77.8 \\ \hline 
-OSB & 0.12 & 598 & 1.00 & 1.58 & 17.10 & 427.4 & 77.1 \\ \hline 
-Oak Flooring & 0.15 & 714 & 1.00 & 1.57 & 18.73 & 418.2 & 77.1 \\ \hline 
-Pine Siding & 0.11 & 328 & 1.00 & 1.84 & 18.01 & 417.4 & 76.5 \\ \hline 
-Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.06 & 441.2 & 74.9 \\ \hline 
+Basswood Panel & 0.10 & 404 & 1.00 & 1.55 & 19.1 & 429.2 & 77.0 \\ \hline 
+Composite Deck Board & 0.23 & 1103 & 1.00 & 1.56 & 13.1 & 368.6 & 83.2 \\ \hline 
+Engineered Flooring & 0.13 & 815 & 1.00 & 1.60 & 8.7 & 399.6 & 78.9 \\ \hline 
+Engineered Wood Furniture & 0.20 & 803 & 1.00 & 1.00 & 13.7 & 395.6 & 78.7 \\ \hline 
+Eucalyptus Flooring & 0.18 & 1025 & 1.00 & 1.67 & 14.2 & 384.7 & 78.5 \\ \hline 
+Luan Panel & 0.07 & 345 & 1.00 & 1.58 & 5.0 & 434.5 & 77.6 \\ \hline 
+MDF & 0.12 & 737 & 1.00 & 1.28 & 19.4 & 420.7 & 77.8 \\ \hline 
+OSB & 0.12 & 598 & 1.00 & 1.58 & 17.1 & 427.4 & 77.1 \\ \hline 
+Oak Flooring & 0.15 & 714 & 1.00 & 1.57 & 18.7 & 418.2 & 77.1 \\ \hline 
+Pine Siding & 0.11 & 328 & 1.00 & 1.84 & 18.0 & 417.4 & 76.5 \\ \hline 
+Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.1 & 441.2 & 74.9 \\ \hline 
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_woods}
 \end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Basswood_Panel_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Composite_Deck_Board_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Engineered_Flooring_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Engineered_Wood_Furniture_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Eucalyptus_Flooring_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Luan_Panel_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_MDF_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_OSB_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Basswood_Panel_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Composite_Deck_Board_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Engineered_Flooring_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Engineered_Wood_Furniture_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Eucalyptus_Flooring_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Luan_Panel_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_MDF_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_OSB_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, wood-based materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of wood-based materials (1/2).}
@@ -1681,9 +1681,9 @@ Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.06 & 441.2 & 74.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Oak_Flooring_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Pine_Siding_cone_all} \\
- \multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Wood_Stud_cone_all}}
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Oak_Flooring_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Pine_Siding_cone_all} \\
+ \multicolumn{2}{c}{\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Materials_Wood_Stud_cone_all}}
 \end{tabular*}
 \caption[Heat release rate per unit area of FSRI materials using scaling model, wood-based materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of wood-based materials (2/2).}
@@ -1702,19 +1702,19 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of JH/FRA Materials]{Properties of JH/FRA Materials ~\cite{Luo:FRA2019}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Acrylic & 0.24 & 1178 & 0.88 & 0.62 & 4.50 & 416.3 & 83.7 \\ \hline 
-CPS Balsa Facesheet & 0.39 & 630 & 0.70 & 0.62 & 15.90 & 382.7 & 74.3 \\ \hline 
-CPS Plywood & 0.295 & 625 & 1.00 & 3.13 & 6.35 & 319.1 & 79.1 \\ \hline 
-CPS Plywood Facesheet & 0.39 & 630 & 0.70 & 0.51 & 12.70 & 514.0 & 76.0 \\ \hline 
-PC Blend & 0.89 & 1320 & 0.93 & 0.67 & 4.50 & 454.8 & 75.1 \\ \hline 
-Phenolic Resin Fiberglass Composite & 0.35 & 1846 & 0.89 & 1.29 & 3.27 & 524.9 & 72.9 \\ \hline 
-PVC Blend & 0.29 & 1314 & 0.88 & 0.42 & 3.27 & 454.9 & 76.1 \\ \hline 
-Vinyl Ester Resin FRP & 0.54 & 1600 & 0.80 & 4.00 & 4.50 & 417.3 & 73.8 \\ \hline 
+Acrylic & 0.24 & 1178 & 0.88 & 0.62 & 4.5 & 416.3 & 83.7 \\ \hline 
+CPS Balsa Facesheet & 0.39 & 630 & 0.70 & 0.62 & 15.9 & 382.7 & 74.3 \\ \hline 
+CPS Plywood & 0.295 & 625 & 1.00 & 3.13 & 6.4 & 319.1 & 79.1 \\ \hline 
+CPS Plywood Facesheet & 0.39 & 630 & 0.70 & 0.51 & 12.7 & 514.0 & 76.0 \\ \hline 
+PC Blend & 0.89 & 1320 & 0.93 & 0.67 & 4.5 & 454.8 & 75.1 \\ \hline 
+Phenolic Resin Fiberglass Comp. & 0.35 & 1846 & 0.89 & 1.29 & 3.3 & 524.9 & 72.9 \\ \hline 
+PVC Blend & 0.29 & 1314 & 0.88 & 0.42 & 3.3 & 454.9 & 76.1 \\ \hline 
+Vinyl Ester Resin FRP & 0.54 & 1600 & 0.80 & 4.00 & 4.5 & 417.3 & 73.8 \\ \hline 
 \end{tabular}
 \label{Properties_JH_FRA_Materials}
 \end{table}
@@ -1723,14 +1723,14 @@ The results of the simulations are shown on the following pages.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Acrylic_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_CPS_Balsa_Facesheet_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_CPS_Plywood_Facesheet_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Plywood_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_PC_Blend_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Phenolic_Resin_Fiberglass_Composite_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_PVC_Blend_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Vinyl_Ester_Resin_FRP_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Acrylic_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_CPS_Balsa_Facesheet_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_CPS_Plywood_Facesheet_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Plywood_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_PC_Blend_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Phenolic_Resin_Fiberglass_Composite_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_PVC_Blend_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRA_Vinyl_Ester_Resin_FRP_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of JH/FRA materials using scaling model]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}
@@ -1749,18 +1749,18 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 \begin{table}[!h]
 \caption[Properties of JH/NIJ Materials]{Properties of JH/NIJ Materials ~\cite{Lattimer:NIJ19}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Black PMMA & 0.12 & 1154 & 0.95 & 1.52 & 9.20 & 354.1 & 84.5 \\ \hline 
-Cardboard & 0.23 & 128 & 0.93 & 0.69 & 4.10 & 416.4 & 77.3 \\ \hline 
-FRP & 0.39 & 1897 & 0.95 & 1.41 & 12.70 & 368.1 & 76.2 \\ \hline 
-MDF & 0.31 & 688 & 0.99 & 0.40 & 19.20 & 413.5 & 78.3 \\ \hline 
-OSB & 0.38 & 573 & 0.93 & 0.63 & 16.10 & 373.5 & 76.1 \\ \hline 
-White Pine & 0.31 & 499 & 0.90 & 0.60 & 19.10 & 403.0 & 75.6 \\ \hline 
-White Spruce & 0.24 & 430 & 0.90 & 1.10 & 37.22 & 385.0 & 74.7 \\ \hline 
+Black PMMA & 0.12 & 1154 & 0.95 & 1.52 & 9.2 & 354.1 & 84.5 \\ \hline 
+Cardboard & 0.23 & 128 & 0.93 & 0.69 & 4.1 & 416.4 & 77.3 \\ \hline 
+FRP & 0.39 & 1897 & 0.95 & 1.41 & 12.7 & 368.1 & 76.2 \\ \hline 
+MDF & 0.31 & 688 & 0.99 & 0.40 & 19.2 & 413.5 & 78.3 \\ \hline 
+OSB & 0.38 & 573 & 0.93 & 0.63 & 16.1 & 373.5 & 76.1 \\ \hline 
+White Pine & 0.31 & 499 & 0.90 & 0.60 & 19.1 & 403.0 & 75.6 \\ \hline 
+White Spruce & 0.24 & 430 & 0.90 & 1.10 & 37.2 & 385.0 & 74.7 \\ \hline 
 \end{tabular}
 \label{Properties_JH_NIJ_Materials}
 \end{table}
@@ -1769,13 +1769,13 @@ The results of the simulations are shown on the following pages.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_Black_PMMA_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_Cardboard_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_FRP_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_MDF_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_OSB_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_White_Pine_cone_all} \\
- \multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_White_Spruce_cone_all}}
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_Black_PMMA_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_Cardboard_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_FRP_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_MDF_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_OSB_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_White_Pine_cone_all} \\
+ \multicolumn{2}{c}{\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_NIJ_White_Spruce_cone_all}}
 \end{tabular*}
 \caption[Heat release rate per unit area of JH/NIJ materials using scaling model]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}
@@ -1800,39 +1800,41 @@ Representative properties were established based on the SFPE handbook~\cite{SFPE
 \centering
 \begin{tabular}{|p{2.6cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.0cm}|p{1.0cm}|p{1.6cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-80\% wool 20\% Nylon Glue Plywood & 0.29 & 576 & 1.00 & 0.62 & 22.00 & 480.9 & 77.4 \\ \hline 
-Alum. Honey comb coated with HPL & 0.10 & 514 & 1.00 & 0.90 & 22.70 & 530.0 & 74.7 \\ \hline 
-Fabric Foam & 0.04 & 164 & 1.00 & 1.82 & 28.00 & 420.0 & 77.6 \\ \hline 
-Fabric Protection layer Foam & 0.04 & 124 & 1.00 & 1.82 & 32.00 & 509.4 & 77.1 \\ \hline 
-Fabric vandalize protected Foam & 0.24 & 87 & 1.00 & 2.19 & 42.00 & 478.5 & 77.7 \\ \hline 
-Melamine face Calcium silicate board & 0.25 & 1055 & 1.00 & 1.67 & 12.50 & 519.5 & 72.7 \\ \hline 
-Needle punched carpet Glue Recor sealing & 0.24 & 222 & 1.00 & 2.19 & 10.00 & 356.0 & 77.9 \\ \hline 
-PUR rigid Plastic faced steel sheet & 0.20 & 170 & 1.00 & 1.00 & 79.00 & 502.1 & 71.8 \\ \hline 
-PVC wall carpet paper plasterboard & 0.14 & 1388 & 1.00 & 1.08 & 12.70 & 330.2 & 72.4 \\ \hline 
-Painted GRP polyester with gelcoat handlaminated & 0.17 & 2019 & 1.00 & 1.30 & 4.80 & 326.6 & 46.7 \\ \hline 
-Painted paper plasterboard plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.70 & 406.2 & 73.8 \\ \hline 
-Synthetic rubber Glue Plywood 1 & 0.13 & 1125 & 1.00 & 1.96 & 15.00 & 333.1 & 78.2 \\ \hline 
-Synthetic Rubber Glue Plywood 2 & 0.13 & 1070 & 1.00 & 1.96 & 14.80 & 486.9 & 73.8 \\ \hline 
-Textile wall covering paper plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.70 & 317.2 & 62.0 \\ \hline 
-Wool fabric mixed fabric & 0.06 & 912 & 1.00 & 470.50 & 76889.80 & 1.3 & 0.0 \\ \hline 
-Fabric vandalize protected foam & 0.24 & 88 & 1.00 & 2.19 & 42.00 & 317.3 & 45.6 \\ \hline 
+80\% wool 20\% Nylon Glue Plywood & 0.29 & 576 & 1.00 & 0.62 & 22.0 & 480.9 & 77.4 \\ \hline 
+Alum. Honeycomb Coated With HPL & 0.10 & 514 & 1.00 & 0.90 & 22.7 & 530.0 & 74.7 \\ \hline 
+Fabric Foam & 0.04 & 164 & 1.00 & 1.82 & 28.0 & 420.0 & 77.6 \\ \hline 
+Fabric Protection Layer Foam & 0.04 & 124 & 1.00 & 1.82 & 32.0 & 509.4 & 77.1 \\ \hline 
+Fabric Vandalize Protected Foam & 0.24 & 87 & 1.00 & 2.19 & 42.0 & 478.5 & 77.7 \\ \hline 
+Melamine Face Calcium Silicate Board & 0.25 & 1055 & 1.00 & 1.67 & 12.5 & 519.5 & 72.7 \\ \hline 
+Needle Punched Carpet Glue Recor Sealing & 0.24 & 222 & 1.00 & 2.19 & 10.0 & 356.0 & 77.9 \\ \hline 
+PUR Rigid Plastic Faced Steel Sheet & 0.20 & 170 & 1.00 & 1.00 & 79.0 & 502.1 & 71.8 \\ \hline 
+PVC Wall Carpet Paper Plasterboard & 0.14 & 1388 & 1.00 & 1.08 & 12.7 & 330.2 & 72.4 \\ \hline 
+Painted GRP Polyester With Gelcoat Handlaminated & 0.17 & 2019 & 1.0 & 1.30 & 4.8 & 326.6 & 46.7 \\ \hline 
+Painted Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 406.2 & 73.8 \\ \hline 
+Syn. Rubber Glue Plywood 1 & 0.13 & 1125 & 1.00 & 1.96 & 15.0 & 333.1 & 78.2 \\ \hline 
+Syn. Rubber Glue Plywood 2 & 0.13 & 1070 & 1.00 & 1.96 & 14.8 & 486.9 & 73.8 \\ \hline 
+Textile Wall Covering Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 317.2 & 62.0 \\ \hline 
+Wool Fabric Mixed Fabric & 0.06 & 912 & 1.00 & 470.50 & 0.5 & 1.3 & 0.0 \\ \hline 
+Fabric Vandalize Protected Foam & 0.24 & 88 & 1.00 & 2.19 & 42.0 & 317.3 & 45.6 \\ \hline 
 \end{tabular}
 \label{Properties_RISE_Materials_mixtures}
 \end{table}
 
+\clearpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_80_wool__20__Nylon_Glue_Plywood-22m_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Aluminium_Honey_comb_coated_with_HP_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_Foam-28mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_Protection_layer_Foam-32mm_c_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_vandalize_protected_Foam-42m_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Melamine_face_Calcium_silicate_boar_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Needle_punched_carpet_Glue_Recor_se_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PUR_rigid_Plastic_faced_steel_sheet_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_80_wool__20__Nylon_Glue_Plywood-22m_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Aluminium_Honey_comb_coated_with_HP_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_Foam-28mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_Protection_layer_Foam-32mm_c_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Fabric_vandalize_protected_Foam-42m_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Melamine_face_Calcium_silicate_boar_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Needle_punched_carpet_Glue_Recor_se_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PUR_rigid_Plastic_faced_steel_sheet_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, mixtures and layered materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of mixtures and layered materials (1/2).}
@@ -1841,14 +1843,14 @@ Fabric vandalize protected foam & 0.24 & 88 & 1.00 & 2.19 & 42.00 & 317.3 & 45.6
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_wall_carpet_paper_plasterboard-_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_GRP_polyester_with_gelcoat__all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_paper_plasterboard_plasterb_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Synthetic_rubber_Glue_Plywood-15mm__all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_synthetic_rubber_glue_plywood-14mm__all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Textile_wall_covering_paper_plaster_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Woolfabric__mixed_fabric-00mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_fabric__vandalize_protected_foam-42_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_wall_carpet_paper_plasterboard-_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_GRP_polyester_with_gelcoat__all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_paper_plasterboard_plasterb_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Synthetic_rubber_Glue_Plywood-15mm__all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_synthetic_rubber_glue_plywood-14mm__all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Textile_wall_covering_paper_plaster_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Woolfabric__mixed_fabric-00mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_fabric__vandalize_protected_foam-42_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, mixtures and layered materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of mixtures and layered materials (2/2).}
@@ -1860,43 +1862,43 @@ Fabric vandalize protected foam & 0.24 & 88 & 1.00 & 2.19 & 42.00 & 317.3 & 45.6
 \begin{table}[!h]
 \caption[Properties of RISE Materials, polymer materials]{Properties of RISE Materials, polymer materials ~\cite{RISE:Fire_Database} (1/2).}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FR polycarbonate & 0.21 & 1430 & 1.00 & 1.10 & 16.00 & 483.4 & 80.9 \\ \hline 
-HPL Melamine polyester film  & 0.17 & 1640 & 1.00 & 1.30 & 13.40 & 360.5 & 73.4 \\ \hline 
-HPL compact  & 0.17 & 1610 & 1.00 & 1.30 & 4.00 & 458.9 & 73.8 \\ \hline 
-PE XLPE & 0.42 & 950 & 1.00 & 2.00 & 40.00 & 494.9 & 75.7 \\ \hline 
-PVC & 0.14 & 1388 & 1.00 & 1.08 & 2.90 & 383.0 & 76.2 \\ \hline 
-PVC EPR & 0.14 & 1388 & 1.00 & 1.08 & 32.50 & 439.4 & 73.2 \\ \hline 
+FR polycarbonate & 0.21 & 1430 & 1.00 & 1.10 & 16.0 & 483.4 & 80.9 \\ \hline 
+HPL Melamine polyester film  & 0.17 & 1640 & 1.00 & 1.30 & 13.4 & 360.5 & 73.4 \\ \hline 
+HPL compact  & 0.17 & 1610 & 1.00 & 1.30 & 4.0 & 458.9 & 73.8 \\ \hline 
+PE XLPE & 0.42 & 950 & 1.00 & 2.00 & 40.0 & 494.9 & 75.7 \\ \hline 
+PVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 383.0 & 76.2 \\ \hline 
+PVC EPR & 0.14 & 1388 & 1.00 & 1.08 & 32.5 & 439.4 & 73.2 \\ \hline 
 PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 0.01 & 535.5 & 77.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 5.10 & 447.8 & 79.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 8.20 & 402.0 & 78.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 10.20 & 445.8 & 77.8 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 14.80 & 391.0 & 80.8 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 20.00 & 492.5 & 79.0 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 8.20 & 408.4 & 74.9 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 9.40 & 439.2 & 75.9 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 10.00 & 448.6 & 75.1 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.50 & 386.7 & 76.5 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 18.00 & 472.1 & 75.6 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 21.40 & 496.9 & 75.3 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.70 & 412.3 & 80.2 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.00 & 483.2 & 77.1 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 35.00 & 577.4 & 83.0 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 38.60 & 506.1 & 78.9 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 46.00 & 572.1 & 75.3 \\ \hline 
-PVDF & 0.13 & 1760 & 1.00 & 1.30 & 1.95 & 499.4 & 80.0 \\ \hline 
-Painted GFK polyester with Gelcoat handlaminated & 0.17 & 2022 & 1.00 & 1.30 & 4.80 & 401.1 & 73.9 \\ \hline 
-Polyester & 0.17 & 1230 & 1.00 & 1.30 & 2.10 & 462.6 & 77.3 \\ \hline 
-Polyolefin & 0.13 & 970 & 1.00 & 1.87 & 2.90 & 519.9 & 79.0 \\ \hline 
-Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 18.10 & 439.5 & 74.2 \\ \hline 
-Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 32.20 & 524.6 & 75.2 \\ \hline 
-Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 2.50 & 442.2 & 76.9 \\ \hline 
-Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 6.00 & 442.4 & 76.2 \\ \hline 
-Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.70 & 502.4 & 73.0 \\ \hline 
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 5.1 & 447.8 & 79.2 \\ \hline 
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 402.0 & 78.2 \\ \hline 
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 10.2 & 445.8 & 77.8 \\ \hline 
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 14.8 & 391.0 & 80.8 \\ \hline 
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 20.0 & 492.5 & 79.0 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 408.4 & 74.9 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 9.4 & 439.2 & 75.9 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 10.0 & 448.6 & 75.1 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.5 & 386.7 & 76.5 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 18.0 & 472.1 & 75.6 \\ \hline 
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 21.4 & 496.9 & 75.3 \\ \hline 
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 412.3 & 80.2 \\ \hline 
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.0 & 483.2 & 77.1 \\ \hline 
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 35.0 & 577.4 & 83.0 \\ \hline 
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 38.6 & 506.1 & 78.9 \\ \hline 
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 46.0 & 572.1 & 75.3 \\ \hline 
+PVDF & 0.13 & 1760 & 1.00 & 1.30 & 2.0 & 499.4 & 80.0 \\ \hline 
+Painted GFK polyester with Gelcoat handlaminated & 0.17 & 2022 & 1.00 & 1.30 & 4.8 & 401.1 & 73.9 \\ \hline 
+Polyester & 0.17 & 1230 & 1.00 & 1.30 & 2.1 & 462.6 & 77.3 \\ \hline 
+Polyolefin & 0.13 & 970 & 1.00 & 1.87 & 2.9 & 519.9 & 79.0 \\ \hline 
+Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 439.5 & 74.2 \\ \hline 
+Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 32.2 & 524.6 & 75.2 \\ \hline 
+Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 2.5 & 442.2 & 76.9 \\ \hline 
+Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 6.0 & 442.4 & 76.2 \\ \hline 
+Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.7 & 502.4 & 73.0 \\ \hline 
 \end{tabular}
 \label{Properties_RISE_Materials_polymers1}
 \end{table}
@@ -1904,41 +1906,43 @@ Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.70 & 502.4 & 73.0 \\ \hline
 \begin{table}[!h]
 \caption[Properties of RISE Materials, polymer materials]{Properties of RISE Materials, polymer materials ~\cite{RISE:Fire_Database} (2/2).}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 18.10 & 455.4 & 76.9 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 25.00 & 512.8 & 75.7 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 38.10 & 477.5 & 77.1 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 45.00 & 473.3 & 72.7 \\ \hline 
-RPPVC & 0.14 & 1388 & 1.00 & 1.08 & 2.90 & 388.4 & 74.9 \\ \hline 
-RPPVC PEF & 0.14 & 1388 & 1.00 & 1.08 & 4.50 & 452.3 & 72.2 \\ \hline 
-RPPVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.00 & 427.7 & 75.6 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.70 & 484.6 & 79.1 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.50 & 488.9 & 78.3 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 39.30 & 514.5 & 77.8 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 45.00 & 607.8 & 72.8 \\ \hline 
-Solid acrylic & 0.24 & 1900 & 1.00 & 1.00 & 12.20 & 466.2 & 73.4 \\ \hline 
-Transparent polycarbonate & 0.18 & 1579 & 1.00 & 1.26 & 2.30 & 512.1 & 78.2 \\ \hline 
-ZHPolyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.40 & 469.1 & 77.3 \\ \hline 
-ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 13.00 & 460.3 & 77.1 \\ \hline 
-ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline 
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 455.4 & 76.9 \\ \hline 
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 25.0 & 512.8 & 75.7 \\ \hline 
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 38.1 & 477.5 & 77.1 \\ \hline 
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 45.0 & 473.3 & 72.7 \\ \hline 
+RPPVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 388.4 & 74.9 \\ \hline 
+RPPVC PEF & 0.14 & 1388 & 1.00 & 1.08 & 4.5 & 452.3 & 72.2 \\ \hline 
+RPPVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.0 & 427.7 & 75.6 \\ \hline 
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 484.6 & 79.1 \\ \hline 
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.5 & 488.9 & 78.3 \\ \hline 
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 39.3 & 514.5 & 77.8 \\ \hline 
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 45.0 & 607.8 & 72.8 \\ \hline 
+Solid acrylic & 0.24 & 1900 & 1.00 & 1.00 & 12.2 & 466.2 & 73.4 \\ \hline 
+Transparent polycarbonate & 0.18 & 1579 & 1.00 & 1.26 & 2.3 & 512.1 & 78.2 \\ \hline 
+ZHPolyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.4 & 469.1 & 77.3 \\ \hline 
+ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 13.0 & 460.3 & 77.1 \\ \hline 
+ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.0 & 535.0 & 76.9 \\ \hline 
 \end{tabular}
 \label{Properties_RISE_Materials_polymers2}
 \end{table}
 
+\clearpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_polycarbonate-16mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_HPL_Melamine_polyester_film_-13mm_c_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_HPL_compact_-04mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PE_XLPE-40mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC-02mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_EPR-32mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-00mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-05mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_polycarbonate-16mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_HPL_Melamine_polyester_film_-13mm_c_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_HPL_compact_-04mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PE_XLPE-40mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC-02mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_EPR-32mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-00mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-05mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (1/6).}
@@ -1947,14 +1951,14 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-08mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-10mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-14mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-20mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-08mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-09mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-10mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-14mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-08mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-10mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-14mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PE-20mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-08mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-09mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-10mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-14mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (2/6).}
@@ -1963,14 +1967,14 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-18mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-21mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-17mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-22mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-35mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-38mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-46mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVDF-01mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-18mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_PVC-21mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-17mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-22mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-35mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-38mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVC_XLPE-46mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_PVDF-01mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (3/6).}
@@ -1979,14 +1983,14 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_GFK_polyester_with_Gelcoat__all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyester-02mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin-02mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_EPR-18mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_EPR-32mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PA-02mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PA-06mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PP-08mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Painted_GFK_polyester_with_Gelcoat__all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyester-02mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin-02mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_EPR-18mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_EPR-32mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PA-02mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PA-06mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_PP-08mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (4/6).}
@@ -1995,14 +1999,14 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-18mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-25mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-38mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-45mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC-02mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_PEF-04mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_PVC-14mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-17mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-18mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-25mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-38mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Polyolefin_XLPE-45mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC-02mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_PEF-04mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_PVC-14mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-17mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (5/6).}
@@ -2011,14 +2015,14 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-22mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-39mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-45mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Solid_acrylic-12mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Transparent_polycarbonate-02mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_PP-08mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_XLPE-13mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_XLPE-27mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-22mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-39mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_RPPVC_XLPE-45mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Solid_acrylic-12mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Transparent_polycarbonate-02mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_PP-08mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_XLPE-13mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_ZHPolyolefin_XLPE-27mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, polymer materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of polymer materials (6/6).}
@@ -2030,25 +2034,25 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.00 & 535.0 & 76.9 \\ \hline
 \begin{table}[!h]
 \caption[Properties of RISE Materials, wood-based materials]{Properties of RISE Materials, wood-based materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{2.4cm}|p{1.8cm}|p{1.3cm}|p{0.9cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|p{1.6cm}|}
+\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
-                                               & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\
-Material                                       & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\ \hline
+                                               & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
+Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FR Particle board & 0.14 & 628 & 1.00 & 1.30 & 16.00 & 380.6 & 57.2 \\ \hline 
-FR Particle board & 0.14 & 462 & 1.00 & 1.30 & 79.00 & 360.2 & 62.2 \\ \hline 
-MDF board & 0.12 & 700 & 1.00 & 1.28 & 12.00 & 527.9 & 78.6 \\ \hline 
-Spruce & 0.06 & 450 & 1.00 & 0.91 & 10.00 & 558.4 & 74.9 \\ \hline 
+FR Particle board & 0.14 & 628 & 1.00 & 1.30 & 16.0 & 380.6 & 57.2 \\ \hline 
+FR Particle board & 0.14 & 462 & 1.00 & 1.30 & 79.0 & 360.2 & 62.2 \\ \hline 
+MDF board & 0.12 & 700 & 1.00 & 1.28 & 12.0 & 527.9 & 78.6 \\ \hline 
+Spruce & 0.06 & 450 & 1.00 & 0.91 & 10.0 & 558.4 & 74.9 \\ \hline 
 \end{tabular}
 \label{Properties_RISE_Materials_woods}
 \end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_particle_board-16mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_Particle_board-79mm_cone_all} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_MDF_board-12mm_cone_all} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Spruce-10mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_particle_board-16mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_FR_Particle_board-79mm_cone_all} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_MDF_board-12mm_cone_all} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/RISE_Materials_Spruce-10mm_cone_all} \\
 \end{tabular*}
 \caption[Heat release rate per unit area of RISE materials using scaling model, wood-based materials]
 {Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments of wood-based materials.}
