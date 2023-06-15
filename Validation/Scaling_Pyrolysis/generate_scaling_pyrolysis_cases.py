@@ -241,7 +241,8 @@ def findIgnitionTime(times, HRRs, energyCutoff1=0.001):
     tign = times[ind1]
     return tign
 
-def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
+def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False,
+                                hrrThresh=1., numPoints=10000):
     ''' This function interpolates the experimental data to a
     fixed time interval.
     '''
@@ -258,11 +259,51 @@ def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False):
     tmax = np.round(times.max()/dt)*dt
     tmin = np.round(times.min()/dt)*dt
     targetTimes = np.linspace(tmin, tmax, int((tmax-tmin)/dt + 1))
-    HRRs = np.interp(targetTimes, times, HRRs)
+    targetHRRs = np.interp(targetTimes, times, HRRs)
     
-    return targetTimes, HRRs
+    t_peak = times[np.argmax(HRRs)]
+    q_peak = np.nanmax(HRRs)
+    
+    
+    targetTimes = np.append(targetTimes, t_peak)
+    targetHRRs = np.append(targetHRRs, q_peak)
+    
+    targetHRRs = targetHRRs[np.argsort(targetTimes)]
+    targetTimes = np.sort(targetTimes)
+    
+    '''
+    totalEnergy = np.trapz(HRRs, times)
+    totalEnergy2 = np.trapz(targetHRRs, targetTimes)
+    
+    
+    while abs(1-(totalEnergy/totalEnergy2)) > 0.01:
+        targetDt = targetDt*0.9
+        targetTimes = np.linspace(tmin, tmax, int((tmax-tmin)/targetDt + 1))
+        targetHRRs = np.interp(targetTimes, times, HRRs)
+        targetTimes = np.append(targetTimes, t_peak)
+        targetHRRs = np.append(targetHRRs, q_peak)
+        
+        targetHRRs = targetHRRs[np.argsort(targetTimes)]
+        targetTimes = np.sort(targetTimes)
+        totalEnergy2 = np.trapz(targetHRRs, targetTimes)
+    '''
+    
+    reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
+    while (np.max(abs(reconstructedHRR - HRRs)) > hrrThresh) and (targetTimes.shape[0] < numPoints):
+        ind = np.argmax(abs(reconstructedHRR - HRRs))
+        t_diff = times[ind]
+        q_diff = HRRs[ind]
+        
+        targetTimes = np.append(targetTimes, t_diff)
+        targetHRRs = np.append(targetHRRs, q_diff)
+        
+        targetHRRs = targetHRRs[np.argsort(targetTimes)]
+        targetTimes = np.sort(targetTimes)
+        reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
+    print('%d, %0.2f'%(targetTimes.shape[0], np.max(abs(reconstructedHRR - HRRs))))
+    return targetTimes, targetHRRs
 
-def getRepresentativeHrrpua(HRRPUA, factor=0.5):
+def getRepresentativeHrrpua(HRRPUA, time, factor=0.5):
     ''' This function calculates a representative HRRPUA for use
     in estimating the flame heat flux. HRR contains a time series
     of HRRPUA data from a cone calorimeter experiment. All data
@@ -273,7 +314,13 @@ def getRepresentativeHrrpua(HRRPUA, factor=0.5):
     is arbitrary but provides reasonable agreement on the cases
     evaluated here.
     '''
-    representativeHRRPUA = HRRPUA[HRRPUA > HRRPUA.max()*factor].mean()
+    dts = time[1:]-time[:-1]
+    dt = np.min(dts[np.nonzero(dts)])
+    tmin = time.min()
+    tmax = time.max()
+    time_i = np.linspace(tmin, tmax, int((tmax-tmin)/dt + 1))
+    hrrpua_i = np.interp(time_i, time, HRRPUA)
+    representativeHRRPUA = hrrpua_i[hrrpua_i > HRRPUA.max()*factor].mean()
     return representativeHRRPUA
 
 def estimateExposureFlux(coneExposure, representativeHRRPUA):
@@ -285,23 +332,7 @@ def estimateExposureFlux(coneExposure, representativeHRRPUA):
     surface heat transfer coefficient of 15 W/m2-K and a fixed
     gas phase radiative fraction of 0.35.
     '''
-    #exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
-    #exposureFlux = 73.5*(representativeHRRPUA**0.045) - 50 + coneExposure
-    
-    #exposureFlux = 15+0.0175*representativeHRRPUA + coneExposure # Linear 15 to 50
-    exposureFlux = min([15+0.02*representativeHRRPUA, 25]) + coneExposure # Linear 15 to 50
-    
-    #exposureFlux = coneExposure + 35
-    #exposureFlux = 2.4183 * (representativeHRRPUA**(0.3837)) + coneExposure # flame volume with Tinf 900 K, h=15, kf based on Lf
-    #exposureFlux = 1.4694 * (representativeHRRPUA**(0.4496)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    
-    #exposureFlux = 0.7738 * (representativeHRRPUA**(0.6123)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 0.9723 * (representativeHRRPUA**(0.5404)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.0341 * (representativeHRRPUA**(0.5127)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 0.9444 * (representativeHRRPUA**(0.5517)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.0537 * (representativeHRRPUA**(0.5031)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    #exposureFlux = 1.1607 * (representativeHRRPUA**(0.4461)) + coneExposure # flame volume with Tinf 700 K, h=15, kf based on Lf
-    
+    exposureFlux = 55*(representativeHRRPUA**0.065) - 50 + coneExposure
     return exposureFlux
 
 def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
@@ -328,7 +359,7 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
         4. All samples are assumed to have 0.5in / 12.7 mm of ceramic
            fiber insulation behind them.
     '''
-    hrrpua_ref = getRepresentativeHrrpua(hrrpua)
+    hrrpua_ref = getRepresentativeHrrpua(hrrpua, time)
     qref = estimateExposureFlux(coneExposure, hrrpua_ref)
     
     tempOutput = '.TRUE.' if outputTemperature else '.FALSE.'
@@ -347,9 +378,14 @@ def buildFdsFile(chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
     #txt = txt+"&MATL ID='BACKING', CONDUCTIVITY=0.2, DENSITY=585., EMISSIVITY=1., SPECIFIC_HEAT=0.8, /\n"
     txt = txt+"&MATL ID='SAMPLE', CONDUCTIVITY=%0.4f, DENSITY=%0.1f, EMISSIVITY=%0.4f, SPECIFIC_HEAT=%0.4f, /\n"%(k, rho, e, cp)
     
+    prevTime=-1e6
     for i in range(0, len(time)):
-        txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.4f, /\n"%(time[i]-time[0], hrrpua[i])
-    
+        if (time[i]-prevTime) < 0.0001:
+            #txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.1f, /\n"%(time[i]-time[0]+0.0001, hrrpua[i])
+            pass
+        else:
+            txt = txt+"&RAMP ID='CONE-RAMP', T=%0.4f, F=%0.1f, /\n"%(time[i]-time[0], hrrpua[i])
+        prevTime = time[i]
     y = -0.05
     for i, hf in enumerate(HFs):
         hf_ign = estimateHrrpua(coneExposure, hrrpua_ref, hf)
@@ -603,55 +639,6 @@ def plotMaterialExtraction(x, y, f, label, diff=None, axmin=None, axmax=None, lo
     plt.tight_layout()
     return fig, sigma_m, delta
 
-def computeAnova(delta, sigma_m, num_points):
-    means = dict()
-    stds = dict()
-    nums = dict()
-    
-    for key in list(sigma_m.keys()):
-        means[key] = 1/delta[key]
-        stds[key] = (sigma_m[key]**2)*(means[key]**2)
-        nums[key] = num_points[key]
-    
-    overallMean = np.mean([float(x) for x in means.values()])
-    
-    # Calculate the between groups SSD across full set
-    BSSD = 0
-    for key in list(sigma_m.keys()):
-        BSSD += nums[key]*(means[key] - overallMean)**2
-    
-    # Between groups degrees of freedom is one less than number of groups
-    BDOF = len(means.keys())-1
-    
-    # Between goups mean square value is SSD divided by DOF
-    BMSV = SSD/BDOF
-    
-    # Within groups SSD
-    ISSD = 0
-    for key in list(sigma_m.keys()):
-        ISSD += nums[key]*(stds[key]**2)
-    
-    # In groups DOF is number of groups x (number of samples in group - 1)
-    IDOF = dict()
-    for key in list(sigma_m.keys()):
-        IDOF[key] = len(means.keys())*(nums[key]-1)
-    
-    # In groups MSV is SSD / DOF
-    IMSV = dict()
-    for key in list(sigma_m.keys()):
-        IMSV[key] = ISSD/IDOF[key]
-        
-    # F ratio
-    Fratio = dict()
-    for key in list(sigma_m.keys()):
-        Fratio[key] = BMSV/IMSV[key]
-    
-    # F threshold
-    Fthresh = dict()
-    for key in list(sigma_m.keys()):
-        Fthresh[key] = scipy.stats.f.ppf(0.05, IDOF[key], BDOF)
-    
-    return Fratio, Fthresh
 
 def getNormalStats(delta, sigma_m):
     mu = 1/delta
@@ -715,10 +702,10 @@ if __name__ == "__main__":
     uncertainty['MaterialClass'] = []
     
     runSimulations = True
-    showStats = True
-    closePlots = False
-    
-    for i in range(1, specificationFile.shape[0]):
+    showStats = False
+    closePlots = True
+    outTxt = ''
+    for i in [17]: #range(1, specificationFile.shape[0]):
         
         # Check for run code
         code = specificationFile.iloc[i]['Code']
@@ -818,10 +805,24 @@ if __name__ == "__main__":
             times = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceTimeColumn].values
         if preprocess != '':
             times, HRRs = preprocessConeData(times, HRRs)
+        targetDt = 30000
+        #times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False)
+        times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=50)
+        tign, times_trimmed, hrrs_trimmed = findLimits(times2, HRRs2)
         
-        #targetTimes, HRRs_interp = interpolateExperimentalData(times, HRRs, targetDt=15, filterWidth=False)
-        tign, times_trimmed, hrrs_trimmed = findLimits(times, HRRs)
-            
+        #plt.figure(figsize=(12, 6))
+        #plt.plot(times/60, HRRs, label='N=%0d'%(times.shape[0]))
+        #for numPoints in [50]:
+        #    times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=numPoints)
+        #    plt.plot(times2/60, HRRs2, label='N=%0d'%(times2.shape[0]))
+        #plt.legend(fontsize=16, bbox_to_anchor=(1.2,1.0), loc='upper right')
+        #plt.xlabel('Time (min)', fontsize=16)
+        #plt.ylabel('HRRPUA (kW/m2)', fontsize=16)
+        #plt.tick_params(labelsize=16)
+        #plt.grid()
+        #plt.tight_layout()
+        #assert False, "Stopped"
+        
         tigns = dict()
         for ii in range(0, len(validationTimeColumns)):
             timeColumn = validationTimeColumns[ii]
@@ -845,16 +846,17 @@ if __name__ == "__main__":
         # Calculate reference heat flux
         # If the trimmed HRR curve fails, use the full curve and print a warning
         try:
-            hrrpua_ref = getRepresentativeHrrpua(hrrs_trimmed)
+            hrrpua_ref = getRepresentativeHrrpua(hrrs_trimmed, times_trimmed)
         except:
-            hrrpua_ref = getRepresentativeHrrpua(HRRs)
+            hrrpua_ref = getRepresentativeHrrpua(HRRs2, times2)
             print("Warning: Failed to get representative HRRPUA for material %s on trimmed data. Using full HRR curve."%(material))
-            hrrs_trimmed = HRRs
-            times_trimmed = times
+            hrrs_trimmed = HRRs2
+            times_trimmed = times2
         qref = estimateExposureFlux(coneExposure, hrrpua_ref)
         
         # Set chid
         chid = series + '_' + material.replace(' ','_')+"_cone"
+        chid = chid.replace('%','')
         if len(chid) > 50:
             chid = chid[:50]
         
@@ -938,6 +940,23 @@ if __name__ == "__main__":
                 expTime = exp_data[tc].values
                 expHRR = exp_data[hc].values
             
+            expHRR = np.round(expHRR, decimals=1)
+            expTime2 = [expTime[0]]
+            expHRR2 = [expHRR[0]]
+            
+            for iiii in range(1, len(expTime)):
+                if expHRR[iiii] == expHRR2[-1]:
+                    pass
+                else:
+                    expHRR2.append(expHRR[iiii-1])
+                    expTime2.append(expTime[iiii-1])
+                    expHRR2.append(expHRR[iiii])
+                    expTime2.append(expTime[iiii])
+            
+            
+            exp_out = pd.DataFrame(np.array([expTime2, np.round(expHRR2, decimals=1)]).T, columns=['Time','HRR'])
+            exp_out.to_csv("..//..//..//exp//Scaling_Pyrolysis//%s_%02d.csv"%(material.replace('%',''),flux), index=False)
+            
             uncertainty['peak']['EXP'].append(np.nanmax(expHRR))
             uncertainty['peak']['MOD'].append(np.nanmax(scaling))
             
@@ -971,17 +990,129 @@ if __name__ == "__main__":
         
         #if material_output_data[series] is False:
         #    material_output_data[series] = defaultdict(bool)
-        material_output_data[(series,material)] = defaultdict(bool)
-        material_output_data[(series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
-        material_output_data[(series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
-        material_output_data[(series,material)]['Emissivity\n(-)'] = emissivity
-        material_output_data[(series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
-        material_output_data[(series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
-        material_output_data[(series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
-        material_output_data[(series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        material_output_data[(materialClass,series,material)] = defaultdict(bool)
+        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
+        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
+        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
+        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
+        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
+        material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
+        material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
         
+        #assert False, "Stopped"
+        
+        '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        lineColors = ['k','r','g','m','c']
+        materialClassDict = dict()
+        materialClassDict['Wood-Based'] = dict()
+        materialClassDict['Wood-Based']['marker'] = '>'
+        materialClassDict['Wood-Based']['color'] = 'b'
+        materialClassDict['Polymers'] = dict()
+        materialClassDict['Polymers']['marker'] = '^'
+        materialClassDict['Polymers']['color'] = 'r'
+        materialClassDict['Mixtures'] = dict()
+        materialClassDict['Mixtures']['marker'] = 'v'
+        materialClassDict['Mixtures']['color'] = 'g'
+        materialClassDict['Others'] = dict()
+        materialClassDict['Others']['marker'] = 'o'
+        materialClassDict['Others']['color'] = 'm'
+        
+        tMax = 5
+        qMax = 0
+        for iiii, flux in enumerate(validationFluxes):
+            scaling = data['"HRRPUA-%02d"'%(flux)].values
+            if type(exp_data) is dict:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]] > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]][ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]])*1.1])
+            else:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]].values > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]].values[ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]].values)*1.1])
+            qMax = max([qMax, np.nanmax(scaling)*1.1])
+        tMax = np.ceil(tMax/5)*5
+        qMax = np.ceil(qMax/10)*10
+        
+        for iii, flux in enumerate(validationFluxes):
+            lc = lineColors[iii]
+            if iii == 0:
+                switchId = 'd'
+            else:
+                switchId = 'f'
+            materialMarker = materialClassDict[materialClass]['marker']
+            materialColor = materialClassDict[materialClass]['color']
+            matlabelname = material
+            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+            matlabelname = matlabelname.replace('_','\_')
+            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + '%s_%02d.csv"'%(material,flux) + ","
+            outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
+            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
+            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
+    
+    with open('scaling_dataplot_out.csv', 'w') as f:
+        f.write(outTxt)
     material_output_data = pd.DataFrame(material_output_data)
-    material_output_data.to_csv('material_output_data.csv')
+    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
+    
+    tmp = material_output_data.T
+    tmp['MaterialClass'] = [x[0] for x in tmp.index]
+    tmp['Material'] = [x[2] for x in tmp.index]
+    tmp['Series'] = [x[1] for x in tmp.index]
+    series = [x[1] for x in tmp.index]
+    unique_series = list(set(series))
+    start = True
+    for s in unique_series:
+        tmp2 = tmp.loc[[True if s in x else False for x in series]]
+        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
+        for m in uniqueMaterialClass:
+            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
+            tmp4 = tmp3.sort_values('Material')
+            if start:
+                out2 = tmp4
+                start = False
+            else:
+                out2 = out2.append(tmp4)
+    
+    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
+    out2_vals = np.array(out2.values[:, :7], dtype=float)
+    
+    series = ''
+    matClass = ''
+    texout = ''
+    for iiii in range(0, out2.shape[0]):
+        if out2['Series'].iloc[iiii] == series:
+            if out2['MaterialClass'].iloc[iiii] == matClass:
+                pass
+            else:
+                matClass = out2['MaterialClass'].iloc[iiii]
+                texout = texout + '\n' + matClass + '\n'
+        else:
+            series = out2['Series'].iloc[iiii]
+            matClass = out2['MaterialClass'].iloc[iiii]
+            texout = texout + '\n' + series + ' & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\\\ \n'
+            texout = texout + 'Material & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\\\ \\hline \n'
+            texout = texout + '\n' + matClass + '\n'
+        material = out2['Material'].iloc[iiii]
+        if '-' in material: material = material.split('-')[0]
+        if '(' in material: material = material.split('(')[0]
+        while '__' in material: material = material.replace('__', '_')
+        material.replace('_', ' ')
+        cond = out2_vals[iiii, 0]
+        dens = out2_vals[iiii, 1]
+        emis = out2_vals[iiii, 2]
+        spec = out2_vals[iiii, 3]
+        thic = out2_vals[iiii, 4]
+        Tign = out2_vals[iiii, 5]
+        qref = out2_vals[iiii, 6]
+        texout = texout + material + ' & %0.2f & %0.0f & %0.2f & %0.2f & '%(cond, dens, emis, spec)
+        texout = texout + '%0.2f & %0.1f & %0.1f \\\\ \\hline \n'%(thic*1000, Tign, qref)
+    
+    with open('material_output_data_latex.tex', 'w') as f:
+        f.write(texout)
+    out2.to_csv('material_output_data_latex.csv', float_format='%.1f')
     
     material_data = material_output_data.T
     
@@ -1009,7 +1140,9 @@ if __name__ == "__main__":
         outDict['points'] = points
         outDf = pd.DataFrame(outDict)
         outDf.to_csv('statistics_point_data_%s_summary.csv'%(u))
-        
+    
+    #for i in range(1, specificationFile.shape[0]):
+    #    dataName
 
     
     if showStats:
@@ -1029,7 +1162,7 @@ if __name__ == "__main__":
                 axmaxes = [5e3, 5e3, 5e3, 1e4, 5e3]
             else:
                 axmin = 0
-                axmaxes = [2500, 2000, 1500, 10000, 3000]
+                axmaxes = [750, 2000, 1500, 10000, 3000]
             for i in range(0, len(uncertainties)):
                 label = labels[i]
                 axmax = axmaxes[i]
@@ -1058,7 +1191,7 @@ if __name__ == "__main__":
                 axmaxes = [5e3, 1e4, 5e3]
             else:
                 axmin = 0
-                axmaxes = [2500, 10000, 3000]
+                axmaxes = [750, 10000, 3000]
             for i in range(0, len(uncertainties)):
                 label = labels[i]
                 axmax = axmaxes[i]
@@ -1105,7 +1238,7 @@ if __name__ == "__main__":
         
         
         
-        i = 2
+        i = 0
         label = labels[i]
         axmax = axmaxes[i]
         u = uncertainties[i]
@@ -1122,6 +1255,7 @@ if __name__ == "__main__":
         #outputs['sigma_m']['all'] = sigma_m
         #outputs['count']['all'] = len(x)
         hrrpua_thresholds = np.logspace(1,4, num=100)
+        output_points = dict()
         for j in hrrpua_thresholds: #[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000]:
             x2 = x[x > j]
             y2 = y[x > j]
@@ -1130,6 +1264,7 @@ if __name__ == "__main__":
             outputs['delta'][j] = delta
             outputs['sigma_m'][j] = sigma_m
             outputs['count'][j] = len(x2)
+            output_points[np.round(j,decimals=1)] = points
         outputs2 = pd.DataFrame(outputs)
         
         ind = np.where(outputs2['sigma_m'] == outputs2['sigma_m'].min())[0][0]
@@ -1148,16 +1283,17 @@ if __name__ == "__main__":
         plt.figure(figsize=(10, 6))
         #plt.scatter(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', s=30, color=colors[0])
         plt.plot(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', color=colors[0], linewidth=3)
-        app_label = "$\mathrm{\sigma_{m}}=%0.2f - (%0.1fE-4) q''_{peak}$"%(sigma_m_at_max*1.05, -1e4*slope)
+        app_label = "$\mathrm{\sigma_{m}}=%0.2f - (%0.1fE-4) q''_{60s,peak}$"%(sigma_m_at_max*1.05, -1e4*slope)
         plt.plot(hrrpua_thresholds, sigma_e, '--', label='$\mathrm{\sigma_{e}}$', color=colors[2], linewidth=3)
         plt.plot(hrrpua_thresholds, approx, label=app_label, linewidth=3, color=colors[1])
-        plt.xlabel('Peak HRRPUA ($\mathrm{kW/m^{2}}$)', fontsize=fs)
+        plt.xlabel('60s Avg Peak HRRPUA ($\mathrm{kW/m^{2}}$)', fontsize=fs)
         plt.ylabel('$\mathrm{\sigma}$', fontsize=fs)
-        plt.ylim(0.07, 0.18)
+        plt.ylim(0.07, 0.16)
         plt.xlim(0, 1000)
         plt.tick_params(labelsize=fs)
         plt.legend(fontsize=fs)
         plt.grid()
+        plt.tight_layout()
         plt.savefig(os.path.join(figoutdir, 'statistics_sigma_m_with_hrrpua.png'), dpi=300)
         
         statTxt = "Deviation by Scaling up/down\n"
