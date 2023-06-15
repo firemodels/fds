@@ -3636,11 +3636,11 @@ ENDIF
 
 ! Write abridged output to the .err file
 
-IF (T<=0.0001) THEN
+IF (ABS(T)<=0.0001) THEN
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
-ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
-ELSEIF (T>0.001 .AND. T<=0.01) THEN
+ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
 ELSE
    WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
