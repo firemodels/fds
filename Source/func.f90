@@ -1224,7 +1224,7 @@ IF (ALLOCATED(ONE_D%PART_ENTHALPY)) DEALLOCATE(ONE_D%PART_ENTHALPY)           ; 
 IF (ALLOCATED(ONE_D%MATL_COMP)) DEALLOCATE(ONE_D%MATL_COMP)                   ; ALLOCATE(ONE_D%MATL_COMP(ONE_D%N_MATL))
 
 DO NN=1,ONE_D%N_MATL
-   IF (ALLOCATED(ONE_D%MATL_COMP(NN)%RHO_DOT)) DEALLOCATE(ONE_D%MATL_COMP(NN)%RHO_DOT) 
+   IF (ALLOCATED(ONE_D%MATL_COMP(NN)%RHO_DOT)) DEALLOCATE(ONE_D%MATL_COMP(NN)%RHO_DOT)
    ALLOCATE(ONE_D%MATL_COMP(NN)%RHO_DOT(0:ONE_D%N_CELLS_MAX+1))
    IF (ALLOCATED(ONE_D%MATL_COMP(NN)%RHO)) DEALLOCATE(ONE_D%MATL_COMP(NN)%RHO)
    ALLOCATE(ONE_D%MATL_COMP(NN)%RHO(0:ONE_D%N_CELLS_MAX+1))
@@ -2584,7 +2584,7 @@ SORT_QUEUE: DO
       DO NN=1,M%N_OBST
          OB=>M%OBSTRUCTION(NN)
          SELECT CASE(IOR)
-            CASE(-1) 
+            CASE(-1)
                IF (IIN==  OB%I1.AND.IIN==  OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
             CASE( 1)
                IF (IIN-1==OB%I1.AND.IIN-1==OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
@@ -2999,15 +2999,16 @@ END SUBROUTINE RANDOM_RECTANGLE
 !> \param Y0 y-coordinate of the center of the code base (m)
 !> \param Z0 z-coordinate of the center of the code base (m)
 !> \param RR0 Radius of the base (m)
+!> \param RRI Inner radius of the base of the cone (if hollow) (m)
 !> \param HH0 Height of the cone (m)
 !> \param G_FACTOR Geometry indicator: 1 for a cone, 0 for a cylinder
 
-SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,HH0,G_FACTOR)
+SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,RRI,HH0,G_FACTOR)
 
 INTEGER, INTENT(IN) :: NM,G_FACTOR
-REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
+REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,RRI,HH0
 REAL(EB), INTENT(OUT) :: XX,YY,ZZ
-REAL(EB) :: THETA,RR,RN
+REAL(EB) :: THETA,RR,RN,RR1,RR2
 TYPE (MESH_TYPE), POINTER :: M
 
 M => MESHES(NM)
@@ -3021,8 +3022,13 @@ SEARCH_LOOP: DO
    XX = X0 + RR*COS(THETA)
    YY = Y0 + RR*SIN(THETA)
    IF (G_FACTOR==1) THEN
-      IF (RR**2>(RR0*(1._EB-(ZZ-Z0)/HH0))**2) CYCLE SEARCH_LOOP
+      RR1=RRI*(1._EB-(ZZ-Z0)/HH0)
+      RR2=RR0*(1._EB-(ZZ-Z0)/HH0)
+   ELSE
+      RR1=RRI
+      RR2=RR0
    ENDIF
+   IF ((RR**2>RR2**2) .OR. (RR**2<RR1**2)) CYCLE SEARCH_LOOP
    IF (XX>=M%XS .AND. XX<=M%XF .AND. YY>=M%YS .AND. YY<=M%YF .AND. ZZ>=M%ZS .AND. ZZ<=M%ZF) EXIT SEARCH_LOOP
 ENDDO SEARCH_LOOP
 
@@ -3200,13 +3206,14 @@ END FUNCTION CIRCLE_CELL_INTERSECTION_AREA
 !> \param Y0 y-coordinate of the center of the base of the cone (m)
 !> \param Z0 z-coordinate of the center of the base of the cone (m)
 !> \param RR0 Radius of the base of the cone (m)
+!> \param RRI Inner radius of the base of the cone (if hollow) (m)
 !> \param HH0 Height of the cone (m)
 !> \param G_FACTOR Geometry indicator: 1 for a cone, 0 for a cylinder
 
-REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,HH0,G_FACTOR)
+REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,RRI,HH0,G_FACTOR)
 
 INTEGER, INTENT(IN) :: NM,G_FACTOR
-REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
+REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,RRI,HH0
 INTEGER :: I,J,K,NX,NY,NZ
 REAL(EB) :: XX,YY,ZZ,R2,X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX,DX,DY,DZ,SHORT_DIMENSION
 TYPE (MESH_TYPE), POINTER :: M
@@ -3237,7 +3244,7 @@ DO K=1,NZ
       DO I=1,NX
          XX = X_MIN + (I-0.5_EB)*DX
          R2 = (XX-X0)**2+(YY-Y0)**2
-         IF (R2<(RR0*(1._EB-G_FACTOR*(ZZ-Z0)/HH0))**2) &
+         IF ((R2<(RR0*(1._EB-G_FACTOR*(ZZ-Z0)/HH0))**2) .AND. (R2>(RRI*(1._EB-G_FACTOR*(ZZ-Z0)/HH0))**2)) &
             CONE_MESH_INTERSECTION_VOLUME = CONE_MESH_INTERSECTION_VOLUME + DX*DY*DZ
       ENDDO
    ENDDO
@@ -3728,7 +3735,7 @@ INTEGER, INTENT(OUT) :: IERR
 
 IERR = 0
 ! System is underdetermined - find a minimal solution
-! Solution is given by x = A^T t, solve t = (A A^T)**-1 b, get x as A^T t. 
+! Solution is given by x = A^T t, solve t = (A A^T)**-1 b, get x as A^T t.
 IF (M > N) THEN
    AT = TRANSPOSE(A)
    AAT = MATMUL(A,AT)
@@ -4037,7 +4044,7 @@ END FUNCTION F_B
 !> \param LIMITER Indicator of the flux limiting scheme
 
 !> There are 6 options for flux LIMITER:
-!> 
+!>
 !> CENTRAL_LIMITER  = 0
 !> GODUNOV_LIMITER  = 1
 !> SUPERBEE_LIMITER = 2
@@ -4048,7 +4055,7 @@ END FUNCTION F_B
 !> Example: x-direction (IOR=1)
 !>
 !>                   location of face
-!>                            
+!>
 !>                        F(I,J,K)
 !>   |     o     |     o     |     o     |     o     |
 !>                        A(I,J,K)
