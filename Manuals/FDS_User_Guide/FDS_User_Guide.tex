@@ -6002,6 +6002,8 @@ Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles w
 \end{lstlisting}
 Note that in this example, exactly one particle is specified per grid cell, positioned exactly in the center of the cell. The number of actual pine needles this single particle represents depends on the specified {\ct MASS\_PER\_VOLUME} and the mass of an individual cylindrical particle. That information would be provided by the {\ct SURF} line {\ct 'needles'}.
 
+Additionally, for {\ct 'CONE'} and {\ct 'CYLINDER'} shapes it is possible to specify an {\ct INNER\_RADIUS}. This will remove a concentric volume with the specified inner radius, leaving a conical or cylindrical shell. This can be useful if a tree crown has foliage concentrated towards the exterior of the volume. Note that the {\ct MASS\_PER\_VOLUME} will be applied only to the occupied volume of the shell, thus the total mass of the tree crown will decrease when specifying an {\ct INNER\_RADIUS} for a fixed {\ct MASS\_PER\_VOLUME}. Examples of different crown geometries can be found in the {\ct tree\_shapes.fds} verification case in the {\ct fds/Verification/WUI/} directory.
+
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
 
 There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region. When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=T}, the particles will be placed at the center of each cell.
@@ -6918,7 +6920,7 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
       CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
       MASS_PER_VOLUME=10., DRY=T /
 \end{lstlisting}
-These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) {\ct MASS\_PER\_VOLUME}.
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) {\ct MASS\_PER\_VOLUME}. Additional details on specifying different standard tree crown geometries can be found in Section~\ref{info:initial_droplets}.
 
 A handy way to introduce many trees into a simulation is by way of a {\ct SURF} line as follows:
 \begin{lstlisting}
@@ -11602,6 +11604,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEIGHT}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 {\ct HRRPUV}                      & Real              & Section~\ref{info:init_hrrpuv}                & \si{kW/m^3}    &               \\ \hline
 {\ct ID}                          & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
+{\ct INNER\_RADIUS}               & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 {\ct MASS\_FRACTION(:)}           & Real Array        & Section~\ref{info:init_species}               & kg/kg          & Ambient       \\ \hline
 {\ct MASS\_PER\_TIME}             & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
 {\ct MASS\_PER\_VOLUME}           & Real              & Section~\ref{info:initial_droplets}           & \si{kg/m^3}    & 1             \\ \hline

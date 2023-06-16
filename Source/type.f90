@@ -1436,6 +1436,7 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: DZ=0._EB         !< Spacing (m) of an array of particles
    REAL(EB) :: HEIGHT           !< Height of initialization region (m)
    REAL(EB) :: RADIUS           !< Radius of initialization region, like a cone (m)
+   REAL(EB) :: INNER_RADIUS     !< Inner radius of initialization region, like a conical shell (m)
    REAL(EB) :: DIAMETER=-1._EB  !< Diameter of liquid droplets specified on an INIT line (m)
    REAL(EB) :: PARTICLE_WEIGHT_FACTOR !< Multiplicative factor for particles specified on the INIT line
    REAL(EB) :: BULK_DENSITY_FACTOR !< Multiplicative factor for values read in from BULK_DENSITY_FILE
