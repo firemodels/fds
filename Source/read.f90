@@ -7241,6 +7241,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SURF_DEFAULT = TRIM(ID)
    ENDIF
 
+   ! Set up a dummy surface for HT1D and HT3D. The properties will be changed later.
+
+   If (HT1D .OR. HT3D .AND. THICKNESS(1)<TWO_EPSILON_EB) THICKNESS(1) = 0.1_EB
+   If (HT1D .OR. HT3D .AND. MATL_ID(1,1)=='null') MATL_ID(1,1) = MATERIAL(1)%ID
+
    ! Load RAMP parameters into appropriate array
 
    SF%RAMP(1:N_TRACKED_SPECIES)%ID   = RAMP_MF(1:N_TRACKED_SPECIES)
@@ -7290,7 +7295,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             END SELECT
          ENDIF
 
-         IF (.NOT.HT1D .AND. .NOT.HT3D .AND. THICKNESS(NL) < 0._EB) EXIT LAYER_LOOP_2
+         IF (THICKNESS(NL) < 0._EB) EXIT LAYER_LOOP_2
 
          ! If MOISTURE is added, create adjustment to density of dry fuel component
 
@@ -7453,11 +7458,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO LAYER_LOOP
-
-   IF (ANY(THICKNESS>0._EB) .AND. HT3D .AND. .NOT.NORMAL_DIRECTION_ONLY) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have a THICKNESS with HT3D=T'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
 
    IF ((GEOMETRY=='CYLINDRICAL' .OR. GEOMETRY=='SPHERICAL') .AND. RADIUS<0._EB .AND. THICKNESS(1)<0._EB) THEN
       WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a RADIUS or THICKNESS'
