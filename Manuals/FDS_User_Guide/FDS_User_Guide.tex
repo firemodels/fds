@@ -2398,6 +2398,21 @@ If a solid obstruction is thermally-thick, you typically do not want to specify 
 This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and its back side to 20~$^\circ$C. You need not specify the temperature of both surfaces. If the back side of the obstruction is exposed, be sure to assign another {\ct SURF} to the back with the opposite boundary conditions. If you want to vary the temperatures of front and back with time, use ramps {\ct RAMP\_T} and {\ct RAMP\_TMP\_BACK}, respectively.
 
 
+\subsection{1-D Heat Conduction in Solids of Varying Thickness}
+\label{info:ht1d}
+
+Solid boundaries usually have one or more layers of a known thickness, in which case you specify the layer thicknesses and material composition on the {\ct SURF} line. However, there may be solids of more complicated geometry for which the various layers may have varying thicknesses. In such cases, you do not specify a {\ct THICKNESS} or a {\ct MATL\_ID} on the {\ct SURF} line. Instead, you specify {\ct MATL\_ID} on the obstructions ({\ct OBST}s) that make up the solid. Multiple obstructions can be used to create multiple layers, and each layer can be assigned one or more material components via {\ct MATL\_ID(:)} and {\ct MATL\_MASS\_FRACTION(:)}. Unlike the way these parameters are specified on a {\ct SURF} line, the single index represents a material component, not a layer. As an example, consider these input lines:
+\begin{lstlisting}
+&SURF ID='SKIN', COLOR='BLACK', HT1D=T /
+&OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, SURF_ID='SKIN',
+      MATL_ID='Steel','Aluminum', MATL_MASS_FRACTION=0.8,0.2 /
+&HOLE XB=0.3,0.7,0.3,0.7,0.3,0.7 /
+&OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
+      MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
+\end{lstlisting}
+The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct HT1D}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above. 
+
+
 
 \subsection{3-D Heat Conduction (Beta)}
 \label{info:ht3d}
@@ -2408,8 +2423,8 @@ The 1-D heat conduction model used in FDS is appropriate for most building mater
 
 FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
-&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB' /
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
 The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. It is important to specify this parameter because by default, FDS uses a non-uniform grid for 1-D heat solid phase heat transfer that is not appropriate for 3-D applications.
@@ -2419,8 +2434,7 @@ The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third sol
 \subsubsection{Limitations}
 
 \begin{enumerate}
-\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
-\item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
+\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation.
 \end{enumerate}
@@ -11968,6 +11982,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEIGHT}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
+{\ct MATL\_ID(:) }            & Char.~Array     & Section~\ref{info:ht1d}                 &           &               \\ \hline
+{\ct MATL\_MASS\_FRACTION(:)} & Real~Array      & Section~\ref{info:ht1d}                 & kg/kg     &               \\ \hline
 {\ct MULT\_ID }               & Character       & Section~\ref{info:MULT}                 &           &               \\ \hline
 {\ct ORIENTATION(3)}          & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct F}       \\ \hline
@@ -12539,6 +12555,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_TRANSFER\_MODEL}                               & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HORIZONTAL}                                          & Logical         & Section~\ref{info:GEOMETRY}               &                     & {\ct F}                 \\ \hline
 {\ct HRRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
+{\ct HT1D}                                                & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
 {\ct HT3D}                                                & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct F}                 \\ \hline
 {\ct ID}                                                  & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}                               & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
