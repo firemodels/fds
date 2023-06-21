@@ -301,10 +301,6 @@ M%SCALAR_WORK2=0._EB
 M%SCALAR_WORK3=0._EB
 M%SCALAR_WORK4=0._EB
 
-! Boundary file patch counter
-
-ALLOCATE(M%INC(-3:3,0:M%N_OBST),STAT=IZERO) ; CALL ChkMemErr('INIT','INC',IZERO)
-
 IF (STRATIFICATION) THEN
 
    ! Compute the atmospheric pressure profile ramp using the specified temperature ramp
