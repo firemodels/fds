@@ -1,7 +1,7 @@
-&HEAD CHID='PMMA_60_kW', TITLE='Parallel Panel Test, PMMA, Propane, 60 kW' /
+&HEAD CHID='PMMA_60_kW_1_cm', TITLE='Parallel Panel Test, PMMA, Propane, 60 kW' /
 
-&MESH IJK=15,20,20, XB=-0.60,-0.30,-0.40,0.00,-0.30,0.10, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.3, DY=0.4, DZ=0.4, I_UPPER=3, J_UPPER=1, K_UPPER=11 /
+&MESH IJK=30,20,30, XB=-0.60,-0.30,-0.40,-0.20,-0.30,0.00, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.3, DY=0.2, DZ=0.3, I_UPPER=3, J_UPPER=3, K_UPPER=15 /
 
 &TIME T_END=900.0 /
 
@@ -61,11 +61,11 @@
       DENSITY = 2000. /
 
 &SURF ID='BURNER', SPEC_ID='PROPANE', HRRPUA=333., COLOR='RED', RAMP_Q='fire', MATL_ID='GRAVEL', THICKNESS=0.2 /
-&RAMP ID='fire', T=  0., F=0. /
-&RAMP ID='fire', T= 10., F=1. /
-&RAMP ID='fire', T=180., F=1. /
-&RAMP ID='fire', T=181., F=1. /
-&RAMP ID='fire', T=900., F=1. /
+&RAMP ID='fire', T=  0., F=0.0 /
+&RAMP ID='fire', T= 10., F=1.0 /
+&RAMP ID='fire', T=120., F=1.0 /
+&RAMP ID='fire', T=130., F=0.2 /
+&RAMP ID='fire', T=900., F=0.2 /
 
 &SURF ID = 'SAMPLE FRONT'
       COLOR  = 'BLACK'

@@ -83,6 +83,7 @@ purdue_flames
 VTT_Sprays
 fm_datacenter_veltest
 mccaffrey_plume
+NIST_NRC_Parallel_Panels
 Wu_Bakar_Tunnels
 Memorial_Tunnel
 FHWA_Tunnel
