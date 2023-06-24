@@ -2281,7 +2281,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
                !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
                CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),SF%STRETCH_FACTOR(NL),&
-                                      SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),&
+                                      SF%CELL_SIZE_FACTOR(NL),SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),&
                                       SMALLEST_CELL_SIZE(NL),DDSUM)
                   LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
                      N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
@@ -2323,7 +2323,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ELSE EXPAND_CONTRACT
             !Since cells only expanding, there is no issue with remeshing layer
             CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
-               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL), &
+               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR(NL),SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL), &
                ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                REMESH_LAYER(NL) = .TRUE.
