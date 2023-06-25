@@ -339,8 +339,6 @@ ALLOCATE(LU_GEOM(2))
 ALLOCATE(FN_BNDF(2*N_BNDF,NMESHES))
 ALLOCATE(LU_BNDF(2*N_BNDF,NMESHES))
 IF (CC_IBM) THEN
-   ALLOCATE(FN_BNDF_GEOM(N_BNDF,NMESHES))
-   ALLOCATE(LU_BNDF_GEOM(N_BNDF,NMESHES))
    ALLOCATE(FN_CFACE_GEOM(NMESHES))
    ALLOCATE(LU_CFACE_GEOM(NMESHES))
    ALLOCATE(FN_BNDG(2*N_BNDF,NMESHES))
@@ -433,14 +431,12 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_BNDF(N,NM) = GET_FILE_NUMBER()
       LU_BNDF(N+N_BNDF,NM) = GET_FILE_NUMBER()
       IF (CC_IBM) THEN
-         LU_BNDF_GEOM(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N+N_BNDF,NM) = GET_FILE_NUMBER()
       ENDIF
       WRITE(FN_BNDF(N,NM),'(A,A,I0,A,I0,A)')        TRIM(CHID),'_',NM,'_',N,'.bf'
       WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
       IF (CC_IBM) THEN
-         WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
          WRITE(FN_BNDG(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be'
          WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
       ENDIF
@@ -849,8 +845,9 @@ USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_STRINGS,CHKMEMERR
 USE RADCONS, ONLY: DLX,DLY,DLZ
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IOR,IZERO,I,J,K,N,I1B,I2B,IW,NN,NF,IP,N_BNDF_POINTS
+INTEGER :: IOR,IZERO,I,J,K,N,I1B,I2B,IW,NN,NF,IP
 INTEGER :: NTSL
+LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: PAINT_FACE
 REAL(EB) :: TNOW,NRM
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: Z_TERRAIN
 LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: OUT_OF_MESH
@@ -1178,79 +1175,88 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
    ALLOCATE(M%IBK(0:I1B,0:I2B),STAT=IZERO)
    CALL ChkMemErr('DUMP','IBK',IZERO)
 
-   M%INC = 0
-   DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
-      WC => M%WALL(IW)
-      BC => M%BOUNDARY_COORD(WC%BC_INDEX)
-      IF (M%WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. M%WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) &
-          M%INC(BC%IOR,M%WALL(IW)%OBST_INDEX) = 1
-      IF (.NOT.BNDF_DEFAULT .AND. M%WALL(IW)%OBST_INDEX==0) M%INC(BC%IOR,M%WALL(IW)%OBST_INDEX) = 0
-   ENDDO
+   ! Create an array of PATCHes that holds the parameters of each boundary patch
 
-   ! Count and allocate the boundary file PATCHes.
+   CREATE_PATCHES: IF (.NOT.APPEND) THEN
 
-   M%N_PATCH = 0
-   DO N=0,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      DO IOR=-3,3
-         IF (.NOT.OB%SHOW_BNDF(IOR)) M%INC(IOR,N) = 0
-         IF (ABS(IOR)==2 .AND. TWO_D) M%INC(IOR,N) = 0
-         IF (M%INC(IOR,N)==1) M%N_PATCH = M%N_PATCH + 1
+      ! Create an array INC that indicates which face of which obstruction is to be painted with boundary values
+
+      ALLOCATE(PAINT_FACE(0:M%N_OBST,-3:3),STAT=IZERO) ; CALL ChkMemErr('DUMP','PAINT_FACE',IZERO) ; PAINT_FACE = .FALSE.
+      DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
+         WC => M%WALL(IW)
+         BC => M%BOUNDARY_COORD(WC%BC_INDEX)
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) PAINT_FACE(WC%OBST_INDEX,BC%IOR) = .TRUE.
+         IF (.NOT.BNDF_DEFAULT .AND. WC%OBST_INDEX==0) PAINT_FACE(WC%OBST_INDEX,BC%IOR) = .FALSE.
       ENDDO
-   ENDDO
 
-   ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
-   CALL ChkMemErr('DUMP','PATCH',IZERO)
+      ! Count and allocate the PATCHes
 
-   ! Assign coordinate indices for each PATCH
-
-   IP = 0
-   N_BNDF_POINTS = 0
-   DO N=0,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      DO IOR=-3,3
-         IF (M%INC(IOR,N)==0) CYCLE
-         IP = IP + 1
-         PA => M%PATCH(IP)
-         IF (N==0) THEN
-            PA%I1 = 0     ; PA%IG1 = 1
-            PA%I2 = IBAR  ; PA%IG2 = IBAR
-            PA%J1 = 0     ; PA%JG1 = 1
-            PA%J2 = JBAR  ; PA%JG2 = JBAR
-            PA%K1 = 0     ; PA%KG1 = 1
-            PA%K2 = KBAR  ; PA%KG2 = KBAR
-            SELECT CASE(IOR)
-               CASE( 1) ; PA%I2 = PA%I1 ; PA%IG2 = PA%IG1
-               CASE(-1) ; PA%I1 = PA%I2 ; PA%IG1 = PA%IG2
-               CASE( 2) ; PA%J2 = PA%J1 ; PA%JG2 = PA%JG1
-               CASE(-2) ; PA%J1 = PA%J2 ; PA%JG1 = PA%JG2
-               CASE( 3) ; PA%K2 = PA%K1 ; PA%KG2 = PA%KG1
-               CASE(-3) ; PA%K1 = PA%K2 ; PA%KG1 = PA%KG2
-            END SELECT
-         ELSE
-            PA%I1 = OB%I1 ; PA%IG1 = OB%I1+1
-            PA%I2 = OB%I2 ; PA%IG2 = OB%I2
-            PA%J1 = OB%J1 ; PA%JG1 = OB%J1+1
-            PA%J2 = OB%J2 ; PA%JG2 = OB%J2
-            PA%K1 = OB%K1 ; PA%KG1 = OB%K1+1
-            PA%K2 = OB%K2 ; PA%KG2 = OB%K2
-            SELECT CASE(IOR)
-               CASE(-1) ; PA%I2 = PA%I1 ; PA%IG1=PA%IG1-1 ; PA%IG2 = PA%IG1
-               CASE( 1) ; PA%I1 = PA%I2 ; PA%IG2=PA%IG2+1 ; PA%IG1 = PA%IG2
-               CASE(-2) ; PA%J2 = PA%J1 ; PA%JG1=PA%JG1-1 ; PA%JG2 = PA%JG1
-               CASE( 2) ; PA%J1 = PA%J2 ; PA%JG2=PA%JG2+1 ; PA%JG1 = PA%JG2
-               CASE(-3) ; PA%K2 = PA%K1 ; PA%KG1=PA%KG1-1 ; PA%KG2 = PA%KG1
-               CASE( 3) ; PA%K1 = PA%K2 ; PA%KG2=PA%KG2+1 ; PA%KG1 = PA%KG2
-            END SELECT
-         ENDIF
-         PA%IOR        = IOR
-         PA%OBST_INDEX = N
-         N_BNDF_POINTS = N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+      M%N_PATCH = 0
+      DO N=0,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         DO IOR=-3,3
+            IF (.NOT.OB%SHOW_BNDF(IOR)) PAINT_FACE(N,IOR) = .FALSE.
+            IF (ABS(IOR)==2 .AND. TWO_D) PAINT_FACE(N,IOR) = .FALSE.
+            IF (PAINT_FACE(N,IOR)) M%N_PATCH = M%N_PATCH + 1
+         ENDDO
       ENDDO
-   ENDDO
+   
+      ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
+      CALL ChkMemErr('DUMP','PATCH',IZERO)
+   
+      ! Assign coordinate indices for each PATCH
+   
+      IP = 0
+      M%N_BNDF_POINTS = 0
+      DO N=0,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         DO IOR=-3,3
+            IF (.NOT.PAINT_FACE(N,IOR)) CYCLE
+            IP = IP + 1
+            PA => M%PATCH(IP)
+            IF (N==0) THEN
+               PA%I1 = 0     ; PA%IG1 = 1
+               PA%I2 = IBAR  ; PA%IG2 = IBAR
+               PA%J1 = 0     ; PA%JG1 = 1
+               PA%J2 = JBAR  ; PA%JG2 = JBAR
+               PA%K1 = 0     ; PA%KG1 = 1
+               PA%K2 = KBAR  ; PA%KG2 = KBAR
+               SELECT CASE(IOR)
+                  CASE( 1) ; PA%I2 = PA%I1 ; PA%IG2 = PA%IG1
+                  CASE(-1) ; PA%I1 = PA%I2 ; PA%IG1 = PA%IG2
+                  CASE( 2) ; PA%J2 = PA%J1 ; PA%JG2 = PA%JG1
+                  CASE(-2) ; PA%J1 = PA%J2 ; PA%JG1 = PA%JG2
+                  CASE( 3) ; PA%K2 = PA%K1 ; PA%KG2 = PA%KG1
+                  CASE(-3) ; PA%K1 = PA%K2 ; PA%KG1 = PA%KG2
+               END SELECT
+            ELSE
+               PA%I1 = OB%I1 ; PA%IG1 = OB%I1+1
+               PA%I2 = OB%I2 ; PA%IG2 = OB%I2
+               PA%J1 = OB%J1 ; PA%JG1 = OB%J1+1
+               PA%J2 = OB%J2 ; PA%JG2 = OB%J2
+               PA%K1 = OB%K1 ; PA%KG1 = OB%K1+1
+               PA%K2 = OB%K2 ; PA%KG2 = OB%K2
+               SELECT CASE(IOR)
+                  CASE(-1) ; PA%I2 = PA%I1 ; PA%IG1=PA%IG1-1 ; PA%IG2 = PA%IG1
+                  CASE( 1) ; PA%I1 = PA%I2 ; PA%IG2=PA%IG2+1 ; PA%IG1 = PA%IG2
+                  CASE(-2) ; PA%J2 = PA%J1 ; PA%JG1=PA%JG1-1 ; PA%JG2 = PA%JG1
+                  CASE( 2) ; PA%J1 = PA%J2 ; PA%JG2=PA%JG2+1 ; PA%JG1 = PA%JG2
+                  CASE(-3) ; PA%K2 = PA%K1 ; PA%KG1=PA%KG1-1 ; PA%KG2 = PA%KG1
+                  CASE( 3) ; PA%K1 = PA%K2 ; PA%KG2=PA%KG2+1 ; PA%KG1 = PA%KG2
+               END SELECT
+            ENDIF
+            PA%IOR        = IOR
+            PA%OBST_INDEX = N
+            M%N_BNDF_POINTS = M%N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+         ENDDO
+      ENDDO
+
+      DEALLOCATE(PAINT_FACE)
+   
+   ENDIF CREATE_PATCHES
 
    IF (BNDF_TIME_INTEGRALS>0) THEN
-      ALLOCATE(M%BNDF_TIME_INTEGRAL(N_BNDF_POINTS,BNDF_TIME_INTEGRALS),STAT=IZERO)
+      ALLOCATE(M%BNDF_TIME_INTEGRAL(M%N_BNDF_POINTS,BNDF_TIME_INTEGRALS),STAT=IZERO)
       CALL ChkMemErr('DUMP','BNDF_TIME_INTEGRAL',IZERO)
       M%BNDF_TIME_INTEGRAL = 0._FB
    ENDIF
@@ -2023,7 +2029,7 @@ ENDIF
 
 ENDIF MASTER_NODE_IF
 
-! Write out FN_BNDG, FN_BNDF_GEOM to .smv file:
+! Write out FN_BNDG to .smv file:
 
 IF (CC_IBM) THEN
    DO N = 1, N_BNDF
@@ -2042,11 +2048,9 @@ IF (CC_IBM) THEN
             FOUND_GEOM=.TRUE.
          ENDDO
          IF (FOUND_GEOM) THEN
-            WRITE(LU_SMV,'(/A)') 'BGEOM 0'
-            WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
             WRITE(LU_SMV,'(/A,2I6)') 'BNDE',I,1
             WRITE(LU_SMV,'(1X,A)') FN_BNDG(N,I)
-            WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
+            WRITE(LU_SMV,'(1X,A)') ' '
             WRITE(LU_SMV,'(1X,A)') TRIM(BF%SMOKEVIEW_LABEL(1:30))
             WRITE(LU_SMV,'(1X,A)') TRIM(BF%SMOKEVIEW_BAR_LABEL(1:30))
             WRITE(LU_SMV,'(1X,A)') TRIM(OUTPUT_QUANTITY(BF%INDEX)%UNITS(1:30))
@@ -3369,6 +3373,11 @@ ENDIF
 
 IF (LEVEL_SET_MODE>0) WRITE(LU_CORE(NM)) PHI_LS,TOA
 
+IF (N_BNDF>0) THEN
+   WRITE(LU_CORE(NM)) N_PATCH,N_BNDF_POINTS
+   WRITE(LU_CORE(NM)) PATCH
+ENDIF
+
 CLOSE(LU_CORE(NM))
 
 END SUBROUTINE DUMP_RESTART
@@ -3585,6 +3594,12 @@ IF (HVAC_SOLVE .AND. NM==1) THEN
 ENDIF
 
 IF (LEVEL_SET_MODE>0) READ(LU_RESTART(NM)) PHI_LS,TOA
+
+IF (N_BNDF>0) THEN
+   READ(LU_RESTART(NM)) N_PATCH,N_BNDF_POINTS
+   ALLOCATE(MESHES(NM)%PATCH(N_PATCH)) ; PATCH=>MESHES(NM)%PATCH
+   READ(LU_RESTART(NM)) PATCH
+ENDIF
 
 CLOSE(LU_RESTART(NM))
 
@@ -10310,11 +10325,6 @@ IF (CC_IBM) THEN
       I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
       ! write geometry for slice file
       IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
-         ! geometry and data file initial write
-         OPEN(LU_BNDF_GEOM(NF,NM),FILE=FN_BNDF_GEOM(NF,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-         CALL DUMP_SLICE_GEOM(LU_BNDF_GEOM(NF,NM),"INBOUND_FACES",1,STIME,I1,I2,J1,J2,K1,K2)
-         CLOSE(LU_BNDF_GEOM(NF,NM))
-
          OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='REPLACE')
          OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM),FORM='FORMATTED',  STATUS='REPLACE')
          CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM),LU_BNDG(NF+N_BNDF,NM), &
