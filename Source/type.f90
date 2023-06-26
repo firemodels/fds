@@ -13,6 +13,9 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 #ifdef WITH_MKL
 USE MKL_PARDISO
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+USE PETSC_MESH_ZONE, ONLY : PETSC_MZ_TYPE
+#endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -1512,6 +1515,11 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+   TYPE(PETSC_MZ_TYPE) PETSC_MZ
+#else
+   INTEGER :: PETSC_MZ
+#endif
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE

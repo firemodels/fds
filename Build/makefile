@@ -73,6 +73,16 @@ FFLAGSMKL_OPENMPI =
 LFLAGSMKL_OPENMPI =
 FFLAGSMKL_CUSTOM =
 LFLAGSMKL_CUSTOM =
+LFLAGS_PETSC =
+FFLAGS_PETSC =
+ifdef PETSC_DIR # Assumes the PETSc library is available.
+ifeq ("$(MYSYSTEM)", "excess")
+  FFLAGS_PETSC = -Wl,-bind_at_load -Wl,-multiply_defined,suppress -Wl,-multiply_defined -Wl,suppress -Wl,-commons,use_dylibs -Wl,-search_paths_first -Wl,-no_compact_unwind -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include" -I/opt/X11/include
+ LFLAGS_PETSC = -L${PETSC_DIR}/${PETSC_ARCH}/lib -Wl,-rpath,/opt/intel/oneapi/mkl/2022.2.1/lib -L/opt/intel/oneapi/mkl/2022.2.1/lib -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -Wl,-rpath,/opt/X11/lib -L/opt/X11/lib -lX11 -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal -limf -lm -lz -lifport -lifcoremt -lsvml -lipgo -lirc -lc++ -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig  -Wl,-rpath,/Users/mnv/Documents/Software/petsc-3.19.2/arch-darwin-c-opt/lib -L/Users/mnv/Documents/Software/petsc-3.19.2/arch-darwin-c-opt/lib -lHYPRE
+endif
+
+else
+ 
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -110,9 +120,11 @@ ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 endif
 endif # OS test
 endif # MKLROOT test
+endif # PETSc test
+
 
 obj_mpi = prec.o cons.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
-          pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
+          pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o imkl.o \
           wall.o fire.o velo.o pres.o init.o dump.o read.o divg.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -271,8 +283,8 @@ impi_intel_linux_openmp_dv : setup $(obj_mpi)
 
 # OSX Intel Fortran and Open MPI
 
-ompi_intel_osx : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
-ompi_intel_osx : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
+ompi_intel_osx : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM) $(FFLAGS_PETSC)
+ompi_intel_osx : LFLAGSMKL = $(LFLAGSMKL_CUSTOM) $(LFLAGS_PETSC)
 ompi_intel_osx : LFLAGS = -static-intel
 ompi_intel_osx : FCOMPL = mpifort
 ompi_intel_osx : obj = fds_ompi_intel_osx
@@ -288,8 +300,8 @@ ompi_intel_osx_openmp : obj = fds_ompi_intel_osx_openmp
 ompi_intel_osx_openmp : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_intel_osx_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
-ompi_intel_osx_db : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
+ompi_intel_osx_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM) $(FFLAGS_PETSC)
+ompi_intel_osx_db : LFLAGSMKL = $(LFLAGSMKL_CUSTOM) $(LFLAGS_PETSC)
 ompi_intel_osx_db : LFLAGS = -static-intel
 ompi_intel_osx_db : FCOMPL = mpifort
 ompi_intel_osx_db : obj = fds_ompi_intel_osx_db
@@ -348,8 +360,8 @@ ompi_gnu_osx : obj = fds_ompi_gnu_osx
 ompi_gnu_osx : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_osx_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS)
-ompi_gnu_osx_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
+ompi_gnu_osx_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM) $(FFLAGS_PETSC) $(GFORTRAN_OPTIONS)
+ompi_gnu_osx_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(LFLAGS_PETSC)
 ompi_gnu_osx_db : FCOMPL = mpifort
 ompi_gnu_osx_db : FOPENMPFLAGS =
 ompi_gnu_osx_db : obj = fds_ompi_gnu_osx_db
@@ -367,7 +379,7 @@ ompi_gnu_osx_dv : setup $(obj_mpi)
 # *** Object Dependencies ***
 
 prec.o :
-imkl.o :
+imkl.o : prec.o
 cons.o : prec.o
 prop.o : prec.o
 devc.o : prec.o
@@ -400,7 +412,7 @@ divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o prop.o
 
 prec.obj :
-imkl.obj :
+imkl.obj : prec.obj
 cons.obj : prec.obj
 prop.obj : prec.obj
 devc.obj : prec.obj

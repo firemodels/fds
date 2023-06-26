@@ -195,3 +195,35 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
    END INTERFACE
 END MODULE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+
+
+#ifdef WITH_PETSC
+MODULE PETSC_MESH_ZONE
+#include <petsc/finclude/petsc.h>
+! #include <petsc/finclude/petscsys.h>
+   USE PETSC
+
+   PUBLIC :: PETSC_IERR,PETSC_MZ,PETSC_MZ_TYPE,PETSC_MZ_DEALLOC
+
+   INTEGER :: N_PETSC_MZ
+   PetscErrorCode :: PETSC_IERR
+
+   TYPE PETSC_MZ_TYPE
+      INTEGER :: NNZ
+      Mat :: A_H    ! System Matrix
+      Vec :: F_H    ! RHS
+      Vec :: X_H    ! Solution vector
+      KSP :: LS     ! Linear solver
+      PC  :: PR     ! Preconditioner
+   END TYPE PETSC_MZ_TYPE
+
+   ! PETSc info for ZONE_MESH defined in PETSC_MZ, ZONE_MESH_TYPE, type.f90.
+
+   CONTAINS
+
+   SUBROUTINE PETSC_MZ_DEALLOC
+
+   END SUBROUTINE PETSC_MZ_DEALLOC
+
+END MODULE PETSC_MESH_ZONE
+#endif

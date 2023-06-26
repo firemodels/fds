@@ -1082,11 +1082,17 @@ USE MESH_POINTERS
 #ifdef WITH_MKL
 USE MKL_PARDISO
 #endif
+#ifdef WITH_PETSC
+#include <petsc/finclude/petsc.h>
+USE PETSC
+USE PETSC_MESH_ZONE
+#endif
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 INTEGER, PARAMETER :: IS_UNDEFINED  =-11
+INTEGER, PARAMETER :: NNZ_7PT_H     =  7
 INTEGER, PARAMETER :: NNZ_STENCIL_H = 15 ! 7 Point stencil + linked cells.
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: NNZ_H_MAT
 INTEGER, ALLOCATABLE, DIMENSION(:,:) ::  JD_H_MAT
@@ -1133,13 +1139,21 @@ IF (FREEZE_VELOCITY)  RETURN ! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FR
 IF (SOLID_PHASE_ONLY) RETURN
 TNOW=CURRENT_TIME()
 
+#ifdef WITH_PETSC
+IF(NM==LOWER_MESH_INDEX) THEN
+   CALL PETSC_MZ_DEALLOC ! Deallocate all PRESSURE ZONES on all meshes in this proc,
+                         ! in PETSc and then deallocated PETSC_MZ.
+ENDIF
+CALL PETSCINITIALIZE(PETSC_IERR)
+#else
+#if !defined(WITH_MKL)
 ! If MKL library not present stop.
-#ifndef WITH_MKL
 IF (MY_RANK==0) WRITE(LU_ERR,'(A)') &
 'Error: MKL Library compile flag was not defined for ULMAT as pressure solver.'
 ! Some error - stop flag for CALL STOP_CHECK(1).
 STOP_STATUS = SETUP_STOP
 RETURN
+#endif
 #endif
 
 ! Factor to drop DY(J) in cylindrical coordinates. Soln assumes DTheta=1.
@@ -1354,7 +1368,9 @@ CALL ULMAT_GET_H_REGFACES(NM)
 IF(CC_IBM) CALL GET_H_CUTFACES(ONE_NM=NM)
 
 ! Define Pardiso solver control parameters:
+#ifdef WITH_MKL
 CALL ULMAT_DEFINE_IPARM
+#endif
 
 ! Build zone matrix, apply BCs to it and factorize with PARDISO:
 CALL POINT_TO_MESH(NM)
@@ -1375,7 +1391,7 @@ ZONE_MESH_LOOP_4: DO IPZ=0,N_ZONE
    CALL ULMAT_BCS_H_MATRIX(NM,IPZ)
 
    ! 3.f Pass H_MAT, NNZ_H_MAT, JD_H_MAT to CSR format and invoque LU solver:
-   CALL ULMAT_H_MATRIX_LUDCMP(NM,IPZ)
+   CALL ULMAT_H_MATRIX_SOLVER_SETUP(NM,IPZ)
 
 ENDDO ZONE_MESH_LOOP_4
 
@@ -1445,7 +1461,9 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
 #ifdef WITH_MKL
 INTEGER :: PHASE, PERM(1)
 #endif
-
+#ifdef WITH_PETSC
+INTEGER, ALLOCATABLE, DIMENSION(:) :: VECIND
+#endif
 TNOW=CURRENT_TIME()
 
 ! Solve:
@@ -1674,13 +1692,22 @@ H_INDEFINITE_IF_1 : IF (ZM%MTYPE==SYMM_INDEFINITE ) THEN
 ENDIF H_INDEFINITE_IF_1
 
 !.. Back substitution and iterative refinement
-IPARM(8) =  0 ! max numbers of iterative refinement steps
 #ifdef WITH_MKL
+IPARM(8) =  0 ! max numbers of iterative refinement steps
 PHASE    = 33 ! only solving
 CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
              ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
-#endif
 IF (ERROR /= 0) WRITE(0,*) 'ULMAT_SOLVER: The following ERROR was detected: ', ERROR
+#endif
+
+#ifdef WITH_PETSC
+ALLOCATE(VECIND(0:ZM%NUNKH-1));  VECIND(0:ZM%NUNKH-1) = (/ (IROW, IROW=0,ZM%NUNKH-1)  /)
+CALL VECSETVALUES(ZM%PETSC_MZ%F_H,ZM%NUNKH,VECIND(0:ZM%NUNKH-1),ZM%F_H(1:ZM%NUNKH),INSERT_VALUES,PETSC_IERR)
+! Solve system:
+CALL KSPSOLVE(ZM%PETSC_MZ%LS,ZM%PETSC_MZ%F_H,ZM%PETSC_MZ%X_H,PETSC_IERR)
+CALL VECGETVALUES(ZM%PETSC_MZ%X_H,ZM%NUNKH,VECIND(0:ZM%NUNKH-1),ZM%X_H(1:ZM%NUNKH),PETSC_IERR)
+DEALLOCATE(VECIND)
+#endif
 
 ! For indefinite matrices, substract mean of solution X_H:
 H_INDEFINITE_IF_2 : IF (ZM%MTYPE==SYMM_INDEFINITE ) THEN
@@ -2674,8 +2701,8 @@ IPARM(27) = 1  ! Check matrix
 RETURN
 END SUBROUTINE ULMAT_DEFINE_IPARM
 
-! ------------------------------- ULMAT_H_MATRIX_LUDCMP ----------------------------------
-SUBROUTINE ULMAT_H_MATRIX_LUDCMP(NM,IPZ)
+! ----------------------------- ULMAT_H_MATRIX_SOLVER_SETUP --------------------------------
+SUBROUTINE ULMAT_H_MATRIX_SOLVER_SETUP(NM,IPZ)
 
 INTEGER, INTENT(IN) :: NM,IPZ
 
@@ -2699,7 +2726,12 @@ MNUM   = 1
 ! Set level MSG to 1 for factorization:
 IF(CHECK_POISSON) THEN
    MSGLVL = 1
+#ifdef WITH_MKL
    IF(MY_RANK==0) WRITE(LU_ERR,*) 'ULMAT : PARDISO factorization for MESH,ZONE=',NM,IPZ,ZM%NUNKH
+#endif
+#ifdef WITH_PETSC
+   IF(MY_RANK==0) WRITE(LU_ERR,*) 'PETSC : Matrix and Solver setup for MESH,ZONE=',NM,IPZ,ZM%NUNKH
+#endif
 ENDIF
 ERROR     = 0 ! initialize error flag
 
@@ -2708,12 +2740,12 @@ ERROR     = 0 ! initialize error flag
 ! Total number of nonzeros for JD_MAT_H, D_MAT_H:
 TOT_NNZ_H = SUM( NNZ_H_MAT(1:ZM%NUNKH) )
 
+#ifdef WITH_MKL
 ! Allocate A_H IA_H and JA_H matrices, considering all matrix coefficients:
 IF (ALLOCATED(ZM%A_H))  DEALLOCATE(ZM%A_H)
 IF (ALLOCATED(ZM%IA_H)) DEALLOCATE(ZM%IA_H)
 IF (ALLOCATED(ZM%JA_H)) DEALLOCATE(ZM%JA_H)
 ALLOCATE ( ZM%A_H(TOT_NNZ_H) , ZM%IA_H(ZM%NUNKH+1) , ZM%JA_H(TOT_NNZ_H) )
-
 ! Store upper triangular part of symmetric D_MAT_H in CSR format for the ZONE_MESH (ZM%IA_H,ZM%JA_H,ZM%A_H):
 INNZ = 0
 DO IROW=1,ZM%NUNKH
@@ -2726,6 +2758,44 @@ DO IROW=1,ZM%NUNKH
    ENDDO
 ENDDO
 ZM%IA_H(ZM%NUNKH+1) = INNZ + 1
+
+#endif
+
+! Allocate Solution and RHS vectors:
+IF (ALLOCATED(ZM%X_H)) DEALLOCATE(ZM%X_H)
+IF (ALLOCATED(ZM%F_H)) DEALLOCATE(ZM%F_H)
+ALLOCATE( ZM%X_H(ZM%NUNKH) , ZM%F_H(ZM%NUNKH) ); ZM%F_H(:) = 0._EB; ZM%X_H(:) = 0._EB
+
+#ifdef WITH_PETSC
+! Create PETSc Sparse matrix for this ZM:
+CALL MATCREATESEQAIJ(PETSC_COMM_SELF,ZM%NUNKH,ZM%NUNKH,NNZ_7PT_H,PETSC_NULL_INTEGER,ZM%PETSC_MZ%A_H,PETSC_IERR)
+DO IROW=1,ZM%NUNKH
+   DO JCOL=1,NNZ_H_MAT(IROW)
+      ! PETSC expects zero based indexes.
+      CALL MATSETVALUES(ZM%PETSC_MZ%A_H,1,IROW-1,1,JD_H_MAT(JCOL,IROW)-1,D_H_MAT(JCOL,IROW),INSERT_VALUES,PETSC_IERR)
+   ENDDO
+ENDDO
+
+CALL MATASSEMBLYBEGIN(ZM%PETSC_MZ%A_H, MAT_FINAL_ASSEMBLY, PETSC_IERR)
+CALL MATASSEMBLYEND(ZM%PETSC_MZ%A_H, MAT_FINAL_ASSEMBLY, PETSC_IERR)
+
+! Create PETSc RHS and unknown arrays:
+CALL VECCREATESEQ(PETSC_COMM_SELF,ZM%NUNKH,ZM%PETSC_MZ%F_H,PETSC_IERR)
+CALL VECDUPLICATE(ZM%PETSC_MZ%F_H,ZM%PETSC_MZ%X_H,PETSC_IERR)
+
+! Create PETSc linear solver context:
+CALL KSPCREATE(PETSC_COMM_SELF,ZM%PETSC_MZ%LS,PETSC_IERR)
+
+! Create Preconditioner context:
+CALL KSPSETOPERATORS(ZM%PETSC_MZ%LS,ZM%PETSC_MZ%A_H,ZM%PETSC_MZ%A_H,PETSC_IERR) ! A_H Preconditioning Matrix.
+CALL KSPGETPC(ZM%PETSC_MZ%LS,ZM%PETSC_MZ%PR,PETSC_IERR)
+CALL PCSETTYPE(ZM%PETSC_MZ%PR,PCCHOLESKY,PETSC_IERR) ! Default direct LU factorization of solution.
+
+! Runtime options: -ksp_type <type> -pc_type <type> -ksp_monitor -ksp_rtol <rtol>
+CALL KSPSETFROMOPTIONS(ZM%PETSC_MZ%LS,PETSC_IERR)
+CALL PCSETFROMOPTIONS(ZM%PETSC_MZ%PR,PETSC_IERR)
+
+#endif
 
 ! OPEN(unit=20,file="IJKUNKH_H_ULMAT.txt",action="write",status="replace")
 ! DO IROW=1,ZM%NUNKH
@@ -2749,17 +2819,11 @@ ZM%IA_H(ZM%NUNKH+1) = INNZ + 1
 ! Deallocate NNZ_H_MAT, D_H_MAT, JD_H_MAT:
 DEALLOCATE(NNZ_H_MAT, D_H_MAT, JD_H_MAT)
 
-! Allocate Solution and RHS vectors:
-IF (ALLOCATED(ZM%X_H)) DEALLOCATE(ZM%X_H)
-IF (ALLOCATED(ZM%F_H)) DEALLOCATE(ZM%F_H)
-ALLOCATE( ZM%X_H(ZM%NUNKH) , ZM%F_H(ZM%NUNKH) ); ZM%F_H(:) = 0._EB; ZM%X_H(:) = 0._EB
-
 ! PARDISO:
 ! Initialize solver pointer for H matrix solves:
+#ifdef WITH_MKL
 
 IF (.NOT.ALLOCATED(ZM%PT_H)) ALLOCATE(ZM%PT_H(64))
-
-#ifdef WITH_MKL
 
 DO I=1,64
   ZM%PT_H(I)%DUMMY = 0
@@ -2772,7 +2836,7 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
 
 IF (ERROR /= 0) THEN
    IF (MY_RANK==0) &
-   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
+   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_SOLVER_SETUP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
    STOP_STATUS = SETUP_STOP
    RETURN
@@ -2785,7 +2849,7 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
 
 IF (ERROR /= 0) THEN
    IF (MY_RANK==0) &
-   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
+   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_SOLVER_SETUP PARDISO Num Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
    STOP_STATUS = SETUP_STOP
    RETURN
@@ -2797,7 +2861,7 @@ ENDIF
 IF(CHECK_POISSON) MSGLVL = 0
 
 RETURN
-END SUBROUTINE ULMAT_H_MATRIX_LUDCMP
+END SUBROUTINE ULMAT_H_MATRIX_SOLVER_SETUP
 
 
 SUBROUTINE FINISH_ULMAT_SOLVER(NM)
@@ -2825,9 +2889,10 @@ CALL POINT_TO_MESH(NM)
 ! Loop over zones within MESH NM and deallocate ZONE_MESH Pardiso internal arrays.
 ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
    ZM=>ZONE_MESH(IPZ)
-   IF(ZM%USE_FFT .OR. .NOT.ALLOCATED(ZM%PT_H)) CYCLE ZONE_MESH_LOOP
+   IF(ZM%USE_FFT) CYCLE ZONE_MESH_LOOP
    ! Finalize Pardiso:
 #ifdef WITH_MKL
+   IF(.NOT.ALLOCATED(ZM%PT_H)) CYCLE ZONE_MESH_LOOP
    PHASE = -1 ! Free memory.
    CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
                 ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
