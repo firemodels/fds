@@ -19,8 +19,8 @@
 
 &SURF ID='side wall', COLOR='LIGHT BLUE', DEFAULT=T /
 &SURF ID='wall', COLOR='GRAY'/
-&SURF ID='burner', HRRPUA=826.6, COLOR='RED' /
-&SURF ID='coflow', COLOR='BLUE', VEL=-0.074 /
+&SURF ID='burner', HRRPUA=826.6, COLOR='RED', BLOWING=T /
+&SURF ID='coflow', COLOR='BLUE', VEL=-0.041 /
 
 &MULT ID='cube array', DX=0.01,DY=0.01, I_UPPER=19,J_UPPER=19 /
 
