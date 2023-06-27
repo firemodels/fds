@@ -1558,12 +1558,12 @@ WRITE(LU_SMV,'(I3)') NMESHES
 
 !  beginning and ending simulation time
 WRITE(LU_SMV,'(/A)') 'TIMES'
-WRITE(LU_SMV,'(2F11.3)') T_BEGIN, T_END
+WRITE(LU_SMV,'(2F15.3)') T_BEGIN, T_END
 
 ! Information used for touring in Smokeview
 
 WRITE(LU_SMV,'(/A)') 'VIEWTIMES'
-WRITE(LU_SMV,'(2F10.2,I6)') 0.0_EB,MAX(0.01_EB,T_END),MAX(2,NFRAMES)
+WRITE(LU_SMV,'(2F15.2,I6)') 0.0_EB,MAX(0.01_EB,T_END),MAX(2,NFRAMES)
 
 ! Auxilliary CAD geometry via dxf2fds
 
@@ -2523,7 +2523,7 @@ WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
-WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
+WRITE(LU_OUTPUT,'(A,F15.1)')  '   Simulation End Time (s)'       ,(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 WRITE(LU_OUTPUT,'(A,F10.2)')  '   Background Pressure (Pa)    '  ,P_INF
 WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
 
