@@ -4576,6 +4576,21 @@ The simulation is run for 180~s. Shown in Fig.~\ref{fig:ht3d_sphere_time} is a c
 \end{figure}
 
 
+\FloatBarrier
+
+\subsection{3-D Heat Conduction in a Layered Solid (\texorpdfstring{\textct{ht3d\_pile}}{ht1d\_pile})}
+\label{ht1d_pile}
+\label{ht3d_pile}
+
+An 18~cm long solid consisting of three 6~cm long abutting rectangular obstructions, each made of a different material, has a specified surface temperature of 500~$^\circ$C at one end and 20~$^\circ$C at the other. After 3~h, a steady temperature profile emerges as shown in Fig.~\ref{fig:ht3d_pile}. Two simulations are performed; one in which the conduction calculation is performed using the {\ct HT1D} convention, and the other with {\ct HT3D}. The thermal conductivity values are 5~W/m/K, 0.2~W/m/K, and 2~W/m/K. The exact solution is found by asserting that the heat flux, $\dot{q}''=k \, \partial T / \partial x$, is constant in each segment.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht1d_pile}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_pile}
+\caption[The \textct{ht1d\_pile} and \textct{ht3d\_pile} test cases]{Temperature profiles through a stack of three materials with different thermal conductivities. (Left) A 1-D calculation with non-uniform internal nodes. (Right) A 3-D calculation with uniform internal nodes.}
+\label{fig:ht3d_pile}
+\end{figure}
+
 
 
 \chapter{Pyrolysis}

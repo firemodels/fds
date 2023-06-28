@@ -241,6 +241,8 @@ $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
+$QFDS -d Heat_Transfer ht1d_pile.fds
+$QFDS -d Heat_Transfer ht3d_pile.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_1.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_2.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_demo.fds
