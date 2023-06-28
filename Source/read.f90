@@ -7446,8 +7446,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
-      IF (TMP_FRONT>-TMPM .AND. MATL_ID(IL,1)/='null') DIRICHLET_FRONT = .TRUE.
-      IF (TMP_BACK >-TMPM .AND. MATL_ID(IL,1)/='null') DIRICHLET_BACK  = .TRUE.
+      IF (TMP_FRONT>-TMPM .AND. (MATL_ID(IL,1)/='null' .OR. HT1D .OR. HT3D)) DIRICHLET_FRONT = .TRUE.
+      IF (TMP_BACK >-TMPM .AND. (MATL_ID(IL,1)/='null' .OR. HT1D .OR. HT3D)) DIRICHLET_BACK  = .TRUE.
       IF ((ADIABATIC.OR.NET_HEAT_FLUX<1.E12_EB.OR.ABS(CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) &
          .AND. MATL_ID(IL,1)/='null') THEN
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified flux and a MATL_ID'
@@ -9590,6 +9590,7 @@ MESH_LOOP: DO NM=1,NMESHES
       COLOR    = 'null'
       MATL_ID  = 'null'
       MATL_MASS_FRACTION = 0._EB
+      MATL_MASS_FRACTION(1) = 1._EB
       RGB         = -1
       BULK_DENSITY= -1._EB
       TRANSPARENCY= 1._EB
