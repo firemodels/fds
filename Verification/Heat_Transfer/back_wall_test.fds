@@ -1,4 +1,4 @@
-Create a steel box with 1 m sides. Add a hot inner box 0.8 m on a side centered inside the box, and then record 
+Create a steel box with 1 m sides. Add a hot inner box 0.8 m on a side centered inside the box, and then record
 external temperatures of the box sides that are zero or one cell thick. It should not matter whether the sides are zero
 or one cell thick -- the heat conduction should be the same because the steel is 0.5 cm thick on all sides.
 Note that the sides of the box coincide with mesh boundaries. This tests the ability of the code to transfer heat across mesh
@@ -31,16 +31,17 @@ gas is nitrogen. The heat transfer is purely radiative in the gas phase and cond
       COLOR     = 'BLACK'
       MATL_ID   = 'STEEL'
       THICKNESS = 0.005
-      HEAT_TRANSFER_COEFFICIENT=0. /
-      
-&OBST XB=-0.40, 0.40,-0.40, 0.40,-0.40, 0.40, SURF_ID='HOT' / 
+      HEAT_TRANSFER_COEFFICIENT=0.
+      HEAT_TRANSFER_COEFFICIENT_BACK=0. /
 
-&OBST XB=-0.55,-0.50,-0.50, 0.50,-0.50, 0.50 / 
-&OBST XB= 0.50, 0.55,-0.50, 0.50,-0.50, 0.50 / 
-&OBST XB=-0.50, 0.50,-0.55,-0.50,-0.50, 0.50 / 
-&OBST XB=-0.50, 0.50, 0.50, 0.50,-0.50, 0.50 / 
-&OBST XB=-0.50, 0.50,-0.50, 0.50,-0.50,-0.50 / 
-&OBST XB=-0.50, 0.50,-0.50, 0.50, 0.50, 0.50 / 
+&OBST XB=-0.40, 0.40,-0.40, 0.40,-0.40, 0.40, SURF_ID='HOT' /
+
+&OBST XB=-0.55,-0.50,-0.50, 0.50,-0.50, 0.50 /
+&OBST XB= 0.50, 0.55,-0.50, 0.50,-0.50, 0.50 /
+&OBST XB=-0.50, 0.50,-0.55,-0.50,-0.50, 0.50 /
+&OBST XB=-0.50, 0.50, 0.50, 0.50,-0.50, 0.50 /
+&OBST XB=-0.50, 0.50,-0.50, 0.50,-0.50,-0.50 /
+&OBST XB=-0.50, 0.50,-0.50, 0.50, 0.50, 0.50 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
