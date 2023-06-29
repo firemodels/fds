@@ -13010,7 +13010,8 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
       IF (IG==N_GEOMETRY) THEN
-         WRITE(LU_ERR,'(I4.4,A)',advance="no") IG,'.. done.'
+         WRITE(LU_ERR,'(I4.4,A,I9.9,A,I9.9,A)',advance="no") IG,', VERTS=',GEOMETRY(IG)%N_VERTS,&
+                                                                ', FACES=',GEOMETRY(IG)%N_FACES,'.. done.'
          CALL CPU_TIME(CPUTIME)
          WRITE(LU_ERR  ,'(A,F8.3,A)') ' Time taken : ',CPUTIME-CPUTIME_START,' sec.'
       ELSE
