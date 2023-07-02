@@ -2225,7 +2225,9 @@ CALL MESH_EXCHANGE(10)
 
 ! Exchange WALL and THIN_WALL cells
 
+CHECK_BOUNDARY_ONE_D_ARRAYS = .TRUE.
 CALL MESH_EXCHANGE(6)
+CHECK_BOUNDARY_ONE_D_ARRAYS = .FALSE.
 
 ! Initialize 3-D solid interpolation arrays
 
