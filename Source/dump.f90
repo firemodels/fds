@@ -2512,14 +2512,14 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
-      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
    ENDDO MESH_LOOP
-   WRITE(LU_OUTPUT,'(/A,I9/)'  ) ' Total Number of Grid Cells     ',CELL_COUNT
-   WRITE(LU_OUTPUT,'(/A,F9.3)')  ' Maximum Cell Aspect Ratio      ',MAXVAL(MAX_CELL_ASPECT_RATIO)
-   WRITE(LU_OUTPUT,'(A,I9/)')    ' CFL Velocity Norm              ',CFL_VELOCITY_NORM
 ENDIF
 
-WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
+WRITE(LU_OUTPUT,'(/A/)')      ' Miscellaneous Parameters'
+WRITE(LU_OUTPUT,'(A,I9)'  )   '   Total Number of Grid Cells   ',CELL_COUNT
+WRITE(LU_OUTPUT,'(A,F9.3)')   '   Maximum Cell Aspect Ratio    ',MAXVAL(MAX_CELL_ASPECT_RATIO)
+WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)        ',DT
+WRITE(LU_OUTPUT,'(A,I9)')     '   CFL Velocity Norm            ',CFL_VELOCITY_NORM
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
@@ -2970,7 +2970,7 @@ SURFLOOP: DO N=0,N_SURF
       CYCLE SURFLOOP
    ENDIF
 
-   THICK: IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
+   THICK: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. .NOT.SF%HT1D .AND. .NOT. SF%HT_DIM>1) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Material List'
       DO NN=1,SF%N_MATL
          WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,TRIM(SF%MATL_NAME(NN))
@@ -2999,6 +2999,8 @@ SURFLOOP: DO N=0,N_SURF
       ENDIF
       IF (SF%GEOMETRY==SURF_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed cylindrical symmetry'
       IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical symmetry'
+   ELSEIF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. (SF%HT1D .OR. SF%HT_DIM>1)) THEN
+      WRITE(LU_OUTPUT,'(A)')      '     Internal noding and material information taken from underlying obstructions'
    ENDIF THICK
 
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
