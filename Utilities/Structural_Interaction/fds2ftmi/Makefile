@@ -44,7 +44,7 @@ intel_win_db : FFLAGS    = /CB -auto -WB -traceback -fltconsistency -stand:f08
 intel_win_db : FC        = ifort
 intel_win_db : obj       = fds2ftmi_win_db
 
-intel_win_64_db : setup_win $(objwin)
+intel_win_db : setup_win $(objwin)
 	$(FC) -o $(obj) $(FFLAGS) $(objwin)
 
 # ------------- Linux 64 ----------------

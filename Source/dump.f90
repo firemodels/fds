@@ -340,8 +340,6 @@ ALLOCATE(LU_GEOM(2))
 ALLOCATE(FN_BNDF(2*N_BNDF,NMESHES))
 ALLOCATE(LU_BNDF(2*N_BNDF,NMESHES))
 IF (CC_IBM) THEN
-   ALLOCATE(FN_BNDF_GEOM(N_BNDF,NMESHES))
-   ALLOCATE(LU_BNDF_GEOM(N_BNDF,NMESHES))
    ALLOCATE(FN_CFACE_GEOM(NMESHES))
    ALLOCATE(LU_CFACE_GEOM(NMESHES))
    ALLOCATE(FN_BNDG(2*N_BNDF,NMESHES))
@@ -434,14 +432,12 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_BNDF(N,NM) = GET_FILE_NUMBER()
       LU_BNDF(N+N_BNDF,NM) = GET_FILE_NUMBER()
       IF (CC_IBM) THEN
-         LU_BNDF_GEOM(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N+N_BNDF,NM) = GET_FILE_NUMBER()
       ENDIF
       WRITE(FN_BNDF(N,NM),'(A,A,I0,A,I0,A)')        TRIM(CHID),'_',NM,'_',N,'.bf'
       WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
       IF (CC_IBM) THEN
-         WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
          WRITE(FN_BNDG(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be'
          WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
       ENDIF
@@ -832,23 +828,6 @@ PART_DIST_LOOP: DO I=1,N_LAGRANGIAN_CLASSES
    CLOSE(LU)
 ENDDO PART_DIST_LOOP
 
-UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .AND. N_GEOMETRY==0) THEN ! don't do anything if there are &GEOM lines
-   DO N=1,1 ! loop over number of geometry groups
-      RESTART_GE: IF (APPEND) THEN
-         OPEN(LU_GEOM(N),FILE=FN_GEOM(N),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-         OPEN(LU_GEOM(N+1),FILE=FN_GEOM(N+1),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-         ELSE RESTART_GE
-         OPEN(LU_GEOM(N),FILE=FN_GEOM(N),FORM='UNFORMATTED',STATUS='REPLACE')
-         OPEN(LU_GEOM(N+1),FILE=FN_GEOM(N+1),FORM='UNFORMATTED',STATUS='REPLACE')
-         WRITE(LU_GEOM(N)) INTEGER_ONE
-         WRITE(LU_GEOM(N)) INTEGER_ZERO
-         WRITE(LU_GEOM(N)) INTEGER_ZERO ! floating point header
-         WRITE(LU_GEOM(N)) INTEGER_ZERO ! integer header
-         !WRITE(LU_GEOM(N)) INTEGER_ZERO, INTEGER_ZERO ! static vertices and faces
-      ENDIF RESTART_GE
-   ENDDO
-ENDIF UNSTRUCTURED_GEOMETRY
-
 ! Open DEVC and CTRL log file
 IF (WRITE_DEVC_CTRL) THEN
    IF (APPEND) THEN
@@ -872,8 +851,9 @@ USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_STRINGS,CHKMEMERR
 USE RADCONS, ONLY: DLX,DLY,DLZ
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IOR,IZERO,I,J,K,N,I1B,I2B,IW,NN,NF,IP,N_BNDF_POINTS
+INTEGER :: IOR,IZERO,I,J,K,N,I1B,I2B,IW,NN,NF,IP
 INTEGER :: NTSL
+LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: PAINT_FACE
 REAL(EB) :: TNOW,NRM
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: Z_TERRAIN
 LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: OUT_OF_MESH
@@ -1201,79 +1181,88 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
    ALLOCATE(M%IBK(0:I1B,0:I2B),STAT=IZERO)
    CALL ChkMemErr('DUMP','IBK',IZERO)
 
-   M%INC = 0
-   DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
-      WC => M%WALL(IW)
-      BC => M%BOUNDARY_COORD(WC%BC_INDEX)
-      IF (M%WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. M%WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) &
-          M%INC(BC%IOR,M%WALL(IW)%OBST_INDEX) = 1
-      IF (.NOT.BNDF_DEFAULT .AND. M%WALL(IW)%OBST_INDEX==0) M%INC(BC%IOR,M%WALL(IW)%OBST_INDEX) = 0
-   ENDDO
+   ! Create an array of PATCHes that holds the parameters of each boundary patch
 
-   ! Count and allocate the boundary file PATCHes.
+   CREATE_PATCHES: IF (.NOT.APPEND) THEN
 
-   M%N_PATCH = 0
-   DO N=0,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      DO IOR=-3,3
-         IF (.NOT.OB%SHOW_BNDF(IOR)) M%INC(IOR,N) = 0
-         IF (ABS(IOR)==2 .AND. TWO_D) M%INC(IOR,N) = 0
-         IF (M%INC(IOR,N)==1) M%N_PATCH = M%N_PATCH + 1
+      ! Create an array INC that indicates which face of which obstruction is to be painted with boundary values
+
+      ALLOCATE(PAINT_FACE(0:M%N_OBST,-3:3),STAT=IZERO) ; CALL ChkMemErr('DUMP','PAINT_FACE',IZERO) ; PAINT_FACE = .FALSE.
+      DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
+         WC => M%WALL(IW)
+         BC => M%BOUNDARY_COORD(WC%BC_INDEX)
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) PAINT_FACE(WC%OBST_INDEX,BC%IOR) = .TRUE.
+         IF (.NOT.BNDF_DEFAULT .AND. WC%OBST_INDEX==0) PAINT_FACE(WC%OBST_INDEX,BC%IOR) = .FALSE.
       ENDDO
-   ENDDO
 
-   ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
-   CALL ChkMemErr('DUMP','PATCH',IZERO)
+      ! Count and allocate the PATCHes
 
-   ! Assign coordinate indices for each PATCH
-
-   IP = 0
-   N_BNDF_POINTS = 0
-   DO N=0,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      DO IOR=-3,3
-         IF (M%INC(IOR,N)==0) CYCLE
-         IP = IP + 1
-         PA => M%PATCH(IP)
-         IF (N==0) THEN
-            PA%I1 = 0     ; PA%IG1 = 1
-            PA%I2 = IBAR  ; PA%IG2 = IBAR
-            PA%J1 = 0     ; PA%JG1 = 1
-            PA%J2 = JBAR  ; PA%JG2 = JBAR
-            PA%K1 = 0     ; PA%KG1 = 1
-            PA%K2 = KBAR  ; PA%KG2 = KBAR
-            SELECT CASE(IOR)
-               CASE( 1) ; PA%I2 = PA%I1 ; PA%IG2 = PA%IG1
-               CASE(-1) ; PA%I1 = PA%I2 ; PA%IG1 = PA%IG2
-               CASE( 2) ; PA%J2 = PA%J1 ; PA%JG2 = PA%JG1
-               CASE(-2) ; PA%J1 = PA%J2 ; PA%JG1 = PA%JG2
-               CASE( 3) ; PA%K2 = PA%K1 ; PA%KG2 = PA%KG1
-               CASE(-3) ; PA%K1 = PA%K2 ; PA%KG1 = PA%KG2
-            END SELECT
-         ELSE
-            PA%I1 = OB%I1 ; PA%IG1 = OB%I1+1
-            PA%I2 = OB%I2 ; PA%IG2 = OB%I2
-            PA%J1 = OB%J1 ; PA%JG1 = OB%J1+1
-            PA%J2 = OB%J2 ; PA%JG2 = OB%J2
-            PA%K1 = OB%K1 ; PA%KG1 = OB%K1+1
-            PA%K2 = OB%K2 ; PA%KG2 = OB%K2
-            SELECT CASE(IOR)
-               CASE(-1) ; PA%I2 = PA%I1 ; PA%IG1=PA%IG1-1 ; PA%IG2 = PA%IG1
-               CASE( 1) ; PA%I1 = PA%I2 ; PA%IG2=PA%IG2+1 ; PA%IG1 = PA%IG2
-               CASE(-2) ; PA%J2 = PA%J1 ; PA%JG1=PA%JG1-1 ; PA%JG2 = PA%JG1
-               CASE( 2) ; PA%J1 = PA%J2 ; PA%JG2=PA%JG2+1 ; PA%JG1 = PA%JG2
-               CASE(-3) ; PA%K2 = PA%K1 ; PA%KG1=PA%KG1-1 ; PA%KG2 = PA%KG1
-               CASE( 3) ; PA%K1 = PA%K2 ; PA%KG2=PA%KG2+1 ; PA%KG1 = PA%KG2
-            END SELECT
-         ENDIF
-         PA%IOR        = IOR
-         PA%OBST_INDEX = N
-         N_BNDF_POINTS = N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+      M%N_PATCH = 0
+      DO N=0,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         DO IOR=-3,3
+            IF (.NOT.OB%SHOW_BNDF(IOR)) PAINT_FACE(N,IOR) = .FALSE.
+            IF (ABS(IOR)==2 .AND. TWO_D) PAINT_FACE(N,IOR) = .FALSE.
+            IF (PAINT_FACE(N,IOR)) M%N_PATCH = M%N_PATCH + 1
+         ENDDO
       ENDDO
-   ENDDO
+   
+      ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
+      CALL ChkMemErr('DUMP','PATCH',IZERO)
+   
+      ! Assign coordinate indices for each PATCH
+   
+      IP = 0
+      M%N_BNDF_POINTS = 0
+      DO N=0,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         DO IOR=-3,3
+            IF (.NOT.PAINT_FACE(N,IOR)) CYCLE
+            IP = IP + 1
+            PA => M%PATCH(IP)
+            IF (N==0) THEN
+               PA%I1 = 0     ; PA%IG1 = 1
+               PA%I2 = IBAR  ; PA%IG2 = IBAR
+               PA%J1 = 0     ; PA%JG1 = 1
+               PA%J2 = JBAR  ; PA%JG2 = JBAR
+               PA%K1 = 0     ; PA%KG1 = 1
+               PA%K2 = KBAR  ; PA%KG2 = KBAR
+               SELECT CASE(IOR)
+                  CASE( 1) ; PA%I2 = PA%I1 ; PA%IG2 = PA%IG1
+                  CASE(-1) ; PA%I1 = PA%I2 ; PA%IG1 = PA%IG2
+                  CASE( 2) ; PA%J2 = PA%J1 ; PA%JG2 = PA%JG1
+                  CASE(-2) ; PA%J1 = PA%J2 ; PA%JG1 = PA%JG2
+                  CASE( 3) ; PA%K2 = PA%K1 ; PA%KG2 = PA%KG1
+                  CASE(-3) ; PA%K1 = PA%K2 ; PA%KG1 = PA%KG2
+               END SELECT
+            ELSE
+               PA%I1 = OB%I1 ; PA%IG1 = OB%I1+1
+               PA%I2 = OB%I2 ; PA%IG2 = OB%I2
+               PA%J1 = OB%J1 ; PA%JG1 = OB%J1+1
+               PA%J2 = OB%J2 ; PA%JG2 = OB%J2
+               PA%K1 = OB%K1 ; PA%KG1 = OB%K1+1
+               PA%K2 = OB%K2 ; PA%KG2 = OB%K2
+               SELECT CASE(IOR)
+                  CASE(-1) ; PA%I2 = PA%I1 ; PA%IG1=PA%IG1-1 ; PA%IG2 = PA%IG1
+                  CASE( 1) ; PA%I1 = PA%I2 ; PA%IG2=PA%IG2+1 ; PA%IG1 = PA%IG2
+                  CASE(-2) ; PA%J2 = PA%J1 ; PA%JG1=PA%JG1-1 ; PA%JG2 = PA%JG1
+                  CASE( 2) ; PA%J1 = PA%J2 ; PA%JG2=PA%JG2+1 ; PA%JG1 = PA%JG2
+                  CASE(-3) ; PA%K2 = PA%K1 ; PA%KG1=PA%KG1-1 ; PA%KG2 = PA%KG1
+                  CASE( 3) ; PA%K1 = PA%K2 ; PA%KG2=PA%KG2+1 ; PA%KG1 = PA%KG2
+               END SELECT
+            ENDIF
+            PA%IOR        = IOR
+            PA%OBST_INDEX = N
+            M%N_BNDF_POINTS = M%N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+         ENDDO
+      ENDDO
+
+      DEALLOCATE(PAINT_FACE)
+   
+   ENDIF CREATE_PATCHES
 
    IF (BNDF_TIME_INTEGRALS>0) THEN
-      ALLOCATE(M%BNDF_TIME_INTEGRAL(N_BNDF_POINTS,BNDF_TIME_INTEGRALS),STAT=IZERO)
+      ALLOCATE(M%BNDF_TIME_INTEGRAL(M%N_BNDF_POINTS,BNDF_TIME_INTEGRALS),STAT=IZERO)
       CALL ChkMemErr('DUMP','BNDF_TIME_INTEGRAL',IZERO)
       M%BNDF_TIME_INTEGRAL = 0._FB
    ENDIF
@@ -1722,12 +1711,12 @@ WRITE(LU_SMV,'(I3)') NMESHES
 
 !  beginning and ending simulation time
 WRITE(LU_SMV,'(/A)') 'TIMES'
-WRITE(LU_SMV,'(2F11.3)') T_BEGIN, T_END
+WRITE(LU_SMV,'(2F15.3)') T_BEGIN, T_END
 
 ! Information used for touring in Smokeview
 
 WRITE(LU_SMV,'(/A)') 'VIEWTIMES'
-WRITE(LU_SMV,'(2F10.2,I6)') 0.0_EB,MAX(0.01_EB,T_END),MAX(2,NFRAMES)
+WRITE(LU_SMV,'(2F15.2,I6)') 0.0_EB,MAX(0.01_EB,T_END),MAX(2,NFRAMES)
 
 ! Auxilliary CAD geometry via dxf2fds
 
@@ -2193,7 +2182,7 @@ ENDIF
 
 ENDIF MASTER_NODE_IF
 
-! Write out FN_BNDG, FN_BNDF_GEOM to .smv file:
+! Write out FN_BNDG to .smv file:
 
 IF (CC_IBM) THEN
    DO N = 1, N_BNDF
@@ -2212,11 +2201,9 @@ IF (CC_IBM) THEN
             FOUND_GEOM=.TRUE.
          ENDDO
          IF (FOUND_GEOM) THEN
-            WRITE(LU_SMV,'(/A)') 'BGEOM 0'
-            WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
             WRITE(LU_SMV,'(/A,2I6)') 'BNDE',I,1
             WRITE(LU_SMV,'(1X,A)') FN_BNDG(N,I)
-            WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
+            WRITE(LU_SMV,'(1X,A)') ' '
             WRITE(LU_SMV,'(1X,A)') TRIM(BF%SMOKEVIEW_LABEL(1:30))
             WRITE(LU_SMV,'(1X,A)') TRIM(BF%SMOKEVIEW_BAR_LABEL(1:30))
             WRITE(LU_SMV,'(1X,A)') TRIM(OUTPUT_QUANTITY(BF%INDEX)%UNITS(1:30))
@@ -2689,7 +2676,7 @@ WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
-WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
+WRITE(LU_OUTPUT,'(A,F15.1)')  '   Simulation End Time (s)'       ,(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 WRITE(LU_OUTPUT,'(A,F10.2)')  '   Background Pressure (Pa)    '  ,P_INF
 WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
 
@@ -3387,6 +3374,7 @@ SUBROUTINE DUMP_RESTART(T,DT,NM)
 
 USE MEMORY_FUNCTIONS, ONLY: PACK_PARTICLE,PACK_WALL,PACK_THIN_WALL,PACK_CFACE
 REAL(EB), INTENT(IN) :: T,DT
+REAL(EB) :: STIME
 INTEGER :: NOM,N,IP,IW,ITW,ICF,RC,IC,LC
 INTEGER, INTENT(IN) :: NM
 TYPE(OMESH_TYPE), POINTER :: M2=>NULL()
@@ -3397,6 +3385,8 @@ TYPE(STORAGE_TYPE), POINTER :: OS
 OPEN(LU_CORE(NM),FILE=FN_CORE(NM),FORM='UNFORMATTED',STATUS='REPLACE')
 
 CALL POINT_TO_MESH(NM)
+
+STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 
 WRITE(LU_CORE(NM)) U
 WRITE(LU_CORE(NM)) V
@@ -3443,7 +3433,7 @@ DO N=1,N_OBST
    WRITE(LU_CORE(NM)) OB%HIDDEN
 ENDDO
 
-WRITE(LU_CORE(NM)) T,ICYC,BC_CLOCK,WALL_COUNTER,DT, &
+WRITE(LU_CORE(NM)) STIME,ICYC,BC_CLOCK,WALL_COUNTER,DT, &
              PBAR,D_PBAR_DT,EDGE_COUNT,RAD_CALL_COUNTER,ANGLE_INC_COUNTER,T_LAST_DUMP_HRR,T_LAST_DUMP_MASS,&
              RTE_SOURCE_CORRECTION_FACTOR,RAD_Q_SUM,KFST4_SUM,ENTHALPY_SUM(NM)
 WRITE(LU_CORE(NM)) DT_BNDF,DT_CPU,DT_CTRL,DT_DEVC,DT_FLUSH,DT_GEOM,DT_HRR,DT_ISOF,DT_MASS,DT_PART,DT_PL3D,DT_PROF,DT_RADF,&
@@ -3536,6 +3526,11 @@ ENDIF
 
 IF (LEVEL_SET_MODE>0) WRITE(LU_CORE(NM)) PHI_LS,TOA
 
+IF (N_BNDF>0) THEN
+   WRITE(LU_CORE(NM)) N_PATCH,N_BNDF_POINTS
+   WRITE(LU_CORE(NM)) PATCH
+ENDIF
+
 CLOSE(LU_CORE(NM))
 
 END SUBROUTINE DUMP_RESTART
@@ -3551,6 +3546,7 @@ SUBROUTINE READ_RESTART(T,DT,NM)
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE,PACK_PARTICLE,PACK_WALL,PACK_THIN_WALL,PACK_CFACE,ALLOCATE_STORAGE
 REAL(EB), INTENT(OUT) :: T,DT
+REAL(EB) :: STIME
 INTEGER :: NOM,N,N_T_E_MAX,IP,CLASS_INDEX,IW,ITW,SURF_INDEX,ICF,RC,IC,LC
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: EX
@@ -3615,9 +3611,12 @@ DO N=1,N_OBST
    READ(LU_RESTART(NM)) OB%HIDDEN
 ENDDO
 
-READ(LU_RESTART(NM)) T,ICYC,BC_CLOCK,WALL_COUNTER,DT, &
+READ(LU_RESTART(NM)) STIME,ICYC,BC_CLOCK,WALL_COUNTER,DT, &
                      PBAR,D_PBAR_DT,EDGE_COUNT,RAD_CALL_COUNTER,ANGLE_INC_COUNTER,T_LAST_DUMP_HRR,T_LAST_DUMP_MASS,&
                      RTE_SOURCE_CORRECTION_FACTOR,RAD_Q_SUM,KFST4_SUM,ENTHALPY_SUM(NM)
+
+T = (STIME-T_BEGIN)/TIME_SHRINK_FACTOR+T_BEGIN
+
 READ(LU_RESTART(NM)) DT_BNDF,DT_CPU,DT_CTRL,DT_DEVC,DT_FLUSH,DT_GEOM,DT_HRR,DT_ISOF,DT_MASS,DT_PART,DT_PL3D,DT_PROF,DT_RADF,&
                      DT_SLCF,DT_SL3D,DT_SMOKE3D,DT_UVW
 READ(LU_RESTART(NM)) Q_DOT_SUM(1:N_Q_DOT,NM),M_DOT_SUM(1:N_TRACKED_SPECIES,NM),MASS_DT(0:N_SPECIES+N_TRACKED_SPECIES,NM)
@@ -3749,6 +3748,12 @@ ENDIF
 
 IF (LEVEL_SET_MODE>0) READ(LU_RESTART(NM)) PHI_LS,TOA
 
+IF (N_BNDF>0) THEN
+   READ(LU_RESTART(NM)) N_PATCH,N_BNDF_POINTS
+   ALLOCATE(MESHES(NM)%PATCH(N_PATCH)) ; PATCH=>MESHES(NM)%PATCH
+   READ(LU_RESTART(NM)) PATCH
+ENDIF
+
 CLOSE(LU_RESTART(NM))
 
 ! Keep track of whether the output timing intervals are specified by the user or not
@@ -3788,7 +3793,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
 CHARACTER(110) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
-REAL(EB) :: TNOW,CPUTIME
+REAL(EB) :: TNOW,CPUTIME,STIME,DTS
 
 TNOW = CURRENT_TIME()
 
@@ -3806,17 +3811,36 @@ ENDIF
 
 ! Write abridged output to the .err file
 
-IF (T<=0.0001) THEN
-   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
-ELSEIF (T>0.0001 .AND. T <=0.001) THEN
-   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
-ELSEIF (T>0.001 .AND. T<=0.01) THEN
-   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
+
+   IF (ABS(T)<=0.0001) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+   ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+   ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+   ELSE
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+   ENDIF
 ELSE
-   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+
+   STIME = T_BEGIN + (T-T_BEGIN) * TIME_SHRINK_FACTOR
+   DTS = DT * TIME_SHRINK_FACTOR
+   IF (ABS(STIME)<=0.0001) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+   ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+   ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+   ELSE
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+   ENDIF
+
 ENDIF
 
 WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
+
+
 
 ! Header for .out file
 
@@ -3826,42 +3850,77 @@ IF (ICYC==1) WRITE(LU_OUTPUT,100)
 
 IF (SUPPRESS_DIAGNOSTICS) THEN
 
-   IF (ABS(T)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
-         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
-   ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
-         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
-   ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
-         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
-   ELSEIF (ABS(T)>0.01 .AND. ABS(T)<=0.1) THEN
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
-         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
-   ELSE
-      WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
-         ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
-   ENDIF
+IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
+
+      IF (ABS(T)<=0.0001) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+            ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+            ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+            ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(T)>0.01 .AND. ABS(T)<=0.1) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+            ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSE
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+            ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ENDIF
 
    WRITE(LU_OUTPUT,'(A)') TRIM(SIMPLE_OUTPUT)
-   RETURN
 
+   ELSE
+
+      IF (ABS(STIME)<=0.0001) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+            ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+            ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+            ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSEIF (ABS(STIME)>0.01 .AND. ABS(STIME)<=0.1) THEN
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+            ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ELSE
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+            ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
+      ENDIF
+   ENDIF
+   RETURN
 ENDIF
 
 ! Detailed diagnostics to the .out file
 
 CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
-IF (ABS(T)<=0.0001) THEN
-   WRITE(LU_OUTPUT,150) DT,T
-ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-   WRITE(LU_OUTPUT,151) DT,T
-ELSEIF (ABS(T)>0.001 .AND. ABS(T) <=0.01) THEN
-   WRITE(LU_OUTPUT,152) DT,T
-ELSEIF (ABS(T)>0.01 .AND. ABS(T) <=0.1) THEN
-   WRITE(LU_OUTPUT,153) DT,T
+IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
+   IF (ABS(T)<=0.0001) THEN
+      WRITE(LU_OUTPUT,150) DT,T
+   ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
+      WRITE(LU_OUTPUT,151) DT,T
+   ELSEIF (ABS(T)>0.001 .AND. ABS(T) <=0.01) THEN
+      WRITE(LU_OUTPUT,152) DT,T
+   ELSEIF (ABS(T)>0.01 .AND. ABS(T) <=0.1) THEN
+      WRITE(LU_OUTPUT,153) DT,T
+   ELSE
+      WRITE(LU_OUTPUT,253) DT,T
+   ENDIF
 ELSE
-   WRITE(LU_OUTPUT,253) DT,T
+   IF (ABS(STIME)<=0.0001) THEN
+      WRITE(LU_OUTPUT,350) DTS,STIME
+   ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
+      WRITE(LU_OUTPUT,351) DTS,STIME
+   ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME) <=0.01) THEN
+      WRITE(LU_OUTPUT,352) DT,STIME
+   ELSEIF (ABS(STIME)>0.01 .AND. ABS(STIME) <=0.1) THEN
+      WRITE(LU_OUTPUT,353) DTS,STIME
+   ELSE
+      WRITE(LU_OUTPUT,453) DTS,STIME
+   ENDIF
 ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
@@ -3907,6 +3966,11 @@ WRITE(LU_OUTPUT,*)
 152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
 153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
 253 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
+350 FORMAT(6X,' Scaled Step Size: ',E12.3,' s, Scaled Total Time: ',F10.6,' s')
+351 FORMAT(6X,' Scaled Step Size: ',E12.3,' s, Scaled Total Time: ',F10.5,' s')
+352 FORMAT(6X,' Scaled Step Size: ',E12.3,' s, Scaled Total Time: ',F10.4,' s')
+353 FORMAT(6X,' Scaled Step Size: ',E12.3,' s, Scaled Total Time: ',F10.3,' s')
+453 FORMAT(6X,' Scaled Step Size: ',E12.3,' s, Scaled Total Time: ',F10.2,' s')
 154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
@@ -10414,11 +10478,6 @@ IF (CC_IBM) THEN
       I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
       ! write geometry for slice file
       IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
-         ! geometry and data file initial write
-         OPEN(LU_BNDF_GEOM(NF,NM),FILE=FN_BNDF_GEOM(NF,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-         CALL DUMP_SLICE_GEOM(LU_BNDF_GEOM(NF,NM),"INBOUND_FACES",1,STIME,I1,I2,J1,J2,K1,K2)
-         CLOSE(LU_BNDF_GEOM(NF,NM))
-
          OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='REPLACE')
          OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM),FORM='FORMATTED',  STATUS='REPLACE')
          CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM),LU_BNDG(NF+N_BNDF,NM), &

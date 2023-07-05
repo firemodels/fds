@@ -2377,8 +2377,8 @@ Inside solids, FDS solves the one-dimensional heat transfer equation numerically
 The default parameters governing the node spacing are appropriate for simple heat transfer calculations, but sometimes pyrolysis reactions cause spurious fluctuations in temperature and burning rate. The numerical accuracy and stability of the solid phase solution may be improved as follows:
 \begin{description}
 \item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers unless the default value is desired.
-\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1. For example, a value of 0.5 makes the mesh cells half the size. The scaling applies to all layers.
-\item[Specify your own cell size] by specifying {\ct CELL\_SIZE(NL)} directly. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}.
+\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR(NL)} less than 1 for the layer {\ct NL}. For example, a value of 0.5 makes the mesh cells in the layer half the size.
+\item[Specify your own cell size] by specifying {\ct CELL\_SIZE} directly. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR} and it applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type. The feature works by sub-dividing the gas phase time step into halves, quarters, eighths, etc., as specified by the {\ct SURF} line integer parameter {\ct SUBSTEP\_POWER}. Its default value is 2, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of $2^2=4$. If you set {\ct SUBSTEP\_POWER} to 4, the time step will be sub-divided by {\em at most} a factor of $2^4=16$. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain.
 \item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX(:)}. This array input has a default of 1000. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
@@ -6002,6 +6002,8 @@ Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles w
 \end{lstlisting}
 Note that in this example, exactly one particle is specified per grid cell, positioned exactly in the center of the cell. The number of actual pine needles this single particle represents depends on the specified {\ct MASS\_PER\_VOLUME} and the mass of an individual cylindrical particle. That information would be provided by the {\ct SURF} line {\ct 'needles'}.
 
+Additionally, for {\ct 'CONE'} and {\ct 'CYLINDER'} shapes it is possible to specify an {\ct INNER\_RADIUS}. This will remove a concentric volume with the specified inner radius, leaving a conical or cylindrical shell. This can be useful if a tree crown has foliage concentrated towards the exterior of the volume. Note that the {\ct MASS\_PER\_VOLUME} will be applied only to the occupied volume of the shell, thus the total mass of the tree crown will decrease when specifying an {\ct INNER\_RADIUS} for a fixed {\ct MASS\_PER\_VOLUME}. Examples of different crown geometries can be found in the {\ct tree\_shapes.fds} verification case in the {\ct fds/Verification/WUI/} directory.
+
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
 
 There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region. When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=T}, the particles will be placed at the center of each cell.
@@ -6918,7 +6920,7 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
       CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
       MASS_PER_VOLUME=10., DRY=T /
 \end{lstlisting}
-These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) {\ct MASS\_PER\_VOLUME}.
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) {\ct MASS\_PER\_VOLUME}. Additional details on specifying different standard tree crown geometries can be found in Section~\ref{info:initial_droplets}.
 
 A handy way to introduce many trees into a simulation is by way of a {\ct SURF} line as follows:
 \begin{lstlisting}
@@ -7236,12 +7238,40 @@ In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited dir
 If an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_POWER\_SIGMA}, whose default value is 0.001~kW.
 
 
-\subsection{Using Mapping Software}
+\subsection{Wildfire Spread over Realistic Terrain using QGIS}
 \label{info:earth}
 
-If external mapping or GIS software is used to generate an FDS input file, it is handy to include the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
+Wildfire spread over releastic terrain can be modeled in FDS using a plugin to QGIS called qgis2fds: \\
+\href{https://github.com/firetools/qgis2fds}{https://github.com/firetools/qgis2fds} \\
+QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
+A typical input file created with qgis2fds includes the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
+\begin{lstlisting}
+&MISC ORIGIN_LAT=35.7207093
+      ORIGIN_LON=-83.5212387
+      NORTH_BEARING=0.
+      TERRAIN_IMAGE='ridge_ls_1_tex.png'
+      LEVEL_SET_MODE=1 /
+\end{lstlisting}
+A set of sample input files created by qgis2fds reside within the gitHub repository \\
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. For each case, a hypothetical fire spreads from its point of origin over a ridge. Each case simulates 10~h of real time. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
 
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/ridge_terrain_image.png}
+\caption[Satellite image of sample terrain]{Satellite image of sample terrain.}
+\label{ridge_map}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_1.png} &
+\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_2.png} \\
+\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_3.png} &
+\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_4.png}
+\end{tabular*}
+\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 10~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
+\label{ridge_figs}
+\end{figure}
 
 
 
@@ -8839,7 +8869,7 @@ This section describes a set of cases to extract the implied friction factor fro
 
 While reasonable grid resolution is important, the wall models in FDS are capable of giving the correct mean wall stress even at rather coarse resolution.  For example, the $y^+$ for Case C with 10 cells is, in fact, 5000 (this is the location of the middle of the first grid cell divided by the roughness height). Also, note that a roughness of 0.1~mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
 
-The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressure drop in Tunnel~B (2~m/s flow speed, 0.1~m wall roughness) which now contains a hypothetical 60~MW fire at its midpoint. The grid resolution in the vertical direction is listed in the legend of the plots. For this case, the pressure is evaluated at mid-height along the tunnel centerline. The relatively rapid drop in pressure at the open end of the tunnel ($x=1600$~m) is due to the fact that the pressure is assumed to be ambient at an open boundary.
+The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressure drop in Tunnel~B (2~m/s flow speed, 0.1~m wall roughness) which now contains a hypothetical 50~MW fire at its midpoint. The grid resolution in the vertical direction is listed in the legend of the plots. For this case, the pressure is evaluated at mid-height along the tunnel centerline. The relatively rapid drop in pressure at the open end of the tunnel ($x=1600$~m) is due to the fact that the pressure is assumed to be ambient at an open boundary.
 
 
 
@@ -11579,6 +11609,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEIGHT}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 {\ct HRRPUV}                      & Real              & Section~\ref{info:init_hrrpuv}                & \si{kW/m^3}    &               \\ \hline
 {\ct ID}                          & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
+{\ct INNER\_RADIUS}               & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 {\ct MASS\_FRACTION(:)}           & Real Array        & Section~\ref{info:init_species}               & kg/kg          & Ambient       \\ \hline
 {\ct MASS\_PER\_TIME}             & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
 {\ct MASS\_PER\_VOLUME}           & Real              & Section~\ref{info:initial_droplets}           & \si{kg/m^3}    & 1             \\ \hline
@@ -11835,6 +11866,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
+% Undocumented: RAD_CFACE_INTERPOLATE (MV, to test projecting CFACEs to both sides in each dir, areas distance interpolated)
 
 \vspace{\baselineskip}
 
@@ -12487,7 +12519,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
-{\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
+{\ct CELL\_SIZE\_FACTOR(:)}                               & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
@@ -13185,91 +13217,108 @@ IF (NCHARS_OUT > 0) WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
 \end{lstlisting}
 The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine whether the computer creating the 3-D smoke file and the computer viewing the 3-D smoke file use the same or different byte swap (endian) conventions for storing floating point numbers.  The opacity data is converted from 4 byte floating point numbers to one byte integers then compressed using run-length encoding (RLE). The compressed data is contained in {\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
 
+\section{Iso-surface Triangulation Files ({\tt.iso})}
+\label{out:ISO}
 
-
-\section{Geometry, Isosurface Files ({\tt .iso})}
-\label{out:GEOMETRY_ISO}
-
-Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
+Iso-surface files ({\tt .iso}) are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  These files are written out from {\ct smvv.f90} using lines equivalent to the following:
 \begin{lstlisting}
 ! header
 
+WRITE(LU_ISO) ONE
+WRITE(LU_ISO) VERSION
+WRITE(LU_ISO) NISO_LEVELS
+IF (NISO_LEVELS>0) WRITE(LU_ISO) (ISO_LEVELS(I),I=1,NISO_LEVELS)
+WRITE(LU_ISO) ZERO
+WRITE(LU_ISO) ZERO, ZERO 
+
+! Write for each STIME
+
+WRITE(LU_ISO) STIME, ZERO
+WRITE(LU_ISO) N_VERT, N_FACE
+IF (N_VERT_D>0) WRITE(LU_ISO) (Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
+IF (N_FACE_D>0) WRITE(LU_ISO) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
+IF (N_FACE_D>0) WRITE(LU_ISO) (ISO_LEVEL_INDICES(I),I=1,N_FACE)
+\end{lstlisting}
+
+\noindent where:
+
+\begin{itemize}
+\item {\ct ONE}\ Integer set to 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
+\item {\ct VERSION}\ currently has value 1 and indicates the version number of this file format.
+\item {\ct NISO\_LEVELS} The number of iso-surface levels (values) defined at the beginning of the file.
+\item {\ct ISO\_LEVELS} Floating point values for iso-surface levels of  {\ct QUANTITY} stored at the beginning of the file.
+\item {\ct STIME} is the FDS simulation time.
+\item {\ct N\_VERT, N\_FACE}\ are the number of vertices and triangles in the iso-surface.
+\item {\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
+\item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each triangle.  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct LEVEL\_INDICES}\ are the iso-surface level indices for each triangle (points to {\ct ISO\_LEVELS}).
+\item {\ct ZERO}\ Integer set to 0, left for compatibility and future use.
+\end{itemize}
+Data files associated with coloring iso-surfaces by a second {\ct QUANTITY2} are described in section~\ref{out:GEOMETRY_DATA}
+
+
+\section{Geometry Boundary, Unstructured Slice  Files ({\tt .gcf,.gsf})}
+\label{out:GEOMETRY_TRI}
+
+Immersed geometry surfaces and unstructured slices are stored using a file format described in this section. These surfaces are defined in terms of vertices and triangles. Surface polygonal patches (CFACEs) resulting from geometry triangulation intersection with the FDS grid are divided in triangles and used to plot geometry and boundary data ({\tt .gcf}). Unstructured slices ({\tt .gsf}) derive from the {\ct \&SLCF} namelist when the slice crosses geometries, and are also split in triangles. Data files associated with these slices are described in section~\ref{out:GEOMETRY_DATA}. These files are written out from {\ct dump.f90} using lines equivalent to the following:
+\begin{lstlisting}
 WRITE(LU_GEOM) ONE
 WRITE(LU_GEOM) VERSION
-WRITE(LU_GEOM) N_FLOATS
-IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
-WRITE(LU_GEOM) N_INTS
-IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
-
-! static geometry - geometry specified once and appearing at all time steps
-
-WRITE(LU_GEOM) N_VERT_S, N_FACE_S
-IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
-IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
-IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
-
-! dynamic geometry - geometry specified and appearing for each time step
-
-WRITE(LU_GEOM) STIME, GEOM_TYPE
-IF (GEOM_TYPE.EQ.0) THEN
-  WRITE(LU_GEOM) N_VERT_D, N_FACE_D
-  IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-  IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
-  IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
-ELSE IF (GEOM_TYPE.EQ.1) THEN
-  ! rotation and translation parameters used to transform geometry from first
-  ! dynamic time step
-  WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
+WRITE(LU_GEOM) ZERO, ZERO, ONE
+WRITE(LU_GEOM) STIME
+WRITE(LU_GEOM) N_VERT, N_FACE, ZERO
+IF (N_VERT>0 .AND. N_FACE>0) THEN
+   WRITE(LU_GEOM) (Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
+   WRITE(LU_GEOM) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
+   WRITE(LU_GEOM) (LOCATION(I),I=1,N_FACE)
+   IF ( ".gcf" ) THEN
+      WRITE(LU_GEOM) (SURF_IND(I),I=1,N_FACE)
+      WRITE(LU_GEOM) (GEOM_IND(I),I=1,N_FACE)
+   ENDIF 
 ENDIF
 \end{lstlisting}
 
 \noindent where:
 
 \begin{itemize}
-\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
-\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
-\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
-\item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D}\ are the number of static and dynamic vertices and faces.
-\item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S,FACE1\_D, FACE2\_D, FACE3\_D}\ are the static and dynamic vertex indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
-\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (triangle).
-\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented. If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in terms of nodes and faces using the same format as the static geometry. If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a translation and two rotations.  These transformations are applied to the dynamic geometry defined at the first time step.
-\item {\ct Xtran, Ytran, Ztran}\ is the translation applied to the initial dynamic geometry (If {\ct GEOM\_TYPE}\ is 1)
-\item {\ct Xrot0, Yrot0, Zrot0}\ is the origin about which rotations occur.
-\item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry.
+\item {\ct ONE}\ Integer set to 1. 
+\item {\ct VERSION}\ currently has value 2 and indicates the version number of this file format.
+\item {\ct STIME} is the initial FDS simulation time.
+\item {\ct N\_VERT, N\_FACE}\ are the number of vertices and faces.
+\item {\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
+\item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each triangle.  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct LOCATION}\ Integers that define which edges of the triangles belong to polygonal patches boundaries.
+\item {\ct SURF\_IND}\ are the SURF indices for each triangle. Only written in {\tt .gcf} files.
+\item {\ct GEOM\_IND}\ are the geometry indices for each triangle, for geometries listed in the input file sequence. Only written in {\tt .gcf} files.
+\item {\ct ZERO}\ Integer set to 0. Entry left for future use.
 \end{itemize}
 
-\section{Geometry Data Files ({\tt .be})}
+\section{Isosurface, Geometry and Unstructured Slice Data Files
+\newline ({\tt .viso,.be})}
 \label{out:GEOMETRY_DATA}
 
-The geometry data file contains a description of data values computed by FDS on an immersed
-geometrical objects.  This file is analogous to the boundary file.
-The data written out to a geometry data file MUST correspond to the geometry written out
-in the corresponding geometry file.
-Geometry data files are written out from {\ct dump.f90} with the lines equivalent to the following:
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-  WRITE(LU_GEOM_DATA) ONE
-  WRITE(LU_GEOM_DATA) VERSION
-  WRITE(LU_GEOM_DATA) STIME
-  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,N_FACE_D_VALS
-  IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I), I=1,N_VERT_S_VALS)
-  IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I),I=1,N_VERT_D_VALS)
-  IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I), I=1,N_FACE_S_VALS)
-  IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I),I=1,N_FACE_D_VALS)
-              .
-              .
+Isosurface, geometry boundary and unstructured slice data files contain a description of data values computed by FDS on triangulations stemming
+either from isosurfaces ({\tt .viso}) or geometry boundary/unstructured slice ({\tt .be}) files. This files are analogous to boundary files.
+The data written out to an unstructured data file must correspond to the triangulation written out
+in the corresponding geometry file ({\tt .iso} for {\tt .viso}; {\tt .gcf,.gsf} for {\tt .be}). These data files are written out from {\ct dump.f90} with lines 
+equivalent to the following:
+\begin{lstlisting}
+WRITE(FUNIT_DATA) ONE
+WRITE(FUNIT_DATA) FILETYPE
+WRITE(FUNIT_DATA) STIME
+WRITE(FUNIT_DATA) ZERO, ZERO, N_VERT_VALS, N_FACE_VALS
+IF (N_VERT_VALS>0)  WRITE(FUNIT_DATA) (ValVert(I), I=1,N_VERT_VALS)
+IF (N_FACE_VALS>0)  WRITE(FUNIT_DATA) (ValFace(I), I=1,N_FACE_VALS)
 \end{lstlisting}
-The data values written out in this file correspond to the geometry written out in the geometry file.
+
 \begin{itemize}
-\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct ONE}\ has the value 1. 
+\item {\ct FYLETYPE}\ currently has value 1 for isosurface and 2 for geomtery.
 \item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S\_VALS, N\_FACE\_S\_VALS}\ is the number of data values written out for static vertices and faces.  One can write out data values located at nodes, located at the center of faces or both.
-\item {\ct N\_VERT\_D\_VALS, N\_FACE\_D\_VALS}\ is the number of dynamic values written out for dynamic vertices and faces.  One can write out data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
-\item {\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
-\item {\ct ValVertDynamic, ValFaceDynamic}\ dynamic vertex and face data.
+\item {\ct N\_VERT\_VALS, N\_FACE\_VALS}\ is the number of data values written out for vertices and faces.
+\item {\ct ValVert, ValFace}\ vertex and face data. Currently both geometry and isosurface files export either
+face or node data in a single file.
+\item {\ct ZERO}\ Integer set to 0, left for compatibility and future use.
 \end{itemize}
 
 
@@ -13286,8 +13335,6 @@ WRITE(LU_TERRAIN(NM)) ((Z_TERRAIN(I,J),J=0,M%JBAR),I=0,M%IBAR)
 \end{lstlisting}
 {\ct NM} is the mesh number, {\ct M} is a pointer to the variables of the mesh {\ct NM}, {\ct ZS\_MIN} is the lowest $z$ value of the entire domain, {\ct IBP1} and {\ct JBP1} are the number of horizontal grid cells in the mesh plus 1, {\ct XPLT} and {\ct YPLT} are the four byte ({\ct FB}) coordinates, and {\ct Z\_TERRAIN(I,J)} is the elevation at the point with indices {\ct (I,J)}. All real numbers are four bytes. The elevations are defined at cell corners.
 
-
-\ifcompgeom
 
 \section{FDS GEOM I/O binary format ({\tt .bingeom})}
 \label{inout:bingeom}
@@ -13317,164 +13364,61 @@ WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
 \end{itemize}
 
 
-\section{Unstructured Geometry ({\tt .ge})}
+\section{Unstructured Geometry ({\tt .ge,.ge2})}
 \label{out:GEOMETRY}
 
-Immersed geometric objects are stored for SMV reading using a file format described below.
-These objects are defined in terms of vertices, triangles and tetrahedrons.
+Immersed geometric objects are stored for SMV reading using a file format with {\tt .ge} extension described below.
+These objects are defined in terms of vertices and triangles.
 A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
-A triangle is represented as three vertex (integer) indices. A tetrahedron is represented as four vertex (integer) indices.
+A triangle is represented as three vertex (integer) indices. 
+Tetrahedron volumes option in the following are not used by FDS, and left as an option for future functionality.
 An associated file format used to store data  on the geometric object is described in the next section.
-These files are written out from {\ct dump.f90} using lines equivalent to the following:
+These files are written out from {\ct dump.f90,geom.f90} using lines equivalent to the following:
 
 \begin{lstlisting}
-! header
-
 WRITE(LU_GEOM) ONE
 WRITE(LU_GEOM) VERSION
 WRITE(LU_GEOM) N_FLOATS, N_INTS, FIRST_FRAME_STATIC
 IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
 IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
-! geometry frame
-! STIME ignored if first frame is static ( FIRST_FRAME_STATIC set to 1)
-
 WRITE(LU_GEOM) STIME
 WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
 IF (N_VERT>0) WRITE(LU_GEOM)(Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
 IF (N_FACE>0) THEN
    WRITE(LU_GEOM) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
-   WRITE(LU_GEOM) (SURF(I),I=1,N_FACE)
+   WRITE(LU_GEOM) (SURF_IND(I),I=1,N_FACE)
    WRITE(LU_GEOM) (Xtext(I),Ytext(I),I=1,3*N_FACE)
 ENDIF
 IF (N_VOL>0) THEN
    WRITE(LU_GEOM) (VOL1(I),VOL2(I),VOL3(I),VOL4(I),I=1,N_VOL)
    WRITE(LU_GEOM) (MATL(I),I=1,N_VOL)
 ENDIF
-              .
 \end{lstlisting}
 
 \begin{itemize}
-\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
+\item {\ct ONE}\ has the value 1. 
 \item {\ct VERSION}\ currently has value 2 and indicates the version number of this file format.
-\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
+\item {\ct N\_FLOATS, N\_INTS, FIRST\_FRAME\_STATIC} The number of floating point and integer data items stored at
+the beginning of the file. {\ct FIRST\_FRAME\_STATIC} for future use is currently set to 1.
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
-\item {\ct STIME} is the FDS simulation time.
+\item {\ct STIME} is the FDS initial simulation time.
 \item {\ct N\_VERT, N\_FACE, N\_VOL}  are the number of vertices, faces and volumes.
-\item {\ct Xtext, Ytext}\ are the texture coordinates.
 \item {\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
-\item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each face (triangle).
-    The indices range from 1 to the
-    number of vertices.
-\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
-\item {\ct SURF}\ are the SURF indices for each face.
-\item {\ct MATL}\ are the MATL indices for each volume.
+\item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each face (triangle). The indices range from 1 to to {\tt N\_VERT}.
+\item {\ct SURF\_IND}\ are the SURF indices for each face.
+\item {\ct Xtext, Ytext}\ are the texture coordinates.
+\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to {\tt N\_VERT}. Not used currently.
+\item {\ct MATL}\ are the MATL indices for each volume. Not used by FDS currently.
 \end{itemize}
-
-
-\section{Unstructured Data}
-
-\label{out:GEOMETRYDATA}
-
-(add to FDS user's guide 20.13 when ready)
-
-This section describes the file format used for
-storing data associated with unstructured geometric objects.  This format will be used to unify file formats for storing 3D smoke, boundary, particle and slice data.
-Unstructured data files are written out from {\ct dump.f90} using lines equivalent to the following:
-
+The {\tt .ge2} geometry files contain the actual geometry index as read in the .fds input file, written as:
 \begin{lstlisting}
-
-! header
-
-WRITE(LU_GEOM) ONE
-WRITE(LU_GEOM) VERSION
-WRITE(LU_GEOM) N_FLOATS
-IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
-WRITE(LU_GEOM) N_INTS
-IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
-
-! data for each time step
-
-WRITE(LU_GEOM) STIME
-WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
-WRITE(LU_GEOM) HAS_VERT_ID
-IF (N_VERT>0) THEN
-   WRITE(LU_GEOM)(ValVert(I),I=1,N_VERT)
-   IF (HAS_VERT_ID.EQ.1) WRITE(LU_GEOM)(Vert_ID(I),I=1,N_VERT)
-ENDIF
-IF (N_FACE>0) WRITE(LU_GEOM)(ValFace(I),I=1,N_FACE)
-IF (N_VOLS>0) WRITE(LU_GEOM)(ValVol(I),I=1,N_VOLS)
-
-\end{lstlisting}
-
-\begin{itemize}
-\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computers creating and viewing this data file use the same or different conventions for storing floating point numbers.
-\item {\ct VERSION}\ version number of the format used to store data in this file.
-\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
-\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
-\item {\ct STIME} is the simulation time.
-\item {\ct N\_VERT, N\_FACE, N\_VOLS}\ are the number of data values associated with vertices, faces and volumes.
-\item {\ct ValVert}\ is data associated with the vertices in the unstructured geometric object.
-\item {\ct ValFace}\ is data associated with the faces in the unstructured geometric object.
-\item {\ct ValVol}\ is data associated with the volumes in the unstructured geometric object.
-\end{itemize}
-
-\subsection{Isosurface Data}
-\label{out:ISOSURFACE}
-
-FDS generated isosurfaces are stored using a
-file format described in this section.
-Iso-surface files are used to store one or more surfaces where the
-surface has the value specified in the {\ct QUANTITY}\ keyword.
-FDS outputs iso-surface data at fixed time intervals.
-These surfaces are defined in terms of vertices and triangles.
-A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
-A triangle is represented as three vertex (integer) indices.
-These files are written out from {\ct dump.f90} using lines equivalent to the following:
-\begin{lstlisting}
-! header
-
-WRITE(LU_GEOM) ONE
-WRITE(LU_GEOM) VERSION
-WRITE(LU_GEOM) N_FLOATS
-IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
-WRITE(LU_GEOM) N_INTS
-IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
-
-! static geometry - geometry specified once and appearing at all time steps
-
-WRITE(LU_GEOM) N_VERT_S, N_FACE_S
-IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
-IF (N_FACE_S>0)  THEN
-   WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
-   WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S
-ENDIF
-
-! dynamic geometry - geometry specified and appearing for each time step
-
-WRITE(LU_GEOM) STIME, unused
-WRITE(LU_GEOM) N_VERT_D, N_FACE_D
-IF (N_VERT_D>0) WRITE(LU_GEOM)(Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-IF (N_FACE_D>0) THEN
-   WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
-   WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
+IF (N_FACE>0) THEN
+   WRITE(LU_GEOM2) N_FACE
+   WRITE(LU_GEOM2) (GEOM_IDS(I), I=1,N_FACES)
 ENDIF
 \end{lstlisting}
-
-\begin{itemize}
-\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ has value 0 (for isosurface files but has value 1 for geometry files) and indicates the version number of this file format.
-\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
-\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
-\item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D} are the number of static and dynamic vertices and faces.
-\item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).
-    The indices range from 1 to the number of vertices.
-\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (color indices for isosurface files.
-\end{itemize}
-
-\fi
+This information allows for complete area and boundary condition information per geometry in SMV.
 
 \section{FDS HVAC I/O binary format}
 \label{inout:binhvac}
@@ -13547,18 +13491,18 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 %fdsext ter
 %fdsext txt
 
-{\ct .be}        & Position of data in {\ct .gbf} file         & Section \ref{out:GEOMETRY_DATA}                     \\ \hline
+{\ct .be}        & Data values for {\ct .gcf,.gsf,.iso} files   & Section \ref{out:GEOMETRY_DATA}                    \\ \hline
 {\ct .bf}        & Boundary files                              & Section \ref{out:BNDF}                              \\ \hline
-{\ct .bingeom}   & Binary geometry files                       & Section \ref{inout:bingeom}                         \\ \hline
+{\ct .bingeom}   & Binary geometry files                      & Section \ref{inout:bingeom}                          \\ \hline
 {\ct .bnd}       & Min/Max Bound files                         & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
 {\ct .fds}       & FDS input files                             & FDS User's Guide Part \ref{info:inputfilecreation}  \\ \hline
-{\ct .gbf}       & Geometry boundary files                     & Section \ref{out:GEOMETRY_DATA}                     \\ \hline
-{\ct .gcf}       & Cface geometry files                        & Undocumented                                        \\ \hline
+{\ct .gbf}       & Geometry boundary files                     & To be deprecated                                    \\ \hline
+{\ct .gcf}       & CFACE geometry files                        & Section \ref{out:GEOMETRY_TRI}                      \\ \hline
 {\ct .ge}        & Geometry vertices and faces                 & Section \ref{out:GEOMETRY}                          \\ \hline
-{\ct .ge2}       & Geometry face properties                    & Undocumented                                        \\ \hline
-{\ct .gsf}       & Geometry slice files                        & Undocumented                                        \\ \hline
+{\ct .ge2}       & Geometry face properties                    & Section \ref{out:GEOMETRY}                          \\ \hline
+{\ct .gsf}       & Unstructured slice files                    & Section \ref{out:GEOMETRY_TRI}                      \\ \hline
 {\ct .ini}       & Smokeview configuration files               & Smokeview User's Guide \cite{Smokeview_Users_Guide} \\ \hline
-{\ct .iso}       & Isosurface files                            & Section \ref{out:GEOMETRY_ISO}                      \\ \hline
+{\ct .iso}       & Isosurface files                            & Section \ref{out:ISO}                               \\ \hline
 {\ct .out}       & FDS output log files                        & Section \ref{out:file}                              \\ \hline
 {\ct .prt5.gbnd} & Global bounds of all particle files         &                                                     \\ \hline
 {\ct .prt5}      & Particle files                              & Section \ref{out:PART}                              \\ \hline

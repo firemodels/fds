@@ -104,5 +104,6 @@ disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
+disp('tree_shapes...');                   tree_shapes
 
 display('verification scripts completed successfully!')
