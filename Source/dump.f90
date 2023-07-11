@@ -1206,12 +1206,12 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
             IF (PAINT_FACE(N,IOR)) M%N_PATCH = M%N_PATCH + 1
          ENDDO
       ENDDO
-   
+
       ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
       CALL ChkMemErr('DUMP','PATCH',IZERO)
-   
+
       ! Assign coordinate indices for each PATCH
-   
+
       IP = 0
       M%N_BNDF_POINTS = 0
       DO N=0,M%N_OBST
@@ -1258,7 +1258,7 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
       ENDDO
 
       DEALLOCATE(PAINT_FACE)
-   
+
    ENDIF CREATE_PATCHES
 
    IF (BNDF_TIME_INTEGRALS>0) THEN
@@ -2670,6 +2670,12 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
    WRITE(LU_OUTPUT,'(/A,I9/)'  ) ' Total Number of Grid Cells     ',CELL_COUNT
    WRITE(LU_OUTPUT,'(/A,F9.3)')  ' Maximum Cell Aspect Ratio      ',MAXVAL(MAX_CELL_ASPECT_RATIO)
    WRITE(LU_OUTPUT,'(A,I9/)')    ' CFL Velocity Norm              ',CFL_VELOCITY_NORM
+ENDIF
+
+IF (ORIGIN_LAT>-1.E6_EB) THEN
+   WRITE(LU_OUTPUT,'(/A/)')     ' Geographic Parameters'
+   WRITE(LU_OUTPUT,'(A,F11.7)')   '   Origin Latitude            ',ORIGIN_LAT
+   WRITE(LU_OUTPUT,'(A,F12.7)')   '   Origin Longitude          ',ORIGIN_LON
 ENDIF
 
 WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
@@ -9220,6 +9226,9 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
    CASE(72) ! SCALING HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_IN_SMOOTH*0.001_EB
+
+   CASE(73) ! VEGETATION FUEL TYPE
+      SOLID_PHASE_OUTPUT = SF%VEG_LSET_FUEL_INDEX
 
    CASE(100) ! CONDENSATION HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_CONDENSE * 0.001_EB
