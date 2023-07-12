@@ -26,3 +26,5 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+
+   pandoc/test.rst
