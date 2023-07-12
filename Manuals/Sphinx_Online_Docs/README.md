@@ -13,5 +13,15 @@ Prerequisites:
 
 Steps to compile:
 
-1. Run Pandoc script (under construction)
-2. Run Sphinx `make html`
+1. Run Pandoc script
+
+    `cd $firemodels/fds/Manuals/Sphinx_Online_Docs/source/pandoc/`
+
+    `./tex2rst.sh` (under construction)
+2. Run Sphinx
+
+    `cd $firemodels/fds/Manuals/Sphinx_Online_Docs/`
+
+    `make html`
+
+Produces `$firemodels/fds/Manuals/Sphinx_Online_Docs/build/html/index.html`
