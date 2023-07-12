@@ -17,16 +17,12 @@ Welcome to FDS online documentation!
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
 Contents
 --------
 
 .. toctree::
    :maxdepth: 2
-   :caption: User's Guide
-
-   FDS User Guide/Manual <index.rst>
-   FDS User Guide/Manual <test.rst>
