@@ -6,6 +6,7 @@ Prerequisites:
 
 * Install Pandoc
 * Install Sphinx
+* Install "Read the Docs" theme
 * Populate `SCRIPT_FIGURES` directories in `fds/Manuals/*/`
 
 Steps to compile:
