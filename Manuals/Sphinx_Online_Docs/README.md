@@ -6,7 +6,7 @@ The basic process is to convert the LaTeX manuals to restructured text (.rst) fi
 
 Prerequisites:
 
-* Install Pandoc
+* Install Pandoc (Anaconda latest)
 * Install Sphinx v5.0.2 (Anaconda latest)
 * Install [Read the Docs](https://sphinx-rtd-theme.readthedocs.io/en/stable/) theme
 * Populate `SCRIPT_FIGURES` directories in `fds/Manuals/*/`
