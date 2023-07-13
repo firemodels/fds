@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to FDS online documentation!
-====================================
+FDS online documentation
+========================
 
-**Fire Dynamics Simulator (FDS)** is a computational fluid dynamics (CFD) model of fire-driven fluid flow.
+The **Fire Dynamics Simulator (FDS)** is a computational fluid dynamics (CFD) model of fire-driven fluid flow.
 
 .. contents:: Table of Contents
 

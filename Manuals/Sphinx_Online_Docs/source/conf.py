@@ -42,4 +42,10 @@ html_css_files = [
     'css/style.css' 
 ]
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+
+html_logo = 'FDS-logos/FDS-logos_white_cropped.png'
+html_favicon = 'FDS-logos/FDS-logos_black_small_square.png'
+
 
