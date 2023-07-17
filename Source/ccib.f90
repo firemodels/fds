@@ -12691,7 +12691,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                SELECT CASE(X1AXIS)
                CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-               CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+               CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                END SELECT
                IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12729,7 +12729,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                SELECT CASE(X1AXIS)
                CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-               CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+               CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                END SELECT
                IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12769,7 +12769,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12801,7 +12801,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12923,7 +12923,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12961,7 +12961,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13000,7 +13000,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                      SELECT CASE(X1AXIS)
                      CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                     CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                     CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                      CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                      END SELECT
                      IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13032,7 +13032,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                      SELECT CASE(X1AXIS)
                      CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                     CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                     CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                      CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                      END SELECT
                      IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13220,7 +13220,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDIF
 
    ! Volume average:
-   DO IROW_LOC=1,NUNKZ_LOCAL
+   DO IROW_LOC=UNKZ_IND(NM)-UNKZ_IND(NM_START)+1,UNKZ_IND(NM)-UNKZ_IND(NM_START)+NUNKZ_LOC(NM)
       RZ_Z(IROW_LOC)  = RZ_Z( IROW_LOC) / RZ_ZS(IROW_LOC)
    ENDDO
 
