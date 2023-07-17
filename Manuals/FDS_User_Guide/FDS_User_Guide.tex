@@ -4085,6 +4085,34 @@ Gravity             & {\ct MISC}  & {\ct GVEC(3)}                               
 \end{center}
 \end{table}
 
+\subsection{Special Time Ramps}
+\label{info:special_ramp_functions}
+
+In addition to the $t^2$ and tanh functions discussed in the previous section, there are several other special time ramps, but these are invoked directly on the {\ct RAMP} line. For example, you can specify a sine function:
+\be
+   f(t) = \sin \left( \frac{2 \pi (t-t_0)}{\tau} \right)
+\ee
+via the single {\ct RAMP} line
+\begin{lstlisting}
+&RAMP ID='...', PERIOD=..., T_OFFSET=..., FUNCTION_TYPE='SIN' /
+\end{lstlisting}
+where $\tau$ is given by {\ct PERIOD} and $t_0$ is given by {\ct T\_OFFSET}, both in seconds. The inclusion of the parameter {\ct PERIOD} automatically invokes this special function, and no further {\ct RAMP} lines are needed.
+
+Another useful function is akin to a random walk often used in meteorology to represent fluctuating winds:
+\be
+   f(t+\dt) = R^2 \, f(t) + N\left( 0,\sqrt{1-R^2} \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad f(0) = 0
+\ee
+where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, and $\tau$ ({\ct PERIOD}) is a time scale that approximtes the time period of the random function. Both functions are shown in Fig.~\ref{special_ramps_fig}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/special_time_ramps}
+\end{center}
+\caption[Special time ramps]{Special time ramp functions, both with a {\ct PERIOD} of 10~s.}
+\label{special_ramps_fig}
+\end{figure}
+
+
 \section{Temperature-Dependent Functions}
 \label{info:RAMP_Temperature}
 
@@ -12295,14 +12323,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct F}                             & Real          & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
-{\ct T}                             & Real          & Chapter~\ref{info:RAMP}       & s (or $^\circ$C)      &           \\ \hline
-{\ct X}                             & Real          & Section~\ref{info:GVEC}       & m                     &           \\ \hline
-{\ct Z}                             & Real          & Section~\ref{info:wind_ramps} & m                     &           \\ \hline
+{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct FUNCTION\_TYPE}                & Character     & Chapter~\ref{info:special_ramp_functions}   &                       & {\ct 'SIN'} \\ \hline
+{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
+{\ct PERIOD}                        & Real          & Chapter~\ref{info:special_ramp_functions}   & s                     &             \\ \hline
+{\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
+{\ct T\_OFFSET}                     & Real          & Chapter~\ref{info:special_ramp_functions}   & s                     &             \\ \hline
+{\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
+{\ct Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
