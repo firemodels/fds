@@ -4086,7 +4086,7 @@ Gravity             & {\ct MISC}  & {\ct GVEC(3)}                               
 \end{table}
 
 \subsection{Special Time Ramps}
-\label{info:special_ramp_functions}
+\label{special_time_ramps}
 
 In addition to the $t^2$ and tanh functions discussed in the previous section, there are several other special time ramps, but these are invoked directly on the {\ct RAMP} line. For example, you can specify a sine function:
 \be
@@ -12326,12 +12326,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
-{\ct FUNCTION\_TYPE}                & Character     & Chapter~\ref{info:special_ramp_functions}   &                       & {\ct 'SIN'} \\ \hline
+{\ct FUNCTION\_TYPE}                & Character     & Section~\ref{special_time_ramps}   &                       & {\ct 'SIN'} \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
-{\ct PERIOD}                        & Real          & Chapter~\ref{info:special_ramp_functions}   & s                     &             \\ \hline
+{\ct PERIOD}                        & Real          & Section~\ref{special_time_ramps}   & s                     &             \\ \hline
 {\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
-{\ct T\_OFFSET}                     & Real          & Chapter~\ref{info:special_ramp_functions}   & s                     &             \\ \hline
+{\ct T\_OFFSET}                     & Real          & Section~\ref{special_time_ramps}   & s                     &             \\ \hline
 {\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
 {\ct Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
 \end{longtable}
