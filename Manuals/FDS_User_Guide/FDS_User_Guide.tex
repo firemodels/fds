@@ -4085,33 +4085,6 @@ Gravity             & {\ct MISC}  & {\ct GVEC(3)}                               
 \end{center}
 \end{table}
 
-\subsection{Special Time Ramps}
-\label{special_time_ramps}
-
-In addition to the $t^2$ and tanh functions discussed in the previous section, there are several other special time ramps, but these are invoked directly on the {\ct RAMP} line. For example, you can specify a sine function:
-\be
-   f(t) = \sin \left( \frac{2 \pi (t-t_0)}{\tau} \right)
-\ee
-via the single {\ct RAMP} line
-\begin{lstlisting}
-&RAMP ID='...', PERIOD=..., T_OFFSET=..., FUNCTION_TYPE='SIN' /
-\end{lstlisting}
-where $\tau$ is given by {\ct PERIOD} and $t_0$ is given by {\ct T\_OFFSET}, both in seconds. The inclusion of the parameter {\ct PERIOD} automatically invokes this special function, and no further {\ct RAMP} lines are needed.
-
-Another useful function is akin to a random walk often used in meteorology to represent fluctuating winds:
-\be
-   f(t+\dt) = R^2 \, f(t) + N\left( 0,\sqrt{1-R^2} \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad f(0) = 0
-\ee
-where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, and $\tau$ ({\ct PERIOD}) is a time scale that approximtes the time period of the random function. Both functions are shown in Fig.~\ref{special_ramps_fig}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/special_time_ramps}
-\end{center}
-\caption[Special time ramps]{Special time ramp functions, both with a {\ct PERIOD} of 10~s.}
-\label{special_ramps_fig}
-\end{figure}
-
 
 \section{Temperature-Dependent Functions}
 \label{info:RAMP_Temperature}
@@ -8166,6 +8139,35 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 &RAMP ID='BLOWER RAMP', T=100,F=0.5 /
 &RAMP ID='BLOWER RAMP', T=200,F=1.0 /
 \end{lstlisting}
+
+
+\subsection{Special Time Ramps}
+\label{special_time_ramps}
+
+Using the mathematical functions built into the control feature, you can create your own special ramps. For example, you can specify a sine function:
+\be
+   f(t) = \sin \left( \frac{2 \pi (t-5)}{10} \right)
+\ee
+via the lines
+\begin{lstlisting}
+&DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
+&CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+      CONSTANT=0.62831853 /
+&CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
+&RAMP ID='ramp sin', T=-1, F=-1, CTRL_ID='sin(2*pi*(t-t0)/10)' /
+&RAMP ID='ramp sin', T= 1, F= 1 /
+\end{lstlisting}
+The function is shown in Fig.~\ref{special_ramps_fig}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/special_time_ramps}
+\end{center}
+\caption[Sample sine function time ramp]{Sample sine function time ramp.}
+\label{special_ramps_fig}
+\end{figure}
+
 
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
@@ -12326,12 +12328,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
-{\ct FUNCTION\_TYPE}                & Character     & Section~\ref{special_time_ramps}   &                       & {\ct 'SIN'} \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
-{\ct PERIOD}                        & Real          & Section~\ref{special_time_ramps}   & s                     &             \\ \hline
 {\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
-{\ct T\_OFFSET}                     & Real          & Section~\ref{special_time_ramps}   & s                     &             \\ \hline
 {\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
 {\ct Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
 \end{longtable}

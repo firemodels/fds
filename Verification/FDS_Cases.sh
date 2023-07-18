@@ -138,6 +138,7 @@ $QFDS -d Controls device_test.fds
 $QFDS -d Controls hrr_freeze.fds
 $QFDS -d Controls rms_cov_corr.fds
 $QFDS -d Controls rms_example.fds
+$QFDS -d Controls special_time_ramps.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -p 8 -d Detectors beam_detector.fds
@@ -314,7 +315,6 @@ $QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
 $QFDS -d Miscellaneous devc_interpolation_velocity.fds
 $QFDS -d Miscellaneous devc_interpolation_temperature.fds
 $QFDS -d Miscellaneous init_overlap.fds
-$QFDS -d Miscellaneous special_time_ramps.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
