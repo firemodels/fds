@@ -1878,6 +1878,7 @@ END TYPE HVAC_QUANTITY_TYPE
 TYPE CELL_TYPE
    LOGICAL :: SOLID=.FALSE.                            !< Indicates if grid cell is solid or not
    LOGICAL :: EXTERIOR=.FALSE.                         !< Indicates if the grid cell is outside the mesh
+   LOGICAL :: EXTERIOR_EDGE=.FALSE.                    !< Indicates if the grid cell is at an outside edge of the mesh
    INTEGER :: OBST_INDEX=0                             !< Index of obstruction that fills cell (0 if none)
    INTEGER :: I,J,K                                    !< Indices of cell
    INTEGER, DIMENSION(12) :: EDGE_INDEX=0              !< Indices of 12 cell edges
