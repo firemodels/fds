@@ -7674,7 +7674,7 @@ LOGICAL, INTENT(IN)  :: FIRST_CALL
 
 ! Local Variables:
 INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
-REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF,RHOPV(-1:0) !,Z_CC,TMP_0_CC,P_0_CC
+REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF !,Z_CC,TMP_0_CC,P_0_CC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
 INTEGER :: INDADD, INDF, IFC, IFACE2, ICFC
 REAL(EB):: FSCU, AREATOT
@@ -7948,86 +7948,14 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ENDIF PERIODIC_TEST_COND
 
-   ! Populate PHOPVN in regular faces of CCIMPREGION:
-   ! IAXIS faces:
-   X1AXIS = IAXIS
-   DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
-
-      I  = MESHES(NM)%CC_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%CC_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%CC_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
-
-      MESHES(NM)%CC_REGFACE_IAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I:I+1,J,K)
-
-   ENDDO
-
-   ! JAXIS faces:
-   X1AXIS = JAXIS
-   DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
-
-      I  = MESHES(NM)%CC_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%CC_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%CC_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
-
-      MESHES(NM)%CC_REGFACE_JAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I,J:J+1,K)
-
-   ENDDO
-
-   ! KAXIS faces:
-   X1AXIS = KAXIS
-   DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
-
-      I  = MESHES(NM)%CC_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%CC_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%CC_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
-
-      MESHES(NM)%CC_REGFACE_KAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I,J,K:K+1)
-
-   ENDDO
-
-   ! Now populate RCFACES:
-   DO IFACE=1,MESHES(NM)%CC_NRCFACE_Z
-
-      I      = RC_FACE(IFACE)%IJK(IAXIS)
-      J      = RC_FACE(IFACE)%IJK(JAXIS)
-      K      = RC_FACE(IFACE)%IJK(KAXIS)
-      X1AXIS = RC_FACE(IFACE)%IJK(KAXIS+1)
-
-      SELECT CASE(X1AXIS)
-         CASE(IAXIS)
-            RHOPV(-1:0) = RHO(I:I+1,J,K)
-         CASE(JAXIS)
-            RHOPV(-1:0) = RHO(I,J:J+1,K)
-         CASE(KAXIS)
-            RHOPV(-1:0) = RHO(I,J,K:K+1)
-      ENDSELECT
-
-      RC_FACE(IFACE)%RHOPVN(-1:0) = RHOPV(-1:0)
-   ENDDO
-
-   ! Finally Cut-faces:
+   ! Finally Boundary Cut-faces interpolation stencils:
    VIND=0;  EP  =1
    MESH_CUTFACE_LOOP: DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
       I = CUT_FACE(ICF)%IJK(IAXIS)
       J = CUT_FACE(ICF)%IJK(JAXIS)
       K = CUT_FACE(ICF)%IJK(KAXIS)
       X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-      CUT_FACE_STATUS_IF: IF ( CUT_FACE(ICF)%STATUS == CC_GASPHASE ) THEN
-
-         SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               RHOPV(-1:0) = RHO(I:I+1,J,K)
-            CASE(JAXIS)
-               RHOPV(-1:0) = RHO(I,J:J+1,K)
-            CASE(KAXIS)
-               RHOPV(-1:0) = RHO(I,J,K:K+1)
-         ENDSELECT
-
-         DO IFACE=1,CUT_FACE(ICF)%NFACE
-            CUT_FACE(ICF)%RHOPVN(-1:0,IFACE) = RHOPV(-1:0)
-         ENDDO
-
-      ELSEIF( CUT_FACE(ICF)%STATUS == CC_INBOUNDARY ) THEN CUT_FACE_STATUS_IF
+      CUT_FACE_STATUS_IF: IF( CUT_FACE(ICF)%STATUS == CC_INBOUNDARY ) THEN
 
          DO IFACE=1,CUT_FACE(ICF)%NFACE
 
@@ -8912,7 +8840,6 @@ IF (PREDICTOR) THEN
       ENDDO
 
       ! Now get sum(un*ACFace) and add to divergence:
-      CUT_CELL(ICC)%DIVVOL_BC = 0._EB
       DP(I,J,K)  = DIVVOL/(DX(I)*DY(J)*DZ(K)) ! Now push Divergence to underlying Cartesian cell.
       RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
    ENDDO
@@ -8936,7 +8863,6 @@ ELSE ! CORRECTOR
       ENDDO
 
       ! Now get sum(un*ACFace) and add to divergence:
-      CUT_CELL(ICC)%DIVVOL_BC = 0._EB
       DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
       RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
    ENDDO
@@ -12691,7 +12617,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                SELECT CASE(X1AXIS)
                CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-               CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+               CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                END SELECT
                IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12729,7 +12655,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                SELECT CASE(X1AXIS)
                CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-               CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+               CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                END SELECT
                IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12769,7 +12695,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12801,7 +12727,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12923,7 +12849,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -12961,7 +12887,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                  CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                  CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                   CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                   END SELECT
                   IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13000,7 +12926,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                      SELECT CASE(X1AXIS)
                      CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                     CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                     CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                      CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                      END SELECT
                      IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13032,7 +12958,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      NCELL=NCELL+1; II=I; JJ=J; KK=K; IIF=I; JJF=J; KKF=K
                      SELECT CASE(X1AXIS)
                      CASE(IAXIS); IIF = IIF+LOHI-2; II = II+ILH
-                     CASE(JAXIS); JJF = IIF+LOHI-2; JJ = JJ+ILH
+                     CASE(JAXIS); JJF = JJF+LOHI-2; JJ = JJ+ILH
                      CASE(KAXIS); KKF = KKF+LOHI-2; KK = KK+ILH
                      END SELECT
                      IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
@@ -13220,7 +13146,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDIF
 
    ! Volume average:
-   DO IROW_LOC=1,NUNKZ_LOCAL
+   DO IROW_LOC=UNKZ_IND(NM)-UNKZ_IND(NM_START)+1,UNKZ_IND(NM)-UNKZ_IND(NM_START)+NUNKZ_LOC(NM)
       RZ_Z(IROW_LOC)  = RZ_Z( IROW_LOC) / RZ_ZS(IROW_LOC)
    ENDDO
 
@@ -20210,8 +20136,10 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (M3%NICF_S(1)>0) THEN
          DO IW=1,M3%NICF_S(1)
             ICF=  M3%ICF_UFFB_CF_S(IW)
+            IF (ICF<1) CYCLE
             CF => MESHES(NM)%CUT_FACE(ICF)
-            IF(.NOT.ALLOCATED(CF%VEL_LNK)) ALLOCATE(CF%VEL_LNK(1:CF%NFACE)); CF%VEL_LNK = 0._EB
+            IF(.NOT.ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%VEL_LNK)) ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%VEL_LNK(1:CF%NFACE))
+            MESHES(NM)%CUT_FACE(ICF)%VEL_LNK = 0._EB
          ENDDO
       ENDIF
    ENDDO
@@ -21536,12 +21464,6 @@ IF (PRES_FLAG==UGLMAT_FLAG) THEN
 
    ENDDO GRD_CC_LOOP_2
 ENDIF
-
-! Finally define shared RCF_H face:
-DO IRC=1,M%CC_NRCFACE_H
-   IF(M%RC_FACE(M%RCF_H(IRC))%UNKH(LOW_IND)==M%RC_FACE(M%RCF_H(IRC))%UNKH(HIGH_IND)) &
-   M%RC_FACE(M%RCF_H(IRC))%SHAREDH = .TRUE.
-ENDDO
 
 DEALLOCATE(XCELL,YCELL,ZCELL)
 DEALLOCATE(IJKFACE)

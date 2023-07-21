@@ -100,4 +100,60 @@ print(gcf,'-dpdf',[pltdir,'Marinite_Heat_Flux'])
 
 hold off
 
+clear E co
+
+E = importdata([expdir,'Burner_steadyHF_Width_multi-layer.csv'],',',2);
+
+x = [-25 -15 0 15 25];
+y = [ 20  50 75 100];
+[X,Y] = meshgrid(x,y);
+for i=1:4
+   Z(i,1:5) = E.data(i,2:6);
+end
+Z1(1,1:5) = M1.data(end,102:106);
+Z1(2,1:5) = M1.data(end,107:111);
+Z1(3,1:5) = M1.data(end,112:116);
+Z1(4,1:5) = M1.data(end,117:121);
+Z2(1,1:5) = M2.data(end,102:106);
+Z2(2,1:5) = M2.data(end,107:111);
+Z2(3,1:5) = M2.data(end,112:116);
+Z2(4,1:5) = M2.data(end,117:121);
+co2 = [1 0 0  % red
+       0 1 0  % green
+       0 0 1  % blue
+       1 0 1  % magenta
+       1 1 0  % yellow
+       0 1 1  % cyan
+       0 0 0];% black
+levels = [5 10 15 20 30 40 50 60];
+
+[C_exp,h_exp] = contourf(X,Y,Z,levels,'-') ; hold on
+clabel(C_exp,h_exp,'FontSize',6)
+%colormap(co2)
+
+[C1,h1] = contour(X,Y,Z1,levels,'r--') ; hold on
+clabel(C1,h1,'FontSize',6,'Color','red')
+
+[C2,h2] = contour(X,Y,Z2,levels,'g--') ; hold on
+clabel(C2,h2,'FontSize',6,'Color','green')
+
+legend('Experiment','FDS 1 cm','FDS 2 cm','Location','SouthEast','FontSize',8)
+xlabel('Width (cm)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Height (cm)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+axis([-30 30 0 110])
+
+Git_Filename = [outdir,'Marinite_60_kW_2_cm_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf',[pltdir,'Marinite_Heat_Flux_Contours'])
+
+hold off
 

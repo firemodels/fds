@@ -857,7 +857,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.,DIRICHLET_FRONT=.FALSE.,DIRICHLET_BACK=.FALSE.
+              BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.,DIRICHLET_FRONT=.FALSE.,DIRICHLET_BACK=.FALSE.,BLOWING=.FALSE.
    INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
    LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
@@ -924,7 +924,7 @@ TYPE OMESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
 
    ! Level Set
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS,TOA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_SEND_PKG14,REAL_RECV_PKG14
 
 END TYPE OMESH_TYPE
@@ -988,6 +988,7 @@ TYPE OBSTRUCTION_TYPE
 
 END TYPE OBSTRUCTION_TYPE
 
+!> \brief Variables related to bin spatial data structures for geometry triangulations.
 
 TYPE TRIBIN_TYPE
    REAL(EB):: X1_LOW, X1_HIGH
@@ -1007,6 +1008,8 @@ TYPE TRANSFORM_TYPE
    REAL(EB) :: Z_OFFSET
    INTEGER :: GEOM_INDEX=-1
 END TYPE TRANSFORM_TYPE
+
+!> \brief Variables associated with GEOMETRY.
 
 TYPE GEOMETRY_TYPE
    CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,DEVC_ID,MOVE_ID
@@ -1044,117 +1047,154 @@ END TYPE VERTEX_TYPE
 TYPE(VERTEX_TYPE), TARGET, ALLOCATABLE, DIMENSION(:) :: VERTEX
 
 ! --- CC_IBM types:
-! Edge crossings data structure:
-INTEGER, PARAMETER :: CC_MAXCROSS_EDGE = 10 ! Size definition parameter. Max number of crossings per Cartesian Edge.
+INTEGER, PARAMETER :: CC_MAXCROSS_EDGE = 10 !< Size definition parameter. Max number of crossings per Cartesian Edge.
+
+!> \brief Edge crossings data structure for computational geometry engine.
+
 TYPE CC_EDGECROSS_TYPE
-   INTEGER :: NCROSS   ! Number of BODINT_PLANE segments - Cartesian edge crossings.
-   REAL(EB), DIMENSION(1:CC_MAXCROSS_EDGE)   ::  SVAR ! Locations along x2 axis of NCROSS intersections.
-   INTEGER,  DIMENSION(1:CC_MAXCROSS_EDGE)   :: ISVAR ! Type of intersection (i.e. SG, GS or GG).
-   INTEGER,  DIMENSION(MAX_DIM+1)            ::   IJK ! [ i j k X2AXIS]
+   INTEGER :: NCROSS   !< Number of BODINT_PLANE segments - Cartesian edge crossings.
+   REAL(EB), DIMENSION(1:CC_MAXCROSS_EDGE)   ::  SVAR !< Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(1:CC_MAXCROSS_EDGE)   :: ISVAR !< Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(MAX_DIM+1)            ::   IJK !< [ I J K X2AXIS]
 END TYPE CC_EDGECROSS_TYPE
 
-! Cartesian Edge Cut-Edges data structure:
+!> \brief Type of CUT_EDGE data structure that contains cartesian edge/face/cell cut-edges information.
+
 TYPE CC_CUTEDGE_TYPE
-   INTEGER :: IE=0
-   INTEGER :: NVERT, NEDGE, NEDGE1, STATUS         ! Local Vertices, cut-edges and status of this Cartesian edge.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZVERT  ! Locations of vertices.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   CEELEM  ! Cut-Edge connectivities.
-   INTEGER,  DIMENSION(MAX_DIM+2)                  ::      IJK  ! [ i j k X2AXIS cetype]
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   INDSEG  ! [ntr tr1 tr2 ibod]
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::VERT_LIST  ! [VERT_TYPE I J K]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::      DXX  ! [DXX(1,JEC) DXX(2,JEC)]
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:3, -2:2, JEC] Cut-face connected to edge.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ, MU_DUIDXJ ! Unstructured VelGrad components.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
+   INTEGER                                         ::     IE=0  !< Index to entry in structured mesh EDGE array.
+   INTEGER                                         ::    NVERT  !< Number of vertices.
+   INTEGER                                         ::    NEDGE  !< Number of cut-edges in this cartesian entry.
+   INTEGER                                         ::   STATUS  !< Location of cut edge, either CC_GASPHASE or CC_INBOUNDARY.
+   INTEGER                                         ::   NEDGE1  !< Auxiliary number of cut-edges in this cartesian entry.
+   INTEGER,  DIMENSION(MAX_DIM+2)                  ::      IJK  !< Position in mesh of this entry [ I J K X2AXIS cetype]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZVERT  !< Locations of vertices. (IAXIS:KAXIS,1:NVERT)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   CEELEM  !< Cut-Edge connectivities.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   INDSEG  !< Boundary segment triangles and geometry [ntr tr1 tr2 ibod]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::VERT_LIST  !< Vertex list for XYZVERT [VERT_TYPE I J K]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  !< [1:3, -2:2, JEC] Cut-face connected to edge.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::      DXX  !< [DXX(1,JEC) DXX(2,JEC)]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ  !< Unstructured velocity Grad components.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::MU_DUIDXJ  !< Unstructured viscosity * velocity Grad components.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  !< Permutation array for INSERT_FACE_VERT.
 END TYPE CC_CUTEDGE_TYPE
 
-! CC_EDGE type, used for computation of wall model turbulent viscosity, shear stress, vorticity.
+!> \brief Type of CC_RCEDGE, CC_IBEDGE arrays used for computation of wall model turbulent viscosity, shear stress, vorticity.
+
 TYPE CC_EDGE_TYPE
-   INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
-   INTEGER :: IE=0
-   INTEGER, ALLOCATABLE, DIMENSION(:,:)            ::FACE_LIST  ! [1:3, -2:2] Reg/Cut face connected to edge.
+   INTEGER,  DIMENSION(MAX_DIM+1)             :: IJK            !< Edge I,J,K,AXIS indexesin mesh. [ I J K X1AXIS]
+   INTEGER                                    :: IE=0           !< Index to entry in structured mesh EDGE array.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: FACE_LIST      !< [1:3, -2:2] Reg/Cut faces connected to edge.
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IEDGE).
    ! IEDGE = 0, Cartesian GASPHASE EDGE.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_DCOEF      ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF ,INT_NOUT     ! (IAXIS:KAXIS,IEDGE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,IEDGE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,IEDGE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,IEDGE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB,DUIDXJ,MU_DUIDXJ
-   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION,EDGE_IN_MESH
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       !< Interpolation (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_DCOEF      !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF      !< Interpolation (IAXIS:KAXIS,IEDGE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_NOUT       !< Interpolation (IAXIS:KAXIS,IEDGE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      !< Interpolation (1:3,IEDGE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        !< Interpolation (LOW:HIGH,VIND,EP,IEDGE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  !< Interpolation (0:INT_N_EXT_PTS,IEDGE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      !< Interpolation (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      !< Interpolation (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     !< Interp. (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB          !< For edges inside geometry, distance on each face to boundary.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: DUIDXJ         !< Wall modeled velocity Grad components.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: MU_DUIDXJ      !< Wall modeled viscosity * velocity Grad components.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX     !< Surface type for boundary on each face connected to edge in geom.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION !< Computation logical.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: EDGE_IN_MESH   !< Logical stating edge inside mesh (not boundary).
 END TYPE CC_EDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
-INTEGER, PARAMETER :: CC_MAXVERTS_FACE  =3072 ! Size definition parameter. Max number of vertices per Cartesian Face.
-INTEGER, PARAMETER :: CC_MAXCEELEM_FACE =3072 ! Size definition parameter. Max segments per face.
-INTEGER, PARAMETER :: CC_MAXCFELEM_FACE =3072 ! Size definition parameter. Max number of cut faces per Cartesian Face.
-INTEGER, PARAMETER :: CC_MAXVERT_CUTFACE=  24 ! Size definition parameter.
+INTEGER, PARAMETER :: CC_MAXVERTS_FACE  =3072 !< Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: CC_MAXCEELEM_FACE =3072 !< Size definition parameter. Max segments per face.
+INTEGER, PARAMETER :: CC_MAXCFELEM_FACE =3072 !< Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: CC_MAXVERT_CUTFACE=  24 !< Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
+
+!> \brief Type of CUT_FACE data structure that contains gas or boundary cut-faces info per cartesian face/cell.
+
 TYPE CC_CUTFACE_TYPE
-   INTEGER :: IWC=0,PRES_ZONE=-1
-   INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS ! Local Vertices, cut-faces and status of this Cartesian face.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEDGES  ! Cut-Edges. Points to EDGE_LIST.
-   INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA,AREA_ADJUST ! Cut-faces areas.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED,BLK_TAG
-   INTEGER,  ALLOCATABLE, DIMENSION(:)             ::  LINK_LEV ! Level in local Face Linking Hierarchy.
-   !Integrals to be used in cut-cell volume and centroid computations.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  BODTRI
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  UNKH, UNKZ
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XCENLOW, XCENHIGH
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, RHO_D
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  TMP_FACE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO_D_DZDN, H_RHO_D_DZDN
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VEL_SAVE, VEL_LNK
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL_OMESH, VELS_OMESH, VEL_LNK_OMESH, FN_OMESH
-                                                       ! Velocities in cut-face of MESHES(NOM).
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
-   REAL(EB) :: FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  EDGE_LIST ! [CE_TYPE IEC JEC] or [RG_TYPE SIDE_LOHI AXIS]
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K  ]
+   INTEGER :: IWC=0                    !< Wall cell index if wall cell present.
+   INTEGER :: PRES_ZONE=-1             !< Pressure zone cut-face is immersed in.
+   INTEGER :: NVERT=0                  !< Number of gas phase vertices in cartesian face/cell.
+   INTEGER :: NSVERT=0                 !< Number of solid phase Vertices in cartesian face/cell. For Plotting
+   INTEGER :: NFACE=0                  !< Number of gas phase cut-faces in cartesian face/cell.
+   INTEGER :: NSFACE=0                 !< Number of solid phase cut-faces in cartesian face/cell. For Plotting
+   INTEGER :: STATUS                   !< Status of these cut-faces, CC_GASPHASE (cart faces), CC_INBOUNDARY (cart cells).
+
+   INTEGER,  DIMENSION(MAX_DIM+1)        ::          IJK !< Cartesian face/cell location for these cut-faces. [I J K X1AXIS]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::      XYZVERT !< Locations of vertices. (IAXIS:KAXIS,1:NVERT)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       CFELEM !< Cut-faces connectivities.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       CEDGES !< Cut-Edges per cut-face. Points to EDGE_LIST.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         AREA !< Cut-faces areas. (1:NFACE+NSFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::  AREA_ADJUST !< Cut-faces area adjustment factors.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::       XYZCEN !< Cut-faces centroid locations. (IAXIS:KAXIS,1:NFACE+NSFACE)
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)   ::       SHARED
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)   ::      BLK_TAG !< Array used in cut-cell blocking.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::     LINK_LEV !< Level in gas cut-face linking hierarchy, used for momentum stability.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::      INXAREA !< Integral used in cut-cell volume computations.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::    INXSQAREA !< Integral used in cut-cell x centroid computations.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::    JNYSQAREA !< Integral used in cut-cell y centroid computations.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::    KNZSQAREA !< Integral used in cut-cell z centroid computations.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       BODTRI !< GEOMETRY and triangle associated with CC_INBOUNDARY cut-faces (CFACEs).
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::    EDGE_LIST !< Edges list. [CE_TYPE IEC JEC] or [RG_TYPE SIDE_LOHI AXIS]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)::   CELL_LIST !< Connected cut-cells list. [RC_TYPE I J K  ]
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::  CFACE_INDEX  !< In boundary cut-faces only, index in CFACE(:).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::   SURF_INDEX !< In boundary cut-faces only.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       NOMICF !< For external boundary boundary cutfaces, NOM and cut-face list.
+
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKH !< Low and high side cut-cell H unknown number. (LOW:HIGH,1:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKZ !< Low and high side cut-cell Z unknown number. (LOW:HIGH,1:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::         UNKF !< Momentum unknown number, used for face linking. (1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::      XCENLOW !< Centroid position for cut-cells in low side. (IAXIS:KAXIS,1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::     XCENHIGH !< Centroid position for cut-cells in high side. (IAXIS:KAXIS,1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::      ZZ_FACE !< Scalar values interpolated to cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     TMP_FACE !< Gas phase cut-face temperature array. (1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::   RHO_D_DZDN !< Diffusive mass flux for species and cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_RHO_D_DZDN !< Heat flux due to diffusive mass flux for species and cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::          VEL !< Corrector velocity normal to cut-faces. (1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         VELS !< Predictor velocity normal to cut-faces. (1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           FN !< Momentum RHS in cut-faces (Advective+diffusive+body+...).
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         FN_B !< Baroclinic Force RHS in cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     VEL_SAVE !< Saved unlinked velocities container for cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::      VEL_LNK !< Linked velocity container for cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::    VEL_OMESH !< OMESH Corrector velocity normal to cut-faces of MESHES(NOM).
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::   VELS_OMESH !< OMESH Predictor velocity normal to cut-faces. (1:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::VEL_LNK_OMESH !< OMESH Linked velocities.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     FN_OMESH !< OMESH Momentum RHS.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)::         JDH !< Index matrix per cutface in H Poisson matrix.
+   REAL(EB) :: FV=0._EB,FV_B=0._EB                       !< Momentum RHS and baroclinic torque in Cartesian face.
+   REAL(EB) :: ALPHA_CF=1._EB                            !< Area fraction for all gas cut-faces in a given cartesian face.
+   REAL(EB) :: VEL_CF=0._EB,VEL_CRT=0._EB                !< Average cut-face velocity, cartesian velocity containers.
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_HI = INT_NPE(HIGH,VIND,EP,IFACE).
-   ! IFACE = 0, undelying Cartesian face, IFACE=1:NFACE GASPHASE cut-faces.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_DCOEF      ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF,INT_NOUT ! (IAXIS:KAXIS,0:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,0:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,0:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,0:NFACE)  ! 0 is interpolation point.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-
+   ! Interpolation of variables for boundary cut-faces (CFACEs).
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_IJK        !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      :: INT_COEF       !< Interpolation (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_DCOEF      !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XYZBF,INT_NOUT !< Interpolation (IAXIS:KAXIS,0:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_INBFC      !< Interpolation (1:3,0:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:):: INT_NPE        !< Interpolation (LOW:HIGH,VIND,EP,0:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XN,INT_CN  !< Interpolation (0:INT_N_EXT_PTS,0:NFACE) !0 is interp point.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_FVARS      !< Interp (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_NOMIND     !< Interp (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    ! Fields used in INBOUNDARY faces:
-   ! Here: VIND=0, EP=1:INT_N_EXT_PTS,
-   ! INT_H_IND=1, etc. N_INT_CVARS=INT_P_IND+N_TRACKED_SPECIES
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   ! Here: VIND=0, EP=1:INT_N_EXT_PTS, INT_H_IND=1, etc. N_INT_CVARS=INT_P_IND+N_TRACKED_SPECIES
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_CVARS      !< Interpolation (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: RHOPVN
-   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX, UNKF
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
 END TYPE CC_CUTFACE_TYPE
 
+!>brief Data structure type to define radiation CFACEs in Cartesian faces and their relation to surrounding boundary cut-faces.
 
 TYPE RAD_CFACE_TYPE
-   INTEGER :: N_ASSIGNED_CFACES_RADI=0
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI
-   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_FACTOR
+   INTEGER                              :: N_ASSIGNED_CFACES_RADI=0 !< Number of boundary faces assigned to this cartesian face.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI     !< List of indexes for assigned CFACEs.
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_FACTOR               !< Interpolation factor that affects projected areas.
 END TYPE RAD_CFACE_TYPE
 
 
@@ -1163,6 +1203,8 @@ END TYPE RAD_CFACE_TYPE
 INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
 INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=12
 INTEGER, PARAMETER :: N_CFACE_SCALAR_LOGICALS=0
+
+!> \brief Type of CFACE data structure that contains boundary condition data for CC_INBOUNDARY cut-faces.
 
 TYPE CFACE_TYPE
    INTEGER :: CFACE_INDEX=0              !< Index of itself -- used to determine if the CFACE cell has been assigned
@@ -1176,105 +1218,140 @@ TYPE CFACE_TYPE
    INTEGER :: BACK_MESH=0
    INTEGER :: BACK_INDEX=0
    INTEGER :: BOUNDARY_TYPE=0
-   INTEGER :: CUT_FACE_IND1=-11
-   INTEGER :: CUT_FACE_IND2=-11
-   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
-   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
-   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
-   REAL(EB) :: AREA=0._EB
-   REAL(EB) :: NVEC(3)=0._EB
+   INTEGER :: CUT_FACE_IND1=-11          !< First index pointing to CUT_FACE array for this CFACE.
+   INTEGER :: CUT_FACE_IND2=-11          !< Second index pointing to CUT_FACE array for this CFACE.
+   INTEGER :: N_REALS=0                  !< Number of reals to pack into restart or send/recv buffer
+   INTEGER :: N_INTEGERS=0               !< Number of integers to pack into restart or send/recv buffer
+   INTEGER :: N_LOGICALS=0               !< Number of logicals to pack into restart or send/recv buffer
+   REAL(EB) :: AREA=0._EB                !< CFACE area. From CUT_FACE(CUT_FACE_IND1)%AREA(CUT_FACE_IND2)
+   REAL(EB) :: NVEC(3)=0._EB             !< CFACE normal out unit vector.
    REAL(EB) :: VEL_ERR_NEW=0._EB
    REAL(EB) :: V_DEP=0._EB
    REAL(EB) :: Q_LEAK=0._EB
    REAL(EB) :: DUNDT=0._EB
-   REAL(EB) :: RSUM_G=0._EB                     !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
-   REAL(EB) :: TMP_G                            !< Temperature (K) in adjacent gas phase cell
-   REAL(EB) :: RHO_G                            !< Gas density (kg/m3) in adjacent gas phase cell
-   REAL(EB) :: MU_G=0.1_EB                      !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
-   REAL(EB) :: PRES_BXN
+   REAL(EB) :: RSUM_G=0._EB              !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
+   REAL(EB) :: TMP_G                     !< Temperature (K) in adjacent gas phase cell
+   REAL(EB) :: RHO_G                     !< Gas density (kg/m3) in adjacent gas phase cell
+   REAL(EB) :: MU_G=0.1_EB               !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
+   REAL(EB) :: PRES_BXN                  !< Pressure H boundary condition for this CFACE (used in unstructured solvers).
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_G  !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas
 END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
 
-INTEGER, PARAMETER :: CC_MAXVERTS_CELL   =3072
-INTEGER, PARAMETER :: CC_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
+INTEGER, PARAMETER :: CC_MAXVERTS_CELL   =3072 !< Size definition parameter, max num of cutface vertices allowed per cell.
+INTEGER, PARAMETER :: CC_NPARAM_CCFACE   =   6 !< Size definition param for FACE_LIST [face_type side iaxis cei icf to_master].
+
+!> \brief Type of CUT_CELL data structure that contains gas cut-cell info per cartesian cell.
 
 TYPE CC_CUTCELL_TYPE
-   INTEGER :: NCELL=0, NFACE_CELL=0, NFACE_DROPPED=0
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: FACE_LIST, FACE_LIST_DROPPED ! List of faces, cut-faces.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)        ::  LINK_LEV ! Level in local Linking Hierarchy tree.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        ::    VOLUME ! Cut-cell volumes.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    XYZCEN ! Cut-cell centroid locations.
-   INTEGER,  DIMENSION(MAX_DIM)               ::       IJK ! [ i j k ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RHO, RHOS ! Cut cells densities.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        ::  RSUM,TMP ! Cut cells temperatures.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: D,DS,DVOL,DVOL_PR ! Cut cell thermodynamic divg.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: CHI_R,MIX_TIME ! Cut-cell combustion
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      ::    Q_REAC      ! variables.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: REAC_SOURCE_TERM
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
-                                                                    ! fractions and rho*D_z,reaction source.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: UNKH,UNKZ ! Unknown number for pressure H, and scalars.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: RTRM,R_H_G,RHO_0,WVEL,DDDTVOL
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: DELTA_RHO,DELTA_RHO_ZZ
+   INTEGER,  DIMENSION(MAX_DIM)             ::              IJK !< Cartesian cell [ I J K ] location for this entry.
+   INTEGER                                  ::          NCELL=0 !< Num cut-cells in this cartesian cell. Now fixed at 1 by blocking.
+   INTEGER                                  ::     NFACE_CELL=0 !< Number of faces on cut-cells in this entry.
+   INTEGER                                  ::  NFACE_DROPPED=0 !< Parameter used for blocking cut-cells.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           CCELEM !< Cut-cells faces in FACE_LIST. (1:NFACE_CELL+1,1:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::        FACE_LIST !< List of cut-reg faces boundary of cut-cells for this entry.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::FACE_LIST_DROPPED !< Face list used for blocking cut-cells.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::         IJK_LINK !< Cell/cut-cell each cut-cell is linked to.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::         LINK_LEV !< Level in local Linking Hierarchy tree. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::           VOLUME !< Cut-cell volumes. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           XYZCEN !< Cut-cell centroid locations. (IAXIS:KAXIS,1:NCELL)
 
-   ! Here: VIND=0, EP=1:INT_N_EXT_PTS
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF,INT_NOUT ! (IAXIS:KAXIS,0:NCELL)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,0:NCELL)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,0,EP,0:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,0:NCELL)  ! 0 is interpolation point.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CCVARS      ! (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
+   INTEGER                                  ::       N_NOMICC=0 !< Number of entries in NOMICC
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           NOMICC !< OMESH cut-cells array. (1:2,1:N_NOMICC)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: NOADVANCE
-   INTEGER                                    :: N_NOMICC=0
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICC
-   REAL(EB):: DIVVOL_BC=0._EB
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::              RHO !< Corrector cut-cell densities. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RHOS !< Predictor cut-cell densities.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RSUM !< Cut-cells RSUM container. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::              TMP !< Cut-cells temperatures. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                D !< Corrector cut-cells thermodynamic divg. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               DS !< Predictor cut-cells thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             DVOL !< Cut-cells thermodynamic divg*vol.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::          DVOL_PR !< Predictor cut-cell thermodynamic divg*vol.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                Q !< Cut-cells volumetric heat source. (1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               QR !< Cut-cells volumetric radiative heat source.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::         D_SOURCE !< Cut-cells divergence source terms.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            CHI_R !< Cut-cells radiative fraction.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::         MIX_TIME !< Cut-cells species mixing time.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           Q_REAC !< Cut-cells volumetric heat source due to reaction.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: REAC_SOURCE_TERM !< Cut-cells species source term. (1:N_TOTAL_SCALARS,1:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::               ZZ !< Corrector cut-cells mass fractions.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::              ZZS !< Predictor cut-cells mass fractions.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::        M_DOT_PPP !< Cut-cells mass source term.
+
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKH !< Cut-cells unknown number for pressure H. (1:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             KRES !< Cut-cells turbulent kinetic energy.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                H !< Cut-cells predictor pressure values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               HS !< Cut-cells corrector pressure values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RTRM !< Cut-cells 1/(rho*c_p*T).
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            R_H_G !< Cut-cells 1/(c_p*T)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            RHO_0 !< Cut-cells background density.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             WVEL !< Cut-cells centroid vertical velocity.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::          DDDTVOL !< Cut-cells dD/dT * vol.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::        DELTA_RHO !< Cut-cells density change used in check mass density.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::     DELTA_RHO_ZZ !< Cut-cells species density change used in check mass density.
+
+   ! Here: VIND=0, EP=1:INT_N_EXT_PTS, interpolation stencils for WVEL, RHO_0 into cut-cell centroids.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_IJK          !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)      :: INT_COEF         !< Interpolation (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XYZBF,INT_NOUT !< Interpolation (IAXIS:KAXIS,0:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_INBFC        !< Interpolation (1:3,0:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:):: INT_NPE          !< Interpolation (LOW:HIGH,0,EP,0:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XN,INT_CN    !< Interpolation (0:INT_N_EXT_PTS,0:NCELL)  ! 0 is interp pt.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_CCVARS       !< Interpolation (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_NOMIND       !< Interp. (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: DEL_RHO_D_DEL_Z_VOL !< Cut-cells DEL_RHO_D_DEL_Z * VOL
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: U_DOT_DEL_RHO_Z_VOL !< Cut-cells U_DOT_DEL_RHO_Z * VOL
 END TYPE CC_CUTCELL_TYPE
 
 
+!> \brief Regular faces type that contains indexes for construction of H Poisson discretization matrix.
+
 TYPE CC_REGFACE_TYPE
-   INTEGER:: PRES_ZONE=-1
-   INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+   INTEGER                               :: PRES_ZONE=-1 !< Pressure Zone this regular face is located in.
+   INTEGER,  DIMENSION(MAX_DIM)          ::          IJK !< Indexes [I J K] of X, Y or Z face.
+   INTEGER,  DIMENSION(1:2,1:2)          ::           JD !< Indexes in H matrix where this face contributes coefficients.
 END TYPE CC_REGFACE_TYPE
 
+!> \brief Regular faces type that contains scalar transport information, defined only in regular gas faces of cut-cell region.
+
 TYPE CC_REGFACEZ_TYPE
-   LOGICAL :: DO_LO_IND=.FALSE.,DO_HI_IND=.FALSE.
-   INTEGER :: IWC=0
-   REAL(EB):: FN_H_S=0._EB
-   INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D=0._EB,RHOZZ_U=0._EB,FN_ZZ=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D_DZDN=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
-   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
+   LOGICAL                               ::    DO_LO_IND=.FALSE. !< Defines if fluxes are to be assigned in low side cell.
+   LOGICAL                               ::    DO_HI_IND=.FALSE. !< Defines if fluxes are to be assigned in high side cell.
+   INTEGER,  DIMENSION(MAX_DIM)          ::                  IJK !< Location indexes [ I J K ] of X,Y,Z REG face.
+   INTEGER                               ::                IWC=0 !< WALL CELL index (if present) in location of REG Face.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::               NOMICF !< OMESH face info for mesh boundary REG face.
+   REAL(EB)                              ::         FN_H_S=0._EB !< Stores components FX_H_S, FY_H_S, FZ_H_S as needed.
+   REAL(EB), DIMENSION(MAX_SPECIES)      ::        RHOZZ_U=0._EB !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
+   REAL(EB), DIMENSION(MAX_SPECIES)      ::          FN_ZZ=0._EB !< Stores computed FX_ZZ(I,J,K), etc. as needed.
+   REAL(EB), DIMENSION(MAX_SPECIES)      ::     RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in REG face.
+   REAL(EB), DIMENSION(MAX_SPECIES)      ::   H_RHO_D_DZDN=0._EB !< OMESH face info for mesh boundary REG face.
 END TYPE CC_REGFACEZ_TYPE
 
+!> \brief Regular faces type, contains information for reg faces connecting regular and cut-cells.
+
 TYPE CC_RCFACE_TYPE
-   LOGICAL :: SHAREDZ=.FALSE., SHAREDH=.FALSE.
-   INTEGER :: IWC=0, UNKF=0, PRES_ZONE=-1
-   REAL(EB):: TMP_FACE=0._EB
-   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::      UNKZ,UNKH
-   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
-   INTEGER,  DIMENSION(1:2,1:2)                                    ::       JDH
-   INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
-   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: NOMICF
+   LOGICAL                                         ::    SHAREDZ=.FALSE. !< Notes if RC face connects cells with same UNKZ.
+   INTEGER                                         ::              IWC=0 !< WALL CELL index (if present) in location of RC Face.
+   INTEGER                                         ::       PRES_ZONE=-1 !< Pressure zone where RC face is.
+   INTEGER,  DIMENSION(MAX_DIM+1)                  ::                IJK !< Location indexes and axis of RC face. [ I J K X1AXIS]
+   INTEGER                                         ::             UNKF=0 !< Momentum unknown number if face is linked.
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)           ::               UNKZ !< Scalar transport unknown numbers in connected cells.
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)           ::               UNKH !< Pressure unknown numbers in connected cells.
+   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)   ::               XCEN !< Centroid location of connected cells.
+   INTEGER,  DIMENSION(1:2,1:2)                    ::                JDH !< Index matrix for H Poisson matrix coefficients.
+   INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND) ::          CELL_LIST !< Cell type/location of connected cells. [RC_TYPE I J K ]
+   REAL(EB)                                        ::     TMP_FACE=0._EB !< Temperature in RC face.
+   REAL(EB), DIMENSION(MAX_SPECIES)                ::      ZZ_FACE=0._EB !< Species mass fractions in RC face.
+   REAL(EB), DIMENSION(MAX_SPECIES)                ::   RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in RC face.
+   REAL(EB), DIMENSION(MAX_SPECIES)                :: H_RHO_D_DZDN=0._EB !< Species heat fluxes due to RHO_D_DZDN in RC face.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::             NOMICF !< OMESH face info for mesh boundary RC face.
 END TYPE CC_RCFACE_TYPE
+
+!> \brief Data types used in cut-cell blocking.
 
 TYPE CC_INBCF_IJCF_TYPE
    INTEGER :: NWFACE=0
@@ -1886,6 +1963,7 @@ END TYPE HVAC_QUANTITY_TYPE
 TYPE CELL_TYPE
    LOGICAL :: SOLID=.FALSE.                            !< Indicates if grid cell is solid or not
    LOGICAL :: EXTERIOR=.FALSE.                         !< Indicates if the grid cell is outside the mesh
+   LOGICAL :: EXTERIOR_EDGE=.FALSE.                    !< Indicates if the grid cell is at an outside edge of the mesh
    INTEGER :: OBST_INDEX=0                             !< Index of obstruction that fills cell (0 if none)
    INTEGER :: I,J,K                                    !< Indices of cell
    INTEGER, DIMENSION(12) :: EDGE_INDEX=0              !< Indices of 12 cell edges

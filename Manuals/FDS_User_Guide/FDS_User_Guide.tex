@@ -3389,7 +3389,7 @@ It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver. The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain. For more information on coupled hybrid modelling in fire safety engineering, interested readers may want to refer to Ralph et al.'s literature review of the topic~\cite{Ralph:1}.
 
-By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=T} on the {\ct MISC} line, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
+By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct N\_CELLS} for and HVAC duct, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
@@ -3426,11 +3426,11 @@ A typical input line specifying a duct is as follows:
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
-Or, if you are using {\ct HVAC\_MASS\_TRANSPORT=T}, as follows:
+Or, if you are using HVAC mass transport, as follows:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
-      DUCT_INTERP_TYPE='NODE1', N_CELLS=200 /
+      N_CELLS=200 /
 \end{lstlisting}
 where:
 \begin{description}
@@ -3443,7 +3443,7 @@ where:
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  If this is not specified, it will be computed automatically as the difference between the {\ct XYZ} of the duct's endpoints or as the distance along the path between endpoints if {\ct WAYPOINTS} are defined.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct. Do not specify both {\ct MASS\_FLOW} and {\ct VOLUME\_FLOW} for the same duct.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
-\item[{\ct N\_CELLS}] Used when {\ct HVAC\_MASS\_TRANSPORT=T}. It defines the number of cells used in a discretized duct.
+\item[{\ct N\_CELLS}] Enables HVAC mass transport. It defines the number of cells used in a discretized duct.
 \item[{\ct NETWORK\_ID}] Used for Smokeview visualization. All ducts and nodes with a common {\ct NETWORK\_ID} can be selected or deselected as a group in Smokeview.  If no value is given, the duct will be placed in the Unassigned network.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
@@ -4084,6 +4084,7 @@ Gravity             & {\ct MISC}  & {\ct GVEC(3)}                               
 \end{tabular}
 \end{center}
 \end{table}
+
 
 \section{Temperature-Dependent Functions}
 \label{info:RAMP_Temperature}
@@ -8139,6 +8140,35 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 &RAMP ID='BLOWER RAMP', T=200,F=1.0 /
 \end{lstlisting}
 
+
+\subsection{Special Time Ramps}
+\label{special_time_ramps}
+
+Using the mathematical functions built into the control feature, you can create your own special ramps. For example, you can specify a sine function:
+\be
+   f(t) = \sin \left( \frac{2 \pi (t-5)}{10} \right)
+\ee
+via the lines
+\begin{lstlisting}
+&DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
+&CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+      CONSTANT=0.62831853 /
+&CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
+&RAMP ID='ramp sin', T=-1, F=-1, CTRL_ID='sin(2*pi*(t-t0)/10)' /
+&RAMP ID='ramp sin', T= 1, F= 1 /
+\end{lstlisting}
+The function is shown in Fig.~\ref{special_ramps_fig}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/special_time_ramps}
+\end{center}
+\caption[Sample sine function time ramp]{Sample sine function time ramp.}
+\label{special_ramps_fig}
+\end{figure}
+
+
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
 \label{hrr_freeze}
@@ -10254,7 +10284,7 @@ It is sometimes useful to compile probability distribution functions (PDFs) or h
       HISTOGRAM_CUMULATIVE=F
       HISTOGRAM_NORMALIZE=T /
 \end{lstlisting}
-When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value file ({\ct CHID\_hist.csv}). The parameter {\ct HISTOGRAM\_NBINS} is the number of bins dividing the quantity range {{\ct HISTOGRAM\_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE=F}.
+When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value file ({\ct CHID\_hist.csv}). The parameter {\ct HISTOGRAM\_NBINS} is the number of bins dividing the quantity range {\ct HISTOGRAM\_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE=F}.
 
 The histogram output file contains two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
 
@@ -12295,14 +12325,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct F}                             & Real          & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
-{\ct T}                             & Real          & Chapter~\ref{info:RAMP}       & s (or $^\circ$C)      &           \\ \hline
-{\ct X}                             & Real          & Section~\ref{info:GVEC}       & m                     &           \\ \hline
-{\ct Z}                             & Real          & Section~\ref{info:wind_ramps} & m                     &           \\ \hline
+{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
+{\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
+{\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
+{\ct Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -13224,7 +13254,7 @@ WRITE(LU_ISO) VERSION
 WRITE(LU_ISO) NISO_LEVELS
 IF (NISO_LEVELS>0) WRITE(LU_ISO) (ISO_LEVELS(I),I=1,NISO_LEVELS)
 WRITE(LU_ISO) ZERO
-WRITE(LU_ISO) ZERO, ZERO 
+WRITE(LU_ISO) ZERO, ZERO
 
 ! Write for each STIME
 
@@ -13269,14 +13299,14 @@ IF (N_VERT>0 .AND. N_FACE>0) THEN
    IF ( ".gcf" ) THEN
       WRITE(LU_GEOM) (SURF_IND(I),I=1,N_FACE)
       WRITE(LU_GEOM) (GEOM_IND(I),I=1,N_FACE)
-   ENDIF 
+   ENDIF
 ENDIF
 \end{lstlisting}
 
 \noindent where:
 
 \begin{itemize}
-\item {\ct ONE}\ Integer set to 1. 
+\item {\ct ONE}\ Integer set to 1.
 \item {\ct VERSION}\ currently has value 2 and indicates the version number of this file format.
 \item {\ct STIME} is the initial FDS simulation time.
 \item {\ct N\_VERT, N\_FACE}\ are the number of vertices and faces.
@@ -13295,7 +13325,7 @@ ENDIF
 Isosurface, geometry boundary and unstructured slice data files contain a description of data values computed by FDS on triangulations stemming
 either from isosurfaces ({\tt .viso}) or geometry boundary/unstructured slice ({\tt .be}) files. This files are analogous to boundary files.
 The data written out to an unstructured data file must correspond to the triangulation written out
-in the corresponding geometry file ({\tt .iso} for {\tt .viso}; {\tt .gcf,.gsf} for {\tt .be}). These data files are written out from {\ct dump.f90} with lines 
+in the corresponding geometry file ({\tt .iso} for {\tt .viso}; {\tt .gcf,.gsf} for {\tt .be}). These data files are written out from {\ct dump.f90} with lines
 equivalent to the following:
 \begin{lstlisting}
 WRITE(FUNIT_DATA) ONE
@@ -13307,7 +13337,7 @@ IF (N_FACE_VALS>0)  WRITE(FUNIT_DATA) (ValFace(I), I=1,N_FACE_VALS)
 \end{lstlisting}
 
 \begin{itemize}
-\item {\ct ONE}\ has the value 1. 
+\item {\ct ONE}\ has the value 1.
 \item {\ct FYLETYPE}\ currently has value 1 for isosurface and 2 for geomtery.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_VALS, N\_FACE\_VALS}\ is the number of data values written out for vertices and faces.
@@ -13365,7 +13395,7 @@ WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
 Immersed geometric objects are stored for SMV reading using a file format with {\tt .ge} extension described below.
 These objects are defined in terms of vertices and triangles.
 A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
-A triangle is represented as three vertex (integer) indices. 
+A triangle is represented as three vertex (integer) indices.
 Tetrahedron volumes option in the following are not used by FDS, and left as an option for future functionality.
 An associated file format used to store data  on the geometric object is described in the next section.
 These files are written out from {\ct dump.f90,geom.f90} using lines equivalent to the following:
@@ -13392,7 +13422,7 @@ ENDIF
 \end{lstlisting}
 
 \begin{itemize}
-\item {\ct ONE}\ has the value 1. 
+\item {\ct ONE}\ has the value 1.
 \item {\ct VERSION}\ currently has value 2 and indicates the version number of this file format.
 \item {\ct N\_FLOATS, N\_INTS, FIRST\_FRAME\_STATIC} The number of floating point and integer data items stored at
 the beginning of the file. {\ct FIRST\_FRAME\_STATIC} for future use is currently set to 1.

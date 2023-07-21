@@ -1200,12 +1200,12 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
             IF (PAINT_FACE(N,IOR)) M%N_PATCH = M%N_PATCH + 1
          ENDDO
       ENDDO
-   
+
       ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
       CALL ChkMemErr('DUMP','PATCH',IZERO)
-   
+
       ! Assign coordinate indices for each PATCH
-   
+
       IP = 0
       M%N_BNDF_POINTS = 0
       DO N=0,M%N_OBST
@@ -1252,7 +1252,7 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
       ENDDO
 
       DEALLOCATE(PAINT_FACE)
-   
+
    ENDIF CREATE_PATCHES
 
    IF (BNDF_TIME_INTEGRALS>0) THEN
@@ -2517,6 +2517,12 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
    WRITE(LU_OUTPUT,'(/A,I9/)'  ) ' Total Number of Grid Cells     ',CELL_COUNT
    WRITE(LU_OUTPUT,'(/A,F9.3)')  ' Maximum Cell Aspect Ratio      ',MAXVAL(MAX_CELL_ASPECT_RATIO)
    WRITE(LU_OUTPUT,'(A,I9/)')    ' CFL Velocity Norm              ',CFL_VELOCITY_NORM
+ENDIF
+
+IF (ORIGIN_LAT>-1.E6_EB) THEN
+   WRITE(LU_OUTPUT,'(/A/)')     ' Geographic Parameters'
+   WRITE(LU_OUTPUT,'(A,F11.7)')   '   Origin Latitude            ',ORIGIN_LAT
+   WRITE(LU_OUTPUT,'(A,F12.7)')   '   Origin Longitude          ',ORIGIN_LON
 ENDIF
 
 WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
@@ -5628,7 +5634,6 @@ INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II1,II2,
            IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO,I_INC,J_INC
 INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
-INTEGER, POINTER, DIMENSION(:,:,:) :: C
 REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_INTERP2FACES
@@ -5652,19 +5657,6 @@ IF (MESHES(NM)%N_SLCF==0 .AND. .NOT.PLOT3D) RETURN
 
 CALL POINT_TO_MESH(NM)
 
-! Create an array, C, that is 1 at cell faces (I,J,K) for which U, V, and W are defined and 0 otherwise.
-
-C => IWORK1
-C = 0
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
-         IF (CELL(IC)%SOLID .OR. CELL(IC)%EXTERIOR) C(I,J,K) = 1
-      ENDDO
-   ENDDO
-ENDDO
-
 ! Create an array, B, that is 1 in any cell that is to be included in the 8-cell corner average, 0 otherwise.
 
 B => WORK1
@@ -5673,8 +5665,12 @@ B = 1._EB
 DO IC=1,CELL_COUNT(NM)
    IF (CELL(IC)%SOLID) B(CELL(IC)%I,CELL(IC)%J,CELL(IC)%K) = 0._EB
    IF (CELL(IC)%EXTERIOR) THEN
-      CALL SEARCH_OTHER_MESHES(XC(CELL(IC)%I),YC(CELL(IC)%J),ZC(CELL(IC)%K),NOM,IIO,JJO,KKO)
-      IF (NOM==0) B(CELL(IC)%I,CELL(IC)%J,CELL(IC)%K) = 0._EB
+      IF (CELL(IC)%EXTERIOR_EDGE) THEN
+         B(CELL(IC)%I,CELL(IC)%J,CELL(IC)%K) = 0._EB
+      ELSE
+         CALL SEARCH_OTHER_MESHES(XC(CELL(IC)%I),YC(CELL(IC)%J),ZC(CELL(IC)%K),NOM,IIO,JJO,KKO)
+         IF (NOM==0) B(CELL(IC)%I,CELL(IC)%J,CELL(IC)%K) = 0._EB
+      ENDIF
    ENDIF
 ENDDO
 
@@ -9067,6 +9063,9 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
    CASE(72) ! SCALING HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_IN_SMOOTH*0.001_EB
+
+   CASE(73) ! VEGETATION FUEL TYPE
+      SOLID_PHASE_OUTPUT = SF%VEG_LSET_FUEL_INDEX
 
    CASE(100) ! CONDENSATION HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_CONDENSE * 0.001_EB
