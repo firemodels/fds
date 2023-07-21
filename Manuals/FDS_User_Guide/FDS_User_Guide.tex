@@ -8124,7 +8124,7 @@ The simple test case called {\ct activate\_vents} demonstrates several of the co
 
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
 
-\subsection{Changing the Independent variable}
+\subsection{Changing the Independent Variable}
 \label{info:RAMPDEVC}
 
 For any user-defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
@@ -8141,10 +8141,10 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 \end{lstlisting}
 
 
-\subsection{Special Time Ramps}
-\label{special_time_ramps}
+\subsection{Changing the Dependent Variable}
+\label{info:RAMP_DEP_ID}
 
-Using the mathematical functions built into the control feature, you can create your own special ramps. For example, you can specify a sine function:
+The output of any {\ct DEVC} or math {\ct CTRL} can be used in place of a {\ct RAMP} if either {\ct DEVC\_ID\_DEP} or {\ct CTRL\_ID\_DEP} is specified on the {\ct RAMP} input. With either input, the numerical value of the {\ct DEVC} or {\ct CTRL} is used as the {\ct RAMP} output. For example, using the mathematical functions built into the control feature, you can specify the sine function:
 \be
    f(t) = \sin \left( \frac{2 \pi (t-5)}{10} \right)
 \ee
@@ -8155,8 +8155,7 @@ via the lines
 &CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
       CONSTANT=0.62831853 /
 &CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
-&RAMP ID='ramp sin', T=-1, F=-1, CTRL_ID='sin(2*pi*(t-t0)/10)' /
-&RAMP ID='ramp sin', T= 1, F= 1 /
+&RAMP ID='ramp sin', CTRL_DEP_ID='sin(2*pi*(t-t0)/10)' /
 \end{lstlisting}
 The function is shown in Fig.~\ref{special_ramps_fig}.
 
@@ -12326,7 +12325,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct CTRL\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct DEVC\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
