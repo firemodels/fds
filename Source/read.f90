@@ -10162,6 +10162,18 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%BULK_DENSITY = BULK_DENSITY
                IF (BULK_DENSITY > 0._EB) OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
 
+               ! Check for inconsistencies in specification of BUL_DENSITY
+
+               IF (OB%CONSUMABLE .AND. OB%BULK_DENSITY <= 0._EB) THEN
+                  DO IOR=-2,3
+                     IF (IOR==0) CYCLE
+                     IF (OB%SURF_INDEX(IOR)/=OB%SURF_INDEX(-3)) THEN
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: OBST ',TRIM(OB%ID),' needs a BULK_DENSITY if it is to BURN_AWAY'
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                     ENDIF
+                  ENDDO
+               ENDIF
+
                ! Make obstruction invisible if it's within a finer mesh
 
                DO NOM=1,NM-1
