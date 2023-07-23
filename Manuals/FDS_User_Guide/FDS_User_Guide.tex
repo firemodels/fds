@@ -3003,10 +3003,10 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 If a combustible solid is to disappear from the simulation once it is consumed, set {\ct BURN\_AWAY=T} on the {\ct SURF} line that is applied to the {\ct OBST}. The solid object disappears from the calculation cell by cell as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
 \item Use {\ct BURN\_AWAY} cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional information for newly exposed surfaces.
-\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
 \item The heat conduction into an {\ct OBST} that can {\ct BURN\_AWAY} is limited to 1-D. On the {\ct SURF} line, specify the {\ct THICKNESS} to be approximately that of a single cell, and also set {\ct BACKING='VOID'}. It is assumed that the solid is relatively well-insulated and that the in-depth temperature profile drops off relatively quickly at the surface. When a cell is removed, the newly exposed surface is initially at ambient temperature but heats up quickly at the surface.
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used to determine the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
@@ -3389,7 +3389,7 @@ It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver. The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain. For more information on coupled hybrid modelling in fire safety engineering, interested readers may want to refer to Ralph et al.'s literature review of the topic~\cite{Ralph:1}.
 
-By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=T} on the {\ct MISC} line, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
+By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct N\_CELLS} for and HVAC duct, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
@@ -3426,11 +3426,11 @@ A typical input line specifying a duct is as follows:
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
-Or, if you are using {\ct HVAC\_MASS\_TRANSPORT=T}, as follows:
+Or, if you are using HVAC mass transport, as follows:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
-      DUCT_INTERP_TYPE='NODE1', N_CELLS=200 /
+      N_CELLS=200 /
 \end{lstlisting}
 where:
 \begin{description}
@@ -3443,7 +3443,7 @@ where:
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  If this is not specified, it will be computed automatically as the difference between the {\ct XYZ} of the duct's endpoints or as the distance along the path between endpoints if {\ct WAYPOINTS} are defined.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct. Do not specify both {\ct MASS\_FLOW} and {\ct VOLUME\_FLOW} for the same duct.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
-\item[{\ct N\_CELLS}] Used when {\ct HVAC\_MASS\_TRANSPORT=T}. It defines the number of cells used in a discretized duct.
+\item[{\ct N\_CELLS}] Enables HVAC mass transport. It defines the number of cells used in a discretized duct.
 \item[{\ct NETWORK\_ID}] Used for Smokeview visualization. All ducts and nodes with a common {\ct NETWORK\_ID} can be selected or deselected as a group in Smokeview.  If no value is given, the duct will be placed in the Unassigned network.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
@@ -4084,6 +4084,7 @@ Gravity             & {\ct MISC}  & {\ct GVEC(3)}                               
 \end{tabular}
 \end{center}
 \end{table}
+
 
 \section{Temperature-Dependent Functions}
 \label{info:RAMP_Temperature}
@@ -8123,7 +8124,7 @@ The simple test case called {\ct activate\_vents} demonstrates several of the co
 
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
 
-\subsection{Changing the Independent variable}
+\subsection{Changing the Independent Variable}
 \label{info:RAMPDEVC}
 
 For any user-defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
@@ -8138,6 +8139,35 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 &RAMP ID='BLOWER RAMP', T=100,F=0.5 /
 &RAMP ID='BLOWER RAMP', T=200,F=1.0 /
 \end{lstlisting}
+
+
+\subsection{Changing the Dependent Variable}
+\label{info:RAMP_DEP_ID}
+\label{special_time_ramps}
+
+The output of any {\ct DEVC} or math {\ct CTRL} can be used in place of a {\ct RAMP} if either {\ct DEVC\_ID\_DEP} or {\ct CTRL\_ID\_DEP} is specified on the {\ct RAMP} input. With either input, the numerical value of the {\ct DEVC} or {\ct CTRL} is used as the {\ct RAMP} output. For example, using the mathematical functions built into the control feature, you can specify the sine function:
+\be
+   f(t) = \sin \left( \frac{2 \pi (t-5)}{10} \right)
+\ee
+via the lines
+\begin{lstlisting}
+&DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
+&CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+      CONSTANT=0.62831853 /
+&CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
+&RAMP ID='ramp sin', CTRL_DEP_ID='sin(2*pi*(t-t0)/10)' /
+\end{lstlisting}
+The function is shown in Fig.~\ref{special_ramps_fig}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/special_time_ramps}
+\end{center}
+\caption[Sample sine function time ramp]{Sample sine function time ramp.}
+\label{special_ramps_fig}
+\end{figure}
+
 
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
@@ -12300,14 +12330,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
-{\ct F}                             & Real          & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
-{\ct T}                             & Real          & Chapter~\ref{info:RAMP}       & s (or $^\circ$C)      &           \\ \hline
-{\ct X}                             & Real          & Section~\ref{info:GVEC}       & m                     &           \\ \hline
-{\ct Z}                             & Real          & Section~\ref{info:wind_ramps} & m                     &           \\ \hline
+{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct CTRL\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
+{\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
+{\ct DEVC\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
+{\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
+{\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
+{\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
+{\ct Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
