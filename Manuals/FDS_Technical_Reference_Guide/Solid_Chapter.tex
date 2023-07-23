@@ -300,6 +300,45 @@ Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm
 \dm_{\rm f,solid}'' = \dm_{\rm f}'' \frac{\Delta H_{\si{c}}}{\Delta H_{\si{c}{\rm ,solid}}}
 \ee
 
+\subsection{Scaling the Burning Rate by the Heat Flux}
+
+This approach preserves the shape of the heat release rate with time (i.e., burning behavior) measured from cone calorimeter experiments but scales the magnitude and duration based on incident heat at the surface.  The net heat flux into the material is related to the pyrolysis rate through the effective heat of gasification according to the equation
+\be
+   \dot{q}_{net}''=\dot{m}_{f}''\Delta H_{g}
+   \label{SBPyro1}
+\ee
+where $\dot{q}_{net}''$ is the net heat flux into the surface and $\Delta H_{g}$ is the heat of gasification. Similarly, the heat release rate per unit area of a material, $\dot{Q}''$, is related to the pyrolysis rate of the material through the effective heat of combustion, $\Delta H_{c}$, as
+\be
+   \dot{Q}''=\dot{m}_{f}''\Delta H_{c}
+   \label{SBPyro2}
+\ee
+The ratio of Eq.~(\ref{SBPyro1}) and Eq.~(\ref{SBPyro2}) relate $\dot{q}_{net}''$ and $\dot{Q}''$ as
+\be
+   \frac{\dot{Q}''}{\dot{q}_{net}''}=\frac{\Delta H_{c}}{\Delta H_{g}}
+   \label{SBPyro3}
+\ee
+Assuming $\Delta H_{g}$ and $\Delta H_{c}$ are invariant with $\dot{q}_{net}''$, Eq.~(\ref{SBPyro3}) can be related to predict the change in magnitude of $\dot{Q}''$ due to changes in thermal exposure as
+\be
+   \dot{Q}_{1}'' = \frac{\dot{q}_{net,1}''}{\dot{q}_{net,2}''}\dot{Q}_{2}''
+   \label{SBPyro4}
+\ee
+where the subscripts $1$ and $2$ indicate different thermal exposure levels. The acceleration or decceleration of the burning can be calculated by evaluating the difference in time required to release the same amount of energy at the two $\dot{Q}$ over a discrete time interval, $\Delta t}$,
+\be
+   E_{\Delta t}''=\dot{q}_{net}''\frac{\Delta H_{c}}{\Delta H_{g}}\Delta t
+   \label{SBPyro5}
+\ee
+where $E_{\Delta t}$ is the total energy released over $\Delta t$. Relating Eq.~(\ref{SBPyro5}) at two thermal exposure levels yields
+\be
+   \Delta t_{1}=\frac{\dot{q}_{net,2}''}{\dot{q}_{net,1}''}\Delta t_{2}
+   \label{SBPyro6}
+\ee
+Because $\dot{q}_{net}''$ is difficult to measure during burning, an approximate reference heat flux, $\overline{q}''_{ref}$, is introduced as
+\be
+   \overline{q}''_{ref} = \overline{q}''_{cone} + \overline{q}''_{flame}
+   \label{SBPyro7}
+\ee
+where $\overline{q}''_{cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing and $\overline{q}''_{flame}$ is the heat feedback from the flame to the surface. The implementation in FDS uses the sum of the incident radiation and the net convective heat flux as $\overline{q}''_{ref}$ in the calculation at each time step.
+
 \subsection{Solid Fuels}
 
 Solids can undergo simultaneous reactions under the following assumptions:
