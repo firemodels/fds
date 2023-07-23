@@ -66,7 +66,7 @@
 &RAMP ID='fire', T= 60., F=0.98 /
 &RAMP ID='fire', T= 80., F=1.05 /
 &RAMP ID='fire', T=120., F=1.05 /
-&RAMP ID='fire', T=130., F=0.00 /
+&RAMP ID='fire', T=130., F=0.25 /
 
 &SURF ID='WOOL', COLOR='BEIGE', MATL_ID='MINERAL WOOL', THICKNESS=0.05 /
 
