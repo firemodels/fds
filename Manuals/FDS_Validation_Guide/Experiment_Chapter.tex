@@ -124,7 +124,7 @@ The key parameters for each experiment are listed in Table~\ref{BGC_sum}. The Fl
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
 \hline
 Test  & Trench     & Trench    & Aspect  & Wind        & Burning           & Flame       & Flame       & Avg.~Flame  & Max.~Flame  \\
-No.   & Length     & Width     & Ratio   & Speed       & Rate              & Tilt        & Drag        & Length      & Length      \\ 
+No.   & Length     & Width     & Ratio   & Speed       & Rate              & Tilt        & Drag        & Length      & Length      \\
       &        (m) &       (m) &         & (m/s)       & (kg/m$^2$/s)      & (deg)       & Ratio       &        (m)  &        (m)  \\ \hline
 1     & 23.53      & 1.81      & 13.00   & 3.8         & 0.064             & 56.3        & 2.57        & 4.4         & 8.9         \\ \hline
 2     & 15.52      & 1.81      & 8.57    & 1.5         & 0.069             & 56.1        & 2.30        & 3.8         & 7.3         \\ \hline
@@ -147,9 +147,9 @@ No.   & Length     & Width     & Ratio   & Speed       & Rate              & Til
 The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
 
 \begin{description}
-\item[Flame Height Results:] Sec.~\ref{Flame Height} 
-\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt} 
-\item[Heat Flux Results:] Sec.~\ref{BGC_GRI_LNG_Fires_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height}
+\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt}
+\item[Heat Flux Results:] Sec.~\ref{BGC_GRI_LNG_Fires_Heat_Flux}
 \end{description}
 
 \FloatBarrier
@@ -290,7 +290,7 @@ The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was
 \label{BST_FRS_wood_cribs_tests}
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-Test number                     & 1   & 2   & 3   & 4   & 5  & 6  \\ \hline \hline 
+Test number                     & 1   & 2   & 3   & 4   & 5  & 6  \\ \hline \hline
 Combustible load (kg/m$^2$)     & 40  & 20  & 20  & 40  & 20 & 20 \\
 Relative Ventilation Area       & 1/1 & 1/1 & 1/2 & 1/2 & 1/4 & 1/8 \\ \hline
 \end{tabular}
@@ -340,7 +340,7 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 
 \subsubsection{Modeling Notes}
 
-Two of these experiments were originally simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. These simulations modeled the grass as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
+Two of these experiments were originally simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. These simulations modeled the grass as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 Now these two experiments are also simulated using the Boundary Fuel Model (BFM)~\cite{Perez-Ramirez:FT2017} and the Rothermel-Albini fire spread algorithm~\cite{Rothermel:1972,Albini:1976}. For the experiment labelled Case~C064, fuel index 1 (Short Grass) is used, with a modified moisture fraction of 0.063. For F19, fuel index 3 (Tall Grass) is used, with a modified moisture fraction of 0.058.
 
@@ -375,7 +375,7 @@ Moisture Fraction               & \%            & 5.8           & 6.3           
 
 \begin{table}
 \begin{center}
-\caption[Assumed properties for dry grass and soil]{Assumed properties for various types of dried grass and soil. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\caption[Assumed properties for dry grass and soil]{Assumed properties for various types of dried grass and soil.}
 \label{Assumed_Properties_Grasses}
 \begin{tabular}{|l|c|c|c|}
 \hline
@@ -388,7 +388,6 @@ Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                   
 Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
 Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
 Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
 Obukhov Length                  & m                     & -500                      & Assumption                            \\ \hline
 Aerodynamic Roughness Length    & m                     & 0.03                      & Assumption                            \\ \hline
 Drag Coefficient                & --                    & 2.8                       & \cite{Falkenstein-Smith:2018}         \\ \hline \hline
@@ -522,10 +521,10 @@ The test report for the experiments does not explicitly list the components of t
 A few additional assumptions are made concerning the mixtures. First, that the absorption coefficient of all components is set to 150~m$^{-1}$, a value that is typical of heavy hydrocarbon liquids. Seconds, the thermal conductivity of the components is set to an artificially low value of 0.02~W/m/K to roughly account for the buoyancy that drives heated liquid upwards towards the surface. Third, all liquid components are assumed to evaporate into a single gas phase species, n-hexane. If this were not assumed, additional transport equations and combustion reactions would be needed for all liquid components.
 
 Finally, to simulate the ignition of the liquid pools, an external flux is imposed at the surface for 10~s in the case of gasoline and 25~s for kerosene.
- 
+
 \begin{table}[h!]
 \begin{center}
-\caption[Gasoline and kerosene components]{Gasoline and kerosene components~\cite{CRCHandbook:Enthalpy_of_Vaporization}.} 
+\caption[Gasoline and kerosene components]{Gasoline and kerosene components~\cite{CRCHandbook:Enthalpy_of_Vaporization}.}
 \label{fuelprops2}
 \begin{tabular}{|l|c|c|c|c|c|c|} \hline
 Fuel        & Chemical          & $W$         & $\rho$      & $c_p$              & $h_{\rm v}$        & $T_{\rm b}$     \\
@@ -802,9 +801,9 @@ These calculations are performed with a relatively crude grid because typical wi
 
 The National Institute of Justice (NIJ) sponsored a series of experiments to develop a database of material and reaction properties~\cite{McKinnon:FSRI2023_Data}.
 The research focused on systematically quantifying the physical conditions of each material prior to the fire, how the material will respond to the exposure of heat, and how it will perform once it has ignited~\cite{McKinnon:FSRI2023_User}.
-The database includes 134 materials with data from cone calorimeter, Fourier transform infrared spectrometer (FTIR), Heat Flow Meter (HFM), Micro-scale Combustion Calorimeter (MCC), and Simultaneous Thermal Analyzer (STA). 
+The database includes 134 materials with data from cone calorimeter, Fourier transform infrared spectrometer (FTIR), Heat Flow Meter (HFM), Micro-scale Combustion Calorimeter (MCC), and Simultaneous Thermal Analyzer (STA).
 Technical details on each experimental method can be found in ~\cite{McKinnon:FSRI2023_Tech}.
-Note that not all materials in the database have data for each experiment. 
+Note that not all materials in the database have data for each experiment.
 Cone calorimeter data at multiple heat fluxes is included for 54 materials.
 These data are used in validation of the scaling-based pyrolysis model.
 
@@ -862,8 +861,8 @@ The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detail
 
 The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to large-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
 
-Luo, Kraft, DiDomizio, McKinnon, Hodges, Yazdani, and Lattimer ~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials. 
-Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested. 
+Luo, Kraft, DiDomizio, McKinnon, Hodges, Yazdani, and Lattimer ~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials.
+Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested.
 A set of 7 materials were identified for bench-scale and full-scale testing.
 Each material was tested in a TGA  in nitrogen and air environments, a cone calorimeter at three heat fluxes in accordance with ASTM E1354, radiant panel testing in accordance with ASTM E162, and room-corner testing in accordance with NFPA 286.
 The 7 materials included in this test series are summarized in Table \ref{JH_FRA_materials_table}.
@@ -889,10 +888,10 @@ Sample 7    & Phenolic Resin FRP    & Fiberglass material, nominally 3.27 mm thi
 \end{table}
 
 In a follow-up study, Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire tests consisting of fourteen unique configurations and three repeated tests.
-Tests were conducted at three scales including full-scale, half-scale, and quarter-scale. 
+Tests were conducted at three scales including full-scale, half-scale, and quarter-scale.
 The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
 The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
-The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. 
+The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment.
 The lining material thickness was kept the same at each scale to preserve the burning duration.
 
 Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm).
@@ -904,9 +903,9 @@ This configuration was used in quarter, half, and full-scale plywood experiments
 The two lining configurations are shown in Figure ~\ref{JH_FRA_lining_fig}.
 Note the lining coverage numbers are provided for the full-scale and were geometrically scalled down in the half and quarter scales.
 
-Table \ref{JH_FRA_Matrix} provides a summary of the experiments. 
+Table \ref{JH_FRA_Matrix} provides a summary of the experiments.
 Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
-The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_lining_fig} and Figure ~\ref{JH_FRA_instrumentation_fig}. 
+The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_lining_fig} and Figure ~\ref{JH_FRA_instrumentation_fig}.
 
 Data from these experiments are used in validating the thermal environment (HGL Temperature and Depth, heat flux to the surface), velocity through the ventilation, and fire growth (HRR).
 The tests with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7.0 mm thickness but a 3.5 mm thickness was used in this study).
@@ -1175,7 +1174,7 @@ Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
 Test    & Fuel     & Hole  & Dist.    & Wind          & Wind    & Mass   & Heat Rel.    & Flame     & Stand-Off  & Rad.      \\
-No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate         & Length    & Distance   & Frac.     \\ 
+No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate         & Length    & Distance   & Frac.     \\
         &          & (mm)  & (m)      & ($^\circ$)    & (m/s)   & (kg/s) & (MW)         & (m)       & (m)        & (\%)      \\ \hline
 1       & Nat.~Gas & 20    & 9.45     & 271           & 6.3     & 2.9    & 140          & 19.8      & 6.0        & 13.7      \\
 2       & Nat.~Gas & 35    & 15.45    & 297           & 6.2     & 9.6    & 462          & 37.8      & 7.5        & 17.9      \\
@@ -1188,13 +1187,13 @@ No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate 
 
 FDS is a low Mach number code and cannot model directly the supersonic flow at the pipe orifice. Instead, cold (-160~$^\circ$C) droplets with a median volumetric diameter of 1000~$\mu$m are injected wtih an initial velocity of 1000~m/s and spray angle of 10$^\circ$. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
 
-The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. The Nusselt number is taken as 
+The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. The Nusselt number is taken as
 \be
    \NU = 0.027 \, \RE^{0.805} \, \PR^{1/3} \quad ; \quad \RE = \frac{\rho D \|\bu_{\rm t}\| }{\mu} \quad ; \quad \PR=0.7
 \ee
 This correlation is appropriate for $40,000 < \RE < 400,000$~\cite{Incropera:1}.
 
-The values of radiative fraction in the model are based on the measured values reported in Table~\ref{Loughborough_Parameters}. To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m. 
+The values of radiative fraction in the model are based on the measured values reported in Table~\ref{Loughborough_Parameters}. To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m.
 
 The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
 
@@ -1275,7 +1274,7 @@ Of interest here are the experiments where the flat roadway ceiling has been rem
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
-Test     & Sequence & Heat Release  & Number   & Fan Start   \\ 
+Test     & Sequence & Heat Release  & Number   & Fan Start   \\
 Number   & Number   & Rate (MW)     & of Fans  & Time (min)  \\ \hline \hline
 501      & 15       & 20            & 0        & N/A         \\ \hline
 502      & 15       & 50            & 0        & N/A         \\ \hline
@@ -1314,7 +1313,7 @@ The results of the simulations are found in Sec.~\ref{Memorial_Tunnel_Volume_Flo
 \section{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Description}
 
-In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool. 
+In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool.
 
 A summary of the key test parameters is given in Table~\ref{Montoir_Summary}. Note that results were compiled for specific time intervals during each experiment.
 
@@ -1327,7 +1326,7 @@ A summary of the key test parameters is given in Table~\ref{Montoir_Summary}. No
                             & Time    & Burning      & Wind      & 9~m Wind & Amb.                & Rel.                & Atm.                    \\
 Test                        & Interval& Rate         & Direction & Speed    & Temp.               & Hum.                & Pres.                   \\
                             & (s)     & (kg/m$^2$/s) & (deg)     & (m/s)    & ($^\circ$C)         & (\%)                & (mbar)                  \\ \hline \hline
-\multirow{2}{*}{1}          & 60-100  & 0.12         & 59        & 2.5      & \multirow{2}{*}{25} & \multirow{2}{*}{53} & \multirow{2}{*}{1022}   \\  
+\multirow{2}{*}{1}          & 60-100  & 0.12         & 59        & 2.5      & \multirow{2}{*}{25} & \multirow{2}{*}{53} & \multirow{2}{*}{1022}   \\
                             & 130-170 & 0.13         & 70        & 4.8      &                     &                     &                         \\ \hline
 \multirow{4}{*}{2}          & 35-50   & 0.14         & 268       & 6.8      & \multirow{4}{*}{21} & \multirow{4}{*}{54} & \multirow{4}{*}{1015}   \\
                             & 65-85   & 0.15         & 263       & 9.8      &                     &                     &                         \\
@@ -1341,7 +1340,7 @@ Test                        & Interval& Rate         & Direction & Speed    & Te
 
 \subsubsection{Modeling Notes}
 
-The experiments are simulated using the specified fuel burning rates for the several time periods during each experiment. The fuel is assumed to be methane. The atmosphere is assumed to be unstable with an Obukhov length, $L=-350$, and the ground surface is roughly open with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in Table~\ref{Montoir_Summary}. 
+The experiments are simulated using the specified fuel burning rates for the several time periods during each experiment. The fuel is assumed to be methane. The atmosphere is assumed to be unstable with an Obukhov length, $L=-350$, and the ground surface is roughly open with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in Table~\ref{Montoir_Summary}.
 
 The radiative fraction is assumed to 0.14 based on field estimates and the radiative path length is assumed to be 300~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 300~m. 600 solid angles, rather than the default 100, are used to solve the radiative transport equation. The soot yield is assumed to be 0.01.
 
@@ -1436,7 +1435,7 @@ In 2009, Mell et~al. measured the burning rate and heat fluxes from individual D
 
 \subsubsection{Modeling Notes}
 
-The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model applied to the particles is based on TGA measurements of longleaf pine needles described in the FDS Verification Guide~\cite{FDS_Verification_Guide}, chapter ``Pyrolysis,'' Section ``TGA for a Charring Sample (Needle\_TGA).''
+The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model applied to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 Measured properties of the trees are listed in Table~\ref{Properties_Trees}, and assumed properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
 
@@ -2257,14 +2256,14 @@ In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire ex
 
 \subsubsection{Modeling Notes}
 
-The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates.
 
 There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. Also, both wide and narrow-angle radiometer measurements were made at distances ranging from 100~m to 250~m from the pool center, with various inclination angles. For the narrow-angle measurements, FDS chooses the nearest discrete radiation angle to represent the narrow-angle heat flux. At such large distances, it is difficult to ``find'' an angle that emanates from the fire to the location of the device.
 
 \begin{description}
-\item[Flame Height Results:] Sec.~\ref{Flame Height} 
-\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt} 
-\item[Heat Flux Results:] Sec.~\ref{Phoenix_LNG_Fires_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height}
+\item[Flame Tilt Results:] Sec.~\ref{Flame Tilt}
+\item[Heat Flux Results:] Sec.~\ref{Phoenix_LNG_Fires_Heat_Flux}
 \end{description}
 
 \FloatBarrier
@@ -2275,7 +2274,7 @@ There are 1200 solid angles, rather than the default 100, used in the radiative 
 The ``Pool Fires'' cases include a variety of flammable and non-flammable liquid evaporation experiments:
 \begin{enumerate}
 \item A variety of pure liquid pool fires compiled by Gottuk and White~\cite{SFPE:Gottuk_and_White} based on earlier compilations such as that by Mudan~\cite{Mudan:1984}. The liquids are listed in Table~\ref{fuelprops}.
-\item A single experiment involving the evaporation of water under a 50~kW/m$^2$ heat flux in the ASTM~E2058 fire propagration apparatus, reported in Ref.~\cite{SFPE:Tewarson}. 
+\item A single experiment involving the evaporation of water under a 50~kW/m$^2$ heat flux in the ASTM~E2058 fire propagration apparatus, reported in Ref.~\cite{SFPE:Tewarson}.
 \item Two heptane pool fire experiments described in Ref.~\cite{Sikanen:2016}.
 \end{enumerate}
 
@@ -2290,7 +2289,7 @@ The burning rate of liquid hydrocarbon fuels has been found to correlate well wi
 \dot{m}''= 0.001 \; \frac{\Delta h_{\rm c}}{\Delta h_{\rm g}} \quad ; \quad \Delta h_{\rm g} = \Delta h_{\rm v} + \int_{T_0}^{T_{\rm b}} c_p \; dT
 \label{poolcorr}
 \end{equation}
-where $\Delta h_{\rm v}$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_{\rm b}$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. 
+where $\Delta h_{\rm v}$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_{\rm b}$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it.
 
 Table~\ref{fuelprops} lists the liquid fuel properties used in the simulations. Note that the heats of vaporization are evaluated at the liquid boiling temperature. The thermal conductivities, $k$, are found in Ref.~\cite{CRCHandbook}, except for butane, which is found in Ref.~\cite{Webbook:FluidThermo}. The heats of combustion, $\Delta h_{\rm c}$, are computed in FDS based on the heats of formation of the reactants and products listed in Ref.~\cite{NIST_JANAF}. The heats of combustion account for the presence of products of incomplete combustion, like CO and soot.
 
@@ -2434,13 +2433,13 @@ A series of 3~m diameter methane gas burner experiments were conducted in the Fi
 
 \subsubsection{Modeling Notes}
 
-The simulations of the 3~m methane fires are done with 10~cm grid resolution in an open domain. That is, the walls of the cylindrical test cell are not modeled. 
+The simulations of the 3~m methane fires are done with 10~cm grid resolution in an open domain. That is, the walls of the cylindrical test cell are not modeled.
 
-The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire. 
+The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire.
 
 \begin{description}
-\item[Flame Height Results:] Sec.~\ref{Flame Height} 
-\item[Heat Flux Results:] Sec.~\ref{Sandia_Methane_Burner_Heat_Flux} 
+\item[Flame Height Results:] Sec.~\ref{Flame Height}
+\item[Heat Flux Results:] Sec.~\ref{Sandia_Methane_Burner_Heat_Flux}
 \end{description}
 
 \FloatBarrier
@@ -2505,12 +2504,12 @@ Radiometers and pressure transducers were positioned at various distances from t
 
 \subsubsection{Modeling Notes}
 
-The FDS simulations of the three BLEVE experiments are performed with 1~m resolution spanning a volume that is 200~m long, 120~m wide, and 200~m high. The specified mass of LNG is injected uniformly for 0.2~s at the ground over an area 4~m long and 4~m wide. An inert obstruction that is 1~m long by 1~m wide and 1~m tall is suspended 1~m above the spill region to represent the remains of the containment vessel. No attempt is made to model the destuction of the vessel or the subsequent spill of LNG. 
+The FDS simulations of the three BLEVE experiments are performed with 1~m resolution spanning a volume that is 200~m long, 120~m wide, and 200~m high. The specified mass of LNG is injected uniformly for 0.2~s at the ground over an area 4~m long and 4~m wide. An inert obstruction that is 1~m long by 1~m wide and 1~m tall is suspended 1~m above the spill region to represent the remains of the containment vessel. No attempt is made to model the destuction of the vessel or the subsequent spill of LNG.
 
 Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
 
 \begin{description}
-\item[Heat Flux Results:] Sec.~\ref{Shell_LNG_Fireballs_Heat_Flux} 
+\item[Heat Flux Results:] Sec.~\ref{Shell_LNG_Fireballs_Heat_Flux}
 \end{description}
 
 \FloatBarrier
@@ -3309,7 +3308,7 @@ The U.S. Forest Service and collaborators from the University of New South Wales
 
 \subsubsection{Modeling Notes}
 
-The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
+The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
 
 
 \section{USFS/Corsica Experiments}
@@ -3319,7 +3318,7 @@ Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. 
 
 \subsubsection{Modeling Notes}
 
-The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Sec.~\ref{UG-vegetation_model} ``Thermal Degradation Model for Vegetation.''
+The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 The test parameters for these experiments are given in Table~\ref{Corsica_Parameters}.
 
