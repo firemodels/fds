@@ -9,7 +9,7 @@ USE_SSH=
 # set firebot host to blaze
 # if using USE_SSH=1 over VPN add user name to HOST, e.g., HOST=rmcdermo@blaze.el.nist.gov
 HOST=blaze.el.nist.gov
-HOSTDIR=/home2/smokevis2/firebot/FireModels_clone/fds/
+HOSTDIR=/home/firebot/.firebot
 
 # set firebot host to burn
 #HOST=burn.el.nist.gov
