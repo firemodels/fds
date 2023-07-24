@@ -5226,6 +5226,39 @@ Aerosol particles will, over time, collide with one another and stick together t
       N_BINS=10,LUMPED_COMPONENT_ONLY=T/
 \end{lstlisting}
 
+It may be desirable to combine aerosol agglomeration with chemical reaction.  That is, one or more of the aerosol species may participate in a chemical reaction, either as a reactant or product.  Keep in mind that tracked species for the aerosol distribution are appended with the bin number, as stated above.  Within FDS, it is these subspecies that are being tracked and you must explicitly specify the stoichiometry of the subspecies within the reaction (see Sec.~\ref{info:REAC_Diagnostics}).  Below is an example for combustion of \emph{n}-heptane generating soot as an aerosol with five size bins.
+
+\begin{lstlisting}
+&SPEC ID='N-HEPTANE' /
+&SPEC ID='NITROGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='OXYGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON DIOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON MONOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='WATER VAPOR',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='SOOT',LUMPED_COMPONENT_ONLY=T,
+      AEROSOL=T,N_BINS=5,
+      MIN_DIAMETER=0.023,MAX_DIAMETER=11.5/
+
+&SPEC ID='AIR',BACKGROUND=T,
+      SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
+      VOLUME_FRACTION=40.94283132,10.85911,0.020216389,0.497368688/
+&SPEC ID='PRODUCTS',
+      SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR','CARBON MONOXIDE',
+      VOLUME_FRACTION=40.94283132,6.868439402,8.490526567,0.028618803/
+
+&REAC FUEL='N-HEPTANE',
+      SPEC_ID_NU='N-HEPTANE',
+      'AIR',
+      'PRODUCTS',
+      'SOOT_1',
+      'SOOT_2',
+      'SOOT_3',
+      'SOOT_4',
+      'SOOT_5',
+      NU=-1,-1,1,0.035837089,0.030715589,0.026822578,0.023205152,0.02026202,
+      RADIATIVE_FRACTION=0.44 /
+\end{lstlisting}
+
 \section{Aerosol Scrubbing}
 \label{info:scrubbing}
 
@@ -8153,7 +8186,7 @@ via the lines
 \begin{lstlisting}
 &DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
 &CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
-&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0',
       CONSTANT=0.62831853 /
 &CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
 &RAMP ID='ramp sin', CTRL_DEP_ID='sin(2*pi*(t-t0)/10)' /
