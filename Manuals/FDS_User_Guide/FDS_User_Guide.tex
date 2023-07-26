@@ -2192,8 +2192,16 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-
-
+\subsubsection{Blowing Heat Transfer}
+\label{blowing}
+If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas normal to the surface disrupts the thermal boundary layer. When blowing the flow pushes away the gas near the surface, and when sucking the flow pulls the gas near the surface towards the surface. These respectively decrease and increase the heat transfer coefficient. This effect can be accounted for by adding {\ct BLOWING=T} to a {\ct SURF} definition. Except for DNS simulations, When {\ct BLOWING} is active, the heat transfer coefficient computed by FDS is adjust by a factor per the equations below~\cite{Plate_blowing}.
+\begin{equation}
+	\Phi_h = \frac{\dot{m}'' c_g}{h}
+\end{equation}
+\begin{equation}
+	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h 
+\end{equation}
+where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
 
@@ -12576,6 +12584,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical           & Section~\ref{blowing}                   &                   &               \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
