@@ -1154,6 +1154,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
       LP%DX = DX(II)
       LP%DY = DY(JJ)
       LP%DZ = DZ(KK)
+      LP%INITIALIZATION_INDEX = INIT_INDEX
 
       ! Initialize particle properties
 

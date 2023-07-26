@@ -330,6 +330,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
+   INTEGER :: INITIALIZATION_INDEX=0 !< Index for INIT that placed the particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
    INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
    INTEGER :: DUCT_INDEX=0           !< Index of duct
@@ -1526,6 +1527,7 @@ TYPE INITIALIZATION_TYPE
    INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
    INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
    INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
+   INTEGER  :: ORIENTATION_RAMP_INDEX(3)=0 !< Ramp index for particle orientation
    INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
    INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
    INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
