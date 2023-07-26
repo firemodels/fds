@@ -1247,6 +1247,7 @@ TYPE CC_CUTCELL_TYPE
    INTEGER                                  ::          NCELL=0 !< Num cut-cells in this cartesian cell. Now fixed at 1 by blocking.
    INTEGER                                  ::     NFACE_CELL=0 !< Number of faces on cut-cells in this entry.
    INTEGER                                  ::  NFACE_DROPPED=0 !< Parameter used for blocking cut-cells.
+   REAL(EB)                                 ::   ALPHA_CC=0._EB !< Volume factor. ( SUM(VOLUME(1:NCELL))/(DX*DY*DZ) )
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           CCELEM !< Cut-cells faces in FACE_LIST. (1:NFACE_CELL+1,1:NCELL)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::        FACE_LIST !< List of cut-reg faces boundary of cut-cells for this entry.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::FACE_LIST_DROPPED !< Face list used for blocking cut-cells.
