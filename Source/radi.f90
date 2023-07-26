@@ -4368,7 +4368,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         TEMP_ORIENTATION(2) = EVALUATE_RAMP(T,IN%ORIENTATION_RAMP_INDEX(2))
                         TEMP_ORIENTATION(3) = EVALUATE_RAMP(T,IN%ORIENTATION_RAMP_INDEX(3))
                         TEMP_ORIENTATION = TEMP_ORIENTATION / & 
-                                           (SQRT(TEMP_ORIENTATION(1)**2+TEMP_ORIENTATION(2)**2+TEMP_ORIENTATION(3)**2)+TWO_EPSILON_EB)
+                                           (SQRT(TEMP_ORIENTATION(1)**2+TEMP_ORIENTATION(2)**2+TEMP_ORIENTATION(3)**2) &
+                                           +TWO_EPSILON_EB)
                         COS_DL = -(TEMP_ORIENTATION(1)*DLX(N) + &
                                    TEMP_ORIENTATION(2)*DLY(N) + &
                                    TEMP_ORIENTATION(3)*DLZ(N))
