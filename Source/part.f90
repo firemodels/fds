@@ -912,9 +912,11 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
-INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND
+USE COMPLEX_GEOMETRY, ONLY: CC_IDCC,CC_CGSC,CC_SOLID
+INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND,ICC
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,RRI,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR,&
             IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_FRAC
+LOGICAL :: CC_VALID
 
 IN => INITIALIZATION(INIT_INDEX)
 
@@ -1118,7 +1120,12 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
          CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
 
          IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
-         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID) EXIT CHOOSE_XYZ_LOOP
+         ! Check for solid inside GEOM
+         CC_VALID = .TRUE.
+         IF (CC_IBM) THEN
+            IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
+         ENDIF
+         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. CC_VALID) EXIT CHOOSE_XYZ_LOOP
 
          ! If cannot find non-solid grid cell, stop searching
 
@@ -1179,7 +1186,11 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
    DO KK=K1,K2
       DO JJ=J1,J2
          II_LOOP: DO II=I1,I2
-            IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID) CYCLE II_LOOP
+            CC_VALID = .TRUE.
+            IF (CC_IBM) THEN
+               IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
+            ENDIF
+            IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .OR. .NOT.CC_VALID) CYCLE II_LOOP
             IF (IN%SHAPE=='CONE') THEN
                IF (((XC(II)-X0)**2+(YC(JJ)-Y0)**2<(RRI*(1._EB-(ZC(KK)-Z0)/HH))**2) .OR. &
                   ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2)) CYCLE II_LOOP
@@ -1233,6 +1244,15 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                   BC%X = 0.5_EB*(X(II-1)+X(II))
                   BC%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
                   BC%Z = 0.5_EB*(Z(KK-1)+Z(KK))
+                  ! If particle goes in a cut cell, move it to the centroid
+                  IF (CC_IBM) THEN
+                     ICC=CCVAR(II,JJ,KK,CC_IDCC)
+                     IF (ICC>0) THEN
+                        BC%X = CUT_CELL(ICC)%XYZCEN(IAXIS,1)
+                        BC%Y = CUT_CELL(ICC)%XYZCEN(JAXIS,1)
+                        BC%Z = CUT_CELL(ICC)%XYZCEN(KAXIS,1)
+                     ENDIF
+                  ENDIF
                ELSE
                   CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                ENDIF
