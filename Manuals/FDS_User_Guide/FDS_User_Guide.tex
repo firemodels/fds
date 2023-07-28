@@ -424,6 +424,7 @@ The progress of the simulation is indicated by diagnostic output that is written
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
 
+It is recommend that the simulation be run in a folder associated with a drive that is physically attached to the computer. Saving files to a network share or a folder controlled by a cloud service (e.g. OneDrive) can result in simulation failures if a network issue or a file lock during automated backup results in Windows preventing FDS from writing data to a file.
 
 \subsection{Multiple Computers Running MS Windows}
 
