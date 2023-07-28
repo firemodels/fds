@@ -364,6 +364,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: ACCEL_X=0._EB       !< Acceleration in x direction (m/s2)
    REAL(EB) :: ACCEL_Y=0._EB       !< Acceleration in y direction (m/s2)
    REAL(EB) :: ACCEL_Z=0._EB       !< Acceleration in z direction (m/s2)
+   REAL(EB) :: RVC=-1._EB           !< Reciprocal of cell volume containing particle (1/m3)
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 

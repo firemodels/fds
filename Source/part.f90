@@ -1226,9 +1226,17 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                IF (((XC(II)-X0)**2+(YC(JJ)-Y0)**2<RRI**2) .OR. &
                   ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>RR**2)) CYCLE II_LOOP
             ENDIF
-            INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN_X2)-MAX(X(II-1),IN_X1)) &
-                                          * (MIN(Y(JJ),IN_Y2)-MAX(Y(JJ-1),IN_Y1)) &
-                                          * (MIN(Z(KK),IN_Z2)-MAX(Z(KK-1),IN_Z1))
+            IF (CC_IBM .AND. CCVAR(II,JJ,KK,CC_IDCC)>0) THEN
+               INSERT_VOLUME = INSERT_VOLUME + SUM(CUT_CELL(ICC)%VOLUME(:))
+               LP%RVC = 1/SUM(CUT_CELL(ICC)%VOLUME(:))
+            ELSE
+               INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN_X2)-MAX(X(II-1),IN_X1)) &
+                                             * (MIN(Y(JJ),IN_Y2)-MAX(Y(JJ-1),IN_Y1)) &
+                                             * (MIN(Z(KK),IN_Z2)-MAX(Z(KK-1),IN_Z1))
+            ENDIF
+            ! Need to consider places where INIT region slices cut cell volume...
+            ! Actually... maybe dont consider CCVOL here because we're mostly interested in conserving
+            ! mass from the user specified volume
             INSERT_PARTICLE_LOOP_2: DO IP = 1, IN%N_PARTICLES_PER_CELL
                N_INSERT = N_INSERT + 1
                IF (N_INSERT > MAXIMUM_PARTICLES) THEN
@@ -1347,7 +1355,13 @@ IF (N_INSERT>0) THEN
       LP => LAGRANGIAN_PARTICLE(IP)
       IF (IN%MASS_PER_VOLUME>0._EB) THEN
          BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
-         LP%PWT = LP%PWT*PWT0*DX(BC%IIG)*DY(BC%JJG)*DZ(BC%KKG)*RDXI*RDETA*RDZETA
+         ! RVC already assigned if LP in cut cell
+         IF (LP%RVC<0._EB) THEN
+            LP%PWT = LP%PWT*PWT0*DX(BC%IIG)*DY(BC%JJG)*DZ(BC%KKG)*RDXI*RDETA*RDZETA
+            LP%RVC = RDX(BC%IIG)*RDY(BC%JJG)*RDZ(BC%KKG)
+         ELSE
+            LP%PWT = LP%PWT*PWT0*DX(BC%IIG)*DY(BC%JJG)*DZ(BC%KKG)*LP%RVC
+         ENDIF
       ELSE
          LP%PWT = LP%PWT*PWT0
       ENDIF
