@@ -6114,6 +6114,7 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 
 \subsection{Controlled Particle Orientation}
 \label{info:orientation_ramp}
+\label{part_orientation_ramp}
 
 The {\ct ORIENTATION} for a particle placed with an {\ct INIT} line can be controlled by specifying {\ct ORIENTATION\_RAMP} on the {\ct INIT} line. {\ct ORIENTATION\_RAMP} specifies a {\ct RAMP} for each of the three components for the particle {\ct ORIENTATION}. All three components must be defined. At each timestep, the outputs for the {\ct RAMP}s will be normalized to a vector magnitude of one. In the example below, the particle orientation is changed from -x to +x over 10~s by rotating around the z-axis.
 
