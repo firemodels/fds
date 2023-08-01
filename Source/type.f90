@@ -12,6 +12,7 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
 #ifdef WITH_MKL
 USE MKL_PARDISO
+USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -1607,6 +1608,35 @@ TYPE ZONE_MESH_TYPE
    INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for ZONE_MESH, up triang part, CSR format.
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for the ZONE_MESH.
 END TYPE ZONE_MESH_TYPE
+
+
+!> \brief Parameters associated with a ZONE, used in GLOBMAT_SOLVER unstructured pressure solver
+
+TYPE ZONE_SOLVE_TYPE
+#ifdef WITH_MKL
+   TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), ALLOCATABLE  :: PT_H(:)  !< Internal solver memory pointer
+#else
+   INTEGER, ALLOCATABLE :: PT_H(:)
+#endif /* WITH_MKL */
+   INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
+   INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
+   INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
+   INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite).
+   INTEGER :: LOWER_ROW=0, UPPER_ROW=0       !< Local row index bounds of matrix assembled by this process for a pres zone.
+   INTEGER :: CONNECTED_ZONE_PARENT=0                 !< Index of first zone in a connected zone list.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUNKH_LOC  !< Number of local H unknowns per mesh for a given pressure zone.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: UNKH_IND   !< H unknown numbering start index per mesh for a given pressure zone.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NNZ_D_MAT_H!< Number of non-zeros per row of global matrix.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: JD_MAT_H   !< Column index per row of non-zeros of global matrix.
+   REAL(EB),ALLOCATABLE, DIMENSION(:,:) :: D_MAT_H    !< Nonzero values per row for global matrix.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH).
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for pressure zone, up triang part, CSR format.
+   INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for pressure zone, up triang part, CSR format.
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for pressure zone.
+   REAL(FB),ALLOCATABLE, DIMENSION(:)   :: A_H_FB,F_H_FB,X_H_FB!< Arrays in case of single precision solve.
+END TYPE ZONE_SOLVE_TYPE
+
+TYPE (ZONE_SOLVE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ZONE_SOLVE
 
 
 !> \brief Parameters associated with a MOVE line, used to rotate or translate OBSTructions
