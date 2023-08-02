@@ -748,9 +748,11 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          IF (PRESENT(WALL_INDEX)) THEN
             WC    => MESHES(NM)%WALL(WALL_INDEX)
             B1    => MESHES(NM)%BOUNDARY_PROP1(WC%B1_INDEX)
+            IF (WC%OD_INDEX>0) ONE_D => MESHES(NM)%BOUNDARY_ONE_D(WC%OD_INDEX)
          ELSEIF (PRESENT(CFACE_INDEX)) THEN
             CFA   => MESHES(NM)%CFACE(CFACE_INDEX)
             B1    => MESHES(NM)%BOUNDARY_PROP1(CFA%B1_INDEX)
+            IF (CFA%OD_INDEX>0) ONE_D => MESHES(NM)%BOUNDARY_ONE_D(CFA%OD_INDEX)
          ENDIF
 
          ! Ember flag to be used for outputs
