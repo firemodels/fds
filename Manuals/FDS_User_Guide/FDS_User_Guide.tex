@@ -131,7 +131,7 @@ The Fire Dynamics Simulator, in various forms, has been under development for al
 \item Paul Hart of Swiss Re, GAP Services, and Pravinray Gandhi of Underwriters Laboratories provided useful suggestions about water droplet transport on solid objects.
 \item Fran\c{c}ois Demouge of the Centre Scientifique et Technique du B\^{a}timent (CSTB) in France assisted with implementation of synthetic turbulence inflow boundary conditions.
 \item Max Gould, Summer Undergraduate Research Fellow, assisted in the testing and verification of non-standard boundary treatment methods.
-\item Salah Benkorichi at BB7, UK, helped develop the verification cases for 3D heat transfer.
+\item Salah Benkorichi at Buro Happold, UK, helped develop the verification cases for 3D heat transfer.
 \item Daniel Haarhoff of J\"ulich Supercomputing Centre, Germany, helped to implement OpenMP directives and profile the code for FDS v6.
 \item Timo Korhonen of VTT, Finland, was the principle developer of FDS+Evac (FDS versions prior to 6.7.8).
 \item Vivien Lecoustre, while at the University of Maryland, College Park, improved RadCal which included adding 8 additional new fuel species to its database.
@@ -424,6 +424,7 @@ The progress of the simulation is indicated by diagnostic output that is written
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
 
+It is recommend that the simulation be run in a folder associated with a drive that is physically attached to the computer. Saving files to a network share or a folder controlled by a cloud service (e.g. OneDrive) can result in simulation failures if a network issue or a file lock during automated backup results in Windows preventing FDS from writing data to a file.
 
 \subsection{Multiple Computers Running MS Windows}
 
@@ -2192,8 +2193,16 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-
-
+\subsubsection{Blowing Heat Transfer}
+\label{blowing}
+If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas normal to the surface disrupts the thermal boundary layer. When blowing the flow pushes away the gas near the surface, and when sucking the flow pulls the gas near the surface towards the surface. These respectively decrease and increase the heat transfer coefficient. This effect can be accounted for by adding {\ct BLOWING=T} to a {\ct SURF} definition. Except for DNS simulations, When {\ct BLOWING} is active, the heat transfer coefficient computed by FDS is adjust by a factor per the equations below~\cite{Plate_blowing}.
+\begin{equation}
+	\Phi_h = \frac{\dot{m}'' c_g}{h}
+\end{equation}
+\begin{equation}
+	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h 
+\end{equation}
+where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
 
@@ -2619,7 +2628,7 @@ The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPE
 \subsection{Scaling the Burning Rate by the Heat Flux}
 \label{info:scaled_burning}
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occurring during an FDS simulation. This model is invoked by specifying a {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled time step where the scaled time step is the FDS time step adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantaneous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model was developed on heat fluxes ranging from 25~kW/m$^2$ to 75~kW/m$^2$; however, by default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
+FDS has a simple scaling-based pyrolysis model (SBPyro) to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occurring during an FDS simulation. This model is invoked by specifying a {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. {\ct REFERENCE\_HEAT\_FLUX} is the average heat flux to the surface occurring during testing, which includes the exposure heat flux and the heat feedback from the flame. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled time step where the scaled time step is the FDS time step adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is similarly scaled by the ratio of the FDS incident flux and net convective heat flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantaneous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 1 second, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model has been evaluated in heat fluxes ranging from 15~kW/m$^{2}$ to 92~kW/m$^{2}$; however, most of validation data is in the range from 25~kW/m$^2$ to 75~kW/m$^2$. By default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
 
 An example demonstrating the scaling behavior is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
 
@@ -3003,10 +3012,10 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 If a combustible solid is to disappear from the simulation once it is consumed, set {\ct BURN\_AWAY=T} on the {\ct SURF} line that is applied to the {\ct OBST}. The solid object disappears from the calculation cell by cell as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
 \item Use {\ct BURN\_AWAY} cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional information for newly exposed surfaces.
-\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
 \item The heat conduction into an {\ct OBST} that can {\ct BURN\_AWAY} is limited to 1-D. On the {\ct SURF} line, specify the {\ct THICKNESS} to be approximately that of a single cell, and also set {\ct BACKING='VOID'}. It is assumed that the solid is relatively well-insulated and that the in-depth temperature profile drops off relatively quickly at the surface. When a cell is removed, the newly exposed surface is initially at ambient temperature but heats up quickly at the surface.
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used to determine the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
@@ -5226,6 +5235,39 @@ Aerosol particles will, over time, collide with one another and stick together t
       N_BINS=10,LUMPED_COMPONENT_ONLY=T/
 \end{lstlisting}
 
+It may be desirable to combine aerosol agglomeration with chemical reaction.  That is, one or more of the aerosol species may participate in a chemical reaction, either as a reactant or product.  Keep in mind that tracked species for the aerosol distribution are appended with the bin number, as stated above.  Within FDS, it is these subspecies that are being tracked and you must explicitly specify the stoichiometry of the subspecies within the reaction (see Sec.~\ref{info:REAC_Diagnostics}).  Below is an example for combustion of \emph{n}-heptane generating soot as an aerosol with five size bins.
+
+\begin{lstlisting}
+&SPEC ID='N-HEPTANE' /
+&SPEC ID='NITROGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='OXYGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON DIOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON MONOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='WATER VAPOR',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='SOOT',LUMPED_COMPONENT_ONLY=T,
+      AEROSOL=T,N_BINS=5,
+      MIN_DIAMETER=0.023,MAX_DIAMETER=11.5/
+
+&SPEC ID='AIR',BACKGROUND=T,
+      SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
+      VOLUME_FRACTION=40.94283132,10.85911,0.020216389,0.497368688/
+&SPEC ID='PRODUCTS',
+      SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR','CARBON MONOXIDE',
+      VOLUME_FRACTION=40.94283132,6.868439402,8.490526567,0.028618803/
+
+&REAC FUEL='N-HEPTANE',
+      SPEC_ID_NU='N-HEPTANE',
+      'AIR',
+      'PRODUCTS',
+      'SOOT_1',
+      'SOOT_2',
+      'SOOT_3',
+      'SOOT_4',
+      'SOOT_5',
+      NU=-1,-1,1,0.035837089,0.030715589,0.026822578,0.023205152,0.02026202,
+      RADIATIVE_FRACTION=0.44 /
+\end{lstlisting}
+
 \section{Aerosol Scrubbing}
 \label{info:scrubbing}
 
@@ -6070,6 +6112,33 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 \label{fig:part_path_ramp_jog}
 \end{figure}
 
+\subsection{Controlled Particle Orientation}
+\label{info:orientation_ramp}
+\label{part_orientation_ramp}
+
+The {\ct ORIENTATION} for a particle placed with an {\ct INIT} line can be controlled by specifying {\ct ORIENTATION\_RAMP} on the {\ct INIT} line. {\ct ORIENTATION\_RAMP} specifies a {\ct RAMP} for each of the three components for the particle {\ct ORIENTATION}. All three components must be defined. At each timestep, the outputs for the {\ct RAMP}s will be normalized to a vector magnitude of one. In the example below, the particle orientation is changed from -x to +x over 10~s by rotating around the z-axis.
+
+\begin{lstlisting}
+&PART ID='MY PART',SURF_ID='PART SURF',STATIC=T, ORIENTATION=1,1,1/
+&INIT ID='ONE PART',PART_ID='MY PART',XYZ=0.975,1,1,
+          ORIENTATION_RAMP(1:3)='O1','O2','O3',N_PARTICLES=1/
+&RAMP ID='O1',T=0, F=-1/
+&RAMP ID='O1',T=10,F= 1/
+&RAMP ID='O2',T=0, F= 0/
+&RAMP ID='O2',T=5, F= 1/
+&RAMP ID='O2',T=10,F= 0/
+&RAMP ID='O3',T=0, F= 0/
+&RAMP ID='O3',T=10,F= 0/
+\end{lstlisting}
+
+Note that the {\ct PART} input must contain {\ct ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\si{m$^3$} box with the +x wall emitting a radiative flux of 10~\si{kW/m$^2$}, and the remaining walls emitting 1~\si{kW/m$^2$}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_orientation_ramp}
+	\caption[Results of the {\ct part\_orientation\_ramp} case]{Particle radiative flux for {\ct part\_orientatoin\_ramp} case.}
+	\label{fig:part_orientation_ramp}
+\end{figure}
 
 \newpage
 
@@ -8143,6 +8212,7 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 
 \subsection{Changing the Dependent Variable}
 \label{info:RAMP_DEP_ID}
+\label{special_time_ramps}
 
 The output of any {\ct DEVC} or math {\ct CTRL} can be used in place of a {\ct RAMP} if either {\ct DEVC\_ID\_DEP} or {\ct CTRL\_ID\_DEP} is specified on the {\ct RAMP} input. With either input, the numerical value of the {\ct DEVC} or {\ct CTRL} is used as the {\ct RAMP} output. For example, using the mathematical functions built into the control feature, you can specify the sine function:
 \be
@@ -8152,7 +8222,7 @@ via the lines
 \begin{lstlisting}
 &DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
 &CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
-&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0',
       CONSTANT=0.62831853 /
 &CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
 &RAMP ID='ramp sin', CTRL_DEP_ID='sin(2*pi*(t-t0)/10)' /
@@ -8667,7 +8737,7 @@ The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use sho
 
 The {\ct GLMAT} solver is used mainly for testing and diagnostics. Because it solves the pressure over the entire computational domain, it is limited to about 1~million cells total unless your computer has an extraordinary amount of RAM.
 
-\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that (1) it does not allow for internal sealed regions within the domain, (2) it is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. This solver is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
@@ -8688,7 +8758,7 @@ FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iter
 ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
 GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
-UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
+UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact      & exact     & iterative \\
 % \rowcolor{lavender}
 % USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
 % PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
@@ -11641,6 +11711,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NODE\_ID }                   & Character         & Section~\ref{info:hvacmasstransport}          &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct ORIENTATION\_RAMP(3)}        & Character         & Section~\ref{info:orientation_ramp}           &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -12542,6 +12613,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical           & Section~\ref{blowing}                   &                   &               \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
@@ -12627,7 +12699,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Z}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct REFERENCE\_HEAT\_FLUX}                               & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 10.0                    \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 {\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline

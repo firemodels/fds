@@ -92,6 +92,7 @@ function usage {
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
+  echo " -B use fds installed in /usr/local/bin/FDS/FDS6/bin"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
@@ -232,7 +233,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
+while getopts 'Ab:Bd:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -240,6 +241,10 @@ case $OPTION  in
    ;;
   b)
    EMAIL="$OPTARG"
+   ;;
+  B)
+   use_installed=
+   exe=/usr/local/bin/FDS/FDS6/bin/fds
    ;;
   d)
    dir="$OPTARG"
@@ -264,6 +269,7 @@ case $OPTION  in
    ;;
   i)
    use_installed=1
+   use_local_installed=
    ;;
   I)
    use_intel_mpi=1

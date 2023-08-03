@@ -311,6 +311,7 @@ $QFDS -d Miscellaneous obst_sphere_mass_flux.fds
 $QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
 $QFDS -d Miscellaneous obst_cone_mass_flux.fds
 $QFDS -d Miscellaneous obst_box_mass_flux.fds
+$QFDS -d Miscellaneous part_orientation_ramp.fds
 $QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
 $QFDS -d Miscellaneous devc_interpolation_velocity.fds
 $QFDS -d Miscellaneous devc_interpolation_temperature.fds
@@ -337,6 +338,7 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
+$QFDS -p 4 -d Pressure_Effects zone_break_fast_uglmat.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
