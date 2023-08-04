@@ -994,10 +994,13 @@ IN_Z0 = X_OFFSET + IN%Z0
 
 ! If the INIT volume is outside the current mesh, return
 
-IF (IN%SHAPE/='RING' .AND. IN%SHAPE/='LINE' .AND. &
-    (IN_X1>XF*ONE_M_EPS .OR. IN_X2<XS*ONE_P_EPS .OR. &
-     IN_Y1>YF*ONE_M_EPS .OR. IN_Y2<YS*ONE_P_EPS .OR. &
-     IN_Z1>ZF*ONE_M_EPS .OR. IN_Z2<ZS*ONE_P_EPS)) RETURN
+IF (IN%SHAPE/='RING' .AND. IN%SHAPE/='LINE') THEN
+   IF (IN_X1>XF*ONE_M_EPS .OR. IN_X2<XS*ONE_P_EPS .OR. &
+       IN_Y1>YF*ONE_M_EPS .OR. IN_Y2<YS*ONE_P_EPS .OR. &
+       IN_Z1>ZF*ONE_M_EPS .OR. IN_Z2<ZS*ONE_P_EPS) RETURN
+ELSE
+   IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
+ENDIF
 
 ! Skip mesh that is contained completely within a ring
 
