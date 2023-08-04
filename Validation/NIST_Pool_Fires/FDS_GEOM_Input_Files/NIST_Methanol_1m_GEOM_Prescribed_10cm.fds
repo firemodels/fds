@@ -1,4 +1,4 @@
-&HEAD CHID='NIST_Methanol_1m_GEOM_Prescribed_20cm', TITLE='NIST Methanol Pool, 1 m pan, 20 cm resolution' /
+&HEAD CHID='NIST_Methanol_1m_GEOM_Prescribed_10cm', TITLE='NIST Methanol Pool, 1 m pan, 10 cm resolution' /
 
 &TIME T_END=60. /
 
