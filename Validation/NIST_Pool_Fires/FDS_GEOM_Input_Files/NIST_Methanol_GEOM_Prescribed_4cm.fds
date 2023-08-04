@@ -7,7 +7,7 @@
 &DUMP DT_HRR=2., DT_DEVC=0.0000001 /
 
 per Kim, Lee, Hamins, 2019, top of burner was 0.27 cm above floor (1 cm lip)
-&MESH IJK=32,32,48, XB=-0.6,0.6,-0.6,0.6,-0.26,1.54/
+&MESH IJK=32,32,48, XB=-0.64,0.64,-0.64,0.64,-0.26,1.66/
 
 &RADI NUMBER_RADIATION_ANGLES=600, TIME_STEP_INCREMENT=10, ANGLE_INCREMENT=10 /
 
