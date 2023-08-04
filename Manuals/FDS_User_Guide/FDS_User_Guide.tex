@@ -7315,31 +7315,36 @@ Wildfire spread over releastic terrain can be modeled in FDS using a plugin to Q
 \href{https://github.com/firetools/qgis2fds}{https://github.com/firetools/qgis2fds} \\
 QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
+A set of sample input files created by qgis2fds reside within the gitHub repository \\
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ 
+in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
+
+For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
+
 A typical input file created with qgis2fds includes the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
 \begin{lstlisting}
 &MISC ORIGIN_LAT=35.7207093
       ORIGIN_LON=-83.5212387
       NORTH_BEARING=0.
-      TERRAIN_IMAGE='ridge_ls_1_tex.png'
+      TERRAIN_IMAGE='casename.png'
       LEVEL_SET_MODE=1 /
 \end{lstlisting}
-A set of sample input files created by qgis2fds reside within the gitHub repository \\
-\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. For each case, a hypothetical fire spreads from its point of origin over a ridge. Each case simulates 10~h of real time. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
 
-\begin{figure}[!ht]
-\includegraphics[width=\textwidth]{FIGURES/ridge_terrain_image.png}
-\caption[Satellite image of sample terrain]{Satellite image of sample terrain.}
+\begin{figure}[p]
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0000.png}
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0001.png}
+\caption[Satellite and landuse images for sample wildland fire spread case]{(Top) Satellite image of a 2~km by 2~km patch of terrain. (Bottom) 30~m by 30~m tiles indicating the land use of this same area.}
 \label{ridge_map}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_1.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_2.png} \\
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_3.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_4.png}
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_1.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_2.png} \\
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_3.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_4.png}
 \end{tabular*}
-\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 10~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
+\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 24~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
 \label{ridge_figs}
 \end{figure}
 
