@@ -652,7 +652,7 @@ LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 LOGICAL :: ONE_CC_PER_CARTESIAN_CELL=.TRUE.
-LOGICAL :: RAD_CFACE_INTERPOLATE=.TRUE.
+LOGICAL :: RAD_CFACE_INTERPOLATE=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
