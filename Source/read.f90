@@ -9234,7 +9234,7 @@ COUNT_RAMP_POINTS: DO N=1,N_RAMP
          DEVC_ID_DEP = 'null'
          CTRL_ID_DEP = 'null'
          EXTERNAL_FILE = .FALSE.
-         INITIAL_VALUE = 0._EB
+         INITIAL_VALUE = -2.E20_EB
          CALL CHECKREAD('RAMP',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS==1) EXIT SEARCH_LOOP
          READ(LU_INPUT,NML=RAMP,ERR=56,IOSTAT=IOS)
@@ -9247,6 +9247,11 @@ COUNT_RAMP_POINTS: DO N=1,N_RAMP
          IF (EXTERNAL_FILE) THEN
             READ_EXTERNAL = .TRUE.
             RP%EXTERNAL_FILE = EXTERNAL_FILE
+            IF (INITIAL_VALUE <-1.E20_EB) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with RAMP ID:',TRIM(ID),&
+               '. Externally controlled RAMP requires an INITIAL_VALUE.'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
             RP%LAST = INITIAL_VALUE
             RAMP_TYPE(N) = 'EXTERNAL'
          ENDIF
