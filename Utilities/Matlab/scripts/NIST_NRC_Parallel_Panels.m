@@ -21,6 +21,15 @@ zm = linspace(1,243,50);
 E = importdata([expdir,'PMMA_heatflux.csv'],',',2);
 M1 = importdata([outdir,'PMMA_60_kW_1_cm_devc.csv'],',',2);
 M2 = importdata([outdir,'PMMA_60_kW_2_cm_devc.csv'],',',2);
+H1 = importdata([outdir,'PMMA_60_kW_1_cm_hrr.csv'],',',2);
+H2 = importdata([outdir,'PMMA_60_kW_2_cm_hrr.csv'],',',2);
+
+j=0;
+for i=[1 2 3 5 8 9 10]
+   j=j+1;
+   indices1(j) = min(find(H1.data(:,2)>E.data(i,1)));
+   indices2(j) = min(find(H2.data(:,2)>E.data(i,1)));
+end
 
 for i=[1 2 3 5 8 9 10]
    qdot{i} = E.data(i,2:10);
@@ -29,13 +38,13 @@ for i=[1 2 3 5 8 9 10]
    hold on
 end
 
-for i=[31 36 41 46 54 57 58 ]
+for i=indices1
    qdotm{i} = M1.data(i,2:51);
    plot(qdotm{i},zm)
    hold on
 end
 
-for i=[35 43 49 56 66 80 120]
+for i=indices2
    qdotm{i} = M2.data(i,2:51);
    plot(qdotm{i},zm,'--')
    hold on
