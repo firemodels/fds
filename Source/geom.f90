@@ -37,6 +37,7 @@ REAL(EB), PARAMETER :: GEOFCT=10._EB
 ! Threshold cut-cell volume ratio used to define very small cut-cells, tied to NOADVANCE.
 REAL(EB), PARAMETER :: MIN_VOL_FACTOR   = 5.E-4_EB
 REAL(EB), PARAMETER :: ADIFF_INFO_FACTOR= 1.E-1_EB
+REAL(EB), PARAMETER :: SNAP_DIST_FACTOR = 1.E-5_EB
 
 INTEGER,  SAVE ::      NGUARD = 6        ! Layers of guard-cells.
 INTEGER,  SAVE ::      CCGUARD= 6 - 2    ! Layers of guard cut-cells.
@@ -795,6 +796,9 @@ IF (FIRST_CALL) THEN
 
    ! Get geometry triangle bins in Cartesian directions:
    CALL GET_GEOM_TRIBIN
+
+   ! Snap to grid planes node positions in the work volume of this process:
+   CALL SNAP_GEOM_NODES
 
    ! Initialize GEOMETRY fields used by CC_IBM:
    CALL CC_INIT_GEOM
@@ -5117,6 +5121,110 @@ ENDDO LOOP_GEOM
 RETURN
 END SUBROUTINE GET_GEOM_TRIBIN
 
+
+! --------------------------- SNAP_GEOM_NODES --------------------------------------
+
+SUBROUTINE SNAP_GEOM_NODES
+
+INTEGER :: IBIN,IWSELDUM,IWSEL,WSELEM(NOD1:NOD3),X1LO,X1HI,X1IND,ILO_BIN,IHI_BIN
+REAL(EB):: MIN_MESHGEOM,DELBIN
+REAL(EB) :: CPUTIME_START, CPUTIME
+
+IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   WRITE(LU_ERR,'(A)',advance="no") ' 1a. Snap node position to grid planes : SNAP_GEOM_NODES'
+ENDIF
+
+! Main Loop over Geometries, set nodes to SNAP_NODE=T:
+MAIN_GEOM_LOOP_1 : DO IG=1,N_GEOMETRY
+   ALLOCATE(GEOMETRY(IG)%SNAP_NODE(IAXIS:KAXIS,1:GEOMETRY(IG)%N_VERTS)); GEOMETRY(IG)%SNAP_NODE = .FALSE.
+   AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
+      IF (GEOMETRY(IG)%TBAXIS(X1AXIS)%N_BINS<1) CYCLE
+      ! Run all bin on this geometry and set nodes involved to SNAP_NODE=T:
+      IBIN_DO_1 : DO IBIN=1,GEOMETRY(IG)%TBAXIS(X1AXIS)%N_BINS
+         ! Loop surface triangles:
+         DO IWSELDUM=1,GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL
+            IWSEL=GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(IWSELDUM)
+            WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(MAX_DIM*(IWSEL-1)+1:MAX_DIM*IWSEL)
+            GEOMETRY(IG)%SNAP_NODE(X1AXIS, (/WSELEM(NOD1:NOD3)/) ) = .TRUE. ! Set nodes to test for snapping to grid planes.
+         ENDDO
+      ENDDO IBIN_DO_1
+   ENDDO AXIS_LOOP_1
+ENDDO MAIN_GEOM_LOOP_1
+
+! Now Mesh loop on mesh + guard planes to test against
+! Main Loop over Meshes:
+MAIN_MESH_LOOP : DO NM=1,NMESHES
+
+   IF (.NOT.CC_COMPUTE_MESH(NM)) CYCLE ! Only MESHES assigned to processor and OMESHES of these.
+   IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CYCLE ! Don't do OMESHES for PERIODIC_TEST==105
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
+   ! Run by coordinate direction, define planes X1PLN on this mesh, look for involved GEOMETRY vertices using TBAXIS and
+   ! after positive test of SNAP_NODE check if node is to be snapped to plane.
+   AXIS_LOOP_2 : DO X1AXIS=IAXIS,KAXIS
+
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         X1LO = ILO_FACE-CCGUARD;  X1HI = IHI_FACE+CCGUARD
+         ALLOCATE(X1FACE(ISTR:IEND),DX1FACE(ISTR:IEND)); X1FACE = XFACE; DX1FACE = DXFACE
+      CASE(JAXIS)
+         X1LO = JLO_FACE-CCGUARD;  X1HI = JHI_FACE+CCGUARD
+         ALLOCATE(X1FACE(JSTR:JEND),DX1FACE(JSTR:JEND)); X1FACE = YFACE; DX1FACE = DYFACE
+      CASE(KAXIS)
+         X1LO = KLO_FACE-CCGUARD;  X1HI = KHI_FACE+CCGUARD
+         ALLOCATE(X1FACE(KSTR:KEND),DX1FACE(KSTR:KEND)); X1FACE = ZFACE; DX1FACE = DZFACE
+      END SELECT
+
+      ! Loop planes in X1AXIS direction:
+      X1PLN_LOOP : DO X1IND=X1LO,X1HI
+         X1PLN = X1FACE(X1IND) ! Plane position.
+         MAIN_GEOM_LOOP_2 : DO IG=1,N_GEOMETRY
+            IF (GEOMETRY(IG)%TBAXIS(X1AXIS)%N_BINS<1) CYCLE
+            DELBIN       = GEOMETRY(IG)%TBAXIS(X1AXIS)%DELBIN
+            MIN_MESHGEOM = GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(1)%X1_LOW
+            ILO_BIN = MAX(1,CEILING((X1PLN-GEOMEPS-MIN_MESHGEOM)/DELBIN))
+            IHI_BIN = MIN(GEOMETRY(IG)%TBAXIS(X1AXIS)%N_BINS,CEILING((X1PLN+GEOMEPS-MIN_MESHGEOM)/DELBIN))
+            IBIN_DO_2 : DO IBIN=ILO_BIN,IHI_BIN
+               IF ( X1PLN < GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_LOW-GEOMEPS)  CYCLE
+               IF ( X1PLN > GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_HIGH+GEOMEPS) CYCLE
+               ! Loop surface triangles:
+               DO IWSELDUM=1,GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL
+                  IWSEL=GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(IWSELDUM)
+                  WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(MAX_DIM*(IWSEL-1)+1:MAX_DIM*IWSEL)
+                  ! Triangles NODES coordinates:
+                  DO INOD=NOD1,NOD3
+                     IF(.NOT.GEOMETRY(IG)%SNAP_NODE(X1AXIS,WSELEM(INOD))) CYCLE
+                     ! Do test to snap to:
+                     IF(ABS(GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(INOD)-1)+X1AXIS)-X1PLN) < SNAP_DIST_FACTOR*DX1FACE(X1IND) ) THEN
+                        GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(INOD)-1)+X1AXIS) = X1PLN  ! Set node position to plane value.
+                        GEOMETRY(IG)%SNAP_NODE(X1AXIS,WSELEM(INOD)) = .FALSE.        ! No need to snap again.
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO IBIN_DO_2
+         ENDDO MAIN_GEOM_LOOP_2
+      ENDDO X1PLN_LOOP
+
+      DEALLOCATE(X1FACE,DX1FACE)
+
+   ENDDO AXIS_LOOP_2
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
+ENDDO MAIN_MESH_LOOP
+
+! Deallocate SNAP_NODE in geometries:
+DO IG=1,N_GEOMETRY
+   DEALLOCATE(GEOMETRY(IG)%SNAP_NODE)
+ENDDO
+
+IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_ERR,'(A)',advance="no") '.. done.'
+   CALL CPU_TIME(CPUTIME)
+   WRITE(LU_ERR  ,'(A,F8.3,A)') ' Time taken : ',CPUTIME-CPUTIME_START,' sec.'
+ENDIF
+
+END SUBROUTINE SNAP_GEOM_NODES
 
 END SUBROUTINE SET_CUTCELLS_3D
 
@@ -12626,20 +12734,15 @@ REAL(EB):: XYZV(MAX_DIM,NODS_WSEL), V12(MAX_DIM), V23(MAX_DIM), V31(MAX_DIM), WS
 REAL(EB):: X12(MAX_DIM), X23(MAX_DIM), X31(MAX_DIM), SQAREA(MAX_DIM), INT2
 REAL(EB):: MGNRM, XCEN
 REAL(EB):: GEOMEPSSQ ! Local epsilon for GEOM quality check
-LOGICAL :: INLIST
-
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2
 LOGICAL, ALLOCATABLE, DIMENSION(:)  :: COUNTED_VERT
-
-LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .TRUE.
-
 ! REAL(QB) :: V12Q(IAXIS:KAXIS),V23Q(IAXIS:KAXIS),V31Q(IAXIS:KAXIS),WSNORMQ(IAXIS:KAXIS),MGNRMQ
 
 REAL(EB) :: CPUTIME_START, CPUTIME
 
 IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
    CALL CPU_TIME(CPUTIME_START)
-   WRITE(LU_ERR,'(A,I5,A)',advance="no") ' 1. Number of Geometries : ',N_GEOMETRY,&
+   WRITE(LU_ERR,'(A,I5,A)',advance="no") ' 1b. Number of Geometries : ',N_GEOMETRY,&
    ', CC_INIT_GEOM, processed GEOMETRY : '
 ENDIF
 
@@ -12653,7 +12756,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
    NWSEL = GEOMETRY(IG)%N_FACES
    NVERT = GEOMETRY(IG)%N_VERTS
 
-   IF (GEOMETRY(IG)%IS_TERRAIN) THEN ! Terrain is always manifold with volume.
+   IF (GEOMETRY(IG)%IS_TERRAIN) THEN             ! Terrain is always manifold with volume.
       N_TENT_EDGES = INT(1.55_EB*REAL(NWSEL,EB)) ! Number of edges is 1.5 number of triangles.
    ELSE
       N_TENT_EDGES = 3*NWSEL
@@ -12820,9 +12923,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    ! Build geometry connectivity
    ! While building, check that the triangulated surface is manifold and oriented
-
    NWSEDG = 0
-   OPTIMIZE_SEG_DEF_COND : IF (OPTIMIZE_SEG_DEF) THEN
    IX = SIZE(GEOMETRY(IG)%FACES,DIM=1)
    CALL GET_GEOM_EDGES(NVERT,NWSEL,IX,GEOMETRY(IG)%FACES,NWSEDG,GEOMETRY(IG)%EDGES,&
                        GEOMETRY(IG)%FACE_EDGES,GEOMETRY(IG)%EDGE_FACES)
@@ -12890,87 +12991,6 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       ENDIF
    ENDDO
    DEALLOCATE(EDGES2)
-
-   ELSE OPTIMIZE_SEG_DEF_COND
-
-   DO IWSEL=1,NWSEL
-
-      WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-
-      DO IEDGE=EDG1,EDG3 ! For each face halfedge
-
-         SEG(NOD1:NOD2) = WSELEM(NOD1:NOD2) ! Get halfedge
-
-         ! Test triangles edge iedge is already on list
-         ! GEOMETRY(IG)%EDGES. Makes use of fact that two triangles
-         ! sharing an edge have opposite connectivity for it (right hand
-         ! rule for connectivity for normal outside solid).
-
-         INLIST = .FALSE.
-         DO IEDLIST=1,NWSEDG
-            ! Check if halfedge already in list. This would mean that the surface is
-            ! - non-manifold (three faces share the same edge) or
-            ! - not oriented (opposite normals in adjacent faces)
-            IF ( (SEG(NOD1) == GEOMETRY(IG)%EDGES(NOD1,IEDLIST)) .AND. &
-                 (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) ) THEN
-               XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-               XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (MY_RANK==0) THEN
-                  IF (POSITIVE_ERROR_TEST) THEN
-                    WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-                  ELSE
-                    WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-                  ENDIF
-                  WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') &
-                  "  Non manifold geometry in adjacent faces at edge with nodes: NOD1",&
-                  WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
-               ENDIF
-               CALL SHUTDOWN("") ; RETURN
-            ENDIF
-            ! Check if opposite halfedge already in list.
-            IF ( (SEG(NOD1) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) .AND. &
-                 (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD1,IEDLIST)) ) THEN
-               INLIST = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF (INLIST) THEN ! Opposite halfedge already in list
-            ! Check if the opposite halfedge is already coupled with its pair.
-            ! This would mean that the surface is non-manifold (three faces share the same edge)
-            IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 2) THEN
-               XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-               XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (MY_RANK==0) THEN
-                  IF (POSITIVE_ERROR_TEST) THEN
-                    WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-                  ELSE
-                    WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-                  ENDIF
-                  WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Non manifold geometry at edge with nodes: NOD1",&
-                  WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
-               ENDIF
-               CALL SHUTDOWN("") ; RETURN
-            ENDIF
-            ! Couple halfedge with its pair
-            GEOMETRY(IG)%EDGE_FACES(1,IEDLIST)   = 2
-            GEOMETRY(IG)%EDGE_FACES(4,IEDLIST)   = IWSEL;
-            GEOMETRY(IG)%EDGE_FACES(5,IEDLIST)   = IEDGE;
-            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = IEDLIST;
-         ELSE ! Opposite halfedge not in list, add a new entry
-            NWSEDG = NWSEDG + 1;
-            GEOMETRY(IG)%EDGES(NOD1:NOD2,NWSEDG) = SEG(NOD1:NOD2)
-            GEOMETRY(IG)%EDGE_FACES(1,NWSEDG)    = 1
-            GEOMETRY(IG)%EDGE_FACES(2,NWSEDG)    = IWSEL
-            GEOMETRY(IG)%EDGE_FACES(3,NWSEDG)    = IEDGE
-            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = NWSEDG
-         ENDIF
-
-         WSELEM=CSHIFT(WSELEM,1)
-
-      ENDDO
-   ENDDO
-
-   ENDIF OPTIMIZE_SEG_DEF_COND
 
    ! Check if the surface is closed
    ! Each halfedge should be coupled with an opposite halfedge
@@ -13061,11 +13081,9 @@ NWSEDG = 0
 ALLOCATE(NELVERT(NVERT));  NELVERT(:) = 0
 ALLOCATE(ISTVERT(NVERT));  ISTVERT(:) = 0
 DO IWSEL=1,NWSEL
-   NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) = &
-   NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) + 2
-   ! +2 to have max number of verts in allocation, even though might mean
-   ! non manifold.
+   NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) = NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) + 1
 ENDDO
+NELVERT = NELVERT + 1 ! Add buffer.
 DO IVERT=2,NVERT
    ISTVERT(IVERT) = ISTVERT(IVERT-1) + NELVERT(IVERT-1)
 ENDDO
