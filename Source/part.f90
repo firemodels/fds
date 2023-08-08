@@ -992,11 +992,22 @@ IN_X0 = X_OFFSET + IN%X0
 IN_Y0 = X_OFFSET + IN%Y0
 IN_Z0 = X_OFFSET + IN%Z0
 
+! If the INIT volume is outside the current mesh, return
+
+IF (IN%SHAPE/='RING' .AND. IN%SHAPE/='LINE') THEN
+   IF (IN_X1>XF*ONE_M_EPS .OR. IN_X2<XS*ONE_P_EPS .OR. &
+       IN_Y1>YF*ONE_M_EPS .OR. IN_Y2<YS*ONE_P_EPS .OR. &
+       IN_Z1>ZF*ONE_M_EPS .OR. IN_Z2<ZS*ONE_P_EPS) RETURN
+ELSE
+   IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
+ENDIF
+
+! Skip mesh that is contained completely within a ring
+
+IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
+
 ! Cut off parts of the INIT region that are outside the current mesh
 
-IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
-! Skip mesh that is contained completely within a ring
-IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
 X1 = MAX(IN_X1,XS)
 X2 = MIN(IN_X2,XF)
 Y1 = MAX(IN_Y1,YS)

@@ -7315,31 +7315,36 @@ Wildfire spread over releastic terrain can be modeled in FDS using a plugin to Q
 \href{https://github.com/firetools/qgis2fds}{https://github.com/firetools/qgis2fds} \\
 QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
+A set of sample input files created by qgis2fds reside within the gitHub repository \\
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ 
+in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
+
+For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
+
 A typical input file created with qgis2fds includes the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
 \begin{lstlisting}
 &MISC ORIGIN_LAT=35.7207093
       ORIGIN_LON=-83.5212387
       NORTH_BEARING=0.
-      TERRAIN_IMAGE='ridge_ls_1_tex.png'
+      TERRAIN_IMAGE='casename.png'
       LEVEL_SET_MODE=1 /
 \end{lstlisting}
-A set of sample input files created by qgis2fds reside within the gitHub repository \\
-\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. For each case, a hypothetical fire spreads from its point of origin over a ridge. Each case simulates 10~h of real time. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
 
-\begin{figure}[!ht]
-\includegraphics[width=\textwidth]{FIGURES/ridge_terrain_image.png}
-\caption[Satellite image of sample terrain]{Satellite image of sample terrain.}
+\begin{figure}[p]
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0000.png}
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0001.png}
+\caption[Satellite and landuse images for sample wildland fire spread case]{(Top) Satellite image of a 2~km by 2~km patch of terrain. (Bottom) 30~m by 30~m tiles indicating the land use of this same area.}
 \label{ridge_map}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_1.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_2.png} \\
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_3.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_4.png}
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_1.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_2.png} \\
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_3.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_4.png}
 \end{tabular*}
-\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 10~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
+\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 24~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
 \label{ridge_figs}
 \end{figure}
 
@@ -7883,7 +7888,8 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
-{\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline
+{\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline                & External file control, see Section~\ref{info:external_control} \\ \hline
+{\ct EXTERNAL}           
 \end{tabular}
 \end{center}
 \end{table}
@@ -8266,6 +8272,50 @@ It should be noted that devices are updated sequentially in the order that they 
 
 \input{smv_objects.tex}
 
+\section{External Control of FDS (Beta)}
+\label{info:external_control}
+\label{external_control}
+
+It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
+
+When external control is selected, FDS will set the value of the {\ct RAMP} or the logical state of the {\ct CTRL} based on values contained in a csv file whose name is given by {\ct EXTERNAL\_FILENAME} on {\ct MISC}. This file will be checked for new values every {\ct DT\_EXTERNAL} on {\ct TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either {\ct INITIAL\_VALUE} on {\ct RAMP} or {\ct INITIAL\_STATE} on {\ct CTRL}.
+
+The csv file format is:
+\begin{lstlisting}
+	Type(1), ID(1), Value(1)
+	Type(2), ID(2), Value(2)
+	.
+	.
+\end{lstlisting}
+where {\ct Type} is either {\ct RAMP} or {\ct CTRL}, {\ct ID} is the corresponding {\ct ID} in the FDS input files, and {\ct Value} is the new output value for a {\ct RAMP} or the new logical state for a {\ct CTRL} where positive values mean the {\ct CTRL} evaluates as {\ct TRUE} and negative values mean the function evaluates as {\ct FALSE}.
+
+An example set of inputs is below:
+\begin{lstlisting}
+&MISC EXTERNAL_FILENAME='external_test_input.csv'/
+&TIME T_END=10,DT_EXTERNAL=5/
+
+&OBST XB=0.0,0.1,0,1,0,1/
+&VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
+&SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
+&CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
+
+&VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
+&SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
+&RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
+\end{lstlisting}
+In these inputs a vent with a fixed velocity is externally controlled by a {\ct CTRL} that is initially {\ct TRUE}, and a vent with a fixed temperature is externally controlled with a {\ct RAMP} with an initial ramp value that results in a temperature of 100~$^\circ$C. These vents are applied to two faces of a 1 m$^3$ box. At 5~s, the csv file is read with contents of:
+\begin{lstlisting}
+RAMP,"T RAMP"   , 1
+CTRL,"VENT CTRL",-1
+\end{lstlisting}
+This turns off the velocity vent (a negative {\ct CTRL} value means set the state to {\ct .FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a {\ct RAMP} value of 1 means apply the full value of {\ct TMP\_FRONT}). Note that the {\ct ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
+
+\begin{figure}[ht]
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
+	\caption[Results of the {\ct external\_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
+	\label{external_control_fig}
+\end{figure}
 
 
 \chapter{Numerical Considerations}
@@ -11893,6 +11943,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct EXTERNAL\_FILEMANE}                            & Character   & Section~\ref{info:external_control}     &            &                   \\ \hline
 {\ct FIXED\_LES\_FILTER\_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
@@ -12399,8 +12450,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct DEVC\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
+{\ct EXTERNAL\_FILE}                & Logical       & Section~\ref{info:external_control}         &                       &  F          \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct INITIAL\_VALUE}                & Real          & Section~\ref{info:external_control}         &                       &             \\ \hline
 {\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
 {\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
 {\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
@@ -12807,6 +12860,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
 {\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
+{\ct DT\_EXTERNAL               & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline

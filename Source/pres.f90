@@ -3382,6 +3382,7 @@ INTEGER :: NOM,IW,NMLOC,NSETS,ISET,PIVOT,PIVOT_LOC,MESHES_LEFT,CTMSH_LO,CTMSH_HI
 SUPPORTED_MESH = .TRUE.
 
 ! 1. Stretched grids which is untested:
+GLMAT_IF_1 : IF(PRES_FLAG==GLMAT_FLAG) THEN
 TRN_ME(1:2) = 0
 MESH_LOOP_TRN : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    TRN_ME(1) = TRN_ME(1) + TRANS(NM)%NOCMAX
@@ -3394,6 +3395,7 @@ IF (TRN_ME(2) > 0) THEN ! There is a TRNX, TRNY or TRNZ line defined for stretch
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
+ENDIF GLMAT_IF_1
 
 IF (NMESHES == 1) RETURN
 
@@ -3441,7 +3443,7 @@ ENDIF
 ! indefinite), which would require separate solutions.
 ! A possible approach to look at is to solve the whole system as indefinite, and then substract a constant in
 ! zones with Dirichlet condition, s.t. the value of H is zero in open boundaries.
-
+GLMAT_IF_2 : IF(PRES_FLAG==GLMAT_FLAG) THEN
 ! 1. Build global lists of other connected meshes:
 ALLOCATE(MESH_GRAPH(1:6,NMESHES)); MESH_GRAPH(:,:) = 0
 MESH_LOOP_GRAPH : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -3548,8 +3550,9 @@ IF (ANY(DIRI_SET(1:NSETS) == 0)) THEN
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
-
 DEALLOCATE(MESH_GRAPH,DSETS,MESH_LIST,COUNTED,DIRI_SET)
+ENDIF GLMAT_IF_2
+
 RETURN
 END SUBROUTINE CHECK_UNSUPPORTED_MESH
 
@@ -3866,9 +3869,6 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
       ZSL%JA_H(1)   = MAX(1,ZSL%UNKH_IND(NM_START))
    ENDIF
 
-   IPARM(41) = ZSL%LOWER_ROW
-   IPARM(42) = ZSL%UPPER_ROW
-
    ! Define 4 byte A_H, F_H and X_H:
 #ifdef SINGLE_PRECISION_PSN_SOLVE
    IPARM(28) = 1 ! Single Precision solve.
@@ -3878,6 +3878,10 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
 #endif
 
 #ifdef WITH_MKL
+   ! Lower and uppper rows handled by this process:
+   IPARM(41) = ZSL%LOWER_ROW
+   IPARM(42) = ZSL%UPPER_ROW
+
    ! Initialize solver pointer for H matrix solves:
    ALLOCATE(ZSL%PT_H(64))
    DO I=1,64
