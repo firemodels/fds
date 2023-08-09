@@ -13,10 +13,23 @@ pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/NIST_NRC_Parallel_Pa
 
 plot_style
 
+co = [1 0 0; 0 1 0; 0 1 1;0 0 0;1 0 1;0 0 1;0.6 0.2 0.4];
+set(0,'DefaultAxesColorOrder',co)
+
 z = [10 20 30 50 75 100 140 180 220];
 zm = linspace(1,243,50);
 E = importdata([expdir,'PMMA_heatflux.csv'],',',2);
-M = importdata([outdir,'PMMA_60_kW_1_cm_devc.csv'],',',2);
+M1 = importdata([outdir,'PMMA_60_kW_1_cm_devc.csv'],',',2);
+M2 = importdata([outdir,'PMMA_60_kW_2_cm_devc.csv'],',',2);
+H1 = importdata([outdir,'PMMA_60_kW_1_cm_hrr.csv'],',',2);
+H2 = importdata([outdir,'PMMA_60_kW_2_cm_hrr.csv'],',',2);
+
+j=0;
+for i=[1 2 3 5 8 9 10]
+   j=j+1;
+   indices1(j) = min(find(H1.data(:,2)>E.data(i,1)));
+   indices2(j) = min(find(H2.data(:,2)>E.data(i,1)));
+end
 
 for i=[1 2 3 5 8 9 10]
    qdot{i} = E.data(i,2:10);
@@ -25,9 +38,15 @@ for i=[1 2 3 5 8 9 10]
    hold on
 end
 
-for i=[6 7 8 9 10 11 15]
-   qdotm{i} = M.data(i,2:51);
+for i=indices1
+   qdotm{i} = M1.data(i,2:51);
    plot(qdotm{i},zm)
+   hold on
+end
+
+for i=indices2
+   qdotm{i} = M2.data(i,2:51);
+   plot(qdotm{i},zm,'--')
    hold on
 end
    
@@ -51,30 +70,28 @@ print(gcf,'-dpdf',[pltdir,'PMMA_Heat_Flux'])
 
 hold off
 
-clear z E M qdot
+clear z E M1 M2 qdot
 
 z = [20 40 60 80];
 E = importdata([expdir,'Burner_HF_Centerline_multi-layer.csv'],',',2);
 M1 = importdata([outdir,'Marinite_60_kW_1_cm_devc.csv'],',',2);
 M2 = importdata([outdir,'Marinite_60_kW_2_cm_devc.csv'],',',2);
-
-co = [1 0 0; 0 1 0; 0 1 1;0 0 0];
-set(0,'DefaultAxesColorOrder',co)
-
+ 
+set(gca,'ColorOrderIndex',1)
 for i=[1 2 3 4]
    qdot{i} = E.data(i,3:6);
    plot(qdot{i},z,'o')
    hold on
 end
-set(0,'DefaultAxesColorOrder',co)
 xticks([0 10 20 30 40 50 60 70 80])
 yticks([0 20 40 60 80 100 120 140 160 180])
 
+set(gca,'ColorOrderIndex',1)
 for i=[15 21 31 41]
    plot(M1.data(i,2:51),zm)
    hold on
 end
-set(0,'DefaultAxesColorOrder',co)
+set(gca,'ColorOrderIndex',1)
 for i=[15 21 31 41]
    plot(M2.data(i,2:51),zm,'--')
    hold on
@@ -100,7 +117,7 @@ print(gcf,'-dpdf',[pltdir,'Marinite_Heat_Flux'])
 
 hold off
 
-clear E co
+clear E
 
 E = importdata([expdir,'Burner_steadyHF_Width_multi-layer.csv'],',',2);
 

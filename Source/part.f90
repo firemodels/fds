@@ -748,9 +748,11 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          IF (PRESENT(WALL_INDEX)) THEN
             WC    => MESHES(NM)%WALL(WALL_INDEX)
             B1    => MESHES(NM)%BOUNDARY_PROP1(WC%B1_INDEX)
+            IF (WC%OD_INDEX>0) ONE_D => MESHES(NM)%BOUNDARY_ONE_D(WC%OD_INDEX)
          ELSEIF (PRESENT(CFACE_INDEX)) THEN
             CFA   => MESHES(NM)%CFACE(CFACE_INDEX)
             B1    => MESHES(NM)%BOUNDARY_PROP1(CFA%B1_INDEX)
+            IF (CFA%OD_INDEX>0) ONE_D => MESHES(NM)%BOUNDARY_ONE_D(CFA%OD_INDEX)
          ENDIF
 
          ! Ember flag to be used for outputs
@@ -912,9 +914,11 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
-INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND
+USE COMPLEX_GEOMETRY, ONLY: CC_IDCC,CC_CGSC,CC_SOLID
+INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND,ICC
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,RRI,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR,&
             IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_FRAC
+LOGICAL :: CC_VALID
 
 IN => INITIALIZATION(INIT_INDEX)
 
@@ -988,11 +992,22 @@ IN_X0 = X_OFFSET + IN%X0
 IN_Y0 = X_OFFSET + IN%Y0
 IN_Z0 = X_OFFSET + IN%Z0
 
+! If the INIT volume is outside the current mesh, return
+
+IF (IN%SHAPE/='RING' .AND. IN%SHAPE/='LINE') THEN
+   IF (IN_X1>XF*ONE_M_EPS .OR. IN_X2<XS*ONE_P_EPS .OR. &
+       IN_Y1>YF*ONE_M_EPS .OR. IN_Y2<YS*ONE_P_EPS .OR. &
+       IN_Z1>ZF*ONE_M_EPS .OR. IN_Z2<ZS*ONE_P_EPS) RETURN
+ELSE
+   IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
+ENDIF
+
+! Skip mesh that is contained completely within a ring
+
+IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
+
 ! Cut off parts of the INIT region that are outside the current mesh
 
-IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
-! Skip mesh that is contained completely within a ring
-IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
 X1 = MAX(IN_X1,XS)
 X2 = MIN(IN_X2,XF)
 Y1 = MAX(IN_Y1,YS)
@@ -1118,7 +1133,12 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
          CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
 
          IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
-         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID) EXIT CHOOSE_XYZ_LOOP
+         ! Check for solid inside GEOM
+         CC_VALID = .TRUE.
+         IF (CC_IBM) THEN
+            IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
+         ENDIF
+         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. CC_VALID) EXIT CHOOSE_XYZ_LOOP
 
          ! If cannot find non-solid grid cell, stop searching
 
@@ -1154,6 +1174,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
       LP%DX = DX(II)
       LP%DY = DY(JJ)
       LP%DZ = DZ(KK)
+      LP%INITIALIZATION_INDEX = INIT_INDEX
 
       ! Initialize particle properties
 
@@ -1178,7 +1199,11 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
    DO KK=K1,K2
       DO JJ=J1,J2
          II_LOOP: DO II=I1,I2
-            IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID) CYCLE II_LOOP
+            CC_VALID = .TRUE.
+            IF (CC_IBM) THEN
+               IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
+            ENDIF
+            IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .OR. .NOT.CC_VALID) CYCLE II_LOOP
             IF (IN%SHAPE=='CONE') THEN
                IF (((XC(II)-X0)**2+(YC(JJ)-Y0)**2<(RRI*(1._EB-(ZC(KK)-Z0)/HH))**2) .OR. &
                   ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2)) CYCLE II_LOOP
@@ -1232,6 +1257,15 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                   BC%X = 0.5_EB*(X(II-1)+X(II))
                   BC%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
                   BC%Z = 0.5_EB*(Z(KK-1)+Z(KK))
+                  ! If particle goes in a cut cell, move it to the centroid
+                  IF (CC_IBM) THEN
+                     ICC=CCVAR(II,JJ,KK,CC_IDCC)
+                     IF (ICC>0) THEN
+                        BC%X = CUT_CELL(ICC)%XYZCEN(IAXIS,1)
+                        BC%Y = CUT_CELL(ICC)%XYZCEN(JAXIS,1)
+                        BC%Z = CUT_CELL(ICC)%XYZCEN(KAXIS,1)
+                     ENDIF
+                  ENDIF
                ELSE
                   CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                ENDIF
