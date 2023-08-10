@@ -2967,10 +2967,6 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
 
    IF (ZSL%NUNKH_TOTAL==0) CYCLE
 
-   ! Dump local low an high rows assembled by this process in IPARM:
-   IPARM(41) = ZSL%LOWER_ROW
-   IPARM(42) = ZSL%UPPER_ROW
-
    ! Define rhs F_H, here we use Source and BCs populated on PRESSURE_SOLVER:
    ZSL%F_H = 0._EB
    ZSL%X_H = 0._EB
@@ -3026,6 +3022,9 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
    ! WRITE(LU_ERR,*) 'SUM_FH=',SUM(F_H),H_MATRIX_INDEFINITE
 
 #ifdef WITH_MKL
+   ! Dump local low an high rows assembled by this process in IPARM:
+   IPARM(41) = ZSL%LOWER_ROW
+   IPARM(42) = ZSL%UPPER_ROW
    !.. Back substitution and iterative refinement
    IPARM(8) =  0 ! max numbers of iterative refinement steps
    PHASE    = 33 ! only solving
@@ -3719,9 +3718,9 @@ END SUBROUTINE COPY_CCVAR_IN_HS
 ! ------------------------------- GET_H_MATRIX_LUDCMP -------------------------------
 
 SUBROUTINE GET_H_MATRIX_LUDCMP
-
+#ifdef WITH_MKL
 USE MPI_F08
-
+#endif
 ! Local Variables:
 INTEGER :: INNZ, IROW, JCOL
 #ifdef WITH_MKL
