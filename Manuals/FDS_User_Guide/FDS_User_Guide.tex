@@ -4023,7 +4023,7 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 Many of the parameters specified in the FDS input file are fixed constants. However, there are several parameters that may vary in time, temperature, or space. The namelist groups, {\ct RAMP} and {\ct TABL}, allow you to control the behavior of these parameters.  {\ct RAMP} allows you to specify a function with one independent variable (such as time) and one dependent variable (such as velocity). {\ct TABL} allows you to specify a function of multiple independent variables (such as a solid angle) and multiple dependent variables (such as a sprinkler flow rate and droplet speed).
 
-
+FDS limits the number of {\ct RAMP}s that can be specified in the input file. This limit is controlled by the parameter {\ct MAX\_RAMPS} on {\ct MISC}. The default value is 100.
 
 \section{Time-Dependent Functions}
 \label{info:RAMP_Time}
@@ -11965,6 +11965,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
+{\ct MAX\_RAMPS}                                    & Integer      & Section~\ref{info:RAMP}                 &            &  100              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
 {\ct MINIMUM\_ZONE\_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
@@ -12861,7 +12862,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
 {\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
-{\ct DT\_EXTERNAL               & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
+{\ct DT\_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline
