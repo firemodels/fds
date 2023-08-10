@@ -2486,8 +2486,13 @@ WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
 
 IF (APPEND) RETURN
 
+CELL_COUNT = 0
+DO NM=1,NMESHES
+   M => MESHES(NM)
+   CELL_COUNT = CELL_COUNT + M%IBAR*M%JBAR*M%KBAR
+ENDDO
+
 IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
-   CELL_COUNT = 0
    MESH_LOOP: DO NM=1,NMESHES
       M => MESHES(NM)
       WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
@@ -2495,7 +2500,6 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Number of Grid Cells          ',M%IBAR*M%JBAR*M%KBAR
-      CELL_COUNT = CELL_COUNT + M%IBAR*M%JBAR*M%KBAR
       WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
