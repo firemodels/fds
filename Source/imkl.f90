@@ -203,7 +203,7 @@ MODULE PETSC_MESH_ZONE
 ! #include <petsc/finclude/petscsys.h>
    USE PETSC
 
-   PUBLIC :: PETSC_IERR,PETSC_MZ,PETSC_MZ_TYPE,PETSC_MZ_DEALLOC
+   PUBLIC :: PETSC_IERR,PETSC_MZ_TYPE,PETSC_MZ_DEALLOC
 
    INTEGER :: N_PETSC_MZ
    PetscErrorCode :: PETSC_IERR
@@ -226,4 +226,22 @@ MODULE PETSC_MESH_ZONE
    END SUBROUTINE PETSC_MZ_DEALLOC
 
 END MODULE PETSC_MESH_ZONE
+
+MODULE PETSC_ZONE_SOLVE
+#include <petsc/finclude/petsc.h>
+! #include <petsc/finclude/petscsys.h>
+   USE PETSC
+
+   PUBLIC :: PETSC_IERR
+   PetscErrorCode :: PETSC_IERR
+
+   TYPE PETSC_ZS_TYPE
+      Mat :: A_H    ! System Matrix
+      Vec :: F_H    ! RHS
+      Vec :: X_H    ! Solution vector
+      KSP :: LS     ! Linear solver
+      PC  :: PR     ! Preconditioner
+   END TYPE PETSC_ZS_TYPE
+
+END MODULE PETSC_ZONE_SOLVE
 #endif

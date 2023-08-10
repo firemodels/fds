@@ -16,6 +16,7 @@ USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 #ifdef WITH_PETSC
 USE PETSC_MESH_ZONE, ONLY : PETSC_MZ_TYPE
+USE PETSC_ZONE_SOLVE, ONLY : PETSC_ZS_TYPE
 #endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -1626,6 +1627,11 @@ TYPE ZONE_SOLVE_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+   TYPE(PETSC_ZS_TYPE) :: PETSC_ZS
+#else
+   INTEGER :: PETSC_ZS
+#endif
    INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
