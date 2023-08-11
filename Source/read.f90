@@ -10787,13 +10787,13 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 
 INTEGER :: N,N_TOTAL,N_EXPLICIT,NM,NNN,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,II,JJ,KK,OBST_INDEX,N_IMPLICIT_VENTS,I_MODE,&
-           N_ORIGINAL_VENTS
+           N_ORIGINAL_VENTS,IC0,IC1
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB_USER(6),XB_MESH(6), &
             REYNOLDS_STRESS(3,3),L_EDDY,VEL,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-LOGICAL :: REJECT_VENT,OUTLINE,GEOM
+LOGICAL :: REJECT_VENT,OUTLINE,GEOM,SOLID_FOUND
 TYPE IMPLICIT_VENT_TYPE
    REAL(EB) :: XB(6)
    INTEGER, DIMENSION(3) :: RGB=-1
@@ -10869,6 +10869,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDIF
+
+      ! Assign VENT an ID if not given by user
+
+      IF (ID=='null') WRITE(ID,'(I0)') N_EXPLICIT
 
       ! Simple error flagging
 
@@ -11293,35 +11297,49 @@ MESH_LOOP_2: DO NM=1,NMESHES
          IF (K1==KBAR .AND. K2==KBAR) VT%IOR = -3
       ENDIF
 
-      ORIENTATION_IF: IF (VT%IOR==0) THEN
-         IF (I1==I2) THEN
-            DO K=K1+1,K2
-               DO J=J1+1,J2
-                  IF (.NOT.CELL(CELL_INDEX(I2+1,J,K))%SOLID) VT%IOR =  1
-                  IF (.NOT.CELL(CELL_INDEX(I2  ,J,K))%SOLID) VT%IOR = -1
-               ENDDO
-            ENDDO
-         ENDIF
-         IF (J1==J2) THEN
-            DO K=K1+1,K2
-               DO I=I1+1,I2
-                  IF (.NOT.CELL(CELL_INDEX(I,J2+1,K))%SOLID) VT%IOR =  2
-                  IF (.NOT.CELL(CELL_INDEX(I,J2  ,K))%SOLID) VT%IOR = -2
-               ENDDO
-            ENDDO
-         ENDIF
-         IF (K1==K2) THEN
+      ! Assign orientation and determine if the VENT has a solid backing
+
+      SOLID_FOUND = .FALSE.
+
+      IF (I1==I2) THEN
+         DO K=K1+1,K2
             DO J=J1+1,J2
-               DO I=I1+1,I2
-                  IF (.NOT.CELL(CELL_INDEX(I,J,K2+1))%SOLID) VT%IOR =  3
-                  IF (.NOT.CELL(CELL_INDEX(I,J,K2  ))%SOLID) VT%IOR = -3
-               ENDDO
+               IC0 = CELL_INDEX(I2  ,J,K)
+               IC1 = CELL_INDEX(I2+1,J,K)
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  1
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -1
+               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
+               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
             ENDDO
-         ENDIF
-      ENDIF ORIENTATION_IF
+         ENDDO
+      ENDIF
+      IF (J1==J2) THEN
+         DO K=K1+1,K2
+            DO I=I1+1,I2
+               IC0 = CELL_INDEX(I,J2  ,K)
+               IC1 = CELL_INDEX(I,J2+1,K)
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  2
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -2
+               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
+               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
+            ENDDO
+         ENDDO
+      ENDIF
+      IF (K1==K2) THEN
+         DO J=J1+1,J2
+            DO I=I1+1,I2
+               IC0 = CELL_INDEX(I,J,K2)
+               IC1 = CELL_INDEX(I,J,K2+1)
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  3
+               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -3
+               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
+               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
+            ENDDO
+         ENDDO
+      ENDIF
 
       IF (VT%IOR==0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Specify orientation of VENT ',VT%ORDINAL, ', MESH NUMBER',NM
+         WRITE(MESSAGE,'(A,A,A,I0)')  'ERROR: Specify orientation of VENT ',TRIM(VT%ID),', MESH number ',NM
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11331,34 +11349,21 @@ MESH_LOOP_2: DO NM=1,NMESHES
       IF (ABS(VT%IOR)==2 .AND. VT%SURF_INDEX==PERIODIC_SURF_INDEX) PERIODIC_DOMAIN_Y = .TRUE.
       IF (ABS(VT%IOR)==3 .AND. VT%SURF_INDEX==PERIODIC_SURF_INDEX) PERIODIC_DOMAIN_Z = .TRUE.
 
-      ! Other error messages for VENTs
+      ! If the VENT is in the interior of the mesh, check for certain things
 
-      SELECT CASE(ABS(VT%IOR))
-         CASE(1)
-            IF (I1>=1 .AND. I1<=IBM1) THEN
-               IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
-               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-            ENDIF
-         CASE(2)
-            IF (J1>=1 .AND. J1<=JBM1) THEN
-               IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
-               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-            ENDIF
-         CASE(3)
-            IF (K1>=1 .AND. K1<=KBM1) THEN
-               IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-               ENDIF
-               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-            ENDIF
-      END SELECT
+      IF ((ABS(VT%IOR)==1 .AND. I1>=1 .AND. I1<=IBM1) .OR. &
+          (ABS(VT%IOR)==2 .AND. J1>=1 .AND. J1<=JBM1) .OR. &
+          (ABS(VT%IOR)==3 .AND. K1>=1 .AND. K1<=KBM1)) THEN
+         IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',TRIM(VT%ID),' must be an exterior boundary.'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ENDIF
+         IF (.NOT.SOLID_FOUND) THEN
+            WRITE(MESSAGE,'(A,A,A,I0)')  'ERROR: VENT ',TRIM(VT%ID),' has no solid backing, MESH number ',NM
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ENDIF
+         IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
+      ENDIF
 
       ! Open up boundary cells if it is an open vent
 
@@ -11382,7 +11387,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ! Check UVW
 
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
