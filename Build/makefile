@@ -82,7 +82,7 @@ ifeq ("$(MYSYSTEM)", "excess")
 endif
 ifeq ("$(MYSYSTEM)", "nisaba")
   FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include" 
- LFLAGS_PETSC = -Wl,-rpath -Wl,/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib -Wl,--enable-new-dtags -L/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib  -lmpi -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -ldl -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE  -Wl,-rpath,/usr/local/cuda/lib64 -L/usr/local/cuda/lib64 -L/usr/local/cuda/lib64/stubs -lcudart -lnvToolsExt -lcufft -lcublas -lcusparse -lcusolver -lcurand -lcuda -lblas -llapack -lstdc++ -L/usr/lib64 -lX11 
+ LFLAGS_PETSC = -Wl,-rpath -Wl,/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib -Wl,--enable-new-dtags -L/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib  -lmpi -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -ldl -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE  -Wl,-rpath,/usr/local/cuda/lib64 -L/usr/local/cuda/lib64 -L/usr/local/cuda/lib64/stubs -lcudart -lnvToolsExt -lcufft -lcublas -lcusparse -lcusolver -lcurand -lcuda -lflapack -lfblas -lstdc++ -L/usr/lib64 -lX11 
 endif
 
 else
