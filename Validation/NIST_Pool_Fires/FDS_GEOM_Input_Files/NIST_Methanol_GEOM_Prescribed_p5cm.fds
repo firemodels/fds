@@ -1,4 +1,4 @@
-&HEAD CHID='NIST_Methanol_GEOM_Prescribed_4cm', TITLE='NIST Methanol Pool, 4 cm resolution' /
+&HEAD CHID='NIST_Methanol_GEOM_Prescribed_p5cm', TITLE='NIST Methanol Pool, 0.5 cm resolution' /
 
 &TIME T_END=60. /
 
@@ -7,7 +7,8 @@
 &DUMP DT_HRR=2., DT_DEVC=0.0000001 /
 
 per Kim, Lee, Hamins, 2019, top of burner was 0.27 cm above floor (1 cm lip)
-&MESH IJK=32,32,48, XB=-0.64,0.64,-0.64,0.64,-0.26,1.66/
+&MULT ID='m1', DX=0.32,DY=0.32,DZ=0.32, I_UPPER=3,J_UPPER=3,K_UPPER=5/ 96 mesh
+&MESH IJK=64,64,64, XB=-0.64,-0.32,-0.64,-0.32,-0.26,0.06, MULT_ID='m1'/
 
 &RADI NUMBER_RADIATION_ANGLES=600, TIME_STEP_INCREMENT=10, ANGLE_INCREMENT=10 /
 
