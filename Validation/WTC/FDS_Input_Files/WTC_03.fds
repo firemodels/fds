@@ -9,8 +9,8 @@
       FYI='60% Heptane, 40% Toluene, C_7 H_12'
       RADIATIVE_FRACTION=0.39
       C=7.
-      H=12. 
-      CO_YIELD=0.042  
+      H=12.
+      CO_YIELD=0.042
       SOOT_YIELD=0.114 /
 
 &OBST XB= 3.4, 4.4,-1.0, 1.0, 0.01, 0.01, SURF_ID='STEEL PAN' /  Fire Pan
@@ -65,15 +65,23 @@
 &RAMP ID='k_nickel', T=1000.,F=68.2   /
 
 &MATL ID                 = 'INSULATION'
-      FYI                = 'Isolatek BLAZE-SHIELD DC/F'
+      FYI                = 'Isolatek BLAZE-SHIELD DC/F, NCSTAR 1-6A Tables 6-4 and 6-5'
       CONDUCTIVITY_RAMP  = 'k_insulation'
       SPECIFIC_HEAT_RAMP = 'c_insulation'
       DENSITY            = 208. /
-&RAMP ID='c_insulation', T= 20., F=0.8    /
-&RAMP ID='c_insulation', T=677., F=2.0     /
-&RAMP ID='k_insulation', T= 20., F=0.05    /
-&RAMP ID='k_insulation', T=377., F=0.10    /
-&RAMP ID='k_insulation', T=677., F=0.20    /
+&RAMP ID='c_insulation', T=  25., F=0.83/
+&RAMP ID='c_insulation', T= 100., F=0.94/
+&RAMP ID='c_insulation', T= 300., F=0.72/
+&RAMP ID='c_insulation', T= 500., F=0.90/
+&RAMP ID='c_insulation', T= 800., F=1.02/
+&RAMP ID='c_insulation', T=1200., F=1.07/
+
+&RAMP ID='k_insulation', T=  25., F=0.046/
+&RAMP ID='k_insulation', T= 100., F=0.063/
+&RAMP ID='k_insulation', T= 300., F=0.11 /
+&RAMP ID='k_insulation', T= 500., F=0.17 /
+&RAMP ID='k_insulation', T= 800., F=0.34 /
+&RAMP ID='k_insulation', T=1200., F=0.53 /
 
 &MATL ID                 = 'MARINITE'
       FYI                = 'BNZ Materials Marinite I'
@@ -217,9 +225,9 @@
 &BNDF QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
 
 Gas Analyzers
- 
-&DEVC XYZ=6.04,0.28,3.65,QUANTITY='VOLUME FRACTION',SPEC_ID='OXYGEN',         ID='EO2' / 
-&DEVC XYZ=6.04,0.28,3.65,QUANTITY='VOLUME FRACTION',SPEC_ID='CARBON DIOXIDE', ID='ECO2' / 
+
+&DEVC XYZ=6.04,0.28,3.65,QUANTITY='VOLUME FRACTION',SPEC_ID='OXYGEN',         ID='EO2' /
+&DEVC XYZ=6.04,0.28,3.65,QUANTITY='VOLUME FRACTION',SPEC_ID='CARBON DIOXIDE', ID='ECO2' /
 &DEVC XYZ=6.04,0.28,3.65,QUANTITY='VOLUME FRACTION',SPEC_ID='CARBON MONOXIDE',ID='ECO' /
 &DEVC XYZ=1.38,0.59,3.24,QUANTITY='VOLUME FRACTION',SPEC_ID='CARBON DIOXIDE', ID='SMCO2' /
 &DEVC XYZ=1.53,0.59,3.24,QUANTITY='VOLUME FRACTION',SPEC_ID='CARBON MONOXIDE',ID='SMCO' /
