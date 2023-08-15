@@ -838,18 +838,8 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-B1%U_NORMAL/))
          ENDIF WALL_OR_CFACE_IF_2
 
-         ! Embers may not be generated in wall-adjacent cell
-
-         IF (INSERT_TYPE==1 .AND. LP%EMBER) THEN
-            CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,IIG,JJG,KKG)
-            BC%IIG = IIG
-            BC%JJG = JJG
-            BC%KKG = KKG
-         ELSE
-            BC%IIG = IIG
-            BC%JJG = JJG
-            BC%KKG = KKG
-         ENDIF
+         ! Update idicies in case offset puts location in a different cell
+         CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
