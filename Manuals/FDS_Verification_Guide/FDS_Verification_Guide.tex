@@ -4426,6 +4426,15 @@ Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for case
 \label{fig:ht3d_energy_conservation_2}
 \end{figure}
 
+Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flux versus the internal enthalpy in a case where a small hot block is placed above a larger block for which 3-D heat conduction is invoked. In this case, the block has a thermal conductivity of 0.1~W/m/K, typical of an insulating material.  The internal cells cluster near all six faces of the block as would be done in a 1-D case. The calculation of the internal enthalpy can be performed in any coordinate direction, both positive and negative. In this case, the positive $x$ direction is chosen, whereas the hot block is placed above the larger block. This ensures that the energy is properly transferred in the lateral directions.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_4}
+\caption[Additional \textct{ht3d\_energy\_conservation} test case]{Comparison of the integrated net heat flux versus the internal enthalpy of a solid block with relativley low thermal conductivity.}
+\label{fig:ht3d_energy_conservation_4}
+\end{figure}
+
 \FloatBarrier
 
 \subsection{Heat Transfer to a Steel Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
