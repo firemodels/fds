@@ -19,7 +19,7 @@
 
 &SURF ID='POOL', COLOR='LIGHT BLUE', SPEC_ID='METHANOL', TMP_FRONT=64.6, MASS_FLUX=0.01465 / Pool area: 0.073 m2, 21.3 kW
 
-&GEOM ID='Burner' SURF_ID='PAN','POOL' BINARY_FILE='../../../../cad/Waterloo_Methanol/waterloo30cm.bingeom' /
+&GEOM ID='Burner' SURF_ID='PAN','POOL' BINARY_FILE='../../../../cad/Case_Studies/Waterloo_Methanol/waterloo30cm.bingeom' /
 
 &VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /

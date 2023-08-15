@@ -35,7 +35,7 @@
       ABSORPTION_COEFFICIENT = 1500
       BOILING_TEMPERATURE    = 64.65 /
 
-&GEOM ID='Burner' SURF_ID='PAN','POOL' BINARY_FILE='../../../../cad/Waterloo_Methanol/waterloo30cm.bingeom' /
+&GEOM ID='Burner' SURF_ID='PAN','POOL' BINARY_FILE='../../../../cad/Case_Studies/Waterloo_Methanol/waterloo30cm.bingeom' /
 
 &VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
