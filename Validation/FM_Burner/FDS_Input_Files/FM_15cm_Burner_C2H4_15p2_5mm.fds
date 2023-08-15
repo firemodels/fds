@@ -22,15 +22,8 @@
 &SURF ID='burner', HRRPUA=826.6, COLOR='RED', BLOWING=T /
 &SURF ID='coflow', COLOR='BLUE', VEL=-0.041 /
 
-&MULT ID='cube array', DX=0.005,DY=0.005, I_UPPER=39,J_UPPER=39 /
-
-&OBST XB=-0.10,-0.095,-0.10,-0.095,-0.254,0.0000
-      MULT_ID='cube array'
-      SURF_IDS='burner','wall','wall'
-      SHAPE='CYLINDER'
-      RADIUS=0.076
-      HEIGHT=0.254
-      XYZ=0,0,-0.254 /
+! GEOM Vertices: 294 | Faces: 576
+&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
 
 &VENT PBZ=0.83, SURF_ID='OPEN'/
 &VENT PBZ=-0.370, SURF_ID='coflow'/
