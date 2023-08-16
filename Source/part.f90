@@ -9,6 +9,7 @@ USE TRAN
 USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE,PACK_PARTICLE
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 USE SOOT_ROUTINES, ONLY: DROPLET_SCRUBBING
+USE COMPLEX_GEOMETRY, ONLY: CC_IDCC,CC_IDCF,CC_CGSC,CC_SOLID
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 PRIVATE
@@ -837,18 +838,8 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-B1%U_NORMAL/))
          ENDIF WALL_OR_CFACE_IF_2
 
-         ! Embers may not be generated in wall-adjacent cell
-
-         IF (INSERT_TYPE==1 .AND. LP%EMBER) THEN
-            CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,IIG,JJG,KKG)
-            BC%IIG = IIG
-            BC%JJG = JJG
-            BC%KKG = KKG
-         ELSE
-            BC%IIG = IIG
-            BC%JJG = JJG
-            BC%KKG = KKG
-         ENDIF
+         ! Update idicies in case offset puts location in a different cell
+         CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
@@ -914,11 +905,12 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
-USE COMPLEX_GEOMETRY, ONLY: CC_IDCC,CC_CGSC,CC_SOLID
-INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND,ICC
+INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND,ICC,IFACE,INDCF,I_RAND
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,RRI,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR,&
-            IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_FRAC
+            IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_FRAC,DIST,DIST_MIN,&
+            P_VECTOR(3),P_VECTOR_MIN(3),NVEC_MIN(3)
 LOGICAL :: CC_VALID
+TYPE (CC_CUTFACE_TYPE), POINTER :: CF
 
 IN => INITIALIZATION(INIT_INDEX)
 
@@ -1136,7 +1128,29 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
          ! Check for solid inside GEOM
          CC_VALID = .TRUE.
          IF (CC_IBM) THEN
-            IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
+            IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) THEN
+               CC_VALID = .FALSE.
+            ELSE
+               INDCF = CCVAR(II,JJ,KK,CC_IDCF)
+               ! If closest CFACE has positive dot-product of normal and centroid-particle vector, location is assumed valid
+               IF (INDCF>0) THEN
+                  DIST_MIN=HUGE_EB
+                  CF => CUT_FACE(INDCF)
+                  CC_VALID = .FALSE.
+                  CFA_LOOP1: DO IFACE=1,CF%NFACE
+                     P_VECTOR = (/LP_X-CF%XYZCEN(IAXIS,IFACE), &
+                                 LP_Y-CF%XYZCEN(JAXIS,IFACE), &
+                                 LP_Z-CF%XYZCEN(KAXIS,IFACE)/)
+                     DIST = NORM2(P_VECTOR)
+                     IF (DIST<DIST_MIN) THEN
+                        DIST_MIN = DIST
+                        P_VECTOR_MIN = P_VECTOR
+                        NVEC_MIN = CFACE(CF%CFACE_INDEX(IFACE))%NVEC
+                     ENDIF
+                  ENDDO CFA_LOOP1
+                  IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWO_EPSILON_EB) CC_VALID=.TRUE.
+               ENDIF
+            ENDIF
          ENDIF
          IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. CC_VALID) EXIT CHOOSE_XYZ_LOOP
 
@@ -1268,6 +1282,39 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                   ENDIF
                ELSE
                   CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
+                  ! Check for particle inside solid part of cut cell
+                  IF (CC_IBM) THEN
+                     INDCF = CCVAR(II,JJ,KK,CC_IDCF)
+                     IF (INDCF>0) THEN
+                        ICC = CCVAR(II,JJ,KK,CC_IDCC)
+                        CF => CUT_FACE(INDCF)
+                        ! Check dot-product of normal and centroid-particle vector for closest CFACE
+                        ! Limited number of location guesses before choosing the cut cell centroid
+                        RAND_LOCATION_LOOP: DO I_RAND=1,50
+                           DIST_MIN=HUGE_EB
+                           CFA_LOOP2: DO IFACE=1,CF%NFACE
+                              P_VECTOR = (/BC%X-CF%XYZCEN(IAXIS,IFACE), &
+                                          BC%Y-CF%XYZCEN(JAXIS,IFACE), &
+                                          BC%Z-CF%XYZCEN(KAXIS,IFACE)/)
+                              DIST = NORM2(P_VECTOR)
+                              IF (DIST<DIST_MIN) THEN
+                                 DIST_MIN = DIST
+                                 P_VECTOR_MIN = P_VECTOR
+                                 NVEC_MIN = CFACE(CF%CFACE_INDEX(IFACE))%NVEC
+                              ENDIF
+                           ENDDO CFA_LOOP2
+                           IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWO_EPSILON_EB) EXIT RAND_LOCATION_LOOP
+                           CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
+                        ENDDO RAND_LOCATION_LOOP
+                        ! No suitable location was found, move to centroid
+                        IF (I_RAND==51) THEN
+                           BC%X = CUT_CELL(ICC)%XYZCEN(IAXIS,1)
+                           BC%Y = CUT_CELL(ICC)%XYZCEN(JAXIS,1)
+                           BC%Z = CUT_CELL(ICC)%XYZCEN(KAXIS,1)
+                        ENDIF
+                     ENDIF
+                  ENDIF
+
                ENDIF
 
                CALL VOLUME_INIT_PARTICLE
