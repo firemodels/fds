@@ -8195,6 +8195,8 @@ CC_IBM_IF: IF (CC_IBM) THEN
             CFACE_AREA = CFACE_AREA + CUT_FACE(ICF)%AREA(JCF)
 
             IND_SELECT_3: SELECT CASE(IND)
+               CASE DEFAULT
+                  EXIT FCVAR_IF ! GAS_PHASE_OUTPUT_RES is unchanged
                CASE( 2, 3, 4)  ! F_X, F_Y, F_Z
                   GAS_PHASE_OUTPUT_CFA = GAS_PHASE_OUTPUT_CFA + CUT_FACE(ICF)%FN(JCF) * CUT_FACE(ICF)%AREA(JCF)
                CASE(6)   ! U-VELOCITY
