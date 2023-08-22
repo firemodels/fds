@@ -369,6 +369,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: ACCEL_X=0._EB       !< Acceleration in x direction (m/s2)
    REAL(EB) :: ACCEL_Y=0._EB       !< Acceleration in y direction (m/s2)
    REAL(EB) :: ACCEL_Z=0._EB       !< Acceleration in z direction (m/s2)
+   REAL(EB) :: RVC=-1._EB           !< Reciprocal of cell volume containing particle (1/m3)
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
@@ -670,12 +671,12 @@ TYPE REACTION_TYPE
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
    INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
    INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
-   INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
-   INTEGER :: N_SMIX_FR                     !< Number of participating lumped species in reaction equation
-   INTEGER :: N_SMIX_R                      !< Number of reactant lumped species in reaction equation
-   INTEGER :: N_SPEC_READ                   !< Number of primitive species with N_S read
-   INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
-   INTEGER :: N_THIRD                       !< Number of third body non-unity efficiency species in reaction equation
+   INTEGER :: N_SMIX=0                      !< Number of lumped species in reaction equation
+   INTEGER :: N_SMIX_FR=0                   !< Number of participating lumped species in reaction equation
+   INTEGER :: N_SMIX_R=0                    !< Number of reactant lumped species in reaction equation
+   INTEGER :: N_SPEC_READ=0                 !< Number of primitive species with N_S read
+   INTEGER :: N_SPEC=0                      !< Number of primitive species in reaction equation
+   INTEGER :: N_THIRD=0                     !< Number of third body non-unity efficiency species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
    INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction

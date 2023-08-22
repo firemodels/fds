@@ -4243,7 +4243,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
    RN => REACTION(NR)
 
-   IF ((RN%A_IN > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>TWO_EPSILON_EB .OR. RN%H>TWO_EPSILON_EB)) THEN
+   IF ((A > 0._EB .OR. E > 0._EB) .AND. (C>TWO_EPSILON_EB .OR. H>TWO_EPSILON_EB)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
