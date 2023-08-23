@@ -251,6 +251,7 @@ $QFDS -d Heat_Transfer ht3d_energy_conservation.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_2.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_3.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_4.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_5.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation_2.fds

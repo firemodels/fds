@@ -1721,21 +1721,23 @@ The solid phase heat conduction equation in three directions is given by:
 \begin{equation}
 \label{ht3d}
   \rho_{\rm s} c_{\rm s} \frac{\partial T_{\rm s}}{\partial t} = \frac{\partial}{\partial x} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial x} \right) +
-                                                                 \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial y} \right) + 
+                                                                 \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial y} \right) +
                                                                  \frac{\partial}{\partial z} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial z} \right) + \dot{q}'''_{\rm s}
 \end{equation}
-One method of solution is to decompose the temperature field according to coordinate direction under the assumption that the discretization of each component is the same as its 1-D counterpart:
-\be
-   T_{\rm s}(x,y,z,t) = \frac{1}{3} \left( T_{{\rm s},x}(x,t) + T_{{\rm s},y}(y,t) + T_{{\rm s},z}(z,t) \right)
-\ee
-Over the course of three time steps, each of the following equations can be solved using the Crank-Nicolson scheme described above to form an alternating direction implicit (ADI) scheme:
+The method of solution is to split this equation using the following alternating direction implicit (ADI) scheme:
 \begin{align}
 \label{ht3d_xyz}
- \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s},x}}{\partial t} & = \frac{\partial}{\partial x} \left( k_{\rm s} \frac{\partial T_{{\rm s},x}}{\partial x} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
- \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s},y}}{\partial t} & = \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{{\rm s},y}}{\partial y} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
- \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s},z}}{\partial t} & = \frac{\partial}{\partial z} \left( k_{\rm s} \frac{\partial T_{{\rm s},z}}{\partial z} \right) + \frac{\dot{q}'''_{\rm s}}{3}
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial x} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial x} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial y} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial z} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial z} \right) + \frac{\dot{q}'''_{\rm s}}{3}
 \end{align}
-Between each step, the resulting temperature field from, say, the $x$ direction is interpolated onto the $y$ and $z$ directions via linear interpolation. Because of this, the spatial resolution of each direction need not be the same nor uniform. As with the 1-D solver, cells can be clustered near the boundary to capture steep gradients in temperature.
+The solution of the equation is updated over the course of three gas phase time steps of size $\delta t$. For each coordinate direction, the temperature field is finely gridded near the surface and coarsely gridded in the interior, typically. Thus, the temperature field, $T_{\rm s}(x,y,z,t)$, is discretized differently in each direction. For example, for each surface cell normal to the $x$ direction, the 1-D temperature array in depth is $T_{{\rm s},x,i}$, where $1\le i \le N_x$, and $N_x$ is the number of non-uniformly spaced internal cells spanning the entire width of the solid in the $x$ direction. This is exactly the same approach taken  above for 1-D heat conduction in solids with ``exposed'' back surfaces. Likewise, $T_{\rm s}(x,y,z,t)$ is discretized $T_{{\rm s},y,j}$ and $T_{{\rm s},z,k}$ in the $y$ and $z$ directions, respectively.
+
+In each of the three steps, the 1-D heat conduction equation is solved in one of the three coordinate directions using the Crank-Nicolson (C-N) scheme described above, except now the implicit update spans three gas phase time steps, $3\, \delta t$. The temperature fields spanning the other two coordinate directions are updated explicitly. The change in temperature due to the implicit C-N update is denoted $\Delta T_{{\rm s},x,i}$, with similar expressions for the $y$ and $z$ updates. The explicit update taken during the two steps for which $T_{{\rm s},x,i}$ is not updated implicitly transfers enthalpy in the $y$ and $z$ directions:
+\be
+    \rho_{{\rm s},i} c_{{\rm s},i} T_{{\rm s},x,i}^{n+1} = \rho_{{\rm s},i} c_{{\rm s},i} T_{{\rm s},x,i}^{n}  +  \frac{1}{2} \left[ \sum_j w_j \rho_{{\rm s},j} c_{{\rm s},j} \Delta T_{{\rm s},y,j} +   \sum_k w_k \rho_{{\rm s},k} c_{{\rm s},k} \Delta T_{{\rm s},z,k}  \right]
+\ee
+The coefficients, $w_j$ and $w_k$, are the fractions of cell $i$ of the $x$ direction discretization overlapped by cells $j$ and $k$ of the $y$ and $z$ discretizations, respectively.
 
 This type of splitting scheme is discussed by Toro~\cite{Toro}, Chapter~16, ``Methods for Multi-Dimensional PDEs.''
 
