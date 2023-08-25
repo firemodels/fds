@@ -4424,14 +4424,15 @@ Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for case
 \label{fig:ht3d_energy_conservation_2}
 \end{figure}
 
-Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flux versus the internal enthalpy in a case where a small hot block is placed above a larger block for which 3-D heat conduction is invoked. In one case (left plot), the block is made of one material with a thermal conductivity of 0.1~W/m/K, typical of insulation.  The internal cells cluster near all six faces of the block as would be done in a 1-D case. The calculation of the internal enthalpy can be performed in any coordinate direction, both positive and negative. In this case, the positive $x$ direction is chosen, whereas the hot block is placed above the larger block. This ensures that the energy is properly transferred in the lateral directions. In a second case (right plot), the solid block consists of a thin, 1~cm thick layer of insulation over a solid block of steel.
+Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flux versus the internal enthalpy in a case where a small hot block is placed above a larger block for which 3-D heat conduction is invoked. In one case (upper left plot), the block is made of one material with a thermal conductivity of 0.1~W/m/K, typical of insulation.  The internal cells cluster near all six faces of the block as would be done in a 1-D case. The calculation of the internal enthalpy can be performed in any coordinate direction, both positive and negative. In this case, the positive $x$ direction is chosen, whereas the hot block is placed above the larger block. This ensures that the energy is properly transferred in the lateral directions. In a second case (upper right plot), the solid block consists of a thin, 1~cm thick layer of insulation over a solid block of steel. The insulation layer is specified using a one-cell thick obstruction on top of the obstruction representing the steel. In a third case (lower plot), the solid block of steel is covered by two layers of insulation of thickness 1.5~cm and 1.0~cm that are specified using the conventional {\ct SURF} line with arrays of {\ct MATL\_ID} and {\ct THICKNESS}. Each layer of insulation is composed of two different material components.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_4} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_5}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_5} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_6}}
 \end{tabular*}
-\caption[Additional \textct{ht3d\_energy\_conservation} test cases, 4 and 5]{Comparison of the integrated net heat flux versus the internal enthalpy of a homogenous solid block with relativley low thermal conductivity (left), and one with multiple layers (right).}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases, 4, 5, and 6]{Comparison of the integrated net heat flux versus the internal enthalpy for a homogenous solid block of insulation material (upper left), a block of steel with a single layer of insulation (upper right), and a block with multiple layers of multi-component insulation (bottom).}
 \label{fig:ht3d_energy_conservation_4}
 \end{figure}
 

@@ -7234,8 +7234,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! Set up a dummy surface for HT1D and HT3D. The properties will be changed later.
 
-   If (HT1D .OR. HT3D .AND. THICKNESS(1)<TWO_EPSILON_EB) THICKNESS(1) = 0.1_EB
-   If (HT1D .OR. HT3D .AND. MATL_ID(1,1)=='null') MATL_ID(1,1) = MATERIAL(1)%ID
+   If ((HT1D .OR. HT3D) .AND. THICKNESS(1)>TWO_EPSILON_EB .AND. MATL_ID(1,1)/='null') SF%LINING = .TRUE.
+   If ((HT1D .OR. HT3D) .AND. THICKNESS(1)<TWO_EPSILON_EB) THICKNESS(1) = 0.1_EB
+   If ((HT1D .OR. HT3D) .AND. MATL_ID(1,1)=='null') MATL_ID(1,1) = MATERIAL(1)%ID
 
    ! Load RAMP parameters into appropriate array
 
