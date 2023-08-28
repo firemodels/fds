@@ -1599,7 +1599,7 @@ The term {\ct VENT} is somewhat misleading. Taken literally, a {\ct VENT} can be
 \end{lstlisting}
 specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the underlying obstruction.
 
-A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a portion of a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Thus, if the {\ct VENT} is given a {\ct SURF\_ID} that specifies a value of {\ct HRRPUA} (Heat Release Rate Per Unit Area), this rate will only be applied to the portion of the {\ct VENT} for which there is a solid beneath. 
+A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a portion of a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Thus, if the {\ct VENT} is given a {\ct SURF\_ID} that specifies a value of {\ct HRRPUA} (Heat Release Rate Per Unit Area), this rate will only be applied to the portion of the {\ct VENT} for which there is a solid beneath.
 
 Also, a {\ct VENT} derives its orientation by having a solid cell on one side and a gas cell on the other. Do not extend a {\ct VENT} to have multiple orientations.
 
@@ -2202,7 +2202,7 @@ If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas no
 	\Phi_h = \frac{\dot{m}'' c_g}{h}
 \end{equation}
 \begin{equation}
-	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h 
+	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h
 \end{equation}
 where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
 \subsection{Adiabatic Surfaces}
@@ -2421,7 +2421,7 @@ Solid boundaries usually have one or more layers of a known thickness, in which 
 &OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
       MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
 \end{lstlisting}
-The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct HT1D}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above. 
+The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct HT1D}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
 
 
 
@@ -2430,16 +2430,12 @@ The {\ct SURF} line serves only to color the surface black and to indicate, via 
 \label{ht3d_demo}
 \label{info:mesh_separation}
 
-The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate.
-
-FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
-&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK' /
 &OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. It is important to specify this parameter because by default, FDS uses a non-uniform grid for 1-D heat solid phase heat transfer that is not appropriate for 3-D applications.
-
 The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
 
 \subsubsection{Limitations}
@@ -2448,6 +2444,7 @@ The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third sol
 \item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation.
+\item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. 
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -2515,6 +2512,24 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
 &SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE',
       THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
 \end{lstlisting}
+
+
+\subsubsection{Surface Linings}
+
+In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
+\begin{lstlisting}
+&OBST XB=-0.20, 0.20,-0.20, 0.20,-0.05, 0.05, SURF_ID='SLAB', MATL_ID='STEEL' /
+&SURF ID='SLAB', HT3D=T, COLOR='BEIGE', THICKNESS=0.003,0.002,
+      MATL_ID(1,1:2)='STUFF A','STUFF B', MATL_MASS_FRACTION(1,1:2)=0.3,0.7,
+      MATL_ID(2,1:2)='STUFF B','STUFF C', MATL_MASS_FRACTION(2,1:2)=0.2,0.8 /
+&MATL ID='STUFF A', DENSITY=  50, SPECIFIC_HEAT=1.0, CONDUCTIVITY=0.1 /
+&MATL ID='STUFF B', DENSITY=  80, SPECIFIC_HEAT=1.5, CONDUCTIVITY=0.2 /
+&MATL ID='STUFF C', DENSITY=  30, SPECIFIC_HEAT=2.5, CONDUCTIVITY=0.3 /
+&MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50. /
+\end{lstlisting}
+The resulting solid has the same dimensions as the one you specify, but 5~mm of its surface material is replaced by the given layers of ``stuff.'' 
+
+
 
 
 
@@ -7332,7 +7347,7 @@ Wildfire spread over releastic terrain can be modeled in FDS using a plugin to Q
 QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
 A set of sample input files created by qgis2fds reside within the gitHub repository \\
-\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ 
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\
 in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
 
 For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
@@ -7906,7 +7921,7 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
 {\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline                & External file control, see Section~\ref{info:external_control} \\ \hline
-{\ct EXTERNAL}           
+{\ct EXTERNAL}
 \end{tabular}
 \end{center}
 \end{table}
