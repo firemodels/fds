@@ -3892,7 +3892,7 @@ IF(GLMAT_VERBOSE) MSGLVL = 0
 END SUBROUTINE GET_H_MATRIX_LUDCMP
 
 ! -------------------------------- SET_CLUSTER_SOLVER_IPARM ---------------------------------
-
+#ifdef WITH_MKL
 SUBROUTINE SET_CLUSTER_SOLVER_IPARM
 
 ! Define control parameter vector iparm:
@@ -3901,13 +3901,11 @@ ALLOCATE(IPARM(64)); IPARM(:) = 0
 
 IPARM(1) = 1   ! no solver default
 ! Pardiso: IPARM(2) = 2   ! fill-in reordering from METIS
-#ifdef WITH_MKL
 IF (N_MPI_PROCESSES > 4) THEN ! Typical number of computing cores inside one chip.
    IPARM(2) =10   ! 10 = MPI Parallel fill-in reordering from METIS. If 3 = OpenMP parallel reordering in Master Node.
 ELSE              ! Note IPARM(2)=10 has a bug which has been fixed from Intel MKL 2018 update 2 onwards.
    IPARM(2) = 3
 ENDIF
-#endif
 IPARM(4) = 0   ! no iterative-direct algorithm
 IPARM(5) = 0   ! no user fill-in reducing permutation
 IPARM(6) = 0   ! =0 solution on the first n components of x
@@ -3930,7 +3928,7 @@ IPARM(27) = 1  ! Check matrix
 IPARM(40) = 2  ! Matrix, solution and rhs provided in distributed assembled matrix input format.
 
 END SUBROUTINE SET_CLUSTER_SOLVER_IPARM
-
+#endif
 
 ! -------------------------------- GET_BCS_H_MATRIX ---------------------------------
 
