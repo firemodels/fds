@@ -7,7 +7,11 @@ MODULE GLOBAL_CONSTANTS
 
 
 USE PRECISION_PARAMETERS
+#ifdef WITHOUT_MPIF08
+USE MPI
+#else
 USE MPI_F08
+#endif
 USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -353,8 +357,13 @@ LOGICAL :: PROFILING=.FALSE.
 INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS               !< The MPI process of the given mesh index
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FILE_COUNTER          !< Counter for the number of output files currently opened
 
+#ifdef WITHOUT_MPIF08
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI communicator for the a given mesh and its neighbors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
+#else
 TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI communicator for the a given mesh and its neighbors
 TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
+#endif
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,&
