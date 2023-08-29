@@ -1108,7 +1108,9 @@ REAL(EB),ALLOCATABLE, DIMENSION(:,:) ::   D_H_MAT
 ! PARDISO solver control parameters:
 INTEGER, PARAMETER :: SYMM_INDEFINITE       =-2
 INTEGER, PARAMETER :: SYMM_POSITIVE_DEFINITE= 2
+#if WITH_MKL
 INTEGER, ALLOCATABLE :: IPARM( : )
+#endif
 
 ! Message level:
 INTEGER, SAVE ::  MSGLVL = 0
@@ -2678,7 +2680,7 @@ RETURN
 END SUBROUTINE ULMAT_BCS_H_MATRIX
 
 ! -------------------------------- ULMAT_DEFINE_IPARM ------------------------------------
-
+#ifdef WITH_MKL
 SUBROUTINE ULMAT_DEFINE_IPARM
 
 !..
@@ -2707,7 +2709,7 @@ IPARM(27) = 1  ! Check matrix
 
 RETURN
 END SUBROUTINE ULMAT_DEFINE_IPARM
-
+#endif
 ! ----------------------------- ULMAT_H_MATRIX_SOLVER_SETUP --------------------------------
 SUBROUTINE ULMAT_H_MATRIX_SOLVER_SETUP(NM,IPZ)
 
