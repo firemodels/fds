@@ -80,9 +80,23 @@ ifeq ("$(MYSYSTEM)", "excess")
   FFLAGS_PETSC = -Wl,-bind_at_load -Wl,-multiply_defined,suppress -Wl,-multiply_defined -Wl,suppress -Wl,-commons,use_dylibs -Wl,-search_paths_first -Wl,-no_compact_unwind -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include" -I/opt/X11/include
  LFLAGS_PETSC = -L${PETSC_DIR}/${PETSC_ARCH}/lib -Wl,-rpath,/opt/intel/oneapi/mkl/2022.2.1/lib -L/opt/intel/oneapi/mkl/2022.2.1/lib -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -Wl,-rpath,/opt/X11/lib -L/opt/X11/lib -lX11 -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal -limf -lm -lz -lifport -lifcoremt -lsvml -lipgo -lirc -lc++ -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig  -Wl,-rpath,/Users/mnv/Documents/Software/petsc-3.19.2/arch-darwin-c-opt/lib -L/Users/mnv/Documents/Software/petsc-3.19.2/arch-darwin-c-opt/lib -lHYPRE -lsuperlu
 endif
+
+TEST_FLG =
+ifeq ("$(MYSYSTEM)", "enki")
+  TEST_FLG = 1
+endif
 ifeq ("$(MYSYSTEM)", "nisaba")
+  TEST_FLG = 1
+endif
+ifeq ("$(MYSYSTEM)", "polaris")
+  TEST_FLG = 1
+endif
+ifeq ("$(MYSYSTEM)", "summit")
+  TEST_FLG = 1
+endif
+ifdef TEST_FLG
   FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include" 
- LFLAGS_PETSC = -Wl,-rpath -Wl,/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib -Wl,--enable-new-dtags -L/apps/ubuntu-20.04.2/openmpi/4.1.1/gcc-9.3.0/lib  -lmpi -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -ldl -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE  -Wl,-rpath,/usr/local/cuda/lib64 -L/usr/local/cuda/lib64 -L/usr/local/cuda/lib64/stubs -lcudart -lnvToolsExt -lcufft -lcublas -lcusparse -lcusolver -lcurand -lcuda -lflapack -lfblas -lstdc++ -L/usr/lib64 -lX11 
+  LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc 
 endif
 
 else
@@ -378,6 +392,14 @@ ompi_gnu_osx_dv : FCOMPL = mpifort
 ompi_gnu_osx_dv : FOPENMPFLAGS =
 ompi_gnu_osx_dv : obj = fds_ompi_gnu_osx_dv
 ompi_gnu_osx_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+mpich_gnu_polaris : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC)
+mpich_gnu_polaris : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC)
+mpich_gnu_polaris : FCOMPL = ftn
+mpich_gnu_polaris : FOPENMPFLAGS = -fopenmp
+mpich_gnu_polaris : obj = fds_mpich_gnu_polaris
+mpich_gnu_polaris : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # *** Object Dependencies ***
