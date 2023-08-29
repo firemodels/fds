@@ -402,6 +402,14 @@ mpich_gnu_polaris : obj = fds_mpich_gnu_polaris
 mpich_gnu_polaris : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+smpi_gnu_summit : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) -DWITHOUT_MPIF08
+smpi_gnu_summit : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC)
+smpi_gnu_summit : FCOMPL = mpifort
+smpi_gnu_summit : FOPENMPFLAGS = -fopenmp
+smpi_gnu_summit : obj = fds_smpi_gnu_summit
+smpi_gnu_summit : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
 # *** Object Dependencies ***
 
 prec.o :
