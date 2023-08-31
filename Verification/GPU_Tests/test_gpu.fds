@@ -1,0 +1,62 @@
+! Test of Polaris and Summit FDS Builds on a simple fire case:
+! If you comment the &PRES line code will run with FFT Pressure solver in
+! CPU only. If you run with UGLMAT code will run CG+HYPRE PETSc solve in GPU.
+! For Polaris, see pbs_script.sh submission script.
+ 
+&HEAD CHID='test_gpu', TITLE='Simple GPU test: Test PETSc Poisson solvers in simple fire case.' /
+&TIME T_END=1./
+
+# 4 mesh:
+#&MESH ID='mesh', IJK=50,100,50, XB=-2.4,-2.,1.6,2.4,1.2,1.7/
+#&MESH ID='mesh', IJK=50,100,50, XB=-2.,-1.6,1.6,2.4,1.2,1.7/
+#&MESH ID='mesh', IJK=50,100,50, XB=-2.4,-2.,1.6,2.4,1.7,2.2/
+#&MESH ID='mesh', IJK=50,100,50, XB=-2.,-1.6,1.6,2.4,1.7,2.2/
+
+# 8 mesh:
+&MESH ID='mesh', IJK=50,50,50, XB=-2.4,-2.,1.6,2.,1.2,1.7/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.,-1.6,1.6,2.,1.2,1.7/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.4,-2.,1.6,2.,1.7,2.2/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.,-1.6,1.6,2.,1.7,2.2/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.4,-2.,2.,2.4,1.2,1.7/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.,-1.6,2.,2.4,1.2,1.7/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.4,-2.,2.,2.4,1.7,2.2/
+&MESH ID='mesh', IJK=50,50,50, XB=-2.,-1.6,2.,2.4,1.7,2.2/
+
+# 16 mesh:
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,1.6,1.8,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,1.6,1.8,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,1.6,1.8,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,1.6,1.8,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,1.8,2.0,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,1.8,2.0,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,1.8,2.0,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,1.8,2.0,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,2.,2.2,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,2.,2.2,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,2.,2.2,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,2.,2.2,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,2.2,2.4,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,2.2,2.4,1.2,1.7/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.4,-2.,2.2,2.4,1.7,2.2/
+#&MESH ID='mesh', IJK=50,25,50, XB=-2.,-1.6,2.2,2.4,1.7,2.2/
+
+&PRES SOLVER='UGLMAT'/
+&SPEC ID='PROPANE'/
+&REAC FUEL='PROPANE', SOOT_YIELD=0.01 /
+
+&SURF ID='Fire',
+      COLOR='RED',
+      HRRPUA=1000.0,
+      TMP_FRONT=0.0/
+&OBST ID='fire', XB=-2.083333,-1.944535,1.892717,2.05,1.298571,1.378048, SURF_ID='Fire'/ 
+
+&VENT ID='Mesh Vent: mesh [XMAX]', SURF_ID='OPEN', XB=-1.6,-1.6,1.6,2.4,1.2,2.2/ 
+&VENT ID='Mesh Vent: mesh [XMIN]', SURF_ID='OPEN', XB=-2.4,-2.4,1.6,2.4,1.2,2.2/ 
+&VENT ID='Mesh Vent: mesh [YMAX]', SURF_ID='OPEN', XB=-2.4,-1.6,2.4,2.4,1.2,2.2/ 
+&VENT ID='Mesh Vent: mesh [YMIN]', SURF_ID='OPEN', XB=-2.4,-1.6,1.6,1.6,1.2,2.2/ 
+&VENT ID='Mesh Vent: mesh [ZMAX]', SURF_ID='OPEN', XB=-2.4,-1.6,1.6,2.4,2.2,2.2/ 
+&VENT ID='Mesh Vent: mesh [ZMIN]', SURF_ID='OPEN', XB=-2.4,-1.6,1.6,2.4,1.2,1.2/ 
+
+&DEVC ID='Device', QUANTITY='TEMPERATURE', XYZ=-2.414953,1.658883,1.375/
+
+&TAIL /
