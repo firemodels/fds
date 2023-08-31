@@ -2223,7 +2223,7 @@ DT_PART      = -1._EB                  ; RAMP_PART    = 'null' ; DT_PART_SPECIFI
 DT_PL3D      =  HUGE(EB)               ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
 DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null' ; DT_PROF_SPECIFIED    = DT_PROF
 DT_RADF      =  HUGE(EB)               ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
-DT_RESTART   =  HUGE(EB)               ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
+DT_RESTART   =  (T_END-T_BEGIN)/20._EB ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
 DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null' ; DT_SLCF_SPECIFIED    = DT_SLCF
 DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null' ; DT_SL3D_SPECIFIED    = DT_SL3D
 DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null' ; DT_SMOKE3D_SPECIFIED = DT_SMOKE3D
