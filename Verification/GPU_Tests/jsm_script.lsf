@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# Simple LSF submission script to run test_gpu.fds in Summit.
+#
+# - Copy this script and test_gpu.fds to /gpfs/alpine/geo149/world-shared/"YOUR_DIR"
+#   as you can't run cases in your home directory in Summit.
+# - In that dir type:
+#   $bsub jsm_script.lsf 
+# - To check if your job is running type : $bjobs -u "YOUR_USER"
+# - To kill the job : $bkill JOBID
+# 
+# Begin LSF Directives
+#BSUB -P geo149       # Project name
+#BSUB -W 2:00         # Wall time
+#BSUB -q debug        # queue
+#BSUB -nnodes 2       # reserve 2 nodes with 42 physical cores and 6 GPU each
+#BSUB -J test_gpu     # Job name
+#BSUB -o test_gpu.%J  # stdout
+#BSUB -e test_gpu.%J  # stderr
+
+# Modules:
+module load gcc/9.1.0 cuda/11.0.3
+export OMP_NUM_THREADS=7
+
+cd /gpfs/alpine/geo149/world-shared/"YOUR_DIR" 
+
+date
+
+# Submission line: -n refers to resource set, each resource set has 7 physical cores (-c) and one GPU (-g): Summit compute nodes have 7 cores per GPU.                    
+jsrun --smpiargs="-gpu" -n 8 -c 7 -g 1 --bind packed:7 /ccs/home/"YOUR_USER"/Firemodels_fork/fds/Build/smpi_gnu_summit/fds_smpi_gnu_summit test_gpu.fds -mat_type aijcusparse -vec_type cuda 
+

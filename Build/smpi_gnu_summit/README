@@ -8,8 +8,7 @@ ulimit -s unlimited
 ulimit -n 10240
 
 # Modules:
-module load gcc/11.2
-module load cuda/11.7
+module load gcc/9.1.0 cuda/11.0.3
 
 # Petsc:
 export PETSC_DIR=/ccs/home/"YOUR_USER"/Software/petsc
@@ -38,7 +37,7 @@ $git clone https://gitlab.com/petsc/petsc.git
 
 2.b cd into the petsc directory and configure the library:
 
-$./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --download-suitesparse --download-hypre --download-fblaslapack --with-cuda
+$./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --download-suitesparse --download-hypre --download-fblaslapack --with-cc=mpicc --with-cxx=mpiCC --with-fc=mpifort --with-cuda --with-cudac=nvcc
 
 2.c Once configured copy and paste the compilation line provided:
 
