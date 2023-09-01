@@ -26,7 +26,6 @@ cd FM_SNL;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
-cd JH_FRA;  ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
@@ -64,6 +63,7 @@ cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..
+cd UMD_SBI;  ./Run_All.sh $OPTIONS; cd ..
 cd USFS_Catchpole;  ./Run_All.sh $OPTIONS; cd ..
 cd USFS_Corsica;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..

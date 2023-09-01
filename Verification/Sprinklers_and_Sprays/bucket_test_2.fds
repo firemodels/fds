@@ -20,7 +20,7 @@
 &VENT MB='YMIN', SURF_ID='OPEN' /
 &VENT MB='YMAX', SURF_ID='OPEN' /
 
-&DEVC ID='Mass', QUANTITY='AMPUA', PART_ID='water drops', STATISTICS='SURFACE INTEGRAL', XB=-5,5,-5,5,0,0 /
+&DEVC ID='Mass', QUANTITY='AMPUA', PART_ID='water drops', SPATIAL_STATISTIC='SURFACE INTEGRAL', XB=-5,5,-5,5,0,0 /
 &BNDF QUANTITY='AMPUA', PART_ID='water drops' /  Accumulated Mass Per Unit Area, i.e., the Buckets
 
 &TAIL /

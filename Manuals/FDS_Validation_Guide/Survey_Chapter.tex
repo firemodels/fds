@@ -50,7 +50,7 @@ Battaglia et al.~\cite{Battaglia:1} used FDS to simulate fire whirls.  First, th
 
 Quintiere and Ma~\cite{Ma:2,Ma:3} compared predicted flame heights and plume centerline temperatures to empirical correlations.  For plume temperature,  the Heskestad  correlation~\cite{SFPE:Heskestad} was chosen. Favorable agreement was found in the plume region, but the results near the flame region were found to be grid-dependent, especially for low $Q^*$ fires. At this same time, researchers at NIST were reaching similar conclusions, and it was noticed by both teams that a critical parameter for the model is $D^*/\dx$, where $D^*$ is the characteristic fire diameter and $\dx$ is the grid cell size. If this parameter is sufficiently large, the fire can be considered well-resolved and agreement with various flame height correlations was found. If the parameter is not large enough, the fire is not well-resolved and adjustments must be made to the combustion routine to account for it.
 
-Guti\'{e}rrez-Montes et al.~\cite{Gutierrez:Building_and_Environment} simulated 1.3~MW and 2.3~MW fires in a 20~m cubic atrium using FDS version 4. Similar experiments were conducted at VTT, Finland, in a 19~m tall test hall with similar sized fires. These results are included in Section~\ref{VTT_Plume_Temperature}.
+Guti\'{e}rrez-Montes et al.~\cite{Gutierrez:Building_and_Environment} simulated 1.3~MW and 2.3~MW fires in a 20~m cubic atrium using FDS version 4. Similar experiments were conducted at VTT, Finland, in a 19~m tall test hall with similar sized fires. These results are included in Sec.~\ref{VTT_Plume_Temperature}.
 
 Hurley and Munguia~\cite{Hurley:GCR09-921,Hurley:JFPE2009} compared FDS (version 4) simulations with plume and ceiling jet measurements from a series of full-scale tests conducted by Underwriters Laboratories. The tests were conducted in a 36.6~m by 36.6~m compartment with ceiling heights ranging from 3~m to 12.2~m. Heat release rates followed a modified t-squared growth profile. Thermocouples attached to brass disks were used to simulate thermal detectors.
 
@@ -123,6 +123,7 @@ An extensive amount of flame spread validation work with FDS version 4 has been 
 
 Mangs and Hostikka~\cite{Mangs_Hostikka:IAFSS10} carried out experiments and simulations (FDS 5.4.3) of the vertical flame spread on the surface of thin birch wood cylinders at different ambient temperatures. The parameters for the pyrolysis model were estimated from TGA and cone calorimeter experiments. The gas phase flow was calculated in the DNS mode with 1.0 mm grid cells in axi-symmetric geometry. The simulation model was able to predict the flame spread rates within the uncertainties associated with the experiments and postsimulation analysis of the spread rate.
 
+Moinuddin et al.~\cite{Moinuddin:Polymers2015} conducted numerical simulations of coupled solid-phase reactions (pyrolysis) and gas-phase reaction (combustion). FDS was used for simulating the PMMA (non-charring), pine (charring), wool (charring) and cotton (charring) flaming fire experiments conducted with a cone calorimeter at 50~kW/m$^2$ and 30~kW/m$^2$. The inputs of chemical kinetics and the heat of reaction were obtained from sample mass change and enthalpy data in TGA and differential scanning calorimetry (DSC) tests and the flammability parameters were obtained from cone calorimeter experiments.
 
 \subsection{Compartment Fires}
 
@@ -131,16 +132,9 @@ specifically to validate FDS~\cite{NIST_NCSTAR_1-5B}.  The tests were performed 
 tall.  The fires were fueled by heptane for some tests and a heptane/toluene mixture for the others. The results of the experiments and simulations
 are included in detail in this Guide.
 
-A second set of experiments to validate FDS for use in the World Trade Center investigation is documented in Ref.~\cite{NIST_NCSTAR_1-5E}. The experiments
-are not described as part of this Guide. The intent
-of these tests was to evaluate the ability of the model to simulate the growth of a fire burning three office workstations within a compartment of
-dimensions 11~m by 7~m by 4~m, open at one end to mimic the ventilation of windows similar to those in the WTC towers. Six tests were performed
-with various initial conditions exploring the effect of jet fuel spray and ceiling tiles covering the surface of the desks and carpet. Measurements
-were made of the heat release rate and compartment gas  temperatures at four  locations using vertical thermocouple arrays. Six different
-material samples were tested in the NIST cone calorimeter: desk, chair, paper, computer case, privacy panel, and carpet. Data for the carpet,
-desk and privacy panel were input directly into FDS, with the other three materials lumped together to form an idealized fuel type. Open burns of
-single workstations were used to calibrate the simplified fuel package. Details of the modeling are contained in Ref.~\cite{NIST_NCSTAR_1-5F}.
+A second set of experiments to validate FDS for use in the World Trade Center investigation is documented in Ref.~\cite{NIST_NCSTAR_1-5E}. The experiments are not described as part of this Guide. The intent of these tests was to evaluate the ability of the model to simulate the growth of a fire burning three office workstations within a compartment of dimensions 11~m by 7~m by 4~m, open at one end to mimic the ventilation of windows similar to those in the WTC towers. Six tests were performed with various initial conditions exploring the effect of jet fuel spray and ceiling tiles covering the surface of the desks and carpet. Measurements were made of the heat release rate and compartment gas  temperatures at four  locations using vertical thermocouple arrays. Six different material samples were tested in the NIST cone calorimeter: desk, chair, paper, computer case, privacy panel, and carpet. Data for the carpet, desk and privacy panel were input directly into FDS, with the other three materials lumped together to form an idealized fuel type. Open burns of single workstations were used to calibrate the simplified fuel package. Details of the modeling are contained in Ref.~\cite{NIST_NCSTAR_1-5F}.
 
+Moinuddin et al.~\cite{Moinuddin:FSJ2011} conducted experiments to measure the temperature rise of protected and unprotected structural steel during a fire within a small enclosure (an ISO 9705 room). The fuel (wood crib) was placed at two locations (front and back) within the room. The temperature of six steel columns and two steel beams was measured. Predictions by FDS were compared with the measurements.
 
 The BRE Centre for Fire Safety Engineering at the University of Edinburgh conducted a series of large-scale fire tests in a real high rise building in Dalmarnock, Glasgow,
 Scotland~\cite{Rein:Dalmarnock,Rein:FSJ}.
@@ -159,9 +153,9 @@ The simulations were found to provide satisfying results in CFAST, as an alterna
 
 Drean et al.~\cite{Drean2018} measured the fire exposure to an exterior facade of a two-level test facility operated by the engineering firm Efectis in Saint-Aubin, France. The objective was to evaluate the ability of FDS, version~6, to predict the gas temperatures and heat fluxes at the exterior wall.
 
+Chaudhari et al.~\cite{Chaudhari:FT2023} simulated controlled fire experiments using a gas burner conducted in a purpose-built, two-story, moderately air-tight residential structure. Temperatures, gas concentrations (oxygen, water vapor, carbon dioxide), and differential pressures were monitored throughout the structure. HVAC status and stairwell door openings to the fire room were varied for the experiments.
 
-
-
+Moinuddin et al.~\cite{Moinuddin:FM2017} used FDS to simulate fires in a deep enclosure with a depth of 4~m, width of 2~m, and opening heights of 0.6~m, 0.8~m, and 1.0~m. The results were compared to various empirical methods.
 
 
 \subsection{Sprinklers, Mist System, and Suppression by Water}
@@ -182,7 +176,9 @@ O'Grady and Novozhilov~\cite{OGrady:CST} compared the predictions of FDS version
 
 Xiao~\cite{Xiao:FT2012} compared FDS simulations with real scale compartment measurements for unsprinklered and sprinklered experiments. Numerical results for doorway mass flow rate and temperature are compared with the experimental data for three fire sizes.
 
+Zhao and Zhang~\cite{Zhao:2014,Zhao:2023} have simulated the effect of water sprays on vertical flame spread.
 
+Mahmud et al.~\cite{Mahmud:FSJ2016} conducted a study on the characterization of water mists, in terms of distribution of flux density of sprays, produced by a single and a multi-orifice high-pressure jet nozzle. Full-scale experiments were conducted and the distributions of volume flux density of sprays were measured. The sprays were also modeled using FDS to investigate the capability of the model in predicting the distribution behaviour of the spray. 
 
 \subsection{Airflows in Fire Compartments}
 
@@ -256,6 +252,11 @@ the effects of gravitational settling/deposition compared to thermophoretic and 
 large-scale validation cases.
 
 
+\subsection{Wildfires}
+
+Work began in the early 2000's to adapt FDS to wildland fire spread. Mell et al.~\cite{Mell:IJWF2007,Mell:2009} simulated fire spread over grassland and the burning of Douglas fire trees. Perez-Ramirez et al.~\cite{Perez-Ramirez:FT2017} simulated small-scale fire spread experiments under a laboratory calorimeter. All of these studies used a variant of FDS referrred to as Wildland-FDS or WFDS. Since that time, these studies have been redone and the results are included in this guide under the headings ``CSIRO Grassland Fires,'' ``NIST Douglas Firs,'' and ``USFS Corsica.''
+
+Wadhwani et al.~\cite{Wadhwani:IJWF2022,Wadhwani:FSJ2017} conducted experiments using a device that produces controlled and repeatable sets of firebrands, and validated FDS for firebrand transport against this set of experiments.
 
 
 \section{Reconstructions of Actual Fires}
@@ -285,3 +286,6 @@ include:
 \item During the SFPE Professional Development Week in the fall of 2001, a workshop was held in which several engineers related their experiences using FDS as a forensic tool~\cite{Carpenter:SFPE2001}.
 \item The role of carbon monoxide in the deaths of three fire fighters was studied by Christensen and Icove~\cite{Christensen:JFS}.
 \end{itemize}
+
+Icove and May~\cite{Icove:JNAFE2021} discuss the benefits of computer fire models in forensic fire investigations, historical and pending legal case law, and methods to use modeling results within expert reports and testimony. Particular issues reviewed are the use of animations versus simulations, evidentiary guidelines, and authentication using verification and validation studies.
+

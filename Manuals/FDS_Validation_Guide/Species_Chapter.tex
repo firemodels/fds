@@ -12,7 +12,7 @@ For any hydrocarbon fuel, the major combustion products are oxygen and carbon di
 
 \subsection{DelCo Trainers}
 
-Oxygen and carbon dioxide measurements were made at several locations in the one and two level DelCo training structures. See Section~\ref{DelCo_Description} for their exact locations.
+Oxygen and carbon dioxide measurements were made at several locations in the one and two level DelCo training structures. See Sec.~\ref{DelCo_Description} for their exact locations.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -86,7 +86,7 @@ For some experiments, only two concentrations are reported, one being the ambien
 
 Also, the test report does not indicate whether the reported volume fractions were taken to be ``wet'' or ``dry''; that is, whether the water vapor was condensed out of the sample. For the sake of comparison, the FDS results are assumed to be ``dry''.
 
-Further details of the modeling can be found in Section~\ref{LLNL_Enclosure_Description}.
+Further details of the modeling can be found in Sec.~\ref{LLNL_Enclosure_Description}.
 
 \newpage
 
@@ -449,6 +449,8 @@ Each compartment in the PRISME DOOR experiments contained an oxygen and carbon d
 \label{PRISME_Gas_1}
 \end{figure}
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_O2} &
@@ -508,6 +510,8 @@ The compartment in the PRISME SOURCE experiments contained an oxygen and carbon 
 \caption[PRISME SOURCE experiments, CO$_2$ and O$_2$ concentration, Room 2, Tests 1-4]{PRISME SOURCE experiments, CO$_2$ and O$_2$ concentration, Room 2, Tests 1-4.}
 \label{PRISME_SOURCE_Gas_1}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -621,6 +625,8 @@ Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner)
 \label{FM_Burner_Soot_1}
 \end{figure}
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_2p5D_20p9} &
@@ -633,7 +639,7 @@ Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner)
 \label{FM_Burner_Soot_2}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_0p5D_16p8} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_0p5D_16p8} \\
@@ -659,7 +665,7 @@ Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner)
 \label{FM_Burner_Soot_4}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_0p5D_15p2} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_0p5D_15p2} \\
@@ -684,7 +690,6 @@ Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner)
 {FM Burner experiments, plume mean and rms soot volume fraction at heights of 2.5 and 3.5 burner diameters, D, 15.2~\% O$_2$.}
 \label{FM_Burner_Soot_6}
 \end{figure}
-
 
 
 \begin{sidewaysfigure}[p]
@@ -814,8 +819,7 @@ Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests f
 \subsection{NIST/NRC Experiments}
 \label{Smoke Concentration}
 
-For the simulations of the NIST/NRC tests, the smoke yield is specified as one of the test parameters.
-The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer.
+The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer. The experiments are divided into two. Figure~\ref{smoke_closed} displays the results of the experiments in which the compartment door was closed. Figure~\ref{smoke_open} displays the results of the experiments in which the compartment door was open. The results are significantly different---the simulations of the closed door experiments predict smoke concentrations that are more than twice that of the experiments. The reason for this is that FDS has not accounted for the agglomeration and deposition of the smoke on the walls, something that is far more important when the compartment is not well-ventilated.
 
 \newpage
 
@@ -830,13 +834,12 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, Tests 1, 2, 4, 7, 8, 10, 13, 16]{NIST/NRC experiments, smoke concentration, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\caption[NIST/NRC experiments, smoke concentration, closed door experiments]{NIST/NRC experiments, smoke concentration, closed door experiments.}
+\label{smoke_closed}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_17_Smoke} &
- \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Smoke} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Smoke} &
@@ -844,7 +847,8 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, Tests 3, 5, 9, 14, 15, 17, 18]{NIST/NRC experiments, smoke concentration, Tests 3, 5, 9, 14, 15, 17, 18.}
+\caption[NIST/NRC experiments, smoke concentration, open door experiements]{NIST/NRC experiments, smoke concentration, open door experiments.}
+\label{smoke_open}
 \end{figure}
 
 
@@ -895,7 +899,7 @@ Beam obscuration measurements were made at different locations within the compar
 \subsection{Sippola Aerosol Deposition Experiments}
 \label{Aerosol Deposition Velocity}
 
-Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities in the Sippola experiments, and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results. Details of the experiment and simulation are found in Section~\ref{Sippola_Aerosol_Deposition_Description}
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities in the Sippola experiments, and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results. Details of the experiment and simulation are found in Sec.~\ref{Sippola_Aerosol_Deposition_Description}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -925,7 +929,7 @@ Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predi
 \subsection{NIST Soot Deposition Gauge Experiments}
 \label{Aerosol Deposition}
 
-Figure~\ref{NIST Soot Deposition Gauge deposited mass} compares the measured and predicted aerosol mass deposition velocities in the NIST Soot Deposition Gauge experiments, and Figure~\ref{Summary_NIST_SDG} shows a summary of the results. Details of the experiment and simulation are found in Section~\ref{NIST_SDG_Description}
+Figure~\ref{NIST Soot Deposition Gauge deposited mass} compares the measured and predicted aerosol mass deposition velocities in the NIST Soot Deposition Gauge experiments, and Figure~\ref{Summary_NIST_SDG} shows a summary of the results. Details of the experiment and simulation are found in Sec.~\ref{NIST_SDG_Description}
 
 \begin{figure}[!ht]
 	\begin{center}
@@ -985,13 +989,15 @@ Figure~\ref{RM_Tables} compares the measured and predicted evaporation rates for
 \begin{figure}[!ht]
 	\begin{center}
 		\begin{tabular}{c}
-			\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Evaporation_Rate} \\
+			\includegraphics[height=3.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Evaporation_Rate} \\
 			\vspace{0.25in} \\
 		\end{tabular}
 	\end{center}
 	\caption[Summary of evaporation rates for the Ranz and Marshall experiments]{Summary of evaporation rates for the Ranz and Marshall experiments~\cite{Ranz}.}
 	\label{RM_Summary}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Fujita et al.}
 
@@ -1008,7 +1014,7 @@ A description of the experiments is included in Sec.~\ref{Fujita_exp}. Figure~\r
 \label{Fujita_drop_area}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp0_T} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp3_T} \\
@@ -1019,7 +1025,7 @@ A description of the experiments is included in Sec.~\ref{Fujita_exp}. Figure~\r
 \label{Fujita_drop_T}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 \subsection{Gavin}
 
@@ -1034,7 +1040,7 @@ A description of the experiments is included in Sec.~\ref{Gavin_exp}. Figure~\re
 \label{Gavin_plots}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 \subsection{Kolaitis and Founti}
 
@@ -1051,10 +1057,9 @@ A description of the experiments is included in Sec.~\ref{Kolaitis_exp}. Figure~
 	\label{Kolaitis_d2}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_decane_T} &
-		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_ethanol_T} \\
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_decane_T} & \\
 		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_1_T} &
 		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_2_T}
 	\end{tabular*}
@@ -1062,13 +1067,13 @@ A description of the experiments is included in Sec.~\ref{Kolaitis_exp}. Figure~
 	\label{Kolaitis_T}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 \subsection{Maqua et al.}
 
 A description of the experiments is included in Sec.~\ref{Maqua_exp}. Figure~\ref{Maqua_plots} shows the droplet surface temperature for the two experiments.
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/maqua_acetone} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/maqua_ethanol}
@@ -1077,7 +1082,7 @@ A description of the experiments is included in Sec.~\ref{Maqua_exp}. Figure~\re
 \label{Maqua_plots}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 \subsection{Taflin Experiments}
 
@@ -1104,7 +1109,7 @@ Predicting the concentration of products of incomplete combustion is challenging
 \subsection{Smyth Slot Burner Experiment}
 \label{Smyth_Reactions}
 
-Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_h2o_h2} show predicted and measured concentrations of CH$_4$, O$_2$, CO, CO$_2$, H$_2$O and H$_2$ at the same three elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at three elevations above the Smyth slot burner (see Sec.~\ref{Smyth_Slot_Burner_Description} for details). Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_h2o_h2} show predicted and measured concentrations of CH$_4$, O$_2$, CO, CO$_2$, H$_2$O and H$_2$ at the same three elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1116,6 +1121,8 @@ Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at
 {Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_temp}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1165,7 +1172,7 @@ Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at
 
 \subsection{Beyler Hood Experiments}
 
-Fig.~\ref{Beyler_Species} compares measured and predicted species mass fractions in the Beyler Hood experiments. Both measured and predicted values are time-averaged. The FDS results are taken at the extraction vent, whereas the measurements were made downstream of the vent. Details of the experiments can be found in Section~\ref{Beyler_Hood_Description}.
+Fig.~\ref{Beyler_Species} compares measured and predicted species mass fractions in the Beyler Hood experiments. Both measured and predicted values are time-averaged. The FDS results are taken at the extraction vent, whereas the measurements were made downstream of the vent. Details of the experiments can be found in Sec.~\ref{Beyler_Hood_Description}.
 
 
 
@@ -1188,7 +1195,7 @@ Fig.~\ref{Beyler_Species} compares measured and predicted species mass fractions
 \subsection{NIST Reduced Scale Enclosure (RSE) Experiments, 1994}
 \label{sec:NIST_RSE_1994}
 
-Figures~\ref{NIST_RSE_1994_CO} through \ref{NIST_RSE_1994_H2O} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measurements were made 10~cm below the ceiling and 30~cm from the left side wall. The front position was 10~cm from the wall with the door; the back position was 30~cm from the rear wall. Details of the experiments are found in Section~\ref{NIST_RSE_1994_Description}.
+Figures~\ref{NIST_RSE_1994_CO} through \ref{NIST_RSE_1994_H2O} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measurements were made 10~cm below the ceiling and 30~cm from the left side wall. The front position was 10~cm from the wall with the door; the back position was 30~cm from the rear wall. Details of the experiments are found in Sec.~\ref{NIST_RSE_1994_Description}.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1244,7 +1251,7 @@ Figures~\ref{NIST_RSE_1994_CO} through \ref{NIST_RSE_1994_H2O} show the measured
 \subsection{NIST Reduced-Scale Enclosure (RSE) Experiments, 2007}
 \label{sec:NIST_RSE_2007}
 
-Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall. The compartment was 0.95~m wide by 1.42~m deep by 0.98~m tall with a door 0.48~m wide by 0.81~m tall centered on one of the short walls.  Measurements of temperature, O$_2$, CO$_2$, CO, and unburned hydrocarbon concentration were made near the ceiling in the front and back of the compartment. Details of the experiments are found in Section~\ref{NIST_RSE_2007_Description}.
+Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall. The compartment was 0.95~m wide by 1.42~m deep by 0.98~m tall with a door 0.48~m wide by 0.81~m tall centered on one of the short walls.  Measurements of temperature, O$_2$, CO$_2$, CO, and unburned hydrocarbon concentration were made near the ceiling in the front and back of the compartment. Details of the experiments are found in Sec.~\ref{NIST_RSE_2007_Description}.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1410,7 +1417,7 @@ Species and temperature measurements were made in the front and rear of the comp
 \subsection{NIST Full-Scale Enclosure (FSE) Experiments, 2008}
 \label{sec:NIST_FSE_2008}
 
-Species concentrations and temperature measurements were made at the front and rear of the compartment. Details of the experiments are found in Section~\ref{NIST_FSE_2008_Description}.
+Species concentrations and temperature measurements were made at the front and rear of the compartment. Details of the experiments are found in Sec.~\ref{NIST_FSE_2008_Description}.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1774,7 +1781,9 @@ Species concentrations and temperature measurements were made at the front and r
 
 Falkenstein-Smith et al.~\cite{Falkenstein-Smith:2019} made mean temperature and product species concentration measurements along the centerline above 30.5~cm diameter liquid pool fires of acetone, ethanol, and methanol; and a 37.0~cm diameter burner of methane and propane. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process. Note that the species measurements include the vapor form of the primary fuel molecule, in addition to intermediate fuel species. FDS does not model the decomposition of the fuel molecule into intermediate hydrocarbon species except for CO and H$_2$.
 
-The mean centerline temperature profiles are found in Section~\ref{NIST_Pool_Fires_Plume_Temps}. The species concentrations are found in Figs.~\ref{NIST_Pool_Fires_Acetone} through~\ref{NIST_Pool_Fires_Propane_34kW} on the following pages.
+The mean centerline temperature profiles are found in Sec.~\ref{NIST_Pool_Fires_Plume_Temps}. The species concentrations are found in Figs.~\ref{NIST_Pool_Fires_Acetone} through~\ref{NIST_Pool_Fires_Propane_34kW} on the following pages.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

@@ -146,7 +146,9 @@ The following figures show average velocities, taken over a 60~s period and obta
 \label{Ed_Veg_Drag_velocity_low}
 \end{figure}
 
-\begin{figure}[ht]
+\newpage
+
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Edinburgh_Vegetation_Drag/PineNeedles_40kg_050cms} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Edinburgh_Vegetation_Drag/PineNeedles_40kg_100cms} \\
@@ -157,7 +159,7 @@ The following figures show average velocities, taken over a 60~s period and obta
 \label{Ed_Veg_Drag_velocity_medium}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Edinburgh_Vegetation_Drag/PineNeedles_60kg_050cms} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Edinburgh_Vegetation_Drag/PineNeedles_60kg_100cms} \\
@@ -198,9 +200,78 @@ On the following page there are eight plots comparing the predicted and measured
 
 \clearpage
 
+
+\section{JH/FRA Experiments}
+
+The following pages compare the predicted and measured velocities through the compartment door in the JH/FRA scaled compartment series.
+For each test there are plots of the velocity with time at five heights in the door.
+Each velocity was measured with bi-directional probes.
+The test with inert lining increased the burner HRR after 5 minutes (see Section~\ref{JH_FRA_Description}).
+The velocities in the quarter-scale compartments were generally over predicted by FDS compared with those measured; whereas, the velocities measured in the full-scale compartments were higher than those predicted by FDS.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_01_door_velocity} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_02_door_velocity} \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:4 scale inert lining configurations]{JH/FRA experiments, gas velocity, 1:4 scale inert lining configurations.}
+\label{JH_FRA_Door_Velocity_1}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_03_door_velocity} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_03A_door_velocity} \\
+%\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_04_door_velocity} & \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:4 scale combustible lining configurations]{JH/FRA experiments, gas velocity, 1:4 scale combustible lining configurations.}
+\label{JH_FRA_Door_Velocity_2}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_11_door_velocity} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_12_door_velocity} \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:2 scale inert lining configurations]{JH/FRA experiments, gas velocity, 1:2 scale inert lining configurations.}
+\label{JH_FRA_Door_Velocity_3}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_13_door_velocity} &
+\\
+%\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_14_door_velocity} \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:2 scale combustible lining configurations]{JH/FRA experiments, gas velocity, 1:2 scale combustible lining configurations.}
+\label{JH_FRA_Door_Velocity_4}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_21_door_velocity} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_22_door_velocity} \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:1 scale inert lining configurations]{JH/FRA experiments, gas velocity, 1:1 scale inert lining configurations.}
+\label{JH_FRA_Door_Velocity_5}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_23_door_velocity} \\
+%\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_24_door_velocity} \\
+\end{tabular*}
+\caption[JH/FRA experiments, gas velocity, 1:1 scale combustible lining configurations]{JH/FRA experiments, gas velocity, 1:1 scale combustible lining configurations.}
+\label{JH_FRA_Door_Velocity_6}
+\end{figure}
+
+\clearpage
+
+
+
 \section{McCaffrey's Plume Correlation}
 
-The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, nominally $D^*/\dx=[5,10,20]$ (respectively, coarse, medium, and fine resolution).
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, nominally $D^*/\dx=[3,6,12,24]$ based on the $D^*$ of the 14.4 kW burner (respectively, crude, coarse, medium, and fine resolution).
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -220,9 +291,10 @@ Below we plot the same results but arranged in a different way.  The height dime
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Coarse} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Medium} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Fine}}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Crude} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Coarse} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Medium} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Fine}
 \end{tabular*}
 \caption[McCaffrey Plumes, centerline plume velocity, Froude scaling]{McCaffrey Plumes, centerline plume velocity, Froude scaling.}
 \label{McCaffrey_Plume_Velocity_Froude}
@@ -434,13 +506,15 @@ Steckler et al.~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in
 
 \section{UL/NIJ House Experiments}
 
-Details of the UL/NIJ Experiments are presented in Section~\ref{UL_NIJ_Description}.
+Details of the UL/NIJ Experiments are presented in Sec.~\ref{UL_NIJ_Description}.
 
 Velocity was measured at (typically) five vertical locations in the open windows and doorways of the two houses. The bi-directional probes were evenly spaced through the height of each opening.
 
 In the single story house, the velocity profiles in the front doorway and Window~E or F are used for comparison. In the two story house, the profiles in the front doorway and Windows~K, L or A are used.
 
 Note that this data has not been included in the summary scatter plot, Fig.~\ref{Steckler_Scatterplot} because it is too noisy to make precise comparisons. It is included here mainly for qualitative comparison.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -513,7 +587,7 @@ where $u_i$ and $w_i$ are instantaneous values of the horizontal and vertical co
 
 The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
 
-
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

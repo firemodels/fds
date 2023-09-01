@@ -2,8 +2,8 @@
       DENSITY               = 513.6179
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 36300.
-      E                     = 60300.
+      A                     = 1040.
+      E                     = 61041.
       NU_SPEC               = 0.8672
       SPEC_ID               = 'FUEL VAPOR'
       NU_MATL               = 0.1328
@@ -14,16 +14,14 @@
       DENSITY               = 300.
       CONDUCTIVITY          = 0.052
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      N_S                   = 0.
-      NU_O2_CHAR            = 1.65
-      BETA_CHAR             = 0.2
-      A                     = 430.
-      E                     = 74800.
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000. 
       SPEC_ID               = 'PRODUCTS','AIR'
       NU_SPEC               = 8.13,-7.17
       MATL_ID               = 'ASH'
       NU_MATL               = 0.04
-      HEAT_OF_REACTION      = -12000. /
+      HEAT_OF_REACTION      = -25000. /
 
 &MATL ID                    = 'ASH'
       DENSITY               = 67.

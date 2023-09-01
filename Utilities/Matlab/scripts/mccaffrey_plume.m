@@ -32,11 +32,13 @@ Manuals_Dir = '../../Manuals/';
 datadir = [OUT_Dir,'McCaffrey_Plume/'];
 plotdir = [Manuals_Dir,'FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
 
-resolution = {'Coarse','Medium','Fine'};
+resolution = {'Crude','Coarse','Medium','Fine'};
 
 for k=1:length(resolution)
 
     switch resolution{k}
+        case 'Crude'
+            chid = {'McCaffrey_14_kW_5','McCaffrey_22_kW_5','McCaffrey_33_kW_5','McCaffrey_45_kW_5','McCaffrey_57_kW_5'};
         case 'Coarse'
             chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
         case 'Medium'

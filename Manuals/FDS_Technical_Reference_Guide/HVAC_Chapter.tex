@@ -4,9 +4,9 @@
 
 \chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
 
-HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve as a path for heat and combustion products to be moved through a building and the ducts can serve as a supply of fresh air.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts. HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
+HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve as a path for heat and combustion products to be moved through a building, and the ducts can serve as a supply of fresh air for the fire.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts. HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
 
-FDS has relatively simple fixed flow boundary conditions for velocity or mass flux, and it has a simple pressure boundary condition. While these can adequately represent very simple HVAC features, they cannot model an entire multi-room system. There is no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network. To address this limitation, an HVAC network solver has been added to FDS.
+While simple defined velocity, mass flux, or pressure boundary conditions can represent inflow and outflow due to HVAC system, they cannot fully model an HVAC system. There is no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network. To address this limitation, an HVAC network solver has been added to FDS.
 
 The reader may find it useful to read a literature review on coupled hybrid modelling in fire applications~\cite{Ralph:1} and review similar work in coupling CFD to a 1-D nodal model for analysis of ventilation in tunnel fires \cite{Colella:2010, Colella:2011}.
 
@@ -16,8 +16,8 @@ The overall HVAC solver is based on the MELCOR~\cite{MELCOR} thermal hydraulic s
 The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has shown prior success in using the MELCOR solver to model fire spread and smoke movement
 in the presence of complex ventilation systems, and the FDS implementation of the MELCOR solver is largely based on the implementation found in FSSIM.  The coupling of the HVAC solver to the remainder of the FDS computation is in part based upon approaches taken in GOTHIC~\cite{GOTHIC}, another containment analysis code that couples CFD-like features for large containment volumes with a network model for piping and ventilation.
 
-The MELCOR solver uses an explicit solver for the conservation equations of mass and energy combined with an implicit solver for the conservation of momentum equation. An HVAC system is represented as a network of nodes and ducts.  A node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as at a tee joint. A duct segment in the network represents any continuous flow path not interrupted by a node and as such may include multiple fittings (elbows, expansions, or contractions, etc.)
-and may have varying area over its length.  The current implementation of the model does not account for mass storage within an HVAC network. The nodal conservation equations of
+The MELCOR solver uses an explicit solver for the conservation equations of mass and energy combined with an implicit solver for the conservation of momentum equation. An HVAC system is represented as a network of nodes and ducts.  A node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as at a tee joint. A duct segment in the network represents any continuous flow path not interrupted by a node, and as such may include multiple fittings (elbows, expansions, or contractions, etc.)
+and may have varying area over its length. The nodal conservation equations of
 mass, energy, and momentum (in that order) are:
 \be \sum\limits_{j} \rho_j \, u_j \, A_j = 0   \label{HVACmass} \ee
 \be \sum\limits_{j} \rho_j \, u_j \, A_j \, h_j= 0   \label{HVACenergy} \ee
@@ -26,7 +26,7 @@ where $u$ is the duct velocity, $A$ is the duct area, and $h$ is the enthalpy of
 The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
 $\Delta p$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the total dimensionless loss coefficient of the duct segment (which includes wall friction losses and minor losses).
 
-Since nodes have no volume, the mass and energy conservation equations require that what flows into a node must also flow out. In the momentum equation the terms on the right hand side consist of the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g., a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.
+Since nodes have no volume, the mass and energy conservation equations require that what flows into a node must also flow out. In the momentum equation the terms on the right hand side consist of the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g., a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings. In its default mode of operation, the transport delay of mass and energy along the length of a duct is not accounted for. An optional model for this delay is available and described in Sec.~\ref{sec:duct_transport}.
 
 \section{Solution Procedure}
 
@@ -80,28 +80,28 @@ The solution scheme is as follows:
 
 \subsection{Filtration}
 
-Filters have two effects on the flow in an HVAC network.  First, a filter causes a flow loss whose magnitude depends on the loading of the filter.  Second, a filter removes mass from flow going through the filter as a function of the filter's efficiency. Filter losses are evaluated using the filter loading at the start of each time step.  This loss is applied to the upstream duct.  The filter loss is computed as a function of the total filter loading using either a linear ramp or a user defined table.  The total loading of the filter is determined by summing the mass of each species trapped times a weighting factor for that species.
+Filters have two effects on the flow in an HVAC network.  First, a filter causes a flow loss whose magnitude is a function of the mass loading of the filter.  Second, a filter removes one or more species from flow going through the filter. The removal rate is a function of the filtration efficiency for that species and its massflow rate through the filter. Filter losses are evaluated using the filter loading at the start of each time step.  This loss is applied to the upstream duct.  The filter loss is computed as a function of the total filter loading using either a linear ramp or a user defined table.  The total loading of the filter is determined by summing the mass of each species trapped times a weighting factor for that species.
 
 The filter is assumed to remove a fixed fraction (the filter's efficiency) of the species being trapped by the filter.  Each species can be given its own removal efficiency.   Eq.~(\ref{HVACmass}) for a filter is therefore given as:
 \be
-   u_{\rm out} \, \rho_{\rm out} \, A_{\rm out} = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} - \sum_j u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} Y_{j,{\rm in}} E_j = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in}  \left(1 - \sum_j Y_{j,{\rm in}} E_j \right)
+   u_{\rm out} \, \rho_{\rm out} \, A_{\rm out} = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} - \sum_\alpha u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} Y_{\alpha,{\rm in}} E_\alpha = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in}  \left(1 - \sum_\alpha Y_{\alpha,{\rm in}} E_\alpha \right)
 \ee
-where $j$ is a species being filtered and $E_j$ is its removal efficiency.
+where $\alpha$ is a species being filtered and $E_\alpha$ is its removal efficiency.
 
 \subsection{Node Losses}
 
-Some nodes in the modeled HVAC system will represent items such as tees.  Flow through such a node will result in a flow loss.  However, as seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means that losses that are physically associated with a node must be expressed numerically as equivalent losses in the ducts attached to the node.  The losses also need to be applied in a manner that represents the flow conditions within the node.  For example, if a tee has flow into one leg and out of two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to any changes of the flow splitting in the downstream legs.  Loss terms are applied as follows:
+Nodes in the HVAC systems can include inlet and outlets, tees, and other duct fittings. Each of these impose a flow loss ; however, as seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means losses that are physically associated with a node must be expressed numerically as equivalent losses in the ducts attached to the node.  The losses also need to be applied in a manner that represents the flow conditions within the node.  For example, if a tee has flow into one leg and out of two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to any changes of the flow splitting in the downstream legs.  Loss terms are applied as follows:
 
 \begin{enumerate}
 \item If there is no flow at the node, then each duct connected to the node is assigned the average of all the losses for flows to the duct from all other ducts.
-\item If there is flow into only one connected duct, then each outflowing duct is assigned the flow loss for flow from the inlet duct to the outlet duct.
-\item If there is flow out of only one connected duct, then each inflowing duct is assigned the flow loss for flow from the inlet duct to the outlet duct corrected for any change in duct area from inlet to outlet (node losses are input as a function of the downstream duct area).
-\item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the inflowing ducts weighted by the volume flow.
+\item If there is flow into only one connected duct, then each outflowing duct is assigned the flow loss for flow from the inlet duct to that specific outflowing duct.
+\item If there is flow out of only one connected duct, then each inflowing duct is assigned the flow loss for flow from that inlet duct to the outlet duct corrected for any change in duct area from inlet to outlet (node losses are input as a function of the downstream duct area).
+\item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the inflowing ducts weighted by the volume flow through those ducts.
 \end{enumerate}
 
 \subsection{Duct Losses}
 
-The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates), $K_{\mbox{\tiny minor}}$, plus losses due to wall friction, $K_{\mbox{\tiny wall}}$.  Minor losses are a user input. If a duct roughness is set, wall friction losses are modeled as follows:
+The total flow loss in the duct, $K_j$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates), $K_{\mbox{\tiny minor}}$, plus losses due to wall friction, $K_{\mbox{\tiny wall}}$.  Minor losses are a user input. If a duct roughness is set, wall friction losses are modeled as follows:
 \be 
    K_{\mbox{\tiny wall}} = \frac{f \, L}{D} 
 \ee
@@ -113,7 +113,7 @@ where $\epsilon$ is the absolute roughness of the duct.
 
 \subsection{Heating and Cooling Coils}
 
-A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model in which four parameters are specified: the enthalpy of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
+A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model simply adds or removes heat at a specified rate as long as the coil is operating.  The second model uses a heat exchanger effectiveness model in which four parameters are specified: the specific heat of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The coil heat flow rate, $\dot{q}_{\rm coil}$, is then computed as follows:
 
 \be T_{\rm out} = \frac{\dot{m}_{\rm duct} \, c_{p,{\rm duct,in}} \, T_{\rm duct,in} + \dot{m}_{\rm fl} \, c_{p,{\rm fl}} \, T_{\rm fl}}
                              {\dot{m}_{\rm duct} \, c_{p,{\rm duct,in}} + \dot{m}_{\rm fl} \, c_{p,{\rm fl}} } \ee
@@ -122,8 +122,13 @@ A duct can contain a heating or cooling coil.  These either add or remove heat f
 
 \section{Leakage}
 
-With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide small flow paths through obstructions.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participating in that flow path.
+With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide small flow paths through obstructions.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  Two approaches are available for modeling leakage.
 
+In the first approach one or more surfaces in the domain are defined as being part of a leakage path between two pressure zones. An HVAC duct is created whose area is the leakage area and whose nodes are all wall cells belong to the surfaces that make up the leakage path. In this approach only the background pressure, $\bp_m$ , in each zone is used. of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participating in that flow path. Since only the background pressure is used, this approach can only be used for leakage between pressure zones. 
+
+The second approach, a specific area is identified as the inlet and outlet for the leakage path. This approach is useful to represent small openings in known locations that are subgrid such as a the undercut beneath a typical interior door. Similar to the first approach an HVAC dut is created whose area is the leakage area and whose nodes are the wall cells belonging to the identified inlet and outlet regions. This approach uses the total pressure; therefore, it can be applied in cases where the inlet and outlet are in the same pressure zone. 
+
+For more details see the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 \newpage
 \section{Coupling the HVAC solver to FDS}
@@ -191,3 +196,13 @@ A challenge in fire simulation is that the system curve is a function of the pre
 		\caption[Illustration of determining duct runs.]{\label{HVAC_ductrun} Illustration determining duct runs. Left side has a single duct run. Right side has two duct runs.}
 	\end{center}
 \end{figure}
+
+\section{Duct Transport Delay}
+\label{sec:duct_transport}
+
+In its default mode of operation, the HVAC solver does not account for mass storage in ducts. That is over a time step any mass and energy entering a duct, leaves the duct. An optional submodel can be invoked to account for this transport delay. This submodel divides a duct into cells of equal length $\Delta x$ and solves a one dimensional advection equations for mass and energy transport in the duct~\cite{Ralph:3}. In the discretization, temperature, specific heat, species mass fractions, and density are stored at cell centers. The velocity in duct is taken as the value obtained from the solution of Eq.~(\ref{HVACmass}) through Eq.~(\ref{HVACmomentum}). An explicit Runge-Kutta method is used with a Godunov upwinding scheme. Diffusive transport is ignored as this is generally a minor effect in an HVAC system. The species mass and energy conservation equations for updating cell $c$ in duct $j$ from timestep $n$ to $n+1$ are:
+
+\be (\rho \, Y_{\alpha})_c^{n+1}=  \rho_j \, u_j^n - \frac{\Delta t}{\Delta x} \, (\rho \, u)_j^n left(Y_{\alpha ,c}^n - Y_{\alpha ,c-1}^n ) \ee  
+\be (\rho \, h)_c^{n+1}=  \rho_j \, u_j^n - \frac{\Delta t}{\Delta x} \, (\rho \, u)_j^n left(h_c^n - h_{c-1}^n ) \ee  
+
+Updating duct conditions begins at the upwind duct node and marches over the duct length to the downwind duct node. Cell temperatures are extracted from the cell enthalpy $h_c$. This solution is done over groups of ducts that form a duct network basis. A duct network is a set of ducts and nodes that are interconnected via a flow path through HVAC components. The time step $\Delta t$ is taken as the minimum of the current simulation time step and the minimum value of $\frac{\Delta x_j}{2 u_j}$ over all ducts in the netwok. In the summation terms in Eq.~(\ref{HVACmass}) and Eq.~(\ref{HVACenergy}), the mass flow and enthalpy flow into a node from a discretized duct are obtained by integrating those flows using the values in the last cell over each time step taken.

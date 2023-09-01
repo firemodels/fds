@@ -7,7 +7,7 @@ clean_build=1
 
 # Build FDS Config Management Plan
 
-gitrevision=`git describe --long --dirty`
+gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Management_Plan.err

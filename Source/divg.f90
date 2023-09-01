@@ -12,7 +12,7 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE(CFACE_TYPE), POINTER :: CFA
 
@@ -30,7 +30,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC !,RHO_0_MMS,RHO_1_MMS
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC, CC_UNKZ, CC_SOLID, CC_CUTCFE
 USE CC_SCALARS, ONLY : ADD_CUTCELL_PSUM,ADD_LINKEDCELL_PSUM,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,&
-                       SET_EXIMRHOZZLIM_3D,CC_DIVERGENCE_PART_1,CFACE_PREDICT_NORMAL_VELOCITY
+                       SET_EXIMRHOZZLIM_3D,CC_DIVERGENCE_PART_1,CC_VELOCITY_FLUX,CFACE_PREDICT_NORMAL_VELOCITY
 
 ! Compute contributions to the divergence term
 
@@ -86,7 +86,10 @@ CALL MERGE_PRESSURE_ZONES
 ! Compute normal component of velocity at boundaries, U_NORMAL_S in the PREDICTOR step, U_NORMAL in the CORRECTOR.
 
 CALL PREDICT_NORMAL_VELOCITY
-IF (CC_IBM) CALL CFACE_PREDICT_NORMAL_VELOCITY(T,DT)
+IF (CC_IBM) THEN
+   CALL CC_VELOCITY_FLUX(NM,DT,PREDICTOR,RHOP,CORRECT_GRAV=.FALSE.) ! Link F.
+   CALL CFACE_PREDICT_NORMAL_VELOCITY(T,DT)
+ENDIF
 
 ! Compute species-related finite difference terms
 
@@ -182,27 +185,27 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                   CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
                END SELECT
             CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
-               ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+               B1 => BOUNDARY_PROP1(WC%B1_INDEX)
                EWC => EXTERNAL_WALL(IW)
                IF (EWC%NIC>1) THEN
                   ! overwrite coarse mesh diffusive flux with fine mesh average (flux matched) computed in wall_bc
                   SELECT CASE(IOR)
-                     CASE( 1); RHO_D_DZDX(IIG-1,JJG,KKG,N) =  ONE_D%RHO_D_DZDN_F(N)
-                     CASE(-1); RHO_D_DZDX(IIG,JJG,KKG,N)   = -ONE_D%RHO_D_DZDN_F(N)
-                     CASE( 2); RHO_D_DZDY(IIG,JJG-1,KKG,N) =  ONE_D%RHO_D_DZDN_F(N)
-                     CASE(-2); RHO_D_DZDY(IIG,JJG,KKG,N)   = -ONE_D%RHO_D_DZDN_F(N)
-                     CASE( 3); RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  ONE_D%RHO_D_DZDN_F(N)
-                     CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = -ONE_D%RHO_D_DZDN_F(N)
+                     CASE( 1); RHO_D_DZDX(IIG-1,JJG,KKG,N) =  B1%RHO_D_DZDN_F(N)
+                     CASE(-1); RHO_D_DZDX(IIG,JJG,KKG,N)   = -B1%RHO_D_DZDN_F(N)
+                     CASE( 2); RHO_D_DZDY(IIG,JJG-1,KKG,N) =  B1%RHO_D_DZDN_F(N)
+                     CASE(-2); RHO_D_DZDY(IIG,JJG,KKG,N)   = -B1%RHO_D_DZDN_F(N)
+                     CASE( 3); RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  B1%RHO_D_DZDN_F(N)
+                     CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = -B1%RHO_D_DZDN_F(N)
                   END SELECT
                ELSE
                   ! store computed flux for output
                   SELECT CASE(IOR)
-                     CASE( 1); ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDX(IIG-1,JJG,KKG,N)
-                     CASE(-1); ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDX(IIG,JJG,KKG,N)
-                     CASE( 2); ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDY(IIG,JJG-1,KKG,N)
-                     CASE(-2); ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDY(IIG,JJG,KKG,N)
-                     CASE( 3); ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDZ(IIG,JJG,KKG-1,N)
-                     CASE(-3); ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDZ(IIG,JJG,KKG,N)
+                     CASE( 1); B1%RHO_D_DZDN_F(N) =  RHO_D_DZDX(IIG-1,JJG,KKG,N)
+                     CASE(-1); B1%RHO_D_DZDN_F(N) = -RHO_D_DZDX(IIG,JJG,KKG,N)
+                     CASE( 2); B1%RHO_D_DZDN_F(N) =  RHO_D_DZDY(IIG,JJG-1,KKG,N)
+                     CASE(-2); B1%RHO_D_DZDN_F(N) = -RHO_D_DZDY(IIG,JJG,KKG,N)
+                     CASE( 3); B1%RHO_D_DZDN_F(N) =  RHO_D_DZDZ(IIG,JJG,KKG-1,N)
+                     CASE(-3); B1%RHO_D_DZDN_F(N) = -RHO_D_DZDZ(IIG,JJG,KKG,N)
                   END SELECT
                ENDIF
          END SELECT BOUNDARY_TYPE_SELECT
@@ -329,19 +332,19 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
              WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
              WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
          BC => BOUNDARY_COORD(WC%BC_INDEX)
-         ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+         B1 => BOUNDARY_PROP1(WC%B1_INDEX)
          IIG = BC%IIG
          JJG = BC%JJG
          KKG = BC%KKG
          IOR = BC%IOR
 
-         N_ZZ_MAX = MAXLOC(ONE_D%ZZ_F(1:N_TRACKED_SPECIES),1)
-         RHO_D_DZDN = 2._EB*ONE_D%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-ONE_D%ZZ_F(N))*ONE_D%RDN
+         N_ZZ_MAX = MAXLOC(B1%ZZ_F(1:N_TRACKED_SPECIES),1)
+         RHO_D_DZDN = 2._EB*B1%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-B1%ZZ_F(N))*B1%RDN
          IF (N==N_ZZ_MAX) THEN
-            RHO_D_DZDN_GET = 2._EB*ONE_D%RHO_D_F(:)*(ZZP(IIG,JJG,KKG,:)-ONE_D%ZZ_F(:))*ONE_D%RDN
+            RHO_D_DZDN_GET = 2._EB*B1%RHO_D_F(:)*(ZZP(IIG,JJG,KKG,:)-B1%ZZ_F(:))*B1%RDN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
-         ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
+         B1%RHO_D_DZDN_F(N) = RHO_D_DZDN
 
          IF (STORE_SPECIES_FLUX) THEN
             IF (CORRECTOR) THEN
@@ -366,14 +369,14 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          ENDIF
 
          IF (PREDICTOR) THEN
-            UN_P = ONE_D%U_NORMAL_S
+            UN_P = B1%U_NORMAL_S
          ELSE
-            UN_P = ONE_D%U_NORMAL
+            UN_P = B1%U_NORMAL
          ENDIF
          IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
             TMP_F_GAS = TMP(IIG,JJG,KKG)
          ELSE
-            TMP_F_GAS = ONE_D%TMP_F
+            TMP_F_GAS = B1%TMP_F
          ENDIF
 
          CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_F_GAS,H_S)
@@ -415,7 +418,6 @@ IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
             R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
@@ -444,7 +446,7 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K))
          ENDDO
@@ -480,7 +482,6 @@ IF (CHECK_VN .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KP(I,J,K)/(CP(I,J,K)*RHOP(I,J,K)))
          ENDDO
       ENDDO
@@ -511,7 +512,7 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
    II  = BC%II
    JJ  = BC%JJ
    KK  = BC%KK
@@ -519,10 +520,10 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJG = BC%JJG
    KKG = BC%KKG
    IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-      ONE_D%K_G = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
+      B1%K_G = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
       CYCLE CORRECTION_LOOP
    ELSE
-      ONE_D%K_G = KP(IIG,JJG,KKG)
+      B1%K_G = KP(IIG,JJG,KKG)
    ENDIF
    IOR = BC%IOR
    SELECT CASE(IOR)
@@ -540,7 +541,7 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          KDTDZ(II,JJ,KK-1) = 0._EB
    END SELECT
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( ONE_D%AREA_ADJUST*ONE_D%Q_CON_F*ONE_D%RDN - WC%Q_LEAK )
+   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F*B1%RDN - WC%Q_LEAK )
 ENDDO CORRECTION_LOOP
 
 ! Compute (q + del dot k del T) and add to the divergence
@@ -593,7 +594,6 @@ CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
          ENDDO
       ENDDO
@@ -611,7 +611,6 @@ IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IPZ = PRESSURE_ZONE(I,J,K)
             RTRM(I,J,K) = GM1OG*R_PBAR(K,IPZ)
             DP(I,J,K)   = RTRM(I,J,K)*DP(I,J,K)
@@ -626,7 +625,6 @@ ELSE
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
@@ -650,7 +648,7 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP(I,J,K),H_S)
                DP(I,J,K) = DP(I,J,K) + (SM%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K))* &
                     ( DEL_RHO_D_DEL_Z(I,J,K,N) - U_DOT_DEL_RHO_Z(I,J,K) )/RHOP(I,J,K)
@@ -684,7 +682,6 @@ IF (STRATIFICATION) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
@@ -719,7 +716,7 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
    ENDDO
 ENDIF MMS_IF
 
-IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) THEN
+IF (CC_IBM) THEN
    T_USED(2)=T_USED(2)+CURRENT_TIME()-TNOW
    CALL CC_DIVERGENCE_PART_1(T,DT,NM)
    TNOW=CURRENT_TIME()
@@ -741,7 +738,7 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
             IF (INTERPOLATED_MESH(I,J,K)>0) CYCLE
             IPZ = PRESSURE_ZONE(I,J,K)
             IF (IPZ<1) CYCLE
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             VC = DX(I)*RC(I)*VC1
             DSUM(IPZ,NM) = DSUM(IPZ,NM) + VC*DP(I,J,K)
             IF (CC_IBM) THEN
@@ -765,23 +762,23 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
       WC => WALL(IW)
       BC => BOUNDARY_COORD(WC%BC_INDEX)
       IF (INTERPOLATED_MESH(BC%IIG,BC%JJG,BC%KKG)>0) CYCLE
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
-      IPZ = ONE_D%PRESSURE_ZONE
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+      IPZ = B1%PRESSURE_ZONE
       IF (IPZ<1) CYCLE WALL_LOOP4
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP4
-      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + ONE_D%U_NORMAL_S*ONE_D%AREA
-      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + ONE_D%U_NORMAL  *ONE_D%AREA
+      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + B1%U_NORMAL_S*B1%AREA
+      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + B1%U_NORMAL  *B1%AREA
    ENDDO WALL_LOOP4
 
 
-   CFACE_LOOP: DO ICF=N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
+   CFACE_LOOP: DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
       CFA => CFACE(ICF)
       BC => BOUNDARY_COORD(CFA%BC_INDEX)
-      ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
-      IPZ = ONE_D%PRESSURE_ZONE
+      B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+      IPZ = B1%PRESSURE_ZONE
       IF (IPZ<1) CYCLE CFACE_LOOP
-      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + ONE_D%U_NORMAL_S*ONE_D%AREA
-      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + ONE_D%U_NORMAL  *ONE_D%AREA
+      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + B1%U_NORMAL_S*B1%AREA
+      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + B1%U_NORMAL  *B1%AREA
    ENDDO CFACE_LOOP
 
 
@@ -835,7 +832,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
 
    II  = BC%II
    JJ  = BC%JJ
@@ -849,17 +846,17 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! and the gas is flowing out, use the gas temperature for the calculation.
 
    IF (PREDICTOR) THEN
-      UN_P = ONE_D%U_NORMAL_S
+      UN_P = B1%U_NORMAL_S
    ELSE
-      UN_P = ONE_D%U_NORMAL
+      UN_P = B1%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
       TMP_F_GAS = TMP(IIG,JJG,KKG)
    ELSE
-      TMP_F_GAS = ONE_D%TMP_F
+      TMP_F_GAS = B1%TMP_F
    ENDIF
 
-   ZZ_GET(1:N_TRACKED_SPECIES) = ONE_D%ZZ_F(1:N_TRACKED_SPECIES)
+   ZZ_GET(1:N_TRACKED_SPECIES) = B1%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_F_GAS)
 
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
@@ -871,7 +868,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !      ghost          FX/UU(II+1)
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II+1,JJ,KK))%WALL_INDEX(+1)>0)) THEN
                Z_TEMP(0:2,1,1) = (/RHO_H_S_P(II+1,JJ,KK),RHO_H_S_P(II+1:II+2,JJ,KK)/)
                U_TEMP(1,1,1) = UU(II+1,JJ,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
@@ -881,35 +878,35 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !            FX/UU(II-2)     ghost
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II-1,JJ,KK))%WALL_INDEX(-1)>0)) THEN
                Z_TEMP(1:3,1,1) = (/RHO_H_S_P(II-2:II-1,JJ,KK),RHO_H_S_P(II-1,JJ,KK)/)
                U_TEMP(1,1,1) = UU(II-2,JJ,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
                FX_H_S(II-2,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ+1,KK))%WALL_INDEX(+2)>0)) THEN
                Z_TEMP(1,0:2,1) = (/RHO_H_S_P(II,JJ+1,KK),RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
                U_TEMP(1,1,1) = VV(II,JJ+1,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                FY_H_S(II,JJ+1,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ-1,KK))%WALL_INDEX(-2)>0)) THEN
                Z_TEMP(1,1:3,1) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),RHO_H_S_P(II,JJ-1,KK)/)
                U_TEMP(1,1,1) = VV(II,JJ-2,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                FY_H_S(II,JJ-2,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK+1))%WALL_INDEX(+3)>0)) THEN
                Z_TEMP(1,1,0:2) = (/RHO_H_S_P(II,JJ,KK+1),RHO_H_S_P(II,JJ,KK+1:KK+2)/)
                U_TEMP(1,1,1) = WW(II,JJ,KK+1)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
                FZ_H_S(II,JJ,KK+1) = F_TEMP(1,1,1)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK-1))%WALL_INDEX(-3)>0)) THEN
                Z_TEMP(1,1,1:3) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),RHO_H_S_P(II,JJ,KK-1)/)
                U_TEMP(1,1,1) = WW(II,JJ,KK-2)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
@@ -930,14 +927,14 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE(-3); UN = WW(II,JJ,KK-1)
          END SELECT IOR_SELECT
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL
+         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*B1%U_NORMAL_S
+         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*B1%U_NORMAL
       CASE(INTERPOLATED_BOUNDARY)
          UN = UVW_SAVE(IW)
    END SELECT
 
-   DU = (ONE_D%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-   U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*ONE_D%RDN
+   DU = (B1%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+   U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*B1%RDN
 
 ENDDO WALL_LOOP
 
@@ -950,19 +947,19 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE
+         IF (CELL(IC)%SOLID) CYCLE
          DU_P = 0._EB
          DU_M = 0._EB
          DV_P = 0._EB
          DV_M = 0._EB
          DW_P = 0._EB
          DW_M = 0._EB
-         IF (WALL_INDEX(IC, 1)==0) DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)
-         IF (WALL_INDEX(IC,-1)==0) DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)
-         IF (WALL_INDEX(IC, 2)==0) DV_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
-         IF (WALL_INDEX(IC,-2)==0) DV_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
-         IF (WALL_INDEX(IC, 3)==0) DW_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
-         IF (WALL_INDEX(IC,-3)==0) DW_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
+         IF (CELL(IC)%WALL_INDEX( 1)==0) DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-1)==0) DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)
+         IF (CELL(IC)%WALL_INDEX( 2)==0) DV_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-2)==0) DV_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
+         IF (CELL(IC)%WALL_INDEX( 3)==0) DW_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-3)==0) DW_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) + (DV_P-DV_M)*RDY(J) + (DW_P-DW_M)*RDZ(K)
       ENDDO
    ENDDO
@@ -1004,7 +1001,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    II  = BC%II
    JJ  = BC%JJ
@@ -1023,7 +1020,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !      ghost          FX/UU(II+1)
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II+1,JJ,KK))%WALL_INDEX(+1)>0)) THEN
                Z_TEMP(0:2,1,1) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK)/)
                U_TEMP(1,1,1) = UU(II+1,JJ,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
@@ -1033,35 +1030,35 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !            FX/UU(II-2)     ghost
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II-1,JJ,KK))%WALL_INDEX(-1)>0)) THEN
                Z_TEMP(1:3,1,1) = (/RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
                U_TEMP(1,1,1) = UU(II-2,JJ,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
                FX_ZZ(II-2,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_2
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ+1,KK))%WALL_INDEX(+2)>0)) THEN
                Z_TEMP(1,0:2,1) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
                U_TEMP(1,1,1) = VV(II,JJ+1,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                FY_ZZ(II,JJ+1,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_2
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ-1,KK))%WALL_INDEX(-2)>0)) THEN
                Z_TEMP(1,1:3,1) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
                U_TEMP(1,1,1) = VV(II,JJ-2,KK)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
                FY_ZZ(II,JJ-2,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_2
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK+1))%WALL_INDEX(+3)>0)) THEN
                Z_TEMP(1,1,0:2) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2)/)
                U_TEMP(1,1,1) = WW(II,JJ,KK+1)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
                FZ_ZZ(II,JJ,KK+1) = F_TEMP(1,1,1)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_2
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(CELL(CELL_INDEX(II,JJ,KK-1))%WALL_INDEX(-3)>0)) THEN
                Z_TEMP(1,1,1:3) = (/RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
                U_TEMP(1,1,1) = WW(II,JJ,KK-2)
                CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
@@ -1084,14 +1081,14 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE(-3); UN = WW(II,JJ,KK-1)
          END SELECT IOR_SELECT
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL
+         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*B1%U_NORMAL_S
+         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*B1%U_NORMAL
       CASE(INTERPOLATED_BOUNDARY)
          UN = UVW_SAVE(IW)
    END SELECT
 
-   DU = (ONE_D%RHO_F*ONE_D%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-   U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*ONE_D%RDN
+   DU = (B1%RHO_F*B1%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+   U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*B1%RDN
 
 ENDDO WALL_LOOP
 
@@ -1100,19 +1097,19 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE
+         IF (CELL(IC)%SOLID) CYCLE
          DU_P = 0._EB
          DU_M = 0._EB
          DV_P = 0._EB
          DV_M = 0._EB
          DW_P = 0._EB
          DW_M = 0._EB
-         IF (WALL_INDEX(IC, 1)==0) DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
-         IF (WALL_INDEX(IC,-1)==0) DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
-         IF (WALL_INDEX(IC, 2)==0) DV_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
-         IF (WALL_INDEX(IC,-2)==0) DV_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
-         IF (WALL_INDEX(IC,+3)==0) DW_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
-         IF (WALL_INDEX(IC,-3)==0) DW_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
+         IF (CELL(IC)%WALL_INDEX( 1)==0) DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-1)==0) DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
+         IF (CELL(IC)%WALL_INDEX( 2)==0) DV_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-2)==0) DV_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
+         IF (CELL(IC)%WALL_INDEX( 3)==0) DW_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
+         IF (CELL(IC)%WALL_INDEX(-3)==0) DW_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I) + (DV_P-DV_M)*RDY(J) + (DW_P-DW_M)*RDZ(K)
       ENDDO
    ENDDO
@@ -1130,7 +1127,7 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   IF (SOLID(CELL_INDEX(BC%IIG,BC%JJG,BC%KKG))) CYCLE
+   IF (CELL(CELL_INDEX(BC%IIG,BC%JJG,BC%KKG))%SOLID) CYCLE
    IPZ  = PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG)
    IOPZ = PRESSURE_ZONE(BC%II,BC%JJ,BC%KK)
    IF (IW>N_EXTERNAL_WALL_CELLS .AND. IPZ/=IOPZ) THEN
@@ -1157,13 +1154,13 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
       WC => WALL(IW)
       BC => BOUNDARY_COORD(WC%BC_INDEX)
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
 
       WALL_CELL_TYPE: SELECT CASE (WC%BOUNDARY_TYPE)
 
          CASE (NULL_BOUNDARY)
 
-            ONE_D%U_NORMAL_S = 0._EB
+            B1%U_NORMAL_S = 0._EB
 
          CASE (SOLID_BOUNDARY)
 
@@ -1171,62 +1168,62 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
                 SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
-                ONE_D%NODE_INDEX > 0                  .OR. &
+                B1%NODE_INDEX > 0                  .OR. &
                 ANY(SF%LEAK_PATH>0))                          &
                 CYCLE WALL_LOOP3
 
-            IF (ABS(ONE_D%T_IGN-T_BEGIN) < SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+            IF (ABS(B1%T_IGN-T_BEGIN) < SPACING(B1%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
                TSI = T + DT
             ELSE
-               TSI = T + DT - ONE_D%T_IGN
+               TSI = T + DT - B1%T_IGN
                IF (TSI<0._EB) THEN
-                  ONE_D%U_NORMAL_S = 0._EB
+                  B1%U_NORMAL_S = 0._EB
                   CYCLE WALL_LOOP3
                ENDIF
             ENDIF
-            TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_VELO),TAU=SF%TAU(TIME_VELO))
-            ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*ONE_D%U_NORMAL_0
+            TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
+            B1%U_NORMAL_S = TIME_RAMP_FACTOR*B1%U_NORMAL_0
 
             ! Special Cases
             NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
                SELECT CASE(BC%IOR)
-                  CASE( 1); ONE_D%U_NORMAL_S =-(U(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*ONE_D%RDN)
-                  CASE(-1); ONE_D%U_NORMAL_S = (U(BC%IIG-1,BC%JJG,BC%KKG) + SF%VEL_GRAD*ONE_D%RDN)
-                  CASE( 2); ONE_D%U_NORMAL_S =-(V(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*ONE_D%RDN)
-                  CASE(-2); ONE_D%U_NORMAL_S = (V(BC%IIG,BC%JJG-1,BC%KKG) + SF%VEL_GRAD*ONE_D%RDN)
-                  CASE( 3); ONE_D%U_NORMAL_S =-(W(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*ONE_D%RDN)
-                  CASE(-3); ONE_D%U_NORMAL_S = (W(BC%IIG,BC%JJG,BC%KKG-1) + SF%VEL_GRAD*ONE_D%RDN)
+                  CASE( 1); B1%U_NORMAL_S =-(U(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*B1%RDN)
+                  CASE(-1); B1%U_NORMAL_S = (U(BC%IIG-1,BC%JJG,BC%KKG) + SF%VEL_GRAD*B1%RDN)
+                  CASE( 2); B1%U_NORMAL_S =-(V(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*B1%RDN)
+                  CASE(-2); B1%U_NORMAL_S = (V(BC%IIG,BC%JJG-1,BC%KKG) + SF%VEL_GRAD*B1%RDN)
+                  CASE( 3); B1%U_NORMAL_S =-(W(BC%IIG,BC%JJG,BC%KKG)   + SF%VEL_GRAD*B1%RDN)
+                  CASE(-3); B1%U_NORMAL_S = (W(BC%IIG,BC%JJG,BC%KKG-1) + SF%VEL_GRAD*B1%RDN)
                END SELECT
             ENDIF NEUMANN_IF
-            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) ONE_D%U_NORMAL_S = &
-                                                                             ONE_D%U_NORMAL_S*RHOA/ONE_D%RHO_F
+            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) B1%U_NORMAL_S = &
+                                                                             B1%U_NORMAL_S*RHOA/B1%RHO_F
             VENT_IF: IF (WC%VENT_INDEX>0) THEN
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
                   IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-                     PROFILE_FACTOR = ABS(ONE_D%U_NORMAL_0/SF%VEL)
+                     PROFILE_FACTOR = ABS(B1%U_NORMAL_0/SF%VEL)
                   ELSE
                      PROFILE_FACTOR = 1._EB
                   ENDIF
                   SELECT CASE(BC%IOR)
-                     CASE( 1); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%U_EDDY(BC%JJ,BC%KK)*PROFILE_FACTOR
-                     CASE(-1); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%U_EDDY(BC%JJ,BC%KK)*PROFILE_FACTOR
-                     CASE( 2); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%V_EDDY(BC%II,BC%KK)*PROFILE_FACTOR
-                     CASE(-2); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%V_EDDY(BC%II,BC%KK)*PROFILE_FACTOR
-                     CASE( 3); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%W_EDDY(BC%II,BC%JJ)*PROFILE_FACTOR
-                     CASE(-3); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(BC%II,BC%JJ)*PROFILE_FACTOR
+                     CASE( 1); B1%U_NORMAL_S = B1%U_NORMAL_S - TIME_RAMP_FACTOR*VT%U_EDDY(BC%JJ,BC%KK)*PROFILE_FACTOR
+                     CASE(-1); B1%U_NORMAL_S = B1%U_NORMAL_S + TIME_RAMP_FACTOR*VT%U_EDDY(BC%JJ,BC%KK)*PROFILE_FACTOR
+                     CASE( 2); B1%U_NORMAL_S = B1%U_NORMAL_S - TIME_RAMP_FACTOR*VT%V_EDDY(BC%II,BC%KK)*PROFILE_FACTOR
+                     CASE(-2); B1%U_NORMAL_S = B1%U_NORMAL_S + TIME_RAMP_FACTOR*VT%V_EDDY(BC%II,BC%KK)*PROFILE_FACTOR
+                     CASE( 3); B1%U_NORMAL_S = B1%U_NORMAL_S - TIME_RAMP_FACTOR*VT%W_EDDY(BC%II,BC%JJ)*PROFILE_FACTOR
+                     CASE(-3); B1%U_NORMAL_S = B1%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(BC%II,BC%JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
             ENDIF VENT_IF
 
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             SELECT CASE(BC%IOR)
-               CASE( 1); ONE_D%U_NORMAL_S = -U(BC%II,BC%JJ,BC%KK)
-               CASE(-1); ONE_D%U_NORMAL_S =  U(BC%II-1,BC%JJ,BC%KK)
-               CASE( 2); ONE_D%U_NORMAL_S = -V(BC%II,BC%JJ,BC%KK)
-               CASE(-2); ONE_D%U_NORMAL_S =  V(BC%II,BC%JJ-1,BC%KK)
-               CASE( 3); ONE_D%U_NORMAL_S = -W(BC%II,BC%JJ,BC%KK)
-               CASE(-3); ONE_D%U_NORMAL_S =  W(BC%II,BC%JJ,BC%KK-1)
+               CASE( 1); B1%U_NORMAL_S = -U(BC%II,BC%JJ,BC%KK)
+               CASE(-1); B1%U_NORMAL_S =  U(BC%II-1,BC%JJ,BC%KK)
+               CASE( 2); B1%U_NORMAL_S = -V(BC%II,BC%JJ,BC%KK)
+               CASE(-2); B1%U_NORMAL_S =  V(BC%II,BC%JJ-1,BC%KK)
+               CASE( 3); B1%U_NORMAL_S = -W(BC%II,BC%JJ,BC%KK)
+               CASE(-3); B1%U_NORMAL_S =  W(BC%II,BC%JJ,BC%KK-1)
             END SELECT
 
       END SELECT WALL_CELL_TYPE
@@ -1237,8 +1234,8 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
-      WC%DUNDT = RDT*(ONE_D%U_NORMAL_S-ONE_D%U_NORMAL)
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+      WC%DUNDT = RDT*(B1%U_NORMAL_S-B1%U_NORMAL)
    ENDDO
 
 ELSE PREDICT_NORMALS
@@ -1248,23 +1245,23 @@ ELSE PREDICT_NORMALS
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
          SF => SURFACE(WC%SURF_INDEX)
          IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
-             ONE_D%NODE_INDEX > 0                  .OR. &
+             B1%NODE_INDEX > 0                  .OR. &
              ANY(SF%LEAK_PATH>0)) CYCLE
       ENDIF
-      ONE_D%U_NORMAL = ONE_D%U_NORMAL_S
+      B1%U_NORMAL = B1%U_NORMAL_S
    ENDDO
 
    ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUNDT is only used for Neumann BCs. Note the second-order RK formula.
 
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
-      WC%DUNDT = WC%DUNDT + 2._EB*RDT*(ONE_D%U_NORMAL-ONE_D%U_NORMAL_S)
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+      WC%DUNDT = WC%DUNDT + 2._EB*RDT*(B1%U_NORMAL-B1%U_NORMAL_S)
    ENDDO
 
 ENDIF PREDICT_NORMALS
@@ -1372,7 +1369,7 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
          DO I=1,IBAR
             IPZ = PRESSURE_ZONE(I,J,K)
             IF (IPZ<1) CYCLE
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) THEN
                   CYCLE
@@ -1392,10 +1389,10 @@ ENDIF IF_PRESSURE_ZONES
 ! Zero out divergence in solid cells
 
 SOLID_LOOP: DO IC=1,CELL_COUNT(NM)
-   IF (.NOT.SOLID(IC)) CYCLE SOLID_LOOP
-   I = I_CELL(IC)
-   J = J_CELL(IC)
-   K = K_CELL(IC)
+   IF (.NOT.CELL(IC)%SOLID) CYCLE SOLID_LOOP
+   I = CELL(IC)%I
+   J = CELL(IC)%J
+   K = CELL(IC)%K
    DP(I,J,K) = 0._EB
 ENDDO SOLID_LOOP
 
@@ -1422,12 +1419,12 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    BC=>BOUNDARY_COORD(WC%BC_INDEX)
    SELECT CASE (WC%BOUNDARY_TYPE)
       CASE (SOLID_BOUNDARY)
-         IF (.NOT.SOLID(CELL_INDEX(BC%II,BC%JJ,BC%KK))) CYCLE BC_LOOP
-         ONE_D => BOUNDARY_ONE_D(WC%BC_INDEX)
+         IF (.NOT.CELL(CELL_INDEX(BC%II,BC%JJ,BC%KK))%SOLID) CYCLE BC_LOOP
+         B1 => BOUNDARY_PROP1(WC%BC_INDEX)
          IF (PREDICTOR) THEN
-            UN_P = ONE_D%U_NORMAL_S
+            UN_P = B1%U_NORMAL_S
          ELSE
-            UN_P = ONE_D%U_NORMAL
+            UN_P = B1%U_NORMAL
          ENDIF
          SELECT CASE(BC%IOR)
             CASE( 1)
@@ -1520,7 +1517,7 @@ KMX    = 0
 DO K=1,KBAR
    DO J=1,JBAR
       LOOP1: DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE LOOP1
+         IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE LOOP1
          SELECT CASE(CYLINDRICAL)
             CASE(.FALSE.)
                DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + &

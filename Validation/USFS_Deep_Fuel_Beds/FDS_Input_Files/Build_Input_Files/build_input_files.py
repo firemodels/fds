@@ -51,7 +51,7 @@ for irow in df.index:
     param_line = param_line + [param4TEMP] + [param5HMDY] + [param6MRCT]
 
     param_line = param_line + [str(res2)] + [str(angle_d)]
-    n_baisicparams = len(param_line)
+    n_basicparams = len(param_line)
 
 # Record the fuel array parameters
     # calculate effective geometry descriptors
@@ -72,15 +72,15 @@ for irow in df.index:
     param_group = [rg_gap] + [dz_ht] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [depth]
 
     # calculate obst array parameters
-    block_base = 0.2                        # horizontal distance across each obst block.
-    bed_base = 4.8 * math.cos(angle_r)      # horizontal distance underneath the tilted fuel bed
+    block_base = 0.2                         # horizontal distance across each obst block.
+    bed_base = 4.8 * math.cos(angle_r)       # horizontal distance underneath the tilted fuel bed
     dz_obst = block_base * math.tan(angle_r) # vertical distance between obst block bases
     param_group = param_group + [dz_obst] + [math.floor(bed_base/block_base) -1]
 
     param_line = param_line + param_group
 
     #round off large trailing decimals
-    for n in range(n_baisicparams, len(param_line)):
+    for n in range(n_basicparams, len(param_line)):
         param_line[n] = round(param_line[n],4)
 
     #add paramline to FINAL matrix for each irow
@@ -90,7 +90,7 @@ for irow in df.index:
     #make the header list
 topline = ['Template.fds']
     #add basic params
-for i in range(n_baisicparams-1):
+for i in range(n_basicparams-1):
     topline = topline + ["param"+str(i+1)]
     #add fuel params
 for n in range(len(param_group)):

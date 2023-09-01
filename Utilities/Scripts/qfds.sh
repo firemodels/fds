@@ -92,6 +92,7 @@ function usage {
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
+  echo " -B use fds installed in /usr/local/bin/FDS/FDS6/bin"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
@@ -110,7 +111,7 @@ function usage {
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
+  echo " -w time - maximum run time, where time is dd-hh:mm:ss [default: $walltime]"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo " -z   - use --hint=nomultithread on srun line"
@@ -222,6 +223,7 @@ benchmark=no
 showinput=0
 exe=
 SMVZIP=
+walltime=99-99:99:99
 
 if [ $# -lt 1 ]; then
   usage
@@ -231,7 +233,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
+while getopts 'Ab:Bd:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -239,6 +241,10 @@ case $OPTION  in
    ;;
   b)
    EMAIL="$OPTARG"
+   ;;
+  B)
+   use_installed=
+   exe=/usr/local/bin/FDS/FDS6/bin/fds
    ;;
   d)
    dir="$OPTARG"
@@ -263,6 +269,7 @@ case $OPTION  in
    ;;
   i)
    use_installed=1
+   use_local_installed=
    ;;
   I)
    use_intel_mpi=1
@@ -404,12 +411,6 @@ else
   done
 fi
 
-#*** parse options
-
-if [ "$walltime" == "" ]; then
-  walltime=99-99:99:99
-fi
-
 #*** define executable
 
 if [ "$use_installed" == "1" ]; then
@@ -461,21 +462,7 @@ fi
 
 CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
 
-# modules loaded when fds was built
-
-if [ "$exe" != "" ]; then  # first look for file that contains the list
-  FDSDIR=$(dirname "$exe")
-  if [ -e $FDSDIR/.fdsinfo ]; then
-    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
-    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
-  fi
-fi
-
-if [[ "$FDS_LOADED_MODULES" != "" ]]; then
-  MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
-else
-  MODULES=$CURRENT_LOADED_MODULES
-fi
+MODULES=$CURRENT_LOADED_MODULES
 
 #*** define number of nodes
 
@@ -710,15 +697,17 @@ stop_fds_if_requested
 
 #*** setup for SLURM
 
-QSUB="sbatch -p $queue --ignore-pbs"
-MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
+QSUB="sbatch -p $queue"
+if [ "$use_intel_mpi" == "1" ]; then
+   MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node --mpi=pmi2"
+else
+   MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
+fi
 
 #*** Set walltime parameter only if walltime is specified as input argument
 
-walltimestring_pbs=
 walltimestring_slurm=
 if [ "$walltime" != "" ]; then
-  walltimestring_pbs="-l walltime=$walltime"
   walltimestring_slurm="--time=$walltime"
 fi
 
@@ -776,14 +765,6 @@ if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
 
-EOF
-fi
-
-if [[ "$MODULES" != "" ]]; then
-  cat << EOF >> $scriptfile
-export MODULEPATH=$MODULEPATH
-module purge
-module load $MODULES
 EOF
 fi
 

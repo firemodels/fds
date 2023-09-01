@@ -117,9 +117,9 @@ Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process o
 
 \end{itemize}
 
-This document applies only to the program FDS, its companion visualization program called Smokeview,  the related NIST and VTT publications and Internet
+This document applies only to the program FDS, its companion visualization program called Smokeview, the related NIST publications and Internet
 sites, and the various utility programs that support FDS and Smokeview. This document does not apply to third-party software developed by others
-not affiliated with NIST, VTT, or its software development collaborators.
+not affiliated with NIST or its software development collaborators.
 
 
 \input{../Bibliography/disclaimer}
@@ -129,7 +129,7 @@ not affiliated with NIST, VTT, or its software development collaborators.
 
 \label{acksection}
 
-The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the original Firebot automated build and testing process.
+The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Fire Research Institute, UL Research Institutes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with Google, developed the original Firebot automated build and testing process.
 
 
 \cleardoublepage
@@ -182,9 +182,9 @@ Wiki files (accessible through the \emph{Wiki Pages} button at \href{https://pag
 \section{Model Developers}
 
 
-Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland. The developers at NIST and VTT have formed a loose collaboration of interested stakeholders, including:
+Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with Fire Safety Research Institute, UL Research Institutes, Columbia, Maryland. The developers at NIST and UL FSRI have formed a loose collaboration of interested stakeholders, including:
 \begin{itemize}
-\item The various contributors listed at the start of this report,
+\item The various contributors acknowledged at the start of this report and other technical manuals,
 \item The Society of Fire Protection Engineers (SFPE) which conducts training classes on the use of FDS,
 \item Fire protection engineering firms that use the software,
 \item Some recipients of external grants awarded by the NIST Fire Research Division,
@@ -292,7 +292,7 @@ model are listed here.
 
 \section{Project Management}
 
-FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland. For all projects at the NIST Engineering Laboratory, a designated project leader, currently Randall McDermott of the NIST Engineering Laboratory, is responsible for directing and prioritizing model development, error correction, and preparation of documentation for the model development.
+FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with Fire Safety Research Institute, UL Research Institutes. For all projects at the NIST Engineering Laboratory, a designated project leader, currently Randall McDermott of the NIST Engineering Laboratory, is responsible for directing and prioritizing model development, error correction, and preparation of documentation for the model development.
 
 Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include:
 \begin{enumerate}
@@ -305,7 +305,7 @@ Members of the FDS and Smokeview team share in the development and maintenance r
 \item Maintaining a suite of verification and validation cases to test model accuracy and reliability
 \item Developing and updating a ``Roadmap'' of future development
 \end{enumerate}
-Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over a technical issue, the resolution is facilitated by the principal developers at NIST and VTT. Non-technical issues are addressed by the chief of the Fire Research Division at NIST or the respective counterpart at VTT. All policies and procedures described in this document are subject to review by NIST with input from VTT, SFPE, and other Federal agencies.
+Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over a technical issue, the resolution is facilitated by the principal developers at NIST and UL FSRI. Non-technical issues are addressed by the chief of the Fire Research Division at NIST or the respective counterpart at UL FSRI. All policies and procedures described in this document are subject to review by NIST with input from UL FSRI, SFPE, and other Federal agencies.
 
 Review and approval of software and documentation is part of the standard review process for any report or other product developed by NIST. A minimum of five reviews are required prior to release of reports or software, including two independent technical peer reviews, technical and management reviews at the technical workgroup and division level, and a policy review at the NIST-wide level.  This review is documented and recorded on the NIST standard form NIST 114 along with official approval notification provided to the primary author of the product.
 
@@ -348,14 +348,14 @@ Additional details on the use of GitHub for the models are available on the wiki
 
 At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
 
-Official versions of the model released by NIST are identified with specific version numbers tied to specific revisions in the repository and are identified on the download page for the model that can be compared to the version output from the model. For example, the following information is included on the FDS download website for FDS version 6.5.2
+Official versions of the model released by NIST are identified with specific version numbers tied to specific revisions in the repository and are identified on the download page for the model that can be compared to the version output from the model. For example, the following information is included on the FDS download website for FDS version 6.7.9
 \begin{lstlisting}
- Version          : FDS 6.5.2
- Revision         : Git-r21-0-g4e9103f
+ Version          : FDS 6.7.9
+ Revision         : FDS6.7.9-0-gec52dee42-release
  Revision Date    : Wed Aug 24 16:29:46 2016 -0400
  Compilation Date : Aug 24, 2016  22:28:55
 \end{lstlisting}
-New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.5.3 indicates that this is FDS 6, the sixth major release. The 5 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 3 indicates the third maintenance release of 6.5, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
+New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.7.9 indicates that this is FDS 6, the sixth major release. The 7 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 9 indicates the nineth maintenance release of 6.7, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
 
 

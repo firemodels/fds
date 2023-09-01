@@ -21,6 +21,7 @@ cd Insulation_Materials; ./Run_All.sh $OPTIONS; cd ..
 cd LEMTA_Spray; ./Run_All.sh $OPTIONS; cd ..
 cd LLNL_Enclosure; ./Run_All.sh $OPTIONS; cd ..
 cd NIST_He_2009; ./Run_All.sh $OPTIONS; cd ..
+cd NIST_Polymers; ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Smoke_Alarms; ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Facade; ./Run_All.sh $OPTIONS; cd ..
 cd NRL_HAI; ./Run_All.sh $OPTIONS; cd ..
@@ -34,7 +35,6 @@ cd Ulster_SBI; ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Polymers; ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Burning_Rate_Emulator; ./Run_All.sh $OPTIONS; cd ..
 cd USCG_HAI; ./Run_All.sh $OPTIONS; cd ..
-cd Vegetation; ./Run_All.sh $OPTIONS; cd ..
 cd Vettori_Flat_Ceiling; ./Run_All.sh $OPTIONS; cd ..
 cd Vettori_Sloped_Ceiling; ./Run_All.sh $OPTIONS; cd ..
 cd VTT_Sprays; ./Run_All.sh $OPTIONS; cd ..

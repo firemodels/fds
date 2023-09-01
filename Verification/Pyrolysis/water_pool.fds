@@ -24,7 +24,7 @@
 
 &SURF ID                  = 'POOL'
       TMP_INNER           = 20.
-      TMP_BACK            = 20.
+      TMP_GAS_BACK        = 20.
       BACKING             = 'VOID'
       MATL_ID             = 'WATER'
       COLOR               = 'BLUE'
@@ -34,6 +34,7 @@
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
+      ADJUST_H               = .FALSE.
       HEAT_OF_REACTION       = 2260
       CONDUCTIVITY           = 0.6
       SPECIFIC_HEAT          = 4.18

@@ -32,7 +32,6 @@ disp('vort2d...');                         vort2d
 disp('wall_internal_radiation...');        wall_internal_radiation
 disp('ashrae_7...');                       ashrae_7
 disp('flame_species...');                  flame_species
-disp('EDC_species...');                    EDC_species
 disp('cat_propane_depo...');               cat_propane_depo
 disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
@@ -96,7 +95,6 @@ disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance...');                  mass_balance
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
-disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
@@ -106,5 +104,6 @@ disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
+disp('tree_shapes...');                   tree_shapes
 
 display('verification scripts completed successfully!')

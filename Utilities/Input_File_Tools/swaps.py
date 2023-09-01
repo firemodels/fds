@@ -5,10 +5,6 @@ by Randy McDermott
 June 2021
 
 Perform string replacements in an FDS input file (fdsbasefile) based on a parameter file (paramfile).
-
-CAUTION: The string replacements must have *unique* parameter names.  For example, do not simply use
-         an ordered set of parameters with, say, param1 going up to param10, because swaps thinks that the
-         first 6 elements of param10 are param1 and gives the wrong result.
 """
 
 import pandas as pd
@@ -19,8 +15,14 @@ paramfile = 'paramfile.csv'
 
 df = pd.read_csv(paramfile, sep=' *, *', engine='python', dtype=str)
 
+# assumes Template.fds is the first column name
 fdsbasefile = df.columns[0]
+# fdsbasefile = 'Frederica.fds' # or just directly assign the filename
 # print(fdsbasefile)
+
+# sort dataframe column order by descending column name length to avoid swapping substrings
+cols = sorted(df.columns.tolist(),key=len,reverse=True)
+df = df[cols]
 
 for irow in df.index:
 

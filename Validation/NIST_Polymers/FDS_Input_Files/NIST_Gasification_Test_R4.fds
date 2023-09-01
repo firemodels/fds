@@ -1,0 +1,48 @@
+&HEAD CHID='NIST_Gasification_Test_R4', TITLE='Black PMMA at 50 kW/m2 in Gasification Apparatus' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
+
+&TIME T_END=500., WALL_INCREMENT=1, DT=0.1 /
+
+&MISC Y_O2_INFTY=0.001 /
+
+&MATL ID                = 'Kaowool PM Insulation'
+      DENSITY           = 256.
+      SPECIFIC_HEAT     = 1.07
+      CONDUCTIVITY_RAMP = 'k_kaowool' /
+
+&RAMP ID='k_kaowool', T= 260., F=0.0576 /
+&RAMP ID='k_kaowool', T= 538., F=0.085  /
+&RAMP ID='k_kaowool', T= 816., F=0.125  /
+&RAMP ID='k_kaowool', T=1093., F=0.183  /
+
+&CATF OTHER_FILES='pmma_properties.txt' /
+
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      STRETCH_FACTOR=1.
+      HEAT_TRANSFER_COEFFICIENT=13.
+      EXTERNAL_FLUX=50 
+      BACKING='INSULATED'
+      MATL_ID='BLACK PMMA','Kaowool PM Insulation'
+      THICKNESS=0.00565,0.0254 /
+
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=1. /
+
+&DEVC ID='Mass', XB=-0.05,0.05,-0.05,0.05,0.00,0.01, IOR=3, QUANTITY='SURFACE DENSITY', SPATIAL_STATISTIC='SURFACE INTEGRAL'
+      CONVERSION_FACTOR=1000, UNITS='[g]' /
+&DEVC ID='MLR', XB=-0.05,0.05,-0.05,0.05,0.00,0.01, IOR=3, QUANTITY='MASS FLUX', SPEC_ID='MMA', CONVERSION_FACTOR=1000, UNITS='[g/m2/s]' /
+&DEVC ID='Back Surface Temperature', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BACK WALL TEMPERATURE', CONVERSION_ADDEND=273, UNITS='[K]'/
+&DEVC ID='Top Surface Temperature',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', CONVERSION_ADDEND=273, UNITS='[K]'/
+
+&TAIL / 
+
+

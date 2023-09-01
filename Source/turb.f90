@@ -373,13 +373,13 @@ SUBROUTINE TWOD_SOBOROT_UMD(NM)
 ! Used for PERIODIC_TEST==12,13
 !-------------------------------------------------------------------------------
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,IOR,II,JJ,KK,IW,IC
+INTEGER :: I,J,K,IOR,II,JJ,KK,IW
 REAL(EB), PARAMETER :: USCAL = 1._EB     ! scale velocity (m/s)
 REAL(EB), PARAMETER :: WSCAL = 1._EB     ! scale velocity (m/s)
 REAL(EB), PARAMETER :: XCLOC = 0._EB     ! Center of vortex, x (m)
 REAL(EB), PARAMETER :: ZCLOC = 0._EB     ! Center of vortex, z (m)
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE(WALL_TYPE), POINTER :: WC
 
 CALL POINT_TO_MESH(NM)
@@ -405,66 +405,31 @@ DO K=-0,KBP1
    ENDDO
 ENDDO
 
-! fill ghost values for smokeview
-
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBAR
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         V_EDGE_X(IC) = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
-         W_EDGE_X(IC) = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=0,KBP1
-   DO J=0,JBAR
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         U_EDGE_Y(IC) = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
-         W_EDGE_Y(IC) = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=0,KBAR
-   DO J=0,JBP1
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
-         IF (IC==0) CYCLE
-         U_EDGE_Z(IC) = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
-         V_EDGE_Z(IC) = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
-      ENDDO
-   ENDDO
-ENDDO
-
 ! Set normal velocity on external and internal boundaries (follows divg)
 
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
+   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
    IOR = BC%IOR
    II  = BC%II
    JJ  = BC%JJ
    KK  = BC%KK
    SELECT CASE(IOR)
       CASE( 1)
-         ONE_D%U_NORMAL_S = -U(II,JJ,KK)
+         B1%U_NORMAL_S = -U(II,JJ,KK)
       CASE(-1)
-         ONE_D%U_NORMAL_S =  U(II-1,JJ,KK)
+         B1%U_NORMAL_S =  U(II-1,JJ,KK)
       CASE( 2)
-         ONE_D%U_NORMAL_S = -V(II,JJ,KK)
+         B1%U_NORMAL_S = -V(II,JJ,KK)
       CASE(-2)
-         ONE_D%U_NORMAL_S =  V(II,JJ-1,KK)
+         B1%U_NORMAL_S =  V(II,JJ-1,KK)
       CASE( 3)
-         ONE_D%U_NORMAL_S = -W(II,JJ,KK)
+         B1%U_NORMAL_S = -W(II,JJ,KK)
       CASE(-3)
-         ONE_D%U_NORMAL_S =  W(II,JJ,KK-1)
+         B1%U_NORMAL_S =  W(II,JJ,KK-1)
    END SELECT
-   ONE_D%U_NORMAL = ONE_D%U_NORMAL_S
+   B1%U_NORMAL = B1%U_NORMAL_S
 ENDDO
 
 END SUBROUTINE TWOD_SOBOROT_UMD
@@ -1939,12 +1904,12 @@ VENT_LOOP: DO NV=1,N_VENT
    SF => SURFACE(VT%SURF_INDEX)
 
    IF ( .NOT. (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. OPEN_WIND_BOUNDARY)) THEN
-      IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+      IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
          TSI = T
       ELSE
          TSI=T-SF%T_IGN
       ENDIF
-      RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_VELO),TAU=SF%TAU(TIME_VELO))
+      RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
       VEL_NORMAL = SF%VEL     *RAMP_T
       VEL_TANG_1 = SF%VEL_T(1)*RAMP_T
       VEL_TANG_2 = SF%VEL_T(2)*RAMP_T
@@ -1964,8 +1929,8 @@ VENT_LOOP: DO NV=1,N_VENT
                VEL_NORMAL = -(U_WIND(KK)*(1.0-Z_WGT)+U_WIND(KK+1)*Z_WGT)
                VEL_TANG_1 = (V_WIND(KK)*(1.0-Z_WGT)+V_WIND(KK+1)*Z_WGT)
                VEL_TANG_2 = (W_WIND(KK)*(1.0-Z_WGT)+W_WIND(KK+1)*Z_WGT)
-            ELSEIF (SF%RAMP_INDEX(VELO_PROF_Z)>0) THEN
-               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP_INDEX(VELO_PROF_Z))
+            ELSEIF (SF%RAMP(VELO_PROF_Z)%INDEX>0) THEN
+               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP(VELO_PROF_Z)%INDEX)
             ENDIF
 
             VT%X_EDDY(NE) = VT%X_EDDY(NE) - DT*VEL_NORMAL*PROFILE_FACTOR*SIGN(1._EB,REAL(VT%IOR,EB))
@@ -2008,8 +1973,8 @@ VENT_LOOP: DO NV=1,N_VENT
                VEL_TANG_1 = (U_WIND(KK)*(1.0-Z_WGT)+U_WIND(KK+1)*Z_WGT)
                VEL_NORMAL = -(V_WIND(KK)*(1.0-Z_WGT)+V_WIND(KK+1)*Z_WGT)
                VEL_TANG_2 = (W_WIND(KK)*(1.0-Z_WGT)+W_WIND(KK+1)*Z_WGT)
-            ELSEIF (SF%RAMP_INDEX(VELO_PROF_Z)>0) THEN 
-               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP_INDEX(VELO_PROF_Z))
+            ELSEIF (SF%RAMP(VELO_PROF_Z)%INDEX>0) THEN 
+               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP(VELO_PROF_Z)%INDEX)
             ENDIF
 
             VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*VEL_TANG_1*PROFILE_FACTOR
@@ -2052,8 +2017,8 @@ VENT_LOOP: DO NV=1,N_VENT
                VEL_TANG_1 = (U_WIND(KK)*(1.0-Z_WGT)+U_WIND(KK+1)*Z_WGT)
                VEL_TANG_2 = (V_WIND(KK)*(1.0-Z_WGT)+V_WIND(KK+1)*Z_WGT)
                VEL_NORMAL = -(W_WIND(KK)*(1.0-Z_WGT)+W_WIND(KK+1)*Z_WGT)
-            ELSEIF (SF%RAMP_INDEX(VELO_PROF_Z)>0) THEN
-               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP_INDEX(VELO_PROF_Z))
+            ELSEIF (SF%RAMP(VELO_PROF_Z)%INDEX>0) THEN
+               PROFILE_FACTOR = EVALUATE_RAMP(VT%Z_EDDY(NE),SF%RAMP(VELO_PROF_Z)%INDEX)
             ENDIF
             
             VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*VEL_TANG_1*PROFILE_FACTOR
@@ -2273,7 +2238,6 @@ DO IM = 1,NMESHES
    M%V=M%V-MEANV
    M%W=M%W-MEANW
 ENDDO
-
 
 ! handle boundaries and I=0,J=0,K=0 cells for each mesh
 
@@ -3324,7 +3288,6 @@ SUBROUTINE fourier_f2003(data3,nn,ndim,isign,iform,work)
 END SUBROUTINE fourier_f2003
 
 END MODULE TURBULENCE
-
 
 
 MODULE MANUFACTURED_SOLUTIONS

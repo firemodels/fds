@@ -1,0 +1,18 @@
+&HEAD CHID='special_time_ramps', TITLE='Simple demo of special ramps' /
+
+&MESH IJK=4,4,4, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=100. /
+
+&RADI RADIATION=F/
+
+&DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
+&CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', CONSTANT=0.62831853 /
+&CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
+&RAMP ID='ramp sin', CTRL_ID_DEP='sin(2*pi*(t-t0)/10)' /
+
+&CTRL ID='writer', FUNCTION_TYPE='CUSTOM', RAMP_ID='ramp sin', INPUT_ID='t' /
+&DEVC ID='sin function', XYZ=0,0,0, QUANTITY='CONTROL VALUE', CTRL_ID='writer', UNITS='--' /
+
+&TAIL /

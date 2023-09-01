@@ -27,7 +27,7 @@ A cup burner is an apparatus used to determine the minimum extinguishing concent
 
 \subsection{FM Burner Experiments}
 
-A description of the FM Burner experiments can be found in Section~\ref{FM_Burner_Description}. Briefly, a 15.2~cm round steel burner generating a 10~kW fire was supplied with oxygen by an air stream from below that was slowly diluted with nitrogen until the flame extinguished.  In the FDS simulations, nitrogen is added to the air stream supplied through the floor of the enclosure, linearly decreasing the oxygen volume fraction over one minute of simulated time. In Fig.~\ref{fig_fm_burner}, the combustion efficiency, $\eta$, is plotted as a function of oxygen volume fraction for all four fuels tested and compared with the measurements of Zeng and Wang~\cite{Zeng:26ICDERS}.  The auto-ignition temperature (AIT) threshold for each fuel is set according to the Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  The modeled burner is piloted using a ring of 36 particles ejecting enough fuel to produce 1~kW (to match the experimental pilot).
+A description of the FM Burner experiments can be found in Sec.~\ref{FM_Burner_Description}. Briefly, a 15.2~cm round steel burner generating a 10~kW fire was supplied with oxygen by an air stream from below that was slowly diluted with nitrogen until the flame extinguished.  In the FDS simulations, nitrogen is added to the air stream supplied through the floor of the enclosure, linearly decreasing the oxygen volume fraction over one minute of simulated time. In Fig.~\ref{fig_fm_burner}, the combustion efficiency, $\eta$, is plotted as a function of oxygen volume fraction for all four fuels tested and compared with the measurements of Zeng and Wang~\cite{Zeng:26ICDERS}.  The auto-ignition temperature (AIT) threshold for each fuel is set according to the Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}.  The modeled burner is piloted using a ring of 36 particles ejecting enough fuel to produce 1~kW (to match the experimental pilot).
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -44,7 +44,7 @@ A description of the FM Burner experiments can be found in Section~\ref{FM_Burne
 
 \subsection{UMD Line Burner}
 
-A description of UMD Line Burner experiments can be found in Section~\ref{UMD_Line_Burner_Description}. In the experiments, the oxygen co-flow was slowly diluted with nitrogen until the flame weakened and eventually extinguished.  In the FDS simulations, the nitrogen co-flow is setup with a ramp in time to achieve a linear decrease in the co-flow oxygen volume fraction over one minute of real time. In Fig.~\ref{fig_umd_comb_eta}, we plot the combustion efficiency as a function of oxygen volume fraction for both methane and propane and compare with the measurements of White~et~al.~\cite{White:2015}.  Note that the FDS results are presented for three different grid resolutions corresponding to $W/\delta x$ = 4, 8, and 16 ($\delta x$ = 1.25~cm, 0.625~cm, and 0.3125~cm, respectively), where $W=5$ cm is the width of the burner.  A simple re-ignition model with an ignition temperature threshold set to the SFPE Handbook~\cite{SFPE} value of the Auto-Ignition Temperature (AIT) for methane and propane is used.  A piloted ignition region (AIT = 0~K) is set just within the near field of the line burner.  Details of the re-ignition model and pilot region as well as parameter sensitivity studies are provided in White~et~al.~\cite{White:2017}.
+A description of UMD Line Burner experiments can be found in Sec.~\ref{UMD_Line_Burner_Description}. In the experiments, the oxygen co-flow was slowly diluted with nitrogen until the flame weakened and eventually extinguished.  In the FDS simulations, the nitrogen co-flow is setup with a ramp in time to achieve a linear decrease in the co-flow oxygen volume fraction over one minute of real time. In Fig.~\ref{fig_umd_comb_eta}, we plot the combustion efficiency as a function of oxygen volume fraction for both methane and propane and compare with the measurements of White~et~al.~\cite{White:2015}.  Note that the FDS results are presented for three different grid resolutions corresponding to $W/\delta x$ = 4, 8, and 16 ($\delta x$ = 1.25~cm, 0.625~cm, and 0.3125~cm, respectively), where $W=5$ cm is the width of the burner.  A simple re-ignition model with an ignition temperature threshold set to the SFPE Handbook~\cite{SFPE} value of the Auto-Ignition Temperature (AIT) for methane and propane is used.  A piloted ignition region (AIT = 0~K) is set just within the near field of the line burner.  Details of the re-ignition model and pilot region as well as parameter sensitivity studies are provided in White~et~al.~\cite{White:2017}.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -131,7 +131,7 @@ The figures on the following pages contain plots of the heat release rate in bot
 \subsection{NIST/NRC OLIVE-Fire Experiments}
 \label{NIST_NRC_OLIVE-Fire}
 
-These experiments involve fires within large, steel electrical enclosures. A brief description of the experiments and photographs of the enclosures are found in Section~\ref{NIST_NRC_OLIVE-Fire_Description}. Table~\ref{OLIVE_matrix} lists the leakage and vent areas of the enclosures, along with the measured maximum heat release rate (HRR).
+These experiments involve fires within large, steel electrical enclosures. A brief description of the experiments and photographs of the enclosures are found in Sec.~\ref{NIST_NRC_OLIVE-Fire_Description}. Table~\ref{OLIVE_matrix} lists the leakage and vent areas of the enclosures, along with the measured maximum heat release rate (HRR).
 
 Figures \ref{NIST_NRC_HRR_1} through \ref{NIST_NRC_HRR_5} compare predicted versus measured heat release rates and gas species near the ceiling of each enclosure. The HRR plots on the left contain two sets of curves. The black curves represent the nominal HRR based solely on the metered natural gas flow. The gas flow was ramped up in increments of 25~kW, 50~kW, or 100~kW until the HRR determined via oxygen consumption calorimetry (red curves) diverged, at which point the maximum achievable HRR within the enclosure had been reached.
 
@@ -394,28 +394,28 @@ Fire Scenario       & Ventilation                       & \multicolumn{5}{c|}{Ex
 
 \section{Theobald Hose Stream Experiments}
 
-Figures \ref{fig:Theobald_max_range}-\ref{fig:Theobald_max_height_distance} show scatter plots for the maximum range, the maximum height, and the maximum height distance from the Theobald experiments \cite{Theobald:1981}.
+Figures \ref{fig:Theobald_max_range}---\ref{fig:Theobald_max_height_distance} show scatter plots for the maximum range, the maximum height, and the distance to the point of maximum height for the Theobald Hose Stream experiments~\cite{Theobald:1981}.  There are approximately 90 experiments using four different nozzle types (6, 7, 9 [Rouse], 10) with different nozzle diameters (13~mm, 19~mm, 25.4~mm).  Note that the solid circles on the scatter plots below are scaled by the nozzle diameter.  The experiments also varied the hose pressure (and hence exit velocity) from 2.1~bar to 6.2~bar and firing angle (relative to horizotal) from 20$^\circ$ to 45$^\circ$.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Range}
-\caption[Theobald Hose Stream max range]{Theobald Hose Stream max range.}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Range}
+\caption[Theobald Hose Stream max range]{Theobald Hose Stream, maximum range.}
 \label{fig:Theobald_max_range}
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \begin{center}
-\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height}
-\caption[Theobald Hose Stream max range]{Theobald Hose Stream max height.}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height}
+\caption[Theobald Hose Stream max height]{Theobald Hose Stream, maximum height.}
 \label{fig:Theobald_max_height}
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \begin{center}
-\includegraphics[height=4in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height_Distance}
-\caption[Theobald Hose Stream max range]{Theobald Hose Stream max height distance.}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/Theobald_Hose_Stream/Theobald_Hose_Stream_Max_Height_Distance}
+\caption[Theobald Hose Stream distance to max height]{Theobald Hose Stream, distance to the point of maximum height.}
 \label{fig:Theobald_max_height_distance}
 \end{center}
 \end{figure}

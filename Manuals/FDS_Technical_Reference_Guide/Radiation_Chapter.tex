@@ -22,7 +22,7 @@ The Radiative Transport Equation (RTE) for an absorbing, emitting, and scatterin
  }_{\textrm{In-scattering term}}
 \label{RTEbasic}
 \end{align}
-where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength, $\la$; $\bs$ is the direction vector of the intensity; and $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption and scattering coefficients, respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles. The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in Section~\ref{droplet-radiation}.
+where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength, $\la$; $\bs$ is the direction vector of the intensity; and $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption and scattering coefficients, respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles. The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in Sec.~\ref{droplet-radiation}.
 
 In practical simulations, the spectral dependence of the RTE cannot be resolved accurately. Instead, the radiation spectrum is divided into a relatively small number of bands and a separate RTE is derived for each band. For instance, the band specific RTE for a non-scattering gas is
 \be
@@ -43,7 +43,7 @@ where $I_{{\rm b},n}$ is the fraction of the blackbody radiation at temperature 
 \be
    I_{{\rm b},n}(\bx) = F_n(\la_{\rm min},\la_{\rm max}) \, \sigma \, T(\bx)^4/\pi
 \ee
-and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}. The measurement of the absorption coefficients, $\kappa_n$, is discussed in Appendix~\ref{absorption_coefficients}.
+and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}. The calculation of the absorption coefficients, $\kappa_n$, is discussed in Appendix~\ref{absorption_coefficients}.
 
 Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one absorption coefficient ($N=1$) and the source term is given by the blackbody radiation intensity \cite{Ludwig:NASA}
 \be
@@ -320,20 +320,18 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 \subsection{Radiation Contribution to Energy Equation}
 
 The radiant heat flux vector $\dbq_{\rm r}''$ is defined
-\be \dbq_{\rm r}''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; \d \bs'   \ee
-The gas phase contribution to the radiative loss term in the energy equation is (under the gray gas assumption)
+\be \dbq_{\rm r}''(\bx) = \int_{4\pi} \;  I(\bx,\bs) \, \bs \; \d \Omega   \ee
+The interaction between the electromagneric radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
 \be -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
-    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, \d \bs'  \label{net_emission}
+    U(\bx) = \int_{4\pi} \, I(\bx,\bs) \, \d \Omega  \label{net_emission}
 \ee
-For N bands, the gas phase contribution to the radiative loss term in the energy equation is
+This term then appears as a gas phase loss term in the radiation transfer equation. For N bands, the contribution to the radiative source term in the energy equation is
 \be
 -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) = \sum_{n=1}^N  \kappa(\bx) \, U_n(\bx) \, -4 \pi B_n(\bx) \quad
-; \quad U_n(\bx) = \int_{4\pi} \, I_n(\bx,\bs') \, \d \bs'  \label{net_emission_Nbands}
+; \quad U_n(\bx) = \int_{4\pi} \, I_n(\bx,\bs) \, \d \Omega  \label{net_emission_Nbands}
 \ee
-
-In words, the net radiant energy gained by a grid cell is the
-difference between that which is absorbed and that which is emitted.
+In words, the net thermal energy gained by a grid cell from the radiation field is the difference between that which is absorbed and that which is emitted.
 
 \subsection{Correction of the Emission Source Term}
 
@@ -433,23 +431,23 @@ In each grid cell, a discretized equation is derived by integrating Eq.~(\ref{ba
 angle $\delta \Omega^l$, to obtain
 \be
   \int_{\delta \Omega^l} \int_{V_{ijk}}
-   \bs' \cdot \nabla I(\bx',\bs') \d\bx' \d\bs' =
-   \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
-    \left[ I_{\rm b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
+   \bs \cdot \nabla I(\bx,\bs) \, \d V \, \d\Omega =
+   \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx) \;
+    \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \d V \, \d \Omega
 \ee
 The volume integral on the left hand side is replaced by a surface integral over the cell faces using the divergence theorem.
 \be
   \int_{\delta \Omega^l} \int_{A_{ijk}}
-   \left(\bs' \cdot \bn' \right) I(\bx',\bs') \d\bn' \d\bs' =
-   \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
-    \left[ I_{\rm b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
+   \left(\bs \cdot \bn \right) I(\bx,\bs) \d A \, \d\Omega =
+   \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx) \;
+    \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \d V \, \d \Omega
 \ee
 Assuming that the radiation intensity $I(\bx,\bs)$ is constant on each
 of the cell faces, the surface integral can be approximated by a sum
 over the cell faces.  Assuming further that $I(\bx,\bs)$ is constant within the volume $V_{ijk}$ and over the angle $\delta \bO^l$, and that
 $\kappa(\bx')$ and $I_{\rm b}(\bx')$ are constants within the volume $V_{ijk}$, we obtain
 \be  \sum_{m=1}^6 A_m \; I_m^l \;
-      \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
+      \int_{\Omega^l}(\bs \cdot \bn_m) \d \Omega
    = \kappa_{ijk} \,
      \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
      \delta \Omega^l   \label{RTEdiscrete2}
@@ -458,7 +456,7 @@ where
 \begin{tabbing}
 $I_{ijk}^l$ \hspace{1in}  \=  radiant intensity in direction $l$ \\
 $I_m^l$                   \>  radiant intensity at cell face $m$ \\
-$I_{b,ijk}$               \>  radiant blackbody Intensity in cell \\
+$I_{b,ijk}$               \>  radiant blackbody intensity in cell \\
 $\delta \Omega^l$         \>  solid angle corresponding to direction $l$ \\
 $V_{ijk}$                 \>  volume of cell $ijk$ \\
 $A_m$                     \>  area of cell face $m$ \\
@@ -477,7 +475,7 @@ retained.},
 the normal vectors $\bn_m$ are the base vectors of the coordinate system and the integrals over the solid
 angle do not depend on the physical coordinate, but the direction only. These integrals are denoted as
 \be
-D_m^l= \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
+D_m^l= \int_{\Omega^l}(\bs \cdot \bn_m) \d \Omega
 \label{cellfaceintegral}
 \ee
 and the discrete equation becomes
@@ -539,24 +537,20 @@ or scattering are important, or if the scenario is optically very thick. Current
 
 \subsection{Boundary Conditions}
 
-The boundary condition for the radiation intensity leaving
-a gray diffuse wall is given as
+The boundary condition for the radiation intensity leaving a gray diffuse wall is given as
 \be I_{\rm w}(\bs) = \frac{\epsilon \, \sigma \, T_{\rm w}^4}{\pi} + \frac{1-\epsilon}{\pi}
- \int_{\bs'\cdot \bn_{\rm w} < 0} I_{\rm w}(\bs')\; |\bs'\cdot \bn_{\rm w} | \; \d\bs'
- \label{RTEbc} \ee
-where $I_{\rm w}(\bs)$ is the intensity at the wall, $\epsilon$ is the
-emissivity, and $T_{w}$ is the wall surface temperature.
-In discretized form, the boundary condition on a solid wall is given as
-\be I_{\rm w}^l = \frac{\epsilon \, \sigma \, T_{\rm w}^4}{\pi} + \frac{1-\epsilon}{\pi} \sum_{D_{\rm w}^{l'}<0} I_{\rm w}^{l'}\; |D_{\rm w}^{l'} |  \ee
-where $D_{\rm w}^{l'}= \int_{\Omega^{l'}}(\bs\cdot \bn_{\rm w})\d\Omega$.
-The constraint $D_{\rm w}^{l'}<0$ means that only the ``incoming'' directions
-are taken into account when calculating the reflection.
-The {\em net} radiative heat flux on the wall is
-\be \dq_{\rm r}'' = \sum_{l=1}^{N_{\Omega}} I_{\rm w}^l \int_{\delta \Omega^l} (\bs' \cdot \bn_{\rm w}) \, \d\bs'
-     = \sum_{l=1}^{N_{\Omega}} I_{\rm w}^l D_n^l \label{qrdef} \ee
-where the coefficients $D_n^l$ are equal to $\pm D_x^l$, $\pm D_y^l$ or
-$\pm D_z^l$, and can be calculated for each wall element at the start of the
-calculation.
+ \int_{\bs\cdot \bn_{\rm w} < 0} I_{\rm w}(\bs)\; |\bs\cdot \bn_{\rm w} | \; \d\Omega
+ \label{RTEbc} 
+\ee
+where $I_{\rm w}(\bs)$ is the intensity at the wall, $\epsilon$ is the emissivity, and $T_{w}$ is the wall surface temperature. In discretized form, the boundary condition on a solid wall is given as
+\be 
+   I_{\rm w}^l = \frac{\epsilon \, \sigma \, T_{\rm w}^4}{\pi} + \frac{1-\epsilon}{\pi} \sum_{D_{\rm w}^{l'}<0} I_{\rm w}^{l'}\; |D_{\rm w}^{l'} |  
+\ee
+where $D_{\rm w}^{l'}= \int_{\Omega^{l'}}(\bs\cdot \bn_{\rm w})\d\Omega$. The constraint $D_{\rm w}^{l'}<0$ means that only the ``incoming'' directions are taken into account when calculating the reflection. The {\em net} radiative heat flux on the wall is
+\be 
+   \dq_{\rm r}'' = \sum_{l=1}^{N_{\Omega}} I_{\rm w}^l \int_{\delta \Omega^l} (\bs \cdot \bn_{\rm w}) \, \d\Omega = \sum_{l=1}^{N_{\Omega}} I_{\rm w}^l D_n^l \label{qrdef} 
+\ee
+where the coefficients $D_n^l$ are equal to $\pm D_x^l$, $\pm D_y^l$ or $\pm D_z^l$, and can be calculated for each wall element at the start of the calculation.
 
 The open boundaries are treated as black walls, where the incoming intensity is
 the blackbody intensity of the ambient temperature. On mirror
@@ -579,7 +573,7 @@ The attenuation of thermal radiation by liquid droplets and small particles is a
 \bs \cdot \nabla I_{\la}(\bx,\bs) = -\Big[\kappa_{\rm p}(\bx,\la) + \sigma_{\rm p}(\bx,\la)\Big]
 I_{\la}(\bx,\bs) +\kappa_{\rm p}(\bx,\la) \; I_{{\rm b,p}}(\bx,\la) +
 \frac{\sigma_{\rm p}(\bx,\la)}{4\pi}
-\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs') \, \d\bs'
+\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs') \, \d\Omega
 \label{RTEspray}
 \ee
 where $\kappa_{\rm p}$ is the particle absorption coefficient, $\sigma_{\rm p}$ is the particle scattering coefficient and $I_{{\rm b,p}}$ is the emission term of the particles. $\Phi(\bs',\bs)$ is a scattering phase function that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.
@@ -679,7 +673,7 @@ where $m_{\rm p}$ is the mass of the droplet and $\rho_{\rm p}(\bx)$ is the tota
 
 \section{Absorption by Large, Non-Scattering Particles}
 
-FDS uses Lagrangian particles to represent objects that are not resolvable on the numerical grid, but are still relatively large compared to liquid droplets. For example, vegetation is modeled as a collection of large, opaque, non-scattering particles. For more discussion of the radiation absorption by large particles, see Section~\ref{rad_part_absorb}.
+FDS uses Lagrangian particles to represent objects that are not resolvable on the numerical grid, but are still relatively large compared to liquid droplets. For example, vegetation is modeled as a collection of large, opaque, non-scattering particles. For more discussion of the radiation absorption by large particles, see Sec.~\ref{rad_part_absorb}.
 
 
 

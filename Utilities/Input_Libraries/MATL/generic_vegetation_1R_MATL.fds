@@ -1,0 +1,37 @@
+&REAC FUEL='FUEL VAPOR', C=2.10, H=6.20, O=2.16, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425., IDEAL=T /
+
+&SPEC ID='WATER VAPOR' /
+
+&MATL ID                    = 'GENERIC VEGETATION'
+      DENSITY               = 500.
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT_RAMP    = 'c_v'
+      A                     = 1040.
+      E                     = 61041.
+      NU_SPEC               = 0.75
+      SPEC_ID               = 'FUEL VAPOR'
+      NU_MATL               = 0.25
+      MATL_ID               = 'CHAR'
+      HEAT_OF_REACTION      = 418. /
+
+&MATL ID                    = 'CHAR'
+      DENSITY               = 300.
+      CONDUCTIVITY          = 0.052
+      SPECIFIC_HEAT_RAMP    = 'c_v'
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000.
+      SPEC_ID               = 'PRODUCTS','AIR'
+      NU_SPEC               = 8.13,-7.17
+      MATL_ID               = 'ASH'
+      NU_MATL               = 0.04
+      HEAT_OF_REACTION      = -25000. /
+
+&MATL ID                    = 'ASH'
+      DENSITY               = 67.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT_RAMP    = 'c_v' /
+
+&RAMP ID='c_v', T=  0., F=1.1 /
+&RAMP ID='c_v', T=200., F=2.0 /
+&RAMP ID='c_v', T=800., F=2.0 /

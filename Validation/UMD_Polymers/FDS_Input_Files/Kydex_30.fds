@@ -70,7 +70,7 @@
       STRETCH_FACTOR=1.
       EXTERNAL_FLUX=30.
       RAMP_EF= 'external'
-      TMP_BACK=37., TMP_INNER=27.
+      TMP_GAS_BACK=37., TMP_INNER=27.
       HEAT_TRANSFER_COEFFICIENT=5. /
 
 &RAMP ID='external', T=0., F=1 /

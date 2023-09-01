@@ -11,7 +11,7 @@
 
 VPATH = ../Source
 
-# set compiler type 
+# set compiler type
 
 I_IFORT=ifort
 ifdef INTEL_IFORT
@@ -28,7 +28,7 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
 else
 # linux/osx
   SHELL:=/bin/bash
-  GIT_HASH := $(shell git describe --long)
+  GIT_HASH := $(shell git describe --long --abbrev=7)
   ifeq ("$(shell git diff --shortstat $(VPATH)/*.f90)","")
     GIT_STAT :=
   else
@@ -111,9 +111,9 @@ endif
 endif # OS test
 endif # MKLROOT test
 
-obj_mpi = prec.o cons.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
+obj_mpi = prec.o cons.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
           pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
-          wall.o fire.o velo.o scrc.o pres.o init.o dump.o read.o divg.o main.o
+          wall.o fire.o velo.o pres.o init.o dump.o read.o divg.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
 
@@ -146,7 +146,6 @@ pres.o: FFLAGS += $(FOPENMPFLAGS)
 turb.o: FFLAGS += $(FOPENMPFLAGS)
 velo.o: FFLAGS += $(FOPENMPFLAGS)
 radi.o: FFLAGS += $(FOPENMPFLAGS)
-scrc.o: FFLAGS += $(FOPENMPFLAGS)
 main.o: FFLAGS += $(FOPENMPFLAGS)
 
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -157,7 +156,6 @@ pres.obj: FFLAGS += $(FOPENMPFLAGS)
 turb.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
 radi.obj: FFLAGS += $(FOPENMPFLAGS)
-scrc.obj: FFLAGS += $(FOPENMPFLAGS)
 main.obj: FFLAGS += $(FOPENMPFLAGS)
 
 # Windows Intel Fortran Compiler and Intel MPI
@@ -171,6 +169,15 @@ impi_intel_win : FCOMPL = $(I_IFORT)
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+
+impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_vt : MPIINCLUDE = "$(IMPI_INCLUDE)"
+impi_intel_win_vt : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) /Zi /D "TBB_USE_THREADING_TOOLS"
+impi_intel_win_vt : FCOMPL = $(I_IFORT)
+impi_intel_win_vt : obj = fds_impi_intel_win_vt
+impi_intel_win_vt : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+
 
 impi_intel_win_openmp : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_openmp : MPIINCLUDE = "$(IMPI_INCLUDE)"
@@ -216,7 +223,7 @@ impi_intel_win_openmp_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 # Linux Intel Fortran Compiler and Intel MPI
- 
+
 impi_intel_linux : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux : FCOMPL = mpiifort
@@ -263,7 +270,7 @@ impi_intel_linux_openmp_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # OSX Intel Fortran and Open MPI
- 
+
 ompi_intel_osx : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 ompi_intel_osx : LFLAGS = -static-intel
@@ -362,9 +369,10 @@ ompi_gnu_osx_dv : setup $(obj_mpi)
 prec.o :
 imkl.o :
 cons.o : prec.o
+prop.o : prec.o
 devc.o : prec.o
 type.o : prec.o cons.o imkl.o
-data.o : prec.o func.o cons.o
+data.o : prec.o func.o cons.o prop.o
 rcal.o : func.o prec.o cons.o
 mesh.o : prec.o type.o
 func.o : prec.o cons.o type.o mesh.o devc.o
@@ -373,31 +381,31 @@ smvv.o : geom.o prec.o func.o cons.o data.o
 turb.o : prec.o func.o cons.o mesh.o
 soot.o : prec.o mesh.o cons.o func.o turb.o
 pois.o : prec.o cons.o
-geom.o : gsmv.o func.o prec.o cons.o type.o mesh.o turb.o imkl.o
+geom.o : gsmv.o func.o prec.o cons.o type.o mesh.o turb.o imkl.o data.o
 ccib.o : gsmv.o func.o prec.o cons.o type.o mesh.o turb.o geom.o
 radi.o : func.o prec.o cons.o type.o mesh.o rcal.o geom.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o soot.o
 vege.o : func.o prec.o cons.o type.o mesh.o geom.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
-hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
+hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o data.o
 mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o ccib.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o ccib.o
 fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o radi.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o ccib.o
-scrc.o : prec.o cons.o mesh.o func.o pois.o geom.o velo.o imkl.o
-pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o geom.o ccib.o imkl.o
+pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o geom.o ccib.o imkl.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o radi.o pois.o data.o pres.o geom.o
-dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o scrc.o data.o radi.o soot.o geom.o ccib.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o scrc.o data.o geom.o mass.o soot.o
-divg.o : func.o prec.o cons.o type.o mesh.o scrc.o mass.o ccib.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o ccib.o soot.o
+dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o data.o radi.o soot.o geom.o ccib.o fire.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o prop.o
+divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o prop.o
 
 prec.obj :
 imkl.obj :
 cons.obj : prec.obj
+prop.obj : prec.obj
 devc.obj : prec.obj
 type.obj : prec.obj cons.obj imkl.obj
-data.obj : prec.obj func.obj cons.obj
+data.obj : prec.obj func.obj cons.obj prop.obj
 rcal.obj : func.obj prec.obj cons.obj
 mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
@@ -406,24 +414,23 @@ smvv.obj : geom.obj prec.obj func.obj cons.obj data.obj
 turb.obj : prec.obj func.obj cons.obj mesh.obj
 soot.obj : prec.obj mesh.obj cons.obj func.obj turb.obj
 pois.obj : prec.obj cons.obj
-geom.obj : gsmv.obj func.obj prec.obj cons.obj type.obj mesh.obj turb.obj imkl.obj
+geom.obj : gsmv.obj func.obj prec.obj cons.obj type.obj mesh.obj turb.obj imkl.obj data.obj
 ccib.obj : gsmv.obj func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj rcal.obj geom.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj soot.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj geom.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
+hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj data.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj ccib.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj ccib.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj radi.obj
-velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj ccib.obj 
-scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj geom.obj velo.obj imkl.obj
-pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj geom.obj ccib.obj imkl.obj
+velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj ccib.obj
+pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj geom.obj ccib.obj imkl.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj pois.obj data.obj pres.obj geom.obj
-dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj turb.obj scrc.obj data.obj radi.obj soot.obj geom.obj ccib.obj
-read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
-divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj mass.obj ccib.obj
-main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj ccib.obj soot.obj
+dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj turb.obj data.obj radi.obj soot.obj geom.obj ccib.obj fire.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj hvac.obj data.obj geom.obj mass.obj soot.obj prop.obj
+divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj ccib.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj data.obj geom.obj ccib.obj soot.obj prop.obj
 
 #*** Clean Target to remove Object and Module files ***
 

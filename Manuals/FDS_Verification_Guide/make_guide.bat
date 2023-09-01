@@ -3,7 +3,7 @@ set paper=FDS_Verification_Guide
 
 Title Building %paper%
 
-git describe --long --dirty > gitinfo.txt
+git describe --abbrev=7 --long --dirty > gitinfo.txt
 set /p gitrevision=<gitinfo.txt
 echo \newcommand^{\gitrevision^}^{%gitrevision%^} > ..\Bibliography\gitrevision.tex
 

@@ -20,7 +20,7 @@ Here are some other useful links:
 
 [Discussion Forum](https://groups.google.com/forum/#!forum/fds-smv)
 
-[Documentation Nightly Builds](https://drive.google.com/drive/folders/0B_wB1pJL2bFQUlJwMmNfaHlqME0)
+[Nightly Builds (includes Documentation)](https://github.com/firemodels/test_bundles/releases/tag/FDS_TEST)
 
 [FDS Issues](https://github.com/firemodels/fds/issues)
 

@@ -12,7 +12,8 @@ expdir = '../../../exp/FHWA_Tunnel/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FHWA_Tunnel/';
 
 pos = [1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.5 9.5 10.5 11.5];
-test = {'IFAB-07','IFAB-08','IFAB-09','IFAB-10','IFAB-11','IFAB-13','IFAB-14','IFAB-15','IFAB-19','IFAB-22','IFAB-24'};
+test  = {'IFAB-07','IFAB-08','IFAB-09','IFAB-10','IFAB-11','IFAB-13','IFAB-14','IFAB-15','IFAB-19','IFAB-22','IFAB-24'};
+test2 = {'Test 7','Test 8','Test 9','Test 10','Test 11','Test 13','Test 14','Test 15','Test 19','Test 22','Test 24'};
 single_level = [50 50];
 setpoint = [10000 400 399 338 240 322 390 420 360 10000 10000];
 
@@ -94,10 +95,10 @@ for k=1:11 % Experiments
    plot([5.5 5.5],[0 15],'k--')
    plot([0.0 15.],[setpoint(k)/60 setpoint(k)/60],'k:')
 
-   xticks(pos)
-   xticklabels({'1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.5','9.5','10.5','11.5'})
+  %xticks(pos)
+  %xticklabels({'1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.5','9.5','10.5','11.5'})
    ax = gca;
-   ax.XAxis.FontSize = 7;
+   ax.XAxis.FontSize = 16;
    ax.YAxis.FontSize = 16;
    xlabel('Position (m)','FontSize',16,'Interpreter',Font_Interpreter)
    ylabel('Time (min)','FontSize',16,'Interpreter',Font_Interpreter)
@@ -105,7 +106,7 @@ for k=1:11 % Experiments
    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
    set(gca,'FontName',Font_Name)
    axis([0 15 0 15])
-   text(0.5,4,[test{k}],'Fontname',Font_Name,'FontSize',10,'Interpreter',Font_Interpreter)
+   text(0.5,4,[test2{k}],'Fontname',Font_Name,'FontSize',10,'Interpreter',Font_Interpreter)
    text(0.5,3,'FDS red; Exp black','Fontname',Font_Name,'FontSize',10,'Interpreter',Font_Interpreter)
 
    Git_Filename = [outdir,test{k},'_cat_git.txt'];

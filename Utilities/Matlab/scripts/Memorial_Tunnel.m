@@ -46,12 +46,10 @@ Plot_Y          = 0.2;
 Paper_Width     = 6.5;
 Paper_Height    = 1.3;
 
-Plot_Width_2    = 6.2;
+Plot_Width_2    = 6.15;
 Plot_Height_2   = 1.0;
-Plot_X_2        = 0.2;
-Plot_Y_2        = 0.2;
-Paper_Width_2   = 6.5;
-Paper_Height_2  = 1.3;
+Plot_X_2        = 0.3;
+Plot_Y_2        = 0.1;
 
 % Make contour plots of centerline tunnel temperature for 17 experiments and 19 individual times.
 % Also, make a contour plot for each experiment showing a single temperature contour as a function of position and time.
@@ -103,26 +101,27 @@ for k=1:17 % Experiments
       clabel(C_exp,h_exp,'FontSize',3,'Color','black','LabelSpacing',300)
 
       a = get(gca,'XTickLabel');  
-      set(gca,'XTickLabel',a,'fontsize',4)
+      set(gca,'XTickLabel',a,'fontsize',7)
       set(gca,'TickLength',[0 0])
-      xticks(pos)
-      xticklabels({'214','213','211','209','208','207','307','306','305','F','304','303','302','301','202'})
-      ylabel('Height (m)','FontSize',5,'Interpreter',Font_Interpreter)
+      xticks([0 100 200 300 400 500 600 700 800 854]);
+      xticklabels({'0','100','200','300','400','500','600','700','800','854'})
+      xlabel('Tunnel Length (m)','FontSize',7,'Interpreter',Font_Interpreter)
+      ylabel('Height (m)','FontSize',7,'Interpreter',Font_Interpreter)
       set(gca,'Units',Plot_Units)
-      set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+      set(gca,'Position',[Plot_X_2 (Plot_Y_2+0.1) Plot_Width_2 Plot_Height_2])
       set(gca,'FontName',Font_Name)
       axis([0 854 0 8])
-      text(10,7.2,['Test ',test{k}],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-      text(10,6.3,['Time: ',num2str(times{k}(i)),' min'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-      text(10,5.4,['HRR: ',num2str(H.data(hrr_time_index,2)/1000.,'%.1f'),' MW'],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-      text(10,4.5,'FDS red; Exp black','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
+      text(10,7.2,['Test ',test{k}],'Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
+      text(10,6.3,['Time: ',num2str(times{k}(i)),' min'],'Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
+      text(10,5.4,['HRR: ',num2str(H.data(hrr_time_index,2)/1000.,'%.1f'),' MW'],'Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
+      text(10,4.5,'FDS red; Exp black','Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
       
       Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
-      addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
+      addverstr(gca,Git_Filename,'linear',0.75,1.07,'Times','TeX',7)
 
       set(gcf,'Units',Paper_Units);
       set(gcf,'PaperUnits',Paper_Units);
-      set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+      set(gcf,'PaperSize',[Paper_Width Paper_Height+0.2]);
       set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
       print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_T_',num2str(times{k}(i))])
 
@@ -171,25 +170,26 @@ for k=1:17 % Experiments
    plot([615.4 615.4],[0 30],'k--')
 
    a = get(gca,'XTickLabel');
-   set(gca,'XTickLabel',a,'fontsize',4)
+   set(gca,'XTickLabel',a,'fontsize',7)
    set(gca,'TickLength',[0 0])
    xticks(pos)
-   xticklabels({'214','213','211','209','208','207','307','306','305','F','304','303','302','301','202'})
-   ylabel('Time (min)','FontSize',5,'Interpreter',Font_Interpreter)
+  %xticklabels({'214','213','211','209','208','207','307','306','305','F','304','303','302','301','202'})
+   xticklabels({'','','','','','','','','','','','','','',''})
+   ylabel('Time (min)','FontSize',7,'Interpreter',Font_Interpreter)
    set(gca,'Units',Plot_Units)
    set(gca,'Position',[Plot_X_2 Plot_Y_2 Plot_Width_2 Plot_Height_2])
    set(gca,'FontName',Font_Name)
    axis([0 854 0 30])
-   text(10,26,['Test ',test{k}],'Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
-   text(10,22,'FDS red; Exp black','Fontname',Font_Name,'FontSize',6,'Interpreter',Font_Interpreter)
+   text(10,26,['Test ',test{k}],'Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
+   text(10,22,'FDS red; Exp black','Fontname',Font_Name,'FontSize',7,'Interpreter',Font_Interpreter)
 
    Git_Filename = [outdir,'Test_',test{k},'_cat_git.txt'];
-   addverstr(gca,Git_Filename,'linear',0.8,1.05,'Times','TeX',6)
+   addverstr(gca,Git_Filename,'linear',0.75,1.07,'Times','TeX',7)
 
    set(gcf,'Units',Paper_Units);
    set(gcf,'PaperUnits',Paper_Units);
-   set(gcf,'PaperSize',[Paper_Width_2 Paper_Height_2]);
-   set(gcf,'Position',[0 0 Paper_Width_2 Paper_Height_2]);
+   set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+   set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
    print(gcf,'-dpdf',[pltdir,'Test_',test{k},'_tvT'])
 
    hold off

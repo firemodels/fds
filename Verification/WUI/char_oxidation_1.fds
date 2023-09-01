@@ -1,12 +1,12 @@
 &HEAD CHID='char_oxidation_1', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=40 / 
+&TIME T_END=25 /
 
-&MESH IJK=10,10,30 XB=-0.5,0.5,-0.5,0.5,0,3.0 /
+&MESH IJK=10,10,45, XB=-0.5,0.5,-0.5,0.5,0,4.5 /
 
 &REAC FUEL='FUEL VAPOR'
       O          = 2.2
-      C          = 1.1 
+      C          = 1.1
       H          = 6.2 /
 
 &SPEC ID='WATER VAPOR' /
@@ -22,8 +22,8 @@
       DENSITY            = 514.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT_RAMP = 'c_v'
-      A                  = 36300.
-      E                  = 60300.
+      A                  = 1040.
+      E                  = 61041.
       MATL_ID            = 'CHAR'
       NU_MATL            = 0.25
       SPEC_ID            = 'FUEL VAPOR'
@@ -39,16 +39,14 @@
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'c_v'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800.
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000.
       MATL_ID            = 'ASH'
       NU_MATL            = 0.04
       NU_SPEC            = 8.16,-7.2
       SPEC_ID            = 'PRODUCTS','AIR'
-      HEAT_OF_REACTION   = -12000. /
+      HEAT_OF_REACTION   = -25000. /
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.
@@ -56,15 +54,15 @@
       SPECIFIC_HEAT_RAMP = 'c_v' /
 
 &PART ID='foliage part'
-      SAMPLING_FACTOR=1 
-      SURF_ID='foliage' 
+      SAMPLING_FACTOR=1
+      SURF_ID='foliage'
       DRAG_COEFFICIENT=2.8
-      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS' 
-      STATIC=.TRUE. 
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC=.TRUE.
       COLOR='BROWN' /
 
 &INIT ID                   = 'foliage part',
-      PART_ID              = 'foliage part' 
+      PART_ID              = 'foliage part'
       XB                   = -0.3, 0.1,-0.2, 0.2,0.2,0.4
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
@@ -79,8 +77,8 @@
 &VENT MB='YMAX',SURF_ID='OPEN' /
 &VENT MB='ZMIN',SURF_ID='OPEN' /
 &VENT MB='ZMAX',SURF_ID='OPEN' /
- 
-&DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
+
+&DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', SPATIAL_STATISTIC='VOLUME INTEGRAL'  /
 
 &TAIL /
 

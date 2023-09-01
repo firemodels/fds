@@ -1,0 +1,49 @@
+&HEAD CHID=param_chid, TITLE=param_title /
+
+! 2*N*b + d = mesh zmax XB(6)
+&MESH IJK=param_I,param_J,param_K, XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd/
+
+&TIME T_END=400./
+&DUMP DT_DEVC=10./
+&MISC P_INF=102680., TMPA=0., SIMULATION_MODE='LES'/ humidity set in vegetation_model.fds
+
+! sticks aligned with x axis
+! DX0=-l/2, DY0=-l/2, DZ0=d
+! s=(l-nb)/(n-1), DY=s+b, DZ=2b
+! J_UPPER=n-1, K_UPPER=N/2-1
+&MULT ID='m1'
+      DX0=param_hl,DY0=param_hl,DZ0=param_d
+      DY=param_spb,DZ=param_2b
+      J_UPPER=param_nm1,K_UPPER=param_hNm1/
+&OBST XB=0,param_l,0,param_b,0,param_b, SURF_ID='WOOD', MULT_ID='m1'/
+
+! sticks aligned with y axis
+! DX0=-l/2, DY0=-l/2, DZ0=b+d
+! s=(l-nb)/(n-1), DX=s+b, DZ=2b
+! I_UPPER=n-1, K_UPPER=N/2-1
+&MULT ID='m2'
+      DX0=param_hl,DY0=param_hl,DZ0=param_bpd
+      DX=param_spb,DZ=param_2b
+      I_UPPER=param_nm1,K_UPPER=param_hNm1/
+&OBST XB=0,param_b,0,param_l,0,param_b, SURF_ID='WOOD', MULT_ID='m2'/
+
+! external flux roughly based on Figure 10 from Hamins et al. CST, 1994.
+&SURF ID='WOOD'
+      COLOR='BURLY WOOD 4'
+      MATL_ID='DRY VEGETATION'
+      MOISTURE_FRACTION=0.025
+      BACKING='INSULATED'
+      EXTERNAL_FLUX=20
+      RAMP_EF='external_flux'
+      THICKNESS=param_hb /
+
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd
+      QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE INTEGRAL', ID='MASS'/
+
+&DEVC XB=-param_l,param_l,-param_l,param_l,0,param_2Nbpd
+      QUANTITY='SURFACE DENSITY', SURF_ID='WOOD', SPATIAL_STATISTIC='SURFACE AREA', ID='AREA_SURF'/
+
+&CATF OTHER_FILES='common_params.fds','vegetation_model.fds'/
+
+&TAIL/
+

@@ -10,14 +10,14 @@ The combustion model determines the mean chemical mass production rate of specie
 
 The combustion model also determines the heat release rate per unit volume, $\dot{q}^{\prime\prime\prime}$, which is a quantity of fundamental importance in fire physics and typically the largest contribution to the velocity divergence, Eq.~(\ref{eqn_fdsD1}).  Once $\dot{m}^{\prime\prime\prime}_{\alpha}$ has been determined, the heat release rate follows by summing the mass production rates for each species times their respective heats of formation.  Details are discussed below in Section \ref{sec:hrr}.
 
-Before discussing the combustion model, we first discuss of our \emph{lumped species} approach (Section~\ref{sec:lumpedspecies}), which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  In other words, we reduce the number of transport equations we need to solve, which significantly increases the speed of the computation.
+Before discussing the combustion model, we first discuss of our \emph{lumped species} approach (Sec.~\ref{sec:lumpedspecies}), which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  In other words, we reduce the number of transport equations we need to solve, which significantly increases the speed of the computation.
 
-In Section~\ref{sec:batchreactormodel}, we begin the discussion of our generalized combustion model which is designed to handle both fast and slow chemistry and a range of mixing conditions.  For fire, this method holds the promise for improved prediction of carbon monoxide and soot. Each computational cell is treated as a partially-stirred batch reactor with a characteristic mixing time.  Once reactants are mixed, the available reaction mechanisms range from infinitely fast chemistry to Arrhenius rate laws and reversible reactions. Our basic mixing-controlled, fast chemistry combustion model is presented in Section~\ref{sec:fastchemistry}. Section~\ref{extinction} discusses several options for modeling extinction.
+In Sec.~\ref{sec:batchreactormodel}, we begin the discussion of our generalized combustion model which is designed to handle both fast and slow chemistry and a range of mixing conditions.  For fire, this method holds the promise for improved prediction of carbon monoxide and soot. Each computational cell is treated as a partially-stirred batch reactor with a characteristic mixing time.  Once reactants are mixed, the available reaction mechanisms range from infinitely fast chemistry to Arrhenius rate laws and reversible reactions. Our basic mixing-controlled, fast chemistry combustion model is presented in Sec.~\ref{sec:fastchemistry}. Sec.~\ref{extinction} discusses several options for modeling extinction.
 
 \section{Lumped Species Approach}
 \label{sec:lumpedspecies}
 
-In the typical FDS problem the primitive species are lumped into reacting groups and we consider the simple reaction
+In the typical FDS problem the primitive species are lumped into reacting groups, and we consider the simple reaction
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
@@ -107,17 +107,17 @@ In this reaction system, Air (Background) is lumped species 1, Fuel is lumped sp
 The remaining coefficients come from an atom balance.
 
 \paragraph{Example} Consider a methane--air reaction where methane has a specified CO yield of $y_{\mathrm{CO}}=0.1$ and a Soot yield of $y_{\mathrm{S}}=0.01$. The default FDS reaction system lumps these species into Products. Note that, by default, Air is primarily composed of oxygen and nitrogen but includes trace amounts of carbon dioxide and water vapor. For this reaction the transformation matrix, $A$, is
-
+% mass fractions updated on 4/14/23, reflect new default of SOOT = C1
 \begin{center}
 \begin{tabular}{c c c c }
                    & Air & Fuel & Products \\ \hline
 {CH$_4$}           & 0.000000 & 1.000000 & 0.000000 \\
-{N$_2$}            & 0.763017 & 0.000000 & 0.720373 \\
-{O$_2$}            & 0.231163 & 0.000000 & 0.000000 \\
-{CO$_2$}           & 0.000592 & 0.000000 & 0.143067 \\
-{CO}               & 0.000000 & 0.000000 & 0.005589 \\
-{H$_2$O}           & 0.005228 & 0.000000 & 0.130412 \\
-{C}                & 0.000000 & 0.000000 & 0.000559 \\
+{N$_2$}            & 0.762470 & 0.000000 & 0.719891 \\
+{O$_2$}            & 0.230997 & 0.000000 & 0.000000 \\
+{CO$_2$}           & 0.000591 & 0.000000 & 0.142935 \\
+{CO}               & 0.000000 & 0.000000 & 0.005584 \\
+{H$_2$O}           & 0.005941 & 0.000000 & 0.131032 \\
+{C}                & 0.000000 & 0.000000 & 0.000558 \\
 \end{tabular}
 \end{center}
 
@@ -131,7 +131,7 @@ The remaining coefficients come from an atom balance.
 
 Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex reactions---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
 
-To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a {\em turbulent batch reactor}. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, is discussed in Section~\ref{sec:reac_time_scale}. The mixing/reacting evolution equation and its numerical solution are described in Sections~\ref{sec:subgrid_evironment}~and~\ref{sec:reac_time_integration}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast (Section~\ref{sec:fastchemistry}) or governed by an Arrhenius rate law (Section~\ref{Reaction_Rate_Model}).
+To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a {\em turbulent batch reactor}. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, is discussed in Sec.~\ref{sec:reac_time_scale}. The mixing/reacting evolution equation and its numerical solution are described in Sections~\ref{sec:subgrid_evironment}~and~\ref{sec:reac_time_integration}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast (Sec.~\ref{sec:fastchemistry}) or governed by an Arrhenius rate law (Sec.~\ref{Reaction_Rate_Model}).
 
 
 \subsection{Reaction Time Scale Model}
@@ -141,7 +141,7 @@ In this section we provide an expression for the mixing time based on the local 
 
 It is important to consider the behavior of an SGS model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.
 
-First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which is of the order of the traversal time of the flame thickness, $\tau_{\rm chem} \sim \delta/s_{\rm L}$, where $\delta=D_{\rm F}/s_{\rm L}$, $D_{\rm F}$ is the diffusivity of the fuel, and $s_{\rm L}$ is the flame speed. At a slightly larger scale, we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two-thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which is of the order of the traversal time of the flame thickness, $\tau_{\rm chem} \sim \delta/s_{\rm L}$, where $\delta=D_{\rm F}/s_{\rm L}$, $D_{\rm F}$ is the diffusivity of the fuel, and $s_{\rm L}$ is the flame speed. At a slightly larger scale, we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS. This scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing. Here the mixing time varies as the two-thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
 
 Now, let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
 
@@ -166,7 +166,7 @@ The mathematical details of the submodels are as follows:
 \label{eq:tau_sgs}  \tau_{\rm u} &= \frac{C_u \,\Delta}{\sqrt{(2/3)k_{\rm sgs}}} \\
 \label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
-where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Sec.~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
 
@@ -311,7 +311,7 @@ At low pressures, it is common to see so-called \emph{third body} reactions.  Th
 \begin{equation}\label{eq:third_body}
 \mathrm{A} + \mathrm{B} + \mathrm{M} \rightarrow \mathrm{C} + \mathrm{M}
 \end{equation}
-The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$.
+The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$. Some molecules may be more or less efficient as a collision species. This non-unity effect may be specified in the input file. If non-unity species are present, then the concentration of M is taken as the sum of all the individual species concentrations times their weighting factor (if all species have a weighting factor of 1, then the result is $C_{\si{M}}$).
 
 \subsubsection{Equilibrium Chemistry}
 
@@ -319,21 +319,22 @@ Consider the reversible chemical reaction
 
 \be
 a \, \mathrm{A} + b \, \mathrm{B} \overset{r_1}{\underset{r_2}{\leftrightharpoons}} c \, \mathrm{C} + d \, \mathrm{D}
+\label{eq:reverse}
 \ee
 
 \noindent At equilibrium, the forward and reverse reaction rates are equal, $r_{1} = r_{2}$.  The rate constants for each direction are the $k$s in Eq.~(\ref{eq:generic_rate}).  The equilibrium constant is defined as $K \equiv k_{1}/k_{2}$.  The equilibrium constant is computed via
 \be
-K(T) = \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
+K(T) = C_{\si{M}}^{\nu_n} \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
 \ee
-where
-\be
-G_{\mathrm{rxn}}^\circ = \frac{d}{a} G_\mathrm{D}^\circ + \frac{c}{a} G_\mathrm{C}^\circ - \frac{b}{a} G_\mathrm{B}^\circ - G_\mathrm{A}^\circ
+where $\nu_n$ is the net reaction order (for Eq.~\ref{eq:reverse} $\nu_n = a + b - c - d$) and
+\be                                                               
+G_{\mathrm{rxn}}^\circ = d \, G_\mathrm{D}^\circ + c \, G_\mathrm{C}^\circ - b \, G_\mathrm{B}^\circ - a \, G_\mathrm{A}^\circ
 \ee
-Note that the Gibbs free energy is tabulated for species in the FDS database as a function of temperature.  New species may be added with specified Gibbs free energy.
+Note that the Gibbs free energy as a function of temperature is defined for any FDS database that uses NASA polynomials.  Gibbs free energy can be specified for user defined species.
 
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
-For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
+For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed. The change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
 
 
 \subsection{Heat Release Rate}

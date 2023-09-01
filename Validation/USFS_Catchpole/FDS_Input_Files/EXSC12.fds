@@ -109,8 +109,8 @@
       DENSITY            = 398.
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
-      A                  = 36300.
-      E                  = 60300.
+      A                  = 1040.
+      E                  = 61041.
       MATL_ID            = 'Regular Excelsior Char' 
       NU_MATL            = 0.154
       SPEC_ID            = 'WOOD FUEL VAPOR'
@@ -121,16 +121,14 @@
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800. 
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000.  
       MATL_ID            = 'Regular Excelsior Ash'
       NU_MATL            = 0.02
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.18,-7.2
-      HEAT_OF_REACTION   = -32370. /
+      HEAT_OF_REACTION   = -25000. /
 
 &MATL ID            = 'Regular Excelsior Ash'
       DENSITY       = 67.

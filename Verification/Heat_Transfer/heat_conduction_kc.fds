@@ -1,5 +1,5 @@
-This example demostrates the 1D heat conduction in cartesian, 
-cylindrical and spherical geometries with temperature-dependent 
+This example demostrates the 1D heat conduction in cartesian,
+cylindrical and spherical geometries with temperature-dependent
 thermal properties.
 
 The verification result is computed with HEATING finite difference solver.
@@ -37,16 +37,14 @@ surface and center.
 
 &HEAD CHID='heat_conduction_kc', TITLE='Advanced 1D conduction' /
 
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
-&TIME T_END=1000., WALL_INCREMENT=1, DT=0.01 /  
+&TIME T_END=1000., WALL_INCREMENT=1, DT=0.01 /
 
-&MISC TMPA = 0, 
-      SOLID_PHASE_ONLY = .TRUE.
-      ASSUMED_GAS_TEMPERATURE = 700/ 
+&MISC TMPA = 0, SOLID_PHASE_ONLY = .TRUE. /
 &RADI RADIATION = .FALSE. /
 
-&DUMP DT_DEVC=10. / 
+&DUMP DT_DEVC=10. /
 
 &MATL ID='MAT_1'
       EMISSIVITY = 0.0
@@ -62,27 +60,31 @@ surface and center.
 &RAMP ID = 'C_RAMP' T=200, F= 1.00 /
 
 &SURF ID='CART SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='RED'
       STRETCH_FACTOR = 1.0
       MATL_ID='MAT_1'
       HEAT_TRANSFER_COEFFICIENT=10.
-      THICKNESS=0.01 / 
+      HEAT_TRANSFER_COEFFICIENT_BACK=10.
+      THICKNESS=0.01 /
 
 &SURF ID='CYL SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='GREEN'
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'CYLINDRICAL'
       MATL_ID='MAT_1'
       HEAT_TRANSFER_COEFFICIENT=10.
-      THICKNESS=0.01 / 
+      THICKNESS=0.01 /
 
 &SURF ID='SPH SLAB'
+      TMP_GAS_FRONT = 700.
       COLOR='BLUE'
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'SPHERICAL'
       MATL_ID='MAT_1'
       HEAT_TRANSFER_COEFFICIENT=10.
-      THICKNESS=0.01 / 
+      THICKNESS=0.01 /
 
 &VENT XB=-0.15,-0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'CART SLAB' /
 &VENT XB=-0.05, 0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'CYL SLAB' /
@@ -105,6 +107,6 @@ Output
 &DEVC XYZ=0.1,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='sph_front' /
 &DEVC XYZ=0.1,0.0,0.0, IOR=3, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.01,  ID='sph_back' /
 
-&TAIL / 
+&TAIL /
 
 

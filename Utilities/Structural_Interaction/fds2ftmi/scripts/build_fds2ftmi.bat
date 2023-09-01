@@ -7,7 +7,7 @@ set ERROR_LOG=%OUTPUT_DIR%/errors
 set WARNING_LOG=%OUTPUT_DIR%/warnings
 
 :: Get Git Revision
-git describe --long > gitinfo.txt
+git describe --abbrev=7 --long > gitinfo.txt
 set /p gitrevision=<gitinfo.txt
 echo \newcommand^{\gitrevision^}^{%gitrevision%^} > gitrevision.tex
 

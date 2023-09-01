@@ -1,0 +1,26 @@
+RENDERDIR
+..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+LOADINIFILE
+ht3d_demo.ini
+SETVIEWPOINT
+view 1
+LOADFILE
+ht3d_demo_1_1.bf
+LOADFILE
+ht3d_demo_2_1.bf
+LOADFILE
+ht3d_demo_3_1.bf
+LOADFILE
+ht3d_demo_4_1.bf
+LOADFILE
+ht3d_demo_5_1.bf
+LOADFILE
+ht3d_demo_6_1.bf
+LOADFILE
+ht3d_demo_7_1.bf
+LOADFILE
+ht3d_demo_8_1.bf
+SETTIMEVAL
+ 100
+RENDERONCE
+ht3d_demo_100

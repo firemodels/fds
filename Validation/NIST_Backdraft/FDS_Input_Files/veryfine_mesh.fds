@@ -1,0 +1,4 @@
+! 48 meshes from fine_mesh.fds
+&MULT ID='m1', DX=1.14,DY=0.74,DZ=1.21,I_UPPER=3,J_UPPER=2,K_UPPER=3/
+&MESH IJK=120,78,132, XB=-1.539,-0.399,-1.11,-0.37,-1.00,0.21, MULT_ID='m1' /
+

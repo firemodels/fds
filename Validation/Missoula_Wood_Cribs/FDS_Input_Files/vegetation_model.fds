@@ -1,0 +1,59 @@
+
+&SPEC ID='NITROGEN', BACKGROUND=T /
+&SPEC ID='WATER VAPOR',       MASS_FRACTION_0=0.003539 / 90 % relative humidity at 0 deg C
+&SPEC ID='OXYGEN',            MASS_FRACTION_0=0.231556 /
+&SPEC ID='CARBON DIOXIDE',    MASS_FRACTION_0=0.000593 /
+&SPEC ID='SOOT',              MASS_FRACTION_0=0.       /
+&SPEC ID='FUEL VAPOR',        MASS_FRACTION_0=0., C=2.10, H=6.20, O=2.16, RADCAL_ID='PROPANE'/
+
+&REAC FUEL='FUEL VAPOR',
+      SPEC_ID_NU = 'FUEL VAPOR','OXYGEN','CARBON DIOXIDE','WATER VAPOR','SOOT'
+      NU = -1,-2.515023686,2.045023686,3.1,0.054976314,
+      HEAT_OF_COMBUSTION=17425., IDEAL=T
+      RADIATIVE_FRACTION=0 /
+
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.6
+      SPECIFIC_HEAT = 4.190
+      A = 600000.
+      E = 48200.
+      N_T = -0.5
+      NU_SPEC = 1.
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2259. /
+
+&MATL ID = 'DRY VEGETATION'
+      DENSITY = 400.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      A = 1040.
+      E = 61041.
+      NU_MATL = 0.25
+      MATL_ID = 'CHAR'
+      NU_SPEC = 0.74
+      SPEC_ID = 'FUEL VAPOR'
+      HEAT_OF_REACTION = 418. /
+
+&MATL ID = 'CHAR'
+      DENSITY  = 300.
+      CONDUCTIVITY = 0.05
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      SURFACE_OXIDATION_MODEL = T
+      A = 465.
+      E = 68000.
+      MATL_ID = 'ASH'
+      NU_MATL = 0.10
+      SPEC_ID = 'CARBON DIOXIDE','OXYGEN'
+      NU_SPEC = 2.55,-1.65
+      HEAT_OF_REACTION= -25000. /
+
+&MATL ID = 'ASH'
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v' /
+
+&RAMP ID='c_v', T=  0., F=1.1 /
+&RAMP ID='c_v', T=200., F=2.0 /
+&RAMP ID='c_v', T=800., F=2.0 /
+

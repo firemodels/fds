@@ -1,0 +1,24 @@
+! Safe memory allocation test in clusters:
+
+! checkmem.f90 : Increases the memory usage in a system by allocating large arrays of reals.
+! When RAM and Swap memory are overrun the ChkMemErr subroutine will throw an allocation error and stop.
+
+Compile with:
+$ ifort -O0 -g checkmem.f90
+
+Submit, for example, in batch3 of blaze with:
+$ srun -n 1 -p batch3 a.out
+
+This is the result:
+...
+...
+ Trying to allocate iteration=          17 , TOT_GB=                    17  GB.
+ Size RARRAY(NITER)%R=         500         500         500
+ Trying to allocate iteration=          18 , TOT_GB=                    18  GB.
+ Size RARRAY(NITER)%R=         500         500         500
+ Trying to allocate iteration=          19 , TOT_GB=                    19  GB.
+ Size RARRAY(NITER)%R=         500         500         500
+ Trying to allocate iteration=          20 , TOT_GB=                    20  GB.     <- Could not allocate for 20GB Tot RAM + Swap memory.
+ Size RARRAY(NITER)%R=           0           0           0
+
+ERROR: Memory allocation failed for iter    20 TOT_REALS 2500000000
