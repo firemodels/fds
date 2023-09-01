@@ -5,7 +5,7 @@
 \chapter{Solid Phase} \label{SolidPhase}
 \label{chapter:solid_phase}
 
-FDS assumes that solid surfaces consist of multiple layers, with each layer composed of multiple material components that can undergo multiple thermal degradation reactions. Heat conduction is assumed only in the direction normal to the surface. Each reaction can produce multiple gas and solid species. This chapter describes the heat conduction equation for solid materials, plus the various coefficients, source terms, and boundary conditions, including the computation of the convective heat flux $\dq_{\rm c}''$ at solid boundaries.
+FDS assumes that solid surfaces consist of multiple layers, with each layer composed of multiple material components that can undergo multiple thermal degradation reactions. Heat conduction is assumed only in the direction normal to the surface. Each reaction can produce multiple gas and solid species. This chapter describes the heat conduction equation for solid materials, plus the various coefficients, source terms, and boundary conditions, including the computation of the convective heat flux $\dq_{\rm c}''$ at solid boundaries. 
 
 
 
@@ -286,7 +286,7 @@ T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon
 \section{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{\rm s,c}'''$ (see Eq.~(\ref{eq:solid_energy_source_term})),  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{\rm s,c}'''$ (see Eq.~(\ref{eq:solid_energy_source_term})),  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating. The process (enforcing consistency in material heats of formation and temperature dependent heats of reaction) via which FDS ensures energy conservation when solid phase reactions are specified, is detailed in Appendix~\ref{solid_energy_mass}.
 
 
 \subsection{Specified Heat Release Rate}
