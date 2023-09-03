@@ -7,7 +7,8 @@ source $SVNROOT/Validation/Common_Run_All.sh
 
 $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PBT_60_kW.fds
 $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PMMA_60_kW_2_cm.fds
-$QFDS $DEBUG -p 256 $QUEUE -d $INDIR PMMA_60_kW_1_cm.fds
+$QFDS $DEBUG -p 96  $QUEUE -d $INDIR PMMA_60_kW_1_cm.fds
+$QFDS $DEBUG -p 320 $QUEUE -d $INDIR PMMA_60_kW_5_mm.fds
 $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PVC_60_kW.fds
 
 echo FDS cases submitted
