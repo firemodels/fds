@@ -231,5 +231,22 @@ $QFDS $DEBUG -I -p 32  $QUEUE -d $INDIR natconv_15_16_rot_18.fds
 $QFDS $DEBUG -I -p 32  $QUEUE -d $INDIR natconv_16_16_rot_18.fds
 $QFDS $DEBUG -I -p 32  $QUEUE -d $INDIR natconv_17_16_rot_18.fds
 
+# NATURAL CONVECTION FROM AN UPWARDS AND DOWNWARDS FACING HOT PLATE
+
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_1_16.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_1_32.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_1_8.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_2_16.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_2_32.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_2_8.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_3_16.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_3_32.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_3_8.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_4_16.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_4_32.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_4_8.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_16.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_32.fds
+$QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_8.fds
 
 echo FDS cases submitted
