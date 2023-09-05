@@ -131,7 +131,7 @@ The Fire Dynamics Simulator, in various forms, has been under development for al
 \item Paul Hart of Swiss Re, GAP Services, and Pravinray Gandhi of Underwriters Laboratories provided useful suggestions about water droplet transport on solid objects.
 \item Fran\c{c}ois Demouge of the Centre Scientifique et Technique du B\^{a}timent (CSTB) in France assisted with implementation of synthetic turbulence inflow boundary conditions.
 \item Max Gould, Summer Undergraduate Research Fellow, assisted in the testing and verification of non-standard boundary treatment methods.
-\item Salah Benkorichi at BB7, UK, helped develop the verification cases for 3D heat transfer.
+\item Salah Benkorichi at Buro Happold, UK, helped develop the verification cases for 3D heat transfer.
 \item Daniel Haarhoff of J\"ulich Supercomputing Centre, Germany, helped to implement OpenMP directives and profile the code for FDS v6.
 \item Timo Korhonen of VTT, Finland, was the principle developer of FDS+Evac (FDS versions prior to 6.7.8).
 \item Vivien Lecoustre, while at the University of Maryland, College Park, improved RadCal which included adding 8 additional new fuel species to its database.
@@ -424,6 +424,7 @@ The progress of the simulation is indicated by diagnostic output that is written
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
 
+It is recommend that the simulation be run in a folder associated with a drive that is physically attached to the computer. Saving files to a network share or a folder controlled by a cloud service (e.g. OneDrive) can result in simulation failures if a network issue or a file lock during automated backup results in Windows preventing FDS from writing data to a file.
 
 \subsection{Multiple Computers Running MS Windows}
 
@@ -1598,7 +1599,9 @@ The term {\ct VENT} is somewhat misleading. Taken literally, a {\ct VENT} can be
 \end{lstlisting}
 specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the underlying obstruction.
 
-A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Also, a {\ct VENT} derives its orientation by having a solid cell on one side and a gas cell on the other. Do not extend a {\ct VENT} to have multiple orientations.
+A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a portion of a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Thus, if the {\ct VENT} is given a {\ct SURF\_ID} that specifies a value of {\ct HRRPUA} (Heat Release Rate Per Unit Area), this rate will only be applied to the portion of the {\ct VENT} for which there is a solid beneath.
+
+Also, a {\ct VENT} derives its orientation by having a solid cell on one side and a gas cell on the other. Do not extend a {\ct VENT} to have multiple orientations.
 
 An easy way to specify an entire external wall is to replace {\ct XB} with {\ct MB} (Mesh Boundary), a character string whose value is one of the following: {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or {\ct 'ZMIN'} denoting the planes $x=\hbox{\ct XMAX}$, $x=\hbox{\ct XMIN}$, $y=\hbox{\ct YMAX}$, $y=\hbox{\ct YMIN}$, $z=\hbox{\ct ZMAX}$ or $z=\hbox{\ct ZMIN}$, respectively. Like an obstruction, the boundary condition index of a vent is specified with {\ct SURF\_ID}, indicating which of the listed {\ct SURF} lines to apply. If the default boundary condition is desired, then {\ct SURF\_ID} need not be set.
 
@@ -2129,10 +2132,9 @@ This section is labeled as a special topic because normally you do not need to m
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on the larger of the Nusselt (Nu) numbers for free (natural) and forced convection:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} , \frac{2L}{\delta n}\right)   \label{q_con}
 \ee
-where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D<<\delta n$ and so the equation for $h$ becomes:
+where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D \ll \delta n$ and so the equation for $h$ becomes:
 \be h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right). \label{h_particles}
 \ee
-
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
    \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha}
@@ -2143,6 +2145,7 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
                                                 \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
                                                 0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
                                                 0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
+                                                0.52 \, \hbox{Ra}^{1/5}                               &  \hbox{Horizontal hot plate facing down or cold plate facing up}  \\
                                                 \left( 0.60 +  0.321 \, \hbox{Ra}^{1/6}  \right)^2    &  \hbox{Horizontal cylinder} \\
                                                 2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
        \end{array} \right.
@@ -2192,8 +2195,16 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-
-
+\subsubsection{Blowing Heat Transfer}
+\label{blowing}
+If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas normal to the surface disrupts the thermal boundary layer. When blowing the flow pushes away the gas near the surface, and when sucking the flow pulls the gas near the surface towards the surface. These respectively decrease and increase the heat transfer coefficient. This effect can be accounted for by adding {\ct BLOWING=T} to a {\ct SURF} definition. Except for DNS simulations, When {\ct BLOWING} is active, the heat transfer coefficient computed by FDS is adjust by a factor per the equations below~\cite{Plate_blowing}.
+\begin{equation}
+	\Phi_h = \frac{\dot{m}'' c_g}{h}
+\end{equation}
+\begin{equation}
+	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h
+\end{equation}
+where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
 
@@ -2619,7 +2630,7 @@ The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPE
 \subsection{Scaling the Burning Rate by the Heat Flux}
 \label{info:scaled_burning}
 
-FDS has a simple model to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occurring during an FDS simulation. This model is invoked by specifying a {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where \linebreak[4]{\ct REFERENCE\_HEAT\_FLUX} is the heat flux the test was conducted at and {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled time step where the scaled time step is the FDS time step adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is scaled by the ratio of the FDS incident flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantaneous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 10 seconds, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model was developed on heat fluxes ranging from 25~kW/m$^2$ to 75~kW/m$^2$; however, by default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
+FDS has a simple scaling-based pyrolysis model (SBPyro) to extrapolate burning rate data collected from a cone calorimeter or similar device to the heat feedback occurring during an FDS simulation. This model is invoked by specifying a {\ct REFERENCE\_HEAT\_FLUX} along with {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct RAMP\_Q} where {\ct HRRPUA} and {\ct RAMP\_Q} define the burning rate where the test data is shifted so 0 s is the time the sample started burning in the test. {\ct REFERENCE\_HEAT\_FLUX} is the average heat flux to the surface occurring during testing, which includes the exposure heat flux and the heat feedback from the flame. When a wall cell reaches the {\ct IGNITION\_TEMPERATURE}, this model starts marching along the test data curve using a scaled time step where the scaled time step is the FDS time step adjusted by the ratio of {\ct REFERENCE\_HEAT\_FLUX} to the summation of the FDS incident radiative heat flux and net convective heat flux. At the scaled time, the ramp output is similarly scaled by the ratio of the FDS incident flux and net convective heat flux to the {\ct REFERENCE\_HEAT\_FLUX}. Because the instantaneous heat flux at the surface varies significantly from time step to time step, the incident heat flux is time-averaged in this model. The default time-averaging window is 1 second, but this can be changed by the user by setting {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} on the {\ct SURF} line. The time-averaged heat flux used in the scaling approach can be output as the boundary quantity {\ct REFERENCE\_HEAT\_FLUX}. The scaling-based pyrolysis model has been evaluated in heat fluxes ranging from 15~kW/m$^{2}$ to 92~kW/m$^{2}$; however, most of validation data is in the range from 25~kW/m$^2$ to 75~kW/m$^2$. By default the model does not limit the range of heat fluxes which are used in the scaling. This range can be modified by setting the surface quantities {\ct MINIMUM\_SCALING\_HEAT\_FLUX} and {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}. An example where this may be desirable is in simulating fires with small ignition sources where the grid is not fine enough to resolve the flux from the initiating fuel.
 
 An example demonstrating the scaling behavior is given below with results shown in Fig.~\ref{fig:cone_demo}. In this example a material with cone test data at 50 kW/m$^2$ is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%.
 
@@ -4014,7 +4025,7 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 Many of the parameters specified in the FDS input file are fixed constants. However, there are several parameters that may vary in time, temperature, or space. The namelist groups, {\ct RAMP} and {\ct TABL}, allow you to control the behavior of these parameters.  {\ct RAMP} allows you to specify a function with one independent variable (such as time) and one dependent variable (such as velocity). {\ct TABL} allows you to specify a function of multiple independent variables (such as a solid angle) and multiple dependent variables (such as a sprinkler flow rate and droplet speed).
 
-
+FDS limits the number of {\ct RAMP}s that can be specified in the input file. This limit is controlled by the parameter {\ct MAX\_RAMPS} on {\ct MISC}. The default value is 100.
 
 \section{Time-Dependent Functions}
 \label{info:RAMP_Time}
@@ -5014,7 +5025,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures. A specific finite-rate reaction will only be computed if all species consumed or otherwise required (third-body or catalyst) in the reaction are present with a mass fraction greater than {\ct ZZ\_MIN\_GLOBAL} and the local cell temperature is above {\ct FINITE\_RATE\_MIN\_TEMP}, both specified on {\ct COMB}. The default value for {\ct ZZ\_MIN\_GLOBAL} is $1\times 10^{-10}$, which is generally adequate. An exception might be for detailed chemistry where equations involving free-radicals are used.  The user should consider setting {\ct FINITE\_RATE\_MIN\_TEMP} to be around 100 \si{\degreeCelsius} to avoid unnecessary and expensive time integration of the ODEs for detailed kinetics.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. Since finite-rate reactions require a fully-resolved temperature field (i.e., a simulation on a grid capable of resolving the flame temperature), it is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct SIMULATION\_MODE='DNS'} on the {\ct MISC} line). A specific finite-rate reaction will only be computed if all species consumed or otherwise required (third-body or catalyst) in the reaction are present with a mass fraction greater than {\ct ZZ\_MIN\_GLOBAL} and the local cell temperature is above {\ct FINITE\_RATE\_MIN\_TEMP}, both specified on {\ct COMB}. The default value for {\ct ZZ\_MIN\_GLOBAL} is $1\times 10^{-10}$, which is generally adequate. An exception might be for detailed chemistry where equations involving free-radicals are used.  The user should consider setting {\ct FINITE\_RATE\_MIN\_TEMP} to be around 100 \si{\degreeCelsius} to avoid unnecessary and expensive time integration of the ODEs for detailed kinetics.
 
 \subsubsection{Single Step Reaction}
 
@@ -5224,6 +5235,39 @@ Aerosol particles will, over time, collide with one another and stick together t
 \begin{lstlisting}
 &SPEC ID='SOOT', AEROSOL=T,MIN_DIAMETER=1.E-6,MAX_DIAMETER=100.E-6,
       N_BINS=10,LUMPED_COMPONENT_ONLY=T/
+\end{lstlisting}
+
+It may be desirable to combine aerosol agglomeration with chemical reaction.  That is, one or more of the aerosol species may participate in a chemical reaction, either as a reactant or product.  Keep in mind that tracked species for the aerosol distribution are appended with the bin number, as stated above.  Within FDS, it is these subspecies that are being tracked and you must explicitly specify the stoichiometry of the subspecies within the reaction (see Sec.~\ref{info:REAC_Diagnostics}).  Below is an example for combustion of \emph{n}-heptane generating soot as an aerosol with five size bins.
+
+\begin{lstlisting}
+&SPEC ID='N-HEPTANE' /
+&SPEC ID='NITROGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='OXYGEN',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON DIOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='CARBON MONOXIDE',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='WATER VAPOR',LUMPED_COMPONENT_ONLY=T/
+&SPEC ID='SOOT',LUMPED_COMPONENT_ONLY=T,
+      AEROSOL=T,N_BINS=5,
+      MIN_DIAMETER=0.023,MAX_DIAMETER=11.5/
+
+&SPEC ID='AIR',BACKGROUND=T,
+      SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
+      VOLUME_FRACTION=40.94283132,10.85911,0.020216389,0.497368688/
+&SPEC ID='PRODUCTS',
+      SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR','CARBON MONOXIDE',
+      VOLUME_FRACTION=40.94283132,6.868439402,8.490526567,0.028618803/
+
+&REAC FUEL='N-HEPTANE',
+      SPEC_ID_NU='N-HEPTANE',
+      'AIR',
+      'PRODUCTS',
+      'SOOT_1',
+      'SOOT_2',
+      'SOOT_3',
+      'SOOT_4',
+      'SOOT_5',
+      NU=-1,-1,1,0.035837089,0.030715589,0.026822578,0.023205152,0.02026202,
+      RADIATIVE_FRACTION=0.44 /
 \end{lstlisting}
 
 \section{Aerosol Scrubbing}
@@ -6070,6 +6114,33 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 \label{fig:part_path_ramp_jog}
 \end{figure}
 
+\subsection{Controlled Particle Orientation}
+\label{info:orientation_ramp}
+\label{part_orientation_ramp}
+
+The {\ct ORIENTATION} for a particle placed with an {\ct INIT} line can be controlled by specifying {\ct ORIENTATION\_RAMP} on the {\ct INIT} line. {\ct ORIENTATION\_RAMP} specifies a {\ct RAMP} for each of the three components for the particle {\ct ORIENTATION}. All three components must be defined. At each timestep, the outputs for the {\ct RAMP}s will be normalized to a vector magnitude of one. In the example below, the particle orientation is changed from -x to +x over 10~s by rotating around the z-axis.
+
+\begin{lstlisting}
+&PART ID='MY PART',SURF_ID='PART SURF',STATIC=T, ORIENTATION=1,1,1/
+&INIT ID='ONE PART',PART_ID='MY PART',XYZ=0.975,1,1,
+          ORIENTATION_RAMP(1:3)='O1','O2','O3',N_PARTICLES=1/
+&RAMP ID='O1',T=0, F=-1/
+&RAMP ID='O1',T=10,F= 1/
+&RAMP ID='O2',T=0, F= 0/
+&RAMP ID='O2',T=5, F= 1/
+&RAMP ID='O2',T=10,F= 0/
+&RAMP ID='O3',T=0, F= 0/
+&RAMP ID='O3',T=10,F= 0/
+\end{lstlisting}
+
+Note that the {\ct PART} input must contain {\ct ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\si{m$^3$} box with the +x wall emitting a radiative flux of 10~\si{kW/m$^2$}, and the remaining walls emitting 1~\si{kW/m$^2$}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_orientation_ramp}
+	\caption[Results of the {\ct part\_orientation\_ramp} case]{Particle radiative flux for {\ct part\_orientatoin\_ramp} case.}
+	\label{fig:part_orientation_ramp}
+\end{figure}
 
 \newpage
 
@@ -7246,31 +7317,36 @@ Wildfire spread over releastic terrain can be modeled in FDS using a plugin to Q
 \href{https://github.com/firetools/qgis2fds}{https://github.com/firetools/qgis2fds} \\
 QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
+A set of sample input files created by qgis2fds reside within the gitHub repository \\
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\
+in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
+
+For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
+
 A typical input file created with qgis2fds includes the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
 \begin{lstlisting}
 &MISC ORIGIN_LAT=35.7207093
       ORIGIN_LON=-83.5212387
       NORTH_BEARING=0.
-      TERRAIN_IMAGE='ridge_ls_1_tex.png'
+      TERRAIN_IMAGE='casename.png'
       LEVEL_SET_MODE=1 /
 \end{lstlisting}
-A set of sample input files created by qgis2fds reside within the gitHub repository \\
-\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. For each case, a hypothetical fire spreads from its point of origin over a ridge. Each case simulates 10~h of real time. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
 
-\begin{figure}[!ht]
-\includegraphics[width=\textwidth]{FIGURES/ridge_terrain_image.png}
-\caption[Satellite image of sample terrain]{Satellite image of sample terrain.}
+\begin{figure}[p]
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0000.png}
+\includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0001.png}
+\caption[Satellite and landuse images for sample wildland fire spread case]{(Top) Satellite image of a 2~km by 2~km patch of terrain. (Bottom) 30~m by 30~m tiles indicating the land use of this same area.}
 \label{ridge_map}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_1.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_2.png} \\
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_3.png} &
-\includegraphics[trim=.5in 0 .5in 0, clip, height=3.0in]{FIGURES/ridge_ls_4.png}
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_1.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_2.png} \\
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_3.png} &
+\includegraphics[trim=2.in 0 2.in 0, clip, height=3.5in]{FIGURES/Level_Set_Demo_4.png}
 \end{tabular*}
-\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 10~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
+\caption[Results of sample wildland fire spread simulations]{Sample wildland fire spread showing the extent of the fire front after 24~h. The plot in the upper left uses the mode 1 of the level set approach, where the wind field does not conform to the terrain but does vary in time. The plot in the upper right uses mode~2, where the terrain-conforming wind field is frozen at the time of ignition. The plot in the lower left uses mode~3, where the wind varies spatially and temporally over the entire course of the fire. The plot in the lower right uses mode~4, where the wind varies with the terrain, but also is influenced by the fire plume.}
 \label{ridge_figs}
 \end{figure}
 
@@ -7353,7 +7429,8 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct C\_FACTOR}] Conduction Factor in units of (m/s)$^{1/2}$. (Default 0.)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
-\item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s. An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the {\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined. Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
+\item[{\ct FLOW\_RATE}] in units of L/min. This parameter is only appropriate for liquid droplets. An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the {\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1~bar is equivalent to 14.5~psi, 1~gpm (gal/min) is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is equivalent to 14.41~L/min/bar$^\ha$.
+\item[{\ct MASS\_FLOW\_RATE}] in units of kg/s. This parameter can be used instead of {\ct FLOW\_RATE} for liquid droplets, but it must be used for solid particles. If {\ct MASS\_FLOW\_RATE} is specified, the {\ct PARTICLE\_VELOCITY} must also be specified.
 \item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation (Default 0.05~m). It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. Do not locate a sprinkler or nozzle within {\ct OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
@@ -7814,7 +7891,8 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
-{\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline
+{\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline                & External file control, see Section~\ref{info:external_control} \\ \hline
+{\ct EXTERNAL}
 \end{tabular}
 \end{center}
 \end{table}
@@ -8153,7 +8231,7 @@ via the lines
 \begin{lstlisting}
 &DEVC ID='t', QUANTITY='TIME', XYZ=0,0,0 /
 &CTRL ID='t-t0', FUNCTION_TYPE='SUM', INPUT_ID='t','CONSTANT', CONSTANT=-5. /
-&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0', 
+&CTRL ID='2*pi*(t-t0)/10', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','t-t0',
       CONSTANT=0.62831853 /
 &CTRL ID='sin(2*pi*(t-t0)/10)', FUNCTION_TYPE='SIN', INPUT_ID='2*pi*(t-t0)/10' /
 &RAMP ID='ramp sin', CTRL_DEP_ID='sin(2*pi*(t-t0)/10)' /
@@ -8197,6 +8275,50 @@ It should be noted that devices are updated sequentially in the order that they 
 
 \input{smv_objects.tex}
 
+\section{External Control of FDS (Beta)}
+\label{info:external_control}
+\label{external_control}
+
+It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
+
+When external control is selected, FDS will set the value of the {\ct RAMP} or the logical state of the {\ct CTRL} based on values contained in a csv file whose name is given by {\ct EXTERNAL\_FILENAME} on {\ct MISC}. This file will be checked for new values every {\ct DT\_EXTERNAL} on {\ct TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either {\ct INITIAL\_VALUE} on {\ct RAMP} or {\ct INITIAL\_STATE} on {\ct CTRL}.
+
+The csv file format is:
+\begin{lstlisting}
+	Type(1), ID(1), Value(1)
+	Type(2), ID(2), Value(2)
+	.
+	.
+\end{lstlisting}
+where {\ct Type} is either {\ct RAMP} or {\ct CTRL}, {\ct ID} is the corresponding {\ct ID} in the FDS input files, and {\ct Value} is the new output value for a {\ct RAMP} or the new logical state for a {\ct CTRL} where positive values mean the {\ct CTRL} evaluates as {\ct TRUE} and negative values mean the function evaluates as {\ct FALSE}.
+
+An example set of inputs is below:
+\begin{lstlisting}
+&MISC EXTERNAL_FILENAME='external_test_input.csv'/
+&TIME T_END=10,DT_EXTERNAL=5/
+
+&OBST XB=0.0,0.1,0,1,0,1/
+&VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
+&SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
+&CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
+
+&VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
+&SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
+&RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
+\end{lstlisting}
+In these inputs a vent with a fixed velocity is externally controlled by a {\ct CTRL} that is initially {\ct TRUE}, and a vent with a fixed temperature is externally controlled with a {\ct RAMP} with an initial ramp value that results in a temperature of 100~$^\circ$C. These vents are applied to two faces of a 1 m$^3$ box. At 5~s, the csv file is read with contents of:
+\begin{lstlisting}
+RAMP,"T RAMP"   , 1
+CTRL,"VENT CTRL",-1
+\end{lstlisting}
+This turns off the velocity vent (a negative {\ct CTRL} value means set the state to {\ct .FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a {\ct RAMP} value of 1 means apply the full value of {\ct TMP\_FRONT}). Note that the {\ct ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
+
+\begin{figure}[ht]
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
+	\caption[Results of the {\ct external\_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
+	\label{external_control_fig}
+\end{figure}
 
 
 \chapter{Numerical Considerations}
@@ -8668,7 +8790,7 @@ The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use sho
 
 The {\ct GLMAT} solver is used mainly for testing and diagnostics. Because it solves the pressure over the entire computational domain, it is limited to about 1~million cells total unless your computer has an extraordinary amount of RAM.
 
-\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that (1) it does not allow for internal sealed regions within the domain, (2) it is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. This solver is limited to about 1~million grid cells, and (3) it is the most CPU-intensive of the alternative solvers.
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
@@ -8689,7 +8811,7 @@ FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iter
 ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
 GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
-UGLMAT            & $\times$    & $\times$      & $\times$   & $\times$   & exact      & exact     & iterative \\
+UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact      & exact     & iterative \\
 % \rowcolor{lavender}
 % USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
 % PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
@@ -11647,6 +11769,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NODE\_ID }                   & Character         & Section~\ref{info:hvacmasstransport}          &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct ORIENTATION\_RAMP(3)}        & Character         & Section~\ref{info:orientation_ramp}           &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -11828,6 +11951,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
+{\ct EXTERNAL\_FILENAME}                            & Character   & Section~\ref{info:external_control}     &            &                   \\ \hline
 {\ct FIXED\_LES\_FILTER\_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
@@ -11848,6 +11972,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
+{\ct MAX\_RAMPS}                                    & Integer      & Section~\ref{info:RAMP}                 &            &  100              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
 {\ct MINIMUM\_ZONE\_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
@@ -12334,8 +12459,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 {\ct DEVC\_ID\_DEP}                 & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
+{\ct EXTERNAL\_FILE}                & Logical       & Section~\ref{info:external_control}         &                       &  F          \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}                     &                       &             \\ \hline
+{\ct INITIAL\_VALUE}                & Real          & Section~\ref{info:external_control}         &                       &             \\ \hline
 {\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Chapter~\ref{info:RAMP}                     &                       &  5000       \\ \hline
 {\ct T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
 {\ct X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
@@ -12548,6 +12675,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical           & Section~\ref{blowing}                   &                   &               \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
@@ -12633,7 +12761,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Z}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct REFERENCE\_HEAT\_FLUX}                               & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 10.0                    \\ \hline
+{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 {\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
@@ -12741,6 +12869,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
 {\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
+{\ct DT\_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline

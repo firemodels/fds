@@ -12,6 +12,7 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
 #ifdef WITH_MKL
 USE MKL_PARDISO
+USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -330,6 +331,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
+   INTEGER :: INITIALIZATION_INDEX=0 !< Index for INIT that placed the particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
    INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
    INTEGER :: DUCT_INDEX=0           !< Index of duct
@@ -362,6 +364,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: ACCEL_X=0._EB       !< Acceleration in x direction (m/s2)
    REAL(EB) :: ACCEL_Y=0._EB       !< Acceleration in y direction (m/s2)
    REAL(EB) :: ACCEL_Z=0._EB       !< Acceleration in z direction (m/s2)
+   REAL(EB) :: RVC=-1._EB           !< Reciprocal of cell volume containing particle (1/m3)
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
@@ -663,12 +666,12 @@ TYPE REACTION_TYPE
    INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
    INTEGER :: PROD_SMIX_INDEX=-1            !< Lumped species index for products
    INTEGER :: PAIR_INDEX=1000000            !< Paired reaction for 2-step chemistry
-   INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
-   INTEGER :: N_SMIX_FR                     !< Number of participating lumped species in reaction equation
-   INTEGER :: N_SMIX_R                      !< Number of reactant lumped species in reaction equation
-   INTEGER :: N_SPEC_READ                   !< Number of primitive species with N_S read
-   INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
-   INTEGER :: N_THIRD                       !< Number of third body non-unity efficiency species in reaction equation
+   INTEGER :: N_SMIX=0                      !< Number of lumped species in reaction equation
+   INTEGER :: N_SMIX_FR=0                   !< Number of participating lumped species in reaction equation
+   INTEGER :: N_SMIX_R=0                    !< Number of reactant lumped species in reaction equation
+   INTEGER :: N_SPEC_READ=0                 !< Number of primitive species with N_S read
+   INTEGER :: N_SPEC=0                      !< Number of primitive species in reaction equation
+   INTEGER :: N_THIRD=0                     !< Number of third body non-unity efficiency species in reaction equation
    INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS  !< 1 or 2 step simple chemistry
    INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
    INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction
@@ -813,7 +816,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: DELTA_TMP_MAX=10._EB
    REAL(EB) :: BURN_DURATION=1.E6_EB
    REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=10._EB
+   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB
    REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB
    REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
@@ -1023,10 +1026,11 @@ TYPE GEOMETRY_TYPE
                XB(6),SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),MIN_LEDGE,MAX_LEDGE,MEAN_LEDGE,&
                GEOM_BOX(LOW_IND:HIGH_IND,IAXIS:KAXIS),TRANSPARENCY,CYLINDER_ORIGIN(3),CYLINDER_AXIS(3),&
                CYLINDER_RADIUS,CYLINDER_LENGTH
-   INTEGER,ALLOCATABLE,DIMENSION(:) :: FACES,VOLUS,SUB_GEOMS,SURFS,MATLS
-   INTEGER,ALLOCATABLE,DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES
-   REAL(EB),ALLOCATABLE,DIMENSION(:) :: FACES_AREA,VERTS_BASE,VERTS,TFACES,DAZIM,DELEV,ZVALS
+   INTEGER, ALLOCATABLE,DIMENSION(:)   :: FACES,VOLUS,SUB_GEOMS,SURFS,MATLS
+   INTEGER, ALLOCATABLE,DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES
+   REAL(EB),ALLOCATABLE,DIMENSION(:)   :: FACES_AREA,VERTS_BASE,VERTS,TFACES,DAZIM,DELEV,ZVALS
    REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: FACES_NORMAL,DSCALE,DXYZ0,DXYZ
+   LOGICAL, ALLOCATABLE,DIMENSION(:,:) :: SNAP_NODE
    TYPE(TBAXIS_TYPE) :: TBAXIS(IAXIS:KAXIS)
 END TYPE GEOMETRY_TYPE
 
@@ -1246,6 +1250,7 @@ TYPE CC_CUTCELL_TYPE
    INTEGER                                  ::          NCELL=0 !< Num cut-cells in this cartesian cell. Now fixed at 1 by blocking.
    INTEGER                                  ::     NFACE_CELL=0 !< Number of faces on cut-cells in this entry.
    INTEGER                                  ::  NFACE_DROPPED=0 !< Parameter used for blocking cut-cells.
+   REAL(EB)                                 ::   ALPHA_CC=0._EB !< Volume factor. ( SUM(VOLUME(1:NCELL))/(DX*DY*DZ) )
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           CCELEM !< Cut-cells faces in FACE_LIST. (1:NFACE_CELL+1,1:NCELL)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::        FACE_LIST !< List of cut-reg faces boundary of cut-cells for this entry.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::FACE_LIST_DROPPED !< Face list used for blocking cut-cells.
@@ -1253,7 +1258,7 @@ TYPE CC_CUTCELL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::         LINK_LEV !< Level in local Linking Hierarchy tree. (1:NCELL)
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::           VOLUME !< Cut-cell volumes. (1:NCELL)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           XYZCEN !< Cut-cell centroid locations. (IAXIS:KAXIS,1:NCELL)
-
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
    INTEGER                                  ::       N_NOMICC=0 !< Number of entries in NOMICC
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           NOMICC !< OMESH cut-cells array. (1:2,1:N_NOMICC)
@@ -1278,7 +1283,6 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::        M_DOT_PPP !< Cut-cells mass source term.
 
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKH !< Cut-cells unknown number for pressure H. (1:NCELL)
-   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             KRES !< Cut-cells turbulent kinetic energy.
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                H !< Cut-cells predictor pressure values.
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               HS !< Cut-cells corrector pressure values.
@@ -1409,12 +1413,12 @@ END TYPE TABLES_TYPE
 TYPE (TABLES_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TABLES
 
 TYPE RAMPS_TYPE
-   REAL(EB) :: SPAN,RDT,T_MIN,T_MAX
+   REAL(EB) :: SPAN,RDT,T_MIN,T_MAX,LAST=0._EB
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: INDEPENDENT_DATA,DEPENDENT_DATA,INTERPOLATED_DATA
    INTEGER :: NUMBER_DATA_POINTS,NUMBER_INTERPOLATION_POINTS,DEVC_INDEX=-1,CTRL_INDEX=-1,DEVC_DEP_INDEX=-1,CTRL_DEP_INDEX=-1,&
               RESERVED_RAMP_INDEX=0
-   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',DEVC_ID_DEP='null',CTRL_ID_DEP='null'
-   LOGICAL :: DEP_VAR_UNITS_CONVERTED=.FALSE.
+   CHARACTER(LABEL_LENGTH) :: ID='null',DEVC_ID='null',CTRL_ID='null',DEVC_ID_DEP='null',CTRL_ID_DEP='null'
+   LOGICAL :: DEP_VAR_UNITS_CONVERTED=.FALSE.,EXTERNAL_FILE=.FALSE.
 END TYPE RAMPS_TYPE
 
 TYPE (RAMPS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: RAMPS
@@ -1526,6 +1530,7 @@ TYPE INITIALIZATION_TYPE
    INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
    INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
    INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
+   INTEGER  :: ORIENTATION_RAMP_INDEX(3)=0 !< Ramp index for particle orientation
    INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
    INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
    INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
@@ -1604,6 +1609,35 @@ TYPE ZONE_MESH_TYPE
    INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for ZONE_MESH, up triang part, CSR format.
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for the ZONE_MESH.
 END TYPE ZONE_MESH_TYPE
+
+
+!> \brief Parameters associated with a ZONE, used in GLOBMAT_SOLVER unstructured pressure solver
+
+TYPE ZONE_SOLVE_TYPE
+#ifdef WITH_MKL
+   TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), ALLOCATABLE  :: PT_H(:)  !< Internal solver memory pointer
+#else
+   INTEGER, ALLOCATABLE :: PT_H(:)
+#endif /* WITH_MKL */
+   INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
+   INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
+   INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
+   INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite).
+   INTEGER :: LOWER_ROW=0, UPPER_ROW=0       !< Local row index bounds of matrix assembled by this process for a pres zone.
+   INTEGER :: CONNECTED_ZONE_PARENT=0                 !< Index of first zone in a connected zone list.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUNKH_LOC  !< Number of local H unknowns per mesh for a given pressure zone.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: UNKH_IND   !< H unknown numbering start index per mesh for a given pressure zone.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NNZ_D_MAT_H!< Number of non-zeros per row of global matrix.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: JD_MAT_H   !< Column index per row of non-zeros of global matrix.
+   REAL(EB),ALLOCATABLE, DIMENSION(:,:) :: D_MAT_H    !< Nonzero values per row for global matrix.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH).
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for pressure zone, up triang part, CSR format.
+   INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for pressure zone, up triang part, CSR format.
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for pressure zone.
+   REAL(FB),ALLOCATABLE, DIMENSION(:)   :: A_H_FB,F_H_FB,X_H_FB!< Arrays in case of single precision solve.
+END TYPE ZONE_SOLVE_TYPE
+
+TYPE (ZONE_SOLVE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ZONE_SOLVE
 
 
 !> \brief Parameters associated with a MOVE line, used to rotate or translate OBSTructions
