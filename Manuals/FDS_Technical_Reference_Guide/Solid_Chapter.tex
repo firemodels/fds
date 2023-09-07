@@ -102,10 +102,10 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 In an LES calculation, the convective heat transfer coefficient, $h$, is taken as the maximum of its free (natural) and forced forms:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}, \frac{2L}{\delta n} \right)   \label{q_con}
 \ee
-where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the surface, $T_{\rm w}$ is the wall (surface) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D<<\delta n$ and so the equation for $h$ becomes:
-\be h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right).
+where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the surface, $T_{\rm w}$ is the wall (surface) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D \ll \delta n$ and so the equation for $h$ becomes:
+\be 
+   h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right).
 \ee
-
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
    \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha}
@@ -116,6 +116,7 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
                                                 \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
                                                 0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
                                                 0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
+                                                0.52 \, \hbox{Ra}^{1/5}                               &  \hbox{Horizontal hot plate facing down or cold plate facing up}  \\
                                                 \left( 0.60 +  0.321 \, \hbox{Ra}^{1/6}  \right)^2    &  \hbox{Horizontal cylinder} \\
                                                 2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
        \end{array} \right.
@@ -286,7 +287,7 @@ T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon
 \section{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{\rm s,c}'''$ (see Eq.~(\ref{eq:solid_energy_source_term})),  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{\rm s,c}'''$ (see Eq.~(\ref{eq:solid_energy_source_term})),  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating. The process (enforcing consistency in material heats of formation and temperature dependent heats of reaction) via which FDS ensures energy conservation when solid phase reactions are specified, is detailed in Appendix~\ref{solid_energy_mass}.
 
 
 \subsection{Specified Heat Release Rate}

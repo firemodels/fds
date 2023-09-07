@@ -1290,10 +1290,10 @@ END SUBROUTINE WALL_MODEL
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
 !> \param IOR Index of the surface orientation
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR)
+SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,DELTA_TMP)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
-REAL(EB), INTENT(IN) :: RA
+REAL(EB), INTENT(IN) :: RA,DELTA_TMP
 INTEGER, INTENT(IN) :: SURF_INDEX,SURF_GEOMETRY_INDEX,IOR
 
 SELECT CASE(SURF_GEOMETRY_INDEX)
@@ -1302,10 +1302,14 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
          CASE(0:2)
             NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2  ! Incropera and DeWitt, 7th edition, Eq. 9.26
          CASE(3)
-            IF (RA<1.E7_EB) THEN
-               NUSSELT = 0.54_EB*RA**0.25_EB  ! Incropera and DeWitt, 7th edition, Eq. 9.30
+            IF ((IOR==3.AND.DELTA_TMP<0._EB) .OR. (IOR==-3.AND.DELTA_TMP>=0._EB)) THEN
+               IF (RA<1.E7_EB) THEN
+                  NUSSELT = 0.54_EB*RA**0.25_EB  ! Incropera and DeWitt, 7th edition, Eq. 9.30
+               ELSE
+                  NUSSELT = 0.15_EB*RA**ONTH     ! Incropera and DeWitt, 7th edition, Eq. 9.31
+               ENDIF
             ELSE
-               NUSSELT = 0.15_EB*RA**ONTH     ! Incropera and DeWitt, 7th edition, Eq. 9.31
+               NUSSELT = 0.52_EB*RA**0.2     ! Incropera and DeWitt, 7th edition, Eq. 9.32
             ENDIF
       END SELECT
    CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
