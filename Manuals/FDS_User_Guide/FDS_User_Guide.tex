@@ -3421,13 +3421,13 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{FDS}$. The node pressure at time step n+1,$P_{node}^{n+1}$ , is taken as:
 \be
-P_{node}^{n+1}=P_{FDS} \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{node}^n \; {\ct HVAC\_PRES\_RELAX}
+P_{node}^{n+1}=P_{node}^n \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{FDS}^{n+1} \; {\ct HVAC\_PRES\_RELAX}
 \ee
-Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes. 
 
-The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. Note this means a sealed room must have a {\ct ZONE} assigned to it.
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. 
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
