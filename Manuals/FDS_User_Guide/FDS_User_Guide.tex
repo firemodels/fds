@@ -3543,7 +3543,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
 
-Note that a {\ct VENT} being used for an HVAC system should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. If you need to turn on or off a {\ct VENT} connected to an HVAC system, use a damper in the duct connected to {\ct VENT}.
+Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
