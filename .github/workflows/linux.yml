@@ -31,7 +31,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
       # install oneapi components from apt repository based on
       # oneapi-ci/scripts/setup_apt_repo_linux.sh
@@ -84,7 +84,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install openmpi
       run: |
         sudo apt-get update
