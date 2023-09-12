@@ -1599,7 +1599,7 @@ The term {\ct VENT} is somewhat misleading. Taken literally, a {\ct VENT} can be
 \end{lstlisting}
 specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the underlying obstruction.
 
-A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a portion of a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Thus, if the {\ct VENT} is given a {\ct SURF\_ID} that specifies a value of {\ct HRRPUA} (Heat Release Rate Per Unit Area), this rate will only be applied to the portion of the {\ct VENT} for which there is a solid beneath. 
+A {\ct VENT} must always be attached to a solid obstruction. Sometimes, a portion of a {\ct VENT} might extend beyond a solid, in which case it is either ignored or will trigger an error message. Only the portion of the {\ct VENT} that abuts the solid surface is considered. Thus, if the {\ct VENT} is given a {\ct SURF\_ID} that specifies a value of {\ct HRRPUA} (Heat Release Rate Per Unit Area), this rate will only be applied to the portion of the {\ct VENT} for which there is a solid beneath.
 
 Also, a {\ct VENT} derives its orientation by having a solid cell on one side and a gas cell on the other. Do not extend a {\ct VENT} to have multiple orientations.
 
@@ -2132,10 +2132,9 @@ This section is labeled as a special topic because normally you do not need to m
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on the larger of the Nusselt (Nu) numbers for free (natural) and forced convection:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} , \frac{2L}{\delta n}\right)   \label{q_con}
 \ee
-where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D<<\delta n$ and so the equation for $h$ becomes:
+where $T_{\rm g}$ is the temperature at the center of the gas phase cell adjacent to the surface, $T_{\rm w}$ is the surface (wall) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$. The last argument on the right-hand side corresponds to the limit for DNS cases. For Lagrangian particles the assumption is that $D \ll \delta n$ and so the equation for $h$ becomes:
 \be h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced}\right). \label{h_particles}
 \ee
-
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
    \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha}
@@ -2146,6 +2145,7 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
                                                 \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
                                                 0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
                                                 0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
+                                                0.52 \, \hbox{Ra}^{1/5}                               &  \hbox{Horizontal hot plate facing down or cold plate facing up}  \\
                                                 \left( 0.60 +  0.321 \, \hbox{Ra}^{1/6}  \right)^2    &  \hbox{Horizontal cylinder} \\
                                                 2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
        \end{array} \right.
@@ -2202,7 +2202,7 @@ If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas no
 	\Phi_h = \frac{\dot{m}'' c_g}{h}
 \end{equation}
 \begin{equation}
-	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h 
+	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h
 \end{equation}
 where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
 \subsection{Adiabatic Surfaces}
@@ -3421,13 +3421,13 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{FDS}$. The node pressure at time step n+1,$P_{node}^{n+1}$ , is taken as:
 \be
-P_{node}^{n+1}=P_{FDS} \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{node}^n \; {\ct HVAC\_PRES\_RELAX}
+P_{node}^{n+1}=P_{node}^n \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{FDS}^{n+1} \; {\ct HVAC\_PRES\_RELAX}
 \ee
-Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes. 
 
-The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. Note this means a sealed room must have a {\ct ZONE} assigned to it.
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. 
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3543,7 +3543,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
 
-Note that a {\ct VENT} being used for an HVAC system should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. If you need to turn on or off a {\ct VENT} connected to an HVAC system, use a damper in the duct connected to {\ct VENT}.
+Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -7318,7 +7318,7 @@ Wildfire spread over releastic terrain can be modeled in FDS using a plugin to Q
 QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
 
 A set of sample input files created by qgis2fds reside within the gitHub repository \\
-\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\ 
+\href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\
 in the folder called {\ct Wildland\_Fire\_Spread\_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
 
 For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
@@ -7892,7 +7892,7 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
 {\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline                & External file control, see Section~\ref{info:external_control} \\ \hline
-{\ct EXTERNAL}           
+{\ct EXTERNAL}
 \end{tabular}
 \end{center}
 \end{table}
@@ -9181,7 +9181,7 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. A {\ct SPATIAL\_STATISTIC} can only be used for a gas phase {\ct QUANTITY} in Table~\ref{info:gasoutputquantities} with both D and S in the file type column or for a solid phase {\ct QUANTITY}  in Table~\ref{info:solidoutputquantities} with both D and B in the file type column.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 

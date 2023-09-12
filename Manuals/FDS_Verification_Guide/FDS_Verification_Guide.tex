@@ -2025,43 +2025,72 @@ In order to make a comparison with the local correlation we need to scale the FD
 \end{figure}
 
 
-\section{Natural Convection Horizontal Plates (\texorpdfstring{\textct{natconh}}{natconh})}
-\label{sec:natconh}
+\clearpage
 
-This section examines the problem of thermal convection between horiozontal plates of fixed temperature with the hot plate on bottom.  The following correlation for the Nusselt number is taken from \cite{Holman:1}:
+\section{Natural Convection}
+
+LES simulations in FDS use an empirical correlation to define the heat transfer coefficient for natural convection:
 \begin{equation}
-\mathrm{Nu} = C \,\mathrm{Ra}^n
+  h = \frac{{\rm Nu} \, k}{L} \quad ; \quad \mathrm{Nu} = C \,\mathrm{Ra}^n
 \end{equation}
-where the Rayleigh number (product of Grashof and Prandtl numbers), Ra, is given by
+The Rayleigh number (product of Grashof and Prandtl numbers), Ra, is given by
 \begin{equation}
 \label{eq:rayleigh_number}
-\mathrm{Ra} = \frac{g\beta(T_1-T_2)\delta^2}{\nu\alpha}
+\mathrm{Ra} = \frac{g \, \beta \, |T_1-T_2| \, L^3}{\nu\alpha}
 \end{equation}
-Here $g$ is the magnitude of the gravitational acceleration, $T_1$ and $T_2$ are the respective hot and cold plate temperatures, $\delta$ is the distance between the plates, $\nu$ is the kinematic viscosity, and $\alpha$ is the thermal diffusivity of the fluid.
+where $g$ is the magnitude of the gravitational acceleration, $T_1$ and $T_2$ are the respective free stream and surface temperatures, $L$ is a length scale, $\nu$ is the kinematic viscosity and $\alpha$ is the thermal diffusivity of the fluid. The values of $C$ and $n$ and the definition of $L$ vary depending on the configuration. For the test cases given below, the fluid is defined as {\ct 'LJ AIR'} with constant viscosity, specific heat, and thermal conductivity: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid. (Note that the correlations are valid for Pr in the range 0.5 to 2.)
 
-The values of $C$ and $n$ depend on the Rayleigh number range, as shown below in Tab.~\ref{tab:freeconh}.
+\subsection{Horizontal Plate (\texorpdfstring{\textct{nat\_conv\_hot\_plate}}{nat\_conv\_hot\_plate})}
+\label{sec:nat_conv_hot_plate}
+
+Table~\ref{tab:nat_conv_horizontal_default} lists the default parameters for natural convection for a hot plate facing upwards (equivalent to a cold plate facing downwards) \underline{or} a hot plate facing downwards (cold plate facing upwards). The listed ranges for the Ra number are those used within FDS. The ranges given in Ref.~\cite{Incropera:1} are shown in Fig.~\ref{fig_nat_conv_hot_plate}. The length scale is defined $L=A/P$, where $A$ is the area of one side of the plate and $P$ is its perimeter. To verify these default parameters, five cases are set up for which $10^4 < {\rm Ra} < 10^{11}$. The Ra number is varied by changing the side length, $S$, of the square plate and its temperature.
+
+\begin{table}[h]
+\centering
+\caption[Natural convection correlation parameters for horizontal plates]{Natural convection correlation parameters for horizontal plates, $\mathrm{Nu}=C \, \mathrm{Ra}^n$ \cite{Incropera:1}.}
+\label{tab:nat_conv_horizontal_default}
+\begin{tabular}{lccc}
+Configuration                                & Ra                       & $C$   & $n$  \\
+\hline
+\multirow{2}{*}{Upward Facing Hot Surface}   & $ <1 \times 10^7$        & 0.54  & 1/4  \\
+                                             & $ >1 \times 10^7$        & 0.15  & 1/3  \\
+Downward Facing Hot Surface &  All                                      & 0.52  & 1/5  \\
+\end{tabular}
+\end{table}
+
+Three different grid resolutions are tested for the Cartesian cases: $S/\delta x = [8,16,32]$.  The grid resolution is uniform with $\delta x = \delta y = \delta z$. All external boundaries are passive openings. The average heat flux of the plate is monitored and the simulation is run until a clear stationary state is reached.  The results are presented in Fig.~\ref{fig_nat_conv_hot_plate}.
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/nat_conv_hot_plate}
+   \caption[Nusselt correlation natural convection from a hot, horizontal plate]{FDS results for natural convection from an upward and downward facing hot plate.}
+   \label{fig_nat_conv_hot_plate}
+\end{figure}
+
+\FloatBarrier
+
+
+\subsection{Horizontal Enclosure (\texorpdfstring{\textct{natconh}}{natconh})}
+\label{sec:natconh}
+
+Consider thermal convection in an enclosure with a hot floor, cold ceiling, and adiabatic walls. Table~\ref{tab:freeconh} lists values for $C$ and $n$, and the length scale, $L$, is taken as the height of the enclosure, $\delta$.
 \begin{table}[h]
 % see table 7.3 in J.P. Holman 7th Ed.
 \centering
-\caption[Free convection correlation parameters for horizontal plates]{Free convection correlation parameters for horizontal plates \cite{Holman:1}.}
+\caption[Natural convection correlation parameters for a horizontal enclosure]{Natural convection correlation parameters for a horizontal enclosure, $\mathrm{Nu}=C \, \mathrm{Ra}^n$ \cite{Holman:1}.}
 \label{tab:freeconh}
 \begin{tabular}{cll}
 Ra                       & $C$    & $n$ \\
 \hline
 $<1700$                  & 1      & 0   \\
-1700-17000               & 0.059  & 2/5 \\
-7000-$3.2 \times 10^5$   & 0.212  & 1/4 \\
+$1700 - 17000$           & 0.059  & 2/5 \\
+$7000 - 3.2 \times 10^5$ & 0.212  & 1/4 \\
 $>3.2 \times 10^5$       & 0.061  & 1/3
 \end{tabular}
 \end{table}
+There are 19 cases for which $1 < {\rm Ra} < 10^{14}$.  The Rayleigh number is varied by changing both the enclosure height ($\delta$ ranges from 2~mm to 20~m) and the temperature difference.  The ceiling is held fixed at 20~\si{\degreeCelsius} and the floor is varied between 30~\si{\degreeCelsius} and 230~\si{\degreeCelsius}.
 
-\subsubsection*{Case setup}
-
-The fluid is set to {\ct 'LJ AIR'} with constant viscosity, specific heat, and thermal conductivity: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid. (Note that the correlations are valid for Pr in the range 0.5-2.)
-
-There are 19 cases ranging in Ra from roughly 1 - $10^{14}$.  The Rayleigh number is varied by changing both the distance between the plates, $\delta$ ranges from 2 mm to 20 m, and the temperature difference.  The top plate is held fixed at 20 \si{\degreeCelsius} and the bottom plate temperature varies from 30 \si{\degreeCelsius} to 230 \si{\degreeCelsius}.
-
-Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta z$ = [8,16,32].  The resolution is uniform with $\delta x = \delta y = \delta z$.  The width and depth of the plates are each $8 \delta$.  The boundary conditions in the $x$ and $y$ directions are periodic.  The average heat flux on each plate is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconh} (left).
+Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta z = [8,16,32]$.  The resolution is uniform with $\delta x = \delta y = \delta z$.  The length and width of the computational domain are 8 times its height. The boundary conditions in the $x$ and $y$ directions are periodic. The average heat flux on the floor and ceiling is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconh} (left).
 
 For the complex geometry cases, the grid and gravity vector are rotated by 18 degrees.  A hollow cavity is formed using the {\ct GEOM} namelist format with a hot surface below and a cold surface on top and insulated side walls.  Two grid resolutions are tested: $\delta/\delta z$ = [8,16].  The results are shown in Fig.~\ref{fig_natconh} (right).
 
@@ -2074,14 +2103,16 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
    \caption[Nusselt correlation Rayleigh-B\'{e}nard convection]{\label{fig_natconh} FDS results for Nusselt number in Rayleigh-B\'{e}nard convection (natural convection between horizontal plates)---(left) Cartesian geometry; (right) cutcell geometry.}
 \end{figure}
 
-\section{Natural Convection Vertical Enclosure (\texorpdfstring{\textct{natconv}}{natconv})}
+\FloatBarrier
+
+
+\subsection{Vertical Enclosure (\texorpdfstring{\textct{natconv}}{natconv})}
 \label{sec:natconv}
 
-This section examines the problem of thermal convection in an enclosure with vertical plates of fixed temperature and insulated top and bottom boundaries.  The Nusselt number correlation requires an additional factor to account for the ratio of the length $L$ to the depth $\delta$ \cite{Holman:1}:
+Consider now thermal convection in an enclosure with walls of fixed temperature and insulated floor and ceiling.  The Nusselt number correlation requires an additional factor to account for the ratio of the height, $H$, to the distance between the walls $\delta$ \cite{Holman:1}:
 \begin{equation}
-\mathrm{Nu} = C \,\mathrm{Ra}^n \,\left(\frac{L}{\delta}\right)^m
+\mathrm{Nu} = C \,\mathrm{Ra}^n \,\left(\frac{H}{\delta}\right)^m
 \end{equation}
-
 The values of $C$, $n$, and $m$ are given below in Tab.~\ref{tab:freeconv}.
 \begin{table}[h]
 % see table 7.3 in J.P. Holman 7th Ed.
@@ -2089,21 +2120,16 @@ The values of $C$, $n$, and $m$ are given below in Tab.~\ref{tab:freeconv}.
 \caption[Free convection correlation parameters for a vertical enclosure]{Free convection correlation parameters for a vertical enclosure, valid for the ranges Pr=[0.5-2] and $L/\delta$=[11-42] \cite{Holman:1}.}
 \label{tab:freeconv}
 \begin{tabular}{clll}
-Ra                                 & $C$    & $n$ & $m$  \\
+Ra                                   & $C$    & $n$ & $m$  \\
 \hline
-$<2000$                            & 1      & 0   & 0    \\
-6000-$2 \times 10^5$               & 0.197  & 1/4 & -1/9 \\
-$2 \times 10^5$-$1.1 \times 10^7$  & 0.073  & 1/3 & -1/9
+$<2000$                              & 1      & 0   & 0    \\
+$6000 - 2 \times 10^5$               & 0.197  & 1/4 & -1/9 \\
+$2 \times 10^5 - 1.1 \times 10^7$    & 0.073  & 1/3 & -1/9
 \end{tabular}
 \end{table}
+The setup for this series is very similar to the horizontal configuration discussed above (see Sec.~\ref{sec:natconh}). There are 17 cases in the range $1 < {\rm Ra} < 10^{14}$.  The distance between the walls, $\delta$, varies between 2~mm  and 20~m. The right (cold) wall is held fixed at 20~\si{\degreeCelsius} and the left wall varies from 30~\si{\degreeCelsius} to 230~\si{\degreeCelsius}.
 
-\subsubsection*{Case setup}
-
-The setup for this series is very similar to the horizontal configuration discussed above (see Sec.~\ref{sec:natconh}). The fluid is set to {\ct 'LJ AIR'} with constant viscosity, specific heat, and thermal conductivity: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid.
-
-There are 17 cases ranging in Ra from roughly 1 - $10^{14}$.  The Rayleigh number is varied by changing both the distance between the plates, $\delta$ ranges from 2 mm to 20 m, and the temperature difference.  The right (cold) plate is held fixed at 20 \si{\degreeCelsius} and the left plate temperature varies from 30 \si{\degreeCelsius} to 230 \si{\degreeCelsius}.
-
-Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta x$ = [8,16,32].  The resolution is uniform with $\delta x = \delta y = \delta z$.  The length (vertical dimension) and depth (spanwise dimension) of the plates are $16 \delta$ and $4 \delta$, respectively.  The boundary conditions in the $y$ and $z$ directions are homogeneous Neumann ({\ct MIRROR} or ``insulated'').  The average heat flux on each plate is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconv} (left).
+Three different grid resolutions are tested for the Cartesian cases: $\delta/\delta x$ = [8,16,32].  The resolution is uniform with $\delta x = \delta y = \delta z$.  The length (vertical dimension) and depth (spanwise dimension) of the plates are $16 \delta$ and $4 \delta$, respectively.  The boundary conditions in the $y$ and $z$ directions are homogeneous Neumann ({\ct MIRROR} or ``insulated'').  The average heat flux on each wall is monitored and the simulation is run until a clear stationary state is reached.  The results are presented below in Fig.~\ref{fig_natconv} (left).
 
 For the complex geometry cases, the grid and gravity vector are rotated by 18 degrees.  A hollow cavity is formed using the {\ct GEOM} namelist format with a hot surface on the left and a cold surface on the right and insulated side walls.  Two grid resolutions are tested: $\delta/\delta z$ = [8,16].  The results are shown in Fig.~\ref{fig_natconv} (right).
 
@@ -2116,19 +2142,18 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
    \caption[Nusselt correlation natural convection vertical enclosure]{\label{fig_natconv} FDS results for Nusselt number in natural convection within a vertical enclosure---(left) Cartesian geometry; (right) cutcell geometry.}
 \end{figure}
 
-\clearpage
-\section{Free Convection from a Sphere (\texorpdfstring{\textct{free\_conv\_sphere}}{free\_conv\_sphere})}
+\FloatBarrier
+
+
+\subsection{Sphere (\texorpdfstring{\textct{free\_conv\_sphere}}{free\_conv\_sphere})}
 \label{sec:free_conv_sphere}
 
-In this section we present results for a set of four cases ranging in Rayleigh number from approximately 1 to $10^9$.  Yuge \cite{Yuge:1960} and Amato and Tien \cite{Amato:1972} propose the following Nusselt number correlations for free convection from a sphere \cite{Holman:1}.
-\begin{align}
-\mathrm{Nu}_f &= 2 + 0.43 \,\mathrm{Ra}_f^{1/4} \quad \mbox{for} \; 1 < \mathrm{Ra}_f < 10^5 \\
-\mathrm{Nu}_f &= 2 + 0.50 \,\mathrm{Ra}_f^{1/4} \quad \mbox{for} \; 3 \times 10^5 < \mathrm{Ra}_f < 8 \times 10^8
-\end{align}
-
-\subsubsection*{Case setup}
-
-The sphere is generated using the {\ct GEOM} namelist with three levels.  The surface temperature is uniform and constant at 30 \si{\degreeCelsius}.  The Rayleigh number is changed by adjusting the diameter of the sphere from 1 mm to 1 m.  Fluid properties are from {\ct 'LJ AIR'} and held constant: $\mu = 1.8216 \times 10^{-5}$ \si{kg/m/s}, $c_p = 1$ \si{kJ/kg/K}, and $k = 0.018216$ \si{W/m/K}, which provides a $\mathrm{Pr}=1$ fluid.  The convective heat flux is integrated over the surface of the sphere.  All external boundaries are {\ct OPEN} and the grid resolution is uniform. Results are presented in Fig.~\ref{fig_free_conv_sphere} for two grid resolutions corresponding to $D/\delta x$ = [8,16].
+Consider a heated sphere in the range $1 < {\rm Ra} < 10^9$.  Yuge~\cite{Yuge:1960} and Amato and Tien~\cite{Amato:1972} propose the following Nusselt number correlations for natural convection from a sphere \cite{Holman:1}.
+\be
+\mathrm{Nu} = \left\{ \begin{array}{ll}  2 + 0.43 \, \mathrm{Ra}^{1/4} & 1 < \mathrm{Ra} < 10^5 \\
+                                         2 + 0.50 \, \mathrm{Ra}^{1/4} & 3 \times 10^5 < \mathrm{Ra} < 8 \times 10^8 \end{array} \right.
+\ee
+The sphere is generated using the {\ct GEOM} namelist with three levels.  The surface temperature is uniform and constant at 30~\si{\degreeCelsius}.  The Rayleigh number is changed by adjusting the diameter of the sphere from 1~mm to 1~m.  Fluid properties are the same as above.  The convective heat flux is integrated over the surface of the sphere.  All external boundaries are {\ct OPEN} and the grid resolution is uniform. Results are presented in Fig.~\ref{fig_free_conv_sphere} for two grid resolutions corresponding to $D/\delta x$ = [8,16].
 
 \begin{figure}[h]
    \centering
@@ -4846,7 +4871,7 @@ Case 9 takes case 1 and produces a particle of a second material with the same s
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_3} &
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_4} \\
         \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_5} &
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_6} 
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_6}
     \end{tabular*}
     \caption[The \textct{matl\_e\_cons} test cases 1-6]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases 1-6.}
     \label{fig:matl_e_cons1}
@@ -6774,7 +6799,7 @@ We test the manufactured solution test case~\ref{sec:shunn_mms} for scalar trans
 The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in Sec.~\ref{sec:shunn_mms}.
 
 The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in Sec.~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the time integration method defined in FDS.
-The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry. 
+The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry.
 
 
 Simulations were performed for $N = \{32, 64, 128, 256, 320\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on Sec.~\ref{sec:shunn_mms}, are solved using the {\ct GODUNOV} flux limiter and the DNS default {\ct CHARM} limiter. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Time integration in the cut-cell region produces second-order accurate solutions for density, mixture fraction, and velocity, when {\ct CHARM} interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the {\ct GODUNOV} flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on Sec.~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
