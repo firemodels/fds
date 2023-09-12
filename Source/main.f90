@@ -1715,7 +1715,7 @@ IF (MY_RANK==0) THEN
 
    ! Print out device activation times to the .out file
 
-   CALL TIMINGS
+   IF (STOP_STATUS/=SETUP_STOP) CALL TIMINGS
 
    ! Print out stop status to .err and .out files
 
