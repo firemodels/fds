@@ -3421,13 +3421,13 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{FDS}$. The node pressure at time step n+1,$P_{node}^{n+1}$ , is taken as:
 \be
-P_{node}^{n+1}=P_{FDS} \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{node}^n \; {\ct HVAC\_PRES\_RELAX}
+P_{node}^{n+1}=P_{node}^n \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{FDS}^{n+1} \; {\ct HVAC\_PRES\_RELAX}
 \ee
-Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes. 
 
-The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. Note this means a sealed room must have a {\ct ZONE} assigned to it.
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. 
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3543,7 +3543,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
 
-Note that a {\ct VENT} being used for an HVAC system should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. If you need to turn on or off a {\ct VENT} connected to an HVAC system, use a damper in the duct connected to {\ct VENT}.
+Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -7023,11 +7023,11 @@ WRITE(LU_VEG_IN) MASS_PER_VOLUME
 WRITE(LU_VEG_IN) VCX,VCY,VCZ
 WRITE(LU_VEG_IN) MASS_PER_VOLUME
 \end{lstlisting}
-The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is uesd to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordiantes of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
+The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is used to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordinates of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
 
-FDS effectively creats a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
+FDS effectively creates a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
 
-Additionaly, the {\ct BULK\_DENSITY\_FILE} can be scaled using a {\ct BULK\_DENSITY\_FACTOR}. The value of this input, also provided on the {\ct INIT} line, will be multiplied by all values in the {\ct BULK\_DENSITY\_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same {\ct BULK\_DENSITY\_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
+Additionally, the {\ct BULK\_DENSITY\_FILE} can be scaled using a {\ct BULK\_DENSITY\_FACTOR}. The value of this input, also provided on the {\ct INIT} line, will be multiplied by all values in the {\ct BULK\_DENSITY\_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same {\ct BULK\_DENSITY\_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -9181,7 +9181,7 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. A {\ct SPATIAL\_STATISTIC} can only be used for a gas phase {\ct QUANTITY} in Table~\ref{info:gasoutputquantities} with both D and S in the file type column or for a solid phase {\ct QUANTITY}  in Table~\ref{info:solidoutputquantities} with both D and B in the file type column.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
