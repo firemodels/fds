@@ -3549,56 +3549,190 @@ END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 !> \brief Checks duct network for minimal loss defintions
 
 SUBROUTINE EXAMINE_LOSSES
-INTEGER:: ND, NN, COUNTER
-LOGICAL:: CHANGE
-LOGICAL, DIMENSION(:):: LOSS_D(N_DUCTS), LOSS_N(N_DUCTNODES)
+INTEGER :: ND, ND2, ND3, NN
+LOGICAL :: CHANGE
+LOGICAL :: LOSS_D(N_DUCTS,2),LOSS_N(N_DUCTNODES)
+TYPE N_LOSS_TEMP
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOSS
+END TYPE N_LOSS_TEMP
+TYPE(N_LOSS_TEMP), ALLOCATABLE, DIMENSION(:) :: N_LOSS
+TYPE(DUCT_TYPE), POINTER :: DU=> NULL()
+TYPE(DUCTNODE_TYPE), POINTER :: DN=> NULL(),DN2=>NULL()
 
 LOSS_D = .FALSE.
 LOSS_N = .FALSE.
 
-DO ND = 1, N_DUCTS
-   IF (DUCT(ND)%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DUCT(ND)%MASS_FLOW_INITIAL<1.E6_EB) LOSS_D(ND) = .TRUE.
-   IF (ANY(DUCT(ND)%LOSS>0._EB) .OR. DUCT(ND)%ROUGHNESS > 0._EB) LOSS_D(ND) = .TRUE.
-   IF (DUCT(ND)%FAN_INDEX > 0) LOSS_D(ND) = .TRUE.
+ALLOCATE (N_LOSS(N_DUCTNODES))
+
+! Allocate array that identifies if a particular direction out of a node has a loss associated with it
+
+DO NN=1,N_DUCTNODES
+   DN=>DUCTNODE(NN)
+   ! For terminal nodes we have two loss to track: (1,1) into the system and (1,2) out of the system
+   IF (DN%N_DUCTS==1) THEN
+      ALLOCATE(N_LOSS(NN)%LOSS(1,2))
+      N_LOSS(NN)%LOSS = .FALSE.
+      IF (DN%LOSS_ARRAY(1,2) > 0._EB) N_LOSS(NN)%LOSS(1,1) = .TRUE.
+      IF (DN%LOSS_ARRAY(2,1) > 0._EB) N_LOSS(NN)%LOSS(1,2) = .TRUE.
+   ELSE
+      ALLOCATE(N_LOSS(NN)%LOSS(DN%N_DUCTS,DN%N_DUCTS))
+      N_LOSS(NN)%LOSS = .FALSE.
+      DO ND=1,DN%N_DUCTS
+         N_LOSS(NN)%LOSS(ND,ND) = .TRUE.
+         DO ND2=1,DN%N_DUCTS
+            IF (DN%LOSS_ARRAY(ND,ND2) > 0._EB) N_LOSS(NN)%LOSS(ND,ND2) = .TRUE.
+         ENDDO
+      ENDDO
+   ENDIF
 ENDDO
 
-CHANGE = .TRUE.
-CHANGE_LOOP: DO WHILE (CHANGE)
-   CHANGE = .FALSE.
-   NODELOOP: DO NN = 1,N_DUCTNODES
-      IF (LOSS_N(NN)) CYCLE NODELOOP
-      IF (DUCTNODE(NN)%N_DUCTS==2) THEN
-         LOSS_N(NN) = .TRUE.
-         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(1)) = .TRUE.
-         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(2)) = .TRUE.
-         CYCLE NODELOOP
-      ENDIF
-      IF (ANY(DUCTNODE(NN)%LOSS_ARRAY > 0._EB)) THEN
-         LOSS_N(NN) = .TRUE.
-         DO ND = 1,DUCTNODE(NN)%N_DUCTS
-            LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND)) = .TRUE.
-         ENDDO
-         CYCLE NODELOOP
-      ENDIF
-      IF (DUCTNODE(NN)%LEAKAGE) THEN
-         LOSS_N(NN) = .TRUE.
-         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(1)) = .TRUE.
-         CHANGE = .TRUE.
-         CYCLE NODELOOP
-      ENDIF
-      COUNTER = 0
-      DO ND = 1,DUCTNODE(NN)%N_DUCTS
-         IF (LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND))) COUNTER = COUNTER + 1
+! Set initial LOSS_D array indicating if a duct has a loss associate with forward (node 1 to 2) or reverse flow (node 2 to 1)
+DUCTLOOP: DO ND = 1, N_DUCTS
+   DU => DUCT(ND)
+   ! Fixed flow is equivalent to having losses defined as no pressure solution is required to get the flow.
+   IF (DU%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DU%MASS_FLOW_INITIAL<1.E6_EB .OR. DU%ROUGHNESS > 0._EB) THEN
+      LOSS_D(ND,:) = .TRUE.
+      CYCLE
+   ENDIF
+   IF (DU%FAN_INDEX > 0) THEN
+      IF (FAN(DU%FAN_INDEX)%FAN_TYPE==1) LOSS_D(ND,:) = .TRUE.
+      CYCLE
+   ENDIF
+   IF (DU%LOSS(1)>0._EB) LOSS_D(ND,1) = .TRUE.
+   IF (DU%LOSS(2)>0._EB) LOSS_D(ND,2) = .TRUE.
+   ! Check the nodes on either side of the duct to see if the node has losses
+   DN => DUCTNODE(DU%NODE_INDEX(1))
+   IF (DN%N_DUCTS==1) THEN
+      IF (N_LOSS(DU%NODE_INDEX(1))%LOSS(1,1)) LOSS_D(ND,1) = .TRUE.
+      IF (N_LOSS(DU%NODE_INDEX(1))%LOSS(1,2)) LOSS_D(ND,2) = .TRUE.
+   ELSE
+      DO ND2 = 1, DN%N_DUCTS
+         IF (DN%DUCT_INDEX(ND2) /= ND) CYCLE
+         IF (ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(:,ND2)) .AND. &
+             ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(ND2,:))) THEN
+            LOSS_D(ND,1) = .TRUE.
+            LOSS_D(ND,2) = .TRUE.
+         ENDIF
       ENDDO
-      IF (COUNTER > 0 .AND. COUNTER >= DUCTNODE(NN)%N_DUCTS-1) THEN
-         LOSS_N(NN) = .TRUE.
-         DO ND = 1,DUCTNODE(NN)%N_DUCTS
-            LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND)) = .TRUE.
-         ENDDO
+   ENDIF
+   DN => DUCTNODE(DU%NODE_INDEX(2))
+   IF (DN%N_DUCTS==1) THEN
+      IF (N_LOSS(DU%NODE_INDEX(2))%LOSS(1,1)) LOSS_D(ND,2) = .TRUE.
+      IF (N_LOSS(DU%NODE_INDEX(2))%LOSS(1,2)) LOSS_D(ND,1) = .TRUE.
+   ELSE
+      DO ND2 = 1, DN%N_DUCTS
+         IF (DN%DUCT_INDEX(ND2) /= ND) CYCLE
+         IF (ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(:,ND2)) .AND. &
+             ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(ND2,:))) THEN
+            LOSS_D(ND,1) = .TRUE.
+            LOSS_D(ND,2) = .TRUE.
+         ENDIF
+      ENDDO
+   ENDIF
+ENDDO DUCTLOOP
+
+
+CHANGE = .TRUE.
+CHANGELOOP: DO WHILE (CHANGE)
+   CHANGE = .FALSE.
+   NODELOOP: DO NN=1,N_DUCTNODES
+      IF (LOSS_N(NN)) CYCLE NODELOOP
+      IF (ALL(N_LOSS(NN)%LOSS)) THEN
+         LOSS_N(NN) =.TRUE.
          CHANGE = .TRUE.
+         DO ND=1,DUCTNODE(NN)%N_DUCTS
+            IF (.NOT. LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND),1)) THEN
+               LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND),1)= .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+            IF (.NOT. LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND),2)) THEN
+               LOSS_D(DUCTNODE(NN)%DUCT_INDEX(ND),2)= .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+         ENDDO
+         CYCLE NODELOOP
       ENDIF
+      DN => DUCTNODE(NN)
+      IF (DN%N_DUCTS==1) THEN
+         IF (DUCT(DN%DUCT_INDEX(1))%NODE_INDEX(1)==NN) THEN
+            IF (LOSS_D(DN%DUCT_INDEX(1),1) .AND. .NOT. N_LOSS(NN)%LOSS(1,1)) THEN
+               N_LOSS(NN)%LOSS(1,1) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+            IF (LOSS_D(DN%DUCT_INDEX(1),2) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+               N_LOSS(NN)%LOSS(1,2) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+         ELSE
+            IF (LOSS_D(DN%DUCT_INDEX(1),1) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+               N_LOSS(NN)%LOSS(1,2) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+            IF (LOSS_D(DN%DUCT_INDEX(1),2) .AND. .NOT. N_LOSS(NN)%LOSS(1,1)) THEN
+               N_LOSS(NN)%LOSS(1,1) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+         ENDIF
+         IF (ALL(N_LOSS(NN)%LOSS)) THEN
+            LOSS_N(NN) = .TRUE.
+            CHANGE = .TRUE.
+         ENDIF
+         CYCLE NODELOOP
+      ENDIF
+      DUCT_O_LOOP: DO ND=1,DN%N_DUCTS
+         IF (ALL(N_LOSS(NN)%LOSS(ND,:)) .AND. ALL(N_LOSS(NN)%LOSS(:,ND))) THEN
+            IF (.NOT. LOSS_D(DN%DUCT_INDEX(ND),1)) THEN
+               LOSS_D(DN%DUCT_INDEX(ND),1) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+            IF (.NOT. LOSS_D(DN%DUCT_INDEX(ND),2)) THEN
+               LOSS_D(DN%DUCT_INDEX(ND),2) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+         ENDIF
+
+         DUCT_I_LOOP: DO ND2=1,DN%N_DUCTS
+            IF (DUCT(DN%DUCT_INDEX(ND2))%NODE_INDEX(1)==NN) THEN
+               IF (LOSS_D(DN%DUCT_INDEX(ND2),1) .AND. .NOT. N_LOSS(NN)%LOSS(ND,ND2)) THEN
+                  N_LOSS(NN)%LOSS(ND,ND2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (.NOT. N_LOSS(NN)%LOSS(ND,ND2)) THEN
+                  DN2=>DUCTNODE(DUCT(DN%DUCT_INDEX(ND2))%NODE_INDEX(2))
+                  DO ND3=1,DN2%N_DUCTS
+                     IF (DN2%DUCT_INDEX(ND3)==DN%DUCT_INDEX(ND2)) THEN
+                        IF (ALL(N_LOSS(DUCT(DN2%DUCT_INDEX(ND3))%NODE_INDEX(2))%LOSS(ND3,:))) THEN
+                           LOSS_D(DN2%DUCT_INDEX(ND3),1) = .TRUE.
+                           CHANGE = .TRUE.
+                        ENDIF
+                        EXIT
+                     ENDIF
+                  ENDDO
+               ENDIF
+            ELSE
+               IF (LOSS_D(DN%DUCT_INDEX(ND2),2) .AND. .NOT. N_LOSS(NN)%LOSS(ND,ND2)) THEN
+                  N_LOSS(NN)%LOSS(ND,ND2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (.NOT. N_LOSS(NN)%LOSS(ND,ND2)) THEN
+                  DN2=>DUCTNODE(DUCT(DN%DUCT_INDEX(ND2))%NODE_INDEX(1))
+                  DO ND3=1,DN2%N_DUCTS
+                     IF (DN2%DUCT_INDEX(ND3)==DN%DUCT_INDEX(ND2)) THEN
+                        IF (ALL(N_LOSS(DUCT(DN2%DUCT_INDEX(ND3))%NODE_INDEX(1))%LOSS(ND3,:))) THEN
+                           LOSS_D(DN2%DUCT_INDEX(ND3),2) = .TRUE.
+                           CHANGE = .TRUE.
+                        ENDIF
+                        EXIT
+                     ENDIF
+                  ENDDO
+               ENDIF
+            ENDIF
+         ENDDO DUCT_I_LOOP
+      ENDDO DUCT_O_LOOP
    ENDDO NODELOOP
-ENDDO CHANGE_LOOP
+ENDDO CHANGELOOP
+
+DEALLOCATE(N_LOSS)
 
 IF (.NOT. ALL(LOSS_D) .OR. .NOT. ALL(LOSS_N)) THEN
    WRITE(MESSAGE,'(A,I5,A,I5)') 'ERROR: Problem with HVAC network. Insufficient LOSS defintions for DUCTs and DUCTNODEs'
