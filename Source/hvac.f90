@@ -3579,6 +3579,7 @@ DO NN=1,N_DUCTNODES
             IF (DN%LOSS_ARRAY(ND,ND2) > 0._EB) N_LOSS(NN)%LOSS(ND,ND2) = .TRUE.
          ENDDO
       ENDDO
+      IF (DN%FILTER_INDEX > 0) N_LOSS(NN)%LOSS = .TRUE.
    ENDIF
 ENDDO
 
@@ -3591,7 +3592,11 @@ DUCTLOOP: DO ND = 1, N_DUCTS
       CYCLE
    ENDIF
    IF (DU%FAN_INDEX > 0) THEN
-      IF (FAN(DU%FAN_INDEX)%FAN_TYPE==1) LOSS_D(ND,:) = .TRUE.
+      IF (FAN(DU%FAN_INDEX)%FAN_TYPE==1) THEN
+         LOSS_D(ND,:) = .TRUE.
+      ELSE
+         IF (DUCTNODE(DU%NODE_INDEX(1))%N_DUCTS<=2 .AND. DUCTNODE(DU%NODE_INDEX(2))%N_DUCTS<=2) LOSS_D(ND,:) = .TRUE.
+      ENDIF
       CYCLE
    ENDIF
    IF (DU%LOSS(1)>0._EB) LOSS_D(ND,1) = .TRUE.
@@ -3626,7 +3631,6 @@ DUCTLOOP: DO ND = 1, N_DUCTS
       ENDDO
    ENDIF
 ENDDO DUCTLOOP
-
 
 CHANGE = .TRUE.
 CHANGELOOP: DO WHILE (CHANGE)
@@ -3674,6 +3678,99 @@ CHANGELOOP: DO WHILE (CHANGE)
             CHANGE = .TRUE.
          ENDIF
          CYCLE NODELOOP
+      ENDIF
+      IF (DN%N_DUCTS==2) THEN
+         IF (N_LOSS(NN)%LOSS(1,2)) THEN
+            IF (DUCT(DN%DUCT_INDEX(1))%NODE_INDEX(1)==NN) THEN
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(1),2)) THEN
+                  LOSS_D(DN%DUCT_INDEX(1),2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(1),1)) THEN
+                  LOSS_D(DN%DUCT_INDEX(1),1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+            IF (DUCT(DN%DUCT_INDEX(2))%NODE_INDEX(1)==NN) THEN
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(2),1)) THEN
+                  LOSS_D(DN%DUCT_INDEX(2),1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(2),2)) THEN
+                  LOSS_D(DN%DUCT_INDEX(2),2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+         ENDIF
+         IF (N_LOSS(NN)%LOSS(2,1)) THEN
+            IF (DUCT(DN%DUCT_INDEX(1))%NODE_INDEX(1)==NN) THEN
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(1),1)) THEN
+                  LOSS_D(DN%DUCT_INDEX(1),1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(1),2)) THEN
+                  LOSS_D(DN%DUCT_INDEX(1),2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+            IF (DUCT(DN%DUCT_INDEX(2))%NODE_INDEX(1)==NN) THEN
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(2),2)) THEN
+                  LOSS_D(DN%DUCT_INDEX(2),2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (.NOT. LOSS_D(DN%DUCT_INDEX(2),1)) THEN
+                  LOSS_D(DN%DUCT_INDEX(2),1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+         ENDIF
+         IF (ALL(LOSS_D(DN%DUCT_INDEX(1),:)) .OR. ALL(LOSS_D(DN%DUCT_INDEX(2),:))) THEN
+            N_LOSS(NN)%LOSS = .TRUE.
+            CHANGE = .TRUE.
+         ELSE
+            IF (DUCT(DN%DUCT_INDEX(1))%NODE_INDEX(1)==NN) THEN
+               IF (LOSS_D(DN%DUCT_INDEX(1),1) .AND. .NOT. N_LOSS(NN)%LOSS(2,1)) THEN
+                  N_LOSS(NN)%LOSS(2,1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (LOSS_D(DN%DUCT_INDEX(1),2) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+                  N_LOSS(NN)%LOSS(1,2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (LOSS_D(DN%DUCT_INDEX(1),1) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+                  N_LOSS(NN)%LOSS(1,2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (LOSS_D(DN%DUCT_INDEX(1),2) .AND. .NOT. N_LOSS(NN)%LOSS(2,1)) THEN
+                  N_LOSS(NN)%LOSS(2,1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+            IF (DUCT(DN%DUCT_INDEX(2))%NODE_INDEX(1)==NN) THEN
+               IF (LOSS_D(DN%DUCT_INDEX(2),1) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+                  N_LOSS(NN)%LOSS(1,2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (LOSS_D(DN%DUCT_INDEX(2),2) .AND. .NOT. N_LOSS(NN)%LOSS(2,1)) THEN
+                  N_LOSS(NN)%LOSS(2,1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ELSE
+               IF (LOSS_D(DN%DUCT_INDEX(2),1) .AND. .NOT. N_LOSS(NN)%LOSS(2,1)) THEN
+                  N_LOSS(NN)%LOSS(2,1) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+               IF (LOSS_D(DN%DUCT_INDEX(2),2) .AND. .NOT. N_LOSS(NN)%LOSS(1,2)) THEN
+                  N_LOSS(NN)%LOSS(1,2) = .TRUE.
+                  CHANGE = .TRUE.
+               ENDIF
+            ENDIF
+         ENDIF
       ENDIF
       DUCT_O_LOOP: DO ND=1,DN%N_DUCTS
          IF (ALL(N_LOSS(NN)%LOSS(ND,:)) .AND. ALL(N_LOSS(NN)%LOSS(:,ND))) THEN
