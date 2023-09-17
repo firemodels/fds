@@ -3545,9 +3545,9 @@ END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 !> \brief Checks duct network for minimal loss defintions
 
 SUBROUTINE EXAMINE_LOSSES
-INTEGER :: ND, ND2, ND3, NN
+INTEGER :: ND, ND2, ND3, NN, F_COUNTER
 LOGICAL :: CHANGE
-LOGICAL :: LOSS_D(N_DUCTS,2),LOSS_N(N_DUCTNODES)
+LOGICAL :: LOSS_D(N_DUCTS,2),LOSS_N(N_DUCTNODES),FIXED_D(N_DUCTS)
 TYPE N_LOSS_TEMP
    LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOSS
 END TYPE N_LOSS_TEMP
@@ -3587,17 +3587,18 @@ ENDDO
 DUCTLOOP: DO ND = 1, N_DUCTS
    DU => DUCT(ND)
    ! Fixed flow is equivalent to having losses defined as no pressure solution is required to get the flow.
-   IF (DU%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DU%MASS_FLOW_INITIAL<1.E6_EB .OR. DU%ROUGHNESS > 0._EB) THEN
+   IF (DU%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DU%MASS_FLOW_INITIAL<1.E6_EB) THEN
       LOSS_D(ND,:) = .TRUE.
-      CYCLE
+      FIXED_D(ND) = .TRUE.
    ENDIF
+   IF (DU%ROUGHNESS > 0._EB) LOSS_D(ND,:) = .TRUE.
    IF (DU%FAN_INDEX > 0) THEN
       IF (FAN(DU%FAN_INDEX)%FAN_TYPE==1) THEN
+         FIXED_D(ND) = .TRUE.
          LOSS_D(ND,:) = .TRUE.
       ELSE
          IF (DUCTNODE(DU%NODE_INDEX(1))%N_DUCTS<=2 .AND. DUCTNODE(DU%NODE_INDEX(2))%N_DUCTS<=2) LOSS_D(ND,:) = .TRUE.
       ENDIF
-      CYCLE
    ENDIF
    IF (DU%LOSS(1)>0._EB) LOSS_D(ND,1) = .TRUE.
    IF (DU%LOSS(2)>0._EB) LOSS_D(ND,2) = .TRUE.
@@ -3608,11 +3609,13 @@ DUCTLOOP: DO ND = 1, N_DUCTS
       IF (N_LOSS(DU%NODE_INDEX(1))%LOSS(1,2)) LOSS_D(ND,2) = .TRUE.
    ELSE
       DO ND2 = 1, DN%N_DUCTS
-         IF (DN%DUCT_INDEX(ND2) /= ND) CYCLE
-         IF (ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(:,ND2)) .AND. &
-             ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(ND2,:))) THEN
-            LOSS_D(ND,1) = .TRUE.
-            LOSS_D(ND,2) = .TRUE.
+         IF (DN%DUCT_INDEX(ND2) == ND) THEN
+            IF (ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(:,ND2)) .AND. &
+                ALL(N_LOSS(DU%NODE_INDEX(1))%LOSS(ND2,:))) THEN
+               LOSS_D(ND,1) = .TRUE.
+               LOSS_D(ND,2) = .TRUE.
+               EXIT
+            ENDIF
          ENDIF
       ENDDO
    ENDIF
@@ -3622,16 +3625,17 @@ DUCTLOOP: DO ND = 1, N_DUCTS
       IF (N_LOSS(DU%NODE_INDEX(2))%LOSS(1,2)) LOSS_D(ND,1) = .TRUE.
    ELSE
       DO ND2 = 1, DN%N_DUCTS
-         IF (DN%DUCT_INDEX(ND2) /= ND) CYCLE
-         IF (ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(:,ND2)) .AND. &
-             ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(ND2,:))) THEN
-            LOSS_D(ND,1) = .TRUE.
-            LOSS_D(ND,2) = .TRUE.
+         IF (DN%DUCT_INDEX(ND2) == ND) THEN
+            IF (ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(:,ND2)) .AND. &
+                ALL(N_LOSS(DU%NODE_INDEX(2))%LOSS(ND2,:))) THEN
+               LOSS_D(ND,1) = .TRUE.
+               LOSS_D(ND,2) = .TRUE.
+               ENDIF
+            EXIT
          ENDIF
       ENDDO
    ENDIF
 ENDDO DUCTLOOP
-
 CHANGE = .TRUE.
 CHANGELOOP: DO WHILE (CHANGE)
    CHANGE = .FALSE.
@@ -3772,7 +3776,9 @@ CHANGELOOP: DO WHILE (CHANGE)
             ENDIF
          ENDIF
       ENDIF
+      F_COUNTER = 0
       DUCT_O_LOOP: DO ND=1,DN%N_DUCTS
+         IF (FIXED_D(DN%DUCT_INDEX(ND))) F_COUNTER = F_COUNTER + 1
          IF (ALL(N_LOSS(NN)%LOSS(ND,:)) .AND. ALL(N_LOSS(NN)%LOSS(:,ND))) THEN
             IF (.NOT. LOSS_D(DN%DUCT_INDEX(ND),1)) THEN
                LOSS_D(DN%DUCT_INDEX(ND),1) = .TRUE.
@@ -3822,6 +3828,19 @@ CHANGELOOP: DO WHILE (CHANGE)
             ENDIF
          ENDDO DUCT_I_LOOP
       ENDDO DUCT_O_LOOP
+      IF (F_COUNTER >= DN%N_DUCTS - 1) THEN
+         N_LOSS(NN)%LOSS = .TRUE.
+         IF (.NOT. LOSS_N(NN)) THEN
+            LOSS_N(NN) = .TRUE.
+            CHANGE = .TRUE.
+         ENDIF
+         DO ND = 1,DN%N_DUCTS
+            IF (.NOT. ALL(LOSS_D(DN%DUCT_INDEX(ND),:))) THEN
+               LOSS_D(DN%DUCT_INDEX(ND),:) = .TRUE.
+               CHANGE = .TRUE.
+            ENDIF
+         ENDDO
+      ENDIF
    ENDDO NODELOOP
 ENDDO CHANGELOOP
 
