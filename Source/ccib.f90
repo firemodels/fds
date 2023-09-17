@@ -1671,10 +1671,10 @@ REAL(EB),INTENT(IN) :: DT,CYL_FCT
 REAL(EB),INTENT(OUT):: F_H(NUNKH)
 
 ! Local variables:
-INTEGER :: I,J,K,IROW,IW,IIG,JJG,KKG,IOR,ICFACE,IFACE,JFACE
+INTEGER :: I,J,K,IROW,IW,IIG,JJG,KKG,IOR,ICFACE,IFACE,JFACE,ILH,JLH,KLH,IRC
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
-REAL(EB) :: IDX, AF, VAL
+REAL(EB) :: IDX, AF, VAL, BCV
 
 ! Dummy Assignment.
 VAL=DT
@@ -1797,39 +1797,38 @@ WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
       IF( WC%BOUNDARY_TYPE==NULL_BOUNDARY  .OR. &
           WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY ) CYCLE
       ! Define cell size, normal to WC:
+      ILH    = 0; JLH = 0; KLH = 0
       SELECT CASE (IOR)
       CASE(-1) ! -IAXIS oriented, high face of IIG cell.
-         IDX = 1._EB / DXN(IIG)
-         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
-         VAL = -2._EB*IDX*AF*BXF(JJG,KKG)
+         IDX = RDXN(IIG+ILH); BCV = BXF(JJG,KKG)
+         AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
       CASE( 1) ! +IAXIS oriented, low face of IIG cell.
-         IDX = 1._EB / DXN(IIG-1)
-         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
-         VAL = -2._EB*IDX*AF*BXS(JJG,KKG)
+         ILH = -1; IDX = RDXN(IIG+ILH); BCV = BXS(JJG,KKG)
+         AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
       CASE(-2) ! -JAXIS oriented, high face of JJG cell.
-         IDX = 1._EB / DYN(JJG)
-         AF  =  DX(IIG)*DZ(KKG)
-         VAL = -2._EB*IDX*AF*BYF(IIG,KKG)
+         IDX = RDYN(JJG+JLH); BCV = BYF(IIG,KKG)
+         AF  = DX(IIG)*DZ(KKG)
       CASE( 2) ! +JAXIS oriented, low face of JJG cell.
-         IDX = 1._EB / DYN(JJG-1)
-         AF  =  DX(IIG)*DZ(KKG)
-         VAL = -2._EB*IDX*AF*BYS(IIG,KKG)
+         JLH = -1; IDX = RDYN(JJG+JLH); BCV = BYS(IIG,KKG)
+         AF  = DX(IIG)*DZ(KKG)
       CASE(-3) ! -KAXIS oriented, high face of KKG cell.
-         IDX = 1._EB / DZN(KKG)
+         IDX = RDZN(KKG+KLH); BCV = BZF(IIG,JJG)
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
-         VAL = -2._EB*IDX*AF*BZF(IIG,JJG)
       CASE( 3) ! +KAXIS oriented, low face of KKG cell.
-         IDX = 1._EB / DZN(KKG-1)
+         KLH = -1; IDX = RDZN(KKG+KLH); BCV = BZS(IIG,JJG)
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
-         VAL = -2._EB*IDX*AF*BZS(IIG,JJG)
       END SELECT
-
+      ! Address case of RC face in the boundary:
+      IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+         IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
+         IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+      ENDIF
       ! Row number:
       IROW = CCVAR(IIG,JJG,KKG,UNKH) - ZONE_SOLVE(IPZ)%UNKH_IND(NM_START) ! Local numeration.
       IF (IROW <= 0 .AND. CC_IBM) CALL GET_CC_IROW(IIG,JJG,KKG,IPZ,IROW)
       IF (IROW <= 0) CYCLE
       ! Add to F_H:
-      F_H(IROW) = F_H(IROW) + VAL
+      F_H(IROW) = F_H(IROW) + (-2._EB*IDX*AF*BCV)
 
    ENDIF IF_DIRICHLET
 
@@ -20794,7 +20793,7 @@ INTEGER, OPTIONAL, INTENT(IN) :: ONE_NM
 
 ! Local variables:
 INTEGER :: NM,NM_LO,NM_HI
-INTEGER :: NCELL,ICC,JCC,IFC,IFACE,LOWHIGH,ICF1,ICF2
+INTEGER :: NCELL,ICC,JCC,IFC,IFACE,LOWHIGH,ICF1,ICF2,IRC
 INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,X1AXIS
 
 IF (PRESENT(ONE_NM)) THEN
@@ -20868,35 +20867,50 @@ MAIN_MESH_LOOP : DO NM=NM_LO,NM_HI
             LOWHIGH_TEST=LOW_IND
          END SELECT
 
-         IF (FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) /= CC_CUTCFE) CYCLE GUARD_CUT_CELL_LOOP
-
          ! Copy CCVAR(II,JJ,KK,CC_CGSC) to guard cell:
          ICC = MESHES(NM)%CCVAR(II,JJ,KK,CC_IDCC)
 
-         DO JCC=1,CUT_CELL(ICC)%NCELL
+         IF (FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_CUTCFE) THEN
 
+         DO JCC=1,CUT_CELL(ICC)%NCELL
             ! Loop faces and test:
             DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-
                IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
                ! Which face ?
                LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-
                IF ( CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= CC_FTYPE_CFGAS) CYCLE ! Must Be gasphase cut-face
                IF ( LOWHIGH                              /= LOWHIGH_TEST) CYCLE ! In same side as EWC from guard-cell
                IF ( CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
-
                ICF1    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
                ICF2    = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-
                IF ( LOWHIGH == LOW_IND) THEN ! Cut-face on low side of cut-cell:
                   CUT_FACE(ICF1)%UNKH(HIGH_IND,ICF2) = CUT_CELL(ICC)%UNKH(JCC)
                ELSE ! HIGH
                   CUT_FACE(ICF1)%UNKH(LOW_IND,ICF2) = CUT_CELL(ICC)%UNKH(JCC)
                ENDIF
-
             ENDDO
          ENDDO
+
+         ELSEIF (FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS) > 0) THEN ! RC_FACE
+            IRC = FCVAR(IIF,JJF,KKF,CC_IDRC,X1AXIS)
+            IF(ICC>0) THEN
+               DO JCC=1,CUT_CELL(ICC)%NCELL
+                  ! Loop faces and test:
+                  DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+                     IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+                     ! Which face ?
+                     LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+                     IF ( CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= CC_FTYPE_RCGAS) CYCLE ! Must Be gasphase rc-face
+                     IF ( LOWHIGH                          /= LOWHIGH_TEST) CYCLE ! In same side as EWC from guard-cell
+                     IF ( CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
+                     MESHES(NM)%RC_FACE(IRC)%UNKH(3-LOWHIGH_TEST)  = CUT_CELL(ICC)%UNKH(JCC)
+                  ENDDO
+               ENDDO
+            ELSE
+               MESHES(NM)%RC_FACE(IRC)%UNKH(3-LOWHIGH_TEST)  = CCVAR(II,JJ,KK,CC_UNKH)
+            ENDIF
+         ENDIF
+
       ENDDO GUARD_CUT_CELL_LOOP
    ENDIF ULMAT_IF
 
