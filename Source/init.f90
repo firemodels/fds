@@ -2803,13 +2803,17 @@ PROF_LOOP: DO N=1,N_PROF
       RETURN
    ENDIF
 
-   IF (PF%QUANTITY /= 'TEMPERATURE' .AND. PF%QUANTITY /= 'DENSITY') THEN
+   IF (PF%MATL_ID/='null') THEN
       SUCCESS = .FALSE.
       DO NN=1,SF%N_MATL
-         IF (PF%QUANTITY==SF%MATL_NAME(NN)) SUCCESS = .TRUE.
+         IF (PF%MATL_ID==SF%MATL_NAME(NN)) THEN
+            SUCCESS = .TRUE.
+            EXIT
+         ENDIF
       ENDDO
-      IF (.NOT.SUCCESS) THEN
-         WRITE(LU_ERR,'(A,A,A)') 'ERROR: QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
+      IF (.NOT. SUCCESS) THEN
+         WRITE(LU_ERR,'(A,I3,A,A,A,A,A)') 'ERROR PROFile ',N,'. MATL_ID ',TRIM(PF%MATL_ID),' not part of surface type ',&
+                      TRIM(SF%ID),' at the profile location.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
