@@ -9197,11 +9197,11 @@ To record the material component's density with time, use the output quantity {\
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture.
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
 
-To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
+To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy, use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
 
-Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
+Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
 
 \subsubsection{Back Surface Temperature}
 \label{info:BACK}
@@ -9486,20 +9486,20 @@ It is possible to translate and/or rotate a linear array of devices using parame
 \section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time.
+FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time. A {\ct PROF} can use any solid phase output {\ct QUANTITY} that takes a {\ct DEPTH}. These are identified with the file type ``Pr'' in Table~\ref{info:solidoutputquantities}.
 
 The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a wall cell, the parameters are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a wall cell:
 \begin{lstlisting}
-&PROF ID='T-1', XYZ=..., QUANTITY='TEMPERATURE', IOR=3 /
+&PROF ID='T-1', XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', IOR=3 /
 \end{lstlisting}
 For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
 \begin{lstlisting}
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
-&PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
+&PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
-The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEMPERATURE'} or the total {\ct 'DENSITY'}. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
+The {\ct QUANTITY} is the physical quantity to record. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
 
 There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
@@ -10931,7 +10931,7 @@ $^6$                  \> Requires {\ct REAC\_ID}. \\
 \section{Solid Phase Output Quantities}
 \label{info:solidoutputquantities}
 
-Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, and ``D'' refers to the device file, {\ct CHID\_devc.csv}.
+Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, ``D'' refers to the device file, {\ct CHID\_devc.csv},  and ``pr'' refers to the profile file, {\ct CHID\_prof.csv}.
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
 \caption[Solid phase output quantities]{Solid phase output quantities.}
@@ -10965,8 +10965,8 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                 & \si{W/(m^2.K)}     & B,D          \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$           & B,D          \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
-{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D            \\ \hline
-{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D            \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D,Pr         \\ \hline
+{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D,Pr         \\ \hline
 {\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
@@ -10980,9 +10980,11 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:scaled_burning}             & kW/m$^2$           & B,D          \\ \hline
-{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D            \\ \hline
-{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D            \\ \hline
-{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D            \\ \hline
+{\ct SOLID CONDUCTIVITY}$^4$                    & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D,Pr         \\ \hline
+{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D,Pr         \\ \hline
+{\ct SOLID ENTHALPY}$^4$                        & Section~\ref{info:DEPTH}                      & kJ/m$^3$           & D,Pr         \\ \hline
+{\ct SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
+{\ct SOLID SPECIFIC HEAT}$^4$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
 {\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
 {\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
 {\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$           & B,D          \\ \hline
@@ -11003,6 +11005,7 @@ $^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct S
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
+$^5$                 \> Requires a {\ct MATL\_ID}. \\
 \end{tabbing}
 
 
@@ -12330,6 +12333,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct MATL\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
 \end{longtable}
