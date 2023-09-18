@@ -3454,12 +3454,13 @@ SUBROUTINE RADIATION_FVM
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE TRAN, ONLY : GET_IJK
+USE TYPES, ONLY : GEOMETRY
 USE COMPLEX_GEOMETRY, ONLY : CC_IDRA,CC_CGSC,CC_SOLID
 USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION, GET_MASS_FRACTION
 REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, AZU, AZD, VC, RU, RD, RP, AFD, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,SOOT_MASS_FRACTION, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COS_DL,AILFU, &
-            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL
+            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC
 
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
@@ -3708,8 +3709,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               ALPHA_CC = 1._EB
                IF (CC_IBM) THEN
                   IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  IC = CCVAR(I,J,K,CC_IDCC)
+                  IF (IC>0) ALPHA_CC = CUT_CELL(IC)%ALPHA_CC
                ENDIF
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)                  ! Mass frac of the tracked species
                R_MIXTURE = RSUM(I,J,K)                                                       ! Specific gas constant of the mixture
@@ -3726,7 +3730,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
-                     VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                     VOL = R(I)*DX(I)*DY(J)*DZ(K)*ALPHA_CC
                      RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
                ENDIF
@@ -3766,12 +3770,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+                  ALPHA_CC = 1._EB
                   IF (CC_IBM) THEN
                      IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                     IC = CCVAR(I,J,K,CC_IDCC)
+                     IF (IC>0) ALPHA_CC = CUT_CELL(IC)%ALPHA_CC
                   ENDIF
                   KFST4_GAS(I,J,K) = KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
                   IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
-                     VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                     VOL = R(I)*DX(I)*DY(J)*DZ(K)*ALPHA_CC
                      RAD_Q_SUM_PARTIAL = RAD_Q_SUM_PARTIAL + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM_PARTIAL = KFST4_SUM_PARTIAL + KFST4_GAS(I,J,K)*VOL
                   ENDIF
@@ -4073,7 +4080,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KMAX = KSTART
             ENDIF
 
-            GEOMETRY: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
+            GEOMETRY2: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
                J = 1
                CKLOOP: DO K=KSTART,KEND,KSTEP
                   CILOOP: DO I=ISTART,IEND,ISTEP
@@ -4113,7 +4120,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   ENDDO CILOOP
                ENDDO CKLOOP
 
-            ELSEIF (TWO_D) THEN GEOMETRY  ! Sweep in 2D cartesian geometry
+            ELSEIF (TWO_D) THEN GEOMETRY2  ! Sweep in 2D cartesian geometry
                J = 1
                K2LOOP: DO K=KSTART,KEND,KSTEP
                   I2LOOP: DO I=ISTART,IEND,ISTEP
@@ -4138,7 +4145,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   ENDDO I2LOOP
                ENDDO K2LOOP
 
-            ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
+            ELSE GEOMETRY2  ! Sweep in 3D cartesian geometry
 
                IPROP_LOOP: DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
                                         ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
@@ -4165,7 +4172,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, AILFU, &
                   !$OMP& ILZU, VC, AY, AZ, AXU, AYU, AZU, AXD, AYD, AZD, AFD, &
                   !$OMP& IW, WC, BR, CF, CFA, DLF, A_SUM, AIU_SUM, RAP, &
-                  !$OMP& ICF, INDCF, IADD, IFA )
+                  !$OMP& ICF, INDCF, IADD, IFACE )
 
                   SLICE_LOOP: DO IJK = 1, M_IJK
                      I = IJK_SLICE(1,IJK)
@@ -4244,9 +4251,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            IF (ICF>0) AZD = AZD*CUT_FACE(ICF)%ALPHA_CF
                            IF(FCVAR(I,J,K+IADD,CC_FGSC,KAXIS)==CC_SOLID) AZD = 0._EB
 
+                           ! Temporary fix for cells with no downwind face identified
+                           IF((AXD+AYD+AZD+AFD)<TWO_EPSILON_EB) CYCLE SLICE_LOOP
+
                            ! Adjust volume
-                           ICC = CCVAR(I,J,K,CC_IDCC)
-                           VC = VC*CUT_CELL(ICC)%ALPHA_CC
+                           IC = CCVAR(I,J,K,CC_IDCC)
+                           VC = VC*CUT_CELL(IC)%ALPHA_CC
 
                         ENDIF
                      ENDIF
@@ -4259,19 +4269,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                                      ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
                                      (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
 
-                     ! IF (I==2 .AND. J==10 .AND. K==2 .AND. N==355) THEN
-                     !    print*, 'mesh ',NM, ' angle ',N, IL(I,J,K)
-                     !    print*, AXD, AYD, AZD, AXU, AYU, AZU, AFD
-                     !    print*, DLX(N),DLY(N),DLZ(N)
-                     !    print*,-(1+KSTEP)/2,FCVAR(I,J,K-(1+KSTEP)/2,CC_IDCF,KAXIS),(KSTEP-1)/2,FCVAR(I,J,K+(KSTEP-1)/2,CC_IDCF,KAXIS)
-                     !    IF (NM==2) PRINT*, CUT_FACE(7759)%ALPHA_CF,CUT_FACE(7759)%AREA
-                     ! ENDIF
                   ENDDO SLICE_LOOP
                   !$OMP END PARALLEL DO
 
                ENDDO IPROP_LOOP
 
-            ENDIF GEOMETRY
+            ENDIF GEOMETRY2
 
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
 
