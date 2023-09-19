@@ -3466,7 +3466,7 @@ INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, NOM, ARRAY_INDEX,NRA, &
             IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL
-INTEGER  :: IADD,IFA,IFACE,INDCF
+INTEGER  :: IADD,IFACE,INDCF
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART_SINGLE,DLF,DLA(3),TSI,TMP_EXTERIOR,TEMP_ORIENTATION(3)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
@@ -3492,8 +3492,6 @@ CHARACTER(20) :: FORMT
 ! Variables added for the WSGG model
 REAL(EB) :: X_H2O, X_CO2, MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
-
-REAL(EB) :: IL1
 
 ALLOCATE(Z_ARRAY(N_TRACKED_SPECIES))
 
@@ -4202,11 +4200,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AYU = AY; AYD = AY
                      AZU = AZ; AZD = AZ
 
+                     AILFU = 0._EB; AFD = 0._EB
+
                      ! Cut face contributions
                      IF (CC_IBM) THEN
                         IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) CYCLE SLICE_LOOP
-                        AILFU = 0._EB; AFD = 0._EB
-
                         INDCF = CCVAR(I,J,K,CC_IDCF)
                         IF (INDCF>0) THEN ! otherwise can assume CC_GAS?
                            CF => CUT_FACE(INDCF)
