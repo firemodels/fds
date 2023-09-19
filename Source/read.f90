@@ -14161,9 +14161,13 @@ PROF_LOOP: DO NN=1,N_PROFO
 
    CELL_CENTERED = .FALSE.
    FORMAT_INDEX = 1
-   IOR  = 0
+   FYI = 'null'
+   ID = 'null'
    INIT_ID = 'null'
+   IOR  = 0
    MATL_ID = 'null'
+   QUANTITY = 'null'
+   XYZ = 1.E10_EB
    WRITE(ID,'(A,I0)') 'PROFILE ',N
 
    CALL CHECKREAD('PROF',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
@@ -14210,6 +14214,8 @@ PROF_LOOP: DO NN=1,N_PROFO
       IF (MESH_NUMBER==0) THEN  ! No meshes have been found. Throw out this PROFile.
          N      = N-1
          N_PROF = N_PROF-1
+         WRITE(MESSAGE,'(A,I0,A)') 'WARNING: PROF ',NN,' is not located in any MESH.'
+         IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          CYCLE PROF_LOOP
       ENDIF
    ENDIF
