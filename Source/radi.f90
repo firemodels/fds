@@ -3494,7 +3494,6 @@ REAL(EB) :: X_H2O, X_CO2, MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
 
 REAL(EB) :: IL1
-! INTEGER  :: ICC,ILO,IHI,JLO,JHI,KLO,KHI,X1
 
 ALLOCATE(Z_ARRAY(N_TRACKED_SPECIES))
 
@@ -3704,12 +3703,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ELSEIF (WSGG_MODEL) THEN WIDE_BAND_MODEL_IF
 
+      ALPHA_CC = 1._EB
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-               ALPHA_CC = 1._EB
                IF (CC_IBM) THEN
+                  ALPHA_CC = 1._EB
                   IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
                   IC = CCVAR(I,J,K,CC_IDCC)
                   IF (IC>0) ALPHA_CC = CUT_CELL(IC)%ALPHA_CC
@@ -3759,18 +3759,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
          ! Only apply the correction to KFST4_GAS for gray gas model
 
-         !$OMP PARALLEL PRIVATE(RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL) SHARED(RAD_Q_SUM,KFST4_SUM)
+         !$OMP PARALLEL PRIVATE(RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC) SHARED(RAD_Q_SUM,KFST4_SUM)
 
          RAD_Q_SUM_PARTIAL = 0._EB
          KFST4_SUM_PARTIAL = 0._EB
+         ALPHA_CC = 1._EB
 
-         !$OMP DO PRIVATE(VOL)
+         !$OMP DO PRIVATE(VOL,IC)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-                  ALPHA_CC = 1._EB
                   IF (CC_IBM) THEN
+                     ALPHA_CC = 1._EB
                      IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
                      IC = CCVAR(I,J,K,CC_IDCC)
                      IF (IC>0) ALPHA_CC = CUT_CELL(IC)%ALPHA_CC
@@ -4226,20 +4227,20 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            IADD= -(1+ISTEP)/2 ! upwind
                            ICF = FCVAR(I+IADD,J,K,CC_IDCF,IAXIS)
                            IF (ICF>0) AXU = AXU*CUT_FACE(ICF)%ALPHA_CF
-                           IF(FCVAR(I+IADD,J,K,CC_FGSC,KAXIS)==CC_SOLID) AXU = 0._EB
+                           IF(FCVAR(I+IADD,J,K,CC_FGSC,IAXIS)==CC_SOLID) AXU = 0._EB
                            IADD= (ISTEP-1)/2 ! downwind
                            ICF = FCVAR(I+IADD,J,K,CC_IDCF,IAXIS)
                            IF (ICF>0) AXD = AXD*CUT_FACE(ICF)%ALPHA_CF
-                           IF(FCVAR(I+IADD,J,K,CC_FGSC,KAXIS)==CC_SOLID) AXD = 0._EB
+                           IF(FCVAR(I+IADD,J,K,CC_FGSC,IAXIS)==CC_SOLID) AXD = 0._EB
                            ! Y axis
                            IADD= -(1+JSTEP)/2 ! upwind
                            ICF = FCVAR(I,J+IADD,K,CC_IDCF,JAXIS)
                            IF (ICF>0) AYU = AYU*CUT_FACE(ICF)%ALPHA_CF
-                           IF(FCVAR(I,J+IADD,K,CC_FGSC,KAXIS)==CC_SOLID) AYU = 0._EB
+                           IF(FCVAR(I,J+IADD,K,CC_FGSC,JAXIS)==CC_SOLID) AYU = 0._EB
                            IADD= (JSTEP-1)/2 ! downwind
                            ICF = FCVAR(I,J+IADD,K,CC_IDCF,JAXIS)
                            IF (ICF>0) AYD = AYD*CUT_FACE(ICF)%ALPHA_CF
-                           IF(FCVAR(I,J+IADD,K,CC_FGSC,KAXIS)==CC_SOLID) AYD = 0._EB
+                           IF(FCVAR(I,J+IADD,K,CC_FGSC,JAXIS)==CC_SOLID) AYD = 0._EB
                            ! Z axis
                            IADD= -(1+KSTEP)/2 ! upwind
                            ICF = FCVAR(I,J,K+IADD,CC_IDCF,KAXIS)
@@ -4249,9 +4250,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            ICF = FCVAR(I,J,K+IADD,CC_IDCF,KAXIS)
                            IF (ICF>0) AZD = AZD*CUT_FACE(ICF)%ALPHA_CF
                            IF(FCVAR(I,J,K+IADD,CC_FGSC,KAXIS)==CC_SOLID) AZD = 0._EB
-
-                           ! Temporary fix for cells with no downwind face identified
-                           IF((AXD+AYD+AZD+AFD)<TWO_EPSILON_EB) CYCLE SLICE_LOOP
 
                            ! Adjust volume
                            IC = CCVAR(I,J,K,CC_IDCC)
@@ -4331,45 +4329,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO WALL_LOOP3
             !$OMP END DO
             !$OMP END PARALLEL
-
-            ! IF (CC_IBM) THEN
-               ! ! This loop reassigns to cut-cell cartesian cells the value of IL from the gas region in a simple manner.
-               ! CUT_CELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-               !    K = CUT_CELL(ICC)%IJK(KAXIS); KLO=K-1; KHI=K+1
-               !    J = CUT_CELL(ICC)%IJK(JAXIS); JLO=J-1; JHI=J+1
-               !    I = CUT_CELL(ICC)%IJK(IAXIS); ILO=I-1; IHI=I+1
-               !    ! Drop if cut-cell is same as cartesian cell.
-               !    IF( SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL)) > 0.99_EB*DX(I)*DY(J)*DZ(K) ) CYCLE CUT_CELL_DO
-               !    IF (K==1    .OR. FCVAR(I,J,K-1,CC_FGSC,KAXIS)==CC_SOLID) KLO=K
-               !    IF (K==KBAR .OR. FCVAR(I,J,K  ,CC_FGSC,KAXIS)==CC_SOLID) KHI=K
-               !    IF (J==1    .OR. FCVAR(I,J-1,K,CC_FGSC,JAXIS)==CC_SOLID) JLO=J
-               !    IF (J==JBAR .OR. FCVAR(I,J  ,K,CC_FGSC,JAXIS)==CC_SOLID) JHI=J
-               !    IF (I==1    .OR. FCVAR(I-1,J,K,CC_FGSC,IAXIS)==CC_SOLID) ILO=I
-               !    IF (I==IBAR .OR. FCVAR(I  ,J,K,CC_FGSC,IAXIS)==CC_SOLID) IHI=I
-               !    IL1 = 0._EB
-               !    DO KK=KLO,KHI
-               !      DO JJ=JLO,JHI
-               !        II_DO : DO II=ILO,IHI
-               !          IF(CCVAR(II,JJ,KK,CC_CGSC)/=CC_GASPHASE) CYCLE II_DO
-               !          IL1   = MAX(IL1,IL(II,JJ,KK))
-               !        ENDDO II_DO
-               !      ENDDO
-               !    ENDDO
-               !    IL(I,J,K) = MAX(IL(I,J,K),IL1)
-               ! ENDDO CUT_CELL_DO
-
-               ! IL_F= 0._EB
-               ! RAD_CFACE_DO : DO ICR=1,MESHES(NM)%N_RAD_CFACE_CELLS_DIM
-               !    RCFACE_LOOP : DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-               !       ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
-               !       IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE RCFACE_LOOP
-               !       II =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(2,IFA); IF(II<1) II=1; IF(II>IBAR) II=IBAR
-               !       JJ =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(3,IFA); IF(JJ<1) JJ=1; IF(JJ>JBAR) JJ=JBAR
-               !       KK =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(4,IFA); IF(KK<1) KK=1; IF(KK>KBAR) KK=KBAR
-               !       X1 =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(5,IFA)
-               !       IL_F(ICF) = IL_F(ICF) + IL(II,JJ,KK)*CFACE(ICF)%NVEC(X1)**2*RAD_CFACE(ICR)%INT_FACTOR(IFA)
-               !    ENDDO RCFACE_LOOP
-               ! ENDDO RAD_CFACE_DO
 
             CFACE_LOOP2: DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
                CFA => CFACE(ICF)
