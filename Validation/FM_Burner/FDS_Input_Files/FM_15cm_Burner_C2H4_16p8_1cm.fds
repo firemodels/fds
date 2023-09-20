@@ -19,7 +19,7 @@
 
 &SURF ID='side wall', COLOR='LIGHT BLUE', DEFAULT=T /
 &SURF ID='wall', COLOR='GRAY'/
-&SURF ID='burner', HRRPUA=826.6, COLOR='RED', BLOWING=T /
+&SURF ID='burner', HRRPUA=1017.6, COLOR='RED', BLOWING=T /
 &SURF ID='coflow', COLOR='BLUE', VEL=-0.041 /
 
 ! GEOM Vertices: 294 | Faces: 576
