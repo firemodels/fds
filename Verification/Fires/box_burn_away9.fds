@@ -41,19 +41,13 @@ with a density of 50 kg/m3 and 20% residue. The mass of gas pyrolyzed should be 
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
       HT3D                 = T 
-      LAYER_DIVIDE=1.5
+      LAYER_DIVIDE         = 1.5
       MATL_ID              = 'FABRIC'
       THICKNESS            = 0.002 /
 
 &OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB', MATL_ID='FOAM' /
 
 &SURF ID='HOT', TMP_FRONT=1100., COLOR='RED' /
-
-&DUMP DT_PROF=5.0 /
-&PROF XYZ=0.30,0.55,0.55, QUANTITY='TEMPERATURE', IOR=-1 /
-&PROF XYZ=0.30,0.55,0.55, QUANTITY='FOAM', IOR=-1 /
-&PROF XYZ=0.30,0.55,0.55, QUANTITY='ASH', IOR=-1 /
-&PROF XYZ=0.30,0.55,0.55, QUANTITY='FABRIC', IOR=-1 /
 
 &VENT PBX=-0.3, SURF_ID='HOT' /
 &VENT PBX= 1.7, SURF_ID='HOT' /
