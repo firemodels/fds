@@ -3421,13 +3421,13 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{FDS}$. The node pressure at time step n+1,$P_{node}^{n+1}$ , is taken as:
 \be
-P_{node}^{n+1}=P_{FDS} \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{node}^n \; {\ct HVAC\_PRES\_RELAX}
+P_{node}^{n+1}=P_{node}^n \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{FDS}^{n+1} \; {\ct HVAC\_PRES\_RELAX}
 \ee
-Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes. 
 
-The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. Note this means a sealed room must have a {\ct ZONE} assigned to it.
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. 
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3543,7 +3543,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
 
-Note that a {\ct VENT} being used for an HVAC system should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. If you need to turn on or off a {\ct VENT} connected to an HVAC system, use a damper in the duct connected to {\ct VENT}.
+Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -4653,7 +4653,7 @@ $\overline{c_p}$                     \>  Average heat capacity (kJ/(mol$\cdot$K)
 \end{tabbing}
 
 \begin{table}[!ht]
-\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels.}
+\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels, from Table~17.3 of Ref.~\cite{SFPE:Beyler}.}
 \vspace{0.1in}
 \label{tab:CFT}
 \begin{center}
@@ -7023,11 +7023,11 @@ WRITE(LU_VEG_IN) MASS_PER_VOLUME
 WRITE(LU_VEG_IN) VCX,VCY,VCZ
 WRITE(LU_VEG_IN) MASS_PER_VOLUME
 \end{lstlisting}
-The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is uesd to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordiantes of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
+The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is used to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordinates of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
 
-FDS effectively creats a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
+FDS effectively creates a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
 
-Additionaly, the {\ct BULK\_DENSITY\_FILE} can be scaled using a {\ct BULK\_DENSITY\_FACTOR}. The value of this input, also provided on the {\ct INIT} line, will be multiplied by all values in the {\ct BULK\_DENSITY\_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same {\ct BULK\_DENSITY\_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
+Additionally, the {\ct BULK\_DENSITY\_FILE} can be scaled using a {\ct BULK\_DENSITY\_FACTOR}. The value of this input, also provided on the {\ct INIT} line, will be multiplied by all values in the {\ct BULK\_DENSITY\_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same {\ct BULK\_DENSITY\_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -9154,11 +9154,11 @@ To record the material component's density with time, use the output quantity {\
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture.
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
 
-To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
+To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy, use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
 
-Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
+Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
 
 \subsubsection{Back Surface Temperature}
 \label{info:BACK}
@@ -9181,7 +9181,7 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. A {\ct SPATIAL\_STATISTIC} can only be used for a gas phase {\ct QUANTITY} in Table~\ref{info:gasoutputquantities} with both D and S in the file type column or for a solid phase {\ct QUANTITY}  in Table~\ref{info:solidoutputquantities} with both D and B in the file type column.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
@@ -9443,20 +9443,20 @@ It is possible to translate and/or rotate a linear array of devices using parame
 \section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time.
+FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time. A {\ct PROF} can use any solid phase output {\ct QUANTITY} that takes a {\ct DEPTH}. These are identified with the file type ``Pr'' in Table~\ref{info:solidoutputquantities}.
 
 The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a wall cell, the parameters are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a wall cell:
 \begin{lstlisting}
-&PROF ID='T-1', XYZ=..., QUANTITY='TEMPERATURE', IOR=3 /
+&PROF ID='T-1', XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', IOR=3 /
 \end{lstlisting}
 For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
 \begin{lstlisting}
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
-&PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
+&PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
-The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEMPERATURE'} or the total {\ct 'DENSITY'}. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
+The {\ct QUANTITY} is the physical quantity to record. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries. The {\ct ID} is an optional input which, if provided, is used in the file header.
 
 There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
@@ -10888,7 +10888,7 @@ $^6$                  \> Requires {\ct REAC\_ID}. \\
 \section{Solid Phase Output Quantities}
 \label{info:solidoutputquantities}
 
-Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, and ``D'' refers to the device file, {\ct CHID\_devc.csv}.
+Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, ``D'' refers to the device file, {\ct CHID\_devc.csv},  and ``pr'' refers to the profile file, {\ct CHID\_prof.csv}.
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
 \caption[Solid phase output quantities]{Solid phase output quantities.}
@@ -10922,8 +10922,8 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                 & \si{W/(m^2.K)}     & B,D          \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$           & B,D          \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
-{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D            \\ \hline
-{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D            \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D,Pr         \\ \hline
+{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D,Pr         \\ \hline
 {\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
 {\ct MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
@@ -10937,9 +10937,11 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct REFERENCE\_HEAT\_FLUX}                     & Section~\ref{info:scaled_burning}             & kW/m$^2$           & B,D          \\ \hline
-{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D            \\ \hline
-{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D            \\ \hline
-{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D            \\ \hline
+{\ct SOLID CONDUCTIVITY}$^4$                    & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D,Pr         \\ \hline
+{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D,Pr         \\ \hline
+{\ct SOLID ENTHALPY}$^4$                        & Section~\ref{info:DEPTH}                      & kJ/m$^3$           & D,Pr         \\ \hline
+{\ct SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
+{\ct SOLID SPECIFIC HEAT}$^4$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
 {\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
 {\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
 {\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$           & B,D          \\ \hline
@@ -10960,6 +10962,7 @@ $^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct S
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
+$^5$                 \> Requires a {\ct MATL\_ID}. \\
 \end{tabbing}
 
 
@@ -12285,6 +12288,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct MATL\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
 \end{longtable}

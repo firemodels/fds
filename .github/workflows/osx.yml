@@ -46,7 +46,7 @@ jobs:
         shell: bash
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_macos.sh
@@ -141,7 +141,7 @@ jobs:
         shell: bash
         
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install openmpi
       run: |
         brew install open-mpi

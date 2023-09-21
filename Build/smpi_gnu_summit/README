@@ -27,7 +27,7 @@ and replace "YOUR_USER" by your username in Summit. Add the following line in yo
 
 source ~/.bash_profile
 
-then log out of Polaris and login again.
+then log out of Summit and login again.
 
 2. PETSc:
 First setup your git username, and preferences.
