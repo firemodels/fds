@@ -3669,6 +3669,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               IF (CC_IBM) THEN
+                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+               ENDIF
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
                KAPPA_GAS(I,J,K) = GET_KAPPA(ZZ_GET,TMP(I,J,K),IBND)
             ENDDO
@@ -3689,6 +3692,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               IF (CC_IBM) THEN
+                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+               ENDIF
                BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
             ENDDO
@@ -3701,6 +3707,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               IF (CC_IBM) THEN
+                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+               ENDIF
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)                  ! Mass frac of the tracked species
                R_MIXTURE = RSUM(I,J,K)                                                       ! Specific gas constant of the mixture
                X_H2O = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)
@@ -3730,6 +3739,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               IF (CC_IBM) THEN
+                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+               ENDIF
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
             ENDDO
          ENDDO
@@ -3753,6 +3765,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+                  IF (CC_IBM) THEN
+                     IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  ENDIF
                   KFST4_GAS(I,J,K) = KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
                   IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
@@ -3776,6 +3791,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+                  IF (CC_IBM) THEN
+                     IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  ENDIF
                   IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
                ENDDO
             ENDDO
@@ -3792,6 +3810,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+                  IF (CC_IBM) THEN
+                     IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  ENDIF
                   KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
                ENDDO
             ENDDO
@@ -3821,6 +3842,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+                  IF (CC_IBM) THEN
+                     IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  ENDIF
                   IF (ZZ(I,J,K,N) < TWO_EPSILON_EB) CYCLE
                   NCSDROP = 1.5_EB*ZZ(I,J,K,N)*RHO(I,J,K)/ &
                             (SPECIES(SPECIES_MIXTURE(N)%SINGLE_SPEC_INDEX)%DENSITY_LIQUID*SPECIES_MIXTURE(N)%MEAN_DIAMETER)
