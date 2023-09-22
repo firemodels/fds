@@ -1207,15 +1207,6 @@ TYPE CC_CUTFACE_TYPE
 
 END TYPE CC_CUTFACE_TYPE
 
-!>brief Data structure type to define radiation CFACEs in Cartesian faces and their relation to surrounding boundary cut-faces.
-
-TYPE RAD_CFACE_TYPE
-   INTEGER                              :: N_ASSIGNED_CFACES_RADI=0 !< Number of boundary faces assigned to this cartesian face.
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI     !< List of indexes for assigned CFACEs.
-   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_FACTOR               !< Interpolation factor that affects projected areas.
-END TYPE RAD_CFACE_TYPE
-
-
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
