@@ -395,9 +395,7 @@ TYPE WALL_TYPE
    INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
    INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
-   INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
-   INTEGER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
    INTEGER :: VENT_INDEX=0            !< Index of the VENT containing this cell
    INTEGER :: JD11_INDEX=0
    INTEGER :: JD12_INDEX=0
@@ -424,6 +422,8 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: JJO_MAX                                 !< Maximum J index of adjacent cell in other mesh
    INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
    INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
+   INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN         !< Flux-limited \f$ \int \rho Y_\alpha u_n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVNS        !< Estimated value of FVN at next time step
