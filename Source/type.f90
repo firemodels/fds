@@ -729,6 +729,7 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Tracked mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_P    !< Primitive mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_M    !< Primitive mass stoichiometric coefficient for gas to solid conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE_P !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
@@ -761,55 +762,54 @@ END TYPE RAMP_ID_TYPE
 
 TYPE SURFACE_TYPE
 
-   REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
-   REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
-   REAL(EB) :: TMP_BACK =-1._EB                          !< Specified back surface temperture (K)
-   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                  !< Specified initial front surface temperture (K)
-   REAL(EB) :: TMP_GAS_FRONT=-1._EB                      !< Specified front surface gas temperature (K)
-   REAL(EB) :: TMP_GAS_BACK=-1._EB                       !< Specified back surface gas temperature (K)
-   REAL(EB) :: TMP_INNER=-1._EB                          !< Specified inside temperature (K)
-   REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
-   REAL(EB) :: VEL_GRAD
-   REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
-   REAL(EB) :: Z0                                        !< Reference height for boundary layer profile (m)
-   REAL(EB) :: Z_0                                       !< Surface roughness (m)
-   REAL(EB) :: NEAR_WALL_EDDY_VISCOSITY                  !< Used with CONSTANT KINEMATIC EDDY VISCOSITY (m2/s)
-   REAL(EB) :: CONVECTIVE_HEAT_FLUX                      !< Specified convective heat flux at surface (W/m2)
-   REAL(EB) :: NET_HEAT_FLUX                             !< Specified net heat flux at surface (W/m2)
-   REAL(EB) :: VOLUME_FLOW                               !< Specified volume flow (m3/s)
-   REAL(EB) :: HRRPUA                                    !< Specified Heat Release Rate Per Unit Volume (W/m3)
-   REAL(EB) :: MLRPUA                                    !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
-   REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
-   REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
-   REAL(EB) :: CELL_SIZE
-   REAL(EB) :: E_COEFFICIENT
-   REAL(EB) :: TEXTURE_WIDTH
-   REAL(EB) :: TEXTURE_HEIGHT
-   REAL(EB) :: THICKNESS
-   REAL(EB) :: EXTERNAL_FLUX
-   REAL(EB) :: DXF
-   REAL(EB) :: DXB
-   REAL(EB) :: MASS_FLUX_TOTAL
+   REAL(EB) :: AREA_MULTIPLIER=1._EB                   !< Factor for manual surface area adjustment
+   REAL(EB) :: TMP_FRONT=-1._EB                        !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_BACK =-1._EB                        !< Specified back surface temperture (K)
+   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                !< Specified initial front surface temperture (K)
+   REAL(EB) :: TMP_GAS_FRONT=-1._EB                    !< Specified front surface gas temperature (K)
+   REAL(EB) :: TMP_GAS_BACK=-1._EB                     !< Specified back surface gas temperature (K)
+   REAL(EB) :: TMP_INNER=-1._EB                        !< Specified inside temperature (K)
+   REAL(EB) :: VEL                                     !< Specified normal velocity (m/s)
+   REAL(EB) :: VEL_GRAD                                !< Specified surface normal velocity gradient (1/s)
+   REAL(EB) :: PLE                                     !< Exponent for boundary layer velocity profile
+   REAL(EB) :: Z0                                      !< Reference height for boundary layer profile (m)
+   REAL(EB) :: Z_0                                     !< Surface roughness (m)
+   REAL(EB) :: NEAR_WALL_EDDY_VISCOSITY                !< Used with CONSTANT KINEMATIC EDDY VISCOSITY (m2/s)
+   REAL(EB) :: CONVECTIVE_HEAT_FLUX                    !< Specified convective heat flux at surface (W/m2)
+   REAL(EB) :: NET_HEAT_FLUX                           !< Specified net heat flux at surface (W/m2)
+   REAL(EB) :: VOLUME_FLOW                             !< Specified volume flow (m3/s)
+   REAL(EB) :: HRRPUA                                  !< Specified Heat Release Rate Per Unit Volume (W/m3)
+   REAL(EB) :: MLRPUA                                  !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
+   REAL(EB) :: T_IGN                                   !< Specified ignition time (s)
+   REAL(EB) :: SURFACE_DENSITY                         !< Mass per unit area (kg/m2)
+   REAL(EB) :: CELL_SIZE                               !< Specified constant cell size (m)
+   REAL(EB) :: E_COEFFICIENT                           !< Defines decay of fire as a function of delivered density
+   REAL(EB) :: TEXTURE_WIDTH                           !< Smokeview parameter for scaling the width of a texture map
+   REAL(EB) :: TEXTURE_HEIGHT                          !< Smokeview parameter for scaling the height of a texture map
+   REAL(EB) :: THICKNESS                               !< Total surface thickness (m)
+   REAL(EB) :: EXTERNAL_FLUX                           !< Specified external radiant flux onto the surface (kW/m2)
+   REAL(EB) :: DXF                                     !< Gas cell size normal to surface front (m)
+   REAL(EB) :: DXB                                     !< Gas cell size normal to surface back (m)
+   REAL(EB) :: MASS_FLUX_TOTAL                         !< Specified total extraction mass flux (kg/m2/s)
    REAL(EB) :: PARTICLE_MASS_FLUX
-   REAL(EB) :: EMISSIVITY
-   REAL(EB) :: MAX_PRESSURE
-   REAL(EB) :: TMP_IGN
-   REAL(EB) :: TMP_EXT
-   REAL(EB) :: H_V
-   REAL(EB) :: LAYER_DIVIDE
-   REAL(EB) :: ROUGHNESS
-   REAL(EB) :: LENGTH=-1._EB
-   REAL(EB) :: WIDTH=-1._EB
-   REAL(EB) :: DT_INSERT
-   REAL(EB) :: H_FIXED=-1._EB
-   REAL(EB) :: H_FIXED_B=-1._EB
-   REAL(EB) :: HM_FIXED=-1._EB
-   REAL(EB) :: EMISSIVITY_BACK
-   REAL(EB) :: CONV_LENGTH
-   REAL(EB) :: XYZ(3)
-   REAL(EB) :: FIRE_SPREAD_RATE
-   REAL(EB) :: MINIMUM_LAYER_THICKNESS
-   REAL(EB) :: INNER_RADIUS=0._EB
+   REAL(EB) :: EMISSIVITY                              !< Frontside emissivity
+   REAL(EB) :: TMP_IGN                                 ! Temperature when surface ignites (K)
+   REAL(EB) :: TMP_EXT                                 ! Temperature when surface stops burning (K)
+   REAL(EB) :: H_V                                     ! Heat of vaporization of the surface (kJ/kg)
+   REAL(EB) :: LAYER_DIVIDE                            ! Layer boundary for pyrolzates being released at the front or backside
+   REAL(EB) :: ROUGHNESS                               ! Surface sand grain roughness (m)
+   REAL(EB) :: LENGTH=-1._EB                           ! Length used particle area
+   REAL(EB) :: WIDTH=-1._EB                            ! Width used for particle area
+   REAL(EB) :: DT_INSERT                               ! Time between particle insertions from the surface (s)
+   REAL(EB) :: H_FIXED=-1._EB                          ! Frontside heat transfer coefficient (W/m/K)
+   REAL(EB) :: H_FIXED_B=-1._EB                        ! Backside heat transfer coefficient (W/m/K)
+   REAL(EB) :: HM_FIXED=-1._EB                         ! Frontside mass transfer coefficient (m/s)
+   REAL(EB) :: EMISSIVITY_BACK                         ! Backside emissivity
+   REAL(EB) :: CONV_LENGTH                             ! Length used in heat transfer correlations
+   REAL(EB) :: XYZ(3)                                  ! Starting point for a spreading fire
+   REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
+   REAL(EB) :: MINIMUM_LAYER_THICKNESS                 ! Smallest layer size before layer is removed (m)
+   REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
    REAL(EB) :: VEL_BULK
    REAL(EB) :: VEL_PART
@@ -817,25 +817,27 @@ TYPE SURFACE_TYPE
    REAL(EB) :: DRAG_COEFFICIENT=2.8_EB
    REAL(EB) :: SHAPE_FACTOR=0.25_EB
    REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
-   REAL(EB) :: DELTA_TMP_MAX=10._EB
+   REAL(EB) :: DELTA_TMP_MAX=10._EB                    !< Maximum wall node temperature change before reducining wall timestep (K)
    REAL(EB) :: BURN_DURATION=1.E6_EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB
-   REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB
-   REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)
+   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB              !< Reference flux for the flux scaling pyrolysis model (kW/m2)
+   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB !< Averaging time interval for computed flux for flux scaling model (s)
+   REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB         !< Minimum computed flux for input into scaling model (kW/m2)
+   REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)   !< Maximum computed flux for input into scaling model (kW/m2)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
    REAL(EB) :: SWELL_RATIO=1._EB
-   REAL(EB) :: NUSSELT_C0=-1._EB
-   REAL(EB) :: NUSSELT_C1=-1._EB
-   REAL(EB) :: NUSSELT_C2=-1._EB
-   REAL(EB) :: NUSSELT_M=-1._EB
+   REAL(EB) :: NUSSELT_C0=-1._EB                       !< Constant term for user defined HTC correlation
+   REAL(EB) :: NUSSELT_C1=-1._EB                       !< Re multiplier term for user defined HTC correlation
+   REAL(EB) :: NUSSELT_C2=-1._EB                       !< Re adjustment before Pr multiplication for user defined HTC correlation
+   REAL(EB) :: NUSSELT_M=-1._EB                        !< Re exponent for user defined HTC correlation
    REAL(EB) :: EMBER_POWER_MEAN=-1._EB
    REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
+   REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
+   REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,ADJUST_BURN_RATE,DDSUM,SMALLEST_CELL_SIZE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE
    TYPE(RAMP_ID_TYPE),  ALLOCATABLE, DIMENSION(:) :: RAMP
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB) :: TRANSPARENCY
@@ -1194,15 +1196,6 @@ TYPE CC_CUTFACE_TYPE
 
 END TYPE CC_CUTFACE_TYPE
 
-!>brief Data structure type to define radiation CFACEs in Cartesian faces and their relation to surrounding boundary cut-faces.
-
-TYPE RAD_CFACE_TYPE
-   INTEGER                              :: N_ASSIGNED_CFACES_RADI=0 !< Number of boundary faces assigned to this cartesian face.
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI     !< List of indexes for assigned CFACEs.
-   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_FACTOR               !< Interpolation factor that affects projected areas.
-END TYPE RAD_CFACE_TYPE
-
-
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
@@ -1486,8 +1479,8 @@ TYPE (ISOSURFACE_FILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ISOSURFACE_FIL
 
 TYPE PROFILE_TYPE
    REAL(EB) :: X,Y,Z
-   INTEGER  :: IOR=0,WALL_INDEX=0,LP_TAG=0,ORDINAL,MESH,FORMAT_INDEX=1,PART_CLASS_INDEX=-1
-   CHARACTER(LABEL_LENGTH) :: ID='null',QUANTITY='TEMPERATURE',INIT_ID='null'
+   INTEGER  :: IOR=0,WALL_INDEX=0,LP_TAG=0,ORDINAL,MESH,FORMAT_INDEX=1,PART_CLASS_INDEX=-1,QUANTITY_INDEX
+   CHARACTER(LABEL_LENGTH) :: ID='null',QUANTITY='TEMPERATURE',INIT_ID='null',MATL_ID='null'
    LOGICAL :: CELL_CENTERED=.FALSE.
 END TYPE PROFILE_TYPE
 
