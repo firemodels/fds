@@ -8507,7 +8507,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                                                 TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                         ENDIF
-                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)*RN%HEAT_OF_COMBUSTION
+                        SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)*RN%HOC_COMPLETE
                         FUEL_MF = FUEL_MF + SF%MASS_FRACTION(NS)
                      ENDIF
                   ENDIF
