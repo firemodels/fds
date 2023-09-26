@@ -223,6 +223,9 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: N_LAYERS=0       !< Number of material layers
    INTEGER :: N_MATL=0         !< Number of materials
    INTEGER :: N_LPC=0          !< Number of Lagrangian Particle Classes
+   INTEGER :: BACK_INDEX=0     !< WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0      !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0      !< SURF_INDEX on back side of obstruction or exterior wall cell
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
@@ -391,9 +394,6 @@ TYPE WALL_TYPE
    INTEGER :: B2_INDEX=0              !< Index within the array BOUNDARY_PROP2
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
-   INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: VENT_INDEX=0            !< Index of the VENT containing this cell
@@ -441,9 +441,6 @@ TYPE THIN_WALL_TYPE
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
    INTEGER :: B1_INDEX=0              !< Index within the array BOUNDARY_PROP1
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
-   INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
@@ -1224,8 +1221,6 @@ TYPE CFACE_TYPE
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: VENT_INDEX=0
-   INTEGER :: BACK_MESH=0
-   INTEGER :: BACK_INDEX=0
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11          !< First index pointing to CUT_FACE array for this CFACE.
    INTEGER :: CUT_FACE_IND2=-11          !< Second index pointing to CUT_FACE array for this CFACE.
