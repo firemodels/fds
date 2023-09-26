@@ -80,17 +80,17 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       SELECT CASE(IOR)
          CASE( 1)
-            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + WC%DUNDT)
+            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + EWC%DUNDT)
          CASE(-1)
-            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - WC%DUNDT)
+            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - EWC%DUNDT)
          CASE( 2)
-            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + WC%DUNDT)
+            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + EWC%DUNDT)
          CASE(-2)
-            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - WC%DUNDT)
+            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - EWC%DUNDT)
          CASE( 3)
-            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + WC%DUNDT)
+            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + EWC%DUNDT)
          CASE(-3)
-            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - WC%DUNDT)
+            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - EWC%DUNDT)
       END SELECT
    ENDIF IF_NEUMANN
 
@@ -1039,7 +1039,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! Compute velocity difference
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
-   WC%VEL_ERR_NEW = VELOCITY_ERROR
+   B1%VEL_ERR_NEW = VELOCITY_ERROR
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(B1%RDN*DT)
 
    ! Save maximum velocity error

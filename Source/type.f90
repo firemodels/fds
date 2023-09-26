@@ -293,6 +293,8 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
    REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident heat flux for scaling (W/m2)
+   REAL(EB) :: Q_LEAK=0._EB          !< Heat production of leaking gas (W/m3)
+   REAL(EB) :: VEL_ERR_NEW=0._EB     !< Velocity mismatch at mesh or solid boundary (m/s)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
@@ -315,6 +317,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
+   REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
 
    INTEGER  :: SURF_INDEX=-1         !< Surface index
 
@@ -382,11 +385,6 @@ END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 TYPE WALL_TYPE
 
-   REAL(EB) :: DUNDT=0._EB            !< \f$ \partial u_n / \partial t \f$
-   REAL(EB) :: Q_LEAK=0._EB           !< Heat production of leaking gas (W/m3)
-   REAL(EB) :: V_DEP=0._EB            !< Deposition velocity (m/s)
-   REAL(EB) :: VEL_ERR_NEW=0._EB      !< Velocity mismatch at mesh or solid boundary (m/s)
-
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
@@ -425,6 +423,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
    INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
+   REAL(EB) :: DUNDT=0._EB                            !< \f$ \partial u_n / \partial t \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN         !< Flux-limited \f$ \int \rho Y_\alpha u_n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVNS        !< Estimated value of FVN at next time step
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN  !< Species diffusive flux as computed in divg.f90
@@ -1229,9 +1228,6 @@ TYPE CFACE_TYPE
    INTEGER :: N_LOGICALS=0               !< Number of logicals to pack into restart or send/recv buffer
    REAL(EB) :: AREA=0._EB                !< CFACE area. From CUT_FACE(CUT_FACE_IND1)%AREA(CUT_FACE_IND2)
    REAL(EB) :: NVEC(3)=0._EB             !< CFACE normal out unit vector.
-   REAL(EB) :: VEL_ERR_NEW=0._EB
-   REAL(EB) :: V_DEP=0._EB
-   REAL(EB) :: Q_LEAK=0._EB
    REAL(EB) :: DUNDT=0._EB
    REAL(EB) :: RSUM_G=0._EB              !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
    REAL(EB) :: TMP_G                     !< Temperature (K) in adjacent gas phase cell

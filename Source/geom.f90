@@ -8463,7 +8463,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    CFA%CUT_FACE_IND2 = IFACE
 
    INS_INB_COND_1 : IF (IS_INB) THEN
-      CFA%VEL_ERR_NEW=CUT_FACE(ICF)%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
+      B1%VEL_ERR_NEW=CUT_FACE(ICF)%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
       ! Check if fire spreads radially over this surface type
       IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
