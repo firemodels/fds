@@ -662,6 +662,18 @@ LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 LOGICAL :: ONE_UNKH_PER_CUTCELL=.FALSE.
 LOGICAL :: ONE_CC_PER_CARTESIAN_CELL=.TRUE.
 
+! MPI info related to resource sets:
+INTEGER :: FDS_RANKS_PER_GPU=-1
+INTEGER :: MY_RANK_RS,MY_RANK_RS_MASTERS,N_MPI_RS,N_MPI_RS_MASTERS
+#ifdef WITHOUT_MPIF08
+INTEGER :: MPI_COMM_RS, MPI_COMM_RS_MASTERS
+INTEGER :: GROUP_RS_MASTERS
+#else
+TYPE(MPI_COMM) :: MPI_COMM_RS, MPI_COMM_RS_MASTERS
+TYPE(MPI_GROUP):: GROUP_RS_MASTERS
+#endif
+
+
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
 
