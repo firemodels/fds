@@ -8244,6 +8244,8 @@ END FUNCTION GAS_PHASE_OUTPUT
 !> \param OPT_DEVC_INDEX Index of device
 !> \param OPT_CFACE_INDEX Index of immersed boundary cell face
 !> \param OPT_CUT_FACE_INDEX Index of the cut face
+!> \param OPT_NODE_INDEX Index of internal heat conduction grid
+!> \param OPT_PROF_INDEX Index of PROFile
 
 REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX,OPT_BNDF_INDEX,&
                                      OPT_DEVC_INDEX,OPT_CFACE_INDEX,OPT_CUT_FACE_INDEX,OPT_NODE_INDEX,OPT_PROF_INDEX)
