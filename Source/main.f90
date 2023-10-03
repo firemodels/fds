@@ -417,6 +417,12 @@ ENDIF
 
 CALL INITIALIZE_OUTPUT_CLOCKS(T)
 
+! Initialize output files that are mesh-specific
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (TGA_SURF_INDEX<1) CALL INITIALIZE_MESH_DUMPS(NM)
+ENDDO
+
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
 IF (.NOT.RESTART) THEN
@@ -451,13 +457,12 @@ ENDDO
 
 CALL GENERATE_PARTICLE_DISTRIBUTIONS
 
-! Initialize output files that are mesh-specific
+! Initialize point devices, particles, profiles
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INSERT_ALL_PARTICLES(T,NM)
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_DEVICES(NM)
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_PROFILES(NM)
-   IF (TGA_SURF_INDEX<1) CALL INITIALIZE_MESH_DUMPS(NM)
 ENDDO
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed particle initialization')
@@ -489,11 +494,13 @@ IF (HVAC_SOLVE) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL HVAC_BC_IN(NM)
    ENDDO
+   CALL STOP_CHECK(1)
    IF (N_MPI_PROCESSES>1) CALL EXCHANGE_HVAC_BC
    IF (MY_RANK==0) THEN
       CALL COLLAPSE_HVAC_BC(T)
       CALL SET_INIT_HVAC
    ENDIF
+   CALL STOP_CHECK(1)
 ENDIF
 
 ! Make an initial dump of ambient values
