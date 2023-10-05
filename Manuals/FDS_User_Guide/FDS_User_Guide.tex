@@ -5344,6 +5344,7 @@ It is possible to turn off the RTE solver (saving roughly 20 \% in CPU time) by 
 There are some fire scenarios where you might want to set the absorption coefficient in the RTE, $\kappa$, to zero by setting {\ct OPTICALLY\_THIN} to {\ct T} on the {\ct RADI} line, in which case reabsorption of thermal radiation by all gases is neglected. Essentially, the fire radiates the user-specified {\ct RADIATIVE\_FRACTION} of energy, and this energy is transported to the domain boundaries without being reabsorbed by colder gases. This is not something you want to do for a compartment fire scenario, where absorption and emission of thermal radiation by hot and cold smoke is an important consideration. Rather, you might want to choose this option for scenarios where you have a fire outside of a compartment or in a relatively large open space and you want to explicitly dictate the net radiation energy that is transported to targets and solid boundaries. For example, the radiative fraction of very large hydrocarbon fuel fires can decrease with increasing diameter because of the re-absorption of radiated energy by the smoke and combustion products. This is why a large oil fire appears to be comprised mostly of smoke, and this smoke shields external objects from the thermal radiation. Predicting this phenomenon is difficult and can be grid-dependent. In such cases, you may want to just specify the {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line and then {\ct OPTICALLY\_THIN=T} on the {\ct RADI} line, in which case the fire will radiate the given fraction of energy and FDS will not attempt to calculate the re-absorption of this energy by the combustion products or surrouding gases.
 
 \subsection[Radiation Option 3. Optically-Thick; Specified Radiative Fraction]{Radiation Option 3. Optically-Thick; Specified Radiative Fraction (LES Default)}
+\label{info:RTE_Source_Correction}
 
 In its normal operation, the RTE transfers energy from hot, emitting gases, like flames, to colder, absorbing gases like water vapor or soot particulate. The absorption coefficient, $\kappa$, computed using RadCal, governs both the emission and absorption of thermal radiation. Because flame temperatures are not well-resolved for typically large-scale fire simulations, the source term in the RTE is adjusted in grid cells for which the radiative fraction, $\chi_{\rm r}$, times the local heat release rate per unit volume, $\dot{q}'''$, is greater than 10~kW/m$^3$
 \be
@@ -10154,6 +10155,13 @@ INTENSITIES
 \end{figure}
 
 
+\subsection{Flame Temperature}
+\label{info:Flame_Temperature}
+
+The output quantity {\ct 'TEMPERATURE'} reports the average gas temperature within a gas phase grid cell. In a typical fire simulation, combustion within the grid cell occurs over a flame sheet that is not resolvable on the grid. Because the source term in the radiation transport equation is a function of the gas temperature to the fourth power, the temperature in cells where combustion occurs is given an effective value so that the user-specified {\ct RADIATIVE\_FRACTION} is achieved. The output quantity {\ct 'EFFECTIVE FLAME TEMPERATURE'} displays this modified temperature.
+
+This quantity should not be taken as the adiabatic flame temperature. More details are given in Section~\ref{info:RTE_Source_Correction}.
+
 \subsection{Detailed Spray Properties}
 \label{PDPA}
 
@@ -10801,6 +10809,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct DIFFUSIVITY}$^1$                           & Species diffusivity, $D_\alpha$                   & m$^2$/s           & D,I,P,S      \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
+{\ct EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
 {\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & kW/m$^2$          & D,I,P,S      \\ \hline
 {\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & kW/m$^2$          & D,I,P,S      \\ \hline
