@@ -442,6 +442,8 @@ TYPE THIN_WALL_TYPE
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+   INTEGER :: WALL_INDEX_M=0          !< Lower adjacent wall cell index
+   INTEGER :: WALL_INDEX_P=0          !< Upper adjacent wall cell index
    INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
    INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
