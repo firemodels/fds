@@ -25,9 +25,9 @@
       A(1)                  = 1.79
       E(1)                  = 27685.
       N_O2(1)               = 0.68    
-      NU_SPEC               = 3.67
-      SPEC_ID               = 'CARBON DIOXIDE'
-      GAS_DIFFUSION_DEPTH   = 0.0001 /
+      GAS_DIFFUSION_DEPTH   = 0.0001
+      SPEC_ID               = 'PRODUCTS','AIR',
+      NU_SPEC 	             = 12.58455,-11.58455 /
    
 &RAMP ID = 'wood_k', T = 20,  F = 0.1 /
 &RAMP ID = 'wood_k', T = 300, F = 0.2 /
