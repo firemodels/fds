@@ -2890,19 +2890,26 @@ REAL(EB) :: R, THICKNESS, X_DIVIDE
    ! Compute mass flux fraction array (array numbers indicate the fraction of mass flux that is added to the front
 
    IF (LAYER_DIVIDE >= REAL(N_LAYERS,EB)) THEN
-      MF_FRAC = 1.0_EB
+
+      MF_FRAC = 1._EB
+
    ELSE
+
       MF_FRAC = 0._EB
 
-      X_DIVIDE = 0._EB
-      DO NL=1,N_LAYERS
-         IF (LAYER_DIVIDE>=REAL(NL,EB)) THEN
-            X_DIVIDE  = X_DIVIDE + LAYER_THICKNESS(NL)
-         ELSE
-            X_DIVIDE  = X_DIVIDE + MOD(LAYER_DIVIDE,1.0_EB)*LAYER_THICKNESS(NL)
-            EXIT
-         ENDIF
-      ENDDO
+      IF (LAYER_DIVIDE>=0._EB) THEN
+         X_DIVIDE = 0._EB
+         DO NL=1,N_LAYERS
+            IF (LAYER_DIVIDE>=REAL(NL,EB)) THEN
+               X_DIVIDE  = X_DIVIDE + LAYER_THICKNESS(NL)
+            ELSE
+               X_DIVIDE  = X_DIVIDE + MOD(LAYER_DIVIDE,1.0_EB)*LAYER_THICKNESS(NL)
+               EXIT
+            ENDIF
+         ENDDO
+      ELSE
+         X_DIVIDE = 0.5_EB*THICKNESS
+      ENDIF
 
       II = 0
       DIVILOOP: DO NL=1,N_LAYERS
@@ -2916,6 +2923,7 @@ REAL(EB) :: R, THICKNESS, X_DIVIDE
             ENDIF
          ENDDO
       ENDDO DIVILOOP
+
    ENDIF
 
 END SUBROUTINE GET_WALL_NODE_WEIGHTS

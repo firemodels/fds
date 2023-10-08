@@ -7861,15 +7861,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (SF%EMISSIVITY      < 0._EB) SF%EMISSIVITY      = EMISSIVITY_DEFAULT
    IF (SF%EMISSIVITY_BACK < 0._EB) SF%EMISSIVITY_BACK = EMISSIVITY_DEFAULT
 
-   ! Define mass flux division point
+   ! Define mass flux division point if the user does not specify. For all but
+   ! surfaces with exposed backing, all pyrolyzed mass migrates to the front surface.
 
-   IF (SF%LAYER_DIVIDE < 0._EB) THEN
-      IF (SF%BACKING==EXPOSED .AND. .NOT.SF%BURN_AWAY) THEN
-         SF%LAYER_DIVIDE = 0.5_EB * REAL(SF%N_LAYERS,EB)
-      ELSE
-         SF%LAYER_DIVIDE = REAL(SF%N_LAYERS+1)
-      ENDIF
-   ENDIF
+   IF (SF%LAYER_DIVIDE<0._EB .AND. .NOT.SF%BACKING==EXPOSED) SF%LAYER_DIVIDE = REAL(SF%N_LAYERS+1)
 
    ! Add residue materials
 
