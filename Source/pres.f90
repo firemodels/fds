@@ -2777,9 +2777,11 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
               ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
 
 IF (ERROR /= 0) THEN
-   IF (MY_RANK==0) &
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
+   IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
+   ENDIF
    STOP_STATUS = SETUP_STOP
    RETURN
 END IF
@@ -2790,9 +2792,11 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
               ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
 
 IF (ERROR /= 0) THEN
-   IF (MY_RANK==0) &
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
+   IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
+   ENDIF
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
