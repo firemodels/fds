@@ -1535,7 +1535,7 @@ Terrains can also be read and written in binary format, and in this case only th
 \subsection{Handling Split Cells and Thin Geometries}
 \label{info:thin_geom}
 
-One current limitation of the unstructured geometry algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a cell is split by a thin geometry, FDS will fill in the smaller of the two disjoint volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting {\ct CELL\_BLOCK\_IOR} on the {\ct GEOM} line.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currently, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
+One current limitation of the unstructured geometry algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a cell is split by a thin geometry, FDS will fill in the smaller of the two disjoint volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting either {\ct CELL\_BLOCK\_IOR} or {\ct CELL\_BLOCK\_ORIENTATION} on the {\ct GEOM} line. The former is an integer indicating a Cartesian axis while the latter allows the specification of a vector in any direction.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currently, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
 
 
 \begin{figure}
@@ -9157,7 +9157,7 @@ To record the material component's density with time, use the output quantity {\
 \end{lstlisting}
 This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
 
-To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy, use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
+To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\si{kJ/m$^3$}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
 
 Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
 
@@ -10949,7 +10949,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct SOLID CONDUCTIVITY}$^4$                    & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}       & D,Pr         \\ \hline
 {\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$           & D,Pr         \\ \hline
 {\ct SOLID ENTHALPY}$^4$                        & Section~\ref{info:DEPTH}                      & kJ/m$^3$           & D,Pr         \\ \hline
-{\ct SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
+{\ct SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \si{kg/kg}     & D,Pr         \\ \hline
 {\ct SOLID SPECIFIC HEAT}$^4$                   & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)}     & D,Pr         \\ \hline
 {\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
 {\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
@@ -11549,6 +11549,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BINARY\_FILE}     & Character              & Section~\ref{subsec:readbin}            &           &  {\ct 'null'}            \\ \hline
 {\ct BNDF\_GEOM}       & Logical                & Section~\ref{info:BNDF}            &           &  {\ct T}                 \\ \hline
 {\ct CELL\_BLOCK\_IOR} & Integer                & Section~\ref{info:thin_geom}       &           &  0                       \\ \hline
+{\ct CELL\_BLOCK\_ORIENTATION} & Real Triplet   & Section~\ref{info:thin_geom}       &           &  0.0,0.0,0.0             \\ \hline
 {\ct COLOR}            & Character              & Section~\ref{info:colors}          &           &  {\ct 'null'}            \\ \hline
 {\ct CYLINDER\_LENGTH} & Real                   & Section~\ref{info:GEOM_cyls}            &   m       &                          \\ \hline
 {\ct CYLINDER\_RADIUS} & Real                   & Section~\ref{info:GEOM_cyls}            &   m       &                          \\ \hline
