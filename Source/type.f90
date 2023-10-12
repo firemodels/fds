@@ -1031,7 +1031,7 @@ TYPE GEOMETRY_TYPE
                AZIM,ELEV,SCALE(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GAXIS(3),GROTATE,GROTATE_DOT,GROTATE_BASE,&
                XB(6),SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),MIN_LEDGE,MAX_LEDGE,MEAN_LEDGE,&
                GEOM_BOX(LOW_IND:HIGH_IND,IAXIS:KAXIS),TRANSPARENCY,CYLINDER_ORIGIN(3),CYLINDER_AXIS(3),&
-               CYLINDER_RADIUS,CYLINDER_LENGTH
+               CYLINDER_RADIUS,CYLINDER_LENGTH,CELL_BLOCK_ORIENTATION(3)=0._EB
    INTEGER, ALLOCATABLE,DIMENSION(:)   :: FACES,VOLUS,SUB_GEOMS,SURFS,MATLS
    INTEGER, ALLOCATABLE,DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES
    REAL(EB),ALLOCATABLE,DIMENSION(:)   :: FACES_AREA,VERTS_BASE,VERTS,TFACES,DAZIM,DELEV,ZVALS
@@ -1149,8 +1149,9 @@ TYPE CC_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       BODTRI !< GEOMETRY and triangle associated with CC_INBOUNDARY cut-faces (CFACEs).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::    EDGE_LIST !< Edges list. [CE_TYPE IEC JEC] or [RG_TYPE SIDE_LOHI AXIS]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)::   CELL_LIST !< Connected cut-cells list. [RC_TYPE I J K  ]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::  CFACE_INDEX  !< In boundary cut-faces only, index in CFACE(:).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::  CFACE_INDEX !< In boundary cut-faces only, index in CFACE(:).
    INTEGER,  ALLOCATABLE, DIMENSION(:)   ::   SURF_INDEX !< In boundary cut-faces only.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_ORIGIN !< In boundary face origin (built, blocked small cell, blocked split cell).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       NOMICF !< For external boundary boundary cutfaces, NOM and cut-face list.
 
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKH !< Low and high side cut-cell H unknown number. (LOW:HIGH,1:NFACE)
@@ -1256,7 +1257,7 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::           VOLUME !< Cut-cell volumes. (1:NCELL)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           XYZCEN !< Cut-cell centroid locations. (IAXIS:KAXIS,1:NCELL)
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
    INTEGER                                  ::       N_NOMICC=0 !< Number of entries in NOMICC
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           NOMICC !< OMESH cut-cells array. (1:2,1:N_NOMICC)
 
