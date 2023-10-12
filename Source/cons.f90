@@ -232,7 +232,7 @@ LOGICAL :: SUPPRESS_DIAGNOSTICS=.FALSE.     !< Do not print detailed mesh-specif
 LOGICAL :: WRITE_GEOM_FIRST=.TRUE.
 LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.         !< Use simple chemistry combustion model
 LOGICAL :: FIRST_PASS                       !< The point in the time step before the CFL constraint is applied
-LOGICAL :: VERBOSE=.FALSE.                  !< Add extra output in the .err file
+LOGICAL :: VERBOSE=.TRUE.                   !< Add extra output in the .err file
 LOGICAL :: SOLID_HEAT_TRANSFER_3D=.FALSE.
 LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.

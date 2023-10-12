@@ -752,7 +752,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
-            IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+            !IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
 
             ! Mesh boundary colors
 
