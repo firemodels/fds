@@ -2197,14 +2197,16 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 
 \subsubsection{Blowing Heat Transfer}
 \label{blowing}
-If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas normal to the surface disrupts the thermal boundary layer. When blowing the flow pushes away the gas near the surface, and when sucking the flow pulls the gas near the surface towards the surface. These respectively decrease and increase the heat transfer coefficient. This effect can be accounted for by adding {\ct BLOWING=T} to a {\ct SURF} definition. Except for DNS simulations, When {\ct BLOWING} is active, the heat transfer coefficient computed by FDS is adjust by a factor per the equations below~\cite{Plate_blowing}.
+
+If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. This effect can be accounted for by adding {\ct BLOWING=T} to the {\ct SURF} line, except for DNS simulations where empirical heat transfer correlations are not used. When {\ct BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
 \begin{equation}
-	\Phi_h = \frac{\dot{m}'' c_g}{h}
+	\Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
 \begin{equation}
-	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h
+	h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
 \end{equation}
-where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
+where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
+
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
 
