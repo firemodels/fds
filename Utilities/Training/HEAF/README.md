@@ -7,3 +7,5 @@ Each subdirectory contains a single FDS input file that serves as a template for
 python ../../../Input_File_Tools/swaps.py
 ```
 where `swaps.py` is a Python script found in `Utilities/Input_File_Tools`. The script opens the file called `paramfile.csv` and reads the name of the file in the first row and column. This is the template for all of the input files. The parameter values in `paramfile.csv` are "swapped" for the dummy arguments in the template.
+
+Note that these simulations are fragile; that is, they are vulnerable to numerical instability because of the rapid release of energy from a concentrated source of energy.

@@ -18,7 +18,9 @@
 
 ! SMOKE3D_SPEC_ID sets the species used by Smokeview to visualize smoke
 
-&DUMP SMOKE3D_SPEC_ID='3dsmoke',SUPPRESS_DIAGNOSTICS=F,MASS_FILE=T/
+&DUMP SUPPRESS_DIAGNOSTICS=F,MASS_FILE=T/
+
+&SM3D QUANTITY='DENSITY', SPEC_ID='3dsmoke' /
 
 ! Turns off the extinction model. Default values in the model may not be appropriate for metal oxidation
 &COMB SUPPRESSION=F /
@@ -83,7 +85,7 @@ cureac FUEL='COPPER',SPEC_ID_NU='COPPER','OXYGEN','COPPER OXIDE',NU=-2,-0.5,1,HE
 
 ! Melting steel
 &MATL ID='STEEL', DENSITY=7800., SPECIFIC_HEAT_RAMP='STEEL C', CONDUCTIVITY_RAMP='STEEL K', EMISSIVITY=0.85,
-      THRESHOLD_TEMPERATURE=1300., THRESHOLD_SIGN=1, HEAT_OF_REACTION(1)=250., PCR(1)=T, A(1)=0.6, E(1)=0., N_S(1)=0., N_T(1)=1. /
+      REFERENCE_TEMPERATURE=1300., HEAT_OF_REACTION(1)=250., A(1)=0.6, E(1)=0., N_S(1)=0., N_T(1)=1. /
 
 ! Eurocode values
 &RAMP ID='STEEL C',T=20,F=0.440/
