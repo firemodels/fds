@@ -2901,7 +2901,9 @@ Equation~(\ref{rr}) describes the rate of the reaction as a function of temperat
 \subsection{Liquid Fuels}
 \label{info:liquid_fuels}
 
-For a liquid fuel, the thermal properties are similar to those of a solid material, with a few exceptions. The evaporation rate of the fuel is governed by the mass transfer number (see FDS Technical Reference Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
+The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed. 
+
+The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
 &REAC FUEL               = 'ETHANOL'
       CO_YIELD           = 0.001
