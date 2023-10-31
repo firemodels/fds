@@ -6007,6 +6007,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
             CLOSE(LU_SLCF(IQ2,NM))
          ENDIF
       ELSE
+         IQ2 = IQ + N_SLCF_MAX
          STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
          ! write geometry for slice file
          IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
