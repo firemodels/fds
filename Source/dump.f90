@@ -10531,7 +10531,7 @@ IF (CC_IBM) THEN
            BNDF_VAL_MIN = BOUND_MIN
            CHANGE_BOUND = 1
          ENDIF
-         IF (BOUND_MAX < BNDF_VAL_MAX) THEN
+         IF (BOUND_MAX > BNDF_VAL_MAX) THEN
            BNDF_VAL_MAX = BOUND_MAX
            CHANGE_BOUND = 1
          ENDIF
