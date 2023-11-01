@@ -3620,7 +3620,7 @@ M => MESHES(NM)
 
 WC => M%WALL(IW)
 SF => SURFACE(WC%SURF_INDEX)
-IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK .OR. SF%BACKING/=EXPOSED) RETURN
+IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) RETURN
 BC => M%BOUNDARY_COORD(WC%BC_INDEX)
 ICG = M%CELL_INDEX(BC%IIG,BC%JJG,BC%KKG)
 IF (M%CELL(ICG)%SOLID) RETURN
@@ -3718,6 +3718,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
    ! Determine if the back face is found
 
    IF ((.NOT.OM%CELL(IC)%SOLID .AND. OM%CELL(IC)%WALL_INDEX(IOR)>0) .OR. NOM==0) THEN ! the back wall face is found
+      IF (NOM>0 .AND. SF%BACKING/=EXPOSED) RETURN  ! No need to assign back cell information for anything but exposed backing
       ONE_D%BACK_INDEX = OM%CELL(IC)%WALL_INDEX(IOR)
       ONE_D%BACK_MESH  = NOM
       ONE_D%BACK_SURF  = OM%CELL(IC)%SURF_INDEX(IOR)

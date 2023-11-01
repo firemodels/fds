@@ -2443,7 +2443,7 @@ The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third sol
 \subsubsection{Limitations}
 
 \begin{enumerate}
-\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain.
+\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} for which at least one face in each coordinate direction is exposed.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically the same as the gas phase cells.
@@ -2478,7 +2478,7 @@ The volume enclosed by {\ct XB} encompasses the entire assembly. The integral on
 The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the {\ct IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the {\ct CONVERSION\_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter {\ct RELATIVE=T} means that only the change in enthalpy is desired.
 .
 
-\subsubsection{Example: Uncoated Structural Steel}
+\subsubsection{Example: Unprotected Structural Steel}
 
 Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
 \begin{lstlisting}
@@ -2502,7 +2502,7 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \end{figure}
 
 
-\subsubsection{Example: Coated Structural Steel}
+\subsubsection{Example: Insulated Structural Steel}
 \label{info:normal_direction_only}
 
 An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
@@ -2930,7 +2930,7 @@ Equation~(\ref{rr}) describes the rate of the reaction as a function of temperat
 \subsection{Liquid Fuels}
 \label{info:liquid_fuels}
 
-The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed. 
+The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed.
 
 The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
