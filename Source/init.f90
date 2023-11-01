@@ -1875,6 +1875,18 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
          ENDDO ALTERNATE_WALL_LOOP_2D
       ENDDO OTHER_MESH_LOOP
 
+      ! Check to see if the HT3D solid object spans the entire width of the computational domain.
+      ! There must be at least one exposed surface cell in each coordinate direction.
+
+      DO IOR=1,3
+         IF (ABS(BC%IOR)==IOR) CYCLE
+         IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: Two faces of an HT3D solid are blocked, Mesh=',NM,', IOR=',IOR
+            STOP_STATUS = SETUP_STOP
+            RETURN
+         ENDIF
+      ENDDO
+
       ! Renormalize weighting factors of the alternate, intersecting 1-D heat conduction paths
 
       IF (THR_D%NODE(I)%ALTERNATE_WALL_COUNT>0 .AND. &
@@ -1960,8 +1972,22 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
          ENDDO ALTERNATE_WALL_LOOP_2C
       ENDDO OTHER_MESH_LOOP_B
 
+      ! Check to see if the HT3D solid object spans the entire width of the computational domain.
+      ! There must be at least one exposed surface cell in each coordinate direction.
+
+      DO IOR=1,3
+         IF (ABS(BC%IOR)==IOR) CYCLE
+         IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: Two faces of an HT3D thin solid are blocked, Mesh=',NM,', IOR=',IOR
+            STOP_STATUS = SETUP_STOP
+            RETURN
+         ENDIF
+      ENDDO
+
+      ! Renormalize the weighting factors for the temperature interpolation
+
       IF (THR_D%NODE(I)%ALTERNATE_WALL_COUNT>0 .AND. &
-         ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN  ! Renormalize the weighting factors
+         ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN
          SUM_WGT = 0._EB
          DO IWA=1,THR_D%NODE(I)%ALTERNATE_WALL_COUNT
             IOR = THR_D%NODE(I)%ALTERNATE_WALL_IOR(IWA)
