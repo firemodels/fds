@@ -6049,7 +6049,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
             CLOSE(LU_SLCF(IQ2,NM))
          ENDIF
          CLOSE(LU_SLCF(IQ,NM))
-         CLOSE(LU_SLCF(IQ+N_SLCF_MAX,NM))
       ENDIF
    ENDIF
 
