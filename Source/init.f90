@@ -1881,7 +1881,7 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
-            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: Two faces of an HT3D solid are blocked, Mesh=',NM,', IOR=',IOR
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: HT3D solid improperly specified, Mesh=',NM,', IOR=',IOR
             STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
@@ -1978,7 +1978,7 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
-            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: Two faces of an HT3D thin solid are blocked, Mesh=',NM,', IOR=',IOR
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: HT3D thin solid improperly specified, Mesh=',NM,', IOR=',IOR
             STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
