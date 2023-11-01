@@ -3858,7 +3858,7 @@ where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure differe
 
 As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
 \be
-   A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
+   A_{\rm L} = A_{\rm L,ref} \left( \frac{\left| \Delta p \right|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
 \ee
 By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
