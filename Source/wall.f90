@@ -2646,6 +2646,7 @@ B1%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
 
 B1%Q_CON_F = B1%Q_CON_F - 0.5_EB*HTCF*DT_BC_SUB*B1%TMP_F
 IF (RADIATION .AND. .NOT.SF%INTERNAL_RADIATION) B1%Q_RAD_OUT = B1%Q_RAD_OUT + &
+                                                DT_BC_SUB*(B1%TMP_F_OLD**4+2._EB*B1%TMP_F_OLD**3*(B1%TMP_F-B1%TMP_F_OLD))
 
 ! Clipping for excessively high or low temperatures
 
