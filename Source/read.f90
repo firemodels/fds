@@ -752,7 +752,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
-            IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+            !IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
 
             ! Mesh boundary colors
 
@@ -8948,6 +8948,7 @@ SELECT CASE(TRIM(SOLVER))
       PRES_METHOD = 'UGLMAT'
       PRES_FLAG   = UGLMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
+      IF (MAX_PRESSURE_ITERATIONS==10) MAX_PRESSURE_ITERATIONS=1
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
    CASE('GLMAT')

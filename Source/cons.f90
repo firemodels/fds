@@ -196,7 +196,7 @@ LOGICAL :: MASS_FILE=.FALSE.                !< Output a comma-delimited file of 
 LOGICAL :: STRATIFICATION=.TRUE.            !< Assume that the atmosphere decreases in pressure with height
 LOGICAL :: SOLID_PHASE_ONLY=.FALSE.         !< Only perform a solid phase heat transfer and pyrolysis simulation
 LOGICAL :: AEROSOL_AL2O3=.FALSE.            !< Assume that the SOOT is Al_2 O_3
-LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on computers with a shared file system
+LOGICAL :: SHARED_FILE_SYSTEM=.FALSE.       !< Assume that FDS is NOT being run on computers with a shared file system (FireX)
 LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
@@ -232,7 +232,7 @@ LOGICAL :: SUPPRESS_DIAGNOSTICS=.FALSE.     !< Do not print detailed mesh-specif
 LOGICAL :: WRITE_GEOM_FIRST=.TRUE.
 LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.         !< Use simple chemistry combustion model
 LOGICAL :: FIRST_PASS                       !< The point in the time step before the CFL constraint is applied
-LOGICAL :: VERBOSE=.FALSE.                  !< Add extra output in the .err file
+LOGICAL :: VERBOSE=.TRUE.                   !< Add extra output in the .err file
 LOGICAL :: SOLID_HEAT_TRANSFER_3D=.FALSE.
 LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.
