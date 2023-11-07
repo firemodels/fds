@@ -2273,7 +2273,7 @@ where $Y_i$ are the material mass fractions and $\rho_i$ are the material bulk d
 
 \label{info:thermal_properties}
 
-For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$), {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY}\footnote{The {\ct EMISSIVITY} of a {\ct MATL} component of a {\ct SURF} takes precedence over the {\ct EMISSIVITY} specified on the {\ct SURF} line. This is true even if no {\ct EMISSIVITY} is explicitly specified on the {\ct MATL} line. Its default value still takes precedence over whatever might be specified on the {\ct SURF} line.} (0.9 by default). Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot. Temperature-dependence is specified using the {\ct RAMP} convention. As an example, consider Marinite, a wall material suitable for high temperature applications:
+For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$), {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY}\footnote{The values of {\ct EMISSIVITY} that are specified on the various {\ct MATL} lines that define that material components of the solid are used to compute an effective emissivity for the front and back surfaces. However, if you specify an {\ct EMISSIVITY} or {\ct EMISSIVITY\_BACK} on the {\ct SURF} line, these values will then take precedence.} (0.9 by default). Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot. Temperature-dependence is specified using the {\ct RAMP} convention. As an example, consider Marinite, a wall material suitable for high temperature applications:
 \begin{lstlisting}
 &MATL ID                 = 'MARINITE'
       EMISSIVITY         = 0.8
@@ -3031,7 +3031,7 @@ If you use are using a pyrolysis model in which the {\ct MATL} lines have {\ct N
 The burnout time of a liquid fuel is calculated automatically based on the liquid layer {\ct THICKNESS}, liquid {\ct DENSITY}, and the calculated burning rate.
 
 
-\subsubsection{Special topic: Making Fuels Disappear}
+\subsection{Solid Fuels that can Burn Away}
 \label{info:BURN_AWAY}
 \label{box_burn_away1}
 \label{box_burn_away2}
@@ -3052,9 +3052,13 @@ If a combustible solid is to disappear from the simulation once it is consumed, 
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
 \item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
 \item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
+\item By default, newly exposed surfaces take on the same {\ct SURF\_ID} that has been applied to the original obstruction. However, you can specify an optional {\ct SURF\_ID\_INTERIOR} on the {\ct OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
+
+\subsubsection{Examples}
+
 Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}. These are examples of a solid block of material that is pyrolyzed until it is completely consumed. The heat flux is generated by placing hot surfaces around the box. There is no combustion because the {\ct AUTO\_IGNITION\_TEMPERATURE} has been set to a very high value. The properties of the solid material are chosen simply to assure a quick calculation. The objective is to ensure that the pyrolyzed fuel mass is consistent with the mass of the original block. The block is 0.4~m on a side, with a density of 20~kg/m$^3$. The total mass is:
 \be
 (0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
@@ -3129,14 +3133,14 @@ The {\ct SURF} and {\ct MATL} lines describing the pyrolysis of real materials c
 
 \subsection{Simulating the Cone Calorimeter}
 
-This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
+This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
 \item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need three cells in each direction ({\ct IJK=3,3,3}) for the pressure solver to function properly.
 \item On the {\ct MISC} line, set {\ct SOLID\_PHASE\_ONLY=T} to turn off all gas phase computation and speed up the simulation.  Note that convective heat transfer to/from the surface is still applied using the ambient temperature.  In this case the heat transfer coefficient is either specified or taken from the gas phase thermal conductivity divided by the wall-normal grid spacing.
 \item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Sec.~\ref{info:RAMP_Time} for more details about ramps.
-\item Set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item On the {\ct SURF} line, set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)), allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
@@ -12196,6 +12200,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}                  & Integer Array   & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SHAPE}                   & Character       & Section~\ref{info:multobst}             &           &               \\ \hline
 {\ct SURF\_ID}                & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
+{\ct SURF\_ID\_INTERIOR}      & Character       & Section~\ref{info:BURN_AWAY}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SURF\_IDS(3)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}      & Real Array      & Section~\ref{info:texture_map}          & m         & (0.,0.,0.)    \\ \hline
@@ -12840,7 +12845,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_HEIGHT}                                     & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
 {\ct TEXTURE\_MAP}                                        & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
 {\ct TEXTURE\_WIDTH}                                      & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
-{\ct TGA\_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct F}           \\ \hline
+{\ct TGA\_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct F}                 \\ \hline
 {\ct TGA\_FINAL\_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 {\ct TGA\_HEATING\_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
