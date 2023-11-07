@@ -2197,14 +2197,16 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 
 \subsubsection{Blowing Heat Transfer}
 \label{blowing}
-If a surface is emitting (blowing) or removing (sucking) gas, the flow of gas normal to the surface disrupts the thermal boundary layer. When blowing the flow pushes away the gas near the surface, and when sucking the flow pulls the gas near the surface towards the surface. These respectively decrease and increase the heat transfer coefficient. This effect can be accounted for by adding {\ct BLOWING=T} to a {\ct SURF} definition. Except for DNS simulations, When {\ct BLOWING} is active, the heat transfer coefficient computed by FDS is adjust by a factor per the equations below~\cite{Plate_blowing}.
+
+If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. This effect can be accounted for by adding {\ct BLOWING=T} to the {\ct SURF} line, except for DNS simulations where empirical heat transfer correlations are not used. When {\ct BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
 \begin{equation}
-	\Phi_h = \frac{\dot{m}'' c_g}{h}
+	\Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
 \begin{equation}
-	h_{blowing} = \frac{\Phi_h}{e^{\Phi_h}-1} h
+	h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
 \end{equation}
-where $h$ is the non-blowing heat transfer coefficient, $\dot{m}''$ is the flow from the surface in \si{kg/()m$^2$.s)} where the sign is positive for outflow and negative for inflow, and $c_g$ is the specific heat of the gas flow in \si{J/kg.K}.
+where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
+
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
 
@@ -2899,7 +2901,9 @@ Equation~(\ref{rr}) describes the rate of the reaction as a function of temperat
 \subsection{Liquid Fuels}
 \label{info:liquid_fuels}
 
-For a liquid fuel, the thermal properties are similar to those of a solid material, with a few exceptions. The evaporation rate of the fuel is governed by the mass transfer number (see FDS Technical Reference Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
+The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed. 
+
+The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
 &REAC FUEL               = 'ETHANOL'
       CO_YIELD           = 0.001
@@ -3854,7 +3858,7 @@ where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure differe
 
 As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
 \be
-   A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
+   A_{\rm L} = A_{\rm L,ref} \left( \frac{\left| \Delta p \right|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
 \ee
 By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
