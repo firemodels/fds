@@ -2963,9 +2963,12 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
             ! Mass stoichiometric coefficient for oxygen
             NU_O2_CHAR = ML%NU_GAS_M(O2_INDEX,J)
-            Y_O2_S = (SQRT(4._EB*REACTION_RATE/H_MASS*Y_O2+(REACTION_RATE*NU_O2_CHAR/H_MASS)**2._EB + &
-               2._EB*REACTION_RATE*NU_O2_CHAR/H_MASS+1._EB)-REACTION_RATE*NU_O2_CHAR/H_MASS-1) / &
-               (2._EB*REACTION_RATE/H_MASS)
+            Y_O2_S = 0._EB
+            IF (H_MASS>0._EB) THEN
+               Y_O2_S = (SQRT(4._EB*REACTION_RATE/H_MASS*Y_O2+(REACTION_RATE*NU_O2_CHAR/H_MASS)**2._EB + &
+                  2._EB*REACTION_RATE*NU_O2_CHAR/H_MASS+1._EB)-REACTION_RATE*NU_O2_CHAR/H_MASS-1) / &
+                  (2._EB*REACTION_RATE/H_MASS)
+            ENDIF
 
             ! Compute LENGTH_SCALE: 1/(surface-to-volume ratio)
             IF (SF%BOUNDARY_FUEL_MODEL) THEN
