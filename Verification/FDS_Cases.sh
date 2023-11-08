@@ -227,6 +227,7 @@ $QFDS -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
+$QFDS -p 4 -d Heat_Transfer checkerboard.fds
 $QFDS -d Heat_Transfer convective_cooling.fds
 $QFDS -d Heat_Transfer convective_cooling_p1.fds
 $QFDS -d Heat_Transfer convective_cooling_p05.fds

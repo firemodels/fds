@@ -2286,14 +2286,14 @@ MESH_LOOP: DO NM=1,NMESHES
          COLOR_INDEX = VT%COLOR_INDICATOR
       ENDIF
       IF (VT%RGB(1)<0) THEN
-         WRITE(LU_SMV,'(8I5)')        MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+         WRITE(LU_SMV,'(8I5,A,I5)')   MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
                                       MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
-                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR
+                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR,' ! ',VT%IOR
       ELSE
-         WRITE(LU_SMV,'(8I5,4F13.5)') MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
-                                      MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
-                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR, &
-                                      REAL(VT%RGB,FB)/255._FB,VT%TRANSPARENCY
+         WRITE(LU_SMV,'(8I5,4F13.5,A,I5)') MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+                                           MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
+                                           MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR, &
+                                           REAL(VT%RGB,FB)/255._FB,VT%TRANSPARENCY,' ! ',VT%IOR
       ENDIF
    ENDDO
    DO N=1,NDV
