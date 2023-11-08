@@ -2532,7 +2532,28 @@ In some applications, you might want to perform 3-D heat conduction within colle
 The resulting solid has the same dimensions as the one you specify, but 5~mm of its surface material is replaced by the given layers of ``stuff.''
 
 
+\subsubsection{Working with Thin Plates}
 
+The sample case called {\ct Heat\_Transfer/checkerboard.fds} demonstrates how to work with a thin plate of steel. Consider the following lines of input:
+\begin{lstlisting}
+&MATL ID='steel', SPECIFIC_HEAT=0.515, CONDUCTIVITY=16.2, DENSITY=7900 /
+&SURF ID='paint',    COLOR='BLACK',  EMISSIVITY=0.95, HT3D=T /
+&SURF ID='no paint', COLOR='SILVER', EMISSIVITY=0.33, HT3D=T /
+&OBST XB=0.00,1.20,0.00,0.0031,0.00,1.20, MATL_ID='steel', SURF_ID='no paint' /
+&VENT XB=0.00,0.05,0.0000,0.0000,0.00,0.05, SURF_ID='paint', MULT_ID='M', IOR=-2 /
+&VENT XB=0.00,0.05,0.0031,0.0031,0.00,0.05, SURF_ID='paint', MULT_ID='M', IOR= 2 /
+&VENT XB=0.05,0.10,0.0000,0.0000,0.05,0.10, SURF_ID='paint', MULT_ID='M', IOR=-2 /
+&VENT XB=0.05,0.10,0.0031,0.0031,0.05,0.10, SURF_ID='paint', MULT_ID='M', IOR= 2 /
+&MULT ID='M', DX=0.10, DZ=0.10, I_UPPER=11, K_UPPER=11 /
+\end{lstlisting}
+There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long and 1.2~m wide. The gas phase grid size is 25~mm, much larger than the plate thickness. From the standpoint of the gas phase fluid solver, this plate is just a barrier and has no thickness. However, its thickness of 3.1~mm is taken into account by the 3-D heat conduction solver. The plate is assigned a {\ct MATL\_ID} of {\ct 'steel'} and it is also given a default set of surface properties using the {\ct SURF\_ID='no paint'}. This {\ct SURF\_ID} invokes the 3-D solver and it assigns a color and an {\ct EMISSIVITY} of 0.33. If no {\ct EMISSIVITY} had been assigned, it would have taken on that of {\ct 'steel'} which in this case would have taken the default value of 0.9. The {\ct VENT} lines apply a checkerboard pattern of ``black'' or high emissivity squares onto the plate. Figure~\ref{fig:checkerboard} displays an image of the simulation along with a plot showing a comparison of internal enthalpy and net heat flux. 
+
+\begin{figure}[!ht]
+\includegraphics[height=2.35in]{SCRIPT_FIGURES/checkerboard_1000}
+\includegraphics[height=2.35in]{SCRIPT_FIGURES/checkerboard}
+\caption[Results of the {\ct checkerboard} test case]{(Left) Temperature of a thin steel plate subjected to fire. The plate has a patchwork pattern of high and low emissivity. (Right) Plot comparing the enthalpy of the plate and the net surface heat flux.}
+\label{fig:checkerboard}
+\end{figure}
 
 
 
