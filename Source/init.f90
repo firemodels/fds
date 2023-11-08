@@ -1648,6 +1648,8 @@ ELSEIF (PRESENT(THIN_WALL_CELL)) THEN
    ENDIF
 ENDIF
 
+! This code is probably unnecessary. It is only in case the thickness of the solid has not been determined.
+
 IF (ONE_D%LAYER_THICKNESS(1)<TWO_EPSILON_EB) THEN
    SELECT CASE(ABS(BC%IOR))
       CASE(1) ; ONE_D%LAYER_THICKNESS(1) = OB%X2 - OB%X1
@@ -1656,6 +1658,8 @@ IF (ONE_D%LAYER_THICKNESS(1)<TWO_EPSILON_EB) THEN
    END SELECT
 ENDIF
 
+! Initially these arrays were allocated under the assumption that there is only one layer.
+
 IF (ONE_D%N_LAYERS>1) THEN
    CALL REALLOCATE_REAL_ARRAY(ONE_D%SMALLEST_CELL_SIZE,1,1,ONE_D%N_LAYERS)
    CALL REALLOCATE_REAL_ARRAY(ONE_D%DDSUM,1,1,ONE_D%N_LAYERS)
@@ -1663,6 +1667,8 @@ IF (ONE_D%N_LAYERS>1) THEN
 ENDIF
 
 IF (ALLOCATED(ONE_D%MIN_DIFFUSIVITY)) DEALLOCATE(ONE_D%MIN_DIFFUSIVITY) ; ALLOCATE(ONE_D%MIN_DIFFUSIVITY(1:ONE_D%N_LAYERS))
+
+! Go through all layers and reallocate arrays where necessary
 
 ONE_D%N_CELLS_INI = 0
 ONE_D%N_CELLS_MAX = 0
@@ -3588,7 +3594,7 @@ DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    CALL FIND_WALL_BACK_INDEX(NM,IW)
 ENDDO
 
-! Search all neighboring meshes for 3-D WALL cells
+! Search all neighboring meshes for 3-D WALL cells. Add index and surface information from these to M%OMESH(NOM)%WALL_RECV_BUFFER
 
 DO N=1,M%N_NEIGHBORING_MESHES
    NOM = M%NEIGHBORING_MESH(N)
@@ -3624,6 +3630,8 @@ ENDDO
 DO ITW=1,M%N_THIN_WALL_CELLS
    CALL FIND_THIN_WALL_BACK_INDEX(NM,ITW)
 ENDDO
+
+! Search all neighboring meshes for 3-D THIN_WALL cells. Add index and surface info from these to M%OMESH(NOM)%THIN_WALL_RECV_BUFFER
 
 DO N=1,M%N_NEIGHBORING_MESHES
    NOM = M%NEIGHBORING_MESH(N)
@@ -3910,6 +3918,8 @@ END SUBROUTINE FIND_WALL_BACK_INDEX
 !> \brief Find back index of thin wall
 !> \param NM Mesh number
 !> \param ITW Thin wall index
+!> \details ITW is the index of a thin wall cell, which can be thought of as segment of the edge of a single thin obstruction. 
+!> This routine marches from edge to opposite edge looking for the "back" thin wall index.
 
 SUBROUTINE FIND_THIN_WALL_BACK_INDEX(NM,ITW)
 
@@ -3938,14 +3948,20 @@ SF => SURFACE(TW%SURF_INDEX)
 N_MATLS = 0
 MATL_INDEX = 0
 
-IF (TW%OBST_INDEX>0) THEN
-   IF (OB%MATL_INDEX(1)<1) THEN
-      OB%MATL_INDEX(1:SF%N_MATL) = SF%MATL_INDEX(1:SF%N_MATL)
-      OB%MATL_MASS_FRACTION(1:SF%N_LAYER_MATL(1)) = SF%MATL_MASS_FRACTION(1,1:SF%N_LAYER_MATL(1))
-   ENDIF
+! If OBSTstruction to which the thin wall cell is attached has no material index, use the indices associated with the SURF
+
+IF (OB%MATL_INDEX(1)<1) THEN
+   OB%MATL_INDEX(1:SF%N_MATL) = SF%MATL_INDEX(1:SF%N_MATL)
+   OB%MATL_MASS_FRACTION(1:SF%N_LAYER_MATL(1)) = SF%MATL_MASS_FRACTION(1,1:SF%N_LAYER_MATL(1))
 ENDIF
 
+! Form an array of N_MATLS material indices, MATL_INDEX, for this thin wall cell. This
+! list accounts for all materials associated with the OBSTs and SURFs along the distance through the solid.
+
 CALL ADD_MATERIAL(N_MATLS,OB%MATL_INDEX,MATL_INDEX)
+
+! A thin wall cell only has one layer and one obstruction. This loop transfers the material mass fractions 
+! from the OBST to the save array.
 
 DO NN=1,N_MATLS
    DO NNN=1,MAX_MATERIALS
@@ -3961,7 +3977,7 @@ IEC = TW%IEC
 NOM = NM
 OM => MESHES(NOM)
 
-! Find adjacent wall cells
+! Find one or two WALL cells that are adjacent to this THIN_WALL cell
 
 IIGM=II ; JJGM=JJ ; KKGM = KK ; IIGP=II ; JJGP=JJ ; KKGP = KK
 SELECT CASE(IEC)
@@ -3993,7 +4009,7 @@ ICP = M%CELL_INDEX(IIGP,JJGP,KKGP)
 TW%WALL_INDEX_M = M%CELL(ICM)%WALL_INDEX(-IOR)
 TW%WALL_INDEX_P = M%CELL(ICP)%WALL_INDEX(-IOR)
 
-! Look for the back wall cell; that is, the wall cell on the other side of the obstruction
+! Look for the back THIN_WALL cell; that is, the thin wall cell on the other side of the obstruction
 
 FIND_BACK_THIN_WALL_CELL: DO
 
@@ -4046,7 +4062,9 @@ FIND_BACK_THIN_WALL_CELL: DO
       EXIT FIND_BACK_THIN_WALL_CELL
    ENDIF
 
-   SELECT CASE(IOR)  ! New cell indices as we march deeper into the obstruction
+   ! If the back thin wall index is not found, update the cell indices and continue marching deeper into the obstruction
+
+   SELECT CASE(IOR)
       CASE(-1) ; II=II+1
       CASE( 1) ; II=II-1
       CASE(-2) ; JJ=JJ+1
@@ -4056,6 +4074,8 @@ FIND_BACK_THIN_WALL_CELL: DO
    END SELECT
 
 ENDDO FIND_BACK_THIN_WALL_CELL
+
+! Take the array of MATL_INDEX and MATL_MASS_FRACTION and save them in the ONE_D derived type variable.
 
 ONE_D%N_MATL = N_MATLS
 DEALLOCATE(ONE_D%MATL_COMP) ; ALLOCATE(ONE_D%MATL_COMP(ONE_D%N_MATL))
