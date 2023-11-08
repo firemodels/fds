@@ -2416,14 +2416,14 @@ This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and
 
 Solid boundaries usually have one or more layers of a known thickness, in which case you specify the layer thicknesses and material composition on the {\ct SURF} line. However, there may be solids of more complicated geometry for which the various layers may have varying thicknesses. In such cases, you do not specify a {\ct THICKNESS} or a {\ct MATL\_ID} on the {\ct SURF} line. Instead, you specify {\ct MATL\_ID} on the obstructions ({\ct OBST}s) that make up the solid. Multiple obstructions can be used to create multiple layers, and each layer can be assigned one or more material components via {\ct MATL\_ID(:)} and {\ct MATL\_MASS\_FRACTION(:)}. Unlike the way these parameters are specified on a {\ct SURF} line, the single index represents a material component, not a layer. As an example, consider these input lines:
 \begin{lstlisting}
-&SURF ID='SKIN', COLOR='BLACK', HT1D=T /
+&SURF ID='SKIN', COLOR='BLACK', VARIABLE_THICKNESS=T /
 &OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, SURF_ID='SKIN',
       MATL_ID='Steel','Aluminum', MATL_MASS_FRACTION=0.8,0.2 /
 &HOLE XB=0.3,0.7,0.3,0.7,0.3,0.7 /
 &OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
       MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
 \end{lstlisting}
-The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct HT1D}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
+The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct VARIABLE\_THICKNESS}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
 
 
 
@@ -12789,7 +12789,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_TRANSFER\_MODEL}                               & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HORIZONTAL}                                          & Logical         & Section~\ref{info:GEOMETRY}               &                     & {\ct F}                 \\ \hline
 {\ct HRRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
-{\ct HT1D}                                                & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
 {\ct HT3D}                                                & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct F}                 \\ \hline
 {\ct ID}                                                  & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}                               & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
@@ -12877,6 +12876,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
 {\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+{\ct VARIABLE\_THICKNESS}                                 & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
 {\ct VEG\_LSET\_FIREBASE\_TIME}                           & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline

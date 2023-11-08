@@ -49,7 +49,7 @@ The case is meant as a teaching tool and to test functionality.
 &SURF ID             = 'UPHOLSTERY'
       FYI            = 'Properties completely fabricated'
       COLOR          = 'PURPLE'
-      HT1D           = T
+      VARIABLE_THICKNESS = T
       BURN_AWAY      = T
       MATL_ID        = 'FABRIC'
       THICKNESS      = 0.002 /

@@ -1569,7 +1569,7 @@ END SUBROUTINE INITIALIZE_INTERPOLATION
 END SUBROUTINE INITIALIZE_MESH_VARIABLES_2
 
 
-!> \brief Find WALL THIN_WALL cells with HT1D or HT3D and adjust the 1-D internal noding
+!> \brief Find WALL THIN_WALL cells with VARIABLE_THICKNESS or HT3D and adjust the 1-D internal noding
 !> \param NM Mesh index
 
 SUBROUTINE ADJUST_HT3D_WALL_CELLS(NM)
@@ -1591,7 +1591,7 @@ ENDDO PRIMARY_THIN_WALL_LOOP_1
 END SUBROUTINE ADJUST_HT3D_WALL_CELLS
 
 
-!> \brief For a given WALL or THIN_WALL with HT1D or HT3D, adjust the 1-D internal noding
+!> \brief For a given WALL or THIN_WALL with VARIABLE_THICKNESS or HT3D, adjust the 1-D internal noding
 !> \param NM Mesh index
 !> \param WALL_CELL Optional WALL cell index
 !> \param THIN_WALL_CELL Optional THIN_WALL cell index
@@ -1624,7 +1624,7 @@ M => MESHES(NM)
 IF (PRESENT(WALL_CELL)) THEN
    WC => M%WALL(WALL_CELL)
    SF => SURFACE(WC%SURF_INDEX)
-   IF (.NOT.SF%HT1D .AND. .NOT.SF%HT_DIM>1) RETURN
+   IF (.NOT.SF%VARIABLE_THICKNESS .AND. .NOT.SF%HT_DIM>1) RETURN
    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) RETURN
    IF (SF%NORMAL_DIRECTION_ONLY) RETURN
    ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
@@ -3709,7 +3709,7 @@ OM_PREV => MESHES(NOM)
 ITER = 0
 OBST_INDEX = 0
 THICKNESS  = 0._EB
-IF (SF%HT1D .OR. SF%HT_DIM>1) THEN
+IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
    N_LAYERS = 1
    LAYER_THICKNESS = 0._EB
    MATL_MASS_FRACTION = 0._EB
@@ -3733,7 +3733,8 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
       IF (NOM>0) THEN
          IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NOM)) RETURN  ! If NOM not controlled by current MPI process, abandon search
          OM => MESHES(NOM)
-      ELSEIF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. (SF%HT_DIM>1.OR.SF%HT1D)) THEN ! Do not apply HT3D or HT1D to exterior boundary
+      ELSEIF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. (SF%HT_DIM>1.OR.SF%VARIABLE_THICKNESS)) THEN 
+         ! Do not apply HT3D to VARIABLE_THICKNESS exterior boundary
          MESSAGE = 'ERROR: SURF '//TRIM(SURFACE(WC%SURF_INDEX)%ID)//' cannot be applied to an exterior boundary'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          RETURN
@@ -3752,9 +3753,9 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
    IC = OM%CELL_INDEX(II,JJ,KK)
 
-   ! For HT1D and HT3D cases, get material information from obstruction
+   ! For VARIABLE_THICKNESS and HT3D cases, get material information from obstruction
 
-   IF (SF%HT1D .OR. SF%HT_DIM>1) THEN 
+   IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN 
 
       OBST_INDEX_PREVIOUS = OBST_INDEX
       OBST_INDEX = OM%CELL(IC)%OBST_INDEX
@@ -3823,7 +3824,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
    ! If 1-D solid and the user-specified thickness is less than the current thickness, abandon the search for back-wall cell
 
-   IF (.NOT.SF%HT1D .AND. SF%HT_DIM==1 .AND. THICKNESS>SUM(SF%LAYER_THICKNESS)) RETURN
+   IF (.NOT.SF%VARIABLE_THICKNESS .AND. SF%HT_DIM==1 .AND. THICKNESS>SUM(SF%LAYER_THICKNESS)) RETURN
 
    SELECT CASE(IOR)  ! New cell indices as we march deeper into the obstruction
       CASE(-1) ; II=II+1
@@ -3836,7 +3837,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
 ENDDO FIND_BACK_WALL_CELL
 
-! If the user has specified LINING materials (HT3D or HT1D with SURF MATLs and THICKNESS), add this information to 
+! If the user has specified LINING materials (HT3D or VARIABLE_THICKNESS with SURF MATLs and THICKNESS), add this information to 
 ! existing lists of layers and materials.
 ! The new arrays of thickness and material information are temporarily stored in arrays with _NEW suffix.
 
@@ -3894,9 +3895,9 @@ IF (SF%LINING) THEN
    MATL_INDEX(1:N_MATLS) = MATL_INDEX_NEW(1:N_MATLS_NEW)
 ENDIF
 
-! If HT1D or HT3D, reallocate ONE_D arrays holding layer and material info
+! If VARIABLE_THICKNESS or HT3D, reallocate ONE_D arrays holding layer and material info
 
-IF (SF%HT1D .OR. SF%HT_DIM>1) THEN
+IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
    ONE_D%N_LAYERS = N_LAYERS
    ONE_D%N_MATL   = N_MATLS
    DEALLOCATE(ONE_D%MATL_COMP) ; ALLOCATE(ONE_D%MATL_COMP(ONE_D%N_MATL))
