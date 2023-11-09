@@ -193,6 +193,8 @@ TYPE BOUNDARY_COORD_TYPE
    REAL(EB) :: Z1            !< Lower z extent of boundary cell (m)
    REAL(EB) :: Z2            !< Upper z extent of boundary cell (m)
 
+   REAL(EB), DIMENSION(3) :: NVEC=0._EB !< Normal vector
+
 END TYPE BOUNDARY_COORD_TYPE
 
 
@@ -1231,7 +1233,6 @@ TYPE CFACE_TYPE
    INTEGER :: N_INTEGERS=0               !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0               !< Number of logicals to pack into restart or send/recv buffer
    REAL(EB) :: AREA=0._EB                !< CFACE area. From CUT_FACE(CUT_FACE_IND1)%AREA(CUT_FACE_IND2)
-   REAL(EB) :: NVEC(3)=0._EB             !< CFACE normal out unit vector.
    REAL(EB) :: DUNDT=0._EB
    REAL(EB) :: RSUM_G=0._EB              !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
    REAL(EB) :: TMP_G                     !< Temperature (K) in adjacent gas phase cell

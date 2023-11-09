@@ -825,17 +825,17 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             ENDIF
          ELSEIF (PRESENT(CFACE_INDEX)) THEN
             CALL RANDOM_CFACE_XYZ(NM,CFA,CFA_X,CFA_Y,CFA_Z)
-            BC%X = CFA_X + CFA%NVEC(1)*VENT_OFFSET*DX(IIG)
-            BC%Y = CFA_Y + CFA%NVEC(2)*VENT_OFFSET*DY(JJG)
-            BC%Z = CFA_Z + CFA%NVEC(3)*VENT_OFFSET*DZ(KKG)
+            BC%X = CFA_X + BC%NVEC(1)*VENT_OFFSET*DX(IIG)
+            BC%Y = CFA_Y + BC%NVEC(2)*VENT_OFFSET*DY(JJG)
+            BC%Z = CFA_Z + BC%NVEC(3)*VENT_OFFSET*DZ(KKG)
             IF (INSERT_TYPE==1 .AND. LP%EMBER) THEN
                CALL RANDOM_NUMBER(RN3)
                BC%Z = CFA_Z + SF%EMBER_GENERATION_HEIGHT(1) + &
                       (SF%EMBER_GENERATION_HEIGHT(2)-SF%EMBER_GENERATION_HEIGHT(1))*REAL(RN3,EB)
             ENDIF
-            LP%U = DOT_PRODUCT(CFA%NVEC,(/-B1%U_NORMAL,SF%VEL_T(1),SF%VEL_T(2)/))
-            LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-B1%U_NORMAL,SF%VEL_T(2)/))
-            LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-B1%U_NORMAL/))
+            LP%U = DOT_PRODUCT(BC%NVEC,(/-B1%U_NORMAL,SF%VEL_T(1),SF%VEL_T(2)/))
+            LP%V = DOT_PRODUCT(BC%NVEC,(/SF%VEL_T(1),-B1%U_NORMAL,SF%VEL_T(2)/))
+            LP%W = DOT_PRODUCT(BC%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-B1%U_NORMAL/))
          ENDIF WALL_OR_CFACE_IF_2
 
          ! Update idicies in case offset puts location in a different cell
@@ -1146,7 +1146,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
                      IF (DIST<DIST_MIN) THEN
                         DIST_MIN = DIST
                         P_VECTOR_MIN = P_VECTOR
-                        NVEC_MIN = CFACE(CF%CFACE_INDEX(IFACE))%NVEC
+                        NVEC_MIN = BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
                      ENDIF
                   ENDDO CFA_LOOP1
                   IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWO_EPSILON_EB) CC_VALID=.TRUE.
@@ -1319,7 +1319,7 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                               IF (DIST<DIST_MIN) THEN
                                  DIST_MIN = DIST
                                  P_VECTOR_MIN = P_VECTOR
-                                 NVEC_MIN = CFACE(CF%CFACE_INDEX(IFACE))%NVEC
+                                 NVEC_MIN = BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
                               ENDIF
                            ENDDO CFA_LOOP2
                            IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWO_EPSILON_EB) EXIT RAND_LOCATION_LOOP
@@ -1994,16 +1994,16 @@ PARTICLE_LOOP: DO IP=1,NLP
                CFA2 => CFACE(ICF)
                CFA2_BC => BOUNDARY_COORD(CFA2%BC_INDEX)
 
-               DIST2 = DOT_PRODUCT(CFA%NVEC,GVEC/(NORM2(GVEC)+TWO_EPSILON_EB))
+               DIST2 = DOT_PRODUCT(CFA_BC%NVEC,GVEC/(NORM2(GVEC)+TWO_EPSILON_EB))
                IF(DIST2<-0.99_EB) THEN ! Only for slopes less than 8 degrees.
 
                   IN_CFACE=.TRUE.
                   ! Test for case of CFACE_INDEX switching to an ICF with similar slope, if so don't do anything.
-                  IF (.NOT.(LP%CFACE_INDEX/=ICF .AND. (DOT_PRODUCT(CFA%NVEC,CFA2%NVEC))>0.99_EB) ) THEN
+                  IF (.NOT.(LP%CFACE_INDEX/=ICF .AND. (DOT_PRODUCT(CFA_BC%NVEC,CFA2_BC%NVEC))>0.99_EB) ) THEN
 
-                     IF (LP%CFACE_INDEX/=ICF .AND. (DOT_PRODUCT(CFA%NVEC,CFA2%NVEC))<=0.99_EB) THEN
+                     IF (LP%CFACE_INDEX/=ICF .AND. (DOT_PRODUCT(CFA_BC%NVEC,CFA2_BC%NVEC))<=0.99_EB) THEN
                         ! Case of switching to different ICF with different slope:
-                        DIST2 = DOT_PRODUCT(CFA2%NVEC,GVEC/(NORM2(GVEC)+TWO_EPSILON_EB))
+                        DIST2 = DOT_PRODUCT(CFA2_BC%NVEC,GVEC/(NORM2(GVEC)+TWO_EPSILON_EB))
                         ! If ICF is almost vertical pointing in the direction of velocity, set creep velocity.
                         IF(ABS(DIST2)<0.01_EB .AND. (CFA2_BC%Z<CFA_BC%Z)) IN_CFACE=.FALSE.
                      ELSE
@@ -2058,9 +2058,9 @@ PARTICLE_LOOP: DO IP=1,NLP
                CFA => CFACE(ICF)
                CFA_BC => BOUNDARY_COORD(CFA%BC_INDEX)
                P_VECTOR = (/BC%X-CFA_BC%X, BC%Y-CFA_BC%Y, BC%Z-CFA_BC%Z/)
-               TEST_POS = .FALSE.; IF (LP%CFACE_INDEX == 0) TEST_POS = DOT_PRODUCT(CFA%NVEC,P_VECTOR) > TWO_EPSILON_EB
+               TEST_POS = .FALSE.; IF (LP%CFACE_INDEX == 0) TEST_POS = DOT_PRODUCT(CFA_BC%NVEC,P_VECTOR) > TWO_EPSILON_EB
 
-               CFACE_ATTACH : IF (DOT_PRODUCT(CFA%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN
+               CFACE_ATTACH : IF (DOT_PRODUCT(CFA_BC%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN
 
                   ! Normal points down or particle in gas phase. Let particle move freely:
 
@@ -2071,8 +2071,8 @@ PARTICLE_LOOP: DO IP=1,NLP
 
 
                   IF(LPC%ADHERE_TO_SOLID) THEN
-                     CALL CROSS_PRODUCT(VEL_VECTOR_1,CFA%NVEC,GVEC)
-                     CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFA%NVEC)
+                     CALL CROSS_PRODUCT(VEL_VECTOR_1,CFA_BC%NVEC,GVEC)
+                     CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFA_BC%NVEC)
                      CFACE_SLOPE : IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB .AND. ABS(LP%W) > TWO_EPSILON_EB) THEN
                         ! The surface is tilted; particles go down slope:
                         VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
@@ -2092,7 +2092,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                      ELSEIF (LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN CFACE_SLOPE
                         ! Particle moving in horizontal direction and assumed crossing into solid.
                         ! Bounce back on random direction, maintaining CFACE_INDEX:
-                        IF (DOT_PRODUCT( (/ LP%U, LP%V /) ,CFA%NVEC(IAXIS:JAXIS))<-TWO_EPSILON_EB)THEN
+                        IF (DOT_PRODUCT( (/ LP%U, LP%V /) ,CFA_BC%NVEC(IAXIS:JAXIS))<-TWO_EPSILON_EB)THEN
                            CALL RANDOM_NUMBER(RN)
                            DIST2_MIN = (1._EB-SIGN(1._EB,LP%V))*PI/2._EB
                            IF(ABS(LP%U) > TWO_EPSILON_EB) DIST2_MIN = ATAN2(LP%V,LP%U)
@@ -2117,12 +2117,12 @@ PARTICLE_LOOP: DO IP=1,NLP
 
                   PVEC_L = NORM2(P_VECTOR)
                   IF (PVEC_L>TWO_EPSILON_EB) THEN
-                     THETA = ACOS(DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR/PVEC_L))
+                     THETA = ACOS(DOT_PRODUCT(BOUNDARY_COORD(CFACE(ICF)%BC_INDEX)%NVEC,P_VECTOR/PVEC_L))
                      IF (THETA>PIO2) THEN
                         DELTA = PVEC_L*SIN(THETA-0.5_EB*PI)+TWO_EPSILON_EB
-                        BC%X = BC%X + DELTA*CFA%NVEC(1)
-                        BC%Y = BC%Y + DELTA*CFA%NVEC(2)
-                        BC%Z = BC%Z + DELTA*CFA%NVEC(3)
+                        BC%X = BC%X + DELTA*CFA_BC%NVEC(1)
+                        BC%Y = BC%Y + DELTA*CFA_BC%NVEC(2)
+                        BC%Z = BC%Z + DELTA*CFA_BC%NVEC(3)
                      ENDIF
                   ENDIF
                   LP%CFACE_INDEX = ICF
