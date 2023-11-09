@@ -1,0 +1,70 @@
+&HEAD CHID='box_burn_away9', TITLE='Test BURN_AWAY feature' / 
+
+The FOAM box is evaporated away by the high thermal radiation
+from HOT surfaces. The foam has a density of 20 kg/m3 and 50% residue. It is covered by 2 mm of fabric
+with a density of 50 kg/m3 and 20% residue. The mass of gas pyrolyzed should be 0.4^2 m2 * (0.004*40+0.396*10) = 0.6592 kg.
+
+&MESH IJK=10,10,10 XB=-0.3,0.7,-0.4,0.6,0.0,1.0, MULT_ID='mesh' /
+&MULT ID='mesh', DX=1.0, DY=1.0, I_UPPER=1, J_UPPER=1 /
+
+&TIME T_END=180., DT=0.01 /
+
+&SPEC ID='METHANE' /
+
+&MATL ID                   = 'FABRIC'
+      HEAT_OF_REACTION     = 500.
+      CONDUCTIVITY         = 1.
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 50.
+      NU_SPEC              = 0.8
+      SPEC_ID              = 'METHANE'
+      NU_MATL              = 0.2
+      MATL_ID              = 'ASH'
+      REFERENCE_TEMPERATURE= 200. /
+
+&MATL ID                   = 'FOAM'
+      HEAT_OF_REACTION     = 800.
+      CONDUCTIVITY         = 2.2
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 20.
+      NU_SPEC              = 0.5
+      SPEC_ID              = 'METHANE'
+      NU_MATL              = 0.5
+      MATL_ID              = 'ASH'
+      REFERENCE_TEMPERATURE= 200. /
+
+&MATL ID                   = 'ASH'
+      CONDUCTIVITY         = 2.2
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 10. /
+
+&SURF ID                   = 'FOAM SLAB'
+      COLOR                = 'TOMATO 3'
+      HT3D                 = T 
+      LAYER_DIVIDE         = 1.5
+      MATL_ID              = 'FABRIC'
+      THICKNESS            = 0.002 /
+
+&OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB', MATL_ID='FOAM' /
+
+&SURF ID='HOT', TMP_FRONT=1100., COLOR='RED' /
+
+&VENT PBX=-0.3, SURF_ID='HOT' /
+&VENT PBX= 1.7, SURF_ID='HOT' /
+&VENT PBY=-0.4, SURF_ID='HOT' /
+&VENT PBY= 1.6, SURF_ID='HOT' /
+&VENT PBZ= 0.0, SURF_ID='HOT' /
+&VENT PBZ= 1.0, SURF_ID='HOT' /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T /
+&BNDF QUANTITY='MASS FLUX', SPEC_ID='METHANE', CELL_CENTERED=T /
+
+&SLCF PBZ=0.5, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBZ=0.5, QUANTITY='DENSITY', CELL_CENTERED=T /
+&SLCF PBZ=0.5, QUANTITY='MASS FRACTION', SPEC_ID='METHANE', CELL_CENTERED=T /
+
+&DEVC XB=-0.3,1.7,-0.4,1.6,0,1, QUANTITY='DENSITY', SPEC_ID='METHANE', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='Mass fuel' /
+
+&TAIL /
+
+

@@ -2286,14 +2286,14 @@ MESH_LOOP: DO NM=1,NMESHES
          COLOR_INDEX = VT%COLOR_INDICATOR
       ENDIF
       IF (VT%RGB(1)<0) THEN
-         WRITE(LU_SMV,'(8I5)')        MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+         WRITE(LU_SMV,'(8I5,A,I5)')   MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
                                       MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
-                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR
+                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR,' ! ',VT%IOR
       ELSE
-         WRITE(LU_SMV,'(8I5,4F13.5)') MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
-                                      MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
-                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR, &
-                                      REAL(VT%RGB,FB)/255._FB,VT%TRANSPARENCY
+         WRITE(LU_SMV,'(8I5,4F13.5,A,I5)') MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+                                           MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
+                                           MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR, &
+                                           REAL(VT%RGB,FB)/255._FB,VT%TRANSPARENCY,' ! ',VT%IOR
       ENDIF
    ENDDO
    DO N=1,NDV
@@ -2492,8 +2492,13 @@ WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
 
 IF (APPEND) RETURN
 
+CELL_COUNT = 0
+DO NM=1,NMESHES
+   M => MESHES(NM)
+   CELL_COUNT = CELL_COUNT + M%IBAR*M%JBAR*M%KBAR
+ENDDO
+
 IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
-   CELL_COUNT = 0
    MESH_LOOP: DO NM=1,NMESHES
       M => MESHES(NM)
       WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
@@ -2501,16 +2506,11 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Number of Grid Cells          ',M%IBAR*M%JBAR*M%KBAR
-      CELL_COUNT = CELL_COUNT + M%IBAR*M%JBAR*M%KBAR
       WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
-      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
    ENDDO MESH_LOOP
-   WRITE(LU_OUTPUT,'(/A,I9/)'  ) ' Total Number of Grid Cells     ',CELL_COUNT
-   WRITE(LU_OUTPUT,'(/A,F9.3)')  ' Maximum Cell Aspect Ratio      ',MAXVAL(MAX_CELL_ASPECT_RATIO)
-   WRITE(LU_OUTPUT,'(A,I9/)')    ' CFL Velocity Norm              ',CFL_VELOCITY_NORM
 ENDIF
 
 IF (ORIGIN_LAT>-1.E6_EB) THEN
@@ -2519,7 +2519,11 @@ IF (ORIGIN_LAT>-1.E6_EB) THEN
    WRITE(LU_OUTPUT,'(A,F12.7)')   '   Origin Longitude          ',ORIGIN_LON
 ENDIF
 
-WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
+WRITE(LU_OUTPUT,'(/A/)')      ' Miscellaneous Parameters'
+WRITE(LU_OUTPUT,'(A,I9)'  )   '   Total Number of Grid Cells   ',CELL_COUNT
+WRITE(LU_OUTPUT,'(A,F9.3)')   '   Maximum Cell Aspect Ratio    ',MAXVAL(MAX_CELL_ASPECT_RATIO)
+WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)        ',DT
+WRITE(LU_OUTPUT,'(A,I9)')     '   CFL Velocity Norm            ',CFL_VELOCITY_NORM
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
@@ -2970,7 +2974,7 @@ SURFLOOP: DO N=0,N_SURF
       CYCLE SURFLOOP
    ENDIF
 
-   THICK: IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
+   THICK: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. .NOT.SF%VARIABLE_THICKNESS .AND. .NOT. SF%HT_DIM>1) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Material List'
       DO NN=1,SF%N_MATL
          WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,TRIM(SF%MATL_NAME(NN))
@@ -2980,7 +2984,7 @@ SURFLOOP: DO N=0,N_SURF
          IF (SF%HT_DIM==1) WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
-            WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
+            WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%MATL_ID(NL,NN)),', Mass fraction: ',SF%MATL_MASS_FRACTION(NL,NN)
          ENDDO
       ENDDO
       IF (SF%LAYER_DIVIDE<=SF%N_LAYERS) &
@@ -2999,6 +3003,8 @@ SURFLOOP: DO N=0,N_SURF
       ENDIF
       IF (SF%GEOMETRY==SURF_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed cylindrical symmetry'
       IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical symmetry'
+   ELSEIF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1)) THEN
+      WRITE(LU_OUTPUT,'(A)')      '     Internal noding and material information taken from underlying obstructions'
    ENDIF THICK
 
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
@@ -8303,6 +8309,8 @@ END FUNCTION GAS_PHASE_OUTPUT
 !> \param OPT_DEVC_INDEX Index of device
 !> \param OPT_CFACE_INDEX Index of immersed boundary cell face
 !> \param OPT_CUT_FACE_INDEX Index of the cut face
+!> \param OPT_NODE_INDEX Index of internal heat conduction grid
+!> \param OPT_PROF_INDEX Index of PROFile
 
 REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX,OPT_BNDF_INDEX,&
                                      OPT_DEVC_INDEX,OPT_CFACE_INDEX,OPT_CUT_FACE_INDEX,OPT_NODE_INDEX,OPT_PROF_INDEX)
@@ -8735,11 +8743,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
 
    CASE(37) ! VELOCITY ERROR
-      IF (PRESENT(OPT_WALL_INDEX)) THEN
-         SOLID_PHASE_OUTPUT = WC%VEL_ERR_NEW
-      ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
-         SOLID_PHASE_OUTPUT = CFA%VEL_ERR_NEW
-      ENDIF
+      SOLID_PHASE_OUTPUT = B1%VEL_ERR_NEW
 
    CASE(38) ! WALL VISCOSITY
       IF (PRESENT(OPT_WALL_INDEX)) THEN
@@ -8749,11 +8753,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
 
    CASE(39) ! DEPOSITION VELOCITY
-      IF (PRESENT(OPT_WALL_INDEX)) THEN
-         SOLID_PHASE_OUTPUT = WC%V_DEP
-      ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
-         SOLID_PHASE_OUTPUT = CFA%V_DEP
-      ENDIF
+      SOLID_PHASE_OUTPUT = B2%V_DEP
 
    CASE(41) ! WALL CELL COLOR (output VENT index for WC color)
       SOLID_PHASE_OUTPUT = REAL(WC%VENT_INDEX,EB)
@@ -9122,7 +9122,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = 0._EB
       IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
          IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED .OR. SF%HT_DIM>1) THEN
-            NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
+            NWP = SUM(ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS))
             X0 = SUM(ONE_D%LAYER_THICKNESS)
          ELSE
             NWP = SF%N_CELLS_INI
@@ -9137,9 +9137,9 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                CASE (SURF_SPHERICAL)
                   VOL = FOTHPI*((X0-ONE_D%X(I-1))**3-(X0-ONE_D%X(I))**3)
             END SELECT
-            H_MATL_LOOP: DO J=1,SF%N_MATL
+            H_MATL_LOOP: DO J=1,ONE_D%N_MATL
                IF (ONE_D%MATL_COMP(J)%RHO(I)<=TWO_EPSILON_EB) CYCLE H_MATL_LOOP
-               ML  => MATERIAL(SF%MATL_INDEX(J))
+               ML  => MATERIAL(ONE_D%MATL_INDEX(J))
                ITMP = INT(ONE_D%TMP(I))
                SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(J)%RHO(I)*VOL * &
                               (ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(MIN(I_MAX_TEMP,ITMP+1))-ML%H(ITMP)))
@@ -9865,12 +9865,12 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
 
    SF  => SURFACE(SURF_INDEX)
-   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED .OR. SF%HT_DIM>1) THEN
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED .OR. SF%HT_DIM>1 .OR. SF%VARIABLE_THICKNESS) THEN
       NWP = SUM(ONE_D%N_LAYER_CELLS)
       IF (NWP==0) CYCLE PROF_LOOP
       X_S_NEW(0:NWP) = ONE_D%X(0:NWP)
       THICKNESS = SUM(ONE_D%LAYER_THICKNESS)
-      CALL GET_WALL_NODE_WEIGHTS(NWP,SF%N_LAYERS,ONE_D%N_LAYER_CELLS,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
+      CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,ONE_D%N_LAYER_CELLS,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
          ONE_D%X(0:NWP),SF%LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,LAYER_INDEX,MF_FRAC,&
          SF%INNER_RADIUS)
    ELSE
