@@ -1673,6 +1673,7 @@ REAL(EB),INTENT(OUT):: F_H(NUNKH)
 ! Local variables:
 INTEGER :: I,J,K,IROW,IW,IIG,JJG,KKG,IOR,ICFACE,IFACE,JFACE,ILH,JLH,KLH,IRC
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 REAL(EB) :: IDX, AF, VAL, BCV
 
@@ -1708,9 +1709,10 @@ CFACE_LOOP_1 : DO ICFACE=1,N_EXTERNAL_CFACE_CELLS
    IFACE= CFA%CUT_FACE_IND1
    JFACE= CFA%CUT_FACE_IND2
    WC  => WALL(CUT_FACE(IFACE)%IWC)
+   EWC => EXTERNAL_WALL(CUT_FACE(IFACE)%IWC)
 
    ! DIRICHLET boundaries:
-   IF_CFACE_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_CFACE_DIRICHLET: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
 
       ! Gasphase cell indexes:
       BC => BOUNDARY_COORD(WC%BC_INDEX); IF(ZONE_SOLVE(PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
@@ -1747,6 +1749,7 @@ ENDDO CFACE_LOOP_1
 WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
    ! Drop if this is a cut-face or NULL Boundary. Dealt with external CFACE.
    IF (WC%CUT_FACE_INDEX>0 .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
    ! Gasphase cell indexes:
@@ -1754,7 +1757,7 @@ WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
 
    ! NEUMANN boundaries:
-   IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+   IF_NEUMANN: IF (EWC%PRESSURE_BC_TYPE==NEUMANN) THEN
       ! Define cell size, normal to WC:
       SELECT CASE (IOR)
       CASE(-1) ! -IAXIS oriented, high face of IIG cell.
@@ -1790,7 +1793,7 @@ WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDIF IF_NEUMANN
 
    ! DIRICHLET boundaries:
-   IF_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_DIRICHLET: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
       ! Global matrix solve, skip INTERPOLATED boundaries.
       IF (PRES_FLAG/=ULMAT_FLAG .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE
       ! Here case where SOLID and OPEN or interpolated are mixed on a boundary:
@@ -10944,7 +10947,7 @@ DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
    KKG = BC%KKG
    AF  = DY(JJG)*DZ(KKG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
+   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + B1%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
 ENDDO
 
 ! JAXIS faces:
@@ -10962,7 +10965,7 @@ DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
    KKG = BC%KKG
    AF  = DX(IIG)*DZ(KKG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
+   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + B1%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
 ENDDO
 
 ! KAXIS faces:
@@ -10980,7 +10983,7 @@ DO IFACE=1,MESHES(NM)%CC_NREGFACE_Z(X1AXIS)
    KKG = BC%KKG
    AF  = DX(IIG)*DY(JJG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
+   DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + B1%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
 ENDDO
 
 ! Regular faces connecting gasphase - cut-cells:
@@ -11011,13 +11014,13 @@ DO IFACE=1,MESHES(NM)%CC_NBBRCFACE_Z
    SELECT CASE(RC_FACE(IFACE)%CELL_LIST(1,ISIDE+2))
    CASE(CC_FTYPE_RGGAS) ! Regular cell.
       ! Q_LEAK accounts for enthalpy moving through leakage paths
-      DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
+      DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF  + B1%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
    CASE(CC_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
       ICC = RC_FACE(IFACE)%CELL_LIST(2,ISIDE+2)
       IF (ICC > MESHES(NM)%N_CUTCELL_MESH) CYCLE ! Cut-cell is guard-cell cc.
       JCC = RC_FACE(IFACE)%CELL_LIST(3,ISIDE+2)
       CUT_CELL(ICC)%DVOL(JCC) = &
-      CUT_CELL(ICC)%DVOL(JCC) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF + WC%Q_LEAK * CUT_CELL(ICC)%VOLUME(JCC) ! Qconf +ve sign is
+      CUT_CELL(ICC)%DVOL(JCC) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF + B1%Q_LEAK * CUT_CELL(ICC)%VOLUME(JCC) ! Qconf +ve sign is
                                                                                                        ! outwards of cut-cell.
    END SELECT
 ENDDO
@@ -11093,7 +11096,7 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
             IF (ICC > MESHES(NM)%N_CUTCELL_MESH) CYCLE ! Cut-cell is guard-cell cc.
             JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
             CUT_CELL(ICC)%DVOL(JCC) = &
-            CUT_CELL(ICC)%DVOL(JCC) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF + WC%Q_LEAK * CUT_CELL(ICC)%VOLUME(JCC) !Qconf +ve sgn
+            CUT_CELL(ICC)%DVOL(JCC) - ( B1%AREA_ADJUST*B1%Q_CON_F ) * AF + B1%Q_LEAK * CUT_CELL(ICC)%VOLUME(JCC) !Qconf +ve sgn
                                                                                                      ! is outwards of cut-cell.
          END SELECT
       ENDDO
@@ -15871,7 +15874,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    ! Compute velocity difference
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
-   WC%VEL_ERR_NEW = VELOCITY_ERROR
+   B1%VEL_ERR_NEW = VELOCITY_ERROR
    IDX = B1%RDN
    IF(.NOT.GRADH_ON_CARTESIAN) THEN
       IDX = 0._EB

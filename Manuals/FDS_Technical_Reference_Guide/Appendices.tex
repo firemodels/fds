@@ -1717,20 +1717,27 @@ Comparing Eq.~(\ref{T_ghost}) with Eq.~(\ref{T0}), it is apparent that
 
 \section{Optional 3-D Solid Phase Heat Transfer}
 
-The solid phase heat conduction equation can be solved in 3-D by applying the 1-D equation~\ref{crank-nicolson} in the following three-step alternating direction implicit (ADI) scheme:
+The solid phase heat conduction equation in three directions is given by:
+\begin{equation}
+\label{ht3d}
+  \rho_{\rm s} c_{\rm s} \frac{\partial T_{\rm s}}{\partial t} = \frac{\partial}{\partial x} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial x} \right) +
+                                                                 \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial y} \right) +
+                                                                 \frac{\partial}{\partial z} \left( k_{\rm s} \frac{\partial T_{\rm s}}{\partial z} \right) + \dot{q}'''_{\rm s}
+\end{equation}
+The method of solution is to split this equation using the following alternating direction implicit (ADI) scheme:
 \begin{align}
-\label{crank-nicolson_3d}
-(\rho_{\rm s} \, c_{\rm s})_i \frac{T_{{\rm s},i}^{n+1}-T_{{\rm s},i}^{n}}{3 \, \delta t}
-& = \frac{1}{2 \, \delta x_i} \left( k_{{\rm s},i+\frac{1}{2}} \frac{T_{{\rm s},i+1}^{n}  -T_{{\rm s},i}^{n}}  {\delta x_{i+\frac{1}{2}}} - k_{{\rm s},i-\frac{1}{2}} \frac{T_{{\rm s},i}^{n}  -T_{{\rm s},i-1}^{n}}  {\delta x_{i-\frac{1}{2}}} \right) \notag \\[0.1in]
-& + \frac{1}{2 \, \delta x_i} \left( k_{{\rm s},i+\frac{1}{2}} \frac{T_{{\rm s},i+1}^{n+1}-T_{{\rm s},i}^{n+1}}{\delta x_{i+\frac{1}{2}}} - k_{{\rm s},i-\frac{1}{2}} \frac{T_{{\rm s},i}^{n+1}-T_{{\rm s},i-1}^{n+1}}{\delta x_{i-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}  \\[0.2in]
-(\rho_{\rm s} \, c_{\rm s})_j \frac{T_{{\rm s},j}^{n+2}-T_{{\rm s},j}^{n+1}}{3 \, \delta t}
-& = \frac{1}{2 \, \delta y_j} \left( k_{{\rm s},j+\frac{1}{2}} \frac{T_{{\rm s},j+1}^{n+1}-T_{{\rm s},j}^{n+1}}{\delta y_{j+\frac{1}{2}}} - k_{{\rm s},j-\frac{1}{2}} \frac{T_{{\rm s},j}^{n+1}-T_{{\rm s},j-1}^{n+1}}{\delta y_{j-\frac{1}{2}}} \right) \notag \\[0.1in]
-& + \frac{1}{2 \, \delta y_j} \left( k_{{\rm s},j+\frac{1}{2}} \frac{T_{{\rm s},j+1}^{n+2}-T_{{\rm s},j}^{n+2}}{\delta y_{j+\frac{1}{2}}} - k_{{\rm s},j-\frac{1}{2}} \frac{T_{{\rm s},j}^{n+2}-T_{{\rm s},j-1}^{n+1}}{\delta y_{j-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}  \\[0.2in]
-(\rho_{\rm s} \, c_{\rm s})_k \frac{T_{{\rm s},k}^{n+3}-T_{{\rm s},k}^{n+2}}{3 \, \delta t}
-& = \frac{1}{2 \, \delta z_k} \left( k_{{\rm s},k+\frac{1}{2}} \frac{T_{{\rm s},k+1}^{n+2}-T_{{\rm s},k}^{n+2}}{\delta z_{k+\frac{1}{2}}} - k_{{\rm s},k-\frac{1}{2}} \frac{T_{{\rm s},k}^{n+2}-T_{{\rm s},k-1}^{n+2}}{\delta z_{k-\frac{1}{2}}} \right) \notag \\[0.1in]
-& + \frac{1}{2 \, \delta z_k} \left( k_{{\rm s},k+\frac{1}{2}} \frac{T_{{\rm s},k+1}^{n+3}-T_{{\rm s},k}^{n+3}}{\delta z_{k+\frac{1}{2}}} - k_{{\rm s},k-\frac{1}{2}} \frac{T_{{\rm s},k}^{n+3}-T_{{\rm s},k-1}^{n+3}}{\delta z_{k-\frac{1}{2}}} \right) + \frac{\dot{q}'''_{{\rm s},i}}{3}
+\label{ht3d_xyz}
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial x} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial x} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial y} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial y} \right) + \frac{\dot{q}'''_{\rm s}}{3} \\
+ \frac{ \rho_{\rm s} c_{\rm s}}{3} \frac{\partial T_{{\rm s}}}{\partial t} & = \frac{\partial}{\partial z} \left( k_{\rm s} \frac{\partial T_{{\rm s}}}{\partial z} \right) + \frac{\dot{q}'''_{\rm s}}{3}
 \end{align}
-The full update of the 3-D equations is performed over the course of three 1-D solves. Between each 1-D update, the resulting temperature field from, say, the $x$ direction is interpolated onto the $y$ and $z$ directions via linear interpolation. Because of this, the spatial resolution of each direction need not be the same, or uniform. As with the 1-D solver, cells can be clustered near the boundary to capture steep gradients in temperature.
+The solution of the equation is updated over the course of three gas phase time steps of size $\delta t$. For each coordinate direction, the temperature field is finely gridded near the surface and coarsely gridded in the interior, typically. Thus, the temperature field, $T_{\rm s}(x,y,z,t)$, is discretized differently in each direction. For example, for each surface cell normal to the $x$ direction, the 1-D temperature array in depth is $T_{{\rm s},x,i}$, where $1\le i \le N_x$, and $N_x$ is the number of non-uniformly spaced internal cells spanning the entire width of the solid in the $x$ direction. This is exactly the same approach taken  above for 1-D heat conduction in solids with ``exposed'' back surfaces. Likewise, $T_{\rm s}(x,y,z,t)$ is discretized $T_{{\rm s},y,j}$ and $T_{{\rm s},z,k}$ in the $y$ and $z$ directions, respectively.
+
+In each of the three steps, the 1-D heat conduction equation is solved in one of the three coordinate directions using the Crank-Nicolson (C-N) scheme described above, except now the implicit update spans three gas phase time steps, $3\, \delta t$. The temperature fields spanning the other two coordinate directions are updated explicitly. The change in temperature due to the implicit C-N update is denoted $\Delta T_{{\rm s},x,i}$, with similar expressions for the $y$ and $z$ updates. The explicit update taken during the two steps for which $T_{{\rm s},x,i}$ is not updated implicitly transfers enthalpy in the $y$ and $z$ directions:
+\be
+    \rho_{{\rm s},i} c_{{\rm s},i} T_{{\rm s},x,i}^{n+1} = \rho_{{\rm s},i} c_{{\rm s},i} T_{{\rm s},x,i}^{n}  +  \frac{1}{2} \left[ \sum_j w_j \rho_{{\rm s},j} c_{{\rm s},j} \Delta T_{{\rm s},y,j} +   \sum_k w_k \rho_{{\rm s},k} c_{{\rm s},k} \Delta T_{{\rm s},z,k}  \right]
+\ee
+The coefficients, $w_j$ and $w_k$, are the fractions of cell $i$ of the $x$ direction discretization overlapped by cells $j$ and $k$ of the $y$ and $z$ discretizations, respectively.
 
 This type of splitting scheme is discussed by Toro~\cite{Toro}, Chapter~16, ``Methods for Multi-Dimensional PDEs.''
 
@@ -1855,17 +1862,17 @@ To implement this in FDS, the terms $\bar{f}$ and $\bar{b}_{x,m}$ are gathered t
 \chapter{Energy and Mass Conservation for Solid Phase Reactions}
 \label{solid_energy_mass}
 
-A solid material in FDS can undergo one or more reactions (see Sec.~\ref{pyrosection}) that produce new solid materials, gases, or Lagrangian particles (for example, melting or brand formation). These reactions should conserve both mass and energy. 
+A solid material in FDS can undergo one or more reactions (see Sec.~\ref{pyrosection}) that produce new solid materials, gases, or Lagrangian particles (for example, melting or brand formation). These reactions should conserve both mass and energy.
 
 \section{Mass Conservation}
 
 Mass conservation for reaction $\beta$ for solid material $\alpha$ is given by:
 \be
-	\sum_{\alpha'=1}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 0 
+	\sum_{\alpha'=1}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 0
 \ee
 where $N_{\rm m}$ is the number of all types of substances in FDS (solid, gas, or particle) that the reaction produces and $\nu_{\alpha',\alpha \beta}$ is the yield of $\alpha'$ in the reaction where $\alpha'$ could be a new material, a gas, or a type of Lagrangian particle. In FDS input processing, the yield of the original material, $\nu_{\alpha,\alpha \beta}$, is taken as -1, and the prior equation written in terms of the yields as specified in an input file becomes:
 \be
-\sum_{\alpha'=1,\alpha' \neq \alpha}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 1 
+\sum_{\alpha'=1,\alpha' \neq \alpha}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 1
 \label {eq:solid_nusum} \ee
 
 If the left hand side were to sum to larger than 1, this would mean mass is being created. This is not permitted and will result in an error message. If the left hand side sums to less than 1, this would mean mass is being destroyed. This, however, only leads to a warning message. Loosing mass is allowed to represent phenomena where mass is lost from the solid but the user does not wish to track what happens to that mass in the domain.
@@ -1874,14 +1881,14 @@ If the left hand side were to sum to larger than 1, this would mean mass is bein
 
 For energy conservation, the enthalpy prior to the reaction must equal the enthalpy after the reaction plus the heat of reaction, $H_{\rm r,\alpha \beta}$. This, in fact, defines the heat of reaction at a temperature as the difference in enthalpy between the products and reactants:
 \be
-\sum_{\alpha'=1,\nu_{\alpha',\alpha \beta}<0}^{N_{\rm m}} -\nu_{\alpha',\alpha \beta} h_{\alpha'}(T) \, = 
+\sum_{\alpha'=1,\nu_{\alpha',\alpha \beta}<0}^{N_{\rm m}} -\nu_{\alpha',\alpha \beta} h_{\alpha'}(T) \, =
 \sum_{\alpha'=1,\nu_{\alpha',\alpha \beta}>0}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} h_{\alpha'}(T) + H_{\rm r,\alpha \beta}(T)
 \label{eqn_solid_e_cons}
 \ee
 
-Ensuring energy conservation requires that two things be performed as part of handling solid phase reactions. First, the temperature dependence of the heat of reaction must be determined. Second, in reactions combining gasses and solids (including particles), enthalpy differences due to temperature differences must be correctly assessed and apportioned to the gas and solid phase. A challenge for the first item is that for many real world materials, detailed enthalpy data is not known. Enthalpy is known for many pure solid substances (such as NaCl or SiO$_2$), but not for other types of solids like wood or many polymers (plastics and foams). If enthalpies and specific heats are known for all the components of a reaction, then a temperature dependent heat of reaction can be easily generated as the temperature dependent enthalpy difference between products and reactants. 
+Ensuring energy conservation requires that two things be performed as part of handling solid phase reactions. First, the temperature dependence of the heat of reaction must be determined. Second, in reactions combining gasses and solids (including particles), enthalpy differences due to temperature differences must be correctly assessed and apportioned to the gas and solid phase. A challenge for the first item is that for many real world materials, detailed enthalpy data is not known. Enthalpy is known for many pure solid substances (such as NaCl or SiO$_2$), but not for other types of solids like wood or many polymers (plastics and foams). If enthalpies and specific heats are known for all the components of a reaction, then a temperature dependent heat of reaction can be easily generated as the temperature dependent enthalpy difference between products and reactants.
 
-It is noted that the temperature dependence of the heat of reaction is generally a minor effect. For many pyrolysis reactions of interest to fire, the heat of reaction is hundreds of kJ/kg and differences in the specific heat of products and reactants are generally less than 1~\si{kJ/(kg.K)}. In many cases a specific reaction occurs over a narrow temperature range of a few tens of K. Splitting that temperature range around the temperature of the peak reaction rate means that over the temperature range where a reaction takes place that the heat of reaction is often being adjusted by under 10~\%. 
+It is noted that the temperature dependence of the heat of reaction is generally a minor effect. For many pyrolysis reactions of interest to fire, the heat of reaction is hundreds of kJ/kg and differences in the specific heat of products and reactants are generally less than 1~\si{kJ/(kg.K)}. In many cases a specific reaction occurs over a narrow temperature range of a few tens of K. Splitting that temperature range around the temperature of the peak reaction rate means that over the temperature range where a reaction takes place that the heat of reaction is often being adjusted by under 10~\%.
 
 \subsection{Solid Phase Heat of Reaction}
 
@@ -1900,7 +1907,7 @@ The first two cases are typically expected. The first case is where all material
 
 If there is a reaction where mass is destroyed (the LHS of Eq.~\eqref{eq:solid_nusum} is less than 1), this approach must be modified. An assumption must be made about the destroyed mass so that the reaction $\nu$ values balance. In this case, if a reaction looses mass, FDS assumes that the lost mass has the same temperature dependent specific heat as the original material. FDS then adds a virtual material for that product which is included in the solution vector. The virtual material is not tracked outside of determining reference enthalpies.
 
-Once the reference enthalpies are known, the heat of reaction at a specific temperature can be determined by applying Eq.~\ref{eqn_solid_e_cons} at that temperature and solving for the heat of reaction. 
+Once the reference enthalpies are known, the heat of reaction at a specific temperature can be determined by applying Eq.~\ref{eqn_solid_e_cons} at that temperature and solving for the heat of reaction.
 
 \subsection{Accounting for Solid Cell and Gas Cell Temperature Differences}
 

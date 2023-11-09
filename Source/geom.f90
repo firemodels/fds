@@ -8504,7 +8504,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    CFA%CUT_FACE_IND2 = IFACE
 
    INS_INB_COND_1 : IF (IS_INB) THEN
-      CFA%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
+      B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
       ! Check if fire spreads radially over this surface type
       IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
@@ -8703,9 +8703,9 @@ CASE(INTEGER_THREE)
 
                      ! Define BACK_MESH, BACK_INDEX:
 
-                     IF (ICFACE>0) THEN
-                        CFA%BACK_MESH  = NOM
-                        CFA%BACK_INDEX = ICFACE
+                     IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
+                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NOM
+                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
                      ENDIF
 
                      ! Write error for testing:
@@ -8758,8 +8758,10 @@ CASE(INTEGER_THREE)
          ! Vegetation T_IGN setup:
          B1%T_IGN      = WC_B1%T_IGN
          ! Back wall cells:
-         CFA%BACK_MESH  = WC%BACK_MESH
-         CFA%BACK_INDEX = WC%BACK_INDEX
+         IF (WC%OD_INDEX>0 .AND. CFA%OD_INDEX>0) THEN
+            M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = M%BOUNDARY_ONE_D(WC%OD_INDEX)%BACK_MESH
+            M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = M%BOUNDARY_ONE_D(WC%OD_INDEX)%BACK_INDEX
+         ENDIF
       ENDIF
 
    ENDIF INS_INB_COND_3

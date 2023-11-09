@@ -2273,7 +2273,7 @@ where $Y_i$ are the material mass fractions and $\rho_i$ are the material bulk d
 
 \label{info:thermal_properties}
 
-For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$), {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY}\footnote{The {\ct EMISSIVITY} of a {\ct MATL} component of a {\ct SURF} takes precedence over the {\ct EMISSIVITY} specified on the {\ct SURF} line. This is true even if no {\ct EMISSIVITY} is explicitly specified on the {\ct MATL} line. Its default value still takes precedence over whatever might be specified on the {\ct SURF} line.} (0.9 by default). Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot. Temperature-dependence is specified using the {\ct RAMP} convention. As an example, consider Marinite, a wall material suitable for high temperature applications:
+For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$), {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY}\footnote{The values of {\ct EMISSIVITY} that are specified on the various {\ct MATL} lines that define that material components of the solid are used to compute an effective emissivity for the front and back surfaces. However, if you specify an {\ct EMISSIVITY} or {\ct EMISSIVITY\_BACK} on the {\ct SURF} line, these values will then take precedence.} (0.9 by default). Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot. Temperature-dependence is specified using the {\ct RAMP} convention. As an example, consider Marinite, a wall material suitable for high temperature applications:
 \begin{lstlisting}
 &MATL ID                 = 'MARINITE'
       EMISSIVITY         = 0.8
@@ -2389,11 +2389,11 @@ Inside solids, FDS solves the one-dimensional heat transfer equation numerically
 
 The default parameters governing the node spacing are appropriate for simple heat transfer calculations, but sometimes pyrolysis reactions cause spurious fluctuations in temperature and burning rate. The numerical accuracy and stability of the solid phase solution may be improved as follows:
 \begin{description}
-\item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers unless the default value is desired.
-\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR(NL)} less than 1 for the layer {\ct NL}. For example, a value of 0.5 makes the mesh cells in the layer half the size.
+\item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern.
+\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1. For example, a value of 0.5 makes the mesh cells in the layer half the size.
 \item[Specify your own cell size] by specifying {\ct CELL\_SIZE} directly. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR} and it applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type. The feature works by sub-dividing the gas phase time step into halves, quarters, eighths, etc., as specified by the {\ct SURF} line integer parameter {\ct SUBSTEP\_POWER}. Its default value is 2, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of $2^2=4$. If you set {\ct SUBSTEP\_POWER} to 4, the time step will be sub-divided by {\em at most} a factor of $2^4=16$. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain.
-\item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX(:)}. This array input has a default of 1000. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
+\item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX} (default 1000). Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
@@ -2411,31 +2411,42 @@ If a solid obstruction is thermally-thick, you typically do not want to specify 
 This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and its back side to 20~$^\circ$C. You need not specify the temperature of both surfaces. If the back side of the obstruction is exposed, be sure to assign another {\ct SURF} to the back with the opposite boundary conditions. If you want to vary the temperatures of front and back with time, use ramps {\ct RAMP\_T} and {\ct RAMP\_TMP\_BACK}, respectively.
 
 
+\subsection{1-D Heat Conduction in Solids of Varying Thickness}
+\label{info:ht1d}
+
+Solid boundaries usually have one or more layers of a known thickness, in which case you specify the layer thicknesses and material composition on the {\ct SURF} line. However, there may be solids of more complicated geometry for which the various layers may have varying thicknesses. In such cases, you do not specify a {\ct THICKNESS} or a {\ct MATL\_ID} on the {\ct SURF} line. Instead, you specify {\ct MATL\_ID} on the obstructions ({\ct OBST}s) that make up the solid. Multiple obstructions can be used to create multiple layers, and each layer can be assigned one or more material components via {\ct MATL\_ID(:)} and {\ct MATL\_MASS\_FRACTION(:)}. Unlike the way these parameters are specified on a {\ct SURF} line, the single index represents a material component, not a layer. As an example, consider these input lines:
+\begin{lstlisting}
+&SURF ID='SKIN', COLOR='BLACK', VARIABLE_THICKNESS=T /
+&OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, SURF_ID='SKIN',
+      MATL_ID='Steel','Aluminum', MATL_MASS_FRACTION=0.8,0.2 /
+&HOLE XB=0.3,0.7,0.3,0.7,0.3,0.7 /
+&OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
+      MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
+\end{lstlisting}
+The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct VARIABLE\_THICKNESS}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
+
+
 
 \subsection{3-D Heat Conduction (Beta)}
 \label{info:ht3d}
 \label{ht3d_demo}
 \label{info:mesh_separation}
 
-The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate.
-
-FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
-&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB' /
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.01 /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK' /
+&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-The {\ct CELL\_SIZE} indicates that the spatial grid for the 3-D algorithm is uniform as opposed to the 1-D solver. The {\ct CELL\_SIZE} is typically the same as the gas phase cells. It is important to specify this parameter because by default, FDS uses a non-uniform grid for 1-D heat solid phase heat transfer that is not appropriate for 3-D applications.
-
 The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
 
 \subsubsection{Limitations}
 
 \begin{enumerate}
-\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} that is completely within the computational domain. You may use a {\ct VENT} line to apply the {\ct SURF\_ID}, but this {\ct VENT} must be applied to an {\ct OBST}.
-\item Except in limited circumstances, {\ct HT3D} surfaces should only have one layer. The layer may have multiple material components.
+\item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} for which at least one face in each coordinate direction is exposed.
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation.
+\item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically the same as the gas phase cells.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -2467,7 +2478,7 @@ The volume enclosed by {\ct XB} encompasses the entire assembly. The integral on
 The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the {\ct IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the {\ct CONVERSION\_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter {\ct RELATIVE=T} means that only the change in enthalpy is desired.
 .
 
-\subsubsection{Example: Uncoated Structural Steel}
+\subsubsection{Example: Unprotected Structural Steel}
 
 Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
 \begin{lstlisting}
@@ -2491,7 +2502,7 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \end{figure}
 
 
-\subsubsection{Example: Coated Structural Steel}
+\subsubsection{Example: Insulated Structural Steel}
 \label{info:normal_direction_only}
 
 An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
@@ -2504,6 +2515,46 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
       THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
 \end{lstlisting}
 
+
+\subsubsection{Surface Linings}
+
+In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
+\begin{lstlisting}
+&OBST XB=-0.20, 0.20,-0.20, 0.20,-0.05, 0.05, SURF_ID='SLAB', MATL_ID='STEEL' /
+&SURF ID='SLAB', HT3D=T, COLOR='BEIGE', THICKNESS=0.003,0.002,
+      MATL_ID(1,1:2)='STUFF A','STUFF B', MATL_MASS_FRACTION(1,1:2)=0.3,0.7,
+      MATL_ID(2,1:2)='STUFF B','STUFF C', MATL_MASS_FRACTION(2,1:2)=0.2,0.8 /
+&MATL ID='STUFF A', DENSITY=  50, SPECIFIC_HEAT=1.0, CONDUCTIVITY=0.1 /
+&MATL ID='STUFF B', DENSITY=  80, SPECIFIC_HEAT=1.5, CONDUCTIVITY=0.2 /
+&MATL ID='STUFF C', DENSITY=  30, SPECIFIC_HEAT=2.5, CONDUCTIVITY=0.3 /
+&MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50. /
+\end{lstlisting}
+The resulting solid has the same dimensions as the one you specify, but 5~mm of its surface material is replaced by the given layers of ``stuff.''
+
+
+\subsubsection{Working with Thin Plates}
+\label{checkerboard}
+
+The sample case called {\ct Heat\_Transfer/checkerboard.fds} demonstrates how to work with a thin plate of steel. Consider the following lines of input:
+\begin{lstlisting}
+&MATL ID='steel', SPECIFIC_HEAT=0.515, CONDUCTIVITY=16.2, DENSITY=7900 /
+&SURF ID='paint',    COLOR='BLACK',  EMISSIVITY=0.95, HT3D=T /
+&SURF ID='no paint', COLOR='SILVER', EMISSIVITY=0.33, HT3D=T /
+&OBST XB=0.00,1.20,0.00,0.0031,0.00,1.20, MATL_ID='steel', SURF_ID='no paint' /
+&VENT XB=0.00,0.05,0.0000,0.0000,0.00,0.05, SURF_ID='paint', MULT_ID='M', IOR=-2 /
+&VENT XB=0.00,0.05,0.0031,0.0031,0.00,0.05, SURF_ID='paint', MULT_ID='M', IOR= 2 /
+&VENT XB=0.05,0.10,0.0000,0.0000,0.05,0.10, SURF_ID='paint', MULT_ID='M', IOR=-2 /
+&VENT XB=0.05,0.10,0.0031,0.0031,0.05,0.10, SURF_ID='paint', MULT_ID='M', IOR= 2 /
+&MULT ID='M', DX=0.10, DZ=0.10, I_UPPER=11, K_UPPER=11 /
+\end{lstlisting}
+There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long and 1.2~m wide. The gas phase grid size is 25~mm, much larger than the plate thickness. From the standpoint of the gas phase fluid solver, this plate is just a barrier and has no thickness. However, its thickness of 3.1~mm is taken into account by the 3-D heat conduction solver. The plate is assigned a {\ct MATL\_ID} of {\ct 'steel'} and it is also given a default set of surface properties using the {\ct SURF\_ID='no paint'}. This {\ct SURF\_ID} invokes the 3-D solver and it assigns a color and an {\ct EMISSIVITY} of 0.33. If no {\ct EMISSIVITY} had been assigned, it would have taken on that of {\ct 'steel'} which in this case would have taken the default value of 0.9. The {\ct VENT} lines apply a checkerboard pattern of ``black'' or high emissivity squares onto the plate. Figure~\ref{fig:checkerboard} displays an image of the simulation along with a plot showing a comparison of internal enthalpy and net heat flux. 
+
+\begin{figure}[!ht]
+\includegraphics[height=2.35in]{SCRIPT_FIGURES/checkerboard_1000}
+\includegraphics[height=2.35in]{SCRIPT_FIGURES/checkerboard}
+\caption[Results of the {\ct checkerboard} test case]{(Left) Temperature of a thin steel plate subjected to fire. The plate has a patchwork pattern of high and low emissivity. (Right) Plot comparing the enthalpy of the plate and the net surface heat flux.}
+\label{fig:checkerboard}
+\end{figure}
 
 
 
@@ -3000,7 +3051,7 @@ If you use are using a pyrolysis model in which the {\ct MATL} lines have {\ct N
 The burnout time of a liquid fuel is calculated automatically based on the liquid layer {\ct THICKNESS}, liquid {\ct DENSITY}, and the calculated burning rate.
 
 
-\subsubsection{Special topic: Making Fuels Disappear}
+\subsection{Solid Fuels that can Burn Away}
 \label{info:BURN_AWAY}
 \label{box_burn_away1}
 \label{box_burn_away2}
@@ -3010,6 +3061,7 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away6}
 \label{box_burn_away7}
 \label{box_burn_away8}
+\label{box_burn_away9}
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
@@ -3020,9 +3072,13 @@ If a combustible solid is to disappear from the simulation once it is consumed, 
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
 \item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
 \item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
+\item By default, newly exposed surfaces take on the same {\ct SURF\_ID} that has been applied to the original obstruction. However, you can specify an optional {\ct SURF\_ID\_INTERIOR} on the {\ct OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
+
+\subsubsection{Examples}
+
 Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}. These are examples of a solid block of material that is pyrolyzed until it is completely consumed. The heat flux is generated by placing hot surfaces around the box. There is no combustion because the {\ct AUTO\_IGNITION\_TEMPERATURE} has been set to a very high value. The properties of the solid material are chosen simply to assure a quick calculation. The objective is to ensure that the pyrolyzed fuel mass is consistent with the mass of the original block. The block is 0.4~m on a side, with a density of 20~kg/m$^3$. The total mass is:
 \be
 (0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
@@ -3047,6 +3103,12 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 
 \paragraph{Case 8} ({\ct box\_burn\_away8}) This case is similar to Case~4, except that the burning rate is specified using the parameter {\ct MLRPUA}.
 
+\paragraph{Case 9} ({\ct box\_burn\_away9}) A solid cube of foam with side length $L=0.4$~m and density $\rho_1=20$~kg/m$^3$ pyrolyzes with a residue fraction of $\nu_1=0.5$. The block is covered by a $\delta=0.002$~m fabric layer with density $\rho_2=50$~kg/m$^3$ and residue fraction $\nu_2=0.2$. The 3-D heat transfer algorithm is invoked. The expected mass of gaseous fuel is:
+\be
+   m = L^2 \, \bigg( (L-2\delta) (1-\nu_1) \rho_1 + 2 \delta (1-\nu_2) \rho_2 \bigg) = 0.6592 \; \hbox{m}
+\ee
+Note that the 3-D heat conduction equation is solved via 1-D segments in all three coordinate directions. Each segment accounts for the layers that are perpendicular to its direction, but not those that are parallel. As a result, the pyrolyzed mass in this example is less than expected if one were to consider the actual 3-D object.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away1} &
@@ -3061,6 +3123,14 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 \caption[Results of the {\ct box\_burn\_away} test cases]{Output of {\ct box\_burn\_away} test cases.}
 \label{box_burn_away}
 \end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away9}
+\caption[Results of the {\ct box\_burn\_away9} test case]{Output of {\ct box\_burn\_away9} test case.}
+\label{box_burn_away_2}
+\end{figure}
+
 
 \begin{figure}
 \begin{tabular*}{\textwidth}{lr}
@@ -3083,14 +3153,14 @@ The {\ct SURF} and {\ct MATL} lines describing the pyrolysis of real materials c
 
 \subsection{Simulating the Cone Calorimeter}
 
-This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
+This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
 \item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need three cells in each direction ({\ct IJK=3,3,3}) for the pressure solver to function properly.
 \item On the {\ct MISC} line, set {\ct SOLID\_PHASE\_ONLY=T} to turn off all gas phase computation and speed up the simulation.  Note that convective heat transfer to/from the surface is still applied using the ambient temperature.  In this case the heat transfer coefficient is either specified or taken from the gas phase thermal conductivity divided by the wall-normal grid spacing.
 \item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Sec.~\ref{info:RAMP_Time} for more details about ramps.
-\item Set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item On the {\ct SURF} line, set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)), allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
@@ -12139,6 +12209,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEIGHT}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
+{\ct MATL\_ID(:) }            & Char.~Array     & Section~\ref{info:ht1d}                 &           &               \\ \hline
+{\ct MATL\_MASS\_FRACTION(:)} & Real~Array      & Section~\ref{info:ht1d}                 & kg/kg     &               \\ \hline
 {\ct MULT\_ID }               & Character       & Section~\ref{info:MULT}                 &           &               \\ \hline
 {\ct ORIENTATION(3)}          & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct F}       \\ \hline
@@ -12149,6 +12221,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}                  & Integer Array   & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SHAPE}                   & Character       & Section~\ref{info:multobst}             &           &               \\ \hline
 {\ct SURF\_ID}                & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
+{\ct SURF\_ID\_INTERIOR}      & Character       & Section~\ref{info:BURN_AWAY}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SURF\_IDS(3)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}      & Real Array      & Section~\ref{info:texture_map}          & m         & (0.,0.,0.)    \\ \hline
@@ -12687,11 +12760,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
-{\ct BLOWING}                                             & Logical           & Section~\ref{blowing}                   &                   &               \\ \hline
+{\ct BLOWING}                                             & Logical         & Section~\ref{blowing}                     &                     &                         \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
-{\ct CELL\_SIZE\_FACTOR(:)}                               & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
+{\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
@@ -12741,7 +12814,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
 {\ct MLRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
-{\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
+{\ct N\_LAYER\_CELLS\_MAX}                                & Integer         & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
@@ -12780,7 +12853,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE\_FACTOR}                                       & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 0.25                    \\ \hline
 {\ct SPEC\_ID}                                            & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                                        & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
-{\ct STRETCH\_FACTOR(:) }                                 & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
+{\ct STRETCH\_FACTOR }                                    & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
 {\ct SUBSTEP\_POWER}                                      & Integer         & Section~\ref{info:solid_phase_stability}  &                     & 2                       \\ \hline
 {\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                                             & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
@@ -12792,7 +12865,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_HEIGHT}                                     & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
 {\ct TEXTURE\_MAP}                                        & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
 {\ct TEXTURE\_WIDTH}                                      & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
-{\ct TGA\_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct F}           \\ \hline
+{\ct TGA\_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct F}                 \\ \hline
 {\ct TGA\_FINAL\_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 {\ct TGA\_HEATING\_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
@@ -12803,6 +12876,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_GAS\_BACK}                                      & Real            & Section~\ref{info:BACKING}                & $^\circ$C           &                         \\ \hline
 {\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+{\ct VARIABLE\_THICKNESS}                                 & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
 {\ct VEG\_LSET\_FIREBASE\_TIME}                           & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline

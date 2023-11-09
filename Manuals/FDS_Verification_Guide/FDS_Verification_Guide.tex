@@ -4444,14 +4444,25 @@ A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface
 Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for cases where the internal grid cell is 0.25 times the gas phase grid cell size (left plot), and where the internal grid cells stretch as they would for a 1-D heat conduction calculation (right). The grid stretching is not recommended for the 3-D solver.
 
 \begin{figure}[ht]
-\centering
-\vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_2} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_3}
 \end{tabular*}
 \caption[Additional \textct{ht3d\_energy\_conservation} test cases]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. The left plot is the case where the internal grid cells are 0.25 the size of the gas phase cells, and the right plot is the case where the internal cells stretch as is done in the 1-D solver.}
 \label{fig:ht3d_energy_conservation_2}
+\end{figure}
+
+Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flux versus the internal enthalpy in a case where a small hot block is placed above a larger block for which 3-D heat conduction is invoked. In one case (upper left plot), the block is made of one material with a thermal conductivity of 0.1~W/m/K, typical of insulation.  The internal cells cluster near all six faces of the block as would be done in a 1-D case. The calculation of the internal enthalpy can be performed in any coordinate direction, both positive and negative. In this case, the positive $x$ direction is chosen, whereas the hot block is placed above the larger block. This ensures that the energy is properly transferred in the lateral directions. In a second case (upper right plot), the solid block consists of a thin, 1~cm thick layer of insulation over a solid block of steel. The insulation layer is specified using a one-cell thick obstruction on top of the obstruction representing the steel. In a third case (lower plot), the solid block of steel is covered by two layers of insulation of thickness 1.5~cm and 1.0~cm that are specified using the conventional {\ct SURF} line with arrays of {\ct MATL\_ID} and {\ct THICKNESS}. Each layer of insulation is composed of two different material components.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_4} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_5} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_6} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_7}
+\end{tabular*}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases, 4, 5, 6, and 7]{Comparison of the integrated net heat flux versus the internal enthalpy for a homogenous solid block of insulation material (upper left), a block of steel with a single layer of insulation (upper right), a block with multiple layers of multi-component insulation (bottom left), a block of steel that abuts an open boundary (bottom right).}
+\label{fig:ht3d_energy_conservation_4}
 \end{figure}
 
 \FloatBarrier
@@ -4603,6 +4614,21 @@ The simulation is run for 180~s. Shown in Fig.~\ref{fig:ht3d_sphere_time} is a c
 \label{fig:ht3d_sphere_time}
 \end{figure}
 
+
+\FloatBarrier
+
+\subsection{3-D Heat Conduction in a Layered Solid (\texorpdfstring{\textct{ht3d\_pile}}{ht1d\_pile})}
+\label{ht1d_pile}
+\label{ht3d_pile}
+
+An 18~cm long solid consisting of three 6~cm long abutting rectangular obstructions, each made of a different material, has a specified surface temperature of 500~$^\circ$C at one end and 20~$^\circ$C at the other. After 3~h, a steady temperature profile emerges as shown in Fig.~\ref{fig:ht3d_pile}. Two simulations are performed; one in which the conduction calculation is performed using the {\ct HT1D} convention, and the other with {\ct HT3D}. The thermal conductivity values are 5~W/m/K, 0.2~W/m/K, and 2~W/m/K. The exact solution is found by asserting that the heat flux, $\dot{q}''=k \, \partial T / \partial x$, is constant in each segment.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht1d_pile}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_pile}
+\caption[The \textct{ht1d\_pile} and \textct{ht3d\_pile} test cases]{Temperature profiles through a stack of three materials with different thermal conductivities. (Left) A 1-D calculation with non-uniform internal nodes. (Right) A 3-D calculation with uniform internal nodes.}
+\label{fig:ht3d_pile}
+\end{figure}
 
 
 
