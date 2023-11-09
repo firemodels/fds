@@ -2549,12 +2549,10 @@ In the example below, six fuel species are used for four different surfaces with
 \end{lstlisting}
 
 If the second surface was specified as:
-
 \begin{lstlisting}
 &SURF ID='S2',COLOR='ORANGE',HRRPUA=1000,SPEC_ID='MYFUEL','NITROGEN',
       MASS_FRACTION=0.25,0.75/
 \end{lstlisting}
-
 then the fuel mass flux would be the same as before, but now it would be diluted with three times the mass flux of {\ct NITROGEN}.
 
 \begin{figure}[ht]
@@ -2901,7 +2899,7 @@ Equation~(\ref{rr}) describes the rate of the reaction as a function of temperat
 \subsection{Liquid Fuels}
 \label{info:liquid_fuels}
 
-The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed. 
+The evaporation rate of a liquid fuel is analogous to the convective heating rate in that the evaporation rate is a function of a mass transfer coefficient, $h_{\rm m}$, much like thermal convection is a function of the heat transfer coefficient, $h$, discussed in Section~\ref{info:convection}\footnote{As with the convective heat transfer coefficient, there is an option to specify a fixed {\ct MASS\_TRANSFER\_COEFFICIENT} (m/s) on the {\ct SURF} line that describes a liquid pool.}. The FDS Technical Reference Guide~\cite{FDS_Tech_Guide} provides further details on how the evaporation rate is computed.
 
 The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
@@ -3429,9 +3427,9 @@ The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line w
 \be
 P_{node}^{n+1}=P_{node}^n \; (1-{\ct HVAC\_PRES\_RELAX}) \; + \; P_{FDS}^{n+1} \; {\ct HVAC\_PRES\_RELAX}
 \ee
-Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes. 
+Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
 
-The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. 
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -10535,6 +10533,7 @@ There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the p
 \item[{\ct 'VN MAX'}] The maximum value of the VN (Von Neumann) number, a secondary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the VN number remains below 1. If you want to see the VN number in each grid cell, use a slice ({\ct SLCF}) file with {\ct QUANTITY='VN'} and {\ct CELL\_CENTERED=T}.
 \item[{\ct 'WALL CLOCK TIME'}] Elapsed wall clock time since the start of the simulation, in seconds.
 \item[{\ct 'WALL CLOCK TIME ITERATIONS'}] Elapsed wall clock time since the start of the time stepping loop, in seconds.
+\item[{\ct 'RAM'}] (Linux only) The memory used by the process that controls the mesh in which this device is located, in units of MB. This value is the equivalent of the value reported under the heading {\ct RES} when doing a {\ct top} command at the command prompt. Usually {\ct RES} is reported in kB, but it is converted to MB here. More precisely, {\ct 'RAM'} is 1/1000 of the value of {\ct VmRSS} in the system file called {\ct /proc/<PID>/status} where {\ct <PID>} is the process ID.
 \end{description}
 In addition, the following flags can be useful in monitoring the performance of an MPI calculation. They are typically used for debugging.
 \begin{description}
@@ -11017,7 +11016,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 {\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
-{\ct RAM}                                       & Memory usage (Linux only)                     & MB             & D            \\ \hline
+{\ct RAM}                                       & Section~\ref{info:TIMING}                     & MB             & D            \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]            &                & D            \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
