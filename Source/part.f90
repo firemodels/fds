@@ -2962,14 +2962,6 @@ USE TURBULENCE, ONLY: FORCED_CONVECTION_MODEL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL()
-!< Average particle density in a grid cell (kg/m3) used in updating AVG_DROP_DEN
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_RAD=>NULL()
-!< Average particle radius in a grid cell (m) used in updating AVG_DROP_RAD
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_TMP=>NULL()
-!< Average particle temperature in a grid cell (K) used in updating AVG_DROP_TMP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_AREA=>NULL()
-!< Average particle cross sectional areat in a grid cell (m2) used in updating AVG_DROP_AREA
 REAL(EB), POINTER, DIMENSION(:,:,:) :: MVAP_TOT=>NULL()
 !< Amount of mass evaporated into a grid cell (kg)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_INTERIM=>NULL()
@@ -3031,8 +3023,6 @@ REAL(EB) :: SHERWOOD !< Particle Sherwood number
 REAL(EB) :: SH_FAC_GAS !< Sherwood number of a particle in the gas
 REAL(EB) :: M_VAP !< Mass evaporated (kg) from the particle in the current sub time step
 REAL(EB) :: M_VAP_MAX !< Maximum allowable evaporation (kg)
-REAL(EB) :: DEN_ADD !< Weighted drop mass divided by cell volume (kg/m3)
-REAL(EB) :: AREA_ADD !< Weighted drop area divided by cell volume (1/m)
 REAL(EB) :: Y_ALL(1:N_SPECIES) !< Mass fraction of all primitive species
 REAL(EB) :: X_DROP !< Equilibirum vapor mole fraction at the particle temperature
 REAL(EB) :: Y_DROP !< Equilibrium vapor mass fraction at the particle temperature
@@ -3112,7 +3102,7 @@ TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 IF (MESHES(NM)%NLP==0) THEN
-   CALL PARTICLE_RUNNING_AVERAGES
+   IF (N_LP_ARRAY_INDICES > 0) CALL PARTICLE_RUNNING_AVERAGES
    T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
    RETURN
 ELSE
@@ -3805,7 +3795,7 @@ DEALLOCATE(PART_WARNING)
 
 ! Sum up various quantities used in running averages
 
-CALL PARTICLE_RUNNING_AVERAGES
+IF (N_LP_ARRAY_INDICES > 0) CALL PARTICLE_RUNNING_AVERAGES
 
 ! Remove PARTICLEs that have completely evaporated
 
@@ -3820,170 +3810,173 @@ CONTAINS
 
 SUBROUTINE PARTICLE_RUNNING_AVERAGES
 
-SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
+INTEGER :: I,J,K
+REAL(EB) :: DEN_ADD,AREA_ADD
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,DROP_AREA
 
-   DROP_AREA => WORK1
-   DROP_DEN => WORK4
-   DROP_RAD => WORK5
-   DROP_TMP => WORK6
+DROP_AREA => WORK1
+DROP_DEN => WORK4
+DROP_RAD => WORK5
+DROP_TMP => WORK6
 
-   PART_CLASS_SUM_LOOP: DO N_LPC = 1,N_LAGRANGIAN_CLASSES
+PART_CLASS_SUM_LOOP: DO N_LPC = 1,N_LAGRANGIAN_CLASSES
 
-      LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE PART_CLASS_SUM_LOOP
+   LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
+   IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE PART_CLASS_SUM_LOOP
 
-      DROP_DEN = 0._EB
-      DROP_TMP = 0._EB
-      DROP_RAD = 0._EB
-      DROP_AREA = 0._EB
+   DROP_DEN = 0._EB
+   DROP_TMP = 0._EB
+   DROP_RAD = 0._EB
+   DROP_AREA = 0._EB
 
-      PARTICLE_LOOP_2: DO IP=1,NLP
+   PARTICLE_LOOP_2: DO IP=1,NLP
 
-         LP => LAGRANGIAN_PARTICLE(IP)
-         IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_2
-         BC => BOUNDARY_COORD(LP%BC_INDEX)
+      LP => LAGRANGIAN_PARTICLE(IP)
+      IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_2
+      BC => BOUNDARY_COORD(LP%BC_INDEX)
+
+      ! Determine the mass of the PARTICLE/particle, depending on whether the particle has a distinct SURFace type.
+
+      IF (LPC%LIQUID_DROPLET) THEN
+         R_DROP = LP%RADIUS
+         A_DROP = PI*R_DROP**2
+      ELSE
+         SF => SURFACE(LPC%SURF_INDEX)
+         R_DROP = LP%RADIUS
+         SELECT CASE(SF%GEOMETRY)
+            CASE(SURF_CARTESIAN)
+               A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
+            CASE(SURF_CYLINDRICAL)
+               A_DROP = 2._EB*SF%LENGTH*R_DROP
+            CASE(SURF_SPHERICAL)
+               A_DROP = PI*R_DROP**2
+         END SELECT
+      ENDIF
+
+      ! Assign particle or PARTICLE mass to the grid cell if the particle/PARTICLE not on a surface
+
+      IF (BC%IOR==0 .OR. LPC%SOLID_PARTICLE) THEN
          LP_B1 => BOUNDARY_PROP1(LP%B1_INDEX)
-         II = BC%IIG
-         JJ = BC%JJG
-         KK = BC%KKG
+         DEN_ADD  =    LP%PWT*LP%MASS*LP%RVC
+         AREA_ADD =    LP%PWT*A_DROP*LP%RVC
+         DROP_DEN(BC%IIG,BC%JJG,BC%KKG)  = DROP_DEN(BC%IIG,BC%JJG,BC%KKG)  + DEN_ADD
+         DROP_TMP(BC%IIG,BC%JJG,BC%KKG)  = DROP_TMP(BC%IIG,BC%JJG,BC%KKG)  + DEN_ADD*LP_B1%TMP_F
+         DROP_RAD(BC%IIG,BC%JJG,BC%KKG)  = DROP_RAD(BC%IIG,BC%JJG,BC%KKG)  + AREA_ADD*R_DROP
+         DROP_AREA(BC%IIG,BC%JJG,BC%KKG) = DROP_AREA(BC%IIG,BC%JJG,BC%KKG) + AREA_ADD
+      ENDIF
 
-         ! Determine the mass of the PARTICLE/particle, depending on whether the particle has a distinct SURFace type.
+      ! Compute Mass Per Unit Area (MPUA) for a liquid droplet stuck to a solid surface
 
+      IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+         IF (LP%WALL_INDEX>0) THEN
+            WC => WALL(LP%WALL_INDEX)
+            B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+            B2 => BOUNDARY_PROP2(WC%B2_INDEX)
+         ELSE
+            CFA => CFACE(LP%CFACE_INDEX)
+            B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+            B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+         ENDIF
          IF (LPC%LIQUID_DROPLET) THEN
             R_DROP = LP%RADIUS
-            A_DROP = PI*R_DROP**2
+            FTPR   = FOTHPI * LPC%DENSITY
+            M_DROP = FTPR*R_DROP**3
          ELSE
-            SF => SURFACE(LPC%SURF_INDEX)
-            R_DROP = LP%RADIUS
-            SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CARTESIAN)
-                  A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
-               CASE(SURF_CYLINDRICAL)
-                  A_DROP = 2._EB*SF%LENGTH*R_DROP
-               CASE(SURF_SPHERICAL)
-                  A_DROP = PI*R_DROP**2
-            END SELECT
+            M_DROP = LP%MASS
          ENDIF
+         B2%LP_MPUA(LPC%ARRAY_INDEX) = B2%LP_MPUA(LPC%ARRAY_INDEX) + &
+                                       (1._EB-LPC%RUNNING_AVERAGE_FACTOR_WALL)*LP%PWT*M_DROP/B1%AREA
+      ENDIF
 
-         ! Assign particle or PARTICLE mass to the grid cell if the particle/PARTICLE not on a surface
+   ENDDO PARTICLE_LOOP_2
 
-         IF (BC%IOR==0 .OR. LPC%SOLID_PARTICLE) THEN
-            DEN_ADD  =    LP%PWT*LP%MASS*LP%RVC
-            AREA_ADD =    LP%PWT*A_DROP*LP%RVC
-            DROP_DEN(II,JJ,KK)  = DROP_DEN(II,JJ,KK)  + DEN_ADD
-            DROP_TMP(II,JJ,KK)  = DROP_TMP(II,JJ,KK)  + DEN_ADD*LP_B1%TMP_F
-            DROP_RAD(II,JJ,KK)  = DROP_RAD(II,JJ,KK)  + AREA_ADD*R_DROP
-            DROP_AREA(II,JJ,KK) = DROP_AREA(II,JJ,KK) + AREA_ADD
-         ENDIF
+  ! Compute cumulative quantities for PARTICLE "clouds"
 
-         ! Compute Mass Per Unit Area (MPUA) for a liquid droplet stuck to a solid surface
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            DROP_RAD(I,J,K) = DROP_RAD(I,J,K)/(DROP_AREA(I,J,K)+TWO_EPSILON_EB)
+            DROP_TMP(I,J,K) = DROP_TMP(I,J,K)/(DROP_DEN(I,J,K) +TWO_EPSILON_EB)
+            AVG_DROP_RAD(I,J,K,LPC%ARRAY_INDEX ) = DROP_RAD(I,J,K)
+            AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ) + &
+               (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_TMP(I,J,K)
+            IF (LPC%Y_INDEX>0) THEN
+               AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ))
+            ELSE
+               AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(I,J,K,LPC%ARRAY_INDEX ))
+            ENDIF
+            AVG_DROP_DEN(I,J,K,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_DEN(I,J,K,LPC%ARRAY_INDEX ) + &
+               (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_DEN(I,J,K)
+            AVG_DROP_AREA(I,J,K,LPC%ARRAY_INDEX) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_AREA(I,J,K,LPC%ARRAY_INDEX) + &
+               (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_AREA(I,J,K)
+            IF (AVG_DROP_DEN(I,J,K,LPC%ARRAY_INDEX )<0.0001_EB .AND. ABS(DROP_DEN(I,J,K))<TWO_EPSILON_EB) &
+               AVG_DROP_DEN(I,J,K,LPC%ARRAY_INDEX ) = 0.0_EB
+         ENDDO
+      ENDDO
+   ENDDO
 
-         IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
+   ! Compute mean liquid droplet temperature (LP_TEMP) on the walls
+
+   IF (LPC%LIQUID_DROPLET) THEN
+
+      ! Initialize work array for storing droplet total area
+
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         B2 => BOUNDARY_PROP2(WC%B2_INDEX)
+         B2%WORK2 = 0._EB  ! drop area
+      ENDDO
+      DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA => CFACE(ICF)
+         B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+         B2%WORK2 = 0._EB  ! drop area
+      ENDDO
+
+      PARTICLE_LOOP_3: DO IP=1,NLP
+
+         LP => LAGRANGIAN_PARTICLE(IP)
+         IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_3
+         BC => BOUNDARY_COORD(LP%BC_INDEX)
+
+         IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
             IF (LP%WALL_INDEX>0) THEN
                WC => WALL(LP%WALL_INDEX)
-               B1 => BOUNDARY_PROP1(WC%B1_INDEX)
                B2 => BOUNDARY_PROP2(WC%B2_INDEX)
             ELSE
                CFA => CFACE(LP%CFACE_INDEX)
-               B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
                B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
             ENDIF
-            IF (LPC%LIQUID_DROPLET) THEN
-               R_DROP = LP%RADIUS
-               FTPR   = FOTHPI * LPC%DENSITY
-               M_DROP = FTPR*R_DROP**3
-            ELSE
-               M_DROP = LP%MASS
-            ENDIF
-            B2%LP_MPUA(LPC%ARRAY_INDEX) = B2%LP_MPUA(LPC%ARRAY_INDEX) + &
-                                          (1._EB-LPC%RUNNING_AVERAGE_FACTOR_WALL)*LP%PWT*M_DROP/B1%AREA
+            R_DROP = LP%RADIUS
+            A_DROP = LP%PWT*PI*R_DROP**2
+            B2%WORK2 = B2%WORK2 + A_DROP
          ENDIF
 
-      ENDDO PARTICLE_LOOP_2
+      ENDDO PARTICLE_LOOP_3
 
-     ! Compute cumulative quantities for PARTICLE "clouds"
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         B2 => BOUNDARY_PROP2(WC%B2_INDEX)
+         IF (B2%WORK2 > 0._EB) THEN
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = B2%LP_TEMP(LPC%ARRAY_INDEX)/B2%WORK2
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,B2%LP_TEMP(LPC%ARRAY_INDEX))
+         ELSE
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
+         ENDIF
+      ENDDO
+      DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA => CFACE(ICF)
+         B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+         IF (B2%WORK2 > 0._EB) THEN
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = B2%LP_TEMP(LPC%ARRAY_INDEX)/B2%WORK2
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,B2%LP_TEMP(LPC%ARRAY_INDEX))
+         ELSE
+            B2%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
+         ENDIF
+      ENDDO
 
-      DROP_RAD = DROP_RAD/(DROP_AREA+TWO_EPSILON_EB)
-      DROP_TMP = DROP_TMP/(DROP_DEN +TWO_EPSILON_EB)
-      AVG_DROP_RAD(:,:,:,LPC%ARRAY_INDEX ) = DROP_RAD
-      AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + &
-                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_TMP
-      IF (LPC%Y_INDEX>0) THEN
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ELSE
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ENDIF
-      AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) + &
-                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_DEN
-      AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) + &
-                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_AREA
-      WHERE (AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX )<0.0001_EB .AND. ABS(DROP_DEN)<TWO_EPSILON_EB) &
-         AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = 0.0_EB
+   ENDIF
 
-      ! Compute mean liquid droplet temperature (LP_TEMP) on the walls
-
-      IF (LPC%LIQUID_DROPLET) THEN
-
-         ! Initialize work array for storing droplet total area
-
-         DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-            B2%WORK2 = 0._EB  ! drop area
-         ENDDO
-         DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-            CFA => CFACE(ICF)
-            B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-            B2%WORK2 = 0._EB  ! drop area
-         ENDDO
-
-         PARTICLE_LOOP_3: DO IP=1,NLP
-
-            LP => LAGRANGIAN_PARTICLE(IP)
-            IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_3
-            BC => BOUNDARY_COORD(LP%BC_INDEX)
-
-            IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
-               IF (LP%WALL_INDEX>0) THEN
-                  WC => WALL(LP%WALL_INDEX)
-                  B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-               ELSE
-                  CFA => CFACE(LP%CFACE_INDEX)
-                  B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-               ENDIF
-               R_DROP = LP%RADIUS
-               A_DROP = LP%PWT*PI*R_DROP**2
-               B2%WORK2 = B2%WORK2 + A_DROP
-            ENDIF
-
-         ENDDO PARTICLE_LOOP_3
-
-         DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-            IF (B2%WORK2 > 0._EB) THEN
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = B2%LP_TEMP(LPC%ARRAY_INDEX)/B2%WORK2
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,B2%LP_TEMP(LPC%ARRAY_INDEX))
-            ELSE
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
-            ENDIF
-         ENDDO
-         DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-            CFA => CFACE(ICF)
-            B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-            IF (B2%WORK2 > 0._EB) THEN
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = B2%LP_TEMP(LPC%ARRAY_INDEX)/B2%WORK2
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,B2%LP_TEMP(LPC%ARRAY_INDEX))
-            ELSE
-               B2%LP_TEMP(LPC%ARRAY_INDEX) = TMPA
-            ENDIF
-         ENDDO
-
-      ENDIF
-
-   ENDDO PART_CLASS_SUM_LOOP
-
-ENDIF SUM_PART_QUANTITIES
+ENDDO PART_CLASS_SUM_LOOP
 
 END SUBROUTINE PARTICLE_RUNNING_AVERAGES
 
