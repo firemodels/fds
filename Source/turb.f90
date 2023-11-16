@@ -1289,6 +1289,7 @@ END SUBROUTINE WALL_MODEL
 !> \param SURF_INDEX Indicator of the surface type
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
 !> \param IOR Index of the surface orientation
+!> \param DELTA_TMP Temperature difference between gas and surface (K)
 
 SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,DELTA_TMP)
 
