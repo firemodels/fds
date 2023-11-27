@@ -18,7 +18,7 @@
 ! Intel in writing.
 !
         program test_mpi
-        use mpi
+        use mpi_f08
         implicit none
 
         integer i, size, rank, namelen, ierr
