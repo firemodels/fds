@@ -23,7 +23,7 @@
 
         integer i, size, rank, namelen, ierr
         character (len=MPI_MAX_PROCESSOR_NAME) :: name
-        integer stat(MPI_STATUS_SIZE)
+        type(mpi_status) :: stat
 
         call MPI_INIT (ierr)
 
