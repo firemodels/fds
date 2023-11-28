@@ -2,10 +2,13 @@
 
 IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
-  IF NOT DEFINED ONEAPI_ROOT goto intel_notexist
+  set "ONEAPIDIR=C:\Program Files (x86)\Intel\oneAPI"
+  IF DEFINED ONEAPI_ROOT set "ONEAPIDIR=%ONEAPI_ROOT%"
+  IF NOT EXIST "%ONEAPIDIR%\setvars.bat" goto intel_notexist
 
-  call "%ONEAPI_ROOT%\setvars" intel64
-  set INTEL_IFORT=ifort
+  echo Defining Intel compiler environment
+  call "%ONEAPIDIR%\setvars" intel64>Nul
+  set INTEL_IFORT=ifx
 
   IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
