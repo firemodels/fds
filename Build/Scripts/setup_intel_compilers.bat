@@ -7,8 +7,8 @@ IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
   IF NOT EXIST "%ONEAPIDIR%\setvars.bat" goto intel_notexist
 
   echo Defining Intel compiler environment
-  call "%ONEAPIDIR%\setvars" intel64>Nul
-  set INTEL_IFORT=ifx
+  call "%ONEAPIDIR%\setvars" intel64
+  set INTEL_IFORT=ifort
 
   IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
