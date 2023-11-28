@@ -387,7 +387,7 @@ radi.o : func.o prec.o cons.o type.o mesh.o rcal.o geom.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o soot.o
 vege.o : func.o prec.o cons.o type.o mesh.o geom.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
-hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o data.o
+hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o data.o geom.o
 mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o ccib.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o ccib.o
 fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o radi.o
@@ -420,7 +420,7 @@ radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj rcal.obj geom.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj soot.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj geom.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj data.obj
+hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj data.obj geom.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj ccib.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj ccib.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj radi.obj

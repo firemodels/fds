@@ -22,7 +22,7 @@ computed by the first DEVC.
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
       THICKNESS            = 0.01
-      BURN_AWAY            = .TRUE. /
+      BURN_AWAY            = T /
 
 &SURF ID='HOT', TMP_FRONT=600., HEAT_TRANSFER_COEFFICIENT=0., DEFAULT=.TRUE. /
 

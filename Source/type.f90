@@ -20,8 +20,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 !> \brief Arrays to hold derived type (WALL, CFACE, or PARTICLE) components for I/O or MPI exchanges
 
 TYPE STORAGE_TYPE
-   INTEGER :: N_ITEMS=0
-   INTEGER :: START_INDEX=1
+   INTEGER :: N_ITEMS=0,N_ITEMS_DIM=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: ITEM_INDEX,SURF_INDEX
    INTEGER :: N_REALS_DIM=0,N_INTEGERS_DIM=0,N_LOGICALS_DIM=0
    INTEGER :: N_REALS=0,N_INTEGERS=0,N_LOGICALS=0
@@ -161,6 +160,7 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 !> \brief Solid material density for 1-D pyrolysis/conduction algorithm
 
 TYPE MATL_COMP_TYPE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION !< (1:N_LAYERS) Mass Fraction
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
@@ -193,6 +193,8 @@ TYPE BOUNDARY_COORD_TYPE
    REAL(EB) :: Z1            !< Lower z extent of boundary cell (m)
    REAL(EB) :: Z2            !< Upper z extent of boundary cell (m)
 
+   REAL(EB), DIMENSION(3) :: NVEC=0._EB !< Normal vector
+
 END TYPE BOUNDARY_COORD_TYPE
 
 
@@ -201,7 +203,9 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_TMP           !< Temperature change (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:ONE_D\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY     !< (1:ONE_D\%N_LAYERS) Min diffusivity of all matls in layer (m2/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
@@ -212,6 +216,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX                 !< (1:ONE_D\%N_MATL) Number of materials
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
@@ -219,6 +224,9 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: N_LAYERS=0       !< Number of material layers
    INTEGER :: N_MATL=0         !< Number of materials
    INTEGER :: N_LPC=0          !< Number of Lagrangian Particle Classes
+   INTEGER :: BACK_INDEX=0     !< WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH=0      !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BACK_SURF=0      !< SURF_INDEX on back side of obstruction or exterior wall cell
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
@@ -246,6 +254,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_G                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas cell
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
@@ -272,6 +281,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: U_NORMAL_0=0._EB      !< Initial or specified normal component of velocity (m/s) at surface
    REAL(EB) :: U_TANG=0._EB          !< Tangential velocity (m/s) near surface
    REAL(EB) :: RHO_F                 !< Gas density at the wall (kg/m3)
+   REAL(EB) :: RHO_G                 !< Gas density in near wall cell (kg/m3)
    REAL(EB) :: RDN=1._EB             !< \f$ 1/ \delta n \f$ at the surface (1/m)
    REAL(EB) :: K_G=0.1_EB            !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
    REAL(EB) :: Q_DOT_G_PP=0._EB      !< Heat release rate per unit area (W/m2)
@@ -284,6 +294,8 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
    REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident heat flux for scaling (W/m2)
+   REAL(EB) :: Q_LEAK=0._EB          !< Heat production of leaking gas (W/m3)
+   REAL(EB) :: VEL_ERR_NEW=0._EB     !< Velocity mismatch at mesh or solid boundary (m/s)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
@@ -306,6 +318,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
+   REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
 
    INTEGER  :: SURF_INDEX=-1         !< Surface index
 
@@ -373,11 +386,6 @@ END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 TYPE WALL_TYPE
 
-   REAL(EB) :: DUNDT=0._EB            !< \f$ \partial u_n / \partial t \f$
-   REAL(EB) :: Q_LEAK=0._EB           !< Heat production of leaking gas (W/m3)
-   REAL(EB) :: V_DEP=0._EB            !< Deposition velocity (m/s)
-   REAL(EB) :: VEL_ERR_NEW=0._EB      !< Velocity mismatch at mesh or solid boundary (m/s)
-
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
@@ -385,13 +393,8 @@ TYPE WALL_TYPE
    INTEGER :: B2_INDEX=0              !< Index within the array BOUNDARY_PROP2
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
-   INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
-   INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
-   INTEGER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
    INTEGER :: VENT_INDEX=0            !< Index of the VENT containing this cell
    INTEGER :: JD11_INDEX=0
    INTEGER :: JD12_INDEX=0
@@ -418,7 +421,10 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: JJO_MAX                                 !< Maximum J index of adjacent cell in other mesh
    INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
    INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
+   INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
+   REAL(EB) :: DUNDT=0._EB                            !< \f$ \partial u_n / \partial t \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN         !< Flux-limited \f$ \int \rho Y_\alpha u_n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVNS        !< Estimated value of FVN at next time step
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN  !< Species diffusive flux as computed in divg.f90
@@ -435,12 +441,11 @@ TYPE THIN_WALL_TYPE
    INTEGER :: TD_INDEX=0              !< Index within the array BOUNDARY_THR_D
    INTEGER :: B1_INDEX=0              !< Index within the array BOUNDARY_PROP1
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
-   INTEGER :: BACK_INDEX=0            !< THIN_WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH=0             !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER :: BACK_SURF=0             !< SURF_INDEX on back side of obstruction or exterior wall cell
    INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
    INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
    INTEGER :: IEC=0                   !< Orientation index (1=constant x, 2=constant y, 3-constant z)
+   INTEGER :: WALL_INDEX_M=0          !< Lower adjacent wall cell index
+   INTEGER :: WALL_INDEX_P=0          !< Upper adjacent wall cell index
    INTEGER :: N_REALS=0               !< Number of reals to pack into restart or send/recv buffer
    INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
@@ -725,6 +730,7 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PYROLYSIS_RANGE !< Temperature range (K) over which pyrolysis occurs
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS      !< Tracked mass stoichiometric coefficient for solid to gas conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_P    !< Primitive mass stoichiometric coefficient for solid to gas conversion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS_M    !< Primitive mass stoichiometric coefficient for gas to solid conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ADJUST_BURN_RATE_P !< Adjustment to pyrolysis rate to account for different HoC
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_LPC      !< Mass stoichiometric coefficient for particles
@@ -757,55 +763,54 @@ END TYPE RAMP_ID_TYPE
 
 TYPE SURFACE_TYPE
 
-   REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
-   REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
-   REAL(EB) :: TMP_BACK =-1._EB                          !< Specified back surface temperture (K)
-   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                  !< Specified initial front surface temperture (K)
-   REAL(EB) :: TMP_GAS_FRONT=-1._EB                      !< Specified front surface gas temperature (K)
-   REAL(EB) :: TMP_GAS_BACK=-1._EB                       !< Specified back surface gas temperature (K)
-   REAL(EB) :: TMP_INNER=-1._EB                          !< Specified inside temperature (K)
-   REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
-   REAL(EB) :: VEL_GRAD
-   REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
-   REAL(EB) :: Z0                                        !< Reference height for boundary layer profile (m)
-   REAL(EB) :: Z_0                                       !< Surface roughness (m)
-   REAL(EB) :: NEAR_WALL_EDDY_VISCOSITY                  !< Used with CONSTANT KINEMATIC EDDY VISCOSITY (m2/s)
-   REAL(EB) :: CONVECTIVE_HEAT_FLUX                      !< Specified convective heat flux at surface (W/m2)
-   REAL(EB) :: NET_HEAT_FLUX                             !< Specified net heat flux at surface (W/m2)
-   REAL(EB) :: VOLUME_FLOW                               !< Specified volume flow (m3/s)
-   REAL(EB) :: HRRPUA                                    !< Specified Heat Release Rate Per Unit Volume (W/m3)
-   REAL(EB) :: MLRPUA                                    !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
-   REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
-   REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
-   REAL(EB) :: CELL_SIZE
-   REAL(EB) :: E_COEFFICIENT
-   REAL(EB) :: TEXTURE_WIDTH
-   REAL(EB) :: TEXTURE_HEIGHT
-   REAL(EB) :: THICKNESS
-   REAL(EB) :: EXTERNAL_FLUX
-   REAL(EB) :: DXF
-   REAL(EB) :: DXB
-   REAL(EB) :: MASS_FLUX_TOTAL
+   REAL(EB) :: AREA_MULTIPLIER=1._EB                   !< Factor for manual surface area adjustment
+   REAL(EB) :: TMP_FRONT=-1._EB                        !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_BACK =-1._EB                        !< Specified back surface temperture (K)
+   REAL(EB) :: TMP_FRONT_INITIAL=-1._EB                !< Specified initial front surface temperture (K)
+   REAL(EB) :: TMP_GAS_FRONT=-1._EB                    !< Specified front surface gas temperature (K)
+   REAL(EB) :: TMP_GAS_BACK=-1._EB                     !< Specified back surface gas temperature (K)
+   REAL(EB) :: TMP_INNER=-1._EB                        !< Specified inside temperature (K)
+   REAL(EB) :: VEL                                     !< Specified normal velocity (m/s)
+   REAL(EB) :: VEL_GRAD                                !< Specified surface normal velocity gradient (1/s)
+   REAL(EB) :: PLE                                     !< Exponent for boundary layer velocity profile
+   REAL(EB) :: Z0                                      !< Reference height for boundary layer profile (m)
+   REAL(EB) :: Z_0                                     !< Surface roughness (m)
+   REAL(EB) :: NEAR_WALL_EDDY_VISCOSITY                !< Used with CONSTANT KINEMATIC EDDY VISCOSITY (m2/s)
+   REAL(EB) :: CONVECTIVE_HEAT_FLUX                    !< Specified convective heat flux at surface (W/m2)
+   REAL(EB) :: NET_HEAT_FLUX                           !< Specified net heat flux at surface (W/m2)
+   REAL(EB) :: VOLUME_FLOW                             !< Specified volume flow (m3/s)
+   REAL(EB) :: HRRPUA                                  !< Specified Heat Release Rate Per Unit Volume (W/m3)
+   REAL(EB) :: MLRPUA                                  !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
+   REAL(EB) :: T_IGN                                   !< Specified ignition time (s)
+   REAL(EB) :: SURFACE_DENSITY                         !< Mass per unit area (kg/m2)
+   REAL(EB) :: CELL_SIZE                               !< Specified constant cell size (m)
+   REAL(EB) :: E_COEFFICIENT                           !< Defines decay of fire as a function of delivered density
+   REAL(EB) :: TEXTURE_WIDTH                           !< Smokeview parameter for scaling the width of a texture map
+   REAL(EB) :: TEXTURE_HEIGHT                          !< Smokeview parameter for scaling the height of a texture map
+   REAL(EB) :: THICKNESS                               !< Total surface thickness (m)
+   REAL(EB) :: EXTERNAL_FLUX                           !< Specified external radiant flux onto the surface (kW/m2)
+   REAL(EB) :: DXF                                     !< Gas cell size normal to surface front (m)
+   REAL(EB) :: DXB                                     !< Gas cell size normal to surface back (m)
+   REAL(EB) :: MASS_FLUX_TOTAL                         !< Specified total extraction mass flux (kg/m2/s)
    REAL(EB) :: PARTICLE_MASS_FLUX
-   REAL(EB) :: EMISSIVITY
-   REAL(EB) :: MAX_PRESSURE
-   REAL(EB) :: TMP_IGN
-   REAL(EB) :: TMP_EXT
-   REAL(EB) :: H_V
-   REAL(EB) :: LAYER_DIVIDE
-   REAL(EB) :: ROUGHNESS
-   REAL(EB) :: LENGTH=-1._EB
-   REAL(EB) :: WIDTH=-1._EB
-   REAL(EB) :: DT_INSERT
-   REAL(EB) :: H_FIXED=-1._EB
-   REAL(EB) :: H_FIXED_B=-1._EB
-   REAL(EB) :: HM_FIXED=-1._EB
-   REAL(EB) :: EMISSIVITY_BACK
-   REAL(EB) :: CONV_LENGTH
-   REAL(EB) :: XYZ(3)
-   REAL(EB) :: FIRE_SPREAD_RATE
-   REAL(EB) :: MINIMUM_LAYER_THICKNESS
-   REAL(EB) :: INNER_RADIUS=0._EB
+   REAL(EB) :: EMISSIVITY                              !< Frontside emissivity
+   REAL(EB) :: TMP_IGN                                 ! Temperature when surface ignites (K)
+   REAL(EB) :: TMP_EXT                                 ! Temperature when surface stops burning (K)
+   REAL(EB) :: H_V                                     ! Heat of vaporization of the surface (kJ/kg)
+   REAL(EB) :: LAYER_DIVIDE                            ! Layer boundary for pyrolzates being released at the front or backside
+   REAL(EB) :: ROUGHNESS                               ! Surface sand grain roughness (m)
+   REAL(EB) :: LENGTH=-1._EB                           ! Length used particle area
+   REAL(EB) :: WIDTH=-1._EB                            ! Width used for particle area
+   REAL(EB) :: DT_INSERT                               ! Time between particle insertions from the surface (s)
+   REAL(EB) :: H_FIXED=-1._EB                          ! Frontside heat transfer coefficient (W/m/K)
+   REAL(EB) :: H_FIXED_B=-1._EB                        ! Backside heat transfer coefficient (W/m/K)
+   REAL(EB) :: HM_FIXED=-1._EB                         ! Frontside mass transfer coefficient (m/s)
+   REAL(EB) :: EMISSIVITY_BACK                         ! Backside emissivity
+   REAL(EB) :: CONV_LENGTH                             ! Length used in heat transfer correlations
+   REAL(EB) :: XYZ(3)                                  ! Starting point for a spreading fire
+   REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
+   REAL(EB) :: MINIMUM_LAYER_THICKNESS                 ! Smallest layer size before layer is removed (m)
+   REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
    REAL(EB) :: VEL_BULK
    REAL(EB) :: VEL_PART
@@ -813,25 +818,27 @@ TYPE SURFACE_TYPE
    REAL(EB) :: DRAG_COEFFICIENT=2.8_EB
    REAL(EB) :: SHAPE_FACTOR=0.25_EB
    REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
-   REAL(EB) :: DELTA_TMP_MAX=10._EB
+   REAL(EB) :: DELTA_TMP_MAX=10._EB                    !< Maximum wall node temperature change before reducining wall timestep (K)
    REAL(EB) :: BURN_DURATION=1.E6_EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB
-   REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB
-   REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)
+   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB              !< Reference flux for the flux scaling pyrolysis model (kW/m2)
+   REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB !< Averaging time interval for computed flux for flux scaling model (s)
+   REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB         !< Minimum computed flux for input into scaling model (kW/m2)
+   REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)   !< Maximum computed flux for input into scaling model (kW/m2)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
    REAL(EB) :: SWELL_RATIO=1._EB
-   REAL(EB) :: NUSSELT_C0=-1._EB
-   REAL(EB) :: NUSSELT_C1=-1._EB
-   REAL(EB) :: NUSSELT_C2=-1._EB
-   REAL(EB) :: NUSSELT_M=-1._EB
+   REAL(EB) :: NUSSELT_C0=-1._EB                       !< Constant term for user defined HTC correlation
+   REAL(EB) :: NUSSELT_C1=-1._EB                       !< Re multiplier term for user defined HTC correlation
+   REAL(EB) :: NUSSELT_C2=-1._EB                       !< Re adjustment before Pr multiplication for user defined HTC correlation
+   REAL(EB) :: NUSSELT_M=-1._EB                        !< Re exponent for user defined HTC correlation
    REAL(EB) :: EMBER_POWER_MEAN=-1._EB
    REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
+   REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
+   REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,ADJUST_BURN_RATE,DDSUM,SMALLEST_CELL_SIZE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE
    TYPE(RAMP_ID_TYPE),  ALLOCATABLE, DIMENSION(:) :: RAMP
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB) :: TRANSPARENCY
@@ -845,20 +852,26 @@ TYPE SURFACE_TYPE
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
-   INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL,N_LAYER_CELLS_MAX
+   INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL
+   INTEGER :: N_LAYER_CELLS_MAX
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS,INTERNAL_HEAT_SOURCE
-   REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,CELL_SIZE_FACTOR,STRETCH_FACTOR,&
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: INTERNAL_HEAT_SOURCE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
+   REAL(EB) :: CELL_SIZE_FACTOR
+   REAL(EB) :: STRETCH_FACTOR
+   REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,&
                                       MOISTURE_FRACTION,SURFACE_VOLUME_RATIO,PACKING_RATIO,KAPPA_S=-1._EB,RENODE_DELTA_T
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: DENSITY_ADJUST_FACTOR=1._EB,RHO_S
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
-   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_NAME
-   REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_FRAC
+   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_ID
+   REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_MASS_FRACTION
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
               BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.,DIRICHLET_FRONT=.FALSE.,DIRICHLET_BACK=.FALSE.,BLOWING=.FALSE.
    INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
+   LOGICAL :: VARIABLE_THICKNESS=.FALSE.             !< Allow the surface to have varying thickness
+   LOGICAL :: LINING=.FALSE.                         !< Indicator that the properties refer to a wall lining, not entire wall
    LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROP1_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
@@ -867,6 +880,8 @@ TYPE SURFACE_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_THR_D_TYPE=.FALSE.    !< This surface requires in-depth 3-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
+   LOGICAL :: EMISSIVITY_SPECIFIED=.FALSE.           !< Indicates if user has specified a surface emissivity
+   LOGICAL :: EMISSIVITY_BACK_SPECIFIED=.FALSE.      !< Indicates if user has specified a back surface emissivity
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
    CHARACTER(LABEL_LENGTH) :: PART_ID
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
@@ -938,6 +953,7 @@ TYPE OBSTRUCTION_TYPE
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
    INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
+   INTEGER :: SURF_INDEX_INTERIOR             !< SURFace properties for a newly exposed interior cell
    INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
 
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
@@ -957,6 +973,7 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB               !< Area of idealized top, sides, bottom (m2)
    REAL(EB), DIMENSION(3) :: TEXTURE=0._EB                  !< Origin of texture map (m)
    REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB                !< Effective areas of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(MAX_MATERIALS) :: MATL_MASS_FRACTION=0._EB !< Mass fraction of material component
 
    INTEGER :: I1=-1               !< Lower I node
    INTEGER :: I2=-1               !< Upper I node
@@ -973,6 +990,7 @@ TYPE OBSTRUCTION_TYPE
    INTEGER :: DEVC_INDEX_O=-1     !< Original DEVC_INDEX
    INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
    INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
+   INTEGER, DIMENSION(MAX_MATERIALS) :: MATL_INDEX=-1       !< Index of material
 
    LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview
    LOGICAL :: THIN=.FALSE.                      !< The obstruction is zero cells thick
@@ -1025,7 +1043,7 @@ TYPE GEOMETRY_TYPE
                AZIM,ELEV,SCALE(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GAXIS(3),GROTATE,GROTATE_DOT,GROTATE_BASE,&
                XB(6),SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),MIN_LEDGE,MAX_LEDGE,MEAN_LEDGE,&
                GEOM_BOX(LOW_IND:HIGH_IND,IAXIS:KAXIS),TRANSPARENCY,CYLINDER_ORIGIN(3),CYLINDER_AXIS(3),&
-               CYLINDER_RADIUS,CYLINDER_LENGTH
+               CYLINDER_RADIUS,CYLINDER_LENGTH,CELL_BLOCK_ORIENTATION(3)=0._EB
    INTEGER, ALLOCATABLE,DIMENSION(:)   :: FACES,VOLUS,SUB_GEOMS,SURFS,MATLS
    INTEGER, ALLOCATABLE,DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES
    REAL(EB),ALLOCATABLE,DIMENSION(:)   :: FACES_AREA,VERTS_BASE,VERTS,TFACES,DAZIM,DELEV,ZVALS
@@ -1143,8 +1161,9 @@ TYPE CC_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       BODTRI !< GEOMETRY and triangle associated with CC_INBOUNDARY cut-faces (CFACEs).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::    EDGE_LIST !< Edges list. [CE_TYPE IEC JEC] or [RG_TYPE SIDE_LOHI AXIS]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)::   CELL_LIST !< Connected cut-cells list. [RC_TYPE I J K  ]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::  CFACE_INDEX  !< In boundary cut-faces only, index in CFACE(:).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::  CFACE_INDEX !< In boundary cut-faces only, index in CFACE(:).
    INTEGER,  ALLOCATABLE, DIMENSION(:)   ::   SURF_INDEX !< In boundary cut-faces only.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_ORIGIN !< In boundary face origin (built, blocked small cell, blocked split cell).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       NOMICF !< For external boundary boundary cutfaces, NOM and cut-face list.
 
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKH !< Low and high side cut-cell H unknown number. (LOW:HIGH,1:NFACE)
@@ -1190,15 +1209,6 @@ TYPE CC_CUTFACE_TYPE
 
 END TYPE CC_CUTFACE_TYPE
 
-!>brief Data structure type to define radiation CFACEs in Cartesian faces and their relation to surrounding boundary cut-faces.
-
-TYPE RAD_CFACE_TYPE
-   INTEGER                              :: N_ASSIGNED_CFACES_RADI=0 !< Number of boundary faces assigned to this cartesian face.
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI     !< List of indexes for assigned CFACEs.
-   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_FACTOR               !< Interpolation factor that affects projected areas.
-END TYPE RAD_CFACE_TYPE
-
-
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
@@ -1216,8 +1226,6 @@ TYPE CFACE_TYPE
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: VENT_INDEX=0
-   INTEGER :: BACK_MESH=0
-   INTEGER :: BACK_INDEX=0
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11          !< First index pointing to CUT_FACE array for this CFACE.
    INTEGER :: CUT_FACE_IND2=-11          !< Second index pointing to CUT_FACE array for this CFACE.
@@ -1225,10 +1233,6 @@ TYPE CFACE_TYPE
    INTEGER :: N_INTEGERS=0               !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0               !< Number of logicals to pack into restart or send/recv buffer
    REAL(EB) :: AREA=0._EB                !< CFACE area. From CUT_FACE(CUT_FACE_IND1)%AREA(CUT_FACE_IND2)
-   REAL(EB) :: NVEC(3)=0._EB             !< CFACE normal out unit vector.
-   REAL(EB) :: VEL_ERR_NEW=0._EB
-   REAL(EB) :: V_DEP=0._EB
-   REAL(EB) :: Q_LEAK=0._EB
    REAL(EB) :: DUNDT=0._EB
    REAL(EB) :: RSUM_G=0._EB              !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
    REAL(EB) :: TMP_G                     !< Temperature (K) in adjacent gas phase cell
@@ -1259,7 +1263,7 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::           VOLUME !< Cut-cell volumes. (1:NCELL)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           XYZCEN !< Cut-cell centroid locations. (IAXIS:KAXIS,1:NCELL)
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
-   LOGICAL,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
    INTEGER                                  ::       N_NOMICC=0 !< Number of entries in NOMICC
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           NOMICC !< OMESH cut-cells array. (1:2,1:N_NOMICC)
 

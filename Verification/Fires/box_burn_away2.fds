@@ -26,9 +26,8 @@ The gas species here is additional SPEC.
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
-      THICKNESS            = 0.1
-      BURN_AWAY            = .TRUE.
-      BACKING              = 'VOID' /
+      VARIABLE_THICKNESS   = T
+      BURN_AWAY            = T /
 
 &DUMP SMOKE3D = .FALSE. 
       DT_HRR = 0.01

@@ -160,12 +160,13 @@ DO K=1,KBAR
 ENDDO
 
 IF (Q_EXISTS) THEN
-   ! Set Q in the ghost cell, just for better visualization.
+   ! Set Q and CHI_R in the ghost cell, just for better visualization.
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE
       BC => BOUNDARY_COORD(WC%BC_INDEX)
       Q(BC%II,BC%JJ,BC%KK) = Q(BC%IIG,BC%JJG,BC%KKG)
+      CHI_R(BC%II,BC%JJ,BC%KK) = CHI_R(BC%IIG,BC%JJG,BC%KKG)
    ENDDO
 ENDIF
 

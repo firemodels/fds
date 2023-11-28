@@ -1,0 +1,70 @@
+&MESH ID='MESH1',
+IJK=25,25,120,
+XB = 0,0.5,0,0.5,0,2.4,
+MPI_PROCESS = 0 /
+
+&MESH ID='MESH2',
+IJK=5,19,24,
+XB = 0,0.5,0.5,2.4,0,2.4,
+MPI_PROCESS = 0/
+
+&MESH ID='MESH3',
+IJK=48,24,24,
+XB = 0.5,5.3,0,2.4,0,2.4,
+MPI_PROCESS = 0 /
+
+&REAC ID = 'initialfire', SOOT_YIELD=0.01, FUEL='PROPANE' /
+
+&SPEC ID='WATER VAPOR' /
+
+&SURF ID='burner'
+COLOR='FLESH'
+SPEC_ID = 'PROPANE',
+HRRPUA=2500./
+
+&MATL ID='concrete'
+CONDUCTIVITY = 0.1
+SPECIFIC_HEAT = 0.88
+DENSITY = 568.2 /
+
+&SURF ID = 'concretewalls'
+COLOR='GRAY 80'
+MATL_ID='concrete'
+THICKNESS = 0.2 /
+
+&MATL ID					= 'water'
+      DENSITY				= 1000.
+      CONDUCTIVITY			= 0.6
+      EMISSIVITY            = 0.9
+      SPECIFIC_HEAT	        = 4.2
+      N_REACTIONS			= 1
+	  A(1)					= 8.37E12
+      E(1)					= 121.0E3
+	  N_S(1)				= 1.
+      NU_SPEC				= 1.0
+      SPEC_ID				= 'WATER VAPOR'
+      HEAT_OF_REACTION		= 2500./
+	  
+&RAMP ID = 'char_k', T = 20, F = 0.115038 /
+&RAMP ID = 'char_k', T = 900, F = 0.187198 /
+
+&RAMP ID = 'wood_cp', T = 30, F = 0.92 /
+&RAMP ID = 'wood_cp', T = 230, F = 1.8 /
+&RAMP ID = 'wood_cp', T = 800, F = 4.308 /
+
+&RAMP ID = 'char_cp', T = 20., F = 0.6823 /
+&RAMP ID = 'char_cp', T = 40., F = 0.7947 /
+&RAMP ID = 'char_cp', T = 60., F = 0.8887 /
+&RAMP ID = 'char_cp', T = 80., F = 0.9684 /
+&RAMP ID = 'char_cp', T = 100., F = 1.0368 /
+&RAMP ID = 'char_cp', T = 140., F = 1.1478 /
+&RAMP ID = 'char_cp', T = 180., F = 1.2344 /
+&RAMP ID = 'char_cp', T = 220., F = 1.3041 /
+&RAMP ID = 'char_cp', T = 260., F = 1.3617 /
+&RAMP ID = 'char_cp', T = 300., F = 1.4106 /
+&RAMP ID = 'char_cp', T = 350., F = 1.4627 /
+&RAMP ID = 'char_cp', T = 400., F = 1.5074 /
+&RAMP ID = 'char_cp', T = 500., F = 1.5820 /
+&RAMP ID = 'char_cp', T = 600., F = 1.6440 /
+&RAMP ID = 'char_cp', T = 700., F = 1.6982 /
+&RAMP ID = 'char_cp', T = 800., F = 1.7474 /

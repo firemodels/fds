@@ -811,19 +811,19 @@ A common combustible used in fire research and testing is a wood crib; that is, 
 
 \newpage
 
-\subsection{Aalto Woods Cone Calorimeter Measurements}
+\subsection{Aalto Woods}
 \label{Aalto_Woods_HRRPUA}
 
-Cone calorimeter measurements for 2~cm thick samples of spruce and pine under flaming, inert, and smoldering conditions are shown on the following pages. The samples undergo the following three decomposition steps:
+Cone calorimeter measurements for 2~cm thick samples of spruce and pine under flaming, inert, and smoldering conditions are shown in Figures~\ref{Aalto_Woods_HRR} and~\ref{Aalto_Woods_MLR}. Water evaporates and wood pyrolyzes through their independent reactions, and in presence of oxygen, char residue from wood pyrolysis oxidizes:
 \begin{eqnarray}
-   \hbox{Wet Wood} &\to& \nu_{\rm m} \, \hbox{Moisture} + (1-\nu_{\rm m}) \, \hbox{Dry Wood} \\
-   \hbox{Dry Wood} &\to& \nu_{\rm char} \, \hbox{Char} + (1-\nu_{\rm char}) \, \hbox{Pyrolyzate} \\
+   \hbox{Water} &\to& \hbox{Water vapor} \\
+   \hbox{Wood} &\to& \nu_{\rm char} \, \hbox{Char} + (1-\nu_{\rm char}) \, \hbox{Pyrolyzate} \\
    \hbox{Char} + 2.67 \, \hbox{O}_2 &\to& 3.67 \, \hbox{CO}_2
 \end{eqnarray}
 The parameters for the reactions are listed in Table~\ref{Aalto_Woods_Properties}.
 
 \begin{table}[h!]
-\caption[Properties of spruce and pine]{Properties of spruce and pine, as estimated by PROPTI~\cite{Rinta-Paavola:2022}.}
+\caption[Properties of spruce and pine]{Properties of spruce and pine, as estimated by PROPTI~\cite{Rinta-Paavola:2023}.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
@@ -875,6 +875,8 @@ Heat of Reaction             & kJ/kg         & -32000                          &
 \label{Aalto_Woods_HRR}
 \end{figure}
 
+\FloatBarrier
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/pine_N2_35} &
@@ -888,6 +890,23 @@ Heat of Reaction             & kJ/kg         & -32000                          &
 \end{tabular*}
 \caption[Aalto Woods mass loss rates]{Aalto Woods mass loss rates.}
 \label{Aalto_Woods_MLR}
+\end{figure}
+
+\FloatBarrier
+
+The model for spruce estimated using the cone calorimeter measurements is employed in predicting heat release rates in an ISO 9705 room corner test~\cite{Sundstrom:1998}, and in a modified room corner test~\cite{Hietaniemi:2001} (in Finnish, English description of the test available in~\cite{Hietaniemi:1}). The selected test for simulation from~\cite{Sundstrom:1998} is M12, where the walls and ceiling of the test compartment is lined with 10~mm thick spruce timber. In the modified room corner test~\cite{Hietaniemi:2001}, the back wall opposite to the door opening, 240~cm length of an adjacent side wall, and a triangle shaped section of the ceiling connecting the two, are lined with 22~mm thick spruce timber. The gas burner is located in the timber-lined corner. All the other surfaces in the modified test, and the floor in M12~\cite{Sundstrom:1998} test are of concrete, as are the backing surfaces for timber.
+
+For simulations of both room corner tests~\cite{Sundstrom:1998,Hietaniemi:2001}, concrete properties are assumed as given for lightweight concrete in~\cite{Hietaniemi:2001}: thickness of 20~cm, thermal conductivity of 0.1~\si{W/(m.K)} and thermal diffusivity of 2 $\times$ 10$^{-7}$ m$^2$/s. Assuming a specific heat of 0.88~\si{kJ/(kg.K)} for concrete~\cite{Drysdale:2011}, gives a density of 568~kg/m$^3$ from thermal diffusivity.
+
+Figure~\ref{Aalto_Woods_RCT} shows heat release rates in room corner test M12 and in the modified room corner test. The burner output of 100~kW is reduced from both the experimental and simulation data, thus the figure shows only the heat release contribution from burning timber.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/Roomcorner_M12} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Aalto_Woods/Roomcorner_modified} \\
+\end{tabular*}
+\caption[Heat release in room corner tests, Aalto Woods model]{Heat release in room corner tests, Aalto Woods model}
+\label{Aalto_Woods_RCT}
 \end{figure}
 
 
@@ -1297,7 +1316,7 @@ These materials include:
 \begin{enumerate}
 \item Fifteen materials from studies conducted by Jensen Hughes ~\cite{Luo:FRA2019,Lattimer:NIJ19}.
 \item Three materials from the FAA Polymers experiments ~\cite{Stoliarov:CF2009,Stoliarov:FM2012}.
-\item Two materials from the Aalto Wood experiments ~\cite{Rinta-Paavola:2022}.
+\item Two materials from the Aalto Wood experiments ~\cite{Rinta-Paavola:2023}.
 \item Fifty-two materials from the material testing database provided by FSRI at the UL Research Institutes ~\cite{McKinnon:FSRI2023_Data}.
 \item Eight materials from the FPL database ~\cite{FPL:Fire_Database}.
 \item Sixty-eight materials from the RISE database ~\cite{RISE:Fire_Database}.
@@ -1343,7 +1362,7 @@ The ignition temperatures were calculated based on times to ignition at the lowe
 
 
 \begin{table}[!h]
-\caption[Properties of Aalto Woods Materials, wood-based materials]{Properties of Aalto Woods Materials, wood-based materials ~\cite{Rinta-Paavola:2022}.}
+\caption[Properties of Aalto Woods Materials, wood-based materials]{Properties of Aalto Woods Materials, wood-based materials ~\cite{Rinta-Paavola:2023}.}
 \centering
 \begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}
 \hline
