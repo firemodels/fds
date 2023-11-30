@@ -8714,6 +8714,8 @@ ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
 
 FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=F} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
 
+FDS uses a predefined random seed for the random number generator which ensures that each mesh is seeded with a different number. A predefined seed means that all simulations will use the same sequence of random numbers for a given mesh. You can change the random seed by specifying {\ct RND\_SEED} on the {\ct MISC} line. This defines a constant value that is added to the predefined random seed on each mesh.
+
 \subsection{Turning off the Flow Field}
 \label{info:freeze_velocity}
 
@@ -12077,7 +12079,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_GZ}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}           \\ \hline
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
-{\ct SC}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
+{\ct RND\_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
+{\ct SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}           \\ \hline
 {\ct SIMULATION\_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & {\ct 'VLES'}      \\ \hline
 {\ct SMOKE3D\_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & {\ct F}           \\ \hline
