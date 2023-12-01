@@ -1,0 +1,129 @@
+&HEAD CHID='Test_113A', TITLE='Memorial Tunnel Test' /
+    
+&TIME T_END=1070 / 
+ 
+&MISC GVEC=0.313,0.0,-9.805, TMPA=20 /
+
+&CATF OTHER_FILES='mesh_transverse.txt', 'materials.txt', 'fire_50_MW.txt', 'loop_obstructions.txt', 'output_transverse.txt', 'seq_1_ventilation.txt' /
+
+&VENT XB=  0.0,  0.0,-4.4,4.4,0.0,4.4, SURF_ID='OPEN' /
+&VENT XB=856.8,856.8,-4.4,4.4,0.0,4.4, SURF_ID='OPEN' /
+
+&RAMP ID='RAMP_FIRE', T=   0., F=  0.167 /
+&RAMP ID='RAMP_FIRE', T=   4., F=  0.638 /
+&RAMP ID='RAMP_FIRE', T=  22., F=  2.110 /
+&RAMP ID='RAMP_FIRE', T=  50., F=  3.081 /
+&RAMP ID='RAMP_FIRE', T=  80., F=  4.119 /
+&RAMP ID='RAMP_FIRE', T= 111., F=  4.424 /
+&RAMP ID='RAMP_FIRE', T= 142., F=  3.967 /
+&RAMP ID='RAMP_FIRE', T= 172., F=  3.296 /
+&RAMP ID='RAMP_FIRE', T= 202., F=  3.050 /
+&RAMP ID='RAMP_FIRE', T= 232., F=  3.048 /
+&RAMP ID='RAMP_FIRE', T= 262., F=  3.211 /
+&RAMP ID='RAMP_FIRE', T= 292., F=  1.990 /
+&RAMP ID='RAMP_FIRE', T= 322., F=  2.298 /
+&RAMP ID='RAMP_FIRE', T= 352., F=  2.934 /
+&RAMP ID='RAMP_FIRE', T= 382., F=  3.935 /
+&RAMP ID='RAMP_FIRE', T= 412., F=  3.333 /
+&RAMP ID='RAMP_FIRE', T= 442., F=  3.642 /
+&RAMP ID='RAMP_FIRE', T= 472., F=  4.397 /
+&RAMP ID='RAMP_FIRE', T= 502., F=  6.801 /
+&RAMP ID='RAMP_FIRE', T= 532., F=  7.639 /
+&RAMP ID='RAMP_FIRE', T= 562., F=  7.608 /
+&RAMP ID='RAMP_FIRE', T= 592., F=  6.951 /
+&RAMP ID='RAMP_FIRE', T= 622., F=  4.720 /
+&RAMP ID='RAMP_FIRE', T= 652., F=  6.184 /
+&RAMP ID='RAMP_FIRE', T= 681., F=  3.999 /
+&RAMP ID='RAMP_FIRE', T= 710., F=  1.486 /
+&RAMP ID='RAMP_FIRE', T= 742., F=  1.194 /
+&RAMP ID='RAMP_FIRE', T= 772., F=  0.791 /
+&RAMP ID='RAMP_FIRE', T= 801., F=  0.645 /
+&RAMP ID='RAMP_FIRE', T= 830., F=  0.404 /
+&RAMP ID='RAMP_FIRE', T= 860., F=  0.289 /
+&RAMP ID='RAMP_FIRE', T= 890., F=  0.133 /
+&RAMP ID='RAMP_FIRE', T= 920., F=  0.025 /
+&RAMP ID='RAMP_FIRE', T= 950., F=  0.025 /
+&RAMP ID='RAMP_FIRE', T= 980., F=  0.025 /
+&RAMP ID='RAMP_FIRE', T=1012., F=  0.025 /
+&RAMP ID='RAMP_FIRE', T=1042., F=  0.025 /
+&RAMP ID='RAMP_FIRE', T=1072., F=  0.025 /
+ 
+&RAMP ID='RAMP_SOUTH', T=   0., F=   2.15 /
+&RAMP ID='RAMP_SOUTH', T=   4., F=   2.17 /
+&RAMP ID='RAMP_SOUTH', T=  22., F=   2.19 /
+&RAMP ID='RAMP_SOUTH', T=  50., F=   2.20 /
+&RAMP ID='RAMP_SOUTH', T=  80., F=   2.20 /
+&RAMP ID='RAMP_SOUTH', T= 111., F=   2.20 /
+&RAMP ID='RAMP_SOUTH', T= 142., F=   2.20 /
+&RAMP ID='RAMP_SOUTH', T= 172., F=   2.21 /
+&RAMP ID='RAMP_SOUTH', T= 202., F=   2.19 /
+&RAMP ID='RAMP_SOUTH', T= 232., F=   2.18 /
+&RAMP ID='RAMP_SOUTH', T= 262., F=   2.19 /
+&RAMP ID='RAMP_SOUTH', T= 292., F=   2.17 /
+&RAMP ID='RAMP_SOUTH', T= 322., F=   2.18 /
+&RAMP ID='RAMP_SOUTH', T= 352., F=   2.17 /
+&RAMP ID='RAMP_SOUTH', T= 382., F=   2.16 /
+&RAMP ID='RAMP_SOUTH', T= 412., F=   2.17 /
+&RAMP ID='RAMP_SOUTH', T= 442., F=   2.14 /
+&RAMP ID='RAMP_SOUTH', T= 472., F=   2.11 /
+&RAMP ID='RAMP_SOUTH', T= 502., F=   2.03 /
+&RAMP ID='RAMP_SOUTH', T= 532., F=   1.94 /
+&RAMP ID='RAMP_SOUTH', T= 562., F=   1.84 /
+&RAMP ID='RAMP_SOUTH', T= 592., F=   1.65 /
+&RAMP ID='RAMP_SOUTH', T= 622., F=   1.64 /
+&RAMP ID='RAMP_SOUTH', T= 652., F=   1.62 /
+&RAMP ID='RAMP_SOUTH', T= 681., F=   1.38 /
+&RAMP ID='RAMP_SOUTH', T= 710., F=   1.31 /
+&RAMP ID='RAMP_SOUTH', T= 742., F=   1.30 /
+&RAMP ID='RAMP_SOUTH', T= 772., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T= 801., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T= 830., F=   1.30 /
+&RAMP ID='RAMP_SOUTH', T= 860., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T= 890., F=   1.31 /
+&RAMP ID='RAMP_SOUTH', T= 920., F=   1.31 /
+&RAMP ID='RAMP_SOUTH', T= 950., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T= 980., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T=1012., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T=1042., F=   1.32 /
+&RAMP ID='RAMP_SOUTH', T=1072., F=   1.32 /
+ 
+&RAMP ID='RAMP_NORTH', T=   0., F=   1.40 /
+&RAMP ID='RAMP_NORTH', T=   4., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T=  22., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T=  50., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T=  80., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 111., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 142., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 172., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 202., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 232., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 262., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 292., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 322., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 352., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 382., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 412., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 442., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 472., F=   1.40 /
+&RAMP ID='RAMP_NORTH', T= 502., F=   1.39 /
+&RAMP ID='RAMP_NORTH', T= 532., F=   1.38 /
+&RAMP ID='RAMP_NORTH', T= 562., F=   1.38 /
+&RAMP ID='RAMP_NORTH', T= 592., F=   1.38 /
+&RAMP ID='RAMP_NORTH', T= 622., F=   1.38 /
+&RAMP ID='RAMP_NORTH', T= 652., F=   1.39 /
+&RAMP ID='RAMP_NORTH', T= 681., F=   1.40 /
+&RAMP ID='RAMP_NORTH', T= 710., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 742., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 772., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 801., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 830., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 860., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 890., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 920., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T= 950., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T= 980., F=   1.42 /
+&RAMP ID='RAMP_NORTH', T=1012., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T=1042., F=   1.41 /
+&RAMP ID='RAMP_NORTH', T=1072., F=   1.42 /
+ 
+&TAIL /
