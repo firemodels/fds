@@ -73,7 +73,7 @@
 &RAMP ID='VENTR_JF15',T=4200.0,F=0.0 /
 &RAMP ID='VENTR_JF15',T=4205.0,F=1.0 /
 
-&CATF OTHER_FILES='materials.txt', 'obstructions.txt', 'fans.txt' /
+&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'fans.txt' /
 
 &DUMP DT_DEVC=30., DT_HRR=30. /
                 
