@@ -953,7 +953,7 @@ TYPE OBSTRUCTION_TYPE
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
    INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
-   INTEGER :: SURF_INDEX_INTERIOR             !< SURFace properties for a newly exposed interior cell
+   INTEGER :: SURF_INDEX_INTERIOR=0           !< SURFace properties for a newly exposed interior cell
    INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
 
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
