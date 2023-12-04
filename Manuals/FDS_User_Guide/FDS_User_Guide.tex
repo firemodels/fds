@@ -2200,10 +2200,10 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 
 If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. This effect can be accounted for by adding {\ct BLOWING=T} to the {\ct SURF} line, except for DNS simulations where empirical heat transfer correlations are not used. When {\ct BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
 \begin{equation}
-      \Phi_h = \frac{\dot{m}'' c_p}{h}
+	\Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
 \begin{equation}
-      h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
+	h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
 \end{equation}
 where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
 
@@ -5219,7 +5219,7 @@ This type of reaction is specified by adding {\ct THIRD\_BODY=T} to the {\ct REA
 
 Some reactions require the presence of a specific molecule to stabilize the reaction rather than any species as in a third body reaction. An example is given below:
 \begin{equation}\label{eq:catalyst}
-      \mathrm{a \, X + b \, Y + \, Z \rightarrow X_aY_b + Z }
+	\mathrm{a \, X + b \, Y + \, Z \rightarrow X_aY_b + Z }
 \end{equation}
 A catalyst can be specified by listing the catalyst species twice in {\ct SPEC\_ID\_NU} and giving the {\ct NU} values for each side of the equation. The reaction will move forward in FDS using the net {\ct NU} and the default value for {\ct NU\_S} will be the left-hand side stoichiometric coefficient. For a reverse reaction, the value or {\ct NU\_S} for the catalyst will be the right-hand side stoichiometric coefficient.
 
@@ -6209,10 +6209,10 @@ The {\ct ORIENTATION} for a particle placed with an {\ct INIT} line can be contr
 Note that the {\ct PART} input must contain {\ct ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\si{m$^3$} box with the +x wall emitting a radiative flux of 10~\si{kW/m$^2$}, and the remaining walls emitting 1~\si{kW/m$^2$}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
 
 \begin{figure}[ht]
-      \centering
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/part_orientation_ramp}
-      \caption[Results of the {\ct part\_orientation\_ramp} case]{Particle radiative flux for {\ct part\_orientatoin\_ramp} case.}
-      \label{fig:part_orientation_ramp}
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_orientation_ramp}
+	\caption[Results of the {\ct part\_orientation\_ramp} case]{Particle radiative flux for {\ct part\_orientatoin\_ramp} case.}
+	\label{fig:part_orientation_ramp}
 \end{figure}
 
 \newpage
@@ -8358,10 +8358,10 @@ When external control is selected, FDS will set the value of the {\ct RAMP} or t
 
 The csv file format is:
 \begin{lstlisting}
-      Type(1), ID(1), Value(1)
-      Type(2), ID(2), Value(2)
-      .
-      .
+	Type(1), ID(1), Value(1)
+	Type(2), ID(2), Value(2)
+	.
+	.
 \end{lstlisting}
 where {\ct Type} is either {\ct RAMP} or {\ct CTRL}, {\ct ID} is the corresponding {\ct ID} in the FDS input files, and {\ct Value} is the new output value for a {\ct RAMP} or the new logical state for a {\ct CTRL} where positive values mean the {\ct CTRL} evaluates as {\ct TRUE} and negative values mean the function evaluates as {\ct FALSE}.
 
@@ -8387,10 +8387,10 @@ CTRL,"VENT CTRL",-1
 This turns off the velocity vent (a negative {\ct CTRL} value means set the state to {\ct .FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a {\ct RAMP} value of 1 means apply the full value of {\ct TMP\_FRONT}). Note that the {\ct ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
 
 \begin{figure}[ht]
-      \includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
-      \includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
-      \caption[Results of the {\ct external\_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
-      \label{external_control_fig}
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
+	\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
+	\caption[Results of the {\ct external\_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
+	\label{external_control_fig}
 \end{figure}
 
 
@@ -13678,16 +13678,16 @@ This information allows for complete area and boundary condition information per
 \label{inout:binhvac}
 The HVAC outputs under the namelist group {\ct HVAC} are written out unformatted to the file {\ct CHID.hvac}. These files are written out from {\ct dump.f90} with the following lines:
 \begin{lstlisting}
-      WRITE(LU_HVAC) N_NODE_OUT, N_NODE_QUANTITY, N_DUCT_OUT, N_DUCT_QUANTITY
-      WRITE(LU_HVAC) DUCT_CELL(1:N_DUCT_OUT)
+	WRITE(LU_HVAC) N_NODE_OUT, N_NODE_QUANTITY, N_DUCT_OUT, N_DUCT_QUANTITY
+	WRITE(LU_HVAC) DUCT_CELL(1:N_DUCT_OUT)
 
-      WRITE(LU_HVAC) TIME
+	WRITE(LU_HVAC) TIME
     DO N=1,N_NODE_OUT
        WRITE(LU_HVAC) OUTVAL_N(1:N_NODE_QUANTITY)
     ENDDO
-      DO N=1,N_DUCT_OUT
-         IF (DUCT(N)%N_CELLS > 0) THEN
-        DO N=1,DUCT(N)%N_CELLS
+	DO N=1,N_DUCT_OUT
+	   IF (DUCT(N)%N_CELLS > 0) THEN
+     	  DO N=1,DUCT(N)%N_CELLS
              WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
           ENDDO
        ELSE
@@ -13808,7 +13808,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 This appendix lists all predefined species in FDS. If a species name ends in 'p' or 'm', this indicates the positive or negative charge state of that species. If a species ends in 's', this indicates the excited state of that species. This is typically written with a '*' as in CH$^*$. A 'Y in the Liquid column indicates that liquid properties are predefined, and a 'Y' in the Gibbs column indicates that Gibbs energy data is predefined.
 
 \begin{landscape}
-      \IfFileExists{spec_table.tex}{\input{spec_table.tex}}{\typeout{Error: Missing file spec\_table.tex}}
+	\IfFileExists{spec_table.tex}{\input{spec_table.tex}}{\typeout{Error: Missing file spec\_table.tex}}
 \end{landscape}
 
 
