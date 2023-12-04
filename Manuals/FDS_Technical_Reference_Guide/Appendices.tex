@@ -875,11 +875,11 @@ where $\delta(x)$ is the Dirac delta function.  In other words, if we look at a 
         fixed, fixed zerofill, precision=1,
         /tikz/.cd  % Change back to the normal key directory
     }
-    	]
-	\addplot graphics [xmin=-2.10, xmax=-0.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_b}
-	node [above,white] at (30,15) {\Large(a)};
-	\addplot graphics [xmin= 0.10, xmax= 2.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_a}
-	node [above,white] at (250,15) {\Large(b)};
+       ]
+   \addplot graphics [xmin=-2.10, xmax=-0.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_b}
+   node [above,white] at (30,15) {\Large(a)};
+   \addplot graphics [xmin= 0.10, xmax= 2.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_a}
+   node [above,white] at (250,15) {\Large(b)};
 \end{axis}
 \end{tikzpicture}
 \end{center}
@@ -1756,7 +1756,7 @@ The ODEs to be integrated are, respectively, the droplet mass, the change in cel
 \frac{\d T_{\rm w}}{\d t} & = -\frac{A_{\rm p,s} \, h_{\rm w}}{m_{\rm w} \, c_{\rm w}} (T_{\rm w}-T_{\rm p})  \label{app_droplet_solid_temp}
 \end{align}
 
-	Below we will consider the time integration for a single substep in the evaporation routine, which updates the local computational cell from time $t^n$ to $t^n + \Delta t^n$.  Usually, $\Delta t^n = \Delta t_{\mathrm{\tiny LES}}$.  However, it is possible that subtimesteps may be required to prevent spurious mass and temperature overshoots.  In what follows, unless otherwise specified RHS quantities are evaluated at the beginning of the substep, $t^n$ (hence the designation ``semi-implicit'' method).  This limits the stability range of the method (since the method is not fully implicit it is not unconditionally stable), but it greatly simplifies the solution procedure.
+   Below we will consider the time integration for a single substep in the evaporation routine, which updates the local computational cell from time $t^n$ to $t^n + \Delta t^n$.  Usually, $\Delta t^n = \Delta t_{\mathrm{\tiny LES}}$.  However, it is possible that subtimesteps may be required to prevent spurious mass and temperature overshoots.  In what follows, unless otherwise specified RHS quantities are evaluated at the beginning of the substep, $t^n$ (hence the designation ``semi-implicit'' method).  This limits the stability range of the method (since the method is not fully implicit it is not unconditionally stable), but it greatly simplifies the solution procedure.
 
 To begin the development, we expanded Eq.~(\ref{app_droplet_gas_fraction}) with the mass loss rate (to be determined) evaluated at the midpoint of the time interval:
 \begin{equation}
@@ -1868,7 +1868,7 @@ A solid material in FDS can undergo one or more reactions (see Sec.~\ref{pyrosec
 
 Mass conservation for reaction $\beta$ for solid material $\alpha$ is given by:
 \be
-	\sum_{\alpha'=1}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 0
+   \sum_{\alpha'=1}^{N_{\rm m}} \nu_{\alpha',\alpha \beta} = 0
 \ee
 where $N_{\rm m}$ is the number of all types of substances in FDS (solid, gas, or particle) that the reaction produces and $\nu_{\alpha',\alpha \beta}$ is the yield of $\alpha'$ in the reaction where $\alpha'$ could be a new material, a gas, or a type of Lagrangian particle. In FDS input processing, the yield of the original material, $\nu_{\alpha,\alpha \beta}$, is taken as -1, and the prior equation written in terms of the yields as specified in an input file becomes:
 \be
@@ -1899,9 +1899,9 @@ For the first step, reference enthalpies for all the components in a reaction mu
 In this equation $h_{\alpha,ref}$ is the enthalpy at the temperature $T_{ref}$. This is the value being solved for. In many tabulations of solid enthalpies the value of $T_{ref}$ is 298.15~K; however, since it can be determined at any reference temperature, for convenience a temperature of 0~K is picked. The specific heat of a material, $c_{p,\alpha}(T)$, is defined in the input file. Evaluating the integral requires picking the upper bound temperature, T$_R$. This is taken as the reference temperature for the reaction. This may be user defined as part of the input. If not, it can be determined from the reaction $A_{\alpha\beta}$ and $E_{\alpha\beta}$ by performing a TGA simulation for material $\alpha$, reaction $\beta$. The value for $T_R$ is set to the temperature of the peak reaction rate. With $T_R$ defined, the various $\nu_{\alpha',\alpha \beta} h_{\alpha,ref}$ terms can be collected on the left hand side, and the heats of reaction and the various $\nu_{\alpha',\alpha \beta} \int_{T_{ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T$ terms can be collected on the right hand side. The result is a system of linear equations $A \bar{x} = \bar{b}$ where the unknowns, $\bar{x}$, are the values of $h_{\alpha,ref}$; however, it is not guaranteed that there are an equal number of reactions and unknown material reference enthalpies. Solving the system of equations depends on the relative numbers of equations and unknowns as follows:
 
 \begin{description}
-	\item[Reactions = unknowns]{Solution can be found by a simple solution of the linear system: $\bar{x} = A^{-1} \bar{b}$}
-	\item[Reactions < unknowns]{In this case there are an infinite number of solutions; however, any single solution will suffice. The solution that gives the minimum vector magnitude of $\bar{x}$ is $\bar{x}= A^T (A A^T)^{-1} \bar{b}$.}
-	\item[Reactions > unknowns]{In this case the system is overdetermined, and there may not be a solution vector $\bar{x}$ that will perfectly conserve energy. A least-squares solution is given by $\bar{x}=  (A^T A)^{-1} A^T \bar{b}$.}
+   \item[Reactions = unknowns]{Solution can be found by a simple solution of the linear system: $\bar{x} = A^{-1} \bar{b}$}
+   \item[Reactions < unknowns]{In this case there are an infinite number of solutions; however, any single solution will suffice. The solution that gives the minimum vector magnitude of $\bar{x}$ is $\bar{x}= A^T (A A^T)^{-1} \bar{b}$.}
+   \item[Reactions > unknowns]{In this case the system is overdetermined, and there may not be a solution vector $\bar{x}$ that will perfectly conserve energy. A least-squares solution is given by $\bar{x}=  (A^T A)^{-1} A^T \bar{b}$.}
 \end{description}
 The first two cases are typically expected. The first case is where all materials decomposes into one or more gas species and there is no material residue. The second case is where one or more materials produce one or more residues including the possibility that the residue has a reaction. For example, wood pyrolyzing into a fuel gas plus char where the char reacst with oxygen to produce and ash remnant and CO$_2$. The third case would be where multiple solid materials are reactants in the same reaction. This case, while possible, is not typical for pyrolysis reactions.
 
