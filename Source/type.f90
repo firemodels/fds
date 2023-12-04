@@ -20,13 +20,19 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 !> \brief Arrays to hold derived type (WALL, CFACE, or PARTICLE) components for I/O or MPI exchanges
 
 TYPE STORAGE_TYPE
-   INTEGER :: N_ITEMS=0,N_ITEMS_DIM=0
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ITEM_INDEX,SURF_INDEX
-   INTEGER :: N_REALS_DIM=0,N_INTEGERS_DIM=0,N_LOGICALS_DIM=0
-   INTEGER :: N_REALS=0,N_INTEGERS=0,N_LOGICALS=0
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: REALS    !< Array of reals
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: INTEGERS  !< Array of integers
-   LOGICAL, ALLOCATABLE, DIMENSION(:) :: LOGICALS  !< Array of logicals
+   INTEGER :: N_ITEMS=0                              !< Number of WALL cells, CFACEs, or PARTICLEs listed in ITEM_INDEX
+   INTEGER :: N_ITEMS_DIM=0                          !< Dimension of 1-D arrays ITEM_INDEX and SURF_INDEX
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ITEM_INDEX  !< Array of indices of the WALL cells, CFACEs, or PARTICLEs
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_INDEX  !< Array of SURF indices of the WALL cells, CFACEs, or PARTICLEs
+   INTEGER :: N_REALS_DIM=0                          !< Dimension of the array REALS
+   INTEGER :: N_INTEGERS_DIM=0                       !< Dimension of the array INTEGERS
+   INTEGER :: N_LOGICALS_DIM=0                       !< Dimension of the array LOGICALS
+   INTEGER :: N_REALS=0                              !< Number of reals stored in REALS
+   INTEGER :: N_INTEGERS=0                           !< Number of integers stored in INTEGERS
+   INTEGER :: N_LOGICALS=0                           !< Number of logicals stored in LOGICALS
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: REALS      !< Array of reals
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: INTEGERS    !< Array of integers
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: LOGICALS    !< Array of logicals
 END TYPE STORAGE_TYPE
 
 !> \brief Parameters associated with an entire class of Lagrangian particles
@@ -150,7 +156,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
    LOGICAL :: DEBUG=.FALSE.                          !< Flag indicating if known quantities are output for smokeviewe debugging
 
-   TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
+   TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE            !< Storage space for a single particle that is saved during a RESTART
 
 END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
@@ -160,9 +166,9 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 !> \brief Solid material density for 1-D pyrolysis/conduction algorithm
 
 TYPE MATL_COMP_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION !< (1:N_LAYERS) Mass Fraction
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION  !< (1:N_LAYERS) Mass Fraction
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO            !< (1:NWP) Solid density (kg/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT        !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
 !> \brief Radiation intensity at a boundary for a given wavelength band
@@ -235,17 +241,23 @@ END TYPE BOUNDARY_ONE_D_TYPE
 
 TYPE BOUNDARY_THR_D_TYPE
 
-   TYPE(INTERNAL_NODE_TYPE), ALLOCATABLE, DIMENSION(:) :: NODE
+   TYPE(INTERNAL_NODE_TYPE), ALLOCATABLE, DIMENSION(:) :: NODE  !< Index of the interior solid cell
 
 END TYPE BOUNDARY_THR_D_TYPE
 
 
 TYPE INTERNAL_NODE_TYPE
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX,ALTERNATE_WALL_NODE,ALTERNATE_WALL_MESH,&
-                                         ALTERNATE_WALL_TYPE,ALTERNATE_WALL_IOR
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT
-   INTEGER :: ALTERNATE_WALL_COUNT=0
-   INTEGER :: I=-1,J=-1,K=-1,MESH_NUMBER=-1
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_INDEX   !< Index of WALL cell in one of the two alternate directions
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_NODE    !< Interior node of alternate WALL cell
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_MESH    !< MESH number of alternate WALL cell
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_TYPE    !< Type of alternate WALL cell (thin or not thin)
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_IOR     !< Orientation index of alternate WALL cell
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ALTERNATE_WALL_WEIGHT !< Weight factor of alternate WALL cell
+   INTEGER :: ALTERNATE_WALL_COUNT=0                            !< Number of WALL cells that overlap the primary
+   INTEGER :: I=-1                                              !< I index of the node
+   INTEGER :: J=-1                                              !< J index of the node
+   INTEGER :: K=-1                                              !< K index of the node
+   INTEGER :: MESH_NUMBER=-1                                    !< MESH number of the node
 END TYPE INTERNAL_NODE_TYPE
 
 
@@ -580,11 +592,11 @@ TYPE SPECIES_MIXTURE_TYPE
    INTEGER :: CONDENSATION_SMIX_INDEX=-1  !< Species is condensible that condenses into the indexed species
    INTEGER :: EVAPORATION_SMIX_INDEX=-1   !< Species is a condensate that evaporates into the indexed species
    INTEGER :: AGGLOMERATION_INDEX=-1      !< Index of species in the agglomeration arrays
-   LOGICAL :: DEPOSITING=.FALSE.    !< Species is an aerosol species
-   LOGICAL :: VALID_ATOMS=.TRUE.    !< Species has a chemical formula defined
-   LOGICAL :: EVAPORATING=.FALSE.   !< Species is the gas species for a liquid droplet
-   LOGICAL :: EXPLICIT_H_F=.FALSE.  !< All subspecies have an explicitly defined H_F
-   LOGICAL :: EXPLICIT_G_F=.FALSE.   !< All subspecies have an explicitly defined G_F
+   LOGICAL :: DEPOSITING=.FALSE.          !< Species is an aerosol species
+   LOGICAL :: VALID_ATOMS=.TRUE.          !< Species has a chemical formula defined
+   LOGICAL :: EVAPORATING=.FALSE.         !< Species is the gas species for a liquid droplet
+   LOGICAL :: EXPLICIT_H_F=.FALSE.        !< All subspecies have an explicitly defined H_F
+   LOGICAL :: EXPLICIT_G_F=.FALSE.        !< All subspecies have an explicitly defined G_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
 
@@ -738,14 +750,13 @@ TYPE MATERIAL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H             !< Material enthalpy as function of temperaure (J/kg)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S           !< Material conductivity as function of temperaure (W/m/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_S           !< Material specific heat as function of temperaure (J/kg/K)
-   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
-   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
-   LOGICAL :: ALLOW_SHRINKING
-   LOGICAL :: ALLOW_SWELLING
-   LOGICAL :: CONST_C=.TRUE.
-   LOGICAL :: ADJUST_H = .TRUE.
-   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_NAME
-   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: SPEC_ID
+   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC             !< Yield of gas species from a particular reaction
+   REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION  !< Heat of combustion of evaporated material
+   LOGICAL :: ALLOW_SHRINKING                           !< The material can shrink as a result of reactions
+   LOGICAL :: ALLOW_SWELLING                            !< The material can swell as a result of reactions
+   LOGICAL :: ADJUST_H = .TRUE.                         !< Flag indicating whether the enthalpy needs to be adjusted
+   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: RESIDUE_MATL_NAME !< MATL_IDs of solid residues
+   CHARACTER(LABEL_LENGTH), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: SPEC_ID !< SPEC_IDs of pyrolyzing gas species
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
 END TYPE MATERIAL_TYPE
 
