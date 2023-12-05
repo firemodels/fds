@@ -13174,7 +13174,7 @@ IF (TYPE_CODE==1 .OR. TYPE_CODE==2) THEN
       CASE('FAVRE RMS')       ; TEMPORAL_STATISTIC = 'FAVRE RMS'
       CASE('COV')             ; TEMPORAL_STATISTIC = 'COV'
       CASE('CORRCOEF')        ; TEMPORAL_STATISTIC = 'CORRCOEF'
-      CASE DEFAULT             
+      CASE DEFAULT
          IF (TYPE_CODE==2) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: TEMPORAL_STATISTIC for DEVC ',TRIM(ID),' is not recognized'
             ERROR_CODE = 1
@@ -13212,7 +13212,7 @@ IF (TYPE_CODE==1 .OR. TYPE_CODE==3) THEN
       CASE('MINLOC Z')         ; SPATIAL_STATISTIC = 'MINLOC Z'
       CASE('MEAN')             ; SPATIAL_STATISTIC = 'MEAN'
       CASE('INTERPOLATION')    ; SPATIAL_STATISTIC = 'INTERPOLATION'
-      CASE DEFAULT             
+      CASE DEFAULT
          IF (TYPE_CODE==3) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: SPATIAL_STATISTIC for DEVC ',TRIM(ID),' is not recognized'
             ERROR_CODE = 1
@@ -13404,6 +13404,7 @@ SUBROUTINE SET_CTRL_DEFAULTS
    ID            = 'null'
    LATCH         = .TRUE.
    INITIAL_STATE = .FALSE.
+   CONTROL_FORCE = .FALSE.
    SETPOINT      = 1.E30_EB
    DELAY         = 0._EB
    FUNCTION_TYPE = 'null'
@@ -13767,7 +13768,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
 
        IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%HVAC .AND. DV%MESH /= 1) THEN
-           WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),'. Do not specify XYZ or XB for an HVAC output QUANTITY.' 
+           WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),'. Do not specify XYZ or XB for an HVAC output QUANTITY.'
            CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 
