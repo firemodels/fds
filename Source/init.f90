@@ -3861,10 +3861,13 @@ ENDDO FIND_BACK_WALL_CELL
 ! The new arrays of thickness and material information are temporarily stored in arrays with _NEW suffix.
 
 IF (SF%LINING) THEN
+
    SF_BACK => SURFACE(ONE_D%BACK_SURF)
    LINING_THICKNESS = SUM(SF%LAYER_THICKNESS(1:SF%N_LAYERS))
    BACK_LINING_THICKNESS = SUM(SF_BACK%LAYER_THICKNESS(1:SF_BACK%N_LAYERS))
+
    ! Copy the front face SURF layers into the NEW holding arrays
+
    N_LAYERS_NEW = SF%N_LAYERS
    LAYER_THICKNESS_NEW(1:N_LAYERS_NEW) = SF%LAYER_THICKNESS(1:SF%N_LAYERS)
    N_MATLS_NEW = N_MATLS
@@ -3874,6 +3877,12 @@ IF (SF%LINING) THEN
    CALL ADD_MATERIAL(N_MATLS_NEW,SF%MATL_INDEX,MATL_INDEX_NEW)       ! Add new materials from the front surface lining
    CALL ADD_MATERIAL(N_MATLS_NEW,SF_BACK%MATL_INDEX,MATL_INDEX_NEW)  ! Add new materials from the back surface lining
    TOTAL_THICKNESS = SUM(LAYER_THICKNESS(1:N_LAYERS))  ! Thickness of the solid made up of OBSTs
+   IF (TOTAL_THICKNESS<LINING_THICKNESS+BACK_LINING_THICKNESS) THEN
+      MESSAGE = 'ERROR: The layer(s) of SURF '//TRIM(SF%ID)//' are thicker than the underlying obstruction.'
+      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+      RETURN
+   ENDIF
+
    DO NL=1,SF%N_LAYERS
       DO NN=1,SF%N_LAYER_MATL(NL)
          DO NNN=1,N_MATLS_NEW
@@ -3881,7 +3890,9 @@ IF (SF%LINING) THEN
          ENDDO
       ENDDO
    ENDDO
-   ! Add layers made made up of the OBSTs
+
+   ! Add layers that are associated with the underlying OBSTructions
+
    DO NL=1,N_LAYERS
       IF (NL>1) THEN ; LOWER_BOUND=SUM(LAYER_THICKNESS(1:NL-1)) ; ELSE ; LOWER_BOUND=0._EB ; ENDIF
       UPPER_BOUND = SUM(LAYER_THICKNESS(1:NL))
@@ -3895,7 +3906,9 @@ IF (SF%LINING) THEN
          ENDDO
       ENDDO
    ENDDO
+
    ! Add layers from the back surface lining
+
    DO NL=1,SF_BACK%N_LAYERS
       N_LAYERS_NEW = N_LAYERS_NEW + 1
       LAYER_THICKNESS_NEW(N_LAYERS_NEW) = SF_BACK%LAYER_THICKNESS(SF_BACK%N_LAYERS-NL+1)
@@ -3906,12 +3919,15 @@ IF (SF%LINING) THEN
          ENDDO
       ENDDO
    ENDDO
+
    ! Copy the temporary _NEW arrays back into the original holding arrays
+
    N_MATLS = N_MATLS_NEW
    N_LAYERS = N_LAYERS_NEW
    LAYER_THICKNESS(1:N_LAYERS) = LAYER_THICKNESS_NEW(1:N_LAYERS_NEW)
    MATL_MASS_FRACTION(1:N_LAYERS,1:N_MATLS) = MATL_MASS_FRACTION_NEW(1:N_LAYERS_NEW,1:N_MATLS_NEW)
    MATL_INDEX(1:N_MATLS) = MATL_INDEX_NEW(1:N_MATLS_NEW)
+
 ENDIF
 
 ! If VARIABLE_THICKNESS or HT3D, reallocate ONE_D arrays holding layer and material info
@@ -4865,13 +4881,15 @@ INTEGER, INTENT(IN) :: NM
 CALL RANDOM_SEED(SIZE=SIZE_RND)
 ALLOCATE(SEED_RND(SIZE_RND),STAT=IZERO)
 CALL CHKMEMERR('INITIAL_NOISE','SEED_RND',IZERO)
-SEED_RND = 2819 * 13*NM
+SEED_RND = 2819 * 13*NM + RND_SEED
 CALL RANDOM_SEED(PUT=SEED_RND)
 DEALLOCATE(SEED_RND)
 
 DO I=1,NM
    CALL RANDOM_NUMBER(RN2)
 ENDDO
+
+IF (.NOT. NOISE) RETURN
 
 ! Point to local mesh variables
 

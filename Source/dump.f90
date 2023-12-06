@@ -6397,23 +6397,32 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%CELL_POSITION/=CELL_FACE) CYCLE I_DEVICE_CELL_LOOP
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         CFACE_AREA = 0._EB
-                        CC_IBM_IF: IF (CC_IBM) THEN
+                        IF (CC_IBM) THEN
                            IF (CCVAR(I,J,K,CC_CGSC) == CC_SOLID) THEN
                               CYCLE I_DEVICE_CELL_LOOP
                            ELSEIF(CCVAR(I,J,K,CC_CGSC) == CC_CUTCFE) THEN
                               ICC=CCVAR(I,J,K,CC_IDCC)
                               VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
                            ENDIF
-                           ! face-centered quanties
-                           AXIS = ABS(OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%IOR)
-                           AXIS_IF: IF (AXIS>0) THEN
-                              FCVAR_IF: IF (FCVAR(I,J,K,CC_IDCF,AXIS)>0) THEN
-                                 ! face centered quantities
-                                 ICF=FCVAR(I,J,K,CC_IDCF,AXIS)
-                                 CFACE_AREA = SUM( CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE) )
-                              ENDIF FCVAR_IF
-                           ENDIF AXIS_IF
-                        ENDIF CC_IBM_IF
+                        ENDIF
+
+                        ! Face-centered quantities
+                        AXIS = ABS(OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%IOR)
+                        IF (AXIS>0) THEN
+                           ICF = 0
+                           IF (CC_IBM) ICF = FCVAR(I,J,K,CC_IDCF,AXIS)
+                           IF (ICF>0) CFACE_AREA =  SUM( CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE) )
+                           SELECT CASE(AXIS)
+                              CASE(IAXIS)
+                                 VOL = DXN(I)*RC(I)*DY(J)*DZ(K)
+                              CASE(JAXIS)
+                                 VOL = DX(I)*RC(I)*DYN(J)*DZ(K)
+                              CASE(KAXIS)
+                                 VOL = DX(I)*RC(I)*DY(J)*DZN(K)
+                           END SELECT
+                           IF (ICF>0) VOL = VOL*CUT_FACE(ICF)%ALPHA_CF
+                        ENDIF
+
                         VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                                  DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
@@ -9238,7 +9247,14 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          ENDDO SH_MATL_LOOP
          SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT * 0.001_EB
       ENDIF
-
+   CASE(76) ! CONVECTIVE HEAT FLUX GAUGE
+      IF (PY%HEAT_TRANSFER_COEFFICIENT>=0._EB) THEN
+         Q_CON = PY%HEAT_TRANSFER_COEFFICIENT*(TMP(BC%IIG,BC%JJG,BC%KKG)-PY%GAUGE_TEMPERATURE)
+      ELSE
+         Q_CON = B1%Q_CON_F + B1%HEAT_TRANS_COEF*(B1%TMP_F-PY%GAUGE_TEMPERATURE)
+      ENDIF
+      SOLID_PHASE_OUTPUT = Q_CON*0.001_EB
+      
    CASE(100) ! CONDENSATION HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_CONDENSE * 0.001_EB
 
