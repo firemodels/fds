@@ -1001,6 +1001,10 @@ MAIN_LOOP: DO
       RSRT_COUNTER(1) = RSRT_COUNTER(1) + 1
    ENDIF
 
+   ! Stop the run if the wall clock time has exceeded T_END_CLOCK
+
+   IF((CURRENT_TIME()-WALL_CLOCK_START)>T_END_CLOCK) STOP_STATUS = CLOCK_STOP
+
    ! Check for abnormal run stop
 
    CALL STOP_CHECK(1)  ! The argument 1 means that FDS will end unless there is logic associated with the STOP_STATUS
@@ -1715,6 +1719,9 @@ SELECT CASE(STOP_STATUS)
    CASE(USER_STOP)
       DIAGNOSTICS = .TRUE.
       IF (STOP_AT_ITER==0 .AND. .NOT.ALL(RADIATION_COMPLETED)) RETURN
+   CASE(CLOCK_STOP)
+      IF (.NOT.SUPPRESS_DIAGNOSTICS .AND. N_MPI_PROCESSES>1) CALL EXCHANGE_DIAGNOSTICS
+      IF (MY_RANK==0) CALL WRITE_DIAGNOSTICS(T,DT)
 END SELECT
 
 IF (END_CODE==1) CALL END_FDS
@@ -1728,7 +1735,7 @@ SUBROUTINE END_FDS
 
 CHARACTER(255) :: MESSAGE
 
-IF (STOP_STATUS==NO_STOP .OR. STOP_STATUS==USER_STOP) CALL DUMP_TIMERS
+IF (ANY(STOP_STATUS==(/NO_STOP,USER_STOP,CLOCK_STOP/))) CALL DUMP_TIMERS
 
 IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MY_RANK,' has completed'
 
@@ -1760,6 +1767,8 @@ IF (MY_RANK==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS performed a level set analysis only and finished successfully'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
+      CASE(CLOCK_STOP)
+         WRITE(MESSAGE,'(A)') 'STOP: Clock Time exceeded - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
