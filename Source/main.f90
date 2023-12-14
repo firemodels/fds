@@ -1448,11 +1448,14 @@ PRESSURE_ITERATION_LOOP: DO
       CALL PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
    ENDDO
 
-   ! Solve the Poission equation using either FFT or GLMAT
+   ! Special case for tunnels -- filter out the lengthwise pressure gradient
+
+   IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
+
+   ! Solve the Poission equation using either FFT or ULMAT, GLMAT, or UGLMAT
 
    SELECT CASE(PRES_FLAG)
       CASE (FFT_FLAG)
-         IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
          DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL PRESSURE_SOLVER_FFT(NM)
          ENDDO
