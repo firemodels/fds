@@ -279,7 +279,7 @@ ompi_intel_osx : LFLAGS = -static-intel
 ompi_intel_osx : FCOMPL = mpifort
 ompi_intel_osx : obj = fds_ompi_intel_osx
 ompi_intel_osx : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 ompi_intel_osx_openmp : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx_openmp : LFLAGSMKL = $(LFLAGSMKL_CUSTOM_OPENMP)
@@ -288,7 +288,7 @@ ompi_intel_osx_openmp : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 ompi_intel_osx_openmp : FCOMPL = mpifort
 ompi_intel_osx_openmp : obj = fds_ompi_intel_osx_openmp
 ompi_intel_osx_openmp : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 ompi_intel_osx_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx_db : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
@@ -296,7 +296,7 @@ ompi_intel_osx_db : LFLAGS = -static-intel
 ompi_intel_osx_db : FCOMPL = mpifort
 ompi_intel_osx_db : obj = fds_ompi_intel_osx_db
 ompi_intel_osx_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 ompi_intel_osx_openmp_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx_openmp_db : LFLAGSMKL = $(LFLAGSMKL_CUSTOM_OPENMP)
@@ -305,7 +305,7 @@ ompi_intel_osx_openmp_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 ompi_intel_osx_openmp_db : FCOMPL = mpifort
 ompi_intel_osx_openmp_db : obj = fds_ompi_intel_osx_openmp_db
 ompi_intel_osx_openmp_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 ompi_intel_osx_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -stand:f18 -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx_dv : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
@@ -313,7 +313,7 @@ ompi_intel_osx_dv : LFLAGS = -static-intel
 ompi_intel_osx_dv : FCOMPL = mpifort
 ompi_intel_osx_dv : obj = fds_ompi_intel_osx_dv
 ompi_intel_osx_dv : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 ompi_intel_osx_openmp_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -stand:f18 -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 ompi_intel_osx_openmp_dv : LFLAGSMKL = $(LFLAGSMKL_CUSTOM_OPENMP)
@@ -322,7 +322,7 @@ ompi_intel_osx_openmp_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 ompi_intel_osx_openmp_dv : FCOMPL = mpifort
 ompi_intel_osx_openmp_dv : obj = fds_ompi_intel_osx_openmp_dv
 ompi_intel_osx_openmp_dv : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL) -Wl,-ld_classic
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 #*** GNU Compilers ***
 
