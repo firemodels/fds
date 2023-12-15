@@ -86,7 +86,7 @@ CALL GET_INPUT_FILE
 
 INQUIRE(FILE=FN_INPUT,EXIST=EX)
 IF (.NOT.EX) THEN
-   IF (MY_RANK==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,A,A)') 'ERROR(102): Input file ',TRIM(FN_INPUT),' not found in the current directory.'
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
@@ -105,7 +105,6 @@ OPEN(LU_INPUT,FILE=FN_INPUT,ACTION='READ')
 ! Read the input file, NAMELIST group by NAMELIST group
 
 CALL READ_CATF    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
-CALL READ_DEAD    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
 CALL READ_HEAD    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
 CALL READ_MISC    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
 CALL READ_MOVE    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
@@ -238,11 +237,13 @@ INTEGER :: IERR
 NAMELIST /CATF/ OTHER_FILES
 
 ! First retrieve original CHID:
+
 RETURN_BEFORE_STOP_FILE=.TRUE.
 CALL READ_HEAD
 RETURN_BEFORE_STOP_FILE=.FALSE.
 
 ! Check how many &CATF input lines are being defined:
+
 N_CATF_LINES=0
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 COUNT_OFILES_LOOP1: DO
@@ -255,11 +256,12 @@ REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_CATF_LINES==0) RETURN
 
 ! Check that &CATF other files exist:
+
 COUNT_OFILES_LOOP2: DO
    CALL CHECKREAD('CATF',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT COUNT_OFILES_LOOP2
    READ(LU_INPUT,NML=CATF,END=11,ERR=12,IOSTAT=IOS)
-   12 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with CATF line') ; RETURN ; ENDIF
+   12 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with CATF line.') ; RETURN ; ENDIF
    ! OPEN and copy other files into LU_CATF:
    OFI=0
    CPY_LOOP1: DO
@@ -268,7 +270,7 @@ COUNT_OFILES_LOOP2: DO
       ! Inquire if other file exists:
       INQUIRE(FILE=TRIM(OTHER_FILES(OFI)),EXIST=EX)
       IF (.NOT.EX) THEN
-         WRITE(BUFFER,'(A)') 'ERROR: Problem with CATF line, file '//TRIM(OTHER_FILES(OFI))//' does not exist.'
+         WRITE(BUFFER,'(A)') 'ERROR(103): CATF file '//TRIM(OTHER_FILES(OFI))//' not found.'
          CALL SHUTDOWN(TRIM(BUFFER)) ; RETURN
       ENDIF
    ENDDO CPY_LOOP1
@@ -277,18 +279,21 @@ ENDDO COUNT_OFILES_LOOP2
 
 ! Here at least one &CATF line has been found:
 ! Open CHID_cat.fds file which will concatenate all input files:
+
 FN_CATF = TRIM(CHID)//'_cat.fds'
 
 ! Now check state of OVERWRITE:
+
 RETURN_BEFORE_SIM_MODE=.TRUE.
 CALL READ_MISC
 RETURN_BEFORE_SIM_MODE=.FALSE.
 
 ! Inquire if FN_CATF is present, if so stop to avoid overwriting the input file potentially used previously.
+
 INQUIRE(FILE=TRIM(FN_CATF),EXIST=EX)
 IF (EX .AND. .NOT.OVERWRITE) THEN
    WRITE(BUFFER,'(A)') &
-   'ERROR: OVERWRITE=.FALSE. and Concatenated file '//TRIM(FN_CATF)//' exists. Also remove '//TRIM(CHID)//'_cat.out'
+   'ERROR(104): OVERWRITE=F and concatenated file '//TRIM(FN_CATF)//' exists. Also remove '//TRIM(CHID)//'_cat.out'
    CALL SHUTDOWN(TRIM(BUFFER)) ; RETURN
 ENDIF
 
@@ -319,11 +324,13 @@ IF (MY_RANK==0) THEN
 ENDIF
 
 ! Load CHID file into LU_CATF:
+
 CALL COPY_FILE_TO_CAT(LU_INPUT,LU_CATF,0)
 
 IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! One &CATF line by one add the corresponding OTHER_FILES into LU_CATF:
+
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 TFI=0
 COPY_OFILES_LOOP: DO
@@ -331,7 +338,7 @@ COPY_OFILES_LOOP: DO
    IF (IOS==1) EXIT COPY_OFILES_LOOP
    OTHER_FILES(:) = 'null'
    READ(LU_INPUT,NML=CATF,END=13,ERR=14,IOSTAT=IOS)
-   14 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with CATF line') ; RETURN ; ENDIF
+   14 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with CATF line.') ; RETURN ; ENDIF
    ! OPEN and copy other files into LU_CATF:
    OFI=0
    CPY_LOOP: DO
@@ -354,32 +361,28 @@ ENDDO COPY_OFILES_LOOP
 IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Process 0 closes LU_CATF and reopens FN_CATF as LU_INPUT:
+
 IF (MY_RANK==0) THEN
    WRITE(LU_CATF,'(A)')
    WRITE(LU_CATF,'(A)') '&TAIL /'
    CLOSE(LU_CATF)
 ENDIF
 
-IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+CLOSE(LU_INPUT)
+
+CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 IF (MY_RANK==0) THEN
-   CLOSE(LU_INPUT)
    OPEN(LU_INPUT,FILE=FN_CATF,STATUS='OLD',ACTION='READ')
 ENDIF
 
-IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-
 ! Finally other processes reopen FN_CATF as LU_INPUT:
-IOS = 0
+
 IF (MY_RANK/=0) THEN
-   CLOSE(LU_INPUT)
    TFI = 0
    DO
       TFI = TFI + 1
-      IF (TFI > 100) THEN
-         IOS=1
-         EXIT
-      ENDIF
+      IF (TFI > 100) EXIT
       INQUIRE(FILE=FN_CATF,EXIST=EX)
       IF (EX) THEN
          OPEN(LU_INPUT,FILE=FN_CATF,STATUS='OLD',ACTION='READ')
@@ -388,12 +391,6 @@ IF (MY_RANK/=0) THEN
       CALL FDS_SLEEP(1)
    ENDDO
 ENDIF
-
-IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,IOS,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IERR)
-IF (IOS>0) CALL SHUTDOWN('ERROR: Problem Opening CHID_cat.fds file for MPI process /=0.') ; RETURN
-
-
-RETURN
 
 CONTAINS
 
@@ -404,13 +401,14 @@ SUBROUTINE COPY_FILE_TO_CAT(LU_INFILE,LU_OUTFILE,FILENUM)
 INTEGER, INTENT(IN) :: LU_INFILE,LU_OUTFILE,FILENUM
 INTEGER :: MESSAGE_LENGTH_EXT = 2*MESSAGE_LENGTH
 CHARACTER(2*MESSAGE_LENGTH+1) :: BUFFER2 ! This size should be the same as MESSAGE_LENGTH_EXT+1.
+
 COPY_IFILE_LOOP: DO
    ! Non Advancing READ, test if size of record larger than size of BUFFER2 and if end of file:
    READ(LU_INFILE,'(A)',ADVANCE='NO',EOR=11,END=10) BUFFER2
    IF (FILENUM==0) THEN
-      WRITE(BUFFER,'(A,I3,A)') 'ERROR: CATF File '//TRIM(CHID)//'.fds has line with > ',MESSAGE_LENGTH_EXT,' characters. Split it.'
+      WRITE(BUFFER,'(A,I3,A)') 'ERROR(105): Input file '//TRIM(CHID)//'.fds has line with > ',MESSAGE_LENGTH_EXT,' characters.'
    ELSE
-      WRITE(BUFFER,'(A,I3,A)') 'ERROR: CATF file '//TRIM(OTHER_FILES(FILENUM))//'.fds has line with > ',&
+      WRITE(BUFFER,'(A,I3,A)') 'ERROR(106): CATF file '//TRIM(OTHER_FILES(FILENUM))//'.fds has line with > ',&
                                MESSAGE_LENGTH_EXT,' characters. Split it.'
    ENDIF
    CALL SHUTDOWN(BUFFER); RETURN
@@ -429,56 +427,19 @@ END SUBROUTINE COPY_FILE_TO_CAT
 END SUBROUTINE READ_CATF
 
 
-!> \brief Look for deprecated NAMELIST groups.
-
-SUBROUTINE READ_DEAD
-
-CHARACTER(80) :: BAD_TEXT
-
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL SCAN_INPUT_FILE(LU_INPUT,IOS,BAD_TEXT)
-IF (IOS==0) THEN
-   WRITE(MESSAGE,'(3A)') 'ERROR: Hidden carriage return character in line starting with: ',BAD_TEXT(2:15),'...'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
-
-! Look for outdated NAMELIST groups and stop the run if any are found.
-
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('GRID',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: GRID is no longer a valid NAMELIST group. Read User Guide discussion on MESH.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('HEAT',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: HEAT is no longer a valid NAMELIST group. Read User Guide discussion on PROP and DEVC.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('PDIM',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: PDIM is no longer a valid NAMELIST group. Read User Guide discussion on MESH.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('PIPE',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: PIPE is no longer a valid NAMELIST group. Read User Guide discussion on PROP and DEVC.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('PL3D',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: PL3D is no longer a valid NAMELIST group. Read User Guide discussion on DUMP.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('SMOD',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: SMOD is no longer a valid NAMELIST group. Read User Guide discussion on DEVC.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('SPRK',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: SPRK is no longer a valid NAMELIST group. Read User Guide discussion on PROP and DEVC.')
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-CALL CHECKREAD('THCP',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IOS==0) CALL SHUTDOWN('ERROR: THCP is no longer a valid NAMELIST group. Read User Guide discussion on DEVC.')
-
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-END SUBROUTINE READ_DEAD
-
-
 !> \brief Read the HEAD NAMELIST line, which contains the job name
 
 SUBROUTINE READ_HEAD
 INTEGER :: NAMELENGTH
 NAMELIST /HEAD/ CHID,FYI,TITLE
+CHARACTER(80) :: BAD_TEXT
+
+REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+CALL SCAN_INPUT_FILE(LU_INPUT,IOS,BAD_TEXT)
+IF (IOS==0) THEN
+   WRITE(MESSAGE,'(3A)') 'ERROR(107): Hidden carriage return character in line starting with: ',BAD_TEXT(2:15),'...'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
 
 CHID    = 'null'
 TITLE   = '      '
@@ -489,12 +450,12 @@ HEAD_LOOP: DO
    CALL CHECKREAD('HEAD',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT HEAD_LOOP
    READ(LU_INPUT,HEAD,END=13,ERR=14,IOSTAT=IOS)
-   14 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with HEAD line') ; RETURN ; ENDIF
+   14 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with HEAD line') ; RETURN ; ENDIF
 ENDDO HEAD_LOOP
 13 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 CLOOP: DO I=1,CHID_LENGTH-1
-   IF (CHID(I:I)=='.') THEN ; CALL SHUTDOWN('ERROR: No periods allowed in CHID') ; RETURN ; ENDIF
+   IF (CHID(I:I)=='.') THEN ; CALL SHUTDOWN('ERROR(108): No periods allowed in CHID') ; RETURN ; ENDIF
    IF (CHID(I:I)==' ') EXIT CLOOP
 ENDDO CLOOP
 
@@ -517,7 +478,7 @@ INQUIRE(FILE=FN_STOP,EXIST=EX)
 IF (EX) THEN
    STOP_AT_ITER=READ_STOP() ! READ_STOP() returns 0 if there is nothing in the .stop file
    IF (STOP_AT_ITER<=0) THEN
-      WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ",TRIM(FN_STOP),", from the current directory"
+      WRITE(MESSAGE,'(A,A,A)') "ERROR(109): Remove the file, ",TRIM(FN_STOP),", from the current directory"
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ELSE
       WRITE(LU_ERR,'(A,A,A)') "NOTE: The file, ",TRIM(FN_STOP),", was detected."
@@ -570,7 +531,7 @@ COUNT_MESH_LOOP: DO
    READ(LU_INPUT,MESH,END=15,ERR=16,IOSTAT=IOS)
    NMESHES_READ = NMESHES_READ + 1
    IF (NMESHES_READ>1 .AND. ((CYLINDRICAL_OLD_VALUE.NEQV.CYLINDRICAL) .OR. (IJK(2)==1).NEQV.(JBAR_OLD_VALUE==1))) THEN
-      WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: All meshes must be CYLINDRICAL and/or all meshes must have IJK(2) set to 1'
+      WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(110): All meshes must be CYLINDRICAL and/or all meshes must have IJK(2) set to 1'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ELSE
       CYLINDRICAL_OLD_VALUE = CYLINDRICAL
@@ -585,14 +546,13 @@ COUNT_MESH_LOOP: DO
          IF (MULT_ID==MR%ID) N_MESH_NEW = MR%N_COPIES
       ENDDO
       IF (N_MESH_NEW==0) THEN
-         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on MESH line', &
-            NMESHES_READ
+         WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR(111): MULT_ID ',TRIM(MULT_ID),' on MESH line ',NMESHES_READ,' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
    NMESHES      = NMESHES + N_MESH_NEW
 16 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0)') 'ERROR: Problem with MESH line, line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with MESH line, line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -602,7 +562,8 @@ ENDDO COUNT_MESH_LOOP
 ! Stop the calculation if the number of MPI processes is greater than the number of meshes
 
 IF (NMESHES<N_MPI_PROCESSES) THEN
-   WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: The number of MPI processes, ',N_MPI_PROCESSES,', exceeds the number of meshes, ',NMESHES
+   WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(112): The number of MPI processes, ',N_MPI_PROCESSES,&
+                                ', exceeds the number of meshes, ',NMESHES
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -623,7 +584,7 @@ ALLOCATE(RADIATION_COMPLETED(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','RADIA
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-IF (NMESHES<1) THEN ; CALL SHUTDOWN('ERROR: No MESH line(s) defined.') ; RETURN ; ENDIF
+IF (NMESHES<1) THEN ; CALL SHUTDOWN('ERROR(113): No MESH line(s) defined.') ; RETURN ; ENDIF
 
 NM = 0
 
@@ -698,7 +659,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                CURRENT_MPI_PROCESS = MPI_PROCESS
                IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
                   IF (N_MPI_PROCESSES > 1) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR(114): MPI_PROCESS for MESH ',NM,' greater than total number of processes'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ELSE
                      ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
@@ -709,8 +670,8 @@ MESH_LOOP: DO N=1,NMESHES_READ
                ENDIF
             ELSE
                IF (N_MPI_PROCESSES>1 .AND. NM>N_MPI_PROCESSES) THEN
-                  WRITE(MESSAGE,'(A,A)') 'ERROR: Number of meshes exceeds number of MPI processes. Set MPI_PROCESS on each MESH ',&
-                                         'line so that each MESH is assigned to a specific MPI process'
+                  WRITE(MESSAGE,'(A,A)') 'ERROR(115): Number of meshes exceeds number of MPI processes. ',&
+                     ' Set MPI_PROCESS on each MESH line so that each MESH is assigned to a specific MPI process'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
@@ -732,7 +693,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             IF (M%JBAR==1) TWO_D = .TRUE.
             IF (TWO_D .AND. M%JBAR/=1) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
+               WRITE(MESSAGE,'(A)') 'ERROR(116): IJK(2) must be 1 for all grids in 2D Calculation'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -746,12 +707,12 @@ MESH_LOOP: DO N=1,NMESHES_READ
             PROCESS(NM) = CURRENT_MPI_PROCESS
             IF (NM>1) THEN
                IF (PROCESS(NM)-PROCESS(NM-1)>1 .OR. PROCESS(NM-1)>PROCESS(NM)) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: MPI_PROCESS must be continuous and monotonically increasing'
+                  WRITE(MESSAGE, '(A)') 'ERROR(117): MPI_PROCESS must be continuous and monotonically increasing.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ELSE
                IF (PROCESS(NM)/=0) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: MESH 1 must be assigned to MPI_PROCESS 0'
+                  WRITE(MESSAGE, '(A)') 'ERROR(118): MESH 1 must be assigned to MPI_PROCESS 0.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
@@ -772,23 +733,23 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Process Physical Coordinates
 
             IF (XB2-XB1<TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: XMIN > XMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(119): XB(1)=XB(2) on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (XB4-XB3<TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: YMIN > YMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(119): XB(3)=XB(4) on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (XB6-XB5<TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: ZMIN > ZMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(119): XB(5)=XB(6) on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (CYLINDRICAL .AND. XB1<-TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: XMIN < 0 with CYLINDRICAL on MESH ', NM
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(120): XB(1)<0 with CYLINDRICAL on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (CYLINDRICAL .AND. .NOT.TWO_D) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: J>1 with CYLINDRICAL on MESH ', NM
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(121): J>1 with CYLINDRICAL on MESH ', NM 
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -834,7 +795,7 @@ ENDDO MESH_LOOP
 ! Check if there are too many MPI processes assigned to the job
 
 IF (PROCESS(NMESHES) < N_MPI_PROCESSES-1) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: Too many MPI processes have been assigned to this job'
+   WRITE(MESSAGE,'(A)') 'ERROR(122): Too many MPI processes have been assigned to this job.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -843,8 +804,7 @@ ENDIF
 DO NM=1,NMESHES
    IF (NM==1) CYCLE
    IF (PROCESS(NM) < PROCESS(NM-1)) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: MPI_PROCESS for MESH ', NM,' < MPI_PROCESS for MESH ',NM-1,&
-                                     '. Reorder MESH lines.'
+      WRITE(MESSAGE,'(A)') 'ERROR(117): MPI_PROCESS must be continuous and monotonically increasing.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
@@ -1085,7 +1045,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
          END SELECT
          T%NOC(N) = T%NOC(N) + 1
-         18 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with TRN* line') ; RETURN ; ENDIF
+         18 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with TRN* line') ; RETURN ; ENDIF
       ENDDO TRNLOOP
       17 CONTINUE
    ENDDO
@@ -1205,7 +1165,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
             IERROR = 0
             CALL GAUSSJ(A,T%NOC(IC)+1,T%NOCMAX+1,T%C1(1:T%NOCMAX+1,IC),1,1,IERROR)
-            IF (IERROR/=0) THEN ; CALL SHUTDOWN('ERROR: Problem with grid transformation') ; RETURN ; ENDIF
+            IF (IERROR/=0) THEN ; CALL SHUTDOWN('ERROR(124): Problem with grid transformation.') ; RETURN ; ENDIF
 
          CASE (2)  ! linear transformation
 
@@ -1236,7 +1196,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
             DO N=1,T%NOC(IC)+1
                IF (T%C1(N,IC)-T%C1(N-1,IC)<TWO_EPSILON_EB) THEN
-                  CALL SHUTDOWN('ERROR: Do not specify endpoints in linear grid transformation')
+                  CALL SHUTDOWN('ERROR(125): Do not specify endpoints in linear grid transformation.')
                   RETURN
                ENDIF
                T%C3(N,IC) = (T%C2(N,IC)-T%C2(N-1,IC))/(T%C1(N,IC)-T%C1(N-1,IC))
@@ -1318,7 +1278,7 @@ MESH_LOOP: DO NM=1,NMESHES
          M%HX(I) = M%DX(I)/M%DXI
          M%DXMIN = MIN(M%DXMIN,M%DX(I))
          IF (M%HX(I)<=0._EB) THEN
-            WRITE(MESSAGE,'(A,I0)')  'ERROR: x transformation not monotonic, mesh ',NM
+            WRITE(MESSAGE,'(A,I0)')  'ERROR(126): x transformation not monotonic, MESH ',NM
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          M%RDX(I) = 1._EB/M%DX(I)
@@ -1363,7 +1323,7 @@ MESH_LOOP: DO NM=1,NMESHES
          M%HY(J) = M%DY(J)/M%DETA
          M%DYMIN = MIN(M%DYMIN,M%DY(J))
          IF (M%HY(J)<=0._EB) THEN
-            WRITE(MESSAGE,'(A,I0)')  'ERROR: y transformation not monotonic, mesh ',NM
+            WRITE(MESSAGE,'(A,I0)')  'ERROR(126): y transformation not monotonic, MESH ',NM
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          M%RDY(J) = 1._EB/M%DY(J)
@@ -1399,7 +1359,7 @@ MESH_LOOP: DO NM=1,NMESHES
          M%HZ(K) = M%DZ(K)/M%DZETA
          M%DZMIN = MIN(M%DZMIN,M%DZ(K))
          IF (M%HZ(K)<=0._EB) THEN
-            WRITE(MESSAGE,'(A,I0)') 'ERROR: z transformation not monotonic, mesh ',NM
+            WRITE(MESSAGE,'(A,I0)') 'ERROR(126): z transformation not monotonic, MESH ',NM
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          M%RDZ(K) = 1._EB/M%DZ(K)
@@ -1522,7 +1482,7 @@ READ_TIME_LOOP: DO
    CALL CHECKREAD('TIME',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT READ_TIME_LOOP
    READ(LU_INPUT,TIME,END=21,ERR=22,IOSTAT=IOS)
-   22 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with TIME line') ; RETURN ; ENDIF
+   22 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with TIME line') ; RETURN ; ENDIF
 ENDDO READ_TIME_LOOP
 21 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -1554,7 +1514,7 @@ COUNT_MOVE_LOOP: DO
    READ(LU_INPUT,NML=MOVE,END=9,ERR=10,IOSTAT=IOS)
    N_MOVE = N_MOVE + 1
    10 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with MOVE number ',N_MOVE,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with MOVE number ',N_MOVE,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_MOVE_LOOP
@@ -1631,7 +1591,7 @@ COUNT_MULT_LOOP: DO
    READ(LU_INPUT,NML=MULT,END=9,ERR=10,IOSTAT=IOS)
    N_MULT = N_MULT + 1
    10 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with MULT number ',N_MULT,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with MULT number ',N_MULT,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_MULT_LOOP
@@ -1807,7 +1767,7 @@ MISC_LOOP: DO
    CALL CHECKREAD('MISC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT MISC_LOOP
    READ(LU_INPUT,MISC,END=23,ERR=24,IOSTAT=IOS)
-   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with MISC line') ; RETURN ; ENDIF
+   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with MISC line.') ; RETURN ; ENDIF
    N_TERRAIN_IMAGES = 0
    DO I = 1, MAX_TERRAIN_IMAGES
       IF( TERRAIN_IMAGE(I) /= 'null' ) N_TERRAIN_IMAGES = N_TERRAIN_IMAGES + 1
@@ -1837,7 +1797,7 @@ IF (SIMULATION_MODE=='DNS') THEN
    VN_MIN = 0.4
    I_FLUX_LIMITER = CHARM_LIMITER
    IF (TURBULENCE_MODEL/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: TURBULENCE_MODEL,',TRIM(TURBULENCE_MODEL),', is not appropriate for DNS.'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR(127): TURBULENCE_MODEL,',TRIM(TURBULENCE_MODEL),', is not appropriate for DNS.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ELSEIF (SIMULATION_MODE=='LES') THEN
@@ -1859,7 +1819,7 @@ ELSEIF (SIMULATION_MODE=='SVLES') THEN
    CFL_VELOCITY_NORM = 3
    CONSTANT_SPECIFIC_HEAT_RATIO = .TRUE.
 ELSE
-   WRITE(MESSAGE,'(A,A,A)')  'ERROR: SIMULATION_MODE, ',TRIM(SIMULATION_MODE),', is not an option.'
+   WRITE(MESSAGE,'(A,A,A)')  'ERROR(128): SIMULATION_MODE, ',TRIM(SIMULATION_MODE),', is not an option.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -1980,7 +1940,7 @@ SELECT CASE (TRIM(TURBULENCE_MODEL))
    CASE ('null')
       TURB_MODEL=NO_TURB_MODEL
    CASE DEFAULT
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: TURBULENCE_MODEL, ',TRIM(TURBULENCE_MODEL),', is not recognized.'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR(129): TURBULENCE_MODEL, ',TRIM(TURBULENCE_MODEL),', is not recognized.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
 END SELECT
 
@@ -2015,8 +1975,7 @@ SELECT CASE (TRIM(FLUX_LIMITER))
    CASE ('MP5')
       I_FLUX_LIMITER=MP5_LIMITER
    CASE DEFAULT
-      WRITE(MESSAGE,'(A,A,A)')  "ERROR: FLUX_LIMITER, ",TRIM(FLUX_LIMITER),", is not recognized."
-      WRITE(MESSAGE,'(A)')      "       Available options are: 'CENTRAL', GODUNOV', 'SUPERBEE', 'MINMOD', 'CHARM', 'MP5'."
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR(130): FLUX_LIMITER, ',TRIM(FLUX_LIMITER),', is not recognized.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
 END SELECT
 
@@ -2089,7 +2048,7 @@ WIND_LOOP: DO
    CALL CHECKREAD('WIND',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT WIND_LOOP
    READ(LU_INPUT,WIND,END=23,ERR=24,IOSTAT=IOS)
-   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with WIND line') ; RETURN ; ENDIF
+   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with WIND line') ; RETURN ; ENDIF
 ENDDO WIND_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -2264,7 +2223,7 @@ IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*(ZFW-GROUND_LEVEL))
 
 IF (ANY(ABS(GEOSTROPHIC_WIND)>TWO_EPSILON_EB)) THEN
    IF (ALL(ABS(OVEC)<TWO_EPSILON_EB)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: GEOSTROPHIC_WIND requires Coriolis force, set LATITUDE on WIND line'
+      WRITE(MESSAGE,'(A)') 'ERROR(131): GEOSTROPHIC_WIND requires Coriolis force, set LATITUDE on WIND line.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    FVEC(1) = - GEOSTROPHIC_WIND(2)*RHOA*2._EB*EARTH_OMEGA*SIN(LATITUDE*DEG2RAD)
@@ -2346,7 +2305,7 @@ DUMP_LOOP: DO
    CALL CHECKREAD('DUMP',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT DUMP_LOOP
    READ(LU_INPUT,DUMP,END=23,ERR=24,IOSTAT=IOS)
-   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with DUMP line') ; RETURN ; ENDIF
+   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with DUMP line.') ; RETURN ; ENDIF
 ENDDO DUMP_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -2466,7 +2425,7 @@ COUNT_SPEC_LINES: DO
    READ(LU_INPUT,NML=SPEC,END=19,ERR=20,IOSTAT=IOS)
    N_SPEC_READ = N_SPEC_READ+1
 20 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SPECies number ',N_SPEC_READ+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with SPECies number ',N_SPEC_READ+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPEC_ID(1)=='null') THEN
@@ -2475,31 +2434,31 @@ COUNT_SPEC_LINES: DO
          N_TOTAL_BINS = N_TOTAL_BINS + N_BINS
          N_AGGLOMERATION_SPECIES = N_AGGLOMERATION_SPECIES + 1
          IF (N_BINS < 2) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': N_BINS must be >=2'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(132): SPEC ',N_SPEC_READ,': N_BINS must be >=2.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (.NOT. AEROSOL) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': AEROSOL must be .TRUE. to use N_BINS'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(133): SPEC ',N_SPEC_READ,': AEROSOL must be .TRUE. to use N_BINS.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (ABS(MEAN_DIAMETER - 1.E-6_EB) < TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': Do not specify MEAN_DIAMETER and N_BINS'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(134): SPEC ',N_SPEC_READ,': Do not specify MEAN_DIAMETER and N_BINS.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (MAX_DIAMETER < 0._EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': MAX_DIAMETER not set'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(135): SPEC ',N_SPEC_READ,': MAX_DIAMETER not set'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (MIN_DIAMETER < 0._EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': MIN_DIAMETER not set'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(135): SPEC ',N_SPEC_READ,': MIN_DIAMETER not set'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (MAX_DIAMETER <= MIN_DIAMETER) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': MAX_DIAMETER <= MIN_DIAMETER'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(136): SPEC ',N_SPEC_READ,': MAX_DIAMETER <= MIN_DIAMETER.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (.NOT. LUMPED_COMPONENT_ONLY) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': LUMPED_COMPONENT_ONLY must be .TRUE. to use N_BINS'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(137): SPEC ',N_SPEC_READ,': LUMPED_COMPONENT_ONLY must be .TRUE. to use N_BINS'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -2508,16 +2467,15 @@ COUNT_SPEC_LINES: DO
          IF (CHECK_CONDENSABLE(VAPORIZATION_TEMPERATURE,ID)) THEN
             N_CONDENSATION = N_CONDENSATION + 1
             IF (N_BINS>0) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot set both N_BINS > 0 when CONDENSABLE=.TRUE.'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(138): SPEC ',N_SPEC_READ,': Cannot set N_BINS for a condensable species'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (LUMPED_COMPONENT_ONLY) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,&
-                                         ': A CONDENSABLE species cannot have LUMPED_COMPONENT_ONLY=.TRUE.'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(139): SPEC ',N_SPEC_READ,': Condensable species cannot be LUMPED_COMPONENT_ONLY'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (ANY(SPEC_ID/='null')) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': A CONDENSABLE species cannot be a lumped species'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(140): SPEC ',N_SPEC_READ,': Condensable species cannot be a lumped species.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -2526,17 +2484,18 @@ COUNT_SPEC_LINES: DO
       IF (PRIMITIVE) THEN
          N_COPY_PRIMITIVE = N_COPY_PRIMITIVE + 1
          IF (SPEC_ID(1)/='null' .AND. SPEC_ID(2)/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Species ',N_SPEC_READ,' is declared PRIMITIVE and has more than one SPEC_ID given'
+            WRITE(MESSAGE,'(A,I0,A)') &
+               'ERROR(141): Species ',N_SPEC_READ,' is primitive but more than one SPEC_ID given.'
             CALL SHUTDOWN(MESSAGE)          ; RETURN
          ENDIF
       ELSE
          IF (COPY_LUMPED) THEN
             IF (N_BINS >0) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and N_BINS.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR(142): SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and N_BINS.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (BACKGROUND) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and BACKGROUND.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR(143): SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and BACKGROUND.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             N_COPY = N_COPY + 1
@@ -2549,7 +2508,7 @@ COUNT_SPEC_LINES: DO
       IF (DEFINED_BACKGROUND == 0) THEN
          DEFINED_BACKGROUND = N_LUMPED + N_TOTAL_BINS + N_COPY + N_CONDENSATION
       ELSE
-         WRITE(MESSAGE,'(A)') 'ERROR: Can only defined one BACKGROUND SPECies.'
+         WRITE(MESSAGE,'(A)') 'ERROR(144): Only one BACKGROUND SPECies can be defined.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -2566,81 +2525,73 @@ DO N1=1,N_SPEC_READ
    SPEC_ID_READ(N1) = ID
    IF (BACKGROUND) THEN
       IF (LUMPED_COMPONENT_ONLY) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: Cannot define a LUMPED_COMPONENT_ONLY species as the BACKGROUND species'
+         WRITE(MESSAGE,'(A)') 'ERROR(145): Cannot define a LUMPED_COMPONENT_ONLY species as the BACKGROUND species'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SIMPLE_CHEMISTRY) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: Can not define a BACKGROUND SPECies or redefine AIR when using simple chemistry.'
+         WRITE(MESSAGE,'(A)') 'ERROR(146): Can not define a BACKGROUND species or redefine AIR when using simple chemistry.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
    IF (ID=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Species ',N_SPEC_READ, ' needs a name (ID=...)'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(147): Species ',N_SPEC_READ, ' needs a name (ID=...)'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ID=='AIR' .AND. .NOT. BACKGROUND) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot redefine AIR unless it is declared the BACKGROUND species'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(148): SPEC ',TRIM(ID),' cannot redefine AIR unless it is the BACKGROUND species.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPECIFIC_HEAT > 0._EB .AND. RAMP_CP/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both SPECIFIC_HEAT and RAMP_CP'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(149): SPEC ',TRIM(ID),' cannot specify both SPECIFIC_HEAT and RAMP_CP.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPECIFIC_HEAT_LIQUID > 0._EB .AND. RAMP_CP_L/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both SPECIFIC_HEAT_LIQUID and RAMP_CP_L'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(150): SPEC ',TRIM(ID),' cannot specify both SPECIFIC_HEAT_LIQUID and RAMP_CP_L.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (CONDUCTIVITY > 0._EB .AND. RAMP_K/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both CONDUCTIVITY and RAMP_K'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(151): SPEC ',TRIM(ID),' cannot specify both CONDUCTIVITY and RAMP_K.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (DIFFUSIVITY > 0._EB .AND. RAMP_D/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both DIFFUSIVITY and RAMP_D'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(152): SPEC ',TRIM(ID),' cannot specify both DIFFUSIVITY and RAMP_D.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (VISCOSITY > 0._EB .AND. RAMP_MU/='null') THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both VISCOSISTY and RAMP_MU'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(153): SPEC ',TRIM(ID),' cannot specify both VISCOSITY and RAMP_MU.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (REFERENCE_ENTHALPY > -1.E20_EB .AND. ENTHALPY_OF_FORMATION > -1.E20_EB) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),', cannot define both REFERENCE_ENTHALPY and ENTHALPY_OF_FORMATION.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(154): SPEC ',TRIM(ID),', cannot define both REFERENCE_ENTHALPY and ENTHALPY_OF_FORMATION.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
-!   IF (REFERENCE_ENTHALPY > -1.E20_EB .AND. (SPECIFIC_HEAT < 0._EB .AND. RAMP_CP=='null')) THEN
-!      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': REFERENCE_ENTHALPY requires SPECIFIC_HEAT or RAMP_CP'
-!      CALL SHUTDOWN(MESSAGE) ; RETURN
-!   ENDIF
-!   IF (ENTHALPY_OF_FORMATION > -1.E20_EB .AND. (SPECIFIC_HEAT < 0._EB .AND. RAMP_CP=='null')) THEN
-!      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': ENTHALPY_OF_FORMATION requires SPECIFIC_HEAT or RAMP_CP'
-!      CALL SHUTDOWN(MESSAGE) ; RETURN
-!   ENDIF
    DO NN = 1,N1-1
       IF (ID==SPEC_ID_READ(NN)) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: Species ',N1,' has the same ID as species ',NN, '.'
+         WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR(155): Species ',N1,' has the same ID as species ',NN, '.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
    IF (LUMPED_COMPONENT_ONLY .AND. MASS_FRACTION_0>0._EB) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: Cannot define MASS_FRACTION_0 for a LUMPED_COMPONENT_ONLY species'
+      WRITE(MESSAGE,'(A)') 'ERROR(156): Cannot define MASS_FRACTION_0 for a LUMPED_COMPONENT_ONLY species'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF ((HEAT_OF_VAPORIZATION >  0._EB .AND. SPECIFIC_HEAT_LIQUID <= 0._EB .AND. RAMP_CP_L=='null') .OR. &
        (HEAT_OF_VAPORIZATION <= 0._EB .AND. SPECIFIC_HEAT_LIQUID >  0._EB .AND. RAMP_CP_L/='null')) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ' ,N1, &
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(157): SPEC ' ,N1, &
                                 ': If one of SPECIFIC_HEAT_LIQUID (or RAMP_CL_L) or HEAT_OF_VAPORIZATION defined, both must be'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (N_BINS==0 .AND. AEROSOL .AND. MEAN_DIAMETER < 0._EB) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': No MEAN_DIAMETER given.'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(158): SPEC ',N_SPEC_READ,': No MEAN_DIAMETER given.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ANY(MASS_FRACTION>0._EB) .AND. ANY(VOLUME_FRACTION>0._EB)) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both MASS_FRACTION and VOLUME_FRACTION.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(159): SPEC ' ,TRIM(ID),', cannot specify both MASS_FRACTION and VOLUME_FRACTION.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (FORMULA/='null' .AND. (C >0._EB .OR. H>0._EB .OR. O>0._EB .OR. N>0._EB)) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both FORMULA and C,H,O, or N'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(160): SPEC ' ,TRIM(ID),', cannot specify both FORMULA and C,H,O, or N.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
@@ -2739,7 +2690,7 @@ PREDEF_SMIX_ID: IF (SIMPLE_CHEMISTRY) THEN
       PROD_COUNTER = PROD_COUNTER + 1
       IF (ALL(SPEC_ID_READ/=REACTION(NR)%FUEL)) THEN
          IF (.NOT. SIMPLE_FUEL_DEFINED(NR)) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Simple chemistry fuel, ',TRIM(REACTION(NR)%FUEL),', not defined on REAC or SPEC.'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(161): Simple chemistry FUEL, ',TRIM(REACTION(NR)%FUEL),', not defined on REAC or SPEC.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          N_PREDEFINED_SMIX = N_PREDEFINED_SMIX + 1
@@ -2779,7 +2730,7 @@ ENDIF PREDEF_SMIX_ID
 IF (N_PREDEFINED_SMIX > 0) THEN
    DO N1=1,N_SPEC_READ
       IF (ANY(PREDEFINED_SMIX_ID==SPEC_ID_READ(N1))) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),' has the same names as a predefined lumped species'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(162): SPEC ',TRIM(ID),' has the same name as a predefined lumped species.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -3127,8 +3078,7 @@ IF (SIMPLE_CHEMISTRY) THEN
          REACTION(NR)%FUEL_SMIX_INDEX = N1
          SM => SPECIES_MIXTURE(N1)
          IF (ANY(SM%ATOMS(2:5)>0._EB) .OR. ANY(SM%ATOMS(9:)>0._EB)) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: For REACtion ',NR, &
-                                      ' the SPEC FORMULA can only contain C,H,O, and N whne using simple chemistry'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(163): REAC ',NR,': FORMULA limited to C,H,O,N for simple chemistry.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
             REACTION(NR)%C = SM%ATOMS(6)
@@ -3139,8 +3089,7 @@ IF (SIMPLE_CHEMISTRY) THEN
          ENDIF
       ELSE
          IF (REACTION(NR)%C<=TWO_EPSILON_EB .AND. REACTION(NR)%H<=TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: For REACtion ',NR, &
-                                      'must specify fuel chemistry using C and/or H when using simple chemistry'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(164): REAC ',NR,': Specify fuel chemistry using C and/or H for simple chemistry.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -3217,19 +3166,19 @@ CPOPR = CP_GAMMA/PR
 IF (.NOT. SOOT_OXIDATION) RETURN
 
 IF (SIMPLE_CHEMISTRY) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: Cannot use simple chemistry with SOOT_OXIDATION.'
+   WRITE(MESSAGE,'(A)') 'ERROR(165): Cannot use simple chemistry with SOOT_OXIDATION.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
 IF (SOOT_INDEX < 0) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: SOOT_OXIDATION set without SOOT as a species'
+   WRITE(MESSAGE,'(A)') 'ERROR(166): SOOT_OXIDATION set without SOOT as a species.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
 SS => SPECIES(SOOT_INDEX)
 
 IF (SS%MODE /= AEROSOL_SPECIES)  THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: SOOT_OXIDATION set without SOOT defined as an AEROSOL species'
+   WRITE(MESSAGE,'(A)') 'ERROR(167): SOOT_OXIDATION set without SOOT defined as an AEROSOL species'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -3389,14 +3338,14 @@ DO NS = 1,N_SUB_SPECIES
    ENDDO FIND_SPEC_ID
 
    IF (Y_INDEX(NS)<0) THEN
-      WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', sub species ',NS,' not found.'
+      WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR(168): SPEC ' ,TRIM(SM%ID),': Sub-species ',NS,' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (MASS_FRACTION(NS)>0._EB)     CONVERSION = CONVERSION + MASS_FRACTION(NS)   / SPECIES(Y_INDEX(NS))%MW
    IF (VOLUME_FRACTION(NS)>0._EB)   CONVERSION = CONVERSION + VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW
    IF (NN > N_PREDEFINED_SMIX .AND. MASS_FRACTION(NS)<=0._EB .AND. VOLUME_FRACTION(NS)<=0._EB) THEN
-      WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', mass or volume fraction for sub species ',NS,' not found.'
+      WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR(169): SPEC ' ,TRIM(SM%ID),': Mass or volume fraction for sub species ',NS,' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -3405,7 +3354,7 @@ ENDDO
 IF (ANY(MASS_FRACTION>0._EB)) THEN
    DO NS = 1,N_SUB_SPECIES
       IF (SM%MASS_FRACTION(Y_INDEX(NS)) > 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot have duplicate species in SPEC_ID.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(170): SPEC ' ,TRIM(SM%ID),', cannot have duplicate species in SPEC_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       SM%VOLUME_FRACTION(Y_INDEX(NS)) = MASS_FRACTION(NS) / SPECIES(Y_INDEX(NS))%MW / CONVERSION
@@ -3416,7 +3365,7 @@ ENDIF
 IF (ANY(VOLUME_FRACTION>0._EB)) THEN
    DO NS = 1,N_SUB_SPECIES
       IF (SM%VOLUME_FRACTION(Y_INDEX(NS)) > 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot have duplicate species in SPEC_ID.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(170): SPEC ' ,TRIM(SM%ID),', cannot have duplicate species in SPEC_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       SM%MASS_FRACTION(Y_INDEX(NS))   = VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW / CONVERSION
@@ -3599,16 +3548,15 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          RN%NU_O2           = RN%NU_CO2 + 0.5_EB*(RN%NU_CO + RN%NU_H2O - RN%O + RN%NU_SOOT*SOOT_O_FRACTION)
          RN%NU_N2           = 0.5_EB*(RN%N - RN%NU_HCN - RN%NU_SOOT*SOOT_N_FRACTION)
          IF (RN%NU_CO2 <0._EB) THEN
-            WRITE(MESSAGE,'(A,A)') 'ERROR: REAC, Not enough carbon in the fuel for the specified CO_YIELD, SOOT_YIELD,',&
-                                   ' and/or HCN_YIELD'
+            WRITE(MESSAGE,'(A)') 'ERROR(171): REAC, Not enough carbon for the CO_YIELD, SOOT_YIELD, and/or HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN%NU_H2O <0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough hydrogen in the fuel for the specified SOOT_YIELD and/or HCN_YIELD'
+            WRITE(MESSAGE,'(A)') 'ERROR(172): REAC, Not enough hydrogen for the SOOT_YIELD and/or HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN%NU_N2 <0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough nitrogen in the fuel for the specified HCN_YIELD'
+            WRITE(MESSAGE,'(A)') 'ERROR(173): REAC, Not enough nitrogen for the HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -3677,17 +3625,17 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          RN%NU_N2           = (RN%N - RN%NU_HCN - RN%NU_SOOT*SOOT_N_FRACTION)*0.5_EB
          IF (ABS(RN%NU_N2)<TWO_EPSILON_EB) RN%NU_N2 = 0._EB
          IF (RN%NU_N2 <0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough nitrogen in the fuel for the specified FUEL_N_TO_HCN_FRACTION'
+            WRITE(MESSAGE,'(A)') 'ERROR(174): REAC, Not enough nitrogen for the FUEL_N_TO_HCN_FRACTION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN%NU_CO2 <0._EB) THEN
             WRITE(MESSAGE,'(A)') &
-               'ERROR: REAC, Not enough carbon in the fuel for the specified FUEL_C_TO_CO_FRACTION and/or FUEL_N_TO_HCN_FRACTION'
+               'ERROR(175): REAC, Not enough carbon for FUEL_C_TO_CO_FRACTION and/or FUEL_N_TO_HCN_FRACTION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN%NU_H2O <0._EB) THEN
             WRITE(MESSAGE,'(A)') &
-               'ERROR: REAC, Not enough hydrogen in the fuel for the specified FUEL_H_TO_H2_FRACTION and/or FUEL_N_TO_HCN_FRACTION'
+               'ERROR(176): REAC, Not enough hydrogen for the FUEL_H_TO_H2_FRACTION and/or FUEL_N_TO_HCN_FRACTION'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          VOLUME_FRACTION(1) = RN%NU_CO
@@ -3734,15 +3682,15 @@ ELSE BACKGROUND_IF ! Mixture is fuel or products
          RN2%NU_N2           = 0.5_EB*(RN%N - RN2%NU_HCN - RN2%NU_SOOT*SOOT_N_FRACTION)
          IF (RN2%NU_CO2 <0._EB) THEN
             WRITE(MESSAGE,'(A)') &
-               'ERROR: REAC, Not enough carbon in the fuel for the specified CO_YIELD, SOOT_YIELD, and/or HCN_YIELD'
+               'ERROR(171): REAC, Not enough carbon for the CO_YIELD, SOOT_YIELD, and/or HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN2%NU_H2O <0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough hydrogen in the fuel for the specified SOOT_YIELD and/or HCN_YIELD'
+            WRITE(MESSAGE,'(A)') 'ERROR(172): REAC, Not enough hydrogen for the SOOT_YIELD and/or HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (RN2%NU_N2 <0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough nitrogen in the fuel for the specified HCN_YIELD'
+            WRITE(MESSAGE,'(A)') 'ERROR(173): REAC, Not enough nitrogen in the fuel for the specified HCN_YIELD.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -3910,33 +3858,31 @@ SPEC_LOOP: DO N=1,N_SPECIES
       IF (SS%BETA_LIQUID < 0._EB) SS%BETA_LIQUID = BETA_LIQUID
 
       IF (CP_TEMP < 0._EB .AND. SS%SPECIFIC_HEAT_LIQUID < 0._EB .AND. SS%RAMP_CP_L_INDEX < 0) THEN
-         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a SPECIFIC_HEAT_LIQUID or ',&
-            ' a RAMP_CP_L.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(180): SPEC ',TRIM(SS%ID),' does not have a SPECIFIC_HEAT_LIQUID or a RAMP_CP_L.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%TMP_MELT < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a MELTING_TEMPERATURE.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(181): SPEC ',TRIM(SS%ID),' does not have a MELTING_TEMPERATURE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%TMP_V < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a VAPORIZATION_TEMPERATURE.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(182): SPEC ',TRIM(SS%ID),' does not have a VAPORIZATION_TEMPERATURE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%TMP_V <= SS%TMP_MELT) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' MELTING_TEMPERATURE must be less than VAPORIZATION_TEMPERATURE.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(183): SPEC ',TRIM(SS%ID),' MELTING_TEMPERATURE must be less than VAPORIZATION_TEMPERATURE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%HEAT_OF_VAPORIZATION < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a HEAT_OF_VAPORIZATION.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(184): SPEC ',TRIM(SS%ID),' does not have a HEAT_OF_VAPORIZATION.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%DENSITY_LIQUID < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' is not predefined and does not have a DENSITY_LIQUID.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(185): SPEC ',TRIM(SS%ID),' does not have a DENSITY_LIQUID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SS%SPECIFIC_HEAT_LIQUID < 0._EB .AND. SS%RAMP_CP_L_INDEX < 0 .AND. CP_TEMP < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID), &
-            ' is not predefined and does not have a SPECIFIC_HEAT_LIQUID or RAMP_CP_L.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(180): SPEC ',TRIM(SS%ID),' does not have a SPECIFIC_HEAT_LIQUID or RAMP_CP_L.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -4047,8 +3993,7 @@ SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
    SM => SPECIES_MIXTURE(N)
    IF (SM%EVAPORATING) THEN
       IF (.NOT. ALLOCATED(SPECIES(SM%SINGLE_SPEC_INDEX)%C_P_L)) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SM%ID),&
-                                    ' is used for a liquid particle and does not have liquid properties.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(187): SPEC ',TRIM(SM%ID),' is used for droplets and does not have liquid properties.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -4238,7 +4183,7 @@ COMB_LOOP: DO
    CALL CHECKREAD('COMB',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT COMB_LOOP
    READ(LU_INPUT,COMB,END=23,ERR=24,IOSTAT=IOS)
-   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with COMB line') ; RETURN ; ENDIF
+   24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with COMB line.') ; RETURN ; ENDIF
 ENDDO COMB_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -4251,7 +4196,7 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
       CASE ('EXTINCTION 2')
          EXTINCT_MOD = EXTINCTION_2
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXTINCTION_MODEL, ',TRIM(EXTINCTION_MODEL),', is not recognized.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(188): EXTINCTION_MODEL, ',TRIM(EXTINCTION_MODEL),', is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 ELSE
@@ -4262,13 +4207,6 @@ ELSE
       EXTINCT_MOD = EXTINCTION_2
       EXTINCTION_MODEL = 'EXTINCTION 2'
    ENDIF
-ENDIF
-
-! Check range of INITIAL_UNMIXED_FRACTION
-
-IF (INITIAL_UNMIXED_FRACTION<0._EB .OR. INITIAL_UNMIXED_FRACTION>1._EB) THEN
-   WRITE(MESSAGE,'(A)')  'ERROR on MISC: Permissible values for INITIAL_UNMIXED_FRACTION=[0,1]'
-   CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
 FINITE_RATE_MIN_TEMP = FINITE_RATE_MIN_TEMP + TMPM
@@ -4329,7 +4267,7 @@ COUNT_REAC_LOOP: DO
    N_REACTIONS = N_REACTIONS + 1
    IF (REVERSE) N_REVERSE = N_REVERSE+1
    434 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0)') 'ERROR: Problem with REAC ',N_REACTIONS+1
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with REAC ',N_REACTIONS+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_REAC_LOOP
@@ -4356,7 +4294,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN => REACTION(NR)
 
    IF ((A > 0._EB .OR. E > 0._EB) .AND. (C>TWO_EPSILON_EB .OR. H>TWO_EPSILON_EB)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(189): REAC ',NR,' cannot use both finite rate REAC and simple chemistry.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -4368,7 +4306,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
       IF (FUEL=='null' .AND. ID/='null') FUEL = ID ! Backward compatibility
       IF (FUEL=='null') THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REAC ',NR,' requires a FUEL'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(190): REAC ',NR,' requires a FUEL.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -4385,7 +4323,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          IF (L_TMP) THEN
             SIMPLE_FUEL_DEFINED(NR) = .TRUE.
             IF (ANY(ATOM_COUNTS(2:5)>0._EB) .OR. ANY(ATOM_COUNTS(9:)>0._EB)) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
+               WRITE(MESSAGE,'(A)') 'ERROR(191): Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ELSE
                C = ATOM_COUNTS(6)
@@ -4394,7 +4332,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
                N = ATOM_COUNTS(7)
             ENDIF
             IF (C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
+               WRITE(MESSAGE,'(A)') 'ERROR(192): Specify fuel chemistry using C and/or H when using simple chemistry'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -4409,19 +4347,19 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          IF (FUEL_C_TO_CO_FRACTION >= 0._EB .AND. FUEL_C_TO_CO_FRACTION <= 1._EB) THEN
             RN%FUEL_C_TO_CO_FRACTION = FUEL_C_TO_CO_FRACTION
          ELSE
-            WRITE(MESSAGE,'(A)') 'ERROR: FUEL_C_TO_CO_FRACTION must be between 0 and 1'
+            WRITE(MESSAGE,'(A)') 'ERROR(193): FUEL_C_TO_CO_FRACTION must be between 0 and 1.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (FUEL_H_TO_H2_FRACTION >= 0._EB .AND. FUEL_H_TO_H2_FRACTION <= 1._EB) THEN
             RN%FUEL_H_TO_H2_FRACTION = FUEL_H_TO_H2_FRACTION
          ELSE
-            WRITE(MESSAGE,'(A)') 'ERROR: FUEL_H_TO_H2O_FRACTION must be between 0 and 1'
+            WRITE(MESSAGE,'(A)') 'ERROR(194): FUEL_H_TO_H2O_FRACTION must be between 0 and 1.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (FUEL_N_TO_HCN_FRACTION >= 0._EB .AND. FUEL_N_TO_HCN_FRACTION <= 1._EB) THEN
             RN%FUEL_N_TO_HCN_FRACTION = FUEL_N_TO_HCN_FRACTION
          ELSE
-            WRITE(MESSAGE,'(A)') 'ERROR: FUEL_N_TO_HCN_FRACTION must be between 0 and 1'
+            WRITE(MESSAGE,'(A)') 'ERROR(195): FUEL_N_TO_HCN_FRACTION must be between 0 and 1.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -4430,7 +4368,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    IF (A > 0._EB .OR.  E > 0._EB) SUPPRESSION = .FALSE.
 
    IF (.NOT. RN%SIMPLE_CHEMISTRY .AND. TRIM(SPEC_ID_NU(1))=='null' .AND. TRIM(EQUATION)=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. SPEC_ID_NU and NU arrays or EQUATION must be defined.'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(196): REAC ',NR,' SPEC_ID_NU and NU arrays or EQUATION must be defined.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -4522,7 +4460,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          DO NS=1,MAX_SPECIES
             IF (THIRD_EFF_ID(NS)/='null') THEN
                IF (THIRD_EFF(NS) < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. THIRD_EFF values must be >= 0.'
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR(197): REAC ',NR,' THIRD_EFF values must be >= 0.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                RN%N_THIRD = RN%N_THIRD + 1
@@ -4611,7 +4549,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       ELSE
          NS = INDEX(EQUATION,'=')
          IF (NS==0) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Invalid EQUATION specified.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(198): Problem with REAC ',NR,' invalid EQUATION specified.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          TEMP_EQUATION(1:LEN(TRIM(RN2%EQUATION))-NS)=EQUATION(NS+1:LEN(TRIM(RN2%EQUATION)))
@@ -4638,7 +4576,7 @@ DO NR=1,N_REACTIONS
    REAC_FUEL_2(NR) = 'null'
    IF (ANY(REAC_FUEL_2==REACTION(NR)%FUEL)) DUPLICATE_FUEL(NR) = .TRUE.
    IF (REACTION(NR)%SIMPLE_CHEMISTRY .AND. DUPLICATE_FUEL(NR)) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REAC ',NR,' uses simple chemistry and has a duplicate fuel to another reaction.'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(199): REAC ',NR,' uses simple chemistry and has a duplicate fuel to another reaction.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
@@ -4720,7 +4658,7 @@ DO NR=1,N_REACTIONS
          CYCLE
       ELSEIF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==1) THEN
          IF (RN%NU_O2<=0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Fuel specified for simple chemistry has NU_O2 <=0 and it must require air for combustion.'
+            WRITE(MESSAGE,'(A)') 'ERROR(200): Fuel for simple chemistry has NU_O2<=0 and requires air for combustion.'
             CALL SHUTDOWN(MESSAGE)       ; RETURN
          ENDIF
          RN%NU_READ(1)      = -1._EB
@@ -4732,7 +4670,7 @@ DO NR=1,N_REACTIONS
 
          ! Setup FUEL + AIR -> INTERMEDIATE PRODUCTS
          IF (RN%NU_O2<=0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Fuel specified for simple chemistry has NU_O2 <=0 and it must require air for combustion.'
+            WRITE(MESSAGE,'(A)') 'ERROR(200): Fuel for simple chemistry has NU_O2<=0 and requires air for combustion.'
             CALL SHUTDOWN(MESSAGE)       ; RETURN
          ENDIF
          RN%NU_READ(1)      = -1._EB
@@ -4758,7 +4696,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    IF (TRIM(RN%EQUATION)/='null') THEN
       IF(ANY(ABS(RN%NU_READ)>TWO_EPSILON_EB)) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Cannot set NUs if an EQUATION is specified.'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(201): REAC ',NR,'. Cannot set NUs if an EQUATION is specified.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       CALL PARSE_EQUATION(NR)
@@ -4795,8 +4733,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       IF (.NOT. NAME_FOUND) THEN
-         WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
-                                       ' not found.'
+         WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(202): REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -4831,7 +4768,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    IF (TRIM(RN%FUEL)=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. FUEL must be defined'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(190): REAC ',NR,' requires a FUEL.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -4858,7 +4795,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
       IF (.NOT. NAME_FOUND) THEN
          WRITE(MESSAGE,'(A,I0,A,A,A)') &
-            'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
+            'ERROR(204): REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -4957,12 +4894,12 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (RN%NU(NS) >  TWO_EPSILON_EB) MASS_PRODUCT  = MASS_PRODUCT  + RN%NU(NS)*SPECIES_MIXTURE(NS)%MW
    ENDDO
    IF (ABS(MASS_PRODUCT) < TWO_EPSILON_EB .OR. ABS(MASS_REACTANT) < TWO_EPSILON_EB) THEN
-      IF (ABS(MASS_PRODUCT) <TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Products not specified.'
-      IF (ABS(MASS_REACTANT)<TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Reactants not specified.'
+      IF (ABS(MASS_PRODUCT) <TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I0,A)') 'ERROR(205): REAC ',NR,'. Products not specified.'
+      IF (ABS(MASS_REACTANT)<TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I0,A)') 'ERROR(206): REAC ',NR,'. Reactants not specified.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ABS(MASS_PRODUCT+MASS_REACTANT)/ABS(MASS_PRODUCT) > REAC_MASS_ERROR) THEN
-      WRITE(MESSAGE,'(A,I0,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Mass of products, ',MASS_PRODUCT, &
+      WRITE(MESSAGE,'(A,I0,A,F8.3,A,F8.3)') 'ERROR(207): REAC ',NR,'. Mass of products, ',MASS_PRODUCT, &
          ', does not equal mass of reactants,',-MASS_REACTANT
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
@@ -5009,7 +4946,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDDO THIRD1
          IF (.NOT. NAME_FOUND) THEN
             WRITE(MESSAGE,'(A,I0,A,A,A)') &
-               'ERROR: Problem with REAC ',NR,'. THIRD_EFF primitive species ',TRIM(RN%THIRD_EFF_ID_READ(NS)),' not found.'
+               'ERROR(208): REAC ',NR,'. THIRD_EFF primitive species ',TRIM(RN%THIRD_EFF_ID_READ(NS)),' not found.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -5026,7 +4963,7 @@ IF (TRIM(ODE_SOLVER)/='null') THEN
       CASE ('RK3')            ; COMBUSTION_ODE_SOLVER = RK3
       CASE ('RK2 RICHARDSON') ; COMBUSTION_ODE_SOLVER = RK2_RICHARDSON
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
+         WRITE(MESSAGE,'(A)') 'ERROR(209): Name of ODE_SOLVER is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 ELSE
@@ -5086,7 +5023,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
       IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
          IF (HF_COUNT > 1) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 species heat of formation.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(210): REAC ',NR,'. Missing an ENTHALPY_OF_FORMATION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          ! Find heat of formation of lumped fuel to satisfy specified heat of combustion
@@ -5106,7 +5043,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (SMF%SINGLE_SPEC_INDEX>0) SPECIES(SMF%SINGLE_SPEC_INDEX)%H_F = SMF%H_F
       ELSE ! Use H_F_HOC values
          IF (HF_COUNT > 0 .OR. .NOT. LISTED_FUEL) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with REAC ',NR,'. Missing a species heat of formation.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(210): REAC ',NR,'. Missing an ENTHALPY_OF_FORMATION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          RN%HEAT_OF_COMBUSTION = 0._EB
@@ -5210,8 +5147,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    IF (RN%REVERSE) THEN
       DO NS = 1, N_TRACKED_SPECIES
          IF (ABS(RN%NU(NS)) > TWO_EPSILON_EB .AND. .NOT. SPECIES_MIXTURE(NS)%EXPLICIT_G_F) THEN
-            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Reversible reaction species, ',&
-                                          TRIM(SPECIES_MIXTURE(NS)%ID),' does not have G_F defined.'
+            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(212): REAC ',NR,'. Reversible reaction species, ',&
+                                          TRIM(SPECIES_MIXTURE(NS)%ID),' missing G_F.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -5310,7 +5247,7 @@ COUNT_PART_LOOP: DO
    IF (IOS==1) EXIT COUNT_PART_LOOP
    READ(LU_INPUT,PART,END=219,ERR=220,IOSTAT=IOS)
    N_LAGRANGIAN_CLASSES_READ = N_LAGRANGIAN_CLASSES_READ + 1
-   220 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with PART line') ; RETURN ; ENDIF
+   220 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with PART line.') ; RETURN ; ENDIF
 ENDDO COUNT_PART_LOOP
 219 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -5363,7 +5300,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       LPC%SOLID_PARTICLE = .TRUE.
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
       IF (DIAMETER>0._EB) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART ',N,' cannot have both a specified DIAMETER and a SURF_ID.'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(213): PART ',N,' cannot have both a specified DIAMETER and a SURF_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -5383,11 +5320,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       IF (ADHERE_TO_SOLID==0) ADHERE_TO_SOLID = 1
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 10
       IF (DIAMETER<=0._EB .AND. CNF_RAMP_ID=='null') THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART ',N,' requires a specified DIAMETER.'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(214): PART ',N,' requires a specified DIAMETER.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (MASSLESS) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: Cannot have MASSLESS=.TRUE. with evaporating PARTICLEs'
+         WRITE(MESSAGE,'(A)') 'ERROR(215): Cannot have MASSLESS=.TRUE. with evaporating PARTICLEs'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -5403,7 +5340,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! If particle class has no ID at this point, stop.
 
    IF (SURF_ID=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART ',N,' needs a SURF_ID.'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(216): PART ',N,' needs a SURF_ID.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -5437,11 +5374,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          ENDIF
       ENDDO
       IF(LPC%Z_INDEX < 0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART SPEC_ID ',TRIM(LPC%SPEC_ID),' not found'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(217): PART SPEC_ID ',TRIM(LPC%SPEC_ID),' not found'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX < 0) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'.  Particles cannot evaporate to a lumped species.'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(218): PART ',N,'.  Particles cannot evaporate to a lumped species.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
@@ -5629,7 +5566,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Drag laws
 
    IF (ANY(DRAG_COEFFICIENT>0._EB) .AND. (DRAG_LAW=='SPHERE' .OR.  DRAG_LAW=='CYLINDER')) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Do not specify a DRAG_COEFFICIENT for a SPHERE or CYLINDER DRAG_LAW'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(219): PART line ',N,'. Do not specify a DRAG_COEFFICIENT for a SPHERE or CYLINDER DRAG_LAW'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -5646,11 +5583,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          LPC%DRAG_LAW = USER_DRAG
       CASE('SCREEN')
          IF (LPC%N_ORIENTATION/=1) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Must specify exactly one ORIENTATION for SCREEN drag law.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(220): PART ',N,'. Must specify exactly one ORIENTATION for SCREEN drag law.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (LPC%FREE_AREA_FRACTION < 0._EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Must specify FREE_AREA_FRACTION for SCREEN drag law.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(221): PART ',N,'. Must specify FREE_AREA_FRACTION for SCREEN drag law.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          LPC%DRAG_LAW = SCREEN_DRAG
@@ -5658,14 +5595,13 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          LPC%DRAG_COEFFICIENT(1:3) = 4.30E-2_EB*LPC%FREE_AREA_FRACTION**2.13_EB
       CASE('POROUS MEDIA')
          IF (ANY(DRAG_COEFFICIENT<TWO_EPSILON_EB) .OR. ANY(PERMEABILITY<TWO_EPSILON_EB)) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,&
-                                      '.  For POROUS MEDIA must specify all compoents for DRAG_COEFFICIENT and PERMEABILTIY.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(222): PART ',N,'. Specify all compoents for DRAG_COEFFICIENT and PERMEABILTIY.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          LPC%DRAG_LAW = POROUS_DRAG
          LPC%PERMEABILITY = PERMEABILITY
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR: unrecognized drag law on PART line'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(223): PART ',N,'. Unrecognized drag law.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 
@@ -5693,7 +5629,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       CASE('RANZ-MARSHALL FLUX-LIMITED LEWIS B-NUMBER')
          LPC%EVAP_MODEL = RM_FL_LEWIS_B
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Invalid EVAP_MODEL.'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(224): PART line ',N,'. Invalid EVAP_MODEL.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 
@@ -5867,7 +5803,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Exclude some convective heat transfer models from being applied to a particle
 
    IF (SF%HEAT_TRANSFER_MODEL==LOGLAW_HTC_MODEL) THEN
-      CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART')
+      CALL SHUTDOWN('ERROR(225): HEAT_TRANSFER_MODEL not appropriate for PART')
       RETURN
    ENDIF
 
@@ -5985,7 +5921,7 @@ COUNT_PROP_LOOP: DO
    READ(LU_INPUT,PROP,ERR=34,IOSTAT=IOS)
    N_PROP = N_PROP + 1
    34 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with PROP number ', N_PROP+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with PROP number ', N_PROP+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_PROP_LOOP
@@ -6070,7 +6006,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       PY%SPRAY_PATTERN_INDEX = 0
    ENDIF
    IF (ABS(SPRAY_ANGLE(1,1)-SPRAY_ANGLE(2,1))<TWO_EPSILON_EB .OR. ABS(SPRAY_ANGLE(1,2)-SPRAY_ANGLE(2,2))<TWO_EPSILON_EB) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: The two values for SPRAY_ANGLE cannot be the same.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(231): PROP ',TRIM(PY%ID),' values for SPRAY_ANGLE cannot be the same.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    PY%SPRAY_ANGLE = SPRAY_ANGLE*DEG2RAD
@@ -6121,11 +6057,11 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%HISTOGRAM_NORMALIZE   = HISTOGRAM_NORMALIZE
    IF (HISTOGRAM) THEN
       IF (HISTOGRAM_NBINS<2) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', HISTOGRAM needs HISTOGRAM_NBINS>2'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(232): PROP ',TRIM(PY%ID),', HISTOGRAM needs HISTOGRAM_NBINS>2.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
        IF (ABS(HISTOGRAM_LIMITS(1)-HISTOGRAM_LIMITS(2)) < TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', HISTOGRAM needs HISTOGRAM_LIMITS'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(233): PROP ',TRIM(PY%ID),', HISTOGRAM needs HISTOGRAM_LIMITS.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -6133,17 +6069,17 @@ READ_PROP_LOOP: DO N=0,N_PROP
 
    PY%FED_ACTIVITY = FED_ACTIVITY
    IF(FED_ACTIVITY < 1 .OR. FED_ACTIVITY > 3) THEN
-      WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', FED_ACTIVITY out of range: ',FED_ACTIVITY
+      WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(234): PROP ',TRIM(PY%ID),', FED_ACTIVITY out of range: ',FED_ACTIVITY
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    PATCH_VELOCITY_IF: IF (VELOCITY_COMPONENT>0) THEN
       IF(VELOCITY_COMPONENT > 3) THEN
-         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', VELOCITY_COMPONENT > 3: ',VELOCITY_COMPONENT
+         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(235): PROP ',TRIM(PY%ID),', VELOCITY_COMPONENT > 3: ',VELOCITY_COMPONENT
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF(P0<-1.E9_EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', VELOCITY_PATCH requires P0'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(236): PROP ',TRIM(PY%ID),', VELOCITY_PATCH requires P0.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -6178,7 +6114,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       IF (MASS_FLOW_RATE > 0._EB) THEN
          PY%MASS_FLOW_RATE = MASS_FLOW_RATE
          IF (ABS(PARTICLE_VELOCITY) <= TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', must specify PARTICLE_VELOCITY with MASS_FLOW_RATE'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(237): PROP ',TRIM(PY%ID),', specify PARTICLE_VELOCITY with MASS_FLOW_RATE.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
             PY%PARTICLE_VELOCITY  = PARTICLE_VELOCITY
@@ -6187,7 +6123,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
          IF ((FLOW_RATE>0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
             (FLOW_RATE<0._EB .AND. K_FACTOR>=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
             (FLOW_RATE<0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE>0._EB)) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', too few flow parameters'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(238): Problem with PROP ',TRIM(PY%ID),', too few flow parameters.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (K_FACTOR < 0._EB .AND. OPERATING_PRESSURE > 0._EB)  K_FACTOR           = FLOW_RATE/SQRT(OPERATING_PRESSURE)
@@ -6233,7 +6169,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
          ENDIF
       ENDIF
       IF (PY%Y_INDEX<1 .AND. PY%Z_INDEX<0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: PROP SPEC_ID ',TRIM(PY%SPEC_ID),' not found'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(239): PROP SPEC_ID ',TRIM(PY%SPEC_ID),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -6344,7 +6280,7 @@ PROP_LOOP: DO N=0,N_PROP
       ENDDO
 
       IF (PY%PART_INDEX<0) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART_ID for PROP ',N,' not found'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(240): PART_ID for PROP ',TRIM(PY%ID),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -6354,7 +6290,7 @@ PROP_LOOP: DO N=0,N_PROP
                     TRIM(PY%QUANTITY)=='V-VELOCITY'           .OR. &
                     TRIM(PY%QUANTITY)=='W-VELOCITY'           .OR. &
                     TRIM(PY%QUANTITY)=='VELOCITY')                 ) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART_ID for PROP ',N,' cannot refer to MASSLESS particles'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(241): PART_ID for PROP ',TRIM(PY%ID),' cannot refer to MASSLESS particles.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -6376,7 +6312,7 @@ PROP_LOOP: DO N=0,N_PROP
       SUBTOTAL_FLOWRATE=0._EB
       DO NN=1,TA%NUMBER_ROWS
          IF (TA%TABLE_DATA(NN,6) <=0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: Spray Pattern Table, ',TRIM(PY%TABLE_ID),', massflux <= 0 for line ',NN
+            WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(242): Spray Pattern Table ',TRIM(PY%TABLE_ID),' massflux<=0 for line ',NN
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          TOTAL_FLOWRATE = TOTAL_FLOWRATE + TA%TABLE_DATA(NN,6)
@@ -6462,7 +6398,7 @@ COUNT_MATL_LOOP: DO
    N_MATL = N_MATL + 1
    MATL_NAME(N_MATL) = ID
    34 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with MATL number ', N_MATL+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with MATL number ', N_MATL+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_MATL_LOOP
@@ -6541,7 +6477,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
             ADJUST_H = .FALSE.
          ENDIF
          IF (REFERENCE_TEMPERATURE(NR)<-TMPM  .AND. (E(NR)< 0._EB .OR. A(NR)<0._EB)) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NR,'. Set REFERENCE_TEMPERATURE or E, A'
+            WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR(251): MATL ',TRIM(ID),', REAC ',NR,'. Set REFERENCE_TEMPERATURE or E, A'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (ABS(SUM(NU_MATL(:,NR)))<=TWO_EPSILON_EB .AND. ABS(SUM(NU_SPEC(:,NR)))<=TWO_EPSILON_EB &
@@ -6555,7 +6491,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
       N_REACTIONS = 1
       IF (ABS(HEAT_OF_REACTION(1))<=TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',TRIM(ID)
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(252): MATL ',TRIM(ID),', HEAT_OF_REACTION should be greater than 0.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -6564,15 +6500,15 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! Error checking for thermal properties
 
    IF (ABS(DENSITY) <=TWO_EPSILON_EB ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': DENSITY=0'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(253): Problem with MATL ',TRIM(ID),': DENSITY=0.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ABS(CONDUCTIVITY) <=TWO_EPSILON_EB .AND. CONDUCTIVITY_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': CONDUCTIVITY = 0'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(254): Problem with MATL ',TRIM(ID),': CONDUCTIVITY = 0.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ABS(SPECIFIC_HEAT)<=TWO_EPSILON_EB .AND. SPECIFIC_HEAT_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': SPECIFIC_HEAT = 0'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(255): Problem with MATL ',TRIM(ID),': SPECIFIC_HEAT = 0.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
@@ -6688,8 +6624,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    IF (N_REACTIONS > 0 .AND. SURFACE_OXIDATION_MODEL) THEN
       IF (O2_INDEX <= 0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID), &
-            ', SURFACE_OXIDATION_MODEL set but OXYGEN is not a defined species.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(256): MATL ',TRIM(ID),', SURFACE_OXIDATION_MODEL set but OXYGEN not a defined species.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       CHAR_OXIDATION = .TRUE.
@@ -6739,7 +6674,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
             ENDIF
          ENDDO
          IF (ML%RESIDUE_MATL_INDEX(NN,NR)==0) THEN
-            WRITE(MESSAGE,'(5A)') 'ERROR: Residue ', TRIM(ML%RESIDUE_MATL_NAME(NN,NR)),' of ',TRIM(ML%ID),' is not defined.'
+            WRITE(MESSAGE,'(5A)') 'ERROR(257): MATL ',TRIM(ML%ID),' Residue ',TRIM(ML%RESIDUE_MATL_NAME(NN,NR)),' not defined.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          ML%NU_RESIDUE(NN,NR) = NU_MATL(NN,NR)
@@ -6756,8 +6691,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
          DO NNN=1,N_LAGRANGIAN_CLASSES
             IF (LAGRANGIAN_PARTICLE_CLASS(NNN)%ID==PART_ID(NN,NR)) THEN
                IF (LAGRANGIAN_PARTICLE_CLASS(NNN)%MASSLESS_TRACER) THEN
-                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(PART_ID(NN,NR)),&
-                                         ' corresponding to MATL ',TRIM(ML%ID),' cannot be MASSLESS'
+                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(258): PARTicle ',TRIM(PART_ID(NN,NR)),&
+                                         ' corresponding to MATL ',TRIM(ML%ID),' cannot be MASSLESS.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                ML%LPC_INDEX(NN,NR) = NNN
@@ -6765,13 +6700,12 @@ READ_MATL_LOOP: DO N=1,N_MATL
             ENDIF
          ENDDO
          IF (ML%LPC_INDEX(NN,NR)==0) THEN
-            WRITE(MESSAGE,'(5A)') 'ERROR: Particle ', TRIM(PART_ID(NN,NR)),' of ',TRIM(ML%ID),' is not defined.'
+            WRITE(MESSAGE,'(5A)') 'ERROR(259): MATL ',TRIM(ML%ID),' PART_ID ',TRIM(PART_ID(NN,NR)),' not defined.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          ML%NU_LPC(NN,NR) = NU_PART(NN,NR)
          IF (ML%NU_LPC(NN,NR) <= 0._EB) THEN
-            WRITE(MESSAGE,'(5A)') 'ERROR: Particle ', TRIM(PART_ID(NN,NR)),' of ',TRIM(ML%ID),&
-                                  ' has a NU_PART <= 0.'
+            WRITE(MESSAGE,'(5A)') 'ERROR(260): MATL ',TRIM(ML%ID),' PART_ID ',TRIM(PART_ID(NN,NR)),' has a NU_PART<=0.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -6787,7 +6721,7 @@ IF (N_MATL>1) THEN
    DO N=1,N_MATL-1
       DO NN=N+1,N_MATL
          IF(MATL_NAME(N)==MATL_NAME(NN)) THEN
-            WRITE(MESSAGE,'(A,A)') 'ERROR: Duplicate material name: ',TRIM(MATL_NAME(N))
+            WRITE(MESSAGE,'(A,A)') 'ERROR(261): Duplicate material name: ',TRIM(MATL_NAME(N))
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -6870,13 +6804,13 @@ PROC_MATL_LOOP: DO N=1,N_MATL
       DO NS=1,MAX_SPECIES
 
          IF (TRIM(ML%SPEC_ID(NS,NR))=='null' .AND. ABS(ML%NU_SPEC(NS,NR))>TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires a SPEC_ID for yield ',&
+            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR(262): MATL ',TRIM(MATL_NAME(N)),' requires a SPEC_ID for yield ',&
                  NS, 'of reaction ', NR
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (TRIM(ML%SPEC_ID(NS,NR))=='null') EXIT
          IF (NS==2 .AND. ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' can only specify one SPEC_ID for a liquid'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(263): MATL ',TRIM(MATL_NAME(N)),' can only specify one SPEC_ID for a liquid.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO NS2=1,N_TRACKED_SPECIES
@@ -6902,8 +6836,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
             ENDDO REAC_DO
          ENDIF
          IF (Z_INDEX(NS,NR)==-1) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: SPECies ',TRIM(ML%SPEC_ID(NS,NR)),&
-                                         ' corresponding to MATL ',TRIM(MATL_NAME(N)),' is not a tracked species'
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(264): MATL ',TRIM(MATL_NAME(N)),' SPEC_ID ',TRIM(ML%SPEC_ID(NS,NR)),' not tracked.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -6974,7 +6907,7 @@ DO N=1,N_MATL
          TEMP_COUNTER = TEMP_COUNTER + 1
          TEMP_MATL(N,NR) = TEMP_COUNTER
       ELSEIF (SUM_NU(N,NR) - 1._EB > 0.001_EB) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Sum of NU inputs sum to more than 1 for MATL ',TRIM(ML%ID)
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(265): MATL ',TRIM(ML%ID),' Sum of NU inputs more than 1.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
@@ -7247,7 +7180,7 @@ COUNT_SURF_LOOP: DO
    VARIABLE_THICKNESS = .FALSE.
    READ(LU_INPUT,SURF,ERR=34,IOSTAT=IOS)
    IF (ID=='null') THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF line must have an ID'
+      WRITE(MESSAGE,'(A)') 'ERROR(301): SURF line must have an ID.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (PRESENT(QUICK_READ) .AND. (HT3D .OR. VARIABLE_THICKNESS)) THEN
@@ -7256,7 +7189,7 @@ COUNT_SURF_LOOP: DO
    ENDIF
    N_SURF = N_SURF + 1
    34 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SURF number ',N_SURF+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with SURF number ',N_SURF+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_SURF_LOOP
@@ -7283,7 +7216,7 @@ COUNT_SURF_LOOP_AGAIN: DO
    SURFACE(NN)%ID = ID
    DO NNN=1,NN-1
       IF (SURFACE(NNN)%ID==SURFACE(NN)%ID) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ID <',TRIM(SURFACE(NN)%ID),'> is used more than once'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(302): SURF ID ',TRIM(SURFACE(NN)%ID),' is used more than once.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -7422,7 +7355,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
                   SF%DENSITY_ADJUST_FACTOR(NL,NN) = 1._EB / &
                      (1._EB-MATERIAL(NNN)%RHO_S*MOISTURE_FRACTION(NL)/MATERIAL(MOISTURE_INDEX)%RHO_S)
                ELSE
-                  WRITE(MESSAGE,'(3A)') 'ERROR: MOISTURE_FRACTION on SURF ',TRIM(SF%ID),' exceeds theoretical limit.'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(303): MOISTURE_FRACTION on SURF ',TRIM(SF%ID),' exceeds theoretical limit.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDDO
@@ -7474,7 +7407,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       WIDTH    = 0.1
       BACKING  = 'INSULATED'
       IF (THICKNESS(2)>0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: IF TGA_ANALYSIS=.TRUE., the surface can only be one layer thick'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(304): SURF ',TRIM(SF%ID),' One layer only for TGA_ANALYSIS=T.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       THICKNESS(1) = 1.E-6_EB
@@ -7491,7 +7424,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (VEG_LSET_IGNITE_TIME < 1.E6_EB .OR. VEG_LSET_FUEL_INDEX>0 .OR. &
        VEG_LSET_ROS_00>0._EB .OR. VEG_LSET_ROS_HEAD>0._EB) VEG_LSET_SPREAD = .TRUE.
    IF (VEG_LSET_SPREAD .AND. LEVEL_SET_MODE==0) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(ID),' indicates a level set simulation, but LEVEL_SET_MODE is not set on MISC.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(305): SURF ',TRIM(ID),' indicates a level set simulation, but LEVEL_SET_MODE not set on MISC.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (VEG_LSET_FUEL_INDEX>0 .AND. LEVEL_SET_COUPLED_FIRE) HRRPUA = 1._EB  ! HRRPUA to be set properly later
@@ -7562,17 +7495,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
       IF (TMP_BACK >-TMPM .AND. (MATL_ID(IL,1)/='null' .OR. VARIABLE_THICKNESS .OR. HT3D)) DIRICHLET_BACK  = .TRUE.
       IF ((ADIABATIC.OR.NET_HEAT_FLUX<1.E12_EB.OR.ABS(CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) &
          .AND. MATL_ID(IL,1)/='null') THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified flux and a MATL_ID'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(306): SURF ',TRIM(SF%ID),' cannot have a specified flux and a MATL_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (THICKNESS(IL)<=0._EB .AND. .NOT.VARIABLE_THICKNESS .AND. .NOT.HT3D .AND. MATL_ID(IL,1)/='null') THEN
-         WRITE(MESSAGE,'(A,I0)') 'ERROR: SURF '//TRIM(SF%ID)// ' must have a specified THICKNESS for Layer ',IL
+         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(307): SURF ',TRIM(SF%ID),' must have a specified THICKNESS for Layer ',IL
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO LAYER_LOOP
 
    IF ((GEOMETRY=='CYLINDRICAL' .OR. GEOMETRY=='SPHERICAL') .AND. RADIUS<0._EB .AND. THICKNESS(1)<0._EB) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a RADIUS or THICKNESS'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(308): SURF ',TRIM(SF%ID),' needs a RADIUS or THICKNESS.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -7598,7 +7531,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       CASE('EXPOSED')
          SF%BACKING        = EXPOSED
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//', BACKING '//TRIM(BACKING)//' not recognized'
+         WRITE(MESSAGE,'(5A)') 'ERROR(309): SURF ',TRIM(SF%ID),' BACKING ',TRIM(BACKING),' not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
    IF (HT3D) THEN
@@ -7621,12 +7554,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%CONV_LENGTH          = CONVECTION_LENGTH_SCALE
    SF%CONVERT_VOLUME_TO_MASS = CONVERT_VOLUME_TO_MASS
    IF (SF%CONVERT_VOLUME_TO_MASS .AND. TMP_FRONT<-TMPM) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' must specify TMP_FRONT for CONVERT_VOLUME_TO_MASS'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(310): SURF ',TRIM(SF%ID),' must specify TMP_FRONT for CONVERT_VOLUME_TO_MASS.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SF%CONVERT_VOLUME_TO_MASS .AND. (SF%RAMP(TIME_VELO)%ID/='null' .OR. &
       SF%RAMP(VELO_PROF_X)%ID/='null' .OR. SF%RAMP(VELO_PROF_Y)%ID/='null' .OR. SF%RAMP(VELO_PROF_Z)%ID/='null')) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' cannot use velocity RAMP with CONVERT_VOLUME_TO_MASS'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(311): SURF ',TRIM(SF%ID),' cannot use velocity RAMP with CONVERT_VOLUME_TO_MASS.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SF%NET_HEAT_FLUX        = 1000._EB*NET_HEAT_FLUX
@@ -7660,14 +7593,14 @@ READ_SURF_LOOP: DO N=0,N_SURF
          SF%GEOMETRY       = SURF_SPHERICAL
          IF (SF%INNER_RADIUS<TWO_EPSILON_EB) SF%BACKING = INSULATED
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' GEOMETRY not recognized'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(312): SURF ',TRIM(SF%ID),' GEOMETRY not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 
    SF%H_V = 1000._EB*HEAT_OF_VAPORIZATION
    SELECT CASE(HEAT_TRANSFER_MODEL)
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' HEAT_TRANSFER_MODEL not recognized'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(313): SURF ',TRIM(SF%ID),' HEAT_TRANSFER_MODEL not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       CASE('null')
          SF%HEAT_TRANSFER_MODEL = DEFAULT_HTC_MODEL
@@ -7680,13 +7613,13 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%HRRPUA               = 1000._EB*HRRPUA
    SF%MLRPUA               = MLRPUA
    IF ((SF%HRRPUA > 0._EB .OR. SF%MLRPUA > 0) .AND. N_REACTIONS == 0) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' Must have a REAC when using HRRPUA or MLRPUA.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(314): SURF ',TRIM(SF%ID),' Must have a REAC line when using HRRPUA or MLRPUA.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SF%LAYER_DIVIDE         = LAYER_DIVIDE
 
    IF (ANY(LEAK_PATH>=0) .AND. ANY(LEAK_PATH_ID/='null')) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' Define only one of LEAK_PATH and LEAK_PATH_ID'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(315): SURF ',TRIM(SF%ID),' should have only one LEAK_PATH and LEAK_PATH_ID.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SF%LEAK_PATH            = LEAK_PATH
@@ -7697,7 +7630,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%MASS_FRACTION        = 0._EB
    SF%MINIMUM_LAYER_THICKNESS = MINIMUM_LAYER_THICKNESS
    IF (N_LAYER_CELLS_MAX<1) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' N_LAYER_CELLS_MAX must be >= 2'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(316): SURF ',TRIM(SF%ID),' N_LAYER_CELLS_MAX must be > 0.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SF%N_LAYER_CELLS_MAX    = N_LAYER_CELLS_MAX+1
@@ -7777,8 +7710,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Roughness conversion
 
    IF (SF%ROUGHNESS>=0._EB .AND. SF%Z_0>=0._EB) THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID), &
-      '. Specify either ROUGHNESS or Z_0, not both'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(317): SURF ',TRIM(SF%ID),' Specify either ROUGHNESS or Z_0, not both'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SF%ROUGHNESS>=0._EB) THEN
@@ -7813,59 +7745,44 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (MASS_FLUX_TOTAL >= 0._EB) THEN
       SF%MASS_FLUX_TOTAL = MASS_FLUX_TOTAL
    ELSE
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID), &
-      '. MASS_FLUX_TOTAL should only be used for outflow. Use MASS_FLUX for inflow'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(318): SURF: ',TRIM(SF%ID),' MASS_FLUX_TOTAL is only for outflow. Use MASS_FLUX for inflow.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    ! Error checking
 
-   IF (DEFAULT .AND. &
-          (TRIM(ID)=='OPEN'               .OR. &
-           TRIM(ID)=='MIRROR'             .OR. &
-           TRIM(ID)=='INTERPOLATED'       .OR. &
-           TRIM(ID)=='PERIODIC'           .OR. &
-           TRIM(ID)=='HVAC'               .OR. &
-           TRIM(ID)=='MASSLESS TRACER'    .OR. &
-           TRIM(ID)=='DROPLET'            .OR. &
-           TRIM(ID)=='MASSLESS TARGET')        ) THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot set predefined SURF as DEFAULT'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
-
    IF (ANY(MASS_FLUX>0._EB) .AND. ANY(MASS_FRACTION>0._EB))  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use both MASS_FLUX and MASS_FRACTION'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(320): SURF ',TRIM(SF%ID),' cannot use both MASS_FLUX and MASS_FRACTION.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ANY(MASS_FLUX<0._EB) .OR. PARTICLE_MASS_FLUX<0._EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. MASS_FLUX cannot be less than zero'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(321): SURF ',TRIM(SF%ID),' MASS_FLUX cannot be less than zero.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ANY(MASS_FLUX>0._EB) .AND. ABS(VEL)>TWO_EPSILON_EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use both MASS_FLUX and VEL'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(322): SURF ',TRIM(SF%ID),' cannot use both MASS_FLUX and VEL.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ANY(MASS_FLUX>0._EB) .AND. ABS(MASS_FLUX_TOTAL)>TWO_EPSILON_EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use both MASS_FLUX and MASS_FLUX_TOTAL'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(323): SURF ',TRIM(SF%ID),' cannot use both MASS_FLUX and MASS_FLUX_TOTAL.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ABS(MASS_FLUX_TOTAL)>TWO_EPSILON_EB .AND. ABS(VEL)>TWO_EPSILON_EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use both MASS_FLUX_TOTAL and VEL'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(324): SURF ',TRIM(SF%ID),' cannot use both MASS_FLUX_TOTAL and VEL.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ANY(MASS_FRACTION<0._EB))  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use a negative MASS_FRACTION'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(325): SURF ',TRIM(SF%ID),' cannot use a negative MASS_FRACTION.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (ANY(SF%RAMP(1:N_TRACKED_SPECIES)%ID/='null') .AND. (HRRPUA > 0._EB .OR. MLRPUA > 0._EB)) THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),&
-                                   '. Cannot use RAMP_MF with MLRPUA or HRRPUA'
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(326): SURF ',TRIM(SF%ID),' cannot use RAMP_MF with MLRPUA or HRRPUA.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPEC_ID(1)=='null' .AND. (HRRPUA > 0._EB .OR. MLRPUA > 0._EB)) SPEC_ID(1)=REACTION(1)%FUEL
@@ -7873,8 +7790,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       (HRRPUA > 0._EB .OR. MLRPUA > 0._EB)) MASS_FRACTION(1) = 1._EB
    IF (ANY(MASS_FLUX/=0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
       IF (SPEC_ID(1)=='null') THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),&
-                                   '. Must define SPEC_ID when using MASS_FLUX or MASS_FRACTION'
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(327): SURF ',TRIM(SF%ID),' must define SPEC_ID when using MASS_FLUX or MASS_FRACTION.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          DO NN=1,MAX_SPECIES
@@ -7888,7 +7804,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
                   EXIT
                ENDIF
                IF (NNN==N_TRACKED_SPECIES) THEN
-                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),' SPEC ',TRIM(SPEC_ID(NN)),' not found'
+                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(328): SURF ',TRIM(SF%ID),' SPEC ',TRIM(SPEC_ID(NN)),' not found.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDDO
@@ -7896,12 +7812,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ENDIF
       IF (SUM(SF%MASS_FRACTION) > TWO_EPSILON_EB) THEN
          IF (SUM(SF%MASS_FRACTION) > 1._EB) THEN
-            WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. SUM(MASS_FRACTION) > 1'
+            WRITE (MESSAGE,'(A,A,A)') 'ERROR(329): SURF ',TRIM(SF%ID),' sum of mass fractions greater than 1.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (SF%MASS_FRACTION(1) > 0._EB) THEN
-            WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID), &
-                                      '. Cannot use background species with MASS_FRACTION.'
+            WRITE (MESSAGE,'(A,A,A)') 'ERROR(330): SURF ',TRIM(SF%ID),' cannot use background species for MASS_FRACTION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          SF%MASS_FRACTION(1) = 1._EB - SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES))
@@ -7909,14 +7824,14 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    IF (SF%HEAT_TRANSFER_MODEL==RAYLEIGH_HTC_MODEL .AND. GRAV<TWO_EPSILON_EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot use a RAYLEIGH model with GRAV=0'
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR(331): SURF ',TRIM(SF%ID),' cannot use a RAYLEIGH model with GRAV=0.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (SF%REFERENCE_HEAT_FLUX > 0._EB) THEN
       IF (SF%TMP_IGN>=50000._EB .OR. SF%RAMP(TIME_HEAT)%ID=='null' .OR. SF%HRRPUA <=0._EB) THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),&
-                                   '. REFERENCE_HEAT_FLUX requires HRRPUA, IGNITION_TEMPERATURE, and RAMP_Q'
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(332): SURF ',TRIM(SF%ID),&
+                                   ' REFERENCE_HEAT_FLUX requires HRRPUA, IGNITION_TEMPERATURE, and RAMP_Q'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          N_CONE_RAMP = N_CONE_RAMP + 1
@@ -7972,7 +7887,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDIF
          ENDDO
          IF (INDEX_LIST(N_LIST)<0) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: MATL_ID, ',TRIM(NAME_LIST(N_LIST)),', on SURF, ',TRIM(SF%ID),', does not exist'
+            WRITE(MESSAGE,'(5A)') 'ERROR(333): SURF ',TRIM(SF%ID),' MATL_ID ',TRIM(NAME_LIST(N_LIST)),' not found.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO COUNT_LAYER_MATL
@@ -8003,7 +7918,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
                IF (ML%RESIDUE_MATL_NAME(NNN,NR) == 'null') CYCLE
                IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN,NR))) CYCLE
                N_LIST = N_LIST + 1
-               IF (N_LIST>MAX_MATERIALS_TOTAL) THEN ; CALL SHUTDOWN('ERROR: Too many materials in the surface.') ; RETURN ; ENDIF
+               IF (N_LIST>MAX_MATERIALS_TOTAL) THEN 
+                  WRITE(MESSAGE,'(3A)') 'ERROR(334): SURF ',TRIM(SF%ID),' has too many materials.'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN 
+               ENDIF
                NAME_LIST (N_LIST) = ML%RESIDUE_MATL_NAME(NNN,NR)
                INDEX_LIST(N_LIST) = ML%RESIDUE_MATL_INDEX(NNN,NR)
             ENDDO
@@ -8076,7 +7994,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    DO NN=1,SF%N_MATL
       ML => MATERIAL(SF%MATL_INDEX(NN))
       IF (ML%N_REACTIONS>0 .AND. SF%TMP_IGN<50000._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have a REACting MATL and IGNITION_TEMPERATURE'
+         WRITE(MESSAGE,'(3A)') 'ERROR(335): SURF ',TRIM(SF%ID),' cannot have a reacting MATL and IGNITION_TEMPERATURE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -8091,16 +8009,15 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Thermal boundary conditions
 
    IF (SF%ADIABATIC .AND. (SF%NET_HEAT_FLUX < 1.E12_EB .OR. ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB)) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
-                                 ' cannot have both ADIABATIC and NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
+         WRITE(MESSAGE,'(3A)') 'ERROR(336): SURF ',TRIM(SF%ID),' cannot use both ADIABATIC and NET or CONVECTIVE_HEAT_FLUX.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB .AND. ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have both NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
+      WRITE(MESSAGE,'(3A)') 'ERROR(337): SURF ',TRIM(SF%ID),' cannot use both NET and CONVECTIVE_HEAT_FLUX.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB .AND. TMP_FRONT >= -TMPM) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have TMP_FRONT with NET_HEAT_FLUX'
+      WRITE(MESSAGE,'(3A)') 'ERROR(338): SURF ',TRIM(SF%ID),' cannot use TMP_FRONT and NET_HEAT_FLUX.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB .AND. TMP_FRONT >= -TMPM) SF%SET_H =.TRUE.
@@ -8118,27 +8035,27 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE)             SF%THERMAL_BC_INDEX = INFLOW_OUTFLOW
    IF (RAMP_T_I /= 'null') THEN
       IF (HT3D) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I cannot be used with HT3D.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(339): SURF ',TRIM(SF%ID),' RAMP_T_I cannot be used with HT3D.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (.NOT. SF%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I requires a thermally thick surface.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(340): SURF ',TRIM(SF%ID),' RAMP_T_I requires a thermally thick surface.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (TMP_FRONT_INITIAL > -TMPM-1._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I cannot be used with TMP_FRONT_INITIAL.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(341): SURF ',TRIM(SF%ID),' RAMP_T_I cannot be used with TMP_FRONT_INITIAL.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (TMP_FRONT > -TMPM-1._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I cannot be used with TMP_FRONT.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(342): SURF ',TRIM(SF%ID),' RAMP_T_I cannot be used with TMP_FRONT.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (TMP_BACK > -TMPM-1._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I cannot be used with TMP_BACK.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(343): SURF ',TRIM(SF%ID),' RAMP_T_I cannot be used with TMP_BACK.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (TMP_INNER > -TMPM-1._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' RAMP_T_I cannot be used with TMP_INNER.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(344): SURF ',TRIM(SF%ID),' RAMP_T_I cannot be used with TMP_INNER.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       CALL GET_RAMP_INDEX(RAMP_T_I,'T_I PROFILE',SF%RAMP_T_I_INDEX)
@@ -8147,7 +8064,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (SF%PROFILE==BOUNDARY_LAYER_PROFILE) THEN
       IF ( ABS(VEL_BULK)>ABS(VEL) ) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)// ' VEL_BULK invalid, must have VEL_BULK <= VEL'
+         WRITE(MESSAGE,'(3A)') 'ERROR(345): SURF ',TRIM(SF%ID),' VEL_BULK must be less than or equal to VEL.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -8382,11 +8299,11 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDDO ZONE_LOOP
 
       IF (SF%LEAK_PATH(1)==-1) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' ZONE ID for LEAK_PATH_ID(1) not found'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(346): SURF ',TRIM(SF%ID),' ZONE ID for LEAK_PATH_ID(1) not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (SF%LEAK_PATH(2)==-1) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' ZONE ID for LEAK_PATH_ID(2) not found'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(347): SURF ',TRIM(SF%ID),' ZONE ID for LEAK_PATH_ID(2) not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -8399,12 +8316,12 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    IF (SF%LEAK_PATH(1)==SF%LEAK_PATH(2) .AND. SF%LEAK_PATH(1)>=0) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' Cannot set the same ZONE for each leakage path.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(348): SURF ',TRIM(SF%ID),' cannot set the same ZONE for each leakage path.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    IF (SF%LEAK_PATH(1)>N_ZONE .OR. SF%LEAK_PATH(2)>N_ZONE) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' LEAK_PATH greater than number of ZONEs.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(349): SURF ',TRIM(SF%ID),' LEAK_PATH greater than number of ZONEs.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -8423,23 +8340,23 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          SELECT CASE (SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
                IF (SF%THICKNESS<=0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a THICKNESS'
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR(350): SURF ',TRIM(SF%ID),' needs a THICKNESS.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (.NOT. LPC%DRAG_LAW==POROUS_DRAG) THEN
                   IF (SF%LENGTH<=0._EB) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a LENGTH'
+                     WRITE(MESSAGE,'(A,A,A)') 'ERROR(351): SURF ',TRIM(SF%ID),' needs a LENGTH.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   IF (SF%WIDTH<=0._EB) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a WIDTH'
+                     WRITE(MESSAGE,'(A,A,A)') 'ERROR(352): SURF ',TRIM(SF%ID),' needs a WIDTH.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
             CASE(SURF_CYLINDRICAL)
                IF (.NOT. LPC%DRAG_LAW==POROUS_DRAG) THEN
                   IF (SF%LENGTH <0._EB) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a LENGTH'
+                     WRITE(MESSAGE,'(A,A,A)') 'ERROR(351): SURF ',TRIM(SF%ID),' needs a LENGTH'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
@@ -8454,7 +8371,7 @@ ENDDO PROCESS_SURF_LOOP
 DO ILPC=1,N_LAGRANGIAN_CLASSES
    LPC=>LAGRANGIAN_PARTICLE_CLASS(ILPC)
    IF (LPC%SURF_INDEX<0) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(LPC%SURF_ID),' not found'
+      WRITE(MESSAGE,'(5A)') 'ERROR(353): PART ',TRIM(LPC%ID),' SURF_ID ',TRIM(LPC%SURF_ID),' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO
@@ -8495,7 +8412,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          IF (LPC%ID==SF%PART_ID)  SF%PART_INDEX = ILPC
       ENDDO
       IF (SF%PART_INDEX==0) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: PART_ID '//TRIM(SF%PART_ID)//' not found'
+         WRITE(MESSAGE,'(5A)') 'ERROR(354): SURF ',TRIM(SF%ID),' PART_ID ',TRIM(SF%PART_ID),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       PARTICLE_FILE=.TRUE.
@@ -8517,8 +8434,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Internal radiation only allowed for Cartesian geometry
 
    IF (SF%INTERNAL_RADIATION .AND. .NOT.SF%GEOMETRY==SURF_CARTESIAN) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),&
-                               ' is not Cartesian and cannot have a material with an ABSORPTION_COEFFICIENT'
+      WRITE(MESSAGE,'(3A)') 'ERROR(355): SURF ',TRIM(SF%ID),' not Cartesian and cannot have a MATL with an ABSORPTION_COEFFICIENT.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -8529,8 +8445,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          DO NN =1,SF%N_LAYER_MATL(NL)
             ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
             IF (ML%EMISSIVITY == 0._EB) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
-               ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+               WRITE(MESSAGE,'(5A)') 'ERROR(356): SURF ',TRIM(SF%ID),' zero emissivity of MATL ',&
+                                     TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN))),' inconsistent with internal radiation.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDDO
@@ -8562,7 +8478,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) THEN
       IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has a specified HRRPUA or MLRPUA plus another pyrolysis model'
+         WRITE(MESSAGE,'(3A)') 'ERROR(357): SURF ',TRIM(SF%ID),' has a specified HRRPUA or MLRPUA plus another pyrolysis model.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       BURNING = .TRUE.
@@ -8570,7 +8486,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    IF (BURNING .AND. N_REACTIONS==0) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' indicates burning, but there is no REAC line'
+      WRITE(MESSAGE,'(3A)') 'ERROR(314): SURF ',TRIM(SF%ID),' indicates burning, but there is no REAC line.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -8584,7 +8500,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    IF (SUCKING) SF%FREE_SLIP = .TRUE.
 
    IF (BURNING .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified velocity or volume flux'
+      WRITE(MESSAGE,'(3A)') 'ERROR(359): SURF ',TRIM(SF%ID),' cannot have a specified velocity or volume flux.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -8625,8 +8541,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                         NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
                         RN => REACTION(NR)
                         IF (DUPLICATE_FUEL(NR)) THEN
-                           WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses HRRPUA and species ' // &
-                                                TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
+                           WRITE(MESSAGE,'(5A)') 'ERROR(360): SURF ',TRIM(SF%ID),' uses HRRPUA but SPEC ', &
+                                                TRIM(SPECIES_MIXTURE(NS)%ID),' is the FUEL for more than one REACtion.'
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                         ENDIF
                         SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)*RN%HOC_COMPLETE
@@ -8635,7 +8551,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   ENDIF
                ENDDO
                IF (SUM(SF%MASS_FLUX) < TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
+                  WRITE(MESSAGE,'(3A)') 'ERROR(361): SURF ',TRIM(SF%ID),&
                                        ' uses HRRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
@@ -8667,15 +8583,15 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                      NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
                      RN => REACTION(NR)
                      IF (DUPLICATE_FUEL(NR)) THEN
-                        WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' uses MLRPUA and species ' // &
-                                             TRIM(SPECIES_MIXTURE(NS)%ID) // 'is the FUEL for more than one REACtion.'
+                        WRITE(MESSAGE,'(5A)') 'ERROR(362): SURF ',TRIM(SF%ID),' uses MLRPUA and species ', &
+                                               TRIM(SPECIES_MIXTURE(NS)%ID),' is the FUEL for more than one REACtion.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                      FUEL_MF = FUEL_MF + RN%HOC_COMPLETE * SF%MASS_FRACTION(NS)
                   ENDIF
                ENDDO
                IF (FUEL_MF < TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//&
+                  WRITE(MESSAGE,'(3A)') 'ERROR(363): SURF ',TRIM(SF%ID), &
                                        ' uses MLRPUA and MASS_FRACTION but no REACtion FUEL species are specified.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
@@ -8730,19 +8646,19 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    SF%SPECIES_BC_INDEX = NO_MASS_FLUX
 
    IF (ANY(SF%MASS_FRACTION>0._EB) .AND. (ANY(ABS(SF%MASS_FLUX)>TWO_EPSILON_EB) .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify mass fraction with mass flux and/or pyrolysis'
+      WRITE(MESSAGE,'(3A)') 'ERROR(364): SURF ',TRIM(SF%ID),' cannot specify mass fraction with mass flux and/or pyrolysis.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    IF (ANY(SF%MASS_FRACTION>0._EB) .AND. SUCKING) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify both mass fraction and outflow velocity'
+      WRITE(MESSAGE,'(3A)') 'ERROR(365): SURF ',TRIM(SF%ID),' cannot specify both mass fraction and outflow velocity.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    IF (ANY(SF%LEAK_PATH>=0) .AND. (BLOWING .OR. SUCKING .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot leak and specify flow or pyrolysis at the same time'
+      WRITE(MESSAGE,'(3A)') 'ERROR(366): SURF ',TRIM(SF%ID),' cannot leak and specify flow or pyrolysis at the same time.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    IF (ANY(ABS(SF%MASS_FLUX)>TWO_EPSILON_EB) .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have both a mass flux and specified velocity'
+      WRITE(MESSAGE,'(3A)') 'ERROR(367): SURF ',TRIM(SF%ID),' cannot have both a mass flux and specified velocity.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -9013,7 +8929,7 @@ READ_LOOP: DO
    IF (IOS==1) EXIT READ_LOOP
    READ(LU_INPUT,PRES,END=23,ERR=24,IOSTAT=IOS)
    24 IF (IOS>0) THEN
-      CALL SHUTDOWN('ERROR: Problem with PRES line') ; RETURN
+      CALL SHUTDOWN('ERROR(101): Problem with PRES line') ; RETURN
    ENDIF
 ENDDO READ_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -9044,7 +8960,7 @@ SELECT CASE(TRIM(SOLVER))
       ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
    CASE DEFAULT
       ! Here the user added an unknown name to SOLVER, stop:
-      CALL SHUTDOWN('ERROR: Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
+      CALL SHUTDOWN('ERROR(371): Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
@@ -9058,11 +8974,11 @@ ELSE
 ENDIF
 
 IF (NMESHES>1 .AND. ANY(FISHPAK_BC==FISHPAK_BC_PERIODIC)) THEN
-   CALL SHUTDOWN('ERROR: Cannot use FISHPAK_BC_PERIODIC with NMESHES>1') ; RETURN
+   CALL SHUTDOWN('ERROR(372): Cannot use FISHPAK_BC for multiple mesh simulations.') ; RETURN
 ENDIF
 
 IF (ANY(FISHPAK_BC>0)) THEN
-   CALL SHUTDOWN('ERROR: Cannot have FISHPAK_BC>0') ; RETURN
+   CALL SHUTDOWN('ERROR(373): Cannot have FISHPAK_BC>0') ; RETURN
 ENDIF
 
 ! Create arrays to be used in the special pressure solver for tunnels
@@ -9132,7 +9048,7 @@ READ_LOOP: DO
    IF (IOS==1) EXIT READ_LOOP
    READ(LU_INPUT,RADI,END=23,ERR=24,IOSTAT=IOS)
    24 IF (IOS>0) THEN
-      CALL SHUTDOWN('ERROR: Problem with RADI line') ; RETURN
+      CALL SHUTDOWN('ERROR(101): Problem with RADI line') ; RETURN
    ENDIF
 ENDDO READ_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -9173,9 +9089,9 @@ ENDIF
 
 IF (ANY(BAND_LIMITS>0._EB)) THEN
    NUMBER_SPECTRAL_BANDS = COUNT(BAND_LIMITS>0._EB) - 1
-   IF (NUMBER_SPECTRAL_BANDS<2) THEN ; CALL SHUTDOWN('ERROR: Need more spectral band limits.') ; RETURN ; ENDIF
+   IF (NUMBER_SPECTRAL_BANDS<2) THEN ; CALL SHUTDOWN('ERROR(381): Need more spectral band limits.') ; RETURN ; ENDIF
    IF (ANY((BAND_LIMITS(2:NUMBER_SPECTRAL_BANDS+1)-BAND_LIMITS(1:NUMBER_SPECTRAL_BANDS))<0._EB)) THEN
-      CALL SHUTDOWN('ERROR: Spectral band limits should be given in ascending order.')
+      CALL SHUTDOWN('ERROR(382): Spectral band limits should be given in ascending order.')
       RETURN
    ENDIF
    ALLOCATE(WL_HIGH(1:NUMBER_SPECTRAL_BANDS))
@@ -9255,7 +9171,7 @@ CLIP_LOOP: DO
    CALL CHECKREAD('CLIP',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT CLIP_LOOP
    READ(LU_INPUT,CLIP,END=431,ERR=432,IOSTAT=IOS)
-   432 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with CLIP line') ; RETURN ; ENDIF
+   432 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with CLIP line') ; RETURN ; ENDIF
 ENDDO CLIP_LOOP
 431 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -9338,15 +9254,14 @@ COUNT_RAMP_POINTS: DO N=1,N_RAMP
             READ_EXTERNAL = .TRUE.
             RP%EXTERNAL_FILE = EXTERNAL_FILE
             IF (INITIAL_VALUE <-1.E20_EB) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with RAMP ID:',TRIM(ID),&
-               '. Externally controlled RAMP requires an INITIAL_VALUE.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR(390): RAMP ',TRIM(ID),' is externally controlled and requires an INITIAL_VALUE.'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             RP%LAST = INITIAL_VALUE
             RAMP_TYPE(N) = 'EXTERNAL'
          ENDIF
       56 IF (IOS>0) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Problem with RAMP, line number ',INPUT_FILE_LINE_NUMBER
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(101): Problem with RAMP, line number ',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE)
             RETURN
          ENDIF
@@ -9354,8 +9269,8 @@ COUNT_RAMP_POINTS: DO N=1,N_RAMP
    ENDIF
 
    IF (RP%NUMBER_DATA_POINTS<2 .AND. RP%DEVC_ID_DEP=='null' .AND. RP%CTRL_ID_DEP=='null' .AND. .NOT. RP%EXTERNAL_FILE) THEN
-      IF (RP%NUMBER_DATA_POINTS==0) WRITE(MESSAGE,'(A,A,A)') 'ERROR: RAMP ',TRIM(RAMP_ID(N)), ' not found'
-      IF (RP%NUMBER_DATA_POINTS==1) WRITE(MESSAGE,'(A,A,A)') 'ERROR: RAMP ',TRIM(RAMP_ID(N)), ' has only one point'
+      IF (RP%NUMBER_DATA_POINTS==0) WRITE(MESSAGE,'(A,A,A)') 'ERROR(391): RAMP ',TRIM(RAMP_ID(N)),' not found.'
+      IF (RP%NUMBER_DATA_POINTS==1) WRITE(MESSAGE,'(A,A,A)') 'ERROR(392): RAMP ',TRIM(RAMP_ID(N)),' has only one point.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -9402,8 +9317,7 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
          IF (RP%DEVC_ID =='null') RP%DEVC_ID = DEVC_ID
          IF (RP%CTRL_ID =='null') RP%CTRL_ID = CTRL_ID
          IF ((RP%DEVC_ID/='null' .OR. RP%CTRL_ID/='null') .AND. (RP%DEVC_ID_DEP/='null' .OR. RP%CTRL_ID_DEP/='null')) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with RAMP ID:',TRIM(ID),&
-            '. Cannot specify both CTRL_ID or DEVC_ID and CTRL_ID_DEP or DEVC_ID_DEP).'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR(393): RAMP: ',TRIM(ID),' cannot specify both CTRL_ID or DEVC_ID.'
             CALL SHUTDOWN(MESSAGE)
             RETURN
          ENDIF
@@ -9425,7 +9339,7 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
          RP%INDEPENDENT_DATA(NN) = T
          IF (NN>1) THEN
             IF (T<=RP%INDEPENDENT_DATA(NN-1)) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: RAMP ',TRIM(RAMP_ID(N)), ' variable T must be monotonically increasing'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR(394): RAMP ',TRIM(RAMP_ID(N)),' variable T must be monotonically increasing.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -9478,7 +9392,7 @@ DO N=1,N_RAMP
 ENDDO
 
 IF (READ_EXTERNAL .AND. EXTERNAL_FILENAME=='null') THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: A RAMP with EXTERNAL_FILE is present but no EXTERNAL_FILENAME is defined on MISC/'
+   WRITE(MESSAGE,'(A)') 'ERROR(395): A RAMP with EXTERNAL_FILE is present but no EXTERNAL_FILENAME is defined on MISC.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -9525,15 +9439,15 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
       SELECT CASE(TABLE_TYPE(N))
          CASE (SPRAY_PATTERN)
             IF (TABLE_DATA(1)<0._EB .OR.           TABLE_DATA(1)>180._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(396): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st latitude.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(397): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd latitude.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(3)<-180._EB .OR.        TABLE_DATA(3)>360._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(396): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360._EB) THEN
