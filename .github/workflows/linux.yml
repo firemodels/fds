@@ -31,37 +31,14 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
-
-      # install oneapi components from apt repository based on
-      # https://www.intel.com/content/www/us/en/docs/oneapi/installation-guide-linux/2023-2/apt.html
-      # oneapi-ci/scripts/setup_apt_repo_linux.sh
-      # oneapi-ci/scripts/apt_depends.sh
-      # oneapi-ci/scripts/install_linux_apt.sh
-    - name: setup apt repository
-      run: |
-        wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-        sudo apt-get update
-    - name: collect versioned dependencies of apt packages
-      run : |
-        apt-cache depends intel-oneapi-compiler-fortran \
-                          intel-oneapi-mpi-devel \
-                          intel-oneapi-mkl-devel | tee dependencies.txt
-    - name: cache install oneapi
-      id: cache-install
-      uses: actions/cache@v3
+    - uses: rscohn2/setup-oneapi@v0
       with:
-        path: /opt/intel/oneapi
-        key: install-${{ hashFiles('**/dependencies.txt') }}
-    - name: install oneapi compiler, mpi, mkl
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        sudo apt-get install -y intel-oneapi-compiler-fortran \
-                                intel-oneapi-mpi-devel \
-                                intel-oneapi-mkl-devel
-        sudo apt-get clean
+        components: |
+          ifx
+          impi
+          mkl
 
+    - uses: actions/checkout@v4
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
@@ -84,37 +61,16 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
     - name: install openmpi
       run: |
         sudo apt-get update
         sudo apt-get install libopenmpi-dev openmpi-bin
-
-      # install oneapi components from apt repository based on
-      # oneapi-ci/scripts/setup_apt_repo_linux.sh
-      # oneapi-ci/scripts/apt_depends.sh
-      # oneapi-ci/scripts/install_linux_apt.sh
-    - name: setup apt repository
-      run: |
-        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-        echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-        sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/oneAPI.list" -o APT::Get::List-Cleanup="0"
-    - name: collect versioned dependencies of apt packages
-      run : |
-        apt-cache depends intel-oneapi-mkl-devel | tee dependencies.txt
-    - name: cache install oneapi
-      id: cache-install
-      uses: actions/cache@v3
+    - uses: rscohn2/setup-oneapi@v0
       with:
-        path: /opt/intel/oneapi
-        key: install-${{ hashFiles('**/dependencies.txt') }}
-    - name: install oneapi mkl
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        sudo apt-get install -y intel-oneapi-mkl-devel
-        sudo apt-get clean
+        components: |
+          mkl
 
+    - uses: actions/checkout@v4
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
