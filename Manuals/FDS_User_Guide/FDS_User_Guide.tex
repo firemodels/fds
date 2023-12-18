@@ -549,7 +549,11 @@ To confirm the speedup provided by OpenMP, a series of test cases\footnote{The i
 \section{Monitoring Progress}
 \label{info:monitoring_progress}
 
-Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
+Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. By default, the diagnostics are written out every 100 timesteps after the first 100 timesteps. A different time interval can be specified by the user:
+\begin{lstlisting}
+&DUMP DIAGNOSTICS_INTERVAL=100 /
+\end{lstlisting}
+At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
 By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, its value is {\ct F} for jobs involving 32 Meshes or less, and {\ct T} for bigger numbers. When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
 \begin{lstlisting}
@@ -11563,6 +11567,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                        \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
+{\ct DIAGNOSTICS\_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                            \\ \hline
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                   \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline

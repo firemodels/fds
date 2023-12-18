@@ -586,7 +586,7 @@ MAIN_LOOP: DO
    ! Determine when to dump out diagnostics to the .out file
 
    LO10 = INT(LOG10(REAL(MAX(1,ABS(ICYC)),EB)))
-   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
+   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,DIAGNOSTICS_INTERVAL)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
 
    !================================================================================================================================
    !                                           Start of Predictor part of time step
