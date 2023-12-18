@@ -1157,7 +1157,6 @@ END SUBROUTINE ALLOCATE_BOUNDARY_COORD_ARRAYS
 
 
 SUBROUTINE ALLOCATE_BOUNDARY_ONE_D_ARRAYS
-
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 
 IF (OD_INDEX==0 .AND. M%N_BOUNDARY_ONE_D_DIM>0) THEN
@@ -1184,7 +1183,10 @@ M%BOUNDARY_ONE_D_OCCUPANCY(OD_INDEX) = 1
 
 ONE_D => M%BOUNDARY_ONE_D(OD_INDEX)
 
-IF (ONE_D%SURF_INDEX==SURF_INDEX) RETURN
+IF (ONE_D%SURF_INDEX==SURF_INDEX) THEN
+   IF (.NOT. PRESENT(LPC_INDEX)) RETURN
+   IF (LAGRANGIAN_PARTICLE_CLASS(LPC_INDEX)%MONODISPERSE) RETURN
+ENDIF
 
 ! Assume that most ONE_D arrays will have the same dimensions of the corresponding SURF_INDEX. If not, that will be adjusted later
 
@@ -3414,66 +3416,6 @@ INTEGER::IND=0
 IND=MIN(NBINS,MAX(CEILING((VAL-LIMITS(1))/(LIMITS(2)-LIMITS(1))*NBINS),1))
 COUNTS(IND)=COUNTS(IND)+WEIGHT
 END SUBROUTINE UPDATE_HISTOGRAM
-
-
-!> \brief Linearly interpolate the a mesh quantity onto a point
-!> \param X The interpolated value of the 3D array
-!> \param A The 3D array of values
-!> \param I The lower x index of the array
-!> \param J The lower y index of the array
-!> \param K The lower z index of the array
-!> \param P Fraction of the distance from the lower to upper x coordinate
-!> \param R Fraction of the distance from the lower to upper y coordinate
-!> \param S Fraction of the distance from the lower to upper z coordinate
-
-SUBROUTINE MESH_TO_PARTICLE(X,A,I,J,K,P,R,S)
-
-REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A
-INTEGER, INTENT(IN) :: I,J,K
-REAL(EB), INTENT(IN) :: P,R,S
-REAL(EB), INTENT(OUT) :: X
-REAL(EB) :: PP,RR,SS
-
-PP = 1._EB-P
-RR = 1._EB-R
-SS = 1._EB-S
-X  = ((PP*A(I,J,K)  +P*A(I+1,J,K)  )*RR+(PP*A(I,J+1,K)  +P*A(I+1,J+1,K)  )*R)*SS + &
-     ((PP*A(I,J,K+1)+P*A(I+1,J,K+1))*RR+(PP*A(I,J+1,K+1)+P*A(I+1,J+1,K+1))*R)*S
-
-END SUBROUTINE MESH_TO_PARTICLE
-
-
-!> \brief Linearly interpolate the value at a point onto the mesh
-!> \param X The interpolated value of the 3D array
-!> \param A The 3D array of values
-!> \param I The lower x index of the array
-!> \param J The lower y index of the array
-!> \param K The lower z index of the array
-!> \param P Fraction of the distance from the lower to upper x coordinate
-!> \param R Fraction of the distance from the lower to upper y coordinate
-!> \param S Fraction of the distance from the lower to upper z coordinate
-
-SUBROUTINE PARTICLE_TO_MESH(X,A,I,J,K,P,R,S)
-
-REAL(EB), INTENT(INOUT), DIMENSION(0:,0:,0:) :: A
-INTEGER, INTENT(IN) :: I,J,K
-REAL(EB), INTENT(IN) :: P,R,S
-REAL(EB), INTENT(IN) :: X
-REAL(EB) :: PP,RR,SS
-
-PP = 1._EB-P
-RR = 1._EB-R
-SS = 1._EB-S
-A(I  ,J  ,K  ) = A(I  ,J  ,K  ) - X*PP*RR*SS
-A(I+1,J  ,K  ) = A(I+1,J  ,K  ) - X*P *RR*SS
-A(I  ,J+1,K  ) = A(I  ,J+1,K  ) - X*PP*R *SS
-A(I+1,J+1,K  ) = A(I+1,J+1,K  ) - X*P *R *SS
-A(I  ,J  ,K+1) = A(I  ,J  ,K+1) - X*PP*RR*S
-A(I+1,J  ,K+1) = A(I+1,J  ,K+1) - X*P *RR*S
-A(I  ,J+1,K+1) = A(I  ,J+1,K+1) - X*PP*R *S
-A(I+1,J+1,K+1) = A(I+1,J+1,K+1) - X*P *R *S
-
-END SUBROUTINE PARTICLE_TO_MESH
 
 
 !> \brief Calculate the value of polynomial function.

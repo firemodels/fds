@@ -1,0 +1,11 @@
+&HEAD CHID='Test_TEST_ID', TITLE='Memorial Tunnel Test' /
+    
+&TIME T_END=END_TIME / 
+ 
+&MISC GVEC=0.313,0.0,-9.805, TMPA=AMBIENT_TEMP /
+
+&CATF OTHER_FILES='mesh_transverse.txt', 'materials.txt', 'fire_NOMINAL_HRR_MW.txt', 'loop_obstructions.txt', 'output_transverse.txt', 'seq_SEQUENCE_ventilation.txt' /
+
+&VENT XB=  0.0,  0.0,-4.4,4.4,0.0,N_HEIGHT, SURF_ID='OPEN' /
+&VENT XB=856.8,856.8,-4.4,4.4,0.0,S_HEIGHT, SURF_ID='OPEN' /
+

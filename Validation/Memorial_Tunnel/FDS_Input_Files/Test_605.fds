@@ -184,6 +184,6 @@
 &RAMP ID='VENTR_JF15',T=846.0,F=1.0 /
 &RAMP ID='VENTR_JF15',T=856.0,F=0.0 /
                 
-&CATF OTHER_FILES='materials.txt', 'obstructions.txt', 'output.txt', 'fans.txt' /
+&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'output.txt', 'fans.txt' /
 
 &TAIL / 

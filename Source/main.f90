@@ -319,7 +319,7 @@ IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed Poisson initializ
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TGA_SURF_INDEX>0) CYCLE
-   IF (NOISE) CALL INITIAL_NOISE(NM)
+   CALL INITIAL_NOISE(NM)
    IF (PERIODIC_TEST==1) CALL NS_ANALYTICAL_SOLUTION(NM,T_BEGIN,RK_STAGE=2)
    IF (PERIODIC_TEST==2) CALL UVW_INIT(NM,UVW_FILE)
    IF (PERIODIC_TEST==3) CALL COMPRESSION_WAVE(NM,0._EB,3)
@@ -586,7 +586,7 @@ MAIN_LOOP: DO
    ! Determine when to dump out diagnostics to the .out file
 
    LO10 = INT(LOG10(REAL(MAX(1,ABS(ICYC)),EB)))
-   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
+   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,DIAGNOSTICS_INTERVAL)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
 
    !================================================================================================================================
    !                                           Start of Predictor part of time step
@@ -1448,11 +1448,14 @@ PRESSURE_ITERATION_LOOP: DO
       CALL PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
    ENDDO
 
-   ! Solve the Poission equation using either FFT or GLMAT
+   ! Special case for tunnels -- filter out the lengthwise pressure gradient
+
+   IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
+
+   ! Solve the Poission equation using either FFT or ULMAT, GLMAT, or UGLMAT
 
    SELECT CASE(PRES_FLAG)
       CASE (FFT_FLAG)
-         IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
          DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL PRESSURE_SOLVER_FFT(NM)
          ENDDO
