@@ -5960,13 +5960,12 @@ In this case, there is no calculation of heat conduction in depth. Only the surf
 \end{figure}
 
 
-
-
+\FloatBarrier
 
 \subsection{Porous Media}
 \label{info:porous_media}
 
-A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example:
+A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example for a porous aluminum matrix:
 \begin{lstlisting}
 &SURF ID='LIGAMENT', MATL_ID='ALUMINUM ALLOY', THICKNESS=7.3E-5,
       GEOMETRY='CYLINDRICAL', HEAT_TRANSFER_COEFFICIENT=10. /
@@ -5977,14 +5976,15 @@ A 3-D array of particles can be used to represent the drag exerted by porous med
 &INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T,
       PART_ID='FOAM' /
 \end{lstlisting}
-These lines are a model of aluminum foam. The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell.
 
-The {\ct PART} line provides information about the particles. The {\ct DRAG\_LAW} indicates a special empirical model for the porous media. This model states that the pressure drop through the media is given by
+The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell. The {\ct SURF} inputs of {\ct POROUS\_VOLUME\_FRACTION} and {\ct THICKNESS} do not directly effect the drag calculation. They are used to define the surface area for computing heat transfer between the gas and the porous media. 
+
+The {\ct PART} line provides information about the particles which includes the drag they impose on the flow. The {\ct DRAG\_LAW} of {\ct POROUS MEDIA} indicates a special drag model for porous media. This model states that the pressure drop through the media is given by
 \be
    \label{eqn_porous_media}
    \Delta p =  \delta \, \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
-where $\delta$ is the thickness of the foam block in the flow direction, $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
+where $\delta$ is the thickness of the foam block in the flow direction (the smaller of the cell size in the flow direction or the {\ct XB} dimension in the flow direction from the {\ct INIT} input), $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
 
 The {\ct INIT} line designates the volume occupied by the porous media using the sextuplet {\ct XB}. A single particle is inserted into the center of each cell occupied by the foam by specifying the parameters {\ct N\_PARTICLES\_PER\_CELL=1} and {\ct CELL\_CENTERED=T}.
 
