@@ -1,48 +1,64 @@
-&HEAD CHID='NIST_Gasification_Test_R5', TITLE='Black PMMA at 50 kW/m2 in Gasification Apparatus' /
+&HEAD CHID='NIST_Gasification_Test_R5', TITLE='Black PMMA at 50 kW/m2 in Gasification Apparatus Test R5' /
 
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
+&MESH XB=0,1,0,1,0,1,IJK=5,1,4/
 
-&TIME T_END=500., WALL_INCREMENT=1, DT=0.1 /
+&MISC SOLID_PHASE_ONLY=T,TMPA=20.45/
+&VENT XB=0.0,0.2,0,1,0,0,SURF_ID='SAMPLE1'/
 
-&MISC Y_O2_INFTY=0.001 /
-
-&MATL ID                = 'Kaowool PM Insulation'
-      DENSITY           = 256.
-      SPECIFIC_HEAT     = 1.07
-      CONDUCTIVITY_RAMP = 'k_kaowool' /
-
-&RAMP ID='k_kaowool', T= 260., F=0.0576 /
-&RAMP ID='k_kaowool', T= 538., F=0.085  /
-&RAMP ID='k_kaowool', T= 816., F=0.125  /
-&RAMP ID='k_kaowool', T=1093., F=0.183  /
+&TIME T_END=500,DT=0.01/
 
 &CATF OTHER_FILES='pmma_properties.txt' /
 
-&SURF ID='PMMA SLAB'
-      COLOR='BLACK'
-      STRETCH_FACTOR=1.
-      HEAT_TRANSFER_COEFFICIENT=13.
-      EXTERNAL_FLUX=50 
-      BACKING='INSULATED'
-      MATL_ID='BLACK PMMA','Kaowool PM Insulation'
-      THICKNESS=0.0062,0.0254 /
+&MATL ID='KPM',
+      DENSITY = 256.,
+      SPECIFIC_HEAT_RAMP = 'KPM_CP',
+      CONDUCTIVITY_RAMP = 'KPM_K',
+      EMISSIVITY = 0.92/
 
-&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+&MATL ID='AL',
+      DENSITY = 2700.,
+      SPECIFIC_HEAT = 0.89,
+      CONDUCTIVITY = 100.,
+      EMISSIVITY = 0.3/
 
-&VENT MB='XMIN', SURF_ID='OPEN' /
-&VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='YMIN', SURF_ID='OPEN' /
-&VENT MB='YMAX', SURF_ID='OPEN' /
-&VENT MB='ZMAX', SURF_ID='OPEN' /
+! The PMMA was bonded to the the Kaowoll PM (KPM) using a combustible adhesive.
+! The mass of adhesive was treated as if it were PMMA and the sample thickess adjusted accordingly.
+&SURF ID='SAMPLE1',
+      HEAT_TRANSFER_COEFFICIENT=13.,
+      COLOR='WHITE',
+      MATL_ID='BLACK PMMA','KPM','AL',
+      THICKNESS=0.006523,0.02852,0.00635,
+      STRETCH_FACTOR=1,1,1,
+      EXTERNAL_FLUX=50/
 
-&DUMP DT_DEVC=1. /
+&RAMP ID='KPM_CP', T=26.85, F=0.7653/
+&RAMP ID='KPM_CP', T=226.85, F=1.0211/
+&RAMP ID='KPM_CP', T=526.85, F=1.2128/
+&RAMP ID='KPM_CP', T=626.85, F=1.1711/
+&RAMP ID='KPM_CP', T=1326.85, F=1.2834/
 
-&DEVC ID='Mass', XB=-0.05,0.05,-0.05,0.05,0.00,0.01, IOR=3, QUANTITY='SURFACE DENSITY', SPATIAL_STATISTIC='SURFACE INTEGRAL'
-      CONVERSION_FACTOR=1000, UNITS='[g]' /
-&DEVC ID='MLR', XB=-0.05,0.05,-0.05,0.05,0.00,0.01, IOR=3, QUANTITY='MASS FLUX', SPEC_ID='MMA', CONVERSION_FACTOR=1000, UNITS='[g/m2/s]' /
-&DEVC ID='Back Surface Temperature', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BACK WALL TEMPERATURE', CONVERSION_ADDEND=273, UNITS='[K]'/
-&DEVC ID='Top Surface Temperature',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', CONVERSION_ADDEND=273, UNITS='[K]'/
+&RAMP ID='KPM_K', T=260, F=0.0576/
+&RAMP ID='KPM_K', T=538, F=0.085/
+&RAMP ID='KPM_K', T=816, F=0.125/
+&RAMP ID='KPM_K', T=1093, F=0.183/
 
-&TAIL / 
+&DEVC ID='Mass', QUANTITY='CONTROL VALUE',CTRL_ID='MP', UNITS='[g]' /
+&DEVC ID='MLR', XYZ=0.1,0.5,0.0, IOR=3, QUANTITY='BURNING RATE', CONVERSION_FACTOR=1000, UNITS='[g/m2/s]' /
+&DEVC ID='Back Surface Temperature', XYZ=0.1,0.5,0.0, IOR=3, QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=-0.03487, CONVERSION_ADDEND=273, UNITS='[K]'/
+&DEVC ID='Top Surface Temperature',  XYZ=0.1,0.5,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', CONVERSION_ADDEND=273, UNITS='[K]'/
+&DEVC XYZ=0.1,0.5,0.0,QUANTITY='SURFACE DENSITY',MATL_ID='BLACK PMMA',ID='SD_B',IOR=3/
+&DEVC XYZ=0.1,0.5,0.0,QUANTITY='SURFACE DENSITY',MATL_ID='PMMA_INT',ID='SD_I',IOR=3/
+&DEVC XYZ=0.1,0.5,0.0,QUANTITY='SURFACE DENSITY',MATL_ID='PMMA_CHAR',ID='SD_C',IOR=3/
+
+! Sums the virgin, intermediate, and char masses
+&CTRL ID='SDsum',FUNCTION_TYPE='SUM',INPUT_ID='SD_B','SD_I','SD_C'/
+
+! The functions below remove that portion of the PMMA mass that is the adhesive to give
+! SDs - PMMA surface density in kg/m2
+! SDn - Normalized surface density
+! MP - Mass of PMMA in g
+&CTRL ID='SDs',FUNCTION_TYPE='SUBTRACT',INPUT_ID='SDsum','CONSTANT',CONSTANT=0.56704/
+&CTRL ID='SDn',FUNCTION_TYPE='DIVIDE',INPUT_ID='SDs','CONSTANT',CONSTANT=7.8930/
+&CTRL ID='MP',FUNCTION_TYPE='MULTIPLY',INPUT_ID='SDn','CONSTANT',CONSTANT=30.289/
 
 

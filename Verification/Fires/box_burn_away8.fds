@@ -23,10 +23,9 @@ The gas species here is mixture fraction fuel, burning rate specified.
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
-      THICKNESS            = 0.1
-      BURN_AWAY            = .TRUE.
-      MLRPUA               = 0.0733333
-      BACKING              = 'VOID' /
+      VARIABLE_THICKNESS   = T
+      BURN_AWAY            = T
+      MLRPUA               = 0.0733333 /
 
 &REAC FUEL='ETHYLENE'
       FYI='C_2 H_4'
