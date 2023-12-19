@@ -24,8 +24,16 @@ u_r = 5.;
 p_r = p_0-rho_0*g*(z_r-z_0);
 T_r = 20+273.15;
 theta_r = T_r*(p_0/p_r)^0.285;
-u_star = kappa*u_r/log(z_r/z_0);
-theta_0 = theta_r/(1+u_star^2*log(z_r/z_0)/(g*kappa^2*L));
+if L<0;
+   x_r = (1-16*z_r/L).^0.25;
+   psi_m_r = 2*log((1+x_r)/2) + log((1+x_r^2)/2) - 2*atan(x_r) + pi/2;
+   psi_h_r = 2*log((1+x_r^2)/2);
+else
+   psi_m_r = -5*z_r/L;
+   psi_h_r = psi_m_r;
+end
+u_star = kappa*u_r/(log(z_r/z_0)-psi_m_r);
+theta_0 = theta_r/(1+u_star^2*(log(z_r/z_0)-psi_h_r)/(g*kappa^2*L));
 theta_star = u_star^2*theta_0/(g*kappa*L);
 
 z = [z_0 10*z_0 1 2 3 4 5 6 7 8 9 10 15 20 25 30 50 100];
