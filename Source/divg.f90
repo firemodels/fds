@@ -349,20 +349,20 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          IF (STORE_SPECIES_FLUX) THEN
             IF (CORRECTOR) THEN
                SELECT CASE(IOR)
-                  CASE(-1) ; DIF_FXS(IIG  ,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE(-1) ; DIF_FXS(IIG  ,JJG,KKG,N) =  RHO_D_DZDN
                   CASE( 1) ; DIF_FXS(IIG-1,JJG,KKG,N) = -RHO_D_DZDN
-                  CASE(-2) ; DIF_FYS(IIG,JJG  ,KKG,N) = -RHO_D_DZDN
+                  CASE(-2) ; DIF_FYS(IIG,JJG  ,KKG,N) =  RHO_D_DZDN
                   CASE( 2) ; DIF_FYS(IIG,JJG-1,KKG,N) = -RHO_D_DZDN
-                  CASE(-3) ; DIF_FZS(IIG,JJG,KKG  ,N) = -RHO_D_DZDN
+                  CASE(-3) ; DIF_FZS(IIG,JJG,KKG  ,N) =  RHO_D_DZDN
                   CASE( 3) ; DIF_FZS(IIG,JJG,KKG-1,N) = -RHO_D_DZDN
                END SELECT
             ELSE
                SELECT CASE(IOR)
-                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG , JJG,KKG,N)-RHO_D_DZDN)
+                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG , JJG,KKG,N)+RHO_D_DZDN)
                   CASE( 1) ; DIF_FX(IIG-1,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG-1,JJG,KKG,N)-RHO_D_DZDN)
-                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG  ,KKG,N)-RHO_D_DZDN)
+                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG  ,KKG,N)+RHO_D_DZDN)
                   CASE( 2) ; DIF_FY(IIG,JJG-1,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG-1,KKG,N)-RHO_D_DZDN)
-                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG  ,N)-RHO_D_DZDN)
+                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG  ,N)+RHO_D_DZDN)
                   CASE( 3) ; DIF_FZ(IIG,JJG,KKG-1,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG-1,N)-RHO_D_DZDN)
                END SELECT
             ENDIF
@@ -541,7 +541,7 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          KDTDZ(II,JJ,KK-1) = 0._EB
    END SELECT
    ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F*B1%RDN - WC%Q_LEAK )
+   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F*B1%RDN - B1%Q_LEAK )
 ENDDO CORRECTION_LOOP
 
 ! Compute (q + del dot k del T) and add to the divergence
@@ -1235,7 +1235,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
       B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-      WC%DUNDT = RDT*(B1%U_NORMAL_S-B1%U_NORMAL)
+      EXTERNAL_WALL(IW)%DUNDT = RDT*(B1%U_NORMAL_S-B1%U_NORMAL)
    ENDDO
 
 ELSE PREDICT_NORMALS
@@ -1261,7 +1261,7 @@ ELSE PREDICT_NORMALS
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
       B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-      WC%DUNDT = WC%DUNDT + 2._EB*RDT*(B1%U_NORMAL-B1%U_NORMAL_S)
+      EXTERNAL_WALL(IW)%DUNDT = EXTERNAL_WALL(IW)%DUNDT + 2._EB*RDT*(B1%U_NORMAL-B1%U_NORMAL_S)
    ENDDO
 
 ENDIF PREDICT_NORMALS

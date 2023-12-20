@@ -41,8 +41,8 @@ setup_win:
 
 impi_intel_win: SHELL=C:/Windows/System32/cmd.exe
 impi_intel_win: MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
-impi_intel_win: MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE)
+impi_intel_win: MPIINCLUDE = "$(IMPI_INCLUDE)"
+impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) -fc=ifort
 impi_intel_win: FCOMPL = mpiifort
 impi_intel_win: obj = test_mpi
 impi_intel_win: setup_win $(objwin_mpi)
@@ -51,11 +51,10 @@ impi_intel_win: setup_win $(objwin_mpi)
 # Linux
 
 impi_intel_linux: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
-impi_intel_linux: LFLAGS = -static-intel -check_mpi
 impi_intel_linux: FCOMPL = mpiifort
 impi_intel_linux: obj = test_mpi
 impi_intel_linux: $(obj_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(obj_mpi)
 
 # OSX
 

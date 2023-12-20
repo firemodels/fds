@@ -23,7 +23,6 @@
       MATL_ID                   = 'INSULATION','STEEL','INSULATION'
       TMP_GAS_FRONT             = 480.
       HEAT_TRANSFER_COEFFICIENT = 10.
-      HEAT_TRANSFER_COEFFICIENT_BACK = 10.
       INNER_RADIUS              = 0.01
       GEOMETRY                  = 'CYLINDRICAL'
       THICKNESS                 = 0.02,0.01,0.02 /
@@ -35,7 +34,7 @@
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID='WALL' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&PROF XYZ=0.0,0.0,0.0, QUANTITY='TEMPERATURE', IOR=3, FORMAT_INDEX=2 /
+&PROF XYZ=0.0,0.0,0.0, QUANTITY='TEMPERATURE', IOR=3, FORMAT_INDEX=2, ID='Temperature' /
 
 &TAIL /
 

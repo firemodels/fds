@@ -76,27 +76,27 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    ! Apply pressure gradients at NEUMANN boundaries: dH/dn = -F_n - d(u_n)/dt
 
-   IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+   IF_NEUMANN: IF (EWC%PRESSURE_BC_TYPE==NEUMANN) THEN
 
       SELECT CASE(IOR)
          CASE( 1)
-            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + WC%DUNDT)
+            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + EWC%DUNDT)
          CASE(-1)
-            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - WC%DUNDT)
+            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - EWC%DUNDT)
          CASE( 2)
-            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + WC%DUNDT)
+            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + EWC%DUNDT)
          CASE(-2)
-            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - WC%DUNDT)
+            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - EWC%DUNDT)
          CASE( 3)
-            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + WC%DUNDT)
+            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + EWC%DUNDT)
          CASE(-3)
-            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - WC%DUNDT)
+            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - EWC%DUNDT)
       END SELECT
    ENDIF IF_NEUMANN
 
    ! Apply pressures at DIRICHLET boundaries, depending on the specific type
 
-   IF_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_DIRICHLET: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
 
       NOT_OPEN: IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
 
@@ -454,19 +454,6 @@ SELECT CASE(IPS)
       !$OMP END DO
 END SELECT
 
-! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
-
-IF (TUNNEL_PRECONDITIONER) THEN
-   !$OMP MASTER
-   DO I=1,IBAR
-      HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
-   ENDDO
-   BXS = BXS + BXS_BAR  ! b = b' + b_bar
-   BXF = BXF + BXF_BAR  ! b = b' + b_bar
-   !$OMP END MASTER
-   !$OMP BARRIER
-ENDIF
-
 ! Apply boundary conditions to H
 
 !$OMP DO
@@ -530,10 +517,9 @@ SUBROUTINE TUNNEL_POISSON_SOLVER
 USE MPI_F08
 USE GLOBAL_CONSTANTS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
-REAL(EB) :: RR,DXO
+REAL(EB) :: RR,BXS_BAR,BXF_BAR,BXS_BAR_LEFT,BXF_BAR_RIGHT
 INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
-REAL(EB), POINTER, DIMENSION(:) :: RDXNP
 TYPE (MESH_TYPE), POINTER :: M
 LOGICAL :: SINGULAR_CASE
 
@@ -545,10 +531,9 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M => MESHES(NM)
 
-   RDXNP(0:M%IBAR) => M%WORK2(0:M%IBAR,0,0)
-   RDXNP(0:M%IBAR) = M%RDXN(0:M%IBAR)
-   IF (NM>1)       RDXNP(0)      = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
-   IF (NM<NMESHES) RDXNP(M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
+   TP_RDXN(I_OFFSET(NM):I_OFFSET(NM)+M%IBAR) = M%RDXN(0:M%IBAR)
+   IF (NM>1)       TP_RDXN(I_OFFSET(NM))        = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
+   IF (NM<NMESHES) TP_RDXN(I_OFFSET(NM)+M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
 
    DO I=1,M%IBAR
       II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
@@ -564,9 +549,9 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO
       ENDDO
       TP_CC(II) = TP_CC(II)/((M%YF-M%YS)*(M%ZF-M%ZS))  ! RHS linear system of equations
-      TP_DD(II) = -M%RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
-      TP_AA(II) =  M%RDX(I)*RDXNP(I)    ! Upper band of matrix
-      TP_BB(II) =  M%RDX(I)*RDXNP(I-1)  ! Lower band of matrix
+      TP_DD(II) = -M%RDX(I)*(TP_RDXN(II)+TP_RDXN(II-1))  ! Diagonal of tri-diagonal matrix
+      TP_AA(II) =  M%RDX(I)*TP_RDXN(II)    ! Upper band of matrix
+      TP_BB(II) =  M%RDX(I)*TP_RDXN(II-1)  ! Lower band of matrix
       SELECT CASE(M%IPS)
          CASE DEFAULT ; M%PRHS(I,1:M%JBAR,1:M%KBAR) = M%PRHS(I,1:M%JBAR,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson eq
          CASE(2)      ; M%PRHS(1:M%JBAR,I,1:M%KBAR) = M%PRHS(1:M%JBAR,I,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson eq
@@ -577,38 +562,40 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! Subtract average BCs (BXS_BAR, BXF_BAR) from the 3-D BCs (BXS and BXF) for all meshes, including tunnel ends.
 
-   M%BXS_BAR = 0._EB
-   M%BXF_BAR = 0._EB
+   BXS_BAR = 0._EB
+   BXF_BAR = 0._EB
    DO K=1,M%KBAR
      DO J=1,M%JBAR
-         M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
-         M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
+         BXS_BAR = BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+         BXF_BAR = BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
       ENDDO
    ENDDO
-   M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
-   M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
+   BXS_BAR = BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
+   BXF_BAR = BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
 
-   M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
-   M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
+   M%BXS = M%BXS - BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
+   M%BXF = M%BXF - BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
 
    ! Apply boundary conditions at end of tunnel to the matrix components
 
    IF (NM==1) THEN
+      BXS_BAR_LEFT = BXS_BAR
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-         TP_CC(1) = TP_CC(1) + M%DXI*M%BXS_BAR*TP_BB(1)
+         TP_CC(1) = TP_CC(1) + M%DXI*BXS_BAR_LEFT*TP_BB(1)
          TP_DD(1) = TP_DD(1) + TP_BB(1)
       ELSE  ! Dirichlet BC
-         TP_CC(1) = TP_CC(1) - 2._EB*M%BXS_BAR*TP_BB(1)
+         TP_CC(1) = TP_CC(1) - 2._EB*BXS_BAR_LEFT*TP_BB(1)
          TP_DD(1) = TP_DD(1) - TP_BB(1)
       ENDIF
    ENDIF
 
    IF (NM==NMESHES) THEN
+      BXF_BAR_RIGHT = BXF_BAR
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*BXF_BAR_RIGHT*TP_AA(TUNNEL_NXP)
          TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
       ELSE  ! Dirichet BC
-         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*BXF_BAR_RIGHT*TP_AA(TUNNEL_NXP)
          TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
       ENDIF
    ENDIF
@@ -663,19 +650,26 @@ CALL MPI_BCAST(TP_CC(1),TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
-! Apply Dirichlet BCs at mesh interfaces. These are linear interpolations of the values of H_BAR on either side of mesh interface.
+! Apply boundary conditions at the ends of the tunnel.
 
 MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M => MESHES(NM)
 
-   IF (NM/=1) THEN
-      DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
-      M%BXS_BAR = (H_BAR(I_OFFSET(NM))*M%DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(M%DX(1)+DXO)
+   IF (NM==1) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
+         H_BAR(0) = H_BAR(1) - M%DXI*BXS_BAR_LEFT
+      ELSE  ! Dirichlet BC
+         H_BAR(0) = -H_BAR(1) + 2._EB*BXS_BAR_LEFT
+      ENDIF
    ENDIF
-   IF (NM/=NMESHES) THEN
-      DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
-      M%BXF_BAR = (H_BAR(I_OFFSET(NM)+M%IBP1)*M%DX(M%IBAR) + H_BAR(I_OFFSET(NM)+M%IBAR)*DXO)/(M%DX(M%IBAR)+DXO)
+
+   IF (NM==NMESHES) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
+         H_BAR(TUNNEL_NXP+1) = H_BAR(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
+      ELSE  ! Dirichlet BC
+         H_BAR(TUNNEL_NXP+1) = -H_BAR(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
+      ENDIF
    ENDIF
 
 ENDDO MESH_LOOP_2
@@ -1039,7 +1033,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! Compute velocity difference
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
-   WC%VEL_ERR_NEW = VELOCITY_ERROR
+   B1%VEL_ERR_NEW = VELOCITY_ERROR
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(B1%RDN*DT)
 
    ! Save maximum velocity error
@@ -1126,6 +1120,7 @@ INTEGER, POINTER :: IBAR=>NULL(),JBAR=>NULL(),KBAR=>NULL(),IBP1=>NULL(),JBP1=>NU
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 INTEGER, PARAMETER :: NULL_BTYPE=0,DIRICHLET_BTYPE=1,NEUMANN_BTYPE=2,PERIODIC_BTYPE=3
 
@@ -1207,6 +1202,7 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
       ZBTYPE_LAST=NULL_BTYPE
       WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
          WC=>M%WALL(IW)
+         EWC=>M%EXTERNAL_WALL(IW)
          BC=>M%BOUNDARY_COORD(WC%BC_INDEX)
          IOR = BC%IOR
          WALL_BTYPE=NULL_BTYPE
@@ -1224,7 +1220,7 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 
          ! Test for obstructions on an open boundary or mirror set to dirichlet
          IF ( (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) &
-            .AND. WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+            .AND. EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
             ZM%USE_FFT=.FALSE.
             EXIT WALL_LOOP
          ENDIF
@@ -1439,6 +1435,7 @@ INTEGER :: NRHS,MAXFCT,MNUM,ERROR,I,J,K,ICC,JCC,IIG,JJG,KKG,IOR,IW,IROW,NCELL,IC
 REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,DIV_FN_VOL,DIV_FN,IDX,AF,VAL,BCV
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (WALL_TYPE),  POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE),  POINTER :: EWC
 TYPE (CFACE_TYPE), POINTER :: CFA
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
@@ -1498,9 +1495,10 @@ CFACE_LOOP : DO ICFACE=1,N_EXTERNAL_CFACE_CELLS
    IFACE= CFA%CUT_FACE_IND1
    JFACE= CFA%CUT_FACE_IND2
    WC  => WALL(CUT_FACE(IFACE)%IWC)
+   EWC  => EXTERNAL_WALL(CUT_FACE(IFACE)%IWC)
    BC  => BOUNDARY_COORD(WC%BC_INDEX)
    ! DIRICHLET boundaries:
-   IF_CFACE_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_CFACE_DIRICHLET: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
       ! Gasphase cell indexes:
       IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
       IF(ZONE_MESH(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE CFACE_LOOP
@@ -1534,6 +1532,7 @@ ENDDO CFACE_LOOP
 ! Finally add External Wall cell BCs:
 WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
    WC => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
    ! Drop if NULL or this is a cut-face. Dealt with external CFACE.
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%CUT_FACE_INDEX>0) CYCLE WALL_CELL_LOOP_1
    BC  => BOUNDARY_COORD(WC%BC_INDEX)
@@ -1541,7 +1540,7 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
    IF(ZONE_MESH(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE WALL_CELL_LOOP_1
    ! NEUMANN boundaries:
-   IF_NEUMANN_1: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+   IF_NEUMANN_1: IF (EWC%PRESSURE_BC_TYPE==NEUMANN) THEN
 
       IROW = MUNKH(IIG,JJG,KKG)
       IF(CC_IBM) THEN
@@ -1577,7 +1576,7 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDIF IF_NEUMANN_1
 
    ! DIRICHLET boundaries:
-   IF_DIRICHLET_1: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_DIRICHLET_1: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
       ! Here case where SOLID and OPEN or interpolated are mixed on a boundary:
       IF( WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE WALL_CELL_LOOP_1
       IROW = MUNKH(IIG,JJG,KKG)
@@ -1779,12 +1778,13 @@ ENDIF
 ! Fill external boundary conditions for Mesh, if necessary:
 WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
    WC => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    ! Gasphase cell indexes:
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
-   IF(ZONE_MESH(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE WALL_CELL_LOOP_2
+   IF (ZONE_MESH(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE WALL_CELL_LOOP_2
    ! NEUMANN boundaries:
-   IF_NEUMANN_2 : IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+   IF_NEUMANN_2 : IF (EWC%PRESSURE_BC_TYPE==NEUMANN) THEN
       I   = BC%II;  J   = BC%JJ;  K   = BC%KK
       ! Define cell size, normal to WC:
       SELECT CASE (IOR)
@@ -1804,7 +1804,7 @@ WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDIF IF_NEUMANN_2
 
    ! DIRICHLET boundaries:
-   IF_DIRICHLET_2 : IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+   IF_DIRICHLET_2 : IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
       I   = BC%II;  J   = BC%JJ;  K   = BC%KK
       ! Define cell size, normal to WC:
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
@@ -2771,9 +2771,11 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
               ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
 
 IF (ERROR /= 0) THEN
-   IF (MY_RANK==0) &
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
+   IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
+   ENDIF
    STOP_STATUS = SETUP_STOP
    RETURN
 END IF
@@ -2784,9 +2786,11 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
               ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
 
 IF (ERROR /= 0) THEN
-   IF (MY_RANK==0) &
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
+   IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
+   ENDIF
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
@@ -2933,6 +2937,7 @@ INTEGER :: PERM(1), PHASE
 #endif
 INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K, ICC
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 REAL(EB), POINTER, DIMENSION(:,:,:)   :: HP
 REAL(EB) :: SUM_FH(2), SUM_XH(2), MEAN_FH, MEAN_XH
@@ -3105,6 +3110,7 @@ IF (ERROR /= 0 .AND. MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT_SOLVER: The following ER
       ! Fill external boundary conditions for Mesh, if necesary:
       WALL_CELL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS
          WC => WALL(IW)
+         EWC => EXTERNAL_WALL(IW)
          BC => BOUNDARY_COORD(WC%BC_INDEX)
 
          IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
@@ -3112,7 +3118,7 @@ IF (ERROR /= 0 .AND. MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT_SOLVER: The following ER
          I = BC%II; J = BC%JJ; K = BC%KK; IOR = BC%IOR
 
          ! NEUMANN boundaries:
-         IF_NEUMANN2: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+         IF_NEUMANN2: IF (EWC%PRESSURE_BC_TYPE==NEUMANN) THEN
             ! Define cell size, normal to WC:
             SELECT CASE (IOR)
                CASE(-1) ! -IAXIS oriented, high face of IIG cell.
@@ -3131,7 +3137,7 @@ IF (ERROR /= 0 .AND. MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT_SOLVER: The following ER
          ENDIF IF_NEUMANN2
 
          ! DIRICHLET boundaries:
-         IF_DIRICHLET2: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+         IF_DIRICHLET2: IF (EWC%PRESSURE_BC_TYPE==DIRICHLET) THEN
             IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                 WC%BOUNDARY_TYPE==        NULL_BOUNDARY ) CYCLE ! No need for these, that's the whole point of a
                                                                 ! global solve.
@@ -3296,6 +3302,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_GRAPH,DSETS
 LOGICAL, ALLOCATABLE, DIMENSION(:)   :: COUNTED
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: DIRI_SET,MESH_LIST
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 
 INTEGER :: NOM,IW,NMLOC,NSETS,ISET,PIVOT,PIVOT_LOC,MESHES_LEFT,CTMSH_LO,CTMSH_HI
 
@@ -3447,7 +3454,8 @@ SETS_LOOP : DO ISET=1,NSETS
       ! OPEN_BOUNDARY condition.
       DO IW=1,N_EXTERNAL_WALL_CELLS
          WC => WALL(IW)
-         IF (WC%PRESSURE_BC_INDEX==DIRICHLET .AND. WC%BOUNDARY_TYPE==OPEN_BOUNDARY) DIRI_SET(ISET) = 1
+         EWC => EXTERNAL_WALL(IW)
+         IF (EWC%PRESSURE_BC_TYPE==DIRICHLET .AND. WC%BOUNDARY_TYPE==OPEN_BOUNDARY) DIRI_SET(ISET) = 1
       ENDDO
    ENDDO
 ENDDO SETS_LOOP
@@ -3936,10 +3944,11 @@ SUBROUTINE GET_BCS_H_MATRIX
 
 USE MPI_F08
 USE MESH_POINTERS
-USE CC_SCALARS, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF
+USE COMPLEX_GEOMETRY, ONLY : CC_IDRC
+USE CC_SCALARS, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF, GRADH_ON_CARTESIAN
 
 ! Local Variables:
-INTEGER :: NM,NM1,JLOC,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),IERR,IIG,JJG,KKG,II,JJ,KK,IW
+INTEGER :: NM,NM1,JLOC,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),IERR,IIG,JJG,KKG,II,JJ,KK,IW,ILH,JLH,KLH,IRC
 REAL(EB):: AF,IDX,BIJ
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -3964,7 +3973,8 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
          ! unstructured domain. Everything else leads to Neuman BCs on H, no need to modify D_MAT_HP.
          IF ( WC%BOUNDARY_TYPE/=OPEN_BOUNDARY ) CYCLE
          IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
-         IF(CCVAR(IIG,JJG,KKG,UNKH)<1 .OR. ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
+         IF((.NOT.CC_IBM .AND. CCVAR(IIG,JJG,KKG,UNKH)<1) &
+             .OR. ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
          II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK
          ! Unknowns on related cells:
          IF(CCVAR(IIG,JJG,KKG,CGSC)==IS_GASPHASE .OR. PRES_ON_WHOLE_DOMAIN) THEN
@@ -3976,20 +3986,25 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
          ENDIF
 
          IND_LOC(LOW_IND) = IND(LOW_IND) - ZSL%UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
+         ILH           = 0; JLH = 0; KLH = 0
          SELECT CASE(BC%IOR)
          CASE( IAXIS)
-            AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
+            AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG); ILH = -1; IDX= RDXN(IIG+ILH)
          CASE(-IAXIS)
-            AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);            IDX= 1._EB/DXN(IIG  )
+            AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);           IDX= RDXN(IIG+ILH)
          CASE( JAXIS)
-            AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG-1)
+            AF  = DX(IIG)*DZ(KKG); JLH= -1; IDX= RDYN(JJG+JLH)
          CASE(-JAXIS)
-            AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG  )
+            AF  = DX(IIG)*DZ(KKG);          IDX= RDYN(JJG+JLH)
          CASE( KAXIS)
-            AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG-1)
+            AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG); KLH = -1; IDX= RDZN(KKG+KLH)
          CASE(-KAXIS)
-            AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG  )
+            AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);           IDX= RDZN(KKG+KLH)
          END SELECT
+         IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+            IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
+            IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+         ENDIF
          ! Now add to Adiff corresponding coeff:
          BIJ = IDX*AF
          ! Case of unstructured projection:
@@ -4453,7 +4468,8 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
             EWC=>EXTERNAL_WALL(IW); IF(EWC%NOM < 1) CYCLE
          ENDIF
          IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; II = BC%II; JJ = BC%JJ; KK = BC%KK
-         IF(CCVAR(IIG,JJG,KKG,UNKH)<1 .OR. ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
+         IF((.NOT.CC_IBM .AND. CCVAR(IIG,JJG,KKG,UNKH)<1) &
+            .OR. ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
          ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
          IF (CC_IBM) THEN
             IF(CCVAR(II ,JJ ,KK ,CC_CGSC) /= IS_GASPHASE) CYCLE
@@ -4852,7 +4868,7 @@ USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
 USE PRES, ONLY : PRESSURE_SOLVER_CHECK_RESIDUALS
 USE CC_SCALARS, ONLY : UNSTRUCTURED_POISSON_RESIDUAL, UNSTRUCTURED_POISSON_RESIDUAL_RC, &
-                           COMPUTE_LINKED_CUTFACE_BAROCLINIC
+                       COMPUTE_LINKED_CUTFACE_BAROCLINIC
 
 
 INTEGER, INTENT(IN) :: NM
