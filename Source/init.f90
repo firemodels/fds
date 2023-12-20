@@ -1105,7 +1105,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    IF (.NOT.SOLID_CELL) THEN
       IF ( (ABS(B1%U_NORMAL_0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0)) .AND. WC%OBST_INDEX>0 ) THEN
-         WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
+         WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR(401): SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
          STOP_STATUS = SETUP_STOP
          RETURN
@@ -1113,7 +1113,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       IF (WC%VENT_INDEX>0 .AND. WC%OBST_INDEX>0) THEN
          VT => M%VENTS(WC%VENT_INDEX)
          IF (VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
-            WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
+            WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR(402): VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
             STOP_STATUS = SETUP_STOP
             RETURN
@@ -1208,26 +1208,26 @@ EDGE_COUNT(NM) = 0
 
 DO K=0,M%KBAR
    DO J=0,M%JBAR
-      IF (J>0) CALL DEFINE_EDGE(     0,J,K, 1,2,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,2,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(     0,J,K, 1,3,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,3,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(     0,J,K, 1,2,NM,0)
+      IF (J>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,2,NM,0)
+      IF (K>0) CALL DEFINE_EDGE(     0,J,K, 1,3,NM,0)
+      IF (K>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,3,NM,0)
    ENDDO
 ENDDO
 DO K=0,M%KBAR
    DO I=0,M%IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,     0,K, 2,1,NM,0,IERR)
-      IF (I>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,1,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(I,     0,K, 2,3,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,3,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,     0,K, 2,1,NM,0)
+      IF (I>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,1,NM,0)
+      IF (K>0) CALL DEFINE_EDGE(I,     0,K, 2,3,NM,0)
+      IF (K>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,3,NM,0)
    ENDDO
 ENDDO
 DO J=0,M%JBAR
    DO I=0,M%IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,J,     0, 3,1,NM,0,IERR)
-      IF (I>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,1,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(I,J,     0, 3,2,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,2,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,J,     0, 3,1,NM,0)
+      IF (I>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,1,NM,0)
+      IF (J>0) CALL DEFINE_EDGE(I,J,     0, 3,2,NM,0)
+      IF (J>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,2,NM,0)
    ENDDO
 ENDDO
 
@@ -1237,26 +1237,26 @@ OBST_LOOP_3: DO N=1,M%N_OBST
    OB => M%OBSTRUCTION(N)
    DO K=OB%K1,OB%K2
       DO J=OB%J1,OB%J2
-         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I1,J,K,-1,2,NM,N,IERR)
-         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I2,J,K, 1,2,NM,N,IERR)
-         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I1,J,K,-1,3,NM,N,IERR)
-         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I2,J,K, 1,3,NM,N,IERR)
+         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I1,J,K,-1,2,NM,N)
+         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I2,J,K, 1,2,NM,N)
+         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I1,J,K,-1,3,NM,N)
+         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I2,J,K, 1,3,NM,N)
       ENDDO
    ENDDO
    DO K=OB%K1,OB%K2
       DO I=OB%I1,OB%I2
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J1,K,-2,1,NM,N,IERR)
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J2,K, 2,1,NM,N,IERR)
-         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J1,K,-2,3,NM,N,IERR)
-         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J2,K, 2,3,NM,N,IERR)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J1,K,-2,1,NM,N)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J2,K, 2,1,NM,N)
+         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J1,K,-2,3,NM,N)
+         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J2,K, 2,3,NM,N)
       ENDDO
    ENDDO
    DO J=OB%J1,OB%J2
       DO I=OB%I1,OB%I2
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K1,-3,1,NM,N,IERR)
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K2, 3,1,NM,N,IERR)
-         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K1,-3,2,NM,N,IERR)
-         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K2, 3,2,NM,N,IERR)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K1,-3,1,NM,N)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K2, 3,1,NM,N)
+         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K1,-3,2,NM,N)
+         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K2, 3,2,NM,N)
       ENDDO
    ENDDO
 ENDDO OBST_LOOP_3
@@ -1272,12 +1272,11 @@ END SUBROUTINE INITIALIZE_EDGES
 !> \param IEC Orientation of edge; 1=x direction; 2=y; 3=z
 !> \param NM Mesh number
 !> \param OBST_INDEX Obstruction index of edge
-!> \param IERR Error indicator
 
-SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,OBST_INDEX,IERR)
+SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,OBST_INDEX)
 
 INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
-INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,OBST_INDEX,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
+INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,OBST_INDEX,IE,IW,IIO,JJO,KKO,IW1,IW2
 REAL(EB) :: XI,YJ,ZK
 TYPE (MESH_TYPE), POINTER :: MM
 TYPE (EDGE_TYPE), POINTER :: ED
@@ -1338,13 +1337,6 @@ EDGE_DIRECTION_1: SELECT CASE(IEC)
 END SELECT EDGE_DIRECTION_1
 
 ! Decide what to do based on whether or not adjacent tiles exist
-
-IF (IW1==-1 .OR. IW2==-1) THEN
-   WRITE(LU_ERR,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
-   STOP_STATUS = SETUP_STOP
-   IERR = 1
-   RETURN
-ENDIF
 
 IF (IW1==0 .AND. IW2==0) RETURN
 IF (IW1> 0 .AND. IW2==0) IW = IW1
@@ -1897,7 +1889,8 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
-            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: HT3D solid improperly specified, Mesh=',NM,', IOR=',IOR
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: HT3D solid must have at least one face exposed in each direction, Mesh=',NM,&
+                                        ', IOR=',IOR
             STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
@@ -1994,7 +1987,8 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
-            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR: HT3D thin solid improperly specified, Mesh=',NM,', IOR=',IOR
+            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(404): HT3D thin solid must have at least one face exposed, Mesh=',NM,&
+                                        ', IOR=',IOR
             STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
@@ -2217,7 +2211,7 @@ IF (NOC(1)==0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) M%IPS=6
 SELECT CASE(PRES_FLAG)
    CASE DEFAULT
       IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
-         WRITE(LU_ERR,'(A,I3)') 'ERROR: Stretch at most 2 coordinate directions in MESH ',NM
+         WRITE(LU_ERR,'(A,I0,A)') 'ERROR(405): MESH ',NM,' can stretch in at most 2 coordinate directions.'
          STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
@@ -2486,7 +2480,7 @@ ENDDO WALL_CELL_LOOP
 ! Check for errors with Poisson solver initialization
 
 IF (IERR/=0) THEN
-   WRITE(LU_ERR,'(A,I2,A,I3)') 'ERROR: Poisson initialization error, Number=',IERR, ', Mesh=',NM
+   WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(406): MESH ',NM,' Poisson initialization error: ',IERR
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
@@ -2547,8 +2541,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       IF (IW==0 .AND. CC_IBM)  CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
 
       IF (IW==0 .AND. ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
-         WRITE(LU_ERR,'(A,I0,A,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,', ID = ',TRIM(DV%ID)
-         WRITE(LU_ERR,'(A)') 'FDS cannot determine which boundary cell to assign.'
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR(407): DEVC ',TRIM(DV%ID),' requires repositioning.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ELSEIF (IW>0) THEN
@@ -2572,7 +2565,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%INSIDE_SOLID) THEN
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
-         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEVC ',N,' must be associated with a heat-conducting surface'
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR(408): DEVC ',TRIM(DV%ID),' must be associated with a heat-conducting surface.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
@@ -2646,7 +2639,7 @@ PROF_LOOP: DO N=1,N_PROF
          SF => SURFACE(M%WALL(IW)%SURF_INDEX)
          ONE_D => M%BOUNDARY_ONE_D(M%WALL(IW)%OD_INDEX)
       ELSE
-         WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition PROF No. ',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+         WRITE(LU_ERR,'(A,I0,A)') 'ERROR(409): PROF ',PF%ORDINAL,' requires repositioning.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
@@ -2658,7 +2651,7 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
 
    IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
-      WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
+      WRITE(LU_ERR,'(A,I0,A)') 'ERROR(410): PROF ',N,' must be associated with a heat-conducting surface.'
       STOP_STATUS = SETUP_STOP
       RETURN
    ENDIF
@@ -3024,7 +3017,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ! Check to see if the current interpolated cell face spans more than one other mesh
 
    IF (NOM_CHECK(0)/=NOM_CHECK(1)) THEN
-      WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is not in alignment with MESH ',MAXVAL(NOM_CHECK)
+      WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(411): MESH ',NM,' is not in alignment with MESH ',MAXVAL(NOM_CHECK)
       STOP_STATUS = SETUP_STOP
       IERR = 1
       RETURN
@@ -3043,7 +3036,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
          IF (ABS( ((MM%Z(KKO_MAX)-MM%Z(KKO_MIN-1))-(M%Z(K)-M%Z(K-1))) / MM%DZ(KKO_MIN))>ALIGNMENT_TOLERANCE ) ALIGNED = .FALSE.
       ENDIF
       IF (.NOT.ALIGNED) THEN
-         WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',NOM
+         WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(411): MESH ',NM,' is out of alignment with MESH ',NOM
          STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
@@ -3061,7 +3054,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
             IF ( (M%DY(J)>1.01_EB*MM%DY(JJO_MIN)) .AND. (M%DX(I)<0.99_EB*MM%DX(IIO_MIN)) ) ALIGNED = .FALSE.
       END SELECT
       IF (.NOT.ALIGNED) THEN
-         WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is finer in one direction and coarser in the other than MESH ',NOM
+         WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(411): MESH ',NM,' is out of alignment with MESH ',NOM
          STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
@@ -3276,7 +3269,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
          SF%MASS_FLUX = -RHOA*(RSUM0/RSUM_F)*(TMPA/SF%TMP_FRONT)*SF%MASS_FRACTION*B1%U_NORMAL_0
          SF%SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
       ELSE
-         CALL SHUTDOWN('ERROR: SURF: '//TRIM(SF%ID)//' must specify velocity boundary condition for conversion',&
+         CALL SHUTDOWN('ERROR(412): SURF: '//TRIM(SF%ID)//' must specify velocity boundary condition for conversion',&
                         PROCESS_0_ONLY=.FALSE.)
          IERR = 1
          RETURN
@@ -3365,7 +3358,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
 
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE) THEN
       IF (M%ZC(K)<GROUND_LEVEL) THEN
-         CALL SHUTDOWN('ERROR: SURF '//TRIM(SF%ID)//' cannot be applied below GROUND_LEVEL',PROCESS_0_ONLY=.FALSE.)
+         CALL SHUTDOWN('ERROR(413): SURF '//TRIM(SF%ID)//' cannot be applied below GROUND_LEVEL.',PROCESS_0_ONLY=.FALSE.)
          IERR = 1
          RETURN
       ENDIF
@@ -3376,7 +3369,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
       SELECT CASE(ABS(IOR))
          CASE(1)
             IF (SF%RAMP(VELO_PROF_X)%ID/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_X assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
+               CALL SHUTDOWN('ERROR(414): RAMP_V_X assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -3384,7 +3377,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(2)
             IF (SF%RAMP(VELO_PROF_Y)%ID/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
+               CALL SHUTDOWN('ERROR(415): RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -3392,7 +3385,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(3)
             IF (SF%RAMP(VELO_PROF_Z)%ID/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
+               CALL SHUTDOWN('ERROR(416): RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -3774,7 +3767,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
          OM => MESHES(NOM)
       ELSEIF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. (SF%HT_DIM>1.OR.SF%VARIABLE_THICKNESS)) THEN 
          ! Do not apply HT3D to VARIABLE_THICKNESS exterior boundary
-         MESSAGE = 'ERROR: SURF '//TRIM(SURFACE(WC%SURF_INDEX)%ID)//' cannot be applied to an exterior boundary'
+         WRITE(MESSAGE,'(3A)') 'ERROR(417): SURF ',TRIM(SURFACE(WC%SURF_INDEX)%ID),' cannot be applied to an exterior boundary.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          RETURN
       ENDIF
@@ -3898,7 +3891,7 @@ IF (SF%LINING) THEN
    CALL ADD_MATERIAL(N_MATLS_NEW,SF_BACK%MATL_INDEX,MATL_INDEX_NEW)  ! Add new materials from the back surface lining
    TOTAL_THICKNESS = SUM(LAYER_THICKNESS(1:N_LAYERS))  ! Thickness of the solid made up of OBSTs
    IF (TOTAL_THICKNESS<LINING_THICKNESS+BACK_LINING_THICKNESS) THEN
-      MESSAGE = 'ERROR: The layer(s) of SURF '//TRIM(SF%ID)//' are thicker than the underlying obstruction.'
+      WRITE(MESSAGE,'(3A)') 'ERROR(418): SURF ',TRIM(SF%ID),' layers are thicker than the underlying obstruction.'
       CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
       RETURN
    ENDIF
@@ -4972,7 +4965,6 @@ INTEGER  :: I,J,K,II,JJ,KK,IW,IOR,LU_UVW,IERROR,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_UVW
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-CHARACTER(3) :: STR
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
@@ -4983,8 +4975,7 @@ LU_UVW = GET_FILE_NUMBER()
 OPEN(UNIT=LU_UVW,FILE=FN_UVW,FORM='FORMATTED',STATUS='OLD',IOSTAT=IERROR)
 
 IF (IERROR/=0) THEN
-   WRITE(STR,'(I0)') NM
-   MESSAGE = 'ERROR: Problem with MESH '//TRIM(ADJUSTL(STR))//'; UVWFILE '//TRIM(FN_UVW)//' does not exist.'
+   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR(419): MESH ',NM,', UVWFILE ',TRIM(FN_UVW),' does not exist.'
    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
    RETURN
 ENDIF
@@ -5067,7 +5058,6 @@ INTEGER  :: I,J,K,LU_TMP,IERROR,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_TMP
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-CHARACTER(3) :: STR
 
 CALL POINT_TO_MESH(NM)
 
@@ -5075,8 +5065,7 @@ LU_TMP = GET_FILE_NUMBER()
 OPEN(UNIT=LU_TMP,FILE=FN_TMP,FORM='FORMATTED',STATUS='OLD',IOSTAT=IERROR)
 
 IF (IERROR/=0) THEN
-   WRITE(STR,'(I0)') NM
-   MESSAGE = 'ERROR: Problem with MESH '//TRIM(ADJUSTL(STR))//'; TMPFILE '//TRIM(FN_TMP)//' does not exist.'
+   WRITE(MESSAGE,'(A,I0,3A)') 'ERROR(420): MESH ',NM,', TMPFILE ',TRIM(FN_TMP),' does not exist.'
    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
    RETURN
 ENDIF
@@ -5133,7 +5122,6 @@ REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_SPEC
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-CHARACTER(3) :: STR
 
 CALL POINT_TO_MESH(NM)
 
@@ -5141,8 +5129,7 @@ LU_SPEC = GET_FILE_NUMBER()
 OPEN(UNIT=LU_SPEC,FILE=FN_SPEC,FORM='FORMATTED',STATUS='OLD',IOSTAT=IERROR)
 
 IF (IERROR/=0) THEN
-   WRITE(STR,'(I0)') NM
-   MESSAGE = 'ERROR: Problem with MESH '//TRIM(ADJUSTL(STR))//'; SPECFILE '//TRIM(FN_SPEC)//' does not exist.'
+   WRITE(MESSAGE,'(A,I0,3A)') 'ERROR(421): MESH ',NM,', SPECFILE ',TRIM(FN_SPEC),' does not exist.'
    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
    RETURN
 ENDIF
