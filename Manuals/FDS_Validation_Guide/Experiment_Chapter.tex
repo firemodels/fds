@@ -1046,6 +1046,31 @@ The other cases are simulated at the start and end angles since the wall was hel
 Lechene et al.~\cite{Lechene} measured the attenuation of thermal radiation passing through a water spray using a heat flux gauge. The radiation was produced by a 30~cm by 35~cm heat panel whose emission was close to a black body at 500~$^\circ$C. The horizontal distance from the radiation panel to the spray nozzle was 1.5~m and to the measurement point 3~m. The heat flux gauge was positioned at the line passing through the center of the panel. Seven nozzles were arranged in a row, 10~cm apart. They were positioned 1.5~m high. The heat panel was translated vertically during the experiment, the distance between the panel upper edge and the nozzle row varying between 20~cm and 100~cm. The attenuation of radiation is defined as previously described for the BRE Spray experiments. The purpose of the simulations is to compare the measured and simulated attenuation of radiation at different heights. The water mist nozzle has been characterized by Lechene by measuring the spray angles and the water flow rate. The droplet size is set by using a PDPA measurement in a single position, 20~cm below the injection point.
 
 
+\section{LEMTA/UGent Pool Fires}
+\label{LEMTA_UGent_Pool_Fires_Description}
+
+Beji et al.~\cite{Beji:FSJ2024} conducted pool fire experiments using methanol and heptane in square pans measuring 5.5~cm, 8.0~cm, 10.5~cm, and 15.0~cm. The depth of the liquid in each experiment was approximately 4.6~cm, and thermocouples were positioned at 9 vertical locations near the pan center, ranging from 5~mm to 45~mm above the pan floor and spaced 5~mm apart.
+
+\subsubsection{Modeling Notes}
+
+Properties of the liquid fuels are listed in Table~\ref{LEMTA_UGent_Fuels}. The thermal conductivity has been increased by a factor of 12 for heptane and 4.5 for methanol to account for the fact that FDS does not model the convection of the liquid within the pan. Details are found in Ref.~\cite{Beji:FSJ2024}. Also note that the mass transfer coefficient is fixed and not calculated based on local conditions. For heptane, its value is 1.5~mm/s and for methanol, 10~mm/s.
+
+\begin{table}[!htb]
+\caption[Liquid properties used in the LEMTA/UGent Pool Fires simulations]{Liquid properties used in the LEMTA/UGent Pool Fires simulations~\cite{Sikanen:2016}. ``Eff.~Cond.'' is an effective value of the thermal conductivity that accounts for liquid convection.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
+\hline
+           & Liquid     & Eff.     & Spec.         & Heat of        & Heat of      & Boiling       & Soot   & CO     & Rad.     \\
+Fuel       & Density    & Cond.    & Heat          & Vap.           & Comb.        & Temp.         & Yield  & Yield  & Frac.    \\
+           & (kg/m$^3$) & (W/m/K)  & (kJ/kg/K)     & (kJ/kg)        & (kJ/kg)      & ($^\circ$C)   & (--)   & (--)   & (--)     \\ \hline \hline
+Heptane    & 675        & 1.68     & 2.24          & 317            & 43610        & 98.5          & 0.037  & 0.01   & 0.29     \\ \hline
+Methanol   & 796        & 0.90     & 2.48          & 1099           & 21060        & 64.8          & 0.001  & 0.001  & 0.16     \\ \hline
+\end{tabular}
+\end{center}
+\label{LEMTA_UGent_Fuels}
+\end{table}
+
+
 \section{LLNL Enclosure Experiments}
 \label{LLNL_Enclosure_Description}
 
