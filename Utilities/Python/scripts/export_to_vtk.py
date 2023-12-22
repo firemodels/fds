@@ -63,7 +63,7 @@ if __name__ == '__main__':
         if os.spath.isabs(cmdargs.outdir[0]):
             odir = cmdargs.outdir[0] + os.sep
         else:
-            odir = os.path.abspath(cmd.args.outdir[0]) + os.sep
+            odir = os.path.abspath(cmdargs.outdir[0]) + os.sep
     
     if len(cmdargs.chid) == 0:
         print("Warning, no chid was provided, assuming the namespace of the fds file.")
