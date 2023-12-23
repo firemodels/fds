@@ -8561,11 +8561,13 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
             IF (DV%DEPTH > TWO_EPSILON_EB) THEN
                DEPTH = DV%DEPTH
             ELSE
-               DEPTH = MAX(0._EB,SUM(ONE_D%LAYER_THICKNESS)+DV%DEPTH)
+               DEPTH = SUM(ONE_D%LAYER_THICKNESS) + DV%DEPTH
             ENDIF
             II2 = SUM(ONE_D%N_LAYER_CELLS)
             IF (DEPTH>SUM(ONE_D%LAYER_THICKNESS)) THEN
-               SOLID_PHASE_OUTPUT = TMPA-TMPM
+               SOLID_PHASE_OUTPUT = TMPA - TMPM
+            ELSEIF (DEPTH<0._EB) THEN
+               SOLID_PHASE_OUTPUT = B1%TMP_G - TMPM
             ELSE
                DO II2=II2,1,-1
                   IF (DEPTH<=ONE_D%X(II2)) II1 = II2
