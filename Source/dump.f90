@@ -19,6 +19,8 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
+USE PENF
+USE VTK_FORTRAN, ONLY : VTK_FILE
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
@@ -126,6 +128,14 @@ IF (T>=SL3D_CLOCK(SL3D_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
    DO WHILE(SL3D_COUNTER(NM)<SIZE(SL3D_CLOCK)-1)
       SL3D_COUNTER(NM) = SL3D_COUNTER(NM) + 1
       IF (SL3D_CLOCK(SL3D_COUNTER(NM))>=T) EXIT
+   ENDDO
+ENDIF
+
+IF (T>=VTK_CLOCK(VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
+   CALL DUMP_SLCF(T,DT,NM,3)
+   DO WHILE(VTK_COUNTER(NM)<SIZE(VTK_CLOCK)-1)
+      VTK_COUNTER(NM) = VTK_COUNTER(NM) + 1
+      IF (VTK_CLOCK(VTK_COUNTER(NM))>=T) EXIT
    ENDDO
 ENDIF
 
@@ -5762,7 +5772,7 @@ END SUBROUTINE GET_GASCUTFACE_SCALAR_SLICE
 !> \param T Current simulation time (s)
 !> \param DT Current time step size (s)
 !> \param NM Mesh number
-!> \param IFRMT Slice (IFRMT=0) or Plot3D (IFRMT=1) or 3D slice (IFRMT=2)
+!> \param IFRMT Slice (IFRMT=0) or Plot3D (IFRMT=1) or 3D slice (IFRMT=2) or VTK slice (IFRMT=3)
 
 SUBROUTINE DUMP_SLCF(T,DT,NM,IFRMT)
 
@@ -5780,7 +5790,7 @@ INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II1,II2,
 INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
-LOGICAL :: PLOT3D,SLCF3D
+LOGICAL :: PLOT3D,SLCF3D,VTK3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_INTERP2FACES
 REAL(FB) :: SLICE_MIN, SLICE_MAX, DSLICE
 INTEGER :: NX, NY, NZ
@@ -5788,15 +5798,19 @@ INTEGER :: IFACT, JFACT, KFACT
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
 REAL(FB) :: UVEL, VVEL, WVEL, VEL, PLOT3D_MIN, PLOT3D_MAX
 INTEGER :: IERROR
+TYPE(VTK_FILE)     :: A_VTK_FILE                             ! A VTK file.
+CHARACTER(80) :: VTK_FILE_NAME
+INTEGER(IB4)  :: VTK_ERROR=0_IB4                    !< IO Error status.
 
 ! Return if there are no slices to process and this is not a Plot3D dump
 
 DRY=.FALSE.
 
 SELECT CASE(IFRMT)
-   CASE(0) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE.
-   CASE(1) ; PLOT3D=.TRUE.  ; SLCF3D=.FALSE.
-   CASE(2) ; PLOT3D=.FALSE. ; SLCF3D=.TRUE.
+   CASE(0) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE. ; VTK3D=.FALSE.
+   CASE(1) ; PLOT3D=.TRUE.  ; SLCF3D=.FALSE. ; VTK3D=.FALSE.
+   CASE(2) ; PLOT3D=.FALSE. ; SLCF3D=.TRUE. ; VTK3D=.FALSE.
+   CASE(3) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE. ; VTK3D=.TRUE.
 END SELECT
 
 IF (MESHES(NM)%N_SLCF==0 .AND. .NOT.PLOT3D) RETURN
@@ -5836,10 +5850,12 @@ ENDDO
 
 ! If sprinkler diagnostic on, pre-compute various PARTICLE flux output
 
-IF (.NOT.PLOT3D) THEN
+IF (.NOT.PLOT3D .AND. .NOT.VTK3D)  THEN
    IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM)
-ELSE
+ELSEIF (.NOT.VTK3D) THEN
    IF (PL3D_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM)
+ELSE
+   IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM) ! TODO Not sure what we need for VTK here
 ENDIF
 
 ! Determine slice or Plot3D indicies
@@ -5885,6 +5901,25 @@ ELSE
 ENDIF
 
 NTSL = 0
+
+IF (VTK3D) THEN
+   SL => SLICE(IQ)
+   STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+   WRITE(VTK_FILE_NAME,  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',STIME,'.vtr'
+   IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
+      WRITE(*,*) "HELLO WORLD"
+      VTK_ERROR = A_VTK_FILE%initialize(format='ascii', filename=VTK_FILE_NAME, &
+                                    mesh_topology='RectilinearGrid', &
+                                    nx1=I1, nx2=I2, ny1=J1, ny2=J2, nz1=K1, nz2=K2)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(action='open')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(x=0._FB, data_name='TIME')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(x=1_IB16, data_name='CYCLE')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(action='close')
+      ! write one piece
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_piece(nx1=I1, nx2=I2, ny1=J1, ny2=J2, nz1=K1, nz2=K2) ! Piece Extent
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_geo(x=x, y=y, z=z) ! Piece coordinates
+   ENDIF
+ENDIF
 
 QUANTITY_LOOP: DO IQ=1,NQT
 
@@ -6035,7 +6070,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    ! Dump out the slice file to a .sf file
 
-   IF (.NOT.PLOT3D) THEN
+   IF (.NOT.PLOT3D .and. .NOT.VTK3D) THEN
       SL => SLICE(IQ)
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
@@ -6188,6 +6223,42 @@ QUANTITY_LOOP: DO IQ=1,NQT
          CLOSE(LU_SLCF(IQ,NM))
       ENDIF
    ENDIF
+
+
+
+   ! Dump out the slice file to a .vtk file
+
+   IF (VTK3D) THEN
+      SL => SLICE(IQ)
+      IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
+         IF (NX*NY*NZ>0) THEN
+            ALLOCATE(QQ_PACK(NX*NY*NZ))
+
+            DO K = K1, K2
+               KFACT = (K-K1)
+               DO J = J1, J2
+                  JFACT = (J-J1)*NZ
+                  DO I = I1, I2
+                     IFACT = (I - I1)*NY*NZ
+                     QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+                  ENDDO
+               ENDDO
+            ENDDO
+            ! write one quantity
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='cell', ACTION='open')
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(DATA_NAME='cell_value', X=QQ_PACK)
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='cell', ACTION='close')
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
+            DEALLOCATE(QQ_PACK)
+         ENDIF
+      ENDIF
+   ENDIF
+
+IF (VTK3D) THEN
+   ! finish after writing all pieces
+   WRITE(*,*) "HELLO WORLD 2"
+   VTK_ERROR = A_VTK_FILE%FINALIZE()
+ENDIF
 
 ENDDO QUANTITY_LOOP
 
