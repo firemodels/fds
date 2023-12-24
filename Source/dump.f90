@@ -5908,16 +5908,16 @@ IF (VTK3D) THEN
    WRITE(VTK_FILE_NAME,  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',STIME,'.vtr'
    IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
       WRITE(*,*) "HELLO WORLD"
-      VTK_ERROR = A_VTK_FILE%initialize(format='ascii', filename=VTK_FILE_NAME, &
-                                    mesh_topology='RectilinearGrid', &
-                                    nx1=I1, nx2=I2, ny1=J1, ny2=J2, nz1=K1, nz2=K2)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(action='open')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(x=0._FB, data_name='TIME')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(x=1_IB16, data_name='CYCLE')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_fielddata(action='close')
+      VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=VTK_FILE_NAME, &
+                                    MESH_TOPOLOGY='RectilinearGrid', &
+                                    NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(ACTION='open')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(X=0._FB, DATA_NAME='TIME')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(X=1_IB16, DATA_NAME='CYCLE')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(ACTION='close')
       ! write one piece
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_piece(nx1=I1, nx2=I2, ny1=J1, ny2=J2, nz1=K1, nz2=K2) ! Piece Extent
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%write_geo(x=x, y=y, z=z) ! Piece coordinates
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2) ! Piece Extent
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(X=X, Y=Y, Z=Z) ! Piece coordinates
    ENDIF
 ENDIF
 
