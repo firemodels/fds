@@ -336,6 +336,7 @@ ALLOCATE(FN_XYZ(NMESHES))
 ALLOCATE(LU_XYZ(NMESHES))
 ALLOCATE(FN_PL3D(2*NMESHES))
 ALLOCATE(LU_PL3D(2*NMESHES))
+ALLOCATE(FN_VTK(NMESHES))
 
 ALLOCATE(FN_ISOF(N_ISOF,NMESHES))
 ALLOCATE(LU_ISOF(N_ISOF,NMESHES))
@@ -5799,8 +5800,8 @@ REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
 REAL(FB) :: UVEL, VVEL, WVEL, VEL, PLOT3D_MIN, PLOT3D_MAX
 INTEGER :: IERROR
 TYPE(VTK_FILE)     :: A_VTK_FILE                             ! A VTK file.
-CHARACTER(80) :: VTK_FILE_NAME
 INTEGER(IB4)  :: VTK_ERROR=0_IB4                    !< IO Error status.
+LOGICAL :: VTK_INITIALIZED
 
 ! Return if there are no slices to process and this is not a Plot3D dump
 
@@ -5810,7 +5811,7 @@ SELECT CASE(IFRMT)
    CASE(0) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE. ; VTK3D=.FALSE.
    CASE(1) ; PLOT3D=.TRUE.  ; SLCF3D=.FALSE. ; VTK3D=.FALSE.
    CASE(2) ; PLOT3D=.FALSE. ; SLCF3D=.TRUE. ; VTK3D=.FALSE.
-   CASE(3) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE. ; VTK3D=.TRUE.
+   CASE(3) ; PLOT3D=.FALSE. ; SLCF3D=.TRUE. ; VTK3D=.TRUE.
 END SELECT
 
 IF (MESHES(NM)%N_SLCF==0 .AND. .NOT.PLOT3D) RETURN
@@ -5901,25 +5902,7 @@ ELSE
 ENDIF
 
 NTSL = 0
-
-IF (VTK3D) THEN
-   SL => SLICE(IQ)
-   STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
-   WRITE(VTK_FILE_NAME,  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',STIME,'.vtr'
-   IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-      WRITE(*,*) "HELLO WORLD"
-      VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=VTK_FILE_NAME, &
-                                    MESH_TOPOLOGY='RectilinearGrid', &
-                                    NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(ACTION='open')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(X=0._FB, DATA_NAME='TIME')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(X=1_IB16, DATA_NAME='CYCLE')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_FIELDDATA(ACTION='close')
-      ! write one piece
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2) ! Piece Extent
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(X=X, Y=Y, Z=Z) ! Piece coordinates
-   ENDIF
-ENDIF
+VTK_INITIALIZED=.FALSE.
 
 QUANTITY_LOOP: DO IQ=1,NQT
 
@@ -5962,6 +5945,28 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IF(.NOT.CC_CELL_CENTERED .AND. TRIM(SL%SLICETYPE)/='STRUCTURED') CC_INTERP2FACES = .TRUE.
       IF ((I2-I1>0 .AND. J2-J1>0 .AND. K2-K1>0)  .AND. .NOT.SLCF3D) CYCLE QUANTITY_LOOP
       IF ((I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) .AND.      SLCF3D) CYCLE QUANTITY_LOOP
+   ENDIF
+
+   IF (VTK3D .AND. .NOT.VTK_INITIALIZED) THEN
+      SL => SLICE(IQ)
+      STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+      TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+      ITM  = INT(TT)
+      ITM1 = NINT(ABS(TT-ITM)*100)
+      IF (ITM1==100) THEN
+         ITM = ITM+1
+         ITM1 = 0
+      ENDIF
+      IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
+         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_VTK(NM), &
+                                       MESH_TOPOLOGY='RectilinearGrid', is_volatile=.FALSE., &
+                                       NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2)
+         ! write one piece
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2) ! Piece Extent
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(X=MESHES(NM)%XPLT, Y=MESHES(NM)%YPLT, Z=MESHES(NM)%ZPLT) ! Piece coordinates
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='open')
+      ENDIF
+      VTK_INITIALIZED=.TRUE.
    ENDIF
 
    ! Determine what cells need to be evaluated to form cell-corner averages
@@ -6230,25 +6235,30 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    IF (VTK3D) THEN
       SL => SLICE(IQ)
+      I1=SL%I1
+      I2=SL%I2
+      J1=SL%J1
+      J2=SL%J2
+      K1=SL%K1
+      K2=SL%K2
+      NX = I2 + 1 - I1
+      NY = J2 + 1 - J1
+      NZ = K2 + 1 - K1
+      WRITE(*,*) "STARTING TO PACK", SL%SLICETYPE, NX, NY, NZ, I1, I2, J1, J2, K1, K2
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          IF (NX*NY*NZ>0) THEN
             ALLOCATE(QQ_PACK(NX*NY*NZ))
-
-            DO K = K1, K2
-               KFACT = (K-K1)
+            DO I = I1, I2
+               IFACT = (I-I1)
                DO J = J1, J2
-                  JFACT = (J-J1)*NZ
-                  DO I = I1, I2
-                     IFACT = (I - I1)*NY*NZ
+                  JFACT = (J-J1)*NX
+                  DO K = K1, K2
+                     KFACT = (K - K1)*NY*NX
                      QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
                   ENDDO
                ENDDO
             ENDDO
-            ! write one quantity
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='cell', ACTION='open')
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(DATA_NAME='cell_value', X=QQ_PACK)
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='cell', ACTION='close')
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(DATA_NAME=SL%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
             DEALLOCATE(QQ_PACK)
          ENDIF
       ENDIF
@@ -6256,7 +6266,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
 IF (VTK3D) THEN
    ! finish after writing all pieces
-   WRITE(*,*) "HELLO WORLD 2"
+   VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='close')
+   VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
    VTK_ERROR = A_VTK_FILE%FINALIZE()
 ENDIF
 
