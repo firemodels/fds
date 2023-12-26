@@ -6247,8 +6247,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       NZ = K2 + 1 - K1
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          IF (NX*NY*NZ>0) THEN
-            ALLOCATE(QQ_PACK(NX*NY*NZ)
-            
+            ALLOCATE(QQ_PACK(NX*NY*NZ))
             DO I = I1, I2
                IFACT = (I-I1)
                DO J = J1, J2
