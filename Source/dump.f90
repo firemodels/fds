@@ -5957,6 +5957,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ITM = ITM+1
          ITM1 = 0
       ENDIF
+      WRITE(FN_VTK(NM),'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtr'
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_VTK(NM), &
                                        MESH_TOPOLOGY='RectilinearGrid', is_volatile=.FALSE., &
@@ -6244,10 +6245,10 @@ QUANTITY_LOOP: DO IQ=1,NQT
       NX = I2 + 1 - I1
       NY = J2 + 1 - J1
       NZ = K2 + 1 - K1
-      WRITE(*,*) "STARTING TO PACK", SL%SLICETYPE, NX, NY, NZ, I1, I2, J1, J2, K1, K2
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          IF (NX*NY*NZ>0) THEN
-            ALLOCATE(QQ_PACK(NX*NY*NZ))
+            ALLOCATE(QQ_PACK(NX*NY*NZ)
+            
             DO I = I1, I2
                IFACT = (I-I1)
                DO J = J1, J2
@@ -6258,6 +6259,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
                   ENDDO
                ENDDO
             ENDDO
+            
+            ! write one quantity
             VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(DATA_NAME=SL%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
             DEALLOCATE(QQ_PACK)
          ENDIF
