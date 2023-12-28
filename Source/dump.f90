@@ -5963,7 +5963,11 @@ QUANTITY_LOOP: DO IQ=1,NQT
       ENDIF
       WRITE(FN_VTK(NM),'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtu'
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='BINARY', FILENAME=FN_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid') ! do not change capitalization on mesh topology
+         IF (VTK_BINARY) THEN
+            VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='BINARY', FILENAME=FN_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+         ELSE
+            VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ASCII', FILENAME=FN_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+         ENDIF ! do not change capitalization on mesh topology
          
          I1=SL%I1
          I2=SL%I2
