@@ -19,8 +19,10 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
+#ifdef WITH_VTK
 USE PENF
 USE VTK_FORTRAN, ONLY : VTK_FILE
+#endif /* WITH_VTK */
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
@@ -5794,9 +5796,11 @@ REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D,VTK3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_INTERP2FACES
 REAL(FB) :: SLICE_MIN, SLICE_MAX, DSLICE
-INTEGER :: NX, NY, NZ
+INTEGER :: NX, NY, NZ, NC, NP
 INTEGER :: IFACT, JFACT, KFACT
-REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK, X_PTS, Y_PTS, Z_PTS
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+INTEGER(IB4), ALLOCATABLE, DIMENSION(:) :: CELL_TYPE
 REAL(FB) :: UVEL, VVEL, WVEL, VEL, PLOT3D_MIN, PLOT3D_MAX
 INTEGER :: IERROR
 TYPE(VTK_FILE)     :: A_VTK_FILE                             ! A VTK file.
@@ -5957,15 +5961,77 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ITM = ITM+1
          ITM1 = 0
       ENDIF
-      WRITE(FN_VTK(NM),'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtr'
+      WRITE(FN_VTK(NM),'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtu'
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_VTK(NM), &
-                                       MESH_TOPOLOGY='RectilinearGrid', is_volatile=.FALSE., &
-                                       NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2)
-         ! write one piece
-         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NX1=I1, NX2=I2, NY1=J1, NY2=J2, NZ1=K1, NZ2=K2) ! Piece Extent
-         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(X=MESHES(NM)%XPLT, Y=MESHES(NM)%YPLT, Z=MESHES(NM)%ZPLT) ! Piece coordinates
-         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='open')
+         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='BINARY', FILENAME=FN_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid') ! do not change capitalization on mesh topology
+         
+         I1=SL%I1
+         I2=SL%I2
+         J1=SL%J1
+         J2=SL%J2
+         K1=SL%K1
+         K2=SL%K2
+         NX = I2 + 1 - I1
+         NY = J2 + 1 - J1
+         NZ = K2 + 1 - K1
+         NP = NX*NY*NZ
+         NC = (NX-1)*(NY-1)*(NZ-1)
+         
+         ! Fill point data
+         ALLOCATE(X_PTS(NP))
+         ALLOCATE(Y_PTS(NP))
+         ALLOCATE(Z_PTS(NP))
+         IFACT = 1
+         DO K = 0, NZ-1
+            DO J = 0, NY-1
+               DO I = 0, NX-1
+                  X_PTS(IFACT)=MESHES(NM)%X(I)
+                  Y_PTS(IFACT)=MESHES(NM)%Y(J)
+                  Z_PTS(IFACT)=MESHES(NM)%Z(K)
+                  IFACT = IFACT + 1
+               ENDDO
+            ENDDO
+         ENDDO
+         
+         ! Fill cell data
+         ALLOCATE(CONNECT(NC*8))
+         DO I = 1, NX-1
+            IFACT = (I-1)
+            DO J = 1, NY-1
+               JFACT = (J-1)*(NX-1)
+               DO K = 1, NZ-1
+                  KFACT = (K - 1)*(NY-1)*(NX-1)
+                  CONNECT((IFACT+JFACT+KFACT)*8+1) = (K-1)*(NY*NX) + (J-1)*NX + I-1
+                  CONNECT((IFACT+JFACT+KFACT)*8+2) = (K-1)*(NY*NX) + (J-1)*NX + I
+                  CONNECT((IFACT+JFACT+KFACT)*8+3) = (K-1)*(NY*NX) + (J)*NX + I-1
+                  CONNECT((IFACT+JFACT+KFACT)*8+4) = (K-1)*(NY*NX) + (J)*NX + I
+                  CONNECT((IFACT+JFACT+KFACT)*8+5) = (K)*(NY*NX) + (J-1)*NX + I-1
+                  CONNECT((IFACT+JFACT+KFACT)*8+6) = (K)*(NY*NX) + (J-1)*NX + I
+                  CONNECT((IFACT+JFACT+KFACT)*8+7) = (K)*(NY*NX) + (J)*NX + I-1
+                  CONNECT((IFACT+JFACT+KFACT)*8+8) = (K)*(NY*NX) + (J)*NX + I
+               ENDDO
+            ENDDO
+         ENDDO
+         
+         ALLOCATE(OFFSETS(NC))
+         ALLOCATE(CELL_TYPE(NC))
+         
+         DO I=1,NC
+            OFFSETS(I) = (I)*8_IB4
+            CELL_TYPE(I) = 11_IB4
+         ENDDO
+         
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NP, NC=NC)
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NP, NC=NC, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NC, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, CELL_TYPE=CELL_TYPE)
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='OPEN')
+         
+         DEALLOCATE(OFFSETS)
+         DEALLOCATE(CELL_TYPE)
+         DEALLOCATE(CONNECT)
+         DEALLOCATE(X_PTS)
+         DEALLOCATE(Y_PTS)
+         DEALLOCATE(Z_PTS)
       ENDIF
       VTK_INITIALIZED=.TRUE.
    ENDIF
@@ -6268,7 +6334,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
 IF (VTK3D) THEN
    ! finish after writing all pieces
-   VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='close')
+   VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_DATAARRAY(LOCATION='NODE', ACTION='CLOSE')
    VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
    VTK_ERROR = A_VTK_FILE%FINALIZE()
 ENDIF
