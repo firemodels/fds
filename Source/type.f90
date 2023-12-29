@@ -270,6 +270,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: QDOTPP_INT          !< Integrated HRRPUA for the S_Pyro method (kJ/m2)
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
@@ -300,12 +301,11 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: Q_DOT_O2_PP=0._EB     !< Heat release rate per unit area (W/m2) due to oxygen consumption
    REAL(EB) :: Q_CONDENSE=0._EB      !< Heat release rate per unit area (W/m2) due to gas condensation
    REAL(EB) :: BURN_DURATION=0._EB   !< Duration of a specified fire (s)
-   REAL(EB) :: T_SCALE=0._EB         !< Scaled time for a surface with REFERENCE_HEAT_FLUX (s)
-   REAL(EB) :: Q_SCALE=0._EB         !< Scaled integrated heat release for a surface with REFERENCE_HEAT_FLUX
+   REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident flux for the S_Pyro method (kJ)
+   REAL(EB) :: Q_IN_SMOOTH_INT=0._EB !< Integrated smoothed incident flux for the S_Pyro method (kJ)
    REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
-   REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident heat flux for scaling (W/m2)
    REAL(EB) :: Q_LEAK=0._EB          !< Heat production of leaking gas (W/m3)
    REAL(EB) :: VEL_ERR_NEW=0._EB     !< Velocity mismatch at mesh or solid boundary (m/s)
 
@@ -831,11 +831,10 @@ TYPE SURFACE_TYPE
    REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
    REAL(EB) :: DELTA_TMP_MAX=10._EB                    !< Maximum wall node temperature change before reducining wall timestep (K)
    REAL(EB) :: BURN_DURATION=1.E6_EB
-   REAL(EB) :: REFERENCE_HEAT_FLUX=-1._EB              !< Reference flux for the flux scaling pyrolysis model (kW/m2)
    REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB !< Averaging time interval for computed flux for flux scaling model (s)
    REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB         !< Minimum computed flux for input into scaling model (kW/m2)
    REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)   !< Maximum computed flux for input into scaling model (kW/m2)
-   REAL(EB) :: REFERENCE_CONE_THICKNESS=-1._EB         !< Reference thickness used in scaling pyrolysis model (m)
+   REAL(EB) :: SPYRO_TH_FACTOR = 1._EB                 !< Thickness scaling factor used in scaling pyrolysis model (m/m)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
    REAL(EB) :: SWELL_RATIO=1._EB
@@ -847,10 +846,13 @@ TYPE SURFACE_TYPE
    REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
    REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
    REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
+   REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro
+   REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: REFERENCE_HEAT_FLUX !< Reference flux for the flux scaling pyrolysis model (kW/m2)
    TYPE(RAMP_ID_TYPE),  ALLOCATABLE, DIMENSION(:) :: RAMP
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB) :: TRANSPARENCY
@@ -863,13 +865,17 @@ TYPE SURFACE_TYPE
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0,N_CONE_CURVES=0
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX    !< Index for Spyro integrated TIME_HEAT arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX          !< Index for Spyro reference heat flux arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX           !< Index for Spyro integrated TIME_HEAT to time arrays
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
    INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL
    INTEGER :: N_LAYER_CELLS_MAX
+   INTEGER :: N_QDOTPP_REF=0                           !< Number of reference heat fluxes provided for S_Pyro method
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: INTERNAL_HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: REFERENCE_CONE_EXPOSURE, REFERENCE_THICKNESS
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: REFERENCE_THICKNESS
    REAL(EB) :: CELL_SIZE_FACTOR
    REAL(EB) :: STRETCH_FACTOR
    REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,&
@@ -895,6 +901,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
    LOGICAL :: EMISSIVITY_SPECIFIED=.FALSE.           !< Indicates if user has specified a surface emissivity
    LOGICAL :: EMISSIVITY_BACK_SPECIFIED=.FALSE.      !< Indicates if user has specified a back surface emissivity
+   LOGICAL :: INERT_Q_REF                            !< Treat REFERENCE_HEAT_FLUX as an inert atmosphere test
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
    CHARACTER(LABEL_LENGTH) :: PART_ID
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
