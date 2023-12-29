@@ -65,6 +65,13 @@ ompi_intel_osx: obj = test_mpi
 ompi_intel_osx: $(obj_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
 
+ompi_gnu_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
+ompi_gnu_osx: LFLAGS = -static-intel -ld_classic
+ompi_gnu_osx: FCOMPL = mpifort
+ompi_gnu_osx: obj = test_mpi
+ompi_gnu_osx: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
 #*** Clean Target to remove Object and Module files ***
 
 .PHONY : clean
