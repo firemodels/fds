@@ -22,6 +22,9 @@ USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET
 USE VTK, ONLY : INITIALIZE_VTK, WRITE_VTK_SLICE_GEOMETRY, WRITE_VTK_SLICE_CELLS, WRITE_VTK_SLICE_DATA,&
                 FINALIZE_VTK
 
+USE F_MKDIR, ONLY : C_MKDIR
+USE ISO_C_BINDING
+
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
@@ -5963,7 +5966,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ITM = ITM+1
          ITM1 = 0
       ENDIF
-      WRITE(FN_VTK(NM),'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtu'
+      WRITE(FN_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "./results/",TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtu'
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          
          I1=SL%I1
@@ -6022,6 +6025,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
             CELL_TYPE(I) = 11_IB4
          ENDDO
          
+         CALL C_MKDIR("./results"//char(0))
          CALL INITIALIZE_VTK(NM,'UnstructuredGrid')
          CALL WRITE_VTK_SLICE_GEOMETRY(NM, NP, NC, X_PTS, Y_PTS, Z_PTS, 'ascii')
          CALL WRITE_VTK_SLICE_CELLS(NM, CONNECT, OFFSETS, CELL_TYPE, 'ascii')
