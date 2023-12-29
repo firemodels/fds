@@ -1,0 +1,183 @@
+!> \brief Routines for handling vtk output
+
+MODULE VTK
+
+USE MESH_VARIABLES
+USE GLOBAL_CONSTANTS
+
+IMPLICIT NONE (TYPE,EXTERNAL)
+PRIVATE
+
+PUBLIC INITIALIZE_VTK,WRITE_VTK_SLICE_GEOMETRY,WRITE_VTK_SLICE_CELLS,WRITE_VTK_SLICE_DATA,FINALIZE_VTK
+
+CONTAINS
+
+SUBROUTINE INITIALIZE_VTK(NM,MESH_TOPOLOGY)
+
+INTEGER, INTENT(IN) :: NM
+CHARACTER(LEN=*), INTENT(IN) :: MESH_TOPOLOGY
+
+OPEN(LU_VTK(NM),FILE=FN_VTK(NM),FORM='FORMATTED')
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '<?xml version="1.0"?>'
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') '<VTKFile type="',TRIM(MESH_TOPOLOGY),'" version="1.0" byte_order="LittleEndian">'
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') '  <',TRIM(MESH_TOPOLOGY),'>'
+CLOSE(LU_VTK(NM))
+END SUBROUTINE INITIALIZE_VTK
+
+SUBROUTINE WRITE_VTK_SLICE_GEOMETRY(NM, NP, NC, X_PTS, Y_PTS, Z_PTS, FORMAT)
+
+INTEGER, INTENT(IN) :: NM, NC, NP
+REAL(FB), DIMENSION(:), INTENT(IN) :: X_PTS, Y_PTS, Z_PTS
+CHARACTER(LEN=*), INTENT(IN) :: FORMAT
+INTEGER :: I
+
+OPEN(LU_VTK(NM),FILE=FN_VTK(NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+WRITE(LU_VTK(NM),'(A,I0,A,I0,A)',ADVANCE='YES') '    <Piece NumberOfPoints="',NP,'" NumberOfCells="',NC,'">'
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      <Points>'
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') &
+   '        <DataArray type="Float32" NumberOfComponents="3" Name="Points" format="',FORMAT,'">'
+
+WRITE(LU_VTK(NM),'(A)',ADVANCE='NO') '          '
+IF (TRIM(ADJUSTL(FORMAT)) .eq. 'ascii') THEN
+   DO I=1,NP
+      WRITE(LU_VTK(NM),'(E15.8,A,E15.8,A,E15.8,A)',ADVANCE='NO') X_PTS(I),' ',Y_PTS(I),' ',Z_PTS(I),' '
+   ENDDO
+ENDIF
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') ' '
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '        </DataArray>'
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      </Points>'
+CLOSE(LU_VTK(NM))
+
+END SUBROUTINE WRITE_VTK_SLICE_GEOMETRY
+
+SUBROUTINE WRITE_VTK_SLICE_CELLS(NM, CONNECT, OFFSETS, CELL_TYPE, FORMAT)
+
+INTEGER, INTENT(IN) :: NM
+INTEGER, DIMENSION(:), INTENT(IN) :: CONNECT, OFFSETS
+INTEGER(IB4), DIMENSION(:), INTENT(IN) :: CELL_TYPE
+CHARACTER(LEN=*), INTENT(IN) :: FORMAT
+INTEGER :: I
+
+! Open cells section
+OPEN(LU_VTK(NM),FILE=FN_VTK(NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      <Cells>'
+
+! Write connectivity
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') &
+   '        <DataArray type="Int32" NumberOfComponents="1" Name="connectivity" format="',FORMAT,'">'
+
+WRITE(LU_VTK(NM),'(A)',ADVANCE='NO') '          '
+IF (TRIM(ADJUSTL(FORMAT)) .eq. 'ascii') THEN
+   DO I=1,SIZE(CONNECT)
+      WRITE(LU_VTK(NM),'(I0,A)',ADVANCE='NO') CONNECT(I), ' '
+   ENDDO
+ENDIF
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') ' '
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '        </DataArray>'
+
+! Write offsets
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') &
+   '        <DataArray type="Int32" NumberOfComponents="1" Name="offsets" format="',FORMAT,'">'
+
+WRITE(LU_VTK(NM),'(A)',ADVANCE='NO') '          '
+IF (TRIM(ADJUSTL(FORMAT)) .eq. 'ascii') THEN
+   DO I=1,SIZE(OFFSETS)
+      WRITE(LU_VTK(NM),'(I0,A)',ADVANCE='NO') OFFSETS(I), ' '
+   ENDDO
+ENDIF
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') ' '
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '        </DataArray>'
+
+! Write cell types
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') &
+   '        <DataArray type="Int8" NumberOfComponents="1" Name="types" format="',FORMAT,'">'
+
+WRITE(LU_VTK(NM),'(A)',ADVANCE='NO') '          '
+IF (TRIM(ADJUSTL(FORMAT)) .eq. 'ascii') THEN
+   DO I=1,SIZE(CELL_TYPE)
+      WRITE(LU_VTK(NM),'(I0,A)',ADVANCE='NO') CELL_TYPE(I), ' '
+   ENDDO
+ENDIF
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') ' '
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '        </DataArray>'
+
+! Close cell section
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      </Cells>'
+
+! Open point data section
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      <PointData>'
+
+CLOSE(LU_VTK(NM))
+
+END SUBROUTINE WRITE_VTK_SLICE_CELLS
+
+SUBROUTINE WRITE_VTK_SLICE_DATA(NM, DATA, DATA_NAME, FORMAT)
+
+INTEGER, INTENT(IN) :: NM
+CHARACTER(LEN=*), INTENT(IN) :: FORMAT, DATA_NAME
+CHARACTER(LEN=:), ALLOCATABLE :: CODE
+REAL(FB), DIMENSION(:) :: DATA
+INTEGER :: I
+
+! Open data section
+OPEN(LU_VTK(NM),FILE=FN_VTK(NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+
+! Write data
+WRITE(LU_VTK(NM),'(A,A,A,A,A)',ADVANCE='YES') &
+   '        <DataArray type="Float32" NumberOfComponents="1" Name="',&
+  TRIM(DATA_NAME),'" format="',FORMAT,'">'
+
+WRITE(LU_VTK(NM),'(A)',ADVANCE='NO') '          '
+IF (TRIM(ADJUSTL(FORMAT)) .EQ. 'ascii') THEN
+   DO I=1,SIZE(DATA)
+      WRITE(LU_VTK(NM),'(E15.8,A)',ADVANCE='NO') DATA(I), ' '
+   ENDDO
+ELSEIF (TRIM(ADJUSTL(FORMAT)) .EQ. 'binary') THEN
+   !CODE=ENCODE_ASCII_DATAARRAY1_RANK1_FB(DATA)
+   !WRITE(LU_VTK(NM)) CODE
+ENDIF
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') ' '
+
+! Close data section
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '        </DataArray>'
+CLOSE(LU_VTK(NM))
+
+END SUBROUTINE WRITE_VTK_SLICE_DATA
+
+SUBROUTINE FINALIZE_VTK(NM,MESH_TOPOLOGY)
+
+INTEGER, INTENT(IN) :: NM
+CHARACTER(LEN=*), INTENT(IN) :: MESH_TOPOLOGY
+
+! Close VTK file
+OPEN(LU_VTK(NM),FILE=FN_VTK(NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '      </PointData>'
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '    </Piece>'
+WRITE(LU_VTK(NM),'(A,A,A)',ADVANCE='YES') '  </',TRIM(MESH_TOPOLOGY),'>'
+WRITE(LU_VTK(NM),'(A)',ADVANCE='YES') '</VTKFile>'
+
+CLOSE(LU_VTK(NM))
+END SUBROUTINE FINALIZE_VTK
+
+END MODULE VTK
+
+!FUNCTION ENCODE_ASCII_DATAARRAY1_RANK1_FB(X) RESULT(CODE)
+!!< Encode (Base64) a dataarray with 1 components of rank 1 (FB).
+!REAL(FB), INTENT(IN)          :: X(1:) !< Data variable.
+!CHARACTER(len=:), ALLOCATABLE :: CODE  !< Encoded base64 dataarray.
+!INTEGER(IB16)                  :: N     !< Counter.
+!INTEGER(IB16)                  :: L     !< Length
+!INTEGER(IB16)                  :: SP    !< String pointer
+!INTEGER(IB16)                  :: SIZE_N!< Dimension size
+!
+!SIZE_N = SIZE(X,DIM=1)
+!L = DI2P+1
+!SP = 0
+!CODE = REPEAT(' ',L*SIZE_N)
+!DO N = 1,SIZE_N
+!    CODE(SP+1:SP+L) = STR(N=X(N))
+!    SP = SP + L
+!ENDDO
+!ENDFUNCTION ENCODE_ASCII_DATAARRAY1_RANK1_FB
+!
+!END MODULE VTK
