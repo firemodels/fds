@@ -454,19 +454,6 @@ SELECT CASE(IPS)
       !$OMP END DO
 END SELECT
 
-! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
-
-IF (TUNNEL_PRECONDITIONER) THEN
-   !$OMP MASTER
-   DO I=1,IBAR
-      HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
-   ENDDO
-   BXS = BXS + BXS_BAR  ! b = b' + b_bar
-   BXF = BXF + BXF_BAR  ! b = b' + b_bar
-   !$OMP END MASTER
-   !$OMP BARRIER
-ENDIF
-
 ! Apply boundary conditions to H
 
 !$OMP DO
@@ -530,10 +517,9 @@ SUBROUTINE TUNNEL_POISSON_SOLVER
 USE MPI_F08
 USE GLOBAL_CONSTANTS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
-REAL(EB) :: RR,DXO
+REAL(EB) :: RR,BXS_BAR,BXF_BAR,BXS_BAR_LEFT,BXF_BAR_RIGHT
 INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
-REAL(EB), POINTER, DIMENSION(:) :: RDXNP
 TYPE (MESH_TYPE), POINTER :: M
 LOGICAL :: SINGULAR_CASE
 
@@ -545,10 +531,9 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M => MESHES(NM)
 
-   RDXNP(0:M%IBAR) => M%WORK2(0:M%IBAR,0,0)
-   RDXNP(0:M%IBAR) = M%RDXN(0:M%IBAR)
-   IF (NM>1)       RDXNP(0)      = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
-   IF (NM<NMESHES) RDXNP(M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
+   TP_RDXN(I_OFFSET(NM):I_OFFSET(NM)+M%IBAR) = M%RDXN(0:M%IBAR)
+   IF (NM>1)       TP_RDXN(I_OFFSET(NM))        = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
+   IF (NM<NMESHES) TP_RDXN(I_OFFSET(NM)+M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
 
    DO I=1,M%IBAR
       II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
@@ -564,9 +549,9 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO
       ENDDO
       TP_CC(II) = TP_CC(II)/((M%YF-M%YS)*(M%ZF-M%ZS))  ! RHS linear system of equations
-      TP_DD(II) = -M%RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
-      TP_AA(II) =  M%RDX(I)*RDXNP(I)    ! Upper band of matrix
-      TP_BB(II) =  M%RDX(I)*RDXNP(I-1)  ! Lower band of matrix
+      TP_DD(II) = -M%RDX(I)*(TP_RDXN(II)+TP_RDXN(II-1))  ! Diagonal of tri-diagonal matrix
+      TP_AA(II) =  M%RDX(I)*TP_RDXN(II)    ! Upper band of matrix
+      TP_BB(II) =  M%RDX(I)*TP_RDXN(II-1)  ! Lower band of matrix
       SELECT CASE(M%IPS)
          CASE DEFAULT ; M%PRHS(I,1:M%JBAR,1:M%KBAR) = M%PRHS(I,1:M%JBAR,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson eq
          CASE(2)      ; M%PRHS(1:M%JBAR,I,1:M%KBAR) = M%PRHS(1:M%JBAR,I,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson eq
@@ -577,38 +562,40 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! Subtract average BCs (BXS_BAR, BXF_BAR) from the 3-D BCs (BXS and BXF) for all meshes, including tunnel ends.
 
-   M%BXS_BAR = 0._EB
-   M%BXF_BAR = 0._EB
+   BXS_BAR = 0._EB
+   BXF_BAR = 0._EB
    DO K=1,M%KBAR
      DO J=1,M%JBAR
-         M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
-         M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
+         BXS_BAR = BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+         BXF_BAR = BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
       ENDDO
    ENDDO
-   M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
-   M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
+   BXS_BAR = BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
+   BXF_BAR = BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
 
-   M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
-   M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
+   M%BXS = M%BXS - BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
+   M%BXF = M%BXF - BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
 
    ! Apply boundary conditions at end of tunnel to the matrix components
 
    IF (NM==1) THEN
+      BXS_BAR_LEFT = BXS_BAR
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-         TP_CC(1) = TP_CC(1) + M%DXI*M%BXS_BAR*TP_BB(1)
+         TP_CC(1) = TP_CC(1) + M%DXI*BXS_BAR_LEFT*TP_BB(1)
          TP_DD(1) = TP_DD(1) + TP_BB(1)
       ELSE  ! Dirichlet BC
-         TP_CC(1) = TP_CC(1) - 2._EB*M%BXS_BAR*TP_BB(1)
+         TP_CC(1) = TP_CC(1) - 2._EB*BXS_BAR_LEFT*TP_BB(1)
          TP_DD(1) = TP_DD(1) - TP_BB(1)
       ENDIF
    ENDIF
 
    IF (NM==NMESHES) THEN
+      BXF_BAR_RIGHT = BXF_BAR
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*BXF_BAR_RIGHT*TP_AA(TUNNEL_NXP)
          TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
       ELSE  ! Dirichet BC
-         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*BXF_BAR_RIGHT*TP_AA(TUNNEL_NXP)
          TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
       ENDIF
    ENDIF
@@ -663,19 +650,26 @@ CALL MPI_BCAST(TP_CC(1),TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
-! Apply Dirichlet BCs at mesh interfaces. These are linear interpolations of the values of H_BAR on either side of mesh interface.
+! Apply boundary conditions at the ends of the tunnel.
 
 MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M => MESHES(NM)
 
-   IF (NM/=1) THEN
-      DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
-      M%BXS_BAR = (H_BAR(I_OFFSET(NM))*M%DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(M%DX(1)+DXO)
+   IF (NM==1) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
+         H_BAR(0) = H_BAR(1) - M%DXI*BXS_BAR_LEFT
+      ELSE  ! Dirichlet BC
+         H_BAR(0) = -H_BAR(1) + 2._EB*BXS_BAR_LEFT
+      ENDIF
    ENDIF
-   IF (NM/=NMESHES) THEN
-      DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
-      M%BXF_BAR = (H_BAR(I_OFFSET(NM)+M%IBP1)*M%DX(M%IBAR) + H_BAR(I_OFFSET(NM)+M%IBAR)*DXO)/(M%DX(M%IBAR)+DXO)
+
+   IF (NM==NMESHES) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
+         H_BAR(TUNNEL_NXP+1) = H_BAR(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
+      ELSE  ! Dirichlet BC
+         H_BAR(TUNNEL_NXP+1) = -H_BAR(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
+      ENDIF
    ENDIF
 
 ENDDO MESH_LOOP_2
