@@ -10,12 +10,8 @@ gitrevisions=$TEMPDIR/gitrevisions.$$
 cat $FIREMODELS_ROOT/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
-  gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
+  gitrevshort=`echo $gitrev | awk -F - '{print $(NF-1)}' | sed 's/^g//'`
   gitdate=`git show -s --format=%aD $gitrevshort 2> /dev/null | head -1 | awk '{print $3,$2",",$4}'`
-  if [ "$gitdate" == "" ]; then
-    gitrevshort=`echo $gitrev | awk -F - '{print $4}' | sed 's/^.\{1\}//'`
-    gitdate=`git show -s --format=%aD $gitrevshort 2> /dev/null | head -1 | awk '{print $3,$2",",$4}'`
-  fi
   if [ "$gitdate" == "" ]; then
     gitdate="undefined"
     gitdate2=2000000000
