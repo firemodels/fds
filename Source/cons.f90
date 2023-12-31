@@ -535,7 +535,7 @@ INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_V
 INTEGER                              :: LU_HISTOGRAM,LU_HVAC
 INTEGER                              :: LU_GEOC=-1,LU_TGA,LU_INFO,LU_DEVC_CTRL=-1,LU_STL
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_PART,LU_PROF,LU_XYZ,LU_TERRAIN,LU_PL3D,LU_DEVC,LU_STATE,LU_CTRL,LU_CORE,LU_RESTART
-INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM,LU_CFACE_GEOM,LU_VTK
+INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM,LU_CFACE_GEOM,LU_SL3D_VTK,LU_SMOKE3D_VTK
 INTEGER                              :: LU_GEOM_TRAN
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LU_SLCF,LU_SLCF_GEOM,LU_BNDF,LU_BNDG,LU_ISOF,LU_ISOF2, &
                                         LU_SMOKE3D,LU_RADF
@@ -546,10 +546,10 @@ CHARACTER(80)                              :: FN_STOP='null',FN_CPU,FN_CFL,FN_OU
 CHARACTER(80)                              :: FN_MASS,FN_HRR,FN_STEPS,FN_SMV,FN_END,FN_ERR,FN_NOTREADY,FN_VELOCITY_ERROR,FN_GIT
 CHARACTER(80)                              :: FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA,FN_DEVC_CTRL,FN_HVAC,FN_STL
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE,FN_RESTART
-CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM, FN_CFACE_GEOM, FN_VTK
+CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM, FN_CFACE_GEOM
 CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDG, &
                                               FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF
-
+CHARACTER(200), ALLOCATABLE, DIMENSION(:)  :: FN_SL3D_VTK,FN_SMOKE3D_VTK
 
 CHARACTER(9) :: FMT_R
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
@@ -739,35 +739,37 @@ MODULE OUTPUT_CLOCKS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE (TYPE,EXTERNAL)
 
-INTEGER :: RAMP_BNDF_INDEX=0  !< Ramp index for boundary file time series
-INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
-INTEGER :: RAMP_CPU_INDEX =0  !< Ramp index for CPU file time series
-INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
-INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
-INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
-INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
-INTEGER :: RAMP_HVAC_INDEX=0  !< Ramp index for hvac file time series
-INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
-INTEGER :: RAMP_MASS_INDEX=0  !< Ramp index for mass file time series
-INTEGER :: RAMP_PART_INDEX=0  !< Ramp index for particle file time series
-INTEGER :: RAMP_PL3D_INDEX=0  !< Ramp index for Plot3D file time series
-INTEGER :: RAMP_PROF_INDEX=0  !< Ramp index for profile file time series
-INTEGER :: RAMP_RADF_INDEX=0  !< Ramp index for radiation file time series
-INTEGER :: RAMP_RSRT_INDEX=0  !< Ramp index for restart file time series
-INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
-INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
-INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
-INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
-INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
-INTEGER :: RAMP_SPEC_INDEX=0  !< Ramp index for species file time series
-INTEGER :: RAMP_VTK_INDEX=0   !< Ramp index for vtk file time series
+INTEGER :: RAMP_BNDF_INDEX=0       !< Ramp index for boundary file time series
+INTEGER :: RAMP_CTRL_INDEX=0       !< Ramp index for control file time series
+INTEGER :: RAMP_CPU_INDEX =0       !< Ramp index for CPU file time series
+INTEGER :: RAMP_DEVC_INDEX=0       !< Ramp index for device file time series
+INTEGER :: RAMP_FLSH_INDEX=0       !< Ramp index for flush time series
+INTEGER :: RAMP_GEOM_INDEX=0       !< Ramp index for geometry output
+INTEGER :: RAMP_HRR_INDEX =0       !< Ramp index for hrr file time series
+INTEGER :: RAMP_HVAC_INDEX=0       !< Ramp index for hvac file time series
+INTEGER :: RAMP_ISOF_INDEX=0       !< Ramp index for isosurface file time series
+INTEGER :: RAMP_MASS_INDEX=0       !< Ramp index for mass file time series
+INTEGER :: RAMP_PART_INDEX=0       !< Ramp index for particle file time series
+INTEGER :: RAMP_PL3D_INDEX=0       !< Ramp index for Plot3D file time series
+INTEGER :: RAMP_PROF_INDEX=0       !< Ramp index for profile file time series
+INTEGER :: RAMP_RADF_INDEX=0       !< Ramp index for radiation file time series
+INTEGER :: RAMP_RSRT_INDEX=0       !< Ramp index for restart file time series
+INTEGER :: RAMP_SLCF_INDEX=0       !< Ramp index for slice file time series
+INTEGER :: RAMP_SL3D_INDEX=0       !< Ramp index for 3D slice file time series
+INTEGER :: RAMP_SM3D_INDEX=0       !< Ramp index for smoke3d file time series
+INTEGER :: RAMP_UVW_INDEX =0       !< Ramp index for velocity file time series
+INTEGER :: RAMP_TMP_INDEX =0       !< Ramp index for temperature file time series
+INTEGER :: RAMP_SPEC_INDEX=0       !< Ramp index for species file time series
+INTEGER :: RAMP_SL3D_VTK_INDEX=0   !< Ramp index for vtk file time series
+INTEGER :: RAMP_SM3D_VTK_INDEX=0   !< Ramp index for vtk file time series
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,HVAC_CLOCK,&
                                        ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
-                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK ,TMP_CLOCK ,SPEC_CLOCK,VTK_CLOCK
+                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK ,TMP_CLOCK ,SPEC_CLOCK,&
+                                       SL3D_VTK_CLOCK,SM3D_VTK_CLOCK
 INTEGER, ALLOCATABLE, DIMENSION(:) :: BNDF_COUNTER, CPU_COUNTER,CTRL_COUNTER,DEVC_COUNTER,FLSH_COUNTER,GEOM_COUNTER, HRR_COUNTER,&
                                       HVAC_COUNTER,ISOF_COUNTER,MASS_COUNTER,PART_COUNTER,PL3D_COUNTER,PROF_COUNTER,RADF_COUNTER,&
                                       RSRT_COUNTER,SLCF_COUNTER,SL3D_COUNTER,SM3D_COUNTER,UVW_COUNTER ,TMP_COUNTER ,SPEC_COUNTER,&
-                                      VTK_COUNTER
+                                      SL3D_VTK_COUNTER,SM3D_VTK_COUNTER
 REAL(EB) :: TURB_INIT_CLOCK=-1.E10_EB
 REAL(EB) :: MMS_TIMER=1.E10_EB
 REAL(EB) :: DT_SLCF,DT_BNDF,DT_DEVC,DT_PL3D,DT_PART,DT_RESTART,DT_ISOF,DT_HRR,DT_HVAC,DT_MASS,DT_PROF,DT_CTRL,&

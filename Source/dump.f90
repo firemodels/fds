@@ -20,7 +20,7 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
 USE VTK, ONLY : INITIALIZE_VTK, WRITE_VTK_SLICE_GEOMETRY, WRITE_VTK_SLICE_CELLS, WRITE_VTK_SLICE_DATA,&
-                FINALIZE_VTK
+                FINALIZE_VTK,WRITE_VTK_SLICE_WRAPPER,BUILD_VTK_GAS_PHASE_GEOMETRY,WRITE_VTK_SM3D_WRAPPER
 
 USE F_MKDIR, ONLY : C_MKDIR
 USE ISO_C_BINDING
@@ -112,7 +112,8 @@ IF (T>=ISOF_CLOCK(ISOF_COUNTER(NM))) THEN
 ENDIF
 
 IF (T>=SM3D_CLOCK(SM3D_COUNTER(NM)) .AND. SMOKE3D) THEN
-   CALL DUMP_SMOKE3D(T,DT,NM)
+   CALL C_MKDIR("./results"//char(0))
+   CALL DUMP_SMOKE3D(T,DT,NM,0)
    DO WHILE(SM3D_COUNTER(NM)<SIZE(SM3D_CLOCK)-1)
       SM3D_COUNTER(NM) = SM3D_COUNTER(NM) + 1
       IF (SM3D_CLOCK(SM3D_COUNTER(NM))>=T) EXIT
@@ -120,6 +121,7 @@ IF (T>=SM3D_CLOCK(SM3D_COUNTER(NM)) .AND. SMOKE3D) THEN
 ENDIF
 
 IF (T>=SLCF_CLOCK(SLCF_COUNTER(NM))) THEN
+   CALL C_MKDIR("./results"//char(0))
    CALL DUMP_SLCF(T,DT,NM,0)
    DO WHILE(SLCF_COUNTER(NM)<SIZE(SLCF_CLOCK)-1)
       SLCF_COUNTER(NM) = SLCF_COUNTER(NM) + 1
@@ -135,11 +137,27 @@ IF (T>=SL3D_CLOCK(SL3D_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
    ENDDO
 ENDIF
 
-IF (T>=VTK_CLOCK(VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
+! VTK 3-D slices
+IF (T>=SL3D_VTK_CLOCK(SL3D_VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
+   IF (NM .EQ. 1) THEN
+      CALL WRITE_VTK_SLICE_WRAPPER(T,NMESHES,'PUnstructuredGrid')
+   ENDIF
    CALL DUMP_SLCF(T,DT,NM,3)
-   DO WHILE(VTK_COUNTER(NM)<SIZE(VTK_CLOCK)-1)
-      VTK_COUNTER(NM) = VTK_COUNTER(NM) + 1
-      IF (VTK_CLOCK(VTK_COUNTER(NM))>=T) EXIT
+   DO WHILE(SL3D_VTK_COUNTER(NM)<SIZE(SL3D_VTK_CLOCK)-1)
+      SL3D_VTK_COUNTER(NM) = SL3D_VTK_COUNTER(NM) + 1
+      IF (SL3D_VTK_CLOCK(SL3D_VTK_COUNTER(NM))>=T) EXIT
+   ENDDO
+ENDIF
+
+! VTK Smoke 3D slices
+IF (T>=SM3D_VTK_CLOCK(SM3D_VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
+   IF (NM .EQ. 1) THEN
+      CALL WRITE_VTK_SM3D_WRAPPER(T,NMESHES,'PUnstructuredGrid')
+   ENDIF
+   CALL DUMP_SMOKE3D(T,DT,NM,1)
+   DO WHILE(SM3D_VTK_COUNTER(NM)<SIZE(SM3D_VTK_CLOCK)-1)
+      SM3D_VTK_COUNTER(NM) = SM3D_VTK_COUNTER(NM) + 1
+      IF (SM3D_VTK_CLOCK(SM3D_VTK_COUNTER(NM))>=T) EXIT
    ENDDO
 ENDIF
 
@@ -340,8 +358,6 @@ ALLOCATE(FN_XYZ(NMESHES))
 ALLOCATE(LU_XYZ(NMESHES))
 ALLOCATE(FN_PL3D(2*NMESHES))
 ALLOCATE(LU_PL3D(2*NMESHES))
-ALLOCATE(FN_VTK(NMESHES))
-ALLOCATE(LU_VTK(NMESHES))
 
 ALLOCATE(FN_ISOF(N_ISOF,NMESHES))
 ALLOCATE(LU_ISOF(N_ISOF,NMESHES))
@@ -377,6 +393,12 @@ ALLOCATE(FN_CORE(NMESHES))
 ALLOCATE(LU_CORE(NMESHES))
 ALLOCATE(FN_RESTART(NMESHES))
 ALLOCATE(LU_RESTART(NMESHES))
+
+! VTK Files
+ALLOCATE(FN_SL3D_VTK(NMESHES+1))
+ALLOCATE(LU_SL3D_VTK(NMESHES+1))
+ALLOCATE(FN_SMOKE3D_VTK(NMESHES+1))
+ALLOCATE(LU_SMOKE3D_VTK(NMESHES+1))
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -490,7 +512,7 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(FN_CORE(NM),   '(A,A,I0,A)') TRIM(CHID),'_',NM,'.restart'
    
    ! VTK Files
-   LU_VTK(NM)              = GET_FILE_NUMBER() ! slice file
+   LU_SL3D_VTK(NM)              = GET_FILE_NUMBER() ! slice file
       
 
 ENDDO MESH_LOOP
@@ -4255,20 +4277,28 @@ END SUBROUTINE DUMP_ISOF
 !> \param T Current simulation time (s)
 !> \param DT Current time step size (s)
 !> \param NM Mesh number
+!> \param IFRMT SMV (IFRMT=0) or VTK (IFRMT=1)
 
-SUBROUTINE DUMP_SMOKE3D(T,DT,NM)
+SUBROUTINE DUMP_SMOKE3D(T,DT,NM,IFRMT)
 
 USE ISOSMOKE, ONLY: SMOKE3D_TO_FILE
 REAL(EB), INTENT(IN) :: T,DT
-INTEGER,  INTENT(IN) :: NM
-INTEGER  :: I,J,K,N
+INTEGER,  INTENT(IN) :: NM,IFRMT
+INTEGER  :: I,J,K,N,IFACT,JFACT,KFACT,ITM,ITM1
 REAL(FB) :: DXX,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
-REAL(EB) :: FR_C
+REAL(EB) :: FR_C,TT
 TYPE(SMOKE3D_TYPE), POINTER :: S3
+LOGICAL :: SMV_OUT,VTK_OUT
 
 CALL POINT_TO_MESH(NM)
+
+! Swap case
+SELECT CASE(IFRMT)
+   CASE(0) ; SMV_OUT=.TRUE. ; VTK_OUT=.FALSE.
+   CASE(1) ; SMV_OUT=.FALSE. ; VTK_OUT=.TRUE.
+END SELECT
 
 ! Miscellaneous settings
 
@@ -4323,12 +4353,51 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
 
    ! Pack the data into a 1-D array and send to the routine that writes the file for Smokeview
 
-   ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1))
-   QQ_PACK = PACK(QQ(0:IBAR,0:JBAR,0:KBAR,1),MASK=.TRUE.)
-   CALL SMOKE3D_TO_FILE(NM,STIME,DXX,N,QQ_PACK,IBP1,JBP1,KBP1,SMOKE3D_16)
+   IF (SMV_OUT) THEN
+      ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1))
+      QQ_PACK = PACK(QQ(0:IBAR,0:JBAR,0:KBAR,1),MASK=.TRUE.)
+      CALL SMOKE3D_TO_FILE(NM,STIME,DXX,N,QQ_PACK,IBP1,JBP1,KBP1,SMOKE3D_16)
+   ENDIF
+   IF (VTK_OUT) THEN
+      TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+      ITM  = INT(TT)
+      ITM1 = NINT(ABS(TT-ITM)*100)
+      IF (ITM1==100) THEN
+         ITM = ITM+1
+         ITM1 = 0
+      ENDIF
+      WRITE(FN_SMOKE3D_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "./results/",TRIM(CHID),'_SM3D_',NM,'_',ITM,ITM1,'.vtu'
+      !WRITE(*,*) "ARRAY SIZES ", IBAR, JBAR, KBAR, IBP1, JBP1, KBP1
+      ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1))
+      DO I = 0, IBAR
+         IFACT = I
+         DO J = 0, JBAR
+            JFACT = J*(IBAR)
+            DO K = 0, KBAR
+               KFACT = K*(JBAR)*(IBAR)
+               QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (N .EQ. 1) THEN
+         CALL INITIALIZE_VTK(LU_SMOKE3D_VTK(NM),FN_SMOKE3D_VTK(NM),'UnstructuredGrid')
+         CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SMOKE3D_VTK(NM), LU_SMOKE3D_VTK(NM))
+      ENDIF
+      IF (VTK_BINARY) THEN
+         CALL WRITE_VTK_SLICE_DATA(LU_SMOKE3D_VTK(NM), FN_SMOKE3D_VTK(NM),&
+                                   QQ_PACK, S3%SMOKEVIEW_LABEL(1:30), 'ascii')
+      ELSE
+         CALL WRITE_VTK_SLICE_DATA(LU_SMOKE3D_VTK(NM), FN_SMOKE3D_VTK(NM),&
+                                   QQ_PACK, S3%SMOKEVIEW_LABEL(1:30), 'ascii')
+      ENDIF
+   ENDIF
    DEALLOCATE(QQ_PACK)
 
 ENDDO DATA_FILE_LOOP
+
+IF (VTK_OUT) THEN
+   CALL FINALIZE_VTK(LU_SMOKE3D_VTK(NM),FN_SMOKE3D_VTK(NM),'UnstructuredGrid')
+ENDIF
 
 END SUBROUTINE DUMP_SMOKE3D
 
@@ -5966,76 +6035,10 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ITM = ITM+1
          ITM1 = 0
       ENDIF
-      WRITE(FN_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "./results/",TRIM(CHID),'_',NM,'_',ITM,ITM1,'.vtu'
+      WRITE(FN_SL3D_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "./results/",TRIM(CHID),'_SL3D_',NM,'_',ITM,ITM1,'.vtu'
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         
-         I1=SL%I1
-         I2=SL%I2
-         J1=SL%J1
-         J2=SL%J2
-         K1=SL%K1
-         K2=SL%K2
-         NX = I2 + 1 - I1
-         NY = J2 + 1 - J1
-         NZ = K2 + 1 - K1
-         NP = NX*NY*NZ
-         NC = (NX-1)*(NY-1)*(NZ-1)
-         
-         ! Fill point data
-         ALLOCATE(X_PTS(NP))
-         ALLOCATE(Y_PTS(NP))
-         ALLOCATE(Z_PTS(NP))
-         IFACT = 1
-         DO K = 0, NZ-1
-            DO J = 0, NY-1
-               DO I = 0, NX-1
-                  X_PTS(IFACT)=MESHES(NM)%X(I)
-                  Y_PTS(IFACT)=MESHES(NM)%Y(J)
-                  Z_PTS(IFACT)=MESHES(NM)%Z(K)
-                  IFACT = IFACT + 1
-               ENDDO
-            ENDDO
-         ENDDO
-         
-         ! Fill cell data
-         ALLOCATE(CONNECT(NC*8))
-         DO I = 1, NX-1
-            IFACT = (I-1)
-            DO J = 1, NY-1
-               JFACT = (J-1)*(NX-1)
-               DO K = 1, NZ-1
-                  KFACT = (K - 1)*(NY-1)*(NX-1)
-                  CONNECT((IFACT+JFACT+KFACT)*8+1) = (K-1)*(NY*NX) + (J-1)*NX + I-1
-                  CONNECT((IFACT+JFACT+KFACT)*8+2) = (K-1)*(NY*NX) + (J-1)*NX + I
-                  CONNECT((IFACT+JFACT+KFACT)*8+3) = (K-1)*(NY*NX) + (J)*NX + I-1
-                  CONNECT((IFACT+JFACT+KFACT)*8+4) = (K-1)*(NY*NX) + (J)*NX + I
-                  CONNECT((IFACT+JFACT+KFACT)*8+5) = (K)*(NY*NX) + (J-1)*NX + I-1
-                  CONNECT((IFACT+JFACT+KFACT)*8+6) = (K)*(NY*NX) + (J-1)*NX + I
-                  CONNECT((IFACT+JFACT+KFACT)*8+7) = (K)*(NY*NX) + (J)*NX + I-1
-                  CONNECT((IFACT+JFACT+KFACT)*8+8) = (K)*(NY*NX) + (J)*NX + I
-               ENDDO
-            ENDDO
-         ENDDO
-         
-         ALLOCATE(OFFSETS(NC))
-         ALLOCATE(CELL_TYPE(NC))
-         
-         DO I=1,NC
-            OFFSETS(I) = (I)*8_IB4
-            CELL_TYPE(I) = 11_IB4
-         ENDDO
-         
-         CALL C_MKDIR("./results"//char(0))
-         CALL INITIALIZE_VTK(NM,'UnstructuredGrid')
-         CALL WRITE_VTK_SLICE_GEOMETRY(NM, NP, NC, X_PTS, Y_PTS, Z_PTS, 'ascii')
-         CALL WRITE_VTK_SLICE_CELLS(NM, CONNECT, OFFSETS, CELL_TYPE, 'ascii')
-         
-         DEALLOCATE(OFFSETS)
-         DEALLOCATE(CELL_TYPE)
-         DEALLOCATE(CONNECT)
-         DEALLOCATE(X_PTS)
-         DEALLOCATE(Y_PTS)
-         DEALLOCATE(Z_PTS)
+         CALL INITIALIZE_VTK(LU_SL3D_VTK(NM),FN_SL3D_VTK(NM),'UnstructuredGrid')
+         CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SL3D_VTK(NM), LU_SL3D_VTK(NM))
       ENDIF
       VTK_INITIALIZED=.TRUE.
    ENDIF
@@ -6329,7 +6332,13 @@ QUANTITY_LOOP: DO IQ=1,NQT
                ENDDO
             ENDDO
             
-            CALL WRITE_VTK_SLICE_DATA(NM, QQ_PACK, SL%SMOKEVIEW_LABEL(1:30), 'ascii')
+            IF (VTK_BINARY) THEN
+               CALL WRITE_VTK_SLICE_DATA(LU_SL3D_VTK(NM), FN_SL3D_VTK(NM),&
+                                         QQ_PACK, SL%SMOKEVIEW_LABEL(1:30), 'ascii')
+            ELSE
+               CALL WRITE_VTK_SLICE_DATA(LU_SL3D_VTK(NM), FN_SL3D_VTK(NM),&
+                                         QQ_PACK, SL%SMOKEVIEW_LABEL(1:30), 'ascii')
+            ENDIF
             
             DEALLOCATE(QQ_PACK)
          ENDIF
@@ -6340,7 +6349,7 @@ ENDDO QUANTITY_LOOP
 
 IF (VTK3D) THEN
    ! finish after writing all pieces
-   CALL FINALIZE_VTK(NM,'UnstructuredGrid')
+   CALL FINALIZE_VTK(LU_SL3D_VTK(NM),FN_SL3D_VTK(NM),'UnstructuredGrid')
 ENDIF
 
 ! Write out the PLOT3D ``q'' file
