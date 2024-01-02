@@ -3972,6 +3972,8 @@ Unlike the zone leakage approach, this approach has the option to preserve the e
 
 A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}. A {\ct VENT} used for localized leakage should also not have any other input resulting in a mass flow assigned to it.,
 
+A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}.
+
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
 Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
@@ -13408,29 +13410,37 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 395  \> {\ct RAMP with EXTERNAL\_FILE is present but no EXTERNAL\_FILENAME          } \> Section~\ref{info:external_control}  \\
 396  \> {\ct Row \ldots\ of \ldots\ has a bad 1st latitude.                         } \> Section~\ref{info:spraypattern}  \\
 397  \> {\ct Row \ldots\ of \ldots\ has a bad 2nd latitude.                         } \> Section~\ref{info:spraypattern}  \\
-
-401  \> {\ct SURF \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
-402  \> {\ct VENT \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
-403  \> {\ct HT3D solid must have at least one face exposed \ldots\                 } \> Section~\ref{info:HT3D_Limitations}  \\
-404  \> {\ct HT3D thin solid must have at least one face exposed \ldots\            } \> Section~\ref{info:HT3D_Limitations}  \\
-405  \> {\ct MESH \ldots\ can stretch in at most 2 coordinate directions.           } \> Section~\ref{info:TRNX}  \\
-406  \> {\ct MESH \ldots\ Poisson initialization error: \ldots\                     } \> Section~\ref{info:Errors}  \\
-407  \> {\ct DEVC \ldots\ requires repositioning.                                   } \> Section~\ref{info:DEVC_position}  \\
-408  \> {\ct DEVC \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
-409  \> {\ct PROF \ldots\ requires repositioning.                                   } \> Section~\ref{info:PROF}  \\
-410  \> {\ct PROF \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
-411  \> {\ct MESH \ldots\ is not in alignment with MESH \ldots\                     } \> Section~\ref{info:mesh_alignment}  \\
-412  \> {\ct SURF \ldots\ must specify velocity boundary condition ...              } \> Section~\ref{info:MASS_FLUX}  \\
-413  \> {\ct SURF \ldots\ cannot be applied below GROUND\_LEVEL.                    } \> Section~\ref{info:wall_of_wind}  \\
-414  \> {\ct RAMP\_V\_X assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
-415  \> {\ct RAMP\_V\_Y assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
-416  \> {\ct RAMP\_V\_Z assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
-417  \> {\ct SURF \ldots\ cannot be applied to an exterior boundary.                } \> Section~\ref{info:HT3D_Limitations}  \\
-418  \> {\ct SURF \ldots\ layers are thicker than the underlying obstruction.       } \> Section~\ref{info:linings}  \\
-419  \> {\ct MESH \ldots\ UVWFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
-420  \> {\ct MESH \ldots\ TMPFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
-421  \> {\ct MESH \ldots\ SPECFILE \ldots\ does not exist.                          } \> Section~\ref{info:CSVF}  \\
-     \>                                                                               \>                                     \\
+398  \> {\ct Row \ldots\ of \ldots\ has a bad 1st longitude.                        } \> Section~\ref{info:spraypattern}  \\
+399  \> {\ct Row \ldots\ of \ldots\ has a bad 2nd longitude.                        } \> Section~\ref{info:spraypattern}  \\
+400  \> {\ct Row \ldots\ of \ldots\ has a bad velocity.                             } \> Section~\ref{info:spraypattern}  \\
+401  \> {\ct Row \ldots\ of \ldots\ has a bad mass flow.                            } \> Section~\ref{info:spraypattern}  \\
+402  \> {\ct Row \ldots\ of \ldots\ has a bad wavelength.                           } \> Section~\ref{radiative_part_props}  \\
+403  \> {\ct Row \ldots\ of \ldots\ has a bad real index.                           } \> Section~\ref{radiative_part_props}  \\
+404  \> {\ct Row \ldots\ of \ldots\ has a bad complex index.                        } \> Section~\ref{radiative_part_props}  \\
+407  \> {\ct TABLE \ldots\ not found.                                               } \> Section~\ref{info:spraypattern}  \\
+     \>                                                                               \>                          \\
+421  \> {\ct SURF \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
+422  \> {\ct VENT \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
+423  \> {\ct HT3D solid must have at least one face exposed \ldots\                 } \> Section~\ref{info:HT3D_Limitations}  \\
+424  \> {\ct HT3D thin solid must have at least one face exposed \ldots\            } \> Section~\ref{info:HT3D_Limitations}  \\
+425  \> {\ct MESH \ldots\ can stretch in at most 2 coordinate directions.           } \> Section~\ref{info:TRNX}  \\
+426  \> {\ct MESH \ldots\ Poisson initialization error: \ldots\                     } \> Section~\ref{info:Errors}  \\
+427  \> {\ct DEVC \ldots\ requires repositioning.                                   } \> Section~\ref{info:DEVC_position}  \\
+428  \> {\ct DEVC \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
+429  \> {\ct PROF \ldots\ requires repositioning.                                   } \> Section~\ref{info:PROF}  \\
+430  \> {\ct PROF \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
+431  \> {\ct MESH \ldots\ is not in alignment with MESH \ldots\                     } \> Section~\ref{info:mesh_alignment}  \\
+432  \> {\ct SURF \ldots\ must specify velocity boundary condition ...              } \> Section~\ref{info:MASS_FLUX}  \\
+433  \> {\ct SURF \ldots\ cannot be applied below GROUND\_LEVEL.                    } \> Section~\ref{info:wall_of_wind}  \\
+434  \> {\ct RAMP\_V\_X assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+435  \> {\ct RAMP\_V\_Y assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+436  \> {\ct RAMP\_V\_Z assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+437  \> {\ct SURF \ldots\ cannot be applied to an exterior boundary.                } \> Section~\ref{info:HT3D_Limitations}  \\
+438  \> {\ct SURF \ldots\ layers are thicker than the underlying obstruction.       } \> Section~\ref{info:linings}  \\
+439  \> {\ct MESH \ldots\ UVWFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
+440  \> {\ct MESH \ldots\ TMPFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
+441  \> {\ct MESH \ldots\ SPECFILE \ldots\ does not exist.                          } \> Section~\ref{info:CSVF}  \\
+     \>                                                                               \>                          \\
 501 \> {\ct No ID provided \ldots                                                   } \> Section~\ref{info:HVAC}  \\
 502 \> {\ct Invalid TYPE\_ID provided \ldots                                        } \> Section~\ref{info:HVAC}  \\
 503 \> {\ct Must have both DUCTs and NODEs in the input file                        } \> Section~\ref{info:HVAC}  \\

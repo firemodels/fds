@@ -1,7 +1,5 @@
 ! J. Kim and P. Moin. Transport of Passive Scalars in Turbulent Channel Flow. NASA Technical Memorandum 89463, 1987.
 
-! J. Kim and P. Moin. Transport of Passive Scalars in Turbulent Channel Flow. NASA Technical Memorandum 89463, 1987.
-
 &HEAD CHID='heated_channel_Pr_0p71_16', TITLE='LES of turbulent channel with heat source with wall model, Pr=0.71' /
 
 MESH IJK=64,32,32, XB=0,12,0,6,0,2/
@@ -18,8 +16,6 @@ MESH IJK=64,32,32, XB=0,12,0,6,0,2/
 &MISC SIMULATION_MODE='LES', CHECK_HT=T, STRATIFICATION=F, GVEC(3)=0., NOISE_VELOCITY=0.015, TMPA=21.5, PR=0.85, TURBULENCE_MODEL='DYNAMIC SMAGORINSKY'/
 
 &WIND U0=0.045, FORCE_VECTOR(1)=9.0088e-06 / FORCE_VECTOR = dpdx based on Re_tau=180
-
-&PRES SOLVER='GLMAT', MAX_PRESSURE_ITERATIONS=1, CHECK_POISSON=T/
 
 &RADI RADIATION=.FALSE./
 
