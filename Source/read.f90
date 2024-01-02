@@ -9569,8 +9569,7 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDDO
       ENDIF
       IF (MULT_INDEX==-1) THEN
-         WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST_O+1,&
-                                          ', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,3A)') 'ERROR(601): OBST ',N_OBST_O+1,' MULT_ID ',TRIM(MULT_ID),' not found.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       MR => MULTIPLIER(MULT_INDEX)
@@ -9617,7 +9616,7 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDDO J_MULT_LOOP2
       ENDDO K_MULT_LOOP2
       2 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with OBST number ',N_OBST_O+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with OBST number ',N_OBST_O+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
    ENDDO COUNT_OBST_LOOP
@@ -9697,15 +9696,15 @@ MESH_LOOP: DO NM=1,NMESHES
          ! detect input errors
          IF ((SHAPE_TYPE==OBST_SPHERE_TYPE .OR. SHAPE_TYPE==OBST_CYLINDER_TYPE .OR. SHAPE_TYPE==OBST_CONE_TYPE) &
             .AND. RADIUS<0._EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires RADIUS'
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR(602): OBST ',NN,' SHAPE requires RADIUS.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF ((SHAPE_TYPE==OBST_CYLINDER_TYPE .OR. SHAPE_TYPE==OBST_CONE_TYPE) .AND. HEIGHT<0._EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires HEIGHT'
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR(603): OBST ',NN,' SHAPE requires HEIGHT.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (SHAPE_TYPE==OBST_BOX_TYPE .AND. (LENGTH<0._EB .OR. WIDTH<0._EB .OR. HEIGHT<0._EB)) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' BOX SHAPE requires LENGTH, WIDTH, HEIGHT'
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR(604): OBST ',NN,' BOX SHAPE requires LENGTH, WIDTH, HEIGHT.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (ORIENTATION(1)==0._EB .AND. &
@@ -10032,7 +10031,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (SURF_ID/='null') THEN
                   CALL CHECK_SURF_NAME(SURF_ID,EX)
                   IF (.NOT.EX) THEN
-                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(605): SURF_ID ',TRIM(SURF_ID),' does not exist.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
@@ -10040,7 +10039,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (SURF_ID_INTERIOR/='null') THEN
                   CALL CHECK_SURF_NAME(SURF_ID_INTERIOR,EX)
                   IF (.NOT.EX) THEN
-                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID_INTERIOR ',TRIM(SURF_ID_INTERIOR),' does not exist'
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(606): SURF_ID_INTERIOR ',TRIM(SURF_ID_INTERIOR),' does not exist.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
@@ -10049,7 +10048,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_IDS(NNNN)/='null') THEN
                      CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
                      IF (.NOT.EX) THEN
-                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR(605): SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist.'
                         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                      ENDIF
                   ENDIF
@@ -10059,7 +10058,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_ID6(NNNN)/='null') THEN
                      CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
                      IF (.NOT.EX) THEN
-                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR(605): SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist.'
                         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                      ENDIF
                   ENDIF
@@ -10175,7 +10174,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   DO IOR=-2,3
                      IF (IOR==0) CYCLE
                      IF (OB%SURF_INDEX(IOR)/=OB%SURF_INDEX(-3)) THEN
-                        WRITE(MESSAGE,'(A,A,A)')  'ERROR: OBST ',TRIM(OB%ID),' needs a BULK_DENSITY if it is to BURN_AWAY'
+                        WRITE(MESSAGE,'(A,A,A)')  'ERROR(607): OBST ',TRIM(OB%ID),' needs a BULK_DENSITY if it is to BURN_AWAY.'
                         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                      ENDIF
                   ENDDO
@@ -10216,7 +10215,7 @@ MESH_LOOP: DO NM=1,NMESHES
                      ENDIF
                   ENDDO
                   IF (.NOT.FOUND) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ', TRIM(MATL_ID(NNN)),' not found'
+                     WRITE(MESSAGE,'(A,A,A)') 'ERROR(608): MATL_ID ', TRIM(MATL_ID(NNN)),' not found.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   OB%MATL_INDEX(NNN) = NNNN
@@ -10471,13 +10470,13 @@ COUNT_LOOP: DO
          IF (MULT_ID==MR%ID) N_HOLE_NEW = MR%N_COPIES
       ENDDO
       IF (N_HOLE_NEW==0) THEN
-         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on HOLE line', N_HOLE_O
+         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR(609): MULT_ID ',TRIM(MULT_ID),' not found on HOLE line ',N_HOLE_O
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
    ENDIF
    N_HOLE   = N_HOLE   + N_HOLE_NEW
    2 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with HOLE number ',N_HOLE_O+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR(101): Problem with HOLE number ',N_HOLE_O+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
    ENDIF
 ENDDO COUNT_LOOP
@@ -10521,8 +10520,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
              (TEMP_XB(NN,3) <= XB(4) .AND. TEMP_XB(NN,4) >= XB(3)) .AND. &
              (TEMP_XB(NN,5) <= XB(6) .AND. TEMP_XB(NN,6) >= XB(5))) THEN
             IF (CONTROLLED(N) .OR. CONTROLLED(NN)) THEN
-               WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Cannot overlap HOLEs with a DEVC_ID or CTRL_ID. HOLE number ',N_HOLE_O+1,&
-                                             ', line number ',INPUT_FILE_LINE_NUMBER
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(610): HOLE number ',N_HOLE_O+1,' Cannot overlap HOLEs with a DEVC or CTRL_ID.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             ENDIF
          ENDIF
