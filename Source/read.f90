@@ -4236,7 +4236,7 @@ SUBROUTINE READ_REAC
 
 USE PROPERTY_DATA, ONLY : ELEMENT,GET_FORMULA_WEIGHT,GAS_PROPS,&
                           LOOKUP_CHI_R,LOOKUP_CRITICAL_FLAME_TEMPERATURE,LOOKUP_LOWER_OXYGEN_LIMIT
-USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX,GET_TABLE_INDEX
+USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 CHARACTER(LABEL_LENGTH) :: FUEL,RADCAL_ID='null',SPEC_ID_NU(MAX_SPECIES),SPEC_ID_N_S(MAX_SPECIES),&
                            THIRD_EFF_ID(MAX_SPECIES),RAMP_CHI_R
 CHARACTER(FORMULA_LENGTH) :: FORMULA
@@ -9412,7 +9412,7 @@ END SUBROUTINE READ_RAMP
 SUBROUTINE READ_TABL
 
 REAL(EB) :: TABLE_DATA(9)
-INTEGER  :: NN,N,I,J
+INTEGER  :: NN,N
 TYPE(TABLES_TYPE), POINTER :: TA=>NULL()
 NAMELIST /TABL/ FYI,ID,TABLE_DATA
 
@@ -9432,8 +9432,6 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
       CASE (SPRAY_PATTERN)
          TA%NUMBER_COLUMNS = 6
       CASE (PART_RADIATIVE_PROPERTY)
-         TA%NUMBER_COLUMNS = 3
-      CASE (TABLE_2D_TYPE)
          TA%NUMBER_COLUMNS = 3
    END SELECT
    SEARCH_LOOP: DO
@@ -9455,60 +9453,41 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(3)<-180._EB .OR.        TABLE_DATA(3)>360._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(396): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude.'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(398): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(399): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(5)<0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(400): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(6)<0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(401): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          CASE (PART_RADIATIVE_PROPERTY)
             IF (TABLE_DATA(1)<0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad wave length'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(402): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad wavelength.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(2)<=0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad real index'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(403): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad real index.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (TABLE_DATA(3)< 0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad complex index'
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(404): Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad complex index.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
-            ENDIF
-         CASE (TABLE_2D_TYPE)
-            IF (TA%NUMBER_ROWS == 1) THEN
-               IF (INT(TABLE_DATA(1)) <= 0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),&
-                                                ' has < 1 x entries'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
-               IF (INT(TABLE_DATA(2)) < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),&
-                                                ' has < 1 y entries'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
             ENDIF
       END SELECT
 
-      56 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with TABLE '//TRIM(TABLE_ID(N)) ) ; RETURN ; ENDIF
+      56 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with TABLE '//TRIM(TABLE_ID(N)) ) ; RETURN ; ENDIF
    ENDDO SEARCH_LOOP
    IF (TA%NUMBER_ROWS<=0) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: TABLE ',TRIM(TABLE_ID(N)), ' not found'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(407): TABLE ',TRIM(TABLE_ID(N)), ' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
-   IF (TABLE_TYPE(N) == TABLE_2D_TYPE) THEN
-      IF (TA%NUMBER_ROWS<=1) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: 2D TABLE ',TRIM(TABLE_ID(N)), ' must have at least one row of data'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
    ENDIF
 ENDDO COUNT_TABLE_POINTS
 
@@ -9526,47 +9505,6 @@ READ_TABL_LOOP: DO N=1,N_TABLE
       NN = NN+1
       TA%TABLE_DATA(NN,:) = TABLE_DATA(1:TA%NUMBER_COLUMNS)
    ENDDO SEARCH_LOOP2
-   TABLE_2D_IF: IF (TABLE_TYPE(N)==TABLE_2D_TYPE) THEN
-      IF (TA%NUMBER_ROWS-1/=INT(TA%TABLE_DATA(1,1))*INT(TA%TABLE_DATA(1,2))) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: 2D TABLE ',TRIM(TABLE_ID(N)), ' is not rectangular'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-      TA%LX = MINVAL(TA%TABLE_DATA(2:TA%NUMBER_ROWS,1),1)
-      TA%UX = MAXVAL(TA%TABLE_DATA(2:TA%NUMBER_ROWS,1),1)
-      TA%LY = MINVAL(TA%TABLE_DATA(2:TA%NUMBER_ROWS,2),1)
-      TA%UY = MAXVAL(TA%TABLE_DATA(2:TA%NUMBER_ROWS,2),1)
-      ALLOCATE(TA%X(INT(TA%TABLE_DATA(1,1))),STAT=IZERO)
-      CALL ChkMemErr('READ','TA%X',IZERO)
-      ALLOCATE(TA%Y(INT(TA%TABLE_DATA(1,2))),STAT=IZERO)
-      CALL ChkMemErr('READ','TA%Y',IZERO)
-      ALLOCATE(TA%Z(INT(TA%TABLE_DATA(1,1)),INT(TA%TABLE_DATA(1,2))),STAT=IZERO)
-      CALL ChkMemErr('READ','TA%Z',IZERO)
-      NN = 1
-      TA%NUMBER_ROWS = INT(TA%TABLE_DATA(1,1))
-      TA%NUMBER_COLUMNS = INT(TA%TABLE_DATA(1,2))
-      DO I = 1, TA%NUMBER_ROWS
-         DO J = 1, TA%NUMBER_COLUMNS
-            NN = NN + 1
-            IF (J==1) THEN
-               TA%X(I)=TA%TABLE_DATA(NN,1)
-            ELSE
-               IF (TA%TABLE_DATA(NN,1) /= TA%X(I)) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: 2D TABLE ',TRIM(TABLE_ID(N)), ' x value must be the same for each row'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
-            ENDIF
-            IF (I==1) THEN
-               TA%Y(J)=TA%TABLE_DATA(NN,2)
-            ELSE
-               IF (TA%TABLE_DATA(NN,2) /= TA%Y(J)) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: 2D TABLE ',TRIM(TABLE_ID(N)), ' y value must be the same for each column'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
-            ENDIF
-            TA%Z(I,J) = TA%TABLE_DATA(NN,3)
-         ENDDO
-      ENDDO
-   ENDIF TABLE_2D_IF
 ENDDO READ_TABL_LOOP
 
 END SUBROUTINE READ_TABL
