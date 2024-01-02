@@ -3972,6 +3972,8 @@ Unlike the zone leakage approach, this approach has the option to preserve the e
 
 A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}. A {\ct VENT} used for localized leakage should also not have any other input resulting in a mass flow assigned to it.,
 
+A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}.
+
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
 Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
