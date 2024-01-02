@@ -3834,68 +3834,6 @@ ENDIF
 END SUBROUTINE INTERPOLATE1D_UNIFORM
 
 
-!> \brief Find interpolated value in a 2D array
-!> \param TABLE_INDEX Index of the table
-!> \param XI Index of first array dimension
-!> \param YI Index of second array dimension
-!> \param ANS Interpolated value at (XI,YI)
-
-SUBROUTINE INTERPOLATE2D(TABLE_INDEX,XI,YI,ANS)
-
-USE TYPES, ONLY: TABLES,TABLES_TYPE
-INTEGER, INTENT(IN) :: TABLE_INDEX
-REAL(EB), INTENT(IN) :: XI,YI
-REAL(EB), INTENT(OUT) :: ANS
-REAL(EB) :: XL,XU,FRAC
-INTEGER :: I,J
-TYPE (TABLES_TYPE), POINTER :: TA
-
-TA => TABLES(TABLE_INDEX)
-
-! Do 1D for X edges of table
-IF (XI <= TA%LX) THEN
-   CALL INTERPOLATE1D(TA%Y,TA%Z(1,:),YI,ANS)
-   RETURN
-ELSEIF (XI >= TA%UX) THEN
-   CALL INTERPOLATE1D(TA%Y,TA%Z(TA%NUMBER_ROWS,:),YI,ANS)
-   RETURN
-ENDIF
-
-! Do 1D for Y edges of table
-IF (YI <= TA%LY) THEN
-   CALL INTERPOLATE1D(TA%X,TA%Z(:,1),XI,ANS)
-   RETURN
-ELSEIF(YI >= TA%UY) THEN
-   CALL INTERPOLATE1D(TA%X,TA%Z(:,TA%NUMBER_COLUMNS),XI,ANS)
-   RETURN
-ENDIF
-
-! Search for column, do 1D if exact
-DO J = 1, TA%NUMBER_COLUMNS
-   IF (ABS(YI-TA%Y(J)) < SPACING(TA%Y(J))) THEN
-      CALL INTERPOLATE1D(TA%X,TA%Z(:,J),XI,ANS)
-      RETURN
-   ENDIF
-   IF (TA%Y(J) > YI) EXIT
-ENDDO
-
-! Search for row, do 1D if exact
-DO I = 1, TA%NUMBER_ROWS
-   IF(ABS(XI-TA%X(I)) < SPACING(TA%X(I))) THEN
-      CALL INTERPOLATE1D(TA%Y,TA%Z(I,:),YI,ANS)
-      RETURN
-   ENDIF
-   IF (TA%X(I) > XI) EXIT
-ENDDO
-
-FRAC = (XI-TA%X(I-1))/(TA%X(I)-TA%X(I-1))
-XL = FRAC*(TA%Z(I,J-1)-TA%Z(I-1,J-1))+TA%Z(I-1,J-1)
-XU = FRAC*(TA%Z(I,J  )-TA%Z(I-1,J  ))+TA%Z(I-1,J)
-ANS = (YI-TA%Y(J-1))/(TA%Y(J)-TA%Y(J-1))*(XU-XL)+XL
-
-END SUBROUTINE INTERPOLATE2D
-
-
 !> \brief Randomly choose a point from a normal distribution
 !> \param MEAN Mean of the normal distribution
 !> \param SIGMA Standard deviation
