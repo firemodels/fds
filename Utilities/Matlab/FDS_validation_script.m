@@ -22,32 +22,42 @@
 %
 % Dataplot creates most of the plots for the Validation Guide.
 % It must be run before scatplot, which makes the scatter plots.
-
+function FDS_validation_script(dataplot_range)
 close all
-clear all
+%clear all
+
+if (nargin < 1) 
+    ALL_CASES = true;
+else
+    ALL_CASES = false;
+end
+
 
 restoredefaultpath
 addpath 'scripts'
 
 % Scripts that run prior to dataplot
 
-NIST_deposition_gauge
-flame_height
-NIST_RSE
-sippola_aerosol_deposition
-layer_height
-NIST_NRC_Corner_Effects
-%fm_datacenter_scatter
-LNG_Dispersion
-LNG_wind_profiles
-FM_Vertical_Wall_Flames
-umd_line_burner_process
-%Askervein_Hill
-UWO_Wind_Tunnel
-FM_Burner
-Crown_Fires
-ranz_marshall
-Phoenix_LNG_Fires
+if ALL_CASES
+    NIST_deposition_gauge
+    flame_height
+    NIST_RSE
+    sippola_aerosol_deposition
+    layer_height
+    NIST_NRC_Corner_Effects
+    %fm_datacenter_scatter
+    LNG_Dispersion
+    LNG_wind_profiles
+    FM_Vertical_Wall_Flames
+    umd_line_burner_process
+    %Askervein_Hill
+    UWO_Wind_Tunnel
+    FM_Burner
+    Crown_Fires
+    ranz_marshall
+    Phoenix_LNG_Fires
+    ALL_CASES = true;    
+end
 
 % Dataplot and scatplot options
 
@@ -64,7 +74,11 @@ Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scat
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir);
+if ALL_CASES
+    [saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir);
+else
+    [saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir,dataplot_range);
+end
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
@@ -73,22 +87,25 @@ scatplot(saved_data, drange, ...
 
 % Miscellaneous other scripts for special cases
 
-backward_facing_step
-beyler_hood
-sandia_helium_plume
-sandia_methane_fire
-spray_attenuation
-flame_height2
-purdue_flames
-VTT_Sprays
-fm_datacenter_veltest
-mccaffrey_plume
-NIST_NRC_Parallel_Panels
-Wu_Bakar_Tunnels
-Memorial_Tunnel
-Memorial_Tunnel_2
-FHWA_Tunnel
-Theobald_Hose_Stream
-USFS_Deep_Fuel_Beds
+if ALL_CASES
+    backward_facing_step
+    beyler_hood
+    sandia_helium_plume
+    sandia_methane_fire
+    spray_attenuation
+    flame_height2
+    purdue_flames
+    VTT_Sprays
+    fm_datacenter_veltest
+    mccaffrey_plume
+    NIST_NRC_Parallel_Panels
+    Wu_Bakar_Tunnels
+    Memorial_Tunnel
+    Memorial_Tunnel_2
+    FHWA_Tunnel
+    Theobald_Hose_Stream
+    USFS_Deep_Fuel_Beds
+end
 
 display('validation scripts completed successfully!')
+end
