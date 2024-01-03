@@ -59,7 +59,7 @@ impi_intel_linux: $(obj_mpi)
 # OSX
 
 ompi_intel_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
-ompi_intel_osx: LFLAGS = -static-intel
+ompi_intel_osx: LFLAGS = -static-intel -ld_classic
 ompi_intel_osx: FCOMPL = mpifort
 ompi_intel_osx: obj = test_mpi
 ompi_intel_osx: $(obj_mpi)
