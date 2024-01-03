@@ -9,7 +9,7 @@
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 &VENT XB=-0.05,0.05,-0.05,0.05,0,0, SURF_ID='SAMPLE' /
 
-&MATL ID                = 'water'
+&MATL ID                = 'MOISTURE'
       DENSITY           = 1000.
       CONDUCTIVITY      = 0.6
       EMISSIVITY        = 0.9
