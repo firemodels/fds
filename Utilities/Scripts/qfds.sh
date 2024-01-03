@@ -6,49 +6,48 @@ function stop_fds_if_requested {
 if [ "$OPENMPCASES" == "" ]; then
   if [ "$STOPFDS" != "" ]; then
    echo "stopping case: $in"
-   touch $stopfile
+   touch $stopfile $stopcatfile
    exit
   fi
 
   if [ "$STOPFDSMAXITER" != "" ]; then
     echo "creating delayed stop file: $infile"
     echo $STOPFDSMAXITER > $stopfile
+    echo $STOPFDSMAXITER > $stopcatfile
   fi
 
   if [ "$stopjob" == "1" ]; then
     echo "stopping case: $in"
-    touch $stopfile
+    touch $stopfile $stopcatfile
     exit
   fi
 
   if [ "$STOPFDSMAXITER" == "" ]; then
-    if [ -e $stopfile ]; then
-      rm $stopfile
-    fi
+    rm -f $stopfile $stopcatfile
   fi
 else
   for i in `seq 1 $OPENMPCASES`; do
     stopfile=${filebase[$i]}.stop
+    stopcatfile=${filebase[$i]}_cat.stop
     if [ "$STOPFDS" != "" ]; then
       echo "stopping case: ${files[$i]}"
-      touch $stopfile
+      touch $stopfile $stopcatfile
     fi
 
     if [ "$STOPFDSMAXITER" != "" ]; then
-      echo "creating delayed stop file: $stopfile"
+      echo "creating delayed stop file: $stopfile and $stopcatfile"
       echo $STOPFDSMAXITER > $stopfile
+      echo $STOPFDSMAXITER > $stopcatfile
     fi
 
     if [ "$stopjob" == "1" ]; then
       echo "stopping case: ${files[$i]}"
-      touch $stopfile
+      touch $stopfile $stopcatfile
     fi
 
     if [ "$STOPFDSMAXITER" == "" ]; then
       if [ "$STOPFDS" == "" ]; then
-        if [ -e $stopfile ]; then
-          rm $stopfile
-        fi
+        rm -f $stopfile $stopcatfile
       fi
     fi
   done
@@ -644,6 +643,7 @@ outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 qlog=$fulldir/$infile.qlog
 stopfile=$fulldir/$infile.stop
+stopcatfile=$fulldir/${infile}_cat.stop
 scriptlog=$fulldir/$infile.slog
 in_full_file=$fulldir/$in
 
