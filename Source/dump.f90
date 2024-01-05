@@ -19,7 +19,7 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
-USE VTK_FDS_INTERFACE, ONLY : WRITE_VTK_SLICE_WRAPPER,BUILD_VTK_GAS_PHASE_GEOMETRY,&
+USE VTK_FDS_INTERFACE, ONLY : WRITE_VTK_SLICE_WRAPPER,BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,&
                 WRITE_VTK_SM3D_WRAPPER,WRITE_VTK_SL3D_WRAPPER,DEALLOCATE_VTK_GAS_PHASE_GEOMETRY
 USE VTK_FORTRAN, ONLY : VTK_FILE, PVTK_FILE
 
@@ -157,8 +157,18 @@ IF (T>=SM3D_VTK_CLOCK(SM3D_VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) 
    ENDDO
 ENDIF
 
+! VTK Boundary data
+
+IF (T>=BNDF_VTK_CLOCK(BNDF_VTK_COUNTER(NM))) THEN
+   CALL DUMP_BNDF(T,DT,NM,1)
+   DO WHILE(BNDF_VTK_COUNTER(NM)<SIZE(BNDF_VTK_CLOCK)-1)
+      BNDF_VTK_COUNTER(NM) = BNDF_VTK_COUNTER(NM) + 1
+      IF (BNDF_VTK_CLOCK(BNDF_VTK_COUNTER(NM))>=T) EXIT
+   ENDDO
+ENDIF
+
 IF (T>=BNDF_CLOCK(BNDF_COUNTER(NM))) THEN
-   CALL DUMP_BNDF(T,DT,NM)
+   CALL DUMP_BNDF(T,DT,NM,0)
    DO WHILE(BNDF_COUNTER(NM)<SIZE(BNDF_CLOCK)-1)
       BNDF_COUNTER(NM) = BNDF_COUNTER(NM) + 1
       IF (BNDF_CLOCK(BNDF_COUNTER(NM))>=T) EXIT
@@ -395,6 +405,7 @@ ALLOCATE(FN_SL3D_VTK(NMESHES+1))
 ALLOCATE(LU_SL3D_VTK(NMESHES+1))
 ALLOCATE(FN_SMOKE3D_VTK(NMESHES+1))
 ALLOCATE(LU_SMOKE3D_VTK(NMESHES+1))
+ALLOCATE(FN_BNDF_VTK(NMESHES+1))
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -4280,11 +4291,13 @@ SUBROUTINE DUMP_SMOKE3D(T,DT,NM,IFRMT)
 USE ISOSMOKE, ONLY: SMOKE3D_TO_FILE
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER,  INTENT(IN) :: NM,IFRMT
-INTEGER  :: I,J,K,N,IFACT,JFACT,KFACT,ITM,ITM1,NC,NP
+INTEGER  :: I,J,K,N,IFACT,JFACT,KFACT,ITM,ITM1,NC,NP,I1=0,J1=0,K1=0,I2,J2,K2,NX,NY,NZ
 REAL(FB) :: DXX,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
-INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: QQ_PACK_INT
+!INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: QQ_PACK_INT
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK_INT
+CHARACTER(C_CHAR) :: C, MOLD
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: X_PTS, Y_PTS, Z_PTS
 INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
 INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
@@ -4371,30 +4384,30 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
       ENDIF
       WRITE(FN_SMOKE3D_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "",TRIM(CHID),'_SM3D_',NM,'_',ITM,ITM1,'.vtu'
       !WRITE(FN_SMOKE3D_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "./results/",TRIM(CHID),'_SM3D_',NM,'_',ITM,ITM1,'.vtu'
-      !WRITE(*,*) "ARRAY SIZES ", IBAR, JBAR, KBAR, IBP1, JBP1, KBP1
-      ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1))
-      DO I = 0, IBAR
-         IFACT = I
-         DO J = 0, JBAR
-            JFACT = J*(IBAR)
-            DO K = 0, KBAR
-               KFACT = K*(JBAR)*(IBAR)
+      I2 = MESHES(NM)%IBAR
+      J2 = MESHES(NM)%JBAR
+      K2 = MESHES(NM)%KBAR
+      NX = I2 + 1 - I1
+      NY = J2 + 1 - J1
+      NZ = K2 + 1 - K1
+      ALLOCATE(QQ_PACK(NX*NY*NZ))
+      DO I = I1, I2
+         IFACT = (I-I1)
+         DO J = J1, J2
+            JFACT = (J-J1)*NX
+            DO K = K1, K2
+               KFACT = (K - K1)*NY*NX
                QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
             ENDDO
          ENDDO
       ENDDO
       IF (N .EQ. 1) THEN
-         !CALL INITIALIZE_VTK(LU_SMOKE3D_VTK(NM),FN_SMOKE3D_VTK(NM),'UnstructuredGrid')
-         !CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SMOKE3D_VTK(NM),  &
-         !                                  NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
-         !CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
-         !
          IF (VTK_BINARY) THEN
             VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_SMOKE3D_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
          ELSE
             VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_SMOKE3D_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
          ENDIF ! do not change capitalization on mesh topology
-         CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SMOKE3D_VTK(NM), &
+         CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', &
                                            NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
          VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NP, NC=NC)
          VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NP, NC=NC, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
@@ -4403,22 +4416,22 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
          CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
          
       ENDIF
-      ALLOCATE(QQ_PACK_INT(IBP1*JBP1*KBP1))
+      ALLOCATE(QQ_PACK_INT(NX*NY*NZ))
       IF (S3%DISPLAY_TYPE=='GAS') THEN
 
          FACTOR=-REAL(S3%MASS_EXTINCTION_COEFFICIENT,FB)*DXX
          DO I=1,NP
             VAL_FDS = MAX(0.0_FB,QQ_PACK(I))
-            VAL_SMV = 254*(1.0_FB-EXP(FACTOR*VAL_FDS))
-            QQ_PACK_INT(I) = NINT(VAL_SMV)
+            VAL_SMV = 127*(1.0_FB-EXP(FACTOR*VAL_FDS))
+            QQ_PACK_INT(I) = VAL_SMV !NINT(VAL_SMV)
          ENDDO
 
       ELSEIF (S3%DISPLAY_TYPE=='FIRE') THEN
 
          DO I=1,NP
             VAL_FDS = MIN(HRRPUV_MAX_SMV,MAX(0._FB,QQ_PACK(I)))
-            VAL_SMV = 254*(VAL_FDS/HRRPUV_MAX_SMV)
-            QQ_PACK_INT(I) = NINT(VAL_SMV)
+            VAL_SMV = 127*(VAL_FDS/HRRPUV_MAX_SMV)
+            QQ_PACK_INT(I) = VAL_SMV !NINT(VAL_SMV)
          ENDDO
 
       ELSEIF (S3%DISPLAY_TYPE=='TEMPERATURE') THEN
@@ -4426,13 +4439,13 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
          TEMP_MIN = REAL(TMPA-TMPM,FB)
          DO I=1,NP
             VAL_FDS = MIN(TEMP_MAX_SMV,MAX(TEMP_MIN,QQ_PACK(I)))
-            VAL_SMV = 254*((VAL_FDS-TEMP_MIN)/(TEMP_MAX_SMV-TEMP_MIN))
-            QQ_PACK_INT(I) = NINT(VAL_SMV)
+            VAL_SMV = 127*((VAL_FDS-TEMP_MIN)/(TEMP_MAX_SMV-TEMP_MIN))
+            QQ_PACK_INT(I) = VAL_SMV !NINT(VAL_SMV)
          ENDDO
 
       ELSE
          DO I=1,NP
-            QQ_PACK_INT(I) = NINT(QQ_PACK(I))
+            QQ_PACK_INT(I) = QQ_PACK(I) !NINT(QQ_PACK(I))
          ENDDO
       ENDIF
       
@@ -6102,7 +6115,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       ELSE
          VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_SL3D_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
       ENDIF ! do not change capitalization on mesh topology
-      CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SL3D_VTK(NM), &
+      CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', &
                                         NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
       VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NP, NC=NC)
       VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NP, NC=NC, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
@@ -6376,9 +6389,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          CLOSE(LU_SLCF(IQ,NM))
       ENDIF
    ENDIF
-
-
-
+   
    ! Dump out the slice file to a .vtk file
 
    IF (VTK3D) THEN
@@ -6407,13 +6418,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
             ENDDO
             
             VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME=SL%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
-            !IF (VTK_BINARY) THEN
-            !   CALL WRITE_VTK_SLICE_DATA(LU_SL3D_VTK(NM), FN_SL3D_VTK(NM),&
-            !                             QQ_PACK, SL%SMOKEVIEW_LABEL(1:30), 'ascii')
-            !ELSE
-            !   CALL WRITE_VTK_SLICE_DATA(LU_SL3D_VTK(NM), FN_SL3D_VTK(NM),&
-            !                             QQ_PACK, SL%SMOKEVIEW_LABEL(1:30), 'ascii')
-            !ENDIF
             
             DEALLOCATE(QQ_PACK)
          ENDIF
@@ -10739,17 +10743,26 @@ END SUBROUTINE DUMP_MASS
 !> \param T Current simulation time (s)
 !> \param DT Current time step size (s)
 !> \param NM Mesh number
+!> \param IFRMT BNDF (IFRMT=0) or VTK (IFRMT=1)
 
-SUBROUTINE DUMP_BNDF(T,DT,NM)
+SUBROUTINE DUMP_BNDF(T,DT,NM,IFRMT)
 
 REAL(EB), INTENT(IN) :: T,DT
 REAL(FB) :: STIME, BOUND_MIN, BOUND_MAX, BF_FACTOR
-INTEGER :: ISUM,NF,IND,I,J,K,IC,IW,L,L1,L2,N,N1,N2,IP,NC,I1,I2,J1,J2,K1,K2
-INTEGER :: NBF_DEBUG
-INTEGER, INTENT(IN) :: NM
+INTEGER :: ISUM,NF,IND,I,J,K,IC,IW,L,L1,L2,N,N1,N2,IP,NC,I1,I2,J1,J2,K1,K2,ITM,ITM1
+INTEGER :: NBF_DEBUG,IFACT
+INTEGER, INTENT(IN) :: NM,IFRMT
 TYPE(PATCH_TYPE), POINTER :: PA
 REAL(FB) BNDF_TIME, BNDF_VAL_MIN, BNDF_VAL_MAX
 INTEGER :: CHANGE_BOUND, IERROR
+INTEGER :: NX, NY, NZ, NCELLS, NPOINTS
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: X_PTS, Y_PTS, Z_PTS
+INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
+TYPE(VTK_FILE)     :: A_VTK_FILE                    ! A VTK file.
+INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+LOGICAL :: VTK_INITIALIZED
 
 IF (MESHES(NM)%N_PATCH==0 .AND. MESHES(NM)%N_INTERNAL_CFACE_CELLS==0) RETURN
 
@@ -10759,20 +10772,271 @@ STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 
 CALL POINT_TO_MESH(NM)
 
-FILE_LOOP: DO NF=1,N_BNDF
-   IF (N_PATCH == 0) CYCLE FILE_LOOP
-   BF => BOUNDARY_FILE(NF)
-   PY => PROPERTY(BF%PROP_INDEX)
-   BOUND_MAX = -1.0E+33_FB
-   BOUND_MIN = -BOUND_MAX
-   WRITE(LU_BNDF(NF,NM)) STIME
-   IND  = ABS(BF%INDEX)
-   NC = 0
+IF (IFRMT.EQ.0) THEN
+   FILE_LOOP: DO NF=1,N_BNDF
+      IF (N_PATCH == 0) CYCLE FILE_LOOP
+      BF => BOUNDARY_FILE(NF)
+      PY => PROPERTY(BF%PROP_INDEX)
+      BOUND_MAX = -1.0E+33_FB
+      BOUND_MIN = -BOUND_MAX
+      WRITE(LU_BNDF(NF,NM)) STIME
+      IND  = ABS(BF%INDEX)
+      NC = 0
 
-   PATCH_LOOP: DO IP=1,N_PATCH
+      PATCH_LOOP: DO IP=1,N_PATCH
 
+         PA => PATCH(IP)
+
+         PP  = REAL(OUTPUT_QUANTITY(-IND)%AMBIENT_VALUE,FB)
+         PPN = 0._FB
+         IBK = 0
+
+         ! Adjust PATCH indices depending on orientation
+
+         SELECT CASE(ABS(PA%IOR))
+            CASE(1) ; L1=PA%JG1 ; L2=PA%JG2 ; N1=PA%KG1 ; N2=PA%KG2
+            CASE(2) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%KG1 ; N2=PA%KG2
+            CASE(3) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%JG1 ; N2=PA%JG2
+         END SELECT
+
+         ! Evaluate the given boundary quantity at each cell of the current PATCH
+
+         DO K=PA%KG1,PA%KG2
+            DO J=PA%JG1,PA%JG2
+               DO I=PA%IG1,PA%IG2
+                  IC = CELL_INDEX(I,J,K)
+                  IW = CELL(IC)%WALL_INDEX(-PA%IOR) ; IF (IW==0) CYCLE
+                  SELECT CASE(ABS(PA%IOR))
+                     CASE(1) ; L=J ; N=K
+                     CASE(2) ; L=I ; N=K
+                     CASE(3) ; L=I ; N=J
+                  END SELECT
+                  IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. &
+                      WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. .NOT.CELL(IC)%SOLID) THEN
+                     IBK(L,N) = 1
+                     PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW,&
+                                                        OPT_BNDF_INDEX=NF),FB)
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+
+         ! Integrate the boundary quantity in time
+
+         IF (BNDF_COUNTER(NM)>0 .AND. BF%TIME_INTEGRAL_INDEX>0) THEN
+            DO N=N1,N2
+               DO L=L1,L2
+                  NC = NC + 1
+                  BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) + &
+                     PP(L,N)*REAL(BNDF_CLOCK(BNDF_COUNTER(NM))-BNDF_CLOCK(BNDF_COUNTER(NM)-1),FB)
+                  PP(L,N) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX)
+               ENDDO
+            ENDDO
+         ENDIF
+
+         ! Interpolate the boundary quantity PP at cell corners, PPN
+
+         IF (.NOT.BF%CELL_CENTERED) THEN
+            DO N=N1-1,N2
+               DO L=L1-1,L2
+                  IF (IBK(L,N)==1)     PPN(L,N) = PPN(L,N) + PP(L,N)
+                  IF (IBK(L+1,N)==1)   PPN(L,N) = PPN(L,N) + PP(L+1,N)
+                  IF (IBK(L,N+1)==1)   PPN(L,N) = PPN(L,N) + PP(L,N+1)
+                  IF (IBK(L+1,N+1)==1) PPN(L,N) = PPN(L,N) + PP(L+1,N+1)
+                  ISUM = IBK(L,N)+IBK(L,N+1)+IBK(L+1,N)+IBK(L+1,N+1)
+                  IF (ISUM>0) THEN
+                     PPN(L,N) = PPN(L,N)/REAL(ISUM,FB)
+                  ELSE
+                     PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
+                                                        OPT_BNDF_INDEX=NF),FB)
+                  ENDIF
+               ENDDO
+            ENDDO
+            IF (BF%DEBUG .EQ. 0) THEN
+               WRITE(LU_BNDF(NF,NM)) ((PPN(L,N),L=L1-1,L2),N=N1-1,N2)
+               DO L = L1-1, L2
+               DO N = N1-1, N2
+                  BOUND_MIN = MIN(PPN(L,N),BOUND_MIN)
+                  BOUND_MAX = MAX(PPN(L,N),BOUND_MAX)
+               ENDDO
+               ENDDO
+            ELSE
+               NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
+               BF_FACTOR = 0.0_FB
+               IF ( NBF_DEBUG .GT. 1) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
+               WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
+               BOUND_MIN = -STIME
+               BOUND_MAX =  STIME
+            ENDIF
+
+         ELSE
+            IF (BF%DEBUG .EQ. 0) THEN
+               WRITE(LU_BNDF(NF,NM)) ((PP(L,N),L=L1,L2+1),N=N1,N2+1)
+               DO L = L1, L2+1
+               DO N = N1, N2+1
+                  BOUND_MIN = MIN(PP(L,N),BOUND_MIN)
+                  BOUND_MAX = MAX(PP(L,N),BOUND_MAX)
+               ENDDO
+               ENDDO
+            ELSE
+               NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
+               BF_FACTOR = 0.0_FB
+               IF ( NBF_DEBUG .GT. 1 ) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
+               WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
+               BOUND_MIN = -STIME
+               BOUND_MAX =  STIME
+            ENDIF
+         ENDIF
+
+      ENDDO PATCH_LOOP
+      CHANGE_BOUND = 0
+      IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
+         BNDF_VAL_MIN = BOUND_MIN
+         BNDF_VAL_MAX = BOUND_MAX
+         CHANGE_BOUND = 1
+      ELSE
+         OPEN(LU_BNDF(NF+N_BNDF,NM),FILE=FN_BNDF(NF+N_BNDF,NM),ACTION='READ')
+         READ(LU_BNDF(NF+N_BNDF,NM),FMT=*,IOSTAT=IERROR)BNDF_TIME, BNDF_VAL_MIN, BNDF_VAL_MAX
+         CLOSE(LU_BNDF(NF+N_BNDF,NM))
+         IF( IERROR /= 0 .OR. BOUND_MIN < BNDF_VAL_MIN) THEN
+            BNDF_VAL_MIN = BOUND_MIN
+            CHANGE_BOUND = 1
+         ENDIF
+         IF( IERROR /= 0 .OR. BOUND_MAX > BNDF_VAL_MAX) THEN
+            BNDF_VAL_MAX = BOUND_MAX
+            CHANGE_BOUND = 1
+         ENDIF
+      ENDIF
+      IF (CHANGE_BOUND == 1) THEN
+         OPEN(LU_BNDF(NF+N_BNDF,NM),FILE=FN_BNDF(NF+N_BNDF,NM),FORM='FORMATTED',STATUS='REPLACE')
+         WRITE(LU_BNDF(NF+N_BNDF,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)')STIME, BNDF_VAL_MIN, BNDF_VAL_MAX
+         CLOSE(LU_BNDF(NF+N_BNDF,NM))
+      ENDIF
+
+   ENDDO FILE_LOOP
+
+   IF (CC_IBM) THEN
+      FILE_LOOP2 : DO NF=1,N_BNDF
+         BF => BOUNDARY_FILE(NF)
+         PY => PROPERTY(BF%PROP_INDEX)
+         IND  = ABS(BF%INDEX)
+         NC = 0
+         I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
+         ! write geometry for slice file
+         CHANGE_BOUND = 0
+         IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
+            OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='REPLACE')
+            CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM), &
+                                      .FALSE.,.TRUE.,"INBOUND_FACES",1,STIME,I1,I2,J1,J2,K1,K2,BF%DEBUG, &
+                                      IND,0,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,0,0,BF%PROP_INDEX,0,0,T,DT,NM, &
+                                      BOUND_MIN, BOUND_MAX)
+            BNDF_VAL_MIN = BOUND_MIN
+            BNDF_VAL_MAX = BOUND_MAX
+            CHANGE_BOUND = 1
+         ELSE
+            ! data file at subsequent time steps
+            OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+            CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM), &
+                            .FALSE.,.TRUE.,"INBOUND_FACES",0,STIME,I1,I2,J1,J2,K1,K2,BF%DEBUG, &
+                            IND,0,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,0,0,BF%PROP_INDEX,0,0,T,DT,NM, &
+                            BOUND_MIN, BOUND_MAX)
+            OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM), ACTION='READ')
+            READ(LU_BNDG(NF+N_BNDF,NM),FMT=*,IOSTAT=IERROR)BNDF_TIME, BNDF_VAL_MIN, BNDF_VAL_MAX
+            CLOSE(LU_BNDG(NF+N_BNDF,NM))
+            IF (IERROR /= 0 .OR. BOUND_MIN < BNDF_VAL_MIN) THEN
+              BNDF_VAL_MIN = BOUND_MIN
+              CHANGE_BOUND = 1
+            ENDIF
+            IF (IERROR /= 0 .OR. BOUND_MAX > BNDF_VAL_MAX) THEN
+              BNDF_VAL_MAX = BOUND_MAX
+              CHANGE_BOUND = 1
+            ENDIF
+         ENDIF
+         IF (CHANGE_BOUND == 1) THEN
+            OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM),FORM='FORMATTED',STATUS='REPLACE')
+            WRITE(LU_BNDG(NF+N_BNDF,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, BNDF_VAL_MIN, BNDF_VAL_MAX
+            CLOSE(LU_BNDG(NF+N_BNDF,NM))
+         ENDIF
+         CLOSE(LU_BNDG(NF,NM))
+      ENDDO FILE_LOOP2
+   ENDIF
+ELSEIF (IFRMT.EQ.1) THEN
+   ITM  = INT(STIME)
+   ITM1 = NINT(ABS(STIME-ITM)*100)
+   IF (ITM1==100) THEN
+      ITM = ITM+1
+      ITM1 = 0
+   ENDIF
+   WRITE(FN_BNDF_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "",TRIM(CHID),'_BNDF_',NM,'_',ITM,ITM1,'.vtu'
+   IF (VTK_BINARY) THEN
+      VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_BNDF_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+   ELSE
+      VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_BNDF_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+   ENDIF ! do not change capitalization on mesh topology
+   PATCH_LOOP1: DO IP=1,N_PATCH
       PA => PATCH(IP)
+      ! Initialize piece
+      CALL BUILD_VTK_SOLID_PHASE_GEOMETRY(NM, PA, 'UnstructuredGrid', NCELLS, NPOINTS, &
+                                          X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)          
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NPOINTS, NC=NCELLS)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NPOINTS, NC=NCELLS, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NCELLS, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
+      VTK_INITIALIZED=.TRUE.
+      CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
+      
+      ! Loop through cell centered = F
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='OPEN')
+      FILE_LOOPA: DO NF=1,N_BNDF
+         IF (N_PATCH == 0) CYCLE FILE_LOOPA
+         BF => BOUNDARY_FILE(NF)
+         IF (BF%CELL_CENTERED) CYCLE FILE_LOOPA
+         PY => PROPERTY(BF%PROP_INDEX)
+         BOUND_MAX = -1.0E+33_FB
+         BOUND_MIN = -BOUND_MAX
+         IND  = ABS(BF%INDEX)
+                  
+         CALL PACK_VTK_BNDF(PA,BF,IND,PP,PPN,QQ_PACK)
+         
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME=BF%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
+         DEALLOCATE(QQ_PACK)
+      ENDDO FILE_LOOPA
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='CLOSE')
+      
+      ! Loop through cell centered = T
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='OPEN')
+      FILE_LOOPB: DO NF=1,N_BNDF
+         IF (N_PATCH == 0) CYCLE FILE_LOOPB
+         BF => BOUNDARY_FILE(NF)
+         IF (.NOT.BF%CELL_CENTERED) CYCLE FILE_LOOPB
+         PY => PROPERTY(BF%PROP_INDEX)
+         BOUND_MAX = -1.0E+33_FB
+         BOUND_MIN = -BOUND_MAX
+         IND  = ABS(BF%INDEX)
+                  
+         CALL PACK_VTK_BNDF(PA,BF,IND,PP,PPN,QQ_PACK)
+         
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME=BF%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
+         DEALLOCATE(QQ_PACK)
+      ENDDO FILE_LOOPB
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='CLOSE')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
+   ENDDO PATCH_LOOP1
+   VTK_ERROR = A_VTK_FILE%FINALIZE()
+ENDIF
 
+FROM_BNDF = .FALSE.
+
+CONTAINS
+
+   SUBROUTINE PACK_VTK_BNDF(PA,BF,IND,PP,PPN,QQ_PACK)
+      IMPLICIT NONE
+      TYPE(PATCH_TYPE), POINTER, INTENT(IN) :: PA
+      TYPE(BOUNDARY_FILE_TYPE), POINTER, INTENT(IN) :: BF
+      REAL(FB), POINTER, DIMENSION(:,:), INTENT(IN) :: PP,PPN
+      INTEGER, INTENT(IN) :: IND
+      INTEGER :: ISUM,I,J,K,L,L1,L2,N,N1,N2
+      REAL(FB), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: QQ_PACK
+      
       PP  = REAL(OUTPUT_QUANTITY(-IND)%AMBIENT_VALUE,FB)
       PPN = 0._FB
       IBK = 0
@@ -10838,116 +11102,35 @@ FILE_LOOP: DO NF=1,N_BNDF
                ENDIF
             ENDDO
          ENDDO
-         IF (BF%DEBUG .EQ. 0) THEN
-            WRITE(LU_BNDF(NF,NM)) ((PPN(L,N),L=L1-1,L2),N=N1-1,N2)
-            DO L = L1-1, L2
-            DO N = N1-1, N2
-               BOUND_MIN = MIN(PPN(L,N),BOUND_MIN)
-               BOUND_MAX = MAX(PPN(L,N),BOUND_MAX)
+      ENDIF
+      
+      SELECT CASE(ABS(PA%IOR))
+         CASE(1) ; L1=PA%JG1 ; L2=PA%JG2 ; N1=PA%KG1 ; N2=PA%KG2;
+         CASE(2) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%KG1 ; N2=PA%KG2;
+         CASE(3) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%JG1 ; N2=PA%JG2;
+      END SELECT
+      NPOINTS = (L2-L1+2)*(N2-N1+2)
+      NCELLS = (L2-L1+1)*(N2-N1+1)
+      IFACT = 1
+      IF (.NOT.BF%CELL_CENTERED) THEN
+         ALLOCATE(QQ_PACK(NPOINTS))
+         DO N = N1-1,N2
+            DO L = L1-1,L2
+               QQ_PACK(IFACT)=PPN(L,N)
+               IFACT = IFACT+1
             ENDDO
-            ENDDO
-         ELSE
-            NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
-            BF_FACTOR = 0.0_FB
-            IF ( NBF_DEBUG .GT. 1) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
-            WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
-            BOUND_MIN = -STIME
-            BOUND_MAX =  STIME
-         ENDIF
-
+         ENDDO
       ELSE
-         IF (BF%DEBUG .EQ. 0) THEN
-            WRITE(LU_BNDF(NF,NM)) ((PP(L,N),L=L1,L2+1),N=N1,N2+1)
-            DO L = L1, L2+1
-            DO N = N1, N2+1
-               BOUND_MIN = MIN(PP(L,N),BOUND_MIN)
-               BOUND_MAX = MAX(PP(L,N),BOUND_MAX)
+         ALLOCATE(QQ_PACK(NCELLS))
+         DO L = L1,L2
+            DO N = N1,N2
+               QQ_PACK(IFACT)=PP(L,N)
+               IFACT = IFACT+1
             ENDDO
-            ENDDO
-         ELSE
-            NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
-            BF_FACTOR = 0.0_FB
-            IF ( NBF_DEBUG .GT. 1 ) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
-            WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
-            BOUND_MIN = -STIME
-            BOUND_MAX =  STIME
-         ENDIF
+         ENDDO
       ENDIF
 
-   ENDDO PATCH_LOOP
-   CHANGE_BOUND = 0
-   IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
-      BNDF_VAL_MIN = BOUND_MIN
-      BNDF_VAL_MAX = BOUND_MAX
-      CHANGE_BOUND = 1
-   ELSE
-      OPEN(LU_BNDF(NF+N_BNDF,NM),FILE=FN_BNDF(NF+N_BNDF,NM),ACTION='READ')
-      READ(LU_BNDF(NF+N_BNDF,NM),FMT=*,IOSTAT=IERROR)BNDF_TIME, BNDF_VAL_MIN, BNDF_VAL_MAX
-      CLOSE(LU_BNDF(NF+N_BNDF,NM))
-      IF( IERROR /= 0 .OR. BOUND_MIN < BNDF_VAL_MIN) THEN
-         BNDF_VAL_MIN = BOUND_MIN
-         CHANGE_BOUND = 1
-      ENDIF
-      IF( IERROR /= 0 .OR. BOUND_MAX > BNDF_VAL_MAX) THEN
-         BNDF_VAL_MAX = BOUND_MAX
-         CHANGE_BOUND = 1
-      ENDIF
-   ENDIF
-   IF (CHANGE_BOUND == 1) THEN
-      OPEN(LU_BNDF(NF+N_BNDF,NM),FILE=FN_BNDF(NF+N_BNDF,NM),FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(LU_BNDF(NF+N_BNDF,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)')STIME, BNDF_VAL_MIN, BNDF_VAL_MAX
-      CLOSE(LU_BNDF(NF+N_BNDF,NM))
-   ENDIF
-
-ENDDO FILE_LOOP
-
-IF (CC_IBM) THEN
-   FILE_LOOP2 : DO NF=1,N_BNDF
-      BF => BOUNDARY_FILE(NF)
-      PY => PROPERTY(BF%PROP_INDEX)
-      IND  = ABS(BF%INDEX)
-      NC = 0
-      I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
-      ! write geometry for slice file
-      CHANGE_BOUND = 0
-      IF (REAL(T-T_BEGIN,FB)<TWO_EPSILON_FB) THEN
-         OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='REPLACE')
-         CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM), &
-                                   .FALSE.,.TRUE.,"INBOUND_FACES",1,STIME,I1,I2,J1,J2,K1,K2,BF%DEBUG, &
-                                   IND,0,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,0,0,BF%PROP_INDEX,0,0,T,DT,NM, &
-                                   BOUND_MIN, BOUND_MAX)
-         BNDF_VAL_MIN = BOUND_MIN
-         BNDF_VAL_MAX = BOUND_MAX
-         CHANGE_BOUND = 1
-      ELSE
-         ! data file at subsequent time steps
-         OPEN(LU_BNDG(NF,NM),       FILE=FN_BNDG(NF,NM),       FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-         CALL DUMP_SLICE_GEOM_DATA(LU_BNDG(NF,NM), &
-                         .FALSE.,.TRUE.,"INBOUND_FACES",0,STIME,I1,I2,J1,J2,K1,K2,BF%DEBUG, &
-                         IND,0,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,0,0,BF%PROP_INDEX,0,0,T,DT,NM, &
-                         BOUND_MIN, BOUND_MAX)
-         OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM), ACTION='READ')
-         READ(LU_BNDG(NF+N_BNDF,NM),FMT=*,IOSTAT=IERROR)BNDF_TIME, BNDF_VAL_MIN, BNDF_VAL_MAX
-         CLOSE(LU_BNDG(NF+N_BNDF,NM))
-         IF (IERROR /= 0 .OR. BOUND_MIN < BNDF_VAL_MIN) THEN
-           BNDF_VAL_MIN = BOUND_MIN
-           CHANGE_BOUND = 1
-         ENDIF
-         IF (IERROR /= 0 .OR. BOUND_MAX > BNDF_VAL_MAX) THEN
-           BNDF_VAL_MAX = BOUND_MAX
-           CHANGE_BOUND = 1
-         ENDIF
-      ENDIF
-      IF (CHANGE_BOUND == 1) THEN
-         OPEN(LU_BNDG(NF+N_BNDF,NM),FILE=FN_BNDG(NF+N_BNDF,NM),FORM='FORMATTED',STATUS='REPLACE')
-         WRITE(LU_BNDG(NF+N_BNDF,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, BNDF_VAL_MIN, BNDF_VAL_MAX
-         CLOSE(LU_BNDG(NF+N_BNDF,NM))
-      ENDIF
-      CLOSE(LU_BNDG(NF,NM))
-   ENDDO FILE_LOOP2
-ENDIF
-
-FROM_BNDF = .FALSE.
+   END SUBROUTINE PACK_VTK_BNDF
 
 END SUBROUTINE DUMP_BNDF
 
