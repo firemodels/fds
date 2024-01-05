@@ -8587,15 +8587,15 @@ CASE(INTEGER_THREE)
       JCC = CF%CELL_LIST(3,LOW_IND,IFACE)
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-      CFA%TMP_G = TMP_0(CF%IJK(KAXIS))
+      B1%TMP_G = TMP_0(CF%IJK(KAXIS))
       IF (SF%TMP_FRONT > 0._EB) THEN
          B1%TMP_F = SF%TMP_FRONT
       ELSE
-         B1%TMP_F = CFA%TMP_G
+         B1%TMP_F = B1%TMP_G
       ENDIF
 
       B1%RHO_F = CUT_CELL(ICC)%RHO(JCC)
-      CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
+      B1%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
       IF (RADIATION) THEN
@@ -8742,10 +8742,10 @@ CASE(INTEGER_THREE)
          WC_B1 => M%BOUNDARY_PROP1(WC%B1_INDEX)
          WC_BC => M%BOUNDARY_COORD(WC%BC_INDEX)
          ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-         CFA%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%TMP_F = WC_B1%TMP_F
          B1%RHO_F = WC_B1%RHO_F
-         CFA%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%ZZ_F(1:N_TOTAL_SCALARS) = WC_B1%ZZ_F(1:N_TOTAL_SCALARS)
 
          ! Assign normal velocity to CFACE from wall cell:

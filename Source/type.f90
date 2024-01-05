@@ -1222,7 +1222,7 @@ END TYPE CC_CUTFACE_TYPE
 
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
+INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=11
 INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=12
 INTEGER, PARAMETER :: N_CFACE_SCALAR_LOGICALS=0
 
@@ -1246,11 +1246,8 @@ TYPE CFACE_TYPE
    REAL(EB) :: AREA=0._EB                !< CFACE area. From CUT_FACE(CUT_FACE_IND1)%AREA(CUT_FACE_IND2)
    REAL(EB) :: DUNDT=0._EB
    REAL(EB) :: RSUM_G=0._EB              !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
-   REAL(EB) :: TMP_G                     !< Temperature (K) in adjacent gas phase cell
-   REAL(EB) :: RHO_G                     !< Gas density (kg/m3) in adjacent gas phase cell
    REAL(EB) :: MU_G=0.1_EB               !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
    REAL(EB) :: PRES_BXN                  !< Pressure H boundary condition for this CFACE (used in unstructured solvers).
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_G  !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas
 END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
