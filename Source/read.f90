@@ -749,7 +749,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (CYLINDRICAL .AND. .NOT.TWO_D) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR(121): J>1 with CYLINDRICAL on MESH ', NM 
+               WRITE(MESSAGE,'(A,I0)') 'ERROR(121): J>1 with CYLINDRICAL on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -856,8 +856,8 @@ IF_HT3D: IF (N_HT3D_SURF_LINES>0) THEN
          DO II=I-1,1,-1
             HO2 => HT3D_OBST(II)
             IF (HO%XS>HO2%XF.OR.HO%XF<HO2%XS.OR.HO%YS>HO2%YF.OR.HO%YF<HO2%YS.OR.HO%ZS>HO2%ZF.OR.HO%ZF<HO2%ZS) CYCLE
-            IF (HO2%GROUP_INDEX>HO%GROUP_INDEX) THEN  ! If current OBST is connected to one already assigned a GROUP_INDEX, 
-                                                      ! and that GROUP_INDEX is greater than that of the OBST, reduce the 
+            IF (HO2%GROUP_INDEX>HO%GROUP_INDEX) THEN  ! If current OBST is connected to one already assigned a GROUP_INDEX,
+                                                      ! and that GROUP_INDEX is greater than that of the OBST, reduce the
                                                       ! N_GROUPS and GROUP_INDEXs of OBSTs with higher values
                N_GROUPS = N_GROUPS - 1
                DO III=1,I-1
@@ -874,11 +874,11 @@ IF_HT3D: IF (N_HT3D_SURF_LINES>0) THEN
          ENDIF
       ENDIF
    ENDDO HT3D_OBST_LOOP
-   
+
    ! Now determine all the MESH indices corresponding to each group of connected OBSTs
-   
+
    ALLOCATE(MESH_COMM(N_GROUPS))
-   
+
    DO I=1,N_HT3D_OBST
       HO => HT3D_OBST(I)
       MC => MESH_COMM(HO%GROUP_INDEX)
@@ -892,13 +892,13 @@ IF_HT3D: IF (N_HT3D_SURF_LINES>0) THEN
          MC%LIST(MC%N_MESHES) = NM
       ENDDO MESH_LOOP
    ENDDO
-   
+
    DEALLOCATE(HT3D_OBST)
-    
+
 ENDIF IF_HT3D
 
 ! MESH_SEPARATION_DISTANCE is a very small length used to determine if there are periodic boundaries. NEIGHBOR_SEPARATION_DISANCE
-! is the distance beyond which no information or message passing is assumed between the meshes. Its value is deliberately 
+! is the distance beyond which no information or message passing is assumed between the meshes. Its value is deliberately
 ! complicated to avoid having two meshes separated by exactly that same distance.
 
 MESH_SEPARATION_DISTANCE = MIN(1.E-3_EB,0.05_EB*CHARACTERISTIC_CELL_SIZE)
@@ -1711,7 +1711,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 POROUS_FLOOR,PR,PROFILING,&
                 P_INF,RAMP_GX,RAMP_GY,RAMP_GZ,RESTART,RESTART_CHID,SC,&
                 RND_SEED,SHARED_FILE_SYSTEM,SIMULATION_MODE,SMOKE3D_16,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_DENSITY,SOOT_OXIDATION,&
-                TAU_DEFAULT,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
+                TAU_DEFAULT,TENSOR_DIFFUSIVITY,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
                 THERMOPHORETIC_DEPOSITION,THERMOPHORETIC_SETTLING,THICKEN_OBSTRUCTIONS,&
                 TMPA,TURBULENCE_MODEL,TURBULENT_DEPOSITION,UVW_FILE,&
                 VERBOSE,VISIBILITY_FACTOR,VN_MAX,VN_MIN,Y_CO2_INFTY,Y_O2_INFTY,&
@@ -1820,6 +1820,13 @@ ELSEIF (SIMULATION_MODE=='SVLES') THEN
    CONSTANT_SPECIFIC_HEAT_RATIO = .TRUE.
 ELSE
    WRITE(MESSAGE,'(A,A,A)')  'ERROR(128): SIMULATION_MODE, ',TRIM(SIMULATION_MODE),', is not an option.'
+   CALL SHUTDOWN(MESSAGE) ; RETURN
+ENDIF
+
+! Tensor diffusivity requires LES mode
+
+IF (TENSOR_DIFFUSIVITY .AND. SIM_MODE/=LES_MODE) THEN
+   WRITE(MESSAGE,'(A,A,A)')  "ERROR: TENSOR_DIFFUSIVITY requies SIMULATION_MODE='LES'."
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -7619,6 +7626,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
          SF%HEAT_TRANSFER_MODEL = LOGLAW_HTC_MODEL
       CASE('RAYLEIGH')
          SF%HEAT_TRANSFER_MODEL = RAYLEIGH_HTC_MODEL
+      CASE('IMPINGING JET')
+         SF%HEAT_TRANSFER_MODEL = IMPINGING_JET_HTC_MODEL
+      CASE('FM')
+         SF%HEAT_TRANSFER_MODEL = FM_HTC_MODEL
+      CASE('UGENT')
+         SF%HEAT_TRANSFER_MODEL = UGENT_HTC_MODEL
    END SELECT
 
    SF%HRRPUA               = 1000._EB*HRRPUA
@@ -7834,11 +7847,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ENDIF
    ENDIF
 
-   IF (SF%HEAT_TRANSFER_MODEL==RAYLEIGH_HTC_MODEL .AND. GRAV<TWO_EPSILON_EB)  THEN
-      WRITE (MESSAGE,'(A,A,A)') 'ERROR(331): SURF ',TRIM(SF%ID),' cannot use a RAYLEIGH model with GRAV=0.'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
-
    IF (SF%REFERENCE_HEAT_FLUX > 0._EB) THEN
       IF (SF%TMP_IGN>=50000._EB .OR. SF%RAMP(TIME_HEAT)%ID=='null' .OR. SF%HRRPUA <=0._EB) THEN
          WRITE (MESSAGE,'(A,A,A)') 'ERROR(332): SURF ',TRIM(SF%ID),&
@@ -7929,9 +7937,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
                IF (ML%RESIDUE_MATL_NAME(NNN,NR) == 'null') CYCLE
                IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN,NR))) CYCLE
                N_LIST = N_LIST + 1
-               IF (N_LIST>MAX_MATERIALS_TOTAL) THEN 
+               IF (N_LIST>MAX_MATERIALS_TOTAL) THEN
                   WRITE(MESSAGE,'(3A)') 'ERROR(334): SURF ',TRIM(SF%ID),' has too many materials.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN 
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                NAME_LIST (N_LIST) = ML%RESIDUE_MATL_NAME(NNN,NR)
                INDEX_LIST(N_LIST) = ML%RESIDUE_MATL_INDEX(NNN,NR)

@@ -331,8 +331,10 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
+   REAL(EB) :: U_IMPACT=0._EB        !< Impact velocity from stagnation pressure
 
-   INTEGER  :: SURF_INDEX=-1         !< Surface index
+   INTEGER :: SURF_INDEX=-1          !< Surface index
+   INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection
 
 END TYPE BOUNDARY_PROP2_TYPE
 
