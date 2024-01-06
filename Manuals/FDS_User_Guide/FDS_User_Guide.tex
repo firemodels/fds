@@ -2192,6 +2192,15 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
 
+\subsubsection{Impinging Jet Heat Transfer Model}
+\label{info:impinging_jet}
+
+The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingment point and consequently a fictiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on {\ct SURF} using {\ct HEAT\_TRANSFER\_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
+\be
+   \NU_{\rm imp} = C_0 + \left( C_1 \, \RE_{\rm imp}^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm{imp}} L}{\mu}
+\ee
+The default coefficients are $C_0=0$, $C_1=0.055$, $C_2=0$, $m=0.8$.  But custom values may be entered on the {\ct SURF} line as described above.  Again, the default length scale is taken to be $L=1$ m, but may be changed.  This value is usually set to the diameter of the jet source in the literature.  The heat transfer coefficient obtained from $\NU_{\rm imp}$ is compared to that from forced and free convection and the largest value is chosen for the surface.
+
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
@@ -13505,7 +13514,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 559 \> {\ct Output QUANTITY \ldots SPEC\_ID \ldots not found                        } \> Section~\ref{info:hvacoutputquantities}  \\
 560 \> {\ct HVAC\_SMV QUANTITY \ldots not appropriate for .hvac file.               } \> Section~\ref{info:hvacoutputquantities}  \\
 561 \> {\ct HVAC\_SMV QUANTITY \ldots  not found                                    } \> Section~\ref{info:hvacoutputquantities}  \\
-     \>                                                                               \>                          \\ 
+     \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
 603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\
