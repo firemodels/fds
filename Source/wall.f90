@@ -2050,7 +2050,7 @@ ENDIF PYROLYSIS_PREDICTED_IF
 
 ! Add internal heat source specified by user
 
-IF (SF%SPECIFIED_HEAT_SOURCE) Q_S(1:NWP) = Q_S(1:NWP)+SF%INTERNAL_HEAT_SOURCE(LAYER_INDEX(1:NWP))
+Q_S(1:NWP) = Q_S(1:NWP) + ONE_D%HEAT_SOURCE(LAYER_INDEX(1:NWP))
 
 ! Add special convection term for Boundary Fuel Model
 
@@ -2326,23 +2326,23 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
 
                !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
-               CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),SF%STRETCH_FACTOR,&
-                                      SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX,N_LAYER_CELLS_NEW(NL),&
-                                      SMALLEST_CELL_SIZE(NL),DDSUM)
+               CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),ONE_D%STRETCH_FACTOR(NL),&
+                                      ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
+                                      N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),DDSUM)
                   LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
                      N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
                      IF (MOD(N_LAYER_CELLS_NEW(NL),2)==0) THEN
                         DDSUM = 0._EB
                         DO N=1,N_LAYER_CELLS_NEW(NL)/2
-                           DDSUM = DDSUM + SF%STRETCH_FACTOR**(N-1)
+                           DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
                         ENDDO
                         DDSUM = 2._EB*DDSUM
                      ELSE
                         DDSUM = 0._EB
                         DO N=1,(N_LAYER_CELLS_NEW(NL)-1)/2
-                           DDSUM = DDSUM + SF%STRETCH_FACTOR**(N-1)
+                           DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
                         ENDDO
-                        DDSUM = 2._EB*DDSUM + SF%STRETCH_FACTOR**((N_LAYER_CELLS_NEW(NL)-1)/2)
+                        DDSUM = 2._EB*DDSUM + ONE_D%STRETCH_FACTOR(NL)**((N_LAYER_CELLS_NEW(NL)-1)/2)
                      ENDIF
                      ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / DDSUM
                      ONE_D%DDSUM(NL) = DDSUM
@@ -2368,9 +2368,9 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
          ELSE EXPAND_CONTRACT
             !Since cells only expanding, there is no issue with remeshing layer
-            CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
-               SF%STRETCH_FACTOR,SF%CELL_SIZE_FACTOR,SF%CELL_SIZE,SF%N_LAYER_CELLS_MAX,N_LAYER_CELLS_NEW(NL), &
-               ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
+            CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),&
+               ONE_D%STRETCH_FACTOR(NL),ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
+               N_LAYER_CELLS_NEW(NL),ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                REMESH_LAYER(NL) = .TRUE.
          ENDIF EXPAND_CONTRACT
@@ -2438,7 +2438,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ENDDO
 
          CALL GET_WALL_NODE_COORDINATES(NWP_NEW,NWP,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%N_LAYER_CELLS, &
-            ONE_D%SMALLEST_CELL_SIZE(1:ONE_D%N_LAYERS),SF%STRETCH_FACTOR,REMESH_LAYER(1:ONE_D%N_LAYERS),&
+            ONE_D%SMALLEST_CELL_SIZE,ONE_D%STRETCH_FACTOR,REMESH_LAYER(1:ONE_D%N_LAYERS),&
             X_S_NEW(0:NWP_NEW),ONE_D%X(0:NWP),ONE_D%LAYER_THICKNESS(1:ONE_D%N_LAYERS))
          CALL GET_WALL_NODE_WEIGHTS(NWP_NEW,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
             X_S_NEW(0:NWP_NEW),LAYER_DIVIDE,DX_S(1:NWP_NEW),RDX_S(0:NWP_NEW+1),RDXN_S(0:NWP_NEW),&
