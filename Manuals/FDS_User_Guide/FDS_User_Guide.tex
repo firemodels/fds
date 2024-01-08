@@ -408,6 +408,7 @@ MPI and OpenMP can be used together. For example, 4 MPI processes can be assigne
 \newpage
 
 \section{Launching an FDS Job}
+\label{info:launching}
 
 To start an FDS simulation, you can either use a third-party graphical user interface (GUI) or you can invoke the computer's command prompt and type a one-line command, as described in the following sections.
 
@@ -548,7 +549,11 @@ To confirm the speedup provided by OpenMP, a series of test cases\footnote{The i
 \section{Monitoring Progress}
 \label{info:monitoring_progress}
 
-Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
+Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. By default, the diagnostics are written out every 100 timesteps after the first 100 timesteps. A different time interval can be specified by the user:
+\begin{lstlisting}
+&DUMP DIAGNOSTICS_INTERVAL=100 /
+\end{lstlisting}
+At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
 By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, its value is {\ct F} for jobs involving 32 Meshes or less, and {\ct T} for bigger numbers. When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
 \begin{lstlisting}
@@ -639,6 +644,7 @@ Note: Reports of specific bugs, problems, feature requests, and enhancements sho
 
 
 \section{Naming the Input File}
+\label{info:input_file_rules}
 
 The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code for Information Interchange. There are 128 characters that make up the standard ASCII text.} text file containing parameters organized into {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups. The input file provides FDS  with all of the necessary information to describe the scenario. The input file is saved with a name such as {\ct job\_name.fds}, where {\ct job\_name} is any character string that helps to identify the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the input file, then all of the output files associated with the calculation will then have this common prefix name.
 
@@ -788,11 +794,13 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 \section{Concatenating Input Files}
 \label{info:CATF}
 
-The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. The input line:
+The namelist group {\ct CATF} allows for the inclusion of input information from different files into a simulation. The input line:
 \begin{lstlisting}
 &CATF OTHER_FILES='file_1.txt','file_2.txt' /
 \end{lstlisting}
 adds the contents of the two listed files into the current input file. Up to 20 files can be listed on one {\ct CATF} line, and multiple {\ct CATF} lines can be included in the input file. After reading the input file, FDS creates a new input file, {\ct CHID\_cat.fds}, and then runs the case.
+
+When using this feature, limit the number of characters per line in both the original and added input files to 400.
 
 \section{Protecting Old Cases}
 \label{info:OVERWRITE}
@@ -924,6 +932,13 @@ The term ``multiple meshes'' means that the computational domain consists of mor
 \end{figure}
 
 To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases using MPI if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For MPI to work well, there has to be a comparable number of cells assigned to each MPI process, or otherwise most of the processes will sit idle waiting for the one with the largest number of cells to finish processing each time step. You can use multiple meshes on a single processor without using MPI , in which case one CPU will serially process each mesh, one by one.
+
+If your meshes are uniformly spaced, you can use the {\ct MULT} feature (Section~\ref{info:MULT}) to arrange them. For example, the lines
+\begin{lstlisting}
+&MESH IJK=24,24,24, XB=-0.12,-0.06,-0.12,-0.06,-0.12,-0.06, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.06, DY=0.06, DZ=0.06, I_UPPER=3, J_UPPER=3, K_UPPER=3 /
+\end{lstlisting}
+create a 4 by 4 by 4 array of meshes, each of which is 0.06~m on a side.
 
 Usually in an MPI calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 \begin{lstlisting}
@@ -1159,6 +1174,7 @@ Obstructions may be created or removed during a simulation. See Sec.~\ref{info:c
 
 
 \subsection{Thin Obstructions}
+\label{info:thin_obstructions}
 
 An obstruction that is relatively thin compared to the gas phase numerical grid spacing is approximated as an infinitely thin sheet. These obstructions, like window panes, form a flow and (partial) radiation barrier, but if the numerical mesh is coarse relative to its thickness, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. Smokeview renders this obstruction as a thin sheet, but it is allowed to have thermally-thick boundary conditions.
 
@@ -2176,12 +2192,22 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
 
+\subsubsection{Impinging Jet Heat Transfer Model}
+\label{info:impinging_jet}
+
+The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingment point and consequently a fictiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on {\ct SURF} using {\ct HEAT\_TRANSFER\_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
+\be
+   \NU_{\rm imp} = C_0 + \left( C_1 \, \RE_{\rm imp}^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm{imp}} L}{\mu}
+\ee
+The default coefficients are $C_0=0$, $C_1=0.055$, $C_2=0$, $m=0.8$.  But custom values may be entered on the {\ct SURF} line as described above.  Again, the default length scale is taken to be $L=1$ m, but may be changed.  This value is usually set to the diameter of the jet source in the literature.  The heat transfer coefficient obtained from $\NU_{\rm imp}$ is compared to that from forced and free convection and the largest value is chosen for the surface.
+
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
 {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
+\label{info:net_and_convective_heat_flux}
 
 Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since {\ct NET\_HEAT\_FLUX} combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. If you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}. If a droplet lands surface with a specfied heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
 
@@ -2441,6 +2467,7 @@ The 1-D heat conduction model used in FDS is appropriate for most building mater
 The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
 
 \subsubsection{Limitations}
+\label{info:HT3D_Limitations}
 
 \begin{enumerate}
 \item {\ct HT3D} cannot be applied to an exterior boundary; it must be applied to an {\ct OBST} for which at least one face in each coordinate direction is exposed.
@@ -2517,6 +2544,7 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
 
 
 \subsubsection{Surface Linings}
+\label{info:linings}
 
 In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
 \begin{lstlisting}
@@ -2547,7 +2575,7 @@ The sample case called {\ct Heat\_Transfer/checkerboard.fds} demonstrates how to
 &VENT XB=0.05,0.10,0.0031,0.0031,0.05,0.10, SURF_ID='paint', MULT_ID='M', IOR= 2 /
 &MULT ID='M', DX=0.10, DZ=0.10, I_UPPER=11, K_UPPER=11 /
 \end{lstlisting}
-There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long and 1.2~m wide. The gas phase grid size is 25~mm, much larger than the plate thickness. From the standpoint of the gas phase fluid solver, this plate is just a barrier and has no thickness. However, its thickness of 3.1~mm is taken into account by the 3-D heat conduction solver. The plate is assigned a {\ct MATL\_ID} of {\ct 'steel'} and it is also given a default set of surface properties using the {\ct SURF\_ID='no paint'}. This {\ct SURF\_ID} invokes the 3-D solver and it assigns a color and an {\ct EMISSIVITY} of 0.33. If no {\ct EMISSIVITY} had been assigned, it would have taken on that of {\ct 'steel'} which in this case would have taken the default value of 0.9. The {\ct VENT} lines apply a checkerboard pattern of ``black'' or high emissivity squares onto the plate. Figure~\ref{fig:checkerboard} displays an image of the simulation along with a plot showing a comparison of internal enthalpy and net heat flux. 
+There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long and 1.2~m wide. The gas phase grid size is 25~mm, much larger than the plate thickness. From the standpoint of the gas phase fluid solver, this plate is just a barrier and has no thickness. However, its thickness of 3.1~mm is taken into account by the 3-D heat conduction solver. The plate is assigned a {\ct MATL\_ID} of {\ct 'steel'} and it is also given a default set of surface properties using the {\ct SURF\_ID='no paint'}. This {\ct SURF\_ID} invokes the 3-D solver and it assigns a color and an {\ct EMISSIVITY} of 0.33. If no {\ct EMISSIVITY} had been assigned, it would have taken on that of {\ct 'steel'} which in this case would have taken the default value of 0.9. The {\ct VENT} lines apply a checkerboard pattern of ``black'' or high emissivity squares onto the plate. Figure~\ref{fig:checkerboard} displays an image of the simulation along with a plot showing a comparison of internal enthalpy and net heat flux.
 
 \begin{figure}[!ht]
 \includegraphics[height=2.35in]{SCRIPT_FIGURES/checkerboard_1000}
@@ -2942,6 +2970,7 @@ The {\ct REFERENCE\_TEMPERATURE} is the temperature in $^\circ$C where the mass 
 
 
 \subsection{The Heat of Reaction}
+\label{info:HEAT_OF_REACTION}
 
 Equation~(\ref{rr}) describes the rate of the reaction as a function of temperature.  Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into reaction products, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only for simple phase change reactions like the vaporization of water. For other reactions, it must be determined empirically (e.g., by differential scanning calorimetry).
 
@@ -3520,7 +3549,7 @@ where:
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
 \item[{\ct AREA}] is the cross sectional area of the duct in m$^2$.
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Sec.~\ref{info:HVACdamper}).
-\item[{\ct DIAMETER}] is the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
+\item[{\ct DIAMETER}] is the diameter of the duct in m.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  If this is not specified, it will be computed automatically as the difference between the {\ct XYZ} of the duct's endpoints or as the distance along the path between endpoints if {\ct WAYPOINTS} are defined.
@@ -3533,10 +3562,14 @@ where:
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
 \item[{\ct REVERSE}]  is a logical parameter that when {\ct T} indicates that the specified {\ct FAN\_ID} blows from the second node to the first. {\ct REVERSE} has no effect on {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} as a duct input. If {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} is specified for a duct and the reverse flow direction is needed, change the sign of the input to negative.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If {\ct ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in {\ct LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting {\ct ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving {\ct ROUGHNESS} unset.
+\item[{\ct ROUND}] flag indicating a round duct.
+\item[{\ct SQUARE}] flag indicating a square duct.
 \item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
 \item[{\ct WAYPOINTS}] is an array of coordinates in m that define the path a duct takes. Currently this only used for Smokeview visualization of the HVAC network. Up to 30 {\ct WAYPOINTS} can be defined. For example: {\ct WAYPOINTS(1,1:3)=1,1,1, WAYPOINTS(2,1:3)=2,2,2} as part of a duct input would mean the duct starts at the first node, then goes to the point (1,1,1), then to (2,2,2), and finally to the second node.
 \end{description}
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER}, or {\ct FAN\_ID} should be specified for a duct.  Also note that if one of these is specified, but no device or control function is provided, then the item will be assumed to be on or open as appropriate.
+
+If {\ct ROUND} or {\ct SQUARE} are set, then only one of {\ct AREA}, {\ct DIAMETER}, or {\ct PERIMETER} should be set. Otherwise two of the three are required.
 
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction at given point in time (flow can reverse direction over time).  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 
@@ -3601,19 +3634,18 @@ Below are three example duct node inputs representing a typical tee-type connect
 
 \begin{description}
 \item[{\ct AMBIENT}] is a logical value.  If {\ct T}, then the node is connected to the ambient (i.e., it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
-\item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
-\item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter must have two connected ducts. A filter cannot be located at an ambient node, a node that is attached to a {\ct VENT}, or node with three or more ducts.
+\item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node. Only one duct is allowed if the node is {\ct AMBIENT} or has a {\ct VENT\_ID}.  Up to 10 ducts can be connected to a node.
+\item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter must have two connected ducts. This means a filter cannot be located at an ambient node, a node that is attached to a {\ct VENT}, or node with three or more ducts.
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the dimensionless loss coefficients for the node.  {\ct LOSS(I,J)} is the loss coefficient for flow from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss coefficient for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct NETWORK\_ID}] Used for Smokeview visualization. All ducts and nodes with a common {\ct NETWORK\_ID} can be selected or deselected as a group in Smokeview. If no value is given, the node will be placed in the Unassigned network.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.  No two {\ct VENTs} should be defined with the same {\ct VENT\_ID}.
-\item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
-If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.
+\item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node. If the node is connected to the FDS domain, then do not specify {\ct XYZ} as FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
 \noindent
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=T} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.
 
-It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
+It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes; however, the entire {\ct VENT} must lie within a single pressure zone.
 
 Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
 
@@ -3632,8 +3664,8 @@ Below are sample inputs for the three types of fans supported by FDS.
 
 \begin{description}
 \item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational. FDS assumes a default value of 1.
-\item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
-\item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
+\item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model. Value must be > 0.
+\item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model. Value must be > 0.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
 \item[{\ct TAU\_FAN}] defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user-defined ramp) of fans.
 \item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).  If you wish to have a time dependent flow use the {\ct VOLUME\_FLOW} input for a duct rather than for a fan.
@@ -3812,7 +3844,7 @@ By default, cells in a mass transport duct are initialized to ambient values. On
 
 There are two basic approaches for defining HVAC networks in FDS.
 
-In the first approach, one can specify enough {\ct VOLUME\_FLOW} and {\ct MASS\_FLOW} inputs such that all flows everywhere in the network are known. For example, if a tee has three ducts and two of the ducts have specified flow, then the third duct flow is known based on conservation of mass at that node. If all flows are specified everywhere in the HVAC network, then {\ct LOSS} inputs for ducts and nodes are not needed.
+In the first approach, one can specify enough {\ct VOLUME\_FLOW} and {\ct MASS\_FLOW} inputs such that all flows everywhere in the network are known. For example, if a tee has three ducts and two of the ducts have specified flow, then the third duct flow is known based on conservation of mass at that node. If all flows are specified everywhere in the HVAC network, then {\ct LOSS} inputs for ducts and nodes are not needed. Do not over specify flows. For example, if a node has three ducts, do not specify {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} for more than two of the ducts. This ensures that any numerical round-off error does not result in conservation errors.
 
 In the second approach, one or more ducts have flows that are not specified, in this case FDS must solve for the pressures at either end of the duct to determine the flow through the duct. As one example, if a tee has three ducts and only one of the ducts has a specified flow, then FDS will use the relative pressure drops along the two other ducts to determine the flow. If no {\ct LOSS} inputs are given, then FDS may not correctly solve for the flow. As another example, losses in the HVAC network limit how quickly flow in the ducts can change over time. If there is a single duct connecting two rooms with no {\ct LOSS} inputs given, then small pressure changes can lead to large changes in duct velocity and increase the risk of a numerical instability. If you specify an HVAC network where flow is being solved for by FDS, then you must provided {\ct LOSS} inputs for each possible flow path. FDS will perform a check at startup and return an error message if it finds insufficient losses have been specified; however, this check may not discover all cases.
 
@@ -3947,6 +3979,10 @@ This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be name
 
 Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
 
+A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}. A {\ct VENT} used for localized leakage should also not have any other input resulting in a mass flow assigned to it.,
+
+A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}.
+
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
 Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
@@ -4063,6 +4099,7 @@ where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m
 
 
 \subsubsection{Boundary Layer (Circular Vent)}
+\label{info:VEL_BULK}
 
 {\ct PROFILE='BOUNDARY LAYER'} may be used for circular vents created using {\ct RADIUS}. By adding {\ct VEL\_BULK} on the {\ct SURF} line together with {\ct VEL}, FDS will produce a plug flow core profile, with max velocity given by {\ct VEL}, and a quadratic profile in the boundary layer.  The form of the profile is illustrated in Fig.~\ref{fig:bl_profile} for a circular vent.  The functional form of the velocity profile (here taken a vertical profile) is
 \begin{equation}
@@ -4293,9 +4330,9 @@ The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(
 \end{figure}
 
 \subsubsection{Initial Conditions}
+\label{info:MASS_FRACTION_0}
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
-
 \begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
 \end{lstlisting}
@@ -4397,6 +4434,7 @@ The Prandtl number for a gas species can be specified using {\ct PR\_GAS} on {\c
 {\ct PR\_GAS} is defined for a known species, it will override the existing value.
 
 \subsection{Air}
+\label{info:AIR}
 
 There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost.
 
@@ -5294,6 +5332,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 
 \subsection{Soot Surface Oxidation}
+\label{info:SOOT_OXIDATION}
 
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
@@ -5353,13 +5392,15 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
-
 \begin{lstlisting}
 &SPEC ID='WATER VAPOR', AEROSOL=T,MEAN_DIAMETER=1.E-6,
       MASS_FRRACTION_0=0.1,MASS_FRACTION_COND=0.05/
 \end{lstlisting}
-
 Condensation can occur in both gas cells and on wall cells. The heat transfer to a wall due to condensation can be output with the {\ct QUANTITY} of {\ct CONDENSATION HEAT FLUX}. The amount of vapor that condenses can be output with the {\ct QUANTITY} of {\ct SURFACE DEPOSITION} using the condensed phase {\ct SPEC\_ID}.
+
+
+
+
 
 \chapter{Radiation}
 
@@ -5629,6 +5670,7 @@ If the {\ct SPEC\_ID} is listed in Appendix~\ref{info:predefined_species}, and i
 There might be other optional parameters listed on the {\ct PART} line, but these are the ones that are absolutely necessary. In addition, if {\ct SPEC\_ID='WATER VAPOR'} the droplets are not only assigned the thermo-physical properties of water, but also the radiation absorption properties are set to that of water, and the droplets are colored blue in Smokeview.
 
 \subsubsection{Unknown Liquid/Gas Species}
+\label{info:liquid_props}
 
 If the {\ct SPEC\_ID} is not listed in Appendix~\ref{info:predefined_species} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
@@ -5934,13 +5976,12 @@ In this case, there is no calculation of heat conduction in depth. Only the surf
 \end{figure}
 
 
-
-
+\FloatBarrier
 
 \subsection{Porous Media}
 \label{info:porous_media}
 
-A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example:
+A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example for a porous aluminum matrix:
 \begin{lstlisting}
 &SURF ID='LIGAMENT', MATL_ID='ALUMINUM ALLOY', THICKNESS=7.3E-5,
       GEOMETRY='CYLINDRICAL', HEAT_TRANSFER_COEFFICIENT=10. /
@@ -5951,14 +5992,15 @@ A 3-D array of particles can be used to represent the drag exerted by porous med
 &INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T,
       PART_ID='FOAM' /
 \end{lstlisting}
-These lines are a model of aluminum foam. The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell.
 
-The {\ct PART} line provides information about the particles. The {\ct DRAG\_LAW} indicates a special empirical model for the porous media. This model states that the pressure drop through the media is given by
+The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell. The {\ct SURF} inputs of {\ct POROUS\_VOLUME\_FRACTION} and {\ct THICKNESS} do not directly effect the drag calculation. They are used to define the surface area for computing heat transfer between the gas and the porous media.
+
+The {\ct PART} line provides information about the particles which includes the drag they impose on the flow. The {\ct DRAG\_LAW} of {\ct POROUS MEDIA} indicates a special drag model for porous media. This model states that the pressure drop through the media is given by
 \be
    \label{eqn_porous_media}
    \Delta p =  \delta \, \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
-where $\delta$ is the thickness of the foam block in the flow direction, $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
+where $\delta$ is the thickness of the foam block in the flow direction (the smaller of the cell size in the flow direction or the {\ct XB} dimension in the flow direction from the {\ct INIT} input), $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
 
 The {\ct INIT} line designates the volume occupied by the porous media using the sextuplet {\ct XB}. A single particle is inserted into the center of each cell occupied by the foam by specifying the parameters {\ct N\_PARTICLES\_PER\_CELL=1} and {\ct CELL\_CENTERED=T}.
 
@@ -6382,14 +6424,14 @@ It is assumed that the wind speed profile, $u$, and potential temperature\footno
 \end{eqnarray}
 where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
 \begin{eqnarray}
-   \Psi_{\rm M}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
-   \Psi_{\rm H}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+   \Psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \Psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
 \end{eqnarray}
 The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
 
 In the event that these various parameters are not reported or known, they can be estimated from the basic meteorological conditions. From just a single measured mean wind velocity, $u_{\rm ref}$, taken at a height, $z_{\rm ref}$, the friction velocity can be calculated from:
 \be
-   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
+   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)-\Psi_{\rm m}(z_{\rm ref}/L)}
 \ee
 The Obukhov length, $L$, can be chosen from Table~\ref{OL}. Suggested values of the aerodynamic roughness length\footnote{Note that \emph{aerodynamic} roughness, $z_0$, is not the same as \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. For more information, see Sec.~\ref{aerodynamic_roughness}.}, $z_0$, are given in Table~\ref{z0}.
 \begin{table}[!ht]
@@ -6425,7 +6467,7 @@ $z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
 
 The scaling potential temperature, $\theta_*$, can be obtained from the relation:
 \be
-   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}  \label{thera_star_eq}
+   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}  \quad ; \quad \theta_0 = \theta_{\rm ref} \bigg/ \left( 1 + \frac{u_*^2}{g \kappa^2 L} \big[ \ln(z_{\rm ref}/z_0) - \Psi_{\rm h}(z_{\rm ref}/z_0) \big] \right) \label{thera_star_eq}
 \ee
 Alternatively, the scaling potential temperature can be estimated from the expression for the sensible heat flux:
 \be
@@ -9193,6 +9235,7 @@ Every device ({\ct DEVC}) records a particular {\ct QUANTITY}. Usually this {\ct
 There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
 \subsection{Gas Phase Quantity at a Single Point}
+\label{info:DEVC_position}
 
 If you just want to record the time history of, say, the temperature at a particular point in the gas, add a line like:
 \begin{lstlisting}
@@ -11182,13 +11225,13 @@ Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities fo
 
 All HVAC output quantities can be selected with a {\ct DEVC} input. Do not specify an {\ct XYZ} or {\ct XB} for HVAC outputs. When using a {\ct DEVC}, quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID}, and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 
-HVAC output quantities beginning with {\ct DUCT} that are not duct cell quantities and output quantities beginning with {\ct NODE} except for {\ct NODE PRESSURE DIFFERENCE} can also be output to the {\ct CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). These are identified in Table~\ref{tab:hvacoutputquantities} as a File Type of H. Smokeview outputs are specified using the {\ct HVAC} namelist. To select duct outputs use {\ct TYPE\_ID='DUCT QUANTITY LIST'}, and for node outputs use {\ct TYPE\_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using {\ct QUANTITY}, and if any quantities require a species also specify {\ct QUANTITY\_SPEC\_ID}. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using {\ct DT\_HVAC} on {\ct DUMP}. For example:
+HVAC output quantities beginning with {\ct DUCT} that are not duct cell quantities and output quantities beginning with {\ct NODE} except for {\ct NODE PRESSURE DIFFERENCE} can also be output to the {\ct CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). These are identified in Table~\ref{tab:hvacoutputquantities} as a File Type of H. Smokeview outputs are specified using the {\ct HVAC} namelist. To select duct outputs create a single {\ct HVAC} input with {\ct TYPE\_ID='DUCT QUANTITY LIST'}, and to select node outputs create a single {\ct HVAC} input with {\ct TYPE\_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using {\ct QUANTITY}, and if any quantities require a species also specify {\ct QUANTITY\_SPEC\_ID} for that quantities. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using {\ct DT\_HVAC} on {\ct DUMP}. For example:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT QUANTITY LIST',
-       QUANTITY='DUCT VELOCITY','DUCT LOSS','DUCT VOLUME FRACTION',
-       QUANTITY_SPEC_ID(3)='OXYGEN'/
+       QUANTITY='DUCT VELOCITY','DUCT LOSS','DUCT VOLUME FRACTION','DUCT VOLUME FRACTION',
+       QUANTITY_SPEC_ID(3)='OXYGEN',QUANTITY_SPEC_ID(4)='SOOT'/
 \end{lstlisting}
-would output the velocity, flow loss, and the volume fraction of oxygen in all ducts.
+would output the velocity, flow loss, and the volume fractions of oxygen and soot in all ducts.
 
 \end{sloppypar}
 
@@ -11236,6 +11279,7 @@ would output the velocity, flow loss, and the volume fraction of oxygen in all d
 
 
 \chapter{Alphabetical List of Input Parameters}
+\label{info:namelists}
 
 This appendix lists all of the input parameters for FDS in separate tables grouped by namelist, these tables are in alphabetical order along with the parameters within them. This is intended to be used as a quick reference and does not replace reading the detailed description of the parameters in the main body of this guide. See Table \ref{tbl:namelistgroups} for a cross-reference of relevant sections and the tables in this appendix. The reason for this statement is that many of the listed parameters are mutually exclusive -- specifying more than one can cause the program to either fail or run in an unpredictable manner. Also, some of the parameters trigger the code to work in a certain mode when specified. For example, specifying the thermal conductivity of a solid surface triggers the code to assume the material to be thermally-thick, mandating that other
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice. Only prescribe those parameters which are necessary to describe the desired scenario. Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
@@ -11543,6 +11587,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                        \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
+{\ct DIAGNOSTICS\_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                            \\ \hline
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                   \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -11793,9 +11838,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct QUANTITY\_SPEC\_ID}      & Char.~Array   & Sections ~\ref{info:hvacoutputquantities}                                &               &                \\ \hline
 {\ct RAMP\_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan} &               &                \\ \hline
 {\ct RAMP\_LOSS}              & Character     & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &               &                \\ \hline
-{\ct REVERSE}                 & Logical       & Section~\ref{info:HVACduct}                                              &               & {\ct F}  \\ \hline
+{\ct REVERSE}                 & Logical       & Section~\ref{info:HVACduct}                                              &               & {\ct F}        \\ \hline
+{\ct ROUND}                   & Logical       & Section~\ref{info:HVACduct}                                              &               & {\ct T}        \\ \hline
 {\ct ROUGHNESS}               & Real          & Section~\ref{info:HVACduct}                                              &  m            & 0.0            \\ \hline
 {\ct SPEC\_ID}                & Char.~Array   & Section ~\ref{info:HVACfilter}                                           &               &                \\ \hline
+{\ct SQUARE}                  & Logical       & Section~\ref{info:HVACduct}                                              &               & {\ct T}        \\ \hline
 {\ct TAU\_AC}                 & Real          & Section ~\ref{info:HVACaircoil}                                          & s             & 1.0            \\ \hline
 {\ct TAU\_FAN}                & Real          & Section ~\ref{info:HVACfan}                                              & s             & 1.0            \\ \hline
 {\ct TAU\_VF}                 & Real          & Section~\ref{info:HVACduct}                                              & s             & 1.0            \\ \hline
@@ -12050,7 +12097,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
 {\ct HVAC\_LOCAL\_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  {\ct T}          \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L}                & Logical      & Section ~\ref{info:hvacmasstransport}   &            & {\ct F}           \\ \hline
-{\ct HVAC\_PRES\_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 0.5               \\ \hline
+{\ct HVAC\_PRES\_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
 {\ct HVAC\_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & {\ct F}           \\ \hline
 {\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct T}           \\ \hline
 {\ct I\_MAX\_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
@@ -13123,6 +13170,363 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
 {\ct XYZ(3,:)}                     & Real Array            & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
+
+
+
+
+
+
+\chapter{Error Codes}
+
+
+\begin{tabbing}
+\hspace{0.3in}  \= \hspace{5.2in} \= \hspace{1in}  \\
+101  \> {\ct Problem with \ldots\ line.                                             } \> Chapter~\ref{info:namelists}  \\
+102  \> {\ct Input file \ldots\ not found in the current directory.                 } \> Section~\ref{info:launching}  \\
+103  \> {\ct CATF file \ldots\ not found.                                           } \> Section~\ref{info:CATF}  \\
+104  \> {\ct OVERWRITE=F and concatenated file \ldots\ exists.                      } \> Section~\ref{info:OVERWRITE}  \\
+105  \> {\ct Input file \ldots\ has line with \ldots\ characters.                   } \> Section~\ref{info:CATF}  \\
+106  \> {\ct CATF file \ldots\ has line with \ldots\ characters.                    } \> Section~\ref{info:CATF}  \\
+107  \> {\ct Hidden carriage return character in line starting with \ldots\         } \> Section~\ref{info:input_file_rules}  \\
+108  \> {\ct No periods allowed in CHID.                                            } \> Section~\ref{info:input_file_rules}  \\
+109  \> {\ct Remove the file \ldots\ from the current directory.                    } \> Section~\ref{info:restart}  \\
+110  \> {\ct All meshes must be CYLINDRICAL \ldots\                                 } \> Section~\ref{info:2D}  \\
+111  \> {\ct MULT\_ID \ldots\ on MESH line \ldots\ not found.                       } \> Section~\ref{info:multimesh}  \\
+112  \> {\ct The number of MPI processes \ldots\ exceeds the number of meshes       } \> Section~\ref{info:parallelprocessing}  \\
+113  \> {\ct No MESH line(s) defined.                                               } \> Section~\ref{info:MESH_Basics}  \\
+114  \> {\ct MPI\_PROCESS for MESH \ldots\ greater than total \ldots\               } \> Section~\ref{info:multimesh}  \\
+115  \> {\ct Number of meshes exceeds number of MPI processes \ldots\               } \> Section~\ref{info:parallelprocessing}  \\
+116  \> {\ct IJK(2) must be 1 for all grids in 2D Calculation.                      } \> Section~\ref{info:2D}  \\
+117  \> {\ct MPI\_PROCESS must be continuous and monotonically increasing.          } \> Section~\ref{info:multimesh}  \\
+118  \> {\ct MESH 1 must be assigned to MPI\_PROCESS 0.                             } \> Section~\ref{info:multimesh}  \\
+119  \> {\ct XB(:)=XB(:) on MESH \ldots\                                            } \> Section~\ref{info:MESH_Basics}  \\
+120  \> {\ct XB(1)<0 with CYLINDRICAL on MESH \ldots\                               } \> Section~\ref{info:2D}  \\
+121  \> {\ct J>1 with CYLINDRICAL on MESH \ldots\                                   } \> Section~\ref{info:2D}  \\
+122  \> {\ct Too many MPI processes have been assigned to this job.                 } \> Section~\ref{info:parallelprocessing}  \\
+124  \> {\ct Problem with grid transformation.                                      } \> Section~\ref{info:TRNX}  \\
+125  \> {\ct Do not specify endpoints in linear grid transformation.                } \> Section~\ref{info:TRNX}  \\
+126  \> {\ct x (y,z) transformation not monotonic, MESH \ldots\                     } \> Section~\ref{info:TRNX}  \\
+     \>                                                                               \>                                     \\
+127  \> {\ct TURBULENCE\_MODEL \ldots\ is not appropriate for DNS.                  } \> Section~\ref{info:LES}  \\
+128  \> {\ct SIMULATION\_MODE \ldots\ is not an option.                             } \> Section~\ref{Sim_Mode}  \\
+129  \> {\ct TURBULENCE\_MODEL \ldots\ is not recognized.                           } \> Section~\ref{info:LES}  \\
+130  \> {\ct FLUX\_LIMITER \ldots\ is not recognized.                               } \> Section~\ref{info:flux_limiters}  \\
+131  \> {\ct GEOSTROPHIC\_WIND requires Coriolis force \ldots\                      } \> Section~\ref{info:geostrophic_wind}  \\
+     \>                                                                               \>                                     \\
+132  \> {\ct SPEC \ldots: N\_BINS must be >=2.                                      } \> Section~\ref{info:agglomeration}  \\
+133  \> {\ct SPEC \ldots: AEROSOL must be .TRUE. to use N\_BINS.                    } \> Section~\ref{info:agglomeration}  \\
+134  \> {\ct SPEC \ldots: Do not specify MEAN\_DIAMETER and N\_BINS.                } \> Section~\ref{info:agglomeration}  \\
+135  \> {\ct SPEC \ldots: MAX(MIN)\_DIAMETER not set.                               } \> Section~\ref{info:agglomeration}  \\
+136  \> {\ct SPEC \ldots: MAX\_DIAMETER <= MIN\_DIAMETER.                           } \> Section~\ref{info:agglomeration}  \\
+137  \> {\ct SPEC \ldots: LUMPED\_COMPONENT\_ONLY must be .TRUE. to use N\_BINS.    } \> Section~\ref{info:agglomeration}  \\
+138  \> {\ct SPEC \ldots: Cannot set N\_BINS for a condensable species.             } \> Section~\ref{info:condensation}  \\
+139  \> {\ct SPEC \ldots: Condensable species cannot be LUMPED\_SPECIES\_ONLY.      } \> Section~\ref{info:condensation}  \\
+140  \> {\ct SPEC \ldots: Condensable species cannot be a lumped species.           } \> Section~\ref{info:condensation}  \\
+141  \> {\ct Species \ldots\ is primitive but more than one SPEC\_ID given.         } \> Section~\ref{info:lumped}  \\
+142  \> {\ct SPEC \ldots\ cannot specify both COPY\_LUMPED and N\_BINS.             } \> Section~\ref{info:lumped}  \\
+143  \> {\ct SPEC \ldots\ cannot specify both COPY\_LUMPED and BACKGROUND.          } \> Section~\ref{info:lumped}  \\
+144  \> {\ct Only one BACKGROUND SPECies can be defined.                            } \> Section~\ref{info:primitive}  \\
+145  \> {\ct Cannot define a LUMPED\_COMPONENT\_ONLY \ldots\                        } \> Section~\ref{info:lumped}  \\
+146  \> {\ct Cannot define a BACKGROUND species or redefine AIR \ldots\             } \> Section~\ref{info:lumped}  \\
+147  \> {\ct Species \ldots\ needs a name (ID=\ldots).                              } \> Section~\ref{info:SPEC_Basics}  \\
+148  \> {\ct SPEC \ldots\ cannot redefine AIR unless \ldots\                        } \> Section~\ref{info:AIR}  \\
+149  \> {\ct SPEC \ldots\ cannot specify both SPECIFIC\_HEAT and RAMP\_CP.          } \> Section~\ref{user_defined_gas_species_props}  \\
+150  \> {\ct SPEC \ldots\ cannot specify both SPECIFIC\_HEAT\_LIQUID \ldots\        } \> Section~\ref{user_defined_gas_species_props}  \\
+151  \> {\ct SPEC \ldots\ cannot specify both CONDUCTIVITY and RAMP\_K.             } \> Section~\ref{user_defined_gas_species_props}  \\
+152  \> {\ct SPEC \ldots\ cannot specify both DIFFUSIVITY and RAMP\_D.              } \> Section~\ref{user_defined_gas_species_props}  \\
+153  \> {\ct SPEC \ldots\ cannot specify both VISCOSITY and RAMP\_MU.               } \> Section~\ref{user_defined_gas_species_props}  \\
+154  \> {\ct SPEC \ldots\ cannot define both REFERENCE\_ENTHALPY and \ldots\        } \> Section~\ref{user_defined_gas_species_props}  \\
+155  \> {\ct Species \ldots\ has the same ID as species \ldots\                     } \> Section~\ref{info:SPEC_Basics}  \\
+156  \> {\ct Cannot define MASS\_FRACTION\_0 for a LUMPED \ldots\                   } \> Section~\ref{info:MASS_FRACTION_0}  \\
+157  \> {\ct SPEC \ldots: If one of SPECIFIC\_HEAT\_LIQUID \ldots\                  } \> Section~\ref{info:liquid_props}  \\
+158  \> {\ct SPEC \ldots: No MEAN\_DIAMETER given.                                  } \> Section~\ref{info:deposition}  \\
+159  \> {\ct SPEC \ldots\ cannot specify both MASS and VOLUME\_FRACTION.            } \> Section~\ref{info:lumped}  \\
+160  \> {\ct SPEC \ldots\ cannot specify both FORMULA and C,H,O, or N.              } \> Section~\ref{info:FORMULA}  \\
+161  \> {\ct Simple chemistry FUEL \ldots\ not defined on REAC or SPEC.             } \> Section~\ref{info:simple_chemistry}  \\
+162  \> {\ct SPEC \ldots\ has the same names as a predefined lumped species.        } \> Section~\ref{info:simple_chemistry}  \\
+163  \> {\ct REAC \ldots: FORMULA limited to C,H,O,N for simple chemistry.          } \> Section~\ref{info:simple_chemistry}  \\
+164  \> {\ct REAC \ldots: Specify C and/or H for simple chemistry.                  } \> Section~\ref{info:simple_chemistry}  \\
+165  \> {\ct Cannot use simple chemistry with SOOT\_OXIDATION.                      } \> Section~\ref{info:SOOT_OXIDATION}  \\
+166  \> {\ct SOOT\_OXIDATION set without SOOT as a species.                         } \> Section~\ref{info:SOOT_OXIDATION}  \\
+167  \> {\ct SOOT\_OXIDATION set without SOOT defined as an AEROSOL species.        } \> Section~\ref{info:SOOT_OXIDATION}  \\
+168  \> {\ct SPEC \ldots: Subspecies \ldots\ not found.                             } \> Section~\ref{info:lumped}  \\
+169  \> {\ct SPEC \ldots: Mass or volume fraction for subspecies \ldots\            } \> Section~\ref{info:lumped}  \\
+170  \> {\ct SPEC \ldots: Cannot have duplicate species in SPEC\_ID.                } \> Section~\ref{info:lumped}  \\
+     \>                                                                               \>                                     \\
+171  \> {\ct REAC, Not enough carbon for the CO\_YIELD \ldots\                      } \> Section~\ref{info:simple_chemistry}  \\
+172  \> {\ct REAC, Not enough hydrogen for the SOOT\_YIELD \ldots\                  } \> Section~\ref{info:simple_chemistry}  \\
+173  \> {\ct REAC, Not enough nitrogen for the HCN\_YIELD.                          } \> Section~\ref{info:simple_chemistry}  \\
+174  \> {\ct REAC, Not enough nitrogen for the FUEL\_N\_TO\_HCN\_FRACTION.          } \> Section~\ref{info:simple_chemistry}  \\
+175  \> {\ct REAC, Not enough carbon for the FUEL\_C\_TO\_CO\_FRACTION \ldots\      } \> Section~\ref{info:simple_chemistry}  \\
+176  \> {\ct REAC, Not enough hydrogen for the FUEL\_H\_TO\_H2\_FRACTION \ldots\    } \> Section~\ref{info:simple_chemistry}  \\
+180  \> {\ct SPEC \ldots\ does not have a SPECIFIC\_HEAT\_LIQUID \ldots\            } \> Section~\ref{info:liquid_props}  \\
+181  \> {\ct SPEC \ldots\ does not have a MELTING\_TEMPERATURE.                     } \> Section~\ref{info:liquid_props}  \\
+182  \> {\ct SPEC \ldots\ does not have a VAPORIZATION\_TEMPERATURE.                } \> Section~\ref{info:liquid_props}  \\
+183  \> {\ct SPEC \ldots\ MELTING\_TEMPERATURE must be less than \ldots\            } \> Section~\ref{info:liquid_props}  \\
+184  \> {\ct SPEC \ldots\ does not have a HEAT\_OF\_VAPORIZATION.                   } \> Section~\ref{info:liquid_props}  \\
+185  \> {\ct SPEC \ldots\ does not have a DENSITY\_LIQUID.                          } \> Section~\ref{info:liquid_props}  \\
+187  \> {\ct SPEC \ldots\ is used for droplets and does not have liquid props.      } \> Section~\ref{info:liquid_props}  \\
+188  \> {\ct EXTINCTION\_MODEL \ldots\ is not recognized.                           } \> Section~\ref{info:extinction}  \\
+189  \> {\ct REAC \ldots\ cannot use both finite rate and simple chemistry.         } \> Section~\ref{info:simple_chemistry}  \\
+190  \> {\ct REAC \ldots\ requires a FUEL.                                          } \> Section~\ref{info:simple_chemistry}  \\
+191  \> {\ct FORMULA for SIMPLE\_CHEMISTRY can only contain C,H,O, and N.           } \> Section~\ref{info:simple_chemistry}  \\
+192  \> {\ct Specify fuel using C and/or H when using simple chemistry.             } \> Section~\ref{info:simple_chemistry}  \\
+193  \> {\ct FUEL\_C\_TO\_CO\_FRACTION must be between 0 and 1.                     } \> Section~\ref{info:two-step_simple_chemistry}  \\
+194  \> {\ct FUEL\_H\_TO\_H2O\_FRACTION must be between 0 and 1.                    } \> Section~\ref{info:two-step_simple_chemistry}  \\
+195  \> {\ct FUEL\_N\_TO\_HCN\_FRACTION must be between 0 and 1.                    } \> Section~\ref{info:two-step_simple_chemistry}  \\
+196  \> {\ct REAC \ldots\ SPEC\_ID\_NU and NU arrays or EQUATION must be defined.   } \> Section~\ref{info:finite}  \\
+197  \> {\ct REAC \ldots\ THIRD\_EFF values must be >= 0.                           } \> Section~\ref{info:third_body}  \\
+198  \> {\ct REAC \ldots\ invalid EQUATION specified.                               } \> Section~\ref{info:EQUATION}  \\
+199  \> {\ct REAC \ldots\ uses simple chemistry and has a duplicate fuel \ldots\    } \> Section~\ref{info:simple_chemistry}  \\
+200  \> {\ct Fuel for simple chemistry has NU\_O2<= 0 and requires air \ldots\      } \> Section~\ref{info:simple_chemistry}  \\
+201  \> {\ct REAC \ldots\ Cannot set NUs if an EQUATION is specified.               } \> Section~\ref{info:EQUATION}  \\
+202  \> {\ct REAC \ldots\ Tracked species \ldots\ not found.                        } \> Section~\ref{info:finite}  \\
+204  \> {\ct REAC \ldots\ Primitive species \ldots\ not found.                      } \> Section~\ref{info:finite}  \\
+205  \> {\ct REAC \ldots\ Products not specified.                                   } \> Section~\ref{info:finite}  \\
+206  \> {\ct REAC \ldots\ Reactants not specified.                                  } \> Section~\ref{info:finite}  \\
+207  \> {\ct REAC \ldots\ Mass of products does not equal mass of reactants.        } \> Section~\ref{info:REAC_Diagnostics}  \\
+208  \> {\ct REAC \ldots\ THIRD\_EFF primitive species \ldots\ not found.           } \> Section~\ref{info:third_body}  \\
+209  \> {\ct Name of ODE\_SOLVER is not recognized.                                 } \> Section~\ref{info:chem_integration}  \\
+210  \> {\ct REAC \ldots\ Missing an ENTHALPY\_OF\_FORMATION.                       } \> Section~\ref{info:liquid_props}  \\
+212  \> {\ct REAC \ldots\ Reversible reaction species \ldots\ missing G\_F.         } \> Section~\ref{info:gibbs_energy}  \\
+     \>                                                                               \>                                     \\
+213  \> {\ct PART \ldots\ cannot have both a specified DIAMETER and a SURF\_ID.     } \> Section~\ref{info:PART_SURF}  \\
+214  \> {\ct PART \ldots\ requires a specified DIAMETER.                            } \> Section~\ref{info:particle_size}  \\
+215  \> {\ct Cannot have MASSLESS=.TRUE. with evaporating PARTICLEs.                } \> Section~\ref{info:MASSLESS}  \\
+216  \> {\ct PART \ldots\ needs a SURF\_ID.                                         } \> Section~\ref{info:PART_SURF}  \\
+217  \> {\ct PART SPEC\_ID \ldots\ not found.                                       } \> Section~\ref{thermal_part_props}  \\
+218  \> {\ct PART \ldots\ Particles cannot evaporate to a lumped species.           } \> Section~\ref{info:liquid_droplets}  \\
+219  \> {\ct PART \ldots\ No DRAG\_COEFFICIENT when using a DRAG\_LAW.              } \> Section~\ref{info:particle_drag}  \\
+220  \> {\ct PART \ldots\ Specify exactly one ORIENTATION for a SCREEN.             } \> Section~\ref{info:particle_screen}  \\
+221  \> {\ct PART \ldots\ Specify FREE\_AREA\_FRACTION for a SCREEN.                } \> Section~\ref{info:particle_screen}  \\
+222  \> {\ct PART \ldots\ Specify all components for DRAG\_COEFFICIENT and \ldots\  } \> Section~\ref{info:porous_media}  \\
+223  \> {\ct PART \ldots\ Unrecognized drag law.                                    } \> Section~\ref{info:particle_drag}  \\
+224  \> {\ct PART \ldots\ Invalid EVAP\_MODEL.                                      } \> Section~\ref{info:liquid_droplets}  \\
+225  \> {\ct HEAT\_TRANSFER\_MODEL not appropriate for PART.                        } \> Section~\ref{info:convection}  \\
+     \>                                                                               \>                                     \\
+231  \> {\ct PROP \ldots\ values for SPRAY\_ANGLE cannot be the same.               } \> Section~\ref{info:sprinklers}  \\
+232  \> {\ct PROP \ldots\ HISTOGRAM needs HISTOGRAM\_NBINS>2.                       } \> Section~\ref{info:histograms}  \\
+233  \> {\ct PROP \ldots\ HISTOGRAM needs HISTOGRAM\_LIMITS.                        } \> Section~\ref{info:histograms}  \\
+234  \> {\ct PROP \ldots\ FED\_ACTIVITY out of range: \ldots\                       } \> Section~\ref{info:FED}  \\
+235  \> {\ct PROP \ldots\ VELOCITY\_COMPONENT > 3: \ldots\                          } \> Section~\ref{info:velocity_patch}  \\
+236  \> {\ct PROP \ldots\ VELOCITY\_PATCH requires P0.                              } \> Section~\ref{info:velocity_patch}  \\
+237  \> {\ct PROP \ldots\ specify PARTICLE\_VELOCITY with MASS\_FLOW\_RATE.         } \> Section~\ref{info:sprinklers}  \\
+238  \> {\ct PROP \ldots\ too few flow parameters.                                  } \> Section~\ref{info:pressureramp}  \\
+239  \> {\ct PROP SPEC\_ID \ldots\ not found.                                       } \> Section~\ref{info:alternative_smoke}  \\
+240  \> {\ct PART\_ID for PROP \ldots\ not found.                                   } \> Section~\ref{info:sprinklers}  \\
+241  \> {\ct PART\_ID for PROP \ldots\ cannot refer to MASSLESS particles.          } \> Section~\ref{info:sprinklers}  \\
+242  \> {\ct Spray Pattern Table \ldots\ massflux <= 0 for line \ldots\             } \> Section~\ref{info:sprinklers}  \\
+     \>                                                                               \>                                     \\
+251  \> {\ct MATL \ldots\ REAC \ldots\ Set REFERENCE\_TEMPERATURE or E, A.          } \> Section~\ref{info:kinetic_parameters}  \\
+252  \> {\ct MATL \ldots\ HEAT\_OF\_REACTION should be greater than 0.              } \> Section~\ref{info:HEAT_OF_REACTION}  \\
+253  \> {\ct MATL \ldots\ DENSITY=0.                                                } \> Section~\ref{info:thermal_properties}  \\
+254  \> {\ct MATL \ldots\ CONDUCTIVITY=0.                                           } \> Section~\ref{info:thermal_properties}  \\
+255  \> {\ct MATL \ldots\ SPECIFIC\_HEAT=0.                                         } \> Section~\ref{info:thermal_properties}  \\
+256  \> {\ct MATL \ldots\ SURFACE\_OXIDATION\_MODEL but no OXYGEN.                  } \> Section~\ref{vegetation_model}  \\
+257  \> {\ct Residue \ldots\ of \ldots\ is not defined.                             } \> Section~\ref{info:solid_pyrolysis}  \\
+258  \> {\ct PARTicle \ldots\ corresponding to MATL \ldots\ cannot be MASSLESS.     } \> Section~\ref{info:solid_pyrolysis}  \\
+259  \> {\ct MATL \ldots\ PART\_ID \ldots\ not defined.                             } \> Section~\ref{info:solid_pyrolysis}  \\
+260  \> {\ct MATL \ldots\ PART\_ID \ldots\ has a NU\_PART<=0.                       } \> Section~\ref{info:solid_pyrolysis}  \\
+261  \> {\ct Duplicate material name: \ldots\                                       } \> Section~\ref{info:MATL}  \\
+262  \> {\ct MATL \ldots\ requires a SPEC\_ID for yield \ldots\ of reaction \ldots\ } \> Section~\ref{info:solid_pyrolysis}  \\
+263  \> {\ct MATL \ldots\ can only specify one SPEC\_ID for a liquid.               } \> Section~\ref{info:liquid_fuels}  \\
+264  \> {\ct MATL \ldots\ SPEC\_ID \ldots\ not a tracked.                           } \> Section~\ref{info:solid_pyrolysis}  \\
+265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
+     \>                                                                               \>                                     \\
+301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
+302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\
+303  \> {\ct MOISTURE\_FRACTION on SURF \ldots\ exceeds theoretical limit.          } \> Section~\ref{info:vegetation}  \\
+304  \> {\ct SURF \ldots\ One layer only for TGA\_ANALYSIS=T.                       } \> Section~\ref{info:TGA_DSC_MCC}  \\
+305  \> {\ct SURF \ldots\ indicates a level set simulation \ldots\                  } \> Section~\ref{info:level_set}  \\
+306  \> {\ct SURF \ldots\ cannot have a specified flux and a MATL\_ID.              } \> Section~\ref{info:MASS_FLUX}  \\
+307  \> {\ct SURF \ldots\ must have a specified THICKNESS for Layer \ldots\         } \> Section~\ref{info:SURF_MATL_Basics}  \\
+308  \> {\ct SURF \ldots\ needs a RADIUS or THICKNESS.                              } \> Section~\ref{info:GEOMETRY}  \\
+309  \> {\ct SURF \ldots\ BACKING \ldots\ not recognized.                           } \> Section~\ref{info:BACKING}  \\
+310  \> {\ct SURF \ldots\ must specify TMP\_FRONT for CONVERT\_VOLUME\_TO\_MASS.    } \> Section~\ref{info:MASS_FLUX}  \\
+311  \> {\ct SURF \ldots\ cannot use velocity RAMP with CONVERT\_VOLUME\_TO\_MASS.  } \> Section~\ref{info:MASS_FLUX}  \\
+312  \> {\ct SURF \ldots\ GEOMETRY not recognized.                                  } \> Section~\ref{info:GEOMETRY}  \\
+313  \> {\ct SURF \ldots\ HEAT\_TRANSFER\_MODEL not recognized.                     } \> Section~\ref{info:convection}  \\
+314  \> {\ct SURF \ldots\ must have a REAC line when using HRRPUA or MLRPUA.        } \> Section~\ref{info:gas_burner}  \\
+315  \> {\ct SURF \ldots\ should have only one LEAK\_PATH and LEAK\_PATH\_ID.       } \> Section~\ref{info:Leaks}  \\
+316  \> {\ct SURF \ldots\ N\_LAYER\_CELLS\_MAX must be > 0.                         } \> Section~\ref{info:solid_phase_stability}  \\
+317  \> {\ct SURF \ldots\ Specify either ROUGHNESS or Z\_0, not both.               } \> Section~\ref{info:WALL_MODEL}  \\
+318  \> {\ct SURF \ldots\ MASS\_FLUX\_TOTAL is only for outflow.                    } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+320  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and MASS\_FRACTION.            } \> Section~\ref{info:MASS_FLUX}  \\
+321  \> {\ct SURF \ldots\ MASS\_FLUX cannot be less than zero.                      } \> Section~\ref{info:MASS_FLUX}  \\
+322  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and VEL.                       } \> Section~\ref{info:MASS_FLUX}  \\
+323  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and MASS\_FLUX\_TOTAL.         } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+324  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX\_TOTAL and VEL.                } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+325  \> {\ct SURF \ldots\ cannot use a negative MASS\_FRACTION.                     } \> Section~\ref{info:MASS_FLUX}  \\
+326  \> {\ct SURF \ldots\ cannot use RAMP\_MF with MLRPUA or HRRPUA.                } \> Section~\ref{info:RAMP_Time}  \\
+327  \> {\ct SURF \ldots\ Must define SPEC\_ID when using MASS\_FLUX \ldots\        } \> Section~\ref{info:MASS_FLUX}  \\
+328  \> {\ct SURF \ldots\ SPEC \ldots\ not found.                                   } \> Section~\ref{info:MASS_FLUX}  \\
+329  \> {\ct SURF \ldots\ sum of mass fractions greater than 1.                     } \> Section~\ref{info:MASS_FLUX}  \\
+330  \> {\ct SURF \ldots\ cannot use background species for MASS\_FRACTION.         } \> Section~\ref{info:MASS_FLUX}  \\
+331  \> {\ct SURF \ldots\ cannot use a RAYLEIGH model with GRAV=0.                  } \> Section~\ref{info:convection}  \\
+332  \> {\ct SURF \ldots\ REFERENCE\_HEAT\_FLUX requires HRRPUA, \ldots\            } \> Section~\ref{info:scaled_burning}  \\
+333  \> {\ct SURF \ldots\ MATL\_ID \ldots\ not found.                               } \> Section~\ref{info:Leaks}  \\
+334  \> {\ct SURF \ldots\ has too many materials.                                   } \> Section~\ref{info:solid_pyrolysis}  \\
+335  \> {\ct SURF \ldots\ cannot have a reacting MATL and IGNITION\_TEMPERATURE.    } \> Section~\ref{info:specified_burning}  \\
+336  \> {\ct SURF \ldots\ cannot use both ADIABATIC and NET and CONVECTIVE \ldots\  } \> Section~\ref{info:adiabatic}  \\
+337  \> {\ct SURF \ldots\ cannot use both NET and CONVECTIVE\_HEAT\_FLUX.           } \> Section~\ref{info:net_and_convective_heat_flux}  \\
+338  \> {\ct SURF \ldots\ cannot use TMP\_FRONT and NET\_HEAT\_FLUX.                } \> Section~\ref{info:net_and_convective_heat_flux}  \\
+339  \> {\ct SURF \ldots\ RAMP\_T\_I cannot be used with HT3D.                      } \> Section~\ref{info:TMP_INNER}  \\
+340  \> {\ct SURF \ldots\ RAMP\_T\_I requires a thermally thick surface.            } \> Section~\ref{info:TMP_INNER}  \\
+341  \> {\ct SURF \ldots\ RAMP\_T\_I cannot be used with TMP\_FRONT\_INITIAL.       } \> Section~\ref{info:TMP_INNER}  \\
+342  \> {\ct SURF \ldots\ RAMP\_T\_I cannot be used with TMP\_FRONT.                } \> Section~\ref{info:TMP_INNER}  \\
+243  \> {\ct SURF \ldots\ RAMP\_T\_I cannot be used with TMP\_BACK.                 } \> Section~\ref{info:TMP_INNER}  \\
+344  \> {\ct SURF \ldots\ RAMP\_T\_I cannot be used with TMP\_INNER.                } \> Section~\ref{info:TMP_INNER}  \\
+345  \> {\ct SURF \ldots\ VEL\_BULK must be less than or equal to VEL.              } \> Section~\ref{info:VEL_BULK}  \\
+346  \> {\ct SURF \ldots\ ZONE ID for LEAK\_PATH\_ID(1) not found.                  } \> Section~\ref{info:Leaks}  \\
+347  \> {\ct SURF \ldots\ ZONE ID for LEAK\_PATH\_ID(2) not found.                  } \> Section~\ref{info:Leaks}  \\
+348  \> {\ct SURF \ldots\ Cannot set the same ZONE for each leakage path.           } \> Section~\ref{info:Leaks}  \\
+349  \> {\ct SURF \ldots\ LEAK\_PATH greater than number of ZONEs.                  } \> Section~\ref{info:Leaks}  \\
+350  \> {\ct SURF \ldots\ needs a THICKNESS.                                        } \> Section~\ref{info:GEOMETRY}  \\
+351  \> {\ct SURF \ldots\ needs a LENGTH.                                           } \> Section~\ref{info:GEOMETRY}  \\
+352  \> {\ct SURF \ldots\ needs a WIDTH.                                            } \> Section~\ref{info:GEOMETRY}  \\
+353  \> {\ct PART \ldots\ SURF\_ID \ldots\ not found.                               } \> Section~\ref{info:PART_GEOMETRY}  \\
+354  \> {\ct SURF \ldots\ PART\_ID \ldots\ not found.                               } \> Section~\ref{info:particle_flux}  \\
+355  \> {\ct SURF \ldots\ not Cartesian and cannot have a MATL with \ldots\         } \> Section~\ref{info:thermal_properties}  \\
+356  \> {\ct SURF \ldots\ zero emissivity of MATL \ldots\ is inconsistent \ldots\   } \> Section~\ref{info:thermal_properties}  \\
+357  \> {\ct SURF \ldots\ has a specified HRRPUA/MLRPUA and a pyrolysis model.      } \> Section~\ref{info:gas_burner}  \\
+359  \> {\ct SURF \ldots\ cannot have a specified velocity or volume flux.          } \> Section~\ref{info:gas_burner}  \\
+360  \> {\ct SURF \ldots\ uses HRRPUA and species \ldots\ is the FUEL for \ldots\   } \> Section~\ref{info:gas_burner}  \\
+361  \> {\ct SURF \ldots\ uses HRRPUA and MASS\_FRACTION but no REAC \ldots\        } \> Section~\ref{info:simple_chemistry}  \\
+362  \> {\ct SURF \ldots\ uses MLRPUA and species \ldots\ is the FUEL for \ldots\   } \> Section~\ref{info:gas_burner}  \\
+363  \> {\ct SURF \ldots\ uses MLRPUA and MASS\_FRACTION but no REAC \ldots\        } \> Section~\ref{info:simple_chemistry}  \\
+364  \> {\ct SURF \ldots\ cannot specify mass fraction with mass flux \ldots\       } \> Section~\ref{info:MASS_FLUX}  \\
+365  \> {\ct SURF \ldots\ cannot specify both mass fraction and outflow velocity.   } \> Section~\ref{info:MASS_FLUX}  \\
+366  \> {\ct SURF \ldots\ cannot leak and specify flow or pyrolysis \ldots\         } \> Section~\ref{info:Leaks}  \\
+367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
+     \>                                                                               \>                                     \\
+371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
+372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
+373  \> {\ct Cannot have FISHPAK\_BC>0.                                             } \> Section~\ref{sec:periodic}  \\
+     \>                                                                               \>                                     \\
+381  \> {\ct Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
+382  \> {\ct Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
+     \>                                                                               \>                                     \\
+390  \> {\ct RAMP \ldots\ is externally controlled, requires INITIAL\_VALUE.        } \> Section~\ref{info:external_control}  \\
+391  \> {\ct RAMP \ldots\ not found.                                                } \> Chapter~\ref{info:RAMP}  \\
+392  \> {\ct RAMP \ldots\ has only one point.                                       } \> Chapter~\ref{info:RAMP}  \\
+393  \> {\ct RAMP \ldots\ cannot specify both CTRL\_ID and DEVC\_ID.                } \> Chapter~\ref{info:RAMPDEVC}  \\
+394  \> {\ct RAMP \ldots\ variable T must be monotonically increasing.              } \> Chapter~\ref{info:RAMP}  \\
+395  \> {\ct RAMP with EXTERNAL\_FILE is present but no EXTERNAL\_FILENAME          } \> Section~\ref{info:external_control}  \\
+396  \> {\ct Row \ldots\ of \ldots\ has a bad 1st latitude.                         } \> Section~\ref{info:spraypattern}  \\
+397  \> {\ct Row \ldots\ of \ldots\ has a bad 2nd latitude.                         } \> Section~\ref{info:spraypattern}  \\
+398  \> {\ct Row \ldots\ of \ldots\ has a bad 1st longitude.                        } \> Section~\ref{info:spraypattern}  \\
+399  \> {\ct Row \ldots\ of \ldots\ has a bad 2nd longitude.                        } \> Section~\ref{info:spraypattern}  \\
+400  \> {\ct Row \ldots\ of \ldots\ has a bad velocity.                             } \> Section~\ref{info:spraypattern}  \\
+401  \> {\ct Row \ldots\ of \ldots\ has a bad mass flow.                            } \> Section~\ref{info:spraypattern}  \\
+402  \> {\ct Row \ldots\ of \ldots\ has a bad wavelength.                           } \> Section~\ref{radiative_part_props}  \\
+403  \> {\ct Row \ldots\ of \ldots\ has a bad real index.                           } \> Section~\ref{radiative_part_props}  \\
+404  \> {\ct Row \ldots\ of \ldots\ has a bad complex index.                        } \> Section~\ref{radiative_part_props}  \\
+407  \> {\ct TABLE \ldots\ not found.                                               } \> Section~\ref{info:spraypattern}  \\
+     \>                                                                               \>                          \\
+421  \> {\ct SURF \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
+422  \> {\ct VENT \ldots\ cannot be applied to a thin obstruction \ldots\           } \> Section~\ref{info:thin_obstructions}  \\
+423  \> {\ct HT3D solid must have at least one face exposed \ldots\                 } \> Section~\ref{info:HT3D_Limitations}  \\
+424  \> {\ct HT3D thin solid must have at least one face exposed \ldots\            } \> Section~\ref{info:HT3D_Limitations}  \\
+425  \> {\ct MESH \ldots\ can stretch in at most 2 coordinate directions.           } \> Section~\ref{info:TRNX}  \\
+426  \> {\ct MESH \ldots\ Poisson initialization error: \ldots\                     } \> Section~\ref{info:Errors}  \\
+427  \> {\ct DEVC \ldots\ requires repositioning.                                   } \> Section~\ref{info:DEVC_position}  \\
+428  \> {\ct DEVC \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
+429  \> {\ct PROF \ldots\ requires repositioning.                                   } \> Section~\ref{info:PROF}  \\
+430  \> {\ct PROF \ldots\ must be associated with a heat-conducting surface.        } \> Section~\ref{info:solidoutputquantities}  \\
+431  \> {\ct MESH \ldots\ is not in alignment with MESH \ldots\                     } \> Section~\ref{info:mesh_alignment}  \\
+432  \> {\ct SURF \ldots\ must specify velocity boundary condition ...              } \> Section~\ref{info:MASS_FLUX}  \\
+433  \> {\ct SURF \ldots\ cannot be applied below GROUND\_LEVEL.                    } \> Section~\ref{info:wall_of_wind}  \\
+434  \> {\ct RAMP\_V\_X assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+435  \> {\ct RAMP\_V\_Y assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+436  \> {\ct RAMP\_V\_Z assigned to SURF \ldots\                                    } \> Section~\ref{info:RAMP_Vel_Prof}  \\
+437  \> {\ct SURF \ldots\ cannot be applied to an exterior boundary.                } \> Section~\ref{info:HT3D_Limitations}  \\
+438  \> {\ct SURF \ldots\ layers are thicker than the underlying obstruction.       } \> Section~\ref{info:linings}  \\
+439  \> {\ct MESH \ldots\ UVWFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
+440  \> {\ct MESH \ldots\ TMPFILE \ldots\ does not exist.                           } \> Section~\ref{info:CSVF}  \\
+441  \> {\ct MESH \ldots\ SPECFILE \ldots\ does not exist.                          } \> Section~\ref{info:CSVF}  \\
+     \>                                                                               \>                          \\
+501 \> {\ct No ID provided \ldots                                                   } \> Section~\ref{info:HVAC}  \\
+502 \> {\ct Invalid TYPE\_ID provided \ldots                                        } \> Section~\ref{info:HVAC}  \\
+503 \> {\ct Must have both DUCTs and NODEs in the input file                        } \> Section~\ref{info:HVAC}  \\
+504 \> {\ct Duct has no ID \ldots                                                   } \> Section~\ref{info:HVAC}  \\
+505 \> {\ct Duct has no AREA, DIAMETER, or PERIMTER \ldots                          } \> Section~\ref{info:HVACduct}  \\
+506 \> {\ct Duct without AREA has no DIAMETER \ldots                                } \> Section~\ref{info:HVACduct}  \\
+507 \> {\ct If both ROUND and SQUARE are FALSE, Duct with DIAMETER must             } \> Section~\ref{info:HVACduct} \\
+	\> {\ct also have PERIMETER \ldots}   \\
+508 \> {\ct Duct cannot input both PERIMETER and DIAMETER with AREA \ldots          } \> Section~\ref{info:HVACduct}  \\
+509 \> {\ct Can only specify one of CTRL\_ID or DEVC\_ID. \ldots                    } \> Section~\ref{info:HVACduct}  \\
+510 \> {\ct Duct can only have one of damper, fan or aircoil \ldots                 } \> Section~\ref{info:HVACduct}  \\
+511 \> {\ct Duct has fan specied but no fans have been defined \ldots               } \> Section~\ref{info:HVACduct}  \\
+512 \> {\ct Duct has both MASS\_FLOW and VOLUME\_FLOW defined \ldots                } \> Section~\ref{info:HVACduct}  \\
+513 \> {\ct Ductnode has no ID \ldots                                               } \> Section~\ref{info:HVAC}  \\
+514 \> {\ct Ambient or internal ductnode requires an elevation, XYZ(3) \ldots       } \> Section~\ref{info:HVACnode}  \\
+515 \> {\ct Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts \ldots   } \> Section~\ref{info:HVACnode}  \\
+516 \> {\ct AMBIENT or VENT-connected ductnode must have 1 duct \ldots              } \> Section~\ref{info:HVACnode}  \\
+517 \> {\ct No ducts specified for ductnode \ldots                                  } \> Section~\ref{info:HVACnode}  \\
+518 \> {\ct Ductnode with a filter must have 2 ducts \ldots                         } \> Section~\ref{info:HVACfilter}  \\
+519 \> {\ct Fan has no ID \ldots                                                    } \> Section~\ref{info:HVAC}  \\
+520 \> {\ct FAN can only be one of constant volume, quadratic or ramp \ldots        } \> Section~\ref{info:HVACfan}  \\
+521 \> {\ct IF one of MAX\_PRESSURE or MAX\_FLOW given, both must be                } \> Section~\ref{info:HVACfan}\\
+	\> {\ct specified \ldots}   \\
+522 \> {\ct MAX\_PRESSURE must be > 0 \ldots                                        } \> Section~\ref{info:HVACfan}  \\
+523 \> {\ct MAX\_FLOW must be > 0 \ldots                                            } \> Section~\ref{info:HVACfan}  \\
+524 \> {\ct Filter has no ID \ldots                                                 } \> Section~\ref{info:HVAC}  \\
+525 \> {\ct Problem with filter \ldots SPEC \ldots not found                        } \> Section~\ref{info:HVACfilter}  \\
+526 \> {\ct Aircoil has no ID \ldots                                                } \> Section~\ref{info:HVAC}  \\
+527 \> {\ct Localized leakage has no ID \ldots                                      } \> Section~\ref{info:local_leakage}  \\
+528 \> {\ct Leakage path must have VENT\_ID defined \ldots                          } \> Section~\ref{info:local_leakage}  \\
+529 \> {\ct Leakage to AMBIENT must have VENT2\_ID for the AMBIENT node \ldots      } \> Section~\ref{info:local_leakage}  \\
+530 \> {\ct Leakage path must have VENT2\_ID defined \ldots                         } \> Section~\ref{info:local_leakage}  \\
+531 \> {\ct Leakage has no AREA                     \ldots                          } \> Section~\ref{info:local_leakage}  \\
+532 \> {\ct Can only have one HVAC input with TYPE\_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
+    \> {\ct DUCT QUANTITY LIST \ldots  }  \\
+533 \> {\ct Can only have one HVAC input with TYPE\_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
+	\> {\ct NODE QUANTITY LIST \ldots }    \\
+534 \> {\ct Both nodes have the same ID \ldots                                      } \> Section~\ref{info:HVACduct}  \\
+535 \> {\ct Two ducts with the same ID \ldots                                       } \> Section~\ref{info:HVAC}  \\
+536 \> {\ct Duct \ldots Node \ldots does not contain the duct in its list of ducts  } \> Section~\ref{info:HVACnode}  \\
+537 \> {\ct \ldots ductnode not located for duct                                    } \> Section~\ref{info:HVACduct}  \\
+538 \> {\ct Fan not located \ldots                                                  } \> Section~\ref{info:HVACduct}  \\
+539 \> {\ct Aircoil not located \ldots                                              } \> Section~\ref{info:HVACduct}  \\
+540 \> {\ct Two duct nodes with the same ID \ldots                                  } \> Section~\ref{info:HVAC}  \\
+541 \> {\ct VENT for ductnode has a DEVC\_ID or CTRL\_ID \ldots                     } \> Section~\ref{info:HVACnode}  \\
+542 \> {\ct Ductnode attached to VENT without SURF\_ID HVAC \ldots                  } \> Section~\ref{info:HVACnode}  \\
+543 \> {\ct Cannot leak and specify flow or pyrolysis at the same time \ldots       } \> Section~\ref{info:local_leakage}  \\
+544 \> {\ct Cannot specify custom leakage and zone leakage with the same            } \> Section~\ref{info:local_leakage} \\
+    \> {\ct surface \ldots}  \\
+545 \> {\ct Cannot find VENT\_ID: \ldots for Ductnode: \ldots                       } \> Section~\ref{info:HVACnode}  \\
+546 \> {\ct Ductnode cannot be AMBIENT and have an assigned VENT\_ID                } \> Section~\ref{info:HVACnode}  \\
+547 \> {\ct Internal ductnode must have at least two attached ducts \ldots          } \> Section~\ref{info:HVACnode}  \\
+548 \> {\ct External ductnode can only have one attached duct. Ductnode: \ldots     } \> Section~\ref{info:HVACnode}  \\
+559 \> {\ct Duct \ldots not found. Ductnode: \ldots Ductnode ID: \ldots             } \> Section~\ref{info:HVACnode}  \\
+550 \> {\ct Duct: \ldots does not contain Ductnode: \ldots                          } \> Section~\ref{info:HVACduct}  \\
+551 \> {\ct Problem with ductnode: \ldots FILTER \dots not found                    } \> Section~\ref{info:HVACfilter}  \\
+552 \> {\ct Ductnode must lie with a single pressure zone. Node: \ldots             } \> Section~\ref{info:HVACnode}  \\
+553 \> {\ct Cannot specify fixed flows for all branches of internal                 } \> Section~\ref{info:hvacspecified}  \\
+    \> {\ct ductnode \ldots }  \\
+554 \> {\ct Duct has no LENGTH and one node lacks an XYZ. Duct: \ldots              } \> Section~\ref{info:HVACduct}  \\
+555 \> {\ct Problem with HVAC network. Insufficient LOSS definitions for            } \> Section~\ref{info:hvacspecified}\\
+    \> {\ct DUCTs and NODEs }   \\
+556 \> {\ct Duct \ldots has N\_CELLS=0 and is in a duct run with ducts that         } \> Section~\ref{info:hvacmasstransport}\\
+    \> {\ct have N\_CELLS>0. }  \\
+557 \> {\ct SPEC\_ID \ldots is not explicitly specified for QUANTITY \ldots         } \> Section~\ref{info:hvacoutputquantities}  \\
+558 \> {\ct Output QUANTITY \ldots requires a SPEC\_ID                              } \> Section~\ref{info:hvacoutputquantities}  \\
+559 \> {\ct Output QUANTITY \ldots SPEC\_ID \ldots not found                        } \> Section~\ref{info:hvacoutputquantities}  \\
+560 \> {\ct HVAC\_SMV QUANTITY \ldots not appropriate for .hvac file.               } \> Section~\ref{info:hvacoutputquantities}  \\
+561 \> {\ct HVAC\_SMV QUANTITY \ldots  not found                                    } \> Section~\ref{info:hvacoutputquantities}  \\
+     \>                                                                               \>                          \\
+601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
+602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
+603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\
+604 \> {\ct OBST \ldots\ BOX SHAPE requires LENGTH, WIDTH, HEIGHT.                  } \> Section~\ref{info:multobst}  \\
+605 \> {\ct SURF\_ID \ldots\ does not exist.                                        } \> Section~\ref{info:OBST_Basics}  \\
+606 \> {\ct SURF\_ID\_INTERIOR \ldots\ does not exist.                              } \> Section~\ref{info:BURN_AWAY}  \\
+607 \> {\ct OBST \ldots\ needs a BULK\_DENSITY if it is to BURN\_AWAY.              } \> Section~\ref{info:BURN_AWAY}  \\
+608 \> {\ct MATL\_ID \ldots\ not found.                                             } \> Section~\ref{info:ht1d}  \\
+609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
+610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
+
+\end{tabbing}
 
 
 

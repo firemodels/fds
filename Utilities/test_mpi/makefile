@@ -42,7 +42,7 @@ setup_win:
 impi_intel_win: SHELL=C:/Windows/System32/cmd.exe
 impi_intel_win: MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win: MPIINCLUDE = "$(IMPI_INCLUDE)"
-impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) -fc=ifx
+impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) -fc=ifort
 impi_intel_win: FCOMPL = mpiifort
 impi_intel_win: obj = test_mpi
 impi_intel_win: setup_win $(objwin_mpi)
@@ -59,10 +59,17 @@ impi_intel_linux: $(obj_mpi)
 # OSX
 
 ompi_intel_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
-ompi_intel_osx: LFLAGS = -static-intel
+ompi_intel_osx: LFLAGS = -static-intel -ld_classic
 ompi_intel_osx: FCOMPL = mpifort
 ompi_intel_osx: obj = test_mpi
 ompi_intel_osx: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
+ompi_gnu_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
+ompi_gnu_osx: LFLAGS = -static-intel -ld_classic
+ompi_gnu_osx: FCOMPL = mpifort
+ompi_gnu_osx: obj = test_mpi
+ompi_gnu_osx: $(obj_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
 
 #*** Clean Target to remove Object and Module files ***
