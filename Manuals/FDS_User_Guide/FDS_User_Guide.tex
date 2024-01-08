@@ -1545,7 +1545,8 @@ Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
-Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
+Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. 
+The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired. The number of surface IDs defined in the binary file connectivities must match the number of surfaces defined in {\ct SURF\_ID}.
 
 
 \subsection{Handling Split Cells and Thin Geometries}
@@ -13525,6 +13526,40 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 608 \> {\ct MATL\_ID \ldots\ not found.                                             } \> Section~\ref{info:ht1d}  \\
 609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
+    \>                                                                                \>                          \\
+701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
+702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\
+703 \> {\ct missing SURF\_ID in \&GEOM line \ldots\                                 } \> Section~\ref{subsec:readbin}  \\
+704 \> {\ct problem with GEOM, number of surfaces in SURF\_ID field \ldots\         } \> Section~\ref{subsec:readbin}  \\
+705 \> {\ct could not read binary connectivity for GEOM \ldots\                     } \> Section~\ref{subsec:readbin}  \\
+706 \> {\ct GEOM Expected \ldots\ Z values, found \ldots\                           } \> Section~\ref{info:terrain_geom} \\
+707 \> {\ct GEOM IJK(1) and IJK(2) on \&GEOM line  needs to be at least 2.          } \> Section~\ref{info:terrain_geom} \\
+708 \> {\ct GEOM At least 4 XB values \ldots\ required when using ZVALS.            } \> Section~\ref{info:terrain_geom} \\
+709 \> {\ct For terrain GEOM, unconnected boundary edge at node number \ldots\      } \> Section~\ref{info:terrain_geom} \\
+710 \> {\ct For terrain GEOM, unconnected boundary edge at nodes \ldots\            } \> Section~\ref{info:terrain_geom} \\
+711 \> {\ct For terrain GEOM, same boundary vertex \ldots\                          } \> Section~\ref{info:terrain_geom} \\
+712 \> {\ct For extruded Polygon GEOM, extrusion distance \ldots\                   } \> Section~\ref{info:extrpolys} \\
+713 \> {\ct For extruded Polygon GEOM, Number of POLY indexes \ldots\               } \> Section~\ref{info:extrpolys} \\
+714 \> {\ct For extruded Polygon GEOM, Repeated vertex \ldots\                      } \> Section~\ref{info:extrpolys} \\
+715 \> {\ct For extruded Polygon GEOM, Vertices X, Y have same position.            } \> Section~\ref{info:extrpolys} \\
+716 \> {\ct problem with GEOM, the surface ID, is not defined.                      } \> Section~\ref{info:GEOM_Basics} \\               
+717 \> {\ct problem with GEOM, vertex index out of bounds.                          } \> Section~\ref{info:GEOM_Basics} \\
+718 \> {\ct Out of Bounds.GEOM, FACE=, has vertex index I less than 1.              } \> Section~\ref{info:GEOM_Basics} \\
+719 \> {\ct Out of Bounds.GEOM, FACE=, has vertex index I higher than \ldots\       } \> Section~\ref{info:GEOM_Basics} \\
+720 \> {\ct GEOM has currently unsupported BURN\_AWAY feature \ldots\               } \> Section~\ref{info:geom_limitations} \\
+721 \> {\ct For extruded Polygon GEOM, Node I not in the plane of \ldots\           } \> Section~\ref{info:extrpolys} \\
+722 \> {\ct GEOM Segments \ldots\ intersect in average POLY plane.                  } \> Section~\ref{info:extrpolys} \\
+723 \> {\ct For extruded Polygon GEOM, Not enough valid vertices \ldots\            } \> Section~\ref{info:extrpolys} \\
+724 \> {\ct For extruded Polygon GEOM, Could not triangulate polygon.               } \> Section~\ref{info:extrpolys} \\
+725 \> {\ct \&GEOM, MOVE\_ID is not recognized.                                     } \> Section~\ref{info:transform_geom} \\
+726 \> {\ct GEOM ID Unknown: Face normals are probably pointing in \ldots\          } \> Section~\ref{info:GEOM_Basics} \\
+727 \> {\ct GEOM ID=, Edge length too small at \ldots\                              } \> Section~\ref{triangulated_surfaces_quality} \\
+728 \> {\ct GEOM ID=, Face area too small at \ldots\                                } \> Section~\ref{triangulated_surfaces_quality} \\
+729 \> {\ct GEOM ID=, Geometry volume too small.                                    } \> Section~\ref{triangulated_surfaces_quality} \\
+730 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
+731 \> {\ct GEOM ID=, Non manifold geometry in adjacent faces at edge \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
+732 \> {\ct GEOM ID=, Opposite normals on triangles sharing edge with \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
+733 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
 
 \end{tabbing}
 
