@@ -12464,7 +12464,7 @@ PRIVATE
 
 PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,&
        WRITE_VTK_SL3D_WRAPPER,WRITE_VTK_SM3D_WRAPPER,WRITE_VTK_BNDF_WRAPPER,&
-       WRITE_VTK_PART_WRAPPER,&
+       WRITE_VTK_PART_WRAPPER,WRITE_PARAVIEW_STATE_FILE,&
        DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY
 
 CONTAINS
@@ -12859,6 +12859,266 @@ DEALLOCATE(Y_PTS)
 DEALLOCATE(Z_PTS)
 
 ENDSUBROUTINE DEALLOCATE_VTK_GAS_PHASE_GEOMETRY
+
+
+SUBROUTINE WRITE_PARAVIEW_STATE_FILE(NMESHES)
+USE OUTPUT_CLOCKS
+
+INTEGER, INTENT(IN) :: NMESHES
+TYPE (MESH_TYPE), POINTER :: M
+REAL(EB) :: CX,CY,CZ,XMN,XMX,YMN,YMX,ZMN,ZMX
+INTEGER :: NM
+
+XMX = -HUGE(EB)
+YMX = -HUGE(EB)
+ZMX = -HUGE(EB)
+XMN = HUGE(EB)
+YMN = HUGE(EB)
+ZMN = HUGE(EB)
+DO NM=1,NMESHES
+   CALL POINT_TO_MESH(NM)
+   XMX = MAX(XMX, M%XF)
+   XMN = MIN(XMN, M%XS)
+   YMX = MAX(YMX, M%YF)
+   YMN = MIN(YMN, M%YS)
+   ZMX = MAX(ZMX, M%ZF)
+   ZMN = MIN(ZMN, M%ZS)
+ENDDO
+
+CX = (XMX+XMN)/2
+CY = (YMX+YMN)/2
+CZ = (ZMX+ZMN)/2
+
+WRITE(FN_PARAVIEW,'(A,A,A)') "",TRIM(CHID),'_PARAVIEW.py'
+OPEN(LU_PARAVIEW,FILE=FN_PARAVIEW,FORM='FORMATTED', STATUS='REPLACE',ACTION='WRITE')
+WRITE(LU_PARAVIEW,'(A)') '#Script to import FDS generated data for visualization in Paraview'
+WRITE(LU_PARAVIEW,'(A)') 'import os'
+WRITE(LU_PARAVIEW,'(A)') 'import glob'
+WRITE(LU_PARAVIEW,'(A,A,A)') "chid = '",TRIM(CHID),"'"
+WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_Begin = ',0
+WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_End = ',(T_END-T_BEGIN)/DT_VTK
+
+WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CenterOfRotation = [',CX,',',CY,',',CZ,']'
+WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CameraFocalPoint = [',CX,',',CY,',',CZ,']'
+WRITE(LU_PARAVIEW,'(A)') 'import paraview'
+WRITE(LU_PARAVIEW,'(A)') 'from paraview.simple import *'
+WRITE(LU_PARAVIEW,'(A)') 'paraview.simple._DisableFirstRenderCameraReset()'
+WRITE(LU_PARAVIEW,'(A)') 'materialLibrary1 = GetMaterialLibrary()'
+
+WRITE(LU_PARAVIEW,'(A)') "renderView1 = CreateView('RenderView')"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.AxesGrid = 'Grid Axes 3D Actor'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.CenterOfRotation = CenterOfRotation"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.StereoType = 'Crystal Eyes'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.CameraFocalPoint = CameraFocalPoint"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.LegendGrid = 'Legend Grid Actor'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.BackEnd = 'OSPRay raycaster'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.OSPRayMaterialLibrary = materialLibrary1"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveView(None)"
+WRITE(LU_PARAVIEW,'(A)') "layout1 = CreateLayout(name='Layout #1')"
+WRITE(LU_PARAVIEW,'(A)') "layout1.AssignView(0, renderView1)"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveView(renderView1)"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup the data processing pipelines"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "indir = os.path.dirname(os.path.realpath(__file__))"
+WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
+WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
+WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName=chid+'.stl', FileNames=[indir+os.sep+chid+'.stl'])"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay = Show(casestl, renderView1, 'GeometryRepresentation')"
+WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Representation = 'Surface'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ColorArrayName = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ScaleFactor = 1.5493113040924074"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectScaleArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GlyphTableIndexArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GaussianRadius = 0.07746556520462036"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SetScaleArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OpacityArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
+WRITE(LU_PARAVIEW,'(A)') "# Load data files"
+WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(indir+os.sep+chid+'_BNDF_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(indir+os.sep+chid+'_SM3D_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_*.pvtp'))"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
+WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A,A)') "    BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Boundary', FileName=bndfFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    with open(bndfFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "    boundaryNames = []"
+WRITE(LU_PARAVIEW,'(A)') "    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        boundaryNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "    BoundaryData.PointArrayStatus = boundaryNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A,A)') "    sm3dData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Raw Smoke 3D', FileName=sm3dFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    with open(sm3dFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "    sm3dNames = []"
+WRITE(LU_PARAVIEW,'(A)') "    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        sm3dNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "    BoundaryData.PointArrayStatus = sm3dNames"
+WRITE(LU_PARAVIEW,'(A)') "    sm3dData.PointArrayStatus = sm3dNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add particle data"
+WRITE(LU_PARAVIEW,'(A)') "if len(partFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    partTypes = [x.split('_PART_')[1] for x in partFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    partTypes = ['_'.join(x.split('_')[:-1]) for x in partTypes]"
+WRITE(LU_PARAVIEW,'(A)') "    uniquePartTypes = sorted(list(set(partTypes)))"
+WRITE(LU_PARAVIEW,'(A)') "    for partType in uniquePartTypes:"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_'+partType+'*.pvtp'))"
+WRITE(LU_PARAVIEW,'(A)') "        partData = XMLPartitionedPolydataReader(registrationName='Particle: '+partType, FileName=partTypeFiles)"
+WRITE(LU_PARAVIEW,'(A)') "        with open(partTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            partTypeNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        partData.PointArrayStatus = partTypeNames"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay = Show(partData, renderView1, 'GeometryRepresentation')"
+WRITE(LU_PARAVIEW,'(A)') "        # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.Representation = 'Point Gaussian'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ColorArrayName = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ScaleFactor = -2.0000000000000002e+298"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectScaleArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphTableIndexArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GaussianRadius = 0.1"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SetScaleArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OpacityArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectInputVectors = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.WriteLog = ''"
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup filter for smoke 3d data"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1 = ResampleToImage(registrationName='Smoke 3D', Input=sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display = Show(resampleToImage1, renderView1, 'UniformGridRepresentation')"
+
+WRITE(LU_PARAVIEW,'(A)') "# get 2D transfer function for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVTF2D = GetTransferFunction2D('HRRPUV')"
+
+WRITE(LU_PARAVIEW,'(A)') "# get color transfer function/color map for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVLUT = GetColorTransferFunction('HRRPUV')"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVLUT.TransferFunction2D = hRRPUVTF2D"
+WRITE(LU_PARAVIEW,'(A,A)') "hRRPUVLUT.RGBPoints = [-127.0, 0.0, 0.0, 0.0, -25.4, 0.9, 0.0, 0.0,",&
+                         "76.2, 0.9, 0.9, 0.0, 127.0, 1.0, 1.0, 1.0]"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVLUT.ColorSpace = 'RGB'"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVLUT.NanColor = [0.0, 0.5, 1.0]"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVLUT.ScalarRangeInitialized = 1.0"
+
+WRITE(LU_PARAVIEW,'(A)') "# get opacity transfer function/opacity map for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVPWF = GetOpacityTransferFunction('HRRPUV')"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVPWF.Points = [-127.0, 0.0, 0.5, 0.0, 127.0, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "hRRPUVPWF.ScalarRangeInitialized = 1"
+
+WRITE(LU_PARAVIEW,'(A)') "# trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.Representation = 'Volume'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ColorArrayName = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.LookupTable = hRRPUVLUT"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.OSPRayScaleArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ScaleFactor = 3.0"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectScaleArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.GlyphTableIndexArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.GaussianRadius = 0.15"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SetScaleArray = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.OpacityArray = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ScalarOpacityUnitDistance = 0.44"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ScalarOpacityFunction = hRRPUVPWF"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.TransferFunction2D = hRRPUVTF2D"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.OpacityArrayName = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.ColorArray2Name = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SliceFunction = 'Plane'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.Slice = 49"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SelectInputVectors = ['POINTS', '']"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.WriteLog = ''"
+
+WRITE(LU_PARAVIEW,'(A)') "# init the 'Piecewise Function' selected for 'ScaleTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "resampleToImage1Display.ScaleTransferFunction.Points = ",&
+                         "[-127.0, 0.0, 0.5, 0.0, -127, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "# init the 'Piecewise Function' selected for 'OpacityTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "resampleToImage1Display.OpacityTransferFunction.Points = ",&
+                         "[-127.0, 0.0, 0.5, 0.0, -127, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "# init the 'Plane' selected for 'SliceFunction'"
+WRITE(LU_PARAVIEW,'(A)') "resampleToImage1Display.SliceFunction.Origin = CenterOfRotation"
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup animation scene, tracks and keyframes"
+WRITE(LU_PARAVIEW,'(A)') "# note: the Get..() functions create a new object, if needed"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+
+WRITE(LU_PARAVIEW,'(A)') "# get time animation track"
+WRITE(LU_PARAVIEW,'(A)') "timeAnimationCue1 = GetTimeTrack()"
+
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation scene"
+
+WRITE(LU_PARAVIEW,'(A)') "# get the time-keeper"
+WRITE(LU_PARAVIEW,'(A)') "timeKeeper1 = GetTimeKeeper()"
+WRITE(LU_PARAVIEW,'(A)') "# initialize the timekeeper"
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation track"
+WRITE(LU_PARAVIEW,'(A)') "# get animation scene"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1 = GetAnimationScene()"
+
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation scene"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.ViewModules = renderView1"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.Cues = timeAnimationCue1"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.AnimationTime = T_Begin"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.EndTime = T_End"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.PlayMode = 'Snap To TimeSteps'"
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# restore active source"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveSource(sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+
+CLOSE(LU_PARAVIEW)
+
+
+END SUBROUTINE WRITE_PARAVIEW_STATE_FILE
+
+
+
 
 END MODULE VTK_FDS_INTERFACE
 
