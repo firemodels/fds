@@ -1545,7 +1545,8 @@ Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
 If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
-Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
+Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above.
+The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired. The number of surface IDs defined in the binary file connectivities must match the number of surfaces defined in {\ct SURF\_ID}.
 
 
 \subsection{Handling Split Cells and Thin Geometries}
@@ -2415,11 +2416,11 @@ Inside solids, FDS solves the one-dimensional heat transfer equation numerically
 
 The default parameters governing the node spacing are appropriate for simple heat transfer calculations, but sometimes pyrolysis reactions cause spurious fluctuations in temperature and burning rate. The numerical accuracy and stability of the solid phase solution may be improved as follows:
 \begin{description}
-\item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern.
-\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1. For example, a value of 0.5 makes the mesh cells in the layer half the size.
-\item[Specify your own cell size] by specifying {\ct CELL\_SIZE} directly. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR} and it applies to all layers.
+\item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line, where {\ct NL} designates a particular layer. This will generate a perfectly uniform mesh. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern.
+\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR(NL)} less than 1, where {\ct NL} designates a particular layer. For example, a value of 0.5 makes the mesh cells in the layer half the size.
+\item[Specify your own cell size] by specifying {\ct CELL\_SIZE(NL)} directly, where {\ct NL} designates a particular layer. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type. The feature works by sub-dividing the gas phase time step into halves, quarters, eighths, etc., as specified by the {\ct SURF} line integer parameter {\ct SUBSTEP\_POWER}. Its default value is 2, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of $2^2=4$. If you set {\ct SUBSTEP\_POWER} to 4, the time step will be sub-divided by {\em at most} a factor of $2^4=16$. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain.
-\item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX} (default 1000). Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
+\item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX(NL)} (default 1000), where {\ct NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
@@ -12822,8 +12823,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BLOWING}                                             & Logical         & Section~\ref{blowing}                     &                     &                         \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}                 \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
-{\ct CELL\_SIZE}                                          & Real            & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
-{\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
+{\ct CELL\_SIZE(:)}                                       & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
+{\ct CELL\_SIZE\_FACTOR(:)}                               & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
@@ -12873,7 +12874,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
 {\ct MLRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
-{\ct N\_LAYER\_CELLS\_MAX}                                & Integer         & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
+{\ct N\_LAYER\_CELLS\_MAX(:)}                             & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
@@ -12912,7 +12913,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE\_FACTOR}                                       & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 0.25                    \\ \hline
 {\ct SPEC\_ID}                                            & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                                        & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
-{\ct STRETCH\_FACTOR }                                    & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
+{\ct STRETCH\_FACTOR(:) }                                 & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
 {\ct SUBSTEP\_POWER}                                      & Integer         & Section~\ref{info:solid_phase_stability}  &                     & 2                       \\ \hline
 {\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                                             & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
@@ -13530,6 +13531,40 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 608 \> {\ct MATL\_ID \ldots\ not found.                                             } \> Section~\ref{info:ht1d}  \\
 609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
+    \>                                                                                \>                          \\
+701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
+702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\
+703 \> {\ct missing SURF\_ID in \&GEOM line \ldots\                                 } \> Section~\ref{subsec:readbin}  \\
+704 \> {\ct problem with GEOM, number of surfaces in SURF\_ID field \ldots\         } \> Section~\ref{subsec:readbin}  \\
+705 \> {\ct could not read binary connectivity for GEOM \ldots\                     } \> Section~\ref{subsec:readbin}  \\
+706 \> {\ct GEOM Expected \ldots\ Z values, found \ldots\                           } \> Section~\ref{info:terrain_geom} \\
+707 \> {\ct GEOM IJK(1) and IJK(2) on \&GEOM line  needs to be at least 2.          } \> Section~\ref{info:terrain_geom} \\
+708 \> {\ct GEOM At least 4 XB values \ldots\ required when using ZVALS.            } \> Section~\ref{info:terrain_geom} \\
+709 \> {\ct For terrain GEOM, unconnected boundary edge at node number \ldots\      } \> Section~\ref{info:terrain_geom} \\
+710 \> {\ct For terrain GEOM, unconnected boundary edge at nodes \ldots\            } \> Section~\ref{info:terrain_geom} \\
+711 \> {\ct For terrain GEOM, same boundary vertex \ldots\                          } \> Section~\ref{info:terrain_geom} \\
+712 \> {\ct For extruded Polygon GEOM, extrusion distance \ldots\                   } \> Section~\ref{info:extrpolys} \\
+713 \> {\ct For extruded Polygon GEOM, Number of POLY indexes \ldots\               } \> Section~\ref{info:extrpolys} \\
+714 \> {\ct For extruded Polygon GEOM, Repeated vertex \ldots\                      } \> Section~\ref{info:extrpolys} \\
+715 \> {\ct For extruded Polygon GEOM, Vertices X, Y have same position.            } \> Section~\ref{info:extrpolys} \\
+716 \> {\ct problem with GEOM, the surface ID, is not defined.                      } \> Section~\ref{info:GEOM_Basics} \\
+717 \> {\ct problem with GEOM, vertex index out of bounds.                          } \> Section~\ref{info:GEOM_Basics} \\
+718 \> {\ct Out of Bounds.GEOM, FACE=, has vertex index I less than 1.              } \> Section~\ref{info:GEOM_Basics} \\
+719 \> {\ct Out of Bounds.GEOM, FACE=, has vertex index I higher than \ldots\       } \> Section~\ref{info:GEOM_Basics} \\
+720 \> {\ct GEOM has currently unsupported BURN\_AWAY feature \ldots\               } \> Section~\ref{info:geom_limitations} \\
+721 \> {\ct For extruded Polygon GEOM, Node I not in the plane of \ldots\           } \> Section~\ref{info:extrpolys} \\
+722 \> {\ct GEOM Segments \ldots\ intersect in average POLY plane.                  } \> Section~\ref{info:extrpolys} \\
+723 \> {\ct For extruded Polygon GEOM, Not enough valid vertices \ldots\            } \> Section~\ref{info:extrpolys} \\
+724 \> {\ct For extruded Polygon GEOM, Could not triangulate polygon.               } \> Section~\ref{info:extrpolys} \\
+725 \> {\ct \&GEOM, MOVE\_ID is not recognized.                                     } \> Section~\ref{info:transform_geom} \\
+726 \> {\ct GEOM ID Unknown: Face normals are probably pointing in \ldots\          } \> Section~\ref{info:GEOM_Basics} \\
+727 \> {\ct GEOM ID=, Edge length too small at \ldots\                              } \> Section~\ref{triangulated_surfaces_quality} \\
+728 \> {\ct GEOM ID=, Face area too small at \ldots\                                } \> Section~\ref{triangulated_surfaces_quality} \\
+729 \> {\ct GEOM ID=, Geometry volume too small.                                    } \> Section~\ref{triangulated_surfaces_quality} \\
+730 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
+731 \> {\ct GEOM ID=, Non manifold geometry in adjacent faces at edge \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
+732 \> {\ct GEOM ID=, Opposite normals on triangles sharing edge with \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
+733 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
 
 \end{tabbing}
 
