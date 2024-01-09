@@ -8587,15 +8587,15 @@ CASE(INTEGER_THREE)
       JCC = CF%CELL_LIST(3,LOW_IND,IFACE)
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-      CFA%TMP_G = TMP_0(CF%IJK(KAXIS))
+      B1%TMP_G = TMP_0(CF%IJK(KAXIS))
       IF (SF%TMP_FRONT > 0._EB) THEN
          B1%TMP_F = SF%TMP_FRONT
       ELSE
-         B1%TMP_F = CFA%TMP_G
+         B1%TMP_F = B1%TMP_G
       ENDIF
 
       B1%RHO_F = CUT_CELL(ICC)%RHO(JCC)
-      CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
+      B1%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
       IF (RADIATION) THEN
@@ -8742,10 +8742,10 @@ CASE(INTEGER_THREE)
          WC_B1 => M%BOUNDARY_PROP1(WC%B1_INDEX)
          WC_BC => M%BOUNDARY_COORD(WC%BC_INDEX)
          ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-         CFA%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%TMP_F = WC_B1%TMP_F
          B1%RHO_F = WC_B1%RHO_F
-         CFA%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%ZZ_F(1:N_TOTAL_SCALARS) = WC_B1%ZZ_F(1:N_TOTAL_SCALARS)
 
          ! Assign normal velocity to CFACE from wall cell:
@@ -11924,7 +11924,7 @@ IDCR_DO_2 : DO IDCR=1,CRS_NUM(CC_N_CRS)
                IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A)') " SUCCESS: GEOM ID Unknown:"
                ELSE
-                 WRITE(LU_ERR,'(A)') " ERROR: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " ERROR(726): GEOM ID Unknown:"
                ENDIF
                WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
                WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
@@ -12421,7 +12421,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD2),' are not equal.'
@@ -12433,7 +12433,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD2),', ',WSELEM(NOD3),' are not equal.'
@@ -12445,7 +12445,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD3),' are not equal.'
@@ -12478,7 +12478,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(728): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
            WRITE(LU_ERR,*) '  Face IWSEL=', IWSEL, ', Connectivity=', WSELEM(NOD1:NOD3),', Norm Cross=', MGNRM
@@ -12517,7 +12517,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
         IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR(729): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ENDIF
         WRITE(LU_ERR,'(A)') "  Geometry volume too small."
         WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
@@ -12560,7 +12560,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(730): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",SEG(NOD1),&
             " (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -12575,7 +12575,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(731): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Non manifold geometry in adjacent faces at edge with nodes: NOD1",&
             SEG(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -12590,7 +12590,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(732): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') &
             " Opposite normals on triangles sharing edge with nodes: NOD1",&
@@ -12612,7 +12612,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(733): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",&
             WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -21791,7 +21791,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             CALL ALLOCATE_BUFFERS
             DONE=.FALSE.
          ELSE
-            WRITE(BUFFER,'(A,A,A)') 'ERROR: GEOM ID=',TRIM(ID),'. Check &GEOM input line.'
+            WRITE(BUFFER,'(A,A,A)') 'ERROR(101): GEOM ID=',TRIM(ID),'. Check &GEOM input line.'
             CALL SHUTDOWN(TRIM(BUFFER))
             RETURN
          ENDIF
@@ -21849,7 +21849,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             FACES(3*(I-1)+1:3*(I-1)+3) = FACES(4*(I-1)+1:4*(I-1)+3)
             SURFS(I)                   = FACES(4*(I-1)+4)
             IF(SURFS(I) > N_SURF_ID) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(701): problem with GEOM ',TRIM(ID),&
                                            ', local SURF_ID index for FACE ',I,'out of bounds.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -21891,7 +21891,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_SURF_ID    = 3
          DO I=2,3
            IF (TRIM(SURF_ID(I))=='null') THEN
-              WRITE(MESSAGE,'(A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+              WRITE(MESSAGE,'(A,A,A)') 'ERROR(702): problem with GEOM ',TRIM(ID),&
                                        ', SURF_IDS not defined properly.'
               CALL SHUTDOWN(MESSAGE); RETURN
            ENDIF
@@ -21926,13 +21926,13 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (N_VOLUS > 0 ) READ(731) VOLUS(1:4*N_VOLUS)
          CLOSE(731)
          IF (ANY(SURFS(1:N_FACES)>0) .AND. TRIM(SURF_ID(1))=='null') THEN
-          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: missing SURF_ID in &GEOM line ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(703): missing SURF_ID in &GEOM line ',TRIM(ID),&
                                        ' for binary file ',TRIM(BINARY_FILE),&
                                        '. Add SURF_ID in said &GEOM line.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF(N_SURF_ID2 /= N_SURF_ID) THEN
-            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR(704): problem with GEOM ',TRIM(ID),&
                                       ', number of surfaces in SURF_ID field (',N_SURF_ID, &
                                       ') not equal to number of surfaces (',N_SURF_ID2,&
                                       ') defined in bingeom ',TRIM(BINARY_FILE),'.'
@@ -21940,14 +21940,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDIF
          DO I = 1, N_FACES
             IF(SURFS(I) > N_SURF_ID) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(701): problem with GEOM ',TRIM(ID),&
                                            ', local SURF_ID index for FACE ',I,'out of bounds.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
          ENDDO
       ENDIF
 221   IF(IOS > 0) THEN
-         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
+         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(705): could not read binary connectivity for GEOM ',TRIM(ID),&
                                       ' in binary file ',TRIM(BINARY_FILE),&
                                       '. Check file exists.'
          CALL SHUTDOWN(MESSAGE); RETURN
@@ -21964,18 +21964,18 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       TERRAIN_CASE= .TRUE.
       CALL CHECK_XB(XB)
       IF (N_ZVALS/=IJK(1)*IJK(2) ) THEN
-         WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
+         WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR(706): Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (IJK(1)<2 .OR. IJK(2)<2) THEN
-         CALL SHUTDOWN('ERROR: IJK(1) and IJK(2) on &GEOM line  needs to be at least 2')
+         CALL SHUTDOWN('ERROR(707): IJK(1) and IJK(2) on &GEOM line  needs to be at least 2.')
       ENDIF
       NXB=0
       DO I = 1, 4 ! first 4 XB values must be set, don't care about 5th and 6th
         IF (XB(I)<MAX_VAL) NXB=NXB+1
       ENDDO
       IF (NXB<4) THEN
-         CALL SHUTDOWN('ERROR: At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS')
+         CALL SHUTDOWN('ERROR(708): At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS.')
       ENDIF
 
       IF (EXTEND_TERRAIN) THEN
@@ -22315,14 +22315,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDIF
          ENDDO
          IF(I>N_BEDGES) THEN ! Error
-          WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(709): For terrain GEOM ',TRIM(ID),&
                                        ' unconnected boundary edge at node number,',BOUND_EDGES2(NOD2,J-1),'.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
       ENDDO
       DO I=1,N_BEDGES
          IF (COUNTED_EDGES(I) /= 1) THEN
-            WRITE(MESSAGE,'(A,A,A,2I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,2I8,A)') 'ERROR(710): For terrain GEOM ',TRIM(ID),&
                                           ' unconnected boundary edge at nodes,',BOUND_EDGES(NOD1:NOD2,I),'.'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -22414,7 +22414,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          DO ICPT=NOD1,NOD4
             IJE = CLOSE_PT(ICPT+1) - CLOSE_PT(ICPT);
             IF (IJE <= 0) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(711): For terrain GEOM ',TRIM(ID),&
                              ' same boundary vertex ',B_IND(CLOSE_PT(ICPT)),' closest to 2 domain corners.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -22723,26 +22723,26 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ! Setup an extruded POLYGON object:
    POLY_COND : IF (N_POLY_VERTS > 0) THEN
       IF ( ABS(EXTRUDE) < GEOMEPS ) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(712): For extruded Polygon GEOM ',TRIM(ID),&
                        ' : extrusion distance in EXTRUDE field not defined or zero. Define EXTRUDE value in &GEOM.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
 
       ! Do some tests in POLY, Repeated vertex, etc.:
       IF (N_POLY_VERTS > N_VERTS) THEN
-          WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR(713): For extruded Polygon GEOM ',TRIM(ID),&
           ' : Number of POLY indexes ',N_POLY_VERTS,' greater than Number of VERTS ',N_VERTS,'.'
           CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       DO J=1,N_POLY_VERTS
           DO I=J+1,N_POLY_VERTS
               IF (POLY(I)==POLY(J)) THEN
-                  WRITE(MESSAGE,'(A,A,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+                  WRITE(MESSAGE,'(A,A,A,I6,A)') 'ERROR(714): For extruded Polygon GEOM ',TRIM(ID),&
                   ' : Repeated vertex ',POLY(I),' in Polyline.'
                   CALL SHUTDOWN(MESSAGE); RETURN
               ENDIF
               IF (NORM2(VERTS(3*POLY(I)-2:3*POLY(I))-VERTS(3*POLY(J)-2:3*POLY(J))) < GEOMEPS) THEN
-                  WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+                  WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR(715): For extruded Polygon GEOM ',TRIM(ID),&
                   ' : Vertices ',POLY(I),' and ',POLY(J),' have same position.'
                   CALL SHUTDOWN(MESSAGE); RETURN
               ENDIF
@@ -22835,7 +22835,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
              EXIT
           ENDDO
           IF(.NOT.IN_LIST) THEN
-             WRITE(MESSAGE,'(A,I4,3A)') 'ERROR: problem with GEOM, the surface IDV(',I,') =',TRIM(SURF_ID(I)),' is not defined.'
+             WRITE(MESSAGE,'(A,I4,3A)') 'ERROR(716): problem with GEOM, the surface ID(',I,') =',&
+                                         TRIM(SURF_ID(I)),' is not defined.'
              CALL SHUTDOWN(MESSAGE)
           ENDIF
       ENDDO
@@ -22894,7 +22895,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
       G%VOLUS(1: 4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
       IF (ANY(VOLUS(1:4*N_VOLUS)<1 .OR. VOLUS(1:4*N_VOLUS)>N_VERTS)) THEN
-         CALL SHUTDOWN('ERROR: problem with GEOM, vertex index out of bounds')
+         CALL SHUTDOWN('ERROR(717): problem with GEOM, vertex index out of bounds.')
       ENDIF
 
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
@@ -23114,14 +23115,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! Check FACES for out of bounds indexes:
       I = MINVAL(FACES(1:3*N_FACES)); II= MINLOC(FACES(1:3*N_FACES),DIM=1)
       IF (I < 1) THEN
-         WRITE(MESSAGE,'(3A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         WRITE(MESSAGE,'(3A,I8,A,I8,A)') 'ERROR(718): Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
          II/3+1,', has vertex index ',I,' less than 1.'
          CALL SHUTDOWN(MESSAGE)
          RETURN
       ENDIF
       I = MAXVAL(FACES(1:3*N_FACES)); II= MAXLOC(FACES(1:3*N_FACES),DIM=1)
       IF (I > N_VERTS) THEN
-         WRITE(MESSAGE,'(3A,I8,A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         WRITE(MESSAGE,'(3A,I8,A,I8,A,I8,A)') 'ERROR(719): Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
          II/3+1,', has vertex index ',I,', higher than number of vertices defined ',N_VERTS,'.'
          CALL SHUTDOWN(MESSAGE)
          RETURN
@@ -23143,7 +23144,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDIF
             ! HERE do tests on surfaces, is not supperted by GEOMs throw error:
             UNSUPPERTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
-               WRITE(MESSAGE,'(5A)') 'ERROR: GEOM: ',TRIM(ID),&
+               WRITE(MESSAGE,'(5A)') 'ERROR(720): GEOM: ',TRIM(ID),&
                ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
                CALL SHUTDOWN(MESSAGE)
                RETURN
@@ -23329,7 +23330,7 @@ THLEN = 0.05_EB * BBLEN ! Threshold distance to polygon average plane.
 DO I=1,N_POLY_VERTS
    DV1(IAXIS:KAXIS) = PVERTS(3*I-2:3*I    ) - XYZCEN(IAXIS:KAXIS)
    IF (ABS(DOT_PRODUCT(DV1,NVEC)) > THLEN) THEN
-      WRITE(MESSAGE,'(A,A,A,I3,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+      WRITE(MESSAGE,'(A,A,A,I3,A)') 'ERROR(721): For extruded Polygon GEOM ',TRIM(ID),&
       ' : Node (',POLY(I),') not in the plane of the polygon. Check VERTS.'
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
@@ -23362,8 +23363,8 @@ DO I=N_POLY_VERTS+1,2*N_POLY_VERTS
       D2(IAXIS:JAXIS) = (/ DOT_PRODUCT(DV2,SVEC), DOT_PRODUCT(DV2,PVEC) /) - P2(IAXIS:JAXIS) ! Seg vector in SVEC, PVEC axes.
       CALL GET_SEGSEG_INTERSECTION(P1,D1,P2,D2,SVARV,SLENV,INT_FLG)
       IF (INT_FLG>0) THEN
-          WRITE(MESSAGE,'(A,I3,A,I3,A,I3,A,I3,A)') 'Error : Segments (',POLY(I-N_POLY_VERTS),'-',POLY(IP1-N_POLY_VERTS),') and (',&
-          POLY(J-N_POLY_VERTS),'-',POLY(JP1-N_POLY_VERTS),') intersect in average POLY plane.'
+          WRITE(MESSAGE,'(A,I3,A,I3,A,I3,A,I3,A)') 'ERROR(722): Segments (',POLY(I-N_POLY_VERTS),'-',POLY(IP1-N_POLY_VERTS),&
+          ') and (',POLY(J-N_POLY_VERTS),'-',POLY(JP1-N_POLY_VERTS),') intersect in average POLY plane.'
           CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
@@ -23387,7 +23388,7 @@ ENDDO
 
 NVERTS2 = SUM(NODE_FLG(1:N_POLY_VERTS));
 IF (NVERTS2 < 3) THEN
-    WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),' : Not enough valid vertices on the polygon.'
+    WRITE(MESSAGE,'(A,A,A)') 'ERROR(723): For extruded Polygon GEOM ',TRIM(ID),' : Not enough valid vertices on the polygon.'
     CALL SHUTDOWN(MESSAGE); RETURN
 ENDIF
 ALLOCATE(PVERTS2(1:2*MAX_DIM*N_POLY_VERTS)); PVERTS2=0._EB
@@ -23424,7 +23425,7 @@ ELSE IS_CONVEX_IF ! Simple polygon, ear clipping.
     OUTER_LOOP : DO WHILE(NLIST>=3) ! OUTER LOOP
          COUNT_OUT = COUNT_OUT + 1
          IF (COUNT_OUT > NVERTS2**4) THEN
-             WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),' : Could not triangulate polygon.'
+             WRITE(MESSAGE,'(A,A,A)') 'ERROR(724): For extruded Polygon GEOM ',TRIM(ID),' : Could not triangulate polygon.'
              CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IVERT = 1
@@ -24642,7 +24643,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
             ENDIF
          ENDDO
          IF (MOVE_INDEX==0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: &GEOM ',TRIM(G%ID),' MOVE_ID is not recognized'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR(725): &GEOM ',TRIM(G%ID),' MOVE_ID is not recognized'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO IVERT=1,G%N_VERTS

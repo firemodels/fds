@@ -11,8 +11,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 CONTAINS
 
-!> Updates the state of all control functions followed by DEVC where QUANTITY is CONTROL or CONTROL VALUE   
-!>
+!> \brief Update the state of all control functions followed by DEVC where QUANTITY is CONTROL or CONTROL VALUE   
 !> \param T Current time (s)
 !> \param DT Current time step (s)
 !> \param CTRL_STOP_STATUS Flag for a contorl function stopping the FDS calculation
@@ -69,7 +68,6 @@ END SUBROUTINE UPDATE_CONTROLS
 
 
 !> \brief Recursive function that updates a single control function
-!>
 !> \param T Current time (s)
 !> \param ID Index in the array CONTROL for the function being evaluated
 !> \param DT Current time step (s)
