@@ -106,5 +106,6 @@ disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
 disp('tree_shapes...');                   tree_shapes
+disp('impinging_jet...');                 impinging_jet
 
 display('verification scripts completed successfully!')
