@@ -2,15 +2,14 @@
 
 &TIME T_END=240.0 /
 
-Concrete thickness reduced to 5 cm from 20 cm to reduce CPU workload
 &SURF ID = 'woodenwalls',
       COLOR='SANDY BROWN'
-      STRETCH_FACTOR = 1
+      THICKNESS(1:2)        = 0.01,0.20
+      STRETCH_FACTOR(1:2)   = 1.2,2.0
+      CELL_SIZE_FACTOR(1:2) = 0.5,1.0
       DELTA_TMP_MAX = 100.
       SUBSTEP_POWER = 3
-      N_LAYER_CELLS_MAX = 625
-      CELL_SIZE_FACTOR = 0.2,
-      THICKNESS = 0.01,0.05
+      N_LAYER_CELLS_MAX = 500
       MINIMUM_LAYER_THICKNESS = 1E-10
       BACKING='EXPOSED',
       MATL_ID(1,:)='MOISTURE','SPRUCE',
