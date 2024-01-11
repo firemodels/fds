@@ -1976,6 +1976,10 @@ PARTICLE_LOOP: DO IP=1,NLP
          ! Check if there are CFACEs in this cell:
          INDCF_POS : IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
 
+            ! Drop if cell with boundary cut-faces found is outside mesh, no CFACEs defined.
+            ICF=CELL_INDEX(CUT_FACE(INDCF)%IJK(1),CUT_FACE(INDCF)%IJK(2),CUT_FACE(INDCF)%IJK(3))
+            IF (CELL(ICF)%EXTERIOR) CYCLE PARTICLE_LOOP
+
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
                ICF = CUT_FACE(INDCF)%CFACE_INDEX(IFACE)
