@@ -277,6 +277,8 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: QDOTPP_INT          !< Integrated HRRPUA for the S_Pyro method (kJ/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: Q_IN_SMOOTH_INT     !< Integrated smoothed incident flux for the S_Pyro method (kJ)
+   
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
@@ -309,7 +311,6 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: Q_CONDENSE=0._EB      !< Heat release rate per unit area (W/m2) due to gas condensation
    REAL(EB) :: BURN_DURATION=0._EB   !< Duration of a specified fire (s)
    REAL(EB) :: Q_IN_SMOOTH=0._EB     !< Smoothed incident flux for the S_Pyro method (kJ)
-   REAL(EB) :: Q_IN_SMOOTH_INT=0._EB !< Integrated smoothed incident flux for the S_Pyro method (kJ)
    REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
    REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
@@ -841,7 +842,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: REFERENCE_HEAT_FLUX_TIME_INTERVAL=1._EB !< Averaging time interval for computed flux for flux scaling model (s)
    REAL(EB) :: MINIMUM_SCALING_HEAT_FLUX=0._EB         !< Minimum computed flux for input into scaling model (kW/m2)
    REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)   !< Maximum computed flux for input into scaling model (kW/m2)
-   REAL(EB) :: SPYRO_TH_FACTOR = 1._EB                 !< Thickness scaling factor used in scaling pyrolysis model (m/m)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
    REAL(EB) :: SWELL_RATIO=1._EB
@@ -860,6 +860,8 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: REFERENCE_HEAT_FLUX !< Reference flux for the flux scaling pyrolysis model (kW/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SPYRO_TH_FACTOR     !< Thickness scaling factor for the flux scaling pyrolysis model
+
    TYPE(RAMP_ID_TYPE),  ALLOCATABLE, DIMENSION(:) :: RAMP
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB) :: TRANSPARENCY
@@ -875,9 +877,11 @@ TYPE SURFACE_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX    !< Index for Spyro integrated TIME_HEAT arrays
    INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX          !< Index for Spyro reference heat flux arrays
    INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX           !< Index for Spyro integrated TIME_HEAT to time arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: THICK2QREF        !< Map of refernce flux and thicknesses
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
    INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL
    INTEGER :: N_QDOTPP_REF=0                           !< Number of reference heat fluxes provided for S_Pyro method
+   INTEGER :: N_THICK_REF=0                            !< Number of thicknesses provided for S_Pyro method
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS_MAX
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
