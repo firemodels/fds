@@ -340,7 +340,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
 
    INTEGER :: SURF_INDEX=-1          !< Surface index
-   INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection
+   INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection, 4=Resolved
 
 END TYPE BOUNDARY_PROP2_TYPE
 
