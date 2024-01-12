@@ -2196,11 +2196,16 @@ The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\
 \subsubsection{Impinging Jet Heat Transfer Model}
 \label{info:impinging_jet}
 
-The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingment point and consequently a fictiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on {\ct SURF} using {\ct HEAT\_TRANSFER\_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
+The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingement point and consequently a fictitiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on {\ct SURF} using {\ct HEAT\_TRANSFER\_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
 \be
    \NU_{\rm imp} = C_0 + \left( C_1 \, \RE_{\rm imp}^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm{imp}} L}{\mu}
 \ee
 The default coefficients are $C_0=0$, $C_1=0.055$, $C_2=0$, $m=0.8$.  But custom values may be entered on the {\ct SURF} line as described above.  Again, the default length scale is taken to be $L=1$ m, but may be changed.  This value is usually set to the diameter of the jet source in the literature.  The heat transfer coefficient obtained from $\NU_{\rm imp}$ is compared to that from forced and free convection and the largest value is chosen for the surface.
+
+\subsubsection{Output for Convective Heat Transfer Regime}
+\label{info:convection_regime}
+
+It may be useful to visualize which convective heat transfer correlation is being exercised to compute the heat transfer coefficient.  This can be accomplished by using the solid phase output quantity {\ct 'CONVECTIVE HEAT TRANSFER REGIME'} on {\ct BNDF} or {\ct DEVC}.  For wall surfaces (not available for particles), the regime is mapped to an integer value, {\ct 1 = NATURAL}, {\ct 2 = FORCED}, {\ct 3 = IMPACT}, {\ct 4 = RESOLVED}, which is color coded for boundary visualization.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -11041,6 +11046,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX GAUGE}                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
+{\scriptsize\tt CONVECTIVE HEAT TRANSFER REGIME}           & Section \ref{info:convection}                 &                    & B,D          \\ \hline
 {\ct CPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kW/m$^2$           & B,D          \\ \hline
 {\ct CPUA\_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kW/m$^2$           & B,D          \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s                & B,D          \\ \hline
@@ -12157,7 +12163,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: RAD_CFACE_INTERPOLATE (MV, to test projecting CFACEs to both sides in each dir, areas distance interpolated)
+% Undocumented: RAD_CFACE_INTERPOLATE (MV, to test projecting CFACEs to both sides in each dir, areas distance interpolated), TENSOR_DIFFUSIVITY (rmcdermo)
 
 \vspace{\baselineskip}
 
