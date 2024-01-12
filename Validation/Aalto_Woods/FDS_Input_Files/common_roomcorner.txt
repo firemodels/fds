@@ -1,49 +1,39 @@
-&MESH ID='MESH1',
-IJK=25,25,120,
-XB = 0,0.5,0,0.5,0,2.4,
-MPI_PROCESS = 0 /
-
-&MESH ID='MESH2',
-IJK=5,19,24,
-XB = 0,0.5,0.5,2.4,0,2.4,
-MPI_PROCESS = 0/
-
-&MESH ID='MESH3',
-IJK=48,24,24,
-XB = 0.5,5.3,0,2.4,0,2.4,
-MPI_PROCESS = 0 /
+&MESH ID='Burner mesh' , IJK=25,25,60, XB = 0,  0.5, 0,  0.5, 0.0, 1.2,  MPI_PROCESS = 0 /
+&MESH ID='Above burner', IJK=25,25,60, XB = 0,  0.5, 0,  0.5, 1.2, 2.4,  MPI_PROCESS = 1 /
+&MESH ID='MESH2',        IJK=5,19,24,  XB = 0,  0.5, 0.5,2.4, 0.0, 2.4,  MPI_PROCESS = 2 /
+&MESH ID='MESH3',        IJK=48,24,24, XB = 0.5,5.3, 0,  2.4, 0.0, 2.4,  MPI_PROCESS = 3 /
 
 &REAC ID = 'initialfire', SOOT_YIELD=0.01, FUEL='PROPANE' /
 
 &SPEC ID='WATER VAPOR' /
 
 &SURF ID='burner'
-COLOR='FLESH'
-SPEC_ID = 'PROPANE',
-HRRPUA=2500./
+      COLOR='FLESH'
+      SPEC_ID = 'PROPANE',
+      HRRPUA=2500./
 
-&MATL ID='concrete'
-CONDUCTIVITY = 0.1
-SPECIFIC_HEAT = 0.88
-DENSITY = 568.2 /
+&MATL ID='CONCRETE'
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 0.88
+      DENSITY = 568.2 /
 
 &SURF ID = 'concretewalls'
-COLOR='GRAY 80'
-MATL_ID='concrete'
-THICKNESS = 0.2 /
+      COLOR='GRAY 80'
+      MATL_ID='CONCRETE'
+      THICKNESS = 0.2 /
 
-&MATL ID					= 'water'
-      DENSITY				= 1000.
-      CONDUCTIVITY			= 0.6
-      EMISSIVITY            = 0.9
-      SPECIFIC_HEAT	        = 4.2
-      N_REACTIONS			= 1
-	  A(1)					= 8.37E12
-      E(1)					= 121.0E3
-	  N_S(1)				= 1.
-      NU_SPEC				= 1.0
-      SPEC_ID				= 'WATER VAPOR'
-      HEAT_OF_REACTION		= 2500./
+&MATL ID		= 'MOISTURE'
+      DENSITY		= 1000.
+      CONDUCTIVITY	= 0.6
+      EMISSIVITY        = 0.9
+      SPECIFIC_HEAT	= 4.2
+      N_REACTIONS	= 1
+      A(1)		= 8.37E12
+      E(1)		= 121.0E3
+      N_S(1)		= 1.
+      NU_SPEC		= 1.0
+      SPEC_ID		= 'WATER VAPOR'
+      HEAT_OF_REACTION	= 2500./
 	  
 &RAMP ID = 'char_k', T = 20, F = 0.115038 /
 &RAMP ID = 'char_k', T = 900, F = 0.187198 /

@@ -1,7 +1,7 @@
 
 &REAC FUEL='PYROLYZATE', C=6, H=10, O=5, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION = 13850. /
    
-&MATL ID                    = 'wood'
+&MATL ID                    = 'PINE'
       EMISSIVITY            = 0.9
       DENSITY               = 493.
       CONDUCTIVITY_RAMP     = 'wood_k'
@@ -13,9 +13,9 @@
       NU_SPEC(1,1)          = 0.84
       SPEC_ID(1,1)          = 'PYROLYZATE'
       NU_MATL(1,1)          = 0.16
-      MATL_ID(1,1)          = 'char' /   
+      MATL_ID(1,1)          = 'CHAR' /
    
-&MATL ID                    = 'char'
+&MATL ID                    = 'CHAR'
       EMISSIVITY            = 0.84
       DENSITY               = 104
       CONDUCTIVITY_RAMP     = 'char_k'
