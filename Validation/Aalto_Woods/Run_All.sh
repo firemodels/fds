@@ -19,7 +19,7 @@ $QFDS $DEBUG $QUEUE -d $INDIR spruce_N2_35.fds
 $QFDS $DEBUG $QUEUE -d $INDIR spruce_N2_50.fds
 $QFDS $DEBUG $QUEUE -d $INDIR spruce_smolder_25.fds
 $QFDS $DEBUG $QUEUE -d $INDIR spruce_smolder_35.fds
-$QFDS $DEBUG $QUEUE -d $INDIR Roomcorner_M12.fds
-$QFDS $DEBUG $QUEUE -d $INDIR Roomcorner_modified.fds
+$QFDS -p 4 $DEBUG $QUEUE -d $INDIR Roomcorner_M12.fds
+$QFDS -p 4 $DEBUG $QUEUE -d $INDIR Roomcorner_modified.fds
 
 echo FDS cases submitted
