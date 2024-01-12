@@ -19,7 +19,7 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
-USE VTK_FDS_INTERFACE, ONLY : BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,&
+USE VTK_FDS_INTERFACE, ONLY : BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLICE_GEOMETRY,&
                 WRITE_VTK_SM3D_WRAPPER,WRITE_VTK_SL3D_WRAPPER,WRITE_VTK_BNDF_WRAPPER,&
                 WRITE_VTK_PART_WRAPPER,&
                 DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY
@@ -419,7 +419,7 @@ ALLOCATE(FN_RESTART(NMESHES))
 ALLOCATE(LU_RESTART(NMESHES))
 
 ! VTK Files
-ALLOCATE(FN_SL3D_VTK(NMESHES+1))
+ALLOCATE(FN_SL3D_VTK(N_SLCF_MAX,NMESHES+1))
 ALLOCATE(FN_SMOKE3D_VTK(NMESHES+1))
 ALLOCATE(FN_BNDF_VTK(NMESHES+1))
 ALLOCATE(FN_PART_VTK(N_LAGRANGIAN_CLASSES,NMESHES+1))
@@ -5986,7 +5986,7 @@ REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: BSUM,TT
 REAL(FB) :: T_BOUND, SLICE_MIN_BOUND, SLICE_MAX_BOUND
 INTEGER :: CHANGE_BOUND
-INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
+INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II,II1,II2,JJ1,JJ2,KK1,KK2, &
            IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO,I_INC,J_INC
 INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
@@ -6105,422 +6105,547 @@ ELSE
 ENDIF
 
 NTSL = 0
-VTK_INITIALIZED=.FALSE.
 
-QUANTITY_LOOP: DO IQ=1,NQT
-
-   IF (PLOT3D) THEN
-      IND = PLOT3D_QUANTITY_INDEX(IQ)
-      Y_INDEX = PLOT3D_Y_INDEX(IQ)
-      Z_INDEX = PLOT3D_Z_INDEX(IQ)
-      PART_INDEX = PLOT3D_PART_INDEX(IQ)
-      VELO_INDEX = PLOT3D_VELO_INDEX(IQ)
-      PROP_INDEX = 0
-      I1  = 0
-      I2  = IBAR
-      J1  = 0
-      J2  = JBAR
-      K1  = 0
-      K2  = KBAR
-      AGL_TERRAIN_SLICE = .FALSE.
-      CC_CELL_CENTERED  = .FALSE.
-      CC_INTERP2FACES   = .FALSE.
-   ELSE
-      SL => SLICE(IQ)
-      IND  = SL%INDEX
-      IND2 = SL%INDEX2
-      Y_INDEX = SL%Y_INDEX
-      Z_INDEX = SL%Z_INDEX
-      PART_INDEX = SL%PART_INDEX
-      VELO_INDEX = SL%VELO_INDEX
-      PROP_INDEX = SL%PROP_INDEX
-      REAC_INDEX = SL%REAC_INDEX
-      MATL_INDEX = SL%MATL_INDEX
-      I1  = SL%I1
-      I2  = SL%I2
-      J1  = SL%J1
-      J2  = SL%J2
-      K1  = SL%K1
-      K2  = SL%K2
-      AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
-      CC_CELL_CENTERED  = SL%CELL_CENTERED
-      CC_INTERP2FACES   = .FALSE.
-      IF(.NOT.CC_CELL_CENTERED .AND. TRIM(SL%SLICETYPE)/='STRUCTURED') CC_INTERP2FACES = .TRUE.
-      IF ((I2-I1>0 .AND. J2-J1>0 .AND. K2-K1>0)  .AND. .NOT.SLCF3D) CYCLE QUANTITY_LOOP
-      IF ((I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) .AND.      SLCF3D) CYCLE QUANTITY_LOOP
-   ENDIF
-
-   IF (VTK3D .AND. .NOT.VTK_INITIALIZED) THEN
-      SL => SLICE(IQ)
-      STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
-      TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
-      ITM  = INT(TT)
-      ITM1 = NINT(ABS(TT-ITM)*100)
-      IF (ITM1==100) THEN
-         ITM = ITM+1
-         ITM1 = 0
-      ENDIF
-      WRITE(FN_SL3D_VTK(NM),'(A,A,A,I0,A,I8.8,I2.2,A)') "",TRIM(CHID),'_SL3D_',NM,'_',ITM,ITM1,'.vtu'
-      IF (VTK_BINARY) THEN
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_SL3D_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+if (.NOT.VTK3D) THEN
+   QUANTITY_LOOP: DO IQ=1,NQT
+      IF (PLOT3D) THEN
+         IND = PLOT3D_QUANTITY_INDEX(IQ)
+         Y_INDEX = PLOT3D_Y_INDEX(IQ)
+         Z_INDEX = PLOT3D_Z_INDEX(IQ)
+         PART_INDEX = PLOT3D_PART_INDEX(IQ)
+         VELO_INDEX = PLOT3D_VELO_INDEX(IQ)
+         PROP_INDEX = 0
+         I1  = 0
+         I2  = IBAR
+         J1  = 0
+         J2  = JBAR
+         K1  = 0
+         K2  = KBAR
+         AGL_TERRAIN_SLICE = .FALSE.
+         CC_CELL_CENTERED  = .FALSE.
+         CC_INTERP2FACES   = .FALSE.
       ELSE
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_SL3D_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
-      ENDIF ! do not change capitalization on mesh topology
-      CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NP, NC=NC)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NP, NC=NC, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NC, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='OPEN')
-      CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
-      
-      !IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-      !   CALL INITIALIZE_VTK(LU_SL3D_VTK(NM),FN_SL3D_VTK(NM),'UnstructuredGrid')
-      !   CALL BUILD_VTK_GAS_PHASE_GEOMETRY(NM, 'UnstructuredGrid', FN_SL3D_VTK(NM), LU_SL3D_VTK(NM))
-      !ENDIF
-      VTK_INITIALIZED=.TRUE.
-   ENDIF
+         SL => SLICE(IQ)
+         IND  = SL%INDEX
+         IND2 = SL%INDEX2
+         Y_INDEX = SL%Y_INDEX
+         Z_INDEX = SL%Z_INDEX
+         PART_INDEX = SL%PART_INDEX
+         VELO_INDEX = SL%VELO_INDEX
+         PROP_INDEX = SL%PROP_INDEX
+         REAC_INDEX = SL%REAC_INDEX
+         MATL_INDEX = SL%MATL_INDEX
+         I1  = SL%I1
+         I2  = SL%I2
+         J1  = SL%J1
+         J2  = SL%J2
+         K1  = SL%K1
+         K2  = SL%K2
+         AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
+         CC_CELL_CENTERED  = SL%CELL_CENTERED
+         CC_INTERP2FACES   = .FALSE.
+         IF(.NOT.CC_CELL_CENTERED .AND. TRIM(SL%SLICETYPE)/='STRUCTURED') CC_INTERP2FACES = .TRUE.
+         IF ((I2-I1>0 .AND. J2-J1>0 .AND. K2-K1>0)  .AND. .NOT.SLCF3D) CYCLE QUANTITY_LOOP
+         IF ((I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) .AND.      SLCF3D) CYCLE QUANTITY_LOOP
+      ENDIF
 
-   ! Determine what cells need to be evaluated to form cell-corner averages
+      ! Determine what cells need to be evaluated to form cell-corner averages
 
-   II1 = I1
-   II2 = I2+1
-   JJ1 = J1
-   JJ2 = J2+1
-   KK1 = K1
-   KK2 = K2+1
+      II1 = I1
+      II2 = I2+1
+      JJ1 = J1
+      JJ2 = J2+1
+      KK1 = K1
+      KK2 = K2+1
 
-   SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-      CASE(CELL_FACE)
-         IF (OUTPUT_QUANTITY(IND)%IOR==1) II2 = I2
-         IF (OUTPUT_QUANTITY(IND)%IOR==2) JJ2 = J2
-         IF (OUTPUT_QUANTITY(IND)%IOR==3) KK2 = K2
-      CASE(CELL_EDGE)
-         II2 = I2
-         JJ2 = J2
-         KK2 = K2
-   END SELECT
+      SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+         CASE(CELL_FACE)
+            IF (OUTPUT_QUANTITY(IND)%IOR==1) II2 = I2
+            IF (OUTPUT_QUANTITY(IND)%IOR==2) JJ2 = J2
+            IF (OUTPUT_QUANTITY(IND)%IOR==3) KK2 = K2
+         CASE(CELL_EDGE)
+            II2 = I2
+            JJ2 = J2
+            KK2 = K2
+      END SELECT
 
-   ! Loop through the necessary cells, storing the desired output QUANTITY
+      ! Loop through the necessary cells, storing the desired output QUANTITY
 
-   IF (.NOT.AGL_TERRAIN_SLICE) THEN
-      DO K=KK1,KK2
-         DO J=JJ1,JJ2
-            DO I=II1,II2
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,&
-                                                  PROP_INDEX,REAC_INDEX,MATL_INDEX)
+      IF (.NOT.AGL_TERRAIN_SLICE) THEN
+         DO K=KK1,KK2
+            DO J=JJ1,JJ2
+               DO I=II1,II2
+                  QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,&
+                                                     PROP_INDEX,REAC_INDEX,MATL_INDEX)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ELSE
-      NTSL = NTSL + 1
-      DO I=II1,II2
-         DO J=JJ1,JJ2
-            KTS = K_AGL_SLICE(I,J,NTSL)
-            QUANTITY(I,J,K1) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
-         ENDDO
-      ENDDO
-   ENDIF
-
-   ! Average the QUANTITY at cell nodes, faces, or edges, as appropriate
-
-   IF (PLOT3D) THEN
-      IQQ = IQ
-   ELSE
-      IQQ = 1
-   ENDIF
-
-   IF (AGL_TERRAIN_SLICE) THEN
-
-      I_INC = 1
-      J_INC = 1
-      IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==1) I_INC = 0
-      IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==2) J_INC = 0
-
-      DO J=J1,J2
-         DO I=I1,I2
-            QQ(I,J,K1,IQQ) = REAL(0.25_EB*(QUANTITY(I,J      ,K1)+QUANTITY(I+I_INC,J      ,K1)+&
-                                           QUANTITY(I,J+J_INC,K1)+QUANTITY(I+I_INC,J+J_INC,K1)),FB)
-         ENDDO
-      ENDDO
-
-   ELSEIF (CC_CELL_CENTERED) THEN
-
-      DO K=KK1,KK2
-         DO J=JJ1,JJ2
-            DO I=II1,II2
-               QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
+      ELSE
+         NTSL = NTSL + 1
+         DO I=II1,II2
+            DO J=JJ1,JJ2
+               KTS = K_AGL_SLICE(I,J,NTSL)
+               QUANTITY(I,J,K1) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
             ENDDO
          ENDDO
-      ENDDO
+      ENDIF
 
-   ELSEIF (CC_INTERP2FACES) THEN
+      ! Average the QUANTITY at cell nodes, faces, or edges, as appropriate
 
-      DO K=KK1,KK2
-         DO J=JJ1,JJ2
-            DO I=II1,II2
-            !xxx need to change the following code to use face centered interpolation
-            ! (perhaps copy some variant of node centered interpolation code above)
-               QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
-            ENDDO
-         ENDDO
-      ENDDO
+      IF (PLOT3D) THEN
+         IQQ = IQ
+      ELSE
+         IQQ = 1
+      ENDIF
 
-   ELSE  ! Node interpolated slice
+      IF (AGL_TERRAIN_SLICE) THEN
 
-      DO K=K1,K2
+         I_INC = 1
+         J_INC = 1
+         IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==1) I_INC = 0
+         IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==2) J_INC = 0
+
          DO J=J1,J2
             DO I=I1,I2
-               SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-                  CASE(CELL_CENTER)
-                     QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
-                  CASE(CELL_FACE)
-                     QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
-                  CASE(CELL_EDGE)
-                     QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
-               END SELECT
+               QQ(I,J,K1,IQQ) = REAL(0.25_EB*(QUANTITY(I,J      ,K1)+QUANTITY(I+I_INC,J      ,K1)+&
+                                              QUANTITY(I,J+J_INC,K1)+QUANTITY(I+I_INC,J+J_INC,K1)),FB)
             ENDDO
          ENDDO
-      ENDDO
 
-   ENDIF
+      ELSEIF (CC_CELL_CENTERED) THEN
 
-   ! Dump out the slice file to a .sf file
-
-   IF (.NOT.PLOT3D .and. .NOT.VTK3D) THEN
-      SL => SLICE(IQ)
-      IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
-         OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-         WRITE(LU_SLCF(IQ,NM)) STIME
-         IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
-         IF (SL%DEBUG) THEN
-            IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
-               SLICE_MIN = MESHES(NM)%YPLT(J1) - STIME
-               SLICE_MAX = MESHES(NM)%YPLT(J2) + STIME
-               DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(J2-J1, FB)
-               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(J-J1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-            ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
-               SLICE_MIN = MESHES(NM)%ZPLT(K1) - STIME
-               SLICE_MAX = MESHES(NM)%ZPLT(K2) + STIME
-               DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(K2-K1, FB)
-               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(K-K1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-            ELSE
-               SLICE_MIN = MESHES(NM)%XPLT(I1) - STIME
-               SLICE_MAX = MESHES(NM)%XPLT(I2) + STIME
-               IF (I1 .EQ. I2 ) THEN
-                  DSLICE = 0.0_FB
-               ELSE
-                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(I2-I1, FB)
-               ENDIF
-               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(I-I1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-            ENDIF
-         ENDIF
-         CLOSE(LU_SLCF(IQ,NM))
-
-         IF (SL%RLE) THEN
-            IQ3 = IQ + 2*N_SLCF_MAX
-            OPEN(LU_SLCF(IQ3,NM),FILE=FN_SLCF(IQ3,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-            NX = I2 + 1 - I1
-            NY = J2 + 1 - J1
-            NZ = K2 + 1 - K1
-            IF (NX*NY*NZ>0) THEN
-               ALLOCATE(QQ_PACK(NX*NY*NZ))
-
-               DO K = K1, K2
-                  KFACT = (K-K1)
-                  DO J = J1, J2
-                     JFACT = (J-J1)*NZ
-                     DO I = I1, I2
-                        IFACT = (I - I1)*NY*NZ
-                        QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
-                     ENDDO
-                  ENDDO
-               ENDDO
-
-               CALL SLICE_TO_RLEFILE(LU_SLCF(IQ3,NM), STIME, NX, NY, NZ, QQ_PACK, SL%RLE_MIN, SL%RLE_MAX)
-               DEALLOCATE(QQ_PACK)
-            ENDIF
-            CLOSE(LU_SLCF(IQ3,NM))
-         ENDIF
-
-         IF (.NOT.SL%DEBUG) THEN
-            IF (CC_CELL_CENTERED) THEN
-               SLICE_MIN = QQ(MIN(I1+1,I2),MIN(J1+1,J2),MIN(K1+1,K2),1)
-               SLICE_MAX = SLICE_MIN
-               DO K = MIN(K1+1,K2), K2
-                  DO J = MIN(J1+1,J2), J2
-                     DO I = MIN(I1+1,I2), I2
-                        SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
-                        SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ELSE
-               SLICE_MIN = QQ(I1,J1,K1,1)
-               SLICE_MAX = SLICE_MIN
-               DO K = K1, K2
-                  DO J = J1, J2
-                     DO I = I1, I2
-                        SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
-                        SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ENDIF
-         ENDIF
-
-         IQ2 = IQ + N_SLCF_MAX
-         CHANGE_BOUND = 0
-         IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
-           SLICE_MIN_BOUND = SLICE_MIN
-           SLICE_MAX_BOUND = SLICE_MAX
-           CHANGE_BOUND    = 1
-         ELSE
-            OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),ACTION='READ')
-            READ(LU_SLCF(IQ2,NM),FMT=*,IOSTAT=IERROR)T_BOUND, SLICE_MIN_BOUND, SLICE_MAX_BOUND
-            CLOSE(LU_SLCF(IQ2,NM))
-            IF (IERROR /= 0 .OR. SLICE_MIN < SLICE_MIN_BOUND) THEN
-              SLICE_MIN_BOUND = SLICE_MIN
-              CHANGE_BOUND = 1
-            ENDIF
-            IF (IERROR /= 0 .OR. SLICE_MAX > SLICE_MAX_BOUND) THEN
-              SLICE_MAX_BOUND = SLICE_MAX
-              CHANGE_BOUND = 1
-            ENDIF
-         ENDIF
-         IF (CHANGE_BOUND == 1) THEN
-            OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),FORM='FORMATTED',STATUS='REPLACE')
-            WRITE(LU_SLCF(IQ2,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, SLICE_MIN_BOUND, SLICE_MAX_BOUND
-            CLOSE(LU_SLCF(IQ2,NM))
-         ENDIF
-      ELSE
-         IQ2 = IQ + N_SLCF_MAX
-         STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
-         ! write geometry for slice file
-         CHANGE_BOUND = 0
-         IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
-            ! geometry and data file at first time step
-            OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-            CALL DUMP_SLICE_GEOM(LU_SLCF_GEOM(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2)
-            CLOSE(LU_SLCF_GEOM(IQ,NM))
-
-            OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
-                              1,STIME,I1,I2,J1,J2,K1,K2,0,&
-                              IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
-                              SLICE_MIN, SLICE_MAX)
-            SLICE_MIN_BOUND = SLICE_MIN
-            SLICE_MAX_BOUND = SLICE_MAX
-            CHANGE_BOUND = 1
-         ELSE
-            ! data file at subsequent time steps
-            OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
-                              0,STIME,I1,I2,J1,J2,K1,K2,0,&
-                              IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
-                              SLICE_MIN, SLICE_MAX)
-            OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),ACTION='READ')
-            READ(LU_SLCF(IQ2,NM),FMT=*,IOSTAT=IERROR)T_BOUND, SLICE_MIN_BOUND, SLICE_MAX_BOUND
-            CLOSE(LU_SLCF(IQ2,NM))
-            IF (IERROR /= 0 .OR. SLICE_MIN < SLICE_MIN_BOUND) THEN
-              SLICE_MIN_BOUND = SLICE_MIN
-              CHANGE_BOUND = 1
-            ENDIF
-            IF (IERROR /= 0 .OR. SLICE_MAX > SLICE_MAX_BOUND) THEN
-              SLICE_MAX_BOUND = SLICE_MAX
-              CHANGE_BOUND = 1
-            ENDIF
-         ENDIF
-         IF (CHANGE_BOUND == 1) THEN
-            OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),FORM='FORMATTED',STATUS='REPLACE')
-            WRITE(LU_SLCF(IQ2,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, SLICE_MIN_BOUND, SLICE_MAX_BOUND
-            CLOSE(LU_SLCF(IQ2,NM))
-         ENDIF
-         CLOSE(LU_SLCF(IQ,NM))
-      ENDIF
-   ENDIF
-   
-   ! Dump out the slice file to a .vtk file
-
-   IF (VTK3D) THEN
-      SL => SLICE(IQ)
-      I1=SL%I1
-      I2=SL%I2
-      J1=SL%J1
-      J2=SL%J2
-      K1=SL%K1
-      K2=SL%K2
-      NX = I2 + 1 - I1
-      NY = J2 + 1 - J1
-      NZ = K2 + 1 - K1
-      IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         IF (NX*NY*NZ>0) THEN
-            ALLOCATE(QQ_PACK(NX*NY*NZ))
-            DO I = I1, I2
-               IFACT = (I-I1)
-               DO J = J1, J2
-                  JFACT = (J-J1)*NX
-                  DO K = K1, K2
-                     KFACT = (K - K1)*NY*NX
-                     QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
-                  ENDDO
+         DO K=KK1,KK2
+            DO J=JJ1,JJ2
+               DO I=II1,II2
+                  QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
                ENDDO
             ENDDO
-            
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME=SL%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
-            
-            DEALLOCATE(QQ_PACK)
+         ENDDO
+
+      ELSEIF (CC_INTERP2FACES) THEN
+
+         DO K=KK1,KK2
+            DO J=JJ1,JJ2
+               DO I=II1,II2
+               !xxx need to change the following code to use face centered interpolation
+               ! (perhaps copy some variant of node centered interpolation code above)
+                  QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ELSE  ! Node interpolated slice
+
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+                  SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+                     CASE(CELL_CENTER)
+                        QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
+                     CASE(CELL_FACE)
+                        QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
+                     CASE(CELL_EDGE)
+                        QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
+                  END SELECT
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ENDIF
+
+      ! Dump out the slice file to a .sf file
+
+      IF (.NOT.PLOT3D) THEN
+         SL => SLICE(IQ)
+         IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
+            STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+            OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+            WRITE(LU_SLCF(IQ,NM)) STIME
+            IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
+            IF (SL%DEBUG) THEN
+               IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
+                  SLICE_MIN = MESHES(NM)%YPLT(J1) - STIME
+                  SLICE_MAX = MESHES(NM)%YPLT(J2) + STIME
+                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(J2-J1, FB)
+                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(J-J1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
+               ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
+                  SLICE_MIN = MESHES(NM)%ZPLT(K1) - STIME
+                  SLICE_MAX = MESHES(NM)%ZPLT(K2) + STIME
+                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(K2-K1, FB)
+                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(K-K1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
+               ELSE
+                  SLICE_MIN = MESHES(NM)%XPLT(I1) - STIME
+                  SLICE_MAX = MESHES(NM)%XPLT(I2) + STIME
+                  IF (I1 .EQ. I2 ) THEN
+                     DSLICE = 0.0_FB
+                  ELSE
+                     DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(I2-I1, FB)
+                  ENDIF
+                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(I-I1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
+               ENDIF
+            ENDIF
+            CLOSE(LU_SLCF(IQ,NM))
+
+            IF (SL%RLE) THEN
+               IQ3 = IQ + 2*N_SLCF_MAX
+               OPEN(LU_SLCF(IQ3,NM),FILE=FN_SLCF(IQ3,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+               NX = I2 + 1 - I1
+               NY = J2 + 1 - J1
+               NZ = K2 + 1 - K1
+               IF (NX*NY*NZ>0) THEN
+                  ALLOCATE(QQ_PACK(NX*NY*NZ))
+
+                  DO K = K1, K2
+                     KFACT = (K-K1)
+                     DO J = J1, J2
+                        JFACT = (J-J1)*NZ
+                        DO I = I1, I2
+                           IFACT = (I - I1)*NY*NZ
+                           QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+
+                  CALL SLICE_TO_RLEFILE(LU_SLCF(IQ3,NM), STIME, NX, NY, NZ, QQ_PACK, SL%RLE_MIN, SL%RLE_MAX)
+                  DEALLOCATE(QQ_PACK)
+               ENDIF
+               CLOSE(LU_SLCF(IQ3,NM))
+            ENDIF
+
+            IF (.NOT.SL%DEBUG) THEN
+               IF (CC_CELL_CENTERED) THEN
+                  SLICE_MIN = QQ(MIN(I1+1,I2),MIN(J1+1,J2),MIN(K1+1,K2),1)
+                  SLICE_MAX = SLICE_MIN
+                  DO K = MIN(K1+1,K2), K2
+                     DO J = MIN(J1+1,J2), J2
+                        DO I = MIN(I1+1,I2), I2
+                           SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
+                           SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ELSE
+                  SLICE_MIN = QQ(I1,J1,K1,1)
+                  SLICE_MAX = SLICE_MIN
+                  DO K = K1, K2
+                     DO J = J1, J2
+                        DO I = I1, I2
+                           SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
+                           SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            IQ2 = IQ + N_SLCF_MAX
+            CHANGE_BOUND = 0
+            IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
+              SLICE_MIN_BOUND = SLICE_MIN
+              SLICE_MAX_BOUND = SLICE_MAX
+              CHANGE_BOUND    = 1
+            ELSE
+               OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),ACTION='READ')
+               READ(LU_SLCF(IQ2,NM),FMT=*,IOSTAT=IERROR)T_BOUND, SLICE_MIN_BOUND, SLICE_MAX_BOUND
+               CLOSE(LU_SLCF(IQ2,NM))
+               IF (IERROR /= 0 .OR. SLICE_MIN < SLICE_MIN_BOUND) THEN
+                 SLICE_MIN_BOUND = SLICE_MIN
+                 CHANGE_BOUND = 1
+               ENDIF
+               IF (IERROR /= 0 .OR. SLICE_MAX > SLICE_MAX_BOUND) THEN
+                 SLICE_MAX_BOUND = SLICE_MAX
+                 CHANGE_BOUND = 1
+               ENDIF
+            ENDIF
+            IF (CHANGE_BOUND == 1) THEN
+               OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),FORM='FORMATTED',STATUS='REPLACE')
+               WRITE(LU_SLCF(IQ2,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, SLICE_MIN_BOUND, SLICE_MAX_BOUND
+               CLOSE(LU_SLCF(IQ2,NM))
+            ENDIF
+         ELSE
+            IQ2 = IQ + N_SLCF_MAX
+            STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+            ! write geometry for slice file
+            CHANGE_BOUND = 0
+            IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
+               ! geometry and data file at first time step
+               OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+               CALL DUMP_SLICE_GEOM(LU_SLCF_GEOM(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2)
+               CLOSE(LU_SLCF_GEOM(IQ,NM))
+
+               OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+               CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
+                                 1,STIME,I1,I2,J1,J2,K1,K2,0,&
+                                 IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
+                                 SLICE_MIN, SLICE_MAX)
+               SLICE_MIN_BOUND = SLICE_MIN
+               SLICE_MAX_BOUND = SLICE_MAX
+               CHANGE_BOUND = 1
+            ELSE
+               ! data file at subsequent time steps
+               OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+               CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
+                                 0,STIME,I1,I2,J1,J2,K1,K2,0,&
+                                 IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
+                                 SLICE_MIN, SLICE_MAX)
+               OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),ACTION='READ')
+               READ(LU_SLCF(IQ2,NM),FMT=*,IOSTAT=IERROR)T_BOUND, SLICE_MIN_BOUND, SLICE_MAX_BOUND
+               CLOSE(LU_SLCF(IQ2,NM))
+               IF (IERROR /= 0 .OR. SLICE_MIN < SLICE_MIN_BOUND) THEN
+                 SLICE_MIN_BOUND = SLICE_MIN
+                 CHANGE_BOUND = 1
+               ENDIF
+               IF (IERROR /= 0 .OR. SLICE_MAX > SLICE_MAX_BOUND) THEN
+                 SLICE_MAX_BOUND = SLICE_MAX
+                 CHANGE_BOUND = 1
+               ENDIF
+            ENDIF
+            IF (CHANGE_BOUND == 1) THEN
+               OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),FORM='FORMATTED',STATUS='REPLACE')
+               WRITE(LU_SLCF(IQ2,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, SLICE_MIN_BOUND, SLICE_MAX_BOUND
+               CLOSE(LU_SLCF(IQ2,NM))
+            ENDIF
+            CLOSE(LU_SLCF(IQ,NM))
          ENDIF
       ENDIF
-   ENDIF
+      
+   ENDDO QUANTITY_LOOP
 
-ENDDO QUANTITY_LOOP
+   ! Write out the PLOT3D ``q'' file
 
-IF (VTK3D) THEN
-   ! finish after writing all pieces
-   !CALL FINALIZE_VTK(LU_SL3D_VTK(NM),FN_SL3D_VTK(NM),'UnstructuredGrid')
-   VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='CLOSE')
-   VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
-   VTK_ERROR = A_VTK_FILE%FINALIZE()
-ENDIF
-
-! Write out the PLOT3D ``q'' file
-
-IF (PLOT3D) THEN
-   ZERO = 0._EB
-   WRITE(LU_PL3D(NM)) IBP1,JBP1,KBP1
-   WRITE(LU_PL3D(NM)) ZERO,ZERO,ZERO,ZERO
-   WRITE(LU_PL3D(NM)) ((((QQ(I,J,K,IQ),I=0,IBAR),J=0,JBAR),K=0,KBAR),IQ=1,5)
-   CLOSE(LU_PL3D(NM))
-   DO IQ = 1, 5
-      PLOT3D_MIN = QQ(0,0,0,IQ)
-      PLOT3D_MAX = PLOT3D_MIN
+   IF (PLOT3D) THEN
+      ZERO = 0._EB
+      WRITE(LU_PL3D(NM)) IBP1,JBP1,KBP1
+      WRITE(LU_PL3D(NM)) ZERO,ZERO,ZERO,ZERO
+      WRITE(LU_PL3D(NM)) ((((QQ(I,J,K,IQ),I=0,IBAR),J=0,JBAR),K=0,KBAR),IQ=1,5)
+      CLOSE(LU_PL3D(NM))
+      DO IQ = 1, 5
+         PLOT3D_MIN = QQ(0,0,0,IQ)
+         PLOT3D_MAX = PLOT3D_MIN
+         DO K = 0, KBAR
+            DO J = 0, JBAR
+               DO I = 0, IBAR
+                 PLOT3D_MIN = MIN(PLOT3D_MIN,QQ(I,J,K,IQ))
+                 PLOT3D_MAX = MAX(PLOT3D_MAX,QQ(I,J,K,IQ))
+               END DO
+            END DO
+         END DO
+         WRITE(LU_PL3D(NM+NMESHES),'(1X,E13.6,1X,E13.6)')PLOT3D_MIN,PLOT3D_MAX
+      END DO
+      PLOT3D_MIN = 10.0_FB**30
+      PLOT3D_MAX = -PLOT3D_MIN
       DO K = 0, KBAR
          DO J = 0, JBAR
             DO I = 0, IBAR
-              PLOT3D_MIN = MIN(PLOT3D_MIN,QQ(I,J,K,IQ))
-              PLOT3D_MAX = MAX(PLOT3D_MAX,QQ(I,J,K,IQ))
+              UVEL = QQ(I,J,K,2)
+              VVEL = QQ(I,J,K,3)
+              WVEL = QQ(I,J,K,4)
+              VEL = SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
+              PLOT3D_MIN = MIN(PLOT3D_MIN,VEL)
+              PLOT3D_MAX = MAX(PLOT3D_MAX,VEL)
             END DO
          END DO
       END DO
       WRITE(LU_PL3D(NM+NMESHES),'(1X,E13.6,1X,E13.6)')PLOT3D_MIN,PLOT3D_MAX
-   END DO
-   PLOT3D_MIN = 10.0_FB**30
-   PLOT3D_MAX = -PLOT3D_MIN
-   DO K = 0, KBAR
-      DO J = 0, JBAR
-         DO I = 0, IBAR
-           UVEL = QQ(I,J,K,2)
-           VVEL = QQ(I,J,K,3)
-           WVEL = QQ(I,J,K,4)
-           VEL = SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
-           PLOT3D_MIN = MIN(PLOT3D_MIN,VEL)
-           PLOT3D_MAX = MAX(PLOT3D_MAX,VEL)
-         END DO
-      END DO
-   END DO
-   WRITE(LU_PL3D(NM+NMESHES),'(1X,E13.6,1X,E13.6)')PLOT3D_MIN,PLOT3D_MAX
-   CLOSE(LU_PL3D(NM+NMESHES))
+      CLOSE(LU_PL3D(NM+NMESHES))
+   ENDIF
+
+ENDIF
+
+! Dump out the slice file to a .vtk file
+
+IF (VTK3D) THEN
+   STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+   TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+   ITM  = INT(TT)
+   ITM1 = NINT(ABS(TT-ITM)*100)
+   IF (ITM1==100) THEN
+      ITM = ITM+1
+      ITM1 = 0
+   ENDIF
+   
+   UNIQUE_LOOPA: DO II=1,N_UNIQUE_SLCF
+      IF (EMPTY_UNIQUE_SLICE(II)) CYCLE UNIQUE_LOOPA
+      VTK_INITIALIZED=.FALSE.
+      QUANTITY_LOOPA: DO IQ=1,NQT
+         SL => SLICE(IQ)
+         IF (SL%SLCF_NAME.NE.UNIQUE_SLICE_NAMES(II)) CYCLE QUANTITY_LOOPA
+         IND  = SL%INDEX
+         IND2 = SL%INDEX2
+         Y_INDEX = SL%Y_INDEX
+         Z_INDEX = SL%Z_INDEX
+         PART_INDEX = SL%PART_INDEX
+         VELO_INDEX = SL%VELO_INDEX
+         PROP_INDEX = SL%PROP_INDEX
+         REAC_INDEX = SL%REAC_INDEX
+         MATL_INDEX = SL%MATL_INDEX
+         I1  = SL%I1
+         I2  = SL%I2
+         J1  = SL%J1
+         J2  = SL%J2
+         K1  = SL%K1
+         K2  = SL%K2
+         AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
+         CC_CELL_CENTERED  = SL%CELL_CENTERED
+         CC_INTERP2FACES   = .FALSE.
+         IF(.NOT.CC_CELL_CENTERED .AND. TRIM(SL%SLICETYPE)/='STRUCTURED') CC_INTERP2FACES = .TRUE.
+         
+         IF (.NOT.VTK_INITIALIZED) THEN
+            WRITE(FN_SL3D_VTK(II,NM),'(A,A,A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',TRIM(UNIQUE_SLICE_NAMES(II)),&
+                                     '_',NM,'_',ITM,ITM1,'.vtu'
+            !WRITE(FN_SL3D_VTK(II,NM),'(A,A,A,I0,A,I0,A,I8.8,I2.2,A)') "",TRIM(CHID),'_SL3D_',II,'_',NM,'_',ITM,ITM1,'.vtu'
+            IF (VTK_BINARY) THEN
+               VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_SL3D_VTK(II,NM), MESH_TOPOLOGY='UnstructuredGrid')
+            ELSE
+               VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_SL3D_VTK(II,NM), MESH_TOPOLOGY='UnstructuredGrid')
+            ENDIF ! do not change capitalization on mesh topology
+            CALL BUILD_VTK_SLICE_GEOMETRY(NM, SL, NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NP, NC=NC)
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NP, NC=NC, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NC, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
+            VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='OPEN')
+            CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
+            VTK_INITIALIZED=.TRUE.
+         ENDIF
+         
+         ! Determine what cells need to be evaluated to form cell-corner averages
+
+         II1 = I1
+         II2 = I2+1
+         JJ1 = J1
+         JJ2 = J2+1
+         KK1 = K1
+         KK2 = K2+1
+
+         SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+            CASE(CELL_FACE)
+               IF (OUTPUT_QUANTITY(IND)%IOR==1) II2 = I2
+               IF (OUTPUT_QUANTITY(IND)%IOR==2) JJ2 = J2
+               IF (OUTPUT_QUANTITY(IND)%IOR==3) KK2 = K2
+            CASE(CELL_EDGE)
+               II2 = I2
+               JJ2 = J2
+               KK2 = K2
+         END SELECT
+
+         ! Loop through the necessary cells, storing the desired output QUANTITY
+
+         IF (.NOT.AGL_TERRAIN_SLICE) THEN
+            DO K=KK1,KK2
+               DO J=JJ1,JJ2
+                  DO I=II1,II2
+                     QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,&
+                                                        PROP_INDEX,REAC_INDEX,MATL_INDEX)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ELSE
+            NTSL = NTSL + 1
+            DO I=II1,II2
+               DO J=JJ1,JJ2
+                  KTS = K_AGL_SLICE(I,J,NTSL)
+                  QUANTITY(I,J,K1) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+               ENDDO
+            ENDDO
+         ENDIF
+
+         ! Average the QUANTITY at cell nodes, faces, or edges, as appropriate
+
+         IF (PLOT3D) THEN
+            IQQ = IQ
+         ELSE
+            IQQ = 1
+         ENDIF
+
+         IF (AGL_TERRAIN_SLICE) THEN
+
+            I_INC = 1
+            J_INC = 1
+            IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==1) I_INC = 0
+            IF (OUTPUT_QUANTITY(IND)%CELL_POSITION==CELL_FACE .AND. OUTPUT_QUANTITY(IND)%IOR==2) J_INC = 0
+
+            DO J=J1,J2
+               DO I=I1,I2
+                  QQ(I,J,K1,IQQ) = REAL(0.25_EB*(QUANTITY(I,J      ,K1)+QUANTITY(I+I_INC,J      ,K1)+&
+                                                 QUANTITY(I,J+J_INC,K1)+QUANTITY(I+I_INC,J+J_INC,K1)),FB)
+               ENDDO
+            ENDDO
+
+         ELSEIF (CC_CELL_CENTERED) THEN
+
+            DO K=KK1,KK2
+               DO J=JJ1,JJ2
+                  DO I=II1,II2
+                     QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
+                  ENDDO
+               ENDDO
+            ENDDO
+
+         ELSEIF (CC_INTERP2FACES) THEN
+
+            DO K=KK1,KK2
+               DO J=JJ1,JJ2
+                  DO I=II1,II2
+                  !xxx need to change the following code to use face centered interpolation
+                  ! (perhaps copy some variant of node centered interpolation code above)
+                     QQ(I,J,K,IQQ) = REAL(QUANTITY(I,J,K),FB)
+                  ENDDO
+               ENDDO
+            ENDDO
+
+         ELSE  ! Node interpolated slice
+
+            DO K=K1,K2
+               DO J=J1,J2
+                  DO I=I1,I2
+                     SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+                        CASE(CELL_CENTER)
+                           QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
+                        CASE(CELL_FACE)
+                           QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
+                        CASE(CELL_EDGE)
+                           QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
+                     END SELECT
+                  ENDDO
+               ENDDO
+            ENDDO
+
+         ENDIF
+         
+         !I1=SL%I1
+         !I2=SL%I2
+         !J1=SL%J1
+         !J2=SL%J2
+         !K1=SL%K1
+         !K2=SL%K2
+         NX = I2 + 1 - I1
+         NY = J2 + 1 - J1
+         NZ = K2 + 1 - K1
+         IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
+            IF (NX*NY*NZ>0) THEN
+               ALLOCATE(QQ_PACK(NX*NY*NZ))
+               DO I = I1, I2
+                  IFACT = (I-I1)
+                  DO J = J1, J2
+                     JFACT = (J-J1)*NX
+                     DO K = K1, K2
+                        KFACT = (K - K1)*NY*NX
+                        QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+                     ENDDO
+                  ENDDO
+               ENDDO
+               VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME=SL%SMOKEVIEW_LABEL(1:30), X=QQ_PACK)
+               DEALLOCATE(QQ_PACK)
+            ENDIF
+         ENDIF
+      ENDDO QUANTITY_LOOPA
+      IF (VTK_INITIALIZED) THEN
+         ! finish after writing all pieces
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='CLOSE')
+         VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
+         VTK_ERROR = A_VTK_FILE%FINALIZE()
+      ENDIF
+   ENDDO UNIQUE_LOOPA
 ENDIF
 
 CONTAINS
