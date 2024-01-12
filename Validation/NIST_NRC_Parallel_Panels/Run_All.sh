@@ -10,5 +10,8 @@ $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PMMA_60_kW_2_cm.fds
 $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PMMA_60_kW_1_cm.fds
 $QFDS $DEBUG -p 320 $QUEUE -d $INDIR PMMA_60_kW_5_mm.fds
 $QFDS $DEBUG -p 96  $QUEUE -d $INDIR PVC_60_kW.fds
+$QFDS $DEBUG -p 64  $QUEUE -d $INDIR Marinite_60_kW_2_cm.fds
+$QFDS $DEBUG -p 64  $QUEUE -d $INDIR Marinite_60_kW_1_cm.fds
+$QFDS $DEBUG -p 288 $QUEUE -d $INDIR Marinite_60_kW_5_mm.fds
 
 echo FDS cases submitted
