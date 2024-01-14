@@ -11066,11 +11066,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
                K1 = MAX(0,   NINT(GINV(XB_MESH(5)-ZS,3,NM)*RDZETA ))
                K2 = MIN(KBAR,NINT(GINV(XB_MESH(6)-ZS,3,NM)*RDZETA ))
 
-               ! Decide if the VENT is inside or at the boundary of the current MESH
+               ! Decide if the VENT is inside or at the boundary of the current MESH.
+               ! The factor of 10 is to ensure that a vent that is fairly close to the boundary is counted.
 
-               IF ((XB_MESH(1)-XF)>SPACING(XF) .OR. (XS-XB_MESH(2))>SPACING(XS) .OR. &
-                   (XB_MESH(3)-YF)>SPACING(YF) .OR. (YS-XB_MESH(4))>SPACING(YS) .OR. &
-                   (XB_MESH(5)-ZF)>SPACING(ZF) .OR. (ZS-XB_MESH(6))>SPACING(ZS)) REJECT_VENT = .TRUE.
+               IF ((XB_MESH(1)-XF)>10._EB*SPACING(XF) .OR. (XS-XB_MESH(2))>10._EB*SPACING(XS) .OR. &
+                   (XB_MESH(3)-YF)>10._EB*SPACING(YF) .OR. (YS-XB_MESH(4))>10._EB*SPACING(YS) .OR. &
+                   (XB_MESH(5)-ZF)>10._EB*SPACING(ZF) .OR. (ZS-XB_MESH(6))>10._EB*SPACING(ZS)) REJECT_VENT = .TRUE.
 
                IF (ABS(XB_MESH(1)-XB_MESH(2))<=SPACING(XB_MESH(2))) THEN
                   IF (J1==J2  .OR. K1==K2) REJECT_VENT=.TRUE.
