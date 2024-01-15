@@ -2388,10 +2388,7 @@ heats of reaction for the pyrolysis (see Sec.~\ref{info:solid_pyrolysis}),
 internal absorption and emission of radiation (see Sec.~\ref{info:liquid_fuels}), and the source specified by the user.
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
-You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line.
-Its units are {\si kW/m$^3$} and the default value is zero.
-In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal.
-The metal core is heated with a power of 300 {\si kW/m$^3$}.
+You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
 \begin{lstlisting}
 &SURF ID                     = 'Cable'
       THICKNESS              = 0.002,0.008
@@ -2469,6 +2466,7 @@ To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in th
 \end{lstlisting}
 Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
 
+You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero.
 
 \subsection{Limitations}
 \label{info:HT3D_Limitations}
@@ -12104,7 +12102,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
-{\ct EXTERNAL\_FILENAME}                            & Character   & Section~\ref{info:external_control}     &            &                   \\ \hline
+{\ct EXTERNAL\_FILENAME}                            & Character    & Section~\ref{info:external_control}     &            &                   \\ \hline
 {\ct FIXED\_LES\_FILTER\_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
@@ -12175,7 +12173,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: RAD_CFACE_INTERPOLATE (MV, to test projecting CFACEs to both sides in each dir, areas distance interpolated), TENSOR_DIFFUSIVITY (rmcdermo)
+% Undocumented: RAD_CFACE_INTERPOLATE, TENSOR_DIFFUSIVITY
 
 \vspace{\baselineskip}
 
@@ -12283,6 +12281,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DEVC\_ID }               & Character       & Section~\ref{info:activate_deactivate}  &           &               \\ \hline
 {\ct HEIGHT}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
+{\ct INTERNAL\_HEAT\_SOURCE}  & Real            & Section~\ref{info:HT3D_Basics}          & kW/m$^3$  & 0.            \\ \hline
 {\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct MATL\_ID(:) }            & Char.~Array     & Section~\ref{info:ht1d}                 &           &               \\ \hline
 {\ct MATL\_MASS\_FRACTION(:)} & Real~Array      & Section~\ref{info:ht1d}                 & kg/kg     &               \\ \hline
@@ -12491,7 +12490,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.                   \\ \hline
 {\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.                   \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}           \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &                      \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{W/(m^2.K)}$      &                      \\ \hline
 {\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 {\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 {\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
@@ -12525,7 +12524,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
 {\ct SPARK}                             & Logical       & Section~\ref{info:ignition}               &                       & {\ct F}              \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
-{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44                 \\ \hline
+{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{kJ/(kg.K)}$      & 0.44                 \\ \hline
 {\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
 {\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
 {\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
