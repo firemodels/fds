@@ -11319,12 +11319,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DEVC/STATISTICS
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE
 % ignorenamelistkw: /HVAC/DEBUG
-% ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
-% ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
+% ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
+% ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
 % ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK
 % ignorenamelistkw: /PART/DEBUG
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
-% ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE, /SURF/HT1D
+% ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI
@@ -11354,7 +11354,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
 \end{longtable}
 
-% Undocumented: DEBUG
 
 
 \vspace{\baselineskip}
@@ -11877,8 +11876,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ}                     & Real Triplet  & Section~\ref{info:HVACnode}                                              &  m            &  0.0           \\ \hline
 \end{longtable}
 
-% Undocumented: QFAN_BETA, SURF_ID
-
 
 \vspace{\baselineskip}
 
@@ -11944,7 +11941,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
-% Undocumented: PATH_RAMP (JF,RJM)
 
 \vspace{\baselineskip}
 
@@ -12027,14 +12023,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} & Real            & Section~\ref{solid_phase_energy_conservation}    & K                   &               \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &               \\ \hline
-{\ct REFRACTIVE\_INDEX}             & Real            & Section~\ref{info:ht3d}               &                   & 1.            \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.            \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 {\ct SURFACE\_OXIDATION\_MODEL}     & Logical         & Section~\ref{vegetation_model}        &                   & {\ct F}       \\ \hline
 \end{longtable}
 
-% Undocumented: COLOR, REFRACTIVE_INDEX, RGB
 
 \vspace{\baselineskip}
 
@@ -12178,7 +12172,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: RAD_CFACE_INTERPOLATE, TENSOR_DIFFUSIVITY
 
 \vspace{\baselineskip}
 
@@ -12430,7 +12423,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
 \end{longtable}
 
-% Undocumented: LAPLACE_PRESSURE_CORRECTION
 
 
 \vspace{\baselineskip}
@@ -12539,7 +12531,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \end{longtable}
 
-% Undocumented: FED_ACTIVITY
 
 \vspace{\baselineskip}
 
@@ -12990,7 +12981,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z\_0 }                                               & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
 \end{longtable}
 
-% Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
 
 
 \vspace{\baselineskip}
@@ -13121,7 +13111,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
 
-% Undocumented: SLCF_ID (RJM)
 
 \vspace{\baselineskip}
 
