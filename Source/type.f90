@@ -305,7 +305,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: RHO_F                 !< Gas density at the wall (kg/m3)
    REAL(EB) :: RHO_G                 !< Gas density in near wall cell (kg/m3)
    REAL(EB) :: RDN=1._EB             !< \f$ 1/ \delta n \f$ at the surface (1/m)
-   REAL(EB) :: K_G=0.1_EB            !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
+   REAL(EB) :: K_G=0.025_EB          !< Thermal conductivity of gas in adjacent gas phase cell near wall
    REAL(EB) :: Q_DOT_G_PP=0._EB      !< Heat release rate per unit area (W/m2)
    REAL(EB) :: Q_DOT_O2_PP=0._EB     !< Heat release rate per unit area (W/m2) due to oxygen consumption
    REAL(EB) :: Q_CONDENSE=0._EB      !< Heat release rate per unit area (W/m2) due to gas condensation
@@ -721,7 +721,6 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: THERMAL_DIFFUSIVITY                      !< Thermal diffusivity (m2/s)
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
-   REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
    REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
@@ -997,6 +996,10 @@ TYPE OBSTRUCTION_TYPE
    REAL(EB) :: Z1=0._EB                       !< Lower specified \f$ z \f$ boundary (m)
    REAL(EB) :: Z2=1._EB                       !< Upper specified \f$ z \f$ boundary (m)
    REAL(EB) :: MASS=1.E6_EB                   !< Actual mass of the obstruction (kg)
+   REAL(EB) :: HEAT_SOURCE=0._EB              !< Internal heat source (W/m3) used in HT3D applications
+   REAL(EB) :: STRETCH_FACTOR=-1._EB          !< Node stretching factor used in HT3D applications
+   REAL(EB) :: CELL_SIZE=-1._EB               !< Cell size (m) used in HT3D applications
+   REAL(EB) :: CELL_SIZE_FACTOR=-1._EB        !< Cell size factor used in HT3D applications
 
    REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB              !< Specified area of x, y, and z faces (m2)
    REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB    !< Area of x, y, z faces (m2) unbroken by mesh boundaries
@@ -1021,6 +1024,7 @@ TYPE OBSTRUCTION_TYPE
    INTEGER :: DEVC_INDEX_O=-1     !< Original DEVC_INDEX
    INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
    INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
+   INTEGER :: N_LAYER_CELLS_MAX=-1 !< Maximum number of cells allowed in the layer, used in HT3D applications
    INTEGER, DIMENSION(MAX_MATERIALS) :: MATL_INDEX=-1       !< Index of material
 
    LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview

@@ -2254,10 +2254,12 @@ Also note that no solid surface is truly adiabatic; thus, the specification of a
 
 \newpage
 
-\section{Heat Conduction in Solids}
+\section{One-Dimensional Heat Conduction in Solids}
 \label{info:MATL}
 
-Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components. Heat penetration into the solid is assumed to be largely one-dimensional in the direction normal to the surface. There are some limited cases for which three-dimensional heat conduction is possible; see Sec.~\ref{info:ht3d}.
+Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. In most fire scenarios, it is sufficient to compute the conduction of heat normal to the solid surface using a 1-D solver. There are some limited cases for which three-dimensional heat conduction is possible; see Sec.~\ref{info:ht3d}.
+
+The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.  
 
 \subsection{Structure of Solid Boundaries}
 
@@ -2386,10 +2388,7 @@ heats of reaction for the pyrolysis (see Sec.~\ref{info:solid_pyrolysis}),
 internal absorption and emission of radiation (see Sec.~\ref{info:liquid_fuels}), and the source specified by the user.
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
-You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line.
-Its units are {\si kW/m$^3$} and the default value is zero.
-In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal.
-The metal core is heated with a power of 300 {\si kW/m$^3$}.
+You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
 \begin{lstlisting}
 &SURF ID                     = 'Cable'
       THICKNESS              = 0.002,0.008
@@ -2443,36 +2442,33 @@ If a solid obstruction is thermally-thick, you typically do not want to specify 
 This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and its back side to 20~$^\circ$C. You need not specify the temperature of both surfaces. If the back side of the obstruction is exposed, be sure to assign another {\ct SURF} to the back with the opposite boundary conditions. If you want to vary the temperatures of front and back with time, use ramps {\ct RAMP\_T} and {\ct RAMP\_TMP\_BACK}, respectively.
 
 
-\subsection{1-D Heat Conduction in Solids of Varying Thickness}
-\label{info:ht1d}
 
-Solid boundaries usually have one or more layers of a known thickness, in which case you specify the layer thicknesses and material composition on the {\ct SURF} line. However, there may be solids of more complicated geometry for which the various layers may have varying thicknesses. In such cases, you do not specify a {\ct THICKNESS} or a {\ct MATL\_ID} on the {\ct SURF} line. Instead, you specify {\ct MATL\_ID} on the obstructions ({\ct OBST}s) that make up the solid. Multiple obstructions can be used to create multiple layers, and each layer can be assigned one or more material components via {\ct MATL\_ID(:)} and {\ct MATL\_MASS\_FRACTION(:)}. Unlike the way these parameters are specified on a {\ct SURF} line, the single index represents a material component, not a layer. As an example, consider these input lines:
-\begin{lstlisting}
-&SURF ID='SKIN', COLOR='BLACK', VARIABLE_THICKNESS=T /
-&OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, SURF_ID='SKIN',
-      MATL_ID='Steel','Aluminum', MATL_MASS_FRACTION=0.8,0.2 /
-&HOLE XB=0.3,0.7,0.3,0.7,0.3,0.7 /
-&OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
-      MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
-\end{lstlisting}
-The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct VARIABLE\_THICKNESS}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
+\newpage
 
 
-
-\subsection{3-D Heat Conduction (Beta)}
+\section{3-D Heat Conduction (Beta)}
 \label{info:ht3d}
 \label{ht3d_demo}
 \label{info:mesh_separation}
 
-The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
+The 1-D heat conduction model used in FDS is appropriate for most building materials that have a relatively low thermal conductivity; that is, they are insulating. However, materials like steel have a relatively high conductivity, and the 1-D conduction model may not be appropriate. FDS does have a limited 3-D heat conduction capability that is appropriate for structural steel or other solid objects where lateral heat transfer may be important. The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
+
+\subsection{Basics}
+\label{info:HT3D_Basics}
+
+For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is assumed to consist of a mixture of different materials ({\ct MATL}s). Multiple layers can be constructed from multiple obstructions, but these obstructions are snapped to the gas phase grid. Thus, you cannot specify arbitrarily thick layers like you can with the 1-D solver. 
+
+To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
 &SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK' /
 &OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-The 3-D conduction algorithm in FDS makes use of the 1-D solver. Every third solid phase time step, the temperature in one of the three coordinate directions is updated in time, and between each time step, this updated temperature field is transferred to the other two directions. In this way, the 3-D temperature field is updated over the course of three calls to the solid phase solver.
+Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
 
-\subsubsection{Limitations}
+You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero.
+
+\subsection{Limitations}
 \label{info:HT3D_Limitations}
 
 \begin{enumerate}
@@ -2549,7 +2545,7 @@ An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The h
 \end{lstlisting}
 
 
-\subsubsection{Surface Linings}
+\subsection{Surface Linings}
 \label{info:linings}
 
 In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
@@ -2566,7 +2562,7 @@ In some applications, you might want to perform 3-D heat conduction within colle
 The resulting solid has the same dimensions as the one you specify, but 5~mm of its surface material is replaced by the given layers of ``stuff.''
 
 
-\subsubsection{Working with Thin Plates}
+\subsection{Working with Thin Plates}
 \label{checkerboard}
 
 The sample case called {\ct Heat\_Transfer/checkerboard.fds} demonstrates how to work with a thin plate of steel. Consider the following lines of input:
@@ -2589,6 +2585,20 @@ There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long a
 \caption[Results of the {\ct checkerboard} test case]{(Left) Temperature of a thin steel plate subjected to fire. The plate has a patchwork pattern of high and low emissivity. (Right) Plot comparing the enthalpy of the plate and the net surface heat flux.}
 \label{fig:checkerboard}
 \end{figure}
+
+\subsection{1-D Heat Conduction in Solids of Varying Thickness}
+\label{info:ht1d}
+
+There are some scenarios that do not call for 3-D heat conduction, but do not have a well-defined {\ct THICKNESS} which is needed by the default 1-D heat conduction algorithm. In these cases, the solid might have various layers of varying thicknesses. In such cases, you do not specify a {\ct THICKNESS} or a {\ct MATL\_ID} on the {\ct SURF} line. Instead, you specify {\ct MATL\_ID} on the obstructions ({\ct OBST}s) that make up the solid. Multiple obstructions can be used to create multiple layers, and each layer can be assigned one or more material components via {\ct MATL\_ID(:)} and {\ct MATL\_MASS\_FRACTION(:)}. Unlike the way these parameters are specified on a {\ct SURF} line, the single index represents a material component, not a layer. As an example, consider these input lines:
+\begin{lstlisting}
+&SURF ID='SKIN', COLOR='BLACK', VARIABLE_THICKNESS=T /
+&OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, SURF_ID='SKIN',
+      MATL_ID='Steel','Aluminum', MATL_MASS_FRACTION=0.8,0.2 /
+&HOLE XB=0.3,0.7,0.3,0.7,0.3,0.7 /
+&OBST XB=0.3,0.7,0.3,0.7,0.3,0.7, PERMIT_HOLE=F,
+      MATL_ID='Aluminum', MATL_MASS_FRACTION=1. /
+\end{lstlisting}
+The {\ct SURF} line serves only to color the surface black and to indicate, via the parameter {\ct VARIABLE\_THICKNESS}, that the layer thicknesses and material composition are to be conveyed via the {\ct OBST}s that make up the solid. In this case, the solid is a 0.6~m cube made up of steel and aluminum with a hollowed out core made up of pure aluminum. The material properties are conveyed via {\ct MATL} lines as described above.
 
 
 
@@ -11305,12 +11315,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DEVC/STATISTICS
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE
 % ignorenamelistkw: /HVAC/DEBUG
-% ignorenamelistkw: /MISC/BAROCLINIC, /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
-% ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE
+% ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
+% ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
 % ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK
 % ignorenamelistkw: /PART/DEBUG
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
-% ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE, /SURF/HT1D
+% ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI
@@ -11340,7 +11350,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
 \end{longtable}
 
-% Undocumented: DEBUG
 
 
 \vspace{\baselineskip}
@@ -11862,8 +11871,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ}                     & Real Triplet  & Section~\ref{info:HVACnode}                                              &  m            &  0.0           \\ \hline
 \end{longtable}
 
-% Undocumented: QFAN_BETA, SURF_ID
-
 
 \vspace{\baselineskip}
 
@@ -11929,7 +11936,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
-% Undocumented: PATH_RAMP (JF,RJM)
 
 \vspace{\baselineskip}
 
@@ -12012,14 +12018,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} & Real            & Section~\ref{solid_phase_energy_conservation}    & K                   &               \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &               \\ \hline
-{\ct REFRACTIVE\_INDEX}             & Real            & Section~\ref{info:ht3d}               &                   & 1.            \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.            \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 {\ct SURFACE\_OXIDATION\_MODEL}     & Logical         & Section~\ref{vegetation_model}        &                   & {\ct F}       \\ \hline
 \end{longtable}
 
-% Undocumented: COLOR, REFRACTIVE_INDEX, RGB
 
 \vspace{\baselineskip}
 
@@ -12092,7 +12096,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}           \\ \hline
-{\ct EXTERNAL\_FILENAME}                            & Character   & Section~\ref{info:external_control}     &            &                   \\ \hline
+{\ct EXTERNAL\_FILENAME}                            & Character    & Section~\ref{info:external_control}     &            &                   \\ \hline
 {\ct FIXED\_LES\_FILTER\_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}           \\ \hline
@@ -12163,7 +12167,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: RAD_CFACE_INTERPOLATE (MV, to test projecting CFACEs to both sides in each dir, areas distance interpolated), TENSOR_DIFFUSIVITY (rmcdermo)
 
 \vspace{\baselineskip}
 
@@ -12264,15 +12267,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BNDF\_FACE(-3:3)}        & Logical Array   & Section~\ref{info:BNDF}                 &           & {\ct T}       \\ \hline
 {\ct BNDF\_OBST}              & Logical         & Section~\ref{info:BNDF}                 &           & {\ct T}       \\ \hline
 {\ct BULK\_DENSITY}           & Real            & Section~\ref{info:BURN_AWAY}            & kg/m$^3$  &               \\ \hline
+{\ct CELL\_SIZE}              & Real            & Section~\ref{info:HT3D_Basics}          & m         &               \\ \hline
+{\ct CELL\_SIZE\_FACTOR}      & Real            & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct COLOR    }               & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct CTRL\_ID }               & Character       & Section~\ref{info:activate_deactivate}  &           &               \\ \hline
 {\ct DEVC\_ID }               & Character       & Section~\ref{info:activate_deactivate}  &           &               \\ \hline
 {\ct HEIGHT}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
+{\ct INTERNAL\_HEAT\_SOURCE}  & Real            & Section~\ref{info:HT3D_Basics}          & kW/m$^3$  & 0.            \\ \hline
 {\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct MATL\_ID(:) }            & Char.~Array     & Section~\ref{info:ht1d}                 &           &               \\ \hline
 {\ct MATL\_MASS\_FRACTION(:)} & Real~Array      & Section~\ref{info:ht1d}                 & kg/kg     &               \\ \hline
 {\ct MULT\_ID }               & Character       & Section~\ref{info:MULT}                 &           &               \\ \hline
+{\ct N\_LAYER\_CELLS\_MAX}    & Integer         & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct ORIENTATION(3)}          & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct F}       \\ \hline
 {\ct OVERLAY}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct T}       \\ \hline
@@ -12281,6 +12288,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REMOVABLE}               & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RGB(3)}                  & Integer Array   & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SHAPE}                   & Character       & Section~\ref{info:multobst}             &           &               \\ \hline
+{\ct STRETCH\_FACTOR}         & Real            & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct SURF\_ID}                & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SURF\_ID\_INTERIOR}      & Character       & Section~\ref{info:BURN_AWAY}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
@@ -12410,7 +12418,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
 \end{longtable}
 
-% Undocumented: LAPLACE_PRESSURE_CORRECTION
 
 
 \vspace{\baselineskip}
@@ -12475,7 +12482,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.                   \\ \hline
 {\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.                   \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}           \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &                      \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{W/(m^2.K)}$      &                      \\ \hline
 {\ct HISTOGRAM}                         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 {\ct HISTOGRAM\_CUMULATIVE}             & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 {\ct HISTOGRAM\_LIMITS(2)}              & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
@@ -12509,7 +12516,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKEVIEW\_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
 {\ct SPARK}                             & Logical       & Section~\ref{info:ignition}               &                       & {\ct F}              \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
-{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44                 \\ \hline
+{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{kJ/(kg.K)}$      & 0.44                 \\ \hline
 {\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
 {\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
 {\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
@@ -12519,7 +12526,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \end{longtable}
 
-% Undocumented: FED_ACTIVITY
 
 \vspace{\baselineskip}
 
@@ -12970,7 +12976,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z\_0 }                                               & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
 \end{longtable}
 
-% Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
 
 
 \vspace{\baselineskip}
@@ -13101,7 +13106,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
 
-% Undocumented: SLCF_ID (RJM)
 
 \vspace{\baselineskip}
 

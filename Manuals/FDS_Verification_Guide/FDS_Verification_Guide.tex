@@ -4492,12 +4492,15 @@ Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flu
 
 \FloatBarrier
 
-Figure~\ref{fig:ht3d_energy_conservation_8} compares the integrated net heat flux versus the internal enthalpy in a case where a vertical steel column is exposed to a radiant heater. The column is modeled in FDS using thin obstructions to represent a 10~mm thick web and two 18~mm thick flanges. One flange is subjected to the heat, which then passes through the web.
+The left plot in Fig.~\ref{fig:ht3d_energy_conservation_8} compares the integrated net heat flux versus the internal enthalpy in a case where a vertical steel column is exposed to a radiant heater. The column is modeled in FDS using thin obstructions to represent a 10~mm thick web and two 18~mm thick flanges. One flange is subjected to the heat, which then passes through the web.
+
+The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat loss from a collection of solid objects with different thermal properties. One of the objects is completely embedded within the solid and has a volume $V=6\times 10^{-9}$~m$^3$ and generates heat a rate of $\dot{q}'''=1.5 \times 10^5$~kW/m$^3$. It is expected that after a few minutes the heat flux from the surface of the collection of solids should be $-\dot{q}''' \, V = -9 \times 10^{-4}$~kW. The minus sign indicates that the solid loses heat from its surface at the same rate as the heat is generated internally.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_8}
-\caption[Additional \textct{ht3d\_energy\_conservation} test case 8]{Comparison of the integrated net heat flux versus the internal enthalpy for a steel column.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_9}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases 8 and 9]{(Left) Comparison of the integrated net heat flux versus the internal enthalpy for a steel column. (Right) Integrated heat flux from a solid object with an embedded solid object that generates heat at a constant rate.}
 \label{fig:ht3d_energy_conservation_8}
 \end{figure}
 
