@@ -268,7 +268,7 @@ CONTAINS
    REAL(R16P), INTENT(IN) :: I     !< REAL VARIABLE WHOSE NUMBER OF BYTES MUST BE COMPUTED.
    INTEGER(I1P)           :: BYTES !< NUMBER OF BYTES OF R.
 
-   BYTES = BIT_SIZE(I) / 8_I1P
+   BYTES = INT(BIT_SIZE(I),I1P) / 8_I1P
    ENDFUNCTION BYTE_SIZE_R16P
 
    ELEMENTAL FUNCTION BYTE_SIZE_R8P(I) RESULT(BYTES)
@@ -2528,10 +2528,10 @@ CONTAINS
    E = 1_I8P
    DO C=1_I8P,LEN(CODE),4_I8P ! LOOP OVER CODE CHARACTERS: 3 BYTES (24 BITS) SCANNING
       SIXB = 0_I1P
-      SIXB(1) = INDEX(BASE64,CODE(C  :C  )) - 1
-      SIXB(2) = INDEX(BASE64,CODE(C+1:C+1)) - 1
-      SIXB(3) = INDEX(BASE64,CODE(C+2:C+2)) - 1
-      SIXB(4) = INDEX(BASE64,CODE(C+3:C+3)) - 1
+      SIXB(1) = INT(INDEX(BASE64,CODE(C  :C  )),I1P) - 1_I1P
+      SIXB(2) = INT(INDEX(BASE64,CODE(C+1:C+1)),I1P) - 1_I1P
+      SIXB(3) = INT(INDEX(BASE64,CODE(C+2:C+2)),I1P) - 1_I1P
+      SIXB(4) = INT(INDEX(BASE64,CODE(C+3:C+3)),I1P) - 1_I1P
          CALL MVBITS(SIXB(1),0,6,BITS(E  ),2) ; CALL MVBITS(SIXB(2),4,2,BITS(E  ),0)
       IF (E+1<=NB) THEN
          CALL MVBITS(SIXB(2),0,4,BITS(E+1),4) ; CALL MVBITS(SIXB(3),2,4,BITS(E+1),0)
@@ -2761,8 +2761,10 @@ CONTAINS
    INTEGER(I1P),     ALLOCATABLE              :: NI1P(:) !< ONE BYTE INTEGER ARRAY CONTAINING N.
    INTEGER(I4P)                               :: PADD    !< NUMBER OF PADDING CHARACTERS ('=').
 
-   ALLOCATE(NI1P(1:((BYI8P+2)/3)*3)) ; NI1P = 0_I1P
-   CODE = REPEAT(' ',((BYI8P+2)/3)*4)
+   !ALLOCATE(NI1P(1:((BYI8P+2)/3)*3)) ; NI1P = 0_I1P
+   !CODE = REPEAT(' ',((BYI8P+2)/3)*4)
+   ALLOCATE(NI1P(1:3)) ; NI1P = 0_I1P
+   CODE = REPEAT(' ',12)
    NI1P = TRANSFER(N,NI1P)
    PADD = MOD((BYI8P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
@@ -2807,8 +2809,10 @@ CONTAINS
    INTEGER(I1P),     ALLOCATABLE              :: NI1P(:) !< ONE BYTE INTEGER ARRAY CONTAINING N.
    INTEGER(I4P)                               :: PADD    !< NUMBER OF PADDING CHARACTERS ('=').
 
-   ALLOCATE(NI1P(1:((BYI2P+2)/3)*3)) ; NI1P = 0_I1P
-   CODE = REPEAT(' ',((BYI2P+2)/3)*4)
+   ALLOCATE(NI1P(1:3)) ; NI1P = 0_I1P
+   CODE = REPEAT(' ',4_I1P)
+   !ALLOCATE(NI1P(1:((BYI2P+2_I1P)/3_I1P)*3_I1P)) ; NI1P = 0_I1P
+   !CODE = REPEAT(' ',((BYI2P+2_I1P)/3_I1P)*4_I1P)
    NI1P = TRANSFER(N,NI1P)
    PADD = MOD((BYI2P),3_I2P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
@@ -2883,7 +2887,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYR16P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYR16P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYR16P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYR16P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_R16_A
 
@@ -2908,7 +2912,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYR8P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYR8P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYR8P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYR8P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_R8_A
 
@@ -2933,7 +2937,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYR4P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYR4P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYR4P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYR4P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_R4_A
 
@@ -2958,7 +2962,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYI8P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYI8P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYI8P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYI8P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_I8_A
 
@@ -2983,7 +2987,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYI4P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYI4P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYI4P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYI4P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_I4_A
 
@@ -3008,7 +3012,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYI2P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYI2P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYI2P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYI2P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_I2_A
 
@@ -3033,7 +3037,7 @@ CONTAINS
    ALLOCATE(NI1P(1:((NS*BYI1P+2)/3)*3)) ; NI1P = 0_I1P
    CODE = REPEAT(' ',((NS*BYI1P+2)/3)*4)
    NI1P = TRANSFER(N,NI1P)
-   PADD = MOD((NS*BYI1P),3_I8P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
+   PADD = INT(MOD((NS*BYI1P),3_I8P),I4P) ; IF (PADD>0_I4P) PADD = 3_I4P - PADD
    CALL ENCODE_BITS(BITS=NI1P,PADD=PADD,CODE=CODE)
    ENDSUBROUTINE B64_ENCODE_I1_A
 
@@ -3445,7 +3449,7 @@ TYPE :: STRING
     PROCEDURE, PASS(SELF) :: ESCAPE           !< ESCAPE BACKSLASHES (OR CUSTOM ESCAPE CHARACTER).
     PROCEDURE, PASS(SELF) :: EXTENSION        !< RETURN THE EXTENSION OF A STRING CONTAINING A FILE NAME.
     PROCEDURE, PASS(SELF) :: FILL             !< PAD STRING ON THE LEFT (OR RIGHT) WITH ZEROS (OR OTHER CHAR) TO FILL WIDTH.
-    PROCEDURE, PASS(SELF) :: FREE             !< FREE DYNAMIC MEMORY.
+    PROCEDURE, PASS(SELF) :: CUSTOMFREE             !< FREE DYNAMIC MEMORY.
     GENERIC               :: GLOB =>         &
                              GLOB_CHARACTER, &
                              GLOB_STRING      !< GLOB SEARCH, FINDS ALL THE PATHNAMES MATCHING A GIVEN PATTERN.
@@ -4494,7 +4498,7 @@ CONTAINS
    ENDIF
    ENDFUNCTION FILL
 
-   ELEMENTAL SUBROUTINE FREE(SELF)
+   ELEMENTAL SUBROUTINE CUSTOMFREE(SELF)
    !< FREE DYNAMIC MEMORY.
    !<
    !<```FORTRAN
@@ -4507,7 +4511,7 @@ CONTAINS
    CLASS(STRING), INTENT(INOUT) :: SELF !< THE STRING.
 
    IF (ALLOCATED(SELF%RAW)) DEALLOCATE(SELF%RAW)
-   ENDSUBROUTINE FREE
+   ENDSUBROUTINE CUSTOMFREE
 
    SUBROUTINE GLOB_CHARACTER(SELF, PATTERN, LIST)
    !< GLOB SEARCH (CHARACTER OUTPUT), FINDS ALL THE PATHNAMES MATCHING A GIVEN PATTERN ACCORDING TO THE RULES USED BY THE UNIX
@@ -8122,7 +8126,7 @@ TYPE :: XML_TAG
                              DELETE_MULTIPLE_ATTRIBUTES  !< DELETE ATTRIBUTES NAME/VALUE PAIRS.
     PROCEDURE, PASS(SELF) :: DELETE_CONTENT              !< DELETE TAG CONENT.
     PROCEDURE, PASS(SELF) :: END_TAG                     !< RETURN `</TAG_NAME>` END TAG.
-    PROCEDURE, PASS(SELF) :: FREE                        !< FREE DYNAMIC MEMORY.
+    PROCEDURE, PASS(SELF) :: CUSTOMFREE                        !< FREE DYNAMIC MEMORY.
     PROCEDURE, PASS(SELF) :: IS_ATTRIBUTE_PRESENT        !< RETURN .TRUE. IT THE QUERIED ATTRIBUTE NAME IS DEFINED.
     PROCEDURE, PASS(SELF) :: IS_PARSED                   !< CHECK IS TAG IS CORRECTLY PARSED, I.E. ITS *TAG_NAME* IS ALLOCATED.
     PROCEDURE, PASS(SELF) :: NAME                        !< RETURN TAG NAME.
@@ -8250,20 +8254,20 @@ CONTAINS
   ENDIF
   ENDFUNCTION END_TAG
 
-  ELEMENTAL SUBROUTINE FREE(SELF)
+  ELEMENTAL SUBROUTINE CUSTOMFREE(SELF)
   !< FREE DYNAMIC MEMORY.
   CLASS(XML_TAG), INTENT(INOUT) :: SELF !< XML TAG.
 
-  CALL SELF%TAG_NAME%FREE
-  CALL SELF%TAG_CONTENT%FREE
+  CALL SELF%TAG_NAME%CUSTOMFREE
+  CALL SELF%TAG_CONTENT%CUSTOMFREE
   IF (ALLOCATED(SELF%ATTRIBUTE)) THEN
-    CALL SELF%ATTRIBUTE%FREE
+    CALL SELF%ATTRIBUTE%CUSTOMFREE
     DEALLOCATE(SELF%ATTRIBUTE)
   ENDIF
   SELF%ATTRIBUTES_NUMBER = 0
   SELF%INDENT = 0
   SELF%IS_SELF_CLOSING = .FALSE.
-  ENDSUBROUTINE FREE
+  ENDSUBROUTINE CUSTOMFREE
 
   ELEMENTAL FUNCTION IS_PARSED(SELF)
   !< CHECK IS TAG IS CORRECTLY PARSED, I.E. ITS *TAG_NAME* IS ALLOCATED.
@@ -8587,7 +8591,7 @@ CONTAINS
   INTEGER(I4P),      INTENT(IN)    :: NA       !< NUMBER OF ATTRIBUTES.
 
   IF (ALLOCATED(SELF%ATTRIBUTE)) THEN
-    CALL SELF%ATTRIBUTE%FREE
+    CALL SELF%ATTRIBUTE%CUSTOMFREE
     DEALLOCATE(SELF%ATTRIBUTE)
   ENDIF
   ALLOCATE(SELF%ATTRIBUTE(1:2, 1:NA))
@@ -8598,7 +8602,7 @@ CONTAINS
   !< DELETE TAG CONTENT.
   CLASS(XML_TAG), INTENT(INOUT) :: SELF !< XML TAG.
 
-  CALL SELF%TAG_CONTENT%FREE
+  CALL SELF%TAG_CONTENT%CUSTOMFREE
   ENDSUBROUTINE DELETE_CONTENT
 
   PURE SUBROUTINE DELETE_SINGLE_ATTRIBUTE(SELF, NAME)
@@ -8623,7 +8627,7 @@ CONTAINS
           ENDIF
           CALL MOVE_ALLOC(FROM=NEW_ATTRIBUTE, TO=SELF%ATTRIBUTE)
         ELSE
-          CALL SELF%ATTRIBUTE%FREE
+          CALL SELF%ATTRIBUTE%CUSTOMFREE
           DEALLOCATE(SELF%ATTRIBUTE)
         ENDIF
         SELF%ATTRIBUTES_NUMBER = SELF%ATTRIBUTES_NUMBER - 1
@@ -8671,10 +8675,10 @@ CONTAINS
           IF (C2>0) THEN
             SELF%ATTRIBUTE(2, A) = SOURCE(C1:C1+C2-2)
           ELSE
-            CALL SELF%ATTRIBUTE(2, A)%FREE
+            CALL SELF%ATTRIBUTE(2, A)%CUSTOMFREE
           ENDIF
         ELSE
-          CALL SELF%ATTRIBUTE(2, A)%FREE
+          CALL SELF%ATTRIBUTE(2, A)%CUSTOMFREE
         ENDIF
       ENDDO
     ENDIF
@@ -8688,7 +8692,7 @@ CONTAINS
   INTEGER                       :: C1     !< COUNTER.
   INTEGER                       :: C2     !< COUNTER.
 
-  CALL SELF%TAG_CONTENT%FREE
+  CALL SELF%TAG_CONTENT%CUSTOMFREE
   SELF%IS_SELF_CLOSING = .FALSE.
   IF (INDEX(STRING=SOURCE, SUBSTRING='<'//SELF%TAG_NAME)>0) THEN
     C2 = INDEX(STRING=SOURCE, SUBSTRING='</'//SELF%TAG_NAME//'>')
@@ -8812,7 +8816,7 @@ CONTAINS
 
   IF (I.EQ.-1) THEN
   ENDIF
-  CALL SELF%FREE
+  CALL SELF%CUSTOMFREE
   SELF%TAG_NAME = TAG_NAME
   TSTART_ = 1
   TEND_   = 0
@@ -8837,7 +8841,7 @@ CONTAINS
   IF (FOUND) THEN
     SELF = TAG
   ELSE
-    CALL SELF%FREE
+    CALL SELF%CUSTOMFREE
   ENDIF
   IF (PRESENT(TSTART)) TSTART = TSTART_
   IF (PRESENT(TEND  )) TEND   = TEND_
@@ -8850,7 +8854,7 @@ CONTAINS
   TYPE(XML_TAG),  INTENT(IN)    :: RHS !< RIGHT HAND SIDE.
   INTEGER(I4P)                  :: A   !< COUNTER.
 
-  CALL LHS%FREE
+  CALL LHS%CUSTOMFREE
   IF (RHS%TAG_NAME%IS_ALLOCATED()) LHS%TAG_NAME = RHS%TAG_NAME
   IF (RHS%TAG_CONTENT%IS_ALLOCATED()) LHS%TAG_CONTENT = RHS%TAG_CONTENT
   IF (RHS%ATTRIBUTES_NUMBER>0) THEN
@@ -8869,7 +8873,7 @@ CONTAINS
   !< FREE DYNAMIC MEMORY WHEN FINALIZING.
   TYPE(XML_TAG), INTENT(INOUT) :: TAG !< XML TAG.
 
-  CALL TAG%FREE
+  CALL TAG%CUSTOMFREE
   ENDSUBROUTINE FINALIZE
 ENDMODULE FOXY_XML_TAG
 
@@ -8897,7 +8901,7 @@ TYPE, PUBLIC:: XML_FILE
   TYPE(XML_TAG), ALLOCATABLE :: TAG(:) !< XML TAGS ARRAY.
   CONTAINS
     ! PUBLIC METHODS
-    PROCEDURE :: FREE       !< FREE DYNAMIC MEMORY.
+    PROCEDURE :: CUSTOMFREE       !< FREE DYNAMIC MEMORY.
     PROCEDURE :: PARSE      !< PARSE XML DATA FROM STRING OR FILE.
     PROCEDURE :: CONTENT    !< RETURN TAG CONTENT OF TAG NAMED *NAME*.
     PROCEDURE :: STRINGIFY  !< CONVERT THE WHOLE FILE DATA INTO A STRING.
@@ -8909,22 +8913,22 @@ TYPE, PUBLIC:: XML_FILE
 ENDTYPE XML_FILE
 CONTAINS
   ! PUBLIC METHODS
-  ELEMENTAL SUBROUTINE FREE(SELF)
+  ELEMENTAL SUBROUTINE CUSTOMFREE(SELF)
   !< FREE DYNAMIC MEMORY.
   CLASS(XML_FILE), INTENT(INOUT) :: SELF !< XML FILE.
 
   IF (ALLOCATED(SELF%TAG)) THEN
-    CALL SELF%TAG%FREE
+    CALL SELF%TAG%CUSTOMFREE
     DEALLOCATE(SELF%TAG)
     SELF%NT = 0
   ENDIF
-  ENDSUBROUTINE FREE
+  ENDSUBROUTINE CUSTOMFREE
 
   SUBROUTINE FINALIZE(FILE)
   !< FREE DYNAMIC MEMORY WHEN FINALIZING.
   TYPE(XML_FILE), INTENT(INOUT) :: FILE !< XML FILE.
 
-  CALL FILE%FREE
+  CALL FILE%CUSTOMFREE
   ENDSUBROUTINE FINALIZE
 
   SUBROUTINE PARSE(SELF, STRING, FILENAME)
@@ -8936,7 +8940,7 @@ CONTAINS
   CHARACTER(*), OPTIONAL, INTENT(IN)    :: FILENAME !< FILE NAME CONTAINING XML DATA.
   CHARACTER(LEN=:), ALLOCATABLE         :: SOURCE   !< STRING CONTAINING XML DATA.
 
-  CALL SELF%FREE
+  CALL SELF%CUSTOMFREE
   IF (PRESENT(STRING)) THEN
     CALL SELF%PARSE_FROM_STRING(SOURCE_STRING=STRING)
   ELSEIF (PRESENT(FILENAME)) THEN
@@ -9039,7 +9043,7 @@ CONTAINS
   TSTART = 1
   TEND = 0
   DO WHILE(TSTART<LEN(SOURCE_STRING))
-    CALL TAG%FREE
+    CALL TAG%CUSTOMFREE
     CALL TAG%PARSE(SOURCE=SOURCE_STRING(TSTART:), TEND=TEND)
     IF (TEND==0) EXIT
     IF (TAG%IS_PARSED()) CALL SELF%ADD_TAG(TAG)
@@ -9223,7 +9227,7 @@ TYPE, ABSTRACT :: XML_WRITER_ABSTRACT
     ! PUBLIC METHODS (SOME DEFERRED)
     PROCEDURE,                                 PASS(SELF) :: CLOSE_XML_FILE               !< CLOSE XML FILE.
     PROCEDURE,                                 PASS(SELF) :: OPEN_XML_FILE                !< OPEN XML FILE.
-    PROCEDURE,                                 PASS(SELF) :: FREE                         !< FREE ALLOCATED MEMORY.
+    PROCEDURE,                                 PASS(SELF) :: CUSTOMFREE                         !< FREE ALLOCATED MEMORY.
     PROCEDURE,                                 PASS(SELF) :: GET_XML_VOLATILE             !< RETURN THE XML VOLATILE STRING FILE.
     PROCEDURE,                                 PASS(SELF) :: WRITE_CONNECTIVITY           !< WRITE CONNECTIVITY.
     PROCEDURE,                                 PASS(SELF) :: W_DATA_LOCATION_TAG !< WRITE DATAARRAY LOCATION TAG.
@@ -9498,23 +9502,23 @@ CONTAINS
    ENDIF
    ENDSUBROUTINE OPEN_XML_FILE
 
-   ELEMENTAL SUBROUTINE FREE(SELF)
+   ELEMENTAL SUBROUTINE CUSTOMFREE(SELF)
    !ELEMENTAL SUBROUTINE FREE(SELF, ERROR)
    !< FREE ALLOCATED MEMORY.
    CLASS(XML_WRITER_ABSTRACT), INTENT(INOUT)         :: SELF  !< WRITER.
    !INTEGER(I4P),               INTENT(OUT), OPTIONAL :: ERROR !< ERROR STATUS.
 
-   CALL SELF%FORMAT_CH%FREE
-   CALL SELF%TOPOLOGY%FREE
+   CALL SELF%FORMAT_CH%CUSTOMFREE
+   CALL SELF%TOPOLOGY%CUSTOMFREE
    SELF%INDENT=0_I4P
    SELF%IOFFSET=0_I8P
    SELF%XML=0_I4P
    SELF%VTM_BLOCK(1:2)=[-1_I4P, -1_I4P]
    SELF%ERROR=0_I4P
-   CALL SELF%TAG%FREE
+   CALL SELF%TAG%CUSTOMFREE
    SELF%IS_VOLATILE=.FALSE.
-   CALL SELF%XML_VOLATILE%FREE
-   ENDSUBROUTINE FREE
+   CALL SELF%XML_VOLATILE%CUSTOMFREE
+   ENDSUBROUTINE CUSTOMFREE
 
    PURE SUBROUTINE GET_XML_VOLATILE(SELF, XML_VOLATILE)
    !PURE SUBROUTINE GET_XML_VOLATILE(SELF, XML_VOLATILE, ERROR)
@@ -9988,6 +9992,7 @@ CONTAINS
 
    IF ((NP/=SIZE(X, DIM=1)).OR.(NP/=SIZE(Y, DIM=1)).OR.(NP/=SIZE(Z, DIM=1))) THEN
       SELF%ERROR = 1
+      ERROR = 1
       RETURN
    ENDIF
    IF (NC.EQ.-1) THEN
@@ -11580,27 +11585,27 @@ CONTAINS
   NN = SIZE(X, DIM=1)
   SELECT TYPE(X)
   TYPE IS(REAL(R8P))
-    N_BYTE = NN*BYR8P
+    N_BYTE = INT(NN*BYR8P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'R8', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   TYPE IS(REAL(R4P))
-    N_BYTE = NN*BYR4P
+    N_BYTE = INT(NN*BYR4P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'R4', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   TYPE IS(INTEGER(I8P))
-    N_BYTE = NN*BYI8P
+    N_BYTE = INT(NN*BYI8P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'I8', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   TYPE IS(INTEGER(I4P))
-    N_BYTE = NN*BYI4P
+    N_BYTE = INT(NN*BYI4P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'I4', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   TYPE IS(INTEGER(I2P))
-    N_BYTE = NN*BYI2P
+    N_BYTE = INT(NN*BYI2P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'I2', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   TYPE IS(INTEGER(I1P))
-    N_BYTE = NN*BYI1P
+    N_BYTE = INT(NN*BYI1P,I4P)
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)N_BYTE, 'I1', NN
     WRITE(UNIT=SELF%SCRATCH, IOSTAT=SELF%ERROR)X
   ENDSELECT
@@ -12227,7 +12232,7 @@ TYPE :: VTK_FILE
     PROCEDURE, PASS(SELF) :: GET_XML_VOLATILE !< RETURN THE EVENTUAL XML VOLATILE STRING FILE.
     PROCEDURE, PASS(SELF) :: INITIALIZE       !< INITIALIZE FILE.
     PROCEDURE, PASS(SELF) :: FINALIZE         !< FINALIZE FILE.
-    PROCEDURE, PASS(SELF) :: FREE             !< FREE ALLOCATED MEMORY.
+    PROCEDURE, PASS(SELF) :: CUSTOMFREE             !< FREE ALLOCATED MEMORY.
 ENDTYPE VTK_FILE
 CONTAINS
    PURE SUBROUTINE GET_XML_VOLATILE(SELF, XML_VOLATILE, ERROR)
@@ -12312,18 +12317,18 @@ CONTAINS
 
    ERROR = 1
    IF (ALLOCATED(SELF%XML_WRITER)) ERROR = SELF%XML_WRITER%FINALIZE()
-   IF (XML_VOLATILE=="") THEN
+   IF (ALLOCATED(XML_VOLATILE)) THEN
    ENDIF
    ENDFUNCTION FINALIZE
 
-   ELEMENTAL SUBROUTINE FREE(SELF, ERROR)
+   ELEMENTAL SUBROUTINE CUSTOMFREE(SELF, ERROR)
    !< FREE ALLOCATED MEMORY.
    CLASS(VTK_FILE), INTENT(INOUT)         :: SELF  !< VTK FILE.
    INTEGER(I4P),    INTENT(OUT), OPTIONAL :: ERROR !< ERROR STATUS.
    IF (ERROR.EQ.-1) THEN
    ENDIF
-   IF (ALLOCATED(SELF%XML_WRITER)) CALL SELF%XML_WRITER%FREE() !ERROR=ERROR)
-   ENDSUBROUTINE FREE
+   IF (ALLOCATED(SELF%XML_WRITER)) CALL SELF%XML_WRITER%CUSTOMFREE() !ERROR=ERROR)
+   ENDSUBROUTINE CUSTOMFREE
 ENDMODULE VTK_FORTRAN_VTK_FILE
 
 
@@ -12462,9 +12467,9 @@ USE VTK_FORTRAN, ONLY : VTK_FILE, PVTK_FILE
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
-PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,&
+PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLICE_GEOMETRY,&
        WRITE_VTK_SL3D_WRAPPER,WRITE_VTK_SM3D_WRAPPER,WRITE_VTK_BNDF_WRAPPER,&
-       WRITE_VTK_PART_WRAPPER,&
+       WRITE_VTK_PART_WRAPPER,WRITE_PARAVIEW_STATE_FILE,&
        DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY
 
 CONTAINS
@@ -12473,12 +12478,11 @@ CONTAINS
 SUBROUTINE WRITE_VTK_SL3D_WRAPPER(T,NMESHES)
 INTEGER, INTENT(IN) :: NMESHES
 REAL(EB), INTENT(IN) :: T
-TYPE (SLICE_TYPE), POINTER :: SL
-INTEGER :: I,NQT,I1,I2,J1,J2,K1,K2,IQ,ITM,ITM1
+INTEGER :: I,NQT,IQ,ITM,ITM1,NM
 REAL(FB) :: STIME
 REAL(EB) :: TT
 TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
-INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+INTEGER  :: VTK_ERROR                    !< IO Error status.
 CHARACTER(200) :: TMP_FILE
 
 ! Generate filename
@@ -12490,32 +12494,30 @@ IF (ITM1==100) THEN
    ITM = ITM+1
    ITM1 = 0
 ENDIF
-WRITE(FN_SL3D_VTK(NMESHES+1),'(A,A,A,I8.8,I2.2,A)') "",TRIM(CHID),'_SL3D_',ITM,ITM1,'.pvtu'
-VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SL3D_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
-                                   MESH_KIND='Float32')
-VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
-! Add PointData arrays
-NQT = MESHES(1)%N_SLCF
-QUANTITY_LOOP2: DO IQ=1,NQT
-   SL => SLICE(IQ)
-   I1  = SL%I1
-   I2  = SL%I2
-   J1  = SL%J1
-   J2  = SL%J2
-   K1  = SL%K1
-   K2  = SL%K2
-   IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) CYCLE QUANTITY_LOOP2
-   VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(SL%SMOKEVIEW_LABEL(1:30)), &
-                                                           DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
-ENDDO QUANTITY_LOOP2
-VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='CLOSE')
 
-DO I=1,NMESHES
-   WRITE(TMP_FILE,'(A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_SL3D_',I,'_',ITM,ITM1,'.vtu'
-   VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
+DO I = 1,MESHES(1)%N_UNIQUE_SLCF
+   WRITE(FN_SL3D_VTK(I,NMESHES+1),'(A,A,A,A,I8.8,I2.2,A)') TRIM(CHID),'_',TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(I)),&
+                                     '_',ITM,ITM1,'.pvtu'
+   VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SL3D_VTK(I,NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
+                                      MESH_KIND='Float32')
+   VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
+   ! Add PointData arrays
+   NQT = MESHES(1)%N_SLCF_O
+   QUANTITY_LOOP2: DO IQ=1,NQT
+      IF (MESHES(1)%ALL_SLICE_NAMES(IQ).NE.MESHES(1)%UNIQUE_SLICE_NAMES(I)) CYCLE QUANTITY_LOOP2
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(MESHES(1)%ALL_SLICE_QUANTITIES(IQ)), &
+                                                              DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
+   ENDDO QUANTITY_LOOP2
+   VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='CLOSE')
+   MESH_LOOP2: DO NM=1,NMESHES
+      IF (MESHES(NM)%EMPTY_UNIQUE_SLICE(I)) CYCLE MESH_LOOP2
+      WRITE(TMP_FILE,'(A,A,A,A,I0,A,I8.8,I2.2,A)') TRIM(CHID),'_',TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(I)),&
+                                     '_',NM,'_',ITM,ITM1,'.vtu'
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
+   ENDDO MESH_LOOP2
+   VTK_ERROR = A_PVTK_FILE%FINALIZE()
 ENDDO
 
-VTK_ERROR = A_PVTK_FILE%FINALIZE()
 END SUBROUTINE WRITE_VTK_SL3D_WRAPPER
 
 
@@ -12538,7 +12540,7 @@ REAL(FB) :: STIME
 REAL(EB) :: TT
 TYPE(SMOKE3D_TYPE), POINTER :: S3
 TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
-INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+INTEGER  :: VTK_ERROR                    !< IO Error status.
 CHARACTER(200) :: TMP_FILE
 
 ! Generate filename
@@ -12557,8 +12559,10 @@ VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SMOKE3D_VTK(NMESHES+1), MESH_TOPO
 VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
 DATA_FILE_LOOP2: DO N=1,N_SMOKE3D
    S3 => SMOKE3D_FILE(N)
+   !VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(S3%SMOKEVIEW_LABEL(1:30)), &
+   !                                                        DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
    VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(S3%SMOKEVIEW_LABEL(1:30)), &
-                                                           DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
+                                                           DATA_TYPE='Int8', NUMBER_OF_COMPONENTS=1)
 ENDDO DATA_FILE_LOOP2
 VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='CLOSE')
 
@@ -12580,7 +12584,7 @@ INTEGER :: I,IQ,ITM,ITM1
 REAL(FB) :: STIME
 REAL(EB) :: TT
 TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
-INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+INTEGER  :: VTK_ERROR                    !< IO Error status.
 CHARACTER(200) :: TMP_FILE
 
 ! Generate filename
@@ -12622,7 +12626,8 @@ INTEGER :: I,ITM,ITM1,N,NN
 REAL(FB) :: STIME
 REAL(EB) :: TT
 TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
-INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+!INTEGER(IB8)  :: VTK_ERROR=0_IB8                    !< IO Error status.
+INTEGER :: VTK_ERROR
 CHARACTER(200) :: TMP_FILE
 
 ! Generate filename
@@ -12685,9 +12690,9 @@ IFACT = 1
 DO K = 0, NZ-1
    DO J = 0, NY-1
       DO I = 0, NX-1
-         X_PTS(IFACT)=MESHES(NM)%X(I)
-         Y_PTS(IFACT)=MESHES(NM)%Y(J)
-         Z_PTS(IFACT)=MESHES(NM)%Z(K)
+         X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+         Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+         Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
          IFACT = IFACT + 1
       ENDDO
    ENDDO
@@ -12724,6 +12729,145 @@ ENDDO
 ENDSUBROUTINE BUILD_VTK_GAS_PHASE_GEOMETRY
 
 
+
+SUBROUTINE BUILD_VTK_SLICE_GEOMETRY(NM, SL, &
+                                        NC, NP, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
+
+INTEGER :: NX, NY, NZ, NC, NP, I, J, K, IFACT, JFACT, KFACT
+INTEGER :: I1,I2,J1,J2,K1,K2,L1,L2,N1,N2
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: X_PTS, Y_PTS, Z_PTS
+INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
+INTEGER, INTENT(IN) :: NM
+TYPE(SLICE_TYPE), POINTER, INTENT(IN) :: SL
+
+I1  = SL%I1
+I2  = SL%I2
+J1  = SL%J1
+J2  = SL%J2
+K1  = SL%K1
+K2  = SL%K2
+
+NX = I2 + 1 - I1
+NY = J2 + 1 - J1
+NZ = K2 + 1 - K1
+
+NP = NX*NY*NZ
+NC = MAX((NX-1),1)*MAX((NY-1),1)*MAX((NZ-1),1)
+
+! Fill point data
+ALLOCATE(X_PTS(NP))
+ALLOCATE(Y_PTS(NP))
+ALLOCATE(Z_PTS(NP))
+IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
+   IFACT = 1
+   IF (I2-I1==0) THEN
+      DO K = K1, K2
+         DO J = J1, J2
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I1),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ELSEIF (J2-J1==0) THEN
+      DO K = K1, K2
+         DO I = I1, I2
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J1),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ELSEIF (K2-K1==0) THEN
+      DO J = J1, J2
+         DO I = I1, I2
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K1),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ENDIF
+ELSE
+   IFACT = 1
+   DO K = K1, K2
+      DO J = J1, J2
+         DO I = I1, I2
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+! Fill cell data
+ALLOCATE(OFFSETS(NC))
+ALLOCATE(VTKC_TYPE(NC))
+IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
+   !2-D slice
+   ALLOCATE(CONNECT(NC*4))
+   
+   IF (I2-I1==0) THEN
+      L1=J1 ; L2=J2
+      N1=K1 ; N2=K2;
+   ELSEIF (J2-J1==0) THEN
+      L1=I1 ; L2=I2
+      N1=K1 ; N2=K2;
+   ELSEIF (K2-K1==0) THEN
+      L1=I1 ; L2=I2
+      N1=J1 ; N2=J2;
+   ENDIF
+   
+   IFACT = 0
+   DO I = 1, (L2-L1)
+      DO J = 1, (N2-N1)
+         CONNECT((IFACT)*4+1) = (L2-L1+1)*(J-1)+(I-1)
+         CONNECT((IFACT)*4+2) = (L2-L1+1)*(J-1)+(I)
+         CONNECT((IFACT)*4+3) = (L2-L1+1)*(J)+(I-1)
+         CONNECT((IFACT)*4+4) = (L2-L1+1)*(J)+(I)
+         IFACT = IFACT+1
+      ENDDO
+   ENDDO
+
+   DO I=1,NC
+      OFFSETS(I) = (I)*4_IB32
+      VTKC_TYPE(I) = 8_IB8
+   ENDDO
+   
+ELSE
+   !3-D slice
+   ALLOCATE(CONNECT(NC*8))
+   DO I = 1, NX-1
+      IFACT = (I-1)
+      DO J = 1, NY-1
+         JFACT = (J-1)*(NX-1)
+         DO K = 1, NZ-1
+            KFACT = (K - 1)*(NY-1)*(NX-1)
+            CONNECT((IFACT+JFACT+KFACT)*8+1) = (K-1)*(NY*NX) + (J-1)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+2) = (K-1)*(NY*NX) + (J-1)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+3) = (K-1)*(NY*NX) + (J)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+4) = (K-1)*(NY*NX) + (J)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+5) = (K)*(NY*NX) + (J-1)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+6) = (K)*(NY*NX) + (J-1)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+7) = (K)*(NY*NX) + (J)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+8) = (K)*(NY*NX) + (J)*NX + I
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   DO I=1,NC
+      OFFSETS(I) = (I)*8_IB32
+      VTKC_TYPE(I) = 11_IB8
+   ENDDO
+   
+ENDIF
+         
+ENDSUBROUTINE BUILD_VTK_SLICE_GEOMETRY
+
+
 SUBROUTINE BUILD_VTK_SOLID_PHASE_GEOMETRY(NM, PA, &
                                           NCELLS, NPOINTS, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE)
 
@@ -12753,27 +12897,27 @@ SELECT CASE(ABS(PA%IOR))
    CASE(1)
       DO K = PA%K1,PA%K2
          DO J = PA%J1,PA%J2
-            X_PTS(IFACT)=MESHES(NM)%X(PA%I1)
-            Y_PTS(IFACT)=MESHES(NM)%Y(J)
-            Z_PTS(IFACT)=MESHES(NM)%Z(K)
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(PA%I1),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
             IFACT = IFACT + 1
          ENDDO
       ENDDO
    CASE(2)
       DO K = PA%K1,PA%K2
          DO I = PA%I1,PA%I2
-            X_PTS(IFACT)=MESHES(NM)%X(I)
-            Y_PTS(IFACT)=MESHES(NM)%Y(PA%J1)
-            Z_PTS(IFACT)=MESHES(NM)%Z(K)
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(PA%J1),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(K),FB)
             IFACT = IFACT + 1
          ENDDO
       ENDDO
    CASE(3)
       DO J = PA%J1,PA%J2
          DO I = PA%I1,PA%I2
-            X_PTS(IFACT)=MESHES(NM)%X(I)
-            Y_PTS(IFACT)=MESHES(NM)%Y(J)
-            Z_PTS(IFACT)=MESHES(NM)%Z(PA%K1)
+            X_PTS(IFACT)=REAL(MESHES(NM)%X(I),FB)
+            Y_PTS(IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            Z_PTS(IFACT)=REAL(MESHES(NM)%Z(PA%K1),FB)
             IFACT = IFACT + 1
          ENDDO
       ENDDO
@@ -12857,6 +13001,442 @@ DEALLOCATE(Y_PTS)
 DEALLOCATE(Z_PTS)
 
 ENDSUBROUTINE DEALLOCATE_VTK_GAS_PHASE_GEOMETRY
+
+
+SUBROUTINE WRITE_PARAVIEW_STATE_FILE(NMESHES)
+USE OUTPUT_CLOCKS
+
+INTEGER, INTENT(IN) :: NMESHES
+TYPE (MESH_TYPE), POINTER :: M
+REAL(EB) :: CX,CY,CZ,XMN,XMX,YMN,YMX,ZMN,ZMX
+INTEGER :: NM
+
+XMX = -HUGE(EB)
+YMX = -HUGE(EB)
+ZMX = -HUGE(EB)
+XMN = HUGE(EB)
+YMN = HUGE(EB)
+ZMN = HUGE(EB)
+DO NM=1,NMESHES
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+   XMX = MAX(XMX, M%XF)
+   XMN = MIN(XMN, M%XS)
+   YMX = MAX(YMX, M%YF)
+   YMN = MIN(YMN, M%YS)
+   ZMX = MAX(ZMX, M%ZF)
+   ZMN = MIN(ZMN, M%ZS)
+ENDDO
+
+CX = (XMX+XMN)/2
+CY = (YMX+YMN)/2
+CZ = (ZMX+ZMN)/2
+
+OPEN(LU_PARAVIEW,FILE=FN_PARAVIEW,FORM='FORMATTED', STATUS='REPLACE',ACTION='WRITE')
+WRITE(LU_PARAVIEW,'(A)') '#Script to import FDS generated data for visualization in Paraview'
+WRITE(LU_PARAVIEW,'(A)') 'import os'
+WRITE(LU_PARAVIEW,'(A)') 'import glob'
+WRITE(LU_PARAVIEW,'(A,A,A)') "chid = '",TRIM(CHID),"'"
+WRITE(LU_PARAVIEW,'(A)') 'T_Begin = 0.0'
+WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_End = ',(T_END-T_BEGIN)/DT_VTK
+
+WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CenterOfRotation = [',CX,',',CY,',',CZ,']'
+WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CameraFocalPoint = [',CX,',',CY,',',CZ,']'
+WRITE(LU_PARAVIEW,'(A)') 'import paraview'
+WRITE(LU_PARAVIEW,'(A)') 'from paraview.simple import *'
+WRITE(LU_PARAVIEW,'(A)') 'paraview.simple._DisableFirstRenderCameraReset()'
+WRITE(LU_PARAVIEW,'(A)') 'materialLibrary1 = GetMaterialLibrary()'
+
+WRITE(LU_PARAVIEW,'(A)') "renderView1 = CreateView('RenderView')"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.AxesGrid = 'Grid Axes 3D Actor'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.CenterOfRotation = CenterOfRotation"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.StereoType = 'Crystal Eyes'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.CameraFocalPoint = CameraFocalPoint"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.CameraViewUp = [0.0, 0.0, 1.0]"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.LegendGrid = 'Legend Grid Actor'"
+WRITE(LU_PARAVIEW,'(A)') "paraview.simple.LoadPalette('WhiteBackground')"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.BackEnd = 'OSPRay raycaster'"
+WRITE(LU_PARAVIEW,'(A)') "renderView1.OSPRayMaterialLibrary = materialLibrary1"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveView(None)"
+WRITE(LU_PARAVIEW,'(A)') "layout1 = CreateLayout(name='Layout #1')"
+WRITE(LU_PARAVIEW,'(A)') "layout1.AssignView(0, renderView1)"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveView(renderView1)"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup the data processing pipelines"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "indir = os.path.dirname(os.path.realpath(__file__))"
+WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
+WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
+WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='Geometry', FileNames=[indir+os.sep+chid+'.stl'])"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay = Show(casestl, renderView1, 'GeometryRepresentation')"
+WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Representation = 'Surface'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ColorArrayName = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ScaleFactor = 1.5493113040924074"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectScaleArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GlyphTableIndexArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.GaussianRadius = 0.07746556520462036"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SetScaleArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OpacityArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
+WRITE(LU_PARAVIEW,'(A)') "# Load data files"
+WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(indir+os.sep+chid+'_BNDF_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(indir+os.sep+chid+'_SM3D_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dxFiles = sorted(glob.glob(indir+os.sep+chid+'_X_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dyFiles = sorted(glob.glob(indir+os.sep+chid+'_Y_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dzFiles = sorted(glob.glob(indir+os.sep+chid+'_Z_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl3dFiles = sorted(glob.glob(indir+os.sep+chid+'_SL3D_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_*.pvtp'))"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
+WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A,A)') "    BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Boundary', FileName=bndfFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    with open(bndfFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "    boundaryNames = []"
+WRITE(LU_PARAVIEW,'(A)') "    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        boundaryNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "    BoundaryData.PointArrayStatus = boundaryNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A,A)') "    sm3dData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Raw Smoke 3D', FileName=sm3dFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    with open(sm3dFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "    sm3dNames = []"
+WRITE(LU_PARAVIEW,'(A)') "    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        sm3dNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "    sm3dData.PointArrayStatus = sm3dNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add 3d slice data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sl3dFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A,A)') "    sl3dData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Raw 3D Slice', FileName=sl3dFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    with open(sl3dFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            sl3dNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                sl3dNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl3dData.PointArrayStatus = sl3dNames"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            sl3dNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                sl3dNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl3dData.CellArrayStatus = sl3dNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add x-axis slice data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sl2dxFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    slcfxTypes = [x.split(chid+'_X_')[1] for x in sl2dxFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    slcfxTypes = ['_'.join(x.split('_')[:-1]) for x in slcfxTypes]"
+WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfxTypes = sorted(list(set(slcfxTypes)))"
+WRITE(LU_PARAVIEW,'(A)') "    for slcfxType in uniqueSlcfxTypes:"
+WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfxType)/100"
+WRITE(LU_PARAVIEW,'(A)') "        slcfxTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_X_'+slcfxType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A,A)') "        sl2dxData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='X=%0.4f'%(axis), FileName=slcfxTypeFiles)"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfxTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dxData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfxTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dxData.CellArrayStatus = slcfNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add y-axis slice data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sl2dyFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    slcfyTypes = [x.split(chid+'_Y_')[1] for x in sl2dyFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    slcfyTypes = ['_'.join(x.split('_')[:-1]) for x in slcfyTypes]"
+WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfyTypes = sorted(list(set(slcfyTypes)))"
+WRITE(LU_PARAVIEW,'(A)') "    for slcfyType in uniqueSlcfyTypes:"
+WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfyType)/100"
+WRITE(LU_PARAVIEW,'(A)') "        slcfyTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_Y_'+slcfyType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A,A)') "        sl2dyData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Y=%0.4f'%(axis), FileName=slcfyTypeFiles)"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfyTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dyData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfyTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dyData.CellArrayStatus = slcfNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add z-axis slice data"
+WRITE(LU_PARAVIEW,'(A)') "if len(sl2dzFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    slcfzTypes = [x.split(chid+'_Z_')[1] for x in sl2dzFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    slcfzTypes = ['_'.join(x.split('_')[:-1]) for x in slcfzTypes]"
+WRITE(LU_PARAVIEW,'(A)') "    uniqueslcfzTypes = sorted(list(set(slcfzTypes)))"
+WRITE(LU_PARAVIEW,'(A)') "    for slcfzType in uniqueslcfzTypes:"
+WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfzType)/100"
+WRITE(LU_PARAVIEW,'(A)') "        slcfzTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_Z_'+slcfzType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A,A)') "        sl2dzData = XMLPartitionedUnstructuredGridReader(",&
+                         "registrationName='Z=%0.4f'%(axis), FileName=slcfzTypeFiles)"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfzTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dzData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        with open(slcfzTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "            sl2dzData.CellArrayStatus = slcfNames"
+
+WRITE(LU_PARAVIEW,'(A)') "# Add particle data"
+WRITE(LU_PARAVIEW,'(A)') "if len(partFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    partTypes = [x.split('_PART_')[1] for x in partFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    partTypes = ['_'.join(x.split('_')[:-1]) for x in partTypes]"
+WRITE(LU_PARAVIEW,'(A)') "    uniquePartTypes = sorted(list(set(partTypes)))"
+WRITE(LU_PARAVIEW,'(A)') "    for partType in uniquePartTypes:"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_'+partType+'_*.pvtp'))"
+WRITE(LU_PARAVIEW,'(A,A)') "        partData = XMLPartitionedPolydataReader(registrationName='Particle: ",&
+                         "'+partType, FileName=partTypeFiles)"
+WRITE(LU_PARAVIEW,'(A)') "        with open(partTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "            partTypeNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        partData.PointArrayStatus = partTypeNames"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay = Show(partData, renderView1, 'GeometryRepresentation')"
+WRITE(LU_PARAVIEW,'(A)') "        # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.Representation = 'Point Gaussian'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ColorArrayName = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ScaleFactor = -2.0000000000000002e+298"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectScaleArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphTableIndexArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GaussianRadius = 0.1"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SetScaleArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OpacityArray = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectInputVectors = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.WriteLog = ''"
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup filter for fire 3d data"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    fireImage = ResampleToImage(registrationName='Fire', Input=sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay = Show(fireImage, renderView1, 'UniformGridRepresentation')"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get 2D transfer function for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVTF2D = GetTransferFunction2D('HRRPUV', separate=True)"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get color transfer function/color map for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVLUT = GetColorTransferFunction('HRRPUV', separate=True)"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVLUT.TransferFunction2D = hRRPUVTF2D"
+WRITE(LU_PARAVIEW,'(A,A)') "    hRRPUVLUT.RGBPoints = [-127.0, 0.0, 0.0, 0.0, -25.4, 0.9, 0.0, 0.0,",&
+                         "76.2, 0.9, 0.9, 0.0, 127.0, 1.0, 1.0, 1.0]"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVLUT.ColorSpace = 'RGB'"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVLUT.NanColor = [0.0, 0.5, 1.0]"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVLUT.ScalarRangeInitialized = 1.0"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get opacity transfer function/opacity map for 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVPWF = GetOpacityTransferFunction('HRRPUV', separate=True)"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVPWF.Points = [-127.0, 0.0, 0.5, 0.0, 127.0, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    hRRPUVPWF.ScalarRangeInitialized = 1"
+
+WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.Representation = 'Volume'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ColorArrayName = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.LookupTable = hRRPUVLUT"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.OSPRayScaleArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ScaleFactor = 3.0"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectScaleArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.GlyphTableIndexArray = 'HRRPUV'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.GaussianRadius = 0.15"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SetScaleArray = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.OpacityArray = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ScalarOpacityUnitDistance = 0.44"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ScalarOpacityFunction = hRRPUVPWF"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.TransferFunction2D = hRRPUVTF2D"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.OpacityArrayName = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.ColorArray2Name = ['POINTS', 'HRRPUV']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SliceFunction = 'Plane'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.Slice = 49"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SelectInputVectors = ['POINTS', '']"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.WriteLog = ''"
+WRITE(LU_PARAVIEW,'(A)') "    # init the 'Piecewise Function' selected for 'ScaleTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "    fireImageDisplay.ScaleTransferFunction.Points = ",&
+                         "[-127.0, 0.0, 0.5, 0.0, -127, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    # init the 'Piecewise Function' selected for 'OpacityTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "    fireImageDisplay.OpacityTransferFunction.Points = ",&
+                         "[-127.0, 0.0, 0.5, 0.0, -127, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    # init the 'Plane' selected for 'SliceFunction'"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.SliceFunction.Origin = CenterOfRotation"
+WRITE(LU_PARAVIEW,'(A)') "    fireImageDisplay.UseSeparateColorMap = True"
+
+WRITE(LU_PARAVIEW,'(A)') "    # ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "    # setup filter for smoke 3d data"
+WRITE(LU_PARAVIEW,'(A)') "    # ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImage = ResampleToImage(registrationName='Smoke', Input=sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay = Show(smokeImage, renderView1, 'UniformGridRepresentation')"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get 2D transfer function for 'SOOTDENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYTF2D = GetTransferFunction2D('SOOTDENSITY')"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get color transfer function/color map for 'SOOTDENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT = GetColorTransferFunction('SOOTDENSITY')"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT.TransferFunction2D = sOOTDENSITYTF2D"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT.RGBPoints = [-127.0, 0.0, 0.0, 0.0, 127.0, 0.0, 0.0, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT.ColorSpace = 'RGB'"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT.NanColor = [1.0, 0.0, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYLUT.ScalarRangeInitialized = 1.0"
+
+WRITE(LU_PARAVIEW,'(A)') "    # get opacity transfer function/opacity map for 'SOOTDENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYPWF = GetOpacityTransferFunction('SOOTDENSITY')"
+WRITE(LU_PARAVIEW,'(A,A)') "    sOOTDENSITYPWF.Points = ",&
+                         "[-127.0, 0.0, 0.5, 0.0, -126.0, 0.25, 0.5, 0.0, 127.0, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    sOOTDENSITYPWF.ScalarRangeInitialized = 1"
+
+WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.Representation = 'Volume'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.ColorArrayName = ['POINTS', 'SOOT DENSITY']"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.LookupTable = sOOTDENSITYLUT"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectTCoordArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectNormalArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectTangentArray = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.OSPRayScaleArray = 'SOOT DENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.OSPRayScaleFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.Assembly = ''"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectOrientationVectors = 'None'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.ScaleFactor = 3.0"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectScaleArray = 'SOOT DENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.GlyphType = 'Arrow'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.GlyphTableIndexArray = 'SOOT DENSITY'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.GaussianRadius = 0.15"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SetScaleArray = ['POINTS', 'SOOT DENSITY']"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.ScaleTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.OpacityArray = ['POINTS', 'SOOT DENSITY']"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.OpacityTransferFunction = 'Piecewise Function'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.DataAxesGrid = 'Grid Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.PolarAxes = 'Polar Axes Representation'"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.ScalarOpacityFunction = sOOTDENSITYPWF"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.ScalarOpacityUnitDistance = 1.2957383373220388"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.OpacityArrayName = ['POINTS', 'SOOT DENSITY']"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.SelectInputVectors = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "    smokeImageDisplay.WriteLog = ''"
+
+WRITE(LU_PARAVIEW,'(A)') "    # init the 'Piecewise Function' selected for 'ScaleTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "    smokeImageDisplay.ScaleTransferFunction.Points =",&
+                         "[-127.0, 0.0, 0.5, 0.0, -126.0, 1.0, 0.5, 0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    # init the 'Piecewise Function' selected for 'OpacityTransferFunction'"
+WRITE(LU_PARAVIEW,'(A,A)') "    smokeImageDisplay.OpacityTransferFunction.Points =",&
+                         "[-127.0, 0.0, 0.5, 0.0, -126.0, 1.0, 0.5, 0.0]"
+
+
+
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# setup animation scene, tracks and keyframes"
+WRITE(LU_PARAVIEW,'(A)') "# note: the Get..() functions create a new object, if needed"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+
+WRITE(LU_PARAVIEW,'(A)') "# get time animation track"
+WRITE(LU_PARAVIEW,'(A)') "timeAnimationCue1 = GetTimeTrack()"
+
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation scene"
+
+WRITE(LU_PARAVIEW,'(A)') "# get the time-keeper"
+WRITE(LU_PARAVIEW,'(A)') "timeKeeper1 = GetTimeKeeper()"
+WRITE(LU_PARAVIEW,'(A)') "# initialize the timekeeper"
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation track"
+WRITE(LU_PARAVIEW,'(A)') "# get animation scene"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1 = GetAnimationScene()"
+
+WRITE(LU_PARAVIEW,'(A)') "# initialize the animation scene"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.ViewModules = renderView1"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.Cues = timeAnimationCue1"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.AnimationTime = T_Begin"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.EndTime = T_End"
+WRITE(LU_PARAVIEW,'(A)') "animationScene1.PlayMode = 'Snap To TimeSteps'"
+
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+WRITE(LU_PARAVIEW,'(A)') "# restore active source"
+WRITE(LU_PARAVIEW,'(A)') "SetActiveSource(sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
+
+CLOSE(LU_PARAVIEW)
+
+
+END SUBROUTINE WRITE_PARAVIEW_STATE_FILE
+
+
+
 
 END MODULE VTK_FDS_INTERFACE
 
