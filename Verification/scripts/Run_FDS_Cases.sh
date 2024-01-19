@@ -172,19 +172,19 @@ fi
 cd $CURDIR
 cd ..
 
-if [[ "$RESTART" == "" ]] && [[ "$MAKE_PICTURES" == "" ]]; then
+if [[ "$RESTART" == "" ]] && [[ "$RUN_PICTURES" == "" ]]; then
    ./FDS_Cases.sh
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_Cases.sh submitted
    fi
 fi
-if [[ "$RESTART" != "" ]] && [[ "$MAKE_PICTURES" == "" ]]; then
-    ./FDS_RESTART_Cases.sh 
+if [[ "$RESTART" != "" ]] && [[ "$RUN_PICTURES" == "" ]]; then
+   ./FDS_RESTART_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_RESTART_Cases.sh submitted
    fi
 fi
-if [[ "$MAKE_PICTURES" != "" ]]; then
+if [[ "$RUN_PICTURES" != "" ]]; then
   export RUNSMV=$QFDS
   ./FDS_Pictures.sh 
    if [ "$CHECKCASES" == "" ]; then
