@@ -417,6 +417,39 @@ ENDIF
 
 CALL INITIALIZE_OUTPUT_CLOCKS(T)
 
+! Check for custom directory for output
+IF (RESULT_DIR/='') THEN
+   DO I=1,FILE_LENGTH
+      IF (RESULT_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
+         IF (RESULT_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
+            EXIT
+         ELSE
+            RESULT_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
+            EXIT
+         ENDIF
+      ENDIF
+   ENDDO
+! Try to make results directory on all ranks in case one that is not 0
+! This prevents subsequent failure of the software in writing to a non-existent
+! directory later on if rank 0 is running too slow.
+! As an alternative we could add an mpi wait here on other processes.
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(RESULT_DIR)//'"')
+#else
+      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(RESULT_DIR))
+#endif
+   IF (MY_RANK==0) THEN
+      LU_RDIR=GET_FILE_NUMBER()
+      OPEN(LU_RDIR,FILE=TRIM(RESULT_DIR)//'/.ignore',FORM='FORMATTED',STATUS='REPLACE')
+      WRITE(LU_RDIR, '(A)') TRIM(RESULT_DIR)
+      CLOSE(LU_RDIR)
+      INQUIRE(FILE=TRIM(RESULT_DIR)//'/.ignore',EXIST=EX)
+      IF (.NOT.EX) THEN
+         CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(RESULT_DIR))
+      ENDIF
+   ENDIF
+ENDIF
+
 ! Initialize output files that are mesh-specific
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX

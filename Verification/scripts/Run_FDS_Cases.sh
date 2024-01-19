@@ -50,6 +50,7 @@ echo "-J - use Intel MPI version of FDS"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-O - use OpenMPI version of FDS"
+echo "-p - run picture cases"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-r - run restart test cases"
 echo "-s - stop FDS runs"
@@ -95,8 +96,9 @@ export SVNROOT=`pwd`/../..
 cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
+RUN_PICTURES=
 
-while getopts 'Cdhj:Jm:Oq:rsW' OPTION
+while getopts 'Cdhj:Jm:Opq:rsW' OPTION
 do
 case $OPTION in
   C)
@@ -123,11 +125,16 @@ case $OPTION in
    INTEL=o
    INTEL2=
    ;;
+  p)
+   RUN_PICTURES=1
+   RESTART=
+   ;;
   q)
    QUEUE="$OPTARG"
    ;;
   r)
    RESTART=1
+   RUN_PICTURES=
    ;;
   s)
    export STOPFDS=1
@@ -164,15 +171,24 @@ fi
 
 cd $CURDIR
 cd ..
-if [ "$RESTART" == "" ]; then
+
+if [[ "$RESTART" == "" ]] && [[ "$RUN_PICTURES" == "" ]]; then
    ./FDS_Cases.sh
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_Cases.sh submitted
    fi
-else
-    ./FDS_RESTART_Cases.sh 
+fi
+if [[ "$RESTART" != "" ]] && [[ "$RUN_PICTURES" == "" ]]; then
+   ./FDS_RESTART_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_RESTART_Cases.sh submitted
+   fi
+fi
+if [[ "$RUN_PICTURES" != "" ]]; then
+  export RUNSMV=$QFDS
+  ./FDS_Pictures.sh 
+   if [ "$CHECKCASES" == "" ]; then
+      echo Cases in FDS_Pictures.sh submitted
    fi
 fi
 

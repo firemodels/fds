@@ -372,7 +372,7 @@ MESH_LOOP: DO NM=1,NMESHES
    LU_XYZ(NM)  = GET_FILE_NUMBER()
    LU_PL3D(NM) = GET_FILE_NUMBER()
    LU_PL3D(NM+NMESHES) = GET_FILE_NUMBER()
-   WRITE(FN_XYZ(NM),'(A,A,I0,A)') TRIM(CHID),'_',NM,'.xyz'
+   WRITE(FN_XYZ(NM),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'.xyz'
 
    ! Iso Surface Files
 
@@ -385,8 +385,8 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (RESTART) LU_ISOF(N,NM) = ABS(LU_ISOF(N,NM))
       LU_ISOF2(N,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_ISOF2(N,NM) = ABS(LU_ISOF2(N,NM))
-      WRITE(FN_ISOF(N,NM), '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
-      WRITE(FN_ISOF2(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.viso'
+      WRITE(FN_ISOF(N,NM), '(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.iso'
+      WRITE(FN_ISOF2(N,NM),'(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.viso'
    ENDDO
 
    ! Allocate unit numbers and file names for 3d smoke files
@@ -396,11 +396,11 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,N_SMOKE3D
       IF (SMOKE3D_FILE(N)%QUANTITY_INDEX==0) CYCLE
       LU_SMOKE3D(N,NM) = GET_FILE_NUMBER()
-      WRITE(FN_SMOKE3D(N,NM),  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.s3d'
+      WRITE(FN_SMOKE3D(N,NM),  '(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.s3d'
       LU_SMOKE3D(N+N_SMOKE3D,NM) = GET_FILE_NUMBER()
-      WRITE(FN_SMOKE3D(N+N_SMOKE3D,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
+      WRITE(FN_SMOKE3D(N+N_SMOKE3D,NM),'(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
       LU_SMOKE3D(N+2*N_SMOKE3D,NM) = GET_FILE_NUMBER()
-      WRITE(FN_SMOKE3D(N+2*N_SMOKE3D,NM),  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.s16'
+      WRITE(FN_SMOKE3D(N+2*N_SMOKE3D,NM),  '(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.s16'
    ENDDO
 
    ! Slice Files
@@ -411,10 +411,10 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_SLCF(N+N_SLCF_MAX,NM)   = GET_FILE_NUMBER() ! bounds for slice file
       LU_SLCF(N+2*N_SLCF_MAX,NM) = GET_FILE_NUMBER() ! run length encoded slice file
       CFORM = '(A,A,I0,A,I0,A)'
-      WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
-      WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.gsf'
-      WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
-      WRITE(FN_SLCF(N+2*N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.rle'
+      WRITE(FN_SLCF(N,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf'
+      WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.gsf'
+      WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
+      WRITE(FN_SLCF(N+2*N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf.rle'
    ENDDO
 
    ! Radiation Files
@@ -434,11 +434,11 @@ MESH_LOOP: DO NM=1,NMESHES
          LU_BNDG(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N+N_BNDF,NM) = GET_FILE_NUMBER()
       ENDIF
-      WRITE(FN_BNDF(N,NM),'(A,A,I0,A,I0,A)')        TRIM(CHID),'_',NM,'_',N,'.bf'
-      WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
+      WRITE(FN_BNDF(N,NM),'(A,A,I0,A,I0,A)')        TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.bf'
+      WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
       IF (CC_IBM) THEN
-         WRITE(FN_BNDG(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be'
-         WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
+         WRITE(FN_BNDG(N,NM),'(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.be'
+         WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.be.bnd'
       ENDIF
    ENDDO
 
@@ -446,14 +446,14 @@ MESH_LOOP: DO NM=1,NMESHES
 
    IF (CC_IBM) THEN
       LU_CFACE_GEOM(NM) = GET_FILE_NUMBER()
-      WRITE(FN_CFACE_GEOM(NM),'(A,A,I0,A)') TRIM(CHID),'_',NM,'.gcf'
+      WRITE(FN_CFACE_GEOM(NM),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'.gcf'
    ENDIF
 
    ! Boundary Files mapped to slice files for terrain cases
 
    IF (TERRAIN_CASE) THEN
       LU_TERRAIN(NM) = GET_FILE_NUMBER()
-      WRITE(FN_TERRAIN(NM),'(A,A,I0,A)') TRIM(CHID),'_',NM,'.ter'
+      WRITE(FN_TERRAIN(NM),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'.ter'
    ENDIF
 
    ! Particle Files
@@ -461,16 +461,16 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (PARTICLE_FILE) THEN
       LU_PART(NM) = GET_FILE_NUMBER()
       LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-      WRITE(FN_PART(NM),'(A,I0,A)') TRIM(CHID)//'_',NM,'.prt5'
-      WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
+      WRITE(FN_PART(NM),'(A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID)//'_',NM,'.prt5'
+      WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID)//'_',NM,'.prt5.bnd'
    ENDIF
 
    ! Restart Files
 
    LU_RESTART(NM) = GET_FILE_NUMBER()
-   WRITE(FN_RESTART(NM),'(A,A,I0,A)') TRIM(RESTART_CHID),'_',NM,'.restart'
+   WRITE(FN_RESTART(NM),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(RESTART_CHID),'_',NM,'.restart'
    LU_CORE(NM)    = GET_FILE_NUMBER()
-   WRITE(FN_CORE(NM),   '(A,A,I0,A)') TRIM(CHID),'_',NM,'.restart'
+   WRITE(FN_CORE(NM),   '(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'.restart'
 
 ENDDO MESH_LOOP
 
@@ -479,9 +479,9 @@ ENDDO MESH_LOOP
 IF (N_FACE>0 .OR. N_GEOMETRY>0) THEN
    DO N=1,1
       LU_GEOM(N) = GET_FILE_NUMBER()
-      WRITE(FN_GEOM(N),'(A,A,I0,A)') TRIM(CHID),'_',N,'.ge'
+      WRITE(FN_GEOM(N),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',N,'.ge'
       LU_GEOM(N+1) = GET_FILE_NUMBER()   ! used to output which &GEOM a face belongs too
-      WRITE(FN_GEOM(N+1),'(A,A,I0,A)') TRIM(CHID),'_',N,'.ge2'
+      WRITE(FN_GEOM(N+1),'(A,A,I0,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',N,'.ge2'
    ENDDO
 ENDIF
 
@@ -5342,9 +5342,9 @@ IF (NVERTS>0 .AND. NFACES>0) THEN
          VAL_MAX = MAX(VAL_MAX,VALS(I))
       ENDDO
    ELSE
-      WRITE(FUNIT_DATA) (REAL(100*NM,FB),I=1,NVALS)
-      VAL_MIN = REAL(100*NM,FB)
-      VAL_MAX = REAL(100*NM,FB)
+      WRITE(FUNIT_DATA) (REAL(T+100*NM,FB),I=1,NVALS)
+      VAL_MIN = REAL(T+100*NM,FB)
+      VAL_MAX = REAL(T+100*NM,FB)
    ENDIF
    SLICE_MIN = VAL_MIN
    SLICE_MAX = VAL_MAX
@@ -5634,6 +5634,7 @@ INTEGER :: NX, NY, NZ
 INTEGER :: IFACT, JFACT, KFACT
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
 REAL(FB) :: UVEL, VVEL, WVEL, VEL, PLOT3D_MIN, PLOT3D_MAX
+INTEGER :: DEBUG
 INTEGER :: IERROR
 
 ! Return if there are no slices to process and this is not a Plot3D dump
@@ -5701,8 +5702,8 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
       ITM = ITM+1
       ITM1 = 0
    ENDIF
-   WRITE(FN_PL3D(NM),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q'
-   WRITE(FN_PL3D(NM+NMESHES),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q.bnd'
+   WRITE(FN_PL3D(NM),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q'
+   WRITE(FN_PL3D(NM+NMESHES),'(A,A,I0,A,I0,A,I2.2,A)') TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',ITM,'p',ITM1,'.q.bnd'
    IF (N_STRINGS+17>N_STRINGS_MAX) THEN
       CALL RE_ALLOCATE_STRINGS(NM)
       STRING => MESHES(NM)%STRING
@@ -5768,6 +5769,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
       J2  = SL%J2
       K1  = SL%K1
       K2  = SL%K2
+      DEBUG = 0
+      IF(SL%DEBUG)DEBUG = 1
       AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
       CC_CELL_CENTERED  = SL%CELL_CENTERED
       CC_INTERP2FACES   = .FALSE.
@@ -6002,7 +6005,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
             OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
             CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
-                              1,STIME,I1,I2,J1,J2,K1,K2,0,&
+                              1,STIME,I1,I2,J1,J2,K1,K2,DEBUG,&
                               IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
                               SLICE_MIN, SLICE_MAX)
             SLICE_MIN_BOUND = SLICE_MIN
@@ -6012,7 +6015,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
             ! data file at subsequent time steps
             OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
             CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),CC_INTERP2FACES,SL%CELL_CENTERED,SL%SLICETYPE, &
-                              0,STIME,I1,I2,J1,J2,K1,K2,0,&
+                              0,STIME,I1,I2,J1,J2,K1,K2,DEBUG,&
                               IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM, &
                               SLICE_MIN, SLICE_MAX)
             OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),ACTION='READ')
