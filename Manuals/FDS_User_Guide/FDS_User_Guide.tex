@@ -9187,7 +9187,7 @@ FDS has various types of output files that store computed data. Some of the file
 \item A list of HVAC output quantities is given in Sec.~\ref{info:hvacoutputquantities}.
 \end{itemize}
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one {\ct DUMP} line in the input file.
-By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting {\ct RESULT\_DIR} on the {\ct DUMP} line.
+By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting {\ct RESULTS\_DIR} on the {\ct DUMP} line.
 
 
 \section{Controlling the Frequency of Output}
@@ -11655,7 +11655,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RAMP\_TMP}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
-{\ct RESULT\_DIR}                   & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RESULTS\_DIR}                  & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
 {\ct SIG\_FIGS\_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
 {\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                        \\ \hline
