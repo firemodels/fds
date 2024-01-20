@@ -19,6 +19,7 @@ USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,C
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 USE CC_SCALARS, ONLY : ADD_Q_DOT_CUTCELLS,GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
+USE COMP_FUNCTIONS, ONLY : SHUTDOWN
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
@@ -221,6 +222,39 @@ CHARACTER(LABEL_LENGTH) :: CFORM
 ALLOCATE(FILE_COUNTER(0:N_MPI_PROCESSES))
 FILE_COUNTER = 10
 
+! Check for custom directory for output
+IF (RESULT_DIR/='') THEN
+   DO I=1,FILE_LENGTH
+      IF (RESULT_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
+         IF (RESULT_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
+            EXIT
+         ELSE
+            RESULT_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
+            EXIT
+         ENDIF
+      ENDIF
+   ENDDO
+! Try to make results directory on all ranks in case one that is not 0
+! This prevents subsequent failure of the software in writing to a non-existent
+! directory later on if rank 0 is running too slow.
+! As an alternative we could add an mpi wait here on other processes.
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(RESULT_DIR)//'"')
+#else
+      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(RESULT_DIR))
+#endif
+   IF (MY_RANK==0) THEN
+      LU_RDIR=GET_FILE_NUMBER()
+      OPEN(LU_RDIR,FILE=TRIM(RESULT_DIR)//'/.ignore',FORM='FORMATTED',STATUS='REPLACE')
+      WRITE(LU_RDIR, '(A)') TRIM(RESULT_DIR)
+      CLOSE(LU_RDIR)
+      INQUIRE(FILE=TRIM(RESULT_DIR)//'/.ignore',EXIST=EX)
+      IF (.NOT.EX) THEN
+         CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(RESULT_DIR))
+      ENDIF
+   ENDIF
+ENDIF
+
 ! GIT ID file
 
 FN_GIT = TRIM(CHID)//'_git.txt'
@@ -410,11 +444,11 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_SLCF_GEOM(N,NM)         = GET_FILE_NUMBER()
       LU_SLCF(N+N_SLCF_MAX,NM)   = GET_FILE_NUMBER() ! bounds for slice file
       LU_SLCF(N+2*N_SLCF_MAX,NM) = GET_FILE_NUMBER() ! run length encoded slice file
-      CFORM = '(A,A,I0,A,I0,A)'
-      WRITE(FN_SLCF(N,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf'
-      WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.gsf'
-      WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
-      WRITE(FN_SLCF(N+2*N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR)//TRIM(CHID),'_',NM,'_',N,'.sf.rle'
+      CFORM = '(A,A,A,I0,A,I0,A)'
+      WRITE(FN_SLCF(N,NM),CFORM) TRIM(RESULT_DIR),TRIM(CHID),'_',NM,'_',N,'.sf'
+      WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(RESULT_DIR),TRIM(CHID),'_',NM,'_',N,'.gsf'
+      WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR),TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
+      WRITE(FN_SLCF(N+2*N_SLCF_MAX,NM),CFORM) TRIM(RESULT_DIR),TRIM(CHID),'_',NM,'_',N,'.sf.rle'
    ENDDO
 
    ! Radiation Files
