@@ -1478,18 +1478,6 @@ MASTER_NODE_IF: IF (MY_RANK==0) THEN
 
 IF (SETUP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this only a setup run
 
-! initialize the slice info file
-
-OPEN(UNIT=LU_INFO,FILE=TRIM(CHID)//'.sinfo',FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_INFO,'(A)') ' '
-CLOSE(LU_INFO)
-
-! initialize the boundary info file
-
-OPEN(UNIT=LU_INFO,FILE=TRIM(CHID)//'.binfo',FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_INFO,'(A)') ' '
-CLOSE(LU_INFO)
-
 ! Open up the Smokeview ".smv" file
 
 IF (APPEND) THEN
