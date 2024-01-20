@@ -281,7 +281,7 @@ INTEGER :: N_TERRAIN_IMAGES=0                                             !< Num
 CHARACTER(FORMULA_LENGTH), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE !< Name of external terrain image
 CHARACTER(CHID_LENGTH) :: CHID                                            !< Job ID
 CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
-CHARACTER(FILE_LENGTH) :: RESULT_DIR                                      !< Custom directory for output
+CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Custom directory for output
 
 ! Dates, version numbers, revision numbers
 
