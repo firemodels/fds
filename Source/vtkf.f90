@@ -12496,8 +12496,8 @@ IF (ITM1==100) THEN
 ENDIF
 
 DO I = 1,MESHES(1)%N_UNIQUE_SLCF
-   WRITE(FN_SL3D_VTK(I,NMESHES+1),'(A,A,A,A,I8.8,I2.2,A)') TRIM(CHID),'_',TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(I)),&
-                                     '_',ITM,ITM1,'.pvtu'
+   WRITE(FN_SL3D_VTK(I,NMESHES+1),'(A,A,A,A,I8.8,I2.2,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_',&
+                                     TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(I)),'_',ITM,ITM1,'.pvtu'
    VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SL3D_VTK(I,NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
                                       MESH_KIND='Float32')
    VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
@@ -12552,7 +12552,8 @@ IF (ITM1==100) THEN
    ITM = ITM+1
    ITM1 = 0
 ENDIF
-WRITE(FN_SMOKE3D_VTK(NMESHES+1),'(A,A,A,A,A,I8.8,I2.2,A)') "",TRIM(CHID),'_','SM3D','_',ITM,ITM1,'.pvtu'
+WRITE(FN_SMOKE3D_VTK(NMESHES+1),'(A,A,A,A,A,I8.8,I2.2,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_','SM3D',&
+                                 '_',ITM,ITM1,'.pvtu'
 VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SMOKE3D_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
                                    MESH_KIND='Float32')
 ! Add PointData arrays
@@ -12596,7 +12597,7 @@ IF (ITM1==100) THEN
    ITM = ITM+1
    ITM1 = 0
 ENDIF
-WRITE(FN_BNDF_VTK(NMESHES+1),'(A,A,A,I8.8,I2.2,A)') "",TRIM(CHID),'_BNDF_',ITM,ITM1,'.pvtu'
+WRITE(FN_BNDF_VTK(NMESHES+1),'(A,A,A,I8.8,I2.2,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_BNDF_',ITM,ITM1,'.pvtu'
 VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_BNDF_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
                                    MESH_KIND='Float32')
 VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
@@ -12642,7 +12643,8 @@ ENDIF
 
 DO N=1,N_LAGRANGIAN_CLASSES
    LPC => LAGRANGIAN_PARTICLE_CLASS(N)
-   WRITE(FN_PART_VTK(N,NMESHES+1),'(A,A,A,A,A,I8.8,I2.2,A)') "",TRIM(CHID),'_PART_',TRIM(LPC%ID),'_',ITM,ITM1,'.pvtp'
+   WRITE(FN_PART_VTK(N,NMESHES+1),'(A,A,A,A,A,I8.8,I2.2,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_PART_',TRIM(LPC%ID),&
+                                  '_',ITM,ITM1,'.pvtp'
    VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_PART_VTK(N,NMESHES+1), MESH_TOPOLOGY='PPolyData',&
                                       MESH_KIND='Float64')
    VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
@@ -13065,6 +13067,11 @@ WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------
 WRITE(LU_PARAVIEW,'(A)') "# setup the data processing pipelines"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
 WRITE(LU_PARAVIEW,'(A)') "indir = os.path.dirname(os.path.realpath(__file__))"
+WRITE(LU_PARAVIEW,'(A)') "rdir = '"//TRIM(RESULTS_DIR)//"'"
+WRITE(LU_PARAVIEW,'(A)') "if rdir == '':"
+WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+chid"
+WRITE(LU_PARAVIEW,'(A)') "else:"
+WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+rdir+os.sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
 WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
 WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='Geometry', FileNames=[indir+os.sep+chid+'.stl'])"
@@ -13092,13 +13099,13 @@ WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = 'Polar Axes Representation'
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
 WRITE(LU_PARAVIEW,'(A)') "# Load data files"
-WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(indir+os.sep+chid+'_BNDF_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(indir+os.sep+chid+'_SM3D_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dxFiles = sorted(glob.glob(indir+os.sep+chid+'_X_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dyFiles = sorted(glob.glob(indir+os.sep+chid+'_Y_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dzFiles = sorted(glob.glob(indir+os.sep+chid+'_Z_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl3dFiles = sorted(glob.glob(indir+os.sep+chid+'_SL3D_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_*.pvtp'))"
+WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(namespace+'_BNDF_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(namespace+'_SM3D_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dxFiles = sorted(glob.glob(namespace+'_X_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dyFiles = sorted(glob.glob(namespace+'_Y_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl2dzFiles = sorted(glob.glob(namespace+'_Z_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "sl3dFiles = sorted(glob.glob(namespace+'_SL3D_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(namespace+'_PART_*.pvtp'))"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
 WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
@@ -13146,6 +13153,14 @@ WRITE(LU_PARAVIEW,'(A)') "            sl3dNames = []"
 WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
 WRITE(LU_PARAVIEW,'(A,A,A)') "                sl3dNames.append(tmp[i].split('",'"',"')[0])"
 WRITE(LU_PARAVIEW,'(A)') "            sl3dData.CellArrayStatus = sl3dNames"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dImage = ResampleToImage(registrationName='Sampled 3D Slice', Input=sl3dData)"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice = Slice(registrationName='3D Slice Extraction', Input=sl3dImage)"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceType = 'Plane'"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer = 'Plane'"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceOffsetValues = [0.0]"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.PointMergeMethod = 'Uniform Binning'"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceType.Origin = CenterOfRotation"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer.Origin = CenterOfRotation"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add x-axis slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl2dxFiles) > 0:"
@@ -13154,7 +13169,7 @@ WRITE(LU_PARAVIEW,'(A)') "    slcfxTypes = ['_'.join(x.split('_')[:-1]) for x in
 WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfxTypes = sorted(list(set(slcfxTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfxType in uniqueSlcfxTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfxType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfxTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_X_'+slcfxType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcfxTypeFiles = sorted(glob.glob(namespace+'_X_'+slcfxType+'_*.pvtu'))"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dxData = XMLPartitionedUnstructuredGridReader(",&
                          "registrationName='X=%0.4f'%(axis), FileName=slcfxTypeFiles)"
 WRITE(LU_PARAVIEW,'(A)') "        with open(slcfxTypeFiles[0],'r') as f:"
@@ -13183,7 +13198,7 @@ WRITE(LU_PARAVIEW,'(A)') "    slcfyTypes = ['_'.join(x.split('_')[:-1]) for x in
 WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfyTypes = sorted(list(set(slcfyTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfyType in uniqueSlcfyTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfyType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfyTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_Y_'+slcfyType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcfyTypeFiles = sorted(glob.glob(namespace+'_Y_'+slcfyType+'_*.pvtu'))"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dyData = XMLPartitionedUnstructuredGridReader(",&
                          "registrationName='Y=%0.4f'%(axis), FileName=slcfyTypeFiles)"
 WRITE(LU_PARAVIEW,'(A)') "        with open(slcfyTypeFiles[0],'r') as f:"
@@ -13212,7 +13227,7 @@ WRITE(LU_PARAVIEW,'(A)') "    slcfzTypes = ['_'.join(x.split('_')[:-1]) for x in
 WRITE(LU_PARAVIEW,'(A)') "    uniqueslcfzTypes = sorted(list(set(slcfzTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfzType in uniqueslcfzTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfzType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfzTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_Z_'+slcfzType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcfzTypeFiles = sorted(glob.glob(namespace+'_Z_'+slcfzType+'_*.pvtu'))"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dzData = XMLPartitionedUnstructuredGridReader(",&
                          "registrationName='Z=%0.4f'%(axis), FileName=slcfzTypeFiles)"
 WRITE(LU_PARAVIEW,'(A)') "        with open(slcfzTypeFiles[0],'r') as f:"
@@ -13240,7 +13255,7 @@ WRITE(LU_PARAVIEW,'(A)') "    partTypes = [x.split('_PART_')[1] for x in partFil
 WRITE(LU_PARAVIEW,'(A)') "    partTypes = ['_'.join(x.split('_')[:-1]) for x in partTypes]"
 WRITE(LU_PARAVIEW,'(A)') "    uniquePartTypes = sorted(list(set(partTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for partType in uniquePartTypes:"
-WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = sorted(glob.glob(indir+os.sep+chid+'_PART_'+partType+'_*.pvtp'))"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = sorted(glob.glob(namespace+'_PART_'+partType+'_*.pvtp'))"
 WRITE(LU_PARAVIEW,'(A,A)') "        partData = XMLPartitionedPolydataReader(registrationName='Particle: ",&
                          "'+partType, FileName=partTypeFiles)"
 WRITE(LU_PARAVIEW,'(A)') "        with open(partTypeFiles[0],'r') as f:"
