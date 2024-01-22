@@ -50,7 +50,7 @@ jobs:
       # oneapi-ci/scripts/install_windows.bat
     - name: cache install oneapi
       id: cache-install
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\
         key: install-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_BASEKIT_COMPONENTS }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_HPCKIT_COMPONENTS }}
