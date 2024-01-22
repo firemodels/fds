@@ -58,7 +58,7 @@ jobs:
         sudo chown $USER /opt/openmpi
     - name: cache install oneapi, openmpi
       id: cache-install
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           /opt/intel/oneapi
@@ -155,7 +155,7 @@ jobs:
         sudo chown $USER /opt/intel
     - name: cache install oneapi
       id: cache-install
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /opt/intel/oneapi
         key: install-${{ env.MACOS_BASEKIT_URL }}-${{ env.MACOS_BASEKIT_COMPONENTS }}
