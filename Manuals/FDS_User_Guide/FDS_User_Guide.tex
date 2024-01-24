@@ -3189,18 +3189,18 @@ Note that the 3-D heat conduction equation is solved via 1-D segments in all thr
 \newpage
 
 
-\section{Testing Your Pyrolysis Model}
+\section{Testing a Pyrolysis Model}
 \label{solid_phase_verification}
 
 The {\ct SURF} and {\ct MATL} lines describing the pyrolysis of real materials consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, you can perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
 
-This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
+This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. While a full 3-D simulation of the cone heater and sample holder can be created in FDS, such a simulation would take some time to complete and would not disentangle issues with the solid phase model from uncertainties in the gas phase. It is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need three cells in each direction ({\ct IJK=3,3,3}) for the pressure solver to function properly.
+\item Create a trivially small mesh, just enough to let FDS run. Since the gas phase calculation is essentially being shut off, you just need nine cells total ({\ct IJK=3,1,3}) for the pressure solver to function properly.
 \item On the {\ct MISC} line, set {\ct SOLID\_PHASE\_ONLY=T} to turn off all gas phase computation and speed up the simulation.  Note that convective heat transfer to/from the surface is still applied using the ambient temperature.  In this case the heat transfer coefficient is either specified or taken from the gas phase thermal conductivity divided by the wall-normal grid spacing.
-\item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
+\item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. A {\ct REAC} line is not needed, as there is no gas phase combustion allowed.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Sec.~\ref{info:RAMP_Time} for more details about ramps.
 \item On the {\ct SURF} line, set a gas temperature, {\ct TMP\_GAS\_FRONT} ($^\circ$C), and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)), allowing you to control the convective heat flux from gas to surface and vice versa.
@@ -3245,7 +3245,7 @@ Compare your results to measurements made in a bench-scale device, like the cone
 \label{info:TGA_DSC_MCC}
 \label{tga_analysis}
 
-There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermogravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=T} to the {\ct SURF} line you want to analyze. You can only analyze one {\ct SURF} line at a time. Optionally, you can specify {\ct TGA\_HEATING\_RATE} (K/min) and {\ct TGA\_FINAL\_TEMPERATURE} ($^\circ$C) to indicate the linear heating rate and the final temperature of the sample. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
+There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermogravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=T} to the {\ct SURF} line you want to analyze. Only one {\ct SURF} line can be analyzed at a time. Doing multiple {\ct SURF} lines will require multiple runs. The linear heating rate (K/min) and final sample temperature ($^\circ$C) are respectively specified using {\ct TGA\_HEATING\_RATE} and {\ct TGA\_FINAL\_TEMPERATURE}. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
 \begin{lstlisting}
 &SURF ID = 'Cable Insulation'
       TGA_ANALYSIS = T
@@ -3305,9 +3305,8 @@ If the sum of the yields is less than 1, then for the purpose of solving for the
 
 \chapter{Ventilation}
 
-This chapter explains how to model a ventilation system. There are two ways to do this. First, if you only want to specify air flow rates into and out of
-compartments, read Sec.~\ref{info:Velocity_BC} for a description of simple velocity boundary conditions. However, if you want to
-model the entire HVAC system, read Sec.~\ref{info:HVAC}.
+This chapter explains how to model a ventilation system. There are two ways to do this. First, is to explicitly specify air flow rates into and out of
+compartments, see Sec.~\ref{info:Velocity_BC} for a description of simple velocity boundary conditions. Second, is to model airflow rates using an HVAC system, see Sec.~\ref{info:HVAC} for a description of modeling HVAC systems.
 
 
 \section{Simple Vents, Fans and Heaters}
@@ -3350,7 +3349,7 @@ Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the spec
 
 \label{info:MASS_FLUX_TOTAL}
 
-Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density. Note that {\ct MASS\_FLUX\_TOTAL} should only be used for an outflow boundary condition; for inflow use {\ct MASS\_FLUX} which is discussed in Sec.~\ref{info:MASS_FLUX}.
+Most often, a simple supply or exhaust vent is specified by setting either a normal velocity or volume flux at a solid surface. However, it is also possible to specify the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density. Note that {\ct MASS\_FLUX\_TOTAL} should only be used for an outflow boundary condition; for inflow use {\ct MASS\_FLUX} which is discussed in Sec.~\ref{info:MASS_FLUX}.
 
 
 \subsection{Heaters}
@@ -3383,7 +3382,7 @@ is a boundary condition for a louvered vent that pushes air into the space with 
 \end{center}
 \end{figure}
 
-In cases of limited mesh resolution, it may not be possible to describe a louvered vent or slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
+In cases of limited mesh resolution, there may not be enough mesh cells spanning the opening for {\ct VEL\_T} to operate correctly. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
 
 If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for details on how to specify the louver.
 
@@ -3401,7 +3400,7 @@ It is sometimes desirable to specify a Neumann boundary condition (specified gra
 \subsection{Species and Species Mass Flux Boundary Conditions}
 \label{info:MASS_FLUX}
 
-There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if this is all you need. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLOW}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLOW}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} and typically {\ct MASS\_FRACTION(:)} should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
+There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if that is all that is needed. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLOW}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLOW}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} and typically {\ct MASS\_FRACTION(:)} should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
 
 Here is an example of how to specify a surface that generates methane at a rate of 0.025~\si{kg/(m$^2$.s)}:
 \begin{lstlisting}
@@ -3501,7 +3500,7 @@ The current implementation of the Synthetic Eddy Method does not allow variation
 \begin{lstlisting}
 &SURF ID='burner', HRRPUA=100., MASS_FLUX_VAR=0.1 /
 \end{lstlisting}
-It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to visualize the variation.  For example,
+Using the boundary file output quantity {\ct 'MASS FLUX'} might help to visualize the variation.  For example,
 \begin{lstlisting}
 &BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
@@ -3517,7 +3516,7 @@ If the ability to transport heat and combustion products through a duct network 
 
 By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct N\_CELLS} for and HVAC duct, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
-HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
+HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability. Three fan models are available for use.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
 An HVAC network is defined by providing inputs for the ducts; duct nodes; and any fans, dampers, filters, or heating and coiling coils present in the system.
@@ -3568,7 +3567,7 @@ where:
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  If this is not specified, it will be computed automatically as the difference between the {\ct XYZ} of the duct's endpoints or as the distance along the path between endpoints if {\ct WAYPOINTS} are defined.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
-\item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct. Do not specify both {\ct MASS\_FLOW} and {\ct VOLUME\_FLOW} for the same duct.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
+\item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct. Do not specify both {\ct MASS\_FLOW} and {\ct VOLUME\_FLOW} for the same duct.  Its value in time may be changed by either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or {\ct RAMP\_ID} to specify the flow over time.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
 \item[{\ct N\_CELLS}] Enables HVAC mass transport. It defines the number of cells used in a discretized duct.
 \item[{\ct NETWORK\_ID}] Used for Smokeview visualization. All ducts and nodes with a common {\ct NETWORK\_ID} can be selected or deselected as a group in Smokeview.  If no value is given, the duct will be placed in the Unassigned network.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
@@ -3578,7 +3577,7 @@ where:
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If {\ct ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in {\ct LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting {\ct ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving {\ct ROUGHNESS} unset.
 \item[{\ct ROUND}] flag indicating a round duct.
 \item[{\ct SQUARE}] flag indicating a square duct.
-\item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
+\item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or {\ct RAMP\_ID} to specify the flow over time.  {\ct VOLUME\_FLOW} cannot be controlled by a device or control function. This can, however, be cone using a constant volume flow {\ct FAN}.
 \item[{\ct WAYPOINTS}] is an array of coordinates in m that define the path a duct takes. Currently this only used for Smokeview visualization of the HVAC network. Up to 30 {\ct WAYPOINTS} can be defined. For example: {\ct WAYPOINTS(1,1:3)=1,1,1, WAYPOINTS(2,1:3)=2,2,2} as part of a duct input would mean the duct starts at the first node, then goes to the point (1,1,1), then to (2,2,2), and finally to the second node.
 \end{description}
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER}, or {\ct FAN\_ID} should be specified for a duct.  Also note that if one of these is specified, but no device or control function is provided, then the item will be assumed to be on or open as appropriate.
@@ -3612,7 +3611,7 @@ The first method is a simple binary (flow or no flow) damper. This can be placed
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=T,XYZ=0,0,0/
 \end{lstlisting}
 
-If you want the damper to start in the closed position and then open at a later time, the {\ct INITIAL\_STATE} of the {\ct DEVC} should not be set to {\ct T}. The following example shows a duct with a damper which starts closed and then opens at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the Verification Guide.
+To start with the damper in the closed position and then open at a later time, the {\ct INITIAL\_STATE} of the {\ct DEVC} should not be set to {\ct T}. The following example shows a duct with a damper which starts closed and then opens at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the Verification Guide.
 
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
@@ -3661,7 +3660,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes; however, the entire {\ct VENT} must lie within a single pressure zone.
 
-Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. If you need to turn on or off a {\ct VENT} connected to an HVAC system, put a damper in the duct connected to {\ct VENT}.
+Note that a {\ct VENT} being used for an HVAC system must be present throughout the simulation. The {\ct VENT} should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. This also includes the solid surface it is attached; i.e., any {\ct OBST} the {\ct VENT} is attached to also needs to be present throughout the simulation. Turning on or off a {\ct VENT} connected to an HVAC system, requires a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -3851,7 +3850,7 @@ If a duct is discretized, then all other ducts in that ductrun must also be disc
 
 If you are using {\ct DEVC}s to output spatially-integrated statistics as per Sec.~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain.
 
-By default, cells in a mass transport duct are initialized to ambient values. One can initialize a duct to other values by specifying {\ct NODE\_ID} on {\ct INIT} plus {\ct TEMPERATURE} and/or {\ct SPEC\_ID} plus {\ct VOLUME\_FRACTION} or {\ct MASS\_FRACTION}. The values in the duct will then be set by linear interpolation of the values at the duct nodes.
+By default, cells in a mass transport duct are initialized to ambient values. A duct can be initialized a duct to other values by specifying {\ct NODE\_ID} on {\ct INIT} plus {\ct TEMPERATURE} and/or {\ct SPEC\_ID} plus {\ct VOLUME\_FRACTION} or {\ct MASS\_FRACTION}. The values in the duct will then be set by linear interpolation of the values at the duct nodes.
 
 \subsection{Specified Flow vs. Unspecified Flow}
 \label{info:hvacspecified}
@@ -3883,16 +3882,16 @@ A pressure zone can be any region within the computational domain that is separa
 \end{lstlisting}
 The parameter {\ct XYZ} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. ``Breaking'' pressure zones by removing obstructions between them is possible. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but checking the pressures in each mesh to ensure consistency is recommended. If the {\ct ZONE} does span multiple meshes, you do {\em not} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
 
-Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
+Note that removing a solid obstruction (like a door or window) separating two pressure zones will result in FDS merging the two zones into one such that the background pressure within each remains nearly the same.
 
 
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
 \label{pressure_rise}
 
-This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of 0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct STRATIFICATION} is set to {\ct F} simply to remove the slight change in pressure and density with height. The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure, temperature and density to rise during the 60~s injection period. Afterwards, the temperature, density, and pressure should remain constant, according to the equation of state. Figure~\ref{pressure_rise_fig} shows the results of this calculation.  The density matches exactly showing that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with the ideal values obtained from the first law of thermodynamics.
+This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of 0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct STRATIFICATION} is set to {\ct F} simply to remove the slight change in pressure and density with height. The domain is divided into three meshes, each 1~m long and each with identical gridding. Pressure, temperature, and density are expected to rise during the 60~s injection period. Afterwards, the temperature, density, and pressure should remain constant, according to the equation of state. Figure~\ref{pressure_rise_fig} shows the results of this calculation.  The density matches exactly showing that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with the ideal values obtained from the first law of thermodynamics.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -3974,7 +3973,7 @@ As the interior pressure rises in a typical building, the leakage area grows as 
 \be
    A_{\rm L} = A_{\rm L,ref} \left( \frac{\left| \Delta p \right|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
 \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
 The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
@@ -4031,7 +4030,7 @@ A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at 
 
 Sometimes a complicated geometry might have relatively small void spaces that are not connected to other parts of the domain or {\ct OPEN} boundaries. Sometimes these spaces are desired; sometimes not. That is, sometimes they are artifacts of the geometry generation software. If you do not want these void spaces within the domain, you can set a parameter called {\ct MINIMUM\_ZONE\_VOLUME} on the {\ct MISC} line. This parameter, which has units of m$^3$, tells FDS to fill in all void spaces less than this minimum volume. By default, its value is 0~m$^3$, meaning that no voids are filled. If you make its value huge, all voids will be filled.
 
-On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line. This is not the same as setting a high value for {\ct MINIMUM\_ZONE\_VOLUME}. Rather, it tells FDS to simply ignore the void spaces and use the same background pressure throughout the domain.
+On rare occasions completely suppressing pressure {\ct ZONE}s completely may be required. Although not recommended, this approach might be useful for debugging or diagnostic purposes. To remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line. This is not the same as setting a high value for {\ct MINIMUM\_ZONE\_VOLUME}. Rather, it tells FDS to simply ignore the void spaces and use the same background pressure throughout the domain.
 
 \newpage
 
@@ -4054,7 +4053,7 @@ The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follow
 \cH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
 \end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
-The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
+The {\ct PRESSURE\_RAMP} allows for alteration of the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
 The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
 drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow.
