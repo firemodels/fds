@@ -20,7 +20,7 @@ In the test M12~\cite{Sundstrom:1998} the walls and the ceiling are lined with 1
 
 \subsubsection{Modeling Notes}
 
-In the simulations of cone calorimeter simulations experiments, the computational domain size is 30~cm by 30~cm by 30~cm. In the simulations of flaming experiments the grid resolution was 1~cm, but for inert and smoldering experiments, the resolution was 10~cm, as the gaseous phase was not directly modelled. In the simulations of room corner tests, the computational domain continued for 1.5~m outside after the 20~cm thick front wall. In the corner where the burner was located, the grid resolution was 2~cm over a volume that extends for 0.5~m from the corner at x-, and y directions, and spans the entire height from floor to the ceiling. Elsewhere, a resolution of 10~cm was used.
+In the simulations of flaming cone calorimeter experiments, the computational domain is 20~cm in length and width and 30~cm in height, with a grid resolution of 1~cm. For the inert and smoldering experiments the domain is 30~cm by 30~cm by 30~cm with the resolution of 10~cm, as the gaseous phase was not directly modelled. In the simulations of room corner tests, the computational domain continued for 1.5~m outside after the 20~cm thick front wall. In the corner where the burner was located, the grid resolution was 2~cm over a volume that extends for 0.5~m from the corner at x-, and y directions, and spans the entire height from floor to the ceiling. Elsewhere, a resolution of 10~cm was used.
 
 Neither~\cite{Sundstrom:1998} nor~\cite{Hietaniemi:2001} reported the initial moisture content of the timbers, so a moisture mass fraction of 0.09 similar to the cone calorimeter specimens in~\cite{Rinta-Paavola:2023}, was assumed in the beginning of room corner tests. This is a relevant moisture content for timber in normal room air.
 
@@ -1046,6 +1046,31 @@ The other cases are simulated at the start and end angles since the wall was hel
 Lechene et al.~\cite{Lechene} measured the attenuation of thermal radiation passing through a water spray using a heat flux gauge. The radiation was produced by a 30~cm by 35~cm heat panel whose emission was close to a black body at 500~$^\circ$C. The horizontal distance from the radiation panel to the spray nozzle was 1.5~m and to the measurement point 3~m. The heat flux gauge was positioned at the line passing through the center of the panel. Seven nozzles were arranged in a row, 10~cm apart. They were positioned 1.5~m high. The heat panel was translated vertically during the experiment, the distance between the panel upper edge and the nozzle row varying between 20~cm and 100~cm. The attenuation of radiation is defined as previously described for the BRE Spray experiments. The purpose of the simulations is to compare the measured and simulated attenuation of radiation at different heights. The water mist nozzle has been characterized by Lechene by measuring the spray angles and the water flow rate. The droplet size is set by using a PDPA measurement in a single position, 20~cm below the injection point.
 
 
+\section{LEMTA/UGent Pool Fires}
+\label{LEMTA_UGent_Pool_Fires_Description}
+
+Beji et al.~\cite{Beji:FSJ2024} conducted pool fire experiments using methanol and heptane in square pans measuring 5.5~cm, 8.0~cm, 10.5~cm, and 15.0~cm. The depth of the liquid in each experiment was approximately 4.6~cm, and thermocouples were positioned at 9 vertical locations near the pan center, ranging from 5~mm to 45~mm above the pan floor and spaced 5~mm apart.
+
+\subsubsection{Modeling Notes}
+
+Properties of the liquid fuels are listed in Table~\ref{LEMTA_UGent_Fuels}. The thermal conductivity has been increased by a factor of 12 for heptane and 4.5 for methanol to account for the fact that FDS does not model the convection of the liquid within the pan. Details are found in Ref.~\cite{Beji:FSJ2024}. Also note that the mass transfer coefficient is fixed and not calculated based on local conditions. For heptane, its value is 1.5~mm/s and for methanol, 10~mm/s.
+
+\begin{table}[!htb]
+\caption[Liquid properties used in the LEMTA/UGent Pool Fires simulations]{Liquid properties used in the LEMTA/UGent Pool Fires simulations~\cite{Sikanen:2016}. ``Eff.~Cond.'' is an effective value of the thermal conductivity that accounts for liquid convection.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
+\hline
+           & Liquid     & Eff.     & Spec.         & Heat of        & Heat of      & Boiling       & Soot   & CO     & Rad.     \\
+Fuel       & Density    & Cond.    & Heat          & Vap.           & Comb.        & Temp.         & Yield  & Yield  & Frac.    \\
+           & (kg/m$^3$) & (W/m/K)  & (kJ/kg/K)     & (kJ/kg)        & (kJ/kg)      & ($^\circ$C)   & (--)   & (--)   & (--)     \\ \hline \hline
+Heptane    & 675        & 1.68     & 2.24          & 317            & 43610        & 98.5          & 0.037  & 0.01   & 0.29     \\ \hline
+Methanol   & 796        & 0.90     & 2.48          & 1099           & 21060        & 64.8          & 0.001  & 0.001  & 0.16     \\ \hline
+\end{tabular}
+\end{center}
+\label{LEMTA_UGent_Fuels}
+\end{table}
+
+
 \section{LLNL Enclosure Experiments}
 \label{LLNL_Enclosure_Description}
 
@@ -1274,14 +1299,70 @@ The Memorial Tunnel is approximately 854~m long, 8.8~m wide, and 7.9~m tall at t
 
 The fuel used in the experiments is described in the report as a ``low sulfur No.~2 fuel oil.'' The fuel was pumped into pans sized to produce nominally 50~MW, 20~MW, 10~MW, and 30~MW fires. Using a combination of pans, fires of 10~MW, 20~MW, 50~MW or 100~MW were produced.
 
-Of interest here are the experiments where the flat roadway ceiling has been removed and longitudinal jet fans installed. These experiments, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction.
+Eighty-one experiments employed {\em transverse} ventilation; that is, a ceiling was mounted 4.4~m above the roadway and fans at both ends of the tunnel supplied or exhausted air from the tunnel via vents in the ceiling or along the west wall near the roadway. The other seventeen experiments employed {\em longitudinal} ventilation in which the ceiling was removed and jet fans were installed in sets of three at various positions along the length of the tunnel. Tables~\ref{tab:Memorial_Test_Matrix_Transverse} and \ref{tab:Memorial_Test_Matrix} list the nominal parameters of each experiment.
+
+The experiments employing longitudinal ventilation, listed in Table~\ref{tab:Memorial_Test_Matrix}, are identified in the test report as Sequence~15 (natural ventilation), Sequence~17 (15 fans installed uphill of the fuel pans), and Sequence~18 (9 additional fans installed downhill of the fuel pans). A sketch of the tunnel cross-section is shown in Fig.~\ref{Memorial_Tunnel_Cross_Section}.  The fans were installed in sets of three, with each fan centerline a distance of 2.3~m from the curved ceiling and 2.4~m apart. Each fan had an inner diameter of 1.26~m and a volume flow of 42.9~m$^3$/s (91\,000~cfm). Varying numbers of fans were operated during each experiment to determine the ``critical velocity'' required to prevent smoke ``backlayering;'' that is, the spread of smoke in the uphill direction against the flow of air in the downhill direction.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=5in]{FIGURES/Memorial_Tunnel/section}
+\includegraphics[width=4in]{FIGURES/Memorial_Tunnel/section}
 \caption[Memorial Tunnel cross section]{Sketch of the Memorial Tunnel cross section.}
 \label{Memorial_Tunnel_Cross_Section}
 \end{figure}
+
+\begin{table}[p]
+\caption[Summary of Memorial Tunnel Experiments]{Summary of Memorial Tunnel Experiments. Note that the ``Sequence'' refers to a set of experiments with a similar ventilation configuration. }
+\begin{center}
+\begin{tabular}{|c|c|c||c|c|c|}
+\hline
+Test    & Sequence & Heat Release     & Test    & Sequence & Heat Release  \\
+Number  & Number   & Rate (MW)        & Number  & Number   & Rate (MW)     \\ \hline \hline
+101CR   &   1      &  10              & 239     &   6      & 100           \\ \hline
+102     &   1      &  20              & 244B    &   5      &  20           \\ \hline
+102R1   &   1      &  20              & 245B    &   6      &  20           \\ \hline
+102R    &   1      &  20              & 246B    &   6      &  20           \\ \hline
+103     &   1      &  20              & 247B    &   3      &  20           \\ \hline
+104     &   1      &  20              & 248B    &   3      &  20           \\ \hline
+105     &   1      &  20              & 249B    &   3      &  20           \\ \hline
+106     &   1      &  20              & 250B    &   6      &  20           \\ \hline
+107     &   1      &  20              & 251B    &   6      &  20           \\ \hline
+108     &   1      &  20              & 252B    &   3      &  20           \\ \hline
+109     &   1      &  20              & 301A    &   8      &  20           \\ \hline
+110     &   1      &  50              & 302A    &   8      &  20           \\ \hline
+111     &   1      &  50              & 303A    &   8      &  20           \\ \hline
+112A    &   1      &  20              & 305A    &   8      &  20           \\ \hline
+113A    &   1      &  50              & 306A    &   8      &  20           \\ \hline
+115A    &   1      &  50              & 309A    &   8      &  50           \\ \hline
+126B    &   1      &  20              & 312A    &   8      &  50           \\ \hline
+126BR1  &   1      &  20              & 313A    &   8      &  50           \\ \hline
+128B    &   1      &  20              & 314     &   9      &  10           \\ \hline
+202     &   3      &  20              & 315A    &   101    &  10           \\ \hline
+203     &   3      &  20              & 316     &   9      &  20           \\ \hline
+205     &   3      &  20              & 317A    &   102    &  10           \\ \hline
+207A    &   3      &  20              & 318A    &   101    &  10           \\ \hline
+208A    &   3      &  20              & 319A    &   102    &  10           \\ \hline
+210     &   3      &  20              & 320A    &   102    &  10           \\ \hline
+212     &   3      &  20              & 321A    &   9      &  50           \\ \hline
+214A    &   3      &  50              & 338B    &   8      &  20           \\ \hline
+215A    &   3      &  50              & 339B    &   8      &  20           \\ \hline
+216A    &   3      &  50              & 340B    &   8      &  20           \\ \hline
+217A    &   3      &  50              & 341B    &   8      &  20           \\ \hline
+218B    &   3      &  20              & 342B    &   8      &  20           \\ \hline
+223     &   4      &  20              & 343B    &   8      &  20           \\ \hline
+226     &   5      &  20              & 344B    &   8      &  20           \\ \hline
+227A    &   5      &  20              & 345B    &   8      &  20           \\ \hline
+229     &   6      &  20              & 346B    &   8      &  20           \\ \hline
+230     &   6      &  20              & 401A    &   13     &  50           \\ \hline
+231     &   6      &  20              & 403A    &   13     &  20           \\ \hline
+233     &   6      &  20              & 404A    &   14     &  20           \\ \hline
+235     &   6      &  50              & 407B    &   13     &  20           \\ \hline
+236     &   6      &  50              & 408B    &   13     &  20           \\ \hline
+238A    &   6      &  50     & \multicolumn{3}{c|}{ \hspace{.1in}}            \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:Memorial_Test_Matrix_Transverse}
+\end{table}
+
 
 \begin{table}[!ht]
 \caption[Summary of Memorial Tunnel Experiments]{Summary of Memorial Tunnel Experiments.}
@@ -2022,37 +2103,37 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 A series of tests were performed as part of an effort to develop a gauge capable of making real time measurements of soot deposition \cite{NIST_SDG}. The test apparatus consisted of a hot plate and cold plate measuring 8 cm wide by 41~cm long and separated by 1~cm. The hot plate was electrically heated and the cold plate was water cooled. A laminar diffusion flame burner using propene as the fuel was used to generate soot. A portion of the effluent from the burner was sent through the test apparatus. In addition to tests using the new gauge, a series of gravimetric tests were performed using 47~mm diameter pieces of aluminum foil attached to the cold plate in four locations. Tests with the aluminum foil used nominal flowrates of 2.5, 5.0, and 10.0 SLPM and nominal temperature differences of 100~$^{\circ}$C and 200~$^{\circ}$C. The test channel was mounted vertically to avoid gravitational settling and with the laminar flow speeds the device essentially creates only thermophoretic deposition. Four replicate tests were performed for the 2.5 and 5.0 SLPM flowrates and three for the 10.0 SLPM flowrate. A summary of the 22 tests modeled is given in the table below.
 
 \begin{table}[h!]
-	\caption{Experiment Details for Gravimetric Measurements of Soot Deposition}
-	\begin{center}
-		\begin{tabular}{|c|c|c|c|}
-			\hline
-		Test no. & Flow Speed & $\Delta$T & Inlet Soot Conc.  \\
-		         & (SLPM)     & (K)       & (mg/m$^3$)        \\ \hline \hline
-		1        & 2.5        &  94       &  67.6             \\ \hline
-		2        & 2.5        &  94       &  69.2             \\ \hline
-		3        & 2.5        &  96       &  64.2             \\ \hline
-		4        & 2.5        &  96       &  64.2             \\ \hline
-		5        & 5.0        &  96       &  65.5             \\ \hline
-		6        & 5.0        &  95       &  62.7             \\ \hline
-		7        & 5.0        &  92       &  61.9             \\ \hline
-		8        & 5.0        &  94       &  68.4             \\ \hline
-		9        & 10.0       &  97       &  25.9             \\ \hline
-		10       & 10.0       &  98       &  27.4             \\ \hline
-		11       & 10.0       &  99       &  25.5             \\ \hline
-		12       & 2.5        &  187      &  60.2             \\ \hline
-		13       & 2.5        &  190      &  61.5             \\ \hline
-		14       & 2.5        &  189      &  64.2             \\ \hline
-		15       & 2.5        &  187      &  59.1             \\ \hline
-		16       & 5.0        &  188      &  59.7             \\ \hline
-		17       & 5.0        &  186      &  58.5             \\ \hline
-		18       & 5.0        &  187      &  60.7             \\ \hline
-		19       & 5.0        &  187      &  55.5             \\ \hline
-		20       & 10.0       &  191      &  23.5             \\ \hline
-		22       & 10.0       &  188      &  24.4             \\ \hline
-		21       & 10.0       &  189      &  22.6             \\ \hline
-		\end{tabular}
-	\end{center}
-	\label{tab:NIST_SDG}
+   \caption{Experiment Details for Gravimetric Measurements of Soot Deposition}
+   \begin{center}
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+      Test no. & Flow Speed & $\Delta$T & Inlet Soot Conc.  \\
+               & (SLPM)     & (K)       & (mg/m$^3$)        \\ \hline \hline
+      1        & 2.5        &  94       &  67.6             \\ \hline
+      2        & 2.5        &  94       &  69.2             \\ \hline
+      3        & 2.5        &  96       &  64.2             \\ \hline
+      4        & 2.5        &  96       &  64.2             \\ \hline
+      5        & 5.0        &  96       &  65.5             \\ \hline
+      6        & 5.0        &  95       &  62.7             \\ \hline
+      7        & 5.0        &  92       &  61.9             \\ \hline
+      8        & 5.0        &  94       &  68.4             \\ \hline
+      9        & 10.0       &  97       &  25.9             \\ \hline
+      10       & 10.0       &  98       &  27.4             \\ \hline
+      11       & 10.0       &  99       &  25.5             \\ \hline
+      12       & 2.5        &  187      &  60.2             \\ \hline
+      13       & 2.5        &  190      &  61.5             \\ \hline
+      14       & 2.5        &  189      &  64.2             \\ \hline
+      15       & 2.5        &  187      &  59.1             \\ \hline
+      16       & 5.0        &  188      &  59.7             \\ \hline
+      17       & 5.0        &  186      &  58.5             \\ \hline
+      18       & 5.0        &  187      &  60.7             \\ \hline
+      19       & 5.0        &  187      &  55.5             \\ \hline
+      20       & 10.0       &  191      &  23.5             \\ \hline
+      22       & 10.0       &  188      &  24.4             \\ \hline
+      21       & 10.0       &  189      &  22.6             \\ \hline
+      \end{tabular}
+   \end{center}
+   \label{tab:NIST_SDG}
 \end{table}
 
 
@@ -2355,13 +2436,13 @@ In 1952, Ranz and Marshall performed a set of droplet evaporation experiments th
 \label{Ranz_Marshall_Summary} \\
 \hline
 Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
-			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\
+         No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
-			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\
+         No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\
 \hline \hline
 \endhead
 \hline
@@ -2481,20 +2562,20 @@ Prior to running the validation cases, a set of five scoping simulations were ru
 The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
 
 \begin{table}[h]
-	\caption[Summary of SETCOM condensation experiments selected for model validation]{Summary of SETCOM condensation experiments selected for model validation.}
-	\begin{center}
-		\begin{tabular}{|c|c|c|c|}
-			\hline
-			Test      &  Air Speed        &  Temperature          &  Humidity             \\
-			No.       &  (m/s)            &  ($^{\circ}$C)        &  (\%)                 \\ \hline \hline
-			1         &  0.8              &  86                   &  69                   \\ \hline
-			2         &  1.8              &  84                   &  57                   \\ \hline
-			3         &  3.7              &  79                   &  59                   \\ \hline
-			4         &  4.2              &  78                   &  71                   \\ \hline
-			5         &  5.2              &  75                   &  71                   \\ \hline
-		\end{tabular}
-	\end{center}
-	\label{SETCOM_condensation_Summary}
+   \caption[Summary of SETCOM condensation experiments selected for model validation]{Summary of SETCOM condensation experiments selected for model validation.}
+   \begin{center}
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         Test      &  Air Speed        &  Temperature          &  Humidity             \\
+         No.       &  (m/s)            &  ($^{\circ}$C)        &  (\%)                 \\ \hline \hline
+         1         &  0.8              &  86                   &  69                   \\ \hline
+         2         &  1.8              &  84                   &  57                   \\ \hline
+         3         &  3.7              &  79                   &  59                   \\ \hline
+         4         &  4.2              &  78                   &  71                   \\ \hline
+         5         &  5.2              &  75                   &  71                   \\ \hline
+      \end{tabular}
+   \end{center}
+   \label{SETCOM_condensation_Summary}
 \end{table}
 
 \FloatBarrier
@@ -3126,15 +3207,15 @@ The natural gas burner in each set of experiments had dimensions of 0.6~m by 0.6
 \begin{center}
 \begin{tabular}{|c|l||c|l||c|l|}
 \hline
-Temp.           	& Location 			& Pressure          	& Location 		& Velocity              & Location 	\\ \hline \hline
-1TC  				& Bedroom 1 		& 1PT 					& Bedroom 1 	& 1BDP 					& Window E 	\\ \hline
-2TC  				& Bedroom 2 		& 2PT 					& Bedroom 2 	& 2BDP 					& Window D 	\\ \hline
-3TC  				& Bedroom 3 		& 3PT 					& Bedroom 3 	& 3BDP 					& Window B 	\\ \hline
-4TC  				& Hallway 			& 4PT 					& Living Room 	& 4BDP 					& Hallway 	\\ \hline
-5TC  				& Living Room 		& 5PT 					& Kitchen 		& 5BDP 					& Window F 	\\ \hline
-6TC  				& Dining Room 		& 6PT 					& Dining Room 	& 6BDP 					& Front Door\\ \hline
-7TC  				& Kitchen (East) 	& \multicolumn{2}{r||}{}				& 7BDP 					& Window A 	\\ \cline{1-2} \cline{5-6}
-8TC  				& Kitchen (West) 	& \multicolumn{2}{r}{}					& \multicolumn{2}{r|}{}  			\\ \hline
+Temp.              & Location          & Pressure             & Location       & Velocity              & Location    \\ \hline \hline
+1TC              & Bedroom 1       & 1PT                & Bedroom 1    & 1BDP                & Window E    \\ \hline
+2TC              & Bedroom 2       & 2PT                & Bedroom 2    & 2BDP                & Window D    \\ \hline
+3TC              & Bedroom 3       & 3PT                & Bedroom 3    & 3BDP                & Window B    \\ \hline
+4TC              & Hallway          & 4PT                & Living Room    & 4BDP                & Hallway    \\ \hline
+5TC              & Living Room       & 5PT                & Kitchen       & 5BDP                & Window F    \\ \hline
+6TC              & Dining Room       & 6PT                & Dining Room    & 6BDP                & Front Door\\ \hline
+7TC              & Kitchen (East)    & \multicolumn{2}{r||}{}            & 7BDP                & Window A    \\ \cline{1-2} \cline{5-6}
+8TC              & Kitchen (West)    & \multicolumn{2}{r}{}               & \multicolumn{2}{r|}{}           \\ \hline
 \end{tabular}
 \end{center}
 \caption[Locations of measurement devices in the UL/NIJ ranch-style house]
@@ -3146,22 +3227,22 @@ Temp.           	& Location 			& Pressure          	& Location 		& Velocity     
 \begin{center}
 \begin{tabular}{|c|l||c|l||c|l|}
 \hline
-Temp.           	& Location 					& Pressure          	& Location 			& Velocity              & Location 		\\ \hline \hline
-1TC  				& Master Bedroom 			& 1PT 					& Master Bedroom 	& 1BDP 					& Front Door 	\\ \hline
-2TC  				& Bedroom 2 				& 2PT 					& Bedroom 2 		& 2BDP 					& Window J 		\\ \hline
-3TC  				& Bedroom 3 				& 3PT 					& Bedroom 3 		& 3BDP 					& Window K 		\\ \hline
-4TC  				& Bedroom 4 				& 4PT 					& Bedroom 4 		& 4BDP 					& Window L 		\\ \hline
-5TC  				& 2nd Floor Hallway (East) 	& 5PT 					& Front Corridor 	& 5BDP 					& Window E 		\\ \hline
-6TC  				& 2nd Floor Hallway (Middle)& 6PT 					& Living Room 		& 6BDP 					& Window A 		\\ \hline
-7TC  				& Family Room (West Corner)	& 8PT 					& Den 				& \multicolumn{2}{r|}{}  				\\ \cline{1-4}
-8TC  				& Family Room (Center) 		& 9PT 					& Family Room 		& \multicolumn{2}{r|}{}  				\\ \cline{1-4}
-9TC  				& Den 						& 10PT 					& Kitchen 			& \multicolumn{2}{r|}{} 				\\ \cline{1-4}
-10TC 				& Living Room 				& \multicolumn{4}{r|}{}											 					\\ \cline{1-2}
-11TC  				& Under 2nd Floor Hallway 	& \multicolumn{4}{r|}{} 															\\ \cline{1-2}
-12TC  				& Foyer 					& \multicolumn{4}{r|}{} 											 				\\ \cline{1-2}
-13TC  				& Dining Room 				& \multicolumn{4}{r|}{} 											 				\\ \cline{1-2}
-14TC  				& Laundry Room 				& \multicolumn{4}{r|}{} 											 				\\ \cline{1-2}
-15TC  				& Kitchen 					& \multicolumn{4}{r|}{} 											 				\\ \hline
+Temp.              & Location                & Pressure             & Location          & Velocity              & Location       \\ \hline \hline
+1TC              & Master Bedroom          & 1PT                & Master Bedroom    & 1BDP                & Front Door    \\ \hline
+2TC              & Bedroom 2             & 2PT                & Bedroom 2       & 2BDP                & Window J       \\ \hline
+3TC              & Bedroom 3             & 3PT                & Bedroom 3       & 3BDP                & Window K       \\ \hline
+4TC              & Bedroom 4             & 4PT                & Bedroom 4       & 4BDP                & Window L       \\ \hline
+5TC              & 2nd Floor Hallway (East)    & 5PT                & Front Corridor    & 5BDP                & Window E       \\ \hline
+6TC              & 2nd Floor Hallway (Middle)& 6PT                & Living Room       & 6BDP                & Window A       \\ \hline
+7TC              & Family Room (West Corner)   & 8PT                & Den             & \multicolumn{2}{r|}{}              \\ \cline{1-4}
+8TC              & Family Room (Center)       & 9PT                & Family Room       & \multicolumn{2}{r|}{}              \\ \cline{1-4}
+9TC              & Den                   & 10PT                & Kitchen          & \multicolumn{2}{r|}{}             \\ \cline{1-4}
+10TC             & Living Room             & \multicolumn{4}{r|}{}                                                 \\ \cline{1-2}
+11TC              & Under 2nd Floor Hallway    & \multicolumn{4}{r|}{}                                              \\ \cline{1-2}
+12TC              & Foyer                & \multicolumn{4}{r|}{}                                               \\ \cline{1-2}
+13TC              & Dining Room             & \multicolumn{4}{r|}{}                                               \\ \cline{1-2}
+14TC              & Laundry Room             & \multicolumn{4}{r|}{}                                               \\ \cline{1-2}
+15TC              & Kitchen                & \multicolumn{4}{r|}{}                                               \\ \hline
 \end{tabular}
 \end{center}
 \caption[Locations of measurement devices in the UL/NIJ colonial-style house]
@@ -3173,17 +3254,17 @@ Temp.           	& Location 					& Pressure          	& Location 			& Velocity  
 \begin{center}
 \begin{tabular}{|c||c|c|c|}
 \hline
-Event 			& Test 1  	& Test 2 	& Test 5 	\\ \hline \hline
-Front Door Open & 300 s 	& 1200 s 	& 1290 s 	\\ \hline
-Back Door Open  & 1275 s 	& 1860 s 	& 300 s 	\\ \hline
-Window A Open  	& 1260 s 	& 1845 s 	& - 		\\ \hline
-Window B Open  	& 1245 s 	& 1830 s 	& - 		\\ \hline
-Window C Open  	& 1230 s 	& 900 s 	& - 		\\ \hline
-Window D Open  	& 1215 s 	& - 		& 600 s 	\\ \hline
-Window E Open  	& 600 s 	& 600 s 	& - 		\\ \hline
-Window F Open  	& 1200 s 	& 1815 s 	& 1200 s 	\\ \hline
-Window G Open  	& 1300 s 	& 1875 s 	& - 		\\ \hline
-Burner Off 		& 900 s 	& 1500 s 	& 900 s 	\\ \hline
+Event          & Test 1     & Test 2    & Test 5    \\ \hline \hline
+Front Door Open & 300 s    & 1200 s    & 1290 s    \\ \hline
+Back Door Open  & 1275 s    & 1860 s    & 300 s    \\ \hline
+Window A Open     & 1260 s    & 1845 s    & -       \\ \hline
+Window B Open     & 1245 s    & 1830 s    & -       \\ \hline
+Window C Open     & 1230 s    & 900 s    & -       \\ \hline
+Window D Open     & 1215 s    & -       & 600 s    \\ \hline
+Window E Open     & 600 s    & 600 s    & -       \\ \hline
+Window F Open     & 1200 s    & 1815 s    & 1200 s    \\ \hline
+Window G Open     & 1300 s    & 1875 s    & -       \\ \hline
+Burner Off       & 900 s    & 1500 s    & 900 s    \\ \hline
 \end{tabular}
 \end{center}
 \caption[Sequence of events for the one story ranch-style house in the UL/NIJ experiments]
@@ -3195,23 +3276,23 @@ Burner Off 		& 900 s 	& 1500 s 	& 900 s 	\\ \hline
 \begin{center}
 \begin{tabular}{|c||c|c|c|}
 \hline
-Event 			& Test 1  	& Test 4 	& Test 6 	\\ \hline \hline
-Front Door Open & 600 s 	& 600 s 	& 1200 s 	\\ \hline
-Back Door Open  & - 		& - 		& - 		\\ \hline
-Window A Open  	& - 		& - 		& 900 s 	\\ \hline
-Window B Open  	& - 		& 900 s 	& - 		\\ \hline
-Window C Open  	& - 		& - 		& - 		\\ \hline
-Window D Open  	& - 		& - 		& - 		\\ \hline
-Window E Open  	& - 		& - 		& - 		\\ \hline
-Window F Open  	& - 		& - 		& - 		\\ \hline
-Window G Open  	& - 		& - 		& - 		\\ \hline
-Window H Open  	& - 		& - 		& - 		\\ \hline
-Window I Open  	& - 		& - 		& - 		\\ \hline
-Window J Open  	& - 		& - 		& - 		\\ \hline
-Window K Open  	& 900 s 	& 1260 s 	& 600 s 	\\ \hline
-Window L Open  	& 1200 s 	& 1320 s 	& - 		\\ \hline
-Window M Open  	& - 		& - 		& - 		\\ \hline
-Burner Off 		& 1500 s 	& 1200 s 	& 1500 s 	\\ \hline
+Event          & Test 1     & Test 4    & Test 6    \\ \hline \hline
+Front Door Open & 600 s    & 600 s    & 1200 s    \\ \hline
+Back Door Open  & -       & -       & -       \\ \hline
+Window A Open     & -       & -       & 900 s    \\ \hline
+Window B Open     & -       & 900 s    & -       \\ \hline
+Window C Open     & -       & -       & -       \\ \hline
+Window D Open     & -       & -       & -       \\ \hline
+Window E Open     & -       & -       & -       \\ \hline
+Window F Open     & -       & -       & -       \\ \hline
+Window G Open     & -       & -       & -       \\ \hline
+Window H Open     & -       & -       & -       \\ \hline
+Window I Open     & -       & -       & -       \\ \hline
+Window J Open     & -       & -       & -       \\ \hline
+Window K Open     & 900 s    & 1260 s    & 600 s    \\ \hline
+Window L Open     & 1200 s    & 1320 s    & -       \\ \hline
+Window M Open     & -       & -       & -       \\ \hline
+Burner Off       & 1500 s    & 1200 s    & 1500 s    \\ \hline
 \end{tabular}
 \end{center}
 \caption[Sequence of events for the two story colonial-style house in the UL/NIJ experiments]
@@ -3340,14 +3421,14 @@ The test parameters for these experiments are given in Table~\ref{Corsica_Parame
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Exp.         & Dry Fuel Loading    & Slope 	   & Dry Mass per Volume  & Packing & Bed Depth	    \\
+Exp.         & Dry Fuel Loading    & Slope       & Dry Mass per Volume  & Packing & Bed Depth       \\
 No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)          \\ \hline \hline
-1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5          	\\ \hline
-2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5          	\\ \hline
-3\_0         & 1.2                 & 0         & 18                   & 0.035   & 6.5          	\\ \hline
-1\_20        & 0.6                 & 20        & 17                   & 0.033   & 3.5          	\\ \hline
-2\_20        & 0.9                 & 20        & 16                   & 0.031   & 5.5          	\\ \hline
-3\_20        & 1.2                 & 20        & 18                   & 0.035   & 7.5          	\\ \hline
+1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5             \\ \hline
+2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5             \\ \hline
+3\_0         & 1.2                 & 0         & 18                   & 0.035   & 6.5             \\ \hline
+1\_20        & 0.6                 & 20        & 17                   & 0.033   & 3.5             \\ \hline
+2\_20        & 0.9                 & 20        & 16                   & 0.031   & 5.5             \\ \hline
+3\_20        & 1.2                 & 20        & 18                   & 0.035   & 7.5             \\ \hline
 \end{tabular}
 \end{center}
 \caption[Test matrix for the USFS/Corsica Experiments]
@@ -3408,43 +3489,43 @@ Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST t
 \hline
 Time    & Slow     & Medium     & Fast   \\
 (s)     & (kW)     & (kW)       & (kW)   \\  \hline \hline
-0       & 0        & 0          & 0      \\ \hline 10		& 9        &  20        &  75    \\ \hline
-20		& 16       &  34        &  127   \\ \hline
-30		&   23     &  51        &  173   \\ \hline
-40		&   30     &  67        &  196   \\ \hline
-50		&   35     &  83        &  271   \\ \hline
-60		&   42     &  104       &  379   \\ \hline
-70		&   52     &  125       &  515   \\ \hline
-80		&   62     &  143       &  673   \\ \hline
-90		&   68     &  162       &  852   \\ \hline
-100		&  78      &  174       & 1053   \\ \hline
-110		&  85      &  192       &        \\ \hline
-120		&  94      &  239       &        \\ \hline
-130		&  100     &  279       &        \\ \hline
-140		&  109     &  325       &        \\ \hline
-150		&  115     &  373       &        \\ \hline
-160		&  125     &  424       &        \\ \hline
-170		&  137     &  479       &        \\ \hline
-180		&  148     &  537       &        \\ \hline
-190		&  163     &  599       &        \\ \hline
-200		&  179     &  663       &        \\ \hline
-210		&  195     &            &        \\ \hline
-220		&  213     &            &        \\ \hline
-230		&  231     &            &        \\ \hline
-240		&  250     &            &        \\ \hline
-250		&  269     &            &        \\ \hline
-260		&  290     &            &        \\ \hline
-270		&  311     &            &        \\ \hline
-280		&  333     &            &        \\ \hline
-290		&  354     &            &        \\ \hline
-300		&  378     &            &        \\ \hline
-310		&  402     &            &        \\ \hline
-320		&  427     &            &        \\ \hline
-330		&  453     &            &        \\ \hline
-340		&  479     &            &        \\ \hline
-350		&  506     &            &        \\ \hline
-360		&  534     &            &        \\ \hline
-370		&  562     &            &        \\ \hline
+0       & 0        & 0          & 0      \\ \hline 10      & 9        &  20        &  75    \\ \hline
+20      & 16       &  34        &  127   \\ \hline
+30      &   23     &  51        &  173   \\ \hline
+40      &   30     &  67        &  196   \\ \hline
+50      &   35     &  83        &  271   \\ \hline
+60      &   42     &  104       &  379   \\ \hline
+70      &   52     &  125       &  515   \\ \hline
+80      &   62     &  143       &  673   \\ \hline
+90      &   68     &  162       &  852   \\ \hline
+100      &  78      &  174       & 1053   \\ \hline
+110      &  85      &  192       &        \\ \hline
+120      &  94      &  239       &        \\ \hline
+130      &  100     &  279       &        \\ \hline
+140      &  109     &  325       &        \\ \hline
+150      &  115     &  373       &        \\ \hline
+160      &  125     &  424       &        \\ \hline
+170      &  137     &  479       &        \\ \hline
+180      &  148     &  537       &        \\ \hline
+190      &  163     &  599       &        \\ \hline
+200      &  179     &  663       &        \\ \hline
+210      &  195     &            &        \\ \hline
+220      &  213     &            &        \\ \hline
+230      &  231     &            &        \\ \hline
+240      &  250     &            &        \\ \hline
+250      &  269     &            &        \\ \hline
+260      &  290     &            &        \\ \hline
+270      &  311     &            &        \\ \hline
+280      &  333     &            &        \\ \hline
+290      &  354     &            &        \\ \hline
+300      &  378     &            &        \\ \hline
+310      &  402     &            &        \\ \hline
+320      &  427     &            &        \\ \hline
+330      &  453     &            &        \\ \hline
+340      &  479     &            &        \\ \hline
+350      &  506     &            &        \\ \hline
+360      &  534     &            &        \\ \hline
+370      &  562     &            &        \\ \hline
 \end{tabular}
 \end{center}
 \label{Vettori_Ramps}

@@ -18,7 +18,6 @@ curve after 80 degC.
       COLOR='TOMATO 1'
       EXTERNAL_FLUX = 3.0
       HEAT_TRANSFER_COEFFICIENT = 0.
-      HEAT_TRANSFER_COEFFICIENT_BACK = 0.
       MATL_ID(1,:) = 'MAT_A'
       THICKNESS=0.001 /
 

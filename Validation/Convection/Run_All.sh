@@ -249,4 +249,13 @@ $QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_16.fds
 $QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_32.fds
 $QFDS $DEBUG -I -p 8  $QUEUE -d $INDIR nat_conv_hot_plate_5_8.fds
 
+# FORCED CONVECTION FROM AN IMPINGING JET
+
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_1e5_coarse.fds
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_4e5_coarse.fds
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_1e5_medium.fds
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_4e5_medium.fds
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_1e5_fine.fds
+$QFDS $DEBUG -I -p 35  $QUEUE -d $INDIR impinging_jet_Re_4e5_fine.fds
+
 echo FDS cases submitted

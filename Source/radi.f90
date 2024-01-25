@@ -2758,7 +2758,7 @@ USE RADCONS
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
-PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION, GET_KAPPA
+PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION
 
 REAL(EB) :: TYY_FAC
 
@@ -3929,9 +3929,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
          CFA => CFACE(ICF)
          BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
+         BC  => BOUNDARY_COORD(CFA%BC_INDEX)
          DO N=1,NRA
             DLA = (/DLX(N),DLY(N),DLZ(N)/)
-            DLF = DOT_PRODUCT(CFA%NVEC,DLA) ! face normal * radiation angle
+            DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
             IF (DLF<0._EB) INRAD_F(ICF) = INRAD_F(ICF) - DLF*BR%BAND(IBND)%ILW(N)
          ENDDO
       ENDDO
@@ -4033,8 +4034,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                CFA => CFACE(ICF)
                IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP1
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
+               BC => BOUNDARY_COORD(CFA%BC_INDEX)
                B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-               DLF = DOT_PRODUCT(CFA%NVEC,DLA) ! face normal * radiation angle
+               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
                IF (DLF<0._EB) CYCLE CFACE_LOOP1
                BR%BAND(IBND)%ILW(N) = OUTRAD_F(ICF) + RPI*(1._EB-B1%EMISSIVITY)*INRAD_F(ICF)
             ENDDO CFACE_LOOP1
@@ -4211,7 +4213,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            ! Loop through CFACES and assign as upwind or downwind
                            DO IFACE=1,CF%NFACE
                               CFA => CFACE(CF%CFACE_INDEX(IFACE))
-                              DLF = DOT_PRODUCT(CFA%NVEC,DLA) ! face normal * radiation angle
+                              BC => BOUNDARY_COORD(CFA%BC_INDEX)
+                              DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
                               IF (DLF>0._EB) THEN ! upwind
                                  BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                                  AILFU = AILFU + DLF*CFA%AREA*BR%BAND(IBND)%ILW(N)
@@ -4331,7 +4334,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             CFACE_LOOP2: DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
                CFA => CFACE(ICF)
                IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP2
-               DLF = DOT_PRODUCT(CFA%NVEC,DLA) ! face normal * radiation angle
+               BC => BOUNDARY_COORD(CFA%BC_INDEX)
+               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
                IF (DLF>=0._EB) CYCLE CFACE_LOOP2      ! outgoing
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
@@ -4342,7 +4346,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             CFACE_LOOP3: DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
                CFA => CFACE(ICF)
                IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP3
-               DLF = DOT_PRODUCT(CFA%NVEC,DLA) ! face normal * radiation angle
+               BC => BOUNDARY_COORD(CFA%BC_INDEX)
+               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
                IF (DLF>=0._EB) CYCLE CFACE_LOOP3      ! outgoing
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                BC => BOUNDARY_COORD(CFA%BC_INDEX)

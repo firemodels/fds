@@ -444,7 +444,7 @@ Conductivity                & W/m/K         & $\begin{array}{ll} 0.16  & T<395 \
 Specific Heat               & kJ/kg/K       & $\begin{array}{ll} -1.39+ 8.33 \times 10^{-3} \, T & T<395 \; \hbox{K} \\ 0.851 + 3.07 \times 10^{-3} \, T & T>395 \; \hbox{K} \end{array}$  &                \\ \hline
 Emissivity                  &               & 0.96                                                                                                                                         &                \\ \hline
 Absorption Coef.            & m$^{-1}$      & 2870                                                                                                                                         & 280            \\ \hline
-Pre-Exp.~Factor             & s$^{-1}$      & $\begin{array}{ll} 4.95 \times 10^{16} & \hbox{ Step 1} \\ 1.35 \times 10^{11} & \hbox{ Step 2} \end{array}$                                 &                \\ \hline 
+Pre-Exp.~Factor             & s$^{-1}$      & $\begin{array}{ll} 4.95 \times 10^{16} & \hbox{ Step 1} \\ 1.35 \times 10^{11} & \hbox{ Step 2} \end{array}$                                 &                \\ \hline
 Activation Energy           & J/mol         & $\begin{array}{ll} 1.64 \times 10^{5}  & \hbox{ Step 1} \\ 1.64 \times 10^{5}  & \hbox{ Step 2} \end{array}$                                 &                \\ \hline
 Heat of Reaction            & kJ/kg         & $\begin{array}{ll} 5                   & \hbox{ Step 1} \\ 817                 & \hbox{ Step 2} \end{array}$                                 &                \\ \hline
 \end{tabular}
@@ -701,76 +701,76 @@ The reaction mechanism for the cardboard material includes one reaction to descr
 \endhead
 Property                          & Units         & Value                                   & Method                                    & Reference                             \\ \hline \hline
 Moisture Density                  & kg/m$^3$      & 1000                                    & Direct                                    & \cite{McKinnon:CF2013}                \\ \hline
-Moisture Conductivity	          & W/m/K	      & 0.1	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
-Moisture Specific Heat	          & kJ/kg/K	      & 4.19	                                & Literature	                            & \cite{Coblentz:1}                     \\ \hline
-Moisture Emissivity	 	          &               & 0.7	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
-LB Density	                      & kg/m$^3$      &	520	                                    & Direct	                                & \cite{McKinnon:CF2013}                \\ \hline
-LB Conductivity	                  & W/m/K	      & 0.1	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-LB Emissivity	 	              &               & 0.7	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Intermediary Density	          & kg/m$^3$	  & 468	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-LB Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-11}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-LB Intermediary Emissivity	 	  &               & 0.775	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 1 Density	              & kg/m$^3$	  & 173	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 1 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-LB Char 2 Density	              & kg/m$^3$	  & 102	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 2 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-LB Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-CFL Density	                      & kg/m$^3$	  & 49	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-CFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-CFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Intermediary Density	      & kg/m$^3$	  & 44	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-CFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-CFL Intermediary Emissivity	 	  &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 1 Density	              & kg/m$^3$	  & 16	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-CFL Char 2 Density	              & kg/m$^3$	  & 9.4	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-CFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-BFL Density	                      & kg/m$^3$	  & 74	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-BFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-BFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Intermediary Density	      & kg/m$^3$	  & 67	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-BFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-BFL Intermediary Emissivity       &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 1 Density	              & kg/m$^3$	  & 25	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-BFL Char 2 Density	              & kg/m$^3$	  & 15	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-BFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
-Reaction 1 Pre-Exp.~Factor        & s$^{-1}$	  & 6.14	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 1 Activation Energy	  & J/mol	      & 23500                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 1 Heat of Reaction       &	kJ/kg	      & 2445	                                & Literature                                & \cite{Coblentz:1}                     \\ \hline
-Reaction 1 Char Yield	 	      &               & 0	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 2 Pre-Exp.~Factor        & s$^{-1}$      & $7.95\times 10^9$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 2 Activation Energy	  & J/mol	      & $1.30\times 10^5$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 2 Char Yield	 	      &               & 0.9	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 2 Heat of Reaction       & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Fuel Gas 2 Heat of Combustion     & kJ/kg	      & 18500	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 3 Pre-Exp.~Factor        & s$^{-1}$	  & $2\times 10^{11}$                   	& TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 3 Activation Energy	  & J/mol	      & $1.60\times 10^5$	                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 3 Char Yield	 	      &               & 0.37	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 3 Heat of Reaction	      & kJ/kg	      & 126                                 	& DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
-Fuel Gas 3 Heat of Combustion     & kJ/kg	      & 13600	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 4 Pre-Exp.~Factor        & s$^{-1}$	  & 0.0261	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 4 Activation Energy	  & J/mol	      & 17000	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 4 Char Yield	 	      &               & 0.59	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
-Reaction 4 Heat of Reaction	      & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
-Fuel Gas 4 Heat of Combustion     & kJ/kg	      & 14000                               	& MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Conductivity             & W/m/K         & 0.1                                       & Inherited                                & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Specific Heat             & kJ/kg/K         & 4.19                                   & Literature                               & \cite{Coblentz:1}                     \\ \hline
+Moisture Emissivity                 &               & 0.7                                       & Inherited                                & \cite{McKinnon:CF2013}                \\ \hline
+LB Density                         & kg/m$^3$      &   520                                       & Direct                                   & \cite{McKinnon:CF2013}                \\ \hline
+LB Conductivity                     & W/m/K         & 0.1                                       & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Specific Heat                 & kJ/kg/K         & 1.8                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Emissivity                     &               & 0.7                                       & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Density             & kg/m$^3$     & 468                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Conductivity     & W/m/K         & $0.05 + 7.5\times 10^{-11}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Specific Heat     & kJ/kg/K         & 1.55                                   & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Emissivity         &               & 0.775                                   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Density                 & kg/m$^3$     & 173                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Conductivity             & W/m/K         & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Specific Heat             & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+LB Char 2 Density                 & kg/m$^3$     & 102                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Conductivity             & W/m/K         & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Specific Heat             & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Density                         & kg/m$^3$     & 49                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Conductivity                 & W/m/K         & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Specific Heat                 & kJ/kg/K         & 1.8                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Emissivity                     &               & 0.7                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Density         & kg/m$^3$     & 44                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Conductivity     & W/m/K         & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Specific Heat     & kJ/kg/K         & 1.55                                   & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Emissivity         &               & 0.775                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Density                 & kg/m$^3$     & 16                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Conductivity             & W/m/K         & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Specific Heat         & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Char 2 Density                 & kg/m$^3$     & 9.4                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Conductivity             & W/m/K         & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Specific Heat         & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Density                         & kg/m$^3$     & 74                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Conductivity                 & W/m/K         & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Specific Heat                 & kJ/kg/K         & 1.8                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Emissivity                     &               & 0.7                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Density         & kg/m$^3$     & 67                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Conductivity     & W/m/K         & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Specific Heat     & kJ/kg/K         & 1.55                                   & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Emissivity       &               & 0.775                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Density                 & kg/m$^3$     & 25                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Conductivity             & W/m/K         & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Specific Heat         & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Char 2 Density                 & kg/m$^3$     & 15                                       & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Conductivity             & W/m/K         & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Specific Heat         & kJ/kg/K         & 1.3                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Emissivity             &               & 0.85                                   & Literature                               & \cite{Matsumoto:IJT1995}              \\ \hline
+Reaction 1 Pre-Exp.~Factor        & s$^{-1}$     & 6.14                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 1 Activation Energy     & J/mol         & 23500                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 1 Heat of Reaction       &   kJ/kg         & 2445                                   & Literature                                & \cite{Coblentz:1}                     \\ \hline
+Reaction 1 Char Yield             &               & 0                                       & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Pre-Exp.~Factor        & s$^{-1}$      & $7.95\times 10^9$                       & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Activation Energy     & J/mol         & $1.30\times 10^5$                       & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Char Yield             &               & 0.9                                       & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Heat of Reaction       & kJ/kg         & 0                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 2 Heat of Combustion     & kJ/kg         & 18500                                   & MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Pre-Exp.~Factor        & s$^{-1}$     & $2\times 10^{11}$                      & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Activation Energy     & J/mol         & $1.60\times 10^5$                       & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Char Yield             &               & 0.37                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Heat of Reaction         & kJ/kg         & 126                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 3 Heat of Combustion     & kJ/kg         & 13600                                   & MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Pre-Exp.~Factor        & s$^{-1}$     & 0.0261                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Activation Energy     & J/mol         & 17000                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Char Yield             &               & 0.59                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Heat of Reaction         & kJ/kg         & 0                                       & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 4 Heat of Combustion     & kJ/kg         & 14000                                  & MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
 \end{longtable}
 
 \noindent Table~\ref{Dimensions_Cardboard} lists the composition and thickness of each of the layers. The sample is insulated with 28~mm of Kaowool PM board, manufactured by ThermalCeramics (www.thermalceramics.com).
@@ -779,13 +779,13 @@ Fuel Gas 4 Heat of Combustion     & kJ/kg	      & 14000                         
 \begin{center}
 \begin{tabular}{|c|l|c|l|l|}
 \hline
-Layer	  & Composition   & Thickness (mm) \\ \hline \hline
-1	      & Liner Board	  & 0.64       \\ \hline
-2	      & C Flute Layer & 3.2        \\ \hline
-3	      & Liner Board	  & 0.64       \\ \hline
-4	      & B Flute Layer & 2.1        \\ \hline
-5	      & Liner Board	  & 0.64       \\ \hline
-6	      & Kaowool	      & 28         \\ \hline
+Layer     & Composition   & Thickness (mm) \\ \hline \hline
+1         & Liner Board     & 0.64       \\ \hline
+2         & C Flute Layer & 3.2        \\ \hline
+3         & Liner Board     & 0.64       \\ \hline
+4         & B Flute Layer & 2.1        \\ \hline
+5         & Liner Board     & 0.64       \\ \hline
+6         & Kaowool         & 28         \\ \hline
 \end{tabular}
 \end{center}
 \label{Dimensions_Cardboard}
@@ -896,7 +896,7 @@ Heat of Reaction             & kJ/kg         & -32000                          &
 
 The model for spruce estimated using the cone calorimeter measurements is employed in predicting heat release rates in an ISO 9705 room corner test~\cite{Sundstrom:1998}, and in a modified room corner test~\cite{Hietaniemi:2001} (in Finnish, English description of the test available in~\cite{Hietaniemi:1}). The selected test for simulation from~\cite{Sundstrom:1998} is M12, where the walls and ceiling of the test compartment is lined with 10~mm thick spruce timber. In the modified room corner test~\cite{Hietaniemi:2001}, the back wall opposite to the door opening, 240~cm length of an adjacent side wall, and a triangle shaped section of the ceiling connecting the two, are lined with 22~mm thick spruce timber. The gas burner is located in the timber-lined corner. All the other surfaces in the modified test, and the floor in M12~\cite{Sundstrom:1998} test are of concrete, as are the backing surfaces for timber.
 
-For simulations of both room corner tests~\cite{Sundstrom:1998,Hietaniemi:2001}, concrete properties are assumed as given for lightweight concrete in~\cite{Hietaniemi:2001}: thickness of 20~cm, thermal conductivity of 0.1~\si{W/(m.K)} and thermal diffusivity of 2 \times 10^{-7} m$^2$/s. Assuming a specific heat of 0.88~\si{kJ/(kg.K)} for concrete~\cite{Drysdale:2011}, gives a density of 568~kg/m$^3$ from thermal diffusivity.
+For simulations of both room corner tests~\cite{Sundstrom:1998,Hietaniemi:2001}, concrete properties are assumed as given for lightweight concrete in~\cite{Hietaniemi:2001}: thickness of 20~cm, thermal conductivity of 0.1~\si{W/(m.K)} and thermal diffusivity of 2 $\times$ 10$^{-7}$ m$^2$/s. Assuming a specific heat of 0.88~\si{kJ/(kg.K)} for concrete~\cite{Drysdale:2011}, gives a density of 568~kg/m$^3$ from thermal diffusivity.
 
 Figure~\ref{Aalto_Woods_RCT} shows heat release rates in room corner test M12 and in the modified room corner test. The burner output of 100~kW is reduced from both the experimental and simulation data, thus the figure shows only the heat release contribution from burning timber.
 
@@ -923,7 +923,7 @@ Figures~\ref{BST_FRS_wood_cribs_Tests_1to2} through \ref{BST_FRS_wood_cribs_Test
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_2_Line2} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_1_Line6} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_2_Line6} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_1_Line10} &   
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_1_Line10} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_2_Line10}
 \end{tabular*}
 \caption[BST/FRS Wood Cribs temperatures, Tests 1 and 2]{BST/FRS Wood Cribs temperatures, Tests 1 (left) and 2 (right).}
@@ -934,10 +934,10 @@ Figures~\ref{BST_FRS_wood_cribs_Tests_1to2} through \ref{BST_FRS_wood_cribs_Test
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_3_Line2} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_4_Line2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_3_Line6} & 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_3_Line6} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_4_Line6} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_3_Line10} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_4_Line10}    
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BST_FRS_wood_cribs/BST_FRS_4_Line10}
 \end{tabular*}
 \caption[BST/FRS Wood Cribs temperatures, Tests 3 and 4]{BST/FRS Wood Cribs temperatures, Tests 3 (left) and 4 (right).}
 \label{BST_FRS_wood_cribs_Tests_3to4}
@@ -968,7 +968,7 @@ Figure~\ref{NIST_NRC_Transient_Combustibles_cribs} compares measured and predict
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_1x1x1_HRR} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x1x1_HRR} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x2x1_HRR} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x2x2_HRR} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x2x2_HRR}
 \end{tabular*}
 \caption[NIST/NRC Transient Combustibles: wood cribs]{NIST/NRC Transient Combustibles: wood cribs.}
 \label{NIST_NRC_Transient_Combustibles_cribs}
@@ -1117,7 +1117,7 @@ DSF46-C-V-G-15-1.488   & 1.22  & Gasoline  & 15 & Vinyl             \\ \hline
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF5} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF6} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF7} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF8}  
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF8}
 \end{tabular*}
 \caption[DoJ/HAI Pool Fires, Tests 1-8]{DoJ/HAI Pool Fires, Tests 1-8.}
 \label{DoJ_HAI_Pool_Fires_1}
@@ -1197,6 +1197,48 @@ DSF46-C-V-G-15-1.488   & 1.22  & Gasoline  & 15 & Vinyl             \\ \hline
 
 \clearpage
 
+\subsection{LEMTA/UGent Pool Fires}
+
+These experiments are described in Section~\ref{LEMTA_UGent_Pool_Fires_Description}.
+
+Shown on the following pages are comparisons of measured and predicted burning rates of heptane and methanol pools, along with temperatures measured at various heights (5~mm, 20~mm, 35~mm) above the floor of the pan for which the starting depth of the liquid was approximately 46~mm.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H5_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H5_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H8_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H8_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H10_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H10_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H15_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/H15_temp}
+\end{tabular*}
+\caption[LEMTA/UGent Pool Fires burning rate and sub-surface temperature, heptane]{LEMTA/UGent Pool Fires burning rate and sub-surface temperature, heptane.}
+\label{LEMTA_UGent_heptane}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M5_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M5_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M8_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M8_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M10_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M10_temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M15_MLRPUA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LEMTA_UGent_Pool_Fires/M15_temp}
+\end{tabular*}
+\caption[LEMTA/UGent Pool Fires burning rate and sub-surface temperature, methanol]{LEMTA/UGent Pool Fires burning rate and sub-surface temperature, methanol.}
+\label{LEMTA_UGent_methanol}
+\end{figure}
+
+
+
+\clearpage
+
 \subsection{Pool Fire Measurements}
 
 Shown below are comparisons of measured and predicted evaporation/burning rates of various liquid pools. Surface temperature comparisons of these same experiments are shown in Sec.~\ref{sec:Liquid_Pool_Surf_Temp}.
@@ -1211,7 +1253,7 @@ Figure~\ref{ASTM_E2058_Water_Evap_MLR} compares the measured and predicted evapo
 \end{figure}
 
 \noindent
-Figure~\ref{VTT_MLRPUA} shows the measured and predicted mass loss rates of 1.17 m (1.07 m$^2$) and 1.6 m (2.0 m$^2$) diameter heptane pool fires. The measured mass loss rates are averages of two or three individual experiments. 
+Figure~\ref{VTT_MLRPUA} shows the measured and predicted mass loss rates of 1.17 m (1.07 m$^2$) and 1.6 m (2.0 m$^2$) diameter heptane pool fires. The measured mass loss rates are averages of two or three individual experiments.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1289,7 +1331,7 @@ The figures below contain predictions of the burning rate of various plastics in
 
 A description of this experiment is given in Sec.~\ref{UMD_SBI_Description}.
 
-Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spread over PMMA panels in the SBI (Single Burning Item) apparatus. 
+Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spread over PMMA panels in the SBI (Single Burning Item) apparatus.
 
 \begin{figure}[!ht]
 \centering
@@ -1304,7 +1346,7 @@ Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spre
 
 FDS has a scaling-based pyrolysis model which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface.
 This section evaluates the performance of FDS in scaling the buring rate using this model.
-These cases include cone calorimeter experiments conducted at multiple heat transfer levels. 
+These cases include cone calorimeter experiments conducted at multiple heat transfer levels.
 Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown).
 
 Each case is modeled using the solid phase only solver in FDS.
@@ -1323,7 +1365,7 @@ These materials include:
 \end{enumerate}
 Note the RISE and FPL databases did not provide ignition properties or information on specific material conditioning or modifications to test procedures.
 For these materials, representative values of material properties were identified for each of these materials from the FSRI database ~\cite{McKinnon:FSRI2023_Data}, the SFPE handbook ~\cite{SFPE:Tewarson},
-the SFPE Engineering Guide on Piloted Ignition ~\cite{Beyler2002}, and the Ignition Handbook ~\cite{Babrauskas:2}. 
+the SFPE Engineering Guide on Piloted Ignition ~\cite{Beyler2002}, and the Ignition Handbook ~\cite{Babrauskas:2}.
 An emissivity value of unity was assumed for each material unless an ignition temperature which satisfied the measured ignition times could not be achieved with a value of unity.
 
 Table ~\ref{Scaling_Pyrolysis_Materials} summarizes the materials by source and composition category.
@@ -1356,8 +1398,8 @@ Total & 25 & 14 & 79 & 30 & 148 \\ \hline
 \subsection{Aalto Woods Experiments}\label{sec_Aalto_Woods_Materials}
 
 Table ~\ref{Properties_Aalto_Woods_Materials_woods} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 
@@ -1369,8 +1411,8 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Pine  & 0.10 & 493 & 0.90 & 0.91 & 20.0 & 417.4 & 59.1 \\ \hline 
-Spruce  & 0.06 & 408 & 0.90 & 0.91 & 20.0 & 437.3 & 58.5 \\ \hline 
+Pine  & 0.10 & 493 & 0.90 & 0.91 & 20.0 & 417.4 & 59.1 \\ \hline
+Spruce  & 0.06 & 408 & 0.90 & 0.91 & 20.0 & 437.3 & 58.5 \\ \hline
 \end{tabular}
 \label{Properties_Aalto_Woods_Materials_woods}
 \end{table}
@@ -1392,8 +1434,8 @@ The results of the simulations are shown on the following pages.
 \subsection{FAA Polymers Experiments}\label{sec_FAA_Polymers_Materials}
 
 Table ~\ref{Properties_FAA_Polymers_Materials_polymers} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 
@@ -1405,9 +1447,9 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-PC  & 0.22 & 1180 & 0.90 & 1.90 & 6.0 & 463.8 & 105.9 \\ \hline 
-PEEK  & 0.28 & 1300 & 0.90 & 2.05 & 3.9 & 564.8 & 99.5 \\ \hline 
-PVC  & 0.17 & 1430 & 0.90 & 1.55 & 6.0 & 406.4 & 101.8 \\ \hline 
+PC  & 0.22 & 1180 & 0.90 & 1.90 & 6.0 & 463.8 & 105.9 \\ \hline
+PEEK  & 0.28 & 1300 & 0.90 & 2.05 & 3.9 & 564.8 & 99.5 \\ \hline
+PVC  & 0.17 & 1430 & 0.90 & 1.55 & 6.0 & 406.4 & 101.8 \\ \hline
 \end{tabular}
 \label{Properties_FAA_Polymers_Materials_polymers}
 \end{table}
@@ -1430,8 +1472,8 @@ The results of the simulations are shown on the following pages.
 \subsection{FPL Wood Experiments}\label{sec_FPL_Woods_Materials}
 
 Table ~\ref{Properties_FPL_Wood_Materials_woods} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 \begin{table}[!h]
@@ -1442,14 +1484,14 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Hardboard  & 0.16 & 972 & 1.00 & 1.25 & 7.3 & 381.6 & 80.2 \\ \hline 
-Lumber Redoak  & 0.17 & 775 & 1.00 & 2.40 & 19.8 & 389.0 & 76.1 \\ \hline 
-OSB  & 0.12 & 754 & 1.00 & 1.58 & 11.5 & 376.6 & 77.4 \\ \hline 
-Plywood Douglas Fir  & 0.11 & 482 & 1.00 & 2.72 & 11.8 & 370.3 & 74.9 \\ \hline 
-Plywood FRT Douglas Fir  & 0.11 & 604 & 1.00 & 2.72 & 12.5 & 385.5 & 73.8 \\ \hline 
-Plywood FRT Southern Pine  & 0.30 & 700 & 1.00 & 1.00 & 11.3 & 420.2 & 73.8 \\ \hline 
-Plywood Oak  & 0.17 & 502 & 1.00 & 2.40 & 12.7 & 405.7 & 75.5 \\ \hline 
-Waferboard  & 0.12 & 712 & 1.00 & 1.58 & 13.0 & 373.3 & 76.7 \\ \hline 
+Hardboard  & 0.16 & 972 & 1.00 & 1.25 & 7.3 & 381.6 & 80.2 \\ \hline
+Lumber Redoak  & 0.17 & 775 & 1.00 & 2.40 & 19.8 & 389.0 & 76.1 \\ \hline
+OSB  & 0.12 & 754 & 1.00 & 1.58 & 11.5 & 376.6 & 77.4 \\ \hline
+Plywood Douglas Fir  & 0.11 & 482 & 1.00 & 2.72 & 11.8 & 370.3 & 74.9 \\ \hline
+Plywood FRT Douglas Fir  & 0.11 & 604 & 1.00 & 2.72 & 12.5 & 385.5 & 73.8 \\ \hline
+Plywood FRT Southern Pine  & 0.30 & 700 & 1.00 & 1.00 & 11.3 & 420.2 & 73.8 \\ \hline
+Plywood Oak  & 0.17 & 502 & 1.00 & 2.40 & 12.7 & 405.7 & 75.5 \\ \hline
+Waferboard  & 0.12 & 712 & 1.00 & 1.58 & 13.0 & 373.3 & 76.7 \\ \hline
 \end{tabular}
 \label{Properties_FPL_Wood_Materials_woods}
 \end{table}
@@ -1482,8 +1524,8 @@ The results of the simulations are shown on the following pages.
 \subsection{FSRI/NIJ Experiments}\label{sec_FSRI_NIJ_Materials}
 
 Table ~\ref{Properties_FSRI_NIJ_Materials_mixtures}, Table ~\ref{Properties_FSRI_NIJ_Materials_others}, Table ~\ref{Properties_FSRI_NIJ_Materials_polymers}, and Table ~\ref{Properties_FSRI_NIJ_Materials_woods} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 
@@ -1495,10 +1537,10 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FRP Panel & 0.39 & 1555 & 1.00 & 1.41 & 2.0 & 362.4 & 84.0 \\ \hline 
-Overstuffed Chair Assembly & 0.20 & 80 & 1.00 & 1.00 & 19.9 & 450.6 & 83.2 \\ \hline 
-Overstuffed Chair Polyester Batting & 0.20 & 26 & 1.00 & 2.00 & 44.5 & 624.4 & 80.4 \\ \hline 
-Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.6 & 415.8 & 84.9 \\ \hline 
+FRP Panel & 0.39 & 1555 & 1.00 & 1.41 & 2.0 & 362.4 & 84.0 \\ \hline
+Overstuffed Chair Assembly & 0.20 & 80 & 1.00 & 1.00 & 19.9 & 450.6 & 83.2 \\ \hline
+Overstuffed Chair Polyester Batting & 0.20 & 26 & 1.00 & 2.00 & 44.5 & 624.4 & 80.4 \\ \hline
+Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.6 & 415.8 & 84.9 \\ \hline
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_mixtures}
 \end{table}
@@ -1526,19 +1568,19 @@ Overstuffed Chair Polyurethane Foam & 0.20 & 34 & 1.00 & 1.00 & 25.6 & 415.8 & 8
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Asphalt Shingle & 0.08 & 1219 & 1.00 & 1.01 & 2.5& 421.6 & 82.4 \\ \hline 
-Cotton Raw & 0.20 & 31 & 1.00 & 1.00 & 23.8 & 453.9 & 57.7 \\ \hline 
-Cotton Rug & 0.07 & 263 & 1.00 & 1.56 & 5.3 & 439.1 & 81.8 \\ \hline 
-EPDM Membrane & 0.14 & 1200 & 1.00 & 1.46 & 6.0 & 477.1 & 80.9 \\ \hline 
-FDNY LDF & 0.20 & 224 & 1.00 & 1.00 & 12.1 & 405.7 & 76.1 \\ \hline 
-Lightweight Gypsum Wallboard & 0.13 & 494 & 1.00 & 3.00 & 12.6 & 397.2 & 75.8 \\ \hline 
-Polyolefin Carpet Low Pile & 0.06 & 214 & 1.00 & 1.35 & 6.0 & 439.3 & 83.2 \\ \hline 
-Roof Felt & 0.06 & 726 & 1.00 & 1.74 & 0.9 & 407.7 & 83.4 \\ \hline 
-Rubber Band & 0.20 & 88 & 1.00 & 1.00 & 24.2 & 456.8 & 82.8 \\ \hline 
-Rubber Foam Pipe Insulation & 0.04 & 52 & 1.00 & 1.47 & 13.0 & 427.3 & 77.0 \\ \hline 
-Rug Pad & 0.05 & 176 & 1.00 & 1.10 & 4.6 & 448.3 & 79.4 \\ \hline 
-Wool Rug & 0.06 & 226 & 1.00 & 1.33 & 16.5 & 562.3 & 78.1 \\ \hline 
-XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.5 & 481.7 & 84.2 \\ \hline 
+Asphalt Shingle & 0.08 & 1219 & 1.00 & 1.01 & 2.5& 421.6 & 82.4 \\ \hline
+Cotton Raw & 0.20 & 31 & 1.00 & 1.00 & 23.8 & 453.9 & 57.7 \\ \hline
+Cotton Rug & 0.07 & 263 & 1.00 & 1.56 & 5.3 & 439.1 & 81.8 \\ \hline
+EPDM Membrane & 0.14 & 1200 & 1.00 & 1.46 & 6.0 & 477.1 & 80.9 \\ \hline
+FDNY LDF & 0.20 & 224 & 1.00 & 1.00 & 12.1 & 405.7 & 76.1 \\ \hline
+Lightweight Gypsum Wallboard & 0.13 & 494 & 1.00 & 3.00 & 12.6 & 397.2 & 75.8 \\ \hline
+Polyolefin Carpet Low Pile & 0.06 & 214 & 1.00 & 1.35 & 6.0 & 439.3 & 83.2 \\ \hline
+Roof Felt & 0.06 & 726 & 1.00 & 1.74 & 0.9 & 407.7 & 83.4 \\ \hline
+Rubber Band & 0.20 & 88 & 1.00 & 1.00 & 24.2 & 456.8 & 82.8 \\ \hline
+Rubber Foam Pipe Insulation & 0.04 & 52 & 1.00 & 1.47 & 13.0 & 427.3 & 77.0 \\ \hline
+Rug Pad & 0.05 & 176 & 1.00 & 1.10 & 4.6 & 448.3 & 79.4 \\ \hline
+Wool Rug & 0.06 & 226 & 1.00 & 1.33 & 16.5 & 562.3 & 78.1 \\ \hline
+XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.5 & 481.7 & 84.2 \\ \hline
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_others}
 \end{table}
@@ -1582,30 +1624,30 @@ XPS Foam Board & 0.03 & 28 & 1.00 & 1.38 & 25.5 & 481.7 & 84.2 \\ \hline
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Black PMMA & 0.15 & 1182 & 1.00 & 1.48 & 8.4 & 371.3 & 85.5 \\ \hline 
-HDPE & 0.30 & 971 & 1.00 & 1.92 & 3.1 & 437.4 & 88.7 \\ \hline 
-LDPE & 0.22 & 927 & 1.00 & 2.60 & 3.1 & 381.6 & 89.2 \\ \hline 
-Memory Foam Carpet Pad & 0.04 & 134 & 1.00 & 1.87 & 12.7 & 424.0 & 85.2 \\ \hline 
-Nylon & 0.15 & 1070 & 1.00 & 1.84 & 3.1 & 466.5 & 85.6 \\ \hline 
-Nylon Carpet High Pile & 0.06 & 188 & 1.00 & 1.53 & 13.8 & 621.1 & 81.0 \\ \hline 
-PC & 0.18 & 1220 & 1.00 & 1.26 & 5.4 & 581.3 & 80.9 \\ \hline 
-PE Foam Pipe Insulation & 0.06 & 35 & 1.00 & 2.58 & 10.9 & 461.5 & 82.2 \\ \hline 
-PET & 0.19 & 1401 & 1.00 & 1.17 & 6.7 & 432.8 & 83.4 \\ \hline 
-PETG & 0.16 & 1314 & 1.00 & 1.25 & 2.6 & 459.2 & 88.5 \\ \hline 
-PMMA & 0.15 & 1182 & 1.00 & 1.48 & 14.3 & 358.7 & 86.2 \\ \hline 
-PP & 0.15 & 887 & 1.00 & 1.92 & 3.0 & 410.6 & 89.1 \\ \hline 
-PVC & 0.14 & 1388 & 1.00 & 1.08 & 3.1 & 543.1 & 76.1 \\ \hline 
-Plastic Laminate Countertop & 0.20 & 756 & 1.00 & 1.00 & 39.6 & 452.9 & 74.5 \\ \hline 
-PlasticA & 0.20 & 1072 & 1.00 & 1.00 & 3.1 & 431.7 & 86.7 \\ \hline 
-PlasticB & 0.13 & 1067 & 1.00 & 1.35 & 2.9 & 432.7 & 86.4 \\ \hline 
-PlasticC & 0.12 & 1058 & 1.00 & 1.36 & 2.9 & 433.9 & 86.5 \\ \hline 
-Polyester Bed Skirt & 0.02 & 432 & 1.00 & 1.61 & 0.7 & 468.4 & 79.6 \\ \hline 
-Polyester Microfiber Sheet & 0.02 & 457 & 1.00 & 2.08 & 5.0 & 471.6 & 80.1 \\ \hline 
-Polyisocyanurate Foam Board & 0.20 & 34 & 1.00 & 1.00 & 23.2 & 295.3 & 76.7 \\ \hline 
-Rebond Foam Carpet Pad & 0.04 & 86 & 1.00 & 1.82 & 9.1 & 423.4 & 85.2 \\ \hline 
-Vinyl Plank Flooring & 0.07 & 664 & 1.00 & 1.35 & 2.3 & 358.2 & 80.5 \\ \hline 
-Vinyl Siding & 0.10 & 1377 & 1.00 & 1.10 & 1.0 & 465.5 & 77.2 \\ \hline 
-Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.5 & 364.7 & 76.4 \\ \hline 
+Black PMMA & 0.15 & 1182 & 1.00 & 1.48 & 8.4 & 371.3 & 85.5 \\ \hline
+HDPE & 0.30 & 971 & 1.00 & 1.92 & 3.1 & 437.4 & 88.7 \\ \hline
+LDPE & 0.22 & 927 & 1.00 & 2.60 & 3.1 & 381.6 & 89.2 \\ \hline
+Memory Foam Carpet Pad & 0.04 & 134 & 1.00 & 1.87 & 12.7 & 424.0 & 85.2 \\ \hline
+Nylon & 0.15 & 1070 & 1.00 & 1.84 & 3.1 & 466.5 & 85.6 \\ \hline
+Nylon Carpet High Pile & 0.06 & 188 & 1.00 & 1.53 & 13.8 & 621.1 & 81.0 \\ \hline
+PC & 0.18 & 1220 & 1.00 & 1.26 & 5.4 & 581.3 & 80.9 \\ \hline
+PE Foam Pipe Insulation & 0.06 & 35 & 1.00 & 2.58 & 10.9 & 461.5 & 82.2 \\ \hline
+PET & 0.19 & 1401 & 1.00 & 1.17 & 6.7 & 432.8 & 83.4 \\ \hline
+PETG & 0.16 & 1314 & 1.00 & 1.25 & 2.6 & 459.2 & 88.5 \\ \hline
+PMMA & 0.15 & 1182 & 1.00 & 1.48 & 14.3 & 358.7 & 86.2 \\ \hline
+PP & 0.15 & 887 & 1.00 & 1.92 & 3.0 & 410.6 & 89.1 \\ \hline
+PVC & 0.14 & 1388 & 1.00 & 1.08 & 3.1 & 543.1 & 76.1 \\ \hline
+Plastic Laminate Countertop & 0.20 & 756 & 1.00 & 1.00 & 39.6 & 452.9 & 74.5 \\ \hline
+PlasticA & 0.20 & 1072 & 1.00 & 1.00 & 3.1 & 431.7 & 86.7 \\ \hline
+PlasticB & 0.13 & 1067 & 1.00 & 1.35 & 2.9 & 432.7 & 86.4 \\ \hline
+PlasticC & 0.12 & 1058 & 1.00 & 1.36 & 2.9 & 433.9 & 86.5 \\ \hline
+Polyester Bed Skirt & 0.02 & 432 & 1.00 & 1.61 & 0.7 & 468.4 & 79.6 \\ \hline
+Polyester Microfiber Sheet & 0.02 & 457 & 1.00 & 2.08 & 5.0 & 471.6 & 80.1 \\ \hline
+Polyisocyanurate Foam Board & 0.20 & 34 & 1.00 & 1.00 & 23.2 & 295.3 & 76.7 \\ \hline
+Rebond Foam Carpet Pad & 0.04 & 86 & 1.00 & 1.82 & 9.1 & 423.4 & 85.2 \\ \hline
+Vinyl Plank Flooring & 0.07 & 664 & 1.00 & 1.35 & 2.3 & 358.2 & 80.5 \\ \hline
+Vinyl Siding & 0.10 & 1377 & 1.00 & 1.10 & 1.0 & 465.5 & 77.2 \\ \hline
+Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.5 & 364.7 & 76.4 \\ \hline
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_polymers}
 \end{table}
@@ -1668,17 +1710,17 @@ Vinyl Tile & 0.20 & 2512 & 1.00 & 1.00 & 2.5 & 364.7 & 76.4 \\ \hline
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Basswood Panel & 0.10 & 404 & 1.00 & 1.55 & 19.1 & 429.2 & 77.0 \\ \hline 
-Composite Deck Board & 0.23 & 1103 & 1.00 & 1.56 & 13.1 & 368.6 & 83.2 \\ \hline 
-Engineered Flooring & 0.13 & 815 & 1.00 & 1.60 & 8.7 & 399.6 & 78.9 \\ \hline 
-Engineered Wood Furniture & 0.20 & 803 & 1.00 & 1.00 & 13.7 & 395.6 & 78.7 \\ \hline 
-Eucalyptus Flooring & 0.18 & 1025 & 1.00 & 1.67 & 14.2 & 384.7 & 78.5 \\ \hline 
-Luan Panel & 0.07 & 345 & 1.00 & 1.58 & 5.0 & 434.5 & 77.6 \\ \hline 
-MDF & 0.12 & 737 & 1.00 & 1.28 & 19.4 & 420.7 & 77.8 \\ \hline 
-OSB & 0.12 & 598 & 1.00 & 1.58 & 17.1 & 427.4 & 77.1 \\ \hline 
-Oak Flooring & 0.15 & 714 & 1.00 & 1.57 & 18.7 & 418.2 & 77.1 \\ \hline 
-Pine Siding & 0.11 & 328 & 1.00 & 1.84 & 18.0 & 417.4 & 76.5 \\ \hline 
-Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.1 & 441.2 & 74.9 \\ \hline 
+Basswood Panel & 0.10 & 404 & 1.00 & 1.55 & 19.1 & 429.2 & 77.0 \\ \hline
+Composite Deck Board & 0.23 & 1103 & 1.00 & 1.56 & 13.1 & 368.6 & 83.2 \\ \hline
+Engineered Flooring & 0.13 & 815 & 1.00 & 1.60 & 8.7 & 399.6 & 78.9 \\ \hline
+Engineered Wood Furniture & 0.20 & 803 & 1.00 & 1.00 & 13.7 & 395.6 & 78.7 \\ \hline
+Eucalyptus Flooring & 0.18 & 1025 & 1.00 & 1.67 & 14.2 & 384.7 & 78.5 \\ \hline
+Luan Panel & 0.07 & 345 & 1.00 & 1.58 & 5.0 & 434.5 & 77.6 \\ \hline
+MDF & 0.12 & 737 & 1.00 & 1.28 & 19.4 & 420.7 & 77.8 \\ \hline
+OSB & 0.12 & 598 & 1.00 & 1.58 & 17.1 & 427.4 & 77.1 \\ \hline
+Oak Flooring & 0.15 & 714 & 1.00 & 1.57 & 18.7 & 418.2 & 77.1 \\ \hline
+Pine Siding & 0.11 & 328 & 1.00 & 1.84 & 18.0 & 417.4 & 76.5 \\ \hline
+Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.1 & 441.2 & 74.9 \\ \hline
 \end{tabular}
 \label{Properties_FSRI_NIJ_Materials_woods}
 \end{table}
@@ -1715,8 +1757,8 @@ Wood Stud & 0.10 & 379 & 1.00 & 1.47 & 38.1 & 441.2 & 74.9 \\ \hline
 \subsection{JH/FRA Experiments}\label{sec_JH_FRA_Materials}
 
 Table ~\ref{Properties_JH_FRA_Materials} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 \begin{table}[!h]
@@ -1727,14 +1769,14 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Acrylic & 0.24 & 1178 & 0.88 & 0.62 & 4.5 & 416.3 & 83.7 \\ \hline 
-CPS Balsa Facesheet & 0.39 & 630 & 0.70 & 0.62 & 15.9 & 382.7 & 74.3 \\ \hline 
-CPS Plywood & 0.295 & 625 & 1.00 & 3.13 & 6.4 & 319.1 & 79.1 \\ \hline 
-CPS Plywood Facesheet & 0.39 & 630 & 0.70 & 0.51 & 12.7 & 514.0 & 76.0 \\ \hline 
-PC Blend & 0.89 & 1320 & 0.93 & 0.67 & 4.5 & 454.8 & 75.1 \\ \hline 
-Phenolic Resin Fiberglass Comp. & 0.35 & 1846 & 0.89 & 1.29 & 3.3 & 524.9 & 72.9 \\ \hline 
-PVC Blend & 0.29 & 1314 & 0.88 & 0.42 & 3.3 & 454.9 & 76.1 \\ \hline 
-Vinyl Ester Resin FRP & 0.54 & 1600 & 0.80 & 4.00 & 4.5 & 417.3 & 73.8 \\ \hline 
+Acrylic & 0.24 & 1178 & 0.88 & 0.62 & 4.5 & 416.3 & 83.7 \\ \hline
+CPS Balsa Facesheet & 0.39 & 630 & 0.70 & 0.62 & 15.9 & 382.7 & 74.3 \\ \hline
+CPS Plywood & 0.295 & 625 & 1.00 & 3.13 & 6.4 & 319.1 & 79.1 \\ \hline
+CPS Plywood Facesheet & 0.39 & 630 & 0.70 & 0.51 & 12.7 & 514.0 & 76.0 \\ \hline
+PC Blend & 0.89 & 1320 & 0.93 & 0.67 & 4.5 & 454.8 & 75.1 \\ \hline
+Phenolic Resin Fiberglass Comp. & 0.35 & 1846 & 0.89 & 1.29 & 3.3 & 524.9 & 72.9 \\ \hline
+PVC Blend & 0.29 & 1314 & 0.88 & 0.42 & 3.3 & 454.9 & 76.1 \\ \hline
+Vinyl Ester Resin FRP & 0.54 & 1600 & 0.80 & 4.00 & 4.5 & 417.3 & 73.8 \\ \hline
 \end{tabular}
 \label{Properties_JH_FRA_Materials}
 \end{table}
@@ -1762,8 +1804,8 @@ The results of the simulations are shown on the following pages.
 \subsection{JH/NIJ Experiments}\label{sec_JH_NIJ_Materials}
 
 Table ~\ref{Properties_JH_NIJ_Materials} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. 
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. 
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 \begin{table}[!h]
@@ -1774,13 +1816,13 @@ The ignition temperatures were calculated based on times to ignition at the lowe
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Black PMMA & 0.12 & 1154 & 0.95 & 1.52 & 9.2 & 354.1 & 84.5 \\ \hline 
-Cardboard & 0.23 & 128 & 0.93 & 0.69 & 4.1 & 416.4 & 77.3 \\ \hline 
-FRP & 0.39 & 1897 & 0.95 & 1.41 & 12.7 & 368.1 & 76.2 \\ \hline 
-MDF & 0.31 & 688 & 0.99 & 0.40 & 19.2 & 413.5 & 78.3 \\ \hline 
-OSB & 0.38 & 573 & 0.93 & 0.63 & 16.1 & 373.5 & 76.1 \\ \hline 
-White Pine & 0.31 & 499 & 0.90 & 0.60 & 19.1 & 403.0 & 75.6 \\ \hline 
-White Spruce & 0.24 & 430 & 0.90 & 1.10 & 37.2 & 385.0 & 74.7 \\ \hline 
+Black PMMA & 0.12 & 1154 & 0.95 & 1.52 & 9.2 & 354.1 & 84.5 \\ \hline
+Cardboard & 0.23 & 128 & 0.93 & 0.69 & 4.1 & 416.4 & 77.3 \\ \hline
+FRP & 0.39 & 1897 & 0.95 & 1.41 & 12.7 & 368.1 & 76.2 \\ \hline
+MDF & 0.31 & 688 & 0.99 & 0.40 & 19.2 & 413.5 & 78.3 \\ \hline
+OSB & 0.38 & 573 & 0.93 & 0.63 & 16.1 & 373.5 & 76.1 \\ \hline
+White Pine & 0.31 & 499 & 0.90 & 0.60 & 19.1 & 403.0 & 75.6 \\ \hline
+White Spruce & 0.24 & 430 & 0.90 & 1.10 & 37.2 & 385.0 & 74.7 \\ \hline
 \end{tabular}
 \label{Properties_JH_NIJ_Materials}
 \end{table}
@@ -1823,22 +1865,22 @@ Representative properties were established based on the SFPE handbook~\cite{SFPE
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-80\% wool 20\% Nylon Glue Plywood & 0.29 & 576 & 1.00 & 0.62 & 22.0 & 480.9 & 77.4 \\ \hline 
-Alum. Honeycomb Coated With HPL & 0.10 & 514 & 1.00 & 0.90 & 22.7 & 530.0 & 74.7 \\ \hline 
-Fabric Foam & 0.04 & 164 & 1.00 & 1.82 & 28.0 & 420.0 & 77.6 \\ \hline 
-Fabric Protection Layer Foam & 0.04 & 124 & 1.00 & 1.82 & 32.0 & 509.4 & 77.1 \\ \hline 
-Fabric Vandalize Protected Foam & 0.24 & 87 & 1.00 & 2.19 & 42.0 & 478.5 & 77.7 \\ \hline 
-Melamine Face Calcium Silicate Board & 0.25 & 1055 & 1.00 & 1.67 & 12.5 & 519.5 & 72.7 \\ \hline 
-Needle Punched Carpet Glue Recor Sealing & 0.24 & 222 & 1.00 & 2.19 & 10.0 & 356.0 & 77.9 \\ \hline 
-PUR Rigid Plastic Faced Steel Sheet & 0.20 & 170 & 1.00 & 1.00 & 79.0 & 502.1 & 71.8 \\ \hline 
-PVC Wall Carpet Paper Plasterboard & 0.14 & 1388 & 1.00 & 1.08 & 12.7 & 330.2 & 72.4 \\ \hline 
-Painted GRP Polyester With Gelcoat Handlaminated & 0.17 & 2019 & 1.0 & 1.30 & 4.8 & 326.6 & 46.7 \\ \hline 
-Painted Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 406.2 & 73.8 \\ \hline 
-Syn. Rubber Glue Plywood 1 & 0.13 & 1125 & 1.00 & 1.96 & 15.0 & 333.1 & 78.2 \\ \hline 
-Syn. Rubber Glue Plywood 2 & 0.13 & 1070 & 1.00 & 1.96 & 14.8 & 486.9 & 73.8 \\ \hline 
-Textile Wall Covering Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 317.2 & 62.0 \\ \hline 
-Wool Fabric Mixed Fabric & 0.06 & 912 & 1.00 & 470.50 & 0.5 & 1.3 & 0.0 \\ \hline 
-Fabric Vandalize Protected Foam & 0.24 & 88 & 1.00 & 2.19 & 42.0 & 317.3 & 45.6 \\ \hline 
+80\% wool 20\% Nylon Glue Plywood & 0.29 & 576 & 1.00 & 0.62 & 22.0 & 480.9 & 77.4 \\ \hline
+Alum. Honeycomb Coated With HPL & 0.10 & 514 & 1.00 & 0.90 & 22.7 & 530.0 & 74.7 \\ \hline
+Fabric Foam & 0.04 & 164 & 1.00 & 1.82 & 28.0 & 420.0 & 77.6 \\ \hline
+Fabric Protection Layer Foam & 0.04 & 124 & 1.00 & 1.82 & 32.0 & 509.4 & 77.1 \\ \hline
+Fabric Vandalize Protected Foam & 0.24 & 87 & 1.00 & 2.19 & 42.0 & 478.5 & 77.7 \\ \hline
+Melamine Face Calcium Silicate Board & 0.25 & 1055 & 1.00 & 1.67 & 12.5 & 519.5 & 72.7 \\ \hline
+Needle Punched Carpet Glue Recor Sealing & 0.24 & 222 & 1.00 & 2.19 & 10.0 & 356.0 & 77.9 \\ \hline
+PUR Rigid Plastic Faced Steel Sheet & 0.20 & 170 & 1.00 & 1.00 & 79.0 & 502.1 & 71.8 \\ \hline
+PVC Wall Carpet Paper Plasterboard & 0.14 & 1388 & 1.00 & 1.08 & 12.7 & 330.2 & 72.4 \\ \hline
+Painted GRP Polyester With Gelcoat Handlaminated & 0.17 & 2019 & 1.0 & 1.30 & 4.8 & 326.6 & 46.7 \\ \hline
+Painted Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 406.2 & 73.8 \\ \hline
+Syn. Rubber Glue Plywood 1 & 0.13 & 1125 & 1.00 & 1.96 & 15.0 & 333.1 & 78.2 \\ \hline
+Syn. Rubber Glue Plywood 2 & 0.13 & 1070 & 1.00 & 1.96 & 14.8 & 486.9 & 73.8 \\ \hline
+Textile Wall Covering Paper Plasterboard & 0.48 & 1440 & 1.00 & 0.84 & 12.7 & 317.2 & 62.0 \\ \hline
+Wool Fabric Mixed Fabric & 0.06 & 912 & 1.00 & 470.50 & 0.5 & 1.3 & 0.0 \\ \hline
+Fabric Vandalize Protected Foam & 0.24 & 88 & 1.00 & 2.19 & 42.0 & 317.3 & 45.6 \\ \hline
 \end{tabular}
 \label{Properties_RISE_Materials_mixtures}
 \end{table}
@@ -1885,38 +1927,38 @@ Fabric Vandalize Protected Foam & 0.24 & 88 & 1.00 & 2.19 & 42.0 & 317.3 & 45.6 
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FR polycarbonate & 0.21 & 1430 & 1.00 & 1.10 & 16.0 & 483.4 & 80.9 \\ \hline 
-HPL Melamine polyester film  & 0.17 & 1640 & 1.00 & 1.30 & 13.4 & 360.5 & 73.4 \\ \hline 
-HPL compact  & 0.17 & 1610 & 1.00 & 1.30 & 4.0 & 458.9 & 73.8 \\ \hline 
-PE XLPE & 0.42 & 950 & 1.00 & 2.00 & 40.0 & 494.9 & 75.7 \\ \hline 
-PVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 383.0 & 76.2 \\ \hline 
-PVC EPR & 0.14 & 1388 & 1.00 & 1.08 & 32.5 & 439.4 & 73.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 0.01 & 535.5 & 77.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 5.1 & 447.8 & 79.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 402.0 & 78.2 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 10.2 & 445.8 & 77.8 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 14.8 & 391.0 & 80.8 \\ \hline 
-PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 20.0 & 492.5 & 79.0 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 408.4 & 74.9 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 9.4 & 439.2 & 75.9 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 10.0 & 448.6 & 75.1 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.5 & 386.7 & 76.5 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 18.0 & 472.1 & 75.6 \\ \hline 
-PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 21.4 & 496.9 & 75.3 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 412.3 & 80.2 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.0 & 483.2 & 77.1 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 35.0 & 577.4 & 83.0 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 38.6 & 506.1 & 78.9 \\ \hline 
-PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 46.0 & 572.1 & 75.3 \\ \hline 
-PVDF & 0.13 & 1760 & 1.00 & 1.30 & 2.0 & 499.4 & 80.0 \\ \hline 
-Painted GFK polyester with Gelcoat handlaminated & 0.17 & 2022 & 1.00 & 1.30 & 4.8 & 401.1 & 73.9 \\ \hline 
-Polyester & 0.17 & 1230 & 1.00 & 1.30 & 2.1 & 462.6 & 77.3 \\ \hline 
-Polyolefin & 0.13 & 970 & 1.00 & 1.87 & 2.9 & 519.9 & 79.0 \\ \hline 
-Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 439.5 & 74.2 \\ \hline 
-Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 32.2 & 524.6 & 75.2 \\ \hline 
-Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 2.5 & 442.2 & 76.9 \\ \hline 
-Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 6.0 & 442.4 & 76.2 \\ \hline 
-Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.7 & 502.4 & 73.0 \\ \hline 
+FR polycarbonate & 0.21 & 1430 & 1.00 & 1.10 & 16.0 & 483.4 & 80.9 \\ \hline
+HPL Melamine polyester film  & 0.17 & 1640 & 1.00 & 1.30 & 13.4 & 360.5 & 73.4 \\ \hline
+HPL compact  & 0.17 & 1610 & 1.00 & 1.30 & 4.0 & 458.9 & 73.8 \\ \hline
+PE XLPE & 0.42 & 950 & 1.00 & 2.00 & 40.0 & 494.9 & 75.7 \\ \hline
+PVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 383.0 & 76.2 \\ \hline
+PVC EPR & 0.14 & 1388 & 1.00 & 1.08 & 32.5 & 439.4 & 73.2 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 0.01 & 535.5 & 77.2 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 5.1 & 447.8 & 79.2 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 402.0 & 78.2 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 10.2 & 445.8 & 77.8 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 14.8 & 391.0 & 80.8 \\ \hline
+PVC PE & 0.14 & 1388 & 1.00 & 1.08 & 20.0 & 492.5 & 79.0 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 8.2 & 408.4 & 74.9 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 9.4 & 439.2 & 75.9 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 10.0 & 448.6 & 75.1 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.5 & 386.7 & 76.5 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 18.0 & 472.1 & 75.6 \\ \hline
+PVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 21.4 & 496.9 & 75.3 \\ \hline
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 412.3 & 80.2 \\ \hline
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.0 & 483.2 & 77.1 \\ \hline
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 35.0 & 577.4 & 83.0 \\ \hline
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 38.6 & 506.1 & 78.9 \\ \hline
+PVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 46.0 & 572.1 & 75.3 \\ \hline
+PVDF & 0.13 & 1760 & 1.00 & 1.30 & 2.0 & 499.4 & 80.0 \\ \hline
+Painted GFK polyester with Gelcoat handlaminated & 0.17 & 2022 & 1.00 & 1.30 & 4.8 & 401.1 & 73.9 \\ \hline
+Polyester & 0.17 & 1230 & 1.00 & 1.30 & 2.1 & 462.6 & 77.3 \\ \hline
+Polyolefin & 0.13 & 970 & 1.00 & 1.87 & 2.9 & 519.9 & 79.0 \\ \hline
+Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 439.5 & 74.2 \\ \hline
+Polyolefin EPR & 0.13 & 970 & 1.00 & 1.87 & 32.2 & 524.6 & 75.2 \\ \hline
+Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 2.5 & 442.2 & 76.9 \\ \hline
+Polyolefin PA & 0.13 & 970 & 1.00 & 1.87 & 6.0 & 442.4 & 76.2 \\ \hline
+Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.7 & 502.4 & 73.0 \\ \hline
 \end{tabular}
 \label{Properties_RISE_Materials_polymers1}
 \end{table}
@@ -1929,22 +1971,22 @@ Polyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.7 & 502.4 & 73.0 \\ \hline
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 455.4 & 76.9 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 25.0 & 512.8 & 75.7 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 38.1 & 477.5 & 77.1 \\ \hline 
-Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 45.0 & 473.3 & 72.7 \\ \hline 
-RPPVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 388.4 & 74.9 \\ \hline 
-RPPVC PEF & 0.14 & 1388 & 1.00 & 1.08 & 4.5 & 452.3 & 72.2 \\ \hline 
-RPPVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.0 & 427.7 & 75.6 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 484.6 & 79.1 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.5 & 488.9 & 78.3 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 39.3 & 514.5 & 77.8 \\ \hline 
-RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 45.0 & 607.8 & 72.8 \\ \hline 
-Solid acrylic & 0.24 & 1900 & 1.00 & 1.00 & 12.2 & 466.2 & 73.4 \\ \hline 
-Transparent polycarbonate & 0.18 & 1579 & 1.00 & 1.26 & 2.3 & 512.1 & 78.2 \\ \hline 
-ZHPolyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.4 & 469.1 & 77.3 \\ \hline 
-ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 13.0 & 460.3 & 77.1 \\ \hline 
-ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.0 & 535.0 & 76.9 \\ \hline 
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 18.1 & 455.4 & 76.9 \\ \hline
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 25.0 & 512.8 & 75.7 \\ \hline
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 38.1 & 477.5 & 77.1 \\ \hline
+Polyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 45.0 & 473.3 & 72.7 \\ \hline
+RPPVC & 0.14 & 1388 & 1.00 & 1.08 & 2.9 & 388.4 & 74.9 \\ \hline
+RPPVC PEF & 0.14 & 1388 & 1.00 & 1.08 & 4.5 & 452.3 & 72.2 \\ \hline
+RPPVC PVC & 0.14 & 1388 & 1.00 & 1.08 & 14.0 & 427.7 & 75.6 \\ \hline
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 17.7 & 484.6 & 79.1 \\ \hline
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 22.5 & 488.9 & 78.3 \\ \hline
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 39.3 & 514.5 & 77.8 \\ \hline
+RPPVC XLPE & 0.14 & 1388 & 1.00 & 1.08 & 45.0 & 607.8 & 72.8 \\ \hline
+Solid acrylic & 0.24 & 1900 & 1.00 & 1.00 & 12.2 & 466.2 & 73.4 \\ \hline
+Transparent polycarbonate & 0.18 & 1579 & 1.00 & 1.26 & 2.3 & 512.1 & 78.2 \\ \hline
+ZHPolyolefin PP & 0.13 & 970 & 1.00 & 1.87 & 8.4 & 469.1 & 77.3 \\ \hline
+ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 13.0 & 460.3 & 77.1 \\ \hline
+ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.0 & 535.0 & 76.9 \\ \hline
 \end{tabular}
 \label{Properties_RISE_Materials_polymers2}
 \end{table}
@@ -2055,10 +2097,10 @@ ZHPolyolefin XLPE & 0.13 & 970 & 1.00 & 1.87 & 27.0 & 535.0 & 76.9 \\ \hline
                                                & $k$    & $\rho$      & $\varepsilon$   & $c_{p}$ & $\Delta$    & $T_{ign}$ & $q''_{ref}$ \\
 Material                                       & $\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & $\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & $\mathrm{( - )}$ & $\mathrm{\left(\frac{kJ}{(kg\cdot ^{\circ}C)}\right)}$ &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & $\mathrm{\left(\frac{kW}{m^{2}}\right)}$ \\ \hline
 \hline
-FR Particle board & 0.14 & 628 & 1.00 & 1.30 & 16.0 & 380.6 & 57.2 \\ \hline 
-FR Particle board & 0.14 & 462 & 1.00 & 1.30 & 79.0 & 360.2 & 62.2 \\ \hline 
-MDF board & 0.12 & 700 & 1.00 & 1.28 & 12.0 & 527.9 & 78.6 \\ \hline 
-Spruce & 0.06 & 450 & 1.00 & 0.91 & 10.0 & 558.4 & 74.9 \\ \hline 
+FR Particle board & 0.14 & 628 & 1.00 & 1.30 & 16.0 & 380.6 & 57.2 \\ \hline
+FR Particle board & 0.14 & 462 & 1.00 & 1.30 & 79.0 & 360.2 & 62.2 \\ \hline
+MDF board & 0.12 & 700 & 1.00 & 1.28 & 12.0 & 527.9 & 78.6 \\ \hline
+Spruce & 0.06 & 450 & 1.00 & 0.91 & 10.0 & 558.4 & 74.9 \\ \hline
 \end{tabular}
 \label{Properties_RISE_Materials_woods}
 \end{table}

@@ -18,12 +18,12 @@
 ! Intel in writing.
 !
         program test_mpi
-        use mpi
+        use mpi_f08
         implicit none
 
         integer i, size, rank, namelen, ierr
         character (len=MPI_MAX_PROCESSOR_NAME) :: name
-        integer stat(MPI_STATUS_SIZE)
+        type(mpi_status) :: stat
 
         call MPI_INIT (ierr)
 

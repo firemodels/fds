@@ -84,9 +84,9 @@ The diffusion-turbulence deposition velocity depends upon the flow regime
 for these regimes is given below~\cite{McCoy_Hanratty}.
 \be
 u_{\rm dt} = \left\{ \begin{array}{r@{\quad \quad}l}
-	0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
-	3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 22.9 \\
-	0.17 \; u_{\tau}                             &  \tau^+ > 22.9
+   0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
+   3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 22.9 \\
+   0.17 \; u_{\tau}                             &  \tau^+ > 22.9
 \end{array} \right.
 \ee
 where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
@@ -114,8 +114,8 @@ Using this binning, the agglomeration equation becomes:
 where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
 \be
 \eta = \begin{cases}
-	\frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
-	\frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
+   \frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
+   \frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
 \end{cases}
 \ee
 The agglomeration kernel is given by the sum of the Brownian (Br), gravitational (Gr), shear (Sh), and inertial (In) agglomeration  terms.
@@ -178,14 +178,14 @@ The removal efficiency is given by the product sum of an interception efficiency
 \ee
 \be
 \epsilon_{im,vis} = \left\{ \begin{array}{ll}
-	0  & {\rm Stk} \leq 1.214  \\[0.1in]
-	\left(1+\frac{0.75 \ln (2 {\rm Stk}) }{{\rm Stk}-1.214} \right)^{-2} & {\rm Stk} > 1.214
+   0  & {\rm Stk} \leq 1.214  \\[0.1in]
+   \left(1+\frac{0.75 \ln (2 {\rm Stk}) }{{\rm Stk}-1.214} \right)^{-2} & {\rm Stk} > 1.214
 \end{array} \right.  \\[0.1in]
 \ee
 \be
 \epsilon_{im,pot} = \left\{ \begin{array}{ll}
-	0  & Stk \leq 0.0834  \\[0.1in]
-	\left(\frac{{\rm Stk}}{{\rm Stk}+0.5} \right)^2 & {\rm Stk} > 0.2
+   0  & Stk \leq 0.0834  \\[0.1in]
+   \left(\frac{{\rm Stk}}{{\rm Stk}+0.5} \right)^2 & {\rm Stk} > 0.2
 \end{array} \right.  \\[0.1in]
 \ee
 Where ${\rm Stk}$ is the Stokes number. For other values of ${\rm Stk}$, $\epsilon_{im,pot}$ is interpolated. The viscous and potential values are combined as:

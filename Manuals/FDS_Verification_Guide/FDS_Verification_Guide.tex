@@ -2163,6 +2163,31 @@ The sphere is generated using the {\ct GEOM} namelist with three levels.  The su
 
 
 \clearpage
+\section{Impinging Jet (\texorpdfstring{\textct{impinging\_jet}}{impinging\_jet})}
+\label{sec:impinging_jet}
+
+Impinging jet flow poses a challenge for convective heat transfer models because the stagnation velocity goes to zero numerically near the mean stagnation point and hence the computed Reynolds number is fictitiously low leading to an under-prediction of the local heat transfer coefficient.  To handle this problem, the user may specify a special impinging jet heat transfer model, as discussed in the FDS User Guide \cite{FDS_Users_Guide}, which basically uses the forced convection correlation but with a velocity scale obtained from the stagnation pressure, following Huang \cite{Huang:1963,Livingood:1973}.  In this section, we present results from a series of cases designed to confirm the general trend that the highest heat transfer coefficient is found at the stagnation point.  There is no analytical solution to this case.  We take our target correlation to be that of Martin \cite{Martin:1977,Incropera:1}.  The default coefficients of the impinging jet model have been tuned to match the Martin correlation for the specific case discussed below at coarse grid resolution.
+
+The set up for the problem is a simple cubic domain 1 m on a side.  The lateral boundaries are open.  The top boundary is held at a fixed 20 C.  A hot jet of air is injected from a 0.2 m by 0.2 m square vent at 100 C.  Two Reynolds numbers are considered by changing the inlet flow velocity [10, 40] m/s.  Three grid resolutions for each Reynolds number are tested, $D/\delta x$ = [7, 14, 28], representing \emph{coarse}, \emph{medium}, and \emph{fine} resolutions.  The cases are fun for roughly flow through times with statistics collected over the last half of the simulation.
+
+Figure \ref{fig_impinging_jet_corr} shows FDS results for three grid resolutions compared to the correlation in Martin \cite{Martin:1977,Incropera:1}.  The plots below in Fig.~\ref{fig_impinging_jet_prof} show the profile of Nu along the ceiling.
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_correlation}
+   \caption[Impinging jet Nusselt correlation]{\label{fig_impinging_jet_corr} Average Nusselt number correlation for a flat plate compared to FDS results using the impinging jet heat transfer model.}
+\end{figure}
+
+\begin{figure}[h]
+   \centering
+   \begin{tabular*}{\textwidth}{lr}
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_local_Re_1e5} &
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_local_Re_4e5} \\
+   \end{tabular*}
+   \caption[Impinging jet Nusselt profile]{\label{fig_impinging_jet_prof} Profile of average Nusselt number (Nu) along the ceiling at Reynolds numbers (Re) based on jet diameter of $1 \times 10^5$ (left) and $4 \times 10^5$.}
+\end{figure}
+
+\clearpage
 \section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
 \label{sec:ribbed_channel}
 
@@ -3798,12 +3823,12 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 
 This verification case checks that single-step and two-step simple chemistry results in the same total heat of combustion. The case consists of four 1 m$^3$ domains with a 20 kW fire in each (one pair defined using {\textct MLRPUA} and the other using {\textct HRRPUA}) that burns for 8.5~s. Each burner is assigned the fuel C$_3$H$_8$ (as a user defined species). In one mesh of each pair, single-step chemistry is used, and in the other mesh, two-step chemistry is used. The total heat released in all meshes should be the same as shown in Fig.~\ref{fig:1_step_2_step}.
 \begin{figure}[h!]
-	\begin{tabular*}{\textwidth}{lr}
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare_MLRPUA} &
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare_HRRPUA}
-	\end{tabular*}
-	\caption[Result of the 1\_step\_2\_step\_compare test case]{Comparison of the heat release rate for single-step and two-step simple chemistry with the 1\_step\_2\_step\_compare test case. Left - MLRPUA. Right - HRRPUA}
-	\label{fig:1_step_2_step}
+   \begin{tabular*}{\textwidth}{lr}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare_MLRPUA} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare_HRRPUA}
+   \end{tabular*}
+   \caption[Result of the 1\_step\_2\_step\_compare test case]{Comparison of the heat release rate for single-step and two-step simple chemistry with the 1\_step\_2\_step\_compare test case. Left - MLRPUA. Right - HRRPUA}
+   \label{fig:1_step_2_step}
 \end{figure}
 
 
@@ -4444,8 +4469,6 @@ A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface
 Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for cases where the internal grid cell is 0.25 times the gas phase grid cell size (left plot), and where the internal grid cells stretch as they would for a 1-D heat conduction calculation (right). The grid stretching is not recommended for the 3-D solver.
 
 \begin{figure}[ht]
-\centering
-\vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_2} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_3}
@@ -4453,6 +4476,34 @@ Figure~\ref{fig:ht3d_energy_conservation_2} displays the energy balance for case
 \caption[Additional \textct{ht3d\_energy\_conservation} test cases]{Plots of the enthalpy of a metal plate versus the surface heat flux integrated in space and time. The left plot is the case where the internal grid cells are 0.25 the size of the gas phase cells, and the right plot is the case where the internal cells stretch as is done in the 1-D solver.}
 \label{fig:ht3d_energy_conservation_2}
 \end{figure}
+
+Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flux versus the internal enthalpy in a case where a small hot block is placed above a larger block for which 3-D heat conduction is invoked. In one case (upper left plot), the block is made of one material with a thermal conductivity of 0.1~W/m/K, typical of insulation.  The internal cells cluster near all six faces of the block as would be done in a 1-D case. The calculation of the internal enthalpy can be performed in any coordinate direction, both positive and negative. In this case, the positive $x$ direction is chosen, whereas the hot block is placed above the larger block. This ensures that the energy is properly transferred in the lateral directions. In a second case (upper right plot), the solid block consists of a thin, 1~cm thick layer of insulation over a solid block of steel. The insulation layer is specified using a one-cell thick obstruction on top of the obstruction representing the steel. In a third case (lower plot), the solid block of steel is covered by two layers of insulation of thickness 1.5~cm and 1.0~cm that are specified using the conventional {\ct SURF} line with arrays of {\ct MATL\_ID} and {\ct THICKNESS}. Each layer of insulation is composed of two different material components.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_4} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_5} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_6} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_7}
+\end{tabular*}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases, 4, 5, 6, and 7]{Comparison of the integrated net heat flux versus the internal enthalpy for a homogenous solid block of insulation material (upper left), a block of steel with a single layer of insulation (upper right), a block with multiple layers of multi-component insulation (bottom left), a block of steel that abuts an open boundary (bottom right).}
+\label{fig:ht3d_energy_conservation_4}
+\end{figure}
+
+\FloatBarrier
+
+The left plot in Fig.~\ref{fig:ht3d_energy_conservation_8} compares the integrated net heat flux versus the internal enthalpy in a case where a vertical steel column is exposed to a radiant heater. The column is modeled in FDS using thin obstructions to represent a 10~mm thick web and two 18~mm thick flanges. One flange is subjected to the heat, which then passes through the web.
+
+The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat loss from a collection of solid objects with different thermal properties. One of the objects is completely embedded within the solid and has a volume $V=6\times 10^{-9}$~m$^3$ and generates heat a rate of $\dot{q}'''=1.5 \times 10^5$~kW/m$^3$. It is expected that after a few minutes the heat flux from the surface of the collection of solids should be $-\dot{q}''' \, V = -9 \times 10^{-4}$~kW. The minus sign indicates that the solid loses heat from its surface at the same rate as the heat is generated internally.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_8}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_9}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases 8 and 9]{(Left) Comparison of the integrated net heat flux versus the internal enthalpy for a steel column. (Right) Integrated heat flux from a solid object with an embedded solid object that generates heat at a constant rate.}
+\label{fig:ht3d_energy_conservation_8}
+\end{figure}
+
 
 \FloatBarrier
 
@@ -4603,6 +4654,21 @@ The simulation is run for 180~s. Shown in Fig.~\ref{fig:ht3d_sphere_time} is a c
 \label{fig:ht3d_sphere_time}
 \end{figure}
 
+
+\FloatBarrier
+
+\subsection{3-D Heat Conduction in a Layered Solid (\texorpdfstring{\textct{ht3d\_pile}}{ht1d\_pile})}
+\label{ht1d_pile}
+\label{ht3d_pile}
+
+An 18~cm long solid consisting of three 6~cm long abutting rectangular obstructions, each made of a different material, has a specified surface temperature of 500~$^\circ$C at one end and 20~$^\circ$C at the other. After 3~h, a steady temperature profile emerges as shown in Fig.~\ref{fig:ht3d_pile}. Two simulations are performed; one in which the conduction calculation is performed using the {\ct HT1D} convention, and the other with {\ct HT3D}. The thermal conductivity values are 5~W/m/K, 0.2~W/m/K, and 2~W/m/K. The exact solution is found by asserting that the heat flux, $\dot{q}''=k \, \partial T / \partial x$, is constant in each segment.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht1d_pile}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_pile}
+\caption[The \textct{ht1d\_pile} and \textct{ht3d\_pile} test cases]{Temperature profiles through a stack of three materials with different thermal conductivities. (Left) A 1-D calculation with non-uniform internal nodes. (Right) A 3-D calculation with uniform internal nodes.}
+\label{fig:ht3d_pile}
+\end{figure}
 
 
 
@@ -4881,14 +4947,14 @@ Case 9 takes case 1 and produces a particle of a second material with the same s
 \end{figure}
 
 \begin{figure}[p]
-	\noindent
-	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_7} &
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_8} \\
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_9}
-	\end{tabular*}
-	\caption[The \textct{matl\_e\_cons} test cases 7-9]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases 7-9.}
-	\label{fig:matl_e_cons2}
+   \noindent
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_7} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_8} \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/matl_e_cons_9}
+   \end{tabular*}
+   \caption[The \textct{matl\_e\_cons} test cases 7-9]{Comparison of analytical and predicted wall enthalpy for the \textct{matl\_e\_cons} test cases 7-9.}
+   \label{fig:matl_e_cons2}
 \end{figure}
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
@@ -5499,7 +5565,7 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \label{vegetation_drag_1}
 \label{vegetation_drag_2}
 
-Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 5000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 5 particles are inserted randomly in each grid cell, for a total of 5000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
+Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 10000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 10 particles are inserted randomly in each grid cell, for a total of 10000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
 \be
    C_{\rm d} = 10 \, \frac{0.6 + 0.4 \, \RE^{0.8}}{\RE} \approx 1.55 \quad ; \quad \RE = \frac{\rho \, u_0 \, D}{\mu_{\rm air}} \approx 132.9
 \ee

@@ -31,8 +31,7 @@ gas is nitrogen. The heat transfer is purely radiative in the gas phase and cond
       COLOR     = 'BLACK'
       MATL_ID   = 'STEEL'
       THICKNESS = 0.005
-      HEAT_TRANSFER_COEFFICIENT=0.
-      HEAT_TRANSFER_COEFFICIENT_BACK=0. /
+      HEAT_TRANSFER_COEFFICIENT=0. /
 
 &OBST XB=-0.40, 0.40,-0.40, 0.40,-0.40, 0.40, SURF_ID='HOT' /
 

@@ -168,6 +168,7 @@ $QFDS -d Fires box_burn_away5.fds
 $QFDS -d Fires box_burn_away6.fds
 $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
+$QFDS -p 4 -d Fires box_burn_away9.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -p 4 -d Fires couch.fds
@@ -226,6 +227,7 @@ $QFDS -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
+$QFDS -p 4 -d Heat_Transfer checkerboard.fds
 $QFDS -d Heat_Transfer convective_cooling.fds
 $QFDS -d Heat_Transfer convective_cooling_p1.fds
 $QFDS -d Heat_Transfer convective_cooling_p05.fds
@@ -242,12 +244,20 @@ $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
+$QFDS -d Heat_Transfer ht1d_pile.fds
+$QFDS -d Heat_Transfer ht3d_pile.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_1.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_2.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_demo.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_2.fds
 $QFDS -d Heat_Transfer ht3d_energy_conservation_3.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_4.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_5.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_6.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_7.fds
+$QFDS -p 36 -d Heat_Transfer ht3d_energy_conservation_8.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_9.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation_2.fds

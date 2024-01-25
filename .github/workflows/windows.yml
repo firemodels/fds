@@ -26,9 +26,9 @@ permissions:
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/f96c71db-2c6c-45d9-8c1f-0348ef5885cf/w_BaseKit_p_2023.2.0.49396_offline.exe
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/62641e01-1e8d-4ace-91d6-ae03f7f8a71f/w_BaseKit_p_2024.0.0.49563_offline.exe
   WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/438527fc-7140-422c-a851-389f2791816b/w_HPCKit_p_2023.2.0.49441_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/5b36181e-4974-4733-91c7-0c10c54900a5/w_HPCKit_p_2024.0.0.49588_offline.exe
   WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
 
 
@@ -50,7 +50,7 @@ jobs:
       # oneapi-ci/scripts/install_windows.bat
     - name: cache install oneapi
       id: cache-install
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\
         key: install-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_BASEKIT_COMPONENTS }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_HPCKIT_COMPONENTS }}
@@ -77,9 +77,9 @@ jobs:
     - name: specify oneapi version
       run: |
         (
-          echo compiler=2023.2.0
-          echo mkl=2023.2.0
-          echo mpi=2021.10.0
+          echo compiler=2024.0.0
+          echo mkl=2024.0.0
+          echo mpi=2021.11.0
         ) > oneapi_config.txt
     - name: build fds debug
       run: |

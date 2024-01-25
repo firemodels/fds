@@ -1595,6 +1595,14 @@ OUTPUT_QUANTITY(-75)%INSIDE_SOLID = .TRUE.
 OUTPUT_QUANTITY(-75)%BNDF_APPROPRIATE = .FALSE.
 OUTPUT_QUANTITY(-75)%PROF_APPROPRIATE = .TRUE.
 
+OUTPUT_QUANTITY(-76)%NAME= 'CONVECTIVE HEAT FLUX GAUGE'
+OUTPUT_QUANTITY(-76)%UNITS= 'kW/m2'
+OUTPUT_QUANTITY(-76)%SHORT_NAME= 'g_con'
+
+OUTPUT_QUANTITY(-77)%NAME= 'CONVECTIVE HEAT TRANSFER REGIME'
+OUTPUT_QUANTITY(-77)%UNITS= ''
+OUTPUT_QUANTITY(-77)%SHORT_NAME= '1=N,2=F,3=I,4=R'
+
 ! Condensation
 OUTPUT_QUANTITY(-100)%NAME = 'CONDENSATION HEAT FLUX'
 OUTPUT_QUANTITY(-100)%UNITS= 'kW/m2'
@@ -2987,11 +2995,14 @@ ENDDO
 END SUBROUTINE CHECK_REACTION_CHARACTERS
 
 
+!> \brief Write out to both the .err and .out files information on stoichiometry imbalance
+!> \param ATOM_COUNT Number of atoms
+!> \param NR Reaction number with the problem
+!> \param ERR Error tolerance
+
 SUBROUTINE SHUTDOWN_ATOM(ATOM_COUNT,NR,ERR)
 
-! Stops the code gracefully after writing a message
-
-USE GLOBAL_CONSTANTS, ONLY: LU_ERR,FN_OUTPUT,LU_OUTPUT,CHID,N_SPECIES,N_TRACKED_SPECIES
+USE GLOBAL_CONSTANTS, ONLY: LU_ERR,FN_OUTPUT,LU_OUTPUT,CHID,N_SPECIES,N_TRACKED_SPECIES,MY_RANK
 USE TYPES, ONLY:SPECIES,SPECIES_TYPE,SPECIES_MIXTURE_TYPE,SPECIES_MIXTURE,REACTION_TYPE,REACTION
 USE COMP_FUNCTIONS, ONLY:SHUTDOWN
 INTEGER, INTENT(IN) :: NR
@@ -3001,106 +3012,67 @@ REAL(EB) :: REACTION_BALANCE(118)
 LOGICAL :: EX
 TYPE (REACTION_TYPE), POINTER :: RN=>NULL()
 
-WRITE(LU_ERR,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
+IF (MY_RANK==0) THEN
+   CALL WRITE_ATOM_BALANCE_DIAGNOSTICS(LU_ERR)
+   INQUIRE(FILE=FN_OUTPUT,EXIST=EX)
+   IF (.NOT.EX) OPEN(LU_OUTPUT,FILE=TRIM(CHID)//'.out',STATUS='REPLACE',FORM='FORMATTED')
+   CALL WRITE_ATOM_BALANCE_DIAGNOSTICS(LU_OUTPUT)
+ENDIF
+
+CONTAINS
+
+SUBROUTINE WRITE_ATOM_BALANCE_DIAGNOSTICS(LU_OUT)
+
+INTEGER, INTENT(IN) :: LU_OUT
+
+WRITE(LU_OUT,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
 
 ! Write out the transformation matrix that converts species mixtures to primitive species
 
-WRITE(LU_ERR,'(//A)') ' Gas Phase Reaction Information'
+WRITE(LU_OUT,'(//A)') ' Gas Phase Reaction Information'
 
 RN=>REACTION(NR)
 
-IF (RN%ID/='null')  WRITE(LU_ERR,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
+IF (RN%ID/='null')  WRITE(LU_OUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
 
-WRITE(LU_ERR,'(/3X,A)')     'Stoichiometry'
+WRITE(LU_OUT,'(/3X,A)')     'Stoichiometry'
 
-WRITE(LU_ERR,'(/3X,A)')     'Primitive Species'
-WRITE(LU_ERR,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
+WRITE(LU_OUT,'(/3X,A)')     'Primitive Species'
+WRITE(LU_OUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
 DO NN=1,N_SPECIES
-   IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_ERR,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+   IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
 ENDDO
 
-WRITE(LU_ERR,'(/3X,A)')     'Tracked (Lumped) Species'
-WRITE(LU_ERR,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
+WRITE(LU_OUT,'(/3X,A)')     'Tracked (Lumped) Species'
+WRITE(LU_OUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
 DO NN=1,N_TRACKED_SPECIES
    IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-   IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_ERR,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
-   IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_ERR,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
+   IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
+   IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUT,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
 ENDDO
 
-WRITE(LU_ERR,'(//A)') 'Atom Balance Details'
+WRITE(LU_OUT,'(//A)') 'Atom Balance Details'
 
 DO NS=1,N_TRACKED_SPECIES
-   WRITE(LU_ERR,'(/3X,A,A)') 'Tracked (Lumped) Species:',SPECIES_MIXTURE(NS)%ID
-   WRITE(LU_ERR,'(3X,A)') 'Element  nu*Atom Count'
+   WRITE(LU_OUT,'(/3X,A,A)') 'Tracked (Lumped) Species:',SPECIES_MIXTURE(NS)%ID
+   WRITE(LU_OUT,'(3X,A)') 'Element  nu*Atom Count'
    REACTION_BALANCE = RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
    DO I=1,118
       IF (ABS(REACTION_BALANCE(I))>TWO_EPSILON_EB) THEN
-         WRITE(LU_ERR,'(3X,A,3X,F12.6)') ELEMENT(I)%ABBREVIATION,REACTION_BALANCE(I)
+         WRITE(LU_OUT,'(3X,A,3X,F12.6)') ELEMENT(I)%ABBREVIATION,REACTION_BALANCE(I)
       ENDIF
    ENDDO
 ENDDO
 
 
-WRITE(LU_ERR,'(//A)') 'The following elements are unbalanced:'
-WRITE(LU_ERR,'(/A)') 'Element  Atom Error'
+WRITE(LU_OUT,'(//A)') 'The following elements are unbalanced:'
+WRITE(LU_OUT,'(/A)') 'Element  Atom Error'
 
 DO I=1,118
-   IF (ABS(ATOM_COUNT(I)) > ERR) WRITE(LU_ERR,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
+   IF (ABS(ATOM_COUNT(I)) > ERR) WRITE(LU_OUT,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
 ENDDO
 
-! For those running FDS on a PC, ensure that error message gets written to the .out file, too.
-
-INQUIRE(FILE=FN_OUTPUT,EXIST=EX)
-IF (.NOT.EX) OPEN(LU_OUTPUT,FILE=TRIM(CHID)//'.out',STATUS='REPLACE',FORM='FORMATTED')
-
-WRITE(LU_OUTPUT,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
-
-! Write out the transformation matrix that converts species mixtures to primitive species
-
-WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
-
-RN=>REACTION(NR)
-
-IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
-
-WRITE(LU_OUTPUT,'(/3X,A)')     'Stoichiometry'
-
-WRITE(LU_OUTPUT,'(/3X,A)')     'Primitive Species'
-WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
-DO NN=1,N_SPECIES
-   IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-ENDDO
-
-WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species'
-WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
-DO NN=1,N_TRACKED_SPECIES
-   IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-   IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
-   IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
-ENDDO
-
-WRITE(LU_OUTPUT,'(//A)') 'Atom Balance Details'
-
-DO NS=1,N_TRACKED_SPECIES
-   WRITE(LU_OUTPUT,'(/3X,A,A)') 'Tracked (Lumped) Species:',SPECIES_MIXTURE(NS)%ID
-   WRITE(LU_OUTPUT,'(3X,A)') 'Element  nu*Atom Count'
-   REACTION_BALANCE = RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
-   DO I=1,118
-      IF (ABS(REACTION_BALANCE(I))>TWO_EPSILON_EB) THEN
-         WRITE(LU_OUTPUT,'(3X,A,3X,F12.6)') ELEMENT(I)%ABBREVIATION,REACTION_BALANCE(I)
-      ENDIF
-   ENDDO
-ENDDO
-
-
-WRITE(LU_OUTPUT,'(//A)') 'The following elements are unbalanced:'
-WRITE(LU_OUTPUT,'(/A)') 'Element  Atom Error'
-
-DO I=1,118
-   IF (ABS(ATOM_COUNT(I)) > ERR) WRITE(LU_OUTPUT,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
-ENDDO
-
-CALL SHUTDOWN('')
+END SUBROUTINE WRITE_ATOM_BALANCE_DIAGNOSTICS
 
 END SUBROUTINE SHUTDOWN_ATOM
 

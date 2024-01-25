@@ -59,9 +59,9 @@ for k=1:17 % Experiments
    clear M E EV H
    
    M  = importdata([outdir,'Test_',test{k},'_cat_devc.csv'],',',2);
-   E  = importdata([expdir,'TP-',test{k},'.csv'],',',2);
-   EV = importdata([expdir,'VF-',test{k},'.csv'],',',2);
-   H  = importdata([expdir,'HRR-',test{k},'.csv'],',',2);
+   E  = importdata([expdir,'TP',test{k},'.csv'],',',2);
+   EV = importdata([expdir,'QP',test{k},'.csv'],',',2);
+   H  = importdata([expdir,'HRR',test{k},'.csv'],',',2);
    
    for i=1:length(times{k}) % Times
        
@@ -76,7 +76,7 @@ for k=1:17 % Experiments
       [X_exp,Y_exp] = meshgrid(pos(2:14),hgt_exp{2});
       for kk=2:14 % Loops
          Z_mod(:,kk-1) = M.data(mod_time_index,mod_data_indices{kk});
-         Z_exp(:,kk-1) = E.data(exp_time_index,exp_data_indices{kk});
+         Z_exp(:,kk-1) = E.data(exp_time_index,flip(exp_data_indices{kk}));
       end
 
       newpoints = 100;
@@ -143,7 +143,7 @@ for k=1:17 % Experiments
 
    for kk=1:length(E.data(:,1))
       for ii=2:14
-         Z_exp(kk,ii-1) = E.data(kk,exp_data_indices{ii}(8));
+         Z_exp(kk,ii-1) = E.data(kk,exp_data_indices{ii}(1));
       end
    end
 
@@ -227,9 +227,9 @@ for k=3:17 % Experiments
    clear M E EV H
 
    M  = importdata([outdir,'Test_',test{k},'_cat_devc.csv'],',',2);
-   E  = importdata([expdir,'TP-',test{k},'.csv'],',',2);
-   EV = importdata([expdir,'VF-',test{k},'.csv'],',',2);
-   H  = importdata([expdir,'HRR-',test{k},'.csv'],',',2);
+   E  = importdata([expdir,'TP',test{k},'.csv'],',',2);
+   EV = importdata([expdir,'QP',test{k},'.csv'],',',2);
+   H  = importdata([expdir,'HRR',test{k},'.csv'],',',2);
    HM = importdata([outdir,'Test_',test{k},'_cat_hrr.csv'],',',2);
 
    for i=1:length(cv_time{k}) % Times

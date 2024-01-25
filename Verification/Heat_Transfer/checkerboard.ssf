@@ -1,0 +1,23 @@
+RENDERDIR
+..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+LOADINIFILE
+checkerboard.ini
+SETVIEWPOINT
+view 1
+LOAD3DSMOKE
+ HRRPUV
+LOAD3DSMOKE
+ SOOT DENSITY
+LOADFILE
+checkerboard_1_1.bf
+LOADFILE
+checkerboard_2_1.bf
+LOADFILE
+checkerboard_3_1.bf
+LOADFILE
+checkerboard_4_1.bf
+SETTIMEVAL
+ 17.34
+RENDERONCE
+checkerboard_1000
+

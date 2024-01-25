@@ -6,6 +6,9 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)     !< Precision of "Four Byte" reals
 INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)    !< Precision of "Eight Byte" reals
+INTEGER, PARAMETER :: IB8 = SELECTED_INT_KIND(2)     !< Precision of "One Byte" ints
+INTEGER, PARAMETER :: IB16 = SELECTED_INT_KIND(3)    !< Precision of "Two Byte" ints
+INTEGER, PARAMETER :: IB32 = SELECTED_INT_KIND(6)    !< Precision of "Four Byte" ints
 INTEGER, PARAMETER :: QB = SELECTED_REAL_KIND(33,4931) !< Precision of "Sixteen Byte" reals
 INTEGER, PARAMETER :: MAX_LPC=20                     !< Maximum number of declared particle classes
 INTEGER, PARAMETER :: MAX_SPECIES=20                 !< Maximum number of declared species
@@ -24,6 +27,7 @@ INTEGER, PARAMETER :: LABEL_LENGTH=60                !< Maximum length of most l
 INTEGER, PARAMETER :: MESSAGE_LENGTH=200             !< Maximum length of error and warning labels
 INTEGER, PARAMETER :: FORMULA_LENGTH=255             !< Maximum length of chemical formulae
 INTEGER, PARAMETER :: CHID_LENGTH=50                 !< Maximum length of job ID
+INTEGER, PARAMETER :: FILE_LENGTH=200                !< Maximum length of filenames ID
 INTEGER, PARAMETER :: MESH_STRING_LENGTH=LABEL_LENGTH + 80 !< Length for storage of strings
 INTEGER, PARAMETER :: N_OUTPUT_QUANTITIES=600        !< Dimension of array that holds names of output quantities
 INTEGER, PARAMETER :: POINTS_ARRAY_DIM=100           !< Dimension of arrays of linear device coordinates

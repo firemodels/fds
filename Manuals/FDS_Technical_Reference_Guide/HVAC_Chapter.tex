@@ -173,28 +173,28 @@ The first is a rapid estimation approach that relies upon typical building const
 This approach cannot be relied upon if there are multiple fans in a duct run as the approach will not correctly account for the combined effect. This approach can also not be relied upon if large pressure differences occur across the endpoints of the duct run. This might occur with a rapidly growing fire in a relatively well sealed space. In these cases one needs to define a system curve and find its intersection with the fan curve. This is the second approach in FDS.
 
 \begin{figure}[ht!]
-	\begin{center}
-		\scalebox{0.8}{\includegraphics{FIGURES/operationPoint}}
-		\caption[Illustration of the fan curve, system curve, and operation point for an HVAC fan.]{\label{hvac_curves} Illustration of the fan curve, system curve, and operation point for an HVAC fan.}
-	\end{center}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/operationPoint}}
+      \caption[Illustration of the fan curve, system curve, and operation point for an HVAC fan.]{\label{hvac_curves} Illustration of the fan curve, system curve, and operation point for an HVAC fan.}
+   \end{center}
 \end{figure}
 
 A challenge in fire simulation is that the system curve is a function of the pressures seen at the end points of a duct run and the flow rate through the duct run. With a fire whose size changes over time, the pressures will also change. Therefore, a pre-calculated system curve cannot be used. Instead an alternate method~\cite{Ralph:2} is used. This method relies on the observation that pressure and flow in an HVAC system have a quadratic relationship. Pressure drop in a duct is a function of the duct velocity squared. The following steps are taken at each time step to find the operation point for each fan:
 
 \begin{enumerate}
-	\item Locate all duct runs that contain fans. A duct run is any collection of directly interconnected HVAC components. See Fig.~\ref{HVAC_ductrun} for two examples. The figure shows two sets of two compartments connected by HVAC systems. In each set, each compartment has a supply and exhaust duct. On the left side, the two exhaust ducts connect to duct containing a fan which splits into a supply duct for each compartment. In this case there is one duct run. Every HVAC component is connected to every other HVAC component by a path containing only HVAC components. On the right side, the exhaust for each compartment is connected to its own fan which becomes the supply for the other compartment. In this case there are two duct runs. There is no direct path through only HVAC components that join the two ducts.
-	\item Determine the current pressures at each inlet and outlet for each duct run containing a fan.
-	\item For each fan, using just the duct run containing the fan, solve for the flow in the duct run given the current endpoint pressures.
-	\item For each fan, using just the duct run containing the fan, solve for the flow in the duct run given the current endpoint pressures and assuming the fan is applying its maximum pressure to the duct run.
-	\item For each fan, fit a quadratic between the two system points for that fan.
-	\item Use Newton's method to find the intersection between the user specified fan curve and the system curve. The fan pressure, $\Delta p_j$, for the time step is set to the pressure at the intersection. If there is no intersection, the fan pressure is set to either the maximum pressure for the fan or zero pressure. It is set to zero pressure if the system curve flow for zero fan pressure exceeds the maximum flow defined in the fan curve. It is set to maximum pressure if there is reverse flow in the system curve at maximum pressure.
+   \item Locate all duct runs that contain fans. A duct run is any collection of directly interconnected HVAC components. See Fig.~\ref{HVAC_ductrun} for two examples. The figure shows two sets of two compartments connected by HVAC systems. In each set, each compartment has a supply and exhaust duct. On the left side, the two exhaust ducts connect to duct containing a fan which splits into a supply duct for each compartment. In this case there is one duct run. Every HVAC component is connected to every other HVAC component by a path containing only HVAC components. On the right side, the exhaust for each compartment is connected to its own fan which becomes the supply for the other compartment. In this case there are two duct runs. There is no direct path through only HVAC components that join the two ducts.
+   \item Determine the current pressures at each inlet and outlet for each duct run containing a fan.
+   \item For each fan, using just the duct run containing the fan, solve for the flow in the duct run given the current endpoint pressures.
+   \item For each fan, using just the duct run containing the fan, solve for the flow in the duct run given the current endpoint pressures and assuming the fan is applying its maximum pressure to the duct run.
+   \item For each fan, fit a quadratic between the two system points for that fan.
+   \item Use Newton's method to find the intersection between the user specified fan curve and the system curve. The fan pressure, $\Delta p_j$, for the time step is set to the pressure at the intersection. If there is no intersection, the fan pressure is set to either the maximum pressure for the fan or zero pressure. It is set to zero pressure if the system curve flow for zero fan pressure exceeds the maximum flow defined in the fan curve. It is set to maximum pressure if there is reverse flow in the system curve at maximum pressure.
 \end{enumerate}
 
 \begin{figure}[ht!]
-	\begin{center}
-		\scalebox{0.8}{\includegraphics{FIGURES/HVAC_ductrun}}
-		\caption[Illustration of determining duct runs.]{\label{HVAC_ductrun} Illustration determining duct runs. Left side has a single duct run. Right side has two duct runs.}
-	\end{center}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/HVAC_ductrun}}
+      \caption[Illustration of determining duct runs.]{\label{HVAC_ductrun} Illustration determining duct runs. Left side has a single duct run. Right side has two duct runs.}
+   \end{center}
 \end{figure}
 
 \section{Duct Transport Delay}

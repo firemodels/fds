@@ -145,7 +145,7 @@ NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,&
                 LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
                 MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NETWORK_ID,NODE_ID,PERIMETER,QUANTITY,QUANTITY_SPEC_ID,&
-                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
+                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,ROUND,SPEC_ID,SQUARE,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
                 TYPE_ID,WAYPOINTS,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
 
 TNOW=CURRENT_TIME()
@@ -164,12 +164,12 @@ COUNT_HVAC_LOOP: DO
    N_HVAC_READ = N_HVAC_READ + 1
    16 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I5,A,I5)') &
-            'ERROR: Problem with HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
+            'ERROR(101): Problem with HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    IF (TRIM(ID)=='null') THEN
       WRITE(MESSAGE,'(A,I5,A,I5)') &
-         'ERROR: No ID provided for HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
+         'ERROR(501): No ID provided for HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    SELECT CASE(TYPE_ID)
@@ -190,7 +190,7 @@ COUNT_HVAC_LOOP: DO
       CASE ('NODE QUANTITY LIST')
       CASE DEFAULT
          WRITE(MESSAGE,'(A,I5,A,I5)') &
-            'ERROR: Invalid TYPE_ID provided for HVAC line number ',N_HVAC_READ,', input line number',INPUT_FILE_LINE_NUMBER
+            'ERROR(502): Invalid TYPE_ID provided for HVAC line number ',N_HVAC_READ,', input line number',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE); RETURN
    END SELECT
 ENDDO COUNT_HVAC_LOOP
@@ -213,7 +213,7 @@ ENDIF
 IF (N_DUCTS > 0) HVAC_SOLVE = .TRUE.
 
 IF ((N_DUCTS > 0 .AND. N_DUCTNODES <= 0) .OR. (N_DUCTS <= 0 .AND. N_DUCTNODES > 0)) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: Must have both DUCTs and DUCTNODEs in the input file'
+   WRITE(MESSAGE,'(A)') 'ERROR(503): Must have both DUCTs and NODEs in the input file'
    CALL SHUTDOWN(MESSAGE); RETURN
 ENDIF
 
@@ -262,17 +262,17 @@ DO NN=1,N_HVAC_READ
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(504): Duct has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DIAMETER < 0._EB .AND. AREA < 0._EB .AND. PERIMETER < 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(505): Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (AREA < 0._EB) THEN
             IF (DIAMETER < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct without AREA has no DIAMETER. Duct ID:',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(506): Duct without AREA has no DIAMETER. Duct ID:',TRIM(ID),&
                                            ', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -285,16 +285,16 @@ DO NN=1,N_HVAC_READ
             ELSE
                IF (PERIMETER < 0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A,I5)') &
-                     'ERROR: If both ROUND and SQUARE are FALSE, Duct with DIAMETER must also have PERIMETER. Duct ID:',TRIM(ID), &
-                     ', HVAC line number:',NN
+                     'ERROR(507): If both ROUND and SQUARE are FALSE, Duct with DIAMETER must also have PERIMETER. Duct ID:',&
+                     TRIM(ID),', HVAC line number:',NN
                   CALL SHUTDOWN(MESSAGE); RETURN
                ENDIF
                AREA = 0.25_EB*DIAMETER*PERIMETER
             ENDIF
          ELSEIF (AREA > 0._EB) THEN
             IF (DIAMETER >  0._EB .AND. PERIMETER >  0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER with AREA. Duct ID:',TRIM(ID),&
-                                          ', HVAC line number:',NN
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(508): Duct cannot input both PERIMETER and DIAMETER with AREA. Duct ID:',&
+                  TRIM(ID),', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
             IF (SQUARE) THEN
@@ -326,19 +326,19 @@ DO NN=1,N_HVAC_READ
          DU%ZZ_OLD(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          DU%LOSS(1:2) = MAX(0._EB,LOSS(1:2,1))
          IF (CTRL_ID /='null' .AND. DEVC_ID /='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Can only specify one of CTRL_ID or DEVC_ID. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(509): Can only specify one of CTRL_ID or DEVC_ID. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DAMPER .AND. (FAN_ID /='null' .OR. AIRCOIL_ID /='null') .OR. &
              FAN_ID/='null' .AND. (DAMPER .OR. AIRCOIL_ID /='null') .OR. &
              AIRCOIL_ID/='null' .AND. (DAMPER .OR. FAN_ID /='null')) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct can only have one of damper, fan or aircoil. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(510): Duct can only have one of damper, fan or aircoil. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (FAN_ID/='null' .AND. N_FANS<=0) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct has fan specied but no fans have been defined. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(511): Duct has fan specied but no fans have been defined. Duct ID:',TRIM(ID),&
                                         ', HVAC line number: ',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -377,7 +377,7 @@ DO NN=1,N_HVAC_READ
          ENDIF
          DUCT_NODE_A(I_DUCT,:) = NODE_ID
          IF (VOLUME_FLOW < 1.E7_EB .AND. MASS_FLOW < 1.E7_EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct has both MASS_FLOW and VOLUME_FLOW defined. Duct ID:',TRIM(DU%ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(512): Duct has both MASS_FLOW and VOLUME_FLOW defined. Duct ID:',TRIM(DU%ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -422,7 +422,7 @@ DO NN=1,N_HVAC_READ
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Ductnode has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(513): Ductnode has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DN%VENT_ID = VENT_ID
@@ -431,7 +431,7 @@ DO NN=1,N_HVAC_READ
          ! Set temporary node elevation for vents so WIND can establish T and P RAMPs
          IF (DN%VENT .AND. XYZ(3) <-1.E9) XYZ(3) = ZS_MIN
          IF (.NOT. DN%VENT .AND. XYZ(3)<-1.E9) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Ambient or internal ductnode requires an elevation, XYZ(3). Ductnode ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(514): Ambient or internal ductnode requires an elevation, XYZ(3). Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -447,21 +447,21 @@ DO NN=1,N_HVAC_READ
             DN%N_DUCTS=ND
          ENDDO
          IF (DN%N_DUCTS == 1 .AND. .NOT. AMBIENT .AND. VENT_ID=='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts. Ductnode ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(515): Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts. Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DN%N_DUCTS >= 2 .AND. (AMBIENT .OR. VENT_ID/='null')) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: AMBIENT or VENT-connected ductnode must have 1 duct. Ductnode ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(516): AMBIENT or VENT-connected ductnode must have 1 duct. Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DN%N_DUCTS == 0) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: No ducts specified for ductnode ID:',TRIM(DN%ID),', HVAC line number ',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(517): No ducts specified for ductnode ID:',TRIM(DN%ID),', HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DN%N_DUCTS /= 2 .AND. TRIM(FILTER_ID)/='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Ductnode with a filter must have 2 ducts. Ductnode ID:',TRIM(DN%ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(518): Ductnode with a filter must have 2 ducts. Ductnode ID:',TRIM(DN%ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -484,7 +484,7 @@ DO NN=1,N_HVAC_READ
          I_FAN = I_FAN + 1
          FAN(I_FAN)%ID = ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Fan has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(519): Fan has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          FAN(I_FAN)%OFF_LOSS = LOSS(1,1)
@@ -498,21 +498,21 @@ DO NN=1,N_HVAC_READ
          IF (TAU_FAN < 0._EB) FAN(I_FAN)%SPIN_INDEX = TSQR_RAMP
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'FAN',FAN(I_FAN)%RAMP_INDEX)
          IF(( (MAX_FLOW<1.E6_EB .OR. MAX_PRESSURE<1.E6_EB) .AND. (VOLUME_FLOW<1.E6_EB .OR. RAMP_ID/='null')))THEN !.OR. &
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(520): FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF ((MAX_PRESSURE<1.E6_EB .AND. MAX_FLOW>1.E6_EB) .OR. (MAX_PRESSURE>1.E6_EB .AND. MAX_FLOW<1.E6_EB)) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: IF one of MAX_PRESSURE or MAX_FLOW given, both must be specified. Fan ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(521): IF one of MAX_PRESSURE or MAX_FLOW given, both must be specified. Fan ID:',&
                                         TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (MAX_PRESSURE <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: MAX_PRESSURE must be > 0. Fan ID:',TRIM(ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(522): MAX_PRESSURE must be > 0. Fan ID:',TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (MAX_FLOW <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: MAX_FLOW must be > 0. Fan ID:',TRIM(ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(523): MAX_FLOW must be > 0. Fan ID:',TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (VOLUME_FLOW < 1.E6_EB) THEN
@@ -527,7 +527,7 @@ DO NN=1,N_HVAC_READ
          I_FILTER = I_FILTER + 1
          FILTER(I_FILTER)%ID = ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Filter has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(524): Filter has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          FILTER(I_FILTER)%CLEAN_LOSS = CLEAN_LOSS
@@ -549,7 +549,7 @@ DO NN=1,N_HVAC_READ
                   EXIT
                ENDIF
                IF (NS==N_TRACKED_SPECIES) THEN
-                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with filter:',TRIM(ID),'. SPEC ',TRIM(SPEC_ID(N)),' not found'
+                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(525): Problem with filter:',TRIM(ID),'. SPEC ',TRIM(SPEC_ID(N)),' not found'
                   CALL SHUTDOWN(MESSAGE); RETURN
                ENDIF
             ENDDO
@@ -564,7 +564,7 @@ DO NN=1,N_HVAC_READ
          AIRCOIL(I_AIRCOIL)%FIXED_Q      = FIXED_Q*1000._EB
          AIRCOIL(I_AIRCOIL)%ID           = ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Aircoil has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(526): Aircoil has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          AIRCOIL(I_AIRCOIL)%TAU          = TAU_AC
@@ -578,7 +578,7 @@ DO NN=1,N_HVAC_READ
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = VENT_ID
          IF (TRIM(ID)=='null' ) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Localized leakage has no ID, HVAC line number:',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR(527): Localized leakage has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DN%VENT_ID = VENT_ID
@@ -587,12 +587,13 @@ DO NN=1,N_HVAC_READ
          DN%READ_IN = .FALSE.
          DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
          IF (TRIM(DN%VENT_ID)=='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Leakage path must have VENT_ID defined. Leak ID:',TRIM(ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(528): Leakage path must have VENT_ID defined. Leak ID:',TRIM(ID),&
+               ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Leakage to AMBIENT must have VENT2_ID for the AMBIENT node. Leak ID:',TRIM(ID),&
-                                        ', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(529): Leakage to AMBIENT must have VENT2_ID for the AMBIENT node. Leak ID:',&
+               TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DN%N_DUCTS=1
@@ -610,7 +611,7 @@ DO NN=1,N_HVAC_READ
          DN%READ_IN = .FALSE.
          DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
          IF (TRIM(VENT2_ID)=='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I2)') 'ERROR: Leakage path must have VENT2_ID defined. Leak ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I2)') 'ERROR(530): Leakage path must have VENT2_ID defined. Leak ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -634,7 +635,7 @@ DO NN=1,N_HVAC_READ
          DU%ID   = ID
          DU%LOCALIZED_LEAKAGE = .TRUE.
          IF (AREA <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Leakage has no AREA. Leak ID:',TRIM(ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(531): Leakage has no AREA. Leak ID:',TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DU%AREA_INITIAL = AREA
@@ -669,7 +670,8 @@ DO NN=1,N_HVAC_READ
          DU%NETWORK_ID='LEAK'
       CASE ('DUCT QUANTITY LIST')
          IF (DUCT_QUANTITY_DEFINED) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Can only have one HVAC input with TYPE_ID of DUCT QUANTITY LIST. HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,I5)') 'ERROR(532): Can only have one HVAC input with TYPE_ID of DUCT QUANTITY LIST.',&
+               ' HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DUCT_QUANTITY_DEFINED = .TRUE.
@@ -685,7 +687,8 @@ DO NN=1,N_HVAC_READ
          ENDDO
       CASE ('NODE QUANTITY LIST')
          IF (NODE_QUANTITY_DEFINED) THEN
-            WRITE(MESSAGE,'(A,I5)') 'ERROR: Can only have one HVAC input with TYPE_ID of DUCT QUANTITY LIST. HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,I5)') 'ERROR(533): Can only have one HVAC input with TYPE_ID of NODE QUANTITY LIST.',&
+               ' HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          NODE_QUANTITY_DEFINED = .TRUE.
@@ -807,13 +810,13 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
    DU => DUCT(ND)
    IF (DU%LEAKAGE) CYCLE DUCT_LOOP
    IF (TRIM(DUCT_NODE_A(ND,1))==TRIM(DUCT_NODE_A(ND,2))) THEN
-      WRITE(MESSAGE,'(A,A)') 'ERROR: Both nodes have the same ID. Duct ID:',TRIM(DU%ID)
+      WRITE(MESSAGE,'(A,A)') 'ERROR(534): Both nodes have the same ID. Duct ID:',TRIM(DU%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    DO N = 1, ND
       IF (N==ND) CYCLE
       IF (TRIM(DU%ID)==TRIM(DUCT(N)%ID)) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Two ducts with the same ID. Duct ID:',TRIM(DU%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(535): Two ducts with the same ID. Duct ID:',TRIM(DU%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
@@ -828,7 +831,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
             ENDIF
          ENDDO DN1_NAME
          IF (.NOT. FOUND) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DU%ID),'. Node:',&
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(536): Duct: ',TRIM(DU%ID),'. Node:',&
                                       TRIM(DUCTNODE(NN)%ID),' does not contain the duct in its list of ducts.'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -843,7 +846,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
             ENDIF
          ENDDO DN2_NAME
          IF (.NOT. FOUND) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DU%ID),'. Node:',&
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(536): Duct: ',TRIM(DU%ID),'. Node:',&
                                       TRIM(DUCTNODE(NN)%ID),' does not contain the duct in its list of ducts.'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -851,11 +854,11 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
       IF (DU%NODE_INDEX(1) > 0 .AND. DU%NODE_INDEX(2) > 0) EXIT NODELOOP_D
    ENDDO NODELOOP_D
    IF (DU%NODE_INDEX(1) <= 0) THEN
-      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: First ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
+      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR(537): First ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DU%NODE_INDEX(2) <= 0) THEN
-      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Second ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
+      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR(537): Second ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DUCT_FAN_A(ND)/='null') THEN
@@ -867,7 +870,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
          ENDIF
       ENDDO
       IF (DU%FAN_INDEX <= 0) THEN
-         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Fan not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
+         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR(538): Fan not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF
@@ -880,7 +883,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
          ENDIF
       ENDDO
       IF (DU%AIRCOIL_INDEX <= 0) THEN
-         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Aircoil not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
+         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR(539): Aircoil not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF
@@ -916,7 +919,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    DO N = 1, NN
       IF (N==NN) CYCLE
       IF (TRIM(DN%ID)==TRIM(DUCTNODE(N)%ID)) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Two duct nodes with the same ID. Ductnode ID:',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(540): Two duct nodes with the same ID. Ductnode ID:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
@@ -964,12 +967,12 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
                FOUND = .TRUE.
                IF (MESHES(NM)%VENTS(NV)%CTRL_INDEX > 0 .OR. MESHES(NM)%VENTS(NV)%DEVC_INDEX >0) THEN
-                  WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode has a DEVC_ID or CTRL_ID, VENT ID:',&
+                  WRITE(MESSAGE,'(A,A)') 'ERROR(541): VENT for ductnode has a DEVC_ID or CTRL_ID, VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                ENDIF
                IF (DN%READ_IN .AND. MESHES(NM)%VENTS(NV)%SURF_INDEX /= HVAC_SURF_INDEX) THEN
-                  WRITE(MESSAGE,'(A,A)') 'ERROR: Ductnode attached to VENT without SURF_ID HVAC for VENT ID:',&
+                  WRITE(MESSAGE,'(A,A)') 'ERROR(542): Ductnode attached to VENT without SURF_ID HVAC for VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                ENDIF
@@ -977,13 +980,13 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                   SF => SURFACE(MESHES(NM)%VENTS(NV)%SURF_INDEX)
                   IF (ABS(SF%VEL)>TWO_EPSILON_EB .OR. ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB .OR. &
                       ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE) THEN
-                      WRITE(MESSAGE,'(A,A)') 'Cannot leak and specify flow or pyrolysis at the same time.  VENT ID:',&
+                      WRITE(MESSAGE,'(A,A)') 'ERROR(543):Cannot leak and specify flow or pyrolysis at the same time.  VENT ID:',&
                                              TRIM(MESHES(NM)%VENTS(NV)%ID)
                       CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                   ENDIF
                   IF (ANY(SF%LEAK_PATH>0)) THEN
-                      WRITE(MESSAGE,'(A,A)') 'Cannot specify custom leakage and zone leakage with the same surface.  VENT ID:',&
-                                             TRIM(MESHES(NM)%VENTS(NV)%ID)
+                      WRITE(MESSAGE,'(A,A,A)') 'ERROR(544):Cannot specify custom leakage and zone leakage with the same surface. ',&
+                         ' VENT ID:',TRIM(MESHES(NM)%VENTS(NV)%ID)
                       CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                   ENDIF
                ENDIF
@@ -1008,7 +1011,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
 
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,FOUND,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
       IF (.NOT. FOUND) THEN
-         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR(545): Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,DN%XYZ(1),INTEGER_ONE,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERR)
@@ -1017,17 +1020,17 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    ENDIF
 
    IF (DN%VENT .AND. DN%AMBIENT) THEN
-      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID. Ductnode:',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(546): DuctnodeE cannot be AMBIENT and have an assigned VENT_ID. Ductnode:',NN,&
                                   ', Ductnode ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DN%N_DUCTS == 1 .AND. .NOT. DN%VENT .AND. .NOT. DN%AMBIENT) THEN
-      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: Internal DUCTNODE must have at least two attached ducts. Ductnode:',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(547): Internal ductnode must have at least two attached ducts. Ductnode:',NN,&
                                   ', Ductnode ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DN%N_DUCTS> 1 .AND. (DN%AMBIENT .OR. DN%VENT) ) THEN
-      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: External DUCTNODE can only have one attached duct. Ductnode:',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(548): External ductnode can only have one attached duct. Ductnode:',NN,&
                                   ', Ductnode ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
@@ -1047,11 +1050,11 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          ENDIF
       ENDDO
       IF (DN%DUCT_INDEX(ND)==-1) THEN
-         WRITE(MESSAGE,'(A,I5,A,I5,A,A)') 'ERROR: DUCT ',ND,' not found. Ductnode:',NN,', Ductnode ID:',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,I5,A,I5,A,A)') 'ERROR(549): DUCT ',ND,' not found. Ductnode:',NN,', Ductnode ID:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       IF (TRIM(DN%ID) /= TRIM(DUCT_NODE_A(DN%DUCT_INDEX(ND),1)) .AND. TRIM(DN%ID) /= TRIM(DUCT_NODE_A(DN%DUCT_INDEX(ND),2))) THEN
-         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DUCT(DN%DUCT_INDEX(ND))%ID),' does not contain Ductnode:',&
+         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(550): Duct: ',TRIM(DUCT(DN%DUCT_INDEX(ND))%ID),' does not contain Ductnode:',&
                                        TRIM(DN%ID), 'in its list of ductnodes.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
@@ -1064,7 +1067,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             EXIT
          ENDIF
          IF (N==N_FILTERS) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with ductnode:',TRIM(DN%ID), &
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(551): Problem with ductnode:',TRIM(DN%ID), &
                                          ',FILTER ',TRIM(NODE_FILTER_A(NN)),' not found'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -2250,7 +2253,7 @@ ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
       IF (NODE_ZONE(NODE_INDEX,NM) == 0) THEN
          NODE_ZONE(NODE_INDEX,NM) = B1%PRESSURE_ZONE
       ELSE
-         WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NODE_INDEX)%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(552): Ductnode must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NODE_INDEX)%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF
@@ -2494,7 +2497,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDDO
       IF (COUNTER==DN%N_DUCTS) THEN
          IF (ZERO_AREA .AND. ABS(VOLUME_FLOW)<TWO_EPSILON_EB) CYCLE NODE_LOOP
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Cannot specify fixed flows for all branches of internal DUCTNODE:',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(553): Cannot specify fixed flows for all branches of internal ductnode:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
 ENDDO NODE_LOOP
@@ -3006,7 +3009,7 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
       ZONE_TEST = 0
       WHERE (NODE_ZONE(NN,:) /=0) ZONE_TEST = NODE_ZONE(NN,:) - DN%ZONE_INDEX
       IF (ANY(ZONE_TEST /=0)) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NN)%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(552): Ductnode must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NN)%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       IF (ANY(CONNECTED_ZONES(0,DN%ZONE_INDEX,:))) DN%ZONE_INDEX = 0
@@ -3128,7 +3131,7 @@ DO ND=1,N_DUCTS
    DU => DUCT(ND)
    IF (DU%LENGTH < 0._EB) THEN
       IF (.NOT. DUCTNODE(DU%NODE_INDEX(1))%SPECIFIED_XYZ .OR. .NOT. DUCTNODE(DU%NODE_INDEX(2))%SPECIFIED_XYZ) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: DUCT has no LENGTH and one NODE lacks an XYZ. Duct: ',TRIM(DU%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR(554): Duct has no LENGTH and one node lacks an XYZ. Duct: ',TRIM(DU%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       DN =>  DUCTNODE(DU%NODE_INDEX(1))
@@ -3859,7 +3862,7 @@ ENDDO CHANGELOOP
 DEALLOCATE(N_LOSS)
 
 IF (.NOT. ALL(LOSS_D) .OR. .NOT. ALL(LOSS_N)) THEN
-   WRITE(MESSAGE,'(A,I5,A,I5)') 'ERROR: Problem with HVAC network. Insufficient LOSS defintions for DUCTs and DUCTNODEs'
+   WRITE(MESSAGE,'(A,I5,A,I5)') 'ERROR(556): Problem with HVAC network. Insufficient LOSS definitions for DUCTs and NODEs'
    CALL SHUTDOWN(MESSAGE); RETURN
 ENDIF
 
@@ -4229,7 +4232,7 @@ DO NR=1,N_DUCTRUNS
    DO ND=1,DUCTRUN(NR)%N_DUCTS
       IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%N_CELLS==0) THEN
          WRITE(MESSAGE,'(A,A,A)') &
-            'ERROR: Duct ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID),&
+            'ERROR(556): Duct ',TRIM(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%ID),&
             ' has N_CELLS=0 and is in a duct run with ducts that have N_CELLS>0.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
@@ -4942,7 +4945,7 @@ IF (SPEC_ID/='null') THEN
    CALL GET_SPEC_OR_SMIX_INDEX(SPEC_ID,Y_INDEX,Z_INDEX)
    IF (Z_INDEX>=0  .AND. Y_INDEX>=1) Z_INDEX=-999
    IF (Z_INDEX<0 .AND. Y_INDEX<1) THEN
-      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: SPEC_ID ',TRIM(SPEC_ID),' is not explicitly specified for QUANTITY ',TRIM(QUANTITY)
+      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR(557): SPEC_ID ',TRIM(SPEC_ID),' is not explicitly specified for QUANTITY ',TRIM(QUANTITY)
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDIF
@@ -4955,15 +4958,15 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
 
       IF (OUTPUT_QUANTITY(ND)%SPEC_ID_REQUIRED .AND. (Y_INDEX<1 .AND. Z_INDEX<0)) THEN
          IF (SPEC_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID'
+            WRITE(MESSAGE,'(3A)')  'ERROR(558): Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. SPEC_ID ',TRIM(SPEC_ID),' not found.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(559): Output QUANTITY ',TRIM(QUANTITY),'. SPEC_ID ',TRIM(SPEC_ID),' not found.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (.NOT. OUTPUT_QUANTITY(ND)%HVAC_SMV) THEN
-         WRITE(MESSAGE,'(5A)') 'ERROR: HVAC_SMV_QUANTITY ',TRIM(QUANTITY), ' not appropriate for .hvac file.'
+         WRITE(MESSAGE,'(5A)') 'ERROR(560): HVAC_SMV QUANTITY ',TRIM(QUANTITY), ' not appropriate for .hvac file.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -4989,7 +4992,7 @@ ENDDO QUANTITY_INDEX_LOOP
 
 ! If no match for desired QUANTITY is found, stop the job
 
-WRITE(MESSAGE,'(3A)') 'ERROR: HVAC SMV QUANTITY ',TRIM(QUANTITY), ' not found'
+WRITE(MESSAGE,'(3A)') 'ERROR(561): HVAC SMV QUANTITY ',TRIM(QUANTITY), ' not found'
 CALL SHUTDOWN(MESSAGE) ; RETURN
 
 END SUBROUTINE GET_QUANTITY_INDEX

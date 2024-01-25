@@ -37,10 +37,9 @@ The gas species is mixture fraction fuel.
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
-      THICKNESS            = 0.1
+      VARIABLE_THICKNESS   = T
       STRETCH_FACTOR       = 1.0
-      BURN_AWAY            = .TRUE.
-      BACKING              = 'VOID' / 
+      BURN_AWAY            = T /
 
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=15000. /
 

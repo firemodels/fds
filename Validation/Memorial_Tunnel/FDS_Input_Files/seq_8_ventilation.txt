@@ -1,0 +1,8 @@
+
+&SURF ID='North Vent', VOLUME_FLOW=1.0, RAMP_V='RAMP_NORTH', COLOR='RED' /
+&SURF ID='South Vent', VOLUME_FLOW=1.0, RAMP_V='RAMP_SOUTH', COLOR='RED' /
+
+&VENT XB= 22, 22.4, 1.6, 2.8,4.4,4.4, SURF_ID='North Vent', MULT_ID='vent' /
+&VENT XB=422,422.4,-2.8,-1.6,4.4,4.4, SURF_ID='South Vent', MULT_ID='vent' /
+&MULT ID='vent', DX=5.2, I_UPPER=77 /
+
