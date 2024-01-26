@@ -14,7 +14,7 @@ module load amd-mixed/5.4.0
 export MPICH_GPU_SUPPORT_ENABLED=1
 
 # Petsc:
-#./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --with-cc=cc --with-cxx=CC --with-fc=ftn --with-hip --with-hipc=hipcc --download-kokkos --download-kokkos-kernels --download-suitesparse --download-hypre --download-cmake
+#./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --with-cc=cc --with-cxx=CC --with-fc=ftn --with-hip --with-hipc=hipcc --LIBS="-L${MPICH_DIR}/lib -lmpi ${PE_MPICH_GTL_DIR_amd_gfx90a} ${PE_MPICH_GTL_LIBS_amd_gfx90a}" --download-kokkos --download-kokkos-kernels --download-suitesparse --download-hypre --download-cmake
 #make PETSC_DIR=/autofs/nccs-svm1_home1/YOUR USER/Software/petsc PETSC_ARCH=arch-frontier-opt-gcc all
 export PETSC_DIR=/autofs/nccs-svm1_home1/"YOUR USER"/Software/petsc
 export PETSC_ARCH=arch-frontier-opt-gcc
@@ -42,7 +42,7 @@ $git clone https://gitlab.com/petsc/petsc.git
 
 2.b cd into the petsc directory and configure the library:
 
-$./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --with-cc=cc --with-cxx=CC --with-fc=ftn --with-hip --with-hipc=hipcc --download-kokkos --download-kokkos-kernels --download-suitesparse --download-hypre --download-cmake
+$./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --with-cc=cc --with-cxx=CC --with-fc=ftn --with-hip --with-hipc=hipcc --LIBS="-L${MPICH_DIR}/lib -lmpi ${PE_MPICH_GTL_DIR_amd_gfx90a} ${PE_MPICH_GTL_LIBS_amd_gfx90a}" --download-kokkos --download-kokkos-kernels --download-suitesparse --download-hypre --download-cmake
 
 2.c Once configured copy and paste the compilation line provided:
 
