@@ -96,6 +96,9 @@ endif
 ifeq ("$(MYSYSTEM)", "summit")
   TEST_FLG = 1
 endif
+ifeq ("$(MYSYSTEM)", "frontier")
+  TEST_FLG = 1
+endif
 ifdef TEST_FLG
   FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include"
   LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lstdc++
@@ -423,6 +426,15 @@ smpi_gnu_summit : FCOMPL = mpifort
 smpi_gnu_summit : FOPENMPFLAGS = -fopenmp
 smpi_gnu_summit : obj = fds_smpi_gnu_summit
 smpi_gnu_summit : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+mpich_gnu_frontier : FFLAGS = -m64 -O0 -g -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) 
+#mpich_gnu_frontier : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC)
+mpich_gnu_frontier : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC)
+mpich_gnu_frontier : FCOMPL = ftn
+mpich_gnu_frontier : FOPENMPFLAGS = -fopenmp
+mpich_gnu_frontier : obj = fds_mpich_gnu_frontier
+mpich_gnu_frontier : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # *** Object Dependencies ***
