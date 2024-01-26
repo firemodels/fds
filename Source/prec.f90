@@ -25,6 +25,7 @@ INTEGER, PARAMETER :: LABEL_LENGTH=60                !< Maximum length of most l
 INTEGER, PARAMETER :: MESSAGE_LENGTH=200             !< Maximum length of error and warning labels
 INTEGER, PARAMETER :: FORMULA_LENGTH=255             !< Maximum length of chemical formulae
 INTEGER, PARAMETER :: CHID_LENGTH=50                 !< Maximum length of job ID
+INTEGER, PARAMETER :: FILE_LENGTH=200                !< Maximum length of filenames ID
 INTEGER, PARAMETER :: MESH_STRING_LENGTH=LABEL_LENGTH + 80 !< Length for storage of strings
 INTEGER, PARAMETER :: N_OUTPUT_QUANTITIES=600        !< Dimension of array that holds names of output quantities
 INTEGER, PARAMETER :: POINTS_ARRAY_DIM=100           !< Dimension of arrays of linear device coordinates
