@@ -7589,7 +7589,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
                IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             ENDIF
             IF (REFERENCE_HEAT_FLUX(NN) < REFERENCE_HEAT_FLUX(NN-1)) THEN
-               IF (REFERENCE_THICKNESS(NN) > 0._EB .AND. REFERENCE_THICKNESS(NN) - REFERENCE_THICKNESS(NN-1) <=  TWO_EPSILON_EB) THEN
+               IF (REFERENCE_THICKNESS(NN) > 0._EB .AND. &
+                   (REFERENCE_THICKNESS(NN) - REFERENCE_THICKNESS(NN-1)) <=  TWO_EPSILON_EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR(X02): SURF ',TRIM(SF%ID),&
                                            ' REFERENCE_HEAT_FLUX values must increase for each thickness.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
