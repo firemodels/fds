@@ -1326,7 +1326,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                   IF (B1%Q_IN_SMOOTH <= QDOTPP_REF(NQ)) THEN
                      QDOTPP1 = MAX(0._EB,(Q_NEW(NQ-1)- B1%QDOTPP_INT(NQ-1))/DT_SPYRO(N))
                      QDOTPP2 = MAX(0._EB,(Q_NEW(NQ)  - B1%QDOTPP_INT(NQ))/DT_SPYRO(N))
-                     QDOTPP_T(N) = QDOTPP1 + (QDOTPP2 - QDOTPP1)*(B1%Q_IN_SMOOTH - QDOTPP_REF(NQ-1))/(QDOTPP_REF(NQ)-QDOTPP_REF(NQ-1))
+                     QDOTPP_T(N) = QDOTPP1 + (QDOTPP2 - QDOTPP1)*(B1%Q_IN_SMOOTH - QDOTPP_REF(NQ-1))/&
+                                   (QDOTPP_REF(NQ)-QDOTPP_REF(NQ-1))
                      EXIT
                   ENDIF
                ENDDO
