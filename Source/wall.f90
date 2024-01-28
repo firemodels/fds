@@ -1262,7 +1262,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
       ! Calculate smoothed incident heat flux if cone scaling is applied
       IF (SF%REFERENCE_HEAT_FLUX(1) > 0._EB .AND. B1%T_IGN <=T .AND. PREDICTOR) THEN
-         !WRITE(*,*) 'B1',WALL_INDEX,TRIM(SF%ID),SF%N_QDOTPP_REF,SF%N_THICK_REF
          DT_SPYRO(1:SF%N_THICK_REF) = DT * SF%SPYRO_TH_FACTOR(1:SF%N_THICK_REF)
          TSI = MIN(T-B1%T_IGN+DT, SF%REFERENCE_HEAT_FLUX_TIME_INTERVAL+DT)
          IF (SOLID_PHASE_ONLY .AND. .NOT. SF%INERT_Q_REF) THEN
@@ -1277,9 +1276,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ENDIF
          B1%Q_IN_SMOOTH = MIN(MAX(SF%MINIMUM_SCALING_HEAT_FLUX,B1%Q_IN_SMOOTH),SF%MAXIMUM_SCALING_HEAT_FLUX)
          B1%Q_IN_SMOOTH_INT(1:SF%N_THICK_REF) = B1%Q_IN_SMOOTH_INT(1:SF%N_THICK_REF) + DT_SPYRO(1:SF%N_THICK_REF) * B1%Q_IN_SMOOTH
-         !WRITE(*,*) 'B1A',B1%Q_IN_SMOOTH,B1%Q_CON_F,B1%Q_RAD_IN
-         !WRITE(*,*) 'B1B',B1%Q_IN_SMOOTH_INT(1:SF%N_THICK_REF)
-         !WRITE(*,*) 'B1C',DT_SPYRO(1:SF%N_THICK_REF)
       ENDIF
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
@@ -1303,16 +1299,12 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       IF (SF%REFERENCE_HEAT_FLUX(1) > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) THEN
          DO N = 1,SF%N_THICK_REF
             DO IDX1 = 1, SF%THICK2QREF(N,0)
-               !WRITE(*,*) 'A',N,IDX1,SF%THICK2QREF(N,:)
                NQ = SF%THICK2QREF(N,IDX1)
-               !WRITE(*,*) 'AA',NQ,SF%RAMP(TIME_HEAT-NQ+1)%INDEX,SF%HRRPUA_INT_INDEX(NQ),SF%QREF_INDEX(NQ),SF%E2T_INDEX(NQ)
                RP     => RAMPS(SF%HRRPUA_INT_INDEX(NQ))
                RP_REF => RAMPS(SF%QREF_INDEX(NQ))
                RP_E2T => RAMPS(SF%E2T_INDEX(NQ))
                CALL INTERPOLATE1D_UNIFORM(0,RP_E2T%INTERPOLATED_DATA(:),B1%Q_IN_SMOOTH_INT(N)*RP_E2T%RDT,T_SCALE(NQ))
-               !WRITE(*,*) 'A1',T_SCALE(NQ)
                CALL INTERPOLATE1D_UNIFORM(0,RP_REF%INTERPOLATED_DATA(:),T_SCALE(NQ)*RP_REF%RDT,QDOTPP_REF(NQ))
-               !WRITE(*,*) 'A2',QDOTPP_REF(NQ)
                IF (B1%Q_IN_SMOOTH_INT(N) >= RP_E2T%T_MAX) THEN
                   RP => RAMPS(SF%RAMP(TIME_HEAT-NQ+1)%INDEX)
                   Q_NEW(NQ) = B1%QDOTPP_INT(NQ) + &
@@ -1320,7 +1312,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                ELSE
                   CALL INTERPOLATE1D_UNIFORM(0,RP%INTERPOLATED_DATA(:),T_SCALE(NQ)*RP%RDT,Q_NEW(NQ))
                ENDIF
-               !WRITE(*,*) 'A3',Q_NEW(NQ)
             ENDDO
          ENDDO
          DO N = 1,SF%N_THICK_REF
@@ -1328,23 +1319,19 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             IDX2 = SF%THICK2QREF(N,SF%THICK2QREF(N,0))
             IF (B1%Q_IN_SMOOTH <= QDOTPP_REF(IDX1)) THEN
                QDOTPP_T(N) = MAX(0._EB,(Q_NEW(IDX1) - B1%QDOTPP_INT(IDX1))/DT_SPYRO(N))
-               !WRITE(*,*) 'A1',IDX1,QDOTPP_T(N),B1%QDOTPP_INT(IDX1)
             ELSEIF (B1%Q_IN_SMOOTH > QDOTPP_REF(IDX2)) THEN
                QDOTPP_T(N) = MAX(0._EB,(Q_NEW(IDX2) - B1%QDOTPP_INT(IDX2))/DT_SPYRO(N))
-               !WRITE(*,*) 'A2',IDX2,QDOTPP_T(N),B1%QDOTPP_INT(IDX2)
             ELSE
                DO NQ=IDX1+1,IDX2
                   IF (B1%Q_IN_SMOOTH <= QDOTPP_REF(NQ)) THEN
                      QDOTPP1 = MAX(0._EB,(Q_NEW(NQ-1)- B1%QDOTPP_INT(NQ-1))/DT_SPYRO(N))
                      QDOTPP2 = MAX(0._EB,(Q_NEW(NQ)  - B1%QDOTPP_INT(NQ))/DT_SPYRO(N))
                      QDOTPP_T(N) = QDOTPP1 + (QDOTPP2 - QDOTPP1)*(B1%Q_IN_SMOOTH - QDOTPP_REF(NQ-1))/(QDOTPP_REF(NQ)-QDOTPP_REF(NQ-1))
-                     !WRITE(*,*) 'A3',NQ,QDOTPP_T(N),QDOTPP1,QDOTPP2,B1%QDOTPP_INT(NQ-1),B1%QDOTPP_INT(NQ)
                      EXIT
                   ENDIF
                ENDDO
             ENDIF
          ENDDO
-         !WRITE(*,*) 'STF:',SF%SPYRO_TH_FACTOR
          IF (SF%SPYRO_TH_FACTOR(1) >= 1._EB) THEN
             QDOTPP = QDOTPP_T(1)
          ELSE
@@ -1355,7 +1342,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                   IF (SF%SPYRO_TH_FACTOR(N) > 1._EB) THEN
                      QDOTPP = QDOTPP_T(N-1) + (QDOTPP_T(N) - QDOTPP_T(N-1)) * (1._EB-SF%SPYRO_TH_FACTOR(N-1)) / &
                                               (SF%SPYRO_TH_FACTOR(N) - SF%SPYRO_TH_FACTOR(N-1))
-                     !WRITE(*,*) 'T',QDOTPP,QDOTPP_T(N-1),QDOTPP_T(N),SF%SPYRO_TH_FACTOR(N-1),SF%SPYRO_TH_FACTOR(N)
                      EXIT
                   ENDIF
                ENDDO
@@ -1378,7 +1364,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (PREDICTOR) THEN
                   IF (B1%T_IGN <=T) THEN
                      B1%M_DOT_G_PP_ACTUAL(N) = QDOTPP*SF%MASS_FLUX(N)                     
-!                     WRITE(*,*) 'C',QDOTPP,SF%MASS_FLUX(N),B1%M_DOT_G_PP_ACTUAL(N)  
                   ELSE
                      B1%M_DOT_G_PP_ACTUAL(N) = 0._EB
                   ENDIF
