@@ -1261,7 +1261,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
       ! Calculate smoothed incident heat flux if cone scaling is applied
-      IF (SF%REFERENCE_HEAT_FLUX(1) > 0._EB .AND. B1%T_IGN <=T .AND. PREDICTOR) THEN
+      IF (SF%N_QDOTPP_REF > 0 .AND. B1%T_IGN <=T .AND. PREDICTOR) THEN
          DT_SPYRO(1:SF%N_THICK_REF) = DT * SF%SPYRO_TH_FACTOR(1:SF%N_THICK_REF)
          TSI = MIN(T-B1%T_IGN+DT, SF%REFERENCE_HEAT_FLUX_TIME_INTERVAL+DT)
          IF (SOLID_PHASE_ONLY .AND. .NOT. SF%INERT_Q_REF) THEN
@@ -1296,7 +1296,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
 
-      IF (SF%N_QDOTPP_REF > 0._EB .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) THEN
+      IF (SF%N_QDOTPP_REF > 0 .AND. N_REACTIONS>=1 .AND. PREDICTOR .AND. B1%T_IGN <=T) THEN
          DO N = 1,SF%N_THICK_REF
             DO IDX1 = 1, SF%THICK2QREF(N,0)
                NQ = SF%THICK2QREF(N,IDX1)
@@ -1361,7 +1361,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (CORRECTOR) TSI = T      - B1%T_IGN
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
-            IF (SF%REFERENCE_HEAT_FLUX(1) > 0._EB .AND. N_REACTIONS>=1) THEN
+            IF (SF%N_QDOTPP_REF > 0 .AND. N_REACTIONS>=1) THEN
                IF (PREDICTOR) THEN
                   IF (B1%T_IGN <=T) THEN
                      B1%M_DOT_G_PP_ACTUAL(N) = QDOTPP*SF%MASS_FLUX(N)                     
