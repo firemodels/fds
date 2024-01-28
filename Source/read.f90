@@ -7568,17 +7568,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    COUNT_QDOTPP: DO NN=1,MAX_QDOTPP_REF
       IF (NN>1 .AND. RAMP_Q(NN)/='null' .AND. REFERENCE_HEAT_FLUX(NN) < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR(X00): SURF ',TRIM(SF%ID),' has more RAMP_Q than REFERENCE_HEAT_FLUX.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(442): SURF ',TRIM(SF%ID),' has more RAMP_Q than REFERENCE_HEAT_FLUX.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (RAMP_Q(NN)=='null' .AND. REFERENCE_HEAT_FLUX(NN) > 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR(X01): SURF ',TRIM(SF%ID),' has more REFERENCE_HEAT_FLUX than RAMP_Q.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(443): SURF ',TRIM(SF%ID),' has more REFERENCE_HEAT_FLUX than RAMP_Q.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (RAMP_Q(NN)/='null' .AND. REFERENCE_HEAT_FLUX(NN) > 0._EB) THEN
          IF (NN>1) THEN
             IF (REFERENCE_THICKNESS(NN) > 0._EB .NEQV. REFERENCE_THICKNESS(NN-1) > 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR(X02): SURF ',TRIM(SF%ID), ' If one REFERENCE_THICKNESS is set, all must be set.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR(444): SURF ',TRIM(SF%ID), ' If one REFERENCE_THICKNESS is set, all must be set.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (REFERENCE_THICKNESS(NN) > 0._EB .AND. REFERENCE_THICKNESS(NN-1) > 0._EB .AND. &
@@ -7591,12 +7591,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
             IF (REFERENCE_HEAT_FLUX(NN) < REFERENCE_HEAT_FLUX(NN-1)) THEN
                IF (REFERENCE_THICKNESS(NN) > 0._EB .AND. &
                    (REFERENCE_THICKNESS(NN) - REFERENCE_THICKNESS(NN-1)) <=  TWO_EPSILON_EB) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR(X02): SURF ',TRIM(SF%ID),&
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR(445): SURF ',TRIM(SF%ID),&
                                            ' REFERENCE_HEAT_FLUX values must increase for each thickness.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (REFERENCE_THICKNESS(NN) > 0._EB .AND. REFERENCE_THICKNESS(NN) < REFERENCE_THICKNESS(NN-1)) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR(X02): SURF ',TRIM(SF%ID),&
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR(446): SURF ',TRIM(SF%ID),&
                                            ' REFERENCE_THICKNESS values must increase for each new group of REFERENCE_HEAT_FLUX.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
@@ -8716,7 +8716,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          ENDIF
          RP => RAMPS(SF%RAMP(TIME_HEAT-NN+1)%INDEX)
          IF (ABS(RP%T_MIN) > 0._EB) THEN
-            WRITE(MESSAGE,'(3A)') 'ERROR(XXA): RAMP ',TRIM(RP%ID),' used with REFERENCE_HEAT_FLUX must start at T = 0.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(447): RAMP ',TRIM(RP%ID),' used with REFERENCE_HEAT_FLUX must start at T = 0.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          I_CONE_RAMP = I_CONE_RAMP + 1
