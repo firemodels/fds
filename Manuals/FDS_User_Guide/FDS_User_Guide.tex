@@ -2257,7 +2257,7 @@ Also note that no solid surface is truly adiabatic; thus, the specification of a
 
 Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. In most fire scenarios, it is sufficient to compute the conduction of heat normal to the solid surface using a 1-D solver. There are some limited cases for which three-dimensional heat conduction is possible; see Sec.~\ref{info:ht3d}.
 
-The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.  
+The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.
 
 \subsection{Structure of Solid Boundaries}
 
@@ -2454,7 +2454,7 @@ The 1-D heat conduction model used in FDS is appropriate for most building mater
 \subsection{Basics}
 \label{info:HT3D_Basics}
 
-For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is assumed to consist of a mixture of different materials ({\ct MATL}s). Multiple layers can be constructed from multiple obstructions, but these obstructions are snapped to the gas phase grid. Thus, you cannot specify arbitrarily thick layers like you can with the 1-D solver. 
+For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is assumed to consist of a mixture of different materials ({\ct MATL}s). Multiple layers can be constructed from multiple obstructions, but these obstructions are snapped to the gas phase grid. Thus, you cannot specify arbitrarily thick layers like you can with the 1-D solver.
 
 To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
@@ -2532,14 +2532,12 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \subsubsection{Example: Insulated Structural Steel}
 \label{info:normal_direction_only}
 
-An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
+An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is applied to each side via a {\ct SURF} line. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
 \begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /
-&OBST XB=0.12,1.88,0.50,0.54,0.21,0.79, SURF_ID='WEB INSULATION' /
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK',
-      CELL_SIZE=0.1, HEAT_TRANSFER_COEFFICIENT=20 /
-&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE',
-      THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID6='STEEL SLAB','STEEL SLAB',
+      'WEB INSULATION','WEB INSULATION','STEEL SLAB','STEEL SLAB', MATL_ID='STEEL' /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+&SURF ID='WEB INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
 \end{lstlisting}
 
 
@@ -2723,7 +2721,7 @@ The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPE
 \subsection{Scaling the Burning Rate by the Heat Flux}
 \label{info:scaled_burning}
 
-FDS has a simple scaling-based pyrolysis model (SBPyro), using inputs on {\ct SURF}, that scales burning rate data collected from a cone calorimeter or similar device to the actual heat feedback during an FDS simulation. This model requires a thermally-thick surface with a specified {\ct HRRPUA} and {\ct IGNITION\_TEMPERATURE}. Test data is specified with {\ct REFERENCE\_HEAT\_FLUX}, {\ct REFERENCE\_THICKNESS}, and {\ct RAMP\_Q}.  
+FDS has a simple scaling-based pyrolysis model (SBPyro), using inputs on {\ct SURF}, that scales burning rate data collected from a cone calorimeter or similar device to the actual heat feedback during an FDS simulation. This model requires a thermally-thick surface with a specified {\ct HRRPUA} and {\ct IGNITION\_TEMPERATURE}. Test data is specified with {\ct REFERENCE\_HEAT\_FLUX}, {\ct REFERENCE\_THICKNESS}, and {\ct RAMP\_Q}.
 {\ct REFERENCE\_HEAT\_FLUX} is the radiant heat flux in kW/m$^{2}$ imposed by the test device to the sample prior to the start of pyrolysis, i.e. what a water-cooled heat flux gauge would measure. This is an array of up to ten values. {\ct REFERENCE\_THICKNESS} is the tested thickness of the sample in m for each {\ct REFERENCE\_HEAT\_FLUX}. This is just the combustible portion of the sample and not any insulation or other inert backing materials. This parameter is not required. If no {\ct REFERENCE\_THICKNESS} are given, FDS will assume the thickness of the first layer of the surface, i.e. {\ct THICKNESS(1)}. IF one {\ct REFERENCE\_THICKNESS} is given for a {\ct REFERENCE\_HEAT\_FLUX}, then all thicknesses must be given even if they are the same as {\ct THICKNESS(1)}. The {\ct REFERENCE\_THICKNESS} should represent the nominal thickness of the material. Typically when samples are acquired for a cone testing there are slight differences in thickness due to manufacturing or sample preparation. If a group of {\ct REFERENCE\_HEAT\_FLUX} values are intended to be the same thickness, then the same {\ct REFERENCE\_THICKNESS} should be used. {\ct RAMP\_Q} defines the burning rate over time for a pair of {\ct REFERENCE\_HEAT\_FLUX} and {\ct REFERENCE\_THICKNESS}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning in the test. Values for {\ct REFERENCE\_HEAT\_FLUX} and {\ct REFERENCE\_THICKNESS} must be grouped by increasing thickness with increasing flux in each group of thicknesses.
 
 If the test data represents an inert test device where only pryolysis but no combustion occurs, then set {\ct INERT\_Q\_REF=T}. This flag applies to all specified test data.
@@ -12912,7 +12910,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
-{\ct NORMAL\_DIRECTION\_ONLY}                             & Logical         & Section~\ref{info:normal_direction_only}  &                     & {\ct F}                 \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}                 \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 {\ct NUSSELT\_C0}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
@@ -14266,7 +14263,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 
 
 % file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
-%ignoreext bat 
+%ignoreext bat
 %ignoreext binfo
 %ignoreext end
 %ignoreext err
@@ -14284,7 +14281,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
- 
+
 \appendix
 
 \chapter{Predefined Species}
