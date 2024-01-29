@@ -8522,13 +8522,6 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    INS_INB_COND_1 : IF (IS_INB) THEN
       B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
-      ! Check if fire spreads radially over this surface type
-      IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
-         B1%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
-                                      (BC%Y-SF%XYZ(2))**2 + &
-                                      (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
-      ENDIF
-
       ! Normal to cut-face:
       V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
       V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(3,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
@@ -8626,8 +8619,14 @@ CASE(INTEGER_THREE)
       IF(IBOD>0 .AND. ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%VOLUME_FLOW / FDS_AREA_GEOM(SURF_INDEX,IBOD)
       ! Assign normal velocity from MASS_FLUX_TOTAL :
       IF(ABS(SF%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%MASS_FLUX_TOTAL / RHOA * B1%AREA_ADJUST
-      ! Vegetation T_IGN setup:
-      B1%T_IGN      = SF%T_IGN
+      ! Vegetation T_IGN setup: Check if fire spreads radially over this surface type
+      IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
+         B1%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
+                                   (BC%Y-SF%XYZ(2))**2 + &
+                                   (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
+      ELSE
+         B1%T_IGN = SF%T_IGN
+      ENDIF
 
       ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
       IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN

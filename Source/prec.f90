@@ -15,6 +15,7 @@ INTEGER, PARAMETER :: MAX_SPECIES=20                 !< Maximum number of declar
 INTEGER, PARAMETER :: MAX_LAYERS=20                  !< Maximum number of solid material layers
 INTEGER, PARAMETER :: MAX_MATERIALS=20               !< Maximum number of solid material components
 INTEGER, PARAMETER :: MAX_MATERIALS_TOTAL=400        !< Dimension of material work array
+INTEGER, PARAMETER :: MAX_CONE_CURVES=10             !< Maximum number of cone calorimeter curves
 INTEGER, PARAMETER :: MAX_REACTIONS=10               !< Maximum number of chemical reactions
 INTEGER, PARAMETER :: MAX_STEPS=20                   !< Maximum steps in processing of material residues
 INTEGER, PARAMETER :: MAX_NUMBER_SPECTRAL_BANDS=9    !< Maximum number of radiation spectral bands

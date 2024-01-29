@@ -5444,13 +5444,22 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 \section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
 \label{cone_demo_2}
 
-This section tests a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. In the case a surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from a cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
+This section uses two cases to test a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_2}
-    \caption[Cone data extrapolation model (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
+    \caption[Extrapolating a single set of cone data to a time varying heat flux (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
     \label{fig:cone_demo_2}
+\end{figure}
+
+The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:cone_demo_3}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_3}
+	\caption[Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct cone\_demo\_3} case)]{Check of the cone data interpolation model.}
+	\label{fig:cone_demo_3}
 \end{figure}
 
 \section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
@@ -5464,6 +5473,7 @@ This section tests the ability for a {\ct MATL} reaction to produce particles. A
     \caption[Check of the particle production by surface reaction feature (the {\ct ice\_cube} case)]{Check of the particle production by surface reaction feature.}
     \label{fig:ice_cube}
 \end{figure}
+
 
 
 \chapter{Lagrangian Particles}
