@@ -33,7 +33,7 @@
       COLOR     = 'FIREBRICK'
       THICKNESS = 0.013 /
 
-&VENT SURF_ID='SUBSTRATE', XB=0.0,8.0,-0.5,0.5,0,0 / fire board under vegetation
+&VENT SURF_ID='SUBSTRATE', XB=0.05,8.0,-0.5,0.5,0,0 / fire board under vegetation
 
 &MATL ID            = 'STEEL'
       FYI           = 'Drysdale, Intro to Fire Dynamics'
@@ -148,7 +148,7 @@
 &RAMP ID='RAMPFIRE',T=20., F=1.0 /
 &RAMP ID='RAMPFIRE',T=21., F=0.0 /
 
-&VENT XB=-0.05,0.0,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
+&VENT XB=-0.05,0.05,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
 
 &DUMP DT_PART=1, DT_DEVC=1, DT_HRR=1, DT_SLCF=1, DT_BNDF=1 /
 
