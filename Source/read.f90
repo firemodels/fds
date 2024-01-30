@@ -8049,6 +8049,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
       ALLOCATE(SF%MATL_INDEX(SF%N_MATL))                 ! The list of all material indices associated with the surface
+      SF%MATL_INDEX = 0
    ELSE
       SF%TMP_FRONT = TMP_FRONT + TMPM
       SF%TMP_INNER = SF%TMP_FRONT
