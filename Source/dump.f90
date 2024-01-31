@@ -9937,7 +9937,7 @@ PROF_LOOP: DO N=1,N_PROF
       ELSE
          WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
          WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
-                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I)-PF_TEMP(I)),I=0,NWP)
+                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I+1)-PF_TEMP(I)),I=0,NWP)
       ENDIF
    ELSE ! Final values only
       REWIND(LU_PROF(N))
