@@ -3345,12 +3345,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-      B2%WORK2 = 0._EB  ! FILM_THICKNESS
+      B2%WORK2 = 0._EB  ! Depth of liquid layer for a given surface cell
+      B2%WORK3 = 0._EB  ! Total droplet/surface contact area per surface cell
    ENDDO
    DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
       CFA => CFACE(ICF)
       B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-      B2%WORK2 = 0._EB
+      B2%WORK2 = 0._EB  ! Depth of liquid layer for a given surface cell
+      B2%WORK3 = 0._EB  ! Total droplet/surface contact area per surface cell
    ENDDO
 
    ! Loop through all PARTICLEs in the class and determine the depth of the liquid film on each surface cell
@@ -3372,18 +3374,23 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       ELSE
          CYCLE FILM_SUMMING_LOOP
       ENDIF
-      B2%WORK2 = B2%WORK2 + LP%PWT*LP%RADIUS**3/B1%AREA  ! FILM_THICKNESS
+      B2%WORK2 = B2%WORK2 + LP%PWT*FOTHPI*LP%RADIUS**3/B1%AREA  ! Depth of liquid film
+      B2%WORK3 = B2%WORK3 + LP%PWT*PI*(CR2*LP%RADIUS)**2        ! Droplet/surface contact area
    ENDDO FILM_SUMMING_LOOP
+
+   ! If the total droplet/surface contact area is less than the wall cell area, do not assume a film layer.
 
    DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
+      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
       B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-      B2%WORK2 = MAX(MINIMUM_FILM_THICKNESS,FOTHPI*B2%WORK2)
+      IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
    ENDDO
    DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
       CFA => CFACE(ICF)
+      B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
       B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-      B2%WORK2 = MAX(MINIMUM_FILM_THICKNESS,FOTHPI*B2%WORK2)
+      IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
    ENDDO
 
    ! Loop through all PARTICLEs within the class and determine mass/energy transfer
@@ -3497,7 +3504,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   CASE(3)
                      VEL = SQRT(U2**2+V2**2)
                END SELECT
-               A_DROP = M_DROP/(B2%WORK2*LPC%DENSITY)  ! WORK2 is FILM_THICKNESS
+               IF (B2%WORK2>0._EB) THEN
+                  A_DROP = M_DROP/(B2%WORK2*LPC%DENSITY)  ! WORK2 is the computed liquid film layer depth
+               ELSE
+                  A_DROP = PI*(CR2*LP%RADIUS)**2          ! If no assumed film layer, use the droplet/surface contact area directly
+               ENDIF
                Q_DOT_RAD = MIN(A_DROP,B1%AREA/LP%PWT)*B1%Q_RAD_IN
                TMP_WALL = MAX(TMPMIN,B2%WORK1)
             ELSE SOLID_OR_GAS_PHASE_1

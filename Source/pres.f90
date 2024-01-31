@@ -520,12 +520,19 @@ USE MPI_F08
 USE GLOBAL_CONSTANTS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 REAL(EB) :: RR,BXS_BAR,BXF_BAR,BXS_BAR_LEFT,BXF_BAR_RIGHT
+REAL(EB), POINTER, DIMENSION(:) :: H_BAR_P
 INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
 TYPE (MESH_TYPE), POINTER :: M
 LOGICAL :: SINGULAR_CASE
 
 TNOW=CURRENT_TIME()
+
+IF (PREDICTOR) THEN
+   H_BAR_P => H_BAR
+ELSE
+   H_BAR_P => H_BAR_S
+ENDIF
 
 ! For each mesh, compute the diagonal, off-diagonal, and right hand side terms of the tri-diagonal linear system of equations
 
@@ -650,7 +657,7 @@ CALL MPI_BCAST(TP_CC(1),TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 ! Contruct the 1-D solution H_BAR and add boundary conditions at the ends of the tunnel.
 
-H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
+H_BAR_P(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
 ! Apply boundary conditions at the ends of the tunnel.
 
@@ -660,17 +667,17 @@ MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    IF (NM==1) THEN
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-         H_BAR(0) = H_BAR(1) - M%DXI*BXS_BAR_LEFT
+         H_BAR_P(0) = H_BAR_P(1) - M%DXI*BXS_BAR_LEFT
       ELSE  ! Dirichlet BC
-         H_BAR(0) = -H_BAR(1) + 2._EB*BXS_BAR_LEFT
+         H_BAR_P(0) = -H_BAR_P(1) + 2._EB*BXS_BAR_LEFT
       ENDIF
    ENDIF
 
    IF (NM==NMESHES) THEN
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-         H_BAR(TUNNEL_NXP+1) = H_BAR(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
+         H_BAR_P(TUNNEL_NXP+1) = H_BAR_P(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
       ELSE  ! Dirichlet BC
-         H_BAR(TUNNEL_NXP+1) = -H_BAR(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
+         H_BAR_P(TUNNEL_NXP+1) = -H_BAR_P(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
       ENDIF
    ENDIF
 

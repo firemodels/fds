@@ -340,6 +340,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: PHI_LS=-1._EB         !< Level Set value for output only
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
+   REAL(EB) :: WORK3=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
 
