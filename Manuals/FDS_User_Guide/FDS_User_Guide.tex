@@ -2257,7 +2257,7 @@ Also note that no solid surface is truly adiabatic; thus, the specification of a
 
 Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. In most fire scenarios, it is sufficient to compute the conduction of heat normal to the solid surface using a 1-D solver. There are some limited cases for which three-dimensional heat conduction is possible; see Sec.~\ref{info:ht3d}.
 
-The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.  
+The {\ct MATL} namelist group is used to define the properties of the materials that make up bounding solids. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.
 
 \subsection{Structure of Solid Boundaries}
 
@@ -2454,7 +2454,7 @@ The 1-D heat conduction model used in FDS is appropriate for most building mater
 \subsection{Basics}
 \label{info:HT3D_Basics}
 
-For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is assumed to consist of a mixture of different materials ({\ct MATL}s). Multiple layers can be constructed from multiple obstructions, but these obstructions are snapped to the gas phase grid. Thus, you cannot specify arbitrarily thick layers like you can with the 1-D solver. 
+For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is assumed to consist of a mixture of different materials ({\ct MATL}s). Multiple layers can be constructed from multiple obstructions, but these obstructions are snapped to the gas phase grid. Thus, you cannot specify arbitrarily thick layers like you can with the 1-D solver.
 
 To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
@@ -2723,7 +2723,7 @@ The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPE
 \subsection{Scaling the Burning Rate by the Heat Flux}
 \label{info:scaled_burning}
 
-FDS has a simple scaling-based pyrolysis model (SBPyro), using inputs on {\ct SURF}, that scales burning rate data collected from a cone calorimeter or similar device to the actual heat feedback during an FDS simulation. This model requires a thermally-thick surface with a specified {\ct HRRPUA} and {\ct IGNITION\_TEMPERATURE}. Test data is specified with {\ct REFERENCE\_HEAT\_FLUX}, {\ct REFERENCE\_THICKNESS}, and {\ct RAMP\_Q}.  
+FDS has a simple scaling-based pyrolysis model (SBPyro), using inputs on {\ct SURF}, that scales burning rate data collected from a cone calorimeter or similar device to the actual heat feedback during an FDS simulation. This model requires a thermally-thick surface with a specified {\ct HRRPUA} and {\ct IGNITION\_TEMPERATURE}. Test data is specified with {\ct REFERENCE\_HEAT\_FLUX}, {\ct REFERENCE\_THICKNESS}, and {\ct RAMP\_Q}.
 {\ct REFERENCE\_HEAT\_FLUX} is the radiant heat flux in kW/m$^{2}$ imposed by the test device to the sample prior to the start of pyrolysis, i.e. what a water-cooled heat flux gauge would measure. This is an array of up to ten values. {\ct REFERENCE\_THICKNESS} is the tested thickness of the sample in m for each {\ct REFERENCE\_HEAT\_FLUX}. This is just the combustible portion of the sample and not any insulation or other inert backing materials. This parameter is not required. If no {\ct REFERENCE\_THICKNESS} are given, FDS will assume the thickness of the first layer of the surface, i.e. {\ct THICKNESS(1)}. IF one {\ct REFERENCE\_THICKNESS} is given for a {\ct REFERENCE\_HEAT\_FLUX}, then all thicknesses must be given even if they are the same as {\ct THICKNESS(1)}. The {\ct REFERENCE\_THICKNESS} should represent the nominal thickness of the material. Typically when samples are acquired for a cone testing there are slight differences in thickness due to manufacturing or sample preparation. If a group of {\ct REFERENCE\_HEAT\_FLUX} values are intended to be the same thickness, then the same {\ct REFERENCE\_THICKNESS} should be used. {\ct RAMP\_Q} defines the burning rate over time for a pair of {\ct REFERENCE\_HEAT\_FLUX} and {\ct REFERENCE\_THICKNESS}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning in the test. Values for {\ct REFERENCE\_HEAT\_FLUX} and {\ct REFERENCE\_THICKNESS} must be grouped by increasing thickness with increasing flux in each group of thicknesses.
 
 If the test data represents an inert test device where only pryolysis but no combustion occurs, then set {\ct INERT\_Q\_REF=T}. This flag applies to all specified test data.
@@ -5518,6 +5518,13 @@ If it can be assumed that the temperature field is well-resolved and the radiati
 \label{info:RADI_Resolution}
 
 There are several ways to improve the spatial and temporal accuracy of the discrete radiation transport equation (RTE), but each typically increases the computation time. The spatial accuracy can be improved by increasing the number of angles from the default 100 with the integer parameter {\ct NUMBER\_RADIATION\_ANGLES}. A good way to determine if you need better spatial resolution is to add slice ({\ct SLCF}) files of the quantity {\ct 'INTEGRATED INTENSITY'}. Typically, you see high values of this quantity near sources of heat, and these values decrease farther away. Ideally, you should see a somewhat smooth and circular pattern far from the heat source, but because of the finite number of solid angles along which the radiation intensity is tracked, you will see in the far field a star-like pattern that is not physical. If there are no important ``targets'' far from the heat source, this nonphysical pattern can be ignored, but if there are important targets, then increase the number of angles until you see a relatively smooth pattern over the region of interest.
+
+The requirements for accurate angular resolution have been studied by Kim and Trouv\'{e} \cite{KimYJ_Trouve:FSJ2023}.  They suggest the number of solid angles needed for accurate resolution (${\rm NRA}_{\rm critical}$) to a target at a separation distance, $H$, with emission source surface area, $S$, is given by
+\be
+\label{eq:NRA_critical}
+{\rm NRA}_{\rm critical} = N_\Omega \times \frac{4\pi H^2}{S}
+\ee
+where $N_\Omega$ should be between 5 and 10.
 
 The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}. If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps. Given the relatively small time steps dictated by the CFL constraint, 15 time steps is usually still a relatively short interval of time. Increasing the temporal resolution of the radiation solver rarely adds to the overall accuracy of the calculation. Spatial resolution is far more important.
 
@@ -14032,7 +14039,7 @@ ENDIF
 \item {\ct ZERO}\ Integer set to 0. Entry left for future use.
 \end{itemize}
 
-\section{Isosurface, Geometry and Unstructured Slice Data Files
+\section[Isosurface, Geometry and Unstructured Slice Data Files ({\tt .viso,.be})]{Isosurface, Geometry and Unstructured Slice Data Files
 \newline ({\tt .viso,.be})}
 \label{out:GEOMETRY_DATA}
 
@@ -14266,7 +14273,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 
 
 % file extensions ignored by the check_extension script (these keywords are used by the Linux script qfds.sh)
-%ignoreext bat 
+%ignoreext bat
 %ignoreext binfo
 %ignoreext end
 %ignoreext err
@@ -14284,7 +14291,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
- 
+
 \appendix
 
 \chapter{Predefined Species}
