@@ -5885,10 +5885,12 @@ This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} con
 \label{water_evaporation_5_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 6}
 \label{water_evaporation_6}
 
-This pair of cases tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. In both cases, a box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K.
+This pair of cases tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. In both cases, a box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.01$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K.
 
 In case 6, all walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
 \begin{eqnarray*}
@@ -5896,7 +5898,7 @@ In case 6, all walls of the box except the floor are adiabatic.  The floor is th
 \Delta H &=& m_{\rm g,0} \, c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm g,0} ) + m_{\rm d} \Big( c_{\rm l} \, (T_{\rm b}-T_{\rm d,0}) + c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm b}) + h_v  \Big) \\[.1in]
 \Delta p &=& \frac{R}{W \, V} \left( m_{\rm g,f} \, T_{\rm g,f} - m_{\rm g,0} \, T_{\rm g,0} \right) \quad ; \quad R = 8.314 \; \hbox{J/mol/K}
 \end{eqnarray*}
-The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pressure increase is 34.6~kPa.
+The final temperature is calculated to be 460.0~K (186.9~$^\circ$C) and the pressure increase is 27.2~kPa.
 
 \begin{figure}[h!]
 \noindent

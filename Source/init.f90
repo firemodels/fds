@@ -3799,7 +3799,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
       ! If this is a thin obstruction, use its actual user-specified coordinates to determine THICKNESS
 
-      IF (THICKNESS<TWO_EPSILON_EB) THEN
+      IF (THICKNESS<TWO_EPSILON_EB .AND. OBST_INDEX>0) THEN
          SELECT CASE(ABS(BC%IOR))
             CASE(1) ; IF (OB%I1==OB%I2) THICKNESS = OB%X2 - OB%X1
             CASE(2) ; IF (OB%J1==OB%J2) THICKNESS = OB%Y2 - OB%Y1
@@ -3821,7 +3821,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
       LAYER_THICKNESS_OBST(N_LAYERS_OBST) = LAYER_THICKNESS_OBST(N_LAYERS_OBST) + THICKNESS - OLD_THICKNESS
 
-      CALL ADD_MATERIAL(N_MATL_OBST,OB%MATL_INDEX,MATL_INDEX_OBST)
+      IF (OBST_INDEX>0) CALL ADD_MATERIAL(MAX_MATERIALS,OB%MATL_INDEX,N_MATL_OBST,MATL_INDEX_OBST)
 
       IF (OBST_INDEX/=OBST_INDEX_PREVIOUS .AND. OBST_INDEX_PREVIOUS>0 .AND. OBST_INDEX>0) THEN
          OB_PREV => OM_PREV%OBSTRUCTION(OBST_INDEX_PREVIOUS)
@@ -3911,12 +3911,12 @@ IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
    TOTAL_THICKNESS = SUM(LAYER_THICKNESS_OBST(1:N_LAYERS_OBST))  ! Thickness of the solid made up of OBSTs
 
    IF (SF%N_LAYERS>0 .AND. SF%LINING) THEN
-      CALL ADD_MATERIAL(N_MATLS,SF%MATL_INDEX,MATL_INDEX)       ! Add materials from the front surface lining
+      CALL ADD_MATERIAL(SF%N_MATL,SF%MATL_INDEX,N_MATLS,MATL_INDEX)       ! Add materials from the front surface lining
       IF (SF%LINING) FRONT_LINING_THICKNESS = SUM(SF%LAYER_THICKNESS(1:SF%N_LAYERS))
    ENDIF
    SF_BACK => SURFACE(ONE_D%BACK_SURF)
    IF (SF_BACK%N_LAYERS>0 .AND. SF_BACK%LINING) THEN
-      CALL ADD_MATERIAL(N_MATLS,SF_BACK%MATL_INDEX,MATL_INDEX)  ! Add materials from the back surface lining
+      CALL ADD_MATERIAL(SF_BACK%N_MATL,SF_BACK%MATL_INDEX,N_MATLS,MATL_INDEX)  ! Add materials from the back surface lining
       IF (SF_BACK%LINING) BACK_LINING_THICKNESS = SUM(SF_BACK%LAYER_THICKNESS(1:SF_BACK%N_LAYERS))
    ENDIF
 
@@ -4058,7 +4058,7 @@ ENDIF
 ! Form an array of N_MATLS material indices, MATL_INDEX, for this thin wall cell. This
 ! list accounts for all materials associated with the OBSTs and SURFs along the distance through the solid.
 
-CALL ADD_MATERIAL(N_MATLS,OB%MATL_INDEX,MATL_INDEX)
+CALL ADD_MATERIAL(MAX_MATERIALS,OB%MATL_INDEX,N_MATLS,MATL_INDEX)
 
 ! A thin wall cell only has one layer and one obstruction. This loop transfers the material mass fractions 
 ! from the OBST to the save array.
@@ -4192,19 +4192,21 @@ END SUBROUTINE FIND_THIN_WALL_BACK_INDEX
 
 
 !> \brief Update list of material indices
-!> \param N_MATLS_X Number of materials on the list
+!> \param N_MATLS_SEARCH Number of materials in the array to be searched
 !> \param MATL_INDEX_SEARCH Array of material indices
+!> \param N_MATLS_X Number of materials on the list
 !> \param MATL_INDEX_X Array of new material indices
 
-SUBROUTINE ADD_MATERIAL(N_MATLS_X,MATL_INDEX_SEARCH,MATL_INDEX_X)
+SUBROUTINE ADD_MATERIAL(N_MATLS_SEARCH,MATL_INDEX_SEARCH,N_MATLS_X,MATL_INDEX_X)
 
+INTEGER, INTENT(IN) :: N_MATLS_SEARCH
+INTEGER, INTENT(IN), DIMENSION(N_MATLS_SEARCH) :: MATL_INDEX_SEARCH
 INTEGER, INTENT(INOUT) :: N_MATLS_X
-INTEGER :: JJ,MI,JJJ,NR,NRE
 INTEGER, INTENT(INOUT), DIMENSION(MAX_MATERIALS) :: MATL_INDEX_X
-INTEGER, INTENT(IN), DIMENSION(MAX_MATERIALS) :: MATL_INDEX_SEARCH
+INTEGER :: JJ,MI,JJJ,NR,NRE
 TYPE (MATERIAL_TYPE), POINTER :: ML
 
-MATL_LOOP: DO JJ=1,MAX_MATERIALS
+MATL_LOOP: DO JJ=1,N_MATLS_SEARCH
 
    MI = MATL_INDEX_SEARCH(JJ)
    IF (MI<1) EXIT MATL_LOOP

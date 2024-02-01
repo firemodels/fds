@@ -7622,6 +7622,8 @@ IND_SELECT: SELECT CASE(IND)
    CASE( 9)  ! PRESSURE
       GAS_PHASE_OUTPUT_RES = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + &
                              RHO(II,JJ,KK)*(0.5_EB*(H(II,JJ,KK)+HS(II,JJ,KK))-KRES(II,JJ,KK)) - P_0(KK)
+      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
+                                                        RHO(II,JJ,KK)*0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(10)  ! VELOCITY
       SELECT CASE(ABS(VELO_INDEX))
          CASE DEFAULT
@@ -7638,6 +7640,8 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = Q(II,JJ,KK)*0.001_EB
    CASE(12)  ! H
       GAS_PHASE_OUTPUT_RES = 0.5_EB*(HS(II,JJ,KK)+H(II,JJ,KK))
+      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
+                                                        0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(13)  ! MIXTURE FRACTION
       ! requires FUEL + AIR --> PROD (SIMPLE_CHEMISTRY, N_SIMPLE_CHEMISTRY_REACTIONS=1)
       ! f = Z_FUEL + Z_PROD/(1+S), where S is the mass stoichiometric coefficient for AIR
@@ -10504,7 +10508,7 @@ PROF_LOOP: DO N=1,N_PROF
       ELSE
          WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
          WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
-                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I)-PF_TEMP(I)),I=0,NWP)
+                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I+1)-PF_TEMP(I)),I=0,NWP)
       ENDIF
    ELSE ! Final values only
       REWIND(LU_PROF(N))
