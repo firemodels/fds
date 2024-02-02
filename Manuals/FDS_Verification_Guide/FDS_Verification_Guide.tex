@@ -5443,6 +5443,7 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
 \label{cone_demo_2}
+\label{cone_demo_3}
 
 This section uses two cases to test a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
 
@@ -5811,6 +5812,8 @@ The solid horizontal lines denote the expected steady-state values.
 \label{water_evaporation_1_plots}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 2}
 \label{water_evaporation_2}
 
@@ -5831,6 +5834,8 @@ The initial mass fraction of water vapor is 0. It is expected that the water wil
 \caption[Sample case \textct{water\_evaporation\_2}]{Output of the \textct{water\_evaporation\_2} test case.}
 \label{water_evaporation_2_plots}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Case 3}
 \label{water_evaporation_3}
@@ -5855,6 +5860,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_3_plots}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 4}
 \label{water_evaporation_4}
@@ -5872,6 +5878,8 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.  The black line indicates the FDS results for the test case with 1000 particles injected every 0.001 s.  The dashed red line shows results for FDS with 100 particles injected every 0.01 s.  Note that the same total mass is injected in both cases.}
 \label{water_evaporation_4_plot}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Case 5}
 \label{water_evaporation_5}
@@ -5919,14 +5927,13 @@ In case 6a, the floor is also set to adiabatic. For a fixed heat flux surface, F
     \label{water_evaporation_6a_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 7}
 \label{water_evaporation_7}
 
-In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
-introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
-The water completely evaporates before it drips down to the bottom of the channel.
-Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
-\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.4 \; \hbox{kW} \ee
+A gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at 20~$^\circ$C is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of $2\,000~\mu$m are introduced via a nozzle in the middle of the channel at a rate of 0.5~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s. The water completely evaporates before it drips down to the bottom of the channel. Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
+\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 0.5/60 \; \hbox{kg/s} = -21.7 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]
@@ -5936,6 +5943,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \label{water_evaporation_7_plot}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 8}
 \label{water_evaporation_8}
@@ -5953,6 +5961,7 @@ This case is similar to Case~5 except that here the droplet has a diameter of 10
 \label{water_evaporation_8_plots}
 \end{figure}
 
+\FloatBarrier
 
 \section{Water Droplets on Solid Surfaces}
 
