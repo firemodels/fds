@@ -240,6 +240,8 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: BACK_MESH=0      !< Mesh number on back side of obstruction or exterior wall cell
    INTEGER :: BACK_SURF=0      !< SURF_INDEX on back side of obstruction or exterior wall cell
 
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER             !< (1:ONE_D\%N_LAYERS) Indicator that layer in 3D
+
 END TYPE BOUNDARY_ONE_D_TYPE
 
 
@@ -264,6 +266,7 @@ TYPE INTERNAL_NODE_TYPE
    INTEGER :: J=-1                                              !< J index of the node
    INTEGER :: K=-1                                              !< K index of the node
    INTEGER :: MESH_NUMBER=-1                                    !< MESH number of the node
+   LOGICAL :: HT3D=.TRUE.                                       !< Indicates that this cell is meant to be updated in 3D
 END TYPE INTERNAL_NODE_TYPE
 
 
@@ -886,6 +889,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE                               !< Specified constant cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: STRETCH_FACTOR
@@ -902,7 +906,6 @@ TYPE SURFACE_TYPE
    INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
    LOGICAL :: VARIABLE_THICKNESS=.FALSE.             !< Allow the surface to have varying thickness
    LOGICAL :: LINING=.FALSE.                         !< Indicator that the properties refer to a wall lining, not entire wall
-   LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROP1_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_PROP2_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer

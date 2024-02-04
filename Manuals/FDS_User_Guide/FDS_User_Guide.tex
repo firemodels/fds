@@ -2532,14 +2532,12 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \subsubsection{Example: Insulated Structural Steel}
 \label{info:normal_direction_only}
 
-An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is entered as a slightly thicker obstruction with a {\ct SURF} line that indicates that heat is to be conducted in the {\ct NORMAL\_DIRECTION\_ONLY} even though it is declared to be {\ct HT3D}. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
+An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is applied to each side via a {\ct SURF} line. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
 \begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /
-&OBST XB=0.12,1.88,0.50,0.54,0.21,0.79, SURF_ID='WEB INSULATION' /
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK',
-      CELL_SIZE=0.1, HEAT_TRANSFER_COEFFICIENT=20 /
-&SURF ID='WEB INSULATION', MATL_ID='STUFF','STEEL','STUFF', COLOR='BEIGE',
-      THICKNESS=0.010,0.020,0.010, HT3D=T, NORMAL_DIRECTION_ONLY=T /
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID6='STEEL SLAB','STEEL SLAB',
+      'WEB INSULATION','WEB INSULATION','STEEL SLAB','STEEL SLAB', MATL_ID='STEEL' /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+&SURF ID='WEB INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
 \end{lstlisting}
 
 
@@ -12918,7 +12916,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
-{\ct NORMAL\_DIRECTION\_ONLY}                             & Logical         & Section~\ref{info:normal_direction_only}  &                     & {\ct F}                 \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}                 \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 {\ct NUSSELT\_C0}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
