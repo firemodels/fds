@@ -6072,9 +6072,9 @@ IF (PLOT3D) THEN
    DO K = 0, KBAR
       DO J = 0, JBAR
          DO I = 0, IBAR
-           UVEL = QQ(I,J,K,2)
-           VVEL = QQ(I,J,K,3)
-           WVEL = QQ(I,J,K,4)
+           UVEL = MAX(MIN(QQ(I,J,K,2),1E6_FB),-1E6_FB)
+           VVEL = MAX(MIN(QQ(I,J,K,3),1E6_FB),-1E6_FB)
+           WVEL = MAX(MIN(QQ(I,J,K,4),1E6_FB),-1E6_FB)
            VEL = SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
            PLOT3D_MIN = MIN(PLOT3D_MIN,VEL)
            PLOT3D_MAX = MAX(PLOT3D_MAX,VEL)
