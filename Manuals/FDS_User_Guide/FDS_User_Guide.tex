@@ -559,7 +559,7 @@ By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, 
 \begin{lstlisting}
 &DUMP SUPPRESS_DIAGNOSTICS=T /
 \end{lstlisting}
-Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY\_ERROR'}, if necessary.
+Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY ERROR'}, if necessary.
 
 To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
 
