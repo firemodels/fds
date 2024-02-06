@@ -34,10 +34,9 @@ Special switch_id tags:
 
 '''
 import numpy as np
-import os
+import os, sys, argparse, shutil, glob
 import subprocess
 import pandas as pd
-import shutil
 from collections import defaultdict
 from matplotlib.lines import Line2D
 import scipy
@@ -72,7 +71,11 @@ def runModel(outdir, outfile, mpiProcesses, fdsdir, fdscmd, printLiveOutput=Fals
     my_env['PATH'] = fdsdir + ';' + my_env['I_MPI_ROOT'] + ';' + my_env["PATH"]
     my_env['OMP_NUM_THREADS'] = '1'
     
-    process = subprocess.Popen([fdscmd, outfile, ">&", "log.err"], cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL)
+    if printLiveOutput is True:
+        process = subprocess.Popen([fdscmd, outfile, ">", "log.err"], cwd=r'%s'%(outdir), env=my_env, shell=False)
+    else:
+        process = subprocess.Popen([fdscmd, outfile, ">", "log.err"], cwd=r'%s'%(outdir), env=my_env, shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
     
     out, err = process.communicate()
     errcode = process.returncode   
@@ -300,7 +303,7 @@ def interpolateExperimentalData(times, HRRs, targetDt=False, filterWidth=False,
         targetHRRs = targetHRRs[np.argsort(targetTimes)]
         targetTimes = np.sort(targetTimes)
         reconstructedHRR = np.interp(times, targetTimes, targetHRRs)
-    print('%d, %0.2f'%(targetTimes.shape[0], np.max(abs(reconstructedHRR - HRRs))))
+    #print('%d, %0.2f'%(targetTimes.shape[0], np.max(abs(reconstructedHRR - HRRs))))
     return targetTimes, targetHRRs
 
 def getRepresentativeHrrpua(HRRPUA, time, factor=0.5):
@@ -669,10 +672,55 @@ def preprocessConeData(time, hrrpua, truncateTime=False, truncateBelow=10,
     hrrpuas_interp_filtered[time_interp < tign] = 0
     return time_interp, hrrpuas_interp_filtered
 
+def getMaterialsDatabase(systemPath):
+    
+    from git import Repo  # pip install gitpython
+    repo = Repo.clone_from('https://github.com/johodges/materials.git', os.path.join(systemPath, "materials"), branch="main")
+    
+    #cloned_repo = repo.clone('https://github.com/johodges/materials.git')
+    repo.submodule_update(recursive=True)
 
 if __name__ == "__main__":
     
-    fdsdir, fdscmd = findFds()
+    args = sys.argv
+    systemPath = os.path.dirname(os.path.abspath(__file__))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('call')
+    parser.add_argument('--clean', action='store_true', help='Deletes processed data and outputs prior to run')
+    parser.add_argument('--donotinitialize', action='store_true', help='Ignores initialization')
+    
+    cmdargs = parser.parse_args(args)
+    if cmdargs.clean:
+        if os.path.exists(os.path.join(systemPath,'materials')):
+            print("Cleaning materials repo from %s"%(os.path.join(systemPath, 'materials')))
+            shutil.rmtree(os.path.join(systemPath,'materials'))
+        for f in glob.glob(os.path.join(systemPath,'FDS_Input_Files','*.fds')):
+            os.remove(f)
+    
+    if os.path.exists(os.path.join(systemPath,'materials')) is not True:
+        print("Cloning materials repo to %s"%(os.path.join(systemPath, 'materials')))
+        getMaterialsDatabase(systemPath)
+    
+    assert os.path.exists(os.path.join(systemPath,'materials')), "Failed to clone materials repo"
+    
+    my_env = os.environ.copy()
+    if cmdargs.donotinitialize is not True:
+        process = subprocess.Popen([sys.executable, os.path.join(systemPath, 'materials','scripts','initialize.py')], env=my_env, shell=False)
+        out, err = process.communicate()
+        errcode = process.returncode
+    else:
+        print("Ignoring initialization")
+    
+    print([sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py')])
+    process = subprocess.Popen([sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py'),'--inputfiles',os.path.join(systemPath,'FDS_Input_Files')], env=my_env, shell=False)
+    out, err = process.communicate()
+    errcode = process.returncode
+    
+    
+    
+    
+    
+    assert False, "Stopped"
     
     specificationFile = "scaling_pyrolysis_cone_cases.csv"
     figoutdir = "figures"
@@ -705,7 +753,7 @@ if __name__ == "__main__":
     showStats = False
     closePlots = True
     outTxt = ''
-    for i in [17]: #range(1, specificationFile.shape[0]):
+    for i in [17,18]: #range(1, specificationFile.shape[0]):
         
         # Check for run code
         code = specificationFile.iloc[i]['Code']
