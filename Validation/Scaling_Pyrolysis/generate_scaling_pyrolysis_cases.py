@@ -688,6 +688,7 @@ if __name__ == "__main__":
     parser.add_argument('call')
     parser.add_argument('--clean', action='store_true', help='Deletes processed data and outputs prior to run')
     parser.add_argument('--donotinitialize', action='store_true', help='Ignores initialization')
+    parser.add_argument('--donotrun', action='store_true', help='Do not rerun fds')
     
     cmdargs = parser.parse_args(args)
     if cmdargs.clean:
@@ -711,8 +712,10 @@ if __name__ == "__main__":
     else:
         print("Ignoring initialization")
     
-    print([sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py')])
-    process = subprocess.Popen([sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py'),'--inputfiles',os.path.join(systemPath,'FDS_Input_Files')], env=my_env, shell=False)
+    runcommand = [sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py'),'--inputfiles',os.path.join(systemPath,'FDS_Input_Files')]
+    if cmdargs.donotrun is True:
+        runcommand.append('--donotrun')
+    process = subprocess.Popen(runcommand, env=my_env, shell=False)
     out, err = process.communicate()
     errcode = process.returncode
     
