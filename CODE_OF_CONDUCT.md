@@ -1,24 +1,129 @@
-# FDS-SMV Discussion Group Policy Statement
+# Contributor Covenant Code of Conduct
 
-The [FDS and Smokeview (FDS-SMV) Discussion Group](https://groups.google.com/forum/?fromgroups#!forum/fds-smv) and associated pages, such as [Issues](https://github.com/firemodels/fds/issues), have been created to enable open scientific and technical communication. While this group was established and is managed by the development team at NIST, we intend for this to be an open forum for multi-directional communication between all involved in the community, and not just between users and developers.  NIST participants will reply when it is appropriate for them to do so, and may limit their participation in some topics when it is not.  For example, NIST will not provide advice or comment on any matter that is or may be the subject of a legal proceeding. 
+## Our Pledge
 
-To further these objectives, the Discussion Group operates according to the following policies:
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone, regardless of age, body
+size, visible or invisible disability, ethnicity, sex characteristics, gender
+identity and expression, level of experience, education, socio-economic status,
+nationality, personal appearance, race, religion, or sexual identity
+and orientation.
 
-## Registration
+We pledge to act and interact in ways that contribute to an open, welcoming,
+diverse, inclusive, and healthy community.
 
-The [FDS and Smokeview (FDS-SMV) Discussion Group](https://groups.google.com/forum/?fromgroups#!forum/fds-smv) does not permit anonymous public posting to the group.  Anyone with a free Google Account can request an invitation to join.  As part of the invitation request process, new members must respond to a simple statement, "Please state your purpose for using FDS or joining this group.  This will help Managers determine if an applicant is a spam robot or a new member." Managers read the responses to help determine if the request is from a user or from an automated system.  If new members do not respond to the inquiry statement, then the request will be deleted and the new member applicant will have to resubmit an invitation request. Personally identifiable information is not required for the Google account, and personal names do not need to be associated with the account used during group participation.  Information used for registration is used solely for controlling access to the group and to provide a means to restrict participation for those who violate the Group Policies.
+## Our Standards
 
-## Membership Information
+Examples of behavior that contributes to a positive environment for our
+community include:
 
-The Membership list is only accessible to Discussion Group Managers. This precaution helps reduce access to member contact information by potential malicious users. At the same time, all individual messages to the group contain contact information in the email address associated with the registered Google Account.  This information is made public through the message meta-data.
+* Demonstrating empathy and kindness toward other people
+* Being respectful of differing opinions, viewpoints, and experiences
+* Giving and gracefully accepting constructive feedback
+* Accepting responsibility and apologizing to those affected by our mistakes,
+  and learning from the experience
+* Focusing on what is best not just for us as individuals, but for the
+  overall community
 
-## Management Information
+Examples of unacceptable behavior include:
 
-Employees at the National Institute of Standards and Technology and the VTT Technical Research Centre of Finland currently are assigned as Owners and Managers of the Discussion Group.  The role of Owners and Managers are defined on the GoogleGroups Help FAQ as:
-"The original owner is the person who created the group, invited the first members, and chose the group's posting and access settings. Once the owner selects a member to be a manager, both the owner and the manager can approve posts, invite new members, create managers, and change the group's management settings. Only the owner, however, can create a co-owner, transfer ownership to another user, or remove the group."
+* The use of sexualized language or imagery, and sexual attention or
+  advances of any kind
+* Trolling, insulting or derogatory comments, and personal or political attacks
+* Public or private harassment
+* Publishing others' private information, such as a physical or email
+  address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a
+  professional setting
 
-## Discussion Group Posts
+## Enforcement Responsibilities
 
-Posts from registered members are unmoderated and published directly to the public forum. Posts are immediately emailed to all members who elect the email delivery option.  However, all posts are reviewed by FDS-SMV Group Managers and any post that violates the policies herein may be taken down without notice.  Participants must also comply with applicable policies, regulations, and laws of their own locality. Posts are expected to show respect and consideration to others. The Group Owners and Managers will delete posts which obviously infringe upon copyrights or which are clearly off-topic or not relevant to technical discussions such as Spam, personal attacks, political statements, religious statements, cursing or other foul language, pornographic information or statements based on race, age, creed, color, sex, handicap, or sexual orientation.  Information provided by a NIST employee is subject to applicable laws and policies.
+Community leaders are responsible for clarifying and enforcing our standards of
+acceptable behavior and will take appropriate and fair corrective action in
+response to any behavior that they deem inappropriate, threatening, offensive,
+or harmful.
 
-Discussion Group members are encouraged to read this article on [Effective Posting](https://github.com/firemodels/fds/wiki/Effective-Posting).
+Community leaders have the right and responsibility to remove, edit, or reject
+comments, commits, code, wiki edits, issues, and other contributions that are
+not aligned to this Code of Conduct, and will communicate reasons for moderation
+decisions when appropriate.
+
+## Scope
+
+This Code of Conduct applies within all community spaces, and also applies when
+an individual is officially representing the community in public spaces.
+Examples of representing our community include using an official e-mail address,
+posting via an official social media account, or acting as an appointed
+representative at an online or offline event.
+
+## Enforcement
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported to the community leaders responsible for enforcement at
+@rmcdermo.
+All complaints will be reviewed and investigated promptly and fairly.
+
+All community leaders are obligated to respect the privacy and security of the
+reporter of any incident.
+
+## Enforcement Guidelines
+
+Community leaders will follow these Community Impact Guidelines in determining
+the consequences for any action they deem in violation of this Code of Conduct:
+
+### 1. Correction
+
+**Community Impact**: Use of inappropriate language or other behavior deemed
+unprofessional or unwelcome in the community.
+
+**Consequence**: A private, written warning from community leaders, providing
+clarity around the nature of the violation and an explanation of why the
+behavior was inappropriate. A public apology may be requested.
+
+### 2. Warning
+
+**Community Impact**: A violation through a single incident or series
+of actions.
+
+**Consequence**: A warning with consequences for continued behavior. No
+interaction with the people involved, including unsolicited interaction with
+those enforcing the Code of Conduct, for a specified period of time. This
+includes avoiding interactions in community spaces as well as external channels
+like social media. Violating these terms may lead to a temporary or
+permanent ban.
+
+### 3. Temporary Ban
+
+**Community Impact**: A serious violation of community standards, including
+sustained inappropriate behavior.
+
+**Consequence**: A temporary ban from any sort of interaction or public
+communication with the community for a specified period of time. No public or
+private interaction with the people involved, including unsolicited interaction
+with those enforcing the Code of Conduct, is allowed during this period.
+Violating these terms may lead to a permanent ban.
+
+### 4. Permanent Ban
+
+**Community Impact**: Demonstrating a pattern of violation of community
+standards, including sustained inappropriate behavior,  harassment of an
+individual, or aggression toward or disparagement of classes of individuals.
+
+**Consequence**: A permanent ban from any sort of public interaction within
+the community.
+
+## Attribution
+
+This Code of Conduct is adapted from the [Contributor Covenant][homepage],
+version 2.0, available at
+https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
+
+Community Impact Guidelines were inspired by [Mozilla's code of conduct
+enforcement ladder](https://github.com/mozilla/diversity).
+
+[homepage]: https://www.contributor-covenant.org
+
+For answers to common questions about this code of conduct, see the FAQ at
+https://www.contributor-covenant.org/faq. Translations are available at
+https://www.contributor-covenant.org/translations.
+
