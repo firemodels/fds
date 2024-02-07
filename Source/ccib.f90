@@ -14545,8 +14545,6 @@ ORIENTATION_LOOP: DO IS=1,3
       ! Define mu*Gradient:
       MU_DUIDXJ_EP(ICD_SGN) = MU_EP*DUIDXJ_EP(ICD_SGN)
 
-      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
       VEL_GHOST = 0._EB
@@ -14556,10 +14554,12 @@ ORIENTATION_LOOP: DO IS=1,3
             VEL_GHOST = VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
          CASE (NO_SLIP_BC)
             VEL_GHOST = 2._EB*VEL_T - VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
          CASE (WALL_MODEL_BC)
             ! Determine if the cell edge is an external corner:
             CORNER_EDGE=.FALSE.
@@ -14746,6 +14746,10 @@ ORIENTATION_LOOP: DO IS=1,3
    ENDDO SIGN_LOOP
 ENDDO ORIENTATION_LOOP
 
+! Cycle out of the EDGE_LOOP if no tangential gradients have been altered.
+
+IF (.NOT.ANY(ALTERED_GRADIENT)) RETURN
+
 ! Loop over all 4 normal directions and compute vorticity and stress tensor components for each
 
 SIGN_LOOP_2: DO I_SGN=-1,1,2
@@ -14768,11 +14772,11 @@ SIGN_LOOP_2: DO I_SGN=-1,1,2
          CYCLE ORIENTATION_LOOP_2
       ENDIF
       ICDO_SGN = I_SGN*ICDO
-      IF (ALTERED_GRADIENT(ICDO_SGN)) THEN
+      IF (ALTERED_GRADIENT(ICDO_SGN) .AND. .NOT.CC_EDGE%SIDE_IN_GEOM(ICDO_SGN)) THEN
             !DUIDXJ_USE(ICDO) = EC_B(ICDO_SGN)*DUIDXJ(ICDO_SGN)  +  EC_EP(ICDO_SGN)*DUIDXJ_EP(ICDO_SGN)
             DUIDXJ_USE(ICDO) =                 DUIDXJ(ICDO_SGN)
          MU_DUIDXJ_USE(ICDO) = EC_B(ICDO_SGN)*MU_DUIDXJ(ICDO_SGN) + EC_EP(ICDO_SGN)*MU_DUIDXJ_EP(ICDO_SGN)
-      ELSEIF (ALTERED_GRADIENT(-ICDO_SGN)) THEN
+      ELSEIF (ALTERED_GRADIENT(-ICDO_SGN) .AND. .NOT.CC_EDGE%SIDE_IN_GEOM(-ICDO_SGN)) THEN
             !DUIDXJ_USE(ICDO) = EC_B(-ICDO_SGN)*DUIDXJ(-ICDO_SGN) + EC_EP(-ICDO_SGN)*DUIDXJ_EP(-ICDO_SGN)
             DUIDXJ_USE(ICDO) =                 DUIDXJ(-ICDO_SGN)
          MU_DUIDXJ_USE(ICDO) = EC_B(-ICDO_SGN)*MU_DUIDXJ(-ICDO_SGN) + EC_EP(-ICDO_SGN)*MU_DUIDXJ_EP(-ICDO_SGN)
@@ -16422,8 +16426,10 @@ REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_COEF_AUX
 INTEGER :: N_CVAR_START, N_CVAR_COUNT, N_FVAR_START, N_FVAR_COUNT
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EP_TAG
 
-INTEGER :: IS,I_SGN,ICD,ICD_SGN,IIF,JJF,KKF,FAXIS,IEC,IE,SKIP_FCT,IEP,JEP,KEP,INDS(1:2,IAXIS:KAXIS)
-REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP,DEL_IBEDGE
+INTEGER :: IS,I_SGN,ICD,ICD_SGN,IIF,JJF,KKF,FAXIS,IEC,IE,SKIP_FCT,IEP,JEP,KEP,INDS(1:2,IAXIS:KAXIS),AX,ICEDG,JCEDG,LOHI
+REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP,DEL_IBEDGE,XYZ1(IAXIS:KAXIS),XYZ2(IAXIS:KAXIS)
+
+TYPE(CC_CUTEDGE_TYPE), POINTER :: CE=>NULL()
 
 REAL(EB) CPUTIME,CPUTIME_START,CPUTIME_START_LOOP
 CHARACTER(100) :: MSEGS_FILE
@@ -17080,12 +17086,15 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IBEDGE_LOOP1 : DO IEDGE=1,MESHES(NM)%CC_NIBEDGE
 
       ALLOCATE(CC_IBEDGE(IEDGE)%XB_IB(-2:2),CC_IBEDGE(IEDGE)%SURF_INDEX(-2:2),&
-               CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2),CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2))
+               CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2),CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2),&
+               CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(-2:2))
       ALLOCATE(CC_IBEDGE(IEDGE)%INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,-2:2))
       CC_IBEDGE(IEDGE)%XB_IB(-2:2)      = 0._EB
       CC_IBEDGE(IEDGE)%SURF_INDEX(-2:2) = 0
       CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2) = .FALSE. ! Process Orientation in double loop.
       CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2)             = .FALSE. ! If true, no need to mesh_cc_exchange variables.
+      CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(-2:2)             = .TRUE.  ! If true, this side of Cartesian edge looks inside the geometry.
+                                                                ! else there is a boundary edge on its position for this side.
       CC_IBEDGE(IEDGE)%INT_NPE                        = 0 ! Required to avoid segfault in comm.
 
       IE  = MESHES(NM)%CC_IBEDGE(IEDGE)%IE
@@ -17093,6 +17102,14 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       JJ  = EDGE(IE)%J
       KK  = EDGE(IE)%K
       IEC = EDGE(IE)%AXIS
+
+      ! Edge nodes location:
+      XYZ1 = (/ X(I), Y(J), Z(K) /); XYZ2 = XYZ1
+      SELECT CASE(IEC)
+         CASE(IAXIS); XYZ1(IAXIS) = X(I-1)
+         CASE(JAXIS); XYZ1(JAXIS) = Y(J-1)
+         CASE(KAXIS); XYZ1(KAXIS) = Z(K-1)
+      END SELECT
 
       ! First: Loop over all possible face orientations of edge to define XB_IB, SURF_INDEX, PROCESS_EDGE_ORIENTATION:
       ORIENTATION_LOOP_1: DO IS=1,3
@@ -17141,6 +17158,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_1 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_1
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_1
+                     ENDIF
                   ENDIF
                   IF (FAXIS==JAXIS) THEN
                      ! XB_IB:
@@ -17195,6 +17223,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_2 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_2
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_2
+                     ENDIF
                   ENDIF
                   IF (FAXIS==KAXIS) THEN
                      ! XB_IB:
@@ -17247,6 +17286,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_3 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_3
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_3
+                     ENDIF
                   ENDIF
                   IF (FAXIS==IAXIS) THEN
                      ! XB_IB:
