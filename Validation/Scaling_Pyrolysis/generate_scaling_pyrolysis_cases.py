@@ -727,7 +727,12 @@ if __name__ == "__main__":
         files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_git.txt'))
         for file in files:
             shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
-        files = glob.glob(os.path.join(systemPath,'materials','data','faa_materials','*.csv'))
+        files = glob.glob(os.path.join(systemPath,'materials','data','aalto_materials','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        files = glob.glob(os.path.join(systemPath,'materials','data','aalto_materials','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
@@ -818,8 +823,26 @@ if __name__ == "__main__":
         qMax = max([qMax, 0])
         tMax = max([tMax, 5])
         expFiles = spec_file_dict[material]['expFiles']
+        headerRows = spec_file_dict[material]['headerRows']
+        if type(headerRows) is int:
+            headerRows = [headerRows for x in expFiles]
+        else:
+            headerRows = [int(x) for x in headerRows.split('|')]
         for i, expFile in enumerate(expFiles):
-            data_exp = pd.read_csv(os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',expFile))
+            expf = os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',expFile)
+            headerRow = headerRows[i]
+            with open(expf, 'r') as f:
+                d = f.readlines()
+            d = np.array([dd.replace('\n','').split(',') for dd in d])
+            
+            for ii in range(headerRow, len(d)):
+                for j in range(0, len(d[ii])):
+                    try:
+                        d[ii,j] = float(d[ii,j])
+                    except:
+                        d[ii,j] = np.nan
+            columns = [str(c).replace('/','_') for c in d[0]]
+            data_exp = pd.DataFrame(np.array(d[headerRow:, :], dtype=float), columns=columns)
             hrrColumn = spec_file_dict[material]['hrrColumns'][i]
             if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
             qMax = max([qMax, np.ceil(np.nanmax(data_exp[hrrColumn].values)*1.1/10)*10])
@@ -846,7 +869,7 @@ if __name__ == "__main__":
             hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
             outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
             outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/m²),'%(matlabelname)
-            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_all",'%(chid)
             outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
     
     with open('scaling_dataplot_out.csv', 'w') as f:
@@ -854,7 +877,31 @@ if __name__ == "__main__":
     
     
     
+    material_output_data = pd.DataFrame(material_output_data)
+    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
     
+    tmp = material_output_data.T
+    tmp['MaterialClass'] = [x[0] for x in tmp.index]
+    tmp['Material'] = [x[2] for x in tmp.index]
+    tmp['Series'] = [x[1] for x in tmp.index]
+    series = [x[1] for x in tmp.index]
+    unique_series = list(set(series))
+    start = True
+    for s in unique_series:
+        tmp2 = tmp.loc[[True if s in x else False for x in series]]
+        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
+        for m in uniqueMaterialClass:
+            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
+            tmp4 = tmp3.sort_values('Material')
+            if start:
+                out2 = tmp4
+                start = False
+            else:
+                #out2 = out2.append(tmp4)
+                out2 = pd.concat([out2, tmp4], ignore_index=True)
+    
+    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
+    out2_vals = np.array(out2.values[:, :7], dtype=float)
     
     
     
@@ -1373,7 +1420,7 @@ if __name__ == "__main__":
             outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
             outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
             outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
-            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_all",'%(chid)
             outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
     
     with open('scaling_dataplot_out.csv', 'w') as f:

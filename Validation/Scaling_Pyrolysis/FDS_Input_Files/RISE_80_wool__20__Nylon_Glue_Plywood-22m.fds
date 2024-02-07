@@ -1,4 +1,4 @@
-&HEAD CHID='RISE_80%_wool__20_%_Nylon_Glue_Plywood-2', /
+&HEAD CHID='RISE_80_wool__20__Nylon_Glue_Plywood-22m', /
 &TIME DT=1., T_END=2445.2 /
 &DUMP DT_CTRL=1.0, DT_DEVC=1.0, DT_HRR=1.0, SIG_FIGS=4, SIG_FIGS_EXP=2, /
 &MISC SOLID_PHASE_ONLY=.TRUE., TMPA=27., /
