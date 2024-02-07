@@ -2529,22 +2529,17 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \end{figure}
 
 
-\subsubsection{Example: Insulated Structural Steel}
-\label{info:normal_direction_only}
-
-An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is applied to each side via a {\ct SURF} line. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
-\begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID6='STEEL SLAB','STEEL SLAB',
-      'WEB INSULATION','WEB INSULATION','STEEL SLAB','STEEL SLAB', MATL_ID='STEEL' /
-&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
-&SURF ID='WEB INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
-\end{lstlisting}
+\FloatBarrier
 
 
 \subsection{Surface Linings}
 \label{info:linings}
 
-In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
+In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. 
+
+The way linings are handled depends on the size of the obstruction. If the obstruction is a flat plate whose depth is less than one-half a grid cell and is represented as a zero-cell thick sheet, then any layer materials are assumed to {\em add} to the thickness of the underlying plate. For example, if a plate of steel is 1~cm thick and it is assumed to be coated on both sides by layers of insulation that are 2~cm thick, the assembly is still treated as a thin sheet from the standpoint of the gas phase computation, but the depth is taken as 5~cm for the purpose of the heat transfer computation.
+
+On the other hand, if the solid is made up of obstructions that are not thin plates, lining materials displace volume of the underling solid. For example, the following lines of input define a single obstruction made of steel that is lined with two layers of insulation made up of three different components:
 \begin{lstlisting}
 &OBST XB=-0.20, 0.20,-0.20, 0.20,-0.05, 0.05, SURF_ID='SLAB', MATL_ID='STEEL' /
 &SURF ID='SLAB', HT3D=T, COLOR='BEIGE', THICKNESS=0.003,0.002,
@@ -2556,6 +2551,19 @@ In some applications, you might want to perform 3-D heat conduction within colle
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50. /
 \end{lstlisting}
 The resulting solid has the same dimensions as the one you specify, but 5~mm of its surface material is replaced by the given layers of ``stuff.''
+
+\subsubsection{Example: Insulated Structural Steel}
+\label{info:normal_direction_only}
+
+An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is applied to each side via a {\ct SURF} line. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
+\begin{lstlisting}
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID6='STEEL SLAB','STEEL SLAB',
+      'WEB INSULATION','WEB INSULATION','STEEL SLAB','STEEL SLAB', MATL_ID='STEEL' /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+&SURF ID='WEB INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
+\end{lstlisting}
+Note that the {\ct CELL\_SIZE} refers to heat transfer in the lateral direction. The heat transfer in the direction normal to the insulation and thin steel plate will be gridded according to the {\ct SURF} {\ct 'WEB INSULATION'}. 
+
 
 
 \subsection{Working with Thin Plates}
@@ -2581,6 +2589,10 @@ There is a single thin {\ct OBST}struction that is 3.1~mm thick and 1.2~m long a
 \caption[Results of the {\ct checkerboard} test case]{(Left) Temperature of a thin steel plate subjected to fire. The plate has a patchwork pattern of high and low emissivity. (Right) Plot comparing the enthalpy of the plate and the net surface heat flux.}
 \label{fig:checkerboard}
 \end{figure}
+
+
+\FloatBarrier
+
 
 \subsection{1-D Heat Conduction in Solids of Varying Thickness}
 \label{info:ht1d}
