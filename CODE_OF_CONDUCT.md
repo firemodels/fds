@@ -127,4 +127,3 @@ For answers to common questions about this code of conduct, see the FAQ at
 https://www.contributor-covenant.org/faq. Translations are available at
 https://www.contributor-covenant.org/translations.
 
-Discussion Group members are encouraged to read this article on [Effective Posting](https://github.com/firemodels/fds/wiki/Effective-Posting).
