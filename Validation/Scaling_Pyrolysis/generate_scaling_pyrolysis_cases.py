@@ -689,6 +689,7 @@ if __name__ == "__main__":
     parser.add_argument('--clean', action='store_true', help='Deletes processed data and outputs prior to run')
     parser.add_argument('--donotinitialize', action='store_true', help='Ignores initialization')
     parser.add_argument('--donotrun', action='store_true', help='Do not rerun fds')
+    parser.add_argument('--donotcopy', action='store_true', help='Do not copy results to out/exp')
     
     cmdargs = parser.parse_args(args)
     if cmdargs.clean:
@@ -719,7 +720,279 @@ if __name__ == "__main__":
     out, err = process.communicate()
     errcode = process.returncode
     
+    if cmdargs.donotcopy is False:
+        files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_devc.csv'))
+        for file in files:
+            shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+        files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_git.txt'))
+        for file in files:
+            shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+        files = glob.glob(os.path.join(systemPath,'materials','data','faa_materials','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        
+        files = glob.glob(os.path.join(systemPath,'materials','data','fpl_materials_processed','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        
+        files = glob.glob(os.path.join(systemPath,'materials','data','fsri_materials_processed','scaling_pyrolysis','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        
+        files = glob.glob(os.path.join(systemPath,'materials','data','jh_materials','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        
+        files = glob.glob(os.path.join(systemPath,'materials','data','rise_materials_processed','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename(file) not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        
+    from materials.scripts.algorithms import load_material_simulation, get_filtered_cases, getMaterials, load_csv
+    #from materials.scripts.evaluate_database import load_material_simulation, get_filtered_cases
+    spec_file_dict = getMaterials(dataDirectory=os.path.abspath(os.path.join(systemPath,'materials','data')))
+    materials = list(spec_file_dict.keys())
+    baseDir = os.path.join(systemPath,'materials','input_files')
+    energyThreshold=0.25
+    output_statistics = dict()
+    material_output_data = defaultdict(bool)
+    outTxt = ''
+    for material in materials:
+        cases = get_filtered_cases(spec_file_dict, material, energyThreshold=energyThreshold)
+        if cases is False: continue
+        if len(list(cases.keys())) <= 1: continue
+        output_statistics[material] = load_material_simulation(material, baseDir, cases)
+        
+        materialClass = spec_file_dict[material]['materialClass']
+        series = spec_file_dict[material]['series']
+        properties = spec_file_dict[material]
+        density = properties['density']
+        conductivity = properties['conductivity']
+        emissivity = properties['emissivity']
+        specific_heat = properties['specific_heat']
+        soot_yield = properties['soot_yield']
+        heat_of_combustion = properties['heat_of_combustion']
+        fluxes = [cases[c]['cone'] for c in cases.keys()]
+        thicknesses = [cases[c]['delta']*1e3 for c in cases.keys()]
+        material_output_data[(materialClass,series,material)] = defaultdict(bool)
+        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
+        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
+        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
+        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
+        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = '|'.join(['%0.1f'%(cases[c]['delta']*1000) for c in cases.keys()])
+        #material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
+        #material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        #material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['%0.0f'%(f) for f in fluxes])
+        
+        lineColors = ['k','r','g','m','c','y']
+        materialClassDict = dict()
+        materialClassDict['Wood-Based'] = dict()
+        materialClassDict['Wood-Based']['marker'] = '>'
+        materialClassDict['Wood-Based']['color'] = 'b'
+        materialClassDict['Polymers'] = dict()
+        materialClassDict['Polymers']['marker'] = '^'
+        materialClassDict['Polymers']['color'] = 'r'
+        materialClassDict['Mixtures'] = dict()
+        materialClassDict['Mixtures']['marker'] = 'v'
+        materialClassDict['Mixtures']['color'] = 'g'
+        materialClassDict['Others'] = dict()
+        materialClassDict['Others']['marker'] = 'o'
+        materialClassDict['Others']['color'] = 'm'
+        
+        workingDir = os.path.join(baseDir, material.replace(' ','_')) + os.sep
+        chid = material.replace(' ','_')
+        data = load_csv(workingDir, chid)
+        qMax = np.ceil(np.nanmax(data[[c for c in data.columns if 'HRRPUA' in c]].values)/10*1.1)*10
+        tInd = np.argwhere(np.sum(data[[c for c in data.columns if 'HRRPUA' in c]].values,axis=1)>0)[-1][0]
+        tMax = np.ceil(data['Time'].iloc[tInd]/60/5)*5
+        qMax = max([qMax, 0])
+        tMax = max([tMax, 5])
+        expFiles = spec_file_dict[material]['expFiles']
+        for i, expFile in enumerate(expFiles):
+            data_exp = pd.read_csv(os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',expFile))
+            hrrColumn = spec_file_dict[material]['hrrColumns'][i]
+            if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
+            qMax = max([qMax, np.ceil(np.nanmax(data_exp[hrrColumn].values)*1.1/10)*10])
+            timeColumn = spec_file_dict[material]['timeColumns'][i]
+            if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
+            tMax = max([tMax, np.ceil(np.nanmax(data_exp[timeColumn].values)/60/5)*5])
+        for iii, flux in enumerate(fluxes):
+            lc = lineColors[iii]
+            if iii == 0:
+                switchId = 'd'
+            else:
+                switchId = 'f'
+            materialMarker = materialClassDict[materialClass]['marker']
+            materialColor = materialClassDict[materialClass]['color']
+            matlabelname = material
+            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+            matlabelname = matlabelname.replace('_','\_')
+            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + expFiles[iii] + '",' #'%s-%02d.csv"'%(material,flux) + ","
+            timeColumn,hrrColumn=spec_file_dict[material]['timeColumns'][iii],spec_file_dict[material]['hrrColumns'][iii]
+            if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
+            if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
+            outTxt = outTxt + "1,2,%s,%s,"%(timeColumn, hrrColumn)
+            outTxt = outTxt + "Exp (%02d kW/m²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
+            hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
+            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
+            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/m²),'%(matlabelname)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
     
+    with open('scaling_dataplot_out.csv', 'w') as f:
+        f.write(outTxt)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    '''
+    
+        material_output_data[(materialClass,series,material)] = defaultdict(bool)
+        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
+        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
+        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
+        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
+        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
+        material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
+        material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
+        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        
+        #assert False, "Stopped"
+        
+        '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
+        lineColors = ['k','r','g','m','c']
+        materialClassDict = dict()
+        materialClassDict['Wood-Based'] = dict()
+        materialClassDict['Wood-Based']['marker'] = '>'
+        materialClassDict['Wood-Based']['color'] = 'b'
+        materialClassDict['Polymers'] = dict()
+        materialClassDict['Polymers']['marker'] = '^'
+        materialClassDict['Polymers']['color'] = 'r'
+        materialClassDict['Mixtures'] = dict()
+        materialClassDict['Mixtures']['marker'] = 'v'
+        materialClassDict['Mixtures']['color'] = 'g'
+        materialClassDict['Others'] = dict()
+        materialClassDict['Others']['marker'] = 'o'
+        materialClassDict['Others']['color'] = 'm'
+        
+        tMax = 5
+        qMax = 0
+        for iiii, flux in enumerate(validationFluxes):
+            scaling = data['"HRRPUA-%02d"'%(flux)].values
+            if type(exp_data) is dict:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]] > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]][ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]])*1.1])
+            else:
+                ind = np.where(exp_data[validationHrrpuaColumns[iiii]].values > 0)[-1]
+                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]].values[ind])/60])
+                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]].values)*1.1])
+            qMax = max([qMax, np.nanmax(scaling)*1.1])
+        tMax = np.ceil(tMax/5)*5
+        qMax = np.ceil(qMax/10)*10
+        
+        for iii, flux in enumerate(validationFluxes):
+            lc = lineColors[iii]
+            if iii == 0:
+                switchId = 'd'
+            else:
+                switchId = 'f'
+            materialMarker = materialClassDict[materialClass]['marker']
+            materialColor = materialClassDict[materialClass]['color']
+            matlabelname = material
+            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+            matlabelname = matlabelname.replace('_','\_')
+            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + '%s_%02d.csv"'%(material,flux) + ","
+            outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
+            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
+            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
+            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
+    
+    with open('scaling_dataplot_out.csv', 'w') as f:
+        f.write(outTxt)
+    material_output_data = pd.DataFrame(material_output_data)
+    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
+    
+    tmp = material_output_data.T
+    tmp['MaterialClass'] = [x[0] for x in tmp.index]
+    tmp['Material'] = [x[2] for x in tmp.index]
+    tmp['Series'] = [x[1] for x in tmp.index]
+    series = [x[1] for x in tmp.index]
+    unique_series = list(set(series))
+    start = True
+    for s in unique_series:
+        tmp2 = tmp.loc[[True if s in x else False for x in series]]
+        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
+        for m in uniqueMaterialClass:
+            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
+            tmp4 = tmp3.sort_values('Material')
+            if start:
+                out2 = tmp4
+                start = False
+            else:
+                out2 = out2.append(tmp4)
+    
+    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
+    out2_vals = np.array(out2.values[:, :7], dtype=float)
+    
+    series = ''
+    matClass = ''
+    texout = ''
+    for iiii in range(0, out2.shape[0]):
+        if out2['Series'].iloc[iiii] == series:
+            if out2['MaterialClass'].iloc[iiii] == matClass:
+                pass
+            else:
+                matClass = out2['MaterialClass'].iloc[iiii]
+                texout = texout + '\n' + matClass + '\n'
+        else:
+            series = out2['Series'].iloc[iiii]
+            matClass = out2['MaterialClass'].iloc[iiii]
+            texout = texout + '\n' + series + ' & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\\\ \n'
+            texout = texout + 'Material & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\\\ \\hline \n'
+            texout = texout + '\n' + matClass + '\n'
+        material = out2['Material'].iloc[iiii]
+        if '-' in material: material = material.split('-')[0]
+        if '(' in material: material = material.split('(')[0]
+        while '__' in material: material = material.replace('__', '_')
+        material.replace('_', ' ')
+        cond = out2_vals[iiii, 0]
+        dens = out2_vals[iiii, 1]
+        emis = out2_vals[iiii, 2]
+        spec = out2_vals[iiii, 3]
+        thic = out2_vals[iiii, 4]
+        Tign = out2_vals[iiii, 5]
+        qref = out2_vals[iiii, 6]
+        texout = texout + material + ' & %0.2f & %0.0f & %0.2f & %0.2f & '%(cond, dens, emis, spec)
+        texout = texout + '%0.2f & %0.1f & %0.1f \\\\ \\hline \n'%(thic*1000, Tign, qref)
+    
+    with open('material_output_data_latex.tex', 'w') as f:
+        f.write(texout)
+    out2.to_csv('material_output_data_latex.csv', float_format='%.1f')
+    
+    '''
     
     
     
