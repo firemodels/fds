@@ -2110,7 +2110,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
          ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0 .OR. WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
-                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
+                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. .NOT.SYNTHETIC_EDDY_METHOD) THEN
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
@@ -2241,7 +2241,8 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
          INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. &
                    (BOUNDARY_TYPE_M==SOLID_BOUNDARY .OR. BOUNDARY_TYPE_P==SOLID_BOUNDARY) .OR. &
-                   (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY)) THEN
+                   (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY) .OR. &
+                   (SYNTHETIC_EDDY_METHOD .AND. (BOUNDARY_TYPE_M==OPEN_BOUNDARY .OR. BOUNDARY_TYPE_P==OPEN_BOUNDARY)) ) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell. If the BCs are different on each
             ! side of the edge, choose the one with the specified velocity or velocity gradient, if there is one.
@@ -2260,6 +2261,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_B1%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
+            IF (SYNTHETIC_EDDY_METHOD) VELOCITY_BC_INDEX=NO_SLIP_BC
 
             ! Compute the viscosity by averaging the two adjacent gas cells
 
