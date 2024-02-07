@@ -767,7 +767,7 @@ if __name__ == "__main__":
     spec_file_dict = getMaterials(dataDirectory=os.path.abspath(os.path.join(systemPath,'materials','data')))
     materials = list(spec_file_dict.keys())
     baseDir = os.path.join(systemPath,'materials','input_files')
-    energyThreshold=0.25
+    energyThreshold=0.0
     output_statistics = dict()
     material_output_data = defaultdict(bool)
     outTxt = ''
@@ -799,7 +799,7 @@ if __name__ == "__main__":
         #material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
         material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['%0.0f'%(f) for f in fluxes])
         
-        lineColors = ['k','r','g','m','c','y']
+        lineColors = ['k','r','g','m','c','y','k','r','g','m','c','y']
         materialClassDict = dict()
         materialClassDict['Wood-Based'] = dict()
         materialClassDict['Wood-Based']['marker'] = '>'
