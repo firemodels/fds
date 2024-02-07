@@ -281,7 +281,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: QDOTPP_INT          !< Integrated HRRPUA for the S_Pyro method (kJ/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: Q_IN_SMOOTH_INT     !< Integrated smoothed incident flux for the S_Pyro method (kJ)
-   
+
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
@@ -1163,6 +1163,7 @@ TYPE CC_EDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX     !< Surface type for boundary on each face connected to edge in geom.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION !< Computation logical.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: EDGE_IN_MESH   !< Logical stating edge inside mesh (not boundary).
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: SIDE_IN_GEOM   !< Logical stating edge side inside geometry or actual boundary.
 END TYPE CC_EDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
