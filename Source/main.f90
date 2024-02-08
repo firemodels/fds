@@ -1962,11 +1962,11 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
 
    ENDIF
 
-   ! For PERIODIC boundaries with 1 or 2 meshes, we must revert to allocating whole copies of OMESH
+   ! For a single mesh with PERIODIC boundaries, allocate the entire OMESH array
 
-   IF (IMIN>IMAX) THEN; IMIN=0; IMAX=M2%IBP1; ENDIF
-   IF (JMIN>JMAX) THEN; JMIN=0; JMAX=M2%JBP1; ENDIF
-   IF (KMIN>KMAX) THEN; KMIN=0; KMAX=M2%KBP1; ENDIF
+   IF (IMIN>IMAX .OR. NM==NOM) THEN ; IMIN=0 ; IMAX=M2%IBP1 ; ENDIF
+   IF (JMIN>JMAX .OR. NM==NOM) THEN ; JMIN=0 ; JMAX=M2%JBP1 ; ENDIF
+   IF (KMIN>KMAX .OR. NM==NOM) THEN ; KMIN=0 ; KMAX=M2%KBP1 ; ENDIF
 
    ! Embedded meshes. This is the case where mesh NOM is completely inside mesh NM. Mesh NM cannot "see" mesh NOM because mesh NOM
    ! is not connected at the external boundary of mesh NM. The variable CONNECTED_MESH is needed to save this information.

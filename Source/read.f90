@@ -11085,7 +11085,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',N_EXPLICIT,' because it uses PBX, PBY or PBZ.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses PBX, PBY or PBZ.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11094,11 +11094,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ELSEIF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',N_EXPLICIT,' multi-mesh PERIODIC boundary'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT ',N_EXPLICIT,' multi-mesh PERIODIC boundary'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',N_EXPLICIT,' because it uses MB.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses MB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11110,12 +11110,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(6) = ZS
             CASE('ZMAX') ; XB(5) = ZF
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ELSEIF (DB/='null') THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',N_EXPLICIT,' because it uses DB.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses DB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11127,7 +11127,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(5:6) = ZS_MIN+TWO_EPSILON_EB
             CASE('ZMAX') ; XB(5:6) = ZF_MAX-TWO_EPSILON_EB
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ENDIF
