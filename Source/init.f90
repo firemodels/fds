@@ -4892,10 +4892,12 @@ IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
    IF (IW<=N_EXTERNAL_WALL_CELLS) EWC%PRESSURE_BC_TYPE = PRESSURE_BC_TYPE
 ENDIF
 
-! Special case: A BURNed_AWAY obstruction exposes a surface that also burns, in which case the surface is to ignite immediately.
+! Special cases 1: BURNed_AWAY obstruction exposes a surface that also burns, in which case the surface is to ignite immediately.
+! Special cases 2: HT3D solid shifts the position of the burned away surface to the exposed surface position.
 
 SF => SURFACE(WC%SURF_INDEX)
-IF (REMOVE .AND. (SF%THERMAL_BC_INDEX==THERMALLY_THICK .OR. SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED)) THEN
+IF (REMOVE .AND. ( (SF%THERMAL_BC_INDEX==THERMALLY_THICK.AND.(SF%VARIABLE_THICKNESS.OR.SF%HT_DIM>1)) &
+                  .OR. SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED ) ) THEN
    BC => MESHES(NM)%BOUNDARY_COORD(WC%BC_INDEX)
    IIG = BC%IIG
    JJG = BC%JJG
