@@ -966,7 +966,7 @@ if __name__ == "__main__":
                 Ys = spec_file_dict[material]['soot_yield']
                 Tign = spec_file_dict[material]['Tign']
                 
-                outTxt = outTxt + material.ljust(50).replace('_',' ') + '& %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.1f & %0.1f \\\\\n'%(k, rho, eps, cp, Tign, DHc, Ys)
+                outTxt = outTxt + material.ljust(50).replace('_',' ') + '& %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.0f & %0.4f \\\\\n'%(k, rho, eps, cp, Tign, DHc, Ys)
             outTxt = outTxt + '\\end{tabular}\n'
             outTxt = outTxt + '\\label{Properties_%s_%s}\n'%(s,mc)
             outTxt = outTxt + '\\end{table}\n\n\n'
