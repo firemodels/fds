@@ -855,16 +855,16 @@ if __name__ == "__main__":
             matlabelname = material
             while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
             matlabelname = matlabelname.replace('_','\_')
-            outTxt = outTxt + switchId + ',' + 'Scaling_Pyrolysis_'+materialClass + ',"Scaling_Pyrolysis/' + expFiles[iii] + '",' #'%s-%02d.csv"'%(material,flux) + ","
+            outTxt = outTxt + switchId + ',' + 'Scaling_Pyrolysis_'+materialClass + ',Scaling_Pyrolysis/' + expFiles[iii] + ',' #'%s-%02d.csv"'%(material,flux) + ","
             timeColumn,hrrColumn=spec_file_dict[material]['timeColumns'][iii],spec_file_dict[material]['hrrColumns'][iii]
             if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
             if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
             outTxt = outTxt + "1,2,%s,%s,"%(timeColumn, hrrColumn)
             outTxt = outTxt + "Exp (%02d kW/m²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
             hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
-            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
-            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/m²),'%(matlabelname)
-            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_all",'%(chid)
+            outTxt = outTxt + 'Scaling_Pyrolysis/' + chid + '_devc.csv,2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
+            outTxt = outTxt + '%s Cone at various exposures,Time (min),Heat Release Rate (kW/m²),'%(matlabelname)
+            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_all,'%(chid)
             outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
     
     with open('scaling_dataplot_out.csv', 'w') as f:

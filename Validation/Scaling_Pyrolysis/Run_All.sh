@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -d $INDIR Aalto_Pine_(flaming).fds
-$QFDS $DEBUG $QUEUE -d $INDIR Aalto_Spruce_(flaming).fds
+$QFDS $DEBUG $QUEUE -d $INDIR Aalto_Pine_Flaming.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Aalto_Spruce_Flaming.fds
 $QFDS $DEBUG $QUEUE -d $INDIR FAA_HDPE.fds
 $QFDS $DEBUG $QUEUE -d $INDIR FAA_HIPS.fds
 $QFDS $DEBUG $QUEUE -d $INDIR FAA_PBT.fds
