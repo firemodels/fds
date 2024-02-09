@@ -3551,7 +3551,7 @@ OS => WALL_STORAGE
 DO ITW=1,N_THIN_WALL_CELLS
    TW => THIN_WALL(ITW)
    RC=0 ; IC=0 ; LC=0
-   CALL PACK_THIN_WALL(NM,OS,TW,TW%SURF_INDEX,RC,IC,UNPACK_IT=.FALSE.,COUNT_ONLY=.FALSE.)
+   CALL PACK_THIN_WALL(NM,OS,TW,TW%SURF_INDEX,RC,IC,LC,UNPACK_IT=.FALSE.,COUNT_ONLY=.FALSE.)
    WRITE(LU_CORE(NM)) TW%SURF_INDEX
    WRITE(LU_CORE(NM)) OS%REALS,OS%INTEGERS,OS%LOGICALS
 ENDDO
@@ -3768,7 +3768,7 @@ DO ITW=1,N_THIN_WALL_CELLS
    RC=0 ; IC=0 ; LC=0
    CALL ALLOCATE_STORAGE(NM,SURF_INDEX=SURF_INDEX,THIN_WALL_INDEX=ITW)
    TW => MESHES(NM)%THIN_WALL(ITW)
-   CALL PACK_THIN_WALL(NM,OS,TW,SURF_INDEX,RC,IC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.)
+   CALL PACK_THIN_WALL(NM,OS,TW,SURF_INDEX,RC,IC,LC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.)
 ENDDO
 
 READ(LU_RESTART(NM)) N_CFACE_CELLS_DIM
@@ -6008,7 +6008,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D,VTK3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_INTERP2FACES
-REAL(FB) :: SLICE_MIN, SLICE_MAX, DSLICE
+REAL(FB) :: SLICE_MIN, SLICE_MAX
 INTEGER :: NX, NY, NZ, NC, NP
 INTEGER :: IFACT, JFACT, KFACT
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
@@ -6281,26 +6281,9 @@ IF (.NOT.VTK3D) THEN
             WRITE(LU_SLCF(IQ,NM)) STIME
             IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
             IF (SL%DEBUG) THEN
-               IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
-                  SLICE_MIN = MESHES(NM)%YPLT(J1) - STIME
-                  SLICE_MAX = MESHES(NM)%YPLT(J2) + STIME
-                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(J2-J1, FB)
-                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(J-J1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-               ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
-                  SLICE_MIN = MESHES(NM)%ZPLT(K1) - STIME
-                  SLICE_MAX = MESHES(NM)%ZPLT(K2) + STIME
-                  DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(K2-K1, FB)
-                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(K-K1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-               ELSE
-                  SLICE_MIN = MESHES(NM)%XPLT(I1) - STIME
-                  SLICE_MAX = MESHES(NM)%XPLT(I2) + STIME
-                  IF (I1 .EQ. I2 ) THEN
-                     DSLICE = 0.0_FB
-                  ELSE
-                     DSLICE = (SLICE_MAX - SLICE_MIN)/REAL(I2-I1, FB)
-                  ENDIF
-                  WRITE(LU_SLCF(IQ,NM)) (((SLICE_MIN + REAL(I-I1,FB)*DSLICE,I=I1,I2),J=J1,J2),K=K1,K2)
-               ENDIF
+               SLICE_MIN = STIME + REAL(IQ, FB)
+               SLICE_MAX = STIME + REAL(IQ, FB)
+               WRITE(LU_SLCF(IQ,NM)) (((SLICE_MAX  ,I=I1,I2),J=J1,J2),K=K1,K2)
             ENDIF
             CLOSE(LU_SLCF(IQ,NM))
 
@@ -6455,9 +6438,9 @@ IF (.NOT.VTK3D) THEN
       DO K = 0, KBAR
          DO J = 0, JBAR
             DO I = 0, IBAR
-              UVEL = QQ(I,J,K,2)
-              VVEL = QQ(I,J,K,3)
-              WVEL = QQ(I,J,K,4)
+              UVEL = MAX(MIN(QQ(I,J,K,2),1E6_FB),-1E6_FB)
+              VVEL = MAX(MIN(QQ(I,J,K,3),1E6_FB),-1E6_FB)
+              WVEL = MAX(MIN(QQ(I,J,K,4),1E6_FB),-1E6_FB)
               VEL = SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
               PLOT3D_MIN = MIN(PLOT3D_MIN,VEL)
               PLOT3D_MAX = MAX(PLOT3D_MAX,VEL)
@@ -7622,6 +7605,8 @@ IND_SELECT: SELECT CASE(IND)
    CASE( 9)  ! PRESSURE
       GAS_PHASE_OUTPUT_RES = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + &
                              RHO(II,JJ,KK)*(0.5_EB*(H(II,JJ,KK)+HS(II,JJ,KK))-KRES(II,JJ,KK)) - P_0(KK)
+      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
+                                                        RHO(II,JJ,KK)*0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(10)  ! VELOCITY
       SELECT CASE(ABS(VELO_INDEX))
          CASE DEFAULT
@@ -7638,6 +7623,8 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = Q(II,JJ,KK)*0.001_EB
    CASE(12)  ! H
       GAS_PHASE_OUTPUT_RES = 0.5_EB*(HS(II,JJ,KK)+H(II,JJ,KK))
+      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
+                                                        0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(13)  ! MIXTURE FRACTION
       ! requires FUEL + AIR --> PROD (SIMPLE_CHEMISTRY, N_SIMPLE_CHEMISTRY_REACTIONS=1)
       ! f = Z_FUEL + Z_PROD/(1+S), where S is the mass stoichiometric coefficient for AIR
@@ -10504,7 +10491,7 @@ PROF_LOOP: DO N=1,N_PROF
       ELSE
          WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
          WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
-                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I)-PF_TEMP(I)),I=0,NWP)
+                                 (PF_TEMP(I)+DX_WGT_S(I)*(PF_TEMP(I+1)-PF_TEMP(I)),I=0,NWP)
       ENDIF
    ELSE ! Final values only
       REWIND(LU_PROF(N))
@@ -11062,11 +11049,9 @@ IF (IFRMT.EQ.0) THEN
                ENDDO
             ELSE
                NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
-               BF_FACTOR = 0.0_FB
-               IF ( NBF_DEBUG .GT. 1) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
-               WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
-               BOUND_MIN = -STIME
-               BOUND_MAX =  STIME
+               BOUND_MIN =  STIME + REAL(NF, FB)
+               BOUND_MAX =  STIME + REAL(NF, FB)
+               WRITE(LU_BNDF(NF,NM)) (BOUND_MAX,L=0,NBF_DEBUG-1)
             ENDIF
 
          ELSE
@@ -11082,9 +11067,9 @@ IF (IFRMT.EQ.0) THEN
                NBF_DEBUG = (2+L2-L1)*(2+N2-N1)
                BF_FACTOR = 0.0_FB
                IF ( NBF_DEBUG .GT. 1 ) BF_FACTOR = 2.0_FB*STIME/REAL(NBF_DEBUG-1,FB)
-               WRITE(LU_BNDF(NF,NM)) (REAL(-STIME+L*BF_FACTOR,FB),L=0,NBF_DEBUG-1)
-               BOUND_MIN = -STIME
-               BOUND_MAX =  STIME
+               BOUND_MIN =  STIME + REAL(NF, FB)
+               BOUND_MAX =  STIME + REAL(NF, FB)
+               WRITE(LU_BNDF(NF,NM)) (BOUND_MAX,L=0,NBF_DEBUG-1)
             ENDIF
          ENDIF
 

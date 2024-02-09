@@ -347,7 +347,6 @@ REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
 REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calculation
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in liquid evaporation algorithm (m)
-REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
 REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
 REAL(EB) :: HVAC_MASS_TRANSPORT_CELL_L=-1._EB  !< Global cell size for HVAC mass transport (m)
 
@@ -526,7 +525,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_BB                     !< Lower off-di
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_CC                     !< Right hand side of 1-D tunnel pressure linear system
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_DD                     !< Diagonal of tri-diagonal matrix for tunnel pressure solver
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_RDXN                   !< Reciprocal of the distance between tunnel precon points
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure solution of 1-D tunnel pressure solver
+REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: H_BAR             !< Pressure solution of 1-D tunnel pressure solver, predictor step
+REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: H_BAR_S           !< Pressure solution of 1-D tunnel pressure solver, corrector step
+REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: DUDT_BAR          !< Average du/dt for 1-D tunnel pressure solver, predictor step
+REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: DUDT_BAR_S        !< Average du/dt for 1-D tunnel pressure solver, corrector step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel

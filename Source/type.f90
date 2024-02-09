@@ -244,6 +244,8 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: BACK_MESH=0      !< Mesh number on back side of obstruction or exterior wall cell
    INTEGER :: BACK_SURF=0      !< SURF_INDEX on back side of obstruction or exterior wall cell
 
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER             !< (1:ONE_D\%N_LAYERS) Indicator that layer in 3D
+
 END TYPE BOUNDARY_ONE_D_TYPE
 
 
@@ -268,6 +270,7 @@ TYPE INTERNAL_NODE_TYPE
    INTEGER :: J=-1                                              !< J index of the node
    INTEGER :: K=-1                                              !< K index of the node
    INTEGER :: MESH_NUMBER=-1                                    !< MESH number of the node
+   LOGICAL :: HT3D=.TRUE.                                       !< Indicates that this cell is meant to be updated in 3D
 END TYPE INTERNAL_NODE_TYPE
 
 
@@ -282,7 +285,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: QDOTPP_INT          !< Integrated HRRPUA for the S_Pyro method (kJ/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: Q_IN_SMOOTH_INT     !< Integrated smoothed incident flux for the S_Pyro method (kJ)
-   
+
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
@@ -341,6 +344,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: PHI_LS=-1._EB         !< Level Set value for output only
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
+   REAL(EB) :: WORK3=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
 
@@ -889,6 +893,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE                               !< Specified constant cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: STRETCH_FACTOR
@@ -905,7 +910,6 @@ TYPE SURFACE_TYPE
    INTEGER :: HT_DIM=1                               !< Heat Transfer Dimension
    LOGICAL :: VARIABLE_THICKNESS=.FALSE.             !< Allow the surface to have varying thickness
    LOGICAL :: LINING=.FALSE.                         !< Indicator that the properties refer to a wall lining, not entire wall
-   LOGICAL :: NORMAL_DIRECTION_ONLY=.FALSE.          !< Heat Transfer in normal direction only, even if the solid is HT3D
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROP1_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_PROP2_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
@@ -1163,6 +1167,7 @@ TYPE CC_EDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX     !< Surface type for boundary on each face connected to edge in geom.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION !< Computation logical.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: EDGE_IN_MESH   !< Logical stating edge inside mesh (not boundary).
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: SIDE_IN_GEOM   !< Logical stating edge side inside geometry or actual boundary.
 END TYPE CC_EDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:

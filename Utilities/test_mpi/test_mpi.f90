@@ -19,10 +19,12 @@
 !
         program test_mpi
         use mpi_f08
+        use ISO_FORTRAN_ENV
         implicit none
 
         integer i, size, rank, namelen, ierr
         character (len=MPI_MAX_PROCESSOR_NAME) :: name
+        character(len=:), allocatable :: res1,res2
         type(mpi_status) :: stat
 
         call MPI_INIT (ierr)
@@ -32,6 +34,11 @@
         call MPI_GET_PROCESSOR_NAME (name, namelen, ierr)
 
         if (rank.eq.0) then
+
+            res1 = compiler_version()
+            res2 = compiler_options()
+            print *, res1
+            print *, res2
 
             print *, 'Hello world: rank ', rank, ' of ', size, ' running on ', name
 
