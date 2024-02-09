@@ -696,7 +696,7 @@ if __name__ == "__main__":
         if os.path.exists(os.path.join(systemPath,'materials')):
             print("Cleaning materials repo from %s"%(os.path.join(systemPath, 'materials')))
             shutil.rmtree(os.path.join(systemPath,'materials'))
-        for f in glob.glob(os.path.join(systemPath,'FDS_Input_Files','*.fds')):
+        for f in glob.glob(os.path.join(systemPath,'..','*.fds')):
             os.remove(f)
     
     if os.path.exists(os.path.join(systemPath,'materials')) is not True:
@@ -713,7 +713,7 @@ if __name__ == "__main__":
     else:
         print("Ignoring initialization")
     
-    runcommand = [sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py'),'--inputfiles',os.path.join(systemPath,'FDS_Input_Files')]
+    runcommand = [sys.executable, os.path.join(systemPath, 'materials','scripts','evaluate_database.py'),'--inputfiles',os.path.join(systemPath,'..')]
     if cmdargs.donotrun is True:
         runcommand.append('--donotrun')
     process = subprocess.Popen(runcommand, env=my_env, shell=False)
@@ -721,46 +721,41 @@ if __name__ == "__main__":
     errcode = process.returncode
     
     if cmdargs.donotcopy is False:
-        files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_devc.csv'))
-        for file in files:
-            shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
-        files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_git.txt'))
-        for file in files:
-            shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+        #files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_devc.csv'))
+        #for file in files:
+        #    shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+        #files = glob.glob(os.path.join(systemPath,'materials','input_files','*','*_git.txt'))
+        #for file in files:
+        #    shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
         files = glob.glob(os.path.join(systemPath,'materials','data','aalto_materials','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
-        files = glob.glob(os.path.join(systemPath,'materials','data','aalto_materials','*.csv'))
-        for file in files:
-            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
-            if os.path.basename not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
-        
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+
         files = glob.glob(os.path.join(systemPath,'materials','data','fpl_materials_processed','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
         
         files = glob.glob(os.path.join(systemPath,'materials','data','fsri_materials_processed','scaling_pyrolysis','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
         
         files = glob.glob(os.path.join(systemPath,'materials','data','jh_materials','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
         
         files = glob.glob(os.path.join(systemPath,'materials','data','rise_materials_processed','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename(file) not in ignores:
-                shutil.copy(file, os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
         
     from materials.scripts.algorithms import load_material_simulation, get_filtered_cases, getMaterials, load_csv
     #from materials.scripts.evaluate_database import load_material_simulation, get_filtered_cases
@@ -829,7 +824,7 @@ if __name__ == "__main__":
         else:
             headerRows = [int(x) for x in headerRows.split('|')]
         for i, expFile in enumerate(expFiles):
-            expf = os.path.join(systemPath,'..','..','..','exp','Scaling_Pyrolysis',expFile)
+            expf = os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',expFile)
             headerRow = headerRows[i]
             with open(expf, 'r') as f:
                 d = f.readlines()
@@ -860,7 +855,7 @@ if __name__ == "__main__":
             matlabelname = material
             while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
             matlabelname = matlabelname.replace('_','\_')
-            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + expFiles[iii] + '",' #'%s-%02d.csv"'%(material,flux) + ","
+            outTxt = outTxt + switchId + ',' + 'Scaling_Pyrolysis_'+materialClass + ',"Scaling_Pyrolysis/' + expFiles[iii] + '",' #'%s-%02d.csv"'%(material,flux) + ","
             timeColumn,hrrColumn=spec_file_dict[material]['timeColumns'][iii],spec_file_dict[material]['hrrColumns'][iii]
             if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
             if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
@@ -875,6 +870,18 @@ if __name__ == "__main__":
     with open('scaling_dataplot_out.csv', 'w') as f:
         f.write(outTxt)
     
+    
+    with open(os.path.join(systemPath,'..','..','Run_All.sh'),'w') as f:
+        f.write('#!/bin/bash\n\n')
+        f.write('# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.\n')
+        f.write('# See the file Validation/Common_Run_All.sh for more information.\n')
+        f.write('export SVNROOT=`pwd`/../..\n')
+        f.write('source $SVNROOT/Validation/Common_Run_All.sh\n\n')
+        
+        files = sorted(glob.glob(os.path.join(systemPath,'..','*.fds')))
+        for file in files:
+            f.write('$QFDS $DEBUG $QUEUE -d $INDIR %s\n'%(os.path.basename(file)))
+        f.write('\necho FDS cases submitted')
     
     
     material_output_data = pd.DataFrame(material_output_data)
