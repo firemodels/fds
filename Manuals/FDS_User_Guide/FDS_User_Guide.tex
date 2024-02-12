@@ -2208,7 +2208,7 @@ It may be useful to visualize which convective heat transfer correlation is bein
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 To specify the convective heat transfer coefficient, set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)} with optional time dependent ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK} with optional time dependent ramp ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}. 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 \label{info:net_and_convective_heat_flux}
@@ -10972,7 +10972,6 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct ADVECTIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct ADVECTIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                           & mol/mol           & D,I,P,S      \\ \hline
-{\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                        & Pa                & D,I,P,S      \\ \hline
 {\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s               & D,I,P,S      \\ \hline
@@ -12947,6 +12946,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PROFILE}                                             & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
 {\ct RADIUS}                                              & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct RAMP\_EF}                                            & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct RAMP\_MF(:)}                                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
