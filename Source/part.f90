@@ -3560,6 +3560,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
 
+               ! Force removal of droplet
+
+               LP%RADIUS = 0._EB
+
             ELSE BOIL_ALL  ! boil only some of the liquid
 
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
