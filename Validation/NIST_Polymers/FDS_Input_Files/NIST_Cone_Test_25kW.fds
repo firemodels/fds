@@ -3,7 +3,7 @@
 &MESH IJK=10,10,25, XB=-0.10,0.00,-0.10,0.00,-0.03,0.22, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.10, DY=0.10, DZ=0.25, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
-&TIME T_END=600. /
+&TIME T_END=0/600. /
 
 &MATL ID                = 'KAOWOOL'
       DENSITY           = 128.
@@ -55,6 +55,6 @@
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 &BNDF QUANTITY='BURNING RATE' /
 
-&TAIL / 
+&TAIL /
 
 
