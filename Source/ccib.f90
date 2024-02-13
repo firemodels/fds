@@ -7351,6 +7351,9 @@ ENDDO
 MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
 
+! Set CCVOL_LINK an epsilon higher than defined value to have all cells/faces around defined value linked.
+CCVOL_LINK = CCVOL_LINK + GEOMEPS
+
 IF (PERIODIC_TEST == 105) THEN ! Set cc-guard to zero, i.e. do not compute guard-cell cut-cells, for timings.
    NGUARD = 2
    CCGUARD= NGUARD-2
