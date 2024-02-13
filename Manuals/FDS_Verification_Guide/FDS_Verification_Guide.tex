@@ -4507,28 +4507,26 @@ The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat lo
 
 \FloatBarrier
 
-\subsection{Heat Transfer to a Steel Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
+\subsection{Heat Transfer to an I-Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
 \label{ht3d_beam_heating}
 
-A steel I-beam 1.76~m long, with flanges that are 0.22~m wide and 0.03~m thick and a web that is 0.6~m deep and 0.02~m thick, is heated within a sealed compartment that is filled with a gas that has a volume $V_{\rm g}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The steel has a density $\rho_{\rm s}=7500$~kg/m$^3$, specific heat $c_{\rm s}=0.5$~kJ/(kg$\cdot$K), and volume $V_{\rm s}=0.041536$~kg/m$^3$, and initial temperature $T_{\rm s,0}=293.15$~K. Initially, the gas and steel have internal energies given by:
+An aluminum I-beam $L=1.76$~m long and $d=0.58$~m deep (i.e.~in height), with flanges that are $b_{\rm f}=0.22$~m wide and $t_{\rm f}=0.005$~m thick and a web that is $t_{\rm w}=0.006$~m thick, is heated within a sealed compartment with volume $V_{\rm c}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The aluminum has a density $\rho_{\rm a}=2700$~kg/m$^3$, specific heat $c_{\rm a}=0.9$~kJ/(kg$\cdot$K), and initial temperature $T_{\rm a,0}=293.15$~K. Initially, the gas and aluminum have internal energies given by:
 \be
-   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 191.95 \; \hbox{kJ} \quad ; \quad
-   U_{\rm s} = \rho_{\rm s} V_{\rm s} c_{\rm s} T_{\rm s,0} \approx 45661.04 \; \hbox{kJ}
+   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 189.56 \; \hbox{kJ} \quad ; \quad
+   U_{\rm a} = \rho_{\rm a} V_{\rm a} c_{\rm a} T_{\rm a,0} \approx 7046.0 \; \hbox{kJ}
 \ee
 After several minutes, the equilibrium temperature is expected to be:
 \be
-   T = \frac{U_{\rm g}+U_{\rm s}}{\rho_{\rm s} V_{\rm s} c_{\rm s} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 294.045 \; \hbox{K} \; \equiv 20.895 \; ^\circ \hbox{C}
+   T = \frac{U_{\rm g}+U_{\rm a}}{\rho_{\rm a} V_{\rm a} c_{\rm a} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 298.84 \; \hbox{K} \; \equiv 25.69 \; ^\circ \hbox{C}
 \ee
-where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 9.0847$ is the number of moles of gas.
+where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 8.973$ is the number of moles of gas. The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the I-beam.
 
-The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
-
-In a second case, a steel plate that is 1.76~m long, 0.58~m wide, and 0.02~m thick is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 21.808~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
+In a second case, the I-beam is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 25.62~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_1}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_2}
-\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of a steel beam immersed in hot gas. (Right) Average temperature of an insulated steel plate exposed to the same conditions.}
+\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of an I-beam immersed in hot gas. (Right) Average temperature of an insulated I-beam exposed to the same conditions.}
 \label{fig:ht3d_beam_heating}
 \end{figure}
 
