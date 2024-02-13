@@ -6118,6 +6118,10 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \end{lstlisting}
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
+\subsubsection{Target Particles}
+\label{info:target_particles}
+
+To declare solid particle as being just a target for heat transfer, specify {\ct TARGET\_ONLY} on {\ct PART}. When this flag is set and material properties are given, then FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a {\ct CARTESIAN} particle's {\ct SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on {\ct SURF} such as {\ct TMP\_GAS\_BACK} and {\ct EMISSIVITY\_BACK}. If it is still desired to have the {\ct THICKNESS} represent half the thickness of a plate heated from both sides, then set {\ct BACKING='INSULTATED'} on the {\ct SURF} line. Target particles are treated as {\ct STATIC} but can be positioned using {\ct PATH\_RAMP} and/or {\ct ORIENTATION\_RAMP} on {\ct INIT}.
 
 \newpage
 
@@ -12423,6 +12427,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m            &                       \\ \hline
 {\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
 {\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
+{\ct TARGET\_ONLY}                       & Logical     & Section~\ref{info:target_particles}                                   &                   & {\ct F}               \\ \hline
 {\ct TRACK\_EMBERS}                      & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct T}               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline

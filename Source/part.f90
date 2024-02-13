@@ -1702,6 +1702,7 @@ IF (LP%OD_INDEX>0) THEN
    IF (LPC%TMP_INITIAL>0._EB) THEN
       LP_ONE_D%TMP = LPC%TMP_INITIAL
       B1%TMP_F = LP_ONE_D%TMP(1)
+      B1%TMP_B = LP_ONE_D%TMP(1)
    ELSEIF (LP_SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
       IF (LP_SF%RAMP_T_I_INDEX > 0) THEN
          B1%TMP_F = EVALUATE_RAMP(0._EB,LP_SF%RAMP_T_I_INDEX)
@@ -1718,16 +1719,20 @@ IF (LP%OD_INDEX>0) THEN
             LP_ONE_D%TMP = TMPA
          ENDIF
          B1%TMP_F = LP_ONE_D%TMP(1)
+         B1%TMP_B = LP_ONE_D%TMP(1)
       ENDIF
    ELSE
       LP_ONE_D%TMP = TMPA
       B1%TMP_F = LP_ONE_D%TMP(1)
+      B1%TMP_B = LP_ONE_D%TMP(1)
    ENDIF
 ELSE
    IF (LPC%TMP_INITIAL>0._EB) THEN
       B1%TMP_F = LPC%TMP_INITIAL
+      B1%TMP_B = LPC%TMP_INITIAL
    ELSE
       B1%TMP_F = TMPA
+      B1%TMP_B = TMPA
    ENDIF
 ENDIF
 
@@ -1862,12 +1867,18 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Determine particle radius
 
+      IF (LPC%MASSLESS_TARGET) THEN
+         ! If there is a path ramp, move the target
+         IF (LP%PATH_PARTICLE) THEN
+            CALL MOVE_IN_GAS
+            CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+         ENDIF
+         EXIT TIME_STEP_LOOP
+      ENDIF
       IF (LPC%LIQUID_DROPLET .OR. LPC%SOLID_PARTICLE) THEN
          R_D = LP%RADIUS
       ELSEIF (LPC%MASSLESS_TRACER) THEN
          R_D = 0._EB
-      ELSEIF (LPC%MASSLESS_TARGET) THEN
-         EXIT TIME_STEP_LOOP
       ENDIF
 
       ! Throw out particles that have run out of mass.
