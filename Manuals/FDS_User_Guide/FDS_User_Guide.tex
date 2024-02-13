@@ -7175,7 +7175,7 @@ A handy way to introduce many trees into a simulation is by way of a {\ct SURF} 
 This line indicates that solid boundaries with the surface properties given by {\ct 'forest'} shall have 1 tree per 10~m$^2$, as indicated by the parameter {\ct INIT\_PER\_AREA}. The trees may consist of more than one type of particle, as indicated by the array {\ct INIT\_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates {\ct XYZ} on the {\ct INIT} line should be {\ct 0,0,0} so that it can be re-positioned accordingly.
 
 
-\subsection{Bulk density input files}
+\subsection{Bulk Density Input Files}
 \label{bulk_density_file}
 
 In some cases, the user may have access to detailed 3-dimensional spatial information on the distribution of vegetation bulk density, or {\ct MASS\_PER\_VOLUME}, within a tree crown or a forest canopy. These data may be available in a voxelized (gridded) format and are increasingly common with the advancement of both remote sensing techniques (e.g. lidar) and tools for modeling forest canopy structure. It is possible to directly import such bulk density data by specifying a {\ct BULK\_DENSITY\_FILE} on the {\ct INIT} line. Each file should specify the bulk density values for the type of vegetation defined by the {\ct PART\_ID} and {\ct SURF\_ID} associated with the particular {\ct INIT} line. For example, one file may specify the spatial distribution of foliage, another for branches, and so on:
@@ -7222,8 +7222,8 @@ The amount expected on the floor is approximately 0.024~kg.
 \end{figure}
 
 
-\subsection{Ember Generation}
-\label{info:ember_generation}
+\subsection{Ember Generation From Particles}
+\label{info:ember_generation_part}
 
 Although in its early stages of development, a rudimentary ember generation algorithm is available for use in FDS.  Lagrangian particle classes may be tagged as ``ember particles'' and thus subject to lofting by a drag force.  Two parameters control the point at which a given particle becomes an ember.  First is the density threshold, controlled by the parameter {\ct EMBER\_DENSITY\_THRESHOLD} on the {\ct PART} line.  As a vegetative particle burns and converts to char its density decreases from that of a woody material with a density of 500-1000 \si{kg/m^3} to char with a density of 50-100 \si{kg/m^3}.  As the wood turns to char its structural integrity diminishes and the drag forces may rip the vegetative element apart.  While the phenomenon of course depends on the force exerted by the gas flow around the particle, we use a velocity threshold as a surrogate to the drag force, since this is more intuitive.  The threshold is controlled by {\ct EMBER\_VELOCITY\_THRESHOLD} on {\ct PART}.  The {\ct EMBER\_PARTICLE} tag should only be applied to particle classes that are initially {\ct STATIC}.  A typical example is given below.
 \begin{lstlisting}
@@ -7478,10 +7478,17 @@ In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited dir
 \label{level_set_fuel_model_1_fig}
 \end{figure}
 
+\subsection{Ember Generation From Surfaces}
+\label{info:ember_generation_surf}
+
+It is possible to make a burning surface create Lagrangian particles to represent embers by specifying an {\ct EMBER\_YIELD} (kg/kg) on the {\ct SURF} line. As this yield requires a burning surface it was developed to be used with {\ct LEVEL\_SET\_MODE=4}, however, it can also be applied to the Boundary Fuel Model. A {\ct PART\_ID} also needs to be specified to provide the properties of the generated embers. Currently, the ember yield is associated with the mass available to burn in the gas phase and does not account for char yield. For example, a fuel load of 1~kg/m$^2$ with a char yield of 0.2 and an ember yield of 0.05 would produce 0.2~kg/m$^2$ of char, 0.04~kg/m$^2$ of embers, and 0.76~kg/m$^2$ of fuel vapor.  
+
+In many cases, it is not necessary or even practical to track every single ember and a single Lagrangian particle can be used to represent the mass of many embers. This can be accomplished by setting {\ct EMBER\_TRACKING\_RATIO} on the {\ct SURF} line. If not specified, the default value is 100. You can also specify an {\ct EMBER\_GENERATION\_HEIGHT} (m) to dictate the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface. Finally, it is recommended to set {\ct VEL\_PART=0.0} on the {\ct SURF} line when modeling ember generation so that particles start from rest and are naturally lofted by the surrounding flow. 
+
 \subsection{Ember Ignition}
 \label{info:Ember_Ignition}
 
-If an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_POWER\_SIGMA}, whose default value is 0.001~kW.
+When running a Level Set case, if an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_POWER\_SIGMA}, whose default value is 0.001~kW.
 
 
 \subsection{Wildfire Spread over Realistic Terrain using QGIS}
@@ -12385,9 +12392,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DRAG\_COEFFICIENT(3)}               & Real Array  & Section~\ref{info:particle_drag}                                      &                   &                       \\ \hline
 {\ct DRAG\_LAW}                          & Character   & Section~\ref{info:particle_drag}                                      &                   & {\ct 'SPHERE'}        \\ \hline
 {\ct EVAP\_MODEL}                        & Character   & Section~\ref{info:liquid_droplets}                              &   & B-number\footnote{\ct 'RANZ-MARSHALL B-NUMBER'} \\ \hline
-{\ct EMBER\_DENSITY\_THRESHOLD}          & Real        & Section~\ref{info:ember_generation}                                   &                   &                       \\ \hline
-{\ct EMBER\_PARTICLE}                    & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct F}               \\ \hline
-{\ct EMBER\_VELOCITY\_THRESHOLD}         & Real        & Section~\ref{info:ember_generation}                                   &                   &                       \\ \hline
+{\ct EMBER\_DENSITY\_THRESHOLD}          & Real        & Section~\ref{info:ember_generation_part}                              &                   &                       \\ \hline
+{\ct EMBER\_PARTICLE}                    & Logical     & Section~\ref{info:ember_generation_part}                              &                   & {\ct F}               \\ \hline
+{\ct EMBER\_VELOCITY\_THRESHOLD}         & Real        & Section~\ref{info:ember_generation_part}                              &                   &                       \\ \hline
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
@@ -12426,7 +12433,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
 {\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct TARGET\_ONLY}                       & Logical     & Section~\ref{info:target_particles}                                   &                   & {\ct F}               \\ \hline
-{\ct TRACK\_EMBERS}                      & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct T}               \\ \hline
+{\ct TRACK\_EMBERS}                      & Logical     & Section~\ref{info:ember_generation_part}                              &                   & {\ct T}               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
 \end{longtable}
@@ -12885,9 +12892,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DRAG\_COEFFICIENT}                                   & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
 {\ct DT\_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct E\_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
-{\ct EMBER\_GENERATION\_HEIGHT(2)}                        & Real            & Section~\ref{info:particle_flux}          & m                   &                         \\ \hline
+{\ct EMBER\_GENERATION\_HEIGHT(2)}                        & Real            & Section~\ref{info:ember_generation_surf}  & m                   &                         \\ \hline
 {\ct EMBER\_POWER\_MEAN}                                  & Real            & Section~\ref{info:Ember_Ignition}         & kW                  &                         \\ \hline
 {\ct EMBER\_POWER\_SIGMA}                                 & Real            & Section~\ref{info:Ember_Ignition}         & kW                  & 0.001                   \\ \hline
+{\ct EMBER\_TRACKING\_RATIO}                              & Real            & Section~\ref{info:ember_generation_surf}  &                     & 100                  \\ \hline
+{\ct EMBER\_YIELD}                                        & Real            & Section~\ref{info:ember_generation_surf}  & kg/kg               &                      \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                                      & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
