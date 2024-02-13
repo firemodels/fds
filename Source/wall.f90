@@ -1393,7 +1393,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             IF (SF%N_QDOTPP_REF > 0 .AND. N_REACTIONS>=1) THEN
                IF (PREDICTOR) THEN
                   IF (B1%T_IGN <=T) THEN
-                     B1%M_DOT_G_PP_ACTUAL(N) = QDOTPP*SF%MASS_FLUX(N)                     
+                     B1%M_DOT_G_PP_ACTUAL(N) = QDOTPP*SF%MASS_FLUX(N)
                   ELSE
                      B1%M_DOT_G_PP_ACTUAL(N) = 0._EB
                   ENDIF
@@ -1425,6 +1425,17 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)*EXP(-B2%K_SUPPRESSION)
          ENDIF
       ENDIF
+
+      ! Account for accumulation of ember mass (pre-transport)
+      IF (CORRECTOR .AND. SF%EMBER_YIELD>0._EB .AND. (PRESENT(WALL_INDEX).OR.PRESENT(CFACE_INDEX))) THEN
+         N = SF%PART_INDEX
+         B2%LP_EMPUA(N) = B2%LP_EMPUA(N) + B1%M_DOT_G_PP_ACTUAL(REACTION(1)%FUEL_SMIX_INDEX)*SF%EMBER_YIELD*DT
+         ! Readjust flux to conserve mass
+         B1%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX) = &
+            B1%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*(1._EB-SF%EMBER_YIELD)
+         B1%M_DOT_G_PP_ACTUAL(REACTION(1)%FUEL_SMIX_INDEX) = &
+            B1%M_DOT_G_PP_ACTUAL(REACTION(1)%FUEL_SMIX_INDEX)*(1._EB-SF%EMBER_YIELD)
+       ENDIF
 
       ! If processing a 1-D, thermally-thick WALL cell, reduce the mass of the OBSTruction (OB%MASS) to which the WALL cell is
       ! attached. If the WALL cell is at the exterior of the current MESH, and the OBSTstruction to which it is attached
