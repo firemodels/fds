@@ -1992,8 +1992,8 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
-            WRITE(LU_ERR,'(A,I0,A,I0)') 'ERROR(424): HT3D thin solid must have at least one face exposed, Mesh=',NM,&
-                                        ', IOR=',IOR
+            WRITE(LU_ERR,'(7(A,I0))') 'ERROR(424): HT3D thin solid must have at least one face exposed in direction ',IOR,&
+                                      ': Mesh=',NM,', IOR=',BC%IOR,', IIG=',BC%IIG,', JJG=',BC%JJG,', KKG=',BC%KKG,', I=',I
             STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
@@ -4187,6 +4187,10 @@ FIND_BACK_THIN_WALL_CELL: DO
          CASE(2) ; ONE_D%LAYER_THICKNESS(1) = OB%UNDIVIDED_INPUT_LENGTH(2)
          CASE(3) ; ONE_D%LAYER_THICKNESS(1) = OB%UNDIVIDED_INPUT_LENGTH(3)
       END SELECT
+      IF (OB%CELL_SIZE>0._EB) THEN
+         ONE_D%CELL_SIZE(1) = OB%CELL_SIZE
+         ONE_D%STRETCH_FACTOR(1) = 1._EB
+      ENDIF
       EXIT FIND_BACK_THIN_WALL_CELL
    ENDIF
 
