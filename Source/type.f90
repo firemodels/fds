@@ -81,6 +81,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: REAL_REFRACTIVE_INDEX      !< Radiative property of liquid droplet
    REAL(EB) :: COMPLEX_REFRACTIVE_INDEX   !< Radiative property of liquid droplet
    REAL(EB) :: DENSITY=-1._EB             !< Density of liquid droplet (kg/m\f$^3\f$)
+   REAL(EB) :: INITIAL_MASS=-1._EB        !< Initial mass of single particle (kg)
    REAL(EB) :: FTPR                       !< 4/3 * PI * SPECIES(N)\%DENSITY_LIQUID (kg/m3)
    REAL(EB) :: FREE_AREA_FRACTION         !< Area fraction of cell open for flow in SCREEN_DRAG model
    REAL(EB) :: POROUS_VOLUME_FRACTION     !< Volume fraction of cell open to flow in porous media model
@@ -331,6 +332,7 @@ TYPE BOUNDARY_PROP2_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_EMPUA            !< Ember masss generated per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
 
@@ -854,6 +856,8 @@ TYPE SURFACE_TYPE
    REAL(EB) :: NUSSELT_M=-1._EB                        !< Re exponent for user defined HTC correlation
    REAL(EB) :: EMBER_POWER_MEAN=-1._EB
    REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
+   REAL(EB) :: EMBER_TRACKING_RATIO=100._EB            !< Ratio of 'real' embers to Lagrangian particles (-)
+   REAL(EB) :: EMBER_YIELD=-1._EB                      !< Mass yield of embers from a burning surface (kg/kg)
    REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
    REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
    REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro

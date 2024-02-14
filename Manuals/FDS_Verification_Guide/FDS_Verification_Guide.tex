@@ -6550,6 +6550,32 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \label{fig:level_set_ellipse_error}
 \end{figure}
 
+\subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
+\label{LS4_ember_yield}.
+
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 1.0~kg/m$^2$ and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+\begin{lstlisting}
+&SURF ID                    = 'fuel'
+VEG_LSET_ROS_00             = 0.15
+VEL_PART                    = 0.
+EMBER_GENERATION_HEIGHT     = 0.0,0.5
+EMBER_YIELD                 = 0.05
+EMBER_TRACKING_RATIO        = 100
+PART_ID                     = 'brands'/
+\end{lstlisting}
+where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the properties of a single ember. The cumulative yield is shown in Figure~\ref{fig:LS4_ember_yield}. We also verify the use of {\ct EMBER\_TRACKING\_RATIO} by checking the average weighting factor for all Lagrangian particles (the number of embers each represents).
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_yield.pdf}&
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_weighting.pdf}\\
+\end{tabular}
+\end{center}
+ \caption[Level set ember generation]{Expected versus predicted (left) yield of embers and (right) average weighting factor for each Lagrangian particle.}
+\label{fig:LS4_ember_yield}
+\end{figure}
+
 % Unstructured geometry verification tests:
 
 \ifcompgeom
