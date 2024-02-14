@@ -18,13 +18,13 @@ Here are some other useful links:
 
 [Smokeview Downloads](https://github.com/firemodels/smv/releases)
 
-[Discussion Forum](https://groups.google.com/forum/#!forum/fds-smv)
-
-[Nightly Builds (includes Documentation)](https://github.com/firemodels/test_bundles/releases/tag/FDS_TEST)
+[Discussions](https://github.com/firemodels/fds/discussions)
 
 [FDS Issues](https://github.com/firemodels/fds/issues)
 
 [Smokeview Issues](https://github.com/firemodels/smv/issues)
+
+[Nightly Builds (includes Documentation)](https://github.com/firemodels/test_bundles/releases/tag/FDS_TEST)
 
 Pull requests welcome!
 
