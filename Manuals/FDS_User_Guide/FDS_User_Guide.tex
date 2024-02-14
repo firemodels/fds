@@ -2208,7 +2208,7 @@ It may be useful to visualize which convective heat transfer correlation is bein
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 To specify the convective heat transfer coefficient, set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)} with optional time dependent ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK} with optional time dependent ramp ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}. 
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)} with optional time dependent ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK} with optional time dependent ramp ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 \label{info:net_and_convective_heat_flux}
@@ -2535,7 +2535,7 @@ Structural steel members like I-beams are difficult to model for two reasons. Fi
 \subsection{Surface Linings}
 \label{info:linings}
 
-In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s. 
+In some applications, you might want to perform 3-D heat conduction within collections of abutting obstructions, each with a {\ct MATL\_ID}. The obstructions might have some outer lining, like fabric on sofa cushions, for example, and this lining is thinner than a single gas phase grid cell. In other words, this lining material cannot be represented by an {\ct OBST}. However, you can specify one or more layers of multi-component materials using {\ct MATL\_ID}, {\ct MATL\_MASS\_FRACTION}, and {\ct THICKNESS} on the {\ct SURF} line(s) that are assigned to the {\ct OBST}s that also have specified {\ct MATL\_ID}s and {\ct MATL\_MASS\_FRACTION}s.
 
 The way linings are handled depends on the size of the obstruction. If the obstruction is a flat plate whose depth is less than one-half a grid cell and is represented as a zero-cell thick sheet, then any layer materials are assumed to {\em add} to the thickness of the underlying plate. For example, if a plate of steel is 1~cm thick and it is assumed to be coated on both sides by layers of insulation that are 2~cm thick, the assembly is still treated as a thin sheet from the standpoint of the gas phase computation, but the depth is taken as 5~cm for the purpose of the heat transfer computation.
 
@@ -2557,12 +2557,10 @@ The resulting solid has the same dimensions as the one you specify, but 5~mm of 
 
 An insulated steel beam can be modeled as a hybrid of 1-D and 3-D objects. The heat conducted through the insulation varies mainly in the direction normal to the surface, while the heat conducted along the steel beam varies mainly in the lateral direction. The following lines provide an example where a steel plate is coated with insulation. The steel plate is entered as a relatively thin obstruction, and the insulation is applied to each side via a {\ct SURF} line. This latter parameter ensures that the thin steel obstruction and the insulation obstruction are included in the calculation of solid overlap volumes. Note that all dimensions are exact to ensure that the overlap volumes are computed properly.
 \begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID6='STEEL SLAB','STEEL SLAB',
-      'WEB INSULATION','WEB INSULATION','STEEL SLAB','STEEL SLAB', MATL_ID='STEEL' /
-&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
-&SURF ID='WEB INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
+&OBST XB=..., SURF_ID='INSULATION', MATL_ID='STEEL', CELL_SIZE=0.1 /
+&SURF ID='INSULATION', MATL_ID='STUFF', COLOR='BEIGE', THICKNESS=0.01, HT3D=T /
 \end{lstlisting}
-Note that the {\ct CELL\_SIZE} refers to heat transfer in the lateral direction. The heat transfer in the direction normal to the insulation and thin steel plate will be gridded according to the {\ct SURF} {\ct 'WEB INSULATION'}. 
+Note that the {\ct CELL\_SIZE} refers to heat transfer in the lateral direction. The heat transfer in the direction normal to the insulation and thin steel plate will be gridded according to parameters on the {\ct SURF} line {\ct 'INSULATION'}.
 
 
 
@@ -6118,6 +6116,10 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \end{lstlisting}
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
+\subsubsection{Target Particles}
+\label{info:target_particles}
+
+To declare solid particle as being just a target for heat transfer, specify {\ct TARGET\_ONLY} on {\ct PART}. When this flag is set and material properties are given, then FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a {\ct CARTESIAN} particle's {\ct SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on {\ct SURF} such as {\ct TMP\_GAS\_BACK} and {\ct EMISSIVITY\_BACK}. If it is still desired to have the {\ct THICKNESS} represent half the thickness of a plate heated from both sides, then set {\ct BACKING='INSULTATED'} on the {\ct SURF} line. Target particles are treated as {\ct STATIC} but can be positioned using {\ct PATH\_RAMP} and/or {\ct ORIENTATION\_RAMP} on {\ct INIT}.
 
 \newpage
 
@@ -12423,6 +12425,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m            &                       \\ \hline
 {\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
 {\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
+{\ct TARGET\_ONLY}                       & Logical     & Section~\ref{info:target_particles}                                   &                   & {\ct F}               \\ \hline
 {\ct TRACK\_EMBERS}                      & Logical     & Section~\ref{info:ember_generation}                                   &                   & {\ct T}               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
