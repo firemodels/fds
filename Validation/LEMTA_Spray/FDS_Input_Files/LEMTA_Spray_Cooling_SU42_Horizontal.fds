@@ -1,8 +1,8 @@
-&HEAD CHID='LEMTA_Spray_Cooling_SU42_Horizontal', TITLE='Simulation LEMTA SU42 horizontal plate cooling experiment' / 
+&HEAD CHID='LEMTA_Spray_Cooling_SU42_Horizontal', TITLE='Simulation LEMTA SU42 horizontal plate cooling experiment' /
 
 &TIME T_END=500 /
 
-&MESH IJK=24,24,20, XB=-0.6,0.6,-0.6,0.6,-0.30,0.70 / 
+&MESH IJK=24,24,20, XB=-0.6,0.6,-0.6,0.6,-0.30,0.70 /
 
 &MISC TMPA=12.7 /
 
@@ -10,14 +10,12 @@
 
 &OBST XB=-0.50,0.50,-0.50,0.50,-0.002,0.00, SURF_ID='Hot metallic plate', MATL_ID='Steel', CELL_SIZE=0.05 /
 
-&OBST XB=-0.25,0.25,-0.25,0.25,-0.25,-0.20, SURF_IDS='Radiative panel','INERT','INERT', DEVC_ID='timer' /
-
-&DEVC ID='timer', QUANTITY='TIME', XYZ=0,0,0, SETPOINT=385., INITIAL_STATE=T /
+&OBST XB=-0.25,0.25,-0.25,0.25,-0.25,-0.20, SURF_IDS='Radiative panel','INERT','INERT'/
 
 &MATL ID='Steel'
       SPECIFIC_HEAT_RAMP = 'c_ramp'
       CONDUCTIVITY_RAMP = 'k_ramp'
-      DENSITY = 7850 / 
+      DENSITY = 7850 /
 
 &RAMP ID='k_ramp', T=   0., F=55 /
 &RAMP ID='k_ramp', T= 100., F=52 /
@@ -26,7 +24,7 @@
 &RAMP ID='k_ramp', T= 400., F=42 /
 &RAMP ID='k_ramp', T= 600., F=34 /
 &RAMP ID='k_ramp', T= 800., F=30 /
-&RAMP ID='k_ramp', T=1000., F=29 / 
+&RAMP ID='k_ramp', T=1000., F=29 /
 
 &RAMP ID='c_ramp', T=  50., F=0.45 /
 &RAMP ID='c_ramp', T= 250., F=0.50 /
@@ -39,15 +37,15 @@
 &RAMP ID='c_ramp', T=1200., F=0.52 /
 
 &SURF ID='Hot metallic plate', COLOR='BLACK', HT3D=T /
- 
-&SURF ID = 'Radiative panel' 
+
+&SURF ID = 'Radiative panel'
       NET_HEAT_FLUX = 112
       RAMP_Q = 'NHFRAMP' /
 
 &RAMP ID='NHFRAMP', T=  0.0, F=0.0 /
 &RAMP ID='NHFRAMP', T= 32.7, F=0.0 /
 &RAMP ID='NHFRAMP', T= 32.8, F=1.0 /
-&RAMP ID='NHFRAMP', T=384.3, F=1.0 / 
+&RAMP ID='NHFRAMP', T=384.3, F=1.0 /
 &RAMP ID='NHFRAMP', T=384.4, F=0.0 /
 
 &SPEC ID='WATER VAPOR', MASS_EXTINCTION_COEFFICIENT=500 /
@@ -58,12 +56,12 @@
 
 &PROP ID='sprinkler',
       PART_ID='Watermist',
-      OFFSET=0.02, 
+      OFFSET=0.02,
       SPRAY_ANGLE=0,21,
       FLOW_RATE=4.6,
       PARTICLE_VELOCITY=70,
       PARTICLES_PER_SECOND=5000 /
- 
+
 &DUMP DT_DEVC=4. /
 
 &DEVC ID='SPR', XYZ=0.0,0.0,0.5, ORIENTATION=0,0,-1, PROP_ID='sprinkler', QUANTITY='TIME', SETPOINT=383.4 /
@@ -76,11 +74,11 @@
 &VENT DB='ZMAX', SURF_ID='OPEN' /
 
 &SLCF PBZ=-0.001, QUANTITY='TEMPERATURE' /
-&SLCF PBZ=0.001, QUANTITY='TEMPERATURE' / 
+&SLCF PBZ=0.001, QUANTITY='TEMPERATURE' /
 &SLCF PBY=0, QUANTITY='TEMPERATURE' /
 &SLCF PBY=0, QUANTITY='W-VELOCITY' /
 
-&DEVC ID='T_bottom', XYZ=0,0,-0.005, QUANTITY='WALL TEMPERATURE', IOR=-3 / 
+&DEVC ID='T_bottom', XYZ=0,0,-0.005, QUANTITY='WALL TEMPERATURE', IOR=-3 /
 &DEVC ID='T_top',    XYZ=0,0, 0.005, QUANTITY='WALL TEMPERATURE', IOR= 3 /
 
 &DEVC ID='WT1',  XYZ=-0.25,-0.25,-0.001, QUANTITY='WALL TEMPERATURE', IOR=-3  /
