@@ -10,6 +10,7 @@ $QFDS $DEBUG $QUEUE -d $INDIR LEMTA_Spray_2.fds
 $QFDS $DEBUG $QUEUE -d $INDIR LEMTA_Spray_3.fds
 $QFDS $DEBUG $QUEUE -d $INDIR LEMTA_Spray_4.fds
 $QFDS $DEBUG $QUEUE -d $INDIR LEMTA_Spray_5.fds
+$QFDS $DEBUG $QUEUE -d $INDIR LEMTA_Spray_Cooling_SU42_Horizontal.fds
 
 echo FDS cases submitted
 

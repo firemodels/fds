@@ -1,4 +1,4 @@
-## Introduction
+# Contributing
 
 This page provides a starting point for getting involved with the FDS and Smokeview project.  Both novice and experienced developers are also encouraged to review our [Developer Commit Guidelines](https://github.com/firemodels/fds/wiki/Developer-Commit-Guidelines) for details about source code conventions, etc.
 
