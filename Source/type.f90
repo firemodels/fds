@@ -93,7 +93,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
-   REAL(EB) :: LENGTH                     !< Cylinder or plate length used for POROUS_DRAG or SCREEN_DRAG (m)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF         !< Independent variable (radius) in particle size distribution
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CNF           !< Cumulative Number Fraction particle size distribution
@@ -399,6 +398,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: DX=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: DY=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: DZ=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: LENGTH=-1._EB       !< Cylinder or plate length used for POROUS_DRAG or SCREEN_DRAG (m)
    REAL(EB) :: C_DRAG=0._EB        !< Drag coefficient
    REAL(EB) :: RADIUS=0._EB        !< Radius (m)
    REAL(EB) :: ACCEL_X=0._EB       !< Acceleration in x direction (m/s2)
