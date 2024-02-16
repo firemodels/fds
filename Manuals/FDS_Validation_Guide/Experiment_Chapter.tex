@@ -2554,6 +2554,58 @@ The data in the experimental repository for the helium plume is Favre averaged. 
 
 Note that the velocity fields in the methane and hydrogen fire plumes were obtained directly from PIV and are therefore ensemble averaged \cite{Tieszen:2004,Tieszen:2002}.
 
+\section{Scaling Pyrolysis}
+\label{exp_Scaling Pyrolysis}
+
+FDS has a scaling-based pyrolysis model which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface.
+These cases include cone calorimeter experiments conducted at multiple heat transfer levels.
+The robustness of the approach is evaluated using cone calorimeter data for 172 materials available in public datasets.
+These materials include:
+\begin{enumerate}
+\item Fifteen materials from studies conducted by Jensen Hughes ~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+\item Eight materials from the FAA Polymers experiments ~\cite{Stoliarov:CF2009,Stoliarov:FM2012}.
+\item Two materials from the Aalto Wood experiments ~\cite{Rinta-Paavola:2023}.
+\item Seventy-one materials from the material testing database provided by FSRI at the UL Research Institutes ~\cite{McKinnon:FSRI2023_Data}.
+\item Eight materials from the FPL database ~\cite{FPL:Fire_Database}.
+\item Sixty-eight materials from the RISE database ~\cite{RISE:Fire_Database}.
+\end{enumerate}
+Table ~\ref{Scaling_Pyrolysis_Materials} summarizes the materials by source and composition category.
+The polymers category includes pure polymers, polymer blends, polymers with coating (e.g., scratch resistance), and polymers with non-fibrous additives.
+The wood material category includes natural wood species and wood-based products such as plywood, hardboard, and particleboard (with and without fire resistant treatment).
+The mixtures category includes polymers with fibrous additives, multi-layered materials, and assemblies.
+The other material category includes other natural and synthetic materials such as asphalt shingles, cardboard, rubbers, felts, and gypsum wallboards.
+Approximately half of the materials are polymers, with the remaining half split across the other three material categories.
+
+\begin{table}[!h]
+\caption[Summary of Materials]{Summary of Materials}
+\centering
+\begin{tabular}{|l|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+Dataset             & Mixtures    & Others      & Polymers    & Wood-Based  & Total       \\ \hline
+Aalto Woods         & 0           & 0           & 0           & 2           & 2           \\ \hline
+FAA Polymers        & 0           & 0           & 8           & 0           & 8           \\ \hline
+FPL Materials       & 0           & 0           & 0           & 8           & 8           \\ \hline
+FSRI Materials      & 0           & 26          & 30          & 15          & 71          \\ \hline
+JH Materials        & 5           & 1           & 4           & 5           & 15          \\ \hline
+RISE Materials      & 45          & 5           & 15          & 3           & 68          \\ \hline
+Total               & 50          & 32          & 57          & 33          & 172         \\ \hline
+\end{tabular}
+\label{Scaling_Pyrolysis_Materials}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+Each case is modeled using the solid phase only solver in FDS.
+An empirical model is used to acccount for the thermal exposure after ignition based on the estimated flame heat flux.
+The time to ignition in each case is fixed based on experimental data (i.e., the validation focuses on what happens after ignition).
+
+Note the RISE and FPL databases did not provide ignition properties or information on specific material conditioning or modifications to test procedures.
+For these materials, representative values of material properties were identified for each of these materials from the FSRI database ~\cite{McKinnon:FSRI2023_Data}, the SFPE handbook ~\cite{SFPE:Tewarson},
+the SFPE Engineering Guide on Piloted Ignition ~\cite{Beyler2002}, and the Ignition Handbook ~\cite{Babrauskas:2}.
+An emissivity value of unity was assumed for each material unless an ignition temperature which satisfied the measured ignition times could not be achieved with a value of unity.
+
+\FloatBarrier
+
 \section{SETCOM Wall Condensation Experiments}
 \label{SETCOM_Cond_Description}
 

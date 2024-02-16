@@ -680,6 +680,766 @@ def getMaterialsDatabase(systemPath):
     #cloned_repo = repo.clone('https://github.com/johodges/materials.git')
     repo.submodule_update(recursive=True)
 
+def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness1):
+    tMax_by_thickness = dict(tMax_by_thickness1)
+    qMax_by_thickness = dict(qMax_by_thickness1)
+    initial_length = len(tMax_by_thickness.keys())
+    if material == 'Aalto_Pine_Flaming':
+        thickness = 20.00000000
+        tMax_by_thickness[thickness] = 30
+        qMax_by_thickness[thickness] = 250
+    elif material == 'Aalto_Spruce_Flaming':
+        thickness = 20.00000000
+        tMax_by_thickness[thickness] = 30
+        qMax_by_thickness[thickness] = 250
+    
+    elif material == 'FAA_HDPE':
+        thickness = 3.2
+        tMax_by_thickness[thickness] = 12.0
+        qMax_by_thickness[thickness] = 2350.0
+        thickness = 8.1
+        tMax_by_thickness[thickness] = 28.0
+        qMax_by_thickness[thickness] = 2550.0
+        thickness = 27.0
+        tMax_by_thickness[thickness] = 68.0
+        qMax_by_thickness[thickness] = 2800.0
+    elif material == 'FAA_HIPS':
+        thickness = 3.2
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 1370.0
+        thickness = 8.1
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 1425.0
+        thickness = 27.0
+        tMax_by_thickness[thickness] = 54.0
+        qMax_by_thickness[thickness] = 1370.0
+    elif material == 'FAA_PBT':
+        thickness = 4.00000000
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 1975.0
+    elif material == 'FAA_PBTGF':
+        thickness = 4.00000000
+        tMax_by_thickness[thickness] = 7.0
+        qMax_by_thickness[thickness] = 985.0
+    elif material == 'FAA_PC':
+        thickness = 3.0
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 950.0
+        thickness = 5.5
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 765.0
+        thickness = 9.0
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 655.0
+    elif material == 'FAA_PEEK':
+        thickness = 3.90000000
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'FAA_PMMA':
+        thickness = 3.2
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 1400.0
+        thickness = 8.1
+        tMax_by_thickness[thickness] = 17.0
+        qMax_by_thickness[thickness] = 1650.0
+        thickness = 27.0
+        tMax_by_thickness[thickness] = 50.0
+        qMax_by_thickness[thickness] = 1600.0
+    elif material == 'FAA_PVC':
+        thickness = 3.0
+        tMax_by_thickness[thickness] = 6.0
+        qMax_by_thickness[thickness] = 350.0
+        thickness = 6.0
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 400.0
+        thickness = 9.0
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 325.0
+
+
+    elif material == 'FPL_hardboard_6mm':
+        thickness = 7.25000000
+        tMax_by_thickness[thickness] = 15
+        qMax_by_thickness[thickness] = 655.0
+    elif material == 'FPL_lumber_redoak_20mm':
+        thickness = 19.75000000
+        tMax_by_thickness[thickness] = 66.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'FPL_osb_12mm':
+        thickness = 11.50000000
+        tMax_by_thickness[thickness] = 25
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'FPL_plywood_douglas_fir_12mm':
+        thickness = 11.75000000
+        tMax_by_thickness[thickness] = 30
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FPL_plywood_douglas_fir_frt_12mm':
+        thickness = 12.50000000
+        tMax_by_thickness[thickness] = 20
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FPL_plywood_oak_13mm':
+        thickness = 12.70000000
+        tMax_by_thickness[thickness] = 35
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'FPL_plywood_southern_pine_frt_11mm':
+        thickness = 11.25000000
+        tMax_by_thickness[thickness] = 30
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FPL_waferboard_13mm':
+        thickness = 13.00000000
+        tMax_by_thickness[thickness] = 25
+        qMax_by_thickness[thickness] = 380.0
+
+    elif material == 'FSRI_Asphalt_Shingle':
+        thickness = 3.0033
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 1040.0
+    elif material == 'FSRI_Cellulose_Insulation':
+        thickness = 37.7206
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'FSRI_Cotton_Rug':
+        thickness = 6.1034
+        tMax_by_thickness[thickness] = 4
+        qMax_by_thickness[thickness] = 930.0
+    elif material == 'FSRI_Cotton_Sheet':
+        thickness = 0.2201
+        tMax_by_thickness[thickness] = 1.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FSRI_EPDM_Membrane':
+        thickness = 7.7797
+        tMax_by_thickness[thickness] = 15
+        qMax_by_thickness[thickness] = 930.0
+    elif material == 'FSRI_Excelsior':
+        thickness = 2.0204
+        tMax_by_thickness[thickness] = 1
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FSRI_FDNY_LDF':
+        thickness = 12.5935
+        tMax_by_thickness[thickness] = 10
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'FSRI_FRP_Panel':
+        thickness = 6.3791
+        tMax_by_thickness[thickness] = 4
+        qMax_by_thickness[thickness] = 1260.0
+    
+
+    elif material == 'FSRI_Face_Shield':
+        thickness = 19.2521
+        tMax_by_thickness[thickness] = 40.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'FSRI_Feather_Pillow_Feathers':
+        thickness = 0.8007
+        tMax_by_thickness[thickness] = 1.5
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'FSRI_Fiberglass_Insulation_R30_Paper_Faced':
+        thickness = 2.0204
+        tMax_by_thickness[thickness] = 1
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'FSRI_Gypsum_Wallboard':
+        thickness = 13.0028
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'FSRI_Hemp_Sheet':
+        thickness = 0.3804
+        tMax_by_thickness[thickness] = 1
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'FSRI_House_Wrap':
+        thickness = 0.1110
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 80.0
+    elif material == 'FSRI_Latex_Pillow_Foam':
+        thickness = 3.2577
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 1550.0
+    elif material == 'FSRI_Lightweight_Gypsum_Wallboard':
+        thickness = 12.9049
+        tMax_by_thickness[thickness] = 6
+        qMax_by_thickness[thickness] = 325.0
+        
+    elif material == 'FSRI_Overstuffed_Chair_Assembly':
+        thickness = 4.2084
+        tMax_by_thickness[thickness] = 6
+        qMax_by_thickness[thickness] = 1250.0
+    elif material == 'FSRI_PE_Foam_Pipe_Insulation':
+        thickness = 14.2924
+        tMax_by_thickness[thickness] = 4
+        qMax_by_thickness[thickness] = 950.0
+    elif material == 'FSRI_Polyisocyanurate_Foam_Board':
+        thickness = 13.7129
+        tMax_by_thickness[thickness] = 4
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'FSRI_Pressure_Treated_Deck':
+        thickness = 19.2521
+        tMax_by_thickness[thickness] = 40.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'FSRI_Roof_Felt':
+        thickness = 1.0731
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 1205.0
+    elif material == 'FSRI_Rubber_Band':
+        thickness = 4.6658
+        tMax_by_thickness[thickness] = 6.0
+        qMax_by_thickness[thickness] = 1040.0
+    elif material == 'FSRI_Rubber_Foam_Pipe_Insulation':
+        thickness = 12.7742
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'FSRI_Rug_Pad':
+        thickness = 4.0605
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 600.0
+        
+    elif material == 'FSRI_Wool_Rug':
+        thickness = 16.6327
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'FSRI_XPS_Foam_Board':
+        thickness = 27.0723
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 1450.0
+        
+    elif material == 'FSRI_ABS':
+        thickness = 2.9545
+        tMax_by_thickness[thickness] = 6
+        qMax_by_thickness[thickness] = 2150.0
+    elif material == 'FSRI_Black_PMMA':
+        thickness = 8.6925
+        tMax_by_thickness[thickness] = 13.0
+        qMax_by_thickness[thickness] = 1700.0
+    elif material == 'FSRI_Cotton_Raw':
+        thickness = 2.4410
+        tMax_by_thickness[thickness] = 3
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'FSRI_HDPE':
+        thickness = 3.2414
+        tMax_by_thickness[thickness] = 10
+        qMax_by_thickness[thickness] = 2965.0
+    elif material == 'FSRI_HIPS':
+        thickness = 2.9531
+        tMax_by_thickness[thickness] = 7.0
+        qMax_by_thickness[thickness] = 1920.0
+    elif material == 'FSRI_High_Temperature_SCBA_Facepiece':
+        thickness = 37.1994
+        tMax_by_thickness[thickness] = 152.0
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'FSRI_LDPE':
+        thickness = 3.2459
+        tMax_by_thickness[thickness] = 7.0
+        qMax_by_thickness[thickness] = 3075.0
+    elif material == 'FSRI_Memory_Foam_Carpet_Pad':
+        thickness = 12.4020
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 1850.0
+    
+    elif material == 'FSRI_Nylon':
+        thickness = 3.4008
+        tMax_by_thickness[thickness] = 16
+        qMax_by_thickness[thickness] = 1950.0
+    elif material == 'FSRI_Nylon_Carpet_High_Pile':
+        thickness = 13.7257
+        tMax_by_thickness[thickness] = 18
+        qMax_by_thickness[thickness] = 900.0
+    elif material == 'FSRI_Overstuffed_Chair_Polyester_Batting':
+        thickness = 1.4901
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'FSRI_Overstuffed_Chair_Polyester_Fabric':
+        thickness = 0.5245
+        tMax_by_thickness[thickness] = 11.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'FSRI_Overstuffed_Chair_Polyurethane_Foam':
+        thickness = 0.8163
+        tMax_by_thickness[thickness] = 2
+        qMax_by_thickness[thickness] = 1535.0
+    elif material == 'FSRI_PC':
+        thickness = 5.3279
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 820.0
+    elif material == 'FSRI_PET':
+        thickness = 6.5311
+        tMax_by_thickness[thickness] = 17.0
+        qMax_by_thickness[thickness] = 1315.0
+    elif material == 'FSRI_PETG':
+        thickness = 2.6256
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 2745.0
+        
+    elif material == 'FSRI_PMMA':
+        thickness = 2.8173
+        tMax_by_thickness[thickness] = 6
+        qMax_by_thickness[thickness] = 1920.0
+    elif material == 'FSRI_PP':
+        thickness = 3.2256
+        tMax_by_thickness[thickness] = 7.0
+        qMax_by_thickness[thickness] = 3130.0
+    elif material == 'FSRI_PVC':
+        thickness = 3.1772
+        tMax_by_thickness[thickness] = 28.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'FSRI_Pallet_Wood':
+        thickness = 2.9531
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 1920.0
+    elif material == 'FSRI_PlasticC':
+        thickness = 2.9782
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 1975.0
+    elif material == 'FSRI_Plastic_Laminate_Countertop':
+        thickness = 37.1994
+        tMax_by_thickness[thickness] = 152.0
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'FSRI_Plywood':
+        thickness = 8.6925
+        tMax_by_thickness[thickness] = 13
+        qMax_by_thickness[thickness] = 1700.0
+    elif material == 'FSRI_Polyester_Bed_Skirt':
+        thickness = 1.1950
+        tMax_by_thickness[thickness] = 8
+        qMax_by_thickness[thickness] = 655.0
+        
+    elif material == 'FSRI_Polyester_Microfiber_Sheet':
+        thickness = 1.0386
+        tMax_by_thickness[thickness] = 10
+        qMax_by_thickness[thickness] = 655.0
+    elif material == 'FSRI_Polyolefin_Carpet_Low_Pile':
+        thickness = 7.1574
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 1150.0
+    elif material == 'FSRI_Rebond_Foam_Carpet_Pad':
+        thickness = 9.0117
+        tMax_by_thickness[thickness] = 2
+        qMax_by_thickness[thickness] = 1650.0
+    elif material == 'FSRI_Vinyl_Plank_Flooring':
+        thickness = 2.4410
+        tMax_by_thickness[thickness] = 3
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'FSRI_Vinyl_Siding':
+        thickness = 1.1668
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'FSRI_Vinyl_Tile':
+        thickness = 7.8814
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 380.0
+        
+        
+    elif material == 'FSRI_Basswood_Panel':
+        thickness = 19.8317
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'FSRI_Composite_Deck_Board':
+        thickness = 13.2801
+        tMax_by_thickness[thickness] = 58.0
+        qMax_by_thickness[thickness] = 1350.0
+    elif material == 'FSRI_Engineered_Flooring':
+        thickness = 9.0160
+        tMax_by_thickness[thickness] = 20
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'FSRI_Engineered_Wood_Furniture':
+        thickness = 12.0809
+        tMax_by_thickness[thickness] = 30
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'FSRI_Engineered_Wood_Table':
+        thickness = 89.839
+        tMax_by_thickness[thickness] = 60
+        qMax_by_thickness[thickness] = 500.0
+    elif material == 'FSRI_Eucalyptus_Flooring':
+        thickness = 15.6166
+        tMax_by_thickness[thickness] = 50
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'FSRI_Homasote':
+        thickness = 13.2714
+        tMax_by_thickness[thickness] = 20
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'FSRI_Luan_Panel':
+        thickness = 5.8665
+        tMax_by_thickness[thickness] = 6
+        qMax_by_thickness[thickness] = 490.0
+
+    elif material == 'FSRI_MDF':
+        thickness = 19.4120
+        tMax_by_thickness[thickness] = 40.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'FSRI_Masonite_Board':
+        thickness = 3.0701
+        tMax_by_thickness[thickness] = 8
+        qMax_by_thickness[thickness] = 1040.0
+    elif material == 'FSRI_OSB':
+        thickness = 16.9322
+        tMax_by_thickness[thickness] = 32.0
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'FSRI_Oak_Flooring':
+        thickness = 19.8678
+        tMax_by_thickness[thickness] = 40
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'FSRI_Particleboard':
+        thickness = 20.3250
+        tMax_by_thickness[thickness] = 52.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'FSRI_Pine_Siding':
+        thickness = 18.8606
+        tMax_by_thickness[thickness] = 34.0
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'FSRI_Wood_Stud':
+        thickness = 46.1926
+        tMax_by_thickness[thickness] = 88.0
+        qMax_by_thickness[thickness] = 490.0
+
+    elif material == 'JH_Acrylic':
+        thickness = 4.50000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 1400.0
+    elif material == 'JH_Black PMMA':
+        thickness = 9.20000000
+        tMax_by_thickness[thickness] = 13.0
+        qMax_by_thickness[thickness] = 1535.0
+    elif material == 'JH_Cardboard':
+        thickness = 4.10000000
+        tMax_by_thickness[thickness] = 2.0
+        qMax_by_thickness[thickness] = 450.0
+    elif material == 'JH_CPS Balsa Facesheet':
+        thickness = 15.90000000
+        tMax_by_thickness[thickness] = 34.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'JH_CPS Plywood Facesheet':
+        thickness = 12.70000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'JH_FRP':
+        thickness = 12.70000000
+        tMax_by_thickness[thickness] = 50.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'JH_MDF':
+        thickness = 19.20000000
+        tMax_by_thickness[thickness] = 38.0
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'JH_OSB':
+        thickness = 16.10000000
+        tMax_by_thickness[thickness] = 26.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'JH_PC Blend':
+        thickness = 4.50000000
+        tMax_by_thickness[thickness] = 16.0
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'JH_Phenolic Resin Fiberglass Composite':
+        thickness = 3.27000000
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 215.0
+    elif material == 'JH_Plywood':
+        thickness = 6.35000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'JH_PVC Blend':
+        thickness = 3.27000000
+        tMax_by_thickness[thickness] = 22.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'JH_Vinyl Ester Resin FRP':
+        thickness = 4.50000000
+        tMax_by_thickness[thickness] = 36.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'JH_White Pine':
+        thickness = 19.10000000
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'JH_White Spruce':
+        thickness = 37.22000000
+        tMax_by_thickness[thickness] = 74.0
+        qMax_by_thickness[thickness] = 325.0
+
+    elif material == 'RISE_80_wool__20__Nylon_Glue_Plywood-22m':
+        thickness = 22.00000000
+        tMax_by_thickness[thickness] = 32.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_Fabric_Foam-28mm':
+        thickness = 28.00000000
+        tMax_by_thickness[thickness] = 15
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_Fabric_Protection_layer_Foam-32mm':
+        thickness = 32.00000000
+        tMax_by_thickness[thickness] = 20
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'RISE_Fabric_vandaliz_protected_Foam-42mm':
+        thickness = 42.00000000
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_HPL_Melamine_polyester_film_-13mm':
+        thickness = 13.40000000
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'RISE_Melami_face_Calcium_silicat_board-1':
+        thickness = 12.50000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 250.0
+    elif material == 'RISE_Needl_punch_carpe_Glue_Recor_sealin':
+        thickness = 10.00000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_PE_XLPE-40mm':
+        thickness = 40.00000000
+        tMax_by_thickness[thickness] = 168.0
+        qMax_by_thickness[thickness] = 380.0
+        
+    elif material == 'RISE_POlyolefin_XLPE-45mm':
+        thickness = 45.00000000
+        tMax_by_thickness[thickness] = 60.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'RISE_PUR_rigid_Plasti_faced_steel_sheet-':
+        thickness = 79.00000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 160.0
+    elif material == 'RISE_PVC_EPR-32mm':
+        thickness = 32.50000000
+        tMax_by_thickness[thickness] = 80.0
+        qMax_by_thickness[thickness] = 250.0
+    elif material == 'RISE_PVC_PE-00mm':
+        thickness = 0.01270000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 650.0
+    elif material == 'RISE_PVC_PE-05mm':
+        thickness = 5.10000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'RISE_PVC_PE-08mm':
+        thickness = 8.20000000
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_PVC_PE-10mm':
+        thickness = 10.20000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'RISE_PVC_PE-14mm':
+        thickness = 14.80000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 900.0
+        
+    elif material == 'RISE_PVC_PE-20mm':
+        thickness = 20.00000000
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'RISE_PVC_XLPE-17mm':
+        thickness = 17.70000000
+        tMax_by_thickness[thickness] = 25.0
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'RISE_PVC_XLPE-22mm':
+        thickness = 22.00000000
+        tMax_by_thickness[thickness] = 35.0
+        qMax_by_thickness[thickness] = 450.0
+    elif material == 'RISE_PVC_XLPE-35mm':
+        thickness = 35.00000000
+        tMax_by_thickness[thickness] = 58.0
+        qMax_by_thickness[thickness] = 1300.0
+    elif material == 'RISE_PVC_XLPE-38mm':
+        thickness = 38.60000000
+        tMax_by_thickness[thickness] = 80.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'RISE_PVC_XLPE-46mm':
+        thickness = 46.00000000
+        tMax_by_thickness[thickness] = 122.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_wall_carpet_paper_plasterboard-':
+        thickness = 0.01270000
+        tMax_by_thickness[thickness] = 6.0
+        qMax_by_thickness[thickness] = 215.0
+    elif material == 'RISE_Painted_paper_plasterboa_plasterboa':
+        thickness = 0.01270000
+        tMax_by_thickness[thickness] = 3
+        qMax_by_thickness[thickness] = 350.0
+
+    elif material == 'RISE_Polyolefin_EPR-18mm':
+        thickness = 18.10000000
+        tMax_by_thickness[thickness] = 86.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_Polyolefin_EPR-32mm':
+        thickness = 32.20000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_Polyolefin_PA-02mm':
+        thickness = 2.50000000
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'RISE_Polyolefin_PA-06mm':
+        thickness = 6.00000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_Polyolefin_PP-08mm':
+        thickness = 8.70000000
+        tMax_by_thickness[thickness] = 54.0
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'RISE_Polyolefin_XLPE-18mm':
+        thickness = 18.10000000
+        tMax_by_thickness[thickness] = 76.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'RISE_Polyolefin_XLPE-25mm':
+        thickness = 25.00000000
+        tMax_by_thickness[thickness] = 122.0
+        qMax_by_thickness[thickness] = 450.0
+    elif material == 'RISE_Polyolefin_XLPE-38mm':
+        thickness = 38.10000000
+        tMax_by_thickness[thickness] = 138.0
+        qMax_by_thickness[thickness] = 435.0
+
+    elif material == 'RISE_RPPVC_PEF-04mm':
+        thickness = 4.50000000
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 215.0
+    elif material == 'RISE_RPPVC_PVC-14mm':
+        thickness = 14.00000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_RPPVC_XLPE-17mm':
+        thickness = 17.70000000
+        tMax_by_thickness[thickness] = 35.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'RISE_RPPVC_XLPE-22mm':
+        thickness = 22.50000000
+        tMax_by_thickness[thickness] = 50.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_RPPVC_XLPE-39mm':
+        thickness = 39.30000000
+        tMax_by_thickness[thickness] = 80.0
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'RISE_RPPVC_XLPE-45mm':
+        thickness = 45.00000000
+        tMax_by_thickness[thickness] = 154.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'RISE_Synthetic_rubber_Glue_Plywood-15mm':
+        thickness = 15.00000000
+        tMax_by_thickness[thickness] = 34.0
+        qMax_by_thickness[thickness] = 600.0
+    elif material == 'RISE_Textile_wall_coverin_paper_plasterb':
+        thickness = 0.01270000
+        tMax_by_thickness[thickness] = 4.0
+        qMax_by_thickness[thickness] = 435.0
+
+    elif material == 'RISE_ZHPolyolefin_PP-08mm':
+        thickness = 8.40000000
+        tMax_by_thickness[thickness] = 25.0
+        qMax_by_thickness[thickness] = 490.0
+    elif material == 'RISE_ZHPolyolefin_XLPE-13mm':
+        thickness = 13.00000000
+        tMax_by_thickness[thickness] = 50.0
+        qMax_by_thickness[thickness] = 700.0
+    elif material == 'RISE_ZHPolyolefin_XLPE-27mm':
+        thickness = 27.00000000
+        tMax_by_thickness[thickness] = 70.0
+        qMax_by_thickness[thickness] = 450.0
+    elif material == 'RISE_fabric__vandaliz_protecte_foam-42mm':
+        thickness = 42.00000000
+        tMax_by_thickness[thickness] = 6.0
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_synthetic_rubber_glue_plywood-14mm':
+        thickness = 14.80000000
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 270.0
+
+    elif material == 'RISE_Alumi_Honey_comb_coated_with_HPL-22':
+        thickness = 22.70000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_HPL_compact_-04mm':
+        thickness = 4.00000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_Spruce-10mm':
+        thickness = 10.00000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_Wool_fabric_Mixed_fabric-00mm':
+        thickness = 0.50000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 200.0
+    elif material == 'RISE_Woolfabric__mixed_fabric-00mm':
+        thickness = 0.50000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 435.0
+
+
+    elif material == 'RISE_FR_polycarbonate-16mm':
+        thickness = 16.00000000
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 710.0
+    elif material == 'RISE_PVC-02mm':
+        thickness = 2.90000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_PVC-08mm':
+        thickness = 8.20000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_PVC_PVC-09mm':
+        thickness = 9.40000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_PVC-10mm':
+        thickness = 10.00000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_PVC-14mm':
+        thickness = 14.50000000
+        tMax_by_thickness[thickness] = 20.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_PVC-18mm':
+        thickness = 18.00000000
+        tMax_by_thickness[thickness] = 30.0
+        qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_PVC_PVC-21mm':
+        thickness = 21.40000000
+        tMax_by_thickness[thickness] = 40.0
+        qMax_by_thickness[thickness] = 380.0
+
+    elif material == 'RISE_PVDF-01mm':
+        thickness = 1.95000000
+        tMax_by_thickness[thickness] = 4.0
+        qMax_by_thickness[thickness] = 700.0
+    elif material == 'RISE_Paint_GFK_polyes_with_Gelcoa_handla':
+        thickness = 4.80000000
+        tMax_by_thickness[thickness] = 25.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'RISE_Paint_GRP_polyes_with_gelcoa_handla':
+        thickness = 4.80000000
+        tMax_by_thickness[thickness] = 12.0
+        qMax_by_thickness[thickness] = 160.0
+    elif material == 'RISE_Polyester-02mm':
+        thickness = 2.10000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 490.0
+
+    elif material == 'RISE_Polyolefin-02mm':
+        thickness = 2.90000000
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 545.0
+    elif material == 'RISE_RPPVC-02mm':
+        thickness = 2.90000000
+        tMax_by_thickness[thickness] = 6.0
+        qMax_by_thickness[thickness] = 325.0
+    elif material == 'RISE_Transparent_polycarbonate-02mm':
+        thickness = 2.30000000
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 545.0
+
+    elif material == 'RISE_FR_Particle_board-79mm':
+        thickness = 79.00000000
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 435.0
+    elif material == 'RISE_FR_particle_board-16mm':
+        thickness = 16.00000000
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 270.0
+    elif material == 'RISE_MDF_board-12mm':
+        thickness = 12.00000000
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 490.0
+    
+    final_length = len(tMax_by_thickness.keys())
+    
+    if initial_length != final_length:
+        print("warning for material %s"%(material))
+        print(tMax_by_thickness1.keys())
+        print(tMax_by_thickness.keys())
+    
+    return tMax_by_thickness, qMax_by_thickness 
+
 if __name__ == "__main__":
     
     args = sys.argv
@@ -768,6 +1528,7 @@ if __name__ == "__main__":
     outTxt = ''
     #materials = ['FAA_PMMA']
     completeMaterials = []
+    outTxt3 = ''
     for material in materials:
         cases = get_filtered_cases(spec_file_dict, material, energyThreshold=energyThreshold)
         if cases is False: continue
@@ -825,10 +1586,11 @@ if __name__ == "__main__":
         for thickness in sorted(list(set(thicknesses))):
             columns = [c for c in data.columns if 'HRRPUA' in c and ('%0.2f'%(thickness)).replace('.','p') in c]
             qMax = (np.ceil(np.nanmax(data[columns])/50)*1.1+1)*50
-            qMax_by_thickness[thickness] = max([qMax, 0])
+            thickness_rounded = np.round(thickness, decimals=4)
+            qMax_by_thickness[thickness_rounded] = max([qMax, 0])
             tind = np.where(np.sum(abs(data[columns]),axis=1) > 0)[0][-1]
             tMax = (np.ceil(data['Time'].values[tind]/60/2)+1)*2
-            tMax_by_thickness[thickness] = max([tMax, 2])
+            tMax_by_thickness[thickness_rounded] = max([tMax, 2])
         
         '''
         tMax = np.ceil(data['Time'].iloc[tInd]/60/5)*5
@@ -863,13 +1625,15 @@ if __name__ == "__main__":
             if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
             tMax = np.ceil(np.nanmax(data_exp[timeColumn].values)/60/2+1)*2
             thickness = thicknesses[i]
-            tMax_by_thickness[thickness] = max([tMax, tMax_by_thickness[thickness]])
-            qMax_by_thickness[thickness] = max([qMax, qMax_by_thickness[thickness]])
+            thickness_rounded = np.round(thickness, decimals=4)
+            tMax_by_thickness[thickness_rounded] = max([tMax, tMax_by_thickness[thickness_rounded]])
+            qMax_by_thickness[thickness_rounded] = max([qMax, qMax_by_thickness[thickness_rounded]])
+        tMax_by_thickness, qMax_by_thickness = adjust_tmax_qmax_by_material(material, tMax_by_thickness, qMax_by_thickness)
         for thickness in sorted(list(set(thicknesses))):
             counter = 0
+            thickness_rounded = np.round(thickness, decimals=4)
             for iii, flux in enumerate(fluxes):
                 if thickness != thicknesses[iii]: continue
-                print(thickness, iii, flux)
                 lc = lineColors[counter]
                 if counter == 0:
                     switchId = 'd'
@@ -893,8 +1657,14 @@ if __name__ == "__main__":
                 hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
                 outTxt = outTxt + 'Scaling_Pyrolysis/' + chid + '_devc.csv,2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
                 outTxt = outTxt + '%s %0.1f mm,Time (min),Heat Release Rate (kW/m²),'%(matlabelname, thickness)
-                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,NorthEast,,1.0,Scaling_Pyrolysis/'%(tMax_by_thickness[thickness], qMax_by_thickness[thickness]) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
+                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,NorthEast,,1.0,Scaling_Pyrolysis/'%(tMax_by_thickness[thickness_rounded], qMax_by_thickness[thickness_rounded]) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
                 outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
+                
+                outTxt3 = outTxt3 + "elif material == '%s':\n"%(material)
+                outTxt3 = outTxt3 + "    thickness = %0.8f\n"%(thicknesses[iii])
+                outTxt3 = outTxt3 + "    tMax_by_thickness[thickness_rounded] = %0.1f\n"%(tMax_by_thickness[thickness_rounded])
+                outTxt3 = outTxt3 + "    qMax_by_thickness[thickness_rounded] = %0.1f\n"%(qMax_by_thickness[thickness_rounded])
+
         
     with open('scaling_dataplot_out.csv', 'w') as f:
         f.write(outTxt)
@@ -1032,7 +1802,9 @@ if __name__ == "__main__":
                         outTxt = outTxt + '\\end{figure}\n\n'
                         outTxt = outTxt + '\\begin{figure}[p]\n'
                         outTxt = outTxt + '\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n'
-                        counter = 0
+                        ending = '&'
+                        outTxt = outTxt + '\\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/%s.pdf} %s\n'%(fname, ending)
+                        counter = 1
             if counter > 0:
                 outTxt = outTxt + '\\end{tabular*}\n'
                 outTxt = outTxt + '\\caption[HRRPUA of %s using scaling model %s]\n'%(s.replace('_',' '), sending)
@@ -1078,979 +1850,5 @@ if __name__ == "__main__":
     
     
     
-    '''
-    tmp = material_output_data.T
-    tmp['MaterialClass'] = [x[0] for x in tmp.index]
-    tmp['Material'] = [x[2] for x in tmp.index]
-    tmp['Series'] = [x[1] for x in tmp.index]
-    series = [x[1] for x in tmp.index]
-    unique_series = list(set(series))
-    start = True
-    for s in unique_series:
-        tmp2 = tmp.loc[[True if s in x else False for x in series]]
-        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
-        for m in uniqueMaterialClass:
-            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
-            tmp4 = tmp3.sort_values('Material')
-            if start:
-                out2 = tmp4
-                start = False
-            else:
-                #out2 = out2.append(tmp4)
-                out2 = pd.concat([out2, tmp4], ignore_index=True)
-    
-    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
-    out2_vals = np.array(out2.values[:, :7], dtype=float)
-    '''
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    '''
-    
-        material_output_data[(materialClass,series,material)] = defaultdict(bool)
-        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
-        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
-        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
-        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
-        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
-        material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
-        material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
-        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
-        
-        #assert False, "Stopped"
-        
-        '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
-        lineColors = ['k','r','g','m','c']
-        materialClassDict = dict()
-        materialClassDict['Wood-Based'] = dict()
-        materialClassDict['Wood-Based']['marker'] = '>'
-        materialClassDict['Wood-Based']['color'] = 'b'
-        materialClassDict['Polymers'] = dict()
-        materialClassDict['Polymers']['marker'] = '^'
-        materialClassDict['Polymers']['color'] = 'r'
-        materialClassDict['Mixtures'] = dict()
-        materialClassDict['Mixtures']['marker'] = 'v'
-        materialClassDict['Mixtures']['color'] = 'g'
-        materialClassDict['Others'] = dict()
-        materialClassDict['Others']['marker'] = 'o'
-        materialClassDict['Others']['color'] = 'm'
-        
-        tMax = 5
-        qMax = 0
-        for iiii, flux in enumerate(validationFluxes):
-            scaling = data['"HRRPUA-%02d"'%(flux)].values
-            if type(exp_data) is dict:
-                ind = np.where(exp_data[validationHrrpuaColumns[iiii]] > 0)[-1]
-                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]][ind])/60])
-                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]])*1.1])
-            else:
-                ind = np.where(exp_data[validationHrrpuaColumns[iiii]].values > 0)[-1]
-                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]].values[ind])/60])
-                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]].values)*1.1])
-            qMax = max([qMax, np.nanmax(scaling)*1.1])
-        tMax = np.ceil(tMax/5)*5
-        qMax = np.ceil(qMax/10)*10
-        
-        for iii, flux in enumerate(validationFluxes):
-            lc = lineColors[iii]
-            if iii == 0:
-                switchId = 'd'
-            else:
-                switchId = 'f'
-            materialMarker = materialClassDict[materialClass]['marker']
-            materialColor = materialClassDict[materialClass]['color']
-            matlabelname = material
-            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
-            matlabelname = matlabelname.replace('_','\_')
-            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + '%s_%02d.csv"'%(material,flux) + ","
-            outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
-            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
-            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
-            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_all",'%(chid)
-            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
-    
-    with open('scaling_dataplot_out.csv', 'w') as f:
-        f.write(outTxt)
-    material_output_data = pd.DataFrame(material_output_data)
-    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
-    
-    tmp = material_output_data.T
-    tmp['MaterialClass'] = [x[0] for x in tmp.index]
-    tmp['Material'] = [x[2] for x in tmp.index]
-    tmp['Series'] = [x[1] for x in tmp.index]
-    series = [x[1] for x in tmp.index]
-    unique_series = list(set(series))
-    start = True
-    for s in unique_series:
-        tmp2 = tmp.loc[[True if s in x else False for x in series]]
-        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
-        for m in uniqueMaterialClass:
-            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
-            tmp4 = tmp3.sort_values('Material')
-            if start:
-                out2 = tmp4
-                start = False
-            else:
-                out2 = out2.append(tmp4)
-    
-    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
-    out2_vals = np.array(out2.values[:, :7], dtype=float)
-    
-    series = ''
-    matClass = ''
-    texout = ''
-    for iiii in range(0, out2.shape[0]):
-        if out2['Series'].iloc[iiii] == series:
-            if out2['MaterialClass'].iloc[iiii] == matClass:
-                pass
-            else:
-                matClass = out2['MaterialClass'].iloc[iiii]
-                texout = texout + '\n' + matClass + '\n'
-        else:
-            series = out2['Series'].iloc[iiii]
-            matClass = out2['MaterialClass'].iloc[iiii]
-            texout = texout + '\n' + series + ' & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\\\ \n'
-            texout = texout + 'Material & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\\\ \\hline \n'
-            texout = texout + '\n' + matClass + '\n'
-        material = out2['Material'].iloc[iiii]
-        if '-' in material: material = material.split('-')[0]
-        if '(' in material: material = material.split('(')[0]
-        while '__' in material: material = material.replace('__', '_')
-        material.replace('_', ' ')
-        cond = out2_vals[iiii, 0]
-        dens = out2_vals[iiii, 1]
-        emis = out2_vals[iiii, 2]
-        spec = out2_vals[iiii, 3]
-        thic = out2_vals[iiii, 4]
-        Tign = out2_vals[iiii, 5]
-        qref = out2_vals[iiii, 6]
-        texout = texout + material + ' & %0.2f & %0.0f & %0.2f & %0.2f & '%(cond, dens, emis, spec)
-        texout = texout + '%0.2f & %0.1f & %0.1f \\\\ \\hline \n'%(thic*1000, Tign, qref)
-    
-    with open('material_output_data_latex.tex', 'w') as f:
-        f.write(texout)
-    out2.to_csv('material_output_data_latex.csv', float_format='%.1f')
-    
-    '''
-    
-    
-    
-    assert False, "Stopped"
-    
-    specificationFile = "scaling_pyrolysis_cone_cases.csv"
-    figoutdir = "figures"
-    
-    if figoutdir is not None:
-        if os.path.exists(figoutdir) is not True: os.mkdir(figoutdir)
-        import matplotlib.pyplot as plt
-    
-    specificationFile = pd.read_csv(specificationFile)
-    material_uncertainty = defaultdict(bool)
-    material_output_data = defaultdict(bool)
-    uncertainty = defaultdict(bool)
-    uncertainty[60] = defaultdict(bool)
-    uncertainty[180] = defaultdict(bool)
-    uncertainty[300] = defaultdict(bool)
-    uncertainty['peak'] = defaultdict(bool)
-    uncertainty['t_peak'] = defaultdict(bool)
-    
-    for key in list(uncertainty.keys()):
-        uncertainty[key]['EXP'] = []
-        uncertainty[key]['MOD'] = []
-    uncertainty['flux'] = []
-    uncertainty['delta'] = []
-    uncertainty['case'] = []
-    uncertainty['material'] = []
-    uncertainty['series'] = []
-    uncertainty['MaterialClass'] = []
-    
-    runSimulations = True
-    showStats = False
-    closePlots = True
-    outTxt = ''
-    for i in [17,18]: #range(1, specificationFile.shape[0]):
-        
-        # Check for run code
-        code = specificationFile.iloc[i]['Code']
-        num_id = specificationFile.iloc[i]['Number']
-        if code == 's':
-            print("Skipping row %d"%(i))
-            continue
-        elif code =='d':
-            pass
-        else:
-            print("Unknown code %s in row %d"%(code, i))
-            continue
-        
-        # Extract specification file data
-        material = specificationFile.iloc[i]['Material']
-        series = specificationFile.iloc[i]['Series']
-        materialClass = specificationFile.iloc[i]['MaterialClass']
-        coneExposure = specificationFile.iloc[i]['ReferenceExposure']
-        conductivity = specificationFile.iloc[i]['Conductivity']
-        specific_heat = specificationFile.iloc[i]['SpecificHeat']
-        density = specificationFile.iloc[i]['Density']
-        emissivity = specificationFile.iloc[i]['Emissivity']
-        thickness = specificationFile.iloc[i]['Thickness']
-        preprocess = specificationFile.iloc[i]['Preprocess']
-        
-        resultDir = specificationFile.iloc[i]['ResultDir'].replace('\\\\','\\').replace('"','')
-        if os.path.exists(resultDir) is not True: os.mkdir(resultDir)
-        workingDir = os.path.join(resultDir, 'tmp')
-        if os.path.exists(workingDir) is not True: os.mkdir(workingDir)
-        inputFileDir = specificationFile.iloc[i]['InputFileDir'].replace('\\\\','\\').replace('"','')
-        expFileDir = specificationFile.iloc[i]['ExpFileDir'].replace('\\\\','\\').replace('"','')
-        
-        referenceTimeColumn = specificationFile.iloc[i]['ReferenceTime']
-        referenceHrrpuaColumn = str(specificationFile.iloc[i]['ReferenceHRRPUA'])
-        
-        validationTimeColumns = specificationFile.iloc[i]['ValidationTimes'].split('|')
-        validationHrrpuaColumns = specificationFile.iloc[i]['ValidationHrrpuaColumns'].split('|')
-        validationFluxes = specificationFile.iloc[i]['ValidationFluxes'].split('|')
-        fluxes = [float(f) for f in validationFluxes]
-        
-        ignitionTemperature = specificationFile.iloc[i]['IgnitionTemperature']
-        if ignitionTemperature == 'Calculate':
-            calculateIgnitionTemperature = True
-            ignitionTemperatureBasis = specificationFile.iloc[i]['IgnitionTemperatureBasis'].split('|')
-            ignitionTemperatureBasis = [float(x) for x in ignitionTemperatureBasis]
-            Tign = 1000
-        else:
-            Tign = float(ignitionTemperature)
-            calculateIgnitionTemperature = False
-        dataFile = specificationFile.iloc[i]['DataFile'].replace('\\\\','\\').replace('"','')
-        headerRows = specificationFile.iloc[i]['HeaderRows']
-        if '|' in dataFile:
-            dfs = dataFile.split('|')
-            hrs = headerRows.split('|')
-            exp_data = dict()
-            for df, hr in zip(dfs, hrs):
-                fname = df.split(os.sep)[-1]
-                # Read data file, manually due to differing number of header rows
-                with open(df, 'r') as f:
-                    d = f.readlines()
-                d = np.array([dd.replace('\n','').replace('/','_').split(',') for dd in d])
-                hr = int(hr)
-                for ii in range(hr, len(d)):
-                    for j in range(0, len(d[ii])):
-                        try:
-                            d[ii,j] = float(d[ii,j])
-                        except:
-                            d[ii,j] = np.nan
-                columns = [fname + '-' + str(c) for c in d[0]]
-                for ii, c in enumerate(columns):
-                    c2 = os.path.abspath(c).split(os.sep)[-1]
-                    exp_data[c2] = np.array(d[hr:, ii], dtype=float)
-            multipleFiles = True
-        else:
-            headerRows = int(headerRows)
-            # Read data file, manually due to differing number of header rows
-            with open(dataFile, 'r') as f:
-                d = f.readlines()
-            d = np.array([dd.replace('\n','').split(',') for dd in d])
-            
-            for ii in range(headerRows, len(d)):
-                for j in range(0, len(d[ii])):
-                    try:
-                        d[ii,j] = float(d[ii,j])
-                    except:
-                        d[ii,j] = np.nan
-            columns = [str(c) for c in d[0]]
-            exp_data = pd.DataFrame(np.array(d[headerRows:, :], dtype=float), columns=columns)
-            multipleFiles = False
-        if multipleFiles:
-            # Identify time to ignition
-            HRRs = exp_data[referenceHrrpuaColumn]
-            times = exp_data[referenceTimeColumn]
-        else:
-            # Identify time to ignition
-            HRRs = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceHrrpuaColumn].values
-            times = exp_data.loc[~np.isnan(exp_data[referenceTimeColumn]),referenceTimeColumn].values
-        if preprocess != '':
-            times, HRRs = preprocessConeData(times, HRRs)
-        targetDt = 30000
-        #times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False)
-        times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=50)
-        tign, times_trimmed, hrrs_trimmed = findLimits(times2, HRRs2)
-        
-        #plt.figure(figsize=(12, 6))
-        #plt.plot(times/60, HRRs, label='N=%0d'%(times.shape[0]))
-        #for numPoints in [50]:
-        #    times2,HRRs2 = interpolateExperimentalData(times, HRRs, targetDt=targetDt, filterWidth=False, numPoints=numPoints)
-        #    plt.plot(times2/60, HRRs2, label='N=%0d'%(times2.shape[0]))
-        #plt.legend(fontsize=16, bbox_to_anchor=(1.2,1.0), loc='upper right')
-        #plt.xlabel('Time (min)', fontsize=16)
-        #plt.ylabel('HRRPUA (kW/m2)', fontsize=16)
-        #plt.tick_params(labelsize=16)
-        #plt.grid()
-        #plt.tight_layout()
-        #assert False, "Stopped"
-        
-        tigns = dict()
-        for ii in range(0, len(validationTimeColumns)):
-            timeColumn = validationTimeColumns[ii]
-            hrrpuaColumn = validationHrrpuaColumns[ii]
-            if multipleFiles:
-                HRRs_v = exp_data[hrrpuaColumn]
-                times_v = exp_data[timeColumn]
-                if preprocess != '':
-                    times_v, HRRs_v = preprocessConeData(times_v, HRRs_v)
-                    exp_data[hrrpuaColumn] = HRRs_v
-                    exp_data[timeColumn] = times_v
-            else:
-                HRRs_v = exp_data.loc[~np.isnan(exp_data[timeColumn]),hrrpuaColumn].values
-                times_v = exp_data.loc[~np.isnan(exp_data[timeColumn]),timeColumn].values
-                if preprocess != '':
-                    times_v2, HRRs_v2 = preprocessConeData(times_v, HRRs_v)
-                    exp_data[hrrpuaColumn].values[:times_v.shape[0]] = np.interp(times_v, times_v2, HRRs_v2)
-            tign_v = findIgnitionTime(times_v, HRRs_v)
-            tigns[fluxes[ii]] = tign_v
-        
-        # Calculate reference heat flux
-        # If the trimmed HRR curve fails, use the full curve and print a warning
-        try:
-            hrrpua_ref = getRepresentativeHrrpua(hrrs_trimmed, times_trimmed)
-        except:
-            hrrpua_ref = getRepresentativeHrrpua(HRRs2, times2)
-            print("Warning: Failed to get representative HRRPUA for material %s on trimmed data. Using full HRR curve."%(material))
-            hrrs_trimmed = HRRs2
-            times_trimmed = times2
-        qref = estimateExposureFlux(coneExposure, hrrpua_ref)
-        
-        # Set chid
-        chid = series + '_' + material.replace(' ','_')+"_cone"
-        chid = chid.replace('%','')
-        if len(chid) > 50:
-            chid = chid[:50]
-        
-        if calculateIgnitionTemperature and runSimulations:
-            # Generate initial FDS input file to calculate ignition temperature
-            tend = times.max() + 300 # Arbitrary, overwritten in actual calculation after finding Tign
-            txt = buildFdsFile(chid, coneExposure, emissivity, conductivity, density, 
-                                   specific_heat, 1000, thickness, times_trimmed, hrrs_trimmed,
-                                   tend, fluxes, 15.0, ignitionMode='Temperature', outputTemperature=True,
-                                   calculateDevcDt=False, devc_dt=0.1)
-            '''
-            (chid, coneExposure, e, k, rho, cp, Tign, d, time, hrrpua, tend,
-                             HFs, front_h, hfs_tign=False,
-                             ignitionMode='Temperature', outputTemperature=False,
-                             calculateDevcDt=True, devc_dt=1.)
-            '''
-            with open("%s%s%s.fds"%(workingDir, os.sep, chid), 'w') as f:
-                f.write(txt)
-            
-            if runSimulations:
-                runModel(workingDir, chid+".fds", 1, fdsdir, fdscmd, printLiveOutput=False)
-            data = load_csv(workingDir, chid)
-            
-            Tigns = []
-            Tmaxs = []
-            for flux in ignitionTemperatureBasis:
-                tign = tigns[flux]
-                Tign = data.loc[data['Time'] > tign, '"WALL TEMPERATURE-%02d"'%(flux)].values[0]
-                Tmaxs.append(np.nanmax(data['"WALL TEMPERATURE-%02d"'%(flux)].values))
-                Tigns.append(Tign)
-            Tign = np.mean(Tigns)
-            t = Tigns.copy()
-            while Tign > np.min(Tmaxs):
-                t = [x for x in t if x < np.max(t)]
-                Tign = np.max(t)
-            print(i, "Material %s ignition temperature %0.1f reference flux %0.1f"%(material, Tign, qref))
-        else:
-            tend = times.max()*1.5 + 300
-            print(i, "Material %s ignition temperature %0.1f reference flux %0.1f"%(material, Tign, qref))
-        
-        try:
-            tMaxes = [exp_data[key].max() for key in list(exp_data.keys()) if 'Time' in key]
-            tend = max(tMaxes) * 1.5
-        except:
-            tend = times.max()*1.5
-        # Generate fds input file with updated ignition temperature
-        txt = buildFdsFile(chid, coneExposure, emissivity, conductivity, density, 
-                               specific_heat, Tign, thickness, times_trimmed, hrrs_trimmed,
-                               tend, fluxes, 0.0, hfs_tign=tigns, ignitionMode='Time',
-                               outputTemperature=False, calculateDevcDt=True)
-        
-        with open("%s%s%s.fds"%(workingDir, os.sep, chid), 'w') as f:
-            f.write(txt)
-        if runSimulations:
-            runModel(workingDir, chid+".fds", 1, fdsdir, fdscmd, printLiveOutput=False)
-        data = load_csv(workingDir, chid)
-        
-        # Plot results
-        if figoutdir is not None:
-            fig = plotResults_exp(data, exp_data, fluxes, validationTimeColumns, validationHrrpuaColumns, lw=3, fs=16)
-            fig.savefig(os.path.join(figoutdir, '%03d_'%(i)+chid+'.png'), dpi=300)
-            if closePlots:
-                plt.close()
-        
-        
-        validationFluxes = list(fluxes)
-        validationFluxes.remove(coneExposure)
-        
-        validationHrrpuaColumns.remove(referenceHrrpuaColumn)
-        validationTimeColumns.remove(referenceTimeColumn)
-        
-        for flux, hc, tc in zip(validationFluxes, validationHrrpuaColumns, validationTimeColumns):
-            time = data['Time'].values
-            model_dt = np.median(time[1:]-time[:-1])
-            
-            scaling = data['"HRRPUA-%02d"'%(flux)].values
-            if type(exp_data) is dict:
-                expTime = exp_data[tc]
-                expHRR = exp_data[hc]
-            else:
-                expTime = exp_data[tc].values
-                expHRR = exp_data[hc].values
-            
-            expHRR = np.round(expHRR, decimals=1)
-            expTime2 = [expTime[0]]
-            expHRR2 = [expHRR[0]]
-            
-            for iiii in range(1, len(expTime)):
-                if expHRR[iiii] == expHRR2[-1]:
-                    pass
-                else:
-                    expHRR2.append(expHRR[iiii-1])
-                    expTime2.append(expTime[iiii-1])
-                    expHRR2.append(expHRR[iiii])
-                    expTime2.append(expTime[iiii])
-            
-            
-            exp_out = pd.DataFrame(np.array([expTime2, np.round(expHRR2, decimals=1)]).T, columns=['Time','HRR'])
-            exp_out.to_csv("..//..//..//exp//Scaling_Pyrolysis//%s_%02d.csv"%(material.replace('%',''),flux), index=False)
-            
-            uncertainty['peak']['EXP'].append(np.nanmax(expHRR))
-            uncertainty['peak']['MOD'].append(np.nanmax(scaling))
-            
-            uncertainty['t_peak']['EXP'].append(expTime[np.argmax(expHRR)])
-            uncertainty['t_peak']['MOD'].append(time[np.argmax(scaling)])
-            uncertainty['flux'].append(flux)
-            uncertainty['delta'].append(flux-coneExposure)
-            uncertainty['case'].append(num_id)
-            uncertainty['material'].append(material)
-            uncertainty['series'].append(series)
-            uncertainty['MaterialClass'].append(materialClass)
-            for filterWidth in [60, 180, 300]:
-                filterWidth_mod = int(filterWidth/model_dt)
-                fil_mod = np.ones(filterWidth_mod)/filterWidth_mod
-                scaling_filtered = np.convolve(scaling, fil_mod, mode='same')
-                uncertainty[filterWidth]['MOD'].append(np.nanmax(scaling_filtered))
-                
-                exp_dt = np.nanmin(expTime[1:]-expTime[:-1])
-                exp_times2 = np.linspace(0, np.nanmax(expTime), int(np.round(np.nanmax(expTime)/exp_dt)+1))
-                exp_hrr2 = np.interp(exp_times2, expTime, expHRR)
-                
-                filterWidth_exp = int(filterWidth/exp_dt)
-                fil_exp = np.ones(filterWidth_exp)/filterWidth_exp
-                exp_filtered = np.convolve(exp_hrr2, fil_exp, mode='same')
-                uncertainty[filterWidth]['EXP'].append(np.nanmax(exp_filtered))
-        
-        # Copy results to directories for building guide
-        shutil.copy(os.path.join(workingDir, chid+"_devc.csv"), resultDir)
-        shutil.copy(os.path.join(workingDir, chid+"_git.txt"), resultDir)
-        shutil.copy(os.path.join(workingDir, chid+".fds"), inputFileDir)
-        
-        #if material_output_data[series] is False:
-        #    material_output_data[series] = defaultdict(bool)
-        material_output_data[(materialClass,series,material)] = defaultdict(bool)
-        material_output_data[(materialClass,series,material)]['Conductivity\n($\mathrm{W/(m\cdot K)}$)'] = conductivity
-        material_output_data[(materialClass,series,material)]['Density\n($\mathrm{kg/m^{3}}$)'] = density
-        material_output_data[(materialClass,series,material)]['Emissivity\n(-)'] = emissivity
-        material_output_data[(materialClass,series,material)]['Specific Heat\n($\mathrm{kJ/(kg\cdot C}$)'] = specific_heat
-        material_output_data[(materialClass,series,material)]['Thickness\n($\mathrm{mm}$)'] = thickness
-        material_output_data[(materialClass,series,material)]['Ignition Temperaure\n($\mathrm{^{\circ}C}$)'] = Tign
-        material_output_data[(materialClass,series,material)]['Reference Heat Flux\n($\mathrm{kW/m^{2}}$)'] = qref
-        material_output_data[(materialClass,series,material)]['Validation Heat Fluxes\n($\mathrm{kW/m^{2}}$)'] = '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
-        
-        #assert False, "Stopped"
-        
-        '|'.join(['"HRRPUA-%02d"'%(flux) for flux in validationFluxes])
-        lineColors = ['k','r','g','m','c']
-        materialClassDict = dict()
-        materialClassDict['Wood-Based'] = dict()
-        materialClassDict['Wood-Based']['marker'] = '>'
-        materialClassDict['Wood-Based']['color'] = 'b'
-        materialClassDict['Polymers'] = dict()
-        materialClassDict['Polymers']['marker'] = '^'
-        materialClassDict['Polymers']['color'] = 'r'
-        materialClassDict['Mixtures'] = dict()
-        materialClassDict['Mixtures']['marker'] = 'v'
-        materialClassDict['Mixtures']['color'] = 'g'
-        materialClassDict['Others'] = dict()
-        materialClassDict['Others']['marker'] = 'o'
-        materialClassDict['Others']['color'] = 'm'
-        
-        tMax = 5
-        qMax = 0
-        for iiii, flux in enumerate(validationFluxes):
-            scaling = data['"HRRPUA-%02d"'%(flux)].values
-            if type(exp_data) is dict:
-                ind = np.where(exp_data[validationHrrpuaColumns[iiii]] > 0)[-1]
-                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]][ind])/60])
-                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]])*1.1])
-            else:
-                ind = np.where(exp_data[validationHrrpuaColumns[iiii]].values > 0)[-1]
-                tMax = max([tMax, np.nanmax(exp_data[validationTimeColumns[iiii]].values[ind])/60])
-                qMax = max([qMax, np.nanmax(exp_data[validationHrrpuaColumns[iiii]].values)*1.1])
-            qMax = max([qMax, np.nanmax(scaling)*1.1])
-        tMax = np.ceil(tMax/5)*5
-        qMax = np.ceil(qMax/10)*10
-        
-        for iii, flux in enumerate(validationFluxes):
-            lc = lineColors[iii]
-            if iii == 0:
-                switchId = 'd'
-            else:
-                switchId = 'f'
-            materialMarker = materialClassDict[materialClass]['marker']
-            materialColor = materialClassDict[materialClass]['color']
-            matlabelname = material
-            while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
-            matlabelname = matlabelname.replace('_','\_')
-            outTxt = outTxt + switchId + ',' + materialClass + ',"Scaling_Pyrolysis/' + '%s_%02d.csv"'%(material,flux) + ","
-            outTxt = outTxt + "1,2,Time,HRR,Exp (%02d kW/mÂ²),%s-,0,100000,,0,100000,-10000,10000,0,"%(flux, lc)
-            outTxt = outTxt + '"Scaling_Pyrolysis/' + chid + '_devc.csv",2,3,Time,HRRPUA-%02d,'%(flux) + 'FDS (%02d kW/mÂ²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
-            outTxt = outTxt + '"%s, Cone at various exposures",Time (min),Heat Release Rate (kW/mÂ²),'%(matlabelname)
-            outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,"Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt",linear,"FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_all",'%(chid)
-            outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
-    
-    with open('scaling_dataplot_out.csv', 'w') as f:
-        f.write(outTxt)
-    material_output_data = pd.DataFrame(material_output_data)
-    material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
-    
-    tmp = material_output_data.T
-    tmp['MaterialClass'] = [x[0] for x in tmp.index]
-    tmp['Material'] = [x[2] for x in tmp.index]
-    tmp['Series'] = [x[1] for x in tmp.index]
-    series = [x[1] for x in tmp.index]
-    unique_series = list(set(series))
-    start = True
-    for s in unique_series:
-        tmp2 = tmp.loc[[True if s in x else False for x in series]]
-        uniqueMaterialClass = list(set(tmp2['MaterialClass'].values))
-        for m in uniqueMaterialClass:
-            tmp3 = tmp2.loc[[True if m in x else False for x in tmp2['MaterialClass'].values]]
-            tmp4 = tmp3.sort_values('Material')
-            if start:
-                out2 = tmp4
-                start = False
-            else:
-                out2 = out2.append(tmp4)
-    
-    out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
-    out2_vals = np.array(out2.values[:, :7], dtype=float)
-    
-    series = ''
-    matClass = ''
-    texout = ''
-    for iiii in range(0, out2.shape[0]):
-        if out2['Series'].iloc[iiii] == series:
-            if out2['MaterialClass'].iloc[iiii] == matClass:
-                pass
-            else:
-                matClass = out2['MaterialClass'].iloc[iiii]
-                texout = texout + '\n' + matClass + '\n'
-        else:
-            series = out2['Series'].iloc[iiii]
-            matClass = out2['MaterialClass'].iloc[iiii]
-            texout = texout + '\n' + series + ' & Cond.    & Density      & Emis.   & Spec. Heat & Thick.    & Ign. Temp.  & Ref. Heat Flux \\\\ \n'
-            texout = texout + 'Material & ($\mathrm{W/(m\cdot K)}$) & ($\mathrm{kg/m^{3}}$) & (-) & ($\mathrm{kJ/(kg\cdot C}$) &  ($\mathrm{mm}$)   & ($\mathrm{^{\circ}C}$) & ($\mathrm{kW/m^{2}}$) \\\\ \\hline \n'
-            texout = texout + '\n' + matClass + '\n'
-        material = out2['Material'].iloc[iiii]
-        if '-' in material: material = material.split('-')[0]
-        if '(' in material: material = material.split('(')[0]
-        while '__' in material: material = material.replace('__', '_')
-        material.replace('_', ' ')
-        cond = out2_vals[iiii, 0]
-        dens = out2_vals[iiii, 1]
-        emis = out2_vals[iiii, 2]
-        spec = out2_vals[iiii, 3]
-        thic = out2_vals[iiii, 4]
-        Tign = out2_vals[iiii, 5]
-        qref = out2_vals[iiii, 6]
-        texout = texout + material + ' & %0.2f & %0.0f & %0.2f & %0.2f & '%(cond, dens, emis, spec)
-        texout = texout + '%0.2f & %0.1f & %0.1f \\\\ \\hline \n'%(thic*1000, Tign, qref)
-    
-    with open('material_output_data_latex.tex', 'w') as f:
-        f.write(texout)
-    out2.to_csv('material_output_data_latex.csv', float_format='%.1f')
-    
-    material_data = material_output_data.T
-    
-    
-    uncertainty['MaterialClass2'] = [x if (('Others' not in x) and ('Composites' not in x)) else 'Others & Composites' for x in uncertainty['MaterialClass']]
-    uncertainty['series2'] = [x if (('JH' not in x)) else 'JH' for x in uncertainty['series']]
-    
-    uncertainties = [60, 180, 300, 't_peak', 'peak']
-    for u in uncertainties:
-        outDict = dict()
-        x = np.array(uncertainty[u]['EXP'])
-        y = np.array(uncertainty[u]['MOD'])
-        f = np.array(uncertainty['flux'])
-        diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
-        delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=False)
-        
-        outDict['series'] = uncertainty['series2']
-        outDict['material'] = uncertainty['material']
-        outDict['MaterialClass'] = uncertainty['MaterialClass']
-        outDict['f'] = f
-        outDict['delta'] = uncertainty['delta']
-        outDict['direction'] = diff2
-        outDict['x'] = x
-        outDict['y'] = y
-        outDict['points'] = points
-        outDf = pd.DataFrame(outDict)
-        outDf.to_csv('statistics_point_data_%s_summary.csv'%(u))
-    
-    #for i in range(1, specificationFile.shape[0]):
-    #    dataName
 
-    
-    if showStats:
-        axmin, axmax = (1e1, 1e4)
-        
-        axmin = 0
-        axmax = 3000
-        
-        cases = np.array(uncertainty['case'])
-        uncertainties = [60, 180, 300, 't_peak', 'peak']
-        labels = ['60s Avg', '180s Avg', '300s Avg', 'Time to Peak', 'Peak']
-        diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
-        labelNames = {1 : '$\mathrm{q_{exp} > q_{ref}}$', -1 : '$\mathrm{q_{exp} < q_{ref}}$' }
-        for loglog in [False, True]:
-            if loglog:
-                axmin = 5e0
-                axmaxes = [5e3, 5e3, 5e3, 1e4, 5e3]
-            else:
-                axmin = 0
-                axmaxes = [750, 2000, 1500, 10000, 3000]
-            for i in range(0, len(uncertainties)):
-                label = labels[i]
-                axmax = axmaxes[i]
-                u = uncertainties[i]
-                x = np.array(uncertainty[u]['EXP'])
-                y = np.array(uncertainty[u]['MOD'])
-                f = np.array(uncertainty['flux'])
-                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=diff2, axmin=axmin, axmax=axmax, loglog=loglog, labelName=labelNames)
-                if loglog:
-                    fname = os.path.join(figoutdir, 'statistics_loglog_direction_%s.png'%(label))
-                else:
-                    fname = os.path.join(figoutdir, 'statistics_nolog_direction_%s.png'%(label))
-                plt.savefig(fname, dpi=300)
-                plt.close()
-        
-        
-        
-        cases = np.array(uncertainty['case'])
-        uncertainties = [60, 't_peak', 'peak']
-        labels = ['60s Avg', 'Time to Peak', 'Peak']
-        labelNames = {'Mixtures' : 'Mixtures', 'Polymers' : 'Polymers', 'Wood-Based' : 'Wood-Based', 'Others' : 'Others'}
-        
-        for loglog in [False, True]:
-            if loglog:
-                axmin = 5e0
-                axmaxes = [5e3, 1e4, 5e3]
-            else:
-                axmin = 0
-                axmaxes = [750, 10000, 3000]
-            for i in range(0, len(uncertainties)):
-                label = labels[i]
-                axmax = axmaxes[i]
-                u = uncertainties[i]
-                x = np.array(uncertainty[u]['EXP'])
-                y = np.array(uncertainty[u]['MOD'])
-                f = np.array(uncertainty['flux'])
-                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['MaterialClass'], axmin=axmin, axmax=axmax, loglog=loglog, labelName=labelNames)
-                if loglog:
-                    fname = os.path.join(figoutdir, 'statistics_loglog_matclass_%s.png'%(label))
-                else:
-                    fname = os.path.join(figoutdir, 'statistics_nolog_matclass_%s.png'%(label))
-                plt.savefig(fname, dpi=300)
-                plt.close()
-                
-        cases = np.array(uncertainty['case'])
-        uncertainties = [60, 't_peak', 'peak']
-        labels = ['60s Avg', 'Time to Peak', 'Peak']
-        labelNames = {}
-        for case in list(np.unique(uncertainty['series2'])):
-            labelNames[case] = case.replace('_', ' ')
-        
-        for loglog in [False, True]:
-            if loglog:
-                axmin = 5e0
-                axmaxes = [5e3, 1e4, 5e3]
-            else:
-                axmin = 0
-                axmaxes = [2500, 10000, 3000]
-            for i in range(0, len(uncertainties)):
-                label = labels[i]
-                axmax = axmaxes[i]
-                u = uncertainties[i]
-                x = np.array(uncertainty[u]['EXP'])
-                y = np.array(uncertainty[u]['MOD'])
-                f = np.array(uncertainty['flux'])
-                fig, sigma_m, delta = plotMaterialExtraction(x, y, f, label, diff=uncertainty['series2'], axmin=axmin, axmax=axmax, loglog=loglog, labelName=labelNames)
-                if loglog:
-                    fname = os.path.join(figoutdir, 'statistics_loglog_series_%s.png'%(label))
-                else:
-                    fname = os.path.join(figoutdir, 'statistics_nolog_series_%s.png'%(label))
-                plt.savefig(fname, dpi=300)
-                plt.close()
-        
-        
-        
-        i = 0
-        label = labels[i]
-        axmax = axmaxes[i]
-        u = uncertainties[i]
-        x = np.array(uncertainty[u]['EXP'])
-        y = np.array(uncertainty[u]['MOD'])
-        f = np.array(uncertainty['flux'])
-        
-        delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=False)
-        outputs = dict()
-        outputs['delta'] = dict()
-        outputs['sigma_m'] = dict()
-        outputs['count'] = dict()
-        #outputs['delta']['all'] = delta
-        #outputs['sigma_m']['all'] = sigma_m
-        #outputs['count']['all'] = len(x)
-        hrrpua_thresholds = np.logspace(1,4, num=100)
-        output_points = dict()
-        for j in hrrpua_thresholds: #[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000]:
-            x2 = x[x > j]
-            y2 = y[x > j]
-            diff3 = diff2[x > j]
-            delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x2, y2, diff3, split=False)
-            outputs['delta'][j] = delta
-            outputs['sigma_m'][j] = sigma_m
-            outputs['count'][j] = len(x2)
-            output_points[np.round(j,decimals=1)] = points
-        outputs2 = pd.DataFrame(outputs)
-        
-        ind = np.where(outputs2['sigma_m'] == outputs2['sigma_m'].min())[0][0]
-        hrrpua_at_min = hrrpua_thresholds[ind]
-        sigma_m_at_max = outputs2['sigma_m'].max()
-        sigma_m_at_min = outputs2['sigma_m'].min()
-        slope = -1 * (sigma_m_at_max - sigma_m_at_min) / (hrrpua_at_min - 0) *1.05
-        
-        approx = hrrpua_thresholds*slope + sigma_m_at_max*1.05
-        approx[approx < sigma_m_at_min] = sigma_m_at_min
-        
-        sigma_e = np.zeros_like(hrrpua_thresholds) + sigma_m_at_min
-        
-        fs=16
-        colors = getColors()
-        plt.figure(figsize=(10, 6))
-        #plt.scatter(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', s=30, color=colors[0])
-        plt.plot(hrrpua_thresholds, outputs2['sigma_m'], label='$\mathrm{\sigma_{m}}$', color=colors[0], linewidth=3)
-        app_label = "$\mathrm{\sigma_{m}}=%0.2f - (%0.1fE-4) q''_{60s,peak}$"%(sigma_m_at_max*1.05, -1e4*slope)
-        plt.plot(hrrpua_thresholds, sigma_e, '--', label='$\mathrm{\sigma_{e}}$', color=colors[2], linewidth=3)
-        plt.plot(hrrpua_thresholds, approx, label=app_label, linewidth=3, color=colors[1])
-        plt.xlabel('60s Avg Peak HRRPUA ($\mathrm{kW/m^{2}}$)', fontsize=fs)
-        plt.ylabel('$\mathrm{\sigma}$', fontsize=fs)
-        plt.ylim(0.07, 0.16)
-        plt.xlim(0, 1000)
-        plt.tick_params(labelsize=fs)
-        plt.legend(fontsize=fs)
-        plt.grid()
-        plt.tight_layout()
-        plt.savefig(os.path.join(figoutdir, 'statistics_sigma_m_with_hrrpua.png'), dpi=300)
-        
-        statTxt = "Deviation by Scaling up/down\n"
-        print("Deviation by scaling up/down")
-        cases = np.array(uncertainty['case'])
-        uncertainties = [60, 'peak']
-        labels = ['60s Avg', 'Peak']
-        diff2 = np.array(['Lower' if d < 0 else 'Higher' for d in uncertainty['delta']])
-        
-        for i in range(0, len(uncertainties)):
-            label = labels[i]
-            axmax = axmaxes[i]
-            u = uncertainties[i]
-            x = np.array(uncertainty[u]['EXP'])
-            y = np.array(uncertainty[u]['MOD'])
-            
-            print(label.ljust(30), "\tN\t\tBias\tSigma_m")
-            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m\n"
-            tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
-            print("%s\t%0d\t\t%0.4f\t\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m))
-            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m)
-            delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
-            for s in np.unique(diff2):
-                mn1, var1 = getNormalStats(delta[s], sigma_m[s])
-                N1 = num_points[s]
-                mn2, var2 = getNormalStats(tdelta, tsigma_m)
-                N2 = tnum_points
-                
-                stat, p = scipy.stats.levene(points[s], tpoints, center='mean')
-                #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
-                
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p))
-                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], p)
-                
-            print("\n")
-        
-        with open('statistics_summary_updown.csv', 'w') as f:
-            f.write(statTxt)
-        
-            
-        statTxt = "Deviation by series\n"
-        print("Deviation by series")
-        uncertainties = [60, 'peak']
-        labels = ['60s Avg', 'Peak']
-        #diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
-        diff2 = np.array(uncertainty['series2'])
-        
-        for i in range(0, len(uncertainties)):
-            label = labels[i]
-            axmax = axmaxes[i]
-            u = uncertainties[i]
-            x = np.array(uncertainty[u]['EXP'])
-            y = np.array(uncertainty[u]['MOD'])
-            
-            print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
-            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
-            tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
-            print("%s\t%0d\t\t%0.4f\t\t%0.4f\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5))
-            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5)
-            delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
-            
-            for s in np.unique(diff2):
-                mn1, var1 = getNormalStats(delta[s], sigma_m[s])
-                N1 = num_points[s]
-                mn2, var2 = getNormalStats(tdelta, tsigma_m)
-                N2 = tnum_points
-                
-                stat, p = scipy.stats.levene(points[s], tpoints, center='mean')
-                #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
-                
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f,%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
-                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p)
-                
-            print("\n")
-        
-        with open('statistics_summary_series.csv', 'w') as f:
-            f.write(statTxt)
-        
-        print("Deviation by material class")
-        statTxt = "Deviation by material class\n"
-        uncertainties = [60, 'peak']
-        labels = ['60s Avg', 'Peak']
-        #diff2 = np.array([-1 if d < 0 else 1 for d in uncertainty['delta']])
-        diff2 = np.array(uncertainty['MaterialClass'])
-        
-        for i in range(0, len(uncertainties)):
-            label = labels[i]
-            axmax = axmaxes[i]
-            u = uncertainties[i]
-            x = np.array(uncertainty[u]['EXP'])
-            y = np.array(uncertainty[u]['MOD'])
-            
-            print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
-            statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
-            tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff2, split=False)
-            print("%s\t%04d\t%0.4f\t\t%0.4f\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5))
-            statTxt = statTxt + "%s,%0d,%0.4f,%0.4f\t%0.4f\n"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m, np.var(tpoints)**0.5)
-            delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
-            
-            for s in np.unique(diff2):
-                mn1, var1 = getNormalStats(delta[s], sigma_m[s])
-                N1 = num_points[s]
-                mn2, var2 = getNormalStats(tdelta, tsigma_m)
-                N2 = tnum_points
-                
-                stat, p = scipy.stats.levene(points[s], tpoints, center='mean')
-                #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
-                
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f\t%0.4f"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
-                statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], np.var(points[s])**0.5, sigma_m[s], p)
-                
-            print("\n")
-    
-        with open('statistics_summary_materials.csv', 'w') as f:
-            f.write(statTxt)
-            
-        print("Deviation by series and material class")
-        statTxt = "Deviation by series and material class\n"
-        uncertainties = [60, 'peak']
-        labels = ['60s Avg', 'Peak']
-        diff2 = [u1 + u2 for u1, u2 in zip(uncertainty['series2'], uncertainty['MaterialClass'])]
-        
-        diff3 = [u1 for u1 in uncertainty['MaterialClass']]
-        sep = 20
-        for i in range(0, len(uncertainties)):
-            label = labels[i]
-            axmax = axmaxes[i]
-            u = uncertainties[i]
-            x = np.array(uncertainty[u]['EXP'])
-            y = np.array(uncertainty[u]['MOD'])
-            
-            
-            tdelta, tsigma_m, tsigma_e, tnum_points, tpoints = calculateUncertaintyBounds(x, y, diff3, split=True)
-            #print("%s\t%0d\t\t%0.4f\t\t%0.4f"%('Total'.ljust(30), tnum_points, tdelta, tsigma_m))
-            delta, sigma_m, sigma_e, num_points, points = calculateUncertaintyBounds(x, y, diff2, split=True)
-            
-            for j in np.unique(diff3):
-                print(label.ljust(30), "\tN\t\tBias\t\tSigma_m\tSigma_raw\tP-value")
-                statTxt = statTxt + label.ljust(30) + ",N,Bias,Sigma_m,Sigma_raw\tP-Value\n"
-                mn2, var2 = getNormalStats(tdelta[j], tsigma_m[j])
-                print("%s\t%04d\t%0.4f\t\t%0.4f\t%0.4f"%(j.ljust(sep), tnum_points[j], tdelta[j], tsigma_m[j], np.var(tpoints[j])**0.5))
-                statTxt = statTxt + "%s,%0d,%0.4f,%0.4f,%0.4f\n"%('Total'.ljust(30), tnum_points[j], tdelta[j], tsigma_m[j], np.var(tpoints[j])**0.5)
-                tpoint_test = tpoints[j]
-                for s in np.unique(diff2):
-                
-                    if j in s:
-                        l = s.replace(j,'')
-                        mn2, var2 = getNormalStats(tdelta[j], tsigma_m[j])
-                        N2 = tnum_points[j]
-                        stat, p = scipy.stats.levene(points[s], tpoint_test, center='mean')
-                        print("%s\t%04d\t%0.4f\t\t%0.4f\t\t%0.4f\t%0.4f"%(l.ljust(sep), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p))
-                        statTxt = statTxt + "%s,%04d,%0.4f,%0.4f,%0.4f,%0.4f\n"%(s.ljust(30), num_points[s], delta[s], sigma_m[s], np.var(points[s])**0.5, p)
-                        
-                    #mn1, var1 = getNormalStats(delta[s], sigma_m[s])
-                    #N1 = num_points[s]
-    
-                
-                #p = scipy.stats.f.cdf(var2/var1, N2, N1) if var1 > var2 else scipy.stats.f.cdf(var1/var2, N1, N2)
-                
-                
-                
-                print("\n")
-            with open('statistics_summary_series_and_materials.csv', 'w') as f:
-                f.write(statTxt)
-    
-    '''
-    def buildLatexTable(series, material_data):
-        txt = '\begin{table}[!h]\n'
-        if 'material' in series.lower():
-            txt = txt  + '\caption[Properties of %s]{Properties of %s ~\cite{Luo:FRA2019}.}'
-        else:
-            txt = txt  + '\caption[Properties of %s Materials]{Properties of %s ~\cite{Luo:FRA2019}.}'
-    
-
-    \centering
-    \begin{tabular}{|l|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|}
-    \hline
-    Property                                    &     Acrylic   &     PC Blend  &  Phenolic Resin FRP & PVC Blend  & Vinyl Ester Resin FRP \\ \hline
-    Conductivity    ($\mathrm{W/(m\cdot K)}$)    &  0.24         &     0.89      &  0.35               &  0.29      &  0.54 \\ \hline
-    Density        ($\mathrm{kg/m^{3}}$)        &  1178         &     1320      &  1846               &  1314      &  1600  \\ \hline
-    Emissivity                                  &  0.88         &     0.93      &  0.89               &  0.88      &  0.89   \\ \hline
-    Specific Heat  ($\mathrm{kJ/(kg\cdot C}$)   &  0.62         &     0.67      &  1.29               &  0.42      &  0.94 \\ \hline
-    Thickness ($\mathrm{mm}$)                   &  4.5          &     4.5       &  3.3                &  3.3       &  4.5 \\ \hline
-    Ignition Temperaure ($\mathrm{^{\circ}C}$)  &  390.0        &     453.7     &  520.0              &  499.5     &  579.6 \\ \hline
-    Reference Heat Flux ($\mathrm{kW/m^{2}}$)   &  83.7         &     75.1      &  73.0               &  76.1      &  73.8 \\ \hline
-    \end{tabular}
-    \label{Properties_JH_FRA_Materials_polymers}
-    \end{table}
-    '''
     
