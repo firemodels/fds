@@ -4507,28 +4507,26 @@ The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat lo
 
 \FloatBarrier
 
-\subsection{Heat Transfer to a Steel Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
+\subsection{Heat Transfer to an I-Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
 \label{ht3d_beam_heating}
 
-A steel I-beam 1.76~m long, with flanges that are 0.22~m wide and 0.03~m thick and a web that is 0.6~m deep and 0.02~m thick, is heated within a sealed compartment that is filled with a gas that has a volume $V_{\rm g}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The steel has a density $\rho_{\rm s}=7500$~kg/m$^3$, specific heat $c_{\rm s}=0.5$~kJ/(kg$\cdot$K), and volume $V_{\rm s}=0.041536$~kg/m$^3$, and initial temperature $T_{\rm s,0}=293.15$~K. Initially, the gas and steel have internal energies given by:
+An aluminum I-beam $L=1.76$~m long and $d=0.58$~m deep (i.e.~in height), with flanges that are $b_{\rm f}=0.22$~m wide and $t_{\rm f}=0.005$~m thick and a web that is $t_{\rm w}=0.006$~m thick, is heated within a sealed compartment with volume $V_{\rm c}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The aluminum has a density $\rho_{\rm a}=2700$~kg/m$^3$, specific heat $c_{\rm a}=0.9$~kJ/(kg$\cdot$K), and initial temperature $T_{\rm a,0}=293.15$~K. Initially, the gas and aluminum have internal energies given by:
 \be
-   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 191.95 \; \hbox{kJ} \quad ; \quad
-   U_{\rm s} = \rho_{\rm s} V_{\rm s} c_{\rm s} T_{\rm s,0} \approx 45661.04 \; \hbox{kJ}
+   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 189.56 \; \hbox{kJ} \quad ; \quad
+   U_{\rm a} = \rho_{\rm a} V_{\rm a} c_{\rm a} T_{\rm a,0} \approx 7046.0 \; \hbox{kJ}
 \ee
 After several minutes, the equilibrium temperature is expected to be:
 \be
-   T = \frac{U_{\rm g}+U_{\rm s}}{\rho_{\rm s} V_{\rm s} c_{\rm s} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 294.045 \; \hbox{K} \; \equiv 20.895 \; ^\circ \hbox{C}
+   T = \frac{U_{\rm g}+U_{\rm a}}{\rho_{\rm a} V_{\rm a} c_{\rm a} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 298.84 \; \hbox{K} \; \equiv 25.69 \; ^\circ \hbox{C}
 \ee
-where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 9.0847$ is the number of moles of gas.
+where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 8.973$ is the number of moles of gas. The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the I-beam.
 
-The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
-
-In a second case, a steel plate that is 1.76~m long, 0.58~m wide, and 0.02~m thick is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 21.808~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
+In a second case, the I-beam is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 25.62~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_1}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_2}
-\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of a steel beam immersed in hot gas. (Right) Average temperature of an insulated steel plate exposed to the same conditions.}
+\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of an I-beam immersed in hot gas. (Right) Average temperature of an insulated I-beam exposed to the same conditions.}
 \label{fig:ht3d_beam_heating}
 \end{figure}
 
@@ -5443,6 +5441,7 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
 \label{cone_demo_2}
+\label{cone_demo_3}
 
 This section uses two cases to test a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
 
@@ -5811,6 +5810,8 @@ The solid horizontal lines denote the expected steady-state values.
 \label{water_evaporation_1_plots}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 2}
 \label{water_evaporation_2}
 
@@ -5831,6 +5832,8 @@ The initial mass fraction of water vapor is 0. It is expected that the water wil
 \caption[Sample case \textct{water\_evaporation\_2}]{Output of the \textct{water\_evaporation\_2} test case.}
 \label{water_evaporation_2_plots}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Case 3}
 \label{water_evaporation_3}
@@ -5855,6 +5858,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_3_plots}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 4}
 \label{water_evaporation_4}
@@ -5872,6 +5876,8 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.  The black line indicates the FDS results for the test case with 1000 particles injected every 0.001 s.  The dashed red line shows results for FDS with 100 particles injected every 0.01 s.  Note that the same total mass is injected in both cases.}
 \label{water_evaporation_4_plot}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Case 5}
 \label{water_evaporation_5}
@@ -5919,14 +5925,13 @@ In case 6a, the floor is also set to adiabatic. For a fixed heat flux surface, F
     \label{water_evaporation_6a_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 7}
 \label{water_evaporation_7}
 
-In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
-introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
-The water completely evaporates before it drips down to the bottom of the channel.
-Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
-\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.4 \; \hbox{kW} \ee
+A gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at 20~$^\circ$C is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of $2\,000~\mu$m are introduced via a nozzle in the middle of the channel at a rate of 0.5~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s. The water completely evaporates before it drips down to the bottom of the channel. Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
+\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 0.5/60 \; \hbox{kg/s} = -21.7 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]
@@ -5936,6 +5941,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \label{water_evaporation_7_plot}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 8}
 \label{water_evaporation_8}
@@ -5953,6 +5959,7 @@ This case is similar to Case~5 except that here the droplet has a diameter of 10
 \label{water_evaporation_8_plots}
 \end{figure}
 
+\FloatBarrier
 
 \section{Water Droplets on Solid Surfaces}
 
@@ -6541,6 +6548,32 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \end{center}
  \caption[Level set fire front ellipse error]{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
 \label{fig:level_set_ellipse_error}
+\end{figure}
+
+\subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
+\label{LS4_ember_yield}.
+
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 1.0~kg/m$^2$ and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+\begin{lstlisting}
+&SURF ID                    = 'fuel'
+VEG_LSET_ROS_00             = 0.15
+VEL_PART                    = 0.
+EMBER_GENERATION_HEIGHT     = 0.0,0.5
+EMBER_YIELD                 = 0.05
+EMBER_TRACKING_RATIO        = 100
+PART_ID                     = 'brands'/
+\end{lstlisting}
+where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the properties of a single ember. The cumulative yield is shown in Figure~\ref{fig:LS4_ember_yield}. We also verify the use of {\ct EMBER\_TRACKING\_RATIO} by checking the average weighting factor for all Lagrangian particles (the number of embers each represents).
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_yield.pdf}&
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_weighting.pdf}\\
+\end{tabular}
+\end{center}
+ \caption[Level set ember generation]{Expected versus predicted (left) yield of embers and (right) average weighting factor for each Lagrangian particle.}
+\label{fig:LS4_ember_yield}
 \end{figure}
 
 % Unstructured geometry verification tests:
@@ -7261,7 +7294,7 @@ Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\
 
 \ifcompgeom
 
-\chapter{Unstructured Geometry integral conservation tests}
+\chapter{Unstructured Geometry Integral Conservation Tests}
 \label{info:constests}
 
 Consider an immersed body $B$, with surface defined by $N_\tau$ triangles, completely immersed in a domain $\Omega$ divided in $M$ cartesian mesh blocks.

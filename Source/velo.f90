@@ -1381,9 +1381,10 @@ REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,OM_HP
 REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,T_NOW,DHFCT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
-TYPE (OBSTRUCTION_TYPE), POINTER :: OB
-TYPE (WALL_TYPE), POINTER :: WC
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+REAL(EB), POINTER, DIMENSION(:) :: DUDT_BAR_P
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 
@@ -1394,8 +1395,13 @@ CALL POINT_TO_MESH(NM)
 
 RFODT = RELAXATION_FACTOR/DT
 
-IF (PREDICTOR) HP => H
-IF (CORRECTOR) HP => HS
+IF (PREDICTOR) THEN
+   HP => H
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR
+ELSE
+   HP => HS
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR_S
+ENDIF
 
 ! Fill in exterior cells of mesh NM with values of HP from mesh NOM
 
@@ -1443,6 +1449,7 @@ OBST_LOOP: DO N=1,N_OBST
                   DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
                ENDIF
                FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+               IF (TUNNEL_PRECONDITIONER) FVX(I,J,K) = FVX(I,J,K) + DUDT_BAR_P(I_OFFSET(NM)+I)
             ENDIF
          ENDDO
       ENDDO
@@ -1527,6 +1534,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
             ENDIF
             FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK))*DHFCT - DUUDT
+            IF (TUNNEL_PRECONDITIONER) FVX(II,JJ,KK) = FVX(II,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II)*DHFCT
          CASE(-1)
             IF (PREDICTOR) THEN
                DUUDT = RFODT*(UN-U(II-1,JJ,KK))
@@ -1534,6 +1542,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
             ENDIF
             FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK))*DHFCT - DUUDT
+            IF (TUNNEL_PRECONDITIONER) FVX(II-1,JJ,KK) = FVX(II-1,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II-1)*DHFCT
          CASE( 2)
             IF (PREDICTOR) THEN
                DVVDT = RFODT*(UN-V(II,JJ,KK))
@@ -1602,7 +1611,7 @@ USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 USE CC_SCALARS, ONLY : CC_PROJECT_VELOCITY
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
-INTEGER  :: I,J,K,II
+INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: DT_NEW(NMESHES)
@@ -1623,7 +1632,7 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    WS = W
 ELSE FREEZE_VELOCITY_IF
 
-   !$OMP PARALLEL PRIVATE(I,J,K,II)
+   !$OMP PARALLEL PRIVATE(I,J,K)
 
    !$OMP DO SCHEDULE(STATIC)
    DO K=1,KBAR
@@ -1658,10 +1667,9 @@ ELSE FREEZE_VELOCITY_IF
    !$OMP END PARALLEL
 
    IF (TUNNEL_PRECONDITIONER) THEN
-      !$OMP PARALLEL DO PRIVATE(I,II) SCHEDULE(STATIC)
+      !$OMP PARALLEL DO PRIVATE(I,NM) SCHEDULE(STATIC)
       DO I=0,IBAR
-         II = I_OFFSET(NM) + I
-         US(I,1:JBAR,1:KBAR) = US(I,1:JBAR,1:KBAR) - DT*( TP_RDXN(II)*(H_BAR(II+1)-H_BAR(II)) )
+         US(I,1:JBAR,1:KBAR) = US(I,1:JBAR,1:KBAR) + DT*DUDT_BAR(I_OFFSET(NM)+I)
       ENDDO
       !$OMP END PARALLEL DO
    ENDIF
@@ -1724,7 +1732,7 @@ USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 USE CC_SCALARS, ONLY : CC_PROJECT_VELOCITY
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
-INTEGER  :: I,J,K,II
+INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 
@@ -1753,7 +1761,7 @@ ELSE FREEZE_VELOCITY_IF
          CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
    END SELECT
 
-   !$OMP PARALLEL PRIVATE(I,J,K,II)
+   !$OMP PARALLEL PRIVATE(I,J,K)
 
    !$OMP DO SCHEDULE(STATIC)
    DO K=1,KBAR
@@ -1788,10 +1796,9 @@ ELSE FREEZE_VELOCITY_IF
    !$OMP END PARALLEL
 
    IF (TUNNEL_PRECONDITIONER) THEN
-      !$OMP PARALLEL DO PRIVATE(I,II) SCHEDULE(STATIC)
+      !$OMP PARALLEL DO PRIVATE(I,NM) SCHEDULE(STATIC)
       DO I=0,IBAR
-         II = I_OFFSET(NM) + I
-         U(I,1:JBAR,1:KBAR) = U(I,1:JBAR,1:KBAR) - 0.5_EB*DT*( TP_RDXN(II)*(H_BAR_S(II+1)-H_BAR_S(II)) )
+         U(I,1:JBAR,1:KBAR) = U(I,1:JBAR,1:KBAR) + 0.5_EB*DT*DUDT_BAR_S(I_OFFSET(NM)+I)
       ENDDO
       !$OMP END PARALLEL DO
    ENDIF
@@ -1852,7 +1859,7 @@ INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM,U_WIND_LOC,V_WIND_LOC,W_WIND_LOC
 INTEGER :: NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS,IS2,IWPI,IWMI,VENT_INDEX
@@ -2069,33 +2076,60 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
          VEL_EDDY = 0._EB
          SYNTHETIC_EDDY_IF_1: IF (SYNTHETIC_EDDY_METHOD) THEN
+            U_WIND_LOC = 0._EB
+            V_WIND_LOC = 0._EB
+            W_WIND_LOC = 0._EB
             IS_SELECT_1: SELECT CASE(IS) ! unsigned vent orientation
                CASE(1) ! yz plane
                   SELECT CASE(IEC) ! edge orientation
                      CASE(2)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           U_WIND_LOC = 0.5_EB*(U_WIND(KK)+U_WIND(KK+1))
+                           W_WIND_LOC = 0.5_EB*(W_WIND(KK)+W_WIND(KK+1))
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1)) + U_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1)) + W_WIND_LOC
                      CASE(3)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           V_WIND_LOC = V_WIND(KK)
+                           U_WIND_LOC = U_WIND(KK)
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK)) + V_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK)) + U_WIND_LOC
                   END SELECT
                CASE(2) ! zx plane
                   SELECT CASE(IEC)
                      CASE(3)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           V_WIND_LOC = V_WIND(KK)
+                           U_WIND_LOC = U_WIND(KK)
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK)) + V_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK)) + U_WIND_LOC
                      CASE(1)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           W_WIND_LOC = 0.5_EB*(W_WIND(KK)+W_WIND(KK+1))
+                           V_WIND_LOC = 0.5_EB*(V_WIND(KK)+V_WIND(KK+1))
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1)) + W_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1)) + V_WIND_LOC
                   END SELECT
                CASE(3) ! xy plane
                   SELECT CASE(IEC)
                      CASE(1)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           W_WIND_LOC = W_WIND(KK)
+                           V_WIND_LOC = V_WIND(KK)
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1)) + W_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1)) + V_WIND_LOC
                      CASE(2)
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ))
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ))
+                        IF (OPEN_WIND_BOUNDARY) THEN
+                           U_WIND_LOC = U_WIND(KK)
+                           W_WIND_LOC = W_WIND(KK)
+                        ENDIF
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ)) + U_WIND_LOC
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ)) + W_WIND_LOC
                   END SELECT
             END SELECT IS_SELECT_1
          ENDIF SYNTHETIC_EDDY_IF_1
@@ -2103,7 +2137,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
          ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0 .OR. WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
-                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
+                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. .NOT.SYNTHETIC_EDDY_METHOD) THEN
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
@@ -2234,7 +2268,8 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
          INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. &
                    (BOUNDARY_TYPE_M==SOLID_BOUNDARY .OR. BOUNDARY_TYPE_P==SOLID_BOUNDARY) .OR. &
-                   (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY)) THEN
+                   (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY) .OR. &
+                   (SYNTHETIC_EDDY_METHOD .AND. (BOUNDARY_TYPE_M==OPEN_BOUNDARY .OR. BOUNDARY_TYPE_P==OPEN_BOUNDARY)) ) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell. If the BCs are different on each
             ! side of the edge, choose the one with the specified velocity or velocity gradient, if there is one.
@@ -2253,6 +2288,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_B1%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
+            IF (SYNTHETIC_EDDY_METHOD) VELOCITY_BC_INDEX=NO_SLIP_BC
 
             ! Compute the viscosity by averaging the two adjacent gas cells
 
