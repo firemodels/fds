@@ -971,10 +971,10 @@ if __name__ == "__main__":
             outTxt = outTxt + '\\begin{table}[!h]\n'
             outTxt = outTxt + '\\caption[Properties of %s, %s materials]{Properties of %s, %s materials ~\\cite{%s}.}\n'%(s_name, mc_name, s_name, mc_name, s_cite)
             outTxt = outTxt + '\\centering\n'
-            outTxt = outTxt + '\\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}\n'
+            outTxt = outTxt + '\\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|c|}\n'
             outTxt = outTxt + '\\hline\n'
-            outTxt = outTxt + ' '.ljust(12) + '& $k$'.ljust(12) + '& $\\rho$'.ljust(12)+'& $\\varepsilon$'.ljust(12)+'& $c_{p}$'.ljust(12)+'& $T_{ign}$'.ljust(12) + '&$\\Delta H_{c}$' + '& $Y_{s}$  \\\\\n'
-            outTxt = outTxt + 'Material'.ljust(12) + '& $\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ & $\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ & $\\mathrm{( - )}$ & $\\mathrm{\\left(\\frac{kJ}{(kg\\cdot ^{\\circ}C)}\\right)}$ &  ($\\mathrm{\\frac{kJ/kg}}$)   & ($\\mathrm{^{\\circ}C}$) & $\\mathrm{\\left(-\\right)}$ \\\\ \\hline\n'
+            outTxt = outTxt + ' '.ljust(12) + '& \\centering$k$'.ljust(12) + '& \\centering$\\rho$'.ljust(12)+'& \\centering$\\varepsilon$'.ljust(12)+'& \\centering$c_{p}$'.ljust(12)+'& \\centering$T_{\\mathrm{ign}}$'.ljust(12) + '&\\centering$\\Delta H_{c}$' + '& $Y_{s}$  \\\\\n'
+            outTxt = outTxt + 'Material'.ljust(12) + '& $\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ & $\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ & $\\mathrm{( - )}$ & $\\mathrm{\\left(\\frac{kJ}{(kg\\cdot ^{\\circ}C)}\\right)}$ &  ($\\mathrm{^{\\circ}C}$)   & $\\left(\\mathrm{\\frac{kJ}{kg}}\\right)$ & $\\mathrm{\\left(-\\right)}$ \\\\ \\hline\n'
             outTxt = outTxt + '\\hline\n'
             for material in sorted(list(completeMaterials)):
                 if (spec_file_dict[material]['materialClass'] != mc) or (spec_file_dict[material]['series'] != s): continue
