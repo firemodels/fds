@@ -426,8 +426,14 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                ENDIF
                ! Use Ferrari's method
                IF (.NOT. RADIATION) THEN
-                  IF (ABS(B1%HEAT_TRANS_COEF) < TWO_EPSILON_EB) EXIT ADLOOP
-                  B1%TMP_F = (QNET + B1%HEAT_TRANS_COEF * B1%TMP_G)/B1%HEAT_TRANS_COEF
+                  IF (ABS(QNET) < TWO_EPSILON_EB) THEN
+                     HTC_OLD = 0._EB
+                     B1%TMP_F = B1%TMP_G
+                  ELSE
+                     HTC_OLD = B1%HEAT_TRANS_COEF
+                     IF (ABS(B1%HEAT_TRANS_COEF) < TWO_EPSILON_EB) EXIT ADLOOP
+                     B1%TMP_F = (-QNET + B1%HEAT_TRANS_COEF * B1%TMP_G)/B1%HEAT_TRANS_COEF
+                  ENDIF
                   EXIT ADLOOP
                ENDIF
                BBB = B1%HEAT_TRANS_COEF / (B1%EMISSIVITY * SIGMA)
@@ -447,7 +453,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                IF (ABS(HTC_OLD-B1%HEAT_TRANS_COEF) < 1.E-6_EB .OR. ADCOUNT > 20) EXIT ADLOOP
             ENDDO ADLOOP
             B1%HEAT_TRANS_COEF = HTC_OLD
-            B1%Q_CON_F = B1%HEAT_TRANS_COEF*DTMP
+            B1%Q_CON_F = B1%HEAT_TRANS_COEF*(B1%TMP_G-B1%TMP_F)
          ENDIF
       ENDIF
       IF (RADIATION) B1%Q_RAD_OUT = SIGMA*B1%EMISSIVITY*B1%TMP_F**4
