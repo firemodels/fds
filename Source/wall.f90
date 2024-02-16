@@ -407,38 +407,48 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          ELSE
             SF_HTC = -1._EB
          ENDIF
-
-         ADCOUNT = 0
-         ADLOOP: DO
-            ADCOUNT = ADCOUNT + 1
-            DTMP = B1%TMP_G - B1%TMP_F
-            IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) <TWO_EPSILON_EB) DTMP=1._EB
-            IF (PRESENT(WALL_INDEX)) THEN
-               B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)
-            ELSEIF (PRESENT(CFACE_INDEX)) THEN
-               B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,CFACE_INDEX_IN=CFACE_INDEX)
-            ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
-               B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,PARTICLE_INDEX_IN=PARTICLE_INDEX)
-            ENDIF
-            ! Use Ferrari's method
-            BBB = B1%HEAT_TRANS_COEF / (B1%EMISSIVITY * SIGMA)
-            CCC = -(B1%Q_RAD_IN+B1%HEAT_TRANS_COEF*B1%TMP_G-QNET)/(B1%EMISSIVITY * SIGMA)
-            PPP = -CCC
-            QQQ = -0.125_EB*BBB**2
-            RRR = -0.5_EB*QQQ+SQRT(0.25_EB*QQQ**2+PPP**3/27._EB)
-            UUU = RRR**ONTH
-            IF (UUU < TWO_EPSILON_EB) THEN
-               YYY = -QQQ**ONTH
-            ELSE
-               YYY = UUU-ONTH*PPP/UUU
-            ENDIF
-            WWW = SQRT(2._EB*YYY)
-            B1%TMP_F = 0.5_EB*(-WWW+SQRT(-2._EB*(YYY-BBB/WWW)))
-            HTC_OLD = 0.2_EB*HTC_OLD+0.8_EB*B1%HEAT_TRANS_COEF
-            IF (ABS(HTC_OLD-B1%HEAT_TRANS_COEF) < 1.E-6_EB .OR. ADCOUNT > 20) EXIT ADLOOP
-         ENDDO ADLOOP
-         B1%HEAT_TRANS_COEF = HTC_OLD
-         B1%Q_CON_F = B1%HEAT_TRANS_COEF*DTMP
+         IF (ABS(SF_HTC) < TWO_EPSILON_EB) THEN
+            B1%TMP_F = ((-QNET + B1%Q_RAD_IN)/(B1%EMISSIVITY * SIGMA))**0.25_EB
+            B1%HEAT_TRANS_COEF = 0._EB
+            B1%Q_CON_F = 0._EB
+         ELSE
+            ADCOUNT = 0
+            ADLOOP: DO
+               ADCOUNT = ADCOUNT + 1
+               DTMP = B1%TMP_G - B1%TMP_F
+               IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) <TWO_EPSILON_EB) DTMP=1._EB
+               IF (PRESENT(WALL_INDEX)) THEN
+                  B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,WALL_INDEX_IN=WALL_INDEX)
+               ELSEIF (PRESENT(CFACE_INDEX)) THEN
+                  B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,CFACE_INDEX_IN=CFACE_INDEX)
+               ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
+                  B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,DTMP,SF_HTC,SURF_INDEX,PARTICLE_INDEX_IN=PARTICLE_INDEX)
+               ENDIF
+               ! Use Ferrari's method
+               IF (.NOT. RADIATION) THEN
+                  IF (ABS(B1%HEAT_TRANS_COEF) < TWO_EPSILON_EB) EXIT ADLOOP
+                  B1%TMP_F = (QNET + B1%HEAT_TRANS_COEF * B1%TMP_G)/B1%HEAT_TRANS_COEF
+                  EXIT ADLOOP
+               ENDIF
+               BBB = B1%HEAT_TRANS_COEF / (B1%EMISSIVITY * SIGMA)
+               CCC = -(B1%Q_RAD_IN+B1%HEAT_TRANS_COEF*B1%TMP_G-QNET)/(B1%EMISSIVITY * SIGMA)
+               PPP = -CCC
+               QQQ = -0.125_EB*BBB**2
+               RRR = -0.5_EB*QQQ+SQRT(0.25_EB*QQQ**2+PPP**3/27._EB)
+               UUU = RRR**ONTH
+               IF (UUU < TWO_EPSILON_EB) THEN
+                  YYY = -QQQ**ONTH
+               ELSE
+                  YYY = UUU-ONTH*PPP/UUU
+               ENDIF
+               WWW = SQRT(2._EB*YYY)
+               B1%TMP_F = 0.5_EB*(-WWW+SQRT(-2._EB*(YYY-BBB/WWW)))
+               HTC_OLD = 0.2_EB*HTC_OLD+0.8_EB*B1%HEAT_TRANS_COEF
+               IF (ABS(HTC_OLD-B1%HEAT_TRANS_COEF) < 1.E-6_EB .OR. ADCOUNT > 20) EXIT ADLOOP
+            ENDDO ADLOOP
+            B1%HEAT_TRANS_COEF = HTC_OLD
+            B1%Q_CON_F = B1%HEAT_TRANS_COEF*DTMP
+         ENDIF
       ENDIF
       IF (RADIATION) B1%Q_RAD_OUT = SIGMA*B1%EMISSIVITY*B1%TMP_F**4
 
