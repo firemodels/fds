@@ -819,9 +819,22 @@ if __name__ == "__main__":
         data = load_csv(workingDir, chid)
         qMax = np.ceil(np.nanmax(data[[c for c in data.columns if 'HRRPUA' in c]].values)/10*1.1)*10
         tInd = np.argwhere(np.sum(data[[c for c in data.columns if 'HRRPUA' in c]].values,axis=1)>0)[-1][0]
+        
+        tMax_by_thickness = dict()
+        qMax_by_thickness = dict()
+        for thickness in sorted(list(set(thicknesses))):
+            columns = [c for c in data.columns if 'HRRPUA' in c and ('%0.2f'%(thickness)).replace('.','p') in c]
+            qMax = (np.ceil(np.nanmax(data[columns])/50)*1.1+1)*50
+            qMax_by_thickness[thickness] = max([qMax, 0])
+            tind = np.where(np.sum(abs(data[columns]),axis=1) > 0)[0][-1]
+            tMax = (np.ceil(data['Time'].values[tind]/60/2)+1)*2
+            tMax_by_thickness[thickness] = max([tMax, 2])
+        
+        '''
         tMax = np.ceil(data['Time'].iloc[tInd]/60/5)*5
         qMax = max([qMax, 0])
         tMax = max([tMax, 5])
+        '''
         expFiles = spec_file_dict[material]['expFiles']
         headerRows = spec_file_dict[material]['headerRows']
         if type(headerRows) is int:
@@ -845,10 +858,13 @@ if __name__ == "__main__":
             data_exp = pd.DataFrame(np.array(d[headerRow:, :], dtype=float), columns=columns)
             hrrColumn = spec_file_dict[material]['hrrColumns'][i]
             if '.csv' in hrrColumn: hrrColumn = hrrColumn.split('.csv-')[1]
-            qMax = max([qMax, np.ceil(np.nanmax(data_exp[hrrColumn].values)*1.1/10)*10])
+            qMax = np.ceil(np.nanmax(data_exp[hrrColumn].values)*1.1/50+1)*50
             timeColumn = spec_file_dict[material]['timeColumns'][i]
             if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
-            tMax = max([tMax, np.ceil(np.nanmax(data_exp[timeColumn].values)/60/5)*5])
+            tMax = np.ceil(np.nanmax(data_exp[timeColumn].values)/60/2+1)*2
+            thickness = thicknesses[i]
+            tMax_by_thickness[thickness] = max([tMax, tMax_by_thickness[thickness]])
+            qMax_by_thickness[thickness] = max([qMax, qMax_by_thickness[thickness]])
         for thickness in sorted(list(set(thicknesses))):
             counter = 0
             for iii, flux in enumerate(fluxes):
@@ -864,6 +880,9 @@ if __name__ == "__main__":
                 materialColor = materialClassDict[materialClass]['color']
                 matlabelname = material
                 while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+                matlabelname = '_'.join(matlabelname.split('_')[1:])
+                if 'FPL' in series:
+                    matlabelname = '_'.join(matlabelname.split('_')[:-1])
                 matlabelname = matlabelname.replace('_','\_')
                 outTxt = outTxt + switchId + ',' + 'Scaling_Pyrolysis_'+materialClass + ',Scaling_Pyrolysis/' + expFiles[iii] + ',' #'%s-%02d.csv"'%(material,flux) + ","
                 timeColumn,hrrColumn=spec_file_dict[material]['timeColumns'][iii],spec_file_dict[material]['hrrColumns'][iii]
@@ -874,7 +893,7 @@ if __name__ == "__main__":
                 hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
                 outTxt = outTxt + 'Scaling_Pyrolysis/' + chid + '_devc.csv,2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
                 outTxt = outTxt + '%s %0.1f mm,Time (min),Heat Release Rate (kW/m²),'%(matlabelname, thickness)
-                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,EastOutside,,1.4,Scaling_Pyrolysis/'%(tMax, qMax) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
+                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,NorthEast,,1.0,Scaling_Pyrolysis/'%(tMax_by_thickness[thickness], qMax_by_thickness[thickness]) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
                 outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
         
     with open('scaling_dataplot_out.csv', 'w') as f:
@@ -942,6 +961,7 @@ if __name__ == "__main__":
     class_dict = {'Mixtures': 'mixture', 'Others': 'other', 'Polymers': 'polymer', 'Wood-Based': 'Wood-Based'}
     
     outTxt = ''
+    series = [spec_file_dict[material]['series'] for material in completeMaterials]
     for s in sorted(list(set(series))):
         s_name = s.replace('_',' ')
         s_cite = citation_dict[s_name]
@@ -953,8 +973,8 @@ if __name__ == "__main__":
             outTxt = outTxt + '\\centering\n'
             outTxt = outTxt + '\\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.2cm}|}\n'
             outTxt = outTxt + '\\hline\n'
-            outTxt = outTxt + ' '.ljust(12) + '& $k$'.ljust(12) + '& $\\rho$'.ljust(12)+'& $\\varepsilon$'.ljust(12)+'& $c_{p}$'.ljust(12)+'& $T_{ign}$'.ljust(12) + '&$\\Delta H_{c}$' + '& Y_{s}  \\\\\n'
-            outTxt = outTxt + 'Material'.ljust(12) + '& $\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ & $\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ & $\\mathrm{( - )}$ & $\\mathrm{\\left(\\frac{kJ}{(kg\\cdot ^{\\circ}C)}\\right)}$ &  ($\\mathrm{\frac{kJ/kg}}$)   & ($\\mathrm{^{\\circ}C}$) & $\\mathrm{\\left(-\\right)}$ \\\\ \\hline\n'
+            outTxt = outTxt + ' '.ljust(12) + '& $k$'.ljust(12) + '& $\\rho$'.ljust(12)+'& $\\varepsilon$'.ljust(12)+'& $c_{p}$'.ljust(12)+'& $T_{ign}$'.ljust(12) + '&$\\Delta H_{c}$' + '& $Y_{s}$  \\\\\n'
+            outTxt = outTxt + 'Material'.ljust(12) + '& $\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ & $\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ & $\\mathrm{( - )}$ & $\\mathrm{\\left(\\frac{kJ}{(kg\\cdot ^{\\circ}C)}\\right)}$ &  ($\\mathrm{\\frac{kJ/kg}}$)   & ($\\mathrm{^{\\circ}C}$) & $\\mathrm{\\left(-\\right)}$ \\\\ \\hline\n'
             outTxt = outTxt + '\\hline\n'
             for material in sorted(list(completeMaterials)):
                 if (spec_file_dict[material]['materialClass'] != mc) or (spec_file_dict[material]['series'] != s): continue
@@ -966,24 +986,99 @@ if __name__ == "__main__":
                 Ys = spec_file_dict[material]['soot_yield']
                 Tign = spec_file_dict[material]['Tign']
                 
-                outTxt = outTxt + material.ljust(50).replace('_',' ') + '& %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.0f & %0.4f \\\\\n'%(k, rho, eps, cp, Tign, DHc, Ys)
+                outTxt = outTxt + material.ljust(50).replace('_',' ') + '& %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.0f & %0.4f \\\\\\hline\n'%(k, rho, eps, cp, Tign, DHc, Ys)
             outTxt = outTxt + '\\end{tabular}\n'
             outTxt = outTxt + '\\label{Properties_%s_%s}\n'%(s,mc)
             outTxt = outTxt + '\\end{table}\n\n\n'
     
-    
     with open('material_properties.tex', 'w') as f:
+        f.write(outTxt)
+    
+    sending_dict = {'Aalto_Woods': '',
+                     'FAA_Polymers': '',
+                     'FPL_Materials': '',
+                     'FSRI_Materials': 'mc',
+                     'JH_Materials': '',
+                     'RISE_Materials': 'mc'}
+    outTxt = ''
+    series = [spec_file_dict[material]['series'] for material in completeMaterials]
+    for s in sorted(list(set(series))):
+        s_name = s.replace('_',' ')
+        s_cite = citation_dict[s_name]
+        for mc in sorted(list(set(materialClasses))):
+            if material_count[s][mc] == 0: continue
+            mc_name = class_dict[mc]
+            sending = sending_dict[s]
+            if sending == 'mc': sending = ', %s materials'%(mc)
+            outTxt = outTxt + '\\begin{figure}[p]\n'
+            outTxt = outTxt + '\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n'
+            counter = 0
+            for material in sorted(list(completeMaterials)):
+                if (spec_file_dict[material]['materialClass'] != mc) or (spec_file_dict[material]['series'] != s): continue
+                chid = material.replace(' ','_')
+                cases = get_filtered_cases(spec_file_dict, material, energyThreshold=energyThreshold)
+                thicknesses = [cases[c]['delta']*1e3 for c in cases.keys()]
+                for thickness in sorted(list(set(thicknesses))):
+                    fname = ('%s_cone_%s'''%(chid, ('%0.1f'%(thickness)))).replace('.','p')
+                    if counter < 8:
+                        ending = '&' if (counter%2 == 0) else '\\\\'
+                        outTxt = outTxt + '\\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/%s.pdf} %s\n'%(fname, ending)
+                        counter += 1
+                    else:
+                        outTxt = outTxt + '\\end{tabular*}\n'
+                        outTxt = outTxt + '\\caption[HRRPUA of %s using scaling model %s]\n'%(s.replace('_',' '), sending)
+                        outTxt = outTxt + '{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}\n'
+                        outTxt = outTxt + '\\label{%s_HRR_%s}\n'%(s, mc)
+                        outTxt = outTxt + '\\end{figure}\n\n'
+                        outTxt = outTxt + '\\begin{figure}[p]\n'
+                        outTxt = outTxt + '\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n'
+                        counter = 0
+            if counter > 0:
+                outTxt = outTxt + '\\end{tabular*}\n'
+                outTxt = outTxt + '\\caption[HRRPUA of %s using scaling model %s]\n'%(s.replace('_',' '), sending)
+                outTxt = outTxt + '{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}\n'
+                outTxt = outTxt + '\\label{%s_HRR_%s}\n'%(s, mc)
+                outTxt = outTxt + '\\end{figure}\n\n'
+                outTxt = outTxt + '\\begin{figure}[p]\n'
+                outTxt = outTxt + '\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n'
+    
+    with open('material_figures.tex', 'w') as f:
         f.write(outTxt)
     
     
     
     
-    
+    #from materials.scripts.algorithms import get_ignition_temperature
+    #cases = spec_file_dict[material]['cases']
+    #baseDir = os.path.join(systemPath,'materials','input_files')
+    #get_ignition_temperature(material, baseDir, cases)
     
     material_count = pd.DataFrame(material_count)
     material_output_data = pd.DataFrame(material_output_data)
     material_output_data.to_csv('material_output_data.csv', float_format='%.1f')
     
+    
+    
+    
+    
+    
+    
+    
+    files = glob.glob(os.path.join(systemPath, 'materials','input_files','*','*_git.txt'))
+    for file in files:
+        ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+        if os.path.basename(file) not in ignores:
+            shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+    
+    files = glob.glob(os.path.join(systemPath, 'materials','input_files','*','*_devc.csv'))
+    for file in files:
+        ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+        if os.path.basename(file) not in ignores:
+            shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
+    
+    
+    
+    '''
     tmp = material_output_data.T
     tmp['MaterialClass'] = [x[0] for x in tmp.index]
     tmp['Material'] = [x[2] for x in tmp.index]
@@ -1006,7 +1101,7 @@ if __name__ == "__main__":
     
     out2.index = np.linspace(0,len(out2.index)-1, len(out2.index))
     out2_vals = np.array(out2.values[:, :7], dtype=float)
-    
+    '''
     
     
     
