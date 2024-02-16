@@ -408,7 +408,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
             SF_HTC = -1._EB
          ENDIF
          IF (ABS(SF_HTC) < TWO_EPSILON_EB) THEN
-            B1%TMP_F = ((-QNET + B1%Q_RAD_IN)/(B1%EMISSIVITY * SIGMA))**0.25_EB
+            IF (RADIATION) B1%TMP_F = ((-QNET + B1%Q_RAD_IN)/(B1%EMISSIVITY * SIGMA))**0.25_EB
             B1%HEAT_TRANS_COEF = 0._EB
             B1%Q_CON_F = 0._EB
          ELSE
