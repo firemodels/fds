@@ -1399,7 +1399,7 @@ The results of the simulations are shown on the following pages.
 \centering
 \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{1.0cm}|p{1.0cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$& $Y_{s}$ \\
+            & \centering$\Delta^{a}$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{b}$&\centering$\Delta H_{c}$& $Y_{s}$ \\
 Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & \centering$\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & \centering$\mathrm{\left(\frac{kJ}{(kg\cdot K}\right)}$ & \centering$\mathrm{( - )}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & $\mathrm{\left(\frac{g}{g}\right)}$ \\ \hline
 \hline
 HDPE                                              & 3.2, 8.1, 27.0 & 860 & 0.29 & 3.500 & 0.92 & 410 & 47.5 & 0.060 \\\hline
@@ -1414,7 +1414,8 @@ PVC                                               & 3.0, 6.0, 9.0 & 1430 & 0.17 
 \label{Properties_FAA_Polymers_All}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent\footnotesize{$^a$ Comma separation indicates tests at multiple thicknesses.}\\
+\noindent\footnotesize{$^b$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1488,8 +1489,6 @@ Waferboard                                        & 13.0 & 712 & 425 & 13.3 & 0.
 \end{table}
 \vspace{-0.4cm}
 \noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-
-The results of the simulations are shown on the following pages.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1794,13 +1793,14 @@ Table ~\ref{Properties_JH_Materials_All} lists the relevant parameters for model
 Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
 In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
+The results of the simulations are shown on the following pages.
 
 \begin{table}[!h]
 \caption[Properties of JH Materials]{Properties of JH Materials~\cite{Luo:FRA2019,Lattimer:NIJ19}.}
 \centering
 \begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.4cm}|p{0.8cm}|p{1.0cm}|p{1.0cm}|c|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$& $Y_{s}^{b}$ \\
+            & \centering$\Delta$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$& $Y_{s}$ \\
 Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & \centering$\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & \centering$\mathrm{\left(\frac{kJ}{(kg\cdot K}\right)}$ & \centering$\mathrm{( - )}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & $\mathrm{\left(\frac{g}{g}\right)}$ \\ \hline
 \hline
 Acrylic                                           & 4.5 & 1178 & 0.24 & 0.623 & 0.88 & 387 & 24.9 & 0.033 \\\hline
@@ -1823,9 +1823,6 @@ White Spruce                                      & 37.2 & 430 & 0.24 & 1.104 & 
 \end{table}
 \vspace{-0.4cm}
 \noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-
-The results of the simulations are shown on the following pages.
 
 
 \begin{figure}[p]
@@ -1879,7 +1876,7 @@ The results of the simulations are shown on the following pages.
 \begin{table}[!h]
 \caption[Properties of RISE Materials, mixture materials]{Properties of RISE Materials, mixture materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
+\begin{tabular}{|p{4.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{4.0cm}|}
 \hline
             & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
 Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
@@ -1899,12 +1896,6 @@ Polyolefin, EPR                                   & 32.2 & 278 & 547 & 19.9 & 0.
 Polyolefin, PA                                    & 2.5 & 632 & 549 & 22.3 & 0.050 & 516, 517, 518 \\\hline
 Polyolefin, PA                                    & 6.0 & 632 & 476 & 22.3 & 0.050 & 513, 514, 515 \\\hline
 Polyolefin, PP                                    & 8.7 & 513 & 493 & 25.7 & 0.050 & 446, 447, 448 \\\hline
-Polyolefin, XLPE                                  & 18.1 & 392 & 556 & 28.4 & 0.050 & 473, 474, 475 \\\hline
-Polyolefin, XLPE                                  & 25.0 & 392 & 553 & 28.4 & 0.050 & 484, 485, 486 \\\hline
-Polyolefin, XLPE                                  & 38.1 & 392 & 552 & 28.4 & 0.050 & 455, 456, 457 \\\hline
-Polyolefin, XLPE                                  & 45.0 & 392 & 552 & 28.4 & 0.050 & 464, 465, 466 \\\hline
-Pur Rigid, Plastic Faced Steel Sheet              & 79.0 & 170 & 497 & 10.2 & 0.072 & 80, 81, 82, 83, 84, 85 \\\hline
-PVC, EPR                                          & 32.5 & 170 & 508 & 13.9 & 0.050 & 411, 412, 413 \\\hline
 \end{tabular}
 \label{Properties_RISE_Materials_Mixtures1}
 \end{table}
@@ -1913,14 +1904,22 @@ PVC, EPR                                          & 32.5 & 170 & 508 & 13.9 & 0.
 \noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
 \noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
 
+
+
 \begin{table}[!h]
 \caption[Properties of RISE Materials, mixture materials]{Properties of RISE Materials, mixture materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
+\begin{tabular}{|p{4.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{4.0cm}|}
 \hline
             & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
 Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
 \hline
+Polyolefin, XLPE                                  & 18.1 & 392 & 556 & 28.4 & 0.050 & 473, 474, 475 \\\hline
+Polyolefin, XLPE                                  & 25.0 & 392 & 553 & 28.4 & 0.050 & 484, 485, 486 \\\hline
+Polyolefin, XLPE                                  & 38.1 & 392 & 552 & 28.4 & 0.050 & 455, 456, 457 \\\hline
+Polyolefin, XLPE                                  & 45.0 & 392 & 552 & 28.4 & 0.050 & 464, 465, 466 \\\hline
+Pur Rigid, Plastic Faced Steel Sheet              & 79.0 & 170 & 497 & 10.2 & 0.072 & 80, 81, 82, 83, 84, 85 \\\hline
+PVC, EPR                                          & 32.5 & 170 & 508 & 13.9 & 0.050 & 411, 412, 413 \\\hline
 PVC, XLPE                                         & 17.7 & 405 & 341 & 22.4 & 0.050 & 467, 468, 469 \\\hline
 PVC, XLPE                                         & 22.0 & 405 & 341 & 22.4 & 0.050 & 477, 478, 479 \\\hline
 PVC, XLPE                                         & 35.0 & 405 & 341 & 22.4 & 0.050 & 490, 491, 492 \\\hline
@@ -2029,10 +2028,10 @@ Zhpolyolefin, XLPE                                & 27.0 & 412 & 527 & 27.3 & 0.
 \begin{table}[!h]
 \caption[Properties of RISE Materials, other materials]{Properties of RISE Materials, other materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
+\begin{tabular}{|p{4.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{4.0cm}|}
 \hline
             & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
 \hline
 Aluminium Honey Comb Coated With HPL              & 22.7 & 514 & 537 & 17.3 & 0.050 & 1785, 1786, 1787, 1788, 1789, 1790, 1791, 1792, 1793, 2362, 2363, 2364 \\\hline
 HPL Compact                                       & 4.0 & 1610 & 500 & 13.8 & 0.050 & 1695, 1696, 1697, 1698, 1699, 1701, 1702, 1703, 1704, 1705, 2184, 2185, 2186 \\\hline
@@ -2043,7 +2042,6 @@ Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.0
 \vspace{-0.4cm}
 \noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 \noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-\noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
 
 
 \begin{figure}[p]
@@ -2062,7 +2060,7 @@ Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.0
 \begin{table}[!h]
 \caption[Properties of RISE Materials, polymer materials]{Properties of RISE Materials, polymer materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
+\begin{tabular}{|p{4.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{4.0cm}|}
 \hline
             & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
 Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
@@ -2128,10 +2126,10 @@ Transparent Polycarbonate                         & 2.3 & 1579 & 528 & 13.2 & 0.
 \begin{table}[!h]
 \caption[Properties of RISE Materials, Wood-Based materials]{Properties of RISE Materials, Wood-Based materials ~\cite{RISE:Fire_Database}.}
 \centering
-\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|c|}
+\begin{tabular}{|p{4.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{1.0cm}|p{4.0cm}|}
 \hline
             & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
 \hline
 FR Particle Board                                 & 12.0 & 517 & 364 & 7.4 & 0.049 & 158, 159, 160, 161 \\\hline
 FR Particle Board                                 & 16.0 & 517 & 368 & 7.4 & 0.049 & 146, 147, 148, 149, 150, 151, 72, 73 \\\hline
@@ -2144,7 +2142,6 @@ Spruce                                            & 10.0 & 450 & 297 & 12.5 & 0.
 \vspace{-0.4cm}
 \noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 \noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-\noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
