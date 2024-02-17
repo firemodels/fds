@@ -846,7 +846,7 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 435.0
     elif material == 'FSRI_House_Wrap':
         thickness = 0.1110
-        tMax_by_thickness[thickness] = 5
+        tMax_by_thickness[thickness] = 3
         qMax_by_thickness[thickness] = 80.0
     elif material == 'FSRI_Latex_Pillow_Foam':
         thickness = 3.2577
@@ -859,7 +859,7 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         
     elif material == 'FSRI_Overstuffed_Chair_Assembly':
         thickness = 4.2084
-        tMax_by_thickness[thickness] = 6
+        tMax_by_thickness[thickness] = 5
         qMax_by_thickness[thickness] = 1250.0
     elif material == 'FSRI_PE_Foam_Pipe_Insulation':
         thickness = 14.2924
@@ -875,19 +875,19 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 435.0
     elif material == 'FSRI_Roof_Felt':
         thickness = 1.0731
-        tMax_by_thickness[thickness] = 3.0
+        tMax_by_thickness[thickness] = 2.0
         qMax_by_thickness[thickness] = 1205.0
     elif material == 'FSRI_Rubber_Band':
         thickness = 4.6658
-        tMax_by_thickness[thickness] = 6.0
+        tMax_by_thickness[thickness] = 5.0
         qMax_by_thickness[thickness] = 1040.0
     elif material == 'FSRI_Rubber_Foam_Pipe_Insulation':
         thickness = 12.7742
-        tMax_by_thickness[thickness] = 3.0
+        tMax_by_thickness[thickness] = 2.0
         qMax_by_thickness[thickness] = 380.0
     elif material == 'FSRI_Rug_Pad':
         thickness = 4.0605
-        tMax_by_thickness[thickness] = 3.0
+        tMax_by_thickness[thickness] = 2.0
         qMax_by_thickness[thickness] = 600.0
         
     elif material == 'FSRI_Wool_Rug':
@@ -901,77 +901,77 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         
     elif material == 'FSRI_ABS':
         thickness = 2.9545
-        tMax_by_thickness[thickness] = 6
-        qMax_by_thickness[thickness] = 2150.0
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 2250.0
     elif material == 'FSRI_Black_PMMA':
         thickness = 8.6925
-        tMax_by_thickness[thickness] = 13.0
-        qMax_by_thickness[thickness] = 1700.0
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 1800.0
     elif material == 'FSRI_Cotton_Raw':
         thickness = 2.4410
         tMax_by_thickness[thickness] = 3
         qMax_by_thickness[thickness] = 710.0
     elif material == 'FSRI_HDPE':
         thickness = 3.2414
-        tMax_by_thickness[thickness] = 10
-        qMax_by_thickness[thickness] = 2965.0
+        tMax_by_thickness[thickness] = 11
+        qMax_by_thickness[thickness] = 3100.0
     elif material == 'FSRI_HIPS':
         thickness = 2.9531
-        tMax_by_thickness[thickness] = 7.0
-        qMax_by_thickness[thickness] = 1920.0
+        tMax_by_thickness[thickness] = 8.0
+        qMax_by_thickness[thickness] = 2050.0
     elif material == 'FSRI_High_Temperature_SCBA_Facepiece':
         thickness = 37.1994
         tMax_by_thickness[thickness] = 152.0
-        qMax_by_thickness[thickness] = 350.0
+        qMax_by_thickness[thickness] = 300.0
     elif material == 'FSRI_LDPE':
         thickness = 3.2459
-        tMax_by_thickness[thickness] = 7.0
-        qMax_by_thickness[thickness] = 3075.0
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 3100.0
     elif material == 'FSRI_Memory_Foam_Carpet_Pad':
         thickness = 12.4020
-        tMax_by_thickness[thickness] = 3.0
-        qMax_by_thickness[thickness] = 1850.0
+        tMax_by_thickness[thickness] = 3.5
+        qMax_by_thickness[thickness] = 2000.0
     
     elif material == 'FSRI_Nylon':
         thickness = 3.4008
-        tMax_by_thickness[thickness] = 16
-        qMax_by_thickness[thickness] = 1950.0
+        tMax_by_thickness[thickness] = 18
+        qMax_by_thickness[thickness] = 2000
     elif material == 'FSRI_Nylon_Carpet_High_Pile':
         thickness = 13.7257
-        tMax_by_thickness[thickness] = 18
-        qMax_by_thickness[thickness] = 900.0
+        tMax_by_thickness[thickness] = 20
+        qMax_by_thickness[thickness] = 1000.0
     elif material == 'FSRI_Overstuffed_Chair_Polyester_Batting':
         thickness = 1.4901
-        tMax_by_thickness[thickness] = 15.0
-        qMax_by_thickness[thickness] = 710.0
+        tMax_by_thickness[thickness] = 16.0
+        qMax_by_thickness[thickness] = 800.0
     elif material == 'FSRI_Overstuffed_Chair_Polyester_Fabric':
         thickness = 0.5245
-        tMax_by_thickness[thickness] = 11.0
-        qMax_by_thickness[thickness] = 325.0
+        tMax_by_thickness[thickness] = 14.0
+        qMax_by_thickness[thickness] = 400.0
     elif material == 'FSRI_Overstuffed_Chair_Polyurethane_Foam':
         thickness = 0.8163
-        tMax_by_thickness[thickness] = 2
-        qMax_by_thickness[thickness] = 1535.0
+        tMax_by_thickness[thickness] = 2.5
+        qMax_by_thickness[thickness] = 1500.0
     elif material == 'FSRI_PC':
         thickness = 5.3279
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 820.0
     elif material == 'FSRI_PET':
         thickness = 6.5311
-        tMax_by_thickness[thickness] = 17.0
-        qMax_by_thickness[thickness] = 1315.0
+        tMax_by_thickness[thickness] = 18.0
+        qMax_by_thickness[thickness] = 1400.0
     elif material == 'FSRI_PETG':
         thickness = 2.6256
-        tMax_by_thickness[thickness] = 8.0
-        qMax_by_thickness[thickness] = 2745.0
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 3000.0
         
     elif material == 'FSRI_PMMA':
         thickness = 2.8173
-        tMax_by_thickness[thickness] = 6
-        qMax_by_thickness[thickness] = 1920.0
+        tMax_by_thickness[thickness] = 7
+        qMax_by_thickness[thickness] = 2000.0
     elif material == 'FSRI_PP':
         thickness = 3.2256
-        tMax_by_thickness[thickness] = 7.0
+        tMax_by_thickness[thickness] = 9.0
         qMax_by_thickness[thickness] = 3130.0
     elif material == 'FSRI_PVC':
         thickness = 3.1772
@@ -979,33 +979,33 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 400.0
     elif material == 'FSRI_Pallet_Wood':
         thickness = 2.9531
-        tMax_by_thickness[thickness] = 7
-        qMax_by_thickness[thickness] = 1920.0
+        tMax_by_thickness[thickness] = 8
+        qMax_by_thickness[thickness] = 2000.0
     elif material == 'FSRI_PlasticC':
         thickness = 2.9782
-        tMax_by_thickness[thickness] = 7
-        qMax_by_thickness[thickness] = 1975.0
+        tMax_by_thickness[thickness] = 8
+        qMax_by_thickness[thickness] = 2000.0
     elif material == 'FSRI_Plastic_Laminate_Countertop':
         thickness = 37.1994
         tMax_by_thickness[thickness] = 152.0
         qMax_by_thickness[thickness] = 350.0
     elif material == 'FSRI_Plywood':
         thickness = 8.6925
-        tMax_by_thickness[thickness] = 13
-        qMax_by_thickness[thickness] = 1700.0
+        tMax_by_thickness[thickness] = 15
+        qMax_by_thickness[thickness] = 2000.0
     elif material == 'FSRI_Polyester_Bed_Skirt':
         thickness = 1.1950
-        tMax_by_thickness[thickness] = 8
-        qMax_by_thickness[thickness] = 655.0
+        tMax_by_thickness[thickness] = 10
+        qMax_by_thickness[thickness] = 650.0
         
     elif material == 'FSRI_Polyester_Microfiber_Sheet':
         thickness = 1.0386
-        tMax_by_thickness[thickness] = 10
-        qMax_by_thickness[thickness] = 655.0
+        tMax_by_thickness[thickness] = 12
+        qMax_by_thickness[thickness] = 700.0
     elif material == 'FSRI_Polyolefin_Carpet_Low_Pile':
         thickness = 7.1574
-        tMax_by_thickness[thickness] = 5
-        qMax_by_thickness[thickness] = 1150.0
+        tMax_by_thickness[thickness] = 3.5
+        qMax_by_thickness[thickness] = 1200.0
     elif material == 'FSRI_Rebond_Foam_Carpet_Pad':
         thickness = 9.0117
         tMax_by_thickness[thickness] = 2
@@ -1020,7 +1020,7 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 435.0
     elif material == 'FSRI_Vinyl_Tile':
         thickness = 7.8814
-        tMax_by_thickness[thickness] = 10.0
+        tMax_by_thickness[thickness] = 8.0
         qMax_by_thickness[thickness] = 380.0
         
         
@@ -1034,7 +1034,7 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 1350.0
     elif material == 'FSRI_Engineered_Flooring':
         thickness = 9.0160
-        tMax_by_thickness[thickness] = 20
+        tMax_by_thickness[thickness] = 22
         qMax_by_thickness[thickness] = 600.0
     elif material == 'FSRI_Engineered_Wood_Furniture':
         thickness = 12.0809
@@ -1063,8 +1063,8 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 600.0
     elif material == 'FSRI_Masonite_Board':
         thickness = 3.0701
-        tMax_by_thickness[thickness] = 8
-        qMax_by_thickness[thickness] = 1040.0
+        tMax_by_thickness[thickness] = 10
+        qMax_by_thickness[thickness] = 1100.0
     elif material == 'FSRI_OSB':
         thickness = 16.9322
         tMax_by_thickness[thickness] = 32.0
@@ -1088,23 +1088,23 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
 
     elif material == 'JH_Acrylic':
         thickness = 4.50000000
-        tMax_by_thickness[thickness] = 10.0
-        qMax_by_thickness[thickness] = 1400.0
+        tMax_by_thickness[thickness] = 11.0
+        qMax_by_thickness[thickness] = 1500.0
     elif material == 'JH_Black PMMA':
         thickness = 9.20000000
-        tMax_by_thickness[thickness] = 13.0
-        qMax_by_thickness[thickness] = 1535.0
+        tMax_by_thickness[thickness] = 15.0
+        qMax_by_thickness[thickness] = 1800.0
     elif material == 'JH_Cardboard':
         thickness = 4.10000000
         tMax_by_thickness[thickness] = 2.0
         qMax_by_thickness[thickness] = 450.0
     elif material == 'JH_CPS Balsa Facesheet':
         thickness = 15.90000000
-        tMax_by_thickness[thickness] = 34.0
+        tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 325.0
     elif material == 'JH_CPS Plywood Facesheet':
         thickness = 12.70000000
-        tMax_by_thickness[thickness] = 10.0
+        tMax_by_thickness[thickness] = 34.0
         qMax_by_thickness[thickness] = 400.0
     elif material == 'JH_FRP':
         thickness = 12.70000000
@@ -1128,7 +1128,7 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         qMax_by_thickness[thickness] = 215.0
     elif material == 'JH_Plywood':
         thickness = 6.35000000
-        tMax_by_thickness[thickness] = 10.0
+        tMax_by_thickness[thickness] = 10
         qMax_by_thickness[thickness] = 600.0
     elif material == 'JH_PVC Blend':
         thickness = 3.27000000
@@ -1147,288 +1147,296 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         tMax_by_thickness[thickness] = 74.0
         qMax_by_thickness[thickness] = 325.0
 
-    elif material == 'RISE_80_wool__20__Nylon_Glue_Plywood-22m':
+    elif material == 'RISE_80 wool 20 nylon-glue-plywood-22':
         thickness = 22.00000000
         tMax_by_thickness[thickness] = 32.0
         qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_Fabric_Foam-28mm':
+    elif material == 'RISE_carpet-glue-aluminum plate 2 mm-5':
+        thickness = 5
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_fabric-foam-28':
         thickness = 28.00000000
         tMax_by_thickness[thickness] = 15
         qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_Fabric_Protection_layer_Foam-32mm':
+    elif material == 'RISE_fabric-protection layer-foam-32':
         thickness = 32.00000000
         tMax_by_thickness[thickness] = 20
         qMax_by_thickness[thickness] = 545.0
-    elif material == 'RISE_Fabric_vandaliz_protected_Foam-42mm':
+    elif material == 'RISE_fabric vandalize protected-foam-42':
         thickness = 42.00000000
-        tMax_by_thickness[thickness] = 15.0
-        qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_HPL_Melamine_polyester_film_-13mm':
+        tMax_by_thickness[thickness] = 5.0
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_hpl melamine-polyester film -13':
         thickness = 13.40000000
-        tMax_by_thickness[thickness] = 5
+        tMax_by_thickness[thickness] = 2
         qMax_by_thickness[thickness] = 270.0
-    elif material == 'RISE_Melami_face_Calcium_silicat_board-1':
+    elif material == 'RISE_melamine face-calcium silicate board-12':
         thickness = 12.50000000
         tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 250.0
-    elif material == 'RISE_Needl_punch_carpe_Glue_Recor_sealin':
+    elif material == 'RISE_needle punched carpet-glue-recor sealing-10':
         thickness = 10.00000000
         tMax_by_thickness[thickness] = 5.0
         qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_PE_XLPE-40mm':
+    elif material == 'RISE_pe-xlpe-40':
         thickness = 40.00000000
         tMax_by_thickness[thickness] = 168.0
         qMax_by_thickness[thickness] = 380.0
+    elif material == 'RISE_fr eps-calcium silicate board-25':
+        thickness = 25
+        tMax_by_thickness[thickness] = 5
+        qMax_by_thickness[thickness] = 600
         
-    elif material == 'RISE_POlyolefin_XLPE-45mm':
+    elif material == 'RISE_polyolefin-xlpe-45':
         thickness = 45.00000000
         tMax_by_thickness[thickness] = 60.0
-        qMax_by_thickness[thickness] = 270.0
-    elif material == 'RISE_PUR_rigid_Plasti_faced_steel_sheet-':
+        qMax_by_thickness[thickness] = 350.0
+    elif material == 'RISE_pur rigid-plastic faced steel sheet-79':
         thickness = 79.00000000
         tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 160.0
-    elif material == 'RISE_PVC_EPR-32mm':
+    elif material == 'RISE_pvc-epr-32':
         thickness = 32.50000000
         tMax_by_thickness[thickness] = 80.0
         qMax_by_thickness[thickness] = 250.0
-    elif material == 'RISE_PVC_PE-00mm':
+    elif material == 'RISE_pvc-pe-0':
         thickness = 0.01270000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 650.0
-    elif material == 'RISE_PVC_PE-05mm':
+    elif material == 'RISE_pvc-pe-5':
         thickness = 5.10000000
         tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 600.0
-    elif material == 'RISE_PVC_PE-08mm':
+    elif material == 'RISE_pvc-pe-8':
         thickness = 8.20000000
         tMax_by_thickness[thickness] = 15.0
         qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_PVC_PE-10mm':
+    elif material == 'RISE_pvc-pe-10':
         thickness = 10.20000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 545.0
-    elif material == 'RISE_PVC_PE-14mm':
+    elif material == 'RISE_pvc-pe-14':
         thickness = 14.80000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 900.0
         
-    elif material == 'RISE_PVC_PE-20mm':
+    elif material == 'RISE_pvc-pe-20':
         thickness = 20.00000000
         tMax_by_thickness[thickness] = 30.0
         qMax_by_thickness[thickness] = 600.0
-    elif material == 'RISE_PVC_XLPE-17mm':
+    elif material == 'RISE_pvc-xlpe-18':
         thickness = 17.70000000
         tMax_by_thickness[thickness] = 25.0
-        qMax_by_thickness[thickness] = 710.0
-    elif material == 'RISE_PVC_XLPE-22mm':
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_pvc-xlpe-22':
         thickness = 22.00000000
         tMax_by_thickness[thickness] = 35.0
         qMax_by_thickness[thickness] = 450.0
-    elif material == 'RISE_PVC_XLPE-35mm':
+    elif material == 'RISE_pvc-xlpe-35':
         thickness = 35.00000000
         tMax_by_thickness[thickness] = 58.0
-        qMax_by_thickness[thickness] = 1300.0
-    elif material == 'RISE_PVC_XLPE-38mm':
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_pvc-xlpe-39':
         thickness = 38.60000000
-        tMax_by_thickness[thickness] = 80.0
-        qMax_by_thickness[thickness] = 600.0
-    elif material == 'RISE_PVC_XLPE-46mm':
+        tMax_by_thickness[thickness] = 90.0
+        qMax_by_thickness[thickness] = 400.0
+    elif material == 'RISE_pvc-xlpe-46':
         thickness = 46.00000000
         tMax_by_thickness[thickness] = 122.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_wall_carpet_paper_plasterboard-':
+    elif material == 'RISE_pvc_wall_carpet_paper_plasterboard-':
         thickness = 0.01270000
         tMax_by_thickness[thickness] = 6.0
         qMax_by_thickness[thickness] = 215.0
-    elif material == 'RISE_Painted_paper_plasterboa_plasterboa':
+    elif material == 'RISE_painted_paper_plasterboa_plasterboa':
         thickness = 0.01270000
         tMax_by_thickness[thickness] = 3
         qMax_by_thickness[thickness] = 350.0
 
-    elif material == 'RISE_Polyolefin_EPR-18mm':
+    elif material == 'RISE_polyolefin-epr-18':
         thickness = 18.10000000
         tMax_by_thickness[thickness] = 86.0
         qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_Polyolefin_EPR-32mm':
+    elif material == 'RISE_polyolefin-epr-32':
         thickness = 32.20000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_Polyolefin_PA-02mm':
+    elif material == 'RISE_polyolefin-pa-2':
         thickness = 2.50000000
         tMax_by_thickness[thickness] = 8.0
         qMax_by_thickness[thickness] = 435.0
-    elif material == 'RISE_Polyolefin_PA-06mm':
+    elif material == 'RISE_polyolefin-pa-6':
         thickness = 6.00000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 400.0
-    elif material == 'RISE_Polyolefin_PP-08mm':
+    elif material == 'RISE_polyolefin-pp-9':
         thickness = 8.70000000
         tMax_by_thickness[thickness] = 54.0
-        qMax_by_thickness[thickness] = 350.0
-    elif material == 'RISE_Polyolefin_XLPE-18mm':
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_polyolefin-xlpe-18':
         thickness = 18.10000000
         tMax_by_thickness[thickness] = 76.0
         qMax_by_thickness[thickness] = 435.0
-    elif material == 'RISE_Polyolefin_XLPE-25mm':
+    elif material == 'RISE_polyolefin-xlpe-25':
         thickness = 25.00000000
         tMax_by_thickness[thickness] = 122.0
         qMax_by_thickness[thickness] = 450.0
-    elif material == 'RISE_Polyolefin_XLPE-38mm':
+    elif material == 'RISE_polyolefin-xlpe-38':
         thickness = 38.10000000
         tMax_by_thickness[thickness] = 138.0
         qMax_by_thickness[thickness] = 435.0
 
-    elif material == 'RISE_RPPVC_PEF-04mm':
+    elif material == 'RISE_rppvc-pef-4':
         thickness = 4.50000000
         tMax_by_thickness[thickness] = 8.0
         qMax_by_thickness[thickness] = 215.0
-    elif material == 'RISE_RPPVC_PVC-14mm':
+    elif material == 'RISE_rppvc-pvc-14':
         thickness = 14.00000000
         tMax_by_thickness[thickness] = 20.0
-        qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_RPPVC_XLPE-17mm':
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_rppvc-xlpe-18':
         thickness = 17.70000000
         tMax_by_thickness[thickness] = 35.0
-        qMax_by_thickness[thickness] = 600.0
-    elif material == 'RISE_RPPVC_XLPE-22mm':
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_rppvc-xlpe-22':
         thickness = 22.50000000
         tMax_by_thickness[thickness] = 50.0
-        qMax_by_thickness[thickness] = 550.0
-    elif material == 'RISE_RPPVC_XLPE-39mm':
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_rppvc-xlpe-39':
         thickness = 39.30000000
         tMax_by_thickness[thickness] = 80.0
-        qMax_by_thickness[thickness] = 545.0
-    elif material == 'RISE_RPPVC_XLPE-45mm':
+        qMax_by_thickness[thickness] = 300.0
+    elif material == 'RISE_rppvc-xlpe-45':
         thickness = 45.00000000
         tMax_by_thickness[thickness] = 154.0
         qMax_by_thickness[thickness] = 270.0
-    elif material == 'RISE_Synthetic_rubber_Glue_Plywood-15mm':
+    elif material == 'RISE_synthetic rubber-glue-plywood-15':
         thickness = 15.00000000
         tMax_by_thickness[thickness] = 34.0
         qMax_by_thickness[thickness] = 600.0
-    elif material == 'RISE_Textile_wall_coverin_paper_plasterb':
+    elif material == 'RISE_textile_wall_coverin_paper_plasterb':
         thickness = 0.01270000
         tMax_by_thickness[thickness] = 4.0
         qMax_by_thickness[thickness] = 435.0
 
-    elif material == 'RISE_ZHPolyolefin_PP-08mm':
+    elif material == 'RISE_zhpolyolefin-pp-8':
         thickness = 8.40000000
         tMax_by_thickness[thickness] = 25.0
         qMax_by_thickness[thickness] = 490.0
-    elif material == 'RISE_ZHPolyolefin_XLPE-13mm':
+    elif material == 'RISE_zhpolyolefin-xlpe-13':
         thickness = 13.00000000
         tMax_by_thickness[thickness] = 50.0
         qMax_by_thickness[thickness] = 700.0
-    elif material == 'RISE_ZHPolyolefin_XLPE-27mm':
+    elif material == 'RISE_zhpolyolefin-xlpe-27':
         thickness = 27.00000000
         tMax_by_thickness[thickness] = 70.0
         qMax_by_thickness[thickness] = 450.0
-    elif material == 'RISE_fabric__vandaliz_protecte_foam-42mm':
+    elif material == 'RISE_fabric vandalize protected-foam-42':
         thickness = 42.00000000
         tMax_by_thickness[thickness] = 6.0
         qMax_by_thickness[thickness] = 300.0
-    elif material == 'RISE_synthetic_rubber_glue_plywood-14mm':
+    elif material == 'RISE_synthetic rubber-glue-plywood-15':
         thickness = 14.80000000
         tMax_by_thickness[thickness] = 30.0
         qMax_by_thickness[thickness] = 270.0
 
-    elif material == 'RISE_Alumi_Honey_comb_coated_with_HPL-22':
+    elif material == 'RISE_zluminium honey comb coated with hpl-23':
         thickness = 22.70000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 400.0
-    elif material == 'RISE_HPL_compact_-04mm':
+    elif material == 'RISE_hpl compact -4':
         thickness = 4.00000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 300.0
-    elif material == 'RISE_Spruce-10mm':
+    elif material == 'RISE_spruce-10':
         thickness = 10.00000000
         tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_Wool_fabric_Mixed_fabric-00mm':
+    elif material == 'RISE_wool fabric mixed fabric-0':
         thickness = 0.50000000
-        tMax_by_thickness[thickness] = 5.0
-        qMax_by_thickness[thickness] = 200.0
-    elif material == 'RISE_Woolfabric__mixed_fabric-00mm':
-        thickness = 0.50000000
-        tMax_by_thickness[thickness] = 5.0
-        qMax_by_thickness[thickness] = 435.0
+        tMax_by_thickness[thickness] = 4.0
+        qMax_by_thickness[thickness] = 400.0
 
 
-    elif material == 'RISE_FR_polycarbonate-16mm':
+    elif material == 'RISE_fr polycarbonate-16':
         thickness = 16.00000000
         tMax_by_thickness[thickness] = 10.0
         qMax_by_thickness[thickness] = 710.0
-    elif material == 'RISE_PVC-02mm':
+    elif material == 'RISE_pvc-3':
         thickness = 2.90000000
         tMax_by_thickness[thickness] = 5.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_PVC-08mm':
+    elif material == 'RISE_pvc-pvc-8':
         thickness = 8.20000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_PVC_PVC-09mm':
+    elif material == 'RISE_pvc-pvc-9':
         thickness = 9.40000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_PVC-10mm':
+    elif material == 'RISE_pvc-pvc-10':
         thickness = 10.00000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_PVC-14mm':
+    elif material == 'RISE_pvc-pvc-14':
         thickness = 14.50000000
         tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_PVC-18mm':
+    elif material == 'RISE_pvc-pvc-18':
         thickness = 18.00000000
-        tMax_by_thickness[thickness] = 30.0
+        tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 380.0
-    elif material == 'RISE_PVC_PVC-21mm':
+    elif material == 'RISE_pvc-pvc-21':
         thickness = 21.40000000
-        tMax_by_thickness[thickness] = 40.0
+        tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 380.0
 
-    elif material == 'RISE_PVDF-01mm':
+    elif material == 'RISE_pvdf-2':
         thickness = 1.95000000
-        tMax_by_thickness[thickness] = 4.0
+        tMax_by_thickness[thickness] = 5.0
         qMax_by_thickness[thickness] = 700.0
-    elif material == 'RISE_Paint_GFK_polyes_with_Gelcoa_handla':
+    elif material == 'RISE_paint gfk polyester with gelcoat laminated-5':
         thickness = 4.80000000
         tMax_by_thickness[thickness] = 25.0
         qMax_by_thickness[thickness] = 270.0
-    elif material == 'RISE_Paint_GRP_polyes_with_gelcoa_handla':
+    elif material == 'RISE_paint grp polyester with gelcoat laminated-5':
         thickness = 4.80000000
         tMax_by_thickness[thickness] = 12.0
         qMax_by_thickness[thickness] = 160.0
-    elif material == 'RISE_Polyester-02mm':
+    elif material == 'RISE_polyester-2':
         thickness = 2.10000000
         tMax_by_thickness[thickness] = 5.0
         qMax_by_thickness[thickness] = 490.0
 
-    elif material == 'RISE_Polyolefin-02mm':
+    elif material == 'RISE_polyolefin-3':
         thickness = 2.90000000
-        tMax_by_thickness[thickness] = 8.0
-        qMax_by_thickness[thickness] = 545.0
-    elif material == 'RISE_RPPVC-02mm':
+        tMax_by_thickness[thickness] = 10.0
+        qMax_by_thickness[thickness] = 550.0
+    elif material == 'RISE_rppvc-3':
         thickness = 2.90000000
         tMax_by_thickness[thickness] = 6.0
         qMax_by_thickness[thickness] = 325.0
-    elif material == 'RISE_Transparent_polycarbonate-02mm':
+    elif material == 'RISE_transparent polycarbonate-2':
         thickness = 2.30000000
-        tMax_by_thickness[thickness] = 15.0
-        qMax_by_thickness[thickness] = 545.0
+        tMax_by_thickness[thickness] = 18.0
+        qMax_by_thickness[thickness] = 550.0
 
-    elif material == 'RISE_FR_Particle_board-79mm':
+    elif material == 'RISE_fr particle board-12':
+        thickness = 12
+        tMax_by_thickness[thickness] = 3
+        qMax_by_thickness[thickness] = 200
+    elif material == 'RISE_fr particle board-79':
         thickness = 79.00000000
-        tMax_by_thickness[thickness] = 5.0
-        qMax_by_thickness[thickness] = 435.0
-    elif material == 'RISE_FR_particle_board-16mm':
+        tMax_by_thickness[thickness] = 3.0
+        qMax_by_thickness[thickness] = 200.0
+    elif material == 'RISE_fr particle board-16':
         thickness = 16.00000000
         tMax_by_thickness[thickness] = 3.0
-        qMax_by_thickness[thickness] = 270.0
-    elif material == 'RISE_MDF_board-12mm':
+        qMax_by_thickness[thickness] = 200.0
+    elif material == 'RISE_mdf board-12':
         thickness = 12.00000000
-        tMax_by_thickness[thickness] = 15.0
+        tMax_by_thickness[thickness] = 20.0
         qMax_by_thickness[thickness] = 490.0
     
     final_length = len(tMax_by_thickness.keys())
@@ -1439,6 +1447,31 @@ def adjust_tmax_qmax_by_material(material, tMax_by_thickness1, qMax_by_thickness
         print(tMax_by_thickness.keys())
     
     return tMax_by_thickness, qMax_by_thickness 
+
+def get_material_out_name(material, s):
+    if s == 'RISE_Materials':
+        m_out = material.replace('RISE_','')
+        m_out = ', '.join([m for m in m_out.split('-')[:-1]])
+    elif s == 'JH_Materials':
+        m_out = material.replace('JH_','').replace('_',' ')
+    elif s == 'FSRI_Materials':
+        m_out = material.replace('FSRI_','').replace('_',' ')
+    elif s == 'FPL_Materials':
+        m_out = material.replace('FPL_','')
+        m_out = ' '.join([m for m in m_out.split('_')[:-1]])
+    elif s == 'FAA_Polymers':
+        m_out = material.replace('FAA_','')
+    elif s == 'Aalto_Woods':
+        m_out = material.replace('Aalto_','').replace('_',' ')
+    m_out = m_out.title()
+    m_out = m_out.replace('Pbtgf','PBTGF').replace('Pbt','PBT').replace('Frt','FRT').replace('Peek','PEEK')
+    m_out = m_out.replace('Petg','PETG').replace('Pet','PET').replace('Hdpe','HDPE').replace('Hips','HIPS').replace('Ldpe','LDPE').replace('Abs','ABS').replace('Xps','XPS').replace('Ldf','LDF').replace('Epdm','EPDM').replace('Fdny','FDNY')
+    m_out = m_out.replace('Rppvc', 'RPPVC').replace('Pvc','PVC').replace('Mdf','MDF').replace('Xlpe','XLPE').replace('Epr','EPR').replace('Pef','PEF').replace('Frp','FRP').replace('Cps','CPS')
+    m_out = m_out.replace('Eps','EPS').replace('Osb','OSB').replace('Pmma','PMMA').replace('Pc','PC').replace('Pe','PE').replace('Hpl','HPL').replace('Fr','FR').replace('Plasticc','PlasticC')
+    m_out = m_out.replace('Pvdf','PVDF').replace('Gfk','GFK').replace('Grp','GRP').replace('Pp','PP').replace('Pa','PA')
+    m_out = m_out.replace('PAnel','Panel').replace('PAper','Paper').replace('PAd','Pad').replace('PAllet','Pallet').replace('PArticleboard','Particleboard').replace('PArticle','Particle').replace('PAint','Paint')
+    m_out = m_out.replace('Aluminum Plate 2 Mm','Aluminum Plate')
+    return m_out
 
 if __name__ == "__main__":
     
@@ -1488,6 +1521,11 @@ if __name__ == "__main__":
         #for file in files:
         #    shutil.copy(file, os.path.join(systemPath,'..','..','..','out','Scaling_Pyrolysis',os.path.basename(file)))
         files = glob.glob(os.path.join(systemPath,'materials','data','aalto_materials','*.csv'))
+        for file in files:
+            ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
+            if os.path.basename not in ignores:
+                shutil.copy(file, os.path.join(systemPath,'..','..','..','..','..','exp','Scaling_Pyrolysis',os.path.basename(file)))
+        files = glob.glob(os.path.join(systemPath,'materials','data','faa_materials','*.csv'))
         for file in files:
             ignores = ['-29mm-15.csv','-29mm-20.csv','-29mm-25.csv','-29mm-35.csv','-29mm-50.csv','-29mm-75.csv']
             if os.path.basename not in ignores:
@@ -1642,12 +1680,19 @@ if __name__ == "__main__":
                 counter += 1
                 materialMarker = materialClassDict[materialClass]['marker']
                 materialColor = materialClassDict[materialClass]['color']
-                matlabelname = material
-                while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
-                matlabelname = '_'.join(matlabelname.split('_')[1:])
-                if 'FPL' in series:
-                    matlabelname = '_'.join(matlabelname.split('_')[:-1])
-                matlabelname = matlabelname.replace('_','\_')
+                #matlabelname = material
+                #while '__' in matlabelname: matlabelname = matlabelname.replace('__','_')
+                #matlabelname = '_'.join(matlabelname.split('_')[1:])
+                #if 'FPL' in series:
+                #    matlabelname = '_'.join(matlabelname.split('_')[:-1])
+                #matlabelname = matlabelname.replace('_','\_')
+                #legendLoc = 'East' if (((series == 'RISE_Materials')) or (series == 'FSRI_Materials')) else 'NorthEast'
+                #if material == 'FPL_plywood_douglas_fir_frt_12mm': legendLoc = 'East'
+                #if material == 'FPL_plywood_southern_pine_frt_11mm': legendLoc = 'East'
+                
+                matlabelname = get_material_out_name(material, series)
+                matlabelname = matlabelname.replace(',','|')
+                legendLoc = 'East' if len(matlabelname) > 19 else 'NorthEast'
                 outTxt = outTxt + switchId + ',' + 'Scaling_Pyrolysis_'+materialClass + ',Scaling_Pyrolysis/' + expFiles[iii] + ',' #'%s-%02d.csv"'%(material,flux) + ","
                 timeColumn,hrrColumn=spec_file_dict[material]['timeColumns'][iii],spec_file_dict[material]['hrrColumns'][iii]
                 if '.csv' in timeColumn: timeColumn = timeColumn.split('.csv-')[1]
@@ -1657,7 +1702,7 @@ if __name__ == "__main__":
                 hrrColumn = ('HRRPUA-CONE_%03.2f_%03d'%(thicknesses[iii], flux)).replace('.','p') 
                 outTxt = outTxt + 'Scaling_Pyrolysis/' + chid + '_devc.csv,2,3,Time,' + hrrColumn + ',' + 'FDS (%02d kW/m²),%s--,0,100000,,0,100000,-10000,10000,0,'%(flux, lc)
                 outTxt = outTxt + '%s %0.1f mm,Time (min),Heat Release Rate (kW/m²),'%(matlabelname, thickness)
-                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,NorthEast,,1.0,Scaling_Pyrolysis/'%(tMax_by_thickness[thickness_rounded], qMax_by_thickness[thickness_rounded]) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
+                outTxt = outTxt + '0,%0.0f,60,0,%0.0f,1,no,0.05 0.90,%s,,1.0,Scaling_Pyrolysis/'%(tMax_by_thickness[thickness_rounded], qMax_by_thickness[thickness_rounded], legendLoc) + chid +'_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scaling_Pyrolysis/%s_cone_%s,'%(chid, ('%0.1f'%(thickness)).replace('.','p'))
                 outTxt = outTxt + 'Scaling Heat Release Rate Per Unit Area,max,0,' + materialClass + "," + materialMarker+materialColor + "," + materialColor +",TeX\n"
                 
                 outTxt3 = outTxt3 + "elif material == '%s':\n"%(material)
@@ -1735,19 +1780,76 @@ if __name__ == "__main__":
     for s in sorted(list(set(series))):
         s_name = s.replace('_',' ')
         s_cite = citation_dict[s_name]
-        for mc in sorted(list(set(materialClasses))):
-            if material_count[s][mc] == 0: continue
+        oneTable = True if (((s == 'JH_Materials') or (s == 'FAA_Polymers')) or ((s == 'Aalto_Woods') or (s == 'FPL_Materials'))) else False
+        testNumber = True if ((s == 'FPL_Materials') or (s == 'RISE_Materials')) else False
+        printK = False if ((s == 'FPL_Materials') or (s == 'RISE_Materials')) else True
+        printCp = False if ((s == 'FPL_Materials') or (s == 'RISE_Materials')) else True
+        printEmis = False if ((s == 'FPL_Materials') or (s == 'RISE_Materials')) else True
+        if (s == 'FSRI_Materials'): printEmis = False
+        for iii, mc in enumerate(sorted(list(set(materialClasses)))):
+            if (oneTable is False and material_count[s][mc] == 0): continue
+            if (oneTable is True and iii > 0): continue
             mc_name = class_dict[mc]
             outTxt = outTxt + '\\begin{table}[!h]\n'
-            outTxt = outTxt + '\\caption[Properties of %s, %s materials]{Properties of %s, %s materials ~\\cite{%s}.}\n'%(s_name, mc_name, s_name, mc_name, s_cite)
+            if oneTable:
+                outTxt = outTxt + '\\caption[Properties of %s]{Properties of %s~\\cite{%s}.}\n'%(s_name, s_name, s_cite)
+            else:
+                outTxt = outTxt + '\\caption[Properties of %s, %s materials]{Properties of %s, %s materials ~\\cite{%s}.}\n'%(s_name, mc_name, s_name, mc_name, s_cite)
             outTxt = outTxt + '\\centering\n'
-            outTxt = outTxt + '\\begin{tabular}{|p{5.5cm}|p{1.0cm}|p{1.0cm}|p{0.8cm}|p{1.4cm}|p{1.0cm}|p{1.0cm}|c|}\n'
-            outTxt = outTxt + '\\hline\n'
-            outTxt = outTxt + ' '.ljust(12) + '& \\centering$k$'.ljust(12) + '& \\centering$\\rho$'.ljust(12)+'& \\centering$\\varepsilon$'.ljust(12)+'& \\centering$c_{p}$'.ljust(12)+'& \\centering$T_{\\mathrm{ign}}$'.ljust(12) + '&\\centering$\\Delta H_{c}$' + '& $Y_{s}$  \\\\\n'
-            outTxt = outTxt + 'Material'.ljust(12) + '& $\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ & $\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ & $\\mathrm{( - )}$ & $\\mathrm{\\left(\\frac{kJ}{(kg\\cdot ^{\\circ}C)}\\right)}$ &  ($\\mathrm{^{\\circ}C}$)   & $\\left(\\mathrm{\\frac{kJ}{kg}}\\right)$ & $\\mathrm{\\left(-\\right)}$ \\\\ \\hline\n'
-            outTxt = outTxt + '\\hline\n'
+            
+            # All series show material, thickness, density
+            outTxt = outTxt + '\\begin{tabular}{|p{4.5cm}|p{1.0cm}|p{1.0cm}|'
+            
+            # Only show k, cp, emis if called out
+            if printK: outTxt = outTxt + 'p{1.0cm}|'
+            if printCp: outTxt = outTxt + 'p{1.4cm}|'
+            if printEmis: outTxt = outTxt + 'p{0.8cm}|'
+            
+            # All series show Tign, DHc, Ys
+            outTxt = outTxt + 'p{1.0cm}|p{1.0cm}'
+            if testNumber:
+                outTxt = outTxt + '|p{1.0cm}|c'
+            else:
+                outTxt = outTxt + '|c'
+            outTxt = outTxt + '|}\n\\hline\n'
+            
+            # All series show material, thickness, density
+            outTxt = outTxt + ' '.ljust(12) + '& \\centering$\Delta$'.ljust(12) + '& \\centering$\\rho$'.ljust(12)
+            
+            # Only show k, cp, emis if called out
+            if printK: outTxt = outTxt + '& \\centering$k$'.ljust(12)
+            if printCp: outTxt = outTxt + '& \\centering$c_{p}$'.ljust(12)
+            if printEmis: outTxt = outTxt + '& \\centering$\\varepsilon$'.ljust(12)
+            
+            # All series show Tign, DHc, Ys
+            outTxt = outTxt + '& \\centering$T_{\\mathrm{ign}}^{a}$'.ljust(12) + '&\\centering$\\Delta H_{c}$'
+            if testNumber:
+                outTxt = outTxt + '&\\centering$Y_{s}^{b}$ & Test \\# '
+            else:
+                outTxt = outTxt + '& $Y_{s}^{b}$$ '
+            outTxt = outTxt + '\\\\\n'
+            
+            # All series show material, thickness, density
+            outTxt = outTxt + 'Material'.ljust(12) + '& \\centering$\\mathrm{\\left(mm\\right)}$ ' + '& \\centering$\\mathrm{\\left(\\frac{kg}{m^{3}}\\right)}$ '
+            
+            # Only show k, cp, emis if called out
+            if printK: outTxt = outTxt + '& \\centering$\\mathrm{\\left(\\frac{W}{m\\cdot K}\\right)}$ '
+            if printCp: outTxt = outTxt + '& \\centering$\\mathrm{\\left(\\frac{kJ}{(kg\\cdot K}\\right)}$ '
+            if printEmis: outTxt = outTxt + '& \\centering$\\mathrm{( - )}$ '
+            
+            # All series show Tign, DHc, Ys
+            outTxt = outTxt + '&  \\centering($\\mathrm{^{\\circ}C}$)   & \\centering$\\left(\\mathrm{\\frac{MJ}{kg}}\\right)$ '
+            if testNumber:
+                outTxt = outTxt + '& \\centering$\\mathrm{\\left(\\frac{g}{g}\\right)}$ & $\\mathrm{( - )}$  '
+            else:
+                outTxt = outTxt + '& $\\mathrm{\\left(\\frac{g}{g}\\right)}$ '
+            outTxt = outTxt + '\\\\ \\hline\n\\hline\n'
+            
             for material in sorted(list(completeMaterials)):
-                if (spec_file_dict[material]['materialClass'] != mc) or (spec_file_dict[material]['series'] != s): continue
+                if oneTable:
+                    if (spec_file_dict[material]['series'] != s): continue
+                else:
+                    if (spec_file_dict[material]['materialClass'] != mc) or (spec_file_dict[material]['series'] != s): continue
                 k = spec_file_dict[material]['conductivity']
                 rho = spec_file_dict[material]['density']
                 eps = spec_file_dict[material]['emissivity']
@@ -1755,12 +1857,36 @@ if __name__ == "__main__":
                 DHc = spec_file_dict[material]['heat_of_combustion']*1e3
                 Ys = spec_file_dict[material]['soot_yield']
                 Tign = spec_file_dict[material]['Tign']
+                thicknesses = list(set([spec_file_dict[material]['cases'][c]['delta']*1e3 for c in spec_file_dict[material]['cases'].keys()]))
+                thickness_str = ','.join(['%0.1f'%(t) for t in thicknesses])
+                m_out = get_material_out_name(material, s)
+                print(s, m_out)
+                #outTxt = outTxt + (m_out.ljust(50))+ '& %s & %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.0f & %0.4f '%(thickness_str, k, rho, eps, cp, Tign, DHc, Ys)
+                # All series show material, thickness, density
+                outTxt = outTxt + (m_out.ljust(50))+ '& %s & %0.0f '%(thickness_str, rho)
+                # Only show k, cp, emis if called out
+                if printK: outTxt = outTxt + '& %0.2f '%(k)
+                if printCp: outTxt = outTxt + '& %0.3f '%(cp)
+                if printEmis: outTxt = outTxt + '& %0.2f '%(eps)
                 
-                outTxt = outTxt + material.ljust(50).replace('_',' ') + '& %0.2f & %0.0f & %0.2f & %0.2f & %0.1f & %0.0f & %0.4f \\\\\\hline\n'%(k, rho, eps, cp, Tign, DHc, Ys)
+                # All series show Tign, DHc, Ys
+                outTxt = outTxt + '& %0.0f & %0.1f & %0.3f '%(Tign, DHc/1000, Ys)
+                
+                if testNumber:
+                    testNumberStr = spec_file_dict[material]['fyi'].replace('|',' ').replace('_',' ')
+                    while ('  ' in testNumberStr): testNumberStr.replace('  ',' ')
+                    testNumberStr = ','.join(sorted(testNumberStr.split()))
+                    outTxt = outTxt + '& %s '%(testNumberStr)
+                outTxt = outTxt + '\\\\\\hline\n'
             outTxt = outTxt + '\\end{tabular}\n'
-            outTxt = outTxt + '\\label{Properties_%s_%s}\n'%(s,mc)
-            outTxt = outTxt + '\\end{table}\n\n\n'
-    
+            if oneTable:
+                outTxt = outTxt + '\\label{Properties_%s_All}\n'%(s)
+            else:
+                outTxt = outTxt + '\\label{Properties_%s_%s}\n'%(s,mc)
+            outTxt = outTxt + '\\end{table}\n\\vspace{-0.4cm}\n'
+            outTxt = outTxt + '\\noindent\\footnotesize{$^a$ $T_{\\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\\\\n'
+            outTxt = outTxt + '\\noindent\\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\\\\n'
+
     with open('material_properties.tex', 'w') as f:
         f.write(outTxt)
     
@@ -1811,8 +1937,6 @@ if __name__ == "__main__":
                 outTxt = outTxt + '{Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}\n'
                 outTxt = outTxt + '\\label{%s_HRR_%s}\n'%(s, mc)
                 outTxt = outTxt + '\\end{figure}\n\n'
-                outTxt = outTxt + '\\begin{figure}[p]\n'
-                outTxt = outTxt + '\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n'
     
     with open('material_figures.tex', 'w') as f:
         f.write(outTxt)
