@@ -1048,7 +1048,14 @@ Lechene et al.~\cite{Lechene} measured the attenuation of thermal radiation pass
 \section{LEMTA Spray Cooling}
 \label{LEMTA_Spray_Cooling_Description}
 
-A series of experiments was conducted at the Laboratoire \'Energies and M\'ecanique Th\'eorique et Appliqu\'ee (LEMTA) to measure the temperature of a hot steel plate that is cooled by a water spray~\cite{Acem:ISFEH2022}. The experimental set-up consists of a 1~m by 1~m by 2~mm thick horizontal steel plate heated by a radiant panel centered 20~cm below. The 50~cm by 50~cm heater delivers a total power of 50~kW with a radiative component estimated to be 25~kW, producing a radiative heat flux near 100~kW/m$^2$.  After 385~s the radiant panel is switched off and a water spray is activated. The SU42 nozzle is positioned 50~cm above the steel plate. The nozzle delivers a flow rate of 4.6~L/min. The spray angle indicated by the manufacturer is about 20~degrees. The volume-median diameter is about 188~$\mu$m. The steel plate temperature is measured at the center.  
+A series of experiments was conducted at the Laboratoire \'Energies and M\'ecanique Th\'eorique et Appliqu\'ee (LEMTA) to measure the temperature of a hot steel plate cooled by a water spray~\cite{Acem:ISFEH2022}. The 1~m by 1~m by 2~mm thick steel plate, in either a horizonal or vertical configuration, was heated by a radiant panel either 20~cm below or to the side. The 50~cm by 50~cm heater delivered a total power of approximately 50~kW with a radiative component estimated to be 25~kW, producing a radiative heat flux near 100~kW/m$^2$.  After the plate reached a steady temperature, the radiant panel was switched off and a water spray nozzle 50~cm above or to the side of the plate was activated. Three different nozzle designs were tested: (1) a single Protectospray D3 (PSD3) conical nozzle from Tyco flowing at 34.5~L/min, (2) a single SU42 conical jet nozzle from Spraying Systems flowing at 4.6~L/min, and (3) four TPU400067 flat jet nozzles from Spraying Systems flowing for a total of 1.6~L/min. 
+
+Each experiment was performed in a horizontal and vertical orientation. The steel plate temperature was measured at the center on top and bottom in order to assess the heat transfer across the plate.
+
+\subsubsection{Modeling Notes}
+
+For the simulations, the heat flux from the radiant panel is adjusted so as to approximately match the measured steady-state plate temperature at the time of spray activation. Droplet and spray parameters are taken from Ref.~\cite{Acem:ISFEH2022}. It is estimated that the droplets move laterally over the plate at 2~m/s. The heat conduction in the steel plate is performed in 3-D, with extra cells added in the normal direction to capture the thermal gradient in depth.
+
 
 \section{LEMTA/UGent Pool Fires}
 \label{LEMTA_UGent_Pool_Fires_Description}
