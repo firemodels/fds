@@ -3466,7 +3466,6 @@ MEAN_DIAMETER               =  -1._EB
 THERMOPHORETIC_DIAMETER     =  0.03E-6_EB
 MW                          =  0._EB
 PR_GAS                      = -1._EB
-TURBULENT_SCHMIDT_NUMBER    = -1._EB
 PRIMITIVE                   = .FALSE.
 REFERENCE_TEMPERATURE       = -300._EB ! C
 SIGMALJ                     =  0._EB
@@ -3475,7 +3474,7 @@ SPECIFIC_HEAT               = -1._EB
 REFERENCE_ENTHALPY          = -1.E30_EB
 TURBULENT_SCHMIDT_NUMBER    = -1._EB
 VISCOSITY                   = -1._EB
-VISCOSITY_LIQUID            =  -1._EB
+VISCOSITY_LIQUID            = -1._EB
 VOLUME_FRACTION             =  0._EB
 
 DENSITY_LIQUID              = -1._EB
