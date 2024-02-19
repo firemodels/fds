@@ -1826,7 +1826,7 @@ ENDIF
 ! Tensor diffusivity requires LES mode
 
 IF (TENSOR_DIFFUSIVITY .AND. SIM_MODE/=LES_MODE) THEN
-   WRITE(MESSAGE,'(A,A,A)')  "ERROR: TENSOR_DIFFUSIVITY requies SIMULATION_MODE='LES'."
+   WRITE(MESSAGE,'(A)')  "ERROR(123): TENSOR_DIFFUSIVITY requires SIMULATION_MODE='LES'."
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -11089,7 +11089,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
          N_EXPLICIT = N_EXPLICIT + 1
          READ(LU_INPUT,VENT,END=37,ERR=36,IOSTAT=IOS)    ! Read in info for VENT N
       36 IF (IOS>0) THEN
-            WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with VENT number ',N_EXPLICIT,', line number ',INPUT_FILE_LINE_NUMBER
+            WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with VENT number ',N_EXPLICIT,', line number ',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDIF
@@ -11101,13 +11101,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ! Simple error flagging
 
       IF (SURF_ID=='HVAC' .AND. MULT_ID/='null') THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Cannot use MULT_ID with an HVAC VENT, VENT ',N_EXPLICIT,&
-                                      ', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(2A)') 'ERROR(801): VENT ',TRIM(ID),' cannot use MULT_ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Specify an ID for an HVAC VENT, VENT ',N_EXPLICIT,&
-                                      ', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(3A)') 'ERROR(802): VENT ',TRIM(ID), ' needs an explicit ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11115,7 +11113,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses PBX, PBY or PBZ.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(803): VENT ',TRIM(ID),' cannot use MULT_ID because it uses PBX, PBY or PBZ.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11124,11 +11122,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ELSEIF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT ',N_EXPLICIT,' multi-mesh PERIODIC boundary'
+            WRITE(MESSAGE,'(3A)') 'ERROR(804): VENT ',TRIM(ID),' should use PBX, PBY, PBZ or XB if it is PERIODIC.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses MB.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(805): VENT ',TRIM(ID),' cannot use MULT_ID because it uses MB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11140,12 +11138,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(6) = ZS
             CASE('ZMAX') ; XB(5) = ZF
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(3A)') 'ERROR(806): VENT ',TRIM(ID),' must set MB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ELSEIF (DB/='null') THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses DB.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(807): VENT ',TRIM(ID),' cannot use MULT_ID because it uses DB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11157,7 +11155,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(5:6) = ZS_MIN+TWO_EPSILON_EB
             CASE('ZMAX') ; XB(5:6) = ZF_MAX-TWO_EPSILON_EB
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(3A)') 'ERROR(808): VENT ',TRIM(ID),' must set DB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ENDIF
@@ -11165,14 +11163,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ! Check that the vent is properly specified
 
       IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. N_TOTAL>N_IMPLICIT_VENTS) THEN
-         IF (ID=='null')WRITE(MESSAGE,'(A,I0,A)')'ERROR: VENT ',N_EXPLICIT,' cannot be specified on a y boundary in a 2D calc'
-         IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),  ' cannot be specified on a y boundary in a 2D calc'
+         WRITE(MESSAGE,'(3A)') 'ERROR(809): VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calc.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
-      IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4))  .AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
-         IF (ID=='null') WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' must be a plane'
-         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
+      IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4)).AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
+         WRITE(MESSAGE,'(3A)')  'ERROR(810): VENT ',TRIM(ID),' must be a plane.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11189,8 +11185,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             EXIT
          ENDIF
          IF (MULT_ID/='null' .AND. NNN==N_MULT) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT_ID ', TRIM(MULT_ID),' not found for VENT ',N_EXPLICIT,&
-                                             ', line number ',INPUT_FILE_LINE_NUMBER
+            WRITE(MESSAGE,'(5A)') 'ERROR(811): VENT ',TRIM(ID),' MULT_ID ',TRIM(MULT_ID),' not found.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDDO
@@ -11326,8 +11321,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
-                  WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found for VENT ',N_EXPLICIT,&
-                                                   ', line number ',INPUT_FILE_LINE_NUMBER
+                  WRITE(MESSAGE,'(5A)') 'ERROR(812): VENT ',TRIM(ID),' SURF_ID ',TRIM(SURF_ID),' not found.'
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
@@ -11370,9 +11364,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. &
                      VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. &
                      (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
-                  IF (ID=='null') WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: VENT ',N_EXPLICIT, &
-                     ' cannot be controlled by a device, line number ',INPUT_FILE_LINE_NUMBER
-                  IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
+                  WRITE(MESSAGE,'(3A)')  'ERROR(813): VENT ',TRIM(ID),' cannot be controlled by a device.'
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
@@ -11409,7 +11401,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                IF (RADIUS>0._EB) THEN
                   IF (ANY(XYZ<-1.E5_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' requires center point XYZ'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(814): VENT ',TRIM(ID),' requires center point XYZ.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   VT%RADIUS = RADIUS
@@ -11444,15 +11436,15 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (N_EDDY>0) THEN
                   SYNTHETIC_EDDY_METHOD = .TRUE.
                   IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' L_EDDY = 0 in Synthetic Eddy Method'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(815): VENT ',TRIM(ID),' L_EDDY = 0 in Synthetic Eddy Method.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' VEL_RMS = 0 in Synthetic Eddy Method'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(816): VENT ',TRIM(ID),' VEL_RMS = 0 in Synthetic Eddy Method.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (TRIM(SURF_ID)=='HVAC') THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' Synthetic Eddy Method not permitted with HVAC'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(817): VENT ',TRIM(ID),' Synthetic Eddy Method not permitted with HVAC.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
