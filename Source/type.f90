@@ -497,6 +497,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: EPSK=-1._EB                        !< Lennard-Jones \f$ \epsilon/k \f$ (K)
    REAL(EB) :: SIG=-1._EB                         !< Lennard_Jones hard-sphere diameter (Angstroms)
    REAL(EB) :: PR_USER=-1._EB                     !< User-specified Prandtl number
+   REAL(EB) :: SC_T_USER=-1._EB                   !< User-specified Turbulent Schmidt number
    REAL(EB) :: FLD_LETHAL_DOSE=0._EB
    REAL(EB) :: FIC_CONCENTRATION=0._EB
    REAL(EB) :: SPECIFIC_HEAT_LIQUID=-1            !< Liquid specific heat (J/kg/K)
@@ -577,7 +578,8 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
    REAL(EB) :: K_USER=-1._EB                       !< User-specified thermal conductivity (W/m/K)
    REAL(EB) :: D_USER=-1._EB                       !< User-specified diffusion coefficient (m2/s)
-   REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandhl number
+   REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandtl number
+   REAL(EB) :: SC_T_USER=-1._EB                    !< Species-dependent Turbulent Schmidt number (potentially used for aerosol)
    REAL(EB) :: EPSK=-1._EB                         !< Lennard-Jones \f$ \epsilon/k \f$ (K)
    REAL(EB) :: SIG=-1._EB                          !< Lennard_Jones hard-sphere diameter (Angstroms)
    REAL(EB) :: FLD_LETHAL_DOSE=0._EB
