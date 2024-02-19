@@ -13270,6 +13270,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 120  \> {\ct XB(1)<0 with CYLINDRICAL on MESH \ldots\                               } \> Section~\ref{info:2D}  \\
 121  \> {\ct J>1 with CYLINDRICAL on MESH \ldots\                                   } \> Section~\ref{info:2D}  \\
 122  \> {\ct Too many MPI processes have been assigned to this job.                 } \> Section~\ref{info:parallelprocessing}  \\
+%123  \> {\ct TENSOR\_DIFFUSIVITY requires SIMULATION\_MODE='LES'.                   } \> Section~\ref{} \\
 124  \> {\ct Problem with grid transformation.                                      } \> Section~\ref{info:TRNX}  \\
 125  \> {\ct Do not specify endpoints in linear grid transformation.                } \> Section~\ref{info:TRNX}  \\
 126  \> {\ct x (y,z) transformation not monotonic, MESH \ldots\                     } \> Section~\ref{info:TRNX}  \\
@@ -13634,6 +13635,24 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 731 \> {\ct GEOM ID=, Non manifold geometry in adjacent faces at edge \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 732 \> {\ct GEOM ID=, Opposite normals on triangles sharing edge with \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 733 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
+    \>                                                                                \>                          \\
+801 \> {\ct VENT \ldots\ cannot use MULT\_ID because it involves HVAC.              } \> Section~\ref{info:HVAC} \\
+802 \> {\ct VENT \ldots\ needs an explicit ID because it involves HVAC.             } \> Section~\ref{info:HVAC} \\
+803 \> {\ct VENT \ldots\ cannot use MULT\_ID because it uses PBX, PBY or PBZ.       } \> Section~\ref{info:MULT} \\
+804 \> {\ct VENT \ldots\ should use PBX, PBY, PBZ or XB if it is PERIODIC.          } \> Section~\ref{sec:periodic} \\
+805 \> {\ct VENT \ldots\ cannot use MULT\_ID because it uses MB.                    } \> Section~\ref{info:MULT} \\
+806 \> {\ct VENT \ldots\ must set MB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.      } \> Section~\ref{info:VENT_Basics} \\
+807 \> {\ct VENT \ldots\ cannot use MULT\_ID because it uses DB.                    } \> Section~\ref{info:MULT} \\
+808 \> {\ct VENT \ldots\ must set DB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.      } \> Section~\ref{info:VENT_Basics} \\
+809 \> {\ct VENT \ldots\ cannot be specified on a y boundary in a 2D calc.          } \> Section~\ref{info:2D} \\
+810 \> {\ct VENT \ldots\ must be a plane.                                           } \> Section~\ref{info:VENT_Basics} \\
+811 \> {\ct VENT \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT} \\
+812 \> {\ct VENT \ldots\ SURF\_ID \ldots\ not found.                                } \> Section~\ref{info:VENT_Basics} \\
+813 \> {\ct VENT \ldots\ cannot be controlled by a device.                          } \> Section~\ref{info:Special_VENTS} \\
+814 \> {\ct VENT \ldots\ requires center point XYZ.                                 } \> Section~\ref{sec:circvents} \\
+815 \> {\ct VENT \ldots\ L\_EDDY = 0 in Synthetic Eddy Method.                      } \> Section~\ref{info:synthetic_turbulence} \\
+816 \> {\ct VENT \ldots\ VEL\_RMS = 0 in Synthetic Eddy Method.                     } \> Section~\ref{info:synthetic_turbulence} \\
+817 \> {\ct VENT \ldots\ Synthetic Eddy Method not permitted with HVAC.             } \> Section~\ref{info:synthetic_turbulence} \\
 
 \end{tabbing}
 
