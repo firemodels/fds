@@ -856,8 +856,8 @@ TYPE SURFACE_TYPE
    REAL(EB) :: NUSSELT_C1=-1._EB                       !< Re multiplier term for user defined HTC correlation
    REAL(EB) :: NUSSELT_C2=-1._EB                       !< Re adjustment before Pr multiplication for user defined HTC correlation
    REAL(EB) :: NUSSELT_M=-1._EB                        !< Re exponent for user defined HTC correlation
-   REAL(EB) :: EMBER_POWER_MEAN=-1._EB
-   REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
+   REAL(EB) :: EMBER_IGNITION_POWER_MEAN=-1._EB
+   REAL(EB) :: EMBER_IGNITION_POWER_SIGMA=0.001_EB
    REAL(EB) :: EMBER_TRACKING_RATIO=100._EB            !< Ratio of 'real' embers to Lagrangian particles (-)
    REAL(EB) :: EMBER_YIELD=-1._EB                      !< Mass yield of embers from a burning surface (kg/kg)
    REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
