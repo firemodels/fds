@@ -2791,6 +2791,9 @@ IF (SIM_MODE/=DNS_MODE) THEN
    ENDDO
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
+   IF (ANY(SPECIES_MIXTURE(:)%SC_T_USER>0._EB)) &
+        WRITE(LU_OUTPUT,'(A)')   '   Differential turbulent transport specified, see Tracked Species Information'
+
 ENDIF
 
 ! Print out pressure solver information
@@ -2866,6 +2869,8 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
+   IF (SM%SC_T_USER>0._EB) &
+      WRITE(LU_OUTPUT,'(A,F8.3)') '   User Turbulent Schmidt Number    ',SM%SC_T_USER
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
    WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'

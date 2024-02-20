@@ -1,6 +1,0 @@
-*.png
-*/*.png
-figures/
-statistics*.csv
-material_output_data*
-scaling_dataplot_out.csv

@@ -1830,7 +1830,7 @@ ENDIF
 ! Tensor diffusivity requires LES mode
 
 IF (TENSOR_DIFFUSIVITY .AND. SIM_MODE/=LES_MODE) THEN
-   WRITE(MESSAGE,'(A,A,A)')  "ERROR: TENSOR_DIFFUSIVITY requies SIMULATION_MODE='LES'."
+   WRITE(MESSAGE,'(A)')  "ERROR(123): TENSOR_DIFFUSIVITY requires SIMULATION_MODE='LES'."
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -2417,7 +2417,7 @@ REAL(EB) :: MW,SIGMALJ,EPSILONKLJ,VISCOSITY,CONDUCTIVITY,DIFFUSIVITY,MASS_EXTINC
             SPECIFIC_HEAT,REFERENCE_ENTHALPY,REFERENCE_TEMPERATURE,FIC_CONCENTRATION,FLD_LETHAL_DOSE,&
             SPECIFIC_HEAT_LIQUID,DENSITY_LIQUID,VAPORIZATION_TEMPERATURE,HEAT_OF_VAPORIZATION,MELTING_TEMPERATURE,&
             H_V_REFERENCE_TEMPERATURE,MEAN_DIAMETER,CONDUCTIVITY_SOLID,DENSITY_SOLID,ENTHALPY_OF_FORMATION,&
-            MASS_FRACTION_COND_0,MASS_FRACTION_0,&
+            MASS_FRACTION_COND_0,MASS_FRACTION_0,TURBULENT_SCHMIDT_NUMBER,&
             CONVERSION,PR_GAS,CONDUCTIVITY_LIQUID,VISCOSITY_LIQUID,BETA_LIQUID,THERMOPHORETIC_DIAMETER,C,H,O,N
 REAL(EB):: MASS_FRACTION(MAX_SPECIES),VOLUME_FRACTION(MAX_SPECIES),MIN_DIAMETER,MAX_DIAMETER
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
@@ -2438,9 +2438,9 @@ NAMELIST /SPEC/ AEROSOL,BACKGROUND,BETA_LIQUID,C,CONDUCTIVITY,CONDUCTIVITY_LIQUI
                 FORMULA,FYI,H,HEAT_OF_VAPORIZATION,H_V_REFERENCE_TEMPERATURE,ID,LUMPED_COMPONENT_ONLY,&
                 MASS_EXTINCTION_COEFFICIENT,MASS_FRACTION,MASS_FRACTION_COND_0,MASS_FRACTION_0,MAX_DIAMETER,MEAN_DIAMETER,&
                 MELTING_TEMPERATURE,MIN_DIAMETER,MW,N,N_BINS,O,PR_GAS,PRIMITIVE,RADCAL_ID,&
-                RAMP_CP,RAMP_CP_L,RAMP_D,RAMP_G_F,RAMP_K,RAMP_MU,REFERENCE_ENTHALPY,REFERENCE_TEMPERATURE,SIGMALJ,SPEC_ID,&
-                SPECIFIC_HEAT,SPECIFIC_HEAT_LIQUID,THERMOPHORETIC_DIAMETER,VAPORIZATION_TEMPERATURE,VISCOSITY,VISCOSITY_LIQUID,&
-                VOLUME_FRACTION
+                RAMP_CP,RAMP_CP_L,RAMP_D,RAMP_G_F,RAMP_K,RAMP_MU,REFERENCE_ENTHALPY,REFERENCE_TEMPERATURE,&
+                SIGMALJ,SPEC_ID,SPECIFIC_HEAT,SPECIFIC_HEAT_LIQUID,THERMOPHORETIC_DIAMETER,TURBULENT_SCHMIDT_NUMBER,&
+                VAPORIZATION_TEMPERATURE,VISCOSITY,VISCOSITY_LIQUID,VOLUME_FRACTION
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -2844,6 +2844,7 @@ PRIMITIVE_LOOP: DO N1=1,N_SPECIES - N_COPY_PRIMITIVE
    SS%RAMP_MU                     = RAMP_MU
    IF (REFERENCE_TEMPERATURE < -TMPM) REFERENCE_TEMPERATURE = 25._EB
    SS%REFERENCE_TEMPERATURE       = REFERENCE_TEMPERATURE + TMPM
+   SS%SC_T_USER                   = TURBULENT_SCHMIDT_NUMBER
    SS%SIG                         = SIGMALJ
    SS%SPECIFIC_HEAT               = SPECIFIC_HEAT*1000._EB
    SS%REFERENCE_ENTHALPY          = REFERENCE_ENTHALPY*1000._EB
@@ -3188,6 +3189,15 @@ GM1OG = (GAMMA-1._EB)/GAMMA
 CP_GAMMA = SPECIES_MIXTURE(1)%RCON/GM1OG
 CPOPR = CP_GAMMA/PR
 
+! Check for user-specified turbulent Schmidt number and, if present, transfer value from SPECIES to SPECIES_MIXTURE
+
+DO N1 = 1,N_TRACKED_SPECIES
+   IF (SPECIES_MIXTURE(N1)%SINGLE_SPEC_INDEX>0) THEN
+      SS=>SPECIES(SPECIES_MIXTURE(N1)%SINGLE_SPEC_INDEX)
+      IF (SS%SC_T_USER>0._EB) SPECIES_MIXTURE(N1)%SC_T_USER=SS%SC_T_USER
+   ENDIF
+ENDDO
+
 !If SOOT_OXIDATION is enabled make sure to save accumulation on the wall and check that it is an AEROSOL species
 IF (.NOT. SOOT_OXIDATION) RETURN
 
@@ -3256,6 +3266,7 @@ ELSE
    SM%FLD_LETHAL_DOSE             = FLD_LETHAL_DOSE
    SM%MU_USER                     = VISCOSITY
    SM%PR_USER                     = PR_GAS
+   SM%SC_T_USER                   = TURBULENT_SCHMIDT_NUMBER
    SM%RAMP_CP                     = RAMP_CP
    SM%RAMP_D                      = RAMP_D
    SM%RAMP_G_F                    = RAMP_G_F
@@ -3471,8 +3482,9 @@ SIGMALJ                     =  0._EB
 SPEC_ID                     = 'null'
 SPECIFIC_HEAT               = -1._EB
 REFERENCE_ENTHALPY          = -1.E30_EB
+TURBULENT_SCHMIDT_NUMBER    = -1._EB
 VISCOSITY                   = -1._EB
-VISCOSITY_LIQUID            =  -1._EB
+VISCOSITY_LIQUID            = -1._EB
 VOLUME_FRACTION             =  0._EB
 
 DENSITY_LIQUID              = -1._EB
@@ -7179,13 +7191,13 @@ LOGICAL :: DEFAULT,VEG_LSET_SPREAD,VEG_LSET_TAN2,TGA_ANALYSIS,COMPUTE_EMISSIVITY
            COMPUTE_EMISSIVITY_BACK,VARIABLE_THICKNESS,HT3D,THERM_THICK
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DUPLICATE
 ! Ember generating variables
-REAL(EB) :: EMBER_GENERATION_HEIGHT(2),EMBER_POWER_MEAN,EMBER_POWER_SIGMA,EMBER_TRACKING_RATIO,EMBER_YIELD
+REAL(EB) :: EMBER_GENERATION_HEIGHT(2),EMBER_IGNITION_POWER_MEAN,EMBER_IGNITION_POWER_SIGMA,EMBER_TRACKING_RATIO,EMBER_YIELD
 
 NAMELIST /SURF/ ADIABATIC,AREA_MULTIPLIER,BACKING,BLOWING,BURN_AWAY,BURN_DURATION,&
                 CELL_SIZE,CELL_SIZE_FACTOR,COLOR,&
                 CONVECTION_LENGTH_SCALE,CONVECTIVE_HEAT_FLUX,CONVERT_VOLUME_TO_MASS,DEFAULT,DELTA_TMP_MAX,DRAG_COEFFICIENT,&
                 DT_INSERT,E_COEFFICIENT,&
-                EMBER_GENERATION_HEIGHT,EMBER_POWER_MEAN,EMBER_POWER_SIGMA,EMBER_TRACKING_RATIO,EMBER_YIELD,&
+                EMBER_GENERATION_HEIGHT,EMBER_IGNITION_POWER_MEAN,EMBER_IGNITION_POWER_SIGMA,EMBER_TRACKING_RATIO,EMBER_YIELD,&
                 EMISSIVITY,EMISSIVITY_BACK,EXTERNAL_FLUX,EXTINCTION_TEMPERATURE,&
                 FREE_SLIP,INERT_Q_REF,FYI,GEOMETRY,HEAT_OF_VAPORIZATION,HEAT_TRANSFER_COEFFICIENT,HEAT_TRANSFER_COEFFICIENT_BACK,&
                 HEAT_TRANSFER_MODEL,HORIZONTAL,HRRPUA,VARIABLE_THICKNESS,HT3D,ID,IGNITION_TEMPERATURE,&
@@ -7527,8 +7539,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    SF%EMBER_GENERATION_HEIGHT = (/MINVAL(EMBER_GENERATION_HEIGHT),MAXVAL(EMBER_GENERATION_HEIGHT)/)
    IF (SF%EMBER_GENERATION_HEIGHT(1)<0._EB) SF%EMBER_GENERATION_HEIGHT(1) = SF%EMBER_GENERATION_HEIGHT(2)
-   SF%EMBER_POWER_MEAN = EMBER_POWER_MEAN
-   SF%EMBER_POWER_SIGMA = EMBER_POWER_SIGMA
+   SF%EMBER_IGNITION_POWER_MEAN = EMBER_IGNITION_POWER_MEAN
+   SF%EMBER_IGNITION_POWER_SIGMA = EMBER_IGNITION_POWER_SIGMA
    SF%EMBER_TRACKING_RATIO = EMBER_TRACKING_RATIO
    SF%EMBER_YIELD = EMBER_YIELD
 
@@ -8251,8 +8263,8 @@ DT_INSERT               = 0.01_EB
 DUCT_PATH               = 0
 E_COEFFICIENT           = 0._EB
 EMBER_GENERATION_HEIGHT = -1._EB
-EMBER_POWER_MEAN        = -1._EB
-EMBER_POWER_SIGMA       = 0.001_EB
+EMBER_IGNITION_POWER_MEAN = -1._EB
+EMBER_IGNITION_POWER_SIGMA = 0.001_EB
 EMBER_TRACKING_RATIO    = 100._EB
 EMBER_YIELD             = -1._EB
 EMISSIVITY              = -1._EB
@@ -11100,7 +11112,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
          N_EXPLICIT = N_EXPLICIT + 1
          READ(LU_INPUT,VENT,END=37,ERR=36,IOSTAT=IOS)    ! Read in info for VENT N
       36 IF (IOS>0) THEN
-            WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with VENT number ',N_EXPLICIT,', line number ',INPUT_FILE_LINE_NUMBER
+            WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with VENT number ',N_EXPLICIT,', line number ',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDIF
@@ -11112,13 +11124,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ! Simple error flagging
 
       IF (SURF_ID=='HVAC' .AND. MULT_ID/='null') THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Cannot use MULT_ID with an HVAC VENT, VENT ',N_EXPLICIT,&
-                                      ', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(2A)') 'ERROR(801): VENT ',TRIM(ID),' cannot use MULT_ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Specify an ID for an HVAC VENT, VENT ',N_EXPLICIT,&
-                                      ', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(3A)') 'ERROR(802): VENT ',TRIM(ID), ' needs an explicit ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11126,7 +11136,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses PBX, PBY or PBZ.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(803): VENT ',TRIM(ID),' cannot use MULT_ID because it uses PBX, PBY or PBZ.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11135,11 +11145,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ELSEIF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT ',N_EXPLICIT,' multi-mesh PERIODIC boundary'
+            WRITE(MESSAGE,'(3A)') 'ERROR(804): VENT ',TRIM(ID),' should use PBX, PBY, PBZ or XB if it is PERIODIC.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses MB.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(805): VENT ',TRIM(ID),' cannot use MULT_ID because it uses MB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11151,12 +11161,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(6) = ZS
             CASE('ZMAX') ; XB(5) = ZF
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(3A)') 'ERROR(806): VENT ',TRIM(ID),' must set MB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ELSEIF (DB/='null') THEN
          IF (MULT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT ',N_EXPLICIT,' because it uses DB.'
+            WRITE(MESSAGE,'(3A)') 'ERROR(807): VENT ',TRIM(ID),' cannot use MULT_ID because it uses DB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB = (/XS,XF,YS,YF,ZS,ZF/)
@@ -11168,7 +11178,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('ZMIN') ; XB(5:6) = ZS_MIN+TWO_EPSILON_EB
             CASE('ZMAX') ; XB(5:6) = ZF_MAX-TWO_EPSILON_EB
             CASE DEFAULT
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT ',N_EXPLICIT,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
+               WRITE(MESSAGE,'(3A)') 'ERROR(808): VENT ',TRIM(ID),' must set DB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ENDIF
@@ -11176,14 +11186,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ! Check that the vent is properly specified
 
       IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. N_TOTAL>N_IMPLICIT_VENTS) THEN
-         IF (ID=='null')WRITE(MESSAGE,'(A,I0,A)')'ERROR: VENT ',N_EXPLICIT,' cannot be specified on a y boundary in a 2D calc'
-         IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),  ' cannot be specified on a y boundary in a 2D calc'
+         WRITE(MESSAGE,'(3A)') 'ERROR(809): VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calc.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
-      IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4))  .AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
-         IF (ID=='null') WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' must be a plane'
-         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
+      IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4)).AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
+         WRITE(MESSAGE,'(3A)')  'ERROR(810): VENT ',TRIM(ID),' must be a plane.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11200,8 +11208,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             EXIT
          ENDIF
          IF (MULT_ID/='null' .AND. NNN==N_MULT) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT_ID ', TRIM(MULT_ID),' not found for VENT ',N_EXPLICIT,&
-                                             ', line number ',INPUT_FILE_LINE_NUMBER
+            WRITE(MESSAGE,'(5A)') 'ERROR(811): VENT ',TRIM(ID),' MULT_ID ',TRIM(MULT_ID),' not found.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDDO
@@ -11337,8 +11344,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
-                  WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found for VENT ',N_EXPLICIT,&
-                                                   ', line number ',INPUT_FILE_LINE_NUMBER
+                  WRITE(MESSAGE,'(5A)') 'ERROR(812): VENT ',TRIM(ID),' SURF_ID ',TRIM(SURF_ID),' not found.'
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
@@ -11381,9 +11387,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. &
                      VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. &
                      (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
-                  IF (ID=='null') WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: VENT ',N_EXPLICIT, &
-                     ' cannot be controlled by a device, line number ',INPUT_FILE_LINE_NUMBER
-                  IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
+                  WRITE(MESSAGE,'(3A)')  'ERROR(813): VENT ',TRIM(ID),' cannot be controlled by a device.'
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
@@ -11420,7 +11424,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                IF (RADIUS>0._EB) THEN
                   IF (ANY(XYZ<-1.E5_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' requires center point XYZ'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(814): VENT ',TRIM(ID),' requires center point XYZ.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   VT%RADIUS = RADIUS
@@ -11455,15 +11459,15 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (N_EDDY>0) THEN
                   SYNTHETIC_EDDY_METHOD = .TRUE.
                   IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' L_EDDY = 0 in Synthetic Eddy Method'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(815): VENT ',TRIM(ID),' L_EDDY = 0 in Synthetic Eddy Method.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' VEL_RMS = 0 in Synthetic Eddy Method'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(816): VENT ',TRIM(ID),' VEL_RMS = 0 in Synthetic Eddy Method.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (TRIM(SURF_ID)=='HVAC') THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',N_EXPLICIT,' Synthetic Eddy Method not permitted with HVAC'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(817): VENT ',TRIM(ID),' Synthetic Eddy Method not permitted with HVAC.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
@@ -11577,7 +11581,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ENDIF
 
       IF (VT%IOR==0) THEN
-         WRITE(MESSAGE,'(A,A,A,I0)')  'ERROR: Specify orientation of VENT ',TRIM(VT%ID),', MESH number ',NM
+         WRITE(MESSAGE,'(3A)')  'ERROR(818): VENT ',TRIM(VT%ID),' requires an orientation index, IOR.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11593,12 +11597,11 @@ MESH_LOOP_2: DO NM=1,NMESHES
           (ABS(VT%IOR)==2 .AND. J1>=1 .AND. J1<=JBM1) .OR. &
           (ABS(VT%IOR)==3 .AND. K1>=1 .AND. K1<=KBM1)) THEN
          IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',TRIM(VT%ID),' must be an exterior boundary.'
+            WRITE(MESSAGE,'(3A)')  'ERROR(819): VENT ',TRIM(ID),' is OPEN, MIRROR OR PERIODIC and must be on an exterior boundary.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (.NOT.SOLID_FOUND) THEN
-            WRITE(MESSAGE,'(A,A,A,I0)') &
-               'ERROR: VENT ',TRIM(VT%ID),' has no solid backing or an orientation index (IOR) is needed. MESH number=',NM
+            WRITE(MESSAGE,'(3A)') 'ERROR(820): VENT ',TRIM(VT%ID),' has no solid backing or an orientation index (IOR) is needed.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
@@ -11626,7 +11629,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ! Check UVW
 
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0'
+         WRITE(MESSAGE,'(3A)')  'ERROR(821): VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
@@ -11641,7 +11644,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       IF (VT%SURF_INDEX==HVAC_SURF_INDEX .AND. N>1) THEN
          DO NNN=1,N-1
             IF (TRIM(VT%ID)==TRIM(VENTS(NNN)%ID) .AND. VENTS(NNN)%SURF_INDEX==HVAC_SURF_INDEX) THEN
-               WRITE(MESSAGE,'(A,A)')  'ERROR: Two HVAC VENTS have the same ID.  VENT ID: ',TRIM(VT%ID)
+               WRITE(MESSAGE,'(3A)') 'ERROR(822): VENT ',TRIM(VT%ID),' has the same ID as another VENT.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             ENDIF
          ENDDO
@@ -11808,7 +11811,7 @@ COUNT_LOOP: DO
    N_INIT_READ = N_INIT_READ + 1
    READ(LU_INPUT,NML=INIT,END=11,ERR=12,IOSTAT=IOS)
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with INIT number ',N_INIT_READ,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR(101): Problem with INIT number ',N_INIT_READ,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    N_INIT_NEW = 0
@@ -11820,7 +11823,7 @@ COUNT_LOOP: DO
          IF (MULT_ID==MR%ID) N_INIT_NEW = MR%N_COPIES
       ENDDO
       IF (N_INIT_NEW==0) THEN
-         WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: MULT line ',TRIM(MULT_ID),' not found on INIT line', N_INIT_READ
+         WRITE(MESSAGE,'(A,I0,2A)') 'ERROR(841): INIT number ',N_INIT_READ,' has an unknown MULT_ID ',TRIM(MULT_ID)
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -11857,8 +11860,9 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       IF (IOS==1) EXIT INIT_LOOP
       CALL SET_INIT_DEFAULTS
       READ(LU_INPUT,INIT)
+      IF (ID=='null') WRITE(ID,'(I0)') N
       IF (ANY(MASS_FRACTION>=0._EB) .AND. ANY(VOLUME_FRACTION>=0._EB)) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: INIT line ', N, ". Do not specify both MASS_FRACTION and VOLUME_FRACTION."
+         WRITE(MESSAGE,'(3A)') 'ERROR(842): INIT ',TRIM(ID),' cannot have both MASS_FRACTION and VOLUME_FRACTION.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -11885,11 +11889,11 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
    ENDIF
 
    ! Check if domain information is provided for particle INIT
+
    IF (PART_ID/='null') THEN
       IF (ALL(ABS(XB)>1.E5_EB) .AND. ALL(XYZ<-1.E5_EB) .AND. DB=='null' .AND. BULK_DENSITY_FILE=='null' .AND. &
          (TRIM(PATH_RAMP(1))=='null' .OR. TRIM(PATH_RAMP(2))=='null' .OR. TRIM(PATH_RAMP(3))=='null')) THEN
-            WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
-            '. XYZ, XB, DB, BULK_DENSITY_FILE, or PATH_RAMP must be specified with PART_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(843): INIT ',TRIM(ID),' requires PART_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -12044,7 +12048,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             SPEC_INIT_IF: IF (ANY(MASS_FRACTION>=0._EB)) THEN
 
                IF (SPEC_ID(1)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(844): INIT ',TRIM(ID),' requires a SPEC_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                DO NS=1,MAX_SPECIES
@@ -12055,22 +12059,20 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                         EXIT
                      ENDIF
                      IF (NS2==N_TRACKED_SPECIES)  THEN
-                        WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
-                           TRIM(SPEC_ID(NS)),' not found'
+                        WRITE(MESSAGE,'(4A)') 'ERROR(845): INIT ',TRIM(ID),' cannot find SPEC_ID ',TRIM(SPEC_ID(NS))
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDDO
                ENDDO
 
                IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(846): INIT ',TRIM(ID),' cannot have sum of specified mass fractions > 1.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (IN%MASS_FRACTION(1)<=TWO_EPSILON_EB) THEN
                   IN%MASS_FRACTION(1) = 1._EB - SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
                ELSE
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
-                                                '. Cannot specify background species for MASS_FRACTION'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(847): INIT ',TRIM(ID),' cannot use background species for MASS_FRACTION.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
@@ -12080,7 +12082,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             ELSEIF (ANY(VOLUME_FRACTION>=0._EB)) THEN SPEC_INIT_IF
                MASS_FRACTION = 0._EB
                IF (SPEC_ID(1)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with VOLUME_FRACTION'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(844): INIT ',TRIM(ID),' requires a SPEC_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                NS3 = MAX_SPECIES
@@ -12096,9 +12098,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                         EXIT
                      ENDIF
                      IF (NS2==N_TRACKED_SPECIES)  THEN
-                        WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
-                           TRIM(SPEC_ID(NS)),' not found'
-                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        WRITE(MESSAGE,'(4A)') 'ERROR(845): INIT ',TRIM(ID),' cannot find SPEC_ID ',TRIM(SPEC_ID(NS))
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDDO
                ENDDO
@@ -12106,8 +12107,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                IF (MASS_FRACTION(1)<=TWO_EPSILON_EB) THEN
                   MASS_FRACTION(1) = (1._EB - SUM(VOLUME_FRACTION(1:NS3)))*SPECIES_MIXTURE(1)%MW
                ELSE
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
-                                                '. Cannot specify background species for VOLUME_FRACTION'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(847): INIT ',TRIM(ID),' cannot use background species for VOLUME_FRACTION.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES)/SUM(MASS_FRACTION(1:N_TRACKED_SPECIES))
@@ -12138,7 +12138,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%MASS_PER_VOLUME = MASS_PER_VOLUME
 
             IF(N_PARTICLES_PER_CELL>0 .AND. N_PARTICLES>0) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: INIT ',N,' Cannot use both N_PARTICLES and N_PARTICLES_PER_CELL'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(848): INIT ',N,' cannot use both N_PARTICLES and N_PARTICLES_PER_CELL.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -12147,7 +12147,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%PARTICLE_WEIGHT_FACTOR = PARTICLE_WEIGHT_FACTOR
 
             IF (IN%MASS_PER_VOLUME>TWO_EPSILON_EB .AND. IN%VOLUME<TWO_EPSILON_EB) THEN
-               WRITE(MESSAGE,'(A,I0,A)') 'ERROR: INIT ',N,' XB has no volume'
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(849): INIT ',N,' XB has no volume.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -12204,7 +12204,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                   ENDIF
                ENDDO
                IF (IN%PART_INDEX<1) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART_ID ',TRIM(PART_ID),' does not exist'
+                  WRITE(MESSAGE,'(4A)') 'ERROR(850): INIT ',TRIM(ID),' cannot find PART_ID ',TRIM(PART_ID)
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                LPC => LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)
@@ -12215,28 +12215,27 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
                IF (TRIM(PATH_RAMP(1))/='null' .OR. TRIM(PATH_RAMP(2))/='null' .OR. TRIM(PATH_RAMP(3))/='null') THEN
                   IF (.NOT. N_PARTICLES == 1) THEN
-                     WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N, &
-                        '. Must have N_PARTICLES=1 when specifying a PATH_RAMP.'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(851): INIT ',TRIM(ID),' requires N_PARTICLES=1 for a PATH_RAMP.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   IF (TRIM(PATH_RAMP(1))/='null') THEN
                      CALL GET_RAMP_INDEX(PATH_RAMP(1),'TIME',IN%PATH_RAMP_INDEX(1))
                      IF (IN%PATH_RAMP_INDEX(1)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. PATH_RAMP(1) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(852): INIT ',TRIM(ID),' PATH_RAMP(1) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
                   IF (TRIM(PATH_RAMP(2))/='null') THEN
                      CALL GET_RAMP_INDEX(PATH_RAMP(2),'TIME',IN%PATH_RAMP_INDEX(2))
                      IF (IN%PATH_RAMP_INDEX(2)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. PATH_RAMP(2) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(852): INIT ',TRIM(ID),' PATH_RAMP(2) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
                   IF (TRIM(PATH_RAMP(3))/='null') THEN
                      CALL GET_RAMP_INDEX(PATH_RAMP(3),'TIME',IN%PATH_RAMP_INDEX(3))
                      IF (IN%PATH_RAMP_INDEX(3)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. PATH_RAMP(3) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(852): INIT ',TRIM(ID),' PATH_RAMP(3) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
@@ -12249,27 +12248,26 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                   IF (TRIM(ORIENTATION_RAMP(1))/='null') THEN
                      CALL GET_RAMP_INDEX(ORIENTATION_RAMP(1),'TIME',IN%ORIENTATION_RAMP_INDEX(1))
                      IF (IN%ORIENTATION_RAMP_INDEX(1)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. ORIENTATION_RAMP(1) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(853): INIT ',TRIM(ID),' ORIENTATION_RAMP(1) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
                   IF (TRIM(ORIENTATION_RAMP(2))/='null') THEN
                      CALL GET_RAMP_INDEX(ORIENTATION_RAMP(2),'TIME',IN%ORIENTATION_RAMP_INDEX(2))
                      IF (IN%ORIENTATION_RAMP_INDEX(2)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. ORIENTATION_RAMP(2) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(853): INIT ',TRIM(ID),' ORIENTATION_RAMP(2) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
                   IF (TRIM(ORIENTATION_RAMP(3))/='null') THEN
                      CALL GET_RAMP_INDEX(ORIENTATION_RAMP(3),'TIME',IN%ORIENTATION_RAMP_INDEX(3))
                      IF (IN%ORIENTATION_RAMP_INDEX(3)==0) THEN
-                        WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. ORIENTATION_RAMP(3) not found.'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(853): INIT ',TRIM(ID),' ORIENTATION_RAMP(3) not found.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
                   ENDIF
                   IF (ANY(IN%ORIENTATION_RAMP_INDEX <= 0)) THEN
-                     WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
-                                                 '. If any ORIENTATION_RAMP is defined, then all must be defined.'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(854): INIT ',TRIM(ID),' ORIENTATION_RAMP components must all be defined.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
@@ -12302,15 +12300,14 @@ DEVICE_LOOP: DO NN=1,N_DEVC
       IF (IN%ID==DV%INIT_ID) THEN
          IF (ANY(IN%PATH_RAMP_INDEX > 0)) THEN
             IF (DV%SPATIAL_STATISTIC/='null') THEN
-               WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' for INIT ', TRIM(IN%ID),&
-                  ' cannot use a SPATIAL_STATISTIC.'
+               WRITE(MESSAGE,'(5A)') 'ERROR(855): INIT ',TRIM(IN%ID),' DEVC_ID ',TRIM(DV%ID),' cannot use a SPATIAL_STATISTIC.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
          CYCLE DEVICE_LOOP
       ENDIF
    ENDDO
-   WRITE(MESSAGE,'(A,A,A)') 'ERROR: The INIT_ID for DEVC ',TRIM(DV%ID),' cannot be found.'
+   WRITE(MESSAGE,'(3A)') 'ERROR(856): The INIT_ID for DEVC ',TRIM(DV%ID),' cannot be found.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDDO DEVICE_LOOP
 
@@ -12391,7 +12388,7 @@ DO NN=1,N_INIT
    IF (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB .OR. IN%BULK_DENSITY_FILE/='null') THEN
       LPC => LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)
       IF (LPC%DENSITY < 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID),' requires a density'
+         WRITE(MESSAGE,'(5A)') 'ERROR(857): INIT ',TRIM(IN%ID),' PARTicle class ',TRIM(LPC%ID),' requires a density.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          IF (LPC%DRAG_LAW == POROUS_DRAG .AND. IN%MASS_PER_VOLUME>0._EB) &
@@ -12408,8 +12405,8 @@ DO NN=1,N_INIT
    IF (IN%PART_INDEX >0) THEN
       LPC => LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)
       IF (LPC%DRAG_LAW == POROUS_DRAG .AND. LPC%POROUS_VOLUME_FRACTION <= 0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID),&
-                                  ' requires a PART POROUS_VOLUME_FRACTION or INIT MASS_PER_VOLUME'
+         WRITE(MESSAGE,'(5A)') 'ERROR (858): INIT ',TRIM(IN%ID),' PARTicle class ',TRIM(LPC%ID),&
+                               ' requires a PART POROUS_VOLUME_FRACTION or INIT MASS_PER_VOLUME'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -12444,7 +12441,7 @@ COUNT_ZONE_LOOP: DO
    READ(LU_INPUT,NML=ZONE,END=11,ERR=12,IOSTAT=IOS)
    N_ZONE = N_ZONE + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ZONE number ',N_ZONE+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with ZONE number ',N_ZONE+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_ZONE_LOOP
@@ -12534,7 +12531,7 @@ READ_ZONE_LOOP: DO N=1,N_ZONE
       DO NN=1,N-1
          IF (P_ZONE(NN)%LEAK_AREA(N)>0._EB) THEN
             IF (P_ZONE(N)%LEAK_AREA(NN) > 0._EB) THEN
-               WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: LEAK_AREA specified twice for ZONE ',N,' and ',NN
+               WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR(871): LEAK_AREA specified twice for ZONE ',N,' and ',NN
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ELSE
                P_ZONE(N)%LEAK_AREA(NN)               = P_ZONE(NN)%LEAK_AREA(N)
@@ -12604,7 +12601,7 @@ COUNT_DEVC_LOOP: DO
    N_DEVC_READ = N_DEVC_READ + 1
    IF (POINTS>1 .AND. .NOT.TIME_HISTORY) MAX_DEVC_LINE_POINTS = MAX(MAX_DEVC_LINE_POINTS,POINTS)
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with DEVC number ',N_DEVC_READ+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with DEVC number ',N_DEVC_READ+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_DEVC_LOOP
@@ -12691,7 +12688,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    ! Check the QUANTITY_RANGE
 
    IF (QUANTITY_RANGE(2) <= QUANTITY_RANGE(1)) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' has QUANTITY_RANGE(2) <= QUANTITY_RANGE(1)'
+      WRITE(MESSAGE,'(3A)')  'ERROR(881): DEVC ',TRIM(ID),' has QUANTITY_RANGE(2) <= QUANTITY_RANGE(1).'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -12706,7 +12703,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ENDIF
       ENDDO
       IF (MOVE_INDEX==0) THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' MOVE_ID is not recognized'
+         WRITE(MESSAGE,'(3A)')  'ERROR(882): DEVC ',TRIM(ID),' MOVE_ID is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (XYZ(1)>-1.E5_EB) CALL TRANSFORM_COORDINATES(XYZ(1),XYZ(2),XYZ(3),MOVE_INDEX,1)
@@ -12757,7 +12754,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    ! Error statement involving POINTS
 
    IF (POINTS>1 .AND. ANY(XBP<-1.E5_EB) .AND. INIT_ID=='null') THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XBP'
+      WRITE(MESSAGE,'(3A)')  'ERROR(883): DEVC ',TRIM(ID),' must have coordinates given in terms of XBP.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -12797,7 +12794,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ORIENTATION_VECTOR => REALLOCATE2D(ORIENTATION_VECTOR,1,3,0,N_ORIENTATION_VECTOR+10)
       ENDIF
       IF (ALL(ABS(ORIENTATION(1:3))<TWO_EPSILON_EB)) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(ID),'.  All components of ORIENTATION are zero.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(884): DEVC ',TRIM(ID),' components of ORIENTATION are all zero.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       ORIENTATION_VECTOR(1:3,N_ORIENTATION_VECTOR) = ORIENTATION(1:3) / NORM2(ORIENTATION)
@@ -12851,7 +12848,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ELSE
          IF (XYZ(1) < -1.E5_EB .AND. CTRL_ID=='null' .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null' .AND. INIT_ID=='null' &
             .AND. CELL_L < 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
+            WRITE(MESSAGE,'(3A)')  'ERROR(885): DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -12997,7 +12994,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
 
       IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID'
+         WRITE(MESSAGE,'(3A)')  'ERROR(886): DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -13168,7 +13165,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
           DV%QUANTITY(1)=='RADIANCE' .OR. &
           DV%QUANTITY(1)=='ADIABATIC SURFACE TEMPERATURE GAS') THEN
          IF (DV%ORIENTATION_INDEX==0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have an ORIENTATION'
+            WRITE(MESSAGE,'(3A)')  'ERROR(887): DEVC ',TRIM(ID),' must have an ORIENTATION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DV%INIT_ID = DV%ID
@@ -13387,7 +13384,7 @@ IF (TYPE_CODE==1 .OR. TYPE_CODE==2) THEN
       CASE('SMOOTHED')        ; TEMPORAL_STATISTIC = 'SMOOTHED'
       CASE DEFAULT
          IF (TYPE_CODE==2) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: TEMPORAL_STATISTIC for DEVC ',TRIM(ID),' is not recognized'
+            WRITE(MESSAGE,'(3A)')  'ERROR(888): DEVC ',TRIM(ID),' TEMPORAL_STATISTIC is not recognized.'
             ERROR_CODE = 1
             RETURN
          ELSE
@@ -13425,7 +13422,7 @@ IF (TYPE_CODE==1 .OR. TYPE_CODE==3) THEN
       CASE('INTERPOLATION')    ; SPATIAL_STATISTIC = 'INTERPOLATION'
       CASE DEFAULT
          IF (TYPE_CODE==3) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SPATIAL_STATISTIC for DEVC ',TRIM(ID),' is not recognized'
+            WRITE(MESSAGE,'(3A)') 'ERROR(889): DEVC ',TRIM(ID),' SPATIAL_STATISTIC is not recognized.'
             ERROR_CODE = 1
             RETURN
          ELSE
@@ -13435,7 +13432,7 @@ IF (TYPE_CODE==1 .OR. TYPE_CODE==3) THEN
 ENDIF
 
 IF (NO_TEMPORAL_STATISTIC_FOUND .AND. NO_SPATIAL_STATISTIC_FOUND) THEN
-   WRITE(MESSAGE,'(A,A,A)')  'ERROR: STATISTICS for DEVC ',TRIM(ID),' is not recognized'
+   WRITE(MESSAGE,'(3A)')  'ERROR(890): DEVC ',TRIM(ID),' STATISTICS is not recognized.'
    ERROR_CODE = 1
 ENDIF
 
@@ -13468,7 +13465,7 @@ COUNT_CTRL_LOOP: DO
    READ(LU_INPUT,NML=CTRL,END=11,ERR=12,IOSTAT=IOS)
    N_CTRL = N_CTRL + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with CTRL number ',N_CTRL+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with CTRL number ',N_CTRL+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_CTRL_LOOP
@@ -13493,7 +13490,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
    ! Make sure there is either a FUNCTION_TYPE type for the CTRL
 
    IF (FUNCTION_TYPE=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' must have a FUNCTION_TYPE'
+      WRITE(MESSAGE,'(A,I0,A)')  'ERROR(901): CTRL ',NC,' must have a FUNCTION_TYPE.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -13586,11 +13583,11 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
       CASE('PID')
          CF%CONTROL_INDEX = CF_PID
          IF (CF%TARGET_VALUE<-1.E30_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,', PID controller must be given a TARGET_VALUE'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(902): CTRL ',NC,', PID controller must be given a TARGET_VALUE.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' FUNCTION_TYPE not recognized'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(903): CTRL ',NC,' FUNCTION_TYPE not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 
@@ -13604,7 +13601,7 @@ ENDDO READ_CTRL_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 IF (READ_EXTERNAL .AND. EXTERNAL_FILENAME=='null') THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: A CTRL FUNCTION_TYPE=EXTERNAL is present but no EXTERNAL_FILENAME is defined on MISC/'
+   WRITE(MESSAGE,'(A,I0,A)') 'ERROR(904): CTRL ',NC,' FUNCTION_TYPE=EXTERNAL but no EXTERNAL_FILENAME given on MISC.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -13661,41 +13658,41 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    END DO INPUT_COUNT
    CF%N_INPUTS=NN-1
    IF (CF%N_INPUTS==0 .AND. CF%CONTROL_INDEX /= CF_EXTERNAL) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least one input'
+      WRITE(MESSAGE,'(3A)')  'ERROR(905): CTRL ',TRIM(CF%ID),' must have at least one input.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SELECT CASE (CF%CONTROL_INDEX)
       CASE (1:50,101:199)
          IF (CF%N_INPUTS /= 1) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
+            WRITE(MESSAGE,'(3A)') 'ERROR(906): CTRL ',TRIM(CF%ID),' must have only one input.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CF%CONTROL_INDEX/=CUSTOM .AND. ANY(CF%INPUT_ID=='CONSTANT')) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(907): CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       CASE (51:54,56:100)
          IF (CF%N_INPUTS < 1) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least one input'
+            WRITE(MESSAGE,'(3A)') 'ERROR(905): CTRL ',TRIM(CF%ID),' must have at least one input.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       CASE (301:399)
          IF (CF%N_INPUTS < 2) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least two inputs'
+            WRITE(MESSAGE,'(3A)') 'ERROR(908): CTRL ',TRIM(CF%ID),' must have at least two inputs.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       CASE (201:299)
          IF (CF%N_INPUTS /= 2) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only two inputs'
+            WRITE(MESSAGE,'(3A)') 'ERROR(909): CTRL ',TRIM(CF%ID),' must have only two inputs.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       CASE (401:499)
          IF (ANY(CF%INPUT_ID=='CONSTANT')) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(907): CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CF%N_INPUTS /= 1) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
+            WRITE(MESSAGE,'(3A)') 'ERROR(906): CTRL ',TRIM(CF%ID),' must have only one input.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
    END SELECT
@@ -13707,16 +13704,16 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
 
    BUILD_INPUT: DO NN = 1, CF%N_INPUTS
       IF (TRIM(CF%INPUT_ID(NN))==TRIM(CF%ID)) THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a control function as an input to itself'
+         WRITE(MESSAGE,'(3A)') 'ERROR(910): CTRL ',TRIM(CF%ID),' cannot use a control function as an input to itself.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (CF%INPUT_ID(NN)=='CONSTANT') THEN
          IF (CONSTANT_SPECIFIED) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' can only specify one input as a constant value'
+            WRITE(MESSAGE,'(3A)') 'ERROR(911): CTRL ',TRIM(CF%ID),' can only specify one input as a constant value.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CF%CONSTANT < -8.E30_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' has the INPUT_ID CONSTANT but no constant value was specified'
+            WRITE(MESSAGE,'(3A)')  'ERROR(912): CTRL ',TRIM(CF%ID),' has no CONSTANT specified.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          CF%INPUT_TYPE(NN) = CONSTANT_INPUT
@@ -13728,11 +13725,11 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
             IF (CF%CONTROL_INDEX == CF_PERCENTILE) THEN
-               WRITE(MESSAGE,'(A,A,A)')  'ERROR: PRECENTILE CTRL ',TRIM(CF%ID),' must have a DEVC as input'
+               WRITE(MESSAGE,'(3A)') 'ERROR(913): CTRL ',TRIM(CF%ID),' uses PERCENTILE and must have a DEVC as input.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (CF%CONTROL_INDEX == CUSTOM .AND. CONTROL(NNN)%CONTROL_INDEX < 101) THEN
-               WRITE(MESSAGE,'(A,A,A)')  'ERROR: CUSTOM CTRL ',TRIM(CF%ID),' must have a DEVC or math CTRL as input'
+               WRITE(MESSAGE,'(3A)') 'ERROR(914): CTRL ',TRIM(CF%ID),' is CUSTOM and must have a DEVC or math CTRL as input.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             EXIT CTRL_LOOP
@@ -13742,7 +13739,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          IF (DEVICE(NNN)%ID == CF%INPUT_ID(NN)) THEN
             IF (ANY(DEVICE(NNN)%QUANTITY_INDEX==41)) TSF_WARNING=.TRUE.
             IF (CF%INPUT_TYPE(NN) > 0) THEN
-               WRITE(MESSAGE,'(A,A,A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' input ',NN,' is the ID for both a DEVC and a CTRL'
+               WRITE(MESSAGE,'(3A,I0,A)') 'ERROR(915): CTRL ',TRIM(CF%ID),' input ',NN,' is the ID for both a DEVC and a CTRL.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             CF%INPUT(NN) = NNN
@@ -13751,7 +13748,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          ENDIF
       END DO DEVC_LOOP
       IF (CF%INPUT_TYPE(NN) > 0) CYCLE BUILD_INPUT
-      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot locate item for input ',TRIM(CF%INPUT_ID(NN))
+      WRITE(MESSAGE,'(4A)') 'ERROR(916): CTRL ',TRIM(CF%ID),' cannot locate INPUT_ID ',TRIM(CF%INPUT_ID(NN))
       CALL SHUTDOWN(MESSAGE) ; RETURN
    END DO BUILD_INPUT
 
@@ -13873,7 +13870,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    ! Check for HVAC outputs with no HVAC inputs
 
    IF ((DV%DUCT_ID/='null' .OR. DV%NODE_ID(1)/='null') .AND. .NOT. HVAC_SOLVE) THEN
-      WRITE(MESSAGE,'(A)')  'ERROR: HVAC outputs specified with no HVAC inputs'
+      WRITE(MESSAGE,'(3A)')  'ERROR(891): DEVC ',TRIM(DV%ID),' HVAC outputs specified with no HVAC inputs.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -13893,7 +13890,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
       CALL GET_PROPERTY_INDEX(DV%PROP_INDEX,'DEVC',DV%PROP_ID)
       IF (DV%QUANTITY(1)=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY=='null') THEN
-         WRITE(MESSAGE,'(5A)')  'ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY'
+         WRITE(MESSAGE,'(5A)') 'ERROR(892): DEVC ',TRIM(DV%ID),' or PROP ',TRIM(DV%PROP_ID),' must have a QUANTITY.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -13939,31 +13936,24 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
 
       IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%INTEGRATED .AND. DV%X1<=-1.E6_EB) THEN
-         WRITE(MESSAGE,'(3A)')  'ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY(1)),' requires coordinates using XB'
+         WRITE(MESSAGE,'(5A)') 'ERROR(893): DEVC ',TRIM(DV%ID),' QUANTITY ',TRIM(DV%QUANTITY(1)),' requires XB coordinates.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
-
-      ! This check is commented as DEVCs with IOR==0 can be related to CFACES. The test that IOR/=0 for WALL CELLS
-      ! is done in init.f90 routine INITIALIZE_DEVICES (IOR==0 but no CFACE found).
-      !IF (DV%QUANTITY_INDEX(1)<0 .AND. DV%IOR==0 .AND. (DV%SPATIAL_STATISTIC=='null'.OR.DV%LINE>0) .AND. DV%INIT_ID=='null') !THEN
-      !   WRITE(MESSAGE,'(A,A,A)') 'ERROR: Specify orientation of DEVC ',TRIM(DV%ID),' using the parameter IOR'
-      !   CALL SHUTDOWN(MESSAGE) ; RETURN
-      !ENDIF
 
       IF (DV%QUANTITY_INDEX(1) < 0 .AND. (DV%SPATIAL_STATISTIC=='MASS MEAN' .OR. DV%SPATIAL_STATISTIC=='VOLUME MEAN' .OR. &
                                           DV%SPATIAL_STATISTIC=='VOLUME INTEGRAL' .OR. DV%SPATIAL_STATISTIC=='MASS INTEGRAL' .OR. &
                                           DV%SPATIAL_STATISTIC=='MASS' .OR. DV%SPATIAL_STATISTIC=='VOLUME')) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Invalid SPATIAL_STATISTIC specified for wall DEVC ',TRIM(DV%ID)
+         WRITE(MESSAGE,'(3A)') 'ERROR(894): DEVC ',TRIM(DV%ID),' uses invalid solid phase SPATIAL_STATISTIC.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (DV%QUANTITY_INDEX(1) > 0 .AND. (DV%SPATIAL_STATISTIC=='SURFACE INTEGRAL' .OR. DV%SPATIAL_STATISTIC=='SURFACE AREA')) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Invalid SPATIAL_STATISTIC specified for gas DEVC ',TRIM(DV%ID)
+         WRITE(MESSAGE,'(3A)') 'ERROR(895): DEVC ',TRIM(DV%ID),' uses invalid gas phase SPATIAL_STATISTIC.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (DV%QUANTITY_INDEX(1)>0 .AND. DV%SPATIAL_STATISTIC/='null' .AND. DV%X1<-1.E5_EB) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: XB required when SPATIAL_STATISTIC specified for gas DEVC ',TRIM(DV%ID)
+         WRITE(MESSAGE,'(3A)') 'ERROR(896): DEVC ',TRIM(DV%ID),' requires XB for SPATIAL_STATISTIC.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -13973,13 +13963,13 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                                  DV%QUANTITY(1),'null',DV%SPEC_ID,DV%PART_ID,DV%DUCT_ID,DV%NODE_ID(2),'null','null',-1._EB,&
                                  I_DUM(4))
          IF (DV%NODE_INDEX(1)==DV%NODE_INDEX(2)) THEN
-            WRITE(MESSAGE,'(A,A)') 'ERROR: NODE PRESSURE DIFFERENCE node 1 = node 2 ',TRIM(DV%ID)
+            WRITE(MESSAGE,'(3A)') 'ERROR(897): DEVC ',TRIM(DV%ID),' NODE 1 = NODE 2.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
 
        IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%HVAC .AND. DV%MESH /= 1) THEN
-           WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),'. Do not specify XYZ or XB for an HVAC output QUANTITY.'
+           WRITE(MESSAGE,'(3A)') 'ERROR(898): DEVC ',TRIM(DV%ID),' should not use XYZ or XB for an HVAC output QUANTITY.'
            CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 
@@ -14070,12 +14060,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('CHAMBER OBSCURATION')
 
          IF (DV%PROP_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and must have a PROP_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(931): DEVC ',TRIM(DV%ID),' is a smoke detector and must have a PROP_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<0 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<0) THEN
             IF (SOOT_INDEX<1) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+               WRITE(MESSAGE,'(3A)') 'ERROR(932): DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ELSE
                PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
@@ -14094,11 +14084,11 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('LINK TEMPERATURE','SPRINKLER LINK TEMPERATURE')
 
          IF (DV%PROP_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a PROP_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(933): DEVC ',TRIM(DV%ID),' must have a PROP_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE <= -273.15_EB) THEN
-            WRITE(MESSAGE,'(A,A)') 'ERROR: ACTIVATION_TEMPERATURE needed for PROP ',TRIM(DV%PROP_ID)
+            WRITE(MESSAGE,'(5A)') 'ERROR(934): DEVC ',TRIM(DV%ID),' PROP ',TRIM(DV%PROP_ID),' needs an ACTIVATION_TEMPERATURE.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14108,7 +14098,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('THERMOCOUPLE')
 
          IF (DV%SPATIAL_STATISTIC/='null') THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' cannot use SPATIAL_STATISTIC'
+            WRITE(MESSAGE,'(3A)') 'ERROR(935): DEVC ',TRIM(DV%ID),' is a THERMOCOUPLE and cannot use SPATIAL_STATISTIC.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14145,7 +14135,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('SOLID DENSITY')
 
          IF (DV%MATL_ID=='null') THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a MATL_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(936): DEVC ',TRIM(DV%ID),' must have a MATL_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14156,7 +14146,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%Z_INT   = 0._EB
          CALL SEARCH_OTHER_MESHES(DV%X1,DV%Y1,DV%Z1,NOM,I,J,K)
          IF (NOM==0) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is partially outside of the domain'
+            WRITE(MESSAGE,'(3A)') 'ERROR(937): DEVC ',TRIM(DV%ID),' is partially outside of the domain.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DV%LOWEST_MESH = NOM
@@ -14169,7 +14159,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                IF (DV%PROP_INDEX>0) THEN
                   IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1) THEN
                      IF (SOOT_INDEX<1) THEN
-                        WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+                        WRITE(MESSAGE,'(3A)') 'ERROR(932): DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source.'
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ELSE
                         PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
@@ -14177,7 +14167,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                   ENDIF
                ELSE
                   IF (SOOT_INDEX <=0) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+                     WRITE(MESSAGE,'(3A)') 'ERROR(932): DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
@@ -14232,7 +14222,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDDO C1
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
-            WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist for DEVC ',TRIM(DV%ID)
+            WRITE(MESSAGE,'(5A)') 'ERROR(938): DEVC ',TRIM(DV%ID),' CTRL_ID ',TRIM(DV%CTRL_ID),' does not exist.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14248,12 +14238,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDDO C2
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
-            WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist for DEVC ',TRIM(DV%ID)
+            WRITE(MESSAGE,'(5A)') 'ERROR(938): DEVC ',TRIM(DV%ID),' CTRL_ID ',TRIM(DV%CTRL_ID),' does not exist.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CONTROL(DV%CTRL_INDEX)%CONTROL_INDEX>2 .AND. CONTROL(DV%CTRL_INDEX)%CONTROL_INDEX<101) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' for DEVC ',TRIM(DV%ID), &
-               ' is a logic only function and can only use the QUANTITY of CONTROL.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(939): DEVC ',TRIM(DV%ID),' CTRL_ID ',TRIM(DV%CTRL_ID), &
+                                   ' is a logic only function and can only use the QUANTITY of CONTROL.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14262,7 +14252,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ! Check either for a specified SMOKE SPECies, or if simple chemistry model is being used
          IF (DV%PROP_INDEX>0) THEN
             IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1 .AND. SOOT_INDEX<1) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+               WRITE(MESSAGE,'(3A)') 'ERROR(932): DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -14271,8 +14261,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DO NN=1,N_DEVC
             IF (DEVICE(NN)%DEVC_ID==DV%ID) THEN
                IF (DEVICE(NN)%QUANTITY(1)/='DENSITY' .OR. DEVICE(NN)%SPEC_ID=='null') THEN
-                  WRITE(MESSAGE,'(A,A,A)')  &
-                     'ERROR: DEVICE ',TRIM(DEVICE(NN)%ID)," must use QUANTITY='DENSITY' and a SPEC_ID"
+                  WRITE(MESSAGE,'(3A)') 'ERROR(940): DEVC ',TRIM(DEVICE(NN)%ID)," must use QUANTITY='DENSITY' and a SPEC_ID."
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                NNN = NNN + 1
@@ -14296,7 +14285,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                DV%TOTAL_FLOWRATE  = DV%TOTAL_FLOWRATE + DEVICE(NN)%FLOWRATE
                DV%DT = MAX(DV%DT,DEVICE(NN)%DELAY)
                IF (NN > N) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: ASPIRATION DEVICE ',TRIM(DV%ID),' is not listed after all its inputs'
+                  WRITE(MESSAGE,'(3A)') 'ERROR(941): DEVC ',TRIM(DV%ID),' must be listed after all of its inputs.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                DV%DEVC_INDEX(NNN)     = NN
@@ -14310,7 +14299,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%TEMPORAL_STATISTIC = 'TIME INTEGRAL'
          IF (DV%PROP_INDEX>0) THEN
             IF (PROPERTY(DV%PROP_INDEX)%FED_ACTIVITY<1 .AND. PROPERTY(DV%PROP_INDEX)%FED_ACTIVITY>3) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a FED detector and requires an activity'
+               WRITE(MESSAGE,'(3A)') 'ERROR(942): DEVC ',TRIM(DV%ID),' is a FED detector and requires an activity.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             DV%FED_ACTIVITY = PROPERTY(DV%PROP_INDEX)%FED_ACTIVITY
@@ -14324,7 +14313,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             IF (DEVICE(NN)%ID==DV%DEVC_ID) DV%DEVC_INDEX(1) = NN
          ENDDO
          IF (DV%DEVC_ID=='null' .OR. DV%DEVC_INDEX(1)==0) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: A VELOCITY PATCH DEVC line needs a DEVC_ID to control it'
+            WRITE(MESSAGE,'(3A)') 'ERROR(943): DEVC ',TRIM(DV%ID),' is a VELOCITY PATCH and needs a DEVC_ID to control it.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
@@ -14363,7 +14352,7 @@ COUNT_PROF_LOOP: DO
    READ(LU_INPUT,NML=PROF,END=11,ERR=12,IOSTAT=IOS)
    N_PROF = N_PROF + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with PROF number ',N_PROF+1,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with PROF number ',N_PROF+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_PROF_LOOP
@@ -14399,7 +14388,7 @@ PROF_LOOP: DO NN=1,N_PROFO
    ! Check for bad PROF quantities or coordinates
 
    IF (IOR==0 .AND. INIT_ID=='null') THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Specify orientation of PROF ' ,NN,' using the parameter IOR'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR(951): PROF ',NN,' requires an orientation index, IOR.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -14461,7 +14450,7 @@ PROF_LOOP: DO NN=1,N_PROFO
                            PF%QUANTITY,'null','null','null','null','null','null',PF%MATL_ID,&
                            -1._EB,I_DUM(9))
    IF (.NOT. OUTPUT_QUANTITY(PF%QUANTITY_INDEX)%PROF_APPROPRIATE) THEN
-      WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: PROF ' ,NN,' QUANTITY of ',TRIM(PF%QUANTITY),' is not a valid QUANTITY for PROF.'
+      WRITE(MESSAGE,'(A,I0,A3)') 'ERROR(952): PROF ',NN,' QUANTITY ',TRIM(PF%QUANTITY),' is not valid.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    PF%X            = XYZ(1)
@@ -14494,7 +14483,7 @@ COUNT_ISOF_LOOP: DO
    READ(LU_INPUT,NML=ISOF,END=9,ERR=10,IOSTAT=IOS)
    N_ISOF = N_ISOF + 1
    10 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ISOF number ',N_ISOF,', line number ',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with ISOF number ',N_ISOF
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_ISOF_LOOP
@@ -14586,7 +14575,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF + 2
       IF (VECTOR .AND. .NOT. TWO_D) N_SLCF = N_SLCF + 3
       10 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SLCF number ',N_SLCF_O+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with SLCF number ',N_SLCF_O+1
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO COUNT_SLCF_LOOP
@@ -14658,7 +14647,7 @@ MESH_LOOP: DO NM=1,NMESHES
       READ(LU_INPUT,SLCF)
       IF (MESH_NUMBER/=NM) CYCLE SLCF_LOOP
       IF (AGL_SLICE>=0._EB .AND. CELL_CENTERED) THEN
-         WRITE(MESSAGE,'(A)') "ERROR: CELL_CENTERED not allowed with AGL_SLICE"
+         WRITE(MESSAGE,'(A)') 'ERROR(961): CELL_CENTERED not allowed with AGL_SLICE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
@@ -15009,7 +14998,7 @@ MESH_LOOP: DO NM=1,NMESHES
       READ(LU_INPUT,NML=RADF,END=9,ERR=10,IOSTAT=IOS)
       N_RADF = N_RADF + 1
       10 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with RADF number ',N_RADF+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with RADF number ',N_RADF+1
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO COUNT_RADF_LOOP
@@ -15098,7 +15087,7 @@ COUNT_BNDF_LOOP: DO
    READ(LU_INPUT,NML=BNDF,END=209,ERR=210,IOSTAT=IOS)
    N_BNDF = N_BNDF + 1
    210 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with BNDF number ',N_BNDF+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with BNDF number ',N_BNDF+1
          CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 ENDDO COUNT_BNDF_LOOP
@@ -15125,11 +15114,11 @@ READ_BNDF_LOOP: DO N=1,N_BNDF
 
    IF (TRIM(QUANTITY)=='AMPUA_Z' .OR. TRIM(QUANTITY)=='CPUA_Z' .OR. TRIM(QUANTITY)=='MPUA_Z') THEN
       IF (N_LP_ARRAY_INDICES == 0) THEN
-         WRITE(MESSAGE,'(A,I0)') 'ERROR: CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets. BNDF line ',N
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(962): BNDF ',N,' CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          IF (.NOT. ALL(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
-               WRITE(MESSAGE,'(A,I0)') 'ERROR: CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets. BNDF line ',N
+               WRITE(MESSAGE,'(A,I0,A)') 'ERROR(962): BNDF ',N,' CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -15187,7 +15176,7 @@ COUNT_SM3D_LOOP: DO
    READ(LU_INPUT,NML=SM3D,END=209,ERR=210,IOSTAT=IOS)
    N_SMOKE3D_USER_SPECIFIED = N_SMOKE3D_USER_SPECIFIED + 1
    210 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SM3D number ',N_SMOKE3D+1,', line number ',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0)') 'ERROR(101): Problem with SM3D number ',N_SMOKE3D+1
          CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 ENDDO COUNT_SM3D_LOOP
