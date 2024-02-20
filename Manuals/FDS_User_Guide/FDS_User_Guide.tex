@@ -13463,7 +13463,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 362  \> {\ct SURF \ldots\ uses MLRPUA and species \ldots\ is the FUEL for \ldots\   } \> Section~\ref{info:gas_burner}  \\
 363  \> {\ct SURF \ldots\ uses MLRPUA and MASS\_FRACTION but no REAC \ldots\        } \> Section~\ref{info:simple_chemistry}  \\
 364  \> {\ct SURF \ldots\ cannot specify mass fraction with mass flux \ldots\       } \> Section~\ref{info:MASS_FLUX}  \\
-365  \> {\ct SURF \ldots\ cannot specify both mass fraction and outflow velocity.   } \> Section~\ref{info:MASS_FLUX}  \\
+365  \> {\ct SURF \ldots\ cannot specify mass fraction and outflow velocity.        } \> Section~\ref{info:MASS_FLUX}  \\
 366  \> {\ct SURF \ldots\ cannot leak and specify flow or pyrolysis \ldots\         } \> Section~\ref{info:Leaks}  \\
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
      \>                                                                               \>                                     \\
@@ -13536,7 +13536,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 512 \> {\ct Duct has both MASS\_FLOW and VOLUME\_FLOW defined \ldots                } \> Section~\ref{info:HVACduct}  \\
 513 \> {\ct Ductnode has no ID \ldots                                               } \> Section~\ref{info:HVAC}  \\
 514 \> {\ct Ambient or internal ductnode requires an elevation, XYZ(3) \ldots       } \> Section~\ref{info:HVACnode}  \\
-515 \> {\ct Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts \ldots   } \> Section~\ref{info:HVACnode}  \\
+515 \> {\ct Non-AMBIENT or non VENT-connected ductnode needs >=2 ducts              } \> Section~\ref{info:HVACnode}  \\
 516 \> {\ct AMBIENT or VENT-connected ductnode must have 1 duct \ldots              } \> Section~\ref{info:HVACnode}  \\
 517 \> {\ct No ducts specified for ductnode \ldots                                  } \> Section~\ref{info:HVACnode}  \\
 518 \> {\ct Ductnode with a filter must have 2 ducts \ldots                         } \> Section~\ref{info:HVACfilter}  \\
@@ -13560,7 +13560,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 	\> {\ct NODE QUANTITY LIST \ldots }    \\
 534 \> {\ct Both nodes have the same ID \ldots                                      } \> Section~\ref{info:HVACduct}  \\
 535 \> {\ct Two ducts with the same ID \ldots                                       } \> Section~\ref{info:HVAC}  \\
-536 \> {\ct Duct \ldots Node \ldots does not contain the duct in its list of ducts  } \> Section~\ref{info:HVACnode}  \\
+536 \> {\ct Duct \ldots Node \ldots does not contain the duct in its duct list.     } \> Section~\ref{info:HVACnode}  \\
 537 \> {\ct \ldots ductnode not located for duct                                    } \> Section~\ref{info:HVACduct}  \\
 538 \> {\ct Fan not located \ldots                                                  } \> Section~\ref{info:HVACduct}  \\
 539 \> {\ct Aircoil not located \ldots                                              } \> Section~\ref{info:HVACduct}  \\
@@ -13653,11 +13653,90 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 815 \> {\ct VENT \ldots\ L\_EDDY = 0 in Synthetic Eddy Method.                      } \> Section~\ref{info:synthetic_turbulence} \\
 816 \> {\ct VENT \ldots\ VEL\_RMS = 0 in Synthetic Eddy Method.                     } \> Section~\ref{info:synthetic_turbulence} \\
 817 \> {\ct VENT \ldots\ Synthetic Eddy Method not permitted with HVAC.             } \> Section~\ref{info:synthetic_turbulence} \\
+818 \> {\ct VENT \ldots\ requires on orientation index, IOR.                        } \> Section~\ref{info:VENT_Trouble} \\
+819 \> {\ct VENT \ldots\ is OPEN, MIRROR OR PERIODIC \ldots\ exterior boundary.     } \> Section~\ref{info:Special_VENTS} \\
+820 \> {\ct VENT \ldots\ has no solid backing or an IOR is needed.                  } \> Section~\ref{info:VENT_Basics} \\
+821 \> {\ct VENT \ldots\ cannot have normal component of UVW equal to 0.            } \> Section~\ref{info:HVAClouvers} \\
+822 \> {\ct VENT \ldots\ has the same ID as another VENT.                           } \> Section~\ref{info:HVAC} \\
+    \>                                                                                \>                          \\
+841 \> {\ct INIT \ldots\ has an unknown MULT\_ID \ldots\                            } \> Section~\ref{info:MULT} \\
+842 \> {\ct INIT \ldots\ cannot have both MASS and VOLUME\_FRACTION.                } \> Section~\ref{info:init_species} \\
+843 \> {\ct INIT \ldots\ requires a PART\_ID.                                       } \> Section~\ref{info:initial_droplets} \\
+844 \> {\ct INIT \ldots\ requires a SPEC\_ID.                                       } \> Section~\ref{info:init_species} \\
+845 \> {\ct INIT \ldots\ cannot find SPEC\_ID \ldots\                               } \> Section~\ref{info:init_species} \\
+846 \> {\ct INIT \ldots\ cannot have sum of specified mass fractions > 1.           } \> Section~\ref{info:init_species} \\
+847 \> {\ct INIT \ldots\ cannot use background species for MASS\_FRACTION.          } \> Section~\ref{info:init_species} \\
+848 \> {\ct INIT \ldots\ cannot use N\_PARTICLES and N\_PARTICLES\_PER\_CELL.       } \> Section~\ref{info:initial_droplets} \\
+849 \> {\ct INIT \ldots\ XB has no volume.                                          } \> Section~\ref{info:init_species} \\
+850 \> {\ct INIT \ldots\ cannot find PART\_ID \ldots\                               } \> Section~\ref{info:initial_droplets} \\
+851 \> {\ct INIT \ldots\ requires N\_PARTICLES=1 for a PATH\_RAMP.                  } \> Section~\ref{info:path_ramp} \\
+852 \> {\ct INIT \ldots\ PATH\_RAMP(N) not found.                                   } \> Section~\ref{info:path_ramp} \\
+853 \> {\ct INIT \ldots\ ORIENTATION\_RAMP(N) not found.                            } \> Section~\ref{info:path_ramp} \\
+854 \> {\ct INIT \ldots\ ORIENTATION\_RAMP components must all be defined.          } \> Section~\ref{info:path_ramp} \\
+855 \> {\ct INIT \ldots\ DEVC\_ID \ldots\ cannot use a SPATIAL\_STATISTIC.          } \> Section~\ref{info:initial_droplets} \\
+856 \> {\ct The INIT\_ID for DEVC \ldots\ cannot be found.                          } \> Section~\ref{info:PART_SURF} \\
+857 \> {\ct INIT \ldots\ PARTicle class \ldots\ requires a density.                 } \> Section~\ref{info:initial_droplets} \\
+858 \> {\ct INIT \ldots\ PARTicle class \ldots\ requires a \ldots\                  } \> Section~\ref{info:initial_droplets} \\
+    \>                                                                                \>                          \\
+871 \> {\ct LEAK\_AREA specified twice for ZONE \ldots\ and \ldots\                 } \> Section~\ref{info:Leaks} \\
+    \>                                                                                \>                          \\
+881 \> {\ct DEVC \ldots\ has QUANTITY\_RANGE(2) <= QUANTITY\_RANGE(1).              } \> Section~\ref{info:statistics} \\
+882 \> {\ct DEVC \ldots\ MOVE\_ID is not recognized.                                } \> Section~\ref{info:MOVE_ID} \\
+883 \> {\ct DEVC \ldots\ must have coordinates given in terms of XBP.               } \> Section~\ref{info:line_file} \\
+884 \> {\ct DEVC \ldots\ components of ORIENTATION are all zero.                    } \> Section~\ref{info:DEVC} \\
+885 \> {\ct DEVC \ldots\ must have coordinates, even if not a point quantity.       } \> Section~\ref{info:DEVC} \\
+886 \> {\ct DEVC \ldots\ must have either an output QUANTITY or PROP\_ID.           } \> Section~\ref{info:DEVC} \\
+887 \> {\ct DEVC \ldots\ must have an ORIENTATION.                                  } \> Section~\ref{info:heat_flux} \\
+888 \> {\ct DEVC \ldots\ TEMPORAL\_STATISTIC is not recognized.                     } \> Section~\ref{info:statistics} \\
+889 \> {\ct DEVC \ldots\ SPATIAL\_STATISTIC is not recognized.                      } \> Section~\ref{info:statistics} \\
+890 \> {\ct DEVC \ldots\ STATISTICS is not recognized.                              } \> Section~\ref{info:statistics} \\
+891 \> {\ct DEVC \ldots\ HVAC outputs specified with no HVAC inputs.                } \> Section~\ref{info:HVAC} \\
+892 \> {\ct DEVC \ldots\ or PROP \ldots\ must have a QUANTITY.                      } \> Section~\ref{info:HVAC} \\
+893 \> {\ct DEVC \ldots\ QUANTITY \ldots\ requires XB coordinates.                  } \> Section~\ref{info:statistics} \\
+894 \> {\ct DEVC \ldots\ uses invalid solid phase SPATIAL\_STATISTIC.               } \> Section~\ref{info:statistics} \\
+895 \> {\ct DEVC \ldots\ uses invalid gas phase SPATIAL\_STATISTIC.                 } \> Section~\ref{info:statistics} \\
+896 \> {\ct DEVC \ldots\ requires XB for SPATIAL\_STATISTIC.                        } \> Section~\ref{info:statistics} \\
+897 \> {\ct DEVC \ldots\ NODE 1 = NODE 2.                                           } \> Section~\ref{info:hvacoutputquantities} \\
+898 \> {\ct DEVC \ldots\ should not use XYZ or XB for an HVAC output QUANTITY.      } \> Section~\ref{info:hvacoutputquantities} \\
+    \>                                                                                \>                          \\
+901 \> {\ct CTRL \ldots\ must have a FUNCTION\_TYPE.                                } \> Section~\ref{info:basic_control} \\
+902 \> {\ct CTRL \ldots\ PID controller must be given a TARGET\_VALUE.              } \> Section~\ref{info:CONTROL_PID} \\
+903 \> {\ct CTRL \ldots\ FUNCTION\_TYPE not recognized.                             } \> Section~\ref{info:basic_control} \\
+904 \> {\ct CTRL \ldots\ FUNCTION\_TYPE=EXTERNAL but no EXTERNAL\_FILENAME given.   } \> Section~\ref{info:external_control} \\
+905 \> {\ct CTRL \ldots\ must have at least one input.                              } \> Section~\ref{info:CTRL} \\
+906 \> {\ct CTRL \ldots\ must have only one input.                                  } \> Section~\ref{info:CTRL} \\
+907 \> {\ct CTRL \ldots\ cannot use a CONSTANT INPUT\_ID.                           } \> Section~\ref{info:CTRL} \\
+908 \> {\ct CTRL \ldots\ must have at least two inputs.                             } \> Section~\ref{info:CTRL} \\
+909 \> {\ct CTRL \ldots\ must have only two inputs.                                 } \> Section~\ref{info:CTRL} \\
+910 \> {\ct CTRL \ldots\ cannot use a control function as an input to itself.       } \> Section~\ref{info:CTRL} \\
+911 \> {\ct CTRL \ldots\ can only specify one input as a constant value.            } \> Section~\ref{info:CONTROL_MATH} \\
+912 \> {\ct CTRL \ldots\ has no CONSTANT specified.                                 } \> Section~\ref{info:CONTROL_MATH} \\
+913 \> {\ct CTRL \ldots\ uses PERCENTILE and must have a DEVC as input.             } \> Section~\ref{info:PERCENTILE} \\
+914 \> {\ct CTRL \ldots\ is CUSTOM and must have a DEVC or math CTRL as input.      } \> Section~\ref{info:CUSTOM} \\
+915 \> {\ct CTRL \ldots\ input \ldots\ is the ID for both a DEVC and a CTRL.        } \> Section~\ref{info:CTRL} \\
+916 \> {\ct CTRL \ldots\ cannot locate INPUT\_ID \ldots\                            } \> Section~\ref{info:CTRL} \\
+    \>                                                                                \>                          \\
+931 \> {\ct DEVC \ldots\ is a smoke detector and must have a PROP\_ID.              } \> Section~\ref{info:smoke_detector} \\
+932 \> {\ct DEVC \ldots\ is a smoke detector and requires a smoke source.           } \> Section~\ref{info:smoke_detector} \\
+933 \> {\ct DEVC \ldots\ must have a PROP\_ID.                                      } \> Section~\ref{info:sprinklers} \\
+934 \> {\ct DEVC \ldots\ PROP \ldots\ needs an ACTIVATION\_TEMPERATURE.             } \> Section~\ref{info:sprinklers} \\
+935 \> {\ct DEVC \ldots\ is a THERMOCOUPLE and cannot use SPATIAL\_STATISTIC.       } \> Section~\ref{info:THERMOCOUPLE} \\
+936 \> {\ct DEVC \ldots\ must have a MATL\_ID.                                      } \> Section~\ref{info:DEPTH} \\
+937 \> {\ct DEVC \ldots\ is partially outside of the domain.                        } \> Section~\ref{info:layerheight} \\
+938 \> {\ct DEVC \ldots\ CTRL\_ID \ldots\ does not exist.                           } \> Section~\ref{info:RAMPDEVC} \\
+939 \> {\ct DEVC \ldots\ CTRL\_ID \ldots\ is a logic only function \ldots\          } \> Section~\ref{info:RAMPDEVC} \\
+940 \> {\ct DEVC \ldots\ must use QUANTITY='DENSITY' and a SPEC\_ID.                } \> Section~\ref{info:aspiration_detector} \\
+941 \> {\ct DEVC \ldots\ must be listed after all of its inputs.                    } \> Section~\ref{info:aspiration_detector} \\
+942 \> {\ct DEVC \ldots\ is a FED detector and requires an activity.                } \> Section~\ref{info:FED} \\
+943 \> {\ct DEVC \ldots\ is a PATCH and needs a DEVC\_ID to control it.             } \> Section~\ref{info:velocity_patch} \\
+    \>                                                                                \>                          \\
+951 \> {\ct PROF \ldots\ requires an orientation index, IOR.                        } \> Section~\ref{info:PROF} \\
+952 \> {\ct PROF \ldots\ is not valid.                                              } \> Section~\ref{info:PROF} \\
+    \>                                                                                \>                          \\
+961 \> {\ct CELL\_CENTERED not allowed with AGL\_SLICE.                             } \> Section~\ref{info:complex_terrain} \\
+962 \> {\ct BNDF \ldots\ CPUA\_Z, MPUA\_Z, and AMPUA\_Z require liquid droplets.    } \> Section~\ref{bucket_test_1} \\
 
 \end{tabbing}
-
-
-
 
 
 
