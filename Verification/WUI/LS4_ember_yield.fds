@@ -32,19 +32,19 @@
       PART_ID                     = 'brands'/
 &VENT XB=1,9,-4,4,0,0, SURF_ID='fuel'/
 
-&PART ID='brands',
-      DRAG_LAW='DISK',
-      SURF_ID='firebrand',
-      COLOR='ORANGE',
-      PROP_ID='disk image',
-      SAMPLING_FACTOR=1,
+&PART ID='brands'
+      DRAG_LAW='DISK'
+      SURF_ID='firebrand'
+      COLOR='ORANGE'
+      PROP_ID='disk image'
+      SAMPLING_FACTOR=1
       QUANTITIES='PARTICLE WEIGHTING FACTOR','PARTICLE TEMPERATURE'/
 
 &SURF ID                = 'firebrand'
       MATL_ID           = 'char'
       THICKNESS         = 0.0005
-      LENGTH            = 0.0056
-      WIDTH             = 0.0056
+      LENGTH            = 0.005
+      WIDTH             = 0.005
       GEOMETRY          = 'CARTESIAN'
       TMP_INNER         = 1000./
 
@@ -72,7 +72,5 @@
 &DEVC ID='Yield', CTRL_ID='div', QUANTITY='CONTROL VALUE', UNITS='kg/kg'/
 
 &DEVC ID='pwt', XB=0,10,-5.,5.,0,10, QUANTITY='PARTICLE WEIGHTING FACTOR', PART_ID='brands', SPATIAL_STATISTIC='MEAN'/
-
-&DUMP DT_DEVC=0.01/
 
 &TAIL /

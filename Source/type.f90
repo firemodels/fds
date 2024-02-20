@@ -501,6 +501,7 @@ TYPE SPECIES_TYPE
    REAL(EB) :: EPSK=-1._EB                        !< Lennard-Jones \f$ \epsilon/k \f$ (K)
    REAL(EB) :: SIG=-1._EB                         !< Lennard_Jones hard-sphere diameter (Angstroms)
    REAL(EB) :: PR_USER=-1._EB                     !< User-specified Prandtl number
+   REAL(EB) :: SC_T_USER=-1._EB                   !< User-specified Turbulent Schmidt number
    REAL(EB) :: FLD_LETHAL_DOSE=0._EB
    REAL(EB) :: FIC_CONCENTRATION=0._EB
    REAL(EB) :: SPECIFIC_HEAT_LIQUID=-1            !< Liquid specific heat (J/kg/K)
@@ -581,7 +582,8 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
    REAL(EB) :: K_USER=-1._EB                       !< User-specified thermal conductivity (W/m/K)
    REAL(EB) :: D_USER=-1._EB                       !< User-specified diffusion coefficient (m2/s)
-   REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandhl number
+   REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandtl number
+   REAL(EB) :: SC_T_USER=-1._EB                    !< Species-dependent Turbulent Schmidt number (potentially used for aerosol)
    REAL(EB) :: EPSK=-1._EB                         !< Lennard-Jones \f$ \epsilon/k \f$ (K)
    REAL(EB) :: SIG=-1._EB                          !< Lennard_Jones hard-sphere diameter (Angstroms)
    REAL(EB) :: FLD_LETHAL_DOSE=0._EB
@@ -858,8 +860,8 @@ TYPE SURFACE_TYPE
    REAL(EB) :: NUSSELT_C1=-1._EB                       !< Re multiplier term for user defined HTC correlation
    REAL(EB) :: NUSSELT_C2=-1._EB                       !< Re adjustment before Pr multiplication for user defined HTC correlation
    REAL(EB) :: NUSSELT_M=-1._EB                        !< Re exponent for user defined HTC correlation
-   REAL(EB) :: EMBER_POWER_MEAN=-1._EB
-   REAL(EB) :: EMBER_POWER_SIGMA=0.001_EB
+   REAL(EB) :: EMBER_IGNITION_POWER_MEAN=-1._EB
+   REAL(EB) :: EMBER_IGNITION_POWER_SIGMA=0.001_EB
    REAL(EB) :: EMBER_TRACKING_RATIO=100._EB            !< Ratio of 'real' embers to Lagrangian particles (-)
    REAL(EB) :: EMBER_YIELD=-1._EB                      !< Mass yield of embers from a burning surface (kg/kg)
    REAL(EB) :: M_DOT_G_PP_ACTUAL_FAC=1._EB             !< For HRRPUA, scales the solid mass loss if gas H_o_C /= solid H_o_C
