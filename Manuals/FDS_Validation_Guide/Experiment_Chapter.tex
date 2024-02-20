@@ -975,7 +975,7 @@ The combustion reaction is assumed to be propane using the simple chemistry sing
 Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
 The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
-The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_FRA_Materials}.
+The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_Materials}.
 Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
 
 Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used.
@@ -2560,6 +2560,64 @@ The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facil
 The data in the experimental repository for the helium plume is Favre averaged.  The ``helium'' was actually a mixture of 96.4 vol \% (0.7075 mass fraction) helium, 1.7 vol \% (0.1809 mass fraction) acetone, and 1.9 vol \% (0.1116 mass fraction) oxygen; this mixture is referred to as the ``plume fluid'' \cite{OHern:2005}.  The data for ``mass fraction'' in the experimental repository is for Favre averaged plume fluid mass fraction.  To account for any effect of differential diffusion, we separately transport helium, acetone, and oxygen in the simulations.  Then the plume fluid mass fraction is obtained using the conversion $Y_{\mathrm{plume\;fluid}} = Y_{\mathrm{acetone}}/0.1809$.
 
 Note that the velocity fields in the methane and hydrogen fire plumes were obtained directly from PIV and are therefore ensemble averaged \cite{Tieszen:2004,Tieszen:2002}.
+
+\section{Scaling Pyrolysis}
+\label{exp_Scaling Pyrolysis}
+
+FDS has a scaling-based pyrolysis model which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface.
+These cases include cone calorimeter experiments conducted at multiple heat transfer levels.
+The robustness of the approach is evaluated using cone calorimeter data for 166 materials available in public datasets.
+These materials include:
+\begin{enumerate}
+\item Fifteen materials from studies conducted by Jensen Hughes, Inc. (JH) located in Baltimore, MD, USA ~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+\item Eight materials from the U.S. Federal Aviation Administration (FAA) Polymers experiments ~\cite{Stoliarov:CF2009,Stoliarov:FM2012}.
+\item Two materials from the Aalto Wood experiments conducted at Aalto University in Finland ~\cite{Rinta-Paavola:2023}.
+\item Seventy-one materials from the material testing database provided by the Fire Safety Research Institute (FSRI) at the UL Research Institutes ~\cite{McKinnon:FSRI2023_Data}.
+\item Eight materials from the Forest Products Laboratory (FPL) of the U.S. Department of Agriculture database ~\cite{FPL:Fire_Database}.
+\item Sixty-one materials from the Research Insitutes of Sweden (RISE) database ~\cite{RISE:Fire_Database}.
+\end{enumerate}
+Table ~\ref{Scaling_Pyrolysis_Materials} summarizes the materials by source and composition category.
+The polymers category includes pure polymers, polymer blends, polymers with coating (e.g., scratch resistance), and polymers with non-fibrous additives.
+The wood material category includes natural wood species and wood-based products such as plywood, hardboard, and particleboard (with and without fire resistant treatment).
+The mixtures category includes polymers with fibrous additives, multi-layered materials, and assemblies.
+The other material category includes other natural and synthetic materials such as asphalt shingles, cardboard, rubbers, felts, and gypsum wallboards.
+Approximately half of the materials are polymers, with the remaining half split across the other three material categories.
+
+\begin{table}[!h]
+\caption[Summary of Materials]{Summary of Materials}
+\centering
+\begin{tabular}{|l|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+Dataset             & Mixtures    & Others      & Polymers    & Wood-Based  & Total       \\ \hline
+Aalto Woods         & 0           & 0           & 0           & 2           & 2           \\ \hline
+FAA Polymers        & 0           & 0           & 8           & 0           & 8           \\ \hline
+FPL Materials       & 0           & 0           & 0           & 8           & 8           \\ \hline
+FSRI Materials      & 0           & 26          & 30          & 15          & 71          \\ \hline
+JH Materials        & 5           & 1           & 4           & 5           & 15          \\ \hline
+RISE Materials      & 37          & 3           & 16          & 5           & 61          \\ \hline
+Total               & 42          & 30          & 58          & 35          & 165         \\ \hline
+\end{tabular}
+\label{Scaling_Pyrolysis_Materials}
+\end{table}
+
+
+\subsubsection{Modeling Notes}
+
+Each case is modeled using the solid phase only solver in FDS.
+An empirical model is used to acccount for the thermal exposure after ignition based on the estimated flame heat flux.
+The empirical model requires soot yield, $Y_{s}$, data.
+Materials which $Y_{s}$ was measured to be zero or less than zero were set to a minimum value of 0.001 g/g.
+Materials for which data was not available in the original studies used a $Y_{s}$ of 0.05 g/g.
+
+Note that the RISE and FPL databases did not provide ignition properties or information on specific material conditioning or modifications to test procedures.
+For these materials, 
+a thermal conductivity of 0.4 $\mathrm{W/(m\cdot K)}$,
+specific heat capacity of 1.0 $\mathrm{kJ/(kg\cdot K)}$,
+and an emissivity of unity was assumed.
+The ignition temperature of each material was calculated based on measured time to ignitions across all tests using either properties provided by the authors or these assumed properties.
+The ignition temperature is provided for reference; however, in the models the time to ignition in each case is fixed based on experimental data (i.e., the validation focuses on what happens after ignition).
+
+\FloatBarrier
 
 \section{SETCOM Wall Condensation Experiments}
 \label{SETCOM_Cond_Description}
