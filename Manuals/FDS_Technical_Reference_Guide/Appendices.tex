@@ -1920,6 +1920,104 @@ This term is added to the solid cell enthalpy for gases that are consumed ($\nu_
 
 
 
+\chapter{Scaling Based Pyrolysis}
+\label{spyro_appendix}
+
+This approach preserves the shape of the heat release rate with time (i.e., burning behavior) measured from cone calorimeter experiments but scales the magnitude and duration based on incident heat at the surface.  The model is able to scale a single reference curve to different thermal exposures and material thicknesses. An empirical estimation of the flame heat flux is used to calculate the total incident heat flux in a cone calorimeter for use in scaling. Improved agreement can be achieved by incorporating data from multiple cone calorimeter experiments at different thermal exposures and/or material thicknesses. The following subsections describe the technical basis of each of these modules.
+
+\section{Fixed Thickness Scaling Model}
+\label{spyro_appendix:fixed}
+
+The fixed thickness scaling based pyrolysis model is presented in~\cite{Hodges:IAFSS2023}. The net heat flux into the material is related to the pyrolysis rate through the effective heat of gasification according to the equation
+\be
+   \dot{q}_{net}''=\dot{m}_{f}''\Delta H_{g}
+   \label{Spyro1}
+\ee
+where $\dot{q}_{net}''$ is the net heat flux into the surface and $\Delta H_{g}$ is the heat of gasification. Similarly, the heat release rate per unit area of a material, $\dot{Q}''$, is related to the pyrolysis rate of the material through the effective heat of combustion, $\Delta H_{c}$, as
+\be
+   \dot{Q}''=\dot{m}_{f}''\Delta H_{c}
+   \label{Spyro2}
+\ee
+The ratio of Eq.~(\ref{Spyro1}) and Eq.~(\ref{Spyro2}) relate $\dot{q}_{net}''$ and $\dot{Q}''$ as
+\be
+   \frac{\dot{Q}''}{\dot{q}_{net}''}=\frac{\Delta H_{c}}{\Delta H_{g}}
+   \label{Spyro3}
+\ee
+Assuming $\Delta H_{g}$ and $\Delta H_{c}$ are invariant with $\dot{q}_{net}''$, Eq.~(\ref{Spyro3}) can be related to predict the change in magnitude of $\dot{Q}''$ due to changes in thermal exposure as
+\be
+   \dot{Q}_{1}'' = \frac{\dot{q}_{net,1}''}{\dot{q}_{net,2}''}\dot{Q}_{2}''
+   \label{Spyro4}
+\ee
+where the subscripts $1$ and $2$ indicate different thermal exposure levels. The acceleration or decceleration of the burning can be calculated by evaluating the difference in time required to release the same amount of energy at the two $\dot{Q}$ over a discrete time interval, $\Delta t$,
+\be
+   E_{\Delta t}''=\dot{q}_{net}''\frac{\Delta H_{c}}{\Delta H_{g}}\Delta t
+   \label{Spyro5}
+\ee
+where $E_{\Delta t}$ is the total energy released over $\Delta t$. Relating Eq.~(\ref{Spyro5}) at two thermal exposure levels yields
+\be
+   \Delta t_{1}=\frac{\dot{q}_{net,2}''}{\dot{q}_{net,1}''}\Delta t_{2}
+   \label{Spyro6}
+\ee
+Because $\dot{q}_{net}''$ is difficult to measure during burning, an approximate reference heat flux, $\dot{q}''_{ref}$, is introduced as
+\be
+   \dot{q}''_{ref} = \dot{q}''_{cone} + \dot{q}''_{flame}
+   \label{Spyro7}
+\ee
+where $\dot{q}''_{cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing and $\dot{q}''_{flame}$ is the heat feedback from the flame to the surface. The implementation in FDS uses the sum of the incident radiation and the net convective heat flux as $\dot{q}''_{ref}$ in the calculation at each time step.
+
+\section{Adaptation to Multiple Thicknesses}
+
+Detailed pyrolysis models are typically based on an Arrhenius kinetics formulation~\cite{Stoliarov:IAFSS2023}:
+\be
+r=A\mathrm{e}^{-E/(RT_{s})}\zeta_{1}\zeta_{2}...\zeta_{N}
+\ee
+where $r$ is the reaction rate, $A$ and $E$ are the Arrhenius pre-exponential factor and activation energy, $T_{s}$ is the solid temperature, $R$ is the molar gas constant, and $\zeta_{j}$ is the impact of the $j$-th reactant species concentration on the burning. There are two primary impacts of material thickness on the burning behavior of a material. The largest impact is to the burning duration due to differences in the combustible mass. The second impact is the transition between a thermally thin and thermally thick material. The model for scaling to different material thicknesses takes inspiration from this formulation; however, the model assumes that the two impacts can be represented by a non-dimensional scaling of a measured burning profile. 
+
+The non-dimensional temperature profile within a solid material scales with the  Fourier, $\mathrm{Fo}$, and Biot, $\mathrm{Bi}$, numbers. $\mathrm{Fo}$ is the ratio of the heat conduction rate to the rate of thermal energy storage in a solid, and can be thought of as a dimensionless time~\cite{Incropera:1}. It is defined as
+\be
+\mathrm{Fo}=\frac{\alpha}{\Delta^{2}}t=\frac{k}{\rho c_{p}\Delta^{2}}t
+\label{fo_eq}
+\ee
+where $\alpha$ is the thermal diffusivity, $\rho$ is the density, $c_{p}$ is the specific heat capacity, $k$ is the thermal conductivity, $\Delta$ is the the thickness, and $t$ is time. $\mathrm{Bi}$ is the ratio of the internal thermal resistance of a solid to the external resistance of the surface boundary layer~\cite{Incropera:1}:
+\be
+\mathrm{Bi}=\frac{h}{k/\Delta}
+\ee
+where $h$ is the heat transfer coefficient. The traditional formulation of $\mathrm{Bi}$ assumes that the external exposure of the solid is related primarily to surface convection and thus uses the convection heat transfer coefficient, $h_{c}$, for $h$. However, this assumption is not valid in the case of burning solid fuels where external radiation (such as the applied surface heat flux in a cone calorimeter experiment) and flame radiation from the combustion of pyrolyzate above the surface drive the heat transfer to the surface. This is accounted for with an alternative Biot number, $\mathrm{Bi^*}$, which combines the effect of surface convection and radiation:
+\be
+\mathrm{Bi^{*}}=\frac{h_{c}+h_{r}}{k/\Delta}
+\label{bi_eq}
+\ee
+where $h$ has been split into two components for convection, $h_{c}$, and radiation, $h_{r}$. The radiation heat transfer coefficient is calculated based on the linearized formulation~\cite{Incropera:1}:
+\be
+h_{r}=\varepsilon\sigma\left(T_{r}+T_s\right)\left(T_{r}^{2}+T_s^{2}\right)
+\ee
+where $\varepsilon$ is the surface emissivity, $\sigma$ is the Stefan-Boltzmann constant, $T_{r}$ is the radiative temperature, and $T_s$ is the surface temperature. The radiative temperature is an effective temperature representative of the energy absorbed at the surface assuming a view factor of 1:
+\be
+T_{r}=\left[\frac{\dot{q}_{r}''}{\varepsilon\sigma}\right]^{1/4}
+\label{eq:tr}
+\ee
+where $\dot{q}_{r}''$ is the incident radiation to the surface. 
+
+As discussed in Section~\ref{spyro_appendix:fixed}, $\Delta H_{g}$ is assumed to be constant in the prior approach. However, a time-varying effective $\Delta H_{g}$ can be calculated based on Eq.~(\ref{Spyro3}) using the time-varying measurement of $\dot{Q}''$ and estimating the time-varying $\dot{q}''_{flame}$. It is assumed in this model that the variability in burning intensity and duration observed in experiments can be related to the impact of the material thickness and thermal exposure on these non-dimensional groups, $\Delta H_{g}=f\left(\mathrm{Bi}^{*},\mathrm{Fo}\right)$.  $\Delta H_{g}$ was found to collapse at the non-dimensional time-scale $\mathrm{FoBi}^{*}$. A scaling relationship for $\mathrm{FoBi}^{*}$ can be established by equating this non-dimensional time across two exposure levels,
+\be
+\mathrm{FoBi}^{*}=\frac{h_{1}t_{1}}{\rho_{1}c_{p,1}\Delta_{1}}=\frac{h_{2}t_{2}}{\rho_{2}c_{p,2}\Delta_{2}}
+\label{eq:scaling_fobi}
+\ee
+where the subscripts indicate different exposure levels. Equation~(\ref{eq:scaling_fobi}) reveals that non-dimensional time scales with $\rho$, $c_{p}$, $\Delta$, and $h$.
+
+A simplified representation for the scaling of non-dimensional time can be obtained by assuming that changes in material properties (i.e., $k$, $\rho$, $c_{p}$) are related to non-dimensional time. Under this assumption, Eq.~(\ref{eq:scaling_fobi}) reduces to:
+\be
+t_{2} = \frac{\Delta_{2}}{\Delta_{1}}\frac{h_{1}}{h_{2}}t_{1}
+\label{eq:time_scaling}
+\ee
+In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:time_scaling}) is consistent with Eq.~(\ref{Spyro6}) across a discrete time interval. Thus, the ratio of $h$ scales similarly to the ratio of $\dot{q}''$, yielding:
+\be
+\Delta t = \frac{\Delta}{\Delta_{\mathrm{ref}}}\frac{\bar{\dot{q}}''_{\mathrm{ref}}}{\dot{q}''}\Delta t_{\mathrm{ref}}
+\label{eq:time_scaling2}
+\ee
 
 
+\section{Flame Heat Flux}
+
+To be added by Jason
 
