@@ -2627,7 +2627,7 @@ An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
 
-If either {\ct HRRPUA} or {\ct MLRPUA} are specified, but no {\ct SPEC\_ID} is given, then FDS will use the {\ct FUEL} for the first {\ct REAC} input. If a single {\ct SPEC\_ID} is given, then FDS will use that as the fuel. If multiple {\ct SPEC\_ID} along with {\ct MASS\_FRACTION} are given, then FDS will assume that the {\ct HRRPUA} or {\ct MLRPUA} refers to only species corresponding to {\ct FUEL} inputs on a {\ct REAC} line. For {\ct MLRPUA}, FDS will just multiply the {\ct MLRPUA} by the {\ct MASS\_FRACTION} of the fuel species to obtain the fuel species mass flux. If there are any non-fuel species, then the mass flux of those species will be set tp preserve their specified {\ct MASS\_FRACTION}. For {\ct HRRPUA}, FDS will compute the average heat of combustion for all the fuel species. This average heat of combustion is used to define the mass flux of fuel, i.e., the effective {\ct MLRPUA}. Non-fuel species are then treated as with {\ct MLRPUA}.
+If either {\ct HRRPUA} or {\ct MLRPUA} are specified, but no {\ct SPEC\_ID} is given, then FDS will use the {\ct FUEL} for the first {\ct REAC} input. If a single {\ct SPEC\_ID} is given, then FDS will use that as the fuel. This can only be done if the species is used as the {\ct FUEL} in only one {\ct REAC} input; otherwise use {\ct SPEC\_ID} and {\ct MASS\_FLUX}. If multiple {\ct SPEC\_ID} along with {\ct MASS\_FRACTION} are given, then FDS will assume that the {\ct HRRPUA} or {\ct MLRPUA} refers to only species corresponding to {\ct FUEL} inputs on a {\ct REAC} line. For {\ct MLRPUA}, FDS will just multiply the {\ct MLRPUA} by the {\ct MASS\_FRACTION} of the fuel species to obtain the fuel species mass flux. If there are any non-fuel species, then the mass flux of those species will be set to preserve their specified {\ct MASS\_FRACTION}. For {\ct HRRPUA}, FDS will compute the average heat of combustion for all the fuel species. This average heat of combustion is used to define the mass flux of the fuel species, i.e., the effective {\ct MLRPUA}. Non-fuel species are then treated as with {\ct MLRPUA}.
 
 In the example below, six fuel species are used for four different surfaces with {\ct HRRPUA}. Four of the fuel species are predefined with no {\ct HEAT\_OF\_COMBUSTION} on their associated {\ct REAC} inputs; their heats of combustion can be determined using their heats of formation. One species has a {\ct HEAT\_OF\_COMBUSTION} on its {\ct REAC} input. The sixth fuel species is user defined and used in a {\ct REAC} with no {\ct HEAT\_OF\_COMBUSTION}. Its heat of combustion can be determined using {\ct EPUMO2}. surface {\ct S1} has {\ct HRRPUA} but no {\ct SPEC\_ID}; therefore, it will use the {\ct FUEL} species for the first {\ct REAC} input ({\ct METHANE}) for the fuel. The fuel mass flux for {\ct S1} will be given by the {\ct HRRPUA} divided by the {\ct METHANE} heat of combustion. Surface {\ct S2} specifies that the fuel species is {\ct MYFUEL}. Surface {\ct S3} will have a total mass flux computed using the {\ct MASS\_FLUX} weighted average of the heats of combustion for {\ct PROPANE} and {\ct ETHANE}. Surface {\ct S4} will use species {\ct MYFUEL2} whose heat of combustion will be the weighted average of the {\ct TOLUENE} and {\ct HYDROGEN} heats of combustion using the {\ct SPEC} input's {\ct MASS\_FRACTION}. Results are shown in Fig.~\ref{fig:mulitple_reac_hrrpua}.
 
@@ -4676,7 +4676,7 @@ In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} o
 
 When simple chemistry is being used, FDS will automatically create three lumped species: {\ct AIR}, {\ct FUEL}, and {\ct PRODUCTS}.  The actual name of the fuel species will be the name given on the {\ct REAC} line (for example {\ct MY FUEL} in the last sample above). FDS creates these lumped species in the same manner as you would in an input file.  FDS first defines the primitive species and then defines the lumped species. In essence FDS internally creates input lines like those shown in Example 2 of Sec.~\ref{info:lumped}. This means when doing simple chemistry, that even though you did not explicitly define oxygen in the input file, you can request an output for oxygen since it was implicitly defined by FDS.
 
-Multiple simple chemistry reactions can be defined. Each new reaction will require that FDS track a new fuel and product species.
+Multiple simple chemistry reactions can be defined. Each new reaction will require that FDS track a new fuel and product species mixture.
 
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
@@ -4890,7 +4890,7 @@ In this case, methane and air will not combust unless the grid cell temperature 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
 
-The ``simple chemistry'' parameters described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
+The ``simple chemistry'' parameters described above can only be used when the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
 the stoichiometry of the reaction.
 
@@ -5120,7 +5120,7 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
       SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
       NU=-1,-1.02121,1 /
 \end{lstlisting}
-In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
+In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line along with {\ct SPEC\_ID} if there are multiple {\ct REAC} inputs and {\ct MASS\_FRACTION} if the {\ct HRRPUA} is a mixture of fuels. Multiple fuels can also be used by specifying the mass flux of each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
 \begin{lstlisting}
 &VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
 \end{lstlisting}
