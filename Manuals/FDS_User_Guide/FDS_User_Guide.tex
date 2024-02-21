@@ -2208,7 +2208,7 @@ It may be useful to visualize which convective heat transfer correlation is bein
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 To specify the convective heat transfer coefficient, set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)} with optional time dependent ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK} with optional time dependent ramp ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK} with optional time dependent ramp ramp using {\ct RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 \label{info:net_and_convective_heat_flux}
@@ -2624,7 +2624,7 @@ Solids and liquid fuels can be modeled by specifying their relevant properties v
 applies 500~kW/m$^2$ to any surface with the attribute {\ct SURF\_ID='FIRE'}. See the discussion of time-dependent quantities in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
-specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
+specifies the Mass Loss Rate of fuel gas Per Unit Area in \unit{kg/(m^2.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
 
 If either {\ct HRRPUA} or {\ct MLRPUA} are specified, but no {\ct SPEC\_ID} is given, then FDS will use the {\ct FUEL} for the first {\ct REAC} input. If a single {\ct SPEC\_ID} is given, then FDS will use that as the fuel. This can only be done if the species is used as the {\ct FUEL} in only one {\ct REAC} input; otherwise use {\ct SPEC\_ID} and {\ct MASS\_FLUX}. If multiple {\ct SPEC\_ID} along with {\ct MASS\_FRACTION} are given, then FDS will assume that the {\ct HRRPUA} or {\ct MLRPUA} refers to only species corresponding to {\ct FUEL} inputs on a {\ct REAC} line. For {\ct MLRPUA}, FDS will just multiply the {\ct MLRPUA} by the {\ct MASS\_FRACTION} of the fuel species to obtain the fuel species mass flux. If there are any non-fuel species, then the mass flux of those species will be set to preserve their specified {\ct MASS\_FRACTION}. For {\ct HRRPUA}, FDS will compute the average heat of combustion for all the fuel species. This average heat of combustion is used to define the mass flux of the fuel species, i.e., the effective {\ct MLRPUA}. Non-fuel species are then treated as with {\ct MLRPUA}.
@@ -3384,7 +3384,7 @@ Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the spec
 
 \label{info:MASS_FLUX_TOTAL}
 
-Most often, a simple supply or exhaust vent is specified by setting either a normal velocity or volume flux at a solid surface. However, it is also possible to specify the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density. Note that {\ct MASS\_FLUX\_TOTAL} should only be used for an outflow boundary condition; for inflow use {\ct MASS\_FLUX} which is discussed in Sec.~\ref{info:MASS_FLUX}.
+Most often, a simple supply or exhaust vent is specified by setting either a normal velocity or volume flux at a solid surface. However, it is also possible to specify the total mass flow rate per unit area (\unit{kg/(m^2.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density. Note that {\ct MASS\_FLUX\_TOTAL} should only be used for an outflow boundary condition; for inflow use {\ct MASS\_FLUX} which is discussed in Sec.~\ref{info:MASS_FLUX}.
 
 
 \subsection{Heaters}
@@ -3435,9 +3435,9 @@ It is sometimes desirable to specify a Neumann boundary condition (specified gra
 \subsection{Species and Species Mass Flux Boundary Conditions}
 \label{info:MASS_FLUX}
 
-There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if that is all that is needed. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLOW}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLOW}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} and typically {\ct MASS\_FRACTION(:)} should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
+There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if that is all that is needed. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLOW}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLOW}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} and typically {\ct MASS\_FRACTION(:)} should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \unit{kg/(m^2.s)}. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
 
-Here is an example of how to specify a surface that generates methane at a rate of 0.025~\si{kg/(m$^2$.s)}:
+Here is an example of how to specify a surface that generates methane at a rate of 0.025~\unit{kg/(m^2.s)}:
 \begin{lstlisting}
 &SPEC ID='METHANE' /
 &SURF ID='METHANE BURNER', SPEC_ID(1)='METHANE', MASS_FLUX(1)=0.025 /
@@ -4219,7 +4219,7 @@ where $f(t)$ is the result of evaluating the {\ct RAMP\_T} at time $t$, $T_0$ is
 &SURF ID='...', MASS_FLUX(1:2)=0.1,0.3, SPEC_ID(1:2)='ARGON','NITROGEN',
       TAU_MF(1:2)=5.,10. /
 \end{lstlisting}
-indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively.
+indicates that argon and nitrogen are to be injected at rates of 0.1~\unit{kg/(m^2.s)} and 0.3~\unit{kg/(m^2.s)} over time periods of approximately 5~s and 10~s, respectively.
 
 When a time-base {\ct RAMP} is evaluated, the time used for the {\ct RAMP} is the time since the item (e.g., {\ct VENT}, {\ct OBST}, {\ct DEVC}) using the {\ct RAMP} became active. This means {\ct RAMP}s use the actual time if the activation time of the item using the {\ct RAMP} is the same as {\ct T\_BEGIN} (see ~\ref{info:TIME_Basics}). Otherwise, they are evaluated using the time from when the {\ct RAMP} activates. Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example, if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, then {\ct T\_BEGIN} should be set slightly less than 10~s.
 
@@ -4367,7 +4367,7 @@ Each {\ct SPEC} line should include at the very least the name of the species vi
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=T /
 \end{lstlisting}
-The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling_fig}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Appendix~\ref{info:predefined_species}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=T} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
+The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\unit{kg/(m^2.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling_fig}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Appendix~\ref{info:predefined_species}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=T} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 
 \begin{figure}[ht]
 \begin{center}
@@ -4429,7 +4429,19 @@ Conductivity can be specified in one of three ways: it can be defined as a const
 
 \subsubsection{Diffusivity}
 
-Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivty can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivity can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+
+Note that the turbulent diffusivity, $D_{\rm t} = \mu_{\rm t}/{\rm Sc}_{\rm t}$, is controlled by the turbulent Schmidt number, ${\rm Sc}_{\rm t}$, which is 0.5 by default and presumed the same for all tracked species.  In some special cases, usually when the species is an aerosol such as soot, it may be valid to alter the turbulent Schmidt number independently from other species.  To accommodate this, you may set the turbulent Schmidt number on the {\ct SPEC} line for a primitive species (one with no subspecies).  For example, the following lines set up tracking for primitive species with ethylene as the primary fuel allowing differential turbulent transport of soot (note that soot particles transport very slowly compared to gas species \cite{Bisetti:2008,Fernandez:2018}).
+
+\begin{lstlisting}
+&SPEC ID='NITROGEN',        MASS_FRACTION_0=0.762470, BACKGROUND=T/
+&SPEC ID='OXYGEN',          MASS_FRACTION_0=0.230997 /
+&SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0=0.000591 /
+&SPEC ID='WATER VAPOR',     MASS_FRACTION_0=0.005941 /
+&SPEC ID='CARBON MONOXIDE', MASS_FRACTION_0=0.000000 /
+&SPEC ID='SOOT',            MASS_FRACTION_0=0.000000, TURBULENT_SCHMIDT_NUMBER=60. /
+&SPEC ID='ETHYLENE',        MASS_FRACTION_0=0.000000 /
+\end{lstlisting}
 
 \subsubsection{Enthalpy}
 \label{info:Enthalpy}
@@ -5908,7 +5920,7 @@ To demonstrate the basic syntax for solid particles, the following input lines c
 \end{lstlisting}
 The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct F} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that just tells Smokeview that the particles are to be drawn as spheres of diameter 0.01~m. See Sec.~\ref{info:SMOKEVIEW_PART} for details and options. The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Sec.~\ref{info:initial_droplets} for details.
 
-If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value(s) of {\ct DENSITY} of the referenced {\ct MATL} line(s). If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (\si{kg/(m$^2$.s)}).
+If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value(s) of {\ct DENSITY} of the referenced {\ct MATL} line(s). If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (\unit{kg/(m^2.s)}).
 
 The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}.
 By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back (note this means you should set {\ct BACKING='INSULATED'} on the {\ct SURF} line). You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
@@ -6156,7 +6168,7 @@ If the particles have mass and are introduced from a solid surface, specify {\ct
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. By default, the particle initial velocity is the surface normal velocity. This means that the surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning. If not then either specify a non-zero and negative {\ct VEL}, or if you do not wish to also inject gas you can specify {\ct VEL\_PART}. {\ct VEL\_PART} has the same sign convention as {\ct VEL}. If {\ct VEL\_PART} is specified, it will override the gas velocity for the surface and inject the particle at {\ct VEL\_PART}. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
+creates an obstruction that ejects particles out of its sides at a rate of 0.1~\unit{kg/(m^2.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. By default, the particle initial velocity is the surface normal velocity. This means that the surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning. If not then either specify a non-zero and negative {\ct VEL}, or if you do not wish to also inject gas you can specify {\ct VEL\_PART}. {\ct VEL\_PART} has the same sign convention as {\ct VEL}. If {\ct VEL\_PART} is specified, it will override the gas velocity for the surface and inject the particle at {\ct VEL\_PART}. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6307,7 +6319,7 @@ The {\ct ORIENTATION} for a particle placed with an {\ct INIT} line can be contr
 &RAMP ID='O3',T=10,F= 0/
 \end{lstlisting}
 
-Note that the {\ct PART} input must contain {\ct ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\si{m$^3$} box with the +x wall emitting a radiative flux of 10~\si{kW/m$^2$}, and the remaining walls emitting 1~\si{kW/m$^2$}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
+Note that the {\ct PART} input must contain {\ct ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\unit{m^3} box with the +x wall emitting a radiative flux of 10~\unit{kW/m^2}, and the remaining walls emitting 1~\unit{kW/m^2}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
 
 \begin{figure}[ht]
       \centering
@@ -6372,7 +6384,7 @@ Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit area when 
 \be
 k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
-The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The simple example case {\ct Sprinklers\_and\_Sprays/e\_coefficient.fds} demonstrates the use of this parameter.  A water nozzle is placed over a 0.6~m by 0.6~m gas burner defined with the {\ct SURF} line shown below.  The nozzle discharges 0.1~L of water in 0.1 s, 10~s after ignition of the fire. The water's mass per unit area is $0.1/0.36 \approx 0.278$~kg/m$^2$.  Figure~\ref{e_coef_fig} shows the heat release rate of the fire, decreasing from 36~kW to 0~kW in approximately 20~s. There are two cases considered---one where the burner and rim are constructed of conventional {\ct OBST}s and one where the burner is formed using immersed boundary {\ct GEOM}s.
+The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \unit{m^2/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The simple example case {\ct Sprinklers\_and\_Sprays/e\_coefficient.fds} demonstrates the use of this parameter.  A water nozzle is placed over a 0.6~m by 0.6~m gas burner defined with the {\ct SURF} line shown below.  The nozzle discharges 0.1~L of water in 0.1 s, 10~s after ignition of the fire. The water's mass per unit area is $0.1/0.36 \approx 0.278$~kg/m$^2$.  Figure~\ref{e_coef_fig} shows the heat release rate of the fire, decreasing from 36~kW to 0~kW in approximately 20~s. There are two cases considered---one where the burner and rim are constructed of conventional {\ct OBST}s and one where the burner is formed using immersed boundary {\ct GEOM}s.
 \begin{lstlisting}
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=1. /
 \end{lstlisting}
@@ -7481,14 +7493,14 @@ In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited dir
 \subsection{Ember Generation From Surfaces}
 \label{info:ember_generation_surf}
 
-It is possible to make a burning surface create Lagrangian particles to represent embers by specifying an {\ct EMBER\_YIELD} (kg/kg) on the {\ct SURF} line. As this yield requires a burning surface it was developed to be used with {\ct LEVEL\_SET\_MODE=4}, however, it can also be applied to the Boundary Fuel Model. A {\ct PART\_ID} also needs to be specified to provide the properties of the generated embers. Currently, the ember yield is associated with the mass available to burn in the gas phase and does not account for char yield. For example, a fuel load of 1~kg/m$^2$ with a char yield of 0.2 and an ember yield of 0.05 would produce 0.2~kg/m$^2$ of char, 0.04~kg/m$^2$ of embers, and 0.76~kg/m$^2$ of fuel vapor.  
+It is possible to make a burning surface create Lagrangian particles to represent embers by specifying an {\ct EMBER\_YIELD} (kg/kg) on the {\ct SURF} line. As this yield requires a burning surface it was developed to be used with {\ct LEVEL\_SET\_MODE=4}, however, it can also be applied to the Boundary Fuel Model. A {\ct PART\_ID} also needs to be specified to provide the properties of the generated embers. Currently, the ember yield is associated with the mass available to burn in the gas phase and does not account for char yield. For example, a fuel load of 1~kg/m$^2$ with a char yield of 0.2 and an ember yield of 0.05 would produce 0.2~kg/m$^2$ of char, 0.04~kg/m$^2$ of embers, and 0.76~kg/m$^2$ of fuel vapor.
 
-In many cases, it is not necessary or even practical to track every single ember and a single Lagrangian particle can be used to represent the mass of many embers. This can be accomplished by setting {\ct EMBER\_TRACKING\_RATIO} on the {\ct SURF} line. If not specified, the default value is 100. You can also specify an {\ct EMBER\_GENERATION\_HEIGHT} (m) to dictate the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface. Finally, it is recommended to set {\ct VEL\_PART=0.0} on the {\ct SURF} line when modeling ember generation so that particles start from rest and are naturally lofted by the surrounding flow. 
+In many cases, it is not necessary or even practical to track every single ember and a single Lagrangian particle can be used to represent the mass of many embers. This can be accomplished by setting {\ct EMBER\_TRACKING\_RATIO} on the {\ct SURF} line. If not specified, the default value is 100. You can also specify an {\ct EMBER\_GENERATION\_HEIGHT} (m) to dictate the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface. Finally, it is recommended to set {\ct VEL\_PART=0.0} on the {\ct SURF} line when modeling ember generation so that particles start from rest and are naturally lofted by the surrounding flow.
 
 \subsection{Ember Ignition}
 \label{info:Ember_Ignition}
 
-When running a Level Set case, if an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_IGNITION\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_IGNITION\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_IGNITION\_POWER\_SIGMA}, whose default value is 0.001~kW. The best functional form for ignition probability, and ember ignition itself, is an ongoing topic of research. Therefore, it may be useful to treat this as more of a binary threshold (i.e. a use a small standard deviation). Further, a Lagrangian particle may represent more than one ember. Therefore, the particle weighting factor is used to convert the probability of ignition from a single ember to the probability of at least one ignition from the total number of embers represented. The occurance of ignition will be tested for each time step that a particle is lying on the ground. If ignition occurs, the particle will be removed from the simulation.  
+When running a Level Set case, if an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter {\ct EMBER\_IGNITION\_POWER\_MEAN} on the {\ct SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The {\ct EMBER\_IGNITION\_POWER\_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, {\ct EMBER\_IGNITION\_POWER\_SIGMA}, whose default value is 0.001~kW. The best functional form for ignition probability, and ember ignition itself, is an ongoing topic of research. Therefore, it may be useful to treat this as more of a binary threshold (i.e. a use a small standard deviation). Further, a Lagrangian particle may represent more than one ember. Therefore, the particle weighting factor is used to convert the probability of ignition from a single ember to the probability of at least one ignition from the total number of embers represented. The occurance of ignition will be tested for each time step that a particle is lying on the ground. If ignition occurs, the particle will be removed from the simulation.
 
 
 \subsection{Wildfire Spread over Realistic Terrain using QGIS}
@@ -8666,7 +8678,7 @@ In some cases with extremely fast particles, however, the stability of the overa
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \unit{W/m^2}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
 
 
 
@@ -9341,7 +9353,7 @@ To record the material component's density with time, use the output quantity {\
 \end{lstlisting}
 This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
 
-To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\si{kJ/m$^3$}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
+To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
 
 Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
 
@@ -11014,9 +11026,9 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$         & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m                 & D,I,P,S      \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                   & S,D          \\ \hline
-{\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
-{\ct MASS FLUX Y}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
-{\ct MASS FLUX Z}$^1$                           & Section~\ref{info:mass_flow}                      & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                      & \unit{kg/(m^2.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Y}$^1$                           & Section~\ref{info:mass_flow}                      & \unit{kg/(m^2.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Z}$^1$                           & Section~\ref{info:mass_flow}                      & \unit{kg/(m^2.s)} & D,I,P,S      \\ \hline
 {\ct MASS FRACTION}$^1$                         & $Y_\alpha$                                        & kg/kg             & D,I,P,S      \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s               & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time, $\tau_{\rm mix}$          & s                 & D,I,P,S      \\ \hline
@@ -11102,7 +11114,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct AMPUA}$^2$                                 & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct AMPUA\_Z}$^1$                              & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
-{\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
+{\ct BURNING RATE}                              & Mass loss rate of fuel                        & \unit{kg/(m^2.s)}  & B,D          \\ \hline
 {\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX GAUGE}                & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
@@ -11122,8 +11134,8 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$           & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D,Pr         \\ \hline
 {\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D,Pr         \\ \hline
-{\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
-{\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)}  & B,D          \\ \hline
+{\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \unit{kg/(m^2.s)}  & B,D          \\ \hline
+{\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \unit{kg/(m^2.s)}  & B,D          \\ \hline
 {\ct MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct MPUA\_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s                & B,D          \\ \hline
@@ -11253,9 +11265,9 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 {\ct PARTICLE DRAG FORCE X}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
 {\ct PARTICLE DRAG FORCE Y}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
 {\ct PARTICLE DRAG FORCE Z}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
-{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
-{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
-{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{bucket_test_4}                       & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
 {\ct PARTICLE HEAT TRANSFER COEFFICIENT}$^2$    & Section~\ref{particle_colors}                     & W/m$^2$/K         & PA          \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{particle_colors}                     & kg                & PA           \\ \hline
 {\ct PARTICLE PHASE}                            & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
@@ -12852,6 +12864,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}                & Real              & Section~\ref{gas_species_props}         & \si{kJ/(kg.K)}    &               \\ \hline
 {\ct SPECIFIC\_HEAT\_LIQUID}        & Real              & Section~\ref{thermal_part_props}        & \si{kJ/(kg.K)}    &               \\ \hline
 {\ct THERMOPHORETIC\_DIAMETER}      & Real              & Section~\ref{info:deposition}           & m                 &               \\ \hline
+{\ct TURBULENT\_SCHMIDT\_NUMBER}    & Real              & Section~\ref{gas_species_props}         &                   & 0.5           \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE}     & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct VISCOSITY}                     & Real              & Section~\ref{gas_species_props}         & \si{kg/(m.s)}     &               \\ \hline
 {\ct VISCOSITY\_LIQUID}             & Real              & Section~\ref{thermal_part_props}        & \si{kg/(m.s)}     &               \\ \hline
