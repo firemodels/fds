@@ -3140,6 +3140,7 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away7}
 \label{box_burn_away8}
 \label{box_burn_away9}
+\label{box_burn_away10}
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
@@ -3163,15 +3164,26 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 \ee
 
 
-\paragraph{Case 1} ({\ct box\_burn\_away1}) The solid material undergoes a single-step pyrolysis reaction at 200~$^\circ$C that converts it all to fuel gas. Figure~\ref{box_burn_away} displays the evolution of the fuel gas.
-
-\paragraph{Case 1, 2D} ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}) Case~1 is repeated in two dimensions. In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation. The results are shown in Fig.~\ref{box_burn_away_2D_fig}.
+\paragraph{Case 1} ({\ct box\_burn\_away1}) The solid material undergoes a single-step pyrolysis reaction at 200~$^\circ$C that converts it all to fuel gas. Figure~\ref{box_burn_away_1-4} displays the evolution of the fuel gas.
 
 \paragraph{Case 2} ({\ct box\_burn\_away2}) This case is similar to Case~1, except that the solid material vaporizes to form an inert {\ct 'GAS'} with a molecular weight of 50~g/mol.
 
 \paragraph{Case 3} ({\ct box\_burn\_away3}) The pyrolysis rate is specified implicitly via {\ct HRRPUA}, even though the fuel gas does not burn.
 
-\paragraph{Case 4} ({\ct box\_burn\_away4}) This case is similar to Case~3, but the heat of combustion for the solid material is set to a different value from that of the primary gas phase fuel, ethylene. The solid material has a specified heat of combustion of 30,000~kJ/kg while ethylene has a specified value of 40,000~kJ/kg. Figure~\ref{box_burn_away} shows that the amount of ethylene generated is $0.75 \times 1.28 \; \hbox{kg}=0.96 \; \hbox{kg}$. Because there is only one gas phase reaction, the amount of ethylene gas produced generates an equivalent amount of heat as the solid material would with its lower heat of combustion.
+\paragraph{Case 4} ({\ct box\_burn\_away4}) This case is similar to Case~3, but the heat of combustion for the solid material is set to a different value from that of the primary gas phase fuel, ethylene. The solid material has a specified heat of combustion of 30,000~kJ/kg while ethylene has a specified value of 40,000~kJ/kg. Figure~\ref{box_burn_away_1-4} shows that the amount of ethylene generated is $0.75 \times 1.28 \; \hbox{kg}=0.96 \; \hbox{kg}$. Because there is only one gas phase reaction, the amount of ethylene gas produced generates an equivalent amount of heat as the solid material would with its lower heat of combustion.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away1} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away2} \\
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away3} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away4}
+\end{tabular*}
+\caption[Results of the {\ct box\_burn\_away} test cases 1-4]{Output of {\ct box\_burn\_away} test cases 1-4.}
+\label{box_burn_away_1-4}
+\end{figure}
+
+\FloatBarrier
 
 \paragraph{Case 5} ({\ct box\_burn\_away5}) This case is a repeat of Case~1, but with {\ct N\_SIMPLE\_CHEMSITRY\_REACTIONS} set to 2. The results should match Case~1 because the creation of fuel gas should be based upon the total heat of combustion for {\ct 'METHANE'} and not the heat of combustion for the first reaction.
 
@@ -3181,36 +3193,41 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 
 \paragraph{Case 8} ({\ct box\_burn\_away8}) This case is similar to Case~4, except that the burning rate is specified using the parameter {\ct MLRPUA}.
 
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away5} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away6} \\
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away7} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away8}
+\end{tabular*}
+\caption[Results of the {\ct box\_burn\_away} test cases 5-8]{Output of {\ct box\_burn\_away} test cases 5-8.}
+\label{box_burn_away_5-8}
+\end{figure}
+
+\FloatBarrier
+
 \paragraph{Case 9} ({\ct box\_burn\_away9}) A solid cube of foam with side length $L=0.4$~m and density $\rho_1=20$~kg/m$^3$ pyrolyzes with a residue fraction of $\nu_1=0.5$. The block is covered by a $\delta=0.002$~m fabric layer with density $\rho_2=50$~kg/m$^3$ and residue fraction $\nu_2=0.2$. The 3-D heat transfer algorithm is invoked. The expected mass of gaseous fuel is:
 \be
    m = L^2 \, \bigg( (L-2\delta) (1-\nu_1) \rho_1 + 2 \delta (1-\nu_2) \rho_2 \bigg) = 0.6592 \; \hbox{m}
 \ee
 Note that the 3-D heat conduction equation is solved via 1-D segments in all three coordinate directions. Each segment accounts for the layers that are perpendicular to its direction, but not those that are parallel. As a result, the pyrolyzed mass in this example is less than expected if one were to consider the actual 3-D object.
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away1} &
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away2} \\
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away3} &
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away4} \\
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away5} &
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away6} \\
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away7} &
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away8}
-\end{tabular*}
-\caption[Results of the {\ct box\_burn\_away} test cases]{Output of {\ct box\_burn\_away} test cases.}
-\label{box_burn_away}
-\end{figure}
+\paragraph{Case 10} ({\ct box\_burn\_away10}) This case is the same as {\ct box\_burn\_away1} with the addition of a 1~cm thick plate attached to the side of the solid made of the same material. The plate is 0.6~m by 0.6~m by 0.01~m thick adding 0.072~kg of additional fuel mass.
 
-\begin{figure}
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away9}
-\caption[Results of the {\ct box\_burn\_away9} test case]{Output of {\ct box\_burn\_away9} test case.}
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away9} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away10}
+\end{tabular*}
+\caption[Results of the {\ct box\_burn\_away9} and {\ct box\_burn\_away10} test cases]{Output of {\ct box\_burn\_away9} and {\ct box\_burn\_away10} test cases.}
 \label{box_burn_away_2}
 \end{figure}
 
+\FloatBarrier
 
-\begin{figure}
+\paragraph{Case 1, 2D} ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}) Case~1 is repeated in two dimensions. In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation. The results are shown in Fig.~\ref{box_burn_away_2D_fig}.
+
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D_residue}

@@ -10487,6 +10487,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
                      OBT%Y2 = M%Y(OBT%J2)
                      OBT%Z1 = M%Z(OBT%K1)
                      OBT%Z2 = M%Z(OBT%K2)
+                     ! For thin obstructions, maintain original thickness
+                     IF (OB%I1==OB%I2) THEN ; OBT%X1=OB%X1 ; OBT%X2=OB%X2 ; ENDIF
+                     IF (OB%J1==OB%J2) THEN ; OBT%Y1=OB%Y1 ; OBT%Y2=OB%Y2 ; ENDIF
+                     IF (OB%K1==OB%K2) THEN ; OBT%Z1=OB%Z1 ; OBT%Z2=OB%Z2 ; ENDIF
                      IF (OB%BULK_DENSITY > 0._EB) OBT%MASS = OB%MASS/REAL(N_NEW_OBST,EB)
                   ENDDO
                 ENDDO
