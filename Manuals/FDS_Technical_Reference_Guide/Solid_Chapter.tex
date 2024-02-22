@@ -308,9 +308,9 @@ Usually, the user specifies a desired heat release rate per unit area (HRRPUA), 
 \ee
 
 \subsection{Scaling the Burning Rate by the Heat Flux}
-\label{Spyro_algorithm}
+\label{spyro_algorithm}
 
-This approach, called Spyro, is a modified version of the specified heat release rate discussed in the prior subsection. Spyro uses data from one or more cone calorimeter or similar experiments where a sample is exposed to fixed incident radiative flux while mass loss and/or the heat release rate is measured. Data can come from either inert gasification tests or tests where pyrolyzed material is allowed to burn. A detailed justification of the approach can be found in Appendix~\ref{app_Spyro}.
+This approach, called Spyro, is a modified version of the specified heat release rate discussed in the prior subsection. Spyro uses data from one or more cone calorimeter or similar experiments where a sample is exposed to fixed incident radiative flux while mass loss and/or the heat release rate is measured. Data can come from either inert gasification tests or tests where pyrolyzed material is allowed to burn. A detailed justification of the approach can be found in Appendix~\ref{Spyro_appendix}.
 
 
 Spyro assumes that the general shape of the mass loss rate or heat release rate curve for a material sample is constant and that the curve's magnitude and duration is a function of the incident heat flux to the sample and the sample thickness. With this assumption the burning rate for a cone test at one exposure and tested thickness can be scaled to a different exposure and thickness, i.e., the as modeled sample thickness and the incident heat flux predicted during an FDS simulation. The algorithm operates as follows:
@@ -336,7 +336,7 @@ Spyro assumes that the general shape of the mass loss rate or heat release rate 
 		\item For each supplied $f_i(t)$, use the corresponding thickness scaled incident flux to get the equivalent time for that test data, i.e., compute $t_i{E_i'')}$.
 		\item For each supplied $f_i(t)$, look up $\dq_{ref,i}''(t_i)$.
 		\item For each supplied $f_i(t)$, determine $\dq_{\rm user}''f_i(t_i)$. If ${E_i}$ is exceeds the range of  $f_i(t)$, then scale the last provided data point in $f_i(t)$ as $ f_i(t) \frac{\dq_{inc}''}{\dq_{ref,i}''(t_i)}$ to obtain $\dq_{\Delta x_j}''$.
-		\item Interpolate the $\dq_{\Delta x_j}''$ to $\Delta x_{ref}$ using ${\Delta x_j}$ to obtain the HRRPUA for applied for the grid cell.
+		\item Interpolate the $\dq_{\Delta x_j}''$ to $\Delta x_{ref}$ using $\Delta x_j$ to obtain the HRRPUA for applied for the grid cell.
 	\end{enumerate}
 \end{enumerate}
 
