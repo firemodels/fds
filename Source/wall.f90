@@ -2551,14 +2551,14 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ! Set up new node points following shrinking/swelling
 
       ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
-
       X_S_NEW = 0._EB
+
       REMESH_IF: IF (ANY(REMESH_LAYER)) THEN
 
          RHO_H_S = 0._EB
          TMP_S = 0._EB
 
-         !Store wall enthalpy for later temperature extraction.
+         ! Store wall enthalpy for later temperature extraction.
 
          DO I=1,NWP
             VOL = (THICKNESS+SF%INNER_RADIUS-ONE_D%X(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-ONE_D%X(I))**I_GRAD
@@ -2606,6 +2606,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          DEALLOCATE(INT_WGT)
 
          ! Extract temperature
+
          DO I=1,NWP_NEW
             H_NODE = RHO_H_S(I)
             T_NODE = TMP_S(I)
@@ -2645,20 +2646,25 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             ENDDO
          ENDDO
 
-         ONE_D%TMP(0)         = 2._EB*B1%TMP_F-ONE_D%TMP(1)   !Make sure front surface temperature stays the same
-         ONE_D%TMP(NWP_NEW+1) = 2._EB*B1%TMP_B-ONE_D%TMP(NWP_NEW) !Make sure back surface temperature stays the same
+         ONE_D%TMP(0)         = 2._EB*B1%TMP_F-ONE_D%TMP(1)       ! Make sure front surface temperature stays the same
+         ONE_D%TMP(NWP_NEW+1) = 2._EB*B1%TMP_B-ONE_D%TMP(NWP_NEW) ! Make sure back surface temperature stays the same
 
          ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS) = N_LAYER_CELLS_NEW(1:ONE_D%N_LAYERS)
          NWP = NWP_NEW
          ONE_D%X(0:NWP) = X_S_NEW(0:NWP)      ! Note: X(NWP+1...) are not set to zero.
+
       ELSE REMESH_IF
+
          CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS(1:ONE_D%N_LAYERS),SF%GEOMETRY, &
             ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB, &
             LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS)
+
       ENDIF REMESH_IF
+
    ENDIF REMESH_GRID
 
    ! Convert Q_S back to kW/m^3
+
    DO I=1,NWP
       Q_S(I) = Q_S(I)/((SF%INNER_RADIUS+ONE_D%X(NWP)-ONE_D%X(I-1))**I_GRAD-(SF%INNER_RADIUS+ONE_D%X(NWP)-ONE_D%X(I))**I_GRAD)
    ENDDO
