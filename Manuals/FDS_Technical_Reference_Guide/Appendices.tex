@@ -2012,7 +2012,7 @@ t_{2} = \frac{\Delta_2}{\Delta_1}\frac{h_1}{h_2} t_1
 \ee
 In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:time_scaling}) is consistent with Eq.~(\ref{Spyro6}) across a discrete time interval. Thus, the ratio of $h$ scales similarly to the ratio of $\dq''$, yielding:
 \be
-\Delta t = \frac{\Delta}{\Delta_{ref}}\frac{\bar{\dq}''_{ref}}{\dq''}\Delta t_{ref}
+\Delta t = \frac{\Delta}{\Delta_{ref}}\frac{\dq''_{ref}}{\dq''}\Delta t_{ref}
 \label{eq:time_scaling2}
 \ee
 
@@ -2032,7 +2032,7 @@ $\dq_{flame}''$, the delta between burning with the cone on and burning with the
 	\end{center}
 \end{figure}
 
-A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,1000~\si{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\si{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\si{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10,20 and 30~\si{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2 resulting in formulas of CH$_2$O$_0.302$, CH$_2$O$_0.658$, and CH$_2$O$_1.322$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,1000~\si{kJ/kg}. 
+A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,100~\si{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\si{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\si{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10,20 and 30~\si{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2 resulting in formulas of CH$_{2}$O$_{0.302}$, CH$_{2}$O$_{0.658}$, and CH$_{2}$O$_{1.322}$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,100~\si{kJ/kg}. 
 
 If $\dq_{flame}''$ for each heat of combustion is normalized by the maximum value for all HRRPUA, the results collapse as shown in the left of Fig~\ref{fig:Spyro_hoc}. A quadratic fit was then done for the maximum $\dq_{flame}''$ for each heat of combustion as shown in the right of Fig~\ref{fig:Spyro_hoc}.  
 
@@ -2042,11 +2042,11 @@ If $\dq_{flame}''$ for each heat of combustion is normalized by the maximum valu
 		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_ratio} &
 		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_max}
 	\end{tabular*}
-	\caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA, (Right) Maximum flame heat flux as a function of .}
+	\caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA, (Right) Maximum flame heat flux as a function of $\Delta H_c$.}
 	\label{fig:Spyro_hoc}
 \end{figure}
 
-Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \hbox{HRRPUA} / \Delta H_c + C \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{ref}''$ for a cone test first the maximum $\dq_{flame}''$ is determined using $\Delta H_c$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second  $\dq_{flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, thirdly $\Gamma$ is determined and used to adjust  $\dq_{cone}''$, and finally $\dq_{ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
+Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta H_c + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{ref}''$ for a cone test first the maximum $\dq_{flame}''$ is determined using $\Delta H_c$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second  $\dq_{flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, thirdly $\Gamma$ is determined and used to adjust  $\dq_{cone}''$, and finally $\dq_{ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
 
 \begin{figure}
 	\begin{center}
