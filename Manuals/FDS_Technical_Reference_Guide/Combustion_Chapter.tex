@@ -286,7 +286,7 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\si{mol-$\alpha$/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\unit{mol-\alpha/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and combined with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
 A^{\prime}_{i} = A_{i} \, \bigg( \prod \, [W_{\alpha} \times 1000]^{\,-a_{\alpha,i}} \bigg) \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
