@@ -1950,7 +1950,7 @@ Assuming $\Delta H_g$ and $\Delta H_c$ are invariant with $\dq_{net}''$, Eq.~(\r
 \ee
 where the subscripts $1$ and $2$ indicate different thermal exposure levels. The acceleration or deceleration of the burning can be calculated by evaluating the difference in time required to release the same amount of energy at the two $\dQ$ over a discrete time interval, $\Delta t$,
 \be
-   E_{\dt}''=\dq_{net}''\frac{\Delta H_c}{\Delta H_g}\Delta t
+   E_{\Delta t}''=\dq_{net}''\frac{\Delta H_c}{\Delta H_g}\Delta t
    \label{Spyro5}
 \ee
 where $E_{\Delta t}$ is the total energy released over $\Delta t$. Relating Eq.~(\ref{Spyro5}) at two thermal exposure levels yields
@@ -1963,7 +1963,7 @@ Because $\dq_{net}''$ is difficult to measure during burning, an approximate ref
    \dq''_{ref} = \dq''_{cone}(1-\Gamma) + \dq''_{flame}
    \label{Spyro7}
 \ee
-where $\dq''_{cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing, $\Gamma$ is the fraction of that flux absorbed by the flame, and $\dq''_{flame}$ is the heat feedback from the flame to the surface. For the input data from a cone test, the values of $\Gamma$ and $\dq''_{ref}$T are not readily obtained and the empirical approach discussed in Section~\ref{Spyro_q_flame} is used to estimate them when determining $\dq_{net,2}''$ in Eq.~\ref{Spyro4}. For $\dq_{net,1}''$, FDS uses the sum of the incident radiation and the net convective heat flux in the calculation at each time step. 
+where $\dq''_{cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing, $\Gamma$ is the fraction of that flux absorbed by the flame, and $\dq''_{flame}$ is the heat feedback from the flame to the surface. For the input data from a cone test, the values of $\Gamma$ and $\dq''_{ref}$ are not readily obtained, and the empirical approach discussed in Section~\ref{Spyro_q_flame} is used to estimate them when determining $\dq_{net,2}''$ in Eq.~\ref{Spyro4}. For $\dq_{net,1}''$, FDS uses the sum of the incident radiation and the net convective heat flux in the calculation at each time step. 
 
 \section{Adaptation to Multiple Thicknesses}
 
