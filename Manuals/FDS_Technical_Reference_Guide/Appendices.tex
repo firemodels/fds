@@ -1920,6 +1920,137 @@ This term is added to the solid cell enthalpy for gases that are consumed ($\nu_
 
 
 
+\chapter{Scaling Based Pyrolysis}
+\label{spyro_appendix}
+
+This approach preserves the shape of the heat release rate with time (i.e., burning behavior) measured from cone calorimeter experiments but scales the magnitude and duration based on incident heat at the surface.  The model is able to scale a single reference curve to different thermal exposures and material thicknesses. An empirical estimation of the flame heat flux is used to calculate the total incident heat flux in a cone calorimeter for use in scaling. Improved agreement can be achieved by incorporating data from multiple cone calorimeter experiments at different thermal exposures and/or material thicknesses. The following subsections describe the technical basis of each of these modules.
+
+\section{Fixed Thickness Scaling Model}
+\label{spyro_appendix:fixed}
+
+The fixed thickness scaling based pyrolysis model is presented in~\cite{Hodges:IAFSS2023}. The net heat flux into the material is related to the pyrolysis rate through the effective heat of gasification according to the equation
+\be
+   \dq_{net}''=\dm_f''\Delta H_g
+   \label{Spyro1}
+\ee
+where $\dq_{net}''$ is the net heat flux into the surface and $\Delta H_{g}$ is the heat of gasification. Similarly, the heat release rate per unit area of a material, $\dQ''$, is related to the pyrolysis rate of the material through the effective heat of combustion, $\Delta H_c$, as
+\be
+   \dQ''=\dm_f''\Delta H_c
+   \label{Spyro2}
+\ee
+The ratio of Eq.~(\ref{Spyro1}) and Eq.~(\ref{Spyro2}) relate $\dot{q}_{net}''$ and $\dot{Q}''$ as
+\be
+   \frac{\dQ''}{\dq_{net}''}=\frac{\Delta H_c}{\Delta H_g}
+   \label{Spyro3}
+\ee
+Assuming $\Delta H_g$ and $\Delta H_c$ are invariant with $\dq_{net}''$, Eq.~(\ref{Spyro3}) can be related to predict the change in magnitude of $\dQ''$ due to changes in thermal exposure as
+\be
+   \dQ_1'' = \frac{\dq_{net,1}''}{\dq_{net,2}''}\dQ_2''
+   \label{Spyro4}
+\ee
+where the subscripts $1$ and $2$ indicate different thermal exposure levels. The acceleration or deceleration of the burning can be calculated by evaluating the difference in time required to release the same amount of energy at the two $\dQ$ over a discrete time interval, $\Delta t$,
+\be
+   E_{\Delta t}''=\dq_{net}''\frac{\Delta H_c}{\Delta H_g}\Delta t
+   \label{Spyro5}
+\ee
+where $E_{\Delta t}$ is the total energy released over $\Delta t$. Relating Eq.~(\ref{Spyro5}) at two thermal exposure levels yields
+\be
+   \Delta t_{1}=\frac{\dq_{net,2}''}{\dq_{net,1}''}\Delta t_2
+   \label{Spyro6}
+\ee
+Because $\dq_{net}''$ is difficult to measure during burning, an approximate reference heat flux, $\dq''_{ref}$, is introduced as
+\be
+   \dq''_{ref} = \dq''_{cone}(1-\Gamma) + \dq''_{flame}
+   \label{Spyro7}
+\ee
+where $\dq''_{cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing, $\Gamma$ is the fraction of that flux absorbed by the flame, and $\dq''_{flame}$ is the heat feedback from the flame to the surface. For the input data from a cone test, the values of $\Gamma$ and $\dq''_{ref}$ are not readily obtained, and the empirical approach discussed in Section~\ref{Spyro_q_flame} is used to estimate them when determining $\dq_{net,2}''$ in Eq.~\ref{Spyro4}. For $\dq_{net,1}''$, FDS uses the sum of the incident radiation and the net convective heat flux in the calculation at each time step. 
+
+\section{Adaptation to Multiple Thicknesses}
+
+Detailed pyrolysis models are typically based on an Arrhenius kinetics formulation~\cite{Stoliarov:IAFSS2023}:
+\be
+r=A\mathrm{e}^{-E/(RT_s)}\zeta_1\zeta_2...\zeta_N
+\ee
+where $r$ is the reaction rate, $A$ and $E$ are the Arrhenius pre-exponential factor and activation energy, $T_{s}$ is the solid temperature, $R$ is the molar gas constant, and $\zeta_{j}$ is the impact of the $j$-th reactant species concentration on the burning. There are two primary impacts of material thickness on the burning behavior of a material. The largest impact is to the burning duration due to differences in the combustible mass. The second impact is the transition between a thermally thin and thermally thick material. The model for scaling to different material thicknesses takes inspiration from this formulation; however, the model assumes that the two impacts can be represented by a non-dimensional scaling of a measured burning profile. 
+
+The non-dimensional temperature profile within a solid material scales with the  Fourier, $\hbox{Fo}$, and Biot, $\hbox{Bi}$, numbers. $\hbox{Fo}$ is the ratio of the heat conduction rate to the rate of thermal energy storage in a solid, and can be thought of as a dimensionless time~\cite{Incropera:1}. It is defined as
+\be
+\hbox{Fo}=\frac{\alpha}{\Delta^{2}}t=\frac{k}{\rho c_p\Delta^2}t
+\label{fo_eq}
+\ee
+where $\alpha$ is the thermal diffusivity, $\rho$ is the density, $c_{p}$ is the specific heat capacity, $k$ is the thermal conductivity, $\Delta$ is the the thickness, and $t$ is time. $\hbox{Bi}$ is the ratio of the internal thermal resistance of a solid to the external resistance of the surface boundary layer~\cite{Incropera:1}:
+\be
+\hbox{Bi}=\frac{h}{k/\Delta}
+\ee
+where $h$ is the heat transfer coefficient. The traditional formulation of $\hbox{Bi}$ assumes that the external exposure of the solid is related primarily to surface convection and thus uses the convection heat transfer coefficient, $h_c$, for $h$. However, this assumption is not valid in the case of burning solid fuels where external radiation (such as the applied surface heat flux in a cone calorimeter experiment) and flame radiation from the combustion of pyrolyzate above the surface drive the heat transfer to the surface. This is accounted for with an alternative Biot number, $\hbox{Bi}^*$, which combines the effect of surface convection and radiation:
+\be
+\hbox{Bi}^*=\frac{h_c+h_r}{k/\Delta}
+\label{bi_eq}
+\ee
+where $h$ has been split into two components for convection, $h_c$, and radiation, $h_r$. The radiation heat transfer coefficient is calculated based on the linearized formulation~\cite{Incropera:1}:
+\be
+h_r=\varepsilon\sigma\left(T_r+T_s\right)\left(T_r^2+T_s^2\right)
+\ee
+where $\varepsilon$ is the surface emissivity, $\sigma$ is the Stefan-Boltzmann constant, $T_{r}$ is the radiative temperature, and $T_s$ is the surface temperature. The radiative temperature is an effective temperature representative of the energy absorbed at the surface assuming a view factor of 1:
+\be
+T_{r}=\left[\frac{\dq_r''}{\varepsilon \sigma}\right]^\of
+\label{eq:tr}
+\ee
+where $\dq_r''$ is the incident radiation to the surface. 
+
+As discussed in Section~\ref{spyro_appendix:fixed}, $\Delta H_g$ is assumed to be constant in the prior approach. However, a time-varying effective $\Delta H_g$ can be calculated based on Eq.~(\ref{Spyro3}) using the time-varying measurement of $\dQ''$ and estimating the time-varying $\dq''_{flame}$. It is assumed in this model that the variability in burning intensity and duration observed in experiments can be related to the impact of the material thickness and thermal exposure on these non-dimensional groups, $\Delta H_g=f\left(\hbox{Bi}^{*},\hbox{Fo}\right)$.  $\Delta H_g$ was found to collapse at the non-dimensional time-scale $\hbox{FoBi}^{*}$. A scaling relationship for $\hbox{FoBi}^{*}$ can be established by equating this non-dimensional time across two exposure levels,
+\be
+\hbox{FoBi}^{*}=\frac{h_1 t_1}{\rho_1 c_{p,1}\Delta_1}=\frac{h_2 t_2}{\rho_2 c_{p,2} \Delta_2}
+\label{eq:scaling_fobi}
+\ee
+where the subscripts indicate different exposure levels. Equation~(\ref{eq:scaling_fobi}) reveals that non-dimensional time scales with $\rho$, $c_p$, $\Delta$, and $h$.
+
+A simplified representation for the scaling of non-dimensional time can be obtained by assuming that changes in material properties (i.e., $k$, $\rho$, $c_p$) are related to non-dimensional time. Under this assumption, Eq.~(\ref{eq:scaling_fobi}) reduces to:
+\be
+t_{2} = \frac{\Delta_2}{\Delta_1}\frac{h_1}{h_2} t_1
+\label{eq:time_scaling}
+\ee
+In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:time_scaling}) is consistent with Eq.~(\ref{Spyro6}) across a discrete time interval. Thus, the ratio of $h$ scales similarly to the ratio of $\dq''$, yielding:
+\be
+\Delta t = \frac{\Delta}{\Delta_{ref}}\frac{\dq''_{ref}}{\dq''}\Delta t_{ref}
+\label{eq:time_scaling2}
+\ee
 
 
+\section{Cone Reference Heat Flux}
+\label{Spyro_q_flame}
 
+When using Eq.~\ref{Spyro7} to obtain $\dq_{net,2}''$ in Eq.~\ref{Spyro4}, an approach is needed to determine $\Gamma$ and $\dq_{flame}''$. In an actual cone test these will depend upon the material being burned as the heat of combustion, burning rate, and soot yield will all influence the flame heat flux and the absorption of the cone radiation. As there is no simple analytical model to predict these, an empirical approach was developed using FDS simulations of a cone calorimeter. 
+
+The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\si{MJ/kg}) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{cone}''=50$~\si{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\si{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives 
+$\dq_{flame}''$, the delta between burning with the cone on and burning with the cone off and on gives the cone flux reaching the sample, and the cone with no burning phase gives $\dq_{cone}''$. The difference between the cone flux reaching the sample and $\dq_{cone}''$ gives $\Gamma$.
+
+\begin{figure}
+	\begin{center}
+		\scalebox{0.45}{\includegraphics{FIGURES/Spyro_cone_fig}}
+		\caption[FDS geometry used for developing the cone reference flux.]{\label{fig:cone_ref_geom} FDS geometry used for developing the cone reference flux. Red is the cone heater and green is the sample surface. The domain is clipped at the plane y=0~m.}
+	\end{center}
+\end{figure}
+
+A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,100~\si{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\si{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\si{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10,20 and 30~\si{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2 resulting in formulas of CH$_{2}$O$_{0.302}$, CH$_{2}$O$_{0.658}$, and CH$_{2}$O$_{1.322}$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,100~\si{kJ/kg}. 
+
+If $\dq_{flame}''$ for each heat of combustion is normalized by the maximum value for all HRRPUA, the results collapse as shown in the left of Fig~\ref{fig:Spyro_hoc}. A quadratic fit was then done for the maximum $\dq_{flame}''$ for each heat of combustion as shown in the right of Fig~\ref{fig:Spyro_hoc}.  
+
+\begin{figure}
+	\centering
+	\begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_ratio} &
+		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_max}
+	\end{tabular*}
+	\caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA, (Right) Maximum flame heat flux as a function of $\Delta H_c$.}
+	\label{fig:Spyro_hoc}
+\end{figure}
+
+Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta H_c + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{ref}''$ for a cone test first the maximum $\dq_{flame}''$ is determined using $\Delta H_c$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second  $\dq_{flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, thirdly $\Gamma$ is determined and used to adjust  $\dq_{cone}''$, and finally $\dq_{ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
+
+\begin{figure}
+	\begin{center}
+		\scalebox{0.45}{\includegraphics{FIGURES/Spyro_cone_error}}
+		\caption[Scatterplot for predicted vs. empirical reference heat flux.]{\label{fig:Spyro_cone_error} Scatterplot for predicted vs. empirical reference heat flux.}
+	\end{center}
+\end{figure}
