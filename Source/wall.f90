@@ -2357,7 +2357,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) REMESH_LAYER(LAYER_INDEX(I)) = .TRUE.
    ENDDO
 
-   !If any nodes go to zero, apportion Q_S to surrounding nodes.
+   ! If any nodes go to zero, apportion Q_S to surrounding nodes.
 
    IF (ANY(REMESH_LAYER(1:ONE_D%N_LAYERS)) .AND. NWP > 1) THEN
       IF (X_S_NEW(1)-X_S_NEW(0) < TWO_EPSILON_EB) Q_S(2) = Q_S(2) + Q_S(1)
@@ -2388,16 +2388,19 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    DX_MIN = 0._EB
 
    REMESH_GRID: IF (CHANGE_THICKNESS) THEN
+
       NWP_NEW = 0
       THICKNESS = 0._EB
-
       I = 0
+
       LAYER_LOOP: DO NL=1,ONE_D%N_LAYERS
 
          ONE_D%LAYER_THICKNESS(NL) = X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL)) - X_S_NEW(I)
+
          ! Remove very thin layers
 
          IF (ONE_D%LAYER_THICKNESS(NL) < SF%MINIMUM_LAYER_THICKNESS) THEN
+
             X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP) = X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP)-ONE_D%LAYER_THICKNESS(NL)
             ONE_D%LAYER_THICKNESS(NL) = 0._EB
             IF (ONE_D%N_LAYER_CELLS(NL) > 0) REMESH_LAYER(NL) = .TRUE.
@@ -2405,9 +2408,11 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
             I = I + ONE_D%N_LAYER_CELLS(NL)
             CYCLE LAYER_LOOP
+
          ELSE
 
             ! If there is only one cell, nothing to do
+
             IF (ONE_D%N_LAYER_CELLS(NL)==1) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
@@ -2422,6 +2427,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             ENDIF
 
             ! If no cells in the layer have changed size, nothing to do
+
             IF (ALL(ABS(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL))-1._EB) <= TWO_EPSILON_EB)) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
@@ -2429,11 +2435,15 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                I = I + ONE_D%N_LAYER_CELLS(NL)
                CYCLE LAYER_LOOP
             ENDIF
+
          ENDIF
 
          ! Check if layer is expanding or contracting.
+
          EXPAND_CONTRACT: IF (ANY(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL)) < 1._EB)) THEN
+
             ! At least one cell is contracting. Check to see if cells meets the RENODE_DELTA_T criterion
+
             REMESH_CHECK=.TRUE.
             DO N = I+1,I+ONE_D%N_LAYER_CELLS(NL)
                IF (ABS(ONE_D%TMP(N)-ONE_D%TMP(N-1))>SF%RENODE_DELTA_T(NL)) THEN
@@ -2441,60 +2451,71 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   EXIT
                ENDIF
             ENDDO
+
             REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
 
-               !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
+               ! If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
+
                CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),ONE_D%STRETCH_FACTOR(NL),&
                                       ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
                                       N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),DDSUM)
-                  LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
-                     N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
-                     IF (MOD(N_LAYER_CELLS_NEW(NL),2)==0) THEN
-                        DDSUM = 0._EB
-                        DO N=1,N_LAYER_CELLS_NEW(NL)/2
-                           DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
-                        ENDDO
-                        DDSUM = 2._EB*DDSUM
-                     ELSE
-                        DDSUM = 0._EB
-                        DO N=1,(N_LAYER_CELLS_NEW(NL)-1)/2
-                           DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
-                        ENDDO
-                        DDSUM = 2._EB*DDSUM + ONE_D%STRETCH_FACTOR(NL)**((N_LAYER_CELLS_NEW(NL)-1)/2)
-                     ENDIF
-                     ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / DDSUM
-                     ONE_D%DDSUM(NL) = DDSUM
-                     REMESH_LAYER(NL) = .TRUE.
-                  ELSEIF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) == 1) THEN LAYER_CELL_CHECK
-                     ONE_D%SMALLEST_CELL_SIZE(NL) = SMALLEST_CELL_SIZE(NL)
-                     ONE_D%DDSUM(NL) = DDSUM
-                     REMESH_LAYER(NL) = .TRUE.
-                  ELSE LAYER_CELL_CHECK
-                     N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
-                     ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
-                     REMESH_LAYER(NL) = .TRUE.
-                  ENDIF LAYER_CELL_CHECK
+
+               LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
+                  N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
+                  IF (MOD(N_LAYER_CELLS_NEW(NL),2)==0) THEN
+                     DDSUM = 0._EB
+                     DO N=1,N_LAYER_CELLS_NEW(NL)/2
+                        DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
+                     ENDDO
+                     DDSUM = 2._EB*DDSUM
+                  ELSE
+                     DDSUM = 0._EB
+                     DO N=1,(N_LAYER_CELLS_NEW(NL)-1)/2
+                        DDSUM = DDSUM + ONE_D%STRETCH_FACTOR(NL)**(N-1)
+                     ENDDO
+                     DDSUM = 2._EB*DDSUM + ONE_D%STRETCH_FACTOR(NL)**((N_LAYER_CELLS_NEW(NL)-1)/2)
+                  ENDIF
+                  ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / DDSUM
+                  ONE_D%DDSUM(NL) = DDSUM
+                  REMESH_LAYER(NL) = .TRUE.
+               ELSEIF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) == 1) THEN LAYER_CELL_CHECK
+                  ONE_D%SMALLEST_CELL_SIZE(NL) = SMALLEST_CELL_SIZE(NL)
+                  ONE_D%DDSUM(NL) = DDSUM
+                  REMESH_LAYER(NL) = .TRUE.
+               ELSE LAYER_CELL_CHECK
+                  N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
+                  ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
+                  REMESH_LAYER(NL) = .TRUE.
+               ENDIF LAYER_CELL_CHECK
+
             ELSE REMESH_CHECK_IF
 
                ! If at least one cell does not pass the check, keep the same number of cells but remesh.
+
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
                SMALLEST_CELL_SIZE(NL) = ONE_D%SMALLEST_CELL_SIZE(NL)
                REMESH_LAYER(NL) = .TRUE.
+
             ENDIF REMESH_CHECK_IF
+
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
 
          ELSE EXPAND_CONTRACT
-            !Since cells only expanding, there is no issue with remeshing layer
-            CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),&
-               ONE_D%STRETCH_FACTOR(NL),ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
-               N_LAYER_CELLS_NEW(NL),ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
-               NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
-               REMESH_LAYER(NL) = .TRUE.
+
+            ! Since cells only expanding, there is no issue with remeshing layer
+
+            CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),ONE_D%STRETCH_FACTOR(NL),&
+                                   ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
+                                   N_LAYER_CELLS_NEW(NL),ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
+            NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
+            REMESH_LAYER(NL) = .TRUE.
+
          ENDIF EXPAND_CONTRACT
 
          THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
          I = I + ONE_D%N_LAYER_CELLS(NL)
+
       ENDDO LAYER_LOOP
 
       ! Check that NWP_NEW has not exceeded the allocated space N_CELLS_MAX
