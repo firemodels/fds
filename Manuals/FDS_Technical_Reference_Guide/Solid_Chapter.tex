@@ -310,13 +310,13 @@ Usually, the user specifies a desired heat release rate per unit area (HRRPUA), 
 \subsection{Scaling the Burning Rate by the Heat Flux}
 \label{spyro_algorithm}
 
-This approach, called Spyro, is a modified version of the specified heat release rate discussed in the prior subsection. Spyro uses data from one or more cone calorimeter or similar experiments where a sample is exposed to fixed incident radiative flux while mass loss and/or the heat release rate is measured. Data can come from either inert gasification tests or tests where pyrolyzed material is allowed to burn. A detailed justification of the approach can be found in Appendix~\ref{Spyro_appendix}.
+This approach, called Spyro, is a modified version of the specified heat release rate discussed in the prior subsection. Spyro uses data from one or more cone calorimeter or similar experiments where a sample is exposed to fixed incident radiative flux while mass loss and/or the heat release rate is measured. Data can come from either inert gasification tests or tests where pyrolyzed material is allowed to burn. A detailed justification of the approach can be found in Appendix~\ref{spyro_appendix}.
 
 
 Spyro assumes that the general shape of the mass loss rate or heat release rate curve for a material sample is constant and that the curve's magnitude and duration is a function of the incident heat flux to the sample and the sample thickness. With this assumption the burning rate for a cone test at one exposure and tested thickness can be scaled to a different exposure and thickness, i.e., the as modeled sample thickness and the incident heat flux predicted during an FDS simulation. The algorithm operates as follows:
 
 \begin{enumerate}
-	\item Each set, $i$, of supplied test data requires the cone flux, $\dq_{cone_i}''$, the thickness tested in the cone ${\Delta x_i}$, and a time ramp, $f_i(t)$, that is applied to $\dq_{\rm user}''$. For each set of data:
+	\item Each set, $i$, of supplied test data requires the cone flux, $\dq_{cone_i}''$, the thickness tested in the cone ${\Delta x_i}$, and a time ramp, $f_i(t)$, that is applied to $\dq_{\rm user}''$. Note that each $f_i(t)$ should start at $t=0$ corresponding to ignition since the time up to ignition is handled by the 1-D heat transfer model. For each set of data:
 	\begin{enumerate}
 		\item Determine the thickness scaling factor $s_t$ for data set $i$ as $s_{t,i} = \frac{\Delta x_{ref}}{\Delta x_i}$ where $\Delta x_{ref}$ is the material thickness being modeled in FDS and $\Delta x_i$ is the as tested material thickness.
 		\item Determine the incident flux over time, $\dq_{ref,i}''(t)$. For an inert gasification test this is simply the imposed radiative flux:
@@ -327,7 +327,7 @@ Spyro assumes that the general shape of the mass loss rate or heat release rate 
 		
 		\be \dq_{ref,i}''(t)=\dq_{cone_i}''(1-\Gamma_i(t))+\dq_{flame_i}''(t) \ee
 		
-		This value of $\dq_{flame_i}''(t)$ is determined using an empirical approach discussed in Appendix~\ref{app_Spyro}.
+		This value of $\dq_{flame_i}''(t)$ is determined using an empirical approach discussed in Appendix~\ref{spyro_appendix}.
 		\item Integrate the incident flux over time to create a curve of the energy delivered to the surface as a function of time and then invert the curve to give time vs. the energy delivered to the surface, $t_i{E_i'')}$.
 	\end{enumerate}
 	\item For each wall cell using the Spyro method where the ignition temperature has been reached:
@@ -335,7 +335,7 @@ Spyro assumes that the general shape of the mass loss rate or heat release rate 
 		\item For each thickness provided in the input data, integrate the FDS predicted incident flux, $\dq_{inc}''$, using the scaled time step $\Delta t_{scaled}=s_{t,i} \Delta t$.
 		\item For each supplied $f_i(t)$, use the corresponding thickness scaled incident flux to get the equivalent time for that test data, i.e., compute $t_i{E_i'')}$.
 		\item For each supplied $f_i(t)$, look up $\dq_{ref,i}''(t_i)$.
-		\item For each supplied $f_i(t)$, determine $\dq_{\rm user}''f_i(t_i)$. If ${E_i}$ is exceeds the range of  $f_i(t)$, then scale the last provided data point in $f_i(t)$ as $ f_i(t) \frac{\dq_{inc}''}{\dq_{ref,i}''(t_i)}$ to obtain $\dq_{\Delta x_j}''$.
+		\item For each supplied $f_i(t)$, determine $\dq_{\rm user}''f_i(t_i)$. If ${E_i}$ exceeds the range of  $f_i(t)$, then scale the last provided data point in $f_i(t)$ as $ f_i(t) \frac{\dq_{inc}''}{\dq_{ref,i}''(t_i)}$ to obtain $\dq_{\Delta x_j}''$.
 		\item Interpolate the $\dq_{\Delta x_j}''$ to $\Delta x_{ref}$ using $\Delta x_j$ to obtain the HRRPUA for applied for the grid cell.
 	\end{enumerate}
 \end{enumerate}
