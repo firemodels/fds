@@ -1497,7 +1497,7 @@ SUBROUTINE WRITE_STL_FILE
    ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
    !character(len=*), parameter :: fname = 'fds.stl'
    INTEGER :: I,IOS,N,NM,FACES(12, 3),GEOM_VERTICES_IDS(1,3)
-   CHARACTER(LEN=FN_LENGTH) :: TITLE
+   CHARACTER(LEN=80) :: TITLE
    REAL(FB) :: VERTICES(8,3), XB(6)
    REAL(FB) :: GEOM_VERTICES(3,3)
    INTEGER(IB8) :: COLOR(3), ONE
@@ -1552,6 +1552,9 @@ SUBROUTINE WRITE_STL_FILE
          DO I=1,12
             !CALL write_facet_c(U, &
             !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
+            IF (ABS(SUM(VERTICES(FACES(I,1),:)-VERTICES(FACES(I,2),:))).EQ.0) CYCLE
+            IF (ABS(SUM(VERTICES(FACES(I,1),:)-VERTICES(FACES(I,3),:))).EQ.0) CYCLE
+            IF (ABS(SUM(VERTICES(FACES(I,2),:)-VERTICES(FACES(I,3),:))).EQ.0) CYCLE
             CALL WRITE_FACET(LU_STL, &
                VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
          END DO
