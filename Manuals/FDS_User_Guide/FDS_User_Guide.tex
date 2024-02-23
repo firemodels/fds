@@ -4964,8 +4964,8 @@ FDS assumes the following reaction:
 The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a negative value for {\ct NU}. There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
-\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 0.00001)
-\item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 0.0001)
+\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
 
@@ -4973,7 +4973,7 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 \subsection{Complex Fuel Molecules}
 \label{info:Complex_Fuel}
 
-\paragraph{Simple Chemistry Compatible Fuels}
+\paragraph{Fuels Compatible with Simple Chemistry}
 
 For complex fuel molecules that contain only C, H, N, and O the simple chemistry reaction parameters can still be applied. Consider natural gas, which is often a mixture of several component gases. To build the fuel mixture, the primitive (component) species need be defined. Each primitive species will get a {\ct LUMPED\_COMPONENT\_ONLY} designation, which means that each of these species will not be explicitly tracked as they are components to a mixture.  Note that these lumped components can only contain C, H, N, and O atoms. The lumped fuel, {\ct 'natural gas'}, can be created using the defined primitive components and subsequently the reaction can be defined using simple chemistry (Section \ref{info:simple_chemistry}):
 \begin{lstlisting}
@@ -4992,7 +4992,8 @@ For complex fuel molecules that contain only C, H, N, and O the simple chemistry
       SOOT_YIELD=0.01 /
 \end{lstlisting}
 
-\paragraph{Non-Simple Chemistry Compatible Fuels}
+\paragraph{Fuels Not Compatible with Simple Chemistry}
+
 \label{pvc_combustion}
 
 Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
