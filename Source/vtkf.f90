@@ -13442,7 +13442,8 @@ WRITE(LU_PARAVIEW,'(A)') "animationScene1.PlayMode = 'Snap To TimeSteps'"
 
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
 WRITE(LU_PARAVIEW,'(A)') "# restore active source"
-WRITE(LU_PARAVIEW,'(A)') "SetActiveSource(sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
+WRITE(LU_PARAVIEW,'(A)') "    SetActiveSource(sm3dData)"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
 
 CLOSE(LU_PARAVIEW)
