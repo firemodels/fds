@@ -1250,7 +1250,7 @@ The namelist {\ct GEOM} describes one or more unstructured closed geometric surf
 \subsection{My First Geometry}
 \label{info:first_geom}
 
-To get you aquainted with the new geometry features, as much as possible, we have tried to allow for {\ct OBST} namelist parameters to be applied to {\ct GEOM}.  Therefore, subject to the limitations listed at the end of this section (see Sec.~\ref{info:geom_limitations}), you should be able to take a case built from {\ct OBST} and simply do a \emph{replace} with {\ct GEOM} to begin using unstructured geometry. For example, if you have a burner built like this
+To get you aquainted with the new geometry features we allow for some of {\ct OBST} namelist parameters to be applied to {\ct GEOM}.  Therefore, subject to the limitations listed at the end of this section (see Sec.~\ref{info:geom_limitations}), you should be able to take a case built from {\ct OBST} and simply do a \emph{replace} with {\ct GEOM} to begin using unstructured geometry. For example, if you have a burner built like this
 \begin{lstlisting}
 &OBST XB=-1,1,-1,1,0,0.5, SURF_IDS='FIRE','INERT','INERT' /
 \end{lstlisting}
@@ -1568,24 +1568,23 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 \end{figure}
 
 
-\subsection{Current GEOM Limitations}
+\subsection{GEOM Limitations}
 \label{info:geom_limitations}
 
 \begin{itemize}
-\item Currently no control logic is available on {\ct GEOM} namelists.  That is adding or removing a {\ct GEOM} is not possible.
+\item Currently no control logic is available on {\ct GEOM} namelists.  That is, adding or removing a {\ct GEOM} is not possible.
 \item The {\ct MULT} construct cannot currently be applied to geometries.
 \item Thin geometries and corners cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
-\item A {\ct VENT} cannot be applied to a {\ct GEOM}.  Surface properties must be applied face by face via {\ct SURF\_ID}.
-\item No {\ct VENT} implies {\ct HVAC} cannot be applied to a {\ct GEOM} surface.  This is high on the priority list and should be available in the next maintenance release.
-\item Imposing a tangential velocity in geometries cannot be done. {\ct NO\_SLIP} conditions assume a zero tangential velocity. Allowing this capability is also a development priority.
-\item 3D heat transfer with complex geometry cannot be done.
 \item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to {\ct VOID} (quietly).
-\item {\ct BURN\_AWAY} is not allowed.
-\item The {\ct HOLE} namelist is not currently connected to {\ct GEOM}.
-\item Subgrid geometries (smaller than a grid cell) are possible, but not recommended currently. Similarly, gaps should be defined over a cell size thick. These still require testing and are a development priority.
-\item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended.
+\item A {\ct VENT} cannot be applied to a {\ct GEOM}.  Surface properties must be applied face by face via {\ct SURF\_ID}.
+\item No {\ct VENT} implies {\ct HVAC} cannot be applied to a {\ct GEOM} surface.  This is on our priority list and will be available in the future.
+\item Imposing a tangential velocity in geometries cannot be done. {\ct NO\_SLIP} conditions assume a zero tangential velocity. Allowing this capability is also a development priority.
+\item Neither 3D heat transfer nor {\ct BURN\_AWAY} are available in {\ct GEOM}.
+\item The {\ct HOLE} namelist does not apply to {\ct GEOM}.
+\item Subgrid geometries (smaller than a grid cell) are not recommended. They are currently not included in the treatment of momentum equations. Similarly, gaps should be defined over a cell size thick. 
+\item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended. Each face will be assigned boundary conditions at unneccesary resolution compared to Cartesian cells. 
 \item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor. They will behave as pellets, not droplets.
-\item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not yet undergone thorough testing.
+\item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not undergone thorough testing.
 \end{itemize}
 
 \subsection{The Big Picture, Run Time, and Accuracy}
