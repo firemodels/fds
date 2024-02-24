@@ -320,26 +320,26 @@ The project homepage provides detailed instructions on how to download executabl
 \end{center}
 
 \noindent
-The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac~OS~X, and Linux.
+The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, macOS, and Linux.
 
 Old versions can be kept by copying the old version's installation directly to another location so that it is not overwritten when installing a new version.
 
 
 \section{Computer Hardware Requirements}
 
-The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 2 to 4~GB RAM per core. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations since the FDS output for a single calculation may consume more than 10~GB of storage space.
+The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or macOS operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 2 to 4~GB RAM per core. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations since the FDS output for a single calculation may consume more than 10~GB of storage space.
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
-Running FDS using MPI requires shared disk access to each computer on which cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of FDS running the parallel cases.
+Running FDS using MPI requires shared disk access to each computer on which cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or macOS system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of FDS running the parallel cases.
 
 
 \section{Computer Operating System (OS) and Software Requirements}
 
-The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and Linux.
+The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, macOS, and Linux.
 \begin{description}
 \item[{\bf MS Windows}] An installation package is available for the 64~bit Windows operating system. Running FDS/Smokeview any version of MS Windows released prior to Windows 7 is not recommended.
-\item[{\bf Mac OS X}] Pre-compiled executables are installed into a user selected directory using an installation script.  Mac OS~X 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
+\item[{\bf macOS}] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
 
@@ -367,12 +367,12 @@ FDS simulations can exploit multiple processing units on a single computer or mu
 
 When using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. For the purpose of running FDS on a Windows computer, the number of logical processors is the most important consideration.
 
-If you are running FDS under any variety of Linux or Mac~OS~X, you can determine the number of logical processors using the command ``lscpu'' for Linux or ``sysctl hw'' for OS~X. These operating systems might use slightly different terms, but the processors are similar if not the same as those on a Windows computer.
+If you are running FDS under any variety of Linux or macOS, you can determine the number of logical processors using the command ``lscpu'' for Linux or ``sysctl hw'' for OS~X. These operating systems might use slightly different terms, but the processors are similar if not the same as those on a Windows computer.
 
 
 \subsection{Two Ways to Use Multiple Processors}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single\footnote{Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.} executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows).
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, macOS) there is a single\footnote{Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.} executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows).
 
 There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
@@ -400,7 +400,7 @@ Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
 This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer.
 
-There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows and Linux, we use Intel MPI.
+There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For macOS, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows and Linux, we use Intel MPI.
 
 MPI and OpenMP can be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
@@ -468,9 +468,9 @@ The following procedure is intended for a Windows domain network; that is, a net
 
 
 
-\subsection{Linux and Mac OS X}
+\subsection{Linux and macOS}
 
-A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. Tips for running FDS under Linux or Mac~OS~X can be found \href{https://github.com/firemodels/fds/wiki/Installing-and-Running-FDS-on-a-Linux-Cluster}{here}.
+A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. Tips for running FDS under Linux or macOS can be found \href{https://github.com/firemodels/fds/wiki/Installing-and-Running-FDS-on-a-Linux-Cluster}{here}.
 
 If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt:
 \begin{lstlisting}
@@ -483,7 +483,7 @@ comp1 slots=2
 comp2 slots=1
 comp3 slots=2
 \end{lstlisting}
-where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler. A job scheduler will avoid running multiple on the same nodes/cores. If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer.
+where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler. A job scheduler will avoid running multiple on the same nodes/cores. If you are using a single Linux or macOS workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer.
 
 
 
@@ -679,7 +679,7 @@ which means that the first three materials of layer 1 have mass fractions of 0.5
 
 Note that character strings can be enclosed either by single or double quotation marks. Be careful not to create the input file by pasting text from something other than a simple text editor, in which case the punctuation marks may not transfer properly into the text file.
 
-Some text file encodings may not work on all systems. If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding. For example, the text file editor Notepad works fine on a Windows PC, but a file edited in Notepad may not work on Linux or Mac OS~X because of the difference in line endings between Windows and Unix/Linux operating systems. Other text editors, such as Notepad++, typically work better, but try a simple case first.
+Some text file encodings may not work on all systems. If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding. For example, the text file editor Notepad works fine on a Windows PC, but a file edited in Notepad may not work on Linux or macOS because of the difference in line endings between Windows and Unix/Linux operating systems. Other text editors, such as Notepad++, typically work better, but try a simple case first.
 
 
 \section{Input File Structure}
