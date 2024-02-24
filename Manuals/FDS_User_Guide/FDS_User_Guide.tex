@@ -339,7 +339,7 @@ Running FDS using MPI requires shared disk access to each computer on which case
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, macOS, and Linux.
 \begin{description}
 \item[{\bf MS Windows}] An installation package is available for the 64~bit Windows operating system. Running FDS/Smokeview any version of MS Windows released prior to Windows 7 is not recommended.
-\item[{\bf macOS}] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (See Chapter~\ref{info:compilation} for details).
+\item[{\bf macOS}] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (See Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems (M1 and M2 chips); therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), and hence the complex geometry features ({\ct GEOM} namelist) are not available.
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Chapter~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
 
@@ -1581,8 +1581,8 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 \item Imposing a tangential velocity in geometries cannot be done. {\ct NO\_SLIP} conditions assume a zero tangential velocity. Allowing this capability is also a development priority.
 \item Neither 3D heat transfer nor {\ct BURN\_AWAY} are available in {\ct GEOM}.
 \item The {\ct HOLE} namelist does not apply to {\ct GEOM}.
-\item Subgrid geometries (smaller than a grid cell) are not recommended. They are currently not included in the treatment of momentum equations. Similarly, gaps should be defined over a cell size thick. 
-\item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended. Each face will be assigned boundary conditions at unneccesary resolution compared to Cartesian cells. 
+\item Subgrid geometries (smaller than a grid cell) are not recommended. They are currently not included in the treatment of momentum equations. Similarly, gaps should be defined over a cell size thick.
+\item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended. Each face will be assigned boundary conditions at unneccesary resolution compared to Cartesian cells.
 \item Particles will interact with the {\ct GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor. They will behave as pellets, not droplets.
 \item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not undergone thorough testing.
 \end{itemize}
@@ -11382,13 +11382,13 @@ properties be specified as well. Simply prescribing as many properties as possib
 \label{tbl:BNDF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
-\hline 
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
-\hline 
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
 \endhead
 {\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                      &           & {\ct F}   \\ \hline
@@ -11412,13 +11412,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:CATF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CATF} (Concatenate Input Files Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CATF} (Concatenate Input Files Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct OTHER\_FILES}    & Character Array  & Section \ref{info:CATF}                 &           &   \\ \hline
@@ -11434,13 +11434,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:CLIP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
@@ -11460,13 +11460,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:COMB} \\
 \hline
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CHECK\_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & {\ct F}              \\ \hline
@@ -11497,13 +11497,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:CSVF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Initialization Files)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct SPECFILE}        & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
@@ -11523,13 +11523,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:CTRL} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CONSTANT}           & Real           & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
@@ -11563,13 +11563,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:DEVC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
@@ -11653,13 +11653,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:DUMP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct F}                        \\ \hline
@@ -11744,13 +11744,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \label{tbl:GEOM} \\
 \hline
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\tt GEOM} (Unstructured Geometry Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct BINARY\_FILE}     & Character              & Section~\ref{subsec:readbin}            &           &  {\ct 'null'}            \\ \hline
@@ -11828,13 +11828,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:HEAD} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CHID}      & Character   & Section~\ref{info:HEAD}     &           & {\ct 'output'}    \\ \hline
@@ -11852,13 +11852,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:HOLE} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &                 \\ \hline
@@ -11882,13 +11882,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:HVAC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AIRCOIL\_ID}             & Character     & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
@@ -11957,13 +11957,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:INIT} \\
 \hline
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct BULK\_DENSITY\_FACTOR}       & Real              & Section~\ref{bulk_density_file}               &                & 1.            \\ \hline
@@ -12024,13 +12024,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:ISOF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct DELTA}                 & Real          & Section~\ref{info:ISOF}                   &       &         \\ \hline
@@ -12056,13 +12056,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:MATL} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct A(:)}                          & Real Array      & Section~\ref{info:solid_pyrolysis}    &    1/s            &               \\ \hline
@@ -12116,13 +12116,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:MESH} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}         &    & {\ct F}          \\ \hline
@@ -12151,13 +12151,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:MISC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AEROSOL\_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & {\ct F}           \\ \hline
@@ -12260,13 +12260,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:MOVE} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0.,0.,1.)                 \\ \hline
@@ -12295,13 +12295,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:MULT} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MULT} (Multiplier Function Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MULT} (Multiplier Function Parameters)} \\
-\hline   
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
 \endhead
 {\ct DX}             & Real        & Spacing in the $x$ direction                & m  & 0.     \\ \hline
@@ -12342,13 +12342,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:OBST} \\
 \hline
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ALLOW\_VENT}             & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct T}       \\ \hline
@@ -12403,13 +12403,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:PART} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ADHERE\_TO\_SOLID}                  & Integer     & Section~\ref{info:surface_solid_particles}                            &                   & 0                     \\ \hline
@@ -12488,13 +12488,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:PRES} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct BAROCLINIC}                    & Logical       & Section~\ref{baroclinic_torque}             &               & {\ct T}              \\ \hline
@@ -12523,13 +12523,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:PROF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CELL\_CENTERED}        & Logical           & Section~\ref{info:PROF}      &            & {\ct F}  \\ \hline
@@ -12553,13 +12553,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:PROP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24                 \\ \hline
@@ -12634,13 +12634,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:RADF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RADF} (Radiation Output File Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RADF} (Radiation Output File Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct I\_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
@@ -12660,13 +12660,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:RADI} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ANGLE\_INCREMENT}               & Integer      & Section~\ref{info:RADI_Gas_and_Soot} &            & 5              \\ \hline
@@ -12701,13 +12701,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:RAMP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
@@ -12733,13 +12733,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:REAC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
@@ -12792,13 +12792,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:SLCF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AGL\_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
@@ -12831,13 +12831,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:SM3D} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SM3D} (Smoke3D Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SM3D} (Smoke3D Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct QUANTITY}    & Character   & Section~\ref{info:SMOKE3D}      &             &     \\ \hline
@@ -12854,13 +12854,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:SPEC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AEROSOL}                       & Logical           & Section~\ref{info:deposition}           &                   & {\ct F} \\ \hline
@@ -12929,13 +12929,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:SURF} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
@@ -13108,13 +13108,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:TABL} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ID}                & Character   & Section~\ref{info:spraypattern}      &             &     \\ \hline
@@ -13132,13 +13132,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:TIME} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
@@ -13164,13 +13164,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:TRNX} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CC    }            & Real          & Section~\ref{info:TRNX}   & m            &     \\ \hline
@@ -13192,13 +13192,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:VENT} \\
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct COLOR    }             & Character         & Section~\ref{info:colors}                                 &               &                     \\ \hline
@@ -13245,13 +13245,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:WIND} \\
 \hline
 \multicolumn{5}{|c|}{{\ct WIND} (Wind and atmospheric parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct WIND} (Wind and atmospheric parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct CORIOLIS\_VECTOR(3)}                       & Real          & Section~\ref{info:coriolis_force}             &               & 0.                \\ \hline
@@ -13296,13 +13296,13 @@ Keyword             & Type     & Description                      & Units       
 \label{tbl:ZONE} \\
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
-\hline  
+\hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct DISCHARGE\_COEFFICIENT(N)}    & Real                  & Section~\ref{info:Leaks}           &        & 1.            \\ \hline
@@ -13854,6 +13854,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{itemize}
 \item The source code consists entirely of Fortran statements organized into 32 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries.
+\item To compile routines for the ULMAT and UGLMAT pressure solvers, Intel Math Kernel Libraries (MKL) are required.
 \end{itemize}
 
 \begin{table}[ht]
