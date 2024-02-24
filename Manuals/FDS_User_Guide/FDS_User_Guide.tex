@@ -2754,13 +2754,13 @@ There are other optional parameters which can be used to adjust the model behavi
 \item[{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}] The instantaneous heat feedback in FDS can vary greatly from time step to time step. In an actual fire the burning rate is tied to the sample temperature, and thermal inertia means the burning rate changes more slowly than then instantaneous flux. This natural smoothing can be approximated by setting a smoothing window using {\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL} in s (Default 1~s).
 \end{description}
 
-The example, {\ct spyro\_cone\_demo.fds}, demonstrating the scaling behavior is shown in Fig.~\ref{fig:cone_demo}. In this example there is a material with cone test data at 25, 50, and 75 kW/m$^2$. Using just the 50 kW/m$^2$, the sample is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%. The 50 kW/m$^2$ simply returns the test data curve. A fourth surface is modeled that uses the 25 and 75 kW/m$^2$ with the sample exposed to a flux of 50 kW/m$^2$. The resulting burning rate is an average of the 25 and 75 kW/m$^2$ test data. Both extrapolation and interpolation do not perfectly reproduce the test data; however, they do capture the general behavior in terms of burning duration, peak burning rate, and time of peak.
+The example, {\ct spyro\_cone\_demo.fds}, demonstrating the scaling behavior is shown in Fig.~\ref{fig:spyro_cone_demo}. In this example there is a material with cone test data at 25, 50, and 75 kW/m$^2$. Using just the 50 kW/m$^2$, the sample is exposed to fluxes of 25, 50, and 75 kW/m$^2$. It can be seen that at 25 kW/m$^2$ the test data is stretched out in time by a factor of 2 with a reduction in burning rate of a factor of 2. Similarly at 75 kW/m$^2$, the curve is collapsed by 50~\% with the burning rate increased by 50~\%. The 50 kW/m$^2$ simply returns the test data curve. A fourth surface is modeled that uses the 25 and 75 kW/m$^2$ with the sample exposed to a flux of 50 kW/m$^2$. The resulting burning rate is an average of the 25 and 75 kW/m$^2$ test data. Both extrapolation and interpolation do not perfectly reproduce the test data; however, they do capture the general behavior in terms of burning duration, peak burning rate, and time of peak.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cone_demo}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/spyro_cone_demo}
 \caption[Demonstration of extrapolating cone test data to other heat fluxes.]{Demonstration of extrapolating cone test data to other heat fluxes.}
-\label{fig:cone_demo}
+\label{fig:spyro_cone_demo}
 \end{figure}
 
 
