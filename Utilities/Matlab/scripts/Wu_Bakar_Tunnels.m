@@ -28,7 +28,6 @@ V = [0.43,0.46,0.48,0.48,0.48,0.48,0.48,0.48; ...
 L = zeros(5,8);
 
 plot_style
-Font_Interpreter='LaTeX';
 
 for i=1:5
 
@@ -82,8 +81,8 @@ set(gca,'FontSize',Label_Font_Size)
 axis([0.001 10 0.1 1.0])
 set(gca,'xticklabel',arrayfun(@(x) num2str(x),get(gca,'xtick'),'un',0))
 set(gca,'yticklabel',arrayfun(@(y) num2str(y),get(gca,'ytick'),'un',0))
-xlabel('Heat Release Rate, $Q^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('Critical Velocity, $V^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('Heat Release Rate, {\itQ*}','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Critical Velocity, {\itV*}','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 h = legend({'Tunnel A','Tunnel B','Tunnel C','Tunnel D','Tunnel E','Correlation'}, 'Location', 'NorthWest');
 set(h,'Interpreter',Font_Interpreter)
 
@@ -132,8 +131,8 @@ set(gca,'FontSize',Label_Font_Size)
 axis([0.001 10 0.1 1.0])
 set(gca,'xticklabel',arrayfun(@(x) num2str(x),get(gca,'xtick'),'un',0))
 set(gca,'yticklabel',arrayfun(@(y) num2str(y),get(gca,'ytick'),'un',0))
-xlabel('Heat Release Rate, $Q^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('Critical Velocity, $V^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('Heat Release Rate, {\itQ*}','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Critical Velocity, {\itV*}','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 h = legend({'Tunnel A','Tunnel B','Tunnel C','Tunnel D','Tunnel E','Correlation'}, 'Location', 'NorthWest');
 set(h,'Interpreter',Font_Interpreter)
 
