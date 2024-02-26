@@ -2040,8 +2040,8 @@ If $\dq_{\si{flame}}''$ for each heat of combustion is normalized by the maximum
 \begin{figure}
 	\centering
 	\begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
-		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_ratio} &
-		\includegraphics[width=.4\textwidth]{FIGURES/Spyro_hoc_max}
+		\includegraphics[height=2.10in]{FIGURES/Spyro_hoc_ratio} &
+		\includegraphics[height=2.10in]{FIGURES/Spyro_hoc_max}
 	\end{tabular*}
 	\caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA, (Right) Maximum flame heat flux as a function of $\Delta h$.}
 	\label{fig:Spyro_hoc}
@@ -2049,9 +2049,11 @@ If $\dq_{\si{flame}}''$ for each heat of combustion is normalized by the maximum
 
 Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta h + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{\si{ref}}''$ for a cone test first the maximum $\dq_{\si{flame}}''$ is determined using $\Delta h$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second  $\dq_{\si{flame}}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, thirdly $\Gamma$ is determined and used to adjust  $\dq_{\si{cone}}''$, and finally $\dq_{\si{ref}}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
 
-\begin{figure}
-	\begin{center}
-		\scalebox{0.45}{\includegraphics{FIGURES/Spyro_cone_error}}
-		\caption[Scatterplot for predicted vs. empirical reference heat flux.]{\label{fig:Spyro_cone_error} Scatterplot for predicted vs. empirical reference heat flux.}
-	\end{center}
+\begin{figure}[!ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=3.5in]{FIGURES/Spyro_cone_error}
+\end{tabular}
+\caption[Scatterplot for predicted vs. empirical reference heat flux.]{Scatterplot for predicted vs. empirical reference heat flux.}
+\label{fig:Spyro_cone_error}
 \end{figure}
