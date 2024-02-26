@@ -5673,7 +5673,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/position_convergence}
 \end{tabular*}
-\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{ terminal\_velocity} case.}
+\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{terminal\_velocity} case.}
 \label{fig_terminal_velocity_convergence}
 \end{figure}
 
@@ -6391,7 +6391,7 @@ We undertake a convergence study to demonstrate that the adopted numerical metho
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
    \end{tabular*}
-\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e., decreasing cell size).}
 \label{fig_HVAC_mass_transport_conv_2}
 \end{figure}
 
@@ -6553,7 +6553,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
 
-This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~kg/m$^2$ and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
 \begin{lstlisting}
 &SURF ID                    = 'fuel'
 VEG_LSET_ROS_00             = 0.15
@@ -6580,11 +6580,11 @@ where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the prope
 \subsection{Ember ignition (\texorpdfstring{\textct{LS4\_ember\_ignition}}{LS4\_ember\_ignition})}
 \label{LS4_ember_ignition}
 
-This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~kg/m$^2$ and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
+This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
 \be
-\dot{q}_{ember} = A_s \, \left[h_c \, \left( T_{ember} - T_\infty \right) + \sigma \, \epsilon \, \left( T^4_{ember} - T^4_\infty \right) \right].
+\dot{q}_{\rm ember} = A_s \left[h_c \left( T_{\rm ember} - T_\infty \right) + \sigma \epsilon \left( T^4_{\rm ember} - T^4_\infty \right) \right]
 \ee
-Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
+Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
 
 \begin{figure}[h]
 \begin{center}
