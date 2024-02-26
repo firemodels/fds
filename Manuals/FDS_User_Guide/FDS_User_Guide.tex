@@ -6597,13 +6597,13 @@ The pressure gradient force can be related to the average wind speed, $U$, over 
 \be
    \| \bF \| \approx \rho \, C_{\rm D} \, \frac{ U^2 }{H}
 \ee
-where $C_{\rm D}$ is a dimensionless drag coefficient ranging between $2 \times 10^{-3}$ for relatively smooth surfaces to $2 \times 10^{-2}$ for rough or forested surfaces. This relation is appropriate for neutrally stable conditions, i.e. windy and relatively low surface heating. For unstable conditions, i.e. light winds and strong surface heating, the relation becomes
+where $C_{\rm D}$ is a dimensionless drag coefficient ranging between $2 \times 10^{-3}$ for relatively smooth surfaces to $2 \times 10^{-2}$ for rough or forested surfaces. This relation is appropriate for neutrally stable conditions, i.e. windy and relatively low surface heating. For unstable conditions, i.e., light winds and strong surface heating, the relation becomes
 \be
    \| \bF \| \approx \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
 \ee
 where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relative change in potential temperature between the ground and the mid-height of the boundary layer. Note that these relationships are approximate. You need to conduct some numerical experiments if you want to match a particular wind measurement.
 
-The {\ct PRESSURE\_GRADIENT\_FORCE} is input on the {\ct WIND} line in units of Pa/m, for example
+The {\ct PRESSURE\_GRADIENT\_FORCE} is input on the {\ct WIND} line in units of Pa/m, for example,
 \begin{lstlisting}
 &WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315, INITIAL_SPEED=5 /
 \end{lstlisting}
@@ -13174,8 +13174,8 @@ Keyword             & Type     & Description                      & Units       
 {\ct PC    }            & Real          & Section~\ref{info:TRNX}   &              &     \\ \hline
 \end{longtable}
 
-\vspace{\baselineskip}
-
+\clearpage % needed to remove spurious \hline above VENT table
+% \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt VENT}}{VENT} (Vent Parameters)}
