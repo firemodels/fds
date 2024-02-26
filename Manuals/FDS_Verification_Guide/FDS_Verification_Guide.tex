@@ -5439,27 +5439,27 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \newpage
 
-\section{Cone Data Extrapolation Model \\
+\section{Scaling Pyrolysis (SPyro) Model \\
 (\texorpdfstring{\textct{spyro\_cone\_demo\_2} and \textct{spyro\_cone\_demo\_3}}{spyro\_cone\_demo\_2 and spyro\_cone\_demo\_3})}
 \label{spyro_cone_demo_2}
 \label{spyro_cone_demo_3}
 
-This section uses two cases to test a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
+This section uses two cases to test a model for scaling heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_2}
-    \caption[Check of the cone data extrapolation model (the \textct{spyro\_cone\_demo\_2} case).]{Extrapolating a single set of cone data to a time varying heat flux (the {\ct spyro\_cone\_demo\_2} case).}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_2} case)]{Extrapolating a single set of cone data to a time varying heat flux (the {\ct spyro\_cone\_demo\_2} case).}
     \label{fig:spyro_cone_demo_2}
 \end{figure}
 
 The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:spyro_cone_demo_3}.
 
 \begin{figure}[!ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_3}
-	\caption[Check of the cone data interpolation model (the \textct{spyro\_cone\_demo\_3} case).]{Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct spyro\_cone\_demo\_3} case).}
-	\label{fig:spyro_cone_demo_3}
+    \centering
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_3}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_3} case)]{Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct spyro\_cone\_demo\_3} case).}
+    \label{fig:spyro_cone_demo_3}
 \end{figure}
 
 \section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
