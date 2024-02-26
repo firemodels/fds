@@ -5539,19 +5539,13 @@ If you are using multiple meshes, the radiation solver cannot transfer energy fr
 The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated three times to establish thermal equilibrium. To change the number of iterations, set {\ct INITIAL\_RADIATION\_ITERATIONS} on the {\ct RADI} line.
 
 
-
-
-
-
-
 \section{Absorption Coefficient of Gases and Soot}
 \label{info:RADI_Gas_and_Soot}
 
 By default FDS employs a gray gas model for the radiation absorption coefficient. Other options are the wide band model (often called Box Model in the radiation literature), and the Weighted Sum of Gray Gases (WSGG) model. The models are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
-You can output the gray absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
-The Wide Band and WSGG  models employ several values of the absorption coefficients for each location, and the {\ct 'ABSORPTION COEFFICIENT'} output quantity only shows one of them, making this output practically useless.
+You can output the gray absorption coefficient using {\ct QUANTITY=}{\ct 'ABSORPTION COEFFICIENT'}. The Wide Band and WSGG models employ several values of the absorption coefficients for each location, and the {\ct 'ABSORPTION COEFFICIENT'} output quantity only shows one of them, making this output impractical for multiband models.
 
 If aluminum oxide is being modeled, the optical properties of soot can be replaced by the optical properties of aluminum oxide by setting {\ct AEROSOL\_AL2O3=T} on {\ct MISC}. Any species with {\ct RADCAL\_ID='SOOT'} will be treated as aluminum oxide.
 
