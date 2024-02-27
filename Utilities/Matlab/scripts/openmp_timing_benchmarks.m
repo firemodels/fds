@@ -7,7 +7,8 @@ clear all
 
 plot_style
 
-dir = '../../Verification/Timing_Benchmarks/';
+% dir = '../../Verification/Timing_Benchmarks/';
+dir = '../../../out/OMP_Scaling_Tests/';
 
 ncores = [1,2,3,4,5,6,7,8];
 a = {'a','b','c','d','e','f','g','h'};
