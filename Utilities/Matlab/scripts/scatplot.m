@@ -401,7 +401,7 @@ try
         close all
     end
 
-    % Verification and validation statistics output routines
+    % Verification and validation statistics output routines, writes verification_statistics.tex and validation_statistics.tex
     statistics_output
 
     fclose('all');

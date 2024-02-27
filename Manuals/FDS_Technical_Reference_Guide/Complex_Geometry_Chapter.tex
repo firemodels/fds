@@ -83,14 +83,16 @@ Using this last expression in Eq.~\eqref{eq:bal2} we arrive to the basic form of
 \end{equation}
 %
 
-A spatially discretized version of the previous equations in a domain divided in $n_{tot}$ computational cells is given by:
+As will be seen in next section, a spatially discretized version of the previous equations in a domain divided in $ii=1,\ldots,n_{tot}$ computational cells is given by:
 
 %
 \begin{equation}
-\left[ \mathbf{M} \right] \frac{\partial}{\partial t} \left\{ \mathbf{\rho Y_\alpha} \right\}  = \left\{ \mathbf{F_{adv \alpha}} \right\} + \left\{ \mathbf{F_{diff \alpha}} \right\} + \left\{  \mathbf{\dot{m}_\alpha'''} \right\} +  \left\{ \mathbf{F_{BC \alpha}} \right\} \; , \; \alpha=1,\dots,N \label{eq:discbal3}
+\frac{\partial \left(\rho Y_\alpha \right)_{ii} }{\partial t} V_{ii}  = F^{adv}_{\alpha,ii} + F^{diff}_{\alpha,ii} + \dot{m}_{\alpha,ii}''' +  F^{BC}_{\alpha,ii} \; , \; \alpha=1,\dots,N \label{eq:discbal3}
 \end{equation}
 %
-where the vector $\left\{ \mathbf{\rho Y_\alpha} \right\}$ of size $n_{tot}$ is the vector of unknowns (assuming one unknown per computational cell), $\left[ \mathbf{M} \right]$ is the systems mass matrix, and $\left\{ \mathbf{F_{adv \alpha}} \right\}$, $\left\{ \mathbf{F_{diff \alpha}} \right\}$, $\left\{  \mathbf{\dot{m}_\alpha'''} \right\}$, $\left\{ \mathbf{F_{BC \alpha}} \right\}$ are vectors due to advection, diffusion, reaction and boundary conditions. Note that  $\left\{ \mathbf{F_{adv \alpha}} \right\}$, and $\left\{ \mathbf{F_{diff \alpha}} \right\}$ are function of the equations unknowns $\rho Y_\alpha$. 
+where $V_{ii}$ is the cell volume, $\left(\rho Y_\alpha \right)_{ii}$ are the cell unknown partial densities, 
+$F^{adv}_{\alpha,ii}$, $F^{diff}_{\alpha,ii}$, $\dot{m}_{\alpha,ii}''$, $F^{BC}_{\alpha,ii}$ are terms due to advection, diffusion, reaction and boundary conditions. Given that the time integration method we use is explicit, these vectors make use of available values of $\left(\rho Y_\alpha \right)_{ii}$ from a previous time step or substep. 
+
 
 \subsection{Finite Volume Method on Staggered Grid in 2D}
 

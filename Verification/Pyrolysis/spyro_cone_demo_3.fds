@@ -1,4 +1,4 @@
-&HEAD CHID='cone_demo_3'/
+&HEAD CHID='spyro_cone_demo_3'/
 
 &MESH XB=0.0,0.3,0.0,0.1,0.0,0.3,IJK=3,1,3/
 
