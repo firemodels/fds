@@ -50,6 +50,7 @@ cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Structure_Separation;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
+cd OMP_Scaling_Tests;  ./Run_All.sh $OPTIONS; cd ..
 cd Phoenix_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
