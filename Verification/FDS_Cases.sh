@@ -381,9 +381,6 @@ $QFDS -d Pyrolysis cable_11_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_23_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_701_jacket_mcc.fds
 $QFDS -d Pyrolysis cell_burn_away.fds
-$QFDS -d Pyrolysis cone_demo.fds
-$QFDS -d Pyrolysis cone_demo_2.fds
-$QFDS -d Pyrolysis cone_demo_3.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
@@ -397,6 +394,9 @@ $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
 $QFDS -d Pyrolysis shrink_swell.fds
+$QFDS -d Pyrolysis spyro_cone_demo.fds
+$QFDS -d Pyrolysis spyro_cone_demo_2.fds
+$QFDS -d Pyrolysis spyro_cone_demo_3.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel_nonconforming.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds

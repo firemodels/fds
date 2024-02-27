@@ -1,4 +1,4 @@
-&HEAD CHID='cone_demo'/
+&HEAD CHID='spyro_cone_demo'/
 
 &TIME T_END=1500.,DT=0.1/
 

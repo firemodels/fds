@@ -223,73 +223,9 @@ and the volume fraction of component $\alpha$ is computed as
 where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
 
 
-\subsection{Solid Heat Transfer 3D (Beta)}
-\label{sec:ht3d}
-
-This section describes the governing equations for heat transfer in the 3D solver, which may be implemented in FDS by setting {\ct HT3D=.TRUE.} on an {\ct OBST} line.  In-depth radiation may be treated using an optically thick approximation \cite{Modest:2003}, as discussed below.
-
-Let $k_{\mathrm{s}}$, $\rho_{\mathrm{s}}$, and $c_{\mathrm{s}}$ denote, respectively, the thermal conductivity, density, and specific heat of the solid. The thermal properties may be functions of temperature.  The mean temperature of an Eulerian cell in the solid phase is denoted $T_{\mathrm{s}}$.  The heat flux vector is $\dot{\mathbf{q}}''$ and the volumetric heat source, either specified or from chemical reaction, is denoted $\dot{q}_{\mathrm{s}}'''$.  The governing equation for heat transfer is
-\begin{equation}
-  \rho_{\mathrm{s}} c_{\mathrm{s}} \; \dod{T_{\mathrm{s}}}{t} = - \Div\dot{\mathbf{q}}'' + \dot{q}_{\mathrm{s}}'''
-  \label{eq:3dheat}
-\end{equation}
-
-\subsubsection*{Heat Flux}
-\label{sec:heat_flux1}
-{}
-The intercell fluxes are continuous.  If the {\ct OBST} material properties of neighboring cells are the same, then thermal properties at face centers are taken as linear averages when computing the intercell flux. The intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
-\begin{equation}
-\label{eq:intercell_flux}
-\dot{q}_{x,i+\frac{1}{2}}'' = - \left. k_{\mathrm{s}} \dod{T_{\mathrm{s}}}{x} \right|_{i+\frac{1}{2}} \approx - k_{{\mathrm{s}},i} \frac{T_{{\mathrm{s}},i+\frac{1}{2}}^n - T_{{\mathrm{s}},i}^n}{\frac{1}{2}\delta x_i} = - k_{{\mathrm{s}},i+1} \frac{T_{{\mathrm{s}},i+1}^n - T_{{\mathrm{s}},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
-\end{equation}
-
-If the neighboring cells have different material properties (consider the $x$ direction with cell indices $i$ and $i+1$), then the cell interface temperature, $T_{s,i+\frac{1}{2}}$, is computed using
-\begin{equation}
-\label{eq:interface_tmp}
-T_{{\mathrm{s}},i+\frac{1}{2}}^n = \frac{T_{{\mathrm{s}},i}^n + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\mathrm{s}},i+1}^n}{1 + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
-\end{equation}
-which reduces to a simple linear average if $k_{{\mathrm{s}},i}=k_{{\mathrm{s}},i+1}$ and $\delta x_i=\delta x_{i+1}$.
-
-\subsubsection*{Heat Flux with Local Material Deformation}
-\label{sec:heat_flux2}
-
-As a material shrinks or swells, the distance between material points decreases or increases.  It is challenging to handle this behavior on a static Eulerian grid.  Consider the situation depicted in Fig.~\ref{fig:flux_deform} where the material is shrinking.  As the temperature points move closer, the effect is to increase the intercell heat flux.  The flux becomes
-\begin{equation}
-\label{eq:fluxdef}
-\dot{q}_{x,i+\frac{1}{2}}'' \approx - k_{i+\frac{1}{2}} \frac{ T_{s,i+1}-T_{s,i}}{\frac{1}{2}(\delta \tilde{x}_i + \delta \tilde{x}_{i+1})}
-\end{equation}
-
-\begin{figure}
-\centering
-\includegraphics[height=1.25in]{FIGURES/flux_deform}
-\caption{Diagram of intercell heat flux with a shrinking material.}
-\label{fig:flux_deform}
-\end{figure}
-
-\noindent Calculation of the cell volumes, $\delta \tilde{x}$, etc., for pyrolysis with material deformation is discussed below.
-
-\subsubsection*{Boundary Conditions}
-\label{sec:boundary_conditions}
-
-For two-way coupling between the gas and solid phase the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\mathrm{w}}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall cell''.  The flux continuity boundary condition implies
-\begin{equation}
-\label{eq:fluxcontinuity}
-\dot{q}_{{\mathrm{r}}, in}'' - \dot{q}_{{\mathrm{r}}, out}'' + \dot{q}_{\mathrm{c}}'' = -k_{\mathrm{s}} \left. \frac{\partial T_{\mathrm{s}}}{\partial n} \right|_{\mathrm{w}}
-\end{equation}
-To obtain the surface temperature, we take $\dot{q}_{{\mathrm{r}}, in}''$ from the radiation solver, linearize $\dot{q}_{{\mathrm{r}}, out}''$, and use Newton's law of cooling for $\dot{q}_{\mathrm{c}}''$. The flux condition may then be discretized as
-\begin{equation}
-\label{eq:discflux}
-( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 \, T_{\mathrm{w}}^{n+1} + h^n (T_{\mathrm{g}}^n - T_{\mathrm{w}}^{n+1}) = -2 \, k_{\mathrm{s}}^n \, \frac{T_{\mathrm{s}}^n - T_{\mathrm{w}}^{n+1}}{\delta}
-\end{equation}
-where $T_{\mathrm{g}}$ is the gas temperature in the first off-wall grid cell and $n$ indicates the time level in the simulation.  Our result for the updated boundary temperature is
-\begin{equation}
-\label{eq:tmpwall}
-T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 + h^n \, T_{\mathrm{g}}^n + 2 \, k_{\mathrm{s}}^n \, T_{\mathrm{s}}^n/\delta }{ 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 + h^n + 2 \, k_{\mathrm{s}}^n / \delta}
-\end{equation}
-
-
 
 \newpage
+
 \section{Pyrolysis Models}
 \label{pyrosection}
 
@@ -448,9 +384,6 @@ For simplicity, the liquid fuel itself is treated like a thermally-thick solid f
 where $\rho_{\ell,\alpha}$ is the mass per unit volume of liquid component $\alpha$, $h(T)$ is the enthalpy of the liquid, $\delta$ is the layer thickness, $h_{\rm v,\alpha}$ is the heat of vaporization of component $\alpha$, and $\dt$ is the time step.
 
 
-
-
-
 \subsection{Shrinking and Swelling Materials}
 \label{sec:shrink_swell}
 
@@ -463,116 +396,3 @@ The layer thickness is updated according to the ratio of the instantaneous mater
    \end{cases}
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
-
-\subsection{Solid Pyrolysis 3D (Beta)}
-
-To begin our discussion of pyrolysis it is useful to start with definitions of the material mass density and volume.  We consider a solid composed of a mixture of material components $\alpha$.  The \emph{material density} (a property of the material) is
-\begin{equation}
-\label{eq:matden}
-\rho_\alpha \equiv \frac{m_\alpha}{V_\alpha}
-\end{equation}
-The \emph{bulk density} is
-\begin{equation}
-\label{eq:bulkden}
-\rho_{\mathrm{s},\alpha} \equiv \frac{m_\alpha}{V_{\mathrm{s}}}
-\end{equation}
-And the \emph{total solid density} is
-\begin{equation}
-\label{eq:totalsolidden}
-\rho_{\mathrm{s}} \equiv \sum_\alpha \rho_{\mathrm{s},\alpha}
-\end{equation}
-
-The reaction kinetics and heat source terms are the same in 1D and 3D.  The bulk density of material component $\alpha$ evolves by Eq.~(\ref{solid_species_conservation}) and the chemical heat source term is given by Eq.~(\ref{eq:qchem_solid}).
-
-\subsubsection*{Local Material Deformation}
-\label{sec:locmatdef}
-
-A discussion about how the 1D model handles shrinking and swelling materials can be found in Sec.~\ref{sec:shrink_swell}.  In this section, we deal with the same issue in 3D.  One of the key differences in the 1D and 3D models is that the concept of ``thickness'' in the 1D model is not dependent at all on the 3D computational mesh.  In the 1D solver, the material shrinks from the bottom up, with the face of the solid stationary (until the cell potentially burns away).
-
-Conversely, in 3D the solid mass is tied to the Eulerian grid cell.  The grid cell itself cannot disappear.  Instead we track the solid volume relative to the local cell volume.  This volume ratio may be computed from the material densities as follows:
-\begin{equation}
-\label{eq:volratio}
-\phi_{\mathrm{s}} \equiv \frac{V_{\mathrm{s}}}{V_{\mathrm{cell}}} = \frac{\sum_\alpha V_\alpha}{V_{\mathrm{cell}}} = \sum_\alpha \frac{m_\alpha/\rho_\alpha}{m_\alpha/\rho_{\mathrm{s},\alpha}} = \sum_\alpha \frac{\rho_{\mathrm{s},\alpha}}{\rho_\alpha}
-\end{equation}
-
-We presently consider two simple models for material deformation: isotropic and unidirectional.  The method is based on the definition $V_{\mathrm{s}}= \phi_{\mathrm{s}} V_{\mathrm{cell}}$, which is equivalent to $\prod_i \delta \tilde{x}_i = \phi_{\mathrm{s}} \prod_i \delta x_i$. For a 2D case, if the material deforms equally in both directions (isotropic) then the spacing used to compute heat fluxes is computed from
-\begin{align}
-\label{eq:dxdefiso}
-\delta \tilde{x} &= \phi_{\mathrm{s}}^{1/2} \delta x \nonumber\\
-\delta \tilde{y} &= \phi_{\mathrm{s}}^{1/2} \delta y
-\end{align}
-
-If, on the other hand, we have a preferred direction for mass loss (such as in a cone calorimeter test), then the deformation is considered unidirectional.  The flux spacing is computed as (deformation in $x$)
-\begin{align}
-\label{eq:dxdefuni}
-\delta \tilde{x} &= \phi_{\mathrm{s}} \delta x \nonumber\\
-\delta \tilde{y} &= \delta y
-\end{align}
-
-\subsection{Mass Transport}
-\label{sec:mass_transport}
-
-The movement of pyrolysis gas through the material to the solid surface is complicated to model in detail.  In many practical codes, mass transfer resistance is simply ignored.  Thus, any gas generated via pyrolysis is imagined to instantaneously appear at the solid surface as a mass flux boundary condition to the gas phase.  The 3D model allows both instantaneous transport and diffusive transport, which we discuss below.
-
-\subsubsection*{Gas Generation}
-\label{eq:gas_generation}
-
-Similar to Eq.~(\ref{eq:pyrolyzate}), in 3D the mass generation rate per unit volume of pyrolysis gas component $\gamma$ in cell $i,j,k$ is given by
-\begin{equation}
-\label{eq:massprod}
-\dot{m}_{\gamma,i,j,k}''' =  \sum_{\alpha=1}^{N_{\mathrm{m}}} \sum_{\beta=1}^{N_{\mathrm{r},\alpha}} \nu_{\gamma,\alpha\beta} r_{\alpha\beta,i,j,k}
-\end{equation}
-
-\subsubsection*{Instantaneous Transport}
-\label{sec:instantaneous_transport}
-
-Similar to the 1D model, instantaneous transport is the default mode of operation in the 3D model.  However, implementation is not as straight-forward in 3D since Eulerian cells more than one cell below the surface are not usually tied to a ``wall cell''.  In 3D, unless the user specifies otherwise, mass is ejected via the nearest wall cell and the deformation model is taken to be isotropic.  Alternatively, the user may specify the direction for mass ejection and the deformation model becomes unidirectional.
-
-For instantaneous transport, the mass flux at the solid surface for a given wall cell is the summation of the mass production in the column of solid cells tied to the wall cell.  For a column of cells in the $z$ direction tied to wall cell $w$, we have
-\begin{equation}
-\label{eq:mdotint}
-\dot{m}_{\gamma,w}'' = \sum_{k \in w} \dot{m}_{\gamma,i,j,k}''' \,\delta z_k
-\end{equation}
-This is the 3D discrete analog of Eq.~(\ref{eq:1dmassflux_solid}).
-
-\subsubsection*{Diffusive Transport}
-\label{sec:diffusive_transport}
-
-A less arbitrary way to assign the pyrolysis gas to a wall cell is to simply solve a transport equation.  While the physics is not so simple in reality, an isotropic diffusion model of transport has several advantages:  It is easy to implement.  It avoids any ad hoc assumptions applied in the instantaneous model.  It handles smoldering combustion and char oxidation naturally.  And finally, while the physics are not perfect, they are usually qualitatively correct and the implementation lends itself to improvement.
-
-The diffusive transport equation for gas component $\gamma$ is given by
-\begin{equation}
-\label{eq:diff}
-\frac{\partial \rho_\gamma}{\partial t} = - \Div\mathbf{J}_\gamma + \dot{m}_{\gamma}'''
-\end{equation}
-where the diffusive flux is modeled with Fick's law,
-\begin{equation}
-\label{eq:fick}
-\mathbf{J}_\gamma = - D_{\gamma} \tilde{\nabla} \rho_\gamma
-\end{equation}
-Note that the gradient operator is written in terms of a deformed space coordinate, in the same manner as the heat flux.  In the current implementation, the diffusivity is isotropic.  The default is the gas phase molecular value for component $\gamma$.  However, the user may adjust this value if needed.
-
-\subsubsection*{Transport Boundary Conditions}
-\label{sec:transport_bcs}
-
-Consider the flux between solid cell $i$ and gas phase cell $i+1$.  The surface is denoted by F for ``face value''. The mass flux at the solid surface is taken from
-\begin{equation}
-\label{eq:massflux_boundary}
-J_{\gamma,\mathrm{F}} = - D_{\gamma,\mathrm{F}} \frac{\rho_{\gamma,\mathrm{F}} - \rho_{\gamma,i}}{\frac{1}{2}\delta \tilde{x}_i}
-\end{equation}
-where
-\begin{equation}
-\label{eq:rhoF}
-\rho_{\gamma,\mathrm{F}} =
-\left\{\begin{array}{ll}
-0                          & \mbox{if $\gamma$ is fuel} \\
-\rho Y_{\gamma,\mathrm{F}} & \mbox{if $\gamma$ is oxidizer} \\
-\rho_{\gamma,i}            & \mbox{if boundary is impermeable, $J_{\gamma,\mathrm{F}}=0$}
-\end{array}\right.
-\end{equation}
-
-The boundary conditions in Eq.~(\ref{eq:rhoF}) provide qualitatively correct behavior for the pyrolysis gases (transport \emph{out} of the solid) while allowing diffusion of oxidizer into the solid.  Using $\rho Y_{\gamma,\mathrm{F}}$ for the fuel can lead to erratic behavior caused by diffusion of fuel back into the solid, which is not physical.  This ad hoc treatment of the boundary is a limitation of the diffusion model, but we note that the scheme is no worse than the instantaneous transport out of the solid used in most 1D models.
-
-It should be noted that $\rho Y_{\gamma,\mathrm{F}}$ is currently taken from the gas phase solver at the current time level.  The mass flux is therefore time lagged between the gas phase and solid phase solvers, unlike the surface temperature from Eq.~(\ref{eq:tmpwall}).  This is a potential source of error that will be addressed in future development.
-
-
