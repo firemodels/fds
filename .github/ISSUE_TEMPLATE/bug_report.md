@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. If you just have a question about using FDS use the discussion page (https://github.com/firemodels/fds/discussions).
 
 **To Reproduce**
 Steps to reproduce the behavior:
