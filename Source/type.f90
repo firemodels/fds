@@ -864,6 +864,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
    REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro
    REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
+   REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -880,7 +881,7 @@ TYPE SURFACE_TYPE
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1,RAMP_H_FIXED_INDEX=-1,RAMP_H_FIXED_B_INDEX=-1
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
-   INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0,N_CONE_CURVES=0
+   INTEGER :: N_LAYERS,N_MATL,N_SPEC=0,N_LPC=0,N_CONE_CURVES=0
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
    INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX    !< Index for Spyro integrated TIME_HEAT arrays
