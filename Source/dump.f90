@@ -1509,7 +1509,7 @@ SUBROUTINE WRITE_STL_FILE
    COLOR = INT((/0,0,0/),IB8)
    ONE   = 1
 
-   TITLE = FN_STL
+   TITLE = FN_STL(1:80)
 
    FACES(1,:) = (/1,4,2/)
    FACES(2,:) = (/2,4,3/)
