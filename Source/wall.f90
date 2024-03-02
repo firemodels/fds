@@ -2247,18 +2247,9 @@ SUB_TIMESTEP_LOOP: DO
          Q_NET_F = B1%Q_RAD_IN - B1%EMISSIVITY*SIGMA*B1%TMP_F**4 + Q_CON_F
          Q_NET_B = Q_RAD_IN_B  - E_WALLB      *SIGMA*B1%TMP_B**4 + Q_CON_B
       ENDIF
-      DO I=2,NWP-1
-         DELTA_TMP(I) = (DT_BC/ONE_D%RHO_C_S(I))*(RDX_S(I)*(ONE_D%K_S(I)  *RDXN_S(I)  *(ONE_D%TMP(I+1)-ONE_D%TMP(I))-&
-                                                            ONE_D%K_S(I-1)*RDXN_S(I-1)*(ONE_D%TMP(I)-ONE_D%TMP(I-1))) + Q_S(I))
+      DO I=1,NWP
+         DELTA_TMP(I) = DT_BC*Q_S(I)/ONE_D%RHO_C_S(I)
       ENDDO
-      IF (NWP>1) THEN
-         DELTA_TMP(1)   = (DT_BC/ONE_D%RHO_C_S(1))*&
-                          (RDX_S(1)*(ONE_D%K_S(1)*RDXN_S(1)*(ONE_D%TMP(2)-ONE_D%TMP(1))+Q_NET_F) + Q_S(1))
-         DELTA_TMP(NWP) = (DT_BC/ONE_D%RHO_C_S(NWP))*&
-                          (RDX_S(NWP)*(Q_NET_B-ONE_D%K_S(NWP-1)*RDXN_S(NWP-1)*(ONE_D%TMP(NWP)-ONE_D%TMP(NWP-1))) + Q_S(NWP))
-      ELSE
-         DELTA_TMP(1)   = (DT_BC/ONE_D%RHO_C_S(1))*(RDX_S(1)*(Q_NET_B+Q_NET_F) + Q_S(1))
-      ENDIF
       TMP_RATIO = MAX(TWO_EPSILON_EB,MAXVAL(ABS(DELTA_TMP(1:NWP)))/SF%DELTA_TMP_MAX)
       DT_BC_SUB = DT_BC/REAL(MIN(NINT(SF%TIME_STEP_FACTOR*WALL_INCREMENT),MAX(1,NINT(TMP_RATIO))),EB)
       DT_BC_SUB = MIN( DT_BC-T_BC_SUB , DT_BC_SUB )
