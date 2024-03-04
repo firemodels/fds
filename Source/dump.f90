@@ -3974,6 +3974,10 @@ REAL(EB) :: SUM
 REAL(FB) :: STIME
 INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
+REAL(EB) :: ISO_CENX, ISO_CENY, ISO_CENZ, ISO_RAD
+REAL(EB) :: XX, YY, ZZ
+REAL(FB) :: ISO_LEVEL(1)
+INTEGER ::  ISO_NLEVEL
 
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
@@ -4023,14 +4027,30 @@ ISOF_LOOP: DO N=1,N_ISOF
    HAVE_ISO2 = 0
 
    ! Fill up the dummy array QUANTITY with the appropriate gas phase output
-
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0)
+   IF (IS%DEBUG) THEN
+      ISO_CENX = (XS_MIN + XF_MAX)/2.0
+      ISO_CENY = (YS_MIN + YF_MAX)/2.0
+      ISO_CENZ = (ZS_MIN + ZF_MAX)/2.0
+      ISO_RAD = SQRT((XF_MAX-XS_MIN)**2 + (YF_MAX-YS_MIN)**2 + (ZF_MAX-ZS_MIN)**2)
+      DO K=0,KBP1
+         ZZ = ZPLT(MIN(K,KBAR))
+         DO J=0,JBP1
+            YY = YPLT(MIN(J,JBAR))
+            DO I=0,IBP1
+               XX = XPLT(MIN(I,IBAR))
+               QUANTITY(I,J,K) = SQRT((XX-ISO_CENX)**2 + (YY-ISO_CENY)**2 + (ZZ-ISO_CENZ)**2)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Mirror QUANTITY into ghost cells
 
@@ -4063,13 +4083,24 @@ ISOF_LOOP: DO N=1,N_ISOF
 
       ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0)
+      IF (IS%DEBUG) THEN
+         DO K=0,KBP1
+            ZZ = ZPLT(MIN(K,KBAR))
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  QUANTITY2(I,J,K) = ZZ 
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+      ELSE
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 
       ! Mirror QUANTITY into ghost cells
 
@@ -4096,8 +4127,15 @@ ISOF_LOOP: DO N=1,N_ISOF
 
    ENDIF INDEX2_IF
 
-   CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
-        IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   IF (IS%DEBUG) THEN
+      ISO_LEVEL(1) = REAL(ISO_RAD,FB)/4.0_FB
+      ISO_NLEVEL = 1
+      CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
+           ISO_LEVEL(1:ISO_NLEVEL), ISO_NLEVEL, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   ELSE
+      CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
+           IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   ENDIF
 
 ENDDO ISOF_LOOP
 
