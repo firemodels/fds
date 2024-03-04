@@ -20,7 +20,6 @@
 
 &SURF ID                   = 'dry needle surf'
       MATL_ID              = 'pulp'
-      SUBSTEP_POWER        = 10
       THICKNESS            = 0.0005
       LENGTH               = 0.10
       TMP_INNER            = 20.
@@ -29,7 +28,6 @@
 &SURF ID                   = 'wet needle surf'
       MATL_ID              = 'pulp'
       MOISTURE_FRACTION    = 0.2
-      SUBSTEP_POWER        = 10
       THICKNESS            = 0.0005
       LENGTH               = 0.10
       TMP_INNER            = 20.
