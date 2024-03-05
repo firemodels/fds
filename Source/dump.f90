@@ -3974,8 +3974,7 @@ REAL(EB) :: SUM
 REAL(FB) :: STIME
 INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
-REAL(EB) :: ISO_CENX, ISO_CENY, ISO_CENZ, ISO_RAD
-REAL(EB) :: XX, YY, ZZ
+REAL(EB) :: ISO_CENX, ISO_CENY, ISO_CENZ, TIME_FACTOR
 REAL(FB) :: ISO_LEVEL(1)
 INTEGER ::  ISO_NLEVEL
 
@@ -4031,14 +4030,10 @@ ISOF_LOOP: DO N=1,N_ISOF
       ISO_CENX = (XS_MIN + XF_MAX)/2.0
       ISO_CENY = (YS_MIN + YF_MAX)/2.0
       ISO_CENZ = (ZS_MIN + ZF_MAX)/2.0
-      ISO_RAD = SQRT((XF_MAX-XS_MIN)**2 + (YF_MAX-YS_MIN)**2 + (ZF_MAX-ZS_MIN)**2)
-      DO K=0,KBP1
-         ZZ = ZPLT(MIN(K,KBAR))
-         DO J=0,JBP1
-            YY = YPLT(MIN(J,JBAR))
-            DO I=0,IBP1
-               XX = XPLT(MIN(I,IBAR))
-               QUANTITY(I,J,K) = SQRT((XX-ISO_CENX)**2 + (YY-ISO_CENY)**2 + (ZZ-ISO_CENZ)**2)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               QQ(I+1,J+1,K+1,1) = SQRT((XPLT(I)-ISO_CENX)**2 + (YPLT(J)-ISO_CENY)**2 + (ZPLT(K)-ISO_CENZ)**2)
             ENDDO
          ENDDO
       ENDDO
@@ -4050,30 +4045,30 @@ ISOF_LOOP: DO N=1,N_ISOF
             ENDDO
          ENDDO
       ENDDO
-   ENDIF
 
    ! Mirror QUANTITY into ghost cells
 
-   QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
-   QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
-   QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
-   QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
-   QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
-   QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
-   CALL FILL_EDGES(QUANTITY)
+      QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
+      QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
+      QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
+      QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
+      QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
+      QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
+      CALL FILL_EDGES(QUANTITY)
 
    ! Average the data (which is assumed to be cell-centered) at cell corners
 
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            QQ(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
-                                               QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                               QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                               QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               QQ(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
+                                                  QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                                  QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                                  QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
 
    ! Fill up QUANTITY2 and QQ2 arrays if the isosurface is colored with a second quantity
 
@@ -4084,11 +4079,10 @@ ISOF_LOOP: DO N=1,N_ISOF
       ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
       IF (IS%DEBUG) THEN
-         DO K=0,KBP1
-            ZZ = ZPLT(MIN(K,KBAR))
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  QUANTITY2(I,J,K) = ZZ 
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  QQ2(I,J,K,1) = ZPLT(K)
                ENDDO
             ENDDO
          ENDDO
@@ -4100,35 +4094,36 @@ ISOF_LOOP: DO N=1,N_ISOF
                ENDDO
             ENDDO
          ENDDO
-      ENDIF
 
       ! Mirror QUANTITY into ghost cells
 
-      QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
-      QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
-      QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
-      QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
-      QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
-      QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
-      CALL FILL_EDGES(QUANTITY2)
+         QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
+         QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
+         QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
+         QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
+         QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
+         QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
+         CALL FILL_EDGES(QUANTITY2)
 
       ! Average the data (which is assumed to be cell-centered) at cell corners
 
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               QQ2(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
-                                                   QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                                   QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                                   QUANTITY2(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY2(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  QQ2(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
+                                                      QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                                      QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                                      QUANTITY2(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY2(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+      ENDIF
 
    ENDIF INDEX2_IF
 
    IF (IS%DEBUG) THEN
-      ISO_LEVEL(1) = REAL(ISO_RAD,FB)/4.0_FB
+      TIME_FACTOR = (STIME - T_BEGIN)/(T_END - T_BEGIN)
+      ISO_LEVEL(1) = TIME_FACTOR*(ZF_MAX-ZS_MIN)/2.0_FB
       ISO_NLEVEL = 1
       CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
            ISO_LEVEL(1:ISO_NLEVEL), ISO_NLEVEL, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
