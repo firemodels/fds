@@ -711,7 +711,6 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,B1%TMP_G,D_Z_G)
                      IF (SIM_MODE==LES_MODE) CALL GET_VISCOSITY(ZZ_GET,MU_DNS_G,B1%TMP_G)
                END SELECT
-               RSC_LOC = RSC
                RHO_D_DZDN_OTHER = 0._EB
                KKO_LOOP: DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
                   JJO_LOOP: DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
@@ -731,6 +730,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                               RHO_D_TURB = 0._EB
                               IF (SIM_MODE==LES_MODE) THEN
                                  CALL GET_VISCOSITY(ZZ_GET,MU_DNS_OTHER,TMP_OTHER)
+                                 RSC_LOC = RSC
                                  IF (SPECIES_MIXTURE(N)%SC_T_USER>TWO_EPSILON_EB) RSC_LOC=1._EB/SPECIES_MIXTURE(N)%SC_T_USER
                                  RHO_D_TURB = 0.5_EB*(MU_OTHER-MU_DNS_OTHER + MU_G-MU_DNS_G)*RSC_LOC
                               ENDIF
@@ -949,8 +949,8 @@ SELECT CASE(SIM_MODE)
       IIG = BC%IIG
       JJG = BC%JJG
       KKG = BC%KKG
-      RSC_LOC = RSC
       DO N=1,N_TRACKED_SPECIES
+         RSC_LOC = RSC
          IF (SPECIES_MIXTURE(N)%SC_T_USER>TWO_EPSILON_EB) RSC_LOC=1._EB/SPECIES_MIXTURE(N)%SC_T_USER
          B1%RHO_D_F(N) = B1%RHO_F*( D_Z(ITMP,N) + (MU_G-MU_DNS(IIG,JJG,KKG))/B1%RHO_G*RSC_LOC )
       ENDDO
