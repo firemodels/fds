@@ -2879,7 +2879,7 @@ DO N=1,N_TRACKED_SPECIES
    IF (SM%SC_T_USER>0._EB) &
       WRITE(LU_OUTPUT,'(A,F8.3)') '   User Turbulent Schmidt Number    ',SM%SC_T_USER
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '   Enthalpy of Formation (J/kg)     ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
