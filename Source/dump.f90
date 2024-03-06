@@ -4033,7 +4033,7 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               QQ(I+1,J+1,K+1,1) = SQRT((XPLT(I)-ISO_CENX)**2 + (YPLT(J)-ISO_CENY)**2 + (ZPLT(K)-ISO_CENZ)**2)
+               QQ(I,J,K,1) = SQRT( (XPLT(I)-ISO_CENX)**2 + (YPLT(J)-ISO_CENY)**2 + (ZPLT(K)-ISO_CENZ)**2)
             ENDDO
          ENDDO
       ENDDO
@@ -4079,10 +4079,10 @@ ISOF_LOOP: DO N=1,N_ISOF
       ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
       IF (IS%DEBUG) THEN
-         DO K=0,KBAR
-            DO J=0,JBAR
-               DO I=0,IBAR
-                  QQ2(I,J,K,1) = ZPLT(K)
+         DO K=0,KBAR+1
+            DO J=0,JBAR+1
+               DO I=0,IBAR+1
+                  QQ2(I,J,K,1) = ZPLT(MIN(K,KBAR))
                ENDDO
             ENDDO
          ENDDO
@@ -4122,7 +4122,7 @@ ISOF_LOOP: DO N=1,N_ISOF
    ENDIF INDEX2_IF
 
    IF (IS%DEBUG) THEN
-      TIME_FACTOR = (STIME - T_BEGIN)/(T_END - T_BEGIN)
+      TIME_FACTOR = MAX(0.05_EB, (STIME - T_BEGIN)/(T_END - T_BEGIN))
       ISO_LEVEL(1) = TIME_FACTOR*(ZF_MAX-ZS_MIN)/2.0_FB
       ISO_NLEVEL = 1
       CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
