@@ -3977,7 +3977,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
 REAL(EB) :: ISO_CENX, ISO_CENY, ISO_CENZ, TIME_FACTOR
 REAL(FB) :: ISO_LEVEL(1)
 INTEGER ::  ISO_NLEVEL
-
+INTEGER :: II, JJ, KK
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
 DRY=.FALSE.
@@ -4061,7 +4061,7 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               QQ(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
+               QQ(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
                                                   QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
                                                   QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
                                                   QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
@@ -4107,9 +4107,12 @@ ISOF_LOOP: DO N=1,N_ISOF
 
       ! Average the data (which is assumed to be cell-centered) at cell corners
 
-         DO K=0,KBAR
-            DO J=0,JBAR
-               DO I=0,IBAR
+         DO KK=0,KBAR+1
+            K = MIN(KK, KBAR)
+            DO JJ=0,JBAR+1
+               J = MIN(JJ, JBAR)
+               DO II=0,IBAR+1
+                  I = MIN(II, IBAR)
                   QQ2(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
                                                       QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
                                                       QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
