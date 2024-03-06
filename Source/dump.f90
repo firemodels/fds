@@ -3198,7 +3198,7 @@ ENDIF WRITE_RADIATION
 IF (N_ZONE>0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Pressure Zone Information'
    DO N=1,N_ZONE
-      WRITE(LU_OUTPUT,'(3X,I0,A,ES11.4,A,I0,A,I0,A,I0,A,I0,A,I0,A)') N,' Volume:',P_ZONE(N)%VOLUME,' m³, Cells: ',&
+      WRITE(LU_OUTPUT,'(3X,I0,A,ES11.4,A,I0,A,I0,A,I0,A,I0,A,I0,A)') N,' Volume:',P_ZONE(N)%VOLUME,' m3, Cells: ',&
          P_ZONE(N)%N_CELLS,', Mesh: ',P_ZONE(N)%MESH_INDEX,&
          ', Indices: (',P_ZONE(N)%CELL_INDICES(1),',',P_ZONE(N)%CELL_INDICES(2),',',P_ZONE(N)%CELL_INDICES(3),')'
    ENDDO
