@@ -150,7 +150,8 @@ ENDIF
 
 ! VTK Smoke 3D slices
 IF (T>=SM3D_VTK_CLOCK(SM3D_VTK_COUNTER(NM)) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
-   IF (NM .EQ. 1) THEN
+   CALL POINT_TO_MESH(NM)
+   IF ((NM .EQ. 1).AND.(N_SMOKE3D > 0)) THEN
       CALL WRITE_VTK_SM3D_WRAPPER(T,NMESHES)
    ENDIF
    CALL DUMP_SMOKE3D(T,DT,NM,1)
@@ -163,7 +164,7 @@ ENDIF
 ! VTK Boundary data
 
 IF (T>=BNDF_VTK_CLOCK(BNDF_VTK_COUNTER(NM))) THEN
-   IF (NM .EQ. 1) THEN
+   IF ((NM .EQ. 1).AND.(N_BNDF > 0)) THEN
       CALL WRITE_VTK_BNDF_WRAPPER(T,NMESHES)
    ENDIF
    CALL DUMP_BNDF(T,DT,NM,1)
@@ -1369,6 +1370,9 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0) THEN
       M%BNDF_TIME_INTEGRAL = 0._FB
    ENDIF
 
+ELSE
+   M%N_PATCH = 0
+
 ENDIF IF_BOUNDARY_FILES
 
 BOUNDARY_FILES: DO NF=1,N_BNDF
@@ -1505,7 +1509,7 @@ SUBROUTINE WRITE_STL_FILE
    COLOR = INT((/0,0,0/),IB8)
    ONE   = 1
 
-   TITLE = FN_STL
+   TITLE = FN_STL(1:80)
 
    FACES(1,:) = (/1,4,2/)
    FACES(2,:) = (/2,4,3/)
@@ -1551,6 +1555,9 @@ SUBROUTINE WRITE_STL_FILE
          DO I=1,12
             !CALL write_facet_c(U, &
             !   VERTICES(FACES(i,1),:), VERTICES(FACES(i,2),:), VERTICES(FACES(i,3),:), color)
+            IF (ABS(SUM(VERTICES(FACES(I,1),:)-VERTICES(FACES(I,2),:))).EQ.0) CYCLE
+            IF (ABS(SUM(VERTICES(FACES(I,1),:)-VERTICES(FACES(I,3),:))).EQ.0) CYCLE
+            IF (ABS(SUM(VERTICES(FACES(I,2),:)-VERTICES(FACES(I,3),:))).EQ.0) CYCLE
             CALL WRITE_FACET(LU_STL, &
                VERTICES(FACES(I,1),:), VERTICES(FACES(I,2),:), VERTICES(FACES(I,3),:))
          END DO
@@ -2872,7 +2879,7 @@ DO N=1,N_TRACKED_SPECIES
    IF (SM%SC_T_USER>0._EB) &
       WRITE(LU_OUTPUT,'(A,F8.3)') '   User Turbulent Schmidt Number    ',SM%SC_T_USER
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES10.3)')  '   Enthalpy of Formation (J/kg)     ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -3420,7 +3427,7 @@ ENDIF WRITE_RADIATION
 IF (N_ZONE>0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Pressure Zone Information'
    DO N=1,N_ZONE
-      WRITE(LU_OUTPUT,'(3X,I0,A,ES11.4,A,I0,A,I0,A,I0,A,I0,A,I0,A)') N,' Volume:',P_ZONE(N)%VOLUME,' m³, Cells: ',&
+      WRITE(LU_OUTPUT,'(3X,I0,A,ES11.4,A,I0,A,I0,A,I0,A,I0,A,I0,A)') N,' Volume:',P_ZONE(N)%VOLUME,' m3, Cells: ',&
          P_ZONE(N)%N_CELLS,', Mesh: ',P_ZONE(N)%MESH_INDEX,&
          ', Indices: (',P_ZONE(N)%CELL_INDICES(1),',',P_ZONE(N)%CELL_INDICES(2),',',P_ZONE(N)%CELL_INDICES(3),')'
    ENDDO
@@ -4535,7 +4542,7 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
 
 ENDDO DATA_FILE_LOOP
 
-IF (VTK_OUT) THEN
+IF ((VTK_OUT).AND.(N_SMOKE3D > 0)) THEN
    VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE', ACTION='CLOSE')
    VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
    VTK_ERROR = A_VTK_FILE%FINALIZE()
@@ -11150,7 +11157,7 @@ IF (IFRMT.EQ.0) THEN
          CLOSE(LU_BNDG(NF,NM))
       ENDDO FILE_LOOP2
    ENDIF
-ELSEIF (IFRMT.EQ.1) THEN
+ELSEIF ((IFRMT.EQ.1).AND.(MESHES(NM)%N_PATCH > 0)) THEN
    ITM  = INT(STIME)
    ITM1 = NINT(ABS(STIME-ITM)*100)
    IF (ITM1==100) THEN
@@ -11163,6 +11170,7 @@ ELSEIF (IFRMT.EQ.1) THEN
    ELSE
       VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_BNDF_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
    ENDIF ! do not change capitalization on mesh topology
+   
    PATCH_LOOP1: DO IP=1,N_PATCH
       PA => PATCH(IP)
       ! Initialize piece
