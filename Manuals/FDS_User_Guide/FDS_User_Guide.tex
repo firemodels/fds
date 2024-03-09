@@ -4678,7 +4678,7 @@ Multiple simple chemistry reactions can be defined. Each new reaction will requi
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Appendix~\ref{info:predefined_species}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Appendix~\ref{info:predefined_species}, there are several options to ensure that all of the enthalpies of formation are specified.
+In FDS, the energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in density for each species in that volume in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Appendix~\ref{info:predefined_species}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Appendix~\ref{info:predefined_species}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 
@@ -4691,7 +4691,7 @@ Note FDS will also use {\ct REFERENCE\_ENTHALPY}, {\ct SPECIFIC\_HEAT}, or {\ct 
 
 \subsubsection{Option 2: Specify Heat of Combustion}
 
-For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the {\ct HEAT\_OF\_COMBUSTION} in kJ/kg is specified on {\ct REAC}. Sec.~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line. Specifying the {\ct HEAT\_OF\_COMBUSTION} will result in FDS recomputing the fuel species enthalpy of formation. If this occurs for the same {\ct FUEL} in multiple reactions an warning message will be written.
+For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the {\ct HEAT\_OF\_COMBUSTION} in kJ/kg is specified on {\ct REAC}. Sec.~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line. Specifying the {\ct HEAT\_OF\_COMBUSTION} will result in FDS recomputing any fuel species enthalpy of formation based on {\ct SPEC} inputs. If this occurs for the same {\ct FUEL} in multiple reactions a warning message will be written.
 
 \subsubsection{Option 3: Specify Heat of Combustion Based on Oxygen Consumption (Simple Chemistry)}
 
