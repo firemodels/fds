@@ -2771,6 +2771,8 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
 
    WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
    WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+   IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
+                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
 
    IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
       WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&

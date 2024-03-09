@@ -2883,7 +2883,21 @@ PRIMITIVE_LOOP: DO N1=1,N_SPECIES - N_COPY_PRIMITIVE
       IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF
 
-   IF (SS%REFERENCE_ENTHALPY > -1.E21_EB .OR. SS%H_F > -1.E21_EB .OR. SS%SPECIFIC_HEAT > 0._EB) SS%EXPLICIT_H_F = .TRUE.
+   IF (SS%REFERENCE_ENTHALPY > -1.E21_EB .OR. SS%H_F > -1.E21_EB .OR. SS%SPECIFIC_HEAT > 0._EB .OR. SS%RAMP_CP/='null') &
+      SS%EXPLICIT_H_F = .TRUE.
+   IF (SS%REFERENCE_ENTHALPY <= -1.E21_EB .AND. (SS%SPECIFIC_HEAT > 0._EB .OR. SS%RAMP_CP /='null') &
+       .AND. .NOT. SS%LISTED .AND. SS%H_F <= -1.E21_EB .AND. ANY(REACTION%FUEL==SS%ID)) THEN
+      DO NR=1,N_REACTIONS
+         IF (REACTION(NR)%FUEL==SS%ID .AND. REACTION(NR)%HEAT_OF_COMBUSTION <-1.E20_EB .AND. REACTION(NR)%EPUMO2 < 0._EB) THEN
+            WRITE(MESSAGE,'(5A)') 'WARNING: SPEC ',TRIM(ID),' is used as a FUEL for REAC ',TRIM(REACTION(NR)%ID),'.'
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            WRITE(MESSAGE,'(A)') '       -The SPEC has no explicitly defined REFERENCE_ENTHALPY or ENTHALPY_OF_FORMATION.'
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            WRITE(MESSAGE,'(A)') '       -The REAC has no explicitly defined HEAT_OF_COMBUSTION or EPUMO2.'
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+         ENDIF
+      ENDDO
+   ENDIF
 
    CALL FED_PROPS(SS%PROP_ID,SS%FLD_LETHAL_DOSE,SS%FIC_CONCENTRATION)
 
@@ -4625,9 +4639,9 @@ AIT_EXCLUSION_ZONE_DEVC_ID  = 'null'
 C                           = 0._EB
 CHECK_ATOM_BALANCE          = .TRUE.
 CO_YIELD                    = 0._EB
-CRITICAL_FLAME_TEMPERATURE  = -1._EB     ! Values for various fuels and default are in data.f90
-E                           = -1._EB     ! J/mol
-EPUMO2                      = 13100._EB  ! kJ/kg
+CRITICAL_FLAME_TEMPERATURE  = -1._EB  ! Values for various fuels and default are in data.f90
+E                           = -1._EB  ! J/mol
+EPUMO2                      = -1._EB  ! kJ/kg
 EQUATION                    = 'null'
 FORMULA                     = 'null'
 FUEL                        = 'null'
@@ -5132,6 +5146,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ELSE HOC_IF ! Heat of combustion not specified, use EPUMO2 or H_F is fuel is listed
          LISTED_FUEL_IF: IF (.NOT. LISTED_FUEL ) THEN
             SM => SPECIES_MIXTURE(1)
+            IF (RN2%EPUMO2 < 0._EB) RN2%EPUMO2 = 13100000._EB ! J/kg
             RN2%HOC_COMPLETE = RN2%EPUMO2 * RN2%NU_O2 * SPECIES(O2_INDEX)%MW / SMF%MW
             IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==1) THEN
                RN%HEAT_OF_COMBUSTION = RN2%HOC_COMPLETE
@@ -5148,24 +5163,45 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                RN2%EPUMO2 = RN2%HEAT_OF_COMBUSTION*SMF2%MW *RN2%NU(RN2%FUEL_SMIX_INDEX)/(RN2%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
             ENDIF
          ELSE LISTED_FUEL_IF ! Listed Fuel
-            RN%HEAT_OF_COMBUSTION  = SMF%H_F_HOC+RN%S*SPECIES_MIXTURE(1)%H_F_HOC - &
-                                     (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F_HOC
-            SM => SPECIES_MIXTURE(1)
-            RN%EPUMO2 = RN%HEAT_OF_COMBUSTION*SMF%MW*RN%NU(RN%FUEL_SMIX_INDEX)/(RN%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
-            IF (SMF%H_F_HOC /= SMF%H_F) THEN
-               REDEFINE_H_F(RN%FUEL_SMIX_INDEX) = .TRUE.
-               SMF%H_F = RN%HEAT_OF_COMBUSTION - RN%S*SM%H_F + (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F
-            ENDIF
-            IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==2) THEN
-               RN2%HEAT_OF_COMBUSTION=SMF2%H_F+RN2%S*SPECIES_MIXTURE(1)%H_F_HOC - &
-                                      (1._EB+RN2%S)*SPECIES_MIXTURE(RN2%PROD_SMIX_INDEX)%H_F_HOC
+            EPUMO2_IF: IF (RN2%EPUMO2 > 0._EB) THEN
+               RN2%HOC_COMPLETE = RN2%EPUMO2 * RN2%NU_O2 * SPECIES(O2_INDEX)%MW / SMF%MW
+               IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==1) THEN
+                  RN%HEAT_OF_COMBUSTION = RN2%HOC_COMPLETE
+                  SMF%H_F = RN%HEAT_OF_COMBUSTION - RN%S*SM%H_F + (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F
+                  IF (SMF%SINGLE_SPEC_INDEX>0) SPECIES(SMF%SINGLE_SPEC_INDEX)%H_F = SMF%H_F
+               ELSE
+                  RN%HOC_COMPLETE = RN2%HOC_COMPLETE
+                  RN2%HEAT_OF_COMBUSTION = SPECIES_MIXTURE(RN2%FUEL_SMIX_INDEX)%H_F + RN2%S*SM%H_F - &
+                                           (1._EB+RN2%S)*SPECIES_MIXTURE(RN2%PROD_SMIX_INDEX)%H_F
+                  RN%HEAT_OF_COMBUSTION  = RN%HOC_COMPLETE - (1._EB+RN%S)*RN2%HEAT_OF_COMBUSTION
+                  SMF%H_F = RN%HEAT_OF_COMBUSTION - RN%S*SM%H_F + (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F
+                  IF (SMF%SINGLE_SPEC_INDEX>0) SPECIES(SMF%SINGLE_SPEC_INDEX)%H_F = SMF%H_F
+                  RN%EPUMO2  = RN%HEAT_OF_COMBUSTION *SMF%MW  *RN%NU(RN%FUEL_SMIX_INDEX)  / &
+                               (RN%NU(1) *SM%MW*SM%MASS_FRACTION(O2_INDEX))
+                  RN2%EPUMO2 = RN2%HEAT_OF_COMBUSTION*SMF2%MW *RN2%NU(RN2%FUEL_SMIX_INDEX)/ &
+                               (RN2%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
+               ENDIF
+            ELSE EPUMO2_IF
+               RN%HEAT_OF_COMBUSTION  = SMF%H_F_HOC+RN%S*SPECIES_MIXTURE(1)%H_F_HOC - &
+                                        (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F_HOC
                SM => SPECIES_MIXTURE(1)
-               RN2%EPUMO2 = RN2%HEAT_OF_COMBUSTION*SMF2%MW*RN2%NU(RN2%FUEL_SMIX_INDEX)/(RN2%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
-               RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION + (1._EB+RN%S)*RN2%HEAT_OF_COMBUSTION
-               RN2%HOC_COMPLETE = RN%HOC_COMPLETE
-            ELSE
-               RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
-            ENDIF
+               RN%EPUMO2 = RN%HEAT_OF_COMBUSTION*SMF%MW*RN%NU(RN%FUEL_SMIX_INDEX)/(RN%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
+               IF (SMF%H_F_HOC /= SMF%H_F) THEN
+                  REDEFINE_H_F(RN%FUEL_SMIX_INDEX) = .TRUE.
+                  SMF%H_F = RN%HEAT_OF_COMBUSTION - RN%S*SM%H_F + (1._EB+RN%S)*SPECIES_MIXTURE(RN%PROD_SMIX_INDEX)%H_F
+               ENDIF
+               IF (RN%N_SIMPLE_CHEMISTRY_REACTIONS==2) THEN
+                  RN2%HEAT_OF_COMBUSTION=SMF2%H_F+RN2%S*SPECIES_MIXTURE(1)%H_F_HOC - &
+                                         (1._EB+RN2%S)*SPECIES_MIXTURE(RN2%PROD_SMIX_INDEX)%H_F_HOC
+                  SM => SPECIES_MIXTURE(1)
+                  RN2%EPUMO2 = RN2%HEAT_OF_COMBUSTION*SMF2%MW*RN2%NU(RN2%FUEL_SMIX_INDEX)/&
+                               (RN2%NU(1)*SM%MW*SM%MASS_FRACTION(O2_INDEX))
+                  RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION + (1._EB+RN%S)*RN2%HEAT_OF_COMBUSTION
+                  RN2%HOC_COMPLETE = RN%HOC_COMPLETE
+               ELSE
+                  RN%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
+               ENDIF
+            ENDIF EPUMO2_IF
 
          ENDIF LISTED_FUEL_IF
       ENDIF HOC_IF
