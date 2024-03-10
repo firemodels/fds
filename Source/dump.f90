@@ -3977,10 +3977,12 @@ REAL(FB) :: STIME
 INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
 REAL(FB) :: ISO_CENX, ISO_CENY, ISO_CENZ
+REAL(FB) :: ZZ
 REAL(EB) :: TIME_FACTOR
 REAL(FB) :: ISO_LEVEL(1)
 INTEGER ::  ISO_NLEVEL
 INTEGER :: II, JJ, KK
+
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
 DRY=.FALSE.
@@ -4083,9 +4085,14 @@ ISOF_LOOP: DO N=1,N_ISOF
 
       IF (IS%DEBUG) THEN
          DO K=0,KBAR+1
+            IF (K.EQ.KBAR+1) THEN
+               ZZ = 2.0_FB*ZPLT(KBAR) - ZPLT(KBAR-1)
+            ELSE
+               ZZ = ZPLT(K)
+            ENDIF
             DO J=0,JBAR+1
                DO I=0,IBAR+1
-                  QQ2(I,J,K,1) = ZPLT(MIN(K,KBAR))
+                  QQ2(I,J,K,1) = ZZ
                ENDDO
             ENDDO
          ENDDO
