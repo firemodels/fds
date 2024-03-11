@@ -12599,14 +12599,26 @@ ENDIF
 WRITE(FN_BNDF_VTK(NMESHES+1),'(A,A,A,I8.8,I2.2,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_BNDF_',ITM,ITM1,'.pvtu'
 VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_BNDF_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
                                    MESH_KIND='Float32')
-VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
 ! Add PointData arrays
+VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
 QUANTITY_LOOP2: DO IQ=1,N_BNDF
    BF => BOUNDARY_FILE(IQ)
-   VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(BF%SMOKEVIEW_LABEL(1:30)), &
+   IF (.NOT.BF%CELL_CENTERED) THEN
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(BF%SMOKEVIEW_LABEL(1:30)), &
                                                            DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
+   ENDIF
 ENDDO QUANTITY_LOOP2
 VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='CLOSE')
+! Add CellData arrays
+VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='OPEN')
+QUANTITY_LOOP3: DO IQ=1,N_BNDF
+   BF => BOUNDARY_FILE(IQ)
+   IF (BF%CELL_CENTERED) THEN
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(BF%SMOKEVIEW_LABEL(1:30)), &
+                                                           DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=1)
+   ENDIF
+ENDDO QUANTITY_LOOP3
+VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='CLOSE')
 
 DO I=1,NMESHES
    CALL POINT_TO_MESH(I)
@@ -13167,89 +13179,92 @@ WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer.Origin = CenterOfRot
 WRITE(LU_PARAVIEW,'(A)') "# Add x-axis slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl2dxFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "    slcfxTypes = [x.split(chid+'_X_')[1] for x in sl2dxFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    slcfxTypes = ['_'.join(x.split('_')[:-1]) for x in slcfxTypes]"
+WRITE(LU_PARAVIEW,'(A,A)') "    slcfxTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-').replace('pos_','') ",&
+                         "for x in slcfxTypes]"
 WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfxTypes = sorted(list(set(slcfxTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfxType in uniqueSlcfxTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfxType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfxTypeFiles = sorted(glob.glob(namespace+'_X_'+slcfxType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcf_files = sorted([x for x,y in zip(sl2dxFiles, slcfxTypes) if y == slcfxType])"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dxData = XMLPartitionedUnstructuredGridReader(",&
-                         "registrationName='X=%0.4f'%(axis), FileName=slcfxTypeFiles)"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfxTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dxData.PointArrayStatus = slcfNames"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfxTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dxData.CellArrayStatus = slcfNames"
+                         "registrationName='X=%0.4f'%(axis), FileName=slcf_files)"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfxTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dxData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfxTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dxData.CellArrayStatus = slcfNames"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add y-axis slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl2dyFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "    slcfyTypes = [x.split(chid+'_Y_')[1] for x in sl2dyFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    slcfyTypes = ['_'.join(x.split('_')[:-1]) for x in slcfyTypes]"
+WRITE(LU_PARAVIEW,'(A,A)') "    slcfyTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-').replace('pos_','') ",&
+                         "for x in slcfyTypes]"
 WRITE(LU_PARAVIEW,'(A)') "    uniqueSlcfyTypes = sorted(list(set(slcfyTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfyType in uniqueSlcfyTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfyType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfyTypeFiles = sorted(glob.glob(namespace+'_Y_'+slcfyType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcf_files = sorted([x for x,y in zip(sl2dyFiles, slcfyTypes) if y == slcfyType])"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dyData = XMLPartitionedUnstructuredGridReader(",&
-                         "registrationName='Y=%0.4f'%(axis), FileName=slcfyTypeFiles)"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfyTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dyData.PointArrayStatus = slcfNames"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfyTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dyData.CellArrayStatus = slcfNames"
+                         "registrationName='Y=%0.4f'%(axis), FileName=slcf_files)"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfyTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dyData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfyTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dyData.CellArrayStatus = slcfNames"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add z-axis slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl2dzFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "    slcfzTypes = [x.split(chid+'_Z_')[1] for x in sl2dzFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    slcfzTypes = ['_'.join(x.split('_')[:-1]) for x in slcfzTypes]"
+WRITE(LU_PARAVIEW,'(A,A)') "    slcfzTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-').replace('pos_','') ",&
+                         "for x in slcfzTypes]"
 WRITE(LU_PARAVIEW,'(A)') "    uniqueslcfzTypes = sorted(list(set(slcfzTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for slcfzType in uniqueslcfzTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        axis=float(slcfzType)/100"
-WRITE(LU_PARAVIEW,'(A)') "        slcfzTypeFiles = sorted(glob.glob(namespace+'_Z_'+slcfzType+'_*.pvtu'))"
+WRITE(LU_PARAVIEW,'(A)') "        slcf_files = sorted([x for x,y in zip(sl2dzFiles, slcfzTypes) if y == slcfzType])"
 WRITE(LU_PARAVIEW,'(A,A)') "        sl2dzData = XMLPartitionedUnstructuredGridReader(",&
-                         "registrationName='Z=%0.4f'%(axis), FileName=slcfzTypeFiles)"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfzTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PPointData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dzData.PointArrayStatus = slcfNames"
-WRITE(LU_PARAVIEW,'(A)') "        with open(slcfzTypeFiles[0],'r') as f:"
-WRITE(LU_PARAVIEW,'(A)') "            text = f.read()"
-WRITE(LU_PARAVIEW,'(A)') "        if '<PCellData>' in text:"
-WRITE(LU_PARAVIEW,'(A)') "            text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
-WRITE(LU_PARAVIEW,'(A,A,A)') "            tmp = text.split('Name=",'"',"')"
-WRITE(LU_PARAVIEW,'(A)') "            slcfNames = []"
-WRITE(LU_PARAVIEW,'(A)') "            for i in range(1, len(tmp)):"
-WRITE(LU_PARAVIEW,'(A,A,A)') "                slcfNames.append(tmp[i].split('",'"',"')[0])"
-WRITE(LU_PARAVIEW,'(A)') "            sl2dzData.CellArrayStatus = slcfNames"
+                         "registrationName='Z=%0.4f'%(axis), FileName=slcf_files)"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfzTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PPointData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PPointData>')[1].split(',</PPointData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dzData.PointArrayStatus = slcfNames"
+WRITE(LU_PARAVIEW,'(A)') "        #with open(slcfzTypeFiles[0],'r') as f:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = f.read()"
+WRITE(LU_PARAVIEW,'(A)') "        #if '<PCellData>' in text:"
+WRITE(LU_PARAVIEW,'(A)') "        #    text = text.split('<PCellData>')[1].split(',</PCellData>')[0]"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #        tmp = text.split('Name=",'"',"')"
+WRITE(LU_PARAVIEW,'(A)') "        #    slcfNames = []"
+WRITE(LU_PARAVIEW,'(A)') "        #    for i in range(1, len(tmp)):"
+WRITE(LU_PARAVIEW,'(A,A,A)') "    #            slcfNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        #    sl2dzData.CellArrayStatus = slcfNames"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add particle data"
 WRITE(LU_PARAVIEW,'(A)') "if len(partFiles) > 0:"

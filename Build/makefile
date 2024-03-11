@@ -270,7 +270,7 @@ impi_intel_linux_db : obj = fds_impi_intel_linux_db
 impi_intel_linux_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_openmp_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_openmp_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT -diag-disable=10448
 impi_intel_linux_openmp_db : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMP)
 impi_intel_linux_openmp_db : FCOMPL = mpiifort
 impi_intel_linux_openmp_db : FOPENMPFLAGS = -qopenmp
