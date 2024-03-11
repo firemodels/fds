@@ -24,7 +24,7 @@ USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
-INTEGER :: I,J,K,IW,IOR,NOM,ICF
+INTEGER :: I,J,K,IW,IOR,NOM
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,TNOW, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY,H0
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -169,18 +169,6 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             END SELECT
          ENDIF
 
-         ICF = 0
-         IF (CC_IBM) THEN
-            SELECT CASE(IOR)
-               CASE( 1); ICF = FCVAR(0,   J,K,CC_IDCF,ABS(IOR))
-               CASE(-1); ICF = FCVAR(IBAR,J,K,CC_IDCF,ABS(IOR))
-               CASE( 2); ICF = FCVAR(I,0,   K,CC_IDCF,ABS(IOR))
-               CASE(-2); ICF = FCVAR(I,JBAR,K,CC_IDCF,ABS(IOR))
-               CASE( 3); ICF = FCVAR(I,J,0,   CC_IDCF,ABS(IOR))
-               CASE(-3); ICF = FCVAR(I,J,KBAR,CC_IDCF,ABS(IOR))
-            END SELECT
-         ENDIF
-
          ! Wind inflow boundary conditions
 
          IF (INITIAL_SPEED>0._EB) THEN
@@ -190,18 +178,14 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          ENDIF
 
          IF (OPEN_WIND_BOUNDARY) THEN
-            IF (ICF>0) THEN
-               H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
-            ELSE
-               SELECT CASE(IOR)
-                  CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K))
-                  CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K))
-                  CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K))
-                  CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K))
-                  CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   ))
-                  CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR))
-               END SELECT
-            ENDIF
+            SELECT CASE(IOR)
+               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K))
+               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K))
+               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K))
+               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K))
+               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   ))
+               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR))
+            END SELECT
          ENDIF
 
          SELECT CASE(IOR)
