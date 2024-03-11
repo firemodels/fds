@@ -190,9 +190,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          ENDIF
 
          IF (OPEN_WIND_BOUNDARY) THEN
-            IF (DOT_PRODUCT(BC%NVEC,(/U_WIND(K),V_WIND(K),W_WIND(K)/))<-TWO_EPSILON_EB) THEN
-               H0 = 0._EB
-            ELSEIF (ICF>0) THEN
+            IF (ICF>0) THEN
                H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
             ELSE
                SELECT CASE(IOR)

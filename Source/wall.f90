@@ -336,6 +336,13 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          B1%ZZ_F(1:N_TRACKED_SPECIES) = B1%ZZ_G(1:N_TRACKED_SPECIES)
       ENDIF
 
+      ! Avoid large fluxes at open downwind boundaries
+
+      IF (OPEN_WIND_BOUNDARY .AND. DOT_PRODUCT(BC%NVEC,(/U_WIND(KK),V_WIND(KK),W_WIND(KK)/))<-TWO_EPSILON_EB) THEN
+         B1%TMP_F = B1%TMP_G
+         B1%ZZ_F(1:N_TRACKED_SPECIES) = B1%ZZ_G(1:N_TRACKED_SPECIES)
+      ENDIF
+
       ! Ghost cell values
 
       TMP(II,JJ,KK) = B1%TMP_F
