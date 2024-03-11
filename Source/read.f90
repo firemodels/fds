@@ -14866,24 +14866,51 @@ CONTAINS
 
 SUBROUTINE GET_SLCF_NAME(PBX,PBY,PBZ,XS_MIN,XF_MAX,YS_MIN,YF_MAX,ZS_MIN,ZF_MAX,SLCF_NAME)
 REAL(EB), INTENT(IN) :: PBX, PBY, PBZ, XS_MIN, XF_MAX, YS_MIN, YF_MAX, ZS_MIN, ZF_MAX
+REAL(EB) :: XS, XF, YS, YF, ZS, ZF
 CHARACTER(200) :: SLCF_NAME,XNAME,YNAME,ZNAME
+CHARACTER(4) :: SIGN_TXT,SIGN_TXT2
 
 IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
-   IF (PBX>-1.E5_EB) THEN 
-      WRITE(SLCF_NAME,'(A,I6.6,I2.2)') 'X_',FLOOR(PBX),FLOOR(ABS(FLOOR(PBX)-PBX)*100)
+   SIGN_TXT="neg_"
+   IF (PBX>-1.E5_EB) THEN
+      IF (PBX > 0) SIGN_TXT="pos_"
+      XS = ABS(PBX)
+      WRITE(SLCF_NAME,'(A,A,I6.6,I2.2)') 'X_',SIGN_TXT,FLOOR(XS),FLOOR((XS-FLOOR(XS))*100)
    ELSEIF (PBY>-1.E5_EB) THEN
-      WRITE(SLCF_NAME,'(A,I6.6,I2.2)') 'Y_',FLOOR(PBY),FLOOR(ABS(FLOOR(PBY)-PBY)*100)
+      IF (PBY > 0) SIGN_TXT="pos_"
+      YS = ABS(PBY)
+      WRITE(SLCF_NAME,'(A,A,I6.6,I2.2)') 'Y_',SIGN_TXT,FLOOR(YS),FLOOR((YS-FLOOR(YS))*100)
    ELSEIF (PBZ>-1.E5_EB) THEN 
-      WRITE(SLCF_NAME,'(A,I6.6,I2.2)') 'Z_',FLOOR(PBZ),FLOOR(ABS(FLOOR(PBZ)-PBZ)*100)
+      IF (PBZ > 0) SIGN_TXT="pos_"
+      ZS = ABS(PBZ)
+      WRITE(SLCF_NAME,'(A,A,I6.6,I2.2)') 'Z_',SIGN_TXT,FLOOR(ZS),FLOOR((ZS-FLOOR(ZS))*100)
    ENDIF
    
 ELSE
-   WRITE(XNAME,'(I6.6,I2.2,A,I6.6,I2.2,A)') FLOOR(XS_MIN),FLOOR(ABS(FLOOR(XS_MIN)-XS_MIN)*100),'_',&
-                                                  FLOOR(XF_MAX),FLOOR(ABS(FLOOR(XF_MAX)-XF_MAX)*100),'_'
-   WRITE(YNAME,'(I6.6,I2.2,A,I6.6,I2.2,A)') FLOOR(YS_MIN),FLOOR(ABS(FLOOR(YS_MIN)-YS_MIN)*100),'_',&
-                                                  FLOOR(YF_MAX),FLOOR(ABS(FLOOR(YF_MAX)-YF_MAX)*100),'_'
-   WRITE(ZNAME,'(I6.6,I2.2,A,I6.6,I2.2)') FLOOR(ZS_MIN),FLOOR(ABS(FLOOR(ZS_MIN)-ZS_MIN)*100),'_',&
-                                                FLOOR(ZF_MAX),FLOOR(ABS(FLOOR(ZF_MAX)-ZF_MAX)*100)
+   XS = ABS(XS_MIN)
+   XF = ABS(XF_MAX)
+   YS = ABS(YS_MIN)
+   YF = ABS(YF_MAX)
+   ZS = ABS(ZS_MIN)
+   ZF = ABS(ZF_MAX)
+   SIGN_TXT="neg_"
+   SIGN_TXT2="neg_"
+   IF (XS_MIN > 0) SIGN_TXT="pos_"
+   IF (XF_MAX > 0) SIGN_TXT2="pos_"
+   WRITE(XNAME,'(A,I6.6,I2.2,A,A,I6.6,I2.2,A)') SIGN_TXT,FLOOR(XS),FLOOR((XS-FLOOR(XS))*100),'_',&
+                                                SIGN_TXT2,FLOOR(XF),FLOOR((XF-FLOOR(XF))*100),'_'
+   SIGN_TXT="neg_"
+   SIGN_TXT2="neg_"
+   IF (YS_MIN > 0) SIGN_TXT="pos_"
+   IF (YF_MAX > 0) SIGN_TXT2="pos_"
+   WRITE(YNAME,'(A,I6.6,I2.2,A,A,I6.6,I2.2,A)') SIGN_TXT,FLOOR(YS),FLOOR((YS-FLOOR(YS))*100),'_',&
+                                                SIGN_TXT2,FLOOR(YF),FLOOR((YF-FLOOR(YF))*100),'_'
+   SIGN_TXT="neg_"
+   SIGN_TXT2="neg_"
+   IF (ZS_MIN > 0) SIGN_TXT="pos_"
+   IF (ZF_MAX > 0) SIGN_TXT2="pos_"
+   WRITE(ZNAME,'(A,I6.6,I2.2,A,A,I6.6,I2.2,A)') SIGN_TXT,FLOOR(ZS),FLOOR((ZS-FLOOR(ZS))*100),'_',&
+                                                SIGN_TXT2,FLOOR(ZF),FLOOR((ZF-FLOOR(ZF))*100),'_'
    WRITE(SLCF_NAME,'(A,A,A,A)') 'SL3D_',TRIM(XNAME),TRIM(YNAME),TRIM(ZNAME)
 ENDIF
 
