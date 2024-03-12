@@ -8562,9 +8562,131 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
 
    CFA  => M%CFACE(CFACE_INDEX)
+   BC   => M%BOUNDARY_COORD(CFA%BC_INDEX)
    B1   => M%BOUNDARY_PROP1(CFA%B1_INDEX)
    ! First: Assign AREA_ADJUST for CFACEs.
    B1%AREA_ADJUST = CF%AREA_ADJUST(IFACE)
+
+   ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
+   IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+      IG  = CF%BODTRI(1,IFACE)
+      TRI = CF%BODTRI(2,IFACE)
+      XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
+      RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
+      TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
+         IF (IWSEL==TRI) CYCLE
+         WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+         ! Triangles NODES coordinates:
+         V1(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+         V2(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+         V3(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
+
+         ! Fast triangle discard method: To do.
+
+         ! Search for intersection point in POS(IAXIS:KAXIS):
+         CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
+
+         IF (IS_INTERSECT) EXIT TRI_LOOP
+
+      ENDDO TRI_LOOP
+
+      IF (IS_INTERSECT) THEN
+
+         ! Check that distance is less than cell diagonal size:
+         ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+         IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
+
+         ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
+         ! Find indexes and mesh of cell containing intersection point:
+         CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
+
+         ! This test and restriction of NOM==NM is temporary. Discard when parallel CFACE info is in place.
+         IF (NOM/=NM) THEN
+            IF(NOM==0) RETURN
+            WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
+                            ', NOM and other cell IIO,JJO,KKO=',NOM,IIO,JJO,KKO,', intersection pt=',POS(IAXIS:KAXIS)
+            RETURN
+         ENDIF
+
+         IF (NOM>0) THEN
+            IF (ALLOCATED(MESHES(NOM)%CCVAR)) THEN
+               IIV(1:3) = (/ IIO, MAX(IIO-1,1), MIN(IIO+1,MESHES(NOM)%IBAR) /)
+               JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
+               KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
+
+               DIST= 1._EB/TWO_EPSILON_EB; ICFF=0; JCF2=0
+               K_LOOP : DO KKK=1,3
+                  KK=KKV(KKK)
+                  DO JJJ=1,3
+                     JJ=JJV(JJJ)
+                     DO III=1,3
+                        II=IIV(III)
+                        ICF2 = MESHES(NOM)%CCVAR(II,JJ,KK,CC_IDCF)
+                        ICF2_COND : IF (ICF2>0) THEN
+
+                           ! Use cut-face with closest centroid to POS:
+                           DO JCF22=1,MESHES(NOM)%CUT_FACE(ICF2)%NFACE
+                              IF(ICF==ICF2 .AND. IFACE==JCF22) CYCLE
+                              DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
+                                      (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
+                                      (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
+                              IF (DIST2<DIST) THEN
+                                 DIST = DIST2
+                                 ICFF = ICF2
+                                 JCF2 = JCF22
+                                 BACK_CFACE_FOUND = .TRUE.
+                              ENDIF
+                           ENDDO
+                        ENDIF ICF2_COND
+                     ENDDO
+                  ENDDO
+               ENDDO K_LOOP
+
+               ! Loop NOM CUT_FACE array to find BACKING CFACE index:
+               IF(BACK_CFACE_FOUND) THEN
+                  ICFACE=0
+                  ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
+                     IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=CC_INBOUNDARY) CYCLE ICF3_LOOP
+                     DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
+                        IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
+                          ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
+                          EXIT ICF3_LOOP
+                        ENDIF
+                     ENDDO
+                  ENDDO ICF3_LOOP
+
+                  ! Define BACK_MESH, BACK_INDEX:
+
+                  IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
+                     M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NOM
+                     M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
+                  ENDIF
+
+                  ! Write error for testing:
+               ELSE
+                  WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
+                  ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
+                  RETURN
+               ENDIF
+            ELSE ! Intersection in mesh furher away than neighboring meshes.
+               ! To Do stop.
+
+            ENDIF
+
+         ELSE ! Intersection outside of domain.
+            ! To Do stop.
+
+         ENDIF
+
+      ELSE ! Did not find intersection with other triangles.
+         ! To Do : Here we can add a test to check if CFACE is indeed within geometry IG. Geometry intersection and
+         ! linearization lead need to CFACES lay outside of the geometry.
+         WRITE(LU_ERR,*) 'WARNING: BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
+                         ', CFACE_INDEX, Centroid location=',CFACE_INDEX,XP(:)
+         RETURN
+      ENDIF
+
+   ENDIF
 
 CASE(INTEGER_THREE)
 
@@ -8610,127 +8732,6 @@ CASE(INTEGER_THREE)
                                    (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
       ELSE
          B1%T_IGN = SF%T_IGN
-      ENDIF
-
-      ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
-      IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-         IG  = CF%BODTRI(1,IFACE)
-         TRI = CF%BODTRI(2,IFACE)
-         XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
-         RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
-         TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
-            IF (IWSEL==TRI) CYCLE
-            WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-            ! Triangles NODES coordinates:
-            V1(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-            V2(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-            V3(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
-
-            ! Fast triangle discard method: To do.
-
-            ! Search for intersection point in POS(IAXIS:KAXIS):
-            CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
-
-            IF (IS_INTERSECT) EXIT TRI_LOOP
-
-         ENDDO TRI_LOOP
-
-         IF (IS_INTERSECT) THEN
-
-            ! Check that distance is less than cell diagonal size:
-            ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
-            IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
-
-            ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
-            ! Find indexes and mesh of cell containing intersection point:
-            CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
-
-            ! This test and restriction of NOM==NM is temporary. Discard when parallel CFACE info is in place.
-            IF (NOM/=NM) THEN
-               IF(NOM==0) RETURN
-               WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
-                               ', NOM and other cell IIO,JJO,KKO=',NOM,IIO,JJO,KKO,', intersection pt=',POS(IAXIS:KAXIS)
-               RETURN
-            ENDIF
-
-            IF (NOM>0) THEN
-               IF (ALLOCATED(MESHES(NOM)%CCVAR)) THEN
-                  IIV(1:3) = (/ IIO, MAX(IIO-1,1), MIN(IIO+1,MESHES(NOM)%IBAR) /)
-                  JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
-                  KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
-
-                  DIST= 1._EB/TWO_EPSILON_EB; ICFF=0; JCF2=0
-                  K_LOOP : DO KKK=1,3
-                     KK=KKV(KKK)
-                     DO JJJ=1,3
-                        JJ=JJV(JJJ)
-                        DO III=1,3
-                           II=IIV(III)
-                           ICF2 = MESHES(NOM)%CCVAR(II,JJ,KK,CC_IDCF)
-                           ICF2_COND : IF (ICF2>0) THEN
-
-                              ! Use cut-face with closest centroid to POS:
-                              DO JCF22=1,MESHES(NOM)%CUT_FACE(ICF2)%NFACE
-                                 IF(ICF==ICF2 .AND. IFACE==JCF22) CYCLE
-                                 DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
-                                         (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
-                                         (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
-                                 IF (DIST2<DIST) THEN
-                                    DIST = DIST2
-                                    ICFF = ICF2
-                                    JCF2 = JCF22
-                                    BACK_CFACE_FOUND = .TRUE.
-                                 ENDIF
-                              ENDDO
-                           ENDIF ICF2_COND
-                        ENDDO
-                     ENDDO
-                  ENDDO K_LOOP
-
-                  ! Loop NOM CUT_FACE array to find BACKING CFACE index:
-                  IF(BACK_CFACE_FOUND) THEN
-                     ICFACE=0
-                     ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
-                        IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=CC_INBOUNDARY) CYCLE ICF3_LOOP
-                        DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
-                           IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
-                             ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
-                             EXIT ICF3_LOOP
-                           ENDIF
-                        ENDDO
-                     ENDDO ICF3_LOOP
-
-                     ! Define BACK_MESH, BACK_INDEX:
-
-                     IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
-                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NOM
-                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
-                     ENDIF
-
-                     ! Write error for testing:
-                  ELSE
-                     WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
-                     ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
-                     RETURN
-                  ENDIF
-               ELSE ! Intersection in mesh furher away than neighboring meshes.
-                  ! To Do stop.
-
-               ENDIF
-
-            ELSE ! Intersection outside of domain.
-               ! To Do stop.
-
-            ENDIF
-
-         ELSE ! Did not find intersection with other triangles.
-            ! To Do : Here we can add a test to check if CFACE is indeed within geometry IG. Geometry intersection and
-            ! linearization lead need to CFACES lay outside of the geometry.
-            WRITE(LU_ERR,*) 'WARNING: BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
-                            ', CFACE_INDEX, Centroid location=',CFACE_INDEX,XP(:)
-            RETURN
-         ENDIF
-
       ENDIF
 
    ELSE INS_INB_COND_3 ! External mesh boundary CFACE
