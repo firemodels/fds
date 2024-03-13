@@ -263,6 +263,11 @@ TYPE MESH_TYPE
    ! Array with boundary cut-face areas pes cut-cell, for use in cut-cell blocking.
    TYPE(CC_INBCF_AREA_TYPE), ALLOCATABLE, DIMENSION(:,:,:) :: INBCF_AREA
 
+   ! Arrays for cut-cell blocking:
+   INTEGER :: N_CC_BLOCKED=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: JBT_CC_BLOCKED
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZ_CC_BLOCKED
+
    ! ...
 
    INTEGER :: N_WALL_CELLS=0,N_WALL_CELLS_DIM=0,N_INTERNAL_WALL_CELLS=0,N_EXTERNAL_WALL_CELLS=0
