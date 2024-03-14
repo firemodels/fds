@@ -83,12 +83,16 @@ IF (CC_IBM) THEN
    ALLOCATE(SUM_AREA(0:IBP1,0:JBP1)) ; SUM_AREA = 0._EB
    ALLOCATE(M%LS_KLO_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_KLO_TERRAIN',IZERO)
    LS_KLO_TERRAIN => M%LS_KLO_TERRAIN ; LS_KLO_TERRAIN = 2*KBP1+1 ! Number larger that KBP1.
+   ALLOCATE(M%LS_KHI_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_KHI_TERRAIN',IZERO)
+   LS_KHI_TERRAIN => M%LS_KHI_TERRAIN ; LS_KHI_TERRAIN = -1 ! Number smaller than 0.
    DO ICF=1,M%N_CUTFACE_MESH
       IF (CUT_FACE(ICF)%STATUS/=2 .OR. CUT_FACE(ICF)%NFACE<1) CYCLE ! CC_INBOUNDARY == 2
       ! Location of CFACE with largest AREA, to define SURF_INDEX:
       IW  = MAXLOC(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE),DIM=1)
       CFA => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )
       BC  => BOUNDARY_COORD(CFA%BC_INDEX)
+      IF (BC%KKG < LS_KLO_TERRAIN(BC%IIG,BC%JJG)) LS_KLO_TERRAIN(BC%IIG,BC%JJG) = BC%KKG
+      IF (BC%KKG > LS_KHI_TERRAIN(BC%IIG,BC%JJG)) LS_KHI_TERRAIN(BC%IIG,BC%JJG) = BC%KKG
       IF (BC%NVEC(KAXIS)>-TWO_EPSILON_EB .AND. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
          IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))<SUM_AREA(BC%IIG,BC%JJG)) THEN
             CYCLE  ! This CUT_FACE does not contain the majority of the area corresponding to the FDS cell area, DX*DY
@@ -98,7 +102,6 @@ IF (CC_IBM) THEN
          ! Area averaged Z height of CFACES within this cut-cell (containing CC_INBOUNDARY CFACES):
          Z_LS(BC%IIG,BC%JJG) = DOT_PRODUCT(CUT_FACE(ICF)%XYZCEN(KAXIS,1:CUT_FACE(ICF)%NFACE), &
                                            CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE)       ) / SUM_AREA(BC%IIG,BC%JJG)
-         IF (BC%KKG < LS_KLO_TERRAIN(BC%IIG,BC%JJG)) LS_KLO_TERRAIN(BC%IIG,BC%JJG) = BC%KKG
          IF (BC%KKG > K_LS(BC%IIG,BC%JJG)) K_LS(BC%IIG,BC%JJG) = BC%KKG
          LS_SURF_INDEX(BC%IIG,BC%JJG) = CFA%SURF_INDEX
       ENDIF
@@ -142,7 +145,7 @@ T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 
 
-!> \brief Continue initialialization of level set routines
+!> \brief Continue initialization of level set routines
 !>
 !> \param NM Mesh number
 !> \param MODE Integer flag indicating (1) full initialization, or (2) partial initialization
@@ -505,9 +508,9 @@ IF (.NOT.PREDICTOR) THEN
          DO IIG=1,IBAR
             SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
             IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
-            DO IKT=LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
+            DO IKT=LS_KLO_TERRAIN(IIG,JJG),LS_KHI_TERRAIN(IIG,JJG)
                ! Loop over all CFACEs corresponding to IIG,JJG and set B1%T_IGN and B2%PHI_LS as below
-               ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! CC_IDCF = 3 CUT_FCE container for this cell.
+               ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! CC_IDCF = 3 CUT_FACE container for this cell.
                DO IW=1,CUT_FACE(ICF)%NFACE ! All CC_INBOUNDARY CFACES on this cell.
                   CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
                   B1  => BOUNDARY_PROP1(CFA%B1_INDEX)
