@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo obtain FDS figures from:
-echo "https://drive.google.com/folderview?id=0B-W-dkXwdHWNOGVsZXNzTjdLek0&usp=sharing"
+echo "https://github.com/firemodels/test_bundles/releases/tag/BUNDLE_TEST"
