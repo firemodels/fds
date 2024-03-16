@@ -139,7 +139,7 @@ We assume (see Fig.~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has b
        width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsBCSketch.png}
       \put(-350,-10){(a)}
       \put(-120,-10){(b)}
-      \caption{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
+      \caption[Cut-cell FV discretization in 2D]{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
    \label{Fig:FVdiscCC}
 \end{figure}
 %
@@ -293,7 +293,7 @@ The treatment of these is as described in the previous section, with the caveat 
        width=0.95\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsFLXLIMSketch.png}
       \put(-330,-10){(a)}
       \put(-110,-10){(b)}
-      \caption{Flux limited interpolation: (a)  Regular and cut-cell species densities are available for 4 point stencil fluc limited interpolation to face $RC$.  (b) Lower cell in stencil is within solid region (cell S), therefore inner cell value $\rho Y_2$ is used for this extreme point.}
+      \caption[Flux limited interpolation]{Flux limited interpolation: (a)  Regular and cut-cell species densities are available for 4 point stencil fluc limited interpolation to face $RC$.  (b) Lower cell in stencil is within solid region (cell S), therefore inner cell value $\rho Y_2$ is used for this extreme point.}
    \label{Fig:FVFlxLimCC}
 \end{figure}
 
@@ -392,7 +392,7 @@ In this section we are interested in the divergence of deviatoric stress $ \nabl
       \centering
        \includegraphics[trim = 70mm 60mm 70mm 50mm, clip,
        width=0.45\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsWallAlignedSketch.png}
-      \caption{Wall stress $\tau_w$ estimation using a wall function for solid boundary crossing through vertex $B$ and aligned with the fluid grid.}
+      \caption[Wall stress estimation]{Wall stress $\tau_w$ estimation using a wall function for solid boundary crossing through vertex $B$ and aligned with the fluid grid.}
         \label{Fig:Strss}
 \end{figure}
 %
@@ -448,7 +448,7 @@ In Fig.~\ref{Fig:STMgraphs}a, we define inside-boundary (IB) edges as edges cont
        width=0.95\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsSTMgraphs.png}
       \put(-350,0){(a)}
       \put(-120,0){(b)}
-      \caption{Velocity gradients and shear stress components estimation. (a) For cut-face (i,j,k) velocity gradient $\partial u/\partial y$ and shear stress component $\mu \partial u/\partial y$ are estimated using a wall function for solid boundary crossing through vertex $B$, and transferred to cartesian edges IB, RC. (b) Details of wall function used in obtaining cartesian velocity derivative, shear stress component.}
+      \caption[Velocity gradients and stress components]{Velocity gradients and stress components estimation. (a) For cut-face (i,j,k) velocity gradient $\partial u/\partial y$ and shear stress component $\mu \partial u/\partial y$ are estimated using a wall function for solid boundary crossing through vertex $B$, and transferred to cartesian edges IB, RC. (b) Details of wall function used in obtaining cartesian velocity derivative, shear stress component.}
         \label{Fig:STMgraphs}
 \end{figure}
 %
