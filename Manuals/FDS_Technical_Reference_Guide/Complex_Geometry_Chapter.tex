@@ -108,15 +108,15 @@ Assuming a time independent control volume, the time derivative and source terms
 %
 \begin{eqnarray}
   \int_{\Omega_{ii}} {\frac{\partial \rho Y_\alpha}{\partial t}} d \Omega & = & \frac{\partial}{\partial t} \int_{\Omega_{ii}} {\rho Y_\alpha} d \Omega
-  = \frac{\partial \widetilde{\rho \: Y_\alpha }_{i,j}}{\partial t} V_{i,j} \\
-  \int_{\Omega_{ii}} { \dot{m}_\alpha''' } d \Omega & = & \widetilde{ \dot{m}_\alpha''' }_{i,j} V_{i,j} \label{eq:intcons}
+  = \frac{\partial \overline{\rho \: Y_\alpha }_{i,j}}{\partial t} V_{i,j} \\
+  \int_{\Omega_{ii}} { \dot{m}_\alpha''' } d \Omega & = & \overline{ \dot{m}_\alpha''' }_{i,j} V_{i,j} \label{eq:intcons}
 \end{eqnarray}
 %
 where $V_{i,j}$ is the volume of cell $(i,j)$. These cell averaged quantities (denoted by tildes) match the cell centroid values of the corresponding scalar fields up to second order spatial accuracy. A consequence of this known fact is that using a second order finite difference method (FD), or a \textit{difference} finite volume approach with same definition
  for diffusion flux spatial derivatives and interpolation on the advective term, will lead to identical discretization matrices (they will vary up to a volume factor) on uniform cartesian grids. The difference between these two numerical discretization methods arises from the source $\dot{m}_\alpha''' $, which for a given cell is the cell centroid value $\dot{m}'''_{\alpha (i,j)}$ in FD, and it is the cell average $ \widetilde{ \dot{m}_\alpha''' }_{i,j}$ in FV. To discretize both diffusive and advective terms in equation~\eqref{eq:intconvdiff}, we make use of the divergence theorem. In the following we drop the tildes to simplify the notation, keeping in mind that using FV, quantities will always be cell or face averaged where it corresponds.
 
 
-\subsection{FV Discretization in Cut-Cells} \label{sec:cc}
+\subsection{Finite-Volume Discretization in Cut-Cells} \label{sec:cc}
 
 The treatment of irregular gas phase Eulerian grid faces and cells that remain after the inclusion of immersed bodies is described in this section.
 We assume (see Fig.~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has been successful in defining the following:
@@ -139,11 +139,11 @@ We assume (see Fig.~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has b
        width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsBCSketch.png}
       \put(-350,-10){(a)}
       \put(-120,-10){(b)}
-      \caption{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
+      \caption[Cut-cell FV discretization in 2D]{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
    \label{Fig:FVdiscCC}
 \end{figure}
 %
-\subsection{CC Discretization of Diffusive Term}  \label{sec:CCdiff}
+\subsection{Cut-Cell Discretization of Diffusive Term}  \label{sec:CCdiff}
 
 Consider the FV discretization of the diffusive term (equation~\eqref{eq:intconvdiff}) on cut-cell $ii$ in Fig.~\ref{Fig:FVdiscCC}b. We have
 %
@@ -260,7 +260,7 @@ In case a Dirichlet boundary condition is specified in boundary face $k=1$ the n
 where the value of $Y_{Ec1}$ is the cell value, and $h$ is taken as half the cell volume divided by surface boundary area on the cell. Note that, as discussed later in Sec.~\ref{sec:exscl}, when small cells are linked to neighboring cells these quantities refer to the control volume of linked cells.
 
 
-\subsection{CC Discretization of Advective Term}
+\subsection{Cut-Cell Discretization of Advective Term}
 
 We study the discretization of the advective term for the six faces of cell $ii$ in Fig.~\ref{Fig:FVdiscCC}b:
 %
@@ -293,7 +293,7 @@ The treatment of these is as described in the previous section, with the caveat 
        width=0.95\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsFLXLIMSketch.png}
       \put(-330,-10){(a)}
       \put(-110,-10){(b)}
-      \caption{Flux limited interpolation: (a)  Regular and cut-cell species densities are available for 4 point stencil fluc limited interpolation to face $RC$.  (b) Lower cell in stencil is within solid region (cell S), therefore inner cell value $\rho Y_2$ is used for this extreme point.}
+      \caption[Flux limited interpolation]{Flux limited interpolation: (a)  Regular and cut-cell species densities are available for 4 point stencil fluc limited interpolation to face $RC$.  (b) Lower cell in stencil is within solid region (cell S), therefore inner cell value $\rho Y_2$ is used for this extreme point.}
    \label{Fig:FVFlxLimCC}
 \end{figure}
 
@@ -392,7 +392,7 @@ In this section we are interested in the divergence of deviatoric stress $ \nabl
       \centering
        \includegraphics[trim = 70mm 60mm 70mm 50mm, clip,
        width=0.45\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsWallAlignedSketch.png}
-      \caption{Wall stress $\tau_w$ estimation using a wall function for solid boundary crossing through vertex $B$ and aligned with the fluid grid.}
+      \caption[Wall stress estimation]{Wall stress $\tau_w$ estimation using a wall function for solid boundary crossing through vertex $B$ and aligned with the fluid grid.}
         \label{Fig:Strss}
 \end{figure}
 %
@@ -448,7 +448,7 @@ In Fig.~\ref{Fig:STMgraphs}a, we define inside-boundary (IB) edges as edges cont
        width=0.95\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsSTMgraphs.png}
       \put(-350,0){(a)}
       \put(-120,0){(b)}
-      \caption{Velocity gradients and shear stress components estimation. (a) For cut-face (i,j,k) velocity gradient $\partial u/\partial y$ and shear stress component $\mu \partial u/\partial y$ are estimated using a wall function for solid boundary crossing through vertex $B$, and transferred to cartesian edges IB, RC. (b) Details of wall function used in obtaining cartesian velocity derivative, shear stress component.}
+      \caption[Velocity gradients and stress components]{Velocity gradients and stress components estimation. (a) For cut-face (i,j,k) velocity gradient $\partial u/\partial y$ and shear stress component $\mu \partial u/\partial y$ are estimated using a wall function for solid boundary crossing through vertex $B$, and transferred to cartesian edges IB, RC. (b) Details of wall function used in obtaining cartesian velocity derivative, shear stress component.}
         \label{Fig:STMgraphs}
 \end{figure}
 %
@@ -490,7 +490,7 @@ Next, we look at the finite volume discretization of the non-conservative advect
 We will use the finite volume version of the previous equation to obtain the volume integrated target thermodynamic divergence on each cut cell volume, and to recompute the thermodynamic divergence on regular gas phase cells adjacent to cut-cells.
 
 
-\subsection{FV Discretization of Scalar Advection Terms $\mathbf{u} \cdot \nabla (\phi)$}
+\subsection{Finite-Volume Discretization of Scalar Advection Terms}
 
 Consider the the equality
 %
@@ -534,7 +534,7 @@ For cut-cell $ii$, the corresponding discrete volume integrated expression is:
 %
 where the overline terms refer to flux limited interpolation of corresponding scalars, terms defined with subscript $ii$ refer to cell defined quantities, and the scalar diffusive flux $\mathbf{J}_\alpha=- \rho D_\alpha \nabla Y_\alpha$. The divergence of radiative heat flux $\nabla \cdot \dot{\mathbf{q}}''_r$ is provided by the solution of radiative transport equation, Sec.~\ref{radnumericalmethodsection}.  Also, the vertical velocity $w_{ii}$ \textit{has been interpolated} to the cut-cell centroid. The flux vector $\dot{\mathbf{q}}''_{ii,k}$ refers to diffusive and conductive heat fluxes described next.
 
-\subsection{Computing Diffusive Heat Flux in FV Form}
+\subsection{Computing Diffusive Heat Flux in Finite-Volume Form}
 
 Given the species diffusion model adopted, the diffusive heat flux vector field is $\dot{\mathbf{q}}_{d,\alpha}''=-h_s \rho D_\alpha \nabla(Y_\alpha)$. The integral of its divergence over a cell $ii$ is:
 \begin{equation}
@@ -543,7 +543,7 @@ Given the species diffusion model adopted, the diffusive heat flux vector field 
 where $\left(-h_s \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k}$ is the mean heat flux defined on boundary surface $k$ of cell $ii$.
 
 
-\subsection{Computing Heat Conduction Flux in FV Form}
+\subsection{Computing Heat Conduction Flux in Finite-Volume Form}
 
 
 The heat conduction flux vector of the mixture is defined as $\dot{\mathbf{q}}_{kT}''= -k \nabla(T)$, where $k$ is the mixture conductivity. The integral of its divergence over a cell $ii$ is computed similarly as in the previous section:

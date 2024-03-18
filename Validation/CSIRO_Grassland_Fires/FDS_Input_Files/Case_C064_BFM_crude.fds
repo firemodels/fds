@@ -49,7 +49,6 @@
       MOISTURE_FRACTION(1)      = 0.063
       MASS_PER_VOLUME(1)        = 1.33
       DRAG_COEFFICIENT          = 2.8
-      MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 9770. /
 
 &CATF OTHER_FILES='vegetation_model.txt' /
