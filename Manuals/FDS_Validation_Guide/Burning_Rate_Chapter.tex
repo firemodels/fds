@@ -1236,7 +1236,6 @@ Shown on the following pages are comparisons of measured and predicted burning r
 \end{figure}
 
 
-
 \clearpage
 
 \subsection{Pool Fire Measurements}
@@ -1344,26 +1343,19 @@ Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spre
 
 \section{Scaling Pyrolysis (SPyro)}\label{sec_Scaling Pyrolysis}
 
-FDS has a scaling-based pyrolysis model (SPyro) which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface.
-This section evaluates the performance of FDS in scaling the buring rate using this model.
-Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown).
-Validation statistics are calculated based on the peak HRRPUA.
+FDS has a scaling-based pyrolysis model (SPyro) which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface. This section evaluates the performance of FDS in scaling the buring rate using this model. Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown). Validation statistics are calculated based on the peak HRRPUA.
 
 \subsection{Aalto Woods Experiments}\label{sec_Aalto_Woods_Materials}
 
-Table ~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
-The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
-The results of the simulations are shown below.
+Table ~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study. Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown below.
 
 \begin{table}[!h]
 \caption[Properties of Aalto Woods]{Properties of Aalto Woods~\cite{Rinta-Paavola:2023}.}
 \centering
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$& $Y_{s}^{b}$ \\
-Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & \centering$\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & \centering$\mathrm{\left(\frac{kJ}{(kg\cdot K}\right)}$ & \centering$\mathrm{( - )}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & $\mathrm{\left(\frac{g}{g}\right)}$ \\ \hline
+            & \centering$\Delta$                   & \centering$\rho$                                   & \centering$k$                                        & \centering$c_{p}$                                       & \centering$\varepsilon$     & \centering$T_{\mathrm{ign}}^{a}$ & \centering$\Delta H_{c}$                        & $Y_{s}^{b}$                         \\
+Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & \centering$\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & \centering$\mathrm{\left(\frac{kJ}{(kg\cdot K}\right)}$ & \centering$\mathrm{( - )}$  & \centering($\mathrm{^{\circ}C}$) & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & $\mathrm{\left(\frac{g}{g}\right)}$ \\ \hline
 \hline
 Pine Flaming                                      & 20.0 & 493 & 0.10 & 0.91 & 0.90 & 485 & 13.8 & 0.015 \\\hline
 Spruce Flaming                                    & 20.0 & 408 & 0.06 & 0.91 & 0.90 & 487 & 13.8 & 0.015 \\\hline
@@ -1371,8 +1363,8 @@ Spruce Flaming                                    & 20.0 & 408 & 0.06 & 0.91 & 0
 \label{Properties_Aalto_Woods_All}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ based on data from the SFPE handbook~\cite{SFPE:Tewarson}.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ based on data from the SFPE handbook~\cite{SFPE:Tewarson}.}\\
 
 \begin{figure}[pb]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1389,8 +1381,7 @@ Spruce Flaming                                    & 20.0 & 408 & 0.06 & 0.91 & 0
 \subsection{FAA Polymers Experiments}\label{sec_FAA_Polymers_Materials}
 
 Table ~\ref{Properties_FAA_Polymers_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
+Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 The results of the simulations are shown on the following pages.
 
@@ -1414,8 +1405,8 @@ PVC                                               & 3.0, 6.0, 9.0  & 1430 & 0.17
 \label{Properties_FAA_Polymers_All}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ Comma separation indicates tests at multiple thicknesses.}\\
-\noindent\footnotesize{$^b$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. \\
+\noindent{\footnotesize $^a$ Comma separation indicates tests at multiple thicknesses.}\\
+\noindent{\footnotesize $^b$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition.} \\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1488,7 +1479,7 @@ Waferboard                                        & 13.0 & 712 & 425 & 13.3 & 0.
 \label{Properties_FPL_Materials_All}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1553,8 +1544,8 @@ Wool Rug                                          & 16.6 & 226  & 0.06 & 1.33 & 
 \label{Properties_FSRI_Materials_Others}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
-\noindent\footnotesize{$^b$ Material not available in web interface. See FSRI database github (\url{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data}})\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
+\noindent{\footnotesize $^b$ Material not available in web interface. See FSRI database github (\url{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data})}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1657,8 +1648,8 @@ Vinyl Tile                                        & 7.9  & 726  & 0.06 & 1.74 & 
 \label{Properties_FSRI_Materials_Polymers}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
-\noindent\footnotesize{$^b$ Material not available in web interface. See FSRI database github (\url{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data}})\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
+\noindent{\footnotesize $^b$ Material not available in web interface. See FSRI database github (\url{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data}})\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1751,8 +1742,8 @@ Wood Stud                                         & 46.2 & 379  & 0.10 & 1.47 & 
 \label{Properties_FSRI_Materials_Wood-Based}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
-\noindent\footnotesize{$^b$ Material not available in web interface. See FSRI database github (\url{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data}})\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed value for emissivity of 1 is used.}\\
+\noindent{\footnotesize $^b$ Material not available in web interface. See \href{https://github.com/ulfsri/fsri_materials_database/tree/main/01_Data}{FSRI database}.}\\
 
 
 \begin{figure}[p]
@@ -1834,7 +1825,7 @@ White Spruce                                      & 37.2 & 430  & 0.24 & 1.10 & 
 \label{Properties_JH_Materials_All}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition.}\\
 
 
 \begin{figure}[p]
@@ -1853,8 +1844,6 @@ White Spruce                                      & 37.2 & 430  & 0.24 & 1.10 & 
 \label{JH_Materials_HRR}
 \end{figure}
 
-
-
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_PC_Blend_cone_4p5.pdf} &
@@ -1871,11 +1860,6 @@ White Spruce                                      & 37.2 & 430  & 0.24 & 1.10 & 
 \end{figure}
 
 \clearpage
-
-
-
-
-
 
 
 \subsection{RISE Experiments}\label{sec_RISE_Materials}
@@ -1917,9 +1901,9 @@ Pur Rigid, Plastic Faced Steel Sheet              & 79.0 & 170 & 497 & 10.2 & 0.
 \label{Properties_RISE_Materials_Mixtures1}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-\noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^c$ Comma separation indicates layers of material.}\\
 
 \clearpage
 
@@ -1952,9 +1936,9 @@ Zhpolyolefin, XLPE                                & 27.0 & 412 & 527 & 27.3 & 0.
 \label{Properties_RISE_Materials_Mixtures2}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-\noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^c$ Comma separation indicates layers of material.}\\
 
 
 
@@ -2054,8 +2038,8 @@ Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.0
 \label{Properties_RISE_Materials_Others}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
 
 
 \begin{figure}[p]
@@ -2099,9 +2083,9 @@ Transparent Polycarbonate                         & 2.3 & 1579 & 528 & 13.2 & 0.
 \label{Properties_RISE_Materials_Polymers}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
-\noindent\footnotesize{$^c$ Comma separation indicates layers of material.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^c$ Comma separation indicates layers of material.}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2154,8 +2138,8 @@ Spruce                                            & 10.0 & 450 & 297 & 12.5 & 0.
 \label{Properties_RISE_Materials_Wood-Based}
 \end{table}
 \vspace{-0.4cm}
-\noindent\footnotesize{$^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
-\noindent\footnotesize{$^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
+\noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2203,26 +2187,12 @@ The following pages compare FDS predictions of room-corner testing of scaled com
 \label{JH_FRA_plywood_01A}
 \end{figure}
 
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_04_hrr}
-%\caption[JH/FRA experiments, HRR, 1:4 scale FRP lining configuration]{JH/FRA experiments, HRR, 1:4 scale FRP lining configuration.}
-%\label{JH_FRA_FRP_01}
-%\end{figure}
-
 \begin{figure}[h!]
 \centering
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_13_hrr}
 \caption[JH/FRA experiments, HRR, 1:2 scale plywood half lining configuration, Test 8]{JH/FRA experiments, HRR, 1:2 scale plywood half lining configuration, Test 8.}
 \label{JH_FRA_plywood_02}
 \end{figure}
-
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_compartment_14_hrr}
-%\caption[JH/FRA experiments, HRR, 1:1 scale FRP lining configuration]{JH/FRA experiments, HRR, 1:2 scale FRP lining configuration.}
-%\label{JH_FRA_FRP_02}
-%\end{figure}
 
 \begin{figure}[h!]
 \centering
@@ -2231,49 +2201,8 @@ The following pages compare FDS predictions of room-corner testing of scaled com
 \label{JH_FRA_plywood_03}
 \end{figure}
 
-%\clearpage
 
-%\subsection{JH/FRA NFPA 286 Compartment Experiments}\label{sec_JH_FRA_NFPA286_Compartments}
-%
-%The Federal Railroad Administration (FRA) in the U.S. sponsored a series NFPA 286 enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
-%The following pages compare FDS predictions of room-corner testing of full-scale compartments.
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_acrylic_hrr}
-%\caption[JH/FRA NFPA 286 experiments, HRR, Acrylic lining configuration]{JH/FRA NFPA 286 experiments, HRR, Acrylic lining configuration.}
-%\label{JH_FRA_acrylic}
-%\end{figure}
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_cps_balsa_hrr}
-%\caption[JH/FRA NFPA 286 experiments, HRR, Balsa Composite lining configuration]{JH/FRA NFPA 286 experiments, HRR, Balsa Composite lining configuration.}
-%\label{JH_FRA_balsa}
-%\end{figure}
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_cps_plywood_hrr}
-%\caption[JH/FRA NFPA 286 experiments, HRR, Plywood Composite lining configuration]{JH/FRA NFPA 286 experiments, HRR, Plywood Composite lining configuration.}
-%\label{JH_FRA_plywood}
-%\end{figure}
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_phenolic_resin_fiberglass_composite_hrr}
-%\caption[JH/FRA NFPA 286 experiments, HRR, Phenolic Resin FRP lining configuration]{JH/FRA NFPA 286 experiments, HRR, Phenolic Resin FRP lining configuration.}
-%\label{JH_FRA_phenolic}
-%\end{figure}
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.15in]{SCRIPT_FIGURES/JH_FRA/JH_FRA_nfpa286_vinyl_ester_resin_frp_hrr}
-%\caption[JH/FRA NFPA 286 experiments, HRR, Vinyl Ester Resin FRP lining configuration]{JH/FRA NFPA 286 experiments, HRR, Vinyl Ester Resin FRP lining configuration.}
-%\label{JH_FRA_vinyl}
-%\end{figure}
-%
-%\clearpage
+\clearpage
 
 \section{Wildland Fire Burning and Spread Rates}
 \label{WUI}
@@ -2729,7 +2658,7 @@ Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the re
 \label{USFS_Catchpole_216}
 \end{figure}
 
-\FloatBarrier
+% \FloatBarrier
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
