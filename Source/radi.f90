@@ -3982,7 +3982,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ! Boundary conditions: Intensities leaving the boundaries.
 
-            !$OMP PARALLEL DO PRIVATE(WC,BC,BR,B1,IOR,II,JJ,KK,LL,NOM,VT) SCHEDULE(GUIDED)
+            !$OMP PARALLEL DO PRIVATE(WC,BC,BR,B1,IOR,II,JJ,KK,LL,NOM,VT,TSI,TMP_EXTERIOR,IC) SCHEDULE(GUIDED)
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                WC => WALL(IW)
                IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
@@ -4171,7 +4171,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                   !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, AILFU, &
                   !$OMP& ILZU, VC, AY, AZ, AXU, AYU, AZU, AXD, AYD, AZD, AFD, &
-                  !$OMP& IW, WC, BR, CF, CFA, DLF, A_SUM, AIU_SUM, RAP, &
+                  !$OMP& IW, WC, BR, CF, CFA, BC, DLF, A_SUM, AIU_SUM, RAP, &
                   !$OMP& ICF, INDCF, IADD, IFACE )
 
                   SLICE_LOOP: DO IJK = 1, M_IJK
