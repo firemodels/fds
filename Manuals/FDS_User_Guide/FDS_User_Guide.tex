@@ -4001,7 +4001,7 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input or the predefined {\ct SURF\_ID} of {\ct INERT}. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
@@ -4018,6 +4018,8 @@ A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
 Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
+
+Since localized leakage uses the HVAC solver, it is subject to the same restriction as other HVAC components, that a localized leakage {\ct VENT} must be present for the entire simulation. If you wish to have, for example, a door that leaks when closed but is opened during the simulation, then define the {\ct VENT}s for the leakage to be on the floor, above the  door, or to the side of the door. The leakage path will still be present with the door opened, but the pressure across the leak path will be much lower and the leak flow will be insignificant compared to the doorway flow.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
@@ -13661,6 +13663,9 @@ Keyword             & Type     & Description                      & Units       
 559 \> {\ct Output QUANTITY \ldots SPEC\_ID \ldots not found                        } \> Section~\ref{info:hvacoutputquantities}  \\
 560 \> {\ct HVAC\_SMV QUANTITY \ldots not appropriate for .hvac file.               } \> Section~\ref{info:hvacoutputquantities}  \\
 561 \> {\ct HVAC\_SMV QUANTITY \ldots  not found                                    } \> Section~\ref{info:hvacoutputquantities}  \\
+562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
+563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
+564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
      \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
