@@ -4001,25 +4001,27 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input or the predefined {\ct SURF\_ID} of {\ct INERT}. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The localized leakage approach addresses situations where the leakage is not necessarily from one sealed pressure zone to another. For example, the gap created by a partially opened door might be too narrow to explicitly resolve, but the hot gases escaping at the top and cold gases entering at the bottom may still be represented in the model. The localized leakage approach uses the local pressure rather than the mean zone pressure, allowing one to define multiple leakage paths for windows and doors that might span a significant height, like in a stairwell where stack effect might be important. To use this approach two {\ct VENT} lines are linked via an {\ct HVAC} line with {\ct TYPE\_ID='LEAK'}. For example, the input lines
 \begin{lstlisting}
-&VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
-&VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
-&HVAC ID='LEAK1',TYPE_ID='LEAK',VENT_ID='VENT 1',VENT2_ID='VENT 2',AREA=0.001/
+&VENT XB=..., SURF_ID='SURF 1', ID='VENT 1' /
+&VENT XB=..., SURF_ID='SURF 2', ID='VENT 2' /
+&HVAC ID='LEAK1', TYPE_ID='LEAK', VENT_ID='VENT 1', VENT2_ID='VENT 2', AREA=0.001 /
 \end{lstlisting}
-This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}). All localized leakage HVAC components are given the {\ct NETWORK\_ID='LEAK'}.
+specify a 0.001 m$^2$ leak between the {\ct VENT}s named {\ct 'VENT 1'} and {\ct 'VENT 2'}. If the leakage path is to outside of the domain, set {\ct VENT2\_ID='AMBIENT'}, in which case the second node will be assigned the name of the first with {\ct 'AMB'} added, e.g. {\ct 'VENT 1 AMB'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}. Wall heat transfer will be computed based upon the specified {\ct SURF\_ID}. Following are some rules and practices regarding localized leakage:
+\begin{itemize}
+\item The {\ct SURF\_ID} for a {\ct VENT} with localized leakage is {\em not} {\ct 'HVAC'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}.
+\item Each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. 
+\item You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and \linebreak {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}). 
+\item All localized leakage HVAC components are given the {\ct NETWORK\_ID='LEAK'}.
+\item A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input.
+\item The localized leakage area should not also be part of the {\ct LEAK\_AREA} defined on a {\ct ZONE} line.
+\item A {\ct VENT} used for localized leakage should not have any other input defining a mass flow.
+\item Particles can be transported through a localized leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} line. This requires that the two {\ct VENT}s have identical area and orientation and offset by no more than one grid cell.
+\item A localized leakage {\ct VENT} must be present for the entire simulation. If you wish to have, for example, a door that leaks when closed but is opened during the simulation, then define the {\ct VENT}s for the leakage to be on the floor, above the door, or to the side of the door. The leakage path will still be present with the door opened, but the pressure across the leak path will be much lower and the leak flow will be insignificant compared to the doorway flow.
+\item Unlike the zone leakage approach, localized leakage has the option to preserve the energy of the gas flowing through the leak. For example, for a door crack using pressure zone leakage, the outflowing gas at the top of the door takes on the same temperature as the outside. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}.
+\item Localized leakage has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}, the same as for pressure zone leakage.
+\end{itemize}
 
-Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
-
-A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}. A {\ct VENT} used for localized leakage should also not have any other input resulting in a mass flow assigned to it.,
-
-A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}.
-
-This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
-
-Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
-
-Since localized leakage uses the HVAC solver, it is subject to the same restriction as other HVAC components, that a localized leakage {\ct VENT} must be present for the entire simulation. If you wish to have, for example, a door that leaks when closed but is opened during the simulation, then define the {\ct VENT}s for the leakage to be on the floor, above the  door, or to the side of the door. The leakage path will still be present with the door opened, but the pressure across the leak path will be much lower and the leak flow will be insignificant compared to the doorway flow.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
