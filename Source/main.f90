@@ -1833,6 +1833,7 @@ SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 INTEGER :: IPZ,IOPZ,IOPZ2
 REAL(EB) :: TNOW
+LOGICAL :: NEW_CONNECTION
 
 TNOW = CURRENT_TIME()
 
@@ -1876,16 +1877,23 @@ ENDDO
 ! Connect zones to others which are not directly connected
 
 DO NM=1,NMESHES
-   DO IPZ=1,N_ZONE
-      DO IOPZ=1,N_ZONE
-         IF (IOPZ==IPZ) CYCLE
-         IF (CONNECTED_ZONES(IPZ,IOPZ,NM)) THEN
-            DO IOPZ2=0,N_ZONE
-               IF (IOPZ==IOPZ2) CYCLE
-               IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) CONNECTED_ZONES(IPZ,IOPZ2,NM) = .TRUE.
-               IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) CONNECTED_ZONES(IOPZ2,IPZ,NM) = .TRUE.
-            ENDDO
-         ENDIF
+   NEW_CONNECTION = .TRUE.
+   DO WHILE (NEW_CONNECTION)
+      NEW_CONNECTION = .FALSE.
+      DO IPZ=1,N_ZONE
+         DO IOPZ=1,N_ZONE
+            IF (IOPZ==IPZ) CYCLE
+            IF (CONNECTED_ZONES(IPZ,IOPZ,NM)) THEN
+               DO IOPZ2=0,N_ZONE
+                  IF (IOPZ==IOPZ2) CYCLE
+                  IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) THEN
+                     IF (.NOT.CONNECTED_ZONES(IPZ,IOPZ2,NM)) NEW_CONNECTION = .TRUE.
+                     CONNECTED_ZONES(IPZ,IOPZ2,NM) = .TRUE.
+                     CONNECTED_ZONES(IOPZ2,IPZ,NM) = .TRUE.
+                  ENDIF
+               ENDDO
+            ENDIF
+         ENDDO
       ENDDO
    ENDDO
 ENDDO
