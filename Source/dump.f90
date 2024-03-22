@@ -3000,6 +3000,8 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
 
    WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
    WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+   IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
+                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
 
    IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
       WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
@@ -3887,11 +3889,11 @@ TNOW = CURRENT_TIME()
 CALL GET_DATE_ISO_8601(DATE)
 CALL CPU_TIME(CPUTIME)
 IF (ABS(T)<=999.99999_EB) THEN
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.5,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.5,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ELSEIF (ABS(T)>999.99999_EB .AND. ABS(T)<=99999.999_EB) THEN
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.3,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.3,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ELSE
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.1,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.1,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ENDIF
 
 ! Write abridged output to the .err file
@@ -3899,26 +3901,26 @@ ENDIF
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
 
    IF (ABS(T)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSE
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ENDIF
 ELSE
 
    STIME = T_BEGIN + (T-T_BEGIN) * TIME_SHRINK_FACTOR
    DTS = DT * TIME_SHRINK_FACTOR
    IF (ABS(STIME)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.5,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.4,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.3,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSE
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.2,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ENDIF
 
 ENDIF
@@ -3938,19 +3940,19 @@ IF (SUPPRESS_DIAGNOSTICS) THEN
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
 
       IF (ABS(T)<=0.0001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.01 .AND. ABS(T)<=0.1) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSE
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ENDIF
 
@@ -3959,19 +3961,19 @@ IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
    ELSE
 
       IF (ABS(STIME)<=0.0001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.01 .AND. ABS(STIME)<=0.1) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSE
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ENDIF
    ENDIF
@@ -3981,7 +3983,7 @@ ENDIF
 ! Detailed diagnostics to the .out file
 
 CALL GET_DATE(DATE)
-WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
+WRITE(LU_OUTPUT,'(7X,A,I8,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
    IF (ABS(T)<=0.0001) THEN
       WRITE(LU_OUTPUT,150) DT,T
@@ -4234,6 +4236,12 @@ REAL(EB) :: SUM
 REAL(FB) :: STIME
 INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
+REAL(FB) :: ISO_CENX, ISO_CENY, ISO_CENZ
+REAL(FB) :: ZZ
+REAL(EB) :: TIME_FACTOR
+REAL(FB) :: ISO_LEVEL(1)
+INTEGER ::  ISO_NLEVEL
+INTEGER :: II, JJ, KK
 
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
@@ -4283,37 +4291,49 @@ ISOF_LOOP: DO N=1,N_ISOF
    HAVE_ISO2 = 0
 
    ! Fill up the dummy array QUANTITY with the appropriate gas phase output
-
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0)
+   IF (IS%DEBUG) THEN
+      ISO_CENX = REAL((XS_MIN + XF_MAX)/2.0_EB, FB)
+      ISO_CENY = REAL((YS_MIN + YF_MAX)/2.0_EB, FB)
+      ISO_CENZ = REAL((ZS_MIN + ZF_MAX)/2.0_EB, FB)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               QQ(I,J,K,1) = SQRT( (XPLT(I)-ISO_CENX)**2 + (YPLT(J)-ISO_CENY)**2 + (ZPLT(K)-ISO_CENZ)**2)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0)
+            ENDDO
+         ENDDO
+      ENDDO
 
    ! Mirror QUANTITY into ghost cells
 
-   QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
-   QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
-   QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
-   QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
-   QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
-   QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
-   CALL FILL_EDGES(QUANTITY)
+      QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
+      QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
+      QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
+      QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
+      QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
+      QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
+      CALL FILL_EDGES(QUANTITY)
 
    ! Average the data (which is assumed to be cell-centered) at cell corners
 
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            QQ(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
-                                               QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                               QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                               QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               QQ(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
+                                                  QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                                  QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                                  QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
 
    ! Fill up QUANTITY2 and QQ2 arrays if the isosurface is colored with a second quantity
 
@@ -4323,41 +4343,67 @@ ISOF_LOOP: DO N=1,N_ISOF
 
       ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0)
+      IF (IS%DEBUG) THEN
+         DO K=0,KBAR+1
+            IF (K.EQ.KBAR+1) THEN
+               ZZ = 2.0_FB*ZPLT(KBAR) - ZPLT(KBAR-1)
+            ELSE
+               ZZ = ZPLT(K)
+            ENDIF
+            DO J=0,JBAR+1
+               DO I=0,IBAR+1
+                  QQ2(I,J,K,1) = ZZ
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+      ELSE
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0)
+               ENDDO
+            ENDDO
+         ENDDO
 
       ! Mirror QUANTITY into ghost cells
 
-      QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
-      QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
-      QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
-      QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
-      QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
-      QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
-      CALL FILL_EDGES(QUANTITY2)
+         QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
+         QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
+         QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
+         QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
+         QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
+         QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
+         CALL FILL_EDGES(QUANTITY2)
 
       ! Average the data (which is assumed to be cell-centered) at cell corners
 
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               QQ2(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
-                                                   QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                                   QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                                   QUANTITY2(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY2(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+         DO KK=0,KBAR+1
+            K = MIN(KK, KBAR)
+            DO JJ=0,JBAR+1
+               J = MIN(JJ, JBAR)
+               DO II=0,IBAR+1
+                  I = MIN(II, IBAR)
+                  QQ2(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
+                                                      QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                                      QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                                      QUANTITY2(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY2(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+      ENDIF
 
    ENDIF INDEX2_IF
 
-   CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
-        IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   IF (IS%DEBUG) THEN
+      TIME_FACTOR = MAX(0.05_EB, (STIME - T_BEGIN)/(T_END - T_BEGIN))
+      ISO_LEVEL(1) = REAL(TIME_FACTOR*(ZF_MAX-ZS_MIN)/2.0_EB, FB)
+      ISO_NLEVEL = 1
+      CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
+           ISO_LEVEL(1:ISO_NLEVEL), ISO_NLEVEL, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   ELSE
+      CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
+           IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+   ENDIF
 
 ENDDO ISOF_LOOP
 

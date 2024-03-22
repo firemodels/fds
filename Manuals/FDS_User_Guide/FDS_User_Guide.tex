@@ -1553,8 +1553,7 @@ The same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is
 \subsection{Handling Split Cells and Thin Geometries}
 \label{info:thin_geom}
 
-One current limitation of the unstructured geometry algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a cell is split by a thin geometry, FDS will fill in the smaller of the two disjoint volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting either {\ct CELL\_BLOCK\_IOR} or {\ct CELL\_BLOCK\_ORIENTATION} on the {\ct GEOM} line. The former is an integer indicating a Cartesian axis while the latter allows the specification of a vector in any direction.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currently, this functionality is limited to geometries where the simple {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere.
-
+One current limitation of the unstructured geometry algorithm is that a Cartesian cell cannot be split by a thin geometry or corner, potentially creating two background pressure zones within one Cartesian cell.  By default, if a cell is split by a thin geometry, FDS will fill in the smaller of the two disjoint volumes.  However, it may be desired to leave one side perfectly smooth while allowing the other to absorb the geometry change.  For example, you want the inside wall of a tunnel or ceiling to be smooth but you are not as concerned with the outer portion for your problem.  In this scenario, you can control which side of the geometry gets filled by setting either {\ct CELL\_BLOCK\_IOR} or {\ct CELL\_BLOCK\_ORIENTATION} on the {\ct GEOM} line. The former is an integer indicating a Cartesian axis while the latter allows the specification of a vector in any direction.  An example of how this works is shown in Fig.~\ref{figure:thin_geometry}. Currently, this functionality is limited to geometries where {\ct IOR} can define the direction.  For example, this would not work for a hollow sphere. For terrain geometries the default is {\ct CELL\_BLOCK\_IOR=-3}.
 
 \begin{figure}
   \centering
@@ -2334,7 +2333,7 @@ There are several options for defining the back surface boundary condition of a 
 
 An alternative back side boundary condition, {\ct BACKING='INSULATED'}, assumes that the solid backs up to a perfectly insulated material, in which case no heat is lost to the back side. Use of this condition means specifying properties of the inner insulating material is not necessary because it is assumed to be perfectly insulated.
 
-If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_TMP\_GAS\_BACK}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_BACK} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
+If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using {\ct TMP\_GAS\_BACK}. A {\ct RAMP} for {\ct TMP\_GAS\_BACK} can be specified with {\ct RAMP\_TMP\_GAS\_BACK}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using {\ct TMP\_GAS\_FRONT} and ramp {\ct RAMP\_TMP\_GAS\_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
 
@@ -4002,23 +4001,27 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The localized leakage approach addresses situations where the leakage is not necessarily from one sealed pressure zone to another. For example, the gap created by a partially opened door might be too narrow to explicitly resolve, but the hot gases escaping at the top and cold gases entering at the bottom may still be represented in the model. The localized leakage approach uses the local pressure rather than the mean zone pressure, allowing one to define multiple leakage paths for windows and doors that might span a significant height, like in a stairwell where stack effect might be important. To use this approach two {\ct VENT} lines are linked via an {\ct HVAC} line with {\ct TYPE\_ID='LEAK'}. For example, the input lines
 \begin{lstlisting}
-&VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
-&VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
-&HVAC ID='LEAK1',TYPE_ID='LEAK',VENT_ID='VENT 1',VENT2_ID='VENT 2',AREA=0.001/
+&VENT XB=..., SURF_ID='SURF 1', ID='VENT 1' /
+&VENT XB=..., SURF_ID='SURF 2', ID='VENT 2' /
+&HVAC ID='LEAK1', TYPE_ID='LEAK', VENT_ID='VENT 1', VENT2_ID='VENT 2', AREA=0.001 /
 \end{lstlisting}
-This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}). All localized leakage HVAC components are given the {\ct NETWORK\_ID='LEAK'}.
+specify a 0.001 m$^2$ leak between the {\ct VENT}s named {\ct 'VENT 1'} and {\ct 'VENT 2'}. If the leakage path is to outside of the domain, set {\ct VENT2\_ID='AMBIENT'}, in which case the second node will be assigned the name of the first with {\ct 'AMB'} added, e.g. {\ct 'VENT 1 AMB'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}. Wall heat transfer will be computed based upon the specified {\ct SURF\_ID}. Following are some rules and practices regarding localized leakage:
+\begin{itemize}
+\item The {\ct SURF\_ID} for a {\ct VENT} with localized leakage is {\em not} {\ct 'HVAC'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}.
+\item Each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. 
+\item You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and \linebreak {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}). 
+\item All localized leakage HVAC components are given the {\ct NETWORK\_ID='LEAK'}.
+\item A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input.
+\item The localized leakage area should not also be part of the {\ct LEAK\_AREA} defined on a {\ct ZONE} line.
+\item A {\ct VENT} used for localized leakage should not have any other input defining a mass flow.
+\item Particles can be transported through a localized leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} line. This requires that the two {\ct VENT}s have identical area and orientation and offset by no more than one grid cell.
+\item A localized leakage {\ct VENT} must be present for the entire simulation. If you wish to have, for example, a door that leaks when closed but is opened during the simulation, then define the {\ct VENT}s for the leakage to be on the floor, above the door, or to the side of the door. The leakage path will still be present with the door opened, but the pressure across the leak path will be much lower and the leak flow will be insignificant compared to the doorway flow.
+\item Unlike the zone leakage approach, localized leakage has the option to preserve the energy of the gas flowing through the leak. For example, for a door crack using pressure zone leakage, the outflowing gas at the top of the door takes on the same temperature as the outside. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}.
+\item Localized leakage has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}, the same as for pressure zone leakage.
+\end{itemize}
 
-Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
-
-A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}. A {\ct VENT} used for localized leakage should also not have any other input resulting in a mass flow assigned to it.,
-
-A VENT used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input. Similarly, any leakage area assigned to localized leakage should not also be part of the {\ct LEAK\_AREA} defined on {\ct ZONE}.
-
-This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
-
-Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
@@ -4437,7 +4440,7 @@ The enthalpy of the gas mixture is given by the following formula:
 \ee
 where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The value of $h(T_{\rm ref})$ can be specified in two ways. The first is to specify {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C) and the value of the enthalpy at that temperature using {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The second is to specify the {\ct ENTHALPY\_OF\_FORMATION} in kJ/mol. For this input $T_{\rm ref}$ is taken as the \linebreak[4] {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line. The default value of either reference temperature is 25~$^\circ$C.
 
-If no input for $h(T_{\rm ref})$ is provided, then FDS will assume that the enthalpy at 0~K is 0~kJ/kg, i.e. if a constant {\ct SPECIFIC\_HEAT} is given, then {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$.
+If no input for $h(T_{\rm ref})$ is provided, then FDS will assume that the enthalpy at 0~K is 0~kJ/kg, i.e. if a constant {\ct SPECIFIC\_HEAT} is given, then {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$. For {\ct RAMP\_CP}, the {\ct RAMP} will be integrated from 0~K to $T_{\rm ref}$.
 
 If no input for specific specific heat is provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
 \be
@@ -4445,7 +4448,7 @@ If no input for specific specific heat is provided, then the specific heat of th
 \ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=T} on the {\ct MISC} line. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
-Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies.
+Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies. Specifying either {\ct SPECIFIC\_HEAT} or {\ct RAMP\_CP} is considered to have explicitly defined $h(T_{\rm ref})$. If you still wish to use the default {\ct EPUMO2} or 13,100~kJ/kg, then you will need to explicitly define it on the {\ct REAC} input.
 
 Also note that if a predefined species name is used and any enthalpy related input in this section is specified for that species, FDS will not use the predefined enthalpy of formation.
 
@@ -4678,7 +4681,7 @@ Multiple simple chemistry reactions can be defined. Each new reaction will requi
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Appendix~\ref{info:predefined_species}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Appendix~\ref{info:predefined_species}, there are several options to ensure that all of the enthalpies of formation are specified.
+In FDS, the energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in density for each species in that volume in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Appendix~\ref{info:predefined_species}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Appendix~\ref{info:predefined_species}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 
@@ -4687,9 +4690,11 @@ You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
 &SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
 \end{lstlisting}
 
+Note FDS will also use {\ct REFERENCE\_ENTHALPY}, {\ct SPECIFIC\_HEAT}, or {\ct RAMP\_CP} to define the enthalpy of formation as discussed in Section~\ref{info:Enthalpy}.
+
 \subsubsection{Option 2: Specify Heat of Combustion}
 
-For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the heat of combustion is specified on {\ct REAC}. Sec.~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line.
+For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the {\ct HEAT\_OF\_COMBUSTION} in kJ/kg is specified on {\ct REAC}. Sec.~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line. Specifying the {\ct HEAT\_OF\_COMBUSTION} will result in FDS recomputing any fuel species enthalpy of formation based on {\ct SPEC} inputs. If this occurs for the same {\ct FUEL} in multiple reactions a warning message will be written.
 
 \subsubsection{Option 3: Specify Heat of Combustion Based on Oxygen Consumption (Simple Chemistry)}
 
@@ -4698,15 +4703,15 @@ If the enthalpy of formation of the fuel and heat of combustion are not specifie
 \Delta h \approx \frac{\nu_{\OTWO} \, W_{\OTWO} } { \nu_{\rm F} \, W_{\rm F} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
 \label{EPUMO2}
 \end{equation}
-The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed. Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting the stoichiometric coefficient of the fuel $\nu_{\rm F}$ to 1. In FDS, the stoichiometric coefficients of the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{\rm F}$ to 1. Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
+The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed. Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting the stoichiometric coefficient of the fuel $\nu_{\rm F}$ to 1. In FDS, the stoichiometric coefficients of the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{\rm F}$ to 1. Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore the value for {\ct EPUMO2}. Note that the assumed value of {\ct EPUMO2} will not be used if Option 1 has been used. If you with to keep using the default value, add {\ct EPUMO2=13100} to the {\ct REAC} line.
 
 If heats of reaction have been specified on the {\ct MATL} lines and the heats of combustion of the materials differ from that specified by the governing gas phase reaction, then add a {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) to the {\ct MATL} line. In a realistic fire scenarios, there may be many fuel gases generated by the various burning objects in the building. Specify the stoichiometry of the predominant reaction via the {\ct REAC} namelist group. If the stoichiometry of the burning material differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is used to ensure that an equivalent amount of fuel is injected into the flow domain from the burning object.
 
-The heat of combustion can be determined in a couple of ways. One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants. This is typically how values are tabulated for pure fuels (e.g., one species) in handbooks. This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, or {\ct HCN\_YIELD} that occurs in a real fire. Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion. Setting {\ct IDEAL=T} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, and {\ct HCN\_YIELD}. If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.
+Values of the heat of combustion tabulated for pure fuels (e.g., one species) in handbooks are often computed using the enthalpies of formation for the the fuel and products assuming complete combustion. This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, or {\ct HCN\_YIELD} that occurs in a real fire. Carbon and hydrogen that go to soot, CO, and HCN rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion. Setting {\ct IDEAL=T} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, and {\ct HCN\_YIELD}.
 
-The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=F}, the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=F}. Note that predefine fuel species have their heat of formation defined; therefore, the heat of combustion for those species will be appropriately adjusted for soot and CO production.
+Another approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=F}, the measured value of the heat release rate includes the effects of any soot, CO, or HCN that is produced and no adjustment is needed.  The default value is {\ct IDEAL=F}. Note that predefined fuel species have their heat of formation defined; therefore, the heat of combustion for those species will be appropriately adjusted for soot and CO production.
 
-Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
+If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed, (i.e., FDS will always treat {\ct EPUMO2} as {\ct IDEAL=F}.
 
 If the reaction is under defined, FDS will return an error at the start of the calculation.
 
@@ -5447,7 +5452,7 @@ Condensation can occur in both gas cells and on wall cells. The heat transfer to
 
 
 
-
+{}
 \chapter{Radiation}
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
@@ -5472,22 +5477,23 @@ Species                  & $\chi_{\rm r}$   & Reference                         
 {\ct ACETONE}            & 0.27             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct ACETYLENE}          & 0.49             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct BENZENE}            & 0.60             & \cite{SFPE:Tewarson}                    \\ \hline
-{\ct BUTANE}             & 0.30             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct BUTANE}             & 0.31             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct DODECANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
 {\ct ETHANE}             & 0.25             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct ETHANOL}            & 0.25             & \cite{SFPE:Tewarson}                    \\ \hline
-{\ct ETHYLENE}           & 0.25             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct ETHYLENE}           & 0.34             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct HYDROGEN}           & 0.20             & \cite{Beyler2:SFPE}                     \\ \hline
 {\ct ISOPROPANOL}        & 0.29             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct METHANE}            & 0.20             & \cite{Beyler2:SFPE}                     \\ \hline
-{\ct METHANOL}           & 0.16             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct METHANOL}           & 0.21             & \cite{Buch:1}                           \\ \hline
 {\ct N-DECANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
 {\ct N-HEPTANE}          & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
 {\ct N-HEXANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
 {\ct N-OCTANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
-{\ct PROPANE}            & 0.30             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct N-PENTANE}          & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct PROPANE}            & 0.29             & \cite{SFPE:Tewarson}                    \\ \hline
 {\ct PROPYLENE}          & 0.37             & \cite{SFPE:Tewarson}                    \\ \hline
-{\ct TOLUENE}            & 0.40             & \cite{Hamins:NISTIR7013}                \\ \hline
+{\ct TOLUENE}            & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
 All other species        & 0.35             &                                         \\ \hline
 \end{tabular}
 \end{center}
@@ -5513,7 +5519,7 @@ The adjustment ensures that the net radiative emission from the combusting regio
 
 The net radiative loss from the computational domain is reported as a function of time in the column {\ct Q\_RADI} in the output file {\ct CHID\_hrr.csv}. The absolute value of {\ct Q\_RADI} divided by the total heat release rate, {\ct HRR}, is usually not exactly equal to the specified {\ct RADIATIVE\_FRACTION}. The reason for this is that the specified radiative fraction of the fire's energy can be reabsorbed by colder combustion products such as smoke and water vapor, thereby decreasing the absolute value of {\ct Q\_RADI}. Or, hot layer smoke and combustion products can heat up and emit thermal radiation, adding to the absolute value of {\ct Q\_RADI}.
 
-The correction factor that is applied to the RTE source term in the region defined by Eq.~(\ref{clip}) by default is bound between 1 and 100, meaning that the correction factor only increases the net radiative output of the combusting region, if necessary, to achieve the desired {\ct RADIATIVE\_FRACTION}. However, you can change the default behavior of the correction as follows. First, you can force the RTE source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. This will essentially force the net radiative loss from the entire domain to obey the {\ct RADIATIVE\_FRACTION}. Second, you can allow the RTE source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
+The correction factor that is applied to the RTE source term in the region defined by Eq.~(\ref{clip}) by default is bound between 1 and 100, meaning that the correction factor only increases the net radiative output of the combusting region, if necessary, to achieve the desired {\ct RADIATIVE\_FRACTION}. However, you can change the default behavior of the correction as follows. First, you can force the RTE source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. This will essentially force the net radiative loss from the entire domain to obey the {\ct RADIATIVE\_FRACTION}. Second, you can allow the RTE source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100. The time-varying correction factor can be output using a device with quantity {\ct RTE SOURCE CORRECTION FACTOR}. Since {\ct RTE SOURCE CORRECTION FACTOR} is a global value, the position of the device does not matter.
 
 \subsection[Radiation Option 4. Optically-Thick; Unspecified Radiative Fraction]{Radiation Option 4. Optically-Thick; Unspecified Radiative Fraction (DNS Default)}
 
@@ -10217,6 +10223,13 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSI
 
 The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
+\item[\ct 'RADIOMETER GAS']
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIOMETER'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
+\begin{lstlisting}
+	&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
+\end{lstlisting}
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
+
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
 \hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
@@ -10236,6 +10249,8 @@ This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX 
 The units for {\ct 'RADIANCE'} are \unit{kW/m^2}/sr.
 
 \end{labeling}
+
+For {\ct QUANTITY} types ending in {\ct GAS}, a view angle for the radiation component of the device can be set using {\ct VIEW\_ANGLE} on {\ct PROP}. Wall devices can only have a 180$^\circ$ view angle. 
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -11030,6 +11045,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
 {\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
+{\ct RTE SOURCE CORRECTION FACTOR}              & Section~\ref{info:RTE_Source_Correction}          &                   & D            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/kg             & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                             & \si{kJ/(kg.K)}    & D,I,P,S      \\ \hline
@@ -11361,6 +11377,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /DEVC/STATISTICS
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE
 % ignorenamelistkw: /HVAC/DEBUG
+% ignorenamelistkw: /ISOF/DEBUG
 % ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
 % ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK
@@ -12620,6 +12637,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
 {\ct TIME\_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
+{\ct VIEW\_ANGLE}                       & Real          & Section~\ref{info:heat_flux}              & degrees               & 180.                 \\ \hline
 \end{longtable}
 
 
@@ -13664,6 +13682,9 @@ Keyword             & Type     & Description                      & Units       
 559 \> {\ct Output QUANTITY \ldots SPEC\_ID \ldots not found                        } \> Section~\ref{info:hvacoutputquantities}  \\
 560 \> {\ct HVAC\_SMV QUANTITY \ldots not appropriate for .hvac file.               } \> Section~\ref{info:hvacoutputquantities}  \\
 561 \> {\ct HVAC\_SMV QUANTITY \ldots  not found                                    } \> Section~\ref{info:hvacoutputquantities}  \\
+562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
+563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
+564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
      \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
