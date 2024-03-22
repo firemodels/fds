@@ -104,8 +104,8 @@ CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
 IF (MY_RANK==0) WRITE(LU_ERR,'(/A/)') ' Starting FDS ...'
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
-WRITE(LU_ERR,'(A,I6,A,A)') ' MPI Process ',MY_RANK,' started on ',PNAME(1:PNAMELEN)
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+! WRITE(LU_ERR,'(A,I6,A,A)') ' MPI Process ',MY_RANK,' started on ',PNAME(1:PNAMELEN)
+! CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Check that MPI processes and OpenMP threads are working properly
 
@@ -1758,7 +1758,7 @@ CHARACTER(255) :: MESSAGE
 
 IF (ANY(STOP_STATUS==(/NO_STOP,USER_STOP,CLOCK_STOP/))) CALL DUMP_TIMERS
 
-IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MY_RANK,' has completed'
+! IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MY_RANK,' has completed'
 
 IF (MY_RANK==0) THEN
 
