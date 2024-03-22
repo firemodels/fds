@@ -744,7 +744,9 @@ LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
 REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
-INTEGER :: N_ORIENTATION_VECTOR                         !< Number of ORIENTATION_VECTORs
+REAL(EB), POINTER, DIMENSION(:) :: ORIENTATION_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_AREA        !< View angle area ORIENTATION_VECTOR
+INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
 INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100             !< Wall index to use for special TGA calculation
@@ -827,6 +829,7 @@ USE PRECISION_PARAMETERS
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN                !< Wall-normal matrix
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLANG              !< Angles
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ORIENTATION_FACTOR !< Fraction of radiation angle corresponding to a particular direction
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC             !< Fraction of blackbody radiation
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_LOW             !< Lower wavelength limit of the spectral band

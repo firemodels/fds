@@ -3889,11 +3889,11 @@ TNOW = CURRENT_TIME()
 CALL GET_DATE_ISO_8601(DATE)
 CALL CPU_TIME(CPUTIME)
 IF (ABS(T)<=999.99999_EB) THEN
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.5,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.5,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ELSEIF (ABS(T)>999.99999_EB .AND. ABS(T)<=99999.999_EB) THEN
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.3,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.3,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ELSE
-   WRITE(LU_STEPS,'(I7,",",A,",",E10.3,",",F10.1,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+   WRITE(LU_STEPS,'(I8,",",A,",",E10.3,",",F10.1,",",E12.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 ENDIF
 
 ! Write abridged output to the .err file
@@ -3901,26 +3901,26 @@ ENDIF
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
 
    IF (ABS(T)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ELSE
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
    ENDIF
 ELSE
 
    STIME = T_BEGIN + (T-T_BEGIN) * TIME_SHRINK_FACTOR
    DTS = DT * TIME_SHRINK_FACTOR
    IF (ABS(STIME)<=0.0001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.5,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.4,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.3,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ELSE
-      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
+      WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I8,A,F10.2,A)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,' s'
    ENDIF
 
 ENDIF
@@ -3940,19 +3940,19 @@ IF (SUPPRESS_DIAGNOSTICS) THEN
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
 
       IF (ABS(T)<=0.0001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(T)>0.01 .AND. ABS(T)<=0.1) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSE
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,&
             ' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ENDIF
 
@@ -3961,19 +3961,19 @@ IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
    ELSE
 
       IF (ABS(STIME)<=0.0001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.6,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.0001 .AND. ABS(STIME) <=0.001) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.5,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.001 .AND. ABS(STIME)<=0.01) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.4,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSEIF (ABS(STIME)>0.01 .AND. ABS(STIME)<=0.1) THEN
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.3,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ELSE
-         WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
+         WRITE(SIMPLE_OUTPUT,'(1X,A,I8,A,F10.2,A,F8.5,A,I0)')  'Time Step:',ICYC,', Scaled Simulation Time:',STIME,&
             ' s, Scaled Step Size:',DTS,' s, Pressure Iterations: ',PRESSURE_ITERATIONS
       ENDIF
    ENDIF
@@ -3983,7 +3983,7 @@ ENDIF
 ! Detailed diagnostics to the .out file
 
 CALL GET_DATE(DATE)
-WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
+WRITE(LU_OUTPUT,'(7X,A,I8,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
 IF (ABS(TIME_SHRINK_FACTOR-1._EB) < TWO_EPSILON_EB) THEN
    IF (ABS(T)<=0.0001) THEN
       WRITE(LU_OUTPUT,150) DT,T
