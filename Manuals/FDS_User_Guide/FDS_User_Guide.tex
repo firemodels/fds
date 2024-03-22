@@ -10219,6 +10219,13 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSI
 
 The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
+\item[\ct 'RADIOMETER GAS']
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIOMETER'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
+\begin{lstlisting}
+	&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
+\end{lstlisting}
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
+
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
 \hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
@@ -10238,6 +10245,8 @@ This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX 
 The units for {\ct 'RADIANCE'} are \unit{kW/m^2}/sr.
 
 \end{labeling}
+
+For {\ct QUANTITY} types ending in {\ct GAS}, a view angle for the radiation component of the device can be set using {\ct VIEW\_ANGLE} on {\PROP}. Wall devices can only have a 180$^\circ$ view angle. 
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -12622,6 +12631,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
 {\ct TIME\_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
+{\ct VIEW\_ANGLE}                       & Real          & Section~\ref{info:heat_flux}              & degrees               & 180.                 \\ \hline
 \end{longtable}
 
 
