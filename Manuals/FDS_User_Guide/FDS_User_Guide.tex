@@ -9719,6 +9719,10 @@ Plot3D data are stored in files with extension {\ct .q} . There is an optional f
 
 Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify the time interval between dumps using {\ct DT\_PL3D} on the {\ct DUMP} line.
 
+\section{Stereolithography (STL) Geometry Dump}
+\label{info:stl}
+
+Stereolithography (STL) is a commonly used file format in computer-aided design (CAD) programs. STL files represent the surface geometry of objects using a set of triangles. FDS will generate an STL representation of input obstructions for visualization in other software packages if {\ct WRITE\_STL=T} is included on the {\ct DUMP} line.
 
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
@@ -11736,6 +11740,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                        \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                        \\ \hline
+{\ct WRITE\_STL}                    & Logical      & Section~\ref{info:stl}                 &           & {\ct F}                        \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                        \\ \hline
 \end{longtable}
 
