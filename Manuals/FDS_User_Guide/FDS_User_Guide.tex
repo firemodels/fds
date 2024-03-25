@@ -5519,7 +5519,7 @@ The adjustment ensures that the net radiative emission from the combusting regio
 
 The net radiative loss from the computational domain is reported as a function of time in the column {\ct Q\_RADI} in the output file {\ct CHID\_hrr.csv}. The absolute value of {\ct Q\_RADI} divided by the total heat release rate, {\ct HRR}, is usually not exactly equal to the specified {\ct RADIATIVE\_FRACTION}. The reason for this is that the specified radiative fraction of the fire's energy can be reabsorbed by colder combustion products such as smoke and water vapor, thereby decreasing the absolute value of {\ct Q\_RADI}. Or, hot layer smoke and combustion products can heat up and emit thermal radiation, adding to the absolute value of {\ct Q\_RADI}.
 
-The correction factor that is applied to the RTE source term in the region defined by Eq.~(\ref{clip}) by default is bound between 1 and 100, meaning that the correction factor only increases the net radiative output of the combusting region, if necessary, to achieve the desired {\ct RADIATIVE\_FRACTION}. However, you can change the default behavior of the correction as follows. First, you can force the RTE source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. This will essentially force the net radiative loss from the entire domain to obey the {\ct RADIATIVE\_FRACTION}. Second, you can allow the RTE source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
+The correction factor that is applied to the RTE source term in the region defined by Eq.~(\ref{clip}) by default is bound between 1 and 100, meaning that the correction factor only increases the net radiative output of the combusting region, if necessary, to achieve the desired {\ct RADIATIVE\_FRACTION}. However, you can change the default behavior of the correction as follows. First, you can force the RTE source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. This will essentially force the net radiative loss from the entire domain to obey the {\ct RADIATIVE\_FRACTION}. Second, you can allow the RTE source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100. The time-varying correction factor can be output using a device with quantity {\ct RTE SOURCE CORRECTION FACTOR}. Since {\ct RTE SOURCE CORRECTION FACTOR} is a global value, the position of the device does not matter.
 
 \subsection[Radiation Option 4. Optically-Thick; Unspecified Radiative Fraction]{Radiation Option 4. Optically-Thick; Unspecified Radiative Fraction (DNS Default)}
 
@@ -10223,6 +10223,13 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSI
 
 The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
+\item[\ct 'RADIOMETER GAS']
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIOMETER'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
+\begin{lstlisting}
+	&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
+\end{lstlisting}
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
+
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
 \hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
@@ -10242,6 +10249,8 @@ This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX 
 The units for {\ct 'RADIANCE'} are \unit{kW/m^2}/sr.
 
 \end{labeling}
+
+For {\ct QUANTITY} types ending in {\ct GAS}, a view angle for the radiation component of the device can be set using {\ct VIEW\_ANGLE} on {\ct PROP}. Wall devices can only have a 180$^\circ$ view angle. 
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -11036,6 +11045,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
 {\ct RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
+{\ct RTE SOURCE CORRECTION FACTOR}              & Section~\ref{info:RTE_Source_Correction}          &                   & D            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                       & kJ/kg             & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                             & \si{kJ/(kg.K)}    & D,I,P,S      \\ \hline
@@ -12627,6 +12637,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
 {\ct TIME\_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
+{\ct VIEW\_ANGLE}                       & Real          & Section~\ref{info:heat_flux}              & degrees               & 180.                 \\ \hline
 \end{longtable}
 
 

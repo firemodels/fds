@@ -267,6 +267,7 @@ LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that 
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: VTK_BINARY=.TRUE.                        !< Flag that indicates VTK outputs should be binary or ascii
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
+LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -568,7 +569,7 @@ CHARACTER(FN_LENGTH) :: FN_INPUT='null',FN_STOP='null',FN_CPU,FN_CFL,FN_OUTPUT='
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:) :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE, &
                                                    FN_RESTART,FN_VEG_OUT,FN_GEOM,FN_CFACE_GEOM
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDG,FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF
-CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:)  :: FN_SMOKE3D_VTK,FN_BNDF_VTK
+CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:)  :: FN_SMOKE3D_VTK,FN_BNDF_VTK,FN_GEOM_VTK
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:,:):: FN_PART_VTK,FN_SL3D_VTK
 CHARACTER(FN_LENGTH)                             :: FN_PARAVIEW
 
@@ -744,7 +745,9 @@ LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
 REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
-INTEGER :: N_ORIENTATION_VECTOR                         !< Number of ORIENTATION_VECTORs
+REAL(EB), POINTER, DIMENSION(:) :: ORIENTATION_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_AREA        !< View angle area ORIENTATION_VECTOR
+INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
 INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100             !< Wall index to use for special TGA calculation
@@ -772,27 +775,27 @@ MODULE OUTPUT_CLOCKS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE (TYPE,EXTERNAL)
 
-INTEGER :: RAMP_BNDF_INDEX=0       !< Ramp index for boundary file time series
-INTEGER :: RAMP_CTRL_INDEX=0       !< Ramp index for control file time series
-INTEGER :: RAMP_CPU_INDEX =0       !< Ramp index for CPU file time series
-INTEGER :: RAMP_DEVC_INDEX=0       !< Ramp index for device file time series
-INTEGER :: RAMP_FLSH_INDEX=0       !< Ramp index for flush time series
-INTEGER :: RAMP_GEOM_INDEX=0       !< Ramp index for geometry output
-INTEGER :: RAMP_HRR_INDEX =0       !< Ramp index for hrr file time series
-INTEGER :: RAMP_HVAC_INDEX=0       !< Ramp index for hvac file time series
-INTEGER :: RAMP_ISOF_INDEX=0       !< Ramp index for isosurface file time series
-INTEGER :: RAMP_MASS_INDEX=0       !< Ramp index for mass file time series
-INTEGER :: RAMP_PART_INDEX=0       !< Ramp index for particle file time series
-INTEGER :: RAMP_PL3D_INDEX=0       !< Ramp index for Plot3D file time series
-INTEGER :: RAMP_PROF_INDEX=0       !< Ramp index for profile file time series
-INTEGER :: RAMP_RADF_INDEX=0       !< Ramp index for radiation file time series
-INTEGER :: RAMP_RSRT_INDEX=0       !< Ramp index for restart file time series
-INTEGER :: RAMP_SLCF_INDEX=0       !< Ramp index for slice file time series
-INTEGER :: RAMP_SL3D_INDEX=0       !< Ramp index for 3D slice file time series
-INTEGER :: RAMP_SM3D_INDEX=0       !< Ramp index for smoke3d file time series
-INTEGER :: RAMP_UVW_INDEX =0       !< Ramp index for velocity file time series
-INTEGER :: RAMP_TMP_INDEX =0       !< Ramp index for temperature file time series
-INTEGER :: RAMP_SPEC_INDEX=0       !< Ramp index for species file time series
+INTEGER :: RAMP_BNDF_INDEX=0  !< Ramp index for boundary file time series
+INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
+INTEGER :: RAMP_CPU_INDEX =0  !< Ramp index for CPU file time series
+INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
+INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
+INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
+INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
+INTEGER :: RAMP_HVAC_INDEX=0  !< Ramp index for hvac file time series
+INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
+INTEGER :: RAMP_MASS_INDEX=0  !< Ramp index for mass file time series
+INTEGER :: RAMP_PART_INDEX=0  !< Ramp index for particle file time series
+INTEGER :: RAMP_PL3D_INDEX=0  !< Ramp index for Plot3D file time series
+INTEGER :: RAMP_PROF_INDEX=0  !< Ramp index for profile file time series
+INTEGER :: RAMP_RADF_INDEX=0  !< Ramp index for radiation file time series
+INTEGER :: RAMP_RSRT_INDEX=0  !< Ramp index for restart file time series
+INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
+INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
+INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
+INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
+INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
+INTEGER :: RAMP_SPEC_INDEX=0  !< Ramp index for species file time series
 INTEGER :: RAMP_SL3D_VTK_INDEX=0   !< Ramp index for vtk file time series
 INTEGER :: RAMP_SM3D_VTK_INDEX=0   !< Ramp index for vtk file time series
 INTEGER :: RAMP_BNDF_VTK_INDEX=0   !< Ramp index for boundary file time series
@@ -827,6 +830,7 @@ USE PRECISION_PARAMETERS
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN                !< Wall-normal matrix
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLANG              !< Angles
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ORIENTATION_FACTOR !< Fraction of radiation angle corresponding to a particular direction
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC             !< Fraction of blackbody radiation
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_LOW             !< Lower wavelength limit of the spectral band

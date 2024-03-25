@@ -12469,7 +12469,7 @@ PRIVATE
 PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLICE_GEOMETRY,&
        WRITE_VTK_SL3D_WRAPPER,WRITE_VTK_SM3D_WRAPPER,WRITE_VTK_BNDF_WRAPPER,&
        WRITE_VTK_PART_WRAPPER,WRITE_PARAVIEW_STATE_FILE,&
-       DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY
+       DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY,WRITE_VTK_GEOM_FILE
 
 CONTAINS
 
@@ -13019,6 +13019,152 @@ DEALLOCATE(Z_PTS)
 ENDSUBROUTINE DEALLOCATE_VTK_GAS_PHASE_GEOMETRY
 
 
+SUBROUTINE WRITE_VTK_GEOM_FILE
+   ! Parts of this subroutine use content from stack overflow
+   ! Original question: https://stackoverflow.com/questions/34144786
+   ! User whos answer is integrated: https://stackoverflow.com/users/4621823/chw21
+   !character(len=*), parameter :: fname = 'fds.stl'
+   INTEGER :: I,IFACT,J,N,NM,FACES(6, 4) !,GEOM_VERTICES_IDS(1,3)
+   REAL(FB) :: XB(6)
+   !REAL(FB) :: GEOM_VERTICES(3,3)
+   INTEGER(IB8) :: COLOR(3) !, ONE
+   INTEGER(IB32) :: NUM_FACETS
+   REAL(FB), DIMENSION(:,:), ALLOCATABLE :: COLORS
+   REAL(FB), DIMENSION(:,:), ALLOCATABLE :: VERTICES
+   INTEGER(IB32), DIMENSION(:,:), ALLOCATABLE :: FACES_OUT
+   REAL(FB), DIMENSION(:), ALLOCATABLE :: X_PTS, Y_PTS, Z_PTS
+   INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+   INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
+   INTEGER :: NPOINTS, NCELLS !, NFACES
+   TYPE(VTK_FILE)          :: A_VTK_FILE       !< A parallel (partioned) VTK file.
+   TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
+   TYPE (MESH_TYPE), POINTER :: M
+   TYPE (GEOMETRY_TYPE), POINTER :: G=>NULL()
+   TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
+   INTEGER  :: VTK_ERROR                    !< IO Error status.
+   CHARACTER(200) :: TMP_FILE
+   !TYPE (SURFACE_TYPE),POINTER :: SF=>NULL()
+
+   COLOR = INT((/0,0,0/),IB8)
+   
+   FACES(1,:) = (/0,3,4,7/)
+   FACES(2,:) = (/1,2,5,6/)
+   FACES(3,:) = (/0,1,4,5/)
+   FACES(4,:) = (/2,3,6,7/)
+   FACES(5,:) = (/0,3,1,2/)
+   FACES(6,:) = (/4,7,5,6/)
+
+   NUM_FACETS = 0
+   DO NM=1,NMESHES
+      M => MESHES(NM)
+      NUM_FACETS = NUM_FACETS + M%N_OBST*6
+   END DO
+
+   DO I= 1,N_GEOMETRY
+      G=>GEOMETRY(I)
+      NUM_FACETS = NUM_FACETS + G%N_FACES
+   END DO
+   
+   IF (MY_RANK==0) THEN
+      WRITE(FN_GEOM_VTK(NMESHES+1),'(A,A,A)') "",TRIM(CHID),'_GEOM.pvtu'
+      VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_GEOM_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
+                                      MESH_KIND='Float32')
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='OPEN')
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME='Color', &
+                                                              DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=3)
+      VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='CLOSE')
+      DO NM=1,NMESHES
+         WRITE(TMP_FILE,'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_GEOM_',NM,'.vtu'
+         VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
+      ENDDO
+      VTK_ERROR = A_PVTK_FILE%FINALIZE()
+   ENDIF
+   
+   MESH_LOOP: DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP
+      WRITE(FN_GEOM_VTK(NM),'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_GEOM_',NM,'.vtu'
+      IF (VTK_BINARY) THEN
+         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_GEOM_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+      ELSE
+         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_GEOM_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
+      ENDIF ! do not change capitalization on mesh topology
+      M => MESHES(NM)
+      NPOINTS = M%N_OBST*8
+      NCELLS = M%N_OBST*6
+      ALLOCATE(COLORS(NCELLS,3))
+      ALLOCATE(FACES_OUT(NCELLS,4))
+      ALLOCATE(VERTICES(NPOINTS,3))
+      ALLOCATE(X_PTS(NPOINTS))
+      ALLOCATE(Y_PTS(NPOINTS))
+      ALLOCATE(Z_PTS(NPOINTS))
+      ALLOCATE(OFFSETS(NCELLS))
+      ALLOCATE(CONNECT(NCELLS*4))
+      ALLOCATE(VTKC_TYPE(NCELLS))
+      DO N=1,M%N_OBST
+         OB=>M%OBSTRUCTION(N)
+         XB(:) = REAL((/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/),FB)
+         COLORS((N-1)*6+1,1:3) = REAL(SURFACE(OB%SURF_INDEX(-1))%RGB,FB)/255._FB
+         COLORS((N-1)*6+2,1:3) = REAL(SURFACE(OB%SURF_INDEX(1))%RGB,FB)/255._FB
+         COLORS((N-1)*6+3,1:3) = REAL(SURFACE(OB%SURF_INDEX(-2))%RGB,FB)/255._FB
+         COLORS((N-1)*6+4,1:3) = REAL(SURFACE(OB%SURF_INDEX(2))%RGB,FB)/255._FB
+         COLORS((N-1)*6+5,1:3) = REAL(SURFACE(OB%SURF_INDEX(-3))%RGB,FB)/255._FB
+         COLORS((N-1)*6+6,1:3) = REAL(SURFACE(OB%SURF_INDEX(3))%RGB,FB)/255._FB
+         VERTICES((N-1)*8+1:N*8,1:3) = GET_VERTICES(XB)
+         X_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,1)
+         Y_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,2)
+         Z_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,3)
+         FACES_OUT((N-1)*6+1:N*6,1:4) = FACES + (N-1)*8
+      END DO
+      IFACT = 0
+      DO I = 1, NCELLS
+         DO J = 1, 4
+            CONNECT((IFACT)*4+J) = FACES_OUT(I, J)
+         ENDDO
+         IFACT = IFACT+1
+      ENDDO
+      
+      DO I=1,NCELLS
+         OFFSETS(I) = (I)*4_IB32
+         VTKC_TYPE(I) = 8_IB8
+      ENDDO
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NPOINTS, NC=NCELLS)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NPOINTS, NC=NCELLS, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NCELLS, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='OPEN')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME='Color', X=COLORS(:,1),Y=COLORS(:,2),Z=COLORS(:,3))
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='CLOSE')
+      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
+      VTK_ERROR = A_VTK_FILE%FINALIZE()
+      DEALLOCATE(COLORS)
+      DEALLOCATE(FACES_OUT)
+      DEALLOCATE(VERTICES)
+      DEALLOCATE(X_PTS)
+      DEALLOCATE(Y_PTS)
+      DEALLOCATE(Z_PTS)
+      DEALLOCATE(OFFSETS)
+      DEALLOCATE(CONNECT)
+      DEALLOCATE(VTKC_TYPE)
+   ENDDO MESH_LOOP
+
+CONTAINS
+
+   FUNCTION GET_VERTICES(XB)
+      REAL(FB), INTENT(IN) :: XB(6)
+      REAL(FB) :: GET_VERTICES(8,3)
+      GET_VERTICES(1,:) = (/XB(1),XB(3),XB(5)/)
+      GET_VERTICES(2,:) = (/XB(2),XB(3),XB(5)/)
+      GET_VERTICES(3,:) = (/XB(2),XB(4),XB(5)/)
+      GET_VERTICES(4,:) = (/XB(1),XB(4),XB(5)/)
+      GET_VERTICES(5,:) = (/XB(1),XB(3),XB(6)/)
+      GET_VERTICES(6,:) = (/XB(2),XB(3),XB(6)/)
+      GET_VERTICES(7,:) = (/XB(2),XB(4),XB(6)/)
+      GET_VERTICES(8,:) = (/XB(1),XB(4),XB(6)/)
+   END FUNCTION GET_VERTICES
+
+END SUBROUTINE WRITE_VTK_GEOM_FILE
+
+
+
 SUBROUTINE WRITE_PARAVIEW_STATE_FILE(NMESHES)
 USE OUTPUT_CLOCKS
 
@@ -13086,9 +13232,18 @@ WRITE(LU_PARAVIEW,'(A)') "if rdir == '':"
 WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "else:"
 WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+rdir+os.sep+chid"
+WRITE(LU_PARAVIEW,'(A)') "# add geometry data"
+WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '_GEOM.pvtu'):"
+WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(registrationName='Geometry',",&
+                         "FileName=[indir + os.sep + chid + '_GEOM.pvtu'])"
+WRITE(LU_PARAVIEW,'(A)') "    geomDisplay = Show(geom, renderView1, 'UnstructuredGridRepresentation')"
+WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.MapScalars = 0"
+WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.Representation = 'Surface'"
+WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.ColorArrayName = ['CELLS', 'Color']"
+
 WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
 WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
-WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='Geometry', FileNames=[indir+os.sep+chid+'.stl'])"
+WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='GeometrySTL', FileNames=[indir+os.sep+chid+'.stl'])"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay = Show(casestl, renderView1, 'GeometryRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Representation = 'Surface'"

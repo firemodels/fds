@@ -1500,6 +1500,7 @@ IF (IN%ID/='null') THEN
          IF (DV%QUANTITY(1)=='RADIATIVE HEAT FLUX' .OR. &
              DV%QUANTITY(1)=='GAUGE HEAT FLUX' .OR. &
              DV%QUANTITY(1)=='RADIANCE' .OR. &
+             DV%QUANTITY(1)=='RADIOMETER' .OR. &
              DV%QUANTITY(1)=='ADIABATIC SURFACE TEMPERATURE') THEN
             IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN  ! use the orientation of the DEVC
                LP%ORIENTATION_INDEX = DV%ORIENTATION_INDEX
