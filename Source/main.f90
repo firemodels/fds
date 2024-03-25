@@ -151,7 +151,7 @@ ENDDO
 
 ! Write STL file if required
 IF (WRITE_STL) THEN
-   IF (MY_RANK==N) CALL WRITE_STL_FILE
+   IF (MY_RANK==0) CALL WRITE_STL_FILE
 ENDIF
 
 ! Write VTK geometry file if REQUIRED
