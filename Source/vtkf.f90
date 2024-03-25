@@ -13165,9 +13165,9 @@ SUBROUTINE WRITE_VTK_GEOM_FILE
             ALLOCATE(CONNECT(G%N_FACES*3))
             ALLOCATE(VTKC_TYPE(G%N_FACES))
             DO J=1,G%N_VERTS
-               X_PTS(J) = G%VERTS((J-1)*3+1)
-               Y_PTS(J) = G%VERTS((J-1)*3+2)
-               Z_PTS(J) = G%VERTS((J-1)*3+3)
+               X_PTS(J) = REAL(G%VERTS((J-1)*3+1),FB)
+               Y_PTS(J) = REAL(G%VERTS((J-1)*3+2),FB)
+               Z_PTS(J) = REAL(G%VERTS((J-1)*3+3),FB)
             ENDDO
 
             DO J=1,G%N_FACES
