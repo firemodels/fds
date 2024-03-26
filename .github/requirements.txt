@@ -1,0 +1,10 @@
+# requirements.txt for pip install
+
+# User's minimal environment for macfp (test)
+
+numpy
+matplotlib
+pandas
+scipy
+seaborn
+pygments
