@@ -1461,6 +1461,29 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
          ENDDO
       ENDDO
    ENDIF
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
+   IF (ALLOCATED(CELLRT)) DEALLOCATE(CELLRT)
+ENDDO MAIN_MESH_LOOP
+
+CALL DEALLOCATE_BODINT_PLANE(BODINT_PLANE)
+CALL DEALLOCATE_BODINT_PLANE(BODINT_PLANE2)
+
+! Deallocate Intersection variables:
+DEALLOCATE(CC_SVAR_CRS,CC_IS_CRS,CC_SEG_CRS,CC_BDNUM_CRS,CC_BDNUM_CRS_AUX,CC_IS_CRS2,CC_SEG_TAN)
+
+! Exchange CC%NOADVANCE(JCC)>0 information among NEIGHBOURING meshes:
+CALL EXCHANGE_CC_NOADVANCE_INFO
+! Add CC%NOADVANCE(JCC) where needed:
+CALL ADD_NEIGHBOR_BLOCKED_CELLS
+
+MAIN_MESH_LOOP_1 : DO NM=1,NMESHES
+
+   IF (.NOT.CC_COMPUTE_MESH(NM)) CYCLE ! Only MESHES assigned to processor and OMESHES of these.
+   IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CYCLE ! Don't do OMESHES for PERIODIC_TEST==105
+
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
 
    ! Block cut-cells whose volume factor is less than MIN_VOL_FACTOR, or remain unlinked:
    CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,SUM_CCELL)
@@ -1495,14 +1518,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       ENDIF
    ENDIF
    CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
-   IF (ALLOCATED(CELLRT)) DEALLOCATE(CELLRT)
-ENDDO MAIN_MESH_LOOP
-
-CALL DEALLOCATE_BODINT_PLANE(BODINT_PLANE)
-CALL DEALLOCATE_BODINT_PLANE(BODINT_PLANE2)
-
-! Deallocate Intersection variables:
-DEALLOCATE(CC_SVAR_CRS,CC_IS_CRS,CC_SEG_CRS,CC_BDNUM_CRS,CC_BDNUM_CRS_AUX,CC_IS_CRS2,CC_SEG_TAN)
+ENDDO MAIN_MESH_LOOP_1
 
 ! Call tag boundary cut-cells for blocking in refinement interfaces:
 CALL TAG_CC_BLOCKING_REFINEMENT
@@ -1519,7 +1535,7 @@ CALL TAG_CC_BLOCKING_REFINEMENT
 !    DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
 !       CC=>M%CUT_CELL(ICC)
 !       DO JCC=1,CC%NCELL
-!          IF(CC%NOADVANCE(JCC)>0) WRITE(LU_ERR,*) 'B',NM,';',ICC,JCC,CC%IJK(IAXIS:KAXIS),CC%NCELL
+!          IF(CC%NOADVANCE(JCC)>0) WRITE(787,*) 'B',NM,';',ICC,JCC,CC%IJK(IAXIS:KAXIS),CC%NCELL
 !       ENDDO
 !    ENDDO
 !    CLOSE(787)
@@ -1655,6 +1671,12 @@ MAIN_MESH_LOOP_3 : DO NM=1,NMESHES
       CALL DEALLOCATE_CUTCF_CONN_MESH(NM)
    ENDIF
 ENDDO MAIN_MESH_LOOP_3
+
+DO NM=1,NMESHES
+   MESHES(NM)%N_CC_BLOCKED = 0
+   IF(ALLOCATED(MESHES(NM)%XYZ_CC_BLOCKED)) DEALLOCATE(MESHES(NM)%XYZ_CC_BLOCKED)
+   IF(ALLOCATED(MESHES(NM)%JBT_CC_BLOCKED)) DEALLOCATE(MESHES(NM)%JBT_CC_BLOCKED)
+ENDDO
 
 ! Finally allocate Face and cell variables, compute area and volume factors:
 MAIN_MESH_LOOP_4 : DO NM=1,NMESHES
@@ -2115,6 +2137,194 @@ ENDIF CCVERBOSE_COND
 RETURN
 
 CONTAINS
+
+SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
+
+USE MPI_F08
+
+! Local Variables:
+INTEGER :: NM,NOM,N,IERR
+TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0
+INTEGER :: N_REQ0
+LOGICAL :: PROCESS_SENDREC
+
+! Define cut-cells to be blocked for exchange:
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+   ! Count cut-cells for blocking in mesh:
+   M%N_CC_BLOCKED = 0
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      CC => CUT_CELL(ICC)
+      DO JCC=1,CC%NCELL
+        IF(CC%NOADVANCE(JCC)>0) M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
+      ENDDO
+   ENDDO
+   IF (M%N_CC_BLOCKED>0) THEN
+      ALLOCATE(M%XYZ_CC_BLOCKED(3,M%N_CC_BLOCKED))
+      ALLOCATE(M%JBT_CC_BLOCKED(2,M%N_CC_BLOCKED))
+      ! Fill in blocked cut-cell info:
+      M%N_CC_BLOCKED = 0
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         CC => CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+         DO JCC=1,CC%NCELL
+           IF(CC%NOADVANCE(JCC)>0) THEN
+              M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
+              M%XYZ_CC_BLOCKED(1:3,M%N_CC_BLOCKED) = (/XC(I),YC(J),ZC(K)/)
+              M%JBT_CC_BLOCKED(1:2,M%N_CC_BLOCKED) = (/JCC,CC%NOADVANCE(JCC)/)
+           ENDIF
+         ENDDO
+      ENDDO
+   ENDIF
+ENDDO
+
+! MPI Exchange:
+IF (N_MPI_PROCESSES>1) THEN
+   ALLOCATE(REQ0(2*NMESHES**2)); N_REQ0 = 0
+   ! Exchange number of cut-cells information to be exchanged between MESH and OMESHES:
+   ! Receive from neighbors:
+   DO NM=1,NMESHES
+      DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         PROCESS_SENDREC = .FALSE.
+         DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
+            IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
+         ENDDO
+         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+            N_REQ0 = N_REQ0 + 1
+            CALL MPI_IRECV(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+         ENDIF
+      ENDDO
+   ENDDO
+   ! Send to neighbors:
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      DO NOM=1,NMESHES
+         PROCESS_SENDREC = .FALSE.
+         DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
+            IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
+         ENDDO
+         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+            N_REQ0 = N_REQ0 + 1
+            CALL MPI_ISEND(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+         ENDIF
+      ENDDO
+   ENDDO
+   IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+   ! At this point values of MESHES(NM)%N_CC_BLOCKED are populated for PROCESSSED and NEIGNBORING meshes.
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)==MY_RANK) CYCLE ! already done for this mesh at the beginning of the routine.
+      IF(MESHES(NM)%N_CC_BLOCKED>0) THEN
+         ALLOCATE(MESHES(NM)%XYZ_CC_BLOCKED(3,MESHES(NM)%N_CC_BLOCKED))
+         ALLOCATE(MESHES(NM)%JBT_CC_BLOCKED(2,MESHES(NM)%N_CC_BLOCKED))
+      ENDIF
+   ENDDO
+
+   ! Exchange blocked cutcells lists:
+   ! Receive from neighbors:
+   N_REQ0 = 0
+   DO NM=1,NMESHES
+      DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         PROCESS_SENDREC = .FALSE.
+         DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
+            IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
+         ENDDO
+         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+         N_REQ0 = N_REQ0 + 1
+         CALL MPI_IRECV(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
+                        MPI_DOUBLE_PRECISION,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+         N_REQ0 = N_REQ0 + 1
+         CALL MPI_IRECV(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
+                        MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+         ENDIF
+      ENDDO
+   ENDDO
+   ! Send to neighbors:
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      DO NOM=1,NMESHES
+         PROCESS_SENDREC = .FALSE.
+         DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
+            IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
+         ENDDO
+         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. PROCESS_SENDREC) THEN
+            N_REQ0 = N_REQ0 + 1
+            CALL MPI_ISEND(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
+                           MPI_DOUBLE_PRECISION,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            N_REQ0 = N_REQ0 + 1
+            CALL MPI_ISEND(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
+                           MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+         ENDIF
+      ENDDO
+   ENDDO
+   IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+   ! Deallocate REQ0:
+   IF(ALLOCATED(REQ0)) DEALLOCATE(REQ0)
+ENDIF
+
+END SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
+
+
+SUBROUTINE ADD_NEIGHBOR_BLOCKED_CELLS
+
+INTEGER :: NM2,ICELL
+LOGICAL :: IND_FOUND
+REAL(EB):: XCO,YCO,ZCO
+
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (.NOT.CC_COMPUTE_MESH(NM)) CYCLE ! Only MESHES assigned to processor and OMESHES of these.
+   IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CYCLE ! Don't do OMESHES for PERIODIC_TEST==105
+
+   !NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
+   ! Add blocked cut-cells from neighboring meshes:
+   NEIGHBORING_MESHES_DO : DO NM2=1,M%N_NEIGHBORING_MESHES
+      NOM = M%NEIGHBORING_MESH(NM2); IF (NOM==NM) CYCLE
+      ICELL_DO : DO ICELL=1,MESHES(NOM)%N_CC_BLOCKED
+         XCO = MESHES(NOM)%XYZ_CC_BLOCKED(IAXIS,ICELL)
+         YCO = MESHES(NOM)%XYZ_CC_BLOCKED(JAXIS,ICELL)
+         ZCO = MESHES(NOM)%XYZ_CC_BLOCKED(KAXIS,ICELL)
+         ! Search along X dir:
+         IND_FOUND = .FALSE.
+         DO I=ILO_CELL-1,IHI_CELL+1
+            IF (ABS(XCO-XCELL(I))<GEOMEPS) THEN
+               IND_FOUND = .TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+         ! Search along Y dir:
+         IND_FOUND = .FALSE.
+         DO J=JLO_CELL-1,JHI_CELL+1
+            IF (ABS(YCO-YCELL(J))<GEOMEPS) THEN
+               IND_FOUND = .TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+         ! Search along Z dir:
+         IND_FOUND = .FALSE.
+         DO K=KLO_CELL-1,KHI_CELL+1
+            IF (ABS(ZCO-ZCELL(K))<GEOMEPS) THEN
+               IND_FOUND = .TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+
+         ! Here we have found the I,J,K indices of the blocked cut-cell:
+         ICC=M%CCVAR(I,J,K,CC_IDCC)
+         IF(ICC>0) M%CUT_CELL(ICC)%NOADVANCE(MESHES(NOM)%JBT_CC_BLOCKED(1,ICELL)) = &
+                                             MESHES(NOM)%JBT_CC_BLOCKED(2,ICELL)
+      ENDDO ICELL_DO
+   ENDDO NEIGHBORING_MESHES_DO
+   CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
+ENDDO MESH_LOOP
+
+END SUBROUTINE ADD_NEIGHBOR_BLOCKED_CELLS
+
 
 SUBROUTINE DEFINE_XYZFACE_CELL(ALLOC_FLG)
 
@@ -2580,7 +2790,8 @@ IF (FINE_CELL) THEN
       ALLOCATE(FACE_LIST(1:CC_NPARAM_CCFACE,1:NFACE_CELL)); FACE_LIST = CC_UNDEFINED
       ALLOCATE(VOLUME(1:NCELL)); VOLUME(1)=M%DX(II1)*M%DY(JJ1)*M%DZ(KK1)
       ALLOCATE(XYZCEN(IAXIS:KAXIS,1:NCELL)); XYZCEN(IAXIS:KAXIS,1) = (/ M%XC(II1),M%YC(JJ1),M%ZC(KK1) /)
-      ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = BLOCKED_REFI_INTER
+      ALLOCATE(NOADVANCE(1:NCELL)); NOADVANCE(1) = NOT_BLOCKED
+      IF(M2%CCVAR(IIO1,JJO1,KKO1,CC_CGSC)==CC_SOLID) NOADVANCE(1) = BLOCKED_REFI_INTER
       ! Add one by one regular and gas cut faces:
       CT = 1; CCELEM(1,1) = 0
       DO AX=IAXIS,KAXIS
@@ -8506,13 +8717,6 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    INS_INB_COND_1 : IF (IS_INB) THEN
       B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
-      ! Check if fire spreads radially over this surface type
-      IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
-         B1%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
-                                      (BC%Y-SF%XYZ(2))**2 + &
-                                      (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
-      ENDIF
-
       ! Normal to cut-face:
       V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
       V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(3,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
@@ -8569,9 +8773,131 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
 
    CFA  => M%CFACE(CFACE_INDEX)
+   BC   => M%BOUNDARY_COORD(CFA%BC_INDEX)
    B1   => M%BOUNDARY_PROP1(CFA%B1_INDEX)
    ! First: Assign AREA_ADJUST for CFACEs.
    B1%AREA_ADJUST = CF%AREA_ADJUST(IFACE)
+
+   ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
+   IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+      IG  = CF%BODTRI(1,IFACE)
+      TRI = CF%BODTRI(2,IFACE)
+      XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
+      RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
+      TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
+         IF (IWSEL==TRI) CYCLE
+         WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+         ! Triangles NODES coordinates:
+         V1(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+         V2(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+         V3(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
+
+         ! Fast triangle discard method: To do.
+
+         ! Search for intersection point in POS(IAXIS:KAXIS):
+         CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
+
+         IF (IS_INTERSECT) EXIT TRI_LOOP
+
+      ENDDO TRI_LOOP
+
+      IF (IS_INTERSECT) THEN
+
+         ! Check that distance is less than cell diagonal size:
+         ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
+         IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
+
+         ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
+         ! Find indexes and mesh of cell containing intersection point:
+         CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
+
+         ! This test and restriction of NOM==NM is temporary. Discard when parallel CFACE info is in place.
+         IF (NOM/=NM) THEN
+            IF(NOM==0) RETURN
+            WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
+                            ', NOM and other cell IIO,JJO,KKO=',NOM,IIO,JJO,KKO,', intersection pt=',POS(IAXIS:KAXIS)
+            RETURN
+         ENDIF
+
+         IF (NOM>0) THEN
+            IF (ALLOCATED(MESHES(NOM)%CCVAR)) THEN
+               IIV(1:3) = (/ IIO, MAX(IIO-1,1), MIN(IIO+1,MESHES(NOM)%IBAR) /)
+               JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
+               KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
+
+               DIST= 1._EB/TWO_EPSILON_EB; ICFF=0; JCF2=0
+               K_LOOP : DO KKK=1,3
+                  KK=KKV(KKK)
+                  DO JJJ=1,3
+                     JJ=JJV(JJJ)
+                     DO III=1,3
+                        II=IIV(III)
+                        ICF2 = MESHES(NOM)%CCVAR(II,JJ,KK,CC_IDCF)
+                        ICF2_COND : IF (ICF2>0) THEN
+
+                           ! Use cut-face with closest centroid to POS:
+                           DO JCF22=1,MESHES(NOM)%CUT_FACE(ICF2)%NFACE
+                              IF(ICF==ICF2 .AND. IFACE==JCF22) CYCLE
+                              DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
+                                      (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
+                                      (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
+                              IF (DIST2<DIST) THEN
+                                 DIST = DIST2
+                                 ICFF = ICF2
+                                 JCF2 = JCF22
+                                 BACK_CFACE_FOUND = .TRUE.
+                              ENDIF
+                           ENDDO
+                        ENDIF ICF2_COND
+                     ENDDO
+                  ENDDO
+               ENDDO K_LOOP
+
+               ! Loop NOM CUT_FACE array to find BACKING CFACE index:
+               IF(BACK_CFACE_FOUND) THEN
+                  ICFACE=0
+                  ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
+                     IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=CC_INBOUNDARY) CYCLE ICF3_LOOP
+                     DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
+                        IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
+                          ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
+                          EXIT ICF3_LOOP
+                        ENDIF
+                     ENDDO
+                  ENDDO ICF3_LOOP
+
+                  ! Define BACK_MESH, BACK_INDEX:
+
+                  IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
+                     M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NOM
+                     M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
+                  ENDIF
+
+                  ! Write error for testing:
+               ELSE
+                  WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
+                  ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
+                  RETURN
+               ENDIF
+            ELSE ! Intersection in mesh furher away than neighboring meshes.
+               ! To Do stop.
+
+            ENDIF
+
+         ELSE ! Intersection outside of domain.
+            ! To Do stop.
+
+         ENDIF
+
+      ELSE ! Did not find intersection with other triangles.
+         ! To Do : Here we can add a test to check if CFACE is indeed within geometry IG. Geometry intersection and
+         ! linearization lead need to CFACES lay outside of the geometry.
+         WRITE(LU_ERR,*) 'WARNING: BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
+                         ', CFACE_INDEX, Centroid location=',CFACE_INDEX,XP(:)
+         RETURN
+      ENDIF
+
+   ENDIF
 
 CASE(INTEGER_THREE)
 
@@ -8587,15 +8913,15 @@ CASE(INTEGER_THREE)
       JCC = CF%CELL_LIST(3,LOW_IND,IFACE)
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-      CFA%TMP_G = TMP_0(CF%IJK(KAXIS))
+      B1%TMP_G = TMP_0(CF%IJK(KAXIS))
       IF (SF%TMP_FRONT > 0._EB) THEN
          B1%TMP_F = SF%TMP_FRONT
       ELSE
-         B1%TMP_F = CFA%TMP_G
+         B1%TMP_F = B1%TMP_G
       ENDIF
 
       B1%RHO_F = CUT_CELL(ICC)%RHO(JCC)
-      CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
+      B1%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
       IF (RADIATION) THEN
@@ -8610,128 +8936,13 @@ CASE(INTEGER_THREE)
       IF(IBOD>0 .AND. ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%VOLUME_FLOW / FDS_AREA_GEOM(SURF_INDEX,IBOD)
       ! Assign normal velocity from MASS_FLUX_TOTAL :
       IF(ABS(SF%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) B1%U_NORMAL_0 = SF%MASS_FLUX_TOTAL / RHOA * B1%AREA_ADJUST
-      ! Vegetation T_IGN setup:
-      B1%T_IGN      = SF%T_IGN
-
-      ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
-      IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-         IG  = CF%BODTRI(1,IFACE)
-         TRI = CF%BODTRI(2,IFACE)
-         XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
-         RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
-         TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
-            IF (IWSEL==TRI) CYCLE
-            WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-            ! Triangles NODES coordinates:
-            V1(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-            V2(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-            V3(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
-
-            ! Fast triangle discard method: To do.
-
-            ! Search for intersection point in POS(IAXIS:KAXIS):
-            CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
-
-            IF (IS_INTERSECT) EXIT TRI_LOOP
-
-         ENDDO TRI_LOOP
-
-         IF (IS_INTERSECT) THEN
-
-            ! Check that distance is less than cell diagonal size:
-            ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
-            IF(NORM2(XP-POS) > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
-
-            ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
-            ! Find indexes and mesh of cell containing intersection point:
-            CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
-
-            ! This test and restriction of NOM==NM is temporary. Discard when parallel CFACE info is in place.
-            IF (NOM/=NM) THEN
-               IF(NOM==0) RETURN
-               WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
-                               ', NOM and other cell IIO,JJO,KKO=',NOM,IIO,JJO,KKO,', intersection pt=',POS(IAXIS:KAXIS)
-               RETURN
-            ENDIF
-
-            IF (NOM>0) THEN
-               IF (ALLOCATED(MESHES(NOM)%CCVAR)) THEN
-                  IIV(1:3) = (/ IIO, MAX(IIO-1,1), MIN(IIO+1,MESHES(NOM)%IBAR) /)
-                  JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
-                  KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
-
-                  DIST= 1._EB/TWO_EPSILON_EB; ICFF=0; JCF2=0
-                  K_LOOP : DO KKK=1,3
-                     KK=KKV(KKK)
-                     DO JJJ=1,3
-                        JJ=JJV(JJJ)
-                        DO III=1,3
-                           II=IIV(III)
-                           ICF2 = MESHES(NOM)%CCVAR(II,JJ,KK,CC_IDCF)
-                           ICF2_COND : IF (ICF2>0) THEN
-
-                              ! Use cut-face with closest centroid to POS:
-                              DO JCF22=1,MESHES(NOM)%CUT_FACE(ICF2)%NFACE
-                                 IF(ICF==ICF2 .AND. IFACE==JCF22) CYCLE
-                                 DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
-                                         (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
-                                         (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
-                                 IF (DIST2<DIST) THEN
-                                    DIST = DIST2
-                                    ICFF = ICF2
-                                    JCF2 = JCF22
-                                    BACK_CFACE_FOUND = .TRUE.
-                                 ENDIF
-                              ENDDO
-                           ENDIF ICF2_COND
-                        ENDDO
-                     ENDDO
-                  ENDDO K_LOOP
-
-                  ! Loop NOM CUT_FACE array to find BACKING CFACE index:
-                  IF(BACK_CFACE_FOUND) THEN
-                     ICFACE=0
-                     ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
-                        IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=CC_INBOUNDARY) CYCLE ICF3_LOOP
-                        DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
-                           IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
-                             ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
-                             EXIT ICF3_LOOP
-                           ENDIF
-                        ENDDO
-                     ENDDO ICF3_LOOP
-
-                     ! Define BACK_MESH, BACK_INDEX:
-
-                     IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
-                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NOM
-                        M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
-                     ENDIF
-
-                     ! Write error for testing:
-                  ELSE
-                     WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
-                     ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
-                     RETURN
-                  ENDIF
-               ELSE ! Intersection in mesh furher away than neighboring meshes.
-                  ! To Do stop.
-
-               ENDIF
-
-            ELSE ! Intersection outside of domain.
-               ! To Do stop.
-
-            ENDIF
-
-         ELSE ! Did not find intersection with other triangles.
-            ! To Do : Here we can add a test to check if CFACE is indeed within geometry IG. Geometry intersection and
-            ! linearization lead need to CFACES lay outside of the geometry.
-            WRITE(LU_ERR,*) 'WARNING: BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
-                            ', CFACE_INDEX, Centroid location=',CFACE_INDEX,XP(:)
-            RETURN
-         ENDIF
-
+      ! Vegetation T_IGN setup: Check if fire spreads radially over this surface type
+      IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
+         B1%T_IGN = T_BEGIN + SQRT((BC%X-SF%XYZ(1))**2 + &
+                                   (BC%Y-SF%XYZ(2))**2 + &
+                                   (BC%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
+      ELSE
+         B1%T_IGN = SF%T_IGN
       ENDIF
 
    ELSE INS_INB_COND_3 ! External mesh boundary CFACE
@@ -8742,10 +8953,10 @@ CASE(INTEGER_THREE)
          WC_B1 => M%BOUNDARY_PROP1(WC%B1_INDEX)
          WC_BC => M%BOUNDARY_COORD(WC%BC_INDEX)
          ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-         CFA%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%TMP_F = WC_B1%TMP_F
          B1%RHO_F = WC_B1%RHO_F
-         CFA%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
+         B1%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          B1%ZZ_F(1:N_TOTAL_SCALARS) = WC_B1%ZZ_F(1:N_TOTAL_SCALARS)
 
          ! Assign normal velocity to CFACE from wall cell:
@@ -11924,7 +12135,7 @@ IDCR_DO_2 : DO IDCR=1,CRS_NUM(CC_N_CRS)
                IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A)') " SUCCESS: GEOM ID Unknown:"
                ELSE
-                 WRITE(LU_ERR,'(A)') " ERROR: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " ERROR(726): GEOM ID Unknown:"
                ENDIF
                WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
                WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
@@ -12421,7 +12632,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD2),' are not equal.'
@@ -12433,7 +12644,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD2),', ',WSELEM(NOD3),' are not equal.'
@@ -12445,7 +12656,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(727): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
            WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD3),' are not equal.'
@@ -12478,7 +12689,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
            IF (POSITIVE_ERROR_TEST) THEN
              WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ELSE
-             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR(728): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
            ENDIF
            WRITE(LU_ERR,'(A,3F12.3)') "  Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
            WRITE(LU_ERR,*) '  Face IWSEL=', IWSEL, ', Connectivity=', WSELEM(NOD1:NOD3),', Norm Cross=', MGNRM
@@ -12517,7 +12728,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
         IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR(729): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ENDIF
         WRITE(LU_ERR,'(A)') "  Geometry volume too small."
         WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
@@ -12560,7 +12771,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(730): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",SEG(NOD1),&
             " (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -12575,7 +12786,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(731): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Non manifold geometry in adjacent faces at edge with nodes: NOD1",&
             SEG(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -12590,7 +12801,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(732): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') &
             " Opposite normals on triangles sharing edge with nodes: NOD1",&
@@ -12612,7 +12823,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (POSITIVE_ERROR_TEST) THEN
               WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ELSE
-              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+              WRITE(LU_ERR,'(A,A,A)') "ERROR(733): GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
             WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",&
             WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
@@ -21791,7 +22002,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             CALL ALLOCATE_BUFFERS
             DONE=.FALSE.
          ELSE
-            WRITE(BUFFER,'(A,A,A)') 'ERROR: GEOM ID=',TRIM(ID),'. Check &GEOM input line.'
+            WRITE(BUFFER,'(A,A,A)') 'ERROR(101): GEOM ID=',TRIM(ID),'. Check &GEOM input line.'
             CALL SHUTDOWN(TRIM(BUFFER))
             RETURN
          ENDIF
@@ -21849,7 +22060,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             FACES(3*(I-1)+1:3*(I-1)+3) = FACES(4*(I-1)+1:4*(I-1)+3)
             SURFS(I)                   = FACES(4*(I-1)+4)
             IF(SURFS(I) > N_SURF_ID) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(701): problem with GEOM ',TRIM(ID),&
                                            ', local SURF_ID index for FACE ',I,'out of bounds.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -21891,7 +22102,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_SURF_ID    = 3
          DO I=2,3
            IF (TRIM(SURF_ID(I))=='null') THEN
-              WRITE(MESSAGE,'(A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+              WRITE(MESSAGE,'(A,A,A)') 'ERROR(702): problem with GEOM ',TRIM(ID),&
                                        ', SURF_IDS not defined properly.'
               CALL SHUTDOWN(MESSAGE); RETURN
            ENDIF
@@ -21926,13 +22137,13 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (N_VOLUS > 0 ) READ(731) VOLUS(1:4*N_VOLUS)
          CLOSE(731)
          IF (ANY(SURFS(1:N_FACES)>0) .AND. TRIM(SURF_ID(1))=='null') THEN
-          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: missing SURF_ID in &GEOM line ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(703): missing SURF_ID in &GEOM line ',TRIM(ID),&
                                        ' for binary file ',TRIM(BINARY_FILE),&
                                        '. Add SURF_ID in said &GEOM line.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF(N_SURF_ID2 /= N_SURF_ID) THEN
-            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR(704): problem with GEOM ',TRIM(ID),&
                                       ', number of surfaces in SURF_ID field (',N_SURF_ID, &
                                       ') not equal to number of surfaces (',N_SURF_ID2,&
                                       ') defined in bingeom ',TRIM(BINARY_FILE),'.'
@@ -21940,14 +22151,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDIF
          DO I = 1, N_FACES
             IF(SURFS(I) > N_SURF_ID) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(701): problem with GEOM ',TRIM(ID),&
                                            ', local SURF_ID index for FACE ',I,'out of bounds.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
          ENDDO
       ENDIF
 221   IF(IOS > 0) THEN
-         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
+         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR(705): could not read binary connectivity for GEOM ',TRIM(ID),&
                                       ' in binary file ',TRIM(BINARY_FILE),&
                                       '. Check file exists.'
          CALL SHUTDOWN(MESSAGE); RETURN
@@ -21964,18 +22175,18 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       TERRAIN_CASE= .TRUE.
       CALL CHECK_XB(XB)
       IF (N_ZVALS/=IJK(1)*IJK(2) ) THEN
-         WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
+         WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR(706): Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (IJK(1)<2 .OR. IJK(2)<2) THEN
-         CALL SHUTDOWN('ERROR: IJK(1) and IJK(2) on &GEOM line  needs to be at least 2')
+         CALL SHUTDOWN('ERROR(707): IJK(1) and IJK(2) on &GEOM line  needs to be at least 2.')
       ENDIF
       NXB=0
       DO I = 1, 4 ! first 4 XB values must be set, don't care about 5th and 6th
         IF (XB(I)<MAX_VAL) NXB=NXB+1
       ENDDO
       IF (NXB<4) THEN
-         CALL SHUTDOWN('ERROR: At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS')
+         CALL SHUTDOWN('ERROR(708): At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS.')
       ENDIF
 
       IF (EXTEND_TERRAIN) THEN
@@ -22315,14 +22526,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDIF
          ENDDO
          IF(I>N_BEDGES) THEN ! Error
-          WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(709): For terrain GEOM ',TRIM(ID),&
                                        ' unconnected boundary edge at node number,',BOUND_EDGES2(NOD2,J-1),'.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
       ENDDO
       DO I=1,N_BEDGES
          IF (COUNTED_EDGES(I) /= 1) THEN
-            WRITE(MESSAGE,'(A,A,A,2I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,2I8,A)') 'ERROR(710): For terrain GEOM ',TRIM(ID),&
                                           ' unconnected boundary edge at nodes,',BOUND_EDGES(NOD1:NOD2,I),'.'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -22414,7 +22625,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          DO ICPT=NOD1,NOD4
             IJE = CLOSE_PT(ICPT+1) - CLOSE_PT(ICPT);
             IF (IJE <= 0) THEN
-               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR(711): For terrain GEOM ',TRIM(ID),&
                              ' same boundary vertex ',B_IND(CLOSE_PT(ICPT)),' closest to 2 domain corners.'
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -22723,26 +22934,26 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ! Setup an extruded POLYGON object:
    POLY_COND : IF (N_POLY_VERTS > 0) THEN
       IF ( ABS(EXTRUDE) < GEOMEPS ) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(712): For extruded Polygon GEOM ',TRIM(ID),&
                        ' : extrusion distance in EXTRUDE field not defined or zero. Define EXTRUDE value in &GEOM.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
 
       ! Do some tests in POLY, Repeated vertex, etc.:
       IF (N_POLY_VERTS > N_VERTS) THEN
-          WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+          WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR(713): For extruded Polygon GEOM ',TRIM(ID),&
           ' : Number of POLY indexes ',N_POLY_VERTS,' greater than Number of VERTS ',N_VERTS,'.'
           CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
       DO J=1,N_POLY_VERTS
           DO I=J+1,N_POLY_VERTS
               IF (POLY(I)==POLY(J)) THEN
-                  WRITE(MESSAGE,'(A,A,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+                  WRITE(MESSAGE,'(A,A,A,I6,A)') 'ERROR(714): For extruded Polygon GEOM ',TRIM(ID),&
                   ' : Repeated vertex ',POLY(I),' in Polyline.'
                   CALL SHUTDOWN(MESSAGE); RETURN
               ENDIF
               IF (NORM2(VERTS(3*POLY(I)-2:3*POLY(I))-VERTS(3*POLY(J)-2:3*POLY(J))) < GEOMEPS) THEN
-                  WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+                  WRITE(MESSAGE,'(A,A,A,I6,A,I6,A)') 'ERROR(715): For extruded Polygon GEOM ',TRIM(ID),&
                   ' : Vertices ',POLY(I),' and ',POLY(J),' have same position.'
                   CALL SHUTDOWN(MESSAGE); RETURN
               ENDIF
@@ -22785,6 +22996,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%CYLINDER_AXIS   = CYLINDER_AXIS
    G%IJK = IJK
    G%GEOM_TYPE = GEOM_TYPE
+   ! If terrain GEOM and CELL_BLOCK_IOR not set in input line, block in the -3 direction:
+   IF(GEOM_TYPE==TERRAIN_GEOM_TYPE .AND. CELL_BLOCK_IOR==0) G%CELL_BLOCK_IOR = -KAXIS
 
    LOGTEST = GEOM_TYPE==CAD_GEOM_TYPE .OR. GEOM_TYPE==TERRAIN_GEOM_TYPE
    IF (.NOT.LOGTEST) THEN
@@ -22835,7 +23048,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
              EXIT
           ENDDO
           IF(.NOT.IN_LIST) THEN
-             WRITE(MESSAGE,'(A,I4,3A)') 'ERROR: problem with GEOM, the surface IDV(',I,') =',TRIM(SURF_ID(I)),' is not defined.'
+             WRITE(MESSAGE,'(A,I4,3A)') 'ERROR(716): problem with GEOM, the surface ID(',I,') =',&
+                                         TRIM(SURF_ID(I)),' is not defined.'
              CALL SHUTDOWN(MESSAGE)
           ENDIF
       ENDDO
@@ -22894,7 +23108,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
       G%VOLUS(1: 4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
       IF (ANY(VOLUS(1:4*N_VOLUS)<1 .OR. VOLUS(1:4*N_VOLUS)>N_VERTS)) THEN
-         CALL SHUTDOWN('ERROR: problem with GEOM, vertex index out of bounds')
+         CALL SHUTDOWN('ERROR(717): problem with GEOM, vertex index out of bounds.')
       ENDIF
 
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
@@ -23114,14 +23328,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! Check FACES for out of bounds indexes:
       I = MINVAL(FACES(1:3*N_FACES)); II= MINLOC(FACES(1:3*N_FACES),DIM=1)
       IF (I < 1) THEN
-         WRITE(MESSAGE,'(3A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         WRITE(MESSAGE,'(3A,I8,A,I8,A)') 'ERROR(718): Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
          II/3+1,', has vertex index ',I,' less than 1.'
          CALL SHUTDOWN(MESSAGE)
          RETURN
       ENDIF
       I = MAXVAL(FACES(1:3*N_FACES)); II= MAXLOC(FACES(1:3*N_FACES),DIM=1)
       IF (I > N_VERTS) THEN
-         WRITE(MESSAGE,'(3A,I8,A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         WRITE(MESSAGE,'(3A,I8,A,I8,A,I8,A)') 'ERROR(719): Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
          II/3+1,', has vertex index ',I,', higher than number of vertices defined ',N_VERTS,'.'
          CALL SHUTDOWN(MESSAGE)
          RETURN
@@ -23143,7 +23357,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDIF
             ! HERE do tests on surfaces, is not supperted by GEOMs throw error:
             UNSUPPERTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
-               WRITE(MESSAGE,'(5A)') 'ERROR: GEOM: ',TRIM(ID),&
+               WRITE(MESSAGE,'(5A)') 'ERROR(720): GEOM: ',TRIM(ID),&
                ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
                CALL SHUTDOWN(MESSAGE)
                RETURN
@@ -23329,7 +23543,7 @@ THLEN = 0.05_EB * BBLEN ! Threshold distance to polygon average plane.
 DO I=1,N_POLY_VERTS
    DV1(IAXIS:KAXIS) = PVERTS(3*I-2:3*I    ) - XYZCEN(IAXIS:KAXIS)
    IF (ABS(DOT_PRODUCT(DV1,NVEC)) > THLEN) THEN
-      WRITE(MESSAGE,'(A,A,A,I3,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),&
+      WRITE(MESSAGE,'(A,A,A,I3,A)') 'ERROR(721): For extruded Polygon GEOM ',TRIM(ID),&
       ' : Node (',POLY(I),') not in the plane of the polygon. Check VERTS.'
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
@@ -23362,8 +23576,8 @@ DO I=N_POLY_VERTS+1,2*N_POLY_VERTS
       D2(IAXIS:JAXIS) = (/ DOT_PRODUCT(DV2,SVEC), DOT_PRODUCT(DV2,PVEC) /) - P2(IAXIS:JAXIS) ! Seg vector in SVEC, PVEC axes.
       CALL GET_SEGSEG_INTERSECTION(P1,D1,P2,D2,SVARV,SLENV,INT_FLG)
       IF (INT_FLG>0) THEN
-          WRITE(MESSAGE,'(A,I3,A,I3,A,I3,A,I3,A)') 'Error : Segments (',POLY(I-N_POLY_VERTS),'-',POLY(IP1-N_POLY_VERTS),') and (',&
-          POLY(J-N_POLY_VERTS),'-',POLY(JP1-N_POLY_VERTS),') intersect in average POLY plane.'
+          WRITE(MESSAGE,'(A,I3,A,I3,A,I3,A,I3,A)') 'ERROR(722): Segments (',POLY(I-N_POLY_VERTS),'-',POLY(IP1-N_POLY_VERTS),&
+          ') and (',POLY(J-N_POLY_VERTS),'-',POLY(JP1-N_POLY_VERTS),') intersect in average POLY plane.'
           CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
@@ -23387,7 +23601,7 @@ ENDDO
 
 NVERTS2 = SUM(NODE_FLG(1:N_POLY_VERTS));
 IF (NVERTS2 < 3) THEN
-    WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),' : Not enough valid vertices on the polygon.'
+    WRITE(MESSAGE,'(A,A,A)') 'ERROR(723): For extruded Polygon GEOM ',TRIM(ID),' : Not enough valid vertices on the polygon.'
     CALL SHUTDOWN(MESSAGE); RETURN
 ENDIF
 ALLOCATE(PVERTS2(1:2*MAX_DIM*N_POLY_VERTS)); PVERTS2=0._EB
@@ -23424,7 +23638,7 @@ ELSE IS_CONVEX_IF ! Simple polygon, ear clipping.
     OUTER_LOOP : DO WHILE(NLIST>=3) ! OUTER LOOP
          COUNT_OUT = COUNT_OUT + 1
          IF (COUNT_OUT > NVERTS2**4) THEN
-             WRITE(MESSAGE,'(A,A,A)') 'ERROR: For extruded Polygon GEOM ',TRIM(ID),' : Could not triangulate polygon.'
+             WRITE(MESSAGE,'(A,A,A)') 'ERROR(724): For extruded Polygon GEOM ',TRIM(ID),' : Could not triangulate polygon.'
              CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IVERT = 1
@@ -24642,7 +24856,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
             ENDIF
          ENDDO
          IF (MOVE_INDEX==0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: &GEOM ',TRIM(G%ID),' MOVE_ID is not recognized'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR(725): &GEOM ',TRIM(G%ID),' MOVE_ID is not recognized'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO IVERT=1,G%N_VERTS

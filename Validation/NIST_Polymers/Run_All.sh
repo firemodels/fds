@@ -10,6 +10,6 @@ $QFDS $DEBUG $QUEUE -d $INDIR NIST_Gasification_Test_R4.fds
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_Gasification_Test_R5.fds
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_TGA_10K.fds
 $QFDS $DEBUG $QUEUE -d $INDIR NIST_MCC_60K.fds
-$QFDS $DEBUG -p 8 $QUEUE -d $INDIR NIST_Cone_Test_25kW.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR NIST_Cone_Test_25kW.fds
 
 echo FDS cases submitted

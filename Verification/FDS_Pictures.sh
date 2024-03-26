@@ -1,5 +1,5 @@
-$RUNSMV -d Adaptive_Mesh_Refinement random_meshes
-$RUNSMV -d Aerosols propane_flame_deposition
+$RUNSMV -d Adaptive_Mesh_Refinement random_meshes.fds
+$RUNSMV -d Aerosols propane_flame_deposition.fds
 $RUNSMV -d Complex_Geometry geom_simple.fds
 #$RUNSMV -d Complex_Geometry geom_azim.fds
 #$RUNSMV -d Complex_Geometry geom_elev.fds
@@ -25,27 +25,27 @@ $RUNSMV -d Complex_Geometry geom_texture3a.fds
 $RUNSMV -d Complex_Geometry geom_texture3b.fds
 $RUNSMV -d Complex_Geometry geom_texture4a.fds
 $RUNSMV -d Complex_Geometry geom_texture4b.fds
-$RUNSMV -d Complex_Geometry sphere_radiate
+$RUNSMV -d Complex_Geometry sphere_radiate.fds
 $RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
-$RUNSMV -d Complex_Geometry cone_1mesh
-$RUNSMV -d Controls activate_vents
-$RUNSMV -d Detectors beam_detector
-$RUNSMV -d Detectors objects_static
-$RUNSMV -d Detectors objects_dynamic
-$RUNSMV -d Fires couch
-$RUNSMV -d Flowfields helium_2d_isothermal
-$RUNSMV -d Flowfields symmetry_test
-$RUNSMV -d Flowfields symmetry_test_2
-$RUNSMV -d Flowfields symmetry_test_mpi
-$RUNSMV -d Flowfields jet_fan
-$RUNSMV -d Flowfields velocity_bc_test
-$RUNSMV -d Heat_Transfer checkerboard
-$RUNSMV -d Heat_Transfer ht3d_demo
-$RUNSMV -d Heat_Transfer ht3d_ibeam
-$RUNSMV -d Heat_Transfer ht3d_network
-$RUNSMV -d HVAC HVAC_mass_conservation
-$RUNSMV -d HVAC HVAC_energy_pressure
-$RUNSMV -d HVAC leak_test_2
+$RUNSMV -d Complex_Geometry cone_1mesh.fds
+$RUNSMV -d Controls activate_vents.fds
+$RUNSMV -d Detectors beam_detector.fds
+$RUNSMV -d Detectors objects_static.fds
+$RUNSMV -d Detectors objects_dynamic.fds
+$RUNSMV -d Fires couch.fds
+$RUNSMV -d Flowfields helium_2d_isothermal.fds
+$RUNSMV -d Flowfields symmetry_test.fds
+$RUNSMV -d Flowfields symmetry_test_2.fds
+$RUNSMV -d Flowfields symmetry_test_mpi.fds
+$RUNSMV -d Flowfields jet_fan.fds
+$RUNSMV -d Flowfields velocity_bc_test.fds
+$RUNSMV -p 4 -d Heat_Transfer checkerboard.fds
+$RUNSMV -p 8 -d Heat_Transfer ht3d_demo.fds
+$RUNSMV -d Heat_Transfer ht3d_ibeam.fds
+$RUNSMV -p 2 -d Heat_Transfer ht3d_network.fds
+$RUNSMV -d HVAC HVAC_mass_conservation.fds
+$RUNSMV -d HVAC HVAC_energy_pressure.fds
+$RUNSMV -d HVAC leak_test_2.fds
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_01
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_02
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_03
@@ -58,22 +58,22 @@ $RUNSMV -d HVAC leak_test_2
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_10
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_11
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_12
-$RUNSMV -d Miscellaneous pyramid
-$RUNSMV -d Miscellaneous obst_sphere
-$RUNSMV -d Miscellaneous obst_cylinder
-$RUNSMV -d Miscellaneous obst_cone
-$RUNSMV -d Miscellaneous obst_rotbox
-$RUNSMV -d NS_Analytical_Solution ns2d_64
-$RUNSMV -d Pressure_Effects pressure_boundary
-$RUNSMV -d Pressure_Solver dancing_eddies_tight
-$RUNSMV -d Scalar_Analytical_Solution move_slug
-$RUNSMV -d Scalar_Analytical_Solution move_slug_fl1
-$RUNSMV -d Scalar_Analytical_Solution shunn3_256
-$RUNSMV -d Scalar_Analytical_Solution soborot_charm_square_wave_64
-$RUNSMV -d Sprinklers_and_Sprays cascade
-$RUNSMV -d Turbulence csmag_64
-$RUNSMV -d Turbulence dsmag_64
-$RUNSMV -d WUI Bova_1a
-$RUNSMV -d WUI Bova_1b
-$RUNSMV -d WUI Bova_4a
-$RUNSMV -d WUI level_set_fuel_model_1
+$RUNSMV -d Miscellaneous pyramid.fds
+$RUNSMV -d Miscellaneous obst_sphere.fds
+$RUNSMV -d Miscellaneous obst_cylinder.fds
+$RUNSMV -d Miscellaneous obst_cone.fds
+$RUNSMV -d Miscellaneous obst_rotbox.fds
+$RUNSMV -d NS_Analytical_Solution ns2d_64.fds
+$RUNSMV -d Pressure_Effects pressure_boundary.fds
+$RUNSMV -d Pressure_Solver dancing_eddies_tight.fds
+$RUNSMV -d Scalar_Analytical_Solution move_slug.fds
+$RUNSMV -d Scalar_Analytical_Solution move_slug_fl1.fds
+$RUNSMV -d Scalar_Analytical_Solution shunn3_256.fds
+$RUNSMV -d Scalar_Analytical_Solution soborot_charm_square_wave_64.fds
+$RUNSMV -d Sprinklers_and_Sprays cascade.fds
+$RUNSMV -d Turbulence csmag_64.fds
+$RUNSMV -d Turbulence dsmag_64.fds
+$RUNSMV -d WUI Bova_1a.fds
+$RUNSMV -d WUI Bova_1b.fds
+$RUNSMV -d WUI Bova_4a.fds
+$RUNSMV -d WUI level_set_fuel_model_1.fds

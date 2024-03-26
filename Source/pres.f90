@@ -18,13 +18,12 @@ SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE COMPLEX_GEOMETRY, ONLY: CC_IDCF
 USE GLOBAL_CONSTANTS
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
-INTEGER :: I,J,K,IW,IOR,NOM,ICF
+INTEGER :: I,J,K,IW,IOR,NOM
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,TNOW, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY,H0
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -63,7 +62,7 @@ ENDIF
 ! manual for details.
 
 !$OMP DO PRIVATE(IW,WC,EWC,BC,B1,I,J,K,IOR,NOM,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI) &
-!$OMP&   PRIVATE(TIME_RAMP_FACTOR,P_EXTERNAL,VEL_EDDY,ICF,H0)
+!$OMP&   PRIVATE(TIME_RAMP_FACTOR,P_EXTERNAL,VEL_EDDY,H0)
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC => WALL(IW)
@@ -169,18 +168,6 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             END SELECT
          ENDIF
 
-         ICF = 0
-         IF (CC_IBM) THEN
-            SELECT CASE(IOR)
-               CASE( 1); ICF = FCVAR(0,   J,K,CC_IDCF,ABS(IOR))
-               CASE(-1); ICF = FCVAR(IBAR,J,K,CC_IDCF,ABS(IOR))
-               CASE( 2); ICF = FCVAR(I,0,   K,CC_IDCF,ABS(IOR))
-               CASE(-2); ICF = FCVAR(I,JBAR,K,CC_IDCF,ABS(IOR))
-               CASE( 3); ICF = FCVAR(I,J,0,   CC_IDCF,ABS(IOR))
-               CASE(-3); ICF = FCVAR(I,J,KBAR,CC_IDCF,ABS(IOR))
-            END SELECT
-         ENDIF
-
          ! Wind inflow boundary conditions
 
          IF (INITIAL_SPEED>0._EB) THEN
@@ -190,18 +177,14 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          ENDIF
 
          IF (OPEN_WIND_BOUNDARY) THEN
-            IF (ICF>0) THEN
-               H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
-            ELSE
-               SELECT CASE(IOR)
-                  CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K))
-                  CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K))
-                  CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K))
-                  CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K))
-                  CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   ))
-                  CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR))
-               END SELECT
-            ENDIF
+            SELECT CASE(IOR)
+               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K))
+               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K))
+               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K))
+               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K))
+               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   ))
+               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR))
+            END SELECT
          ENDIF
 
          SELECT CASE(IOR)
@@ -518,12 +501,21 @@ USE MPI_F08
 USE GLOBAL_CONSTANTS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 REAL(EB) :: RR,BXS_BAR,BXF_BAR,BXS_BAR_LEFT,BXF_BAR_RIGHT
+REAL(EB), POINTER, DIMENSION(:) :: H_BAR_P,DUDT_BAR_P
 INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
 TYPE (MESH_TYPE), POINTER :: M
 LOGICAL :: SINGULAR_CASE
 
 TNOW=CURRENT_TIME()
+
+IF (PREDICTOR) THEN
+   H_BAR_P => H_BAR
+   DUDT_BAR_P => DUDT_BAR
+ELSE
+   H_BAR_P => H_BAR_S
+   DUDT_BAR_P => DUDT_BAR_S
+ENDIF
 
 ! For each mesh, compute the diagonal, off-diagonal, and right hand side terms of the tri-diagonal linear system of equations
 
@@ -648,7 +640,7 @@ CALL MPI_BCAST(TP_CC(1),TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 ! Contruct the 1-D solution H_BAR and add boundary conditions at the ends of the tunnel.
 
-H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
+H_BAR_P(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
 ! Apply boundary conditions at the ends of the tunnel.
 
@@ -658,21 +650,27 @@ MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    IF (NM==1) THEN
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-         H_BAR(0) = H_BAR(1) - M%DXI*BXS_BAR_LEFT
+         H_BAR_P(0) = H_BAR_P(1) - M%DXI*BXS_BAR_LEFT
       ELSE  ! Dirichlet BC
-         H_BAR(0) = -H_BAR(1) + 2._EB*BXS_BAR_LEFT
+         H_BAR_P(0) = -H_BAR_P(1) + 2._EB*BXS_BAR_LEFT
       ENDIF
    ENDIF
 
    IF (NM==NMESHES) THEN
       IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-         H_BAR(TUNNEL_NXP+1) = H_BAR(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
+         H_BAR_P(TUNNEL_NXP+1) = H_BAR_P(TUNNEL_NXP) + M%DXI*BXF_BAR_RIGHT
       ELSE  ! Dirichlet BC
-         H_BAR(TUNNEL_NXP+1) = -H_BAR(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
+         H_BAR_P(TUNNEL_NXP+1) = -H_BAR_P(TUNNEL_NXP) + 2._EB*BXF_BAR_RIGHT
       ENDIF
    ENDIF
 
 ENDDO MESH_LOOP_2
+
+! Create the array DUDT_BAR
+
+DO I=0,TUNNEL_NXP
+   DUDT_BAR_P(I) = -TP_RDXN(I)*(H_BAR_P(I+1)-H_BAR_P(I))
+ENDDO
 
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE TUNNEL_POISSON_SOLVER
@@ -686,6 +684,7 @@ USE GLOBAL_CONSTANTS
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,RHOP,P,RESIDUAL
+REAL(EB), POINTER, DIMENSION(:) :: DUDT_BAR_P
 INTEGER :: I,J,K
 REAL(EB) :: LHSS,RHSS,TNOW
 
@@ -698,9 +697,11 @@ CALL POINT_TO_MESH(NM)
 IF (PREDICTOR) THEN
    HP => H
    RHOP => RHO
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR
 ELSE
    HP => HS
    RHOP => RHOS
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR_S
 ENDIF
 
 ! Optional check of the accuracy of the separable pressure solution, del^2 H = -del dot F - dD/dt
@@ -718,6 +719,7 @@ IF (CHECK_POISSON) THEN
             LHSS = ((HP(I+1,J,K)-HP(I,J,K))*RDXN(I)*R(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J)      - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K)      - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
+            IF (TUNNEL_PRECONDITIONER) LHSS = LHSS - (DUDT_BAR_P(I_OFFSET(NM)+I) - DUDT_BAR_P(I_OFFSET(NM)+I-1))*RDX(I)
             RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
@@ -763,6 +765,7 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
                  + ((KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)*R(I) - (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)      - (KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
+            IF (TUNNEL_PRECONDITIONER) LHSS = LHSS - (DUDT_BAR_P(I_OFFSET(NM)+I) - DUDT_BAR_P(I_OFFSET(NM)+I-1))*RDX(I)
             RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
@@ -788,7 +791,8 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
-                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG
+                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG,TUNNEL_PRECONDITIONER,&
+                            DUDT_BAR,DUDT_BAR_S,I_OFFSET
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
@@ -857,8 +861,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       SELECT CASE(IOR)
          CASE( 1)
             UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))*DHFCT)
+            IF (TUNNEL_PRECONDITIONER) UN_NEW = UN_NEW + DT*DUDT_BAR(I_OFFSET(NM)+II)*DHFCT
          CASE(-1)
             UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))*DHFCT)
+            IF (TUNNEL_PRECONDITIONER) UN_NEW = UN_NEW + DT*DUDT_BAR(I_OFFSET(NM)+II-1)*DHFCT
          CASE( 2)
             UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))*DHFCT)
          CASE(-2)
@@ -872,8 +878,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       SELECT CASE(IOR)
          CASE( 1)
             UN_NEW =0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)    -DT*(FVX(II,JJ,KK)  +RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))*DHFCT))
+            IF (TUNNEL_PRECONDITIONER) UN_NEW = UN_NEW + 0.5*DT*DUDT_BAR_S(I_OFFSET(NM)+II)*DHFCT
          CASE(-1)
             UN_NEW =0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)-DT*(FVX(II-1,JJ,KK)+RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))*DHFCT))
+            IF (TUNNEL_PRECONDITIONER) UN_NEW = UN_NEW + 0.5*DT*DUDT_BAR_S(I_OFFSET(NM)+II-1)*DHFCT
          CASE( 2)
             UN_NEW =0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)    -DT*(FVY(II,JJ,KK)  +RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))*DHFCT))
          CASE(-2)
@@ -906,6 +914,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   DO JJO=JJO1,JJO2
                      DO IIO=IIO1,IIO2
                         DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
+                        IF (TUNNEL_PRECONDITIONER) DUDT = DUDT + DUDT_BAR(I_OFFSET(EWC%NOM)+IIO)
                         UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
                      ENDDO
                   ENDDO
@@ -915,6 +924,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   DO JJO=JJO1,JJO2
                      DO IIO=IIO1,IIO2
                         DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
+                        IF (TUNNEL_PRECONDITIONER) DUDT = DUDT + DUDT_BAR(I_OFFSET(EWC%NOM)+IIO-1)
                         UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
                      ENDDO
                   ENDDO
@@ -963,6 +973,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   DO JJO=JJO1,JJO2
                      DO IIO=IIO1,IIO2
                         DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
+                        IF (TUNNEL_PRECONDITIONER) DUDT = DUDT + DUDT_BAR_S(I_OFFSET(EWC%NOM)+IIO)
                         UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
                      ENDDO
                   ENDDO
@@ -972,6 +983,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   DO JJO=JJO1,JJO2
                      DO IIO=IIO1,IIO2
                         DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
+                        IF (TUNNEL_PRECONDITIONER) DUDT = DUDT + DUDT_BAR_S(I_OFFSET(EWC%NOM)+IIO-1)
                         UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
                      ENDDO
                   ENDDO

@@ -2163,6 +2163,31 @@ The sphere is generated using the {\ct GEOM} namelist with three levels.  The su
 
 
 \clearpage
+\section{Impinging Jet (\texorpdfstring{\textct{impinging\_jet}}{impinging\_jet})}
+\label{sec:impinging_jet}
+
+Impinging jet flow poses a challenge for convective heat transfer models because the stagnation velocity goes to zero numerically near the mean stagnation point and hence the computed Reynolds number is fictitiously low leading to an under-prediction of the local heat transfer coefficient.  To handle this problem, the user may specify a special impinging jet heat transfer model, as discussed in the FDS User Guide \cite{FDS_Users_Guide}, which basically uses the forced convection correlation but with a velocity scale obtained from the stagnation pressure, following Huang \cite{Huang:1963,Livingood:1973}.  In this section, we present results from a series of cases designed to confirm the general trend that the highest heat transfer coefficient is found at the stagnation point.  There is no analytical solution to this case.  We take our target correlation to be that of Martin \cite{Martin:1977,Incropera:1}.  The default coefficients of the impinging jet model have been tuned to match the Martin correlation for the specific case discussed below at coarse grid resolution.
+
+The set up for the problem is a simple cubic domain 1 m on a side.  The lateral boundaries are open.  The top boundary is held at a fixed 20 C.  A hot jet of air is injected from a 0.2 m by 0.2 m square vent at 100 C.  Two Reynolds numbers are considered by changing the inlet flow velocity [10, 40] m/s.  Three grid resolutions for each Reynolds number are tested, $D/\delta x$ = [7, 14, 28], representing \emph{coarse}, \emph{medium}, and \emph{fine} resolutions.  The cases are fun for roughly flow through times with statistics collected over the last half of the simulation.
+
+Figure \ref{fig_impinging_jet_corr} shows FDS results for three grid resolutions compared to the correlation in Martin \cite{Martin:1977,Incropera:1}.  The plots below in Fig.~\ref{fig_impinging_jet_prof} show the profile of Nu along the ceiling.
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_correlation}
+   \caption[Impinging jet Nusselt correlation]{\label{fig_impinging_jet_corr} Average Nusselt number correlation for a flat plate compared to FDS results using the impinging jet heat transfer model.}
+\end{figure}
+
+\begin{figure}[h]
+   \centering
+   \begin{tabular*}{\textwidth}{lr}
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_local_Re_1e5} &
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/impinging_jet_local_Re_4e5} \\
+   \end{tabular*}
+   \caption[Impinging jet Nusselt profile]{\label{fig_impinging_jet_prof} Profile of average Nusselt number (Nu) along the ceiling at Reynolds numbers (Re) based on jet diameter of $1 \times 10^5$ (left) and $4 \times 10^5$.}
+\end{figure}
+
+\clearpage
 \section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
 \label{sec:ribbed_channel}
 
@@ -4467,40 +4492,41 @@ Figure~\ref{fig:ht3d_energy_conservation_4} compares the integrated net heat flu
 
 \FloatBarrier
 
-Figure~\ref{fig:ht3d_energy_conservation_8} compares the integrated net heat flux versus the internal enthalpy in a case where a vertical steel column is exposed to a radiant heater. The column is modeled in FDS using thin obstructions to represent a 10~mm thick web and two 18~mm thick flanges. One flange is subjected to the heat, which then passes through the web.
+The left plot in Fig.~\ref{fig:ht3d_energy_conservation_8} compares the integrated net heat flux versus the internal enthalpy in a case where a vertical steel column is exposed to a radiant heater. The column is modeled in FDS using thin obstructions to represent a 10~mm thick web and two 18~mm thick flanges. One flange is subjected to the heat, which then passes through the web.
+
+The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat loss from a collection of solid objects with different thermal properties. One of the objects is completely embedded within the solid and has a volume $V=6\times 10^{-9}$~m$^3$ and generates heat a rate of $\dot{q}'''=1.5 \times 10^5$~kW/m$^3$. It is expected that after a few minutes the heat flux from the surface of the collection of solids should be $-\dot{q}''' \, V = -9 \times 10^{-4}$~kW. The minus sign indicates that the solid loses heat from its surface at the same rate as the heat is generated internally.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_8}
-\caption[Additional \textct{ht3d\_energy\_conservation} test case 8]{Comparison of the integrated net heat flux versus the internal enthalpy for a steel column.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_energy_conservation_9}
+\caption[Additional \textct{ht3d\_energy\_conservation} test cases 8 and 9]{(Left) Comparison of the integrated net heat flux versus the internal enthalpy for a steel column. (Right) Integrated heat flux from a solid object with an embedded solid object that generates heat at a constant rate.}
 \label{fig:ht3d_energy_conservation_8}
 \end{figure}
 
 
 \FloatBarrier
 
-\subsection{Heat Transfer to a Steel Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
+\subsection{Heat Transfer to an I-Beam (\texorpdfstring{\textct{ht3d\_beam\_heating}}{ht3d\_beam\_heating})}
 \label{ht3d_beam_heating}
 
-A steel I-beam 1.76~m long, with flanges that are 0.22~m wide and 0.03~m thick and a web that is 0.6~m deep and 0.02~m thick, is heated within a sealed compartment that is filled with a gas that has a volume $V_{\rm g}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The steel has a density $\rho_{\rm s}=7500$~kg/m$^3$, specific heat $c_{\rm s}=0.5$~kJ/(kg$\cdot$K), and volume $V_{\rm s}=0.041536$~kg/m$^3$, and initial temperature $T_{\rm s,0}=293.15$~K. Initially, the gas and steel have internal energies given by:
+An aluminum I-beam $L=1.76$~m long and $d=0.58$~m deep (i.e.~in height), with flanges that are $b_{\rm f}=0.22$~m wide and $t_{\rm f}=0.005$~m thick and a web that is $t_{\rm w}=0.006$~m thick, is heated within a sealed compartment with volume $V_{\rm c}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The aluminum has a density $\rho_{\rm a}=2700$~kg/m$^3$, specific heat $c_{\rm a}=0.9$~kJ/(kg$\cdot$K), and initial temperature $T_{\rm a,0}=293.15$~K. Initially, the gas and aluminum have internal energies given by:
 \be
-   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 191.95 \; \hbox{kJ} \quad ; \quad
-   U_{\rm s} = \rho_{\rm s} V_{\rm s} c_{\rm s} T_{\rm s,0} \approx 45661.04 \; \hbox{kJ}
+   U_{\rm g} = \rho_{\rm g} V_{\rm g} c_{\rm g} T_{\rm g,0} - p_0 V_{\rm g} \approx 189.56 \; \hbox{kJ} \quad ; \quad
+   U_{\rm a} = \rho_{\rm a} V_{\rm a} c_{\rm a} T_{\rm a,0} \approx 7046.0 \; \hbox{kJ}
 \ee
 After several minutes, the equilibrium temperature is expected to be:
 \be
-   T = \frac{U_{\rm g}+U_{\rm s}}{\rho_{\rm s} V_{\rm s} c_{\rm s} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 294.045 \; \hbox{K} \; \equiv 20.895 \; ^\circ \hbox{C}
+   T = \frac{U_{\rm g}+U_{\rm a}}{\rho_{\rm a} V_{\rm a} c_{\rm a} + \rho_{\rm g} V_{\rm g} c_{\rm g} - n R} \approx 298.84 \; \hbox{K} \; \equiv 25.69 \; ^\circ \hbox{C}
 \ee
-where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 9.0847$ is the number of moles of gas.
+where $n=p_0 V_{\rm g}/(RT_{\rm g,0}) \approx 8.973$ is the number of moles of gas. The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the I-beam.
 
-The left hand plot in Fig.~\ref{fig:ht3d_beam_heating} displays the average surface temperature of the steel beam. Its computed value is approximately 4~\% lower than the exact value because the overlap of the web and flanges is not accounted for with the current 3-D heating algorithm in FDS.
-
-In a second case, a steel plate that is 1.76~m long, 0.58~m wide, and 0.02~m thick is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 21.808~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
+In a second case, the I-beam is coated with a 1~cm thick layer of thermal insulation (density $\rho_{\rm i}=20$~kg/m$^3$, specific heat $c_{\rm i}=1.0$~kJ/(kg$\cdot$K)) and exposed to the same thermal environment. The expected equilibrium temperature is 25.62~$^\circ$C. The right hand plot in Fig.~\ref{fig:ht3d_beam_heating} compares the computed and exact temperatures.
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_1}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_beam_heating_2}
-\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of a steel beam immersed in hot gas. (Right) Average temperature of an insulated steel plate exposed to the same conditions.}
+\caption[The \textct{ht3d\_beam\_heating} test cases]{(Left) Average surface temperature of an I-beam immersed in hot gas. (Right) Average temperature of an insulated I-beam exposed to the same conditions.}
 \label{fig:ht3d_beam_heating}
 \end{figure}
 
@@ -5413,16 +5439,27 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \newpage
 
-\section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
-\label{cone_demo_2}
+\section{Scaling Pyrolysis (SPyro) Model \\
+(\texorpdfstring{\textct{spyro\_cone\_demo\_2} and \textct{spyro\_cone\_demo\_3}}{spyro\_cone\_demo\_2 and spyro\_cone\_demo\_3})}
+\label{spyro_cone_demo_2}
+\label{spyro_cone_demo_3}
 
-This section tests a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. In the case a surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from a cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
+This section uses two cases to test a model for scaling heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_2}
-    \caption[Cone data extrapolation model (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
-    \label{fig:cone_demo_2}
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_2}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_2} case)]{Extrapolating a single set of cone data to a time varying heat flux (the {\ct spyro\_cone\_demo\_2} case).}
+    \label{fig:spyro_cone_demo_2}
+\end{figure}
+
+The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:spyro_cone_demo_3}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_3}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_3} case)]{Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct spyro\_cone\_demo\_3} case).}
+    \label{fig:spyro_cone_demo_3}
 \end{figure}
 
 \section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
@@ -5436,6 +5473,7 @@ This section tests the ability for a {\ct MATL} reaction to produce particles. A
     \caption[Check of the particle production by surface reaction feature (the {\ct ice\_cube} case)]{Check of the particle production by surface reaction feature.}
     \label{fig:ice_cube}
 \end{figure}
+
 
 
 \chapter{Lagrangian Particles}
@@ -5636,7 +5674,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/position_convergence}
 \end{tabular*}
-\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{ terminal\_velocity} case.}
+\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{terminal\_velocity} case.}
 \label{fig_terminal_velocity_convergence}
 \end{figure}
 
@@ -5773,6 +5811,8 @@ The solid horizontal lines denote the expected steady-state values.
 \label{water_evaporation_1_plots}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 2}
 \label{water_evaporation_2}
 
@@ -5793,6 +5833,8 @@ The initial mass fraction of water vapor is 0. It is expected that the water wil
 \caption[Sample case \textct{water\_evaporation\_2}]{Output of the \textct{water\_evaporation\_2} test case.}
 \label{water_evaporation_2_plots}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Case 3}
 \label{water_evaporation_3}
@@ -5817,6 +5859,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_3_plots}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 4}
 \label{water_evaporation_4}
@@ -5835,6 +5878,8 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \label{water_evaporation_4_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 5}
 \label{water_evaporation_5}
 
@@ -5847,10 +5892,12 @@ This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} con
 \label{water_evaporation_5_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 6}
 \label{water_evaporation_6}
 
-This pair of cases tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. In both cases, a box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K.
+This pair of cases tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. In both cases, a box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.01$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K.
 
 In case 6, all walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
 \begin{eqnarray*}
@@ -5858,7 +5905,7 @@ In case 6, all walls of the box except the floor are adiabatic.  The floor is th
 \Delta H &=& m_{\rm g,0} \, c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm g,0} ) + m_{\rm d} \Big( c_{\rm l} \, (T_{\rm b}-T_{\rm d,0}) + c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm b}) + h_v  \Big) \\[.1in]
 \Delta p &=& \frac{R}{W \, V} \left( m_{\rm g,f} \, T_{\rm g,f} - m_{\rm g,0} \, T_{\rm g,0} \right) \quad ; \quad R = 8.314 \; \hbox{J/mol/K}
 \end{eqnarray*}
-The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pressure increase is 34.6~kPa.
+The final temperature is calculated to be 460.0~K (186.9~$^\circ$C) and the pressure increase is 27.2~kPa.
 
 \begin{figure}[h!]
 \noindent
@@ -5879,14 +5926,13 @@ In case 6a, the floor is also set to adiabatic. For a fixed heat flux surface, F
     \label{water_evaporation_6a_plot}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Case 7}
 \label{water_evaporation_7}
 
-In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
-introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
-The water completely evaporates before it drips down to the bottom of the channel.
-Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
-\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.4 \; \hbox{kW} \ee
+A gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at 20~$^\circ$C is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of $2\,000~\mu$m are introduced via a nozzle in the middle of the channel at a rate of 0.5~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s. The water completely evaporates before it drips down to the bottom of the channel. Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
+\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 0.5/60 \; \hbox{kg/s} = -21.7 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]
@@ -5896,6 +5942,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \label{water_evaporation_7_plot}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Case 8}
 \label{water_evaporation_8}
@@ -5913,6 +5960,7 @@ This case is similar to Case~5 except that here the droplet has a diameter of 10
 \label{water_evaporation_8_plots}
 \end{figure}
 
+\FloatBarrier
 
 \section{Water Droplets on Solid Surfaces}
 
@@ -6344,7 +6392,7 @@ We undertake a convergence study to demonstrate that the adopted numerical metho
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
    \end{tabular*}
-\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e., decreasing cell size).}
 \label{fig_HVAC_mass_transport_conv_2}
 \end{figure}
 
@@ -6501,6 +6549,52 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \end{center}
  \caption[Level set fire front ellipse error]{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
 \label{fig:level_set_ellipse_error}
+\end{figure}
+
+\subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
+\label{LS4_ember_yield}
+
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+\begin{lstlisting}
+&SURF ID                    = 'fuel'
+VEG_LSET_ROS_00             = 0.15
+VEL_PART                    = 0.
+EMBER_GENERATION_HEIGHT     = 0.0,0.5
+EMBER_YIELD                 = 0.05
+EMBER_TRACKING_RATIO        = 100
+PART_ID                     = 'brands'/
+\end{lstlisting}
+where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the properties of a single ember. The cumulative yield is shown in Figure~\ref{fig:LS4_ember_yield}. We also verify the use of {\ct EMBER\_TRACKING\_RATIO} by checking the average weighting factor for all Lagrangian particles (the number of embers each represents).
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_yield.pdf}&
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_weighting.pdf}\\
+\end{tabular}
+\end{center}
+ \caption[Level set ember generation]{Expected versus predicted (left) yield of embers and (right) average weighting factor for each Lagrangian particle.}
+\label{fig:LS4_ember_yield}
+\end{figure}
+
+
+\subsection{Ember ignition (\texorpdfstring{\textct{LS4\_ember\_ignition}}{LS4\_ember\_ignition})}
+\label{LS4_ember_ignition}
+
+This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
+\be
+\dot{q}_{\rm ember} = A_s \left[h_c \left( T_{\rm ember} - T_\infty \right) + \sigma \epsilon \left( T^4_{\rm ember} - T^4_\infty \right) \right]
+\ee
+Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS4_ember_ignition.pdf}
+\end{tabular}
+\end{center}
+ \caption[Level set ember ignition]{Test of level set fire spread when initiated from spot fire based on {\ct EMBER\_IGNITION\_POWER\_MEAN}.}
+\label{fig:LS4_ember_ignition}
 \end{figure}
 
 % Unstructured geometry verification tests:
@@ -7059,6 +7153,7 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 
 \section{Restart Function}
 \label{geom_restart}
+\label{geom_ls_restart}
 
 In this test, a {\ct GEOM} cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]
@@ -7221,7 +7316,7 @@ Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\
 
 \ifcompgeom
 
-\chapter{Unstructured Geometry integral conservation tests}
+\chapter{Unstructured Geometry Integral Conservation Tests}
 \label{info:constests}
 
 Consider an immersed body $B$, with surface defined by $N_\tau$ triangles, completely immersed in a domain $\Omega$ divided in $M$ cartesian mesh blocks.

@@ -3,43 +3,31 @@
 &TIME T_END=240.0 /
 
 &SURF ID = 'woodenwalls',
-COLOR='SANDY BROWN'
-STRETCH_FACTOR(1) = 1
-STRETCH_FACTOR(2) = 1.5
-DELTA_TMP_MAX = 100.
-SUBSTEP_POWER = 3
-N_LAYER_CELLS_MAX(1) = 625
-N_LAYER_CELLS_MAX(2) = 50
-CELL_SIZE_FACTOR = 0.2,
-THICKNESS = 0.01,0.2
-MINIMUM_LAYER_THICKNESS = 1E-10
-BACKING='EXPOSED',
-MATL_ID(1,:)='water','wood',
-MATL_ID(2,1)='concrete',
-MATL_MASS_FRACTION(1,:) = 0.09, 0.91 /
+      COLOR='SANDY BROWN'
+      THICKNESS(1:2)        = 0.01,0.20
+      STRETCH_FACTOR(1:2)   = 1.2,2.0
+      CELL_SIZE_FACTOR(1:2) = 0.5,1.0
+      DELTA_TMP_MAX = 100.
+      N_LAYER_CELLS_MAX = 500
+      MINIMUM_LAYER_THICKNESS = 1E-10
+      BACKING='EXPOSED',
+      MATL_ID(1,:)='MOISTURE','SPRUCE',
+      MATL_ID(2,1)='CONCRETE',
+      MATL_MASS_FRACTION(1,:) = 0.09, 0.91 /
 
 &VENT SURF_ID='burner'
-XB = 0.0,0.2,0.0,0.2,0.0,0.0
-IOR = 3/
+      XB = 0.0,0.2,0.0,0.2,0.0,0.0
+      IOR = 3/
 
-&VENT SURF_ID='woodenwalls'
-XB = 0.0,0.0,0.0,2.4,0.0,2.4 /
-&VENT SURF_ID='woodenwalls'
-XB = 0.0,3.6,0.0,0.0,0.0,2.4 /
-&VENT SURF_ID='woodenwalls'
-XB = 0.0,3.6,2.4,2.4,0.0,2.4 /
-&VENT SURF_ID='woodenwalls'
-XB = 0.0,3.6,0.0,2.4,2.4,2.4 /
-&VENT SURF_ID='concretewalls'
-XB = 0.0,3.6,0.0,2.4,0.0,0.0 /
-&VENT SURF_ID='OPEN'
-XB = 5.3,5.3,0.0,2.4,0.0,2.4 /
-&VENT SURF_ID='OPEN'
-XB = 3.8,5.3,0.0,0.0,0.0,2.4 /
-&VENT SURF_ID='OPEN'
-XB = 3.8,5.3,2.4,2.4,0.0,2.4 /
-&VENT SURF_ID='OPEN'
-XB = 3.8,5.3,0.0,2.4,2.4,2.4 /
+&VENT SURF_ID='woodenwalls'    XB = 0.0,0.0,0.0,2.4,0.0,2.4 /
+&VENT SURF_ID='woodenwalls'    XB = 0.0,3.6,0.0,0.0,0.0,2.4 /
+&VENT SURF_ID='woodenwalls'    XB = 0.0,3.6,2.4,2.4,0.0,2.4 /
+&VENT SURF_ID='woodenwalls'    XB = 0.0,3.6,0.0,2.4,2.4,2.4 /
+&VENT SURF_ID='concretewalls'  XB = 0.0,3.6,0.0,2.4,0.0,0.0 /
+&VENT SURF_ID='OPEN'	       XB = 5.3,5.3,0.0,2.4,0.0,2.4 /
+&VENT SURF_ID='OPEN'	       XB = 3.8,5.3,0.0,0.0,0.0,2.4 /
+&VENT SURF_ID='OPEN'	       XB = 3.8,5.3,2.4,2.4,0.0,2.4 /
+&VENT SURF_ID='OPEN'	       XB = 3.8,5.3,0.0,2.4,2.4,2.4 /
 
 &OBST XB=3.6,3.8,0,2.4,0,2.4, SURF_ID6='woodenwalls','concretewalls','INERT','INERT','INERT','INERT'/
 

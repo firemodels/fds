@@ -169,6 +169,7 @@ $QFDS -d Fires box_burn_away6.fds
 $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
 $QFDS -p 4 -d Fires box_burn_away9.fds
+$QFDS -p 4 -d Fires box_burn_away10.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -p 4 -d Fires couch.fds
@@ -257,6 +258,7 @@ $QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_5.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_6.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_7.fds
 $QFDS -p 36 -d Heat_Transfer ht3d_energy_conservation_8.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_energy_conservation_9.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation.fds
 $QFDS -d Heat_Transfer ht3d_mass_conservation_2.fds
@@ -379,8 +381,6 @@ $QFDS -d Pyrolysis cable_11_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_23_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_701_jacket_mcc.fds
 $QFDS -d Pyrolysis cell_burn_away.fds
-$QFDS -d Pyrolysis cone_demo.fds
-$QFDS -d Pyrolysis cone_demo_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
@@ -394,6 +394,9 @@ $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
 $QFDS -d Pyrolysis shrink_swell.fds
+$QFDS -d Pyrolysis spyro_cone_demo.fds
+$QFDS -d Pyrolysis spyro_cone_demo_2.fds
+$QFDS -d Pyrolysis spyro_cone_demo_3.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel_nonconforming.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds
@@ -516,6 +519,8 @@ $QFDS -p 4 -d Restart device_restart_base_case.fds
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart geom_restart_a.fds
 $QFDS -d Restart geom_restart_base_case.fds
+$QFDS -d Restart geom_ls_restart_a.fds
+$QFDS -d Restart geom_ls_restart_base_case.fds
 $QFDS -d Restart clocks_restart_a.fds
 $QFDS -d Restart clocks_restart_base_case.fds
 $QFDS -p 4 -d Restart restart_ulmat_a.fds
@@ -770,6 +775,8 @@ $QFDS -d WUI LS_ellipse_0ms_00deg.fds
 $QFDS -d WUI LS_ellipse_5ms_00deg.fds
 $QFDS -d WUI LS_ellipse_0ms_30deg.fds
 $QFDS -d WUI LS_ellipse_5ms_30deg.fds
+$QFDS -d WUI LS4_ember_ignition.fds
+$QFDS -d WUI LS4_ember_yield.fds
 $QFDS -d WUI Morvan_TGA.fds
 $QFDS -d WUI Morvan_TGA_2.fds
 $QFDS -d WUI Needle_TGA_A.fds

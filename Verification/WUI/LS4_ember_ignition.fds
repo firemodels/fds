@@ -1,0 +1,77 @@
+&HEAD CHID='LS4_ember_ignition',  TITLE='Test of ember ignition with LS4' /
+
+&MESH IJK=10,10,10, XB=0,5,-2.5,2.5,0,5/
+&MESH IJK=10,10,10, XB=7.5,12.5,-2.5,2.5,0,5/
+
+&TIME T_END=50./
+&MISC LEVEL_SET_MODE=4/
+
+&REAC FUEL='WOOD FUEL VAPOR'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17260. /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='fuel' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+! Ignitable fuel (e.g. very dry fuel bed)
+&SURF ID                    = 'fuel'
+      VEG_LSET_ROS_00       = 0.15
+      EMBER_IGNITION_POWER_MEAN      = 0.005/
+
+&PART ID = 'hotter brand'
+      DRAG_LAW = 'DISK'
+      SURF_ID = 'firebrand'
+      COLOR = 'ORANGE'
+      PROP_ID = 'disk image'
+      SAMPLING_FACTOR = 1
+      AGE = 20
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 1000
+      EMBER_VELOCITY_THRESHOLD = 0
+      INITIAL_TEMPERATURE = 1000.
+      QUANTITIES = 'PARTICLE TEMPERATURE'/
+
+&PART ID = 'cooler brand'
+      DRAG_LAW = 'DISK'
+      SURF_ID = 'firebrand'
+      COLOR = 'ORANGE'
+      PROP_ID = 'disk image'
+      SAMPLING_FACTOR = 1
+      AGE = 20
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 1000
+      EMBER_VELOCITY_THRESHOLD = 0
+      INITIAL_TEMPERATURE = 500.
+      QUANTITIES = 'PARTICLE TEMPERATURE'/
+
+&INIT XYZ=2.5,0,4.5, PART_ID='cooler brand', N_PARTICLES=1/
+&INIT XYZ=10,0,4.5, PART_ID='hotter brand', N_PARTICLES=1/
+
+&SURF ID                = 'firebrand'
+      MATL_ID           = 'char'
+      THICKNESS         = 0.0005
+      LENGTH            = 0.005
+      WIDTH             = 0.005
+      HEAT_TRANSFER_COEFFICIENT = 20.
+      GEOMETRY          = 'CARTESIAN'/
+
+&MATL ID            = 'char'
+      DENSITY       = 110.
+      CONDUCTIVITY  = 0.1
+      EMISSIVITY    = 1.
+      SPECIFIC_HEAT = 10000.0 /
+
+&SLCF AGL_SLICE=0.1, QUANTITY='LEVEL SET VALUE' /
+
+&DEVC ID='m_T_low', XB=0,5,-2.5,2.5,0,0, QUANTITY='MASS FLUX', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'/
+&DEVC ID='m_T_high', XB=7.5,12.5,-2.5,2.5,0,0, QUANTITY='MASS FLUX', SPEC_ID='WOOD FUEL VAPOR', SPATIAL_STATISTIC='SURFACE INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL'/
+
+&TAIL /

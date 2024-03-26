@@ -91,6 +91,7 @@ $\Delta$                  \> LES filter width \\
 $\Delta h$                \> heat of combustion \\
 $\Delta h_\OTWO$          \> energy released per unit mass oxygen consumed \\
 $\Delta h_{\rm f,\alpha}^0$ \> heat of formation of species $\alpha$ \\
+$\Delta h_{\rm g}$        \> heat of gasification \\
 $\delta$                  \> film thickness; scaling factor of thickness and density \\
 $\epsilon$                \> dissipation rate; emissivity; agglomeration factor \\
 $\eta$                    \> agglomeration apportioning factor \\
@@ -100,7 +101,7 @@ $\mu$                     \> dynamic viscosity \\
 $\nu$                     \> frequency of the thermal radiation \\
 $\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
 $\nu_{\rm s}$             \> yield of solid residue in solid phase reaction \\
-$\nu_{{\rm g},\gamma}$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
+$\nu_{\rm g,\gamma}$      \> yield of gaseous species $\gamma$ in solid phase reaction \\
 $\rho$                    \> density \\
 $\bar{\tau}_{\om}$        \> mean spectral transmissivity of a narrow band centered in $\om$ \\
 $\btau_{ij}$              \> viscous stress tensor \\
@@ -151,7 +152,7 @@ $\om$                     \> wavenumber \\
 The equations governing the evolution of a low-Mach number, variable density fluid---first introduced by Rehm and Baum in 1978 \cite{Rehm:1}---are continuity, species concentration (mass fraction), momentum, energy (sensible enthalpy), and the ideal gas equation of state:
 \begin{gather}
 \label{eqn_rho} \frac{\partial \rho}{\partial t} + \Div(\rho\mathbf{u}) = \dot{m}_{\rm b}''' \\
-\label{eqn_Y_a} \frac{\partial \rho Y_\alpha}{\partial t} + \Div(\rho Y_\alpha \mathbf{u}) = \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime + \dot{m}_{{\rm b},\alpha}^\tripleprime \\
+\label{eqn_Y_a} \frac{\partial \rho Y_\alpha}{\partial t} + \Div(\rho Y_\alpha \mathbf{u}) = \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime + \dot{m}_{\rm b,\alpha}^\tripleprime \\
 \label{eqn_u}   \frac{\partial \rho \mathbf{u}}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) = -\nabla \tilde{p} - \Div\mathbf{\tau} + (\rho-\rho_0) \mathbf{g} \\
 \label{eqn_h_s} \frac{\partial \rho h_s}{\partial t} + \Div(\rho h_s \mathbf{u}) = \frac{\mbox{D} \bar{p}}{\mbox{D} t} + \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp \\
 \label{eqn_eos} \rho = \frac{\bar{p} \overline{W}}{RT}
@@ -405,8 +406,8 @@ The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law
 \be \label{eq:Planck_law}
 I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \, c}{k_{\rm B} \, \la \, T }\right)-1}\d \la
 \ee
-Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K) \cite{Mohr:2012}.
-$I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
+Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~\unit{J.s}), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K) \cite{Mohr:2012}.
+$I_{\rm b,\la}(T)$ is in units of \unit{W/m^2/str/m}; the wavelengths are converted from \unit{\micro m} to m.
 
 The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{n,i,{\rm e}}(Y_i,T,L)$ which is defined according to the following equation
 \be
@@ -474,7 +475,7 @@ These new data have been obtained through FTIR measurements for wavenumbers betw
 \ee
 whose units are $\rm {atm^{-1} cm^{-2}}$. The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from 5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$, and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
 
-The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficients are calculated using RADCAL and then tabulated as a function of species concentration and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values. The contributions of individual species are summed to the the total absorption coefficient.
+The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficients are calculated using RADCAL and then tabulated as a function of species concentration and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values. The contributions of individual species are summed to the total absorption coefficient.
 
 
 
@@ -901,7 +902,7 @@ As discussed by Pope \cite{Pope:2000}, the PDF (\ref{eq:pdf}) evolves by the Fok
 The term on the right in angled brackets is a conditional mean.  Here it is modeled using a variant of IEM \cite{Dopazo:1974} which we call {\em interaction by exchange with the mixed mean} or IEMM.  When including chemical reaction, the conditional mean is modeled by
 \begin{equation}
 \label{eq:iem2}
-\left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle = \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{.}
+\left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle = \frac{1}{\tau_{\rm mix}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{.}
 \end{equation}
 Using (\ref{eq:iem2}), the zeroth moment of (\ref{eq:fokker-planck}) yields (\ref{eq:final_comp}).  The zeroth and first moments of (\ref{eq:fokker-planck}) combine to yield the model for the chemical source term (\ref{mass_prod_rate}), once multiplied by density.
 
@@ -916,12 +917,12 @@ LHS:
 \end{align}
 RHS:
 \begin{multline}
-\int - \psi_\beta \frac{\partial}{\partial \psi_\alpha} \left( f \left\{ \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \right\} \right) \d \psi_\beta =\\ - \underbrace{\int \frac{\partial}{\partial \psi_\alpha}\left[ \psi_\beta f \{ \;\;\; \} \right] \d \psi_\beta}_{\mbox{0 by Pope Exercise 12.1 \cite{Pope:2000}}} + \int f \{\;\;\;\} \underbrace{\frac{\partial \psi_\beta}{\partial \psi_\alpha}}_{\delta_{\alpha \beta}} \d \psi_\beta
+\int - \psi_\beta \frac{\partial}{\partial \psi_\alpha} \left( f \left\{ \frac{1}{\tau_{\rm mix}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \right\} \right) \d \psi_\beta =\\ - \underbrace{\int \frac{\partial}{\partial \psi_\alpha}\left[ \psi_\beta f \{ \;\;\; \} \right] \d \psi_\beta}_{\mbox{0 by Pope Exercise 12.1 \cite{Pope:2000}}} + \int f \{\;\;\;\} \underbrace{\frac{\partial \psi_\beta}{\partial \psi_\alpha}}_{\delta_{\alpha \beta}} \d \psi_\beta
 \end{multline}
 \begin{align}
-&= \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\beta - \widetilde{Y}_\beta) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
-&= \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\beta - [\zeta \widetilde{Y}_\beta^0 + (1-\zeta)\hat{Y}_\beta]) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
-&= \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\beta - \widetilde{Y}_\beta^0) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \label{eq:first_moment}
+&= \frac{1}{\tau_{\rm mix}}(\hat{Y}_\beta - \widetilde{Y}_\beta) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
+&= \frac{1}{\tau_{\rm mix}}(\hat{Y}_\beta - [\zeta \widetilde{Y}_\beta^0 + (1-\zeta)\hat{Y}_\beta]) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
+&= \frac{\zeta}{\tau_{\rm mix}}(\hat{Y}_\beta - \widetilde{Y}_\beta^0) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \label{eq:first_moment}
 \end{align}
 
 \subsection*{Evolution of the Unmixed Fraction}
@@ -937,7 +938,7 @@ Equation (\ref{eq:zeta}) may be derived as follows.  Differentiating (\ref{eq:fi
 Comparing (\ref{eq:diff_comp}) with (\ref{eq:first_moment}) we see that during the reactor step the unmixed fraction evolves by
 \begin{equation}
 \label{eq:zeta_ode}
-\frac{\d \zeta}{\d t} = - \frac{\zeta}{\tau_{\si{mix}}} \,\mbox{.}
+\frac{\d \zeta}{\d t} = - \frac{\zeta}{\tau_{\rm mix}} \,\mbox{.}
 \end{equation}
 Note that while (\ref{mass_prod_rate}) invokes (\ref{eq:zeta_ode}) in its derivation, (\ref{eq:first_moment}) does not---it is an independent derivation that relies on the choice of mixing model, in this case a variant of IEM as shown in (\ref{eq:iem2}).
 
@@ -954,7 +955,7 @@ The turbulent batch reactor model, Eq.~(\ref{mass_prod_rate}), is equivalent to 
 When the reactants are initially completely mixed ($\zeta_0=0$) and the chemical kinetics are infinitely fast for a single step reaction, $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$, the present model reduces to the Burke-Schumann solution (see, e.g., \cite{Turns:1996}), where the cell mean mixture fraction is given by
 \begin{equation}
 \label{eq:mixture_fraction}
-\widetilde{Z} = \widetilde{Y}_{\si{F}} + \left(\frac{1}{1+s}\right) \widetilde{Y}_{\si{P}} \,\mbox{.}
+\widetilde{Z} = \widetilde{Y}_{\rm F} + \left(\frac{1}{1+s}\right) \widetilde{Y}_{{\rm P}} \,\mbox{.}
 \end{equation}
 
 \section{Basic EDC}
@@ -962,18 +963,18 @@ When the reactants are initially completely mixed ($\zeta_0=0$) and the chemical
 When the reactants are initially unmixed ($\zeta_0=1$) and the kinetics are infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) as described in \cite{Poinsot:TNC}.  First, write (\ref{mass_prod_rate}) for Fuel (F) with $\zeta = 1$:
 \begin{equation}
 \label{eq:src_zeta_1}
-\dot{m}^{\prime\prime\prime}_{\si{F}} = \rho \frac{1}{\tau_{\si{mix}}} (\hat{Y}_{\si{F}} - \widetilde{Y}_{\si{F}}^0) \,\mbox{.}
+\dot{m}^{\prime\prime\prime}_{\rm F} = \rho \frac{1}{\tau_{\rm mix}} (\hat{Y}_{\rm F} - \widetilde{Y}_{\rm F}^0) \,\mbox{.}
 \end{equation}
 For infinitely fast kinetics, the Fuel composition in the mixed zone is
 \begin{equation}
 \label{eq:mixed_fuel_comp}
-\hat{Y}_{\si{F}} = \left\{ \begin{array}{ll} 0 & \mbox{if} \quad \widetilde{Y}_{\si{F}}^0 \le \widetilde{Y}_{\si{A}}^0/s \quad \mbox{(excess Air)}  \,\mbox{,} \\
-\widetilde{Y}_{\si{F}}^0 - \widetilde{Y}_{\si{A}}^0/s & \mbox{if} \quad \widetilde{Y}_{\si{F}}^0 > \widetilde{Y}_{\si{A}}^0/s \quad \mbox{(excess Fuel)}  \,\mbox{.} \end{array} \right.
+\hat{Y}_{\rm F} = \left\{ \begin{array}{ll} 0 & \mbox{if} \quad \widetilde{Y}_{\rm F}^0 \le \widetilde{Y}_{{\rm A}}^0/s \quad \mbox{(excess Air)}  \,\mbox{,} \\
+\widetilde{Y}_{\rm F}^0 - \widetilde{Y}_{{\rm A}}^0/s & \mbox{if} \quad \widetilde{Y}_{\rm F}^0 > \widetilde{Y}_{{\rm A}}^0/s \quad \mbox{(excess Fuel)}  \,\mbox{.} \end{array} \right.
 \end{equation}
 Using (\ref{eq:mixed_fuel_comp}) in (\ref{eq:edc}) we recover the basic EDC model:
 \begin{equation}
 \label{eq:edc_basic}
-\dot{m}^{\prime\prime\prime}_{\si{F}} = - \rho \frac{\min(\widetilde{Y}_{\si{F}}^0,\widetilde{Y}_{\si{A}}^0/s)}{\tau_{\si{mix}}} \,\mbox{.}
+\dot{m}^{\prime\prime\prime}_{\rm F} = - \rho \frac{\min(\widetilde{Y}_{\rm F}^0,\widetilde{Y}_{{\rm A}}^0/s)}{\tau_{\rm mix}} \,\mbox{.}
 \end{equation}
 
 \section{Extended EDC}
@@ -988,21 +989,21 @@ where $\gamma_\lambda$ is the ``ratio between the mass of the fine structure and
 %\paragraph{Remarks}
 %\begin{enumerate}
 %\item It is not clear why $\gamma_\lambda$ should be squared in (\ref{eq:panjwani_edc}).  In fact, \cite{Chen:1} does not square this quantity.
-%\item Given that $\gamma_\lambda$ and $\chi$ are in the range [0,1], the sign of the RHS of (\ref{eq:panjwani_edc}) is inconsistent since for fast chemistry $Y_{\si{F}}^\star$ may be 0 (this sign convention is used consistently by the aforementioned authors).
+%\item Given that $\gamma_\lambda$ and $\chi$ are in the range [0,1], the sign of the RHS of (\ref{eq:panjwani_edc}) is inconsistent since for fast chemistry $Y_{\rm F}^\star$ may be 0 (this sign convention is used consistently by the aforementioned authors).
 %\item A comparison between the models written down by \cite{Panjwani:2010} (see Eq.~(\ref{eq:panjwani_edc})) and \cite{Lilleberg:2010} makes it clear that the cell mean mass fraction may be written as $\widetilde{Y}_\alpha = (1-\gamma_\lambda^2 \chi) Y_\alpha^0 + \gamma_\lambda^2 \chi \, Y_\alpha^\star$, which is equivalent to our (\ref{eq:final_comp}) with $\zeta = 1-\gamma_\lambda^2 \chi$.  This definition of the cell mean is inconsistent with the stated definition of $\gamma_\lambda$ (quoted above) in \cite{Panjwani:2010}.
 %\item Equation (\ref{eq:panjwani_edc}) may be rewritten as
 %   \begin{align}
 %      \label{eq:edc_compare}
-%      \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} &= \rho \, \frac{(1-\zeta)}{\tau_{\si{mix}}} ( \widetilde{Y}_\alpha^0 - \hat{Y}_\alpha ) \,\mbox{,} \notag \\
-%      &= \rho \, \frac{(\zeta-1)}{\tau_{\si{mix}}} ( \hat{Y}_\alpha - \widetilde{Y}_\alpha^0 ) \,\mbox{,} \notag \\
-%      &= \rho \, \left[ \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \widetilde{Y}_\alpha^0) + \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}} \right] \,\mbox{.}
+%      \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} &= \rho \, \frac{(1-\zeta)}{\tau_{\rm mix}} ( \widetilde{Y}_\alpha^0 - \hat{Y}_\alpha ) \,\mbox{,} \notag \\
+%      &= \rho \, \frac{(\zeta-1)}{\tau_{\rm mix}} ( \hat{Y}_\alpha - \widetilde{Y}_\alpha^0 ) \,\mbox{,} \notag \\
+%      &= \rho \, \left[ \frac{\zeta}{\tau_{\rm mix}}(\hat{Y}_\alpha - \widetilde{Y}_\alpha^0) + \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\rm mix}} \right] \,\mbox{.}
 %   \end{align}
 %   Compare (\ref{eq:edc_compare}) with (\ref{mass_prod_rate}).  Again, the first term on the RHS represents mixing, the second term reaction.  Evidently, the PSR model is
 %   \begin{equation}
 %      \label{eq:psr}
-%      \frac{\d \hat{Y}_\alpha}{\d t} = \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}(1-\zeta)} \,\mbox{,}
+%      \frac{\d \hat{Y}_\alpha}{\d t} = \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\rm mix}(1-\zeta)} \,\mbox{,}
 %   \end{equation}
-%   where the residence time in the reactor is $\tau_{\si{mix}}(1-\zeta)$.
+%   where the residence time in the reactor is $\tau_{\rm mix}(1-\zeta)$.
 %\end{enumerate}
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
@@ -1429,9 +1430,6 @@ where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}). The transfer
 
 
 
-
-
-
 \chapter{Simplifications of the Radiation Transport Equation}
 \label{radiation_derivations}
 
@@ -1513,7 +1511,7 @@ The assumption of blackbody radiation is adequate for sooty flames in which radi
 \centering
 \begin{tabular}{l c c}
 \hline\hline
-Liquid                                              & Wavenumber Range (\si{1/\cm})  & Effective Absorption Coefficient, $\kappa$    \\ \hline
+Liquid                                              & Wavenumber Range (\unit{1/\cm})  & Effective Absorption Coefficient, $\kappa$    \\ \hline
 JP-8 \cite{Suo-Anttila:PCT2009}                     &  -                             & 301.4                                         \\
 Ethanol-Toluene blend \cite{Suo-Anttila:PCT2009}    &  -                             & 680.1                                         \\
 Ethanol \cite{Suo-Anttila:PCT2009}                  &  -                             & 1534.3                                        \\
@@ -1888,15 +1886,15 @@ For energy conservation, the enthalpy prior to the reaction must equal the entha
 
 Ensuring energy conservation requires that two things be performed as part of handling solid phase reactions. First, the temperature dependence of the heat of reaction must be determined. Second, in reactions combining gasses and solids (including particles), enthalpy differences due to temperature differences must be correctly assessed and apportioned to the gas and solid phase. A challenge for the first item is that for many real world materials, detailed enthalpy data is not known. Enthalpy is known for many pure solid substances (such as NaCl or SiO$_2$), but not for other types of solids like wood or many polymers (plastics and foams). If enthalpies and specific heats are known for all the components of a reaction, then a temperature dependent heat of reaction can be easily generated as the temperature dependent enthalpy difference between products and reactants.
 
-It is noted that the temperature dependence of the heat of reaction is generally a minor effect. For many pyrolysis reactions of interest to fire, the heat of reaction is hundreds of kJ/kg and differences in the specific heat of products and reactants are generally less than 1~\si{kJ/(kg.K)}. In many cases a specific reaction occurs over a narrow temperature range of a few tens of K. Splitting that temperature range around the temperature of the peak reaction rate means that over the temperature range where a reaction takes place that the heat of reaction is often being adjusted by under 10~\%.
+It is noted that the temperature dependence of the heat of reaction is generally a minor effect. For many pyrolysis reactions of interest to fire, the heat of reaction is hundreds of kJ/kg and differences in the specific heat of products and reactants are generally less than 1~\unit{kJ/(kg.K)}. In many cases a specific reaction occurs over a narrow temperature range of a few tens of K. Splitting that temperature range around the temperature of the peak reaction rate means that over the temperature range where a reaction takes place that the heat of reaction is often being adjusted by under 10~\%.
 
 \subsection{Solid Phase Heat of Reaction}
 
 For the first step, reference enthalpies for all the components in a reaction must be determined. FDS has a database for many common gases that includes predefined reference enthalpies. In a typical simulation any gases not in the database are likely fuels participating in combustion reactions where the reference enthalpy can be determined from the heat of combustion and the reference enthalpies of the combustion products. Therefore, gas reference enthalpies are treated as known quantities for the solid phase. A similar rationale applies to liquid particles produced by a solid phase reaction. Definition of a liquid particle includes specifying the gas it evaporates to and the heat of vaporization which means a reference enthalpy for the liquid can be determined. Reference enthalpies for solid materials are generally not known except for some pure substances. Even if available, the published values when placed in Eq.~\ref{eqn_solid_e_cons} may not exactly result in the specified heat of reaction. Reference enthalpies for any solid material participating as a reactant or product in a solid phase reaction must be determined. For solid materials not participating in reactions the assumption that the reference enthalpy is 0~kJ/kg at 0~K suffices as there is no exchange of mass (and its asssociated enthalpy) with the gas phase. Solid phase products for a solid phase reaction include both solid materials that remain part of the reacting surface and solid materials that leave the surface in the form of particles (i.e., a firebrand). Finding these enthalpies is done by solving a system of linear equations where there is one equation for every material reaction and one unknown for the reference enthalpy of every solid material participating in a material reaction as reactant or product. To build the matrix, Eq.~\ref{eqn_solid_e_cons} is applied to every material reaction. The enthalpy of material $\alpha$, $h_{\alpha}$, is given by~\cite{NIST_JANAF}:
 \be
-  h_{\alpha}(T) = h_{\alpha,ref} + \int_{T_{ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T
+  h_{\alpha}(T) = h_{\alpha,ref} + \int_{T_{\rm ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T
 \ee
-In this equation $h_{\alpha,ref}$ is the enthalpy at the temperature $T_{ref}$. This is the value being solved for. In many tabulations of solid enthalpies the value of $T_{ref}$ is 298.15~K; however, since it can be determined at any reference temperature, for convenience a temperature of 0~K is picked. The specific heat of a material, $c_{p,\alpha}(T)$, is defined in the input file. Evaluating the integral requires picking the upper bound temperature, T$_R$. This is taken as the reference temperature for the reaction. This may be user defined as part of the input. If not, it can be determined from the reaction $A_{\alpha\beta}$ and $E_{\alpha\beta}$ by performing a TGA simulation for material $\alpha$, reaction $\beta$. The value for $T_R$ is set to the temperature of the peak reaction rate. With $T_R$ defined, the various $\nu_{\alpha',\alpha \beta} h_{\alpha,ref}$ terms can be collected on the left hand side, and the heats of reaction and the various $\nu_{\alpha',\alpha \beta} \int_{T_{ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T$ terms can be collected on the right hand side. The result is a system of linear equations $A \bar{x} = \bar{b}$ where the unknowns, $\bar{x}$, are the values of $h_{\alpha,ref}$; however, it is not guaranteed that there are an equal number of reactions and unknown material reference enthalpies. Solving the system of equations depends on the relative numbers of equations and unknowns as follows:
+In this equation $h_{\alpha,ref}$ is the enthalpy at the temperature $T_{\rm ref}$. This is the value being solved for. In many tabulations of solid enthalpies the value of $T_{\rm ref}$ is 298.15~K; however, since it can be determined at any reference temperature, for convenience a temperature of 0~K is picked. The specific heat of a material, $c_{p,\alpha}(T)$, is defined in the input file. Evaluating the integral requires picking the upper bound temperature, T$_R$. This is taken as the reference temperature for the reaction. This may be user defined as part of the input. If not, it can be determined from the reaction $A_{\alpha\beta}$ and $E_{\alpha\beta}$ by performing a TGA simulation for material $\alpha$, reaction $\beta$. The value for $T_R$ is set to the temperature of the peak reaction rate. With $T_R$ defined, the various $\nu_{\alpha',\alpha \beta} h_{\alpha,ref}$ terms can be collected on the left hand side, and the heats of reaction and the various $\nu_{\alpha',\alpha \beta} \int_{T_{\rm ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T$ terms can be collected on the right hand side. The result is a system of linear equations $A \bar{x} = \bar{b}$ where the unknowns, $\bar{x}$, are the values of $h_{\alpha,ref}$; however, it is not guaranteed that there are an equal number of reactions and unknown material reference enthalpies. Solving the system of equations depends on the relative numbers of equations and unknowns as follows:
 
 \begin{description}
    \item[Reactions = unknowns]{Solution can be found by a simple solution of the linear system: $\bar{x} = A^{-1} \bar{b}$}
@@ -1920,6 +1918,139 @@ This term is added to the solid cell enthalpy for gases that are consumed ($\nu_
 
 
 
+\chapter{The Scaling Pyrolysis (SPyro) Method}
+\label{spyro_appendix}
+
+This approach preserves the shape of the heat release rate with time (i.e., burning behavior) measured from cone calorimeter experiments but scales the magnitude and duration based on incident heat at the surface.  The model is able to scale a single reference curve to different thermal exposures and material thicknesses. An empirical estimation of the flame heat flux is used to calculate the total incident heat flux in a cone calorimeter for use in scaling. Improved agreement can be achieved by incorporating data from multiple cone calorimeter experiments at different thermal exposures and/or material thicknesses. The following subsections describe the technical basis of each of these modules.
+
+\section{Fixed Thickness Scaling Model}
+\label{spyro_appendix:fixed}
+
+The fixed thickness scaling based pyrolysis model is presented in~\cite{Hodges:IAFSS2023}. The net heat flux into the material is related to the pyrolysis rate through the effective heat of gasification according to the equation
+\be
+   \dq_{\rm net}''=\dm_{\rm f}''\Delta h_{\rm g}
+   \label{Spyro1}
+\ee
+where $\dq_{\rm net}''$ is the net heat flux into the surface and $\Delta h_{\rm g}$ is the heat of gasification. Similarly, the heat release rate per unit area of a material, $\dQ''$, is related to the pyrolysis rate of the material through the effective heat of combustion, $\Delta h$, as
+\be
+   \dQ''=\dm_{\rm f}''\Delta h
+   \label{Spyro2}
+\ee
+The ratio of Eq.~(\ref{Spyro1}) and Eq.~(\ref{Spyro2}) relate $\dot{q}_{\rm net}''$ and $\dot{Q}''$ as
+\be
+   \frac{\dQ''}{\dq_{\rm net}''}=\frac{\Delta h}{\Delta h_{\rm g}}
+   \label{Spyro3}
+\ee
+Assuming $\Delta h_{\rm g}$ and $\Delta h$ are invariant with $\dq_{\rm net}''$, Eq.~(\ref{Spyro3}) can be related to predict the change in magnitude of $\dQ''$ due to changes in thermal exposure as
+\be
+   \dQ_1'' = \frac{\dq_{{\rm net},1}''}{\dq_{{\rm net},2}''}\dQ_2''
+   \label{Spyro4}
+\ee
+where the subscripts $1$ and $2$ indicate different thermal exposure levels. The acceleration or deceleration of the burning can be calculated by evaluating the difference in time required to release the same amount of energy at the two $\dQ$ over a discrete time interval, $\Delta t$,
+\be
+   E_{\Delta t}''=\dq_{\rm net}''\frac{\Delta h}{\Delta h_{\rm g}}\Delta t
+   \label{Spyro5}
+\ee
+where $E_{\Delta t}$ is the total energy released over $\Delta t$. Relating Eq.~(\ref{Spyro5}) at two thermal exposure levels yields
+\be
+   \Delta t_{1}=\frac{\dq_{{\rm net},2}''}{\dq_{{\rm net},1}''}\Delta t_2
+   \label{Spyro6}
+\ee
+Because $\dq_{\rm net}''$ is difficult to measure during burning, an approximate reference heat flux, $\dq''_{\rm ref}$, is introduced as
+\be
+   \dq''_{\rm ref} = \dq''_{\rm cone}(1-\Gamma) + \dq''_{\rm flame}
+   \label{Spyro7}
+\ee
+where $\dq''_{\rm cone}$ is the set exposure flux to a cold surface in the cone calorimeter testing, $\Gamma$ is the fraction of that flux absorbed by the flame, and $\dq''_{\rm flame}$ is the heat feedback from the flame to the surface. For the input data from a cone test, the values of $\Gamma$ and $\dq''_{\rm ref}$ are not readily obtained, and the empirical approach discussed in Section~\ref{Spyro_q_flame} is used to estimate them when determining $\dq_{{\rm net},2}''$ in Eq.~\ref{Spyro4}. For $\dq_{{\rm net},1}''$, FDS uses the sum of the incident radiation and the net convective heat flux in the calculation at each time step.
+
+\section{Adaptation to Multiple Thicknesses}
+
+Detailed pyrolysis models are typically based on an Arrhenius kinetics formulation~\cite{Stoliarov:IAFSS2023}:
+\be
+r=A\mathrm{e}^{-E/(RT_{{\rm s}})}\zeta_1\zeta_2...\zeta_{{\rm N}}
+\ee
+where $r$ is the reaction rate, $A$ and $E$ are the Arrhenius pre-exponential factor and activation energy, $T_{{\rm s}}$ is the solid temperature, $R$ is the molar gas constant, and $\zeta_{j}$ is the impact of the $j$-th reactant species concentration on the burning. There are two primary impacts of material thickness on the burning behavior of a material. The largest impact is to the burning duration due to differences in the combustible mass. The second impact is the transition between a thermally thin and thermally thick material. The model for scaling to different material thicknesses takes inspiration from this formulation; however, the model assumes that the two impacts can be represented by a non-dimensional scaling of a measured burning profile.
+
+The non-dimensional temperature profile within a solid material scales with the  Fourier, $\hbox{Fo}$, and Biot, $\hbox{Bi}$, numbers. $\hbox{Fo}$ is the ratio of the heat conduction rate to the rate of thermal energy storage in a solid, and can be thought of as a dimensionless time~\cite{Incropera:1}. It is defined as
+\be
+\hbox{Fo}=\frac{\alpha}{\Delta^{2}}t=\frac{k}{\rho c_p\Delta^2}t
+\label{fo_eq}
+\ee
+where $\alpha$ is the thermal diffusivity, $\rho$ is the density, $c_{p}$ is the specific heat capacity, $k$ is the thermal conductivity, $\Delta$ is the thickness, and $t$ is time. $\hbox{Bi}$ is the ratio of the internal thermal resistance of a solid to the external resistance of the surface boundary layer~\cite{Incropera:1}:
+\be
+\hbox{Bi}=\frac{h}{k/\Delta}
+\ee
+where $h$ is the heat transfer coefficient. The traditional formulation of $\hbox{Bi}$ assumes that the external exposure of the solid is related primarily to surface convection and thus uses the convection heat transfer coefficient, $h_{\rm c}$, for $h$. However, this assumption is not valid in the case of burning solid fuels where external radiation (such as the applied surface heat flux in a cone calorimeter experiment) and flame radiation from the combustion of pyrolyzate above the surface drive the heat transfer to the surface. This is accounted for with an alternative Biot number, $\hbox{Bi}^*$, which combines the effect of surface convection and radiation:
+\be
+\hbox{Bi}^*=\frac{h_{\rm c}+h_{\rm r}}{k/\Delta}
+\label{bi_eq}
+\ee
+where $h$ has been split into two components for convection, $h_{\rm c}$, and radiation, $h_{\rm r}$. The radiation heat transfer coefficient is calculated based on the linearized formulation~\cite{Incropera:1}:
+\be
+h_{\rm r}=\varepsilon\sigma\left(T_{\rm r}+T_{{\rm s}}\right)\left(T_{\rm r}^2+T_{{\rm s}}^2\right)
+\ee
+where $\varepsilon$ is the surface emissivity, $\sigma$ is the Stefan-Boltzmann constant, $T_{\rm r}$ is the radiative temperature, and $T_{{\rm s}}$ is the surface temperature. The radiative temperature is an effective temperature representative of the energy absorbed at the surface assuming a view factor of 1:
+\be
+T_{\rm r}=\left[\frac{\dq_{\rm r}''}{\varepsilon \sigma}\right]^\of
+\label{eq:tr}
+\ee
+where $\dq_{\rm r}''$ is the incident radiation to the surface.
+
+As discussed in Section~\ref{spyro_appendix:fixed}, $\Delta h_{\rm g}$ is assumed to be constant in the prior approach. However, a time-varying effective $\Delta h_{\rm g}$ can be calculated based on Eq.~(\ref{Spyro3}) using the time-varying measurement of $\dQ''$ and estimating the time-varying $\dq''_{\rm flame}$. It is assumed in this model that the variability in burning intensity and duration observed in experiments can be related to the impact of the material thickness and thermal exposure on these non-dimensional groups, $\Delta h_{\rm g}=f\left(\hbox{Bi}^{*},\hbox{Fo}\right)$.  $\Delta h_{\rm g}$ was found to collapse at the non-dimensional time-scale $\hbox{FoBi}^{*}$. A scaling relationship for $\hbox{FoBi}^{*}$ can be established by equating this non-dimensional time across two exposure levels,
+\be
+\hbox{FoBi}^{*}=\frac{h_1 t_1}{\rho_1 c_{p,1}\Delta_1}=\frac{h_2 t_2}{\rho_2 c_{p,2} \Delta_2}
+\label{eq:scaling_fobi}
+\ee
+where the subscripts indicate different exposure levels. Equation~(\ref{eq:scaling_fobi}) reveals that non-dimensional time scales with $\rho$, $c_p$, $\Delta$, and $h$.
+
+A simplified representation for the scaling of non-dimensional time can be obtained by assuming that changes in material properties (i.e., $k$, $\rho$, $c_p$) are related to non-dimensional time. Under this assumption, Eq.~(\ref{eq:scaling_fobi}) reduces to:
+\be
+t_{2} = \frac{\Delta_2}{\Delta_1}\frac{h_1}{h_2} t_1
+\label{eq:time_scaling}
+\ee
+In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:time_scaling}) is consistent with Eq.~(\ref{Spyro6}) across a discrete time interval. Thus, the ratio of $h$ scales similarly to the ratio of $\dq''$, yielding:
+\be
+\Delta t = \frac{\Delta}{\Delta_{\rm ref}}\frac{\dq''_{\rm ref}}{\dq''}\Delta t_{\rm ref}
+\label{eq:time_scaling2}
+\ee
 
 
+\section{Cone Reference Heat Flux}
+\label{Spyro_q_flame}
 
+When using Eq.~\ref{Spyro7} to obtain $\dq_{{\rm net},2}''$ in Eq.~\ref{Spyro4}, an approach is needed to determine $\Gamma$ and $\dq_{\rm flame}''$. In an actual cone test these will depend upon the material being burned as the heat of combustion, burning rate, and soot yield will all influence the flame heat flux and the absorption of the cone radiation. As there is no simple analytical model to predict these, an empirical approach was developed using FDS simulations of a cone calorimeter.
+
+The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\unit{MJ/kg}) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{\rm cone}''=50$~\unit{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\unit{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives
+$\dq_{\rm flame}''$, the delta between burning with the cone on and burning with the cone off and on gives the cone flux reaching the sample, and the cone with no burning phase gives $\dq_{\rm cone}''$. The difference between the cone flux reaching the sample and $\dq_{\rm cone}''$ gives $\Gamma$.
+
+\begin{figure}
+    \begin{center}
+        \scalebox{0.45}{\includegraphics{FIGURES/Spyro_cone_fig}}
+        \caption[FDS geometry used for developing the cone reference flux.]{\label{fig:cone_ref_geom} FDS geometry used for developing the cone reference flux. Red is the cone heater and green is the sample surface. The domain is clipped at the plane y=0~m.}
+    \end{center}
+\end{figure}
+
+A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,100~\unit{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\unit{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\unit{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10, 20 and 30~\unit{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2, resulting in formulas of CH$_{2}$O$_{0.302}$, CH$_{2}$O$_{0.658}$, and CH$_{2}$O$_{1.322}$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,100~\unit{kJ/kg}.
+
+If $\dq_{\rm flame}''$ for each heat of combustion is normalized by the maximum value for all HRRPUA, the results collapse as shown in the left of Fig~\ref{fig:Spyro_hoc}. We can then determine a quadratic fit for the maximum $\dq_{\rm flame}''$ as a function of heat of combustion as shown in the right of Fig~\ref{fig:Spyro_hoc}.
+
+\begin{figure}
+    \centering
+    \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
+        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_ratio} &
+        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_max}
+    \end{tabular*}
+    \caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA. (Right) Maximum flame heat flux as a function of $\Delta h$.}
+    \label{fig:Spyro_hoc}
+\end{figure}
+
+Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta h + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{\rm ref}''$ for a cone test, first, the maximum $\dq_{\rm flame}''$ is determined using $\Delta h$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second,  $\dq_{\rm flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, third, $\Gamma$ is determined and used to adjust  $\dq_{\rm cone}''$, and finally, $\dq_{\rm ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
+
+\begin{figure}[!ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=3.5in]{FIGURES/Spyro_cone_error}
+\end{tabular}
+\caption[Scatterplot for predicted vs. empirical reference heat flux.]{Scatterplot for predicted vs. empirical reference heat flux.}
+\label{fig:Spyro_cone_error}
+\end{figure}

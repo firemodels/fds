@@ -6688,6 +6688,7 @@ REAL(EB), INTENT(OUT) :: PRESS
 ! Local Variables:
 INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
 ! REAL(EB):: VVEL(IAXIS:KAXIS), U_NORM
+TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 
 ! Cell-centered variables:
 VIND=0; EP  = 1
@@ -6714,12 +6715,13 @@ IF (INT_NPE_HI > 0) THEN
    ENDDO
    ! PRESS = PRESS + B1%RHO_F*U_NORM**2._EB
 ELSE
+   B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
    ! Underlying cell approximate value:
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
    IIG = CUT_CELL(ICC)%IJK(1)
    JJG = CUT_CELL(ICC)%IJK(2)
    KKG = CUT_CELL(ICC)%IJK(3)
-   PRESS=CFA%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
+   PRESS=B1%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
 ENDIF
 
 RETURN
@@ -6732,6 +6734,7 @@ SUBROUTINE GET_PRES_CFACE_TEST(PRESS,IND1,IND2,CFA)
 TYPE(CFACE_TYPE), INTENT(IN) :: CFA
 INTEGER,  INTENT( IN) :: IND1, IND2
 REAL(EB), INTENT(OUT) :: PRESS
+TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 
 ! Local Variables:
 INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
@@ -6748,12 +6751,13 @@ IF (INT_NPE_HI > 0) THEN
       CUT_FACE(IND1)%INT_CVARS( INT_RHO_IND,INPE)*CUT_FACE(IND1)%INT_CVARS( INT_H_IND,INPE)
    ENDDO
 ELSE
+   B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
    ! Underlying cell approximate value:
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
    IIG = CUT_CELL(ICC)%IJK(1)
    JJG = CUT_CELL(ICC)%IJK(2)
    KKG = CUT_CELL(ICC)%IJK(3)
-   PRESS=CFA%RHO_G*H(IIG,JJG,KKG)
+   PRESS=B1%RHO_G*H(IIG,JJG,KKG)
 ENDIF
 
 RETURN
@@ -6761,10 +6765,11 @@ END SUBROUTINE GET_PRES_CFACE_TEST
 
 ! ------------------------------- CFACE_THERMAL_GASVARS ------------------------------
 
-SUBROUTINE CFACE_THERMAL_GASVARS(ICF,B1)
-
+SUBROUTINE CFACE_THERMAL_GASVARS(ICF,ISF,B1,T)
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 TYPE(BOUNDARY_PROP1_TYPE) :: B1
-INTEGER, INTENT(IN) :: ICF
+INTEGER, INTENT(IN) :: ICF,ISF
+REAL(EB),INTENT(IN) :: T
 
 ! Local Variables:
 INTEGER :: IND1, IND2, ICC, JCC, I ,J ,K, IFACE, IFC2, IFACE2, NFCELL, ICCF, X1AXIS, LOWHIGH, ILH, IBOD, IWSEL
@@ -6773,10 +6778,11 @@ REAL(EB):: MU_DNS_G
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 REAL(EB):: VVEL(IAXIS:KAXIS), V_TANG(IAXIS:KAXIS)
 INTEGER :: VIND,EP,INPE,INT_NPE_LO,INT_NPE_HI
+TYPE(SURFACE_TYPE), POINTER :: SF
 
 CFA => CFACE(ICF)
 BC => BOUNDARY_COORD(CFA%BC_INDEX)
-
+SF => SURFACE(ISF)
 ! Load indexes {ICF,IFACE} in CUT_FACE, for CFACE {ICFACE}:
 IND1=CFA%CUT_FACE_IND1
 IND2=CFA%CUT_FACE_IND2
@@ -6797,25 +6803,29 @@ IF (CFACE_INTERPOLATE) THEN
    INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
 
    IF (INT_NPE_HI > 0) THEN
-      CFA%TMP_G = 0._EB
+      B1%TMP_G = 0._EB
       CFA%RSUM_G= 0._EB
-      CFA%RHO_G = 0._EB
-      CFA%ZZ_G(1:N_TRACKED_SPECIES) = 0._EB
+      B1%RHO_G = 0._EB
+      B1%ZZ_G(1:N_TRACKED_SPECIES) = 0._EB
       CFA%MU_G = 0._EB
       MU_DNS_G   = 0._EB
       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-         CFA%TMP_G  = CFA%TMP_G  + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_TMP_IND,INPE)
+         IF (SF%TMP_GAS_FRONT > 0._EB) THEN
+            B1%TMP_G = TMPA + EVALUATE_RAMP(T-T_BEGIN,SF%RAMP(TIME_TGF)%INDEX)*(SF%TMP_GAS_FRONT-TMPA)
+         ELSE
+            B1%TMP_G   = B1%TMP_G   + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_TMP_IND,INPE)
+         ENDIF
          CFA%RSUM_G = CFA%RSUM_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_RSUM_IND,INPE)
-         CFA%RHO_G  = CFA%RHO_G  + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_RHO_IND,INPE)
+         B1%RHO_G   = B1%RHO_G   + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_RHO_IND,INPE)
          CFA%MU_G   = CFA%MU_G   + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(   INT_MU_IND,INPE)
          MU_DNS_G   = MU_DNS_G   + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(INT_MUDNS_IND,INPE)
-         CFA%ZZ_G(1:N_TRACKED_SPECIES) = CFA%ZZ_G(1:N_TRACKED_SPECIES) + &
+         B1%ZZ_G(1:N_TRACKED_SPECIES) =  B1%ZZ_G(1:N_TRACKED_SPECIES) + &
                                          CUT_FACE(IND1)%INT_COEF(INPE)*    &
                                          CUT_FACE(IND1)%INT_CVARS(INT_P_IND+1:INT_P_IND+N_TRACKED_SPECIES,INPE)
       ENDDO
 
       ! Gas conductivity:
-      CALL GET_CC_CELL_CONDUCTIVITY(CFA%ZZ_G(1:N_TRACKED_SPECIES),CFA%MU_G,MU_DNS_G,CFA%TMP_G,K_G)
+      CALL GET_CC_CELL_CONDUCTIVITY(B1%ZZ_G(1:N_TRACKED_SPECIES),CFA%MU_G,MU_DNS_G,B1%TMP_G,K_G)
       B1%K_G = K_G
 
       ! Finally U_TANG velocity:
@@ -6869,19 +6879,19 @@ CASE(CC_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    K = CUT_CELL(ICC)%IJK(KAXIS)
 
    ! ADD CUT_CELL properties:
-   CFA%TMP_G = CUT_CELL(ICC)%TMP(JCC)
+   B1%TMP_G = CUT_CELL(ICC)%TMP(JCC)
    CFA%RSUM_G= CUT_CELL(ICC)%RSUM(JCC)
 
    ! Mixture density and Species mass fractions:
-   CFA%RHO_G = PREDFCT*CUT_CELL(ICC)%RHOS(JCC) + (1._EB-PREDFCT)*CUT_CELL(ICC)%RHO(JCC)
-   CFA%ZZ_G(1:N_TRACKED_SPECIES) = PREDFCT *CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC) + &
+   B1%RHO_G = PREDFCT*CUT_CELL(ICC)%RHOS(JCC) + (1._EB-PREDFCT)*CUT_CELL(ICC)%RHO(JCC)
+   B1%ZZ_G(1:N_TRACKED_SPECIES) = PREDFCT *CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC) + &
                               (1._EB-PREDFCT)*CUT_CELL(ICC)% ZZ(1:N_TRACKED_SPECIES,JCC)
 
    ! Viscosity, Use MU from bearing cartesian cell:
    CFA%MU_G = MU(I,J,K)
 
    ! Gas conductivity:
-   CALL GET_CC_CELL_CONDUCTIVITY(CFA%ZZ_G(1:N_TRACKED_SPECIES),MU(I,J,K),MU_DNS(I,J,K),CFA%TMP_G,K_G)
+   CALL GET_CC_CELL_CONDUCTIVITY(B1%ZZ_G(1:N_TRACKED_SPECIES),MU(I,J,K),MU_DNS(I,J,K),B1%TMP_G,K_G)
    B1%K_G = K_G
 
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
@@ -7340,6 +7350,9 @@ ENDDO
 ! Set relative epsilon for cut-cell definition:
 MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
+
+! Set CCVOL_LINK an epsilon higher than defined value to have all cells/faces around defined value linked.
+CCVOL_LINK = CCVOL_LINK + GEOMEPS
 
 IF (PERIODIC_TEST == 105) THEN ! Set cc-guard to zero, i.e. do not compute guard-cell cut-cells, for timings.
    NGUARD = 2
@@ -7990,10 +8003,12 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 
    ! Geometry boundary CFACES initialize P1 BCs:
-   DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-      CFA  => CFACE(ICF)
-      CALL INIT_CFACE_CELL(NM,CFA%CUT_FACE_IND1,CFA%CUT_FACE_IND2,ICF,CFA%SURF_INDEX,INTEGER_THREE,IS_INB=.TRUE.)
-   ENDDO
+   IF(.NOT.RESTART) THEN ! Only if not restarting, otherwise the Boundary P1 vars are read from restart file.
+      DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA  => CFACE(ICF)
+         CALL INIT_CFACE_CELL(NM,CFA%CUT_FACE_IND1,CFA%CUT_FACE_IND2,ICF,CFA%SURF_INDEX,INTEGER_THREE,IS_INB=.TRUE.)
+      ENDDO
+   ENDIF
 
 ENDDO MESH_LOOP_1
 
@@ -10189,7 +10204,7 @@ CFACE_LOOP : DO ICFA=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNA
    AF = CFA%AREA
    VELC      = PRFCT*B1%U_NORMAL + (1._EB-PRFCT)*B1%U_NORMAL_S ! Contains AREA_ADJUST for the CFACE.
    TMP_F_GAS = B1%TMP_F
-   IF (VELC>0._EB) TMP_F_GAS = CFA%TMP_G ! CUT_CELL(ICC)%TMP(JCC)
+   IF (VELC>0._EB) TMP_F_GAS = B1%TMP_G ! CUT_CELL(ICC)%TMP(JCC)
    ZZ_GET(1:N_TRACKED_SPECIES) = B1%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_F_GAS)
    FN_H_S = B1%RHO_F*H_S ! bar{rho*hs}
@@ -10452,7 +10467,7 @@ CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL
    ! H_RHO_D_DZDN
    UN_P =  PRFCT*B1%U_NORMAL + (1._EB-PRFCT)*B1%U_NORMAL_S
    TMP_G = B1%TMP_F
-   IF (UN_P>0._EB) TMP_G = CFA%TMP_G
+   IF (UN_P>0._EB) TMP_G = B1%TMP_G
    DO N=1,N_TOTAL_SCALARS
       CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
       CUT_FACE(IND1)%H_RHO_D_DZDN(N,IND2) = H_S*B1%RHO_D_DZDN_F(N)
@@ -11418,9 +11433,9 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
       ! Use external Gas point data for ZZ_G estimation, consistent with CFA%B1%RDN in the finite difference.
       ! Flux fixing done here for CFACEs:
-      RHO_D_DZDN = 2._EB*B1%RHO_D_F(N)*(CFA%ZZ_G(N)-B1%ZZ_F(N))*B1%RDN
+      RHO_D_DZDN = 2._EB*B1%RHO_D_F(N)*(B1%ZZ_G(N)-B1%ZZ_F(N))*B1%RDN
       IF (N==N_ZZ_MAX_V(ICF)) THEN
-         ZZ_GET(1:N_TRACKED_SPECIES) = CFA%ZZ_G(1:N_TRACKED_SPECIES)
+         ZZ_GET(1:N_TRACKED_SPECIES) = B1%ZZ_G(1:N_TRACKED_SPECIES)
          RHO_D_DZDN_GET(1:N_TRACKED_SPECIES) = &
          2._EB*B1%RHO_D_F(1:N_TRACKED_SPECIES)*( ZZ_GET(1:N_TRACKED_SPECIES) - B1%ZZ_F(1:N_TRACKED_SPECIES))*B1%RDN
          RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(1:N_TRACKED_SPECIES))-RHO_D_DZDN)
@@ -14541,8 +14556,6 @@ ORIENTATION_LOOP: DO IS=1,3
       ! Define mu*Gradient:
       MU_DUIDXJ_EP(ICD_SGN) = MU_EP*DUIDXJ_EP(ICD_SGN)
 
-      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
       VEL_GHOST = 0._EB
@@ -14552,10 +14565,12 @@ ORIENTATION_LOOP: DO IS=1,3
             VEL_GHOST = VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
          CASE (NO_SLIP_BC)
             VEL_GHOST = 2._EB*VEL_T - VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
          CASE (WALL_MODEL_BC)
             ! Determine if the cell edge is an external corner:
             CORNER_EDGE=.FALSE.
@@ -14742,6 +14757,10 @@ ORIENTATION_LOOP: DO IS=1,3
    ENDDO SIGN_LOOP
 ENDDO ORIENTATION_LOOP
 
+! Cycle out of the EDGE_LOOP if no tangential gradients have been altered.
+
+IF (.NOT.ANY(ALTERED_GRADIENT)) RETURN
+
 ! Loop over all 4 normal directions and compute vorticity and stress tensor components for each
 
 SIGN_LOOP_2: DO I_SGN=-1,1,2
@@ -14764,11 +14783,11 @@ SIGN_LOOP_2: DO I_SGN=-1,1,2
          CYCLE ORIENTATION_LOOP_2
       ENDIF
       ICDO_SGN = I_SGN*ICDO
-      IF (ALTERED_GRADIENT(ICDO_SGN)) THEN
+      IF (ALTERED_GRADIENT(ICDO_SGN) .AND. .NOT.CC_EDGE%SIDE_IN_GEOM(ICDO_SGN)) THEN
             !DUIDXJ_USE(ICDO) = EC_B(ICDO_SGN)*DUIDXJ(ICDO_SGN)  +  EC_EP(ICDO_SGN)*DUIDXJ_EP(ICDO_SGN)
             DUIDXJ_USE(ICDO) =                 DUIDXJ(ICDO_SGN)
          MU_DUIDXJ_USE(ICDO) = EC_B(ICDO_SGN)*MU_DUIDXJ(ICDO_SGN) + EC_EP(ICDO_SGN)*MU_DUIDXJ_EP(ICDO_SGN)
-      ELSEIF (ALTERED_GRADIENT(-ICDO_SGN)) THEN
+      ELSEIF (ALTERED_GRADIENT(-ICDO_SGN) .AND. .NOT.CC_EDGE%SIDE_IN_GEOM(-ICDO_SGN)) THEN
             !DUIDXJ_USE(ICDO) = EC_B(-ICDO_SGN)*DUIDXJ(-ICDO_SGN) + EC_EP(-ICDO_SGN)*DUIDXJ_EP(-ICDO_SGN)
             DUIDXJ_USE(ICDO) =                 DUIDXJ(-ICDO_SGN)
          MU_DUIDXJ_USE(ICDO) = EC_B(-ICDO_SGN)*MU_DUIDXJ(-ICDO_SGN) + EC_EP(-ICDO_SGN)*MU_DUIDXJ_EP(-ICDO_SGN)
@@ -16418,8 +16437,10 @@ REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_COEF_AUX
 INTEGER :: N_CVAR_START, N_CVAR_COUNT, N_FVAR_START, N_FVAR_COUNT
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EP_TAG
 
-INTEGER :: IS,I_SGN,ICD,ICD_SGN,IIF,JJF,KKF,FAXIS,IEC,IE,SKIP_FCT,IEP,JEP,KEP,INDS(1:2,IAXIS:KAXIS)
-REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP,DEL_IBEDGE
+INTEGER :: IS,I_SGN,ICD,ICD_SGN,IIF,JJF,KKF,FAXIS,IEC,IE,SKIP_FCT,IEP,JEP,KEP,INDS(1:2,IAXIS:KAXIS),AX,ICEDG,JCEDG,LOHI
+REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP,DEL_IBEDGE,XYZ1(IAXIS:KAXIS),XYZ2(IAXIS:KAXIS)
+
+TYPE(CC_CUTEDGE_TYPE), POINTER :: CE=>NULL()
 
 REAL(EB) CPUTIME,CPUTIME_START,CPUTIME_START_LOOP
 CHARACTER(100) :: MSEGS_FILE
@@ -17076,12 +17097,15 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IBEDGE_LOOP1 : DO IEDGE=1,MESHES(NM)%CC_NIBEDGE
 
       ALLOCATE(CC_IBEDGE(IEDGE)%XB_IB(-2:2),CC_IBEDGE(IEDGE)%SURF_INDEX(-2:2),&
-               CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2),CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2))
+               CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2),CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2),&
+               CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(-2:2))
       ALLOCATE(CC_IBEDGE(IEDGE)%INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,-2:2))
       CC_IBEDGE(IEDGE)%XB_IB(-2:2)      = 0._EB
       CC_IBEDGE(IEDGE)%SURF_INDEX(-2:2) = 0
       CC_IBEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2) = .FALSE. ! Process Orientation in double loop.
       CC_IBEDGE(IEDGE)%EDGE_IN_MESH(-2:2)             = .FALSE. ! If true, no need to mesh_cc_exchange variables.
+      CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(-2:2)             = .TRUE.  ! If true, this side of Cartesian edge looks inside the geometry.
+                                                                ! else there is a boundary edge on its position for this side.
       CC_IBEDGE(IEDGE)%INT_NPE                        = 0 ! Required to avoid segfault in comm.
 
       IE  = MESHES(NM)%CC_IBEDGE(IEDGE)%IE
@@ -17089,6 +17113,14 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       JJ  = EDGE(IE)%J
       KK  = EDGE(IE)%K
       IEC = EDGE(IE)%AXIS
+
+      ! Edge nodes location:
+      XYZ1 = (/ X(I), Y(J), Z(K) /); XYZ2 = XYZ1
+      SELECT CASE(IEC)
+         CASE(IAXIS); XYZ1(IAXIS) = X(I-1)
+         CASE(JAXIS); XYZ1(JAXIS) = Y(J-1)
+         CASE(KAXIS); XYZ1(KAXIS) = Z(K-1)
+      END SELECT
 
       ! First: Loop over all possible face orientations of edge to define XB_IB, SURF_INDEX, PROCESS_EDGE_ORIENTATION:
       ORIENTATION_LOOP_1: DO IS=1,3
@@ -17137,6 +17169,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_1 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_1
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_1
+                     ENDIF
                   ENDIF
                   IF (FAXIS==JAXIS) THEN
                      ! XB_IB:
@@ -17191,6 +17234,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_2 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_2
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_2
+                     ENDIF
                   ENDIF
                   IF (FAXIS==KAXIS) THEN
                      ! XB_IB:
@@ -17243,6 +17297,17 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
                      DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT)) - &
                                       MINVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                     ICEDG = FCVAR(IIF,JJF,KKF,CC_IDCE,FAXIS)
+                     IF(ICEDG>0) THEN
+                        CE => CUT_EDGE(ICEDG)
+                        JEDG_LOOP_3 : DO JCEDG=1,CE%NEDGE
+                           DO LOHI=1,2; DO AX=IAXIS,KAXIS
+                           IF( ABS(XYZ1(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS .AND. &
+                               ABS(XYZ2(AX)-CE%XYZVERT(AX,CE%CEELEM(LOHI,JCEDG)))>GEOMEPS ) CYCLE JEDG_LOOP_3
+                           ENDDO; ENDDO
+                           CC_IBEDGE(IEDGE)%SIDE_IN_GEOM(ICD_SGN) = .FALSE. ! This side of Cartesian edge looks into the gasphase.
+                        ENDDO JEDG_LOOP_3
+                     ENDIF
                   ENDIF
                   IF (FAXIS==IAXIS) THEN
                      ! XB_IB:

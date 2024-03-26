@@ -35,6 +35,9 @@ In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x
 
 Because FDS was designed to simulate thermally-driven flows within buildings, the most obvious and simplest numerical grid is rectilinear. In fact, because FDS is a large eddy simulation (LES) model, uniform meshing is preferred, and the only numerical parameters chosen by the end user are the three dimensions of the grid. Once established, it is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM). Unstructured geometry is possible in FDS by virtue of a cutcell method as described in Sec.~\ref{sec:unstructured_geometry}.
 
+\subsection{The Staggered Grid}
+\label{sec:staggered_grid}
+
 The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; the velocity components at the appropriate cell faces; and vorticity components at cell edges. This is what is commonly referred to as a staggered grid \cite{Harlow:1,Morinishi}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model. Figure~\ref{variable_positions} displays where in a given grid cell the various flow variables are located.
 
 \begin{figure}[!h]
@@ -70,6 +73,45 @@ The governing equations are approximated using second-order accurate finite diff
 \end{tikzpicture}
 \caption[Position of flow variables in a grid cell]{Position of flow variables in grid cell $ijk$. The arrows indicate the positive direction of the given variable. Scalar variables, such as the density, $\rho$, temperature, $T$, and pressure, $p$, are defined at the cell center. Velocity components, $\mathbf{u}=(u,v,w)$, are defined at their respective cell faces, and vorticity components, $\vec{\omega}=(\omega_x,\omega_y,\omega_z)$, are located at cell edges.}
 \label{variable_positions}
+\end{figure}
+
+\subsection{Cell Edges}
+\label{sec:cell_edges}
+
+In the FDS staggered grid arrangement, cell edges are the storage location of both off-diagonal stresses and vorticity.  The computational edge variable position environment is described below.
+
+\begin{figure}[!h]
+\centering
+\scalebox{0.75}{
+\begin{tikzpicture}[x=1in,y=1in]
+\draw [->] (-1,2) -- (-0.5,2); \node[text width=1, anchor=west] at (-0.5,2) {$x$};
+\draw [->] (-1,2) -- (-0.84,2.16); \node[text width=1, anchor=west] at (-0.84,2.16) {$y$};
+\draw [->] (-1,2) -- (-1,2.5); \node[text width=1, anchor=west] at (-1,2.5) {$z$};
+
+\draw (0,0) (-1,1) -- (0,2) -- (3,2) -- (2,1) -- (-1,1);
+
+\draw [->] (1.0,1.5) -- (1.0,1.7); \node[text width=1, anchor=west] at (0.80,1.35) {$w_{ijk}$};
+\draw [->] (2.0,2.5) -- (2.0,2.7); \node[text width=1, anchor=west] at (1.80,2.35) {$w_{i,j+1,k}$};
+
+\draw [->] (1.4,0.4) -- (1.6,0.6); \node[text width=1, anchor=west] at (1.40,0.30) {$v_{ijk}$};
+\draw [->] (1.4,3.4) -- (1.6,3.6); \node[text width=1, anchor=west] at (1.40,3.70) {$v_{i,j,k+1}$};
+
+\draw [line width=1mm] (0,0) (0,2) -- (3,2); \node[text width=1, anchor=west] at (3.2, 2) {{\tt IEC}\;=\;1};
+
+\draw [->] (1.5, 1.925) arc (-90:180:0.05 and 0.1); \node[text width=1, anchor=west] at (1.2, 1.8) {$\omega_{x,ijk}$};
+
+\draw [dashed] (0,0) (0,2) -- (1,3) -- (3,3);
+\draw (0,0) (3,3) -- (4,3) -- (3,2);
+
+\draw (0,0) (0,2) -- (0,5) -- (3,5) -- (3,2) -- (0,2);
+
+\draw (0,0) (0,1) -- (0,-1) -- (3,-1) -- (3,2);
+\draw [dashed] (0,0) (0,1) -- (0,2);
+
+\end{tikzpicture}
+}
+\caption[Position of flow variables around a computational edge]{Position of flow variables around a computational edge along the $x$ axis.  The Index of the Edge Component ({\ct IEC}) is 1 in this case.  The orientations of the faces (defined by the directions normal to the faces) that connect to the edge are {\ct IOR} = $\pm2$, $\pm3$.  The vorticity around the edge is $\omega_x = \partial w/\partial y - \partial v/\partial z$.}
+\label{fig:edge_positions}
 \end{figure}
 
 \section{Mass and Species Transport}

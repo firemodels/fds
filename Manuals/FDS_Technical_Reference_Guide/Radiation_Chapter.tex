@@ -535,6 +535,39 @@ three spatial directions are known, and the intensity $I_{ijk}^l$ can be solved 
 all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections
 or scattering are important, or if the scenario is optically very thick. Currently, no iterations are made.
 
+\subsection{Spatial Discretization in Cut Cells}
+
+In the case of complex gemoetry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
+\be  \sum_{f=1}^n A_f \; I_f^l \; D_f^l
+   = \kappa_{ijk} \,
+     \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
+     \delta \Omega^l, 
+\ee
+where $A_f$ are the $n$ cut-face areas. These include both gasphase cut-faces, which are cartesian grid aligned, and in-boundary cut-faces, which can have any orientation. The $D_f$-terms are calculated as
+\begin{align}
+D_f^l & = \int_{\Omega^l}(\bs \cdot \bn_f) \d \Omega \\
+& = \int_{\dph}\int_{\dth} [\cos\phi\sin\theta \, \hat{x}_f + \sin\phi\sin\theta \, \hat{y}_f + \cos\theta \, \hat{z}_f] \sin\theta \; \d \theta \d\phi \notag \\
+& = D_x^l \, \hat{x}_f + D_y^l \, \hat{y}_f + D_z^l \, \hat{z}_f, \notag
+\end{align}
+with $D_x^l$, $D_y^l$, and $D_z^l$ defined as above and ($\hat{x}_f,\hat{y}_f,\hat{z}_f$) is the unit normal vector of the relevant face. If $D_f^l>0$ the faces are upwind for a given angular direction, $D_{fu}^l$, and downwind otherwise, $D_{fd}^l$. Equation~\ref{RTEdiscrete4} can then be rewritten as
+\be
+   \sum_{fd} A_{fd} \; I_{ijk}^l \; D_{fd}^l = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l
+   - \kappa_{ijk}\,I_{ijk}^l\,V_{ijk} \,\delta \Omega^l.
+\ee
+In this case the upwind cut-face intensities, $I_{nu}^l$, come from the upwind value for gasphase cut-faces (as with the cartesian solution) and from the boundary conditions for in-boundary cut-faces.  The downwind cut-face intensities, $I_{nd}^l$, use the cell value, $I_{ijk}^l$.
+
+Adopting the previous notation, the equation for intensity becomes
+\be
+  a_{ijk}^l I_{ijk}^l = \sum_{nu} a_{nu} \; I_{nu}^l + b_{ijk}^l
+\ee
+where
+\begin{align}
+  a_{ijk}^l & = \sum_{nd} A_{nd} [D_x^l \, \hat{x}_{nd} + D_y^l \, \hat{y}_{nd} + D_z^l \, \hat{z}_{nd}] +
+  \kappa_{ijk} \; V_{ijk} \delta\Omega^l \\
+  a_{nu}^l & = A_{nu} [D_x^l \, \hat{x}_{nu} + D_y^l \, \hat{y}_{nu} + D_z^l \, \hat{z}_{nu}] \\
+  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l
+\end{align}
+
 \subsection{Boundary Conditions}
 
 The boundary condition for the radiation intensity leaving a gray diffuse wall is given as

@@ -27,6 +27,7 @@ cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
+cd LEMTA_UGent_Pool_Fires:  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
@@ -49,6 +50,7 @@ cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Structure_Separation;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
+cd OMP_Scaling_Tests;  ./Run_All.sh $OPTIONS; cd ..
 cd Phoenix_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..

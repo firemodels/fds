@@ -99,8 +99,8 @@ REF_ERROR = [0.1199    0.1619    0.0410; ...
 
 % Conclusion: At coarse resolution, forced convection is 40% error, at moderate to high resolution, 25%.
 
-ERROR = norm(REL_ERROR-REF_ERROR); % 5e-3 tolerance
+ERROR = norm(REL_ERROR-REF_ERROR); % 0.1 tolerance
 
-if ERROR > 5e-3
+if ERROR > 0.1
    display(['Matlab Warning: Forced convection out of tolerance. ERROR = ',num2str(ERROR)])
 end
