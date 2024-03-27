@@ -1,6 +1,6 @@
 # requirements.txt for pip install
 
-# User's minimal environment for macfp (test)
+# User's minimal environment for FDS
 
 numpy
 matplotlib
@@ -8,3 +8,5 @@ pandas
 scipy
 seaborn
 pygments
+ipython
+
