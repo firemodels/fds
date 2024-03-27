@@ -14038,7 +14038,7 @@ You must specifically ask that this file be generated, as it can potentially cos
 \section{Slice Files ({\tt .sf})}
 \label{out:SLCF}
 
-The slice files defined under the namelist group {\ct SLCF} are named {\ct CHID\_$n$.sf} ($n$=01,02...), and are written out unformatted, unless otherwise directed. These files are written out from {\ct dump.f90} with the following lines:
+The slice files defined under the namelist group {\ct SLCF} are named {\ct CHID\_M\_N.sf} where {\ct M} is the mesh index and {\ct N} is the quantity index. The files are unformatted and written from {\ct dump.f90} with the following lines:
 \begin{lstlisting}
 WRITE(LUSF) QUANTITY
 WRITE(LUSF) SHORT_NAME
@@ -14058,7 +14058,7 @@ There is a short Fortran 90 program provided, called {\ct fds2ascii.f90}, that c
 \section{Plot3D Data ({\tt .xyz,.q})}
 \label{out:PL3D}
 
-Quantities over the entire mesh can be output in a format used by the graphics package Plot3D. The Plot3D data sets are single precision (32 bit reals), whole and unformatted. Note that there is blanking, that is, blocked out data points are not plotted. If the statement {\ct WRITE\_XYZ=T} is included on the {\ct DUMP} line, then the mesh data is written out to a file called {\ct CHID.xyz}
+Quantities over the entire mesh can be output in a format used by the graphics package Plot3D. The Plot3D data sets are single precision (32 bit reals), whole and unformatted. Note that there is blanking, that is, blocked out data points are not plotted. If the statement {\ct WRITE\_XYZ=T} is included on the {\ct DUMP} line, then the mesh data is written out to a file called {\ct CHID\_M.xyz}
 \begin{lstlisting}
 WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
 WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR), &
@@ -14068,7 +14068,7 @@ WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR), &
 \end{lstlisting}
 where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners, and {\ct IBLK} is an indicator of whether or not the cell is blocked. If the point ({\ct X,Y,Z}) is completely embedded within a solid region, then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh file is not dumped.
 
-The flow variables are written to a file called {\ct CHID\_****\_**.q}, where the stars indicate a time at which the data is output. The file is written with the lines
+The flow variables are written to a file called {\ct CHID\_M\_<time>.q}, where {\ct M} is the mesh number and {\ct <time>} is the number of seconds when the data is output. The file is written with the lines
 \begin{lstlisting}
 WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
 WRITE(LU14) ZERO,ZERO,ZERO,ZERO
@@ -14082,7 +14082,7 @@ Smokeview can display the Plot3D data. In addition, the Plot3D data sets can be 
 \section{Boundary Files ({\tt .bf})}
 \label{out:BNDF}
 
-The boundary files defined under the namelist group {\ct BNDF} are named {\ct CHID\_$n$.bf} ($n$=0001,0002...), and are written out unformatted. These files are written out from {\ct dump.f90} with the following lines:
+The boundary files defined under the namelist group {\ct BNDF} are named {\ct CHID\_M\_N.bf} where {\ct M} is the mesh index and {\ct N} is the quantity index. The files are unformatted and written from {\ct dump.f90} with the following lines:
 \begin{lstlisting}
 WRITE(LUBF) QUANTITY
 WRITE(LUBF) SHORT_NAME
@@ -14107,13 +14107,7 @@ only program available to view the boundary files.
 \label{out:PART}
 
 Coordinates and specified quantities related to tracer particles, sprinkler droplets, and other Lagrangian particles are written
-to a FORTRAN unformatted (binary) file called {\ct CHID.prt5}.
-Note that the format of this file has changed from previous versions (4 and below).
-The file consists of some header material, followed by particle data output every
-{\ct DT\_PART} seconds. The time increment {\ct DT\_PART} is specified on the
-{\ct DUMP} line. It is {\ct T\_END/NFRAMES} by default.
-The header materials is written by the following FORTRAN code in the file called {\ct dump.f90}.
-
+to a FORTRAN unformatted (binary) file called {\ct CHID\_M.prt5} where {\ct M} is the mesh index. Note that the format of this file has changed from previous versions (4 and below). The file consists of some header material, followed by particle data output every {\ct DT\_PART} seconds. The time increment {\ct DT\_PART} is specified on the {\ct DUMP} line. It is {\ct T\_END/NFRAMES} by default.  The header materials is written by the following FORTRAN code in the file called {\ct dump.f90}.
 \begin{lstlisting}
 WRITE(LUPF) ONE_INTEGER          ! Integer 1 to check Endian-ness
 WRITE(LUPF) NINT(VERSION*100.)   ! FDS version number
@@ -14152,7 +14146,7 @@ several different quantities.
 \section{Profile Files}
 \label{out:PROF}
 
-The profile files defined under the namelist group {\ct PROF} are named {\ct CHID\_prof\_$nn$.csv} ($nn$=01,02...), and are written out formatted. These files are written out from {\ct dump.f90} with the following line:
+The profile files defined under the namelist group {\ct PROF} are named {\ct CHID\_prof\_N.csv} and are written out formatted. These files are written out from {\ct dump.f90} with the following line:
 \begin{lstlisting}
 WRITE(LU_PROF) T,NWP+1,(X_S(I),I=0,NWP),(Q(I),I=0,NWP)
 \end{lstlisting}
@@ -14281,7 +14275,7 @@ face or node data in a single file.
 \section{Terrain Data Files ({\tt .ter})}
 \label{out:TERRAIN_DATA}
 
-For simulations involving outdoor terrain, files of the form {\ct CHID\_NM.ter} are created for each mesh with some terrain cutting through. The write statements are:
+For simulations involving outdoor terrain, files of the form {\ct CHID\_M.ter} are created for each mesh, {\ct M}, with some terrain cutting through. The write statements are:
 \begin{lstlisting}
 WRITE(LU_TERRAIN(NM)) REAL(ZS_MIN-1._EB,FB)
 WRITE(LU_TERRAIN(NM)) M%IBP1,M%JBP1
