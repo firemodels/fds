@@ -268,6 +268,7 @@ LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental
 LOGICAL :: VTK_BINARY=.TRUE.                        !< Flag that indicates VTK outputs should be binary or ascii
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
 LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
+LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vtk files should be generated
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -796,6 +797,7 @@ INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
 INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
 INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
 INTEGER :: RAMP_SPEC_INDEX=0  !< Ramp index for species file time series
+INTEGER :: RAMP_SLCF_VTK_INDEX=0   !< Ramp index for vtk file time series
 INTEGER :: RAMP_SL3D_VTK_INDEX=0   !< Ramp index for vtk file time series
 INTEGER :: RAMP_SM3D_VTK_INDEX=0   !< Ramp index for vtk file time series
 INTEGER :: RAMP_BNDF_VTK_INDEX=0   !< Ramp index for boundary file time series
@@ -803,15 +805,16 @@ INTEGER :: RAMP_PART_VTK_INDEX=0   !< Ramp index for boundary file time series
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,HVAC_CLOCK,&
                                        ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
                                        SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK ,TMP_CLOCK ,SPEC_CLOCK,&
-                                       SL3D_VTK_CLOCK,SM3D_VTK_CLOCK,BNDF_VTK_CLOCK,PART_VTK_CLOCK
+                                       SL3D_VTK_CLOCK,SM3D_VTK_CLOCK,BNDF_VTK_CLOCK,PART_VTK_CLOCK,SLCF_VTK_CLOCK
 INTEGER, ALLOCATABLE, DIMENSION(:) :: BNDF_COUNTER, CPU_COUNTER,CTRL_COUNTER,DEVC_COUNTER,FLSH_COUNTER,GEOM_COUNTER, HRR_COUNTER,&
                                       HVAC_COUNTER,ISOF_COUNTER,MASS_COUNTER,PART_COUNTER,PL3D_COUNTER,PROF_COUNTER,RADF_COUNTER,&
                                       RSRT_COUNTER,SLCF_COUNTER,SL3D_COUNTER,SM3D_COUNTER,UVW_COUNTER ,TMP_COUNTER ,SPEC_COUNTER,&
-                                      SL3D_VTK_COUNTER,SM3D_VTK_COUNTER,BNDF_VTK_COUNTER,PART_VTK_COUNTER
+                                      SL3D_VTK_COUNTER,SM3D_VTK_COUNTER,BNDF_VTK_COUNTER,PART_VTK_COUNTER,SLCF_VTK_COUNTER
 REAL(EB) :: TURB_INIT_CLOCK=-1.E10_EB
 REAL(EB) :: MMS_TIMER=1.E10_EB
 REAL(EB) :: DT_SLCF,DT_BNDF,DT_DEVC,DT_PL3D,DT_PART,DT_RESTART,DT_ISOF,DT_HRR,DT_HVAC,DT_MASS,DT_PROF,DT_CTRL,&
-            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_SMOKE3D,DT_UVW ,DT_TMP,DT_SPEC,DT_VTK
+            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_SMOKE3D,DT_UVW ,DT_TMP,DT_SPEC,DT_VTK,&
+            DT_SL3D_VTK,DT_SLCF_VTK,DT_SM3D_VTK,DT_BNDF_VTK,DT_PART_VTK
 REAL(EB) :: DT_SLCF_SPECIFIED =-1._EB,DT_BNDF_SPECIFIED   =-1._EB,DT_DEVC_SPECIFIED=-1._EB,DT_PL3D_SPECIFIED=-1._EB,&
             DT_PART_SPECIFIED =-1._EB,DT_RESTART_SPECIFIED=-1._EB,DT_ISOF_SPECIFIED=-1._EB,DT_HRR_SPECIFIED =-1._EB,&
             DT_HVAC_SPECIFIED =-1._EB,DT_MASS_SPECIFIED   =-1._EB,DT_PROF_SPECIFIED=-1._EB,DT_CTRL_SPECIFIED=-1._EB,&
