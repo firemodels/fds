@@ -12474,8 +12474,8 @@ PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLI
 CONTAINS
 
 
-SUBROUTINE WRITE_VTK_SL3D_WRAPPER(T,NMESHES)
-INTEGER, INTENT(IN) :: NMESHES
+SUBROUTINE WRITE_VTK_SL3D_WRAPPER(T,NMESHES,IFMT)
+INTEGER, INTENT(IN) :: NMESHES,IFMT
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,NQT,IQ,ITM,ITM1,NM
 REAL(FB) :: STIME
@@ -12494,7 +12494,9 @@ IF (ITM1==100) THEN
    ITM1 = 0
 ENDIF
 
-DO I = 1,MESHES(1)%N_UNIQUE_SLCF
+UNIQUE_SLICE_LOOP: DO I = 1,MESHES(1)%N_UNIQUE_SLCF
+   IF ((IFMT == 0).AND.(MESHES(1)%UNIQUE_SLICE_IS_SL3D(I))) CYCLE UNIQUE_SLICE_LOOP
+   IF ((IFMT == 1).AND.(.NOT.MESHES(1)%UNIQUE_SLICE_IS_SL3D(I))) CYCLE UNIQUE_SLICE_LOOP
    WRITE(FN_SL3D_VTK(I,NMESHES+1),'(A,A,A,A,I8.8,I2.2,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_',&
                                      TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(I)),'_',ITM,ITM1,'.pvtu'
    VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_SL3D_VTK(I,NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
@@ -12515,7 +12517,7 @@ DO I = 1,MESHES(1)%N_UNIQUE_SLCF
       VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
    ENDDO MESH_LOOP2
    VTK_ERROR = A_PVTK_FILE%FINALIZE()
-ENDDO
+ENDDO UNIQUE_SLICE_LOOP
 
 END SUBROUTINE WRITE_VTK_SL3D_WRAPPER
 
@@ -12663,6 +12665,7 @@ DO N=1,N_LAGRANGIAN_CLASSES
                                       MESH_KIND='Float64')
    VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='NODE',ACTION='OPEN')
    VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME="TAG", DATA_TYPE='Int32', NUMBER_OF_COMPONENTS=1)
+   VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME="COLOR", DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=3)
    ! Add PointData arrays
    DO NN=1,LPC%N_QUANTITIES
       VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME=TRIM(LPC%SMOKEVIEW_LABEL(NN)), &
@@ -13265,10 +13268,15 @@ WRITE(LU_PARAVIEW,'(A)') 'import os'
 WRITE(LU_PARAVIEW,'(A)') 'import glob'
 WRITE(LU_PARAVIEW,'(A,A,A)') "chid = '",TRIM(CHID),"'"
 WRITE(LU_PARAVIEW,'(A)') 'T_Begin = 0.0'
-WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_End = ',(T_END-T_BEGIN)/DT_VTK
+IF (DT_VTK_SPECIFIED > 0) THEN
+   WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_End = ',(T_END-T_BEGIN)/DT_VTK_SPECIFIED
+ELSE
+   WRITE(LU_PARAVIEW,'(A,F15.3)') 'T_End = ',REAL(NFRAMES,FB)
+ENDIF
 
 WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CenterOfRotation = [',CX,',',CY,',',CZ,']'
 WRITE(LU_PARAVIEW,'(A,F15.3,A,F15.3,A,F15.3,A)') 'CameraFocalPoint = [',CX,',',CY,',',CZ,']'
+WRITE(LU_PARAVIEW,'(A)') 'CameraFocalPoint = [x+0.01 if (abs(x) < 0.01) else x for x in CameraFocalPoint]'
 WRITE(LU_PARAVIEW,'(A)') 'import paraview'
 WRITE(LU_PARAVIEW,'(A)') 'from paraview.simple import *'
 WRITE(LU_PARAVIEW,'(A)') 'paraview.simple._DisableFirstRenderCameraReset()'
@@ -13304,7 +13312,13 @@ WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(regi
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay = Show(geom, renderView1, 'UnstructuredGridRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.MapScalars = 0"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.Representation = 'Surface'"
+WRITE(LU_PARAVIEW,'(A)') "    gcOLORTF2D = GetTransferFunction2D('Color')"
+WRITE(LU_PARAVIEW,'(A)') "    geomColor = GetColorTransferFunction('Color')"
+WRITE(LU_PARAVIEW,'(A)') "    geomColor.TransferFunction2D = gcOLORTF2D"
+WRITE(LU_PARAVIEW,'(A)') "    geomColor.RGBPoints = [1.13, 0.23, 0.30, 0.75, 1.13, 0.87, 0.87, 0.87, 1.13, 0.71, 0.02, 0.15]"
+WRITE(LU_PARAVIEW,'(A)') "    geomColor.ScalarRangeInitialized = 1.0"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.ColorArrayName = ['CELLS', 'Color']"
+WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.LookupTable = geomColor"
 
 WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
 WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
@@ -13500,11 +13514,18 @@ WRITE(LU_PARAVIEW,'(A,A,A)') "        tmp = text.split('Name=",'"',"')"
 WRITE(LU_PARAVIEW,'(A)') "        partTypeNames = []"
 WRITE(LU_PARAVIEW,'(A)') "        for i in range(1, len(tmp)):"
 WRITE(LU_PARAVIEW,'(A,A,A)') "            partTypeNames.append(tmp[i].split('",'"',"')[0])"
+WRITE(LU_PARAVIEW,'(A)') "        cOLORTF2D = GetTransferFunction2D('COLOR')"
+WRITE(LU_PARAVIEW,'(A)') "        partColor = GetColorTransferFunction('COLOR')"
+WRITE(LU_PARAVIEW,'(A)') "        partColor.TransferFunction2D = cOLORTF2D"
+WRITE(LU_PARAVIEW,'(A)') "        partColor.RGBPoints = [1.13, 0.23, 0.30, 0.75, 1.13, 0.87, 0.87, 0.87, 1.13, 0.71, 0.02, 0.15]"
+WRITE(LU_PARAVIEW,'(A)') "        partColor.ScalarRangeInitialized = 1.0"
 WRITE(LU_PARAVIEW,'(A)') "        partData.PointArrayStatus = partTypeNames"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay = Show(partData, renderView1, 'GeometryRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "        # trace defaults for the display properties."
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.Representation = 'Point Gaussian'"
-WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ColorArrayName = [None, '']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ColorArrayName = ['POINTS', 'COLOR']"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.LookupTable = partColor"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.MapScalars = 0"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTCoordArray = 'None'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectNormalArray = 'None'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectTangentArray = 'None'"
@@ -13516,6 +13537,7 @@ WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SelectScaleArray = 'None'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphType = 'Arrow'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GlyphTableIndexArray = 'None'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.GaussianRadius = 0.1"
+WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ShaderPreset = 'Plain circle'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.SetScaleArray = [None, '']"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.ScaleTransferFunction = 'Piecewise Function'"
 WRITE(LU_PARAVIEW,'(A)') "        partDisplay.OpacityArray = [None, '']"
@@ -13665,7 +13687,7 @@ WRITE(LU_PARAVIEW,'(A)') "# initialize the animation scene"
 WRITE(LU_PARAVIEW,'(A)') "animationScene1.ViewModules = renderView1"
 WRITE(LU_PARAVIEW,'(A)') "animationScene1.Cues = timeAnimationCue1"
 WRITE(LU_PARAVIEW,'(A)') "animationScene1.AnimationTime = T_Begin"
-WRITE(LU_PARAVIEW,'(A)') "animationScene1.EndTime = T_End"
+!WRITE(LU_PARAVIEW,'(A)') "animationScene1.EndTime = T_End"
 WRITE(LU_PARAVIEW,'(A)') "animationScene1.PlayMode = 'Snap To TimeSteps'"
 
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
