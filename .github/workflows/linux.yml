@@ -52,6 +52,19 @@ jobs:
         sh ./make_fds.sh
         ./fds_impi_intel_linux
 
+    # Setup python
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip' # caching pip dependencies
+    - run: pip install -r .github/requirements.txt
+
+    # Run Hello World test
+    - name: Python test
+      run: |
+        echo $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/Utilities/Python
+        python hello_world.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on
