@@ -8379,10 +8379,10 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX,OPT_CFACE_INDEX,OPT
                                  OPT_NODE_INDEX,OPT_PROF_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: Q_CON,RHOSUM,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,DEPTH,UN,H_S,RHO_D_DYDN,U_CELL,V_CELL,W_CELL,&
-            LTMP,ATMP,CTMP,H_W_EFF,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL,DN,PRESS,&
+            LTMP,ATMP,CTMP,H_W_EFF,X0,VOL,DN,PRESS,&
             NVEC(3),PVEC(3),TAU_IJ(3,3),VEL_CELL(3),VEL_WALL(3),MU_WALL,RHO_WALL,FVEC(3),SVEC(3),TVEC1(3),TVEC2(3),&
             PR1,PR2,Z1,Z2,RADIUS,CUT_FACE_AREA,SOLID_PHASE_OUTPUT_CTF,AAA,BBB,CCC,ALP,BET,GAM,MMM,DTMP
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,IWX,SURF_INDEX,I,J,II,JJ,KK,NWP,IOR,M_INDEX,ICC,IND1,IND2,IC2,ITMP,ICF,JCF,NFACE,NR
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,IWX,SURF_INDEX,I,J,NWP,M_INDEX,ICC,IND1,IND2,IC2,ITMP,ICF,JCF,NFACE,NR
 CHARACTER(LABEL_LENGTH) :: MATL_ID='null'
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1=>NULL()
 TYPE(BOUNDARY_PROP2_TYPE), POINTER :: B2=>NULL()
@@ -8902,60 +8902,6 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          Y_SPECIES = 1._EB
       ENDIF
       SOLID_PHASE_OUTPUT = RHO(BC%IIG,BC%JJG,BC%KKG)*Y_SPECIES
-
-   CASE(62) ! SOLID CELL TEMPERATURE
-
-      IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) RETURN
-      !              X(II-1)      X(II)      X(IIG-1)
-      !                XC1         XC0        //|
-      !     |           |    II     |         //| <= 3D CELL INDEX, VOL=XC1-XC0
-      !     |     o     |     o     |     o   //| <= WALL CELL (WC)
-      !     |.................................//| <= ONE_D%X, dx
-      !
-      !     TMP_BAR = 1/VOL * INT_XC0^XC1 ONE_D%TMP * dx
-
-      II  = DV%I(1)
-      JJ  = DV%J(1)
-      KK  = DV%K(1)
-      IIG = BC%IIG
-      JJG = BC%JJG
-      KKG = BC%KKG
-      IOR = BC%IOR
-      NWP = SUM(ONE_D%N_LAYER_CELLS)
-
-      SELECT CASE(IOR)
-         CASE (1)
-            XC0 = X(IIG-1) - X(II)
-            XC1 = X(IIG-1) - X(II-1)
-         CASE (-1)
-            XC0 = X(II-1)  - X(IIG)
-            XC1 = X(II)    - X(IIG)
-         CASE (2)
-            XC0 = Y(JJG-1) - Y(JJ)
-            XC1 = Y(JJG-1) - Y(JJ-1)
-         CASE (-2)
-            XC0 = Y(JJ-1)  - Y(JJG)
-            XC1 = Y(JJ)    - Y(JJG)
-         CASE (3)
-            XC0 = Z(KKG-1) - Z(KK)
-            XC1 = Z(KKG-1) - Z(KK-1)
-         CASE (-3)
-            XC0 = Z(KK-1)  - Z(KKG)
-            XC1 = Z(KK)    - Z(KKG)
-      END SELECT
-
-      TMP_BAR = 0._EB
-      VOL = 0._EB
-      DO I=1,NWP
-         X0 = ONE_D%X(I-1); IF (X0>XC1) EXIT
-         X1 = ONE_D%X(I)  ; IF (X1<XC0) CYCLE
-         DVOL = MIN(X1,XC1) - MAX(X0,XC0)
-         TMP_BAR = TMP_BAR + ONE_D%TMP(I) * DVOL
-         VOL = VOL + DVOL
-      ENDDO
-      IF (VOL>TWO_EPSILON_EB) TMP_BAR = TMP_BAR/VOL
-
-      SOLID_PHASE_OUTPUT = TMP_BAR - TMPM
 
    CASE(63) ! THERMAL WALL UNITS
       IF ((PRESENT(OPT_WALL_INDEX).OR.PRESENT(OPT_CFACE_INDEX)) .AND. ASSOCIATED(B2)) THEN
