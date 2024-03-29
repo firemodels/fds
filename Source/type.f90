@@ -168,7 +168,6 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 TYPE MATL_COMP_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION  !< (1:N_LAYERS) Mass Fraction
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO            !< (1:NWP) Solid density (kg/m3)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT        !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
 !> \brief Radiation intensity at a boundary for a given wavelength band
@@ -211,6 +210,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_TMP           !< Temperature change (K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:ONE_D\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_THICKNESS !< (1:ONE_D\%N_LAYERS) Minimum thickness of layer (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY     !< (1:ONE_D\%N_LAYERS) Min diffusivity of all matls in layer (m2/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
@@ -381,7 +381,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
    INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
-
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -835,7 +834,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: CONV_LENGTH                             ! Length used in heat transfer correlations
    REAL(EB) :: XYZ(3)                                  ! Starting point for a spreading fire
    REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
-   REAL(EB) :: MINIMUM_LAYER_THICKNESS                 ! Smallest layer size before layer is removed (m)
    REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
    REAL(EB) :: VEL_BULK
@@ -896,6 +894,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_THICKNESS  ! Smallest layer size before layer is removed (m)
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE                               !< Specified constant cell size (m)
