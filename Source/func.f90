@@ -1559,6 +1559,7 @@ END SUBROUTINE PACK_WALL
 !> \param SURF_INDEX Index of the surface type
 !> \param RC Counter of real variables
 !> \param IC Counter of integer variables
+!> \param LC Counter of logical variables
 !> \param UNPACK_IT Logical indicating whether the data is to be packed or unpacked
 !> \param COUNT_ONLY Logical indicating whether the aim is simply to count variables
 
@@ -1711,6 +1712,7 @@ END SUBROUTINE PACK_BOUNDARY_COORD
 !> \param NM Mesh index
 !> \param IC Integer counter
 !> \param RC Real counter
+!> \param LC Logical counter
 !> \param OS STORAGE_ARRAY name
 !> \param OD_INDEX Index of the BOUNDARY_ONE_D array
 !> \param UNPACK_IT Flag indicating whether the data is to be packed into the 1-D array or unpacked from it
@@ -1954,6 +1956,7 @@ END SUBROUTINE INITIALIZE_BOUNDARY_PROP1
 !> \param B1_INDEX Index of the BOUNDARY_PROP1 array
 !> \param UNPACK_IT Flag indicating whether the data is to be packed into the 1-D array or unpacked from it
 !> \param COUNT_ONLY Flag signifying that only a variable count is to be done; no packing
+!> \param SURF_INDEX Index of the SURFACE type
 
 SUBROUTINE PACK_BOUNDARY_PROP1(NM,IC,RC,LC,OS,B1_INDEX,UNPACK_IT,COUNT_ONLY,SURF_INDEX)
 
