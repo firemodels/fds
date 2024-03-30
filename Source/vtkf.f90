@@ -13311,14 +13311,36 @@ WRITE(LU_PARAVIEW,'(A)') "SetActiveView(renderView1)"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
 WRITE(LU_PARAVIEW,'(A)') "# setup the data processing pipelines"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
-WRITE(LU_PARAVIEW,'(A)') "indir = os.path.dirname(os.path.realpath(__file__))"
+WRITE(LU_PARAVIEW,'(A)') "t1 = type(servermanager.ActiveConnection.__dict__['Session'])"
+WRITE(LU_PARAVIEW,'(A)') "if (t1 == paraview.modules.vtkRemotingServerManager.vtkSMSessionClient):"
+WRITE(LU_PARAVIEW,'(A)') "    indir = '"//TRIM(WORKING_DIR)//"'"
+WRITE(LU_PARAVIEW,'(A)') "    sep = '/'"
+WRITE(LU_PARAVIEW,'(A)') "else:"
+WRITE(LU_PARAVIEW,'(A)') "    indir = os.path.dirname(os.path.realpath(__file__))"
+WRITE(LU_PARAVIEW,'(A)') "    sep = os.sep"
 WRITE(LU_PARAVIEW,'(A)') "rdir = '"//TRIM(RESULTS_DIR)//"'"
 WRITE(LU_PARAVIEW,'(A)') "if rdir == '':"
 WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "else:"
 WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+rdir+os.sep+chid"
+WRITE(LU_PARAVIEW,'(A)') "pxm = servermanager.ProxyManager()"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy = pxm.NewProxy('misc', 'ListDirectory')"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy.List(indir+os.sep+rdir)"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy.UpdatePropertyInformation()"
+WRITE(LU_PARAVIEW,'(A,A)') "fileList = sorted(servermanager.VectorProperty(",&
+                               "directory_proxy,directory_proxy.GetProperty('FileList')))"
+WRITE(LU_PARAVIEW,'(A,A)') "directoryList = servermanager.VectorProperty(",&
+                               "directory_proxy,directory_proxy.GetProperty('DirectoryList'))"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root = pxm.NewProxy('misc', 'ListDirectory')"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.List(indir+os.sep)"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.UpdatePropertyInformation()"
+WRITE(LU_PARAVIEW,'(A,A)') "fileList_root = sorted(servermanager.VectorProperty(",&
+                               "directory_proxy_root,directory_proxy_root.GetProperty('FileList')))"
+WRITE(LU_PARAVIEW,'(A,A)') "directoryList_root = servermanager.VectorProperty(",&
+                               "directory_proxy_root,directory_proxy_root.GetProperty('DirectoryList'))"
+
 WRITE(LU_PARAVIEW,'(A)') "# add geometry data"
-WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '_GEOM.pvtu'):"
+WRITE(LU_PARAVIEW,'(A)') "if chid + '_GEOM.pvtu' in fileList_root:"
 WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(registrationName='Geometry',",&
                          "FileName=[indir + os.sep + chid + '_GEOM.pvtu'])"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay = Show(geom, renderView1, 'UnstructuredGridRepresentation')"
@@ -13333,7 +13355,7 @@ WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.ColorArrayName = ['CELLS', 'Color']"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.LookupTable = geomColor"
 
 WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
-WRITE(LU_PARAVIEW,'(A)') "if os.path.exists(indir + os.sep + chid + '.stl'):"
+WRITE(LU_PARAVIEW,'(A)') "if chid + '.stl' in fileList_root:"
 WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='GeometrySTL', FileNames=[indir+os.sep+chid+'.stl'])"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay = Show(casestl, renderView1, 'GeometryRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
@@ -13359,13 +13381,27 @@ WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = 'Polar Axes Representation'
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
 WRITE(LU_PARAVIEW,'(A)') "# Load data files"
-WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(namespace+'_BNDF_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(namespace+'_SM3D_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dxFiles = sorted(glob.glob(namespace+'_X_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dyFiles = sorted(glob.glob(namespace+'_Y_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl2dzFiles = sorted(glob.glob(namespace+'_Z_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "sl3dFiles = sorted(glob.glob(namespace+'_SL3D_*.pvtu'))"
-WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(namespace+'_PART_*.pvtp'))"
+WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_BNDF_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_SM3D_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_X_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_Y_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_Z_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_SL3D_' in x) and ('.pvtu' in x)]"
+WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+                               "if ('_PART_' in x) and ('.pvtp' in x)]"
+!WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(namespace+'_BNDF_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(namespace+'_SM3D_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "sl2dxFiles = sorted(glob.glob(namespace+'_X_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "sl2dyFiles = sorted(glob.glob(namespace+'_Y_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "sl2dzFiles = sorted(glob.glob(namespace+'_Z_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "sl3dFiles = sorted(glob.glob(namespace+'_SL3D_*.pvtu'))"
+!WRITE(LU_PARAVIEW,'(A)') "partFiles = sorted(glob.glob(namespace+'_PART_*.pvtp'))"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
 WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"

@@ -283,7 +283,7 @@ END SUBROUTINE DUMP_MESH_OUTPUTS
 SUBROUTINE ASSIGN_FILE_NAMES
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
-INTEGER :: NM,I,N
+INTEGER :: NM,I,N,IO
 CHARACTER(LABEL_LENGTH) :: CFORM
 
 ! Set up file number counter
@@ -321,6 +321,19 @@ IF (RESULTS_DIR/='') THEN
       IF (.NOT.EX) THEN
          CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(RESULTS_DIR))
       ENDIF
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
+#else
+      CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
+#endif
+      OPEN(NEWUNIT=IO, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
+      READ(IO, '(A)') WORKING_DIR
+      CLOSE(IO)
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
+#else
+      CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
+#endif
    ENDIF
 ENDIF
 
