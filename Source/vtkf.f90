@@ -13295,12 +13295,14 @@ WRITE(LU_PARAVIEW,'(A)') 'paraview.simple._DisableFirstRenderCameraReset()'
 WRITE(LU_PARAVIEW,'(A)') 'materialLibrary1 = GetMaterialLibrary()'
 
 WRITE(LU_PARAVIEW,'(A)') "renderView1 = CreateView('RenderView')"
-WRITE(LU_PARAVIEW,'(A)') "renderView1.AxesGrid = 'Grid Axes 3D Actor'"
+WRITE(LU_PARAVIEW,'(A)') "try:"
+WRITE(LU_PARAVIEW,'(A)') "    renderView1.AxesGrid = 'Grid Axes 3D Actor'"
+WRITE(LU_PARAVIEW,'(A)') "except:"
+WRITE(LU_PARAVIEW,'(A)') "    renderView1.AxesGrid = 'GridAxes3DActor'"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.CenterOfRotation = CenterOfRotation"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.StereoType = 'Crystal Eyes'"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.CameraFocalPoint = CameraFocalPoint"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.CameraViewUp = [0.0, 0.0, 1.0]"
-WRITE(LU_PARAVIEW,'(A)') "renderView1.LegendGrid = 'Legend Grid Actor'"
 WRITE(LU_PARAVIEW,'(A)') "paraview.simple.LoadPalette('WhiteBackground')"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.BackEnd = 'OSPRay raycaster'"
 WRITE(LU_PARAVIEW,'(A)') "renderView1.OSPRayMaterialLibrary = materialLibrary1"
@@ -13320,19 +13322,19 @@ WRITE(LU_PARAVIEW,'(A)') "    indir = os.path.dirname(os.path.realpath(__file__)
 WRITE(LU_PARAVIEW,'(A)') "    sep = os.sep"
 WRITE(LU_PARAVIEW,'(A)') "rdir = '"//TRIM(RESULTS_DIR)//"'"
 WRITE(LU_PARAVIEW,'(A)') "if rdir == '':"
-WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+chid"
+WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "else:"
-WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+os.sep+rdir+os.sep+chid"
+WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+sep+rdir+sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "pxm = servermanager.ProxyManager()"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy = pxm.NewProxy('misc', 'ListDirectory')"
-WRITE(LU_PARAVIEW,'(A)') "directory_proxy.List(indir+os.sep+rdir)"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy.List(indir+sep+rdir)"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy.UpdatePropertyInformation()"
 WRITE(LU_PARAVIEW,'(A,A)') "fileList = sorted(servermanager.VectorProperty(",&
                                "directory_proxy,directory_proxy.GetProperty('FileList')))"
 WRITE(LU_PARAVIEW,'(A,A)') "directoryList = servermanager.VectorProperty(",&
                                "directory_proxy,directory_proxy.GetProperty('DirectoryList'))"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root = pxm.NewProxy('misc', 'ListDirectory')"
-WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.List(indir+os.sep)"
+WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.List(indir+sep)"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.UpdatePropertyInformation()"
 WRITE(LU_PARAVIEW,'(A,A)') "fileList_root = sorted(servermanager.VectorProperty(",&
                                "directory_proxy_root,directory_proxy_root.GetProperty('FileList')))"
@@ -13342,7 +13344,7 @@ WRITE(LU_PARAVIEW,'(A,A)') "directoryList_root = servermanager.VectorProperty(",
 WRITE(LU_PARAVIEW,'(A)') "# add geometry data"
 WRITE(LU_PARAVIEW,'(A)') "if chid + '_GEOM.pvtu' in fileList_root:"
 WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(registrationName='Geometry',",&
-                         "FileName=[indir + os.sep + chid + '_GEOM.pvtu'])"
+                         "FileName=[indir + sep + chid + '_GEOM.pvtu'])"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay = Show(geom, renderView1, 'UnstructuredGridRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.MapScalars = 0"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.Representation = 'Surface'"
@@ -13356,7 +13358,7 @@ WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.LookupTable = geomColor"
 
 WRITE(LU_PARAVIEW,'(A)') "# create a new 'STL Reader'"
 WRITE(LU_PARAVIEW,'(A)') "if chid + '.stl' in fileList_root:"
-WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='GeometrySTL', FileNames=[indir+os.sep+chid+'.stl'])"
+WRITE(LU_PARAVIEW,'(A)') "    casestl = STLReader(registrationName='GeometrySTL', FileNames=[indir+sep+chid+'.stl'])"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay = Show(casestl, renderView1, 'GeometryRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    # trace defaults for the display properties."
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.Representation = 'Surface'"
@@ -13381,19 +13383,19 @@ WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = 'Polar Axes Representation'
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
 WRITE(LU_PARAVIEW,'(A)') "# Load data files"
-WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_BNDF_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_X_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Y_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Z_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+os.sep+rdir+os.sep+x for x in fileList ",&
+WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_PART_' in x) and ('.pvtp' in x)]"
 !WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(namespace+'_BNDF_*.pvtu'))"
 !WRITE(LU_PARAVIEW,'(A)') "sm3dFiles = sorted(glob.glob(namespace+'_SM3D_*.pvtu'))"
@@ -13405,18 +13407,18 @@ WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+os.sep+rdir+os.sep+x for x in fil
 
 WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
 WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    bndfFiles = [rdir + x.split(os.sep)[-1] for x in bndfFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
 WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(bndfFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+os.sep+'bndf.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'bndf.pvtu.series'"
 WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
 WRITE(LU_PARAVIEW,'(A)') "    writeSeries(bndfFiles, times, outname)"
 WRITE(LU_PARAVIEW,'(A,A)') "    BoundaryData = XMLPartitionedUnstructuredGridReader(",&
                                   "registrationName='Boundary', FileName=[outname])"
 WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    sm3dFiles = [rdir + x.split(os.sep)[-1] for x in sm3dFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
 WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(sm3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+os.sep+'sm3d.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'sm3d.pvtu.series'"
 WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
 WRITE(LU_PARAVIEW,'(A)') "    writeSeries(sm3dFiles, times, outname)"
 WRITE(LU_PARAVIEW,'(A,A)') "    sm3dData = XMLPartitionedUnstructuredGridReader(",&
@@ -13430,9 +13432,9 @@ WRITE(LU_PARAVIEW,'(A)') "        if ('hrrpuv' in s.lower()):"
 WRITE(LU_PARAVIEW,'(A)') "            fireName = s"
 WRITE(LU_PARAVIEW,'(A)') "# Add 3d slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    sl3dFiles = [rdir + x.split(os.sep)[-1] for x in sl3dFiles]"
+WRITE(LU_PARAVIEW,'(A)') "    sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
 WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(sl3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+os.sep+'sl3d.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'sl3d.pvtu.series'"
 WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
 WRITE(LU_PARAVIEW,'(A)') "    writeSeries(sl3dFiles, times, outname)"
 WRITE(LU_PARAVIEW,'(A,A)') "    sl3dData = XMLPartitionedUnstructuredGridReader(",&
@@ -13457,10 +13459,10 @@ WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).r
 WRITE(LU_PARAVIEW,'(A)') "        uniqueSlcfTypes = sorted(list(set(slcfTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "        for slcfType in uniqueSlcfTypes:"
 WRITE(LU_PARAVIEW,'(A)') "            axis=float(slcfType)/100"
-WRITE(LU_PARAVIEW,'(A,A)') "            slcf_files = sorted([rdir + x.split(os.sep)[-1] for x,y in ",&
+WRITE(LU_PARAVIEW,'(A,A)') "            slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
                                             "zip(sl2dFiles, slcfTypes) if y == slcfType])"
 WRITE(LU_PARAVIEW,'(A)') "            times = parseTimes(slcf_files, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "            outname = indir+os.sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "            outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
 WRITE(LU_PARAVIEW,'(A)') "            outname = os.path.abspath(outname)"
 WRITE(LU_PARAVIEW,'(A)') "            writeSeries(slcf_files, times, outname)"
 WRITE(LU_PARAVIEW,'(A,A)') "            sl2dxData = XMLPartitionedUnstructuredGridReader(",&
@@ -13473,9 +13475,9 @@ WRITE(LU_PARAVIEW,'(A)') "    partTypes = ['_'.join(x.split('_')[:-1]) for x in 
 WRITE(LU_PARAVIEW,'(A)') "    uniquePartTypes = sorted(list(set(partTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "    for partType in uniquePartTypes:"
 WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = sorted(glob.glob(namespace+'_PART_'+partType+'_*.pvtp'))"
-WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = [rdir + x.split(os.sep)[-1] for x in partTypeFiles]"
+WRITE(LU_PARAVIEW,'(A)') "        partTypeFiles = [rdir + x.split(sep)[-1] for x in partTypeFiles]"
 WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(partTypeFiles, '.pvtp')"
-WRITE(LU_PARAVIEW,'(A)') "        outname = indir+os.sep+'particles-'+partType.replace(' ','-')+'.pvtp.series'"
+WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'particles-'+partType.replace(' ','-')+'.pvtp.series'"
 WRITE(LU_PARAVIEW,'(A)') "        outname = os.path.abspath(outname)"
 WRITE(LU_PARAVIEW,'(A)') "        writeSeries(partTypeFiles, times, outname)"
         
