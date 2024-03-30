@@ -13423,7 +13423,7 @@ WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
 WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
-                                        "registrationName='Raw Smoke 3D', FileName=sm3dData)"
+                                        "registrationName='Raw Smoke 3D', FileName=sm3dFiles)"
 WRITE(LU_PARAVIEW,'(A)') "    else:"
 WRITE(LU_PARAVIEW,'(A)') "        sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
 WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sm3dFiles, '.pvtu')"
