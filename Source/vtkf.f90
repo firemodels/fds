@@ -13313,13 +13313,15 @@ WRITE(LU_PARAVIEW,'(A)') "SetActiveView(renderView1)"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
 WRITE(LU_PARAVIEW,'(A)') "# setup the data processing pipelines"
 WRITE(LU_PARAVIEW,'(A)') "# ----------------------------------------------------------------"
-WRITE(LU_PARAVIEW,'(A)') "t1 = type(servermanager.ActiveConnection.__dict__['Session'])"
-WRITE(LU_PARAVIEW,'(A)') "if (t1 == paraview.modules.vtkRemotingServerManager.vtkSMSessionClient):"
+WRITE(LU_PARAVIEW,'(A)') "remoteConnection = servermanager.ActiveConnection.IsRemote()"
+WRITE(LU_PARAVIEW,'(A)') "if remoteConnection:"
 WRITE(LU_PARAVIEW,'(A)') "    indir = r'"//TRIM(WORKING_DIR)//"'"
 WRITE(LU_PARAVIEW,'(A)') "    sep = '/'"
+WRITE(LU_PARAVIEW,'(A)') "    uri = servermanager.ActiveConnection.GetURI()"
 WRITE(LU_PARAVIEW,'(A)') "else:"
 WRITE(LU_PARAVIEW,'(A)') "    indir = os.path.dirname(os.path.realpath(__file__))"
 WRITE(LU_PARAVIEW,'(A)') "    sep = os.sep"
+WRITE(LU_PARAVIEW,'(A)') "    uri = None"
 WRITE(LU_PARAVIEW,'(A)') "rdir = r'"//TRIM(RESULTS_DIR)//"'"
 WRITE(LU_PARAVIEW,'(A)') "if rdir == '':"
 WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+sep+chid"
@@ -13407,22 +13409,28 @@ WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+sep+rdir+sep+x for x in fileList 
 
 WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
 WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(bndfFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'bndf.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
-WRITE(LU_PARAVIEW,'(A)') "    writeSeries(bndfFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "    BoundaryData = XMLPartitionedUnstructuredGridReader(",&
-                                  "registrationName='Boundary', FileName=[outname])"
+WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Boundary', FileName=bndfFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    else:"
+WRITE(LU_PARAVIEW,'(A)') "        bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
+WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(bndfFiles, '.pvtu')"
+WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'bndf.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "        writeSeries(bndfFiles, times, outname)"
+WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Boundary', FileName=[outname])"
 WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(sm3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'sm3d.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
-WRITE(LU_PARAVIEW,'(A)') "    writeSeries(sm3dFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "    sm3dData = XMLPartitionedUnstructuredGridReader(",&
-                                  "registrationName='Raw Smoke 3D', FileName=[outname])"
+WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Raw Smoke 3D', FileName=sm3dData)"
+WRITE(LU_PARAVIEW,'(A)') "    else:"
+WRITE(LU_PARAVIEW,'(A)') "        sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
+WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sm3dFiles, '.pvtu')"
+WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sm3d.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sm3dFiles, times, outname)"
+WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Raw Smoke 3D', FileName=[outname])"
 WRITE(LU_PARAVIEW,'(A)') "    smokeName = None"
 WRITE(LU_PARAVIEW,'(A)') "    fireName = None"
 WRITE(LU_PARAVIEW,'(A)') "    for s in sm3dData.PointArrayStatus:"
@@ -13432,13 +13440,16 @@ WRITE(LU_PARAVIEW,'(A)') "        if ('hrrpuv' in s.lower()):"
 WRITE(LU_PARAVIEW,'(A)') "            fireName = s"
 WRITE(LU_PARAVIEW,'(A)') "# Add 3d slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
-WRITE(LU_PARAVIEW,'(A)') "    times = parseTimes(sl3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "    outname = indir+sep+'sl3d.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "    outname = os.path.abspath(outname)"
-WRITE(LU_PARAVIEW,'(A)') "    writeSeries(sl3dFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "    sl3dData = XMLPartitionedUnstructuredGridReader(",&
-                                    "registrationName='Raw 3D Slice', FileName=[outname])"
+WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Raw 3D Slice', FileName=sl3dFiles)"
+WRITE(LU_PARAVIEW,'(A)') "    else:"
+WRITE(LU_PARAVIEW,'(A)') "        sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
+WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sl3dFiles, '.pvtu')"
+WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sl3d.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sl3dFiles, times, outname)"
+WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
+                                        "registrationName='Raw 3D Slice', FileName=[outname])"
 WRITE(LU_PARAVIEW,'(A,A)') "    sl3dImage = ResampleToImage(",&
                                     "registrationName='Sampled 3D Slice', Input=sl3dData)"
 WRITE(LU_PARAVIEW,'(A,A)') "    sl3dSlice = Slice(",&
@@ -13451,7 +13462,8 @@ WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceType.Origin = CenterOfRotation"
 WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer.Origin = CenterOfRotation"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add 2d slice data"
-WRITE(LU_PARAVIEW,'(A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles],['X','Y','Z']):"
+WRITE(LU_PARAVIEW,'(A,A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles],",&
+                           "    ['X','Y','Z']):"
 WRITE(LU_PARAVIEW,'(A)') "    if len(sl2dFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "        slcfTypes = [x.split(chid+'_'+axis_name+'_')[1] for x in sl2dFiles]"
 WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-')",&
@@ -13459,14 +13471,19 @@ WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).r
 WRITE(LU_PARAVIEW,'(A)') "        uniqueSlcfTypes = sorted(list(set(slcfTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "        for slcfType in uniqueSlcfTypes:"
 WRITE(LU_PARAVIEW,'(A)') "            axis=float(slcfType)/100"
-WRITE(LU_PARAVIEW,'(A,A)') "            slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
-                                            "zip(sl2dFiles, slcfTypes) if y == slcfType])"
-WRITE(LU_PARAVIEW,'(A)') "            times = parseTimes(slcf_files, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "            outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "            outname = os.path.abspath(outname)"
-WRITE(LU_PARAVIEW,'(A)') "            writeSeries(slcf_files, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "            sl2dxData = XMLPartitionedUnstructuredGridReader(",&
-                                            "registrationName='%s=%0.4f'%(axis_name,axis), FileName=[outname])"
+WRITE(LU_PARAVIEW,'(A)') "            if remoteConnection:"
+WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([x for x,y in zip(sl2dFiles, slcfTypes)",&
+                                                "if y == slcfType])"
+WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
+                                                "registrationName='%s=%0.4f'%(axis_name,axis), FileName=slcf_files)"
+WRITE(LU_PARAVIEW,'(A)') "            else:"
+WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
+                                                "zip(sl2dFiles, slcfTypes) if y == slcfType])"
+WRITE(LU_PARAVIEW,'(A)') "                times = parseTimes(slcf_files, '.pvtu')"
+WRITE(LU_PARAVIEW,'(A)') "                outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
+WRITE(LU_PARAVIEW,'(A)') "                writeSeries(slcf_files, times, outname)"
+WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
+                                                "registrationName='%s=%0.4f'%(axis_name,axis), FileName=[outname])"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add particle data"
 WRITE(LU_PARAVIEW,'(A)') "if len(partFiles) > 0:"
