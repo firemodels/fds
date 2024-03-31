@@ -4813,6 +4813,10 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                EXIT FIND_FUEL2
             ENDIF
          ENDDO FIND_FUEL2
+         IF (RN%FUEL_SMIX_INDEX < 0) THEN
+            WRITE(MESSAGE,'(A,I0,3A)') 'ERROR(266): REAC ',NR,' FUEL ',TRIM(RN%FUEL),' is not a predefined or tracked species.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
       ENDIF
    ENDIF
 
