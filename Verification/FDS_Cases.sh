@@ -170,7 +170,7 @@ $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
 $QFDS -p 4 -d Fires box_burn_away9.fds
 $QFDS -p 4 -d Fires box_burn_away10.fds
-$QFDS -d Fires box_burn_away11.fds
+$QFDS -p 4 -d Fires box_burn_away11.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -p 4 -d Fires couch.fds
