@@ -10157,7 +10157,9 @@ MESH_LOOP: DO NM=1,NMESHES
                XB4 = MIN(XB4,YF)
                XB5 = MAX(XB5,ZS)
                XB6 = MIN(XB6,ZF)
-               IF (XB1>XF .OR. XB2<XS .OR. XB3>YF .OR. XB4<YS .OR. XB5>ZF .OR. XB6<ZS .OR. REJECT_OBST) THEN
+               IF (XB1>XF+TWO_EPSILON_EB .OR. XB2<XS-TWO_EPSILON_EB .OR. &
+                   XB3>YF+TWO_EPSILON_EB .OR. XB4<YS-TWO_EPSILON_EB .OR. &
+                   XB5>ZF+TWO_EPSILON_EB .OR. XB6<ZS-TWO_EPSILON_EB .OR. REJECT_OBST) THEN
                   N = N-1
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
@@ -10324,9 +10326,9 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Check for thin obstruction
 
-               IF (OB%I1==OB%I2 .AND. OB%I1>0 .AND. OB%I2<IBAR) OB%THIN = .TRUE.
-               IF (OB%J1==OB%J2 .AND. OB%J1>0 .AND. OB%J2<JBAR) OB%THIN = .TRUE.
-               IF (OB%K1==OB%K2 .AND. OB%K1>0 .AND. OB%K2<KBAR) OB%THIN = .TRUE.
+               IF (OB%I1==OB%I2 .AND. OB%UNDIVIDED_INPUT_LENGTH(1)<0.5_EB*DX(OB%I1)) OB%THIN = .TRUE.
+               IF (OB%J1==OB%J2 .AND. OB%UNDIVIDED_INPUT_LENGTH(2)<0.5_EB*DY(OB%J1)) OB%THIN = .TRUE.
+               IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) OB%THIN = .TRUE.
 
                ! Save boundary condition info for obstacles
 
@@ -10421,12 +10423,22 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%ALLOW_VENT  = ALLOW_VENT
                OB%OVERLAY     = OVERLAY
 
-               ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
+               ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume.
+               ! If the obstruction is thin, use its original thickness in the volume calculation.
 
                OB%BULK_DENSITY = BULK_DENSITY
-               IF (BULK_DENSITY > 0._EB) OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
 
-               ! Check for inconsistencies in specification of BUL_DENSITY
+               IF (BULK_DENSITY > 0._EB) THEN
+                  OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
+                  IF (OB%I1==OB%I2 .AND. OB%UNDIVIDED_INPUT_LENGTH(1)<0.5_EB*DX(OB%I1)) &
+                     OB%MASS = OB%BULK_DENSITY*OB%UNDIVIDED_INPUT_LENGTH(1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
+                  IF (OB%J1==OB%J2 .AND. OB%UNDIVIDED_INPUT_LENGTH(2)<0.5_EB*DY(OB%J1)) &
+                     OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*OB%UNDIVIDED_INPUT_LENGTH(2)*(OB%Z2-OB%Z1)
+                  IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) &
+                     OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*OB%UNDIVIDED_INPUT_LENGTH(3)
+               ENDIF
+
+               ! Check for inconsistencies in specification of BULK_DENSITY
 
                IF (OB%CONSUMABLE .AND. OB%BULK_DENSITY <= 0._EB) THEN
                   DO IOR=-2,3
