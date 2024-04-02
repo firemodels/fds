@@ -5998,6 +5998,18 @@ This test case is a modified version of {\ct Radiation/adiabatic\_surface\_tempe
 \label{adiabatic_surf_temp_spray}
 \end{figure}
 
+\subsection{Droplet Movement on Solid Surfaces with MPI (\texorpdfstring{{\textct{cascadempi}}}{cascadempi}) }
+\label{cascadempi}
+
+This test case is a modified version of {\ct cascade}. The single mesh is replaced with 4 meshes to verify that particles crossing mesh boundaries in the gas phase and along solid surfaces are handled correctly. The plots show the total water mass with and without mpi.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/cascade}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascadempi}
+\caption[Results of the {\ct cascadempi} test case]{(Left) Case without mpi {\ct cascade} (Right) Case with mpi {\ct cascadempi}.}
+\label{cascadempi_image}
+\end{figure}
+
 
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textct{flow\_rate\_2}}}{flow\_rate\_2}) }
