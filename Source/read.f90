@@ -15255,15 +15255,15 @@ IF (SPEC_ID/='null') THEN
    CALL GET_SPEC_OR_SMIX_INDEX(SPEC_ID,Y_INDEX,Z_INDEX)
    IF (QUANTITY=='AEROSOL VOLUME FRACTION' .AND. SPEC_ID/='SOOT') THEN
       IF (Z_INDEX<0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SPEC_ID ',TRIM(SPEC_ID),' for AEROSOL VOLUME FRACTION must be a tracked species'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1001): SPEC_ID ',TRIM(SPEC_ID),' for AERO. VOL. FRAC. must be a tracked species.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          IF (SPECIES_MIXTURE(Z_INDEX)%SINGLE_SPEC_INDEX<0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SPEC_ID ',TRIM(SPEC_ID),' for AEROSOL VOLUME FRACTION cannot be a lumped species'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1002): SPEC_ID ',TRIM(SPEC_ID),' for AERO. VOL. FRAC. cannot be a lumped species.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
             IF (.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
-               WRITE(MESSAGE,'(A,A,A)')  'ERROR: SPEC_ID ',TRIM(SPEC_ID),' for AEROSOL VOLUME FRACTION is not an AEROSOL'
+               WRITE(MESSAGE,'(3A)')  'ERROR(1003): SPEC_ID ',TRIM(SPEC_ID),' for AERO. VOL. FRAC. is not an AEROSOL.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -15281,7 +15281,7 @@ IF (SPEC_ID/='null') THEN
          OUTPUT_INDEX = 0
          RETURN
       ELSE
-         WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: SPEC_ID ',TRIM(SPEC_ID),' is not explicitly specified for QUANTITY ',TRIM(QUANTITY)
+         WRITE(MESSAGE,'(4A)')  'ERROR(1004): SPEC_ID ',TRIM(SPEC_ID),' is not explicitly specified for QUANTITY ',TRIM(QUANTITY)
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -15307,11 +15307,10 @@ ENDIF
 
 IF (CELL_L > 0._EB) THEN
    IF (DUCT_ID == 'null') THEN
-      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID'
+      WRITE(MESSAGE,'(4A)')  'ERROR(1005): Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ELSEIF (CELL_L > DUCT(DUCT_INDEX)%LENGTH) THEN
-      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CELL_L used for output QUANTITY ',TRIM(QUANTITY),' is outside of DUCT_ID ',&
-      TRIM(DUCT_ID)
+      WRITE(MESSAGE,'(4A)')  'ERROR(1006): CELL_L used for output QUANTITY ',TRIM(QUANTITY),' is outside of DUCT_ID ',TRIM(DUCT_ID)
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    DUCT_CELL_INDEX = MAX(1,NINT(CELL_L/DUCT(DUCT_INDEX)%LENGTH*DUCT(DUCT_INDEX)%N_CELLS))
@@ -15335,7 +15334,7 @@ IF (TRIM(QUANTITY)=='FILTER LOADING') THEN
       ENDIF
    ENDDO
    IF (Z_INDEX<0) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: FILTER LOADING. ',TRIM(SPEC_ID),' is not a tracked species'
+      WRITE(MESSAGE,'(3A)')  'ERROR(1007): SPEC_ID ',TRIM(SPEC_ID),' for FILTER LOADING is not a tracked species.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDIF
@@ -15350,11 +15349,11 @@ IF (TRIM(QUANTITY)=='EQUILIBRIUM VAPOR FRACTION' .OR. TRIM(QUANTITY)=='EQUILIBRI
       ENDIF
    ENDDO
    IF (Z_INDEX<0) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: EQUILIBRIUM VAPOR FRACTION. ',TRIM(SPEC_ID),' is not a tracked species'
+      WRITE(MESSAGE,'(3A)') 'ERROR(1008): SPEC_ID ',TRIM(SPEC_ID),' for EQUILIBRIUM VAPOR FRACTION is not a tracked species.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (.NOT. SPECIES_MIXTURE(Z_INDEX)%EVAPORATING) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: EQUILIBRIUM VAPOR FRACTION. ',TRIM(SPEC_ID),' is not an evaporating species'
+      WRITE(MESSAGE,'(3A)') 'ERROR(1009): SPEC_ID ',TRIM(SPEC_ID),' for EQUILIBRIUM VAPOR FRACTION is not an evaporating species.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDIF
@@ -15373,7 +15372,7 @@ IF (TRIM(QUANTITY)=='MIXTURE FRACTION') THEN
          ENDIF
       ENDDO
       IF (N_PLUS/=1 .AND. N_MINUS/=2) THEN
-         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: REAC ',NR,' MIXTURE FRACTION requires reaction of the form A + B -> C'
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR(1010): REAC ',NR,' MIXTURE FRACTION requires reaction A + B -> C.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
@@ -15386,14 +15385,14 @@ IF (QUANTITY=='ADVECTIVE MASS FLUX X' .OR. QUANTITY=='ADVECTIVE MASS FLUX Y' .OR
 
 IF (TRIM(QUANTITY)=='HRRPUV REAC') THEN
    IF (TRIM(REAC_ID)=='null') THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: HRRPUV REAC requires a REAC_ID'
+      WRITE(MESSAGE,'(A)') 'ERROR(1011): HRRPUV REAC requires a REAC_ID.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    DO NR = 1,N_REACTIONS
       IF (TRIM(REAC_ID)==TRIM(REACTION(NR)%ID)) REAC_INDEX = NR
    ENDDO
    IF (REAC_INDEX==0) THEN
-      WRITE(MESSAGE,'(3A)') 'ERROR: REAC_ID ',TRIM(REAC_ID),' not found for HRRPUV REAC'
+      WRITE(MESSAGE,'(3A)') 'ERROR(1012): REAC_ID ',TRIM(REAC_ID),' not found for HRRPUV REAC.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDIF
@@ -15425,13 +15424,13 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
       OUTPUT2_INDEX=ND
 
       IF (OUTPUT_QUANTITY(ND)%SPEC_ID_REQUIRED .AND. (Y_INDEX<1 .AND. Z_INDEX<0)) THEN
-         WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY2 ',TRIM(QUANTITY2),' requires a SPEC_ID'
+         WRITE(MESSAGE,'(3A)')  'ERROR(1013): Output QUANTITY2 ',TRIM(QUANTITY2),' requires a SPEC_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       ! QUANTITY2 only works with SLCF at the moment
       IF (.NOT.OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-          WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY2 ',TRIM(QUANTITY2),' is not appropriate for SLCF'
+          WRITE(MESSAGE,'(3A)')  'ERROR(1014): Output QUANTITY2 ',TRIM(QUANTITY2),' is not appropriate for SLCF.'
           CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -15445,90 +15444,90 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
       OUTPUT_INDEX = ND
 
       IF (OUTPUT_QUANTITY(ND)%QUANTITY2_REQUIRED .AND. OUTPUT2_INDEX==0) THEN
-         WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a QUANTITY2'
+         WRITE(MESSAGE,'(3A)')  'ERROR(1015): Output QUANTITY ',TRIM(QUANTITY),' requires a QUANTITY2.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%SPEC_ID_REQUIRED .AND. (Y_INDEX<1 .AND. Z_INDEX<0)) THEN
          IF (SPEC_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1016): Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID.'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. SPEC_ID ',TRIM(SPEC_ID),' not found.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(1017): Output QUANTITY ',TRIM(QUANTITY),' SPEC_ID ',TRIM(SPEC_ID),' not found.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%MATL_ID_REQUIRED .AND. MATL_INDEX < 1) THEN
          IF (MATL_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a MATL_ID'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1018): Output QUANTITY ',TRIM(QUANTITY),' requires a MATL_ID.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' MATL_ID ', TRIM(MATL_ID),' not found.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(1019): Output QUANTITY ',TRIM(QUANTITY),' MATL_ID ', TRIM(MATL_ID),' not found.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%PART_ID_REQUIRED .AND. PART_INDEX<1) THEN
          IF (PART_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a PART_ID'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1020): Output QUANTITY ',TRIM(QUANTITY),' requires a PART_ID.'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. PART_ID ',TRIM(PART_ID),' not found.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(1021): Output QUANTITY ',TRIM(QUANTITY),' PART_ID ',TRIM(PART_ID),' not found.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%DUCT_ID_REQUIRED .AND. DUCT_INDEX<1) THEN
          IF (DUCT_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1022): Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID.'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. DUCT_ID ',TRIM(DUCT_ID),' not found.'
+            WRITE(MESSAGE,'(5A)')  'ERROR(1023): Output QUANTITY ',TRIM(QUANTITY),' DUCT_ID ',TRIM(DUCT_ID),' not found.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%CELL_L_REQUIRED .AND. DUCT_CELL_INDEX<1) THEN
          IF (DUCT_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a positive CELL_L'
+            WRITE(MESSAGE,'(3A)')  'ERROR(1024): Output QUANTITY ',TRIM(QUANTITY),' requires a positive CELL_L.'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' in DUCT_ID ',TRIM(DUCT_ID),&
-            ' requires a positive CELL_L'
+            WRITE(MESSAGE,'(5A)')  'ERROR(1025): Output QUANTITY ',TRIM(QUANTITY),' in DUCT_ID ',TRIM(DUCT_ID),&
+            ' requires a positive CELL_L.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%CELL_L_REQUIRED .AND. (HVAC_MASS_TRANSPORT .NEQV. .TRUE.)) THEN
-         WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' in DUCT_ID ',TRIM(DUCT_ID),&
-         ' requires HVAC_MASS_TRANSPORT to be active.'
+         WRITE(MESSAGE,'(5A)')  'ERROR(1026): Output QUANTITY ',TRIM(QUANTITY),' in DUCT_ID ',TRIM(DUCT_ID),&
+                                ' requires HVAC_MASS_TRANSPORT to be active.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (OUTPUT_QUANTITY(ND)%NODE_ID_REQUIRED .AND. NODE_INDEX<1) THEN
          IF (NODE_ID=='null') THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a NODE_ID'
+            WRITE(MESSAGE,'(3A)') 'ERROR(1027): Output QUANTITY ',TRIM(QUANTITY),' requires a NODE_ID.'
          ELSE
-            WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. NODE_ID ',TRIM(NODE_ID),' not found.'
+            WRITE(MESSAGE,'(5A)') 'ERROR(1028): Output QUANTITY ',TRIM(QUANTITY),' NODE_ID ',TRIM(NODE_ID),' not found.'
          ENDIF
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (( QUANTITY=='RELATIVE HUMIDITY' .OR. QUANTITY=='HUMIDITY').AND. H2O_INDEX==0) THEN
-         WRITE(MESSAGE,'(A)')  'ERROR: RELATIVE HUMIDITY and HUMIDITY require SPEC=WATER VAPOR'
+         WRITE(MESSAGE,'(A)') 'ERROR(1029): RELATIVE HUMIDITY and HUMIDITY require SPEC_ID WATER VAPOR'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       END IF
 
       IF (TRIM(QUANTITY)=='DIFFUSIVITY' .AND. SIM_MODE==DNS_MODE .AND. Z_INDEX < 0) THEN
-         WRITE(MESSAGE,'(A)')  'ERROR: DIFFUSIVITY requires a tracked species SPEC_ID when using DNS'
+         WRITE(MESSAGE,'(A)')  'ERROR(1030): DIFFUSIVITY requires a tracked SPEC_ID when using DNS.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (TRIM(QUANTITY)=='SURFACE DEPOSITION') THEN
          IF (Z_INDEX==0) THEN
-            WRITE(MESSAGE,'(A)')  'ERROR: Cannot select background species for deposition'
+            WRITE(MESSAGE,'(A)')  'ERROR(1031): BACKGROUND species inappropriate for deposition.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (Y_INDEX > 0) THEN
             IF (SPECIES(Y_INDEX)%MODE /= AEROSOL_SPECIES) THEN
-               WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol species'
+               WRITE(MESSAGE,'(A,A,A)')'ERROR(1032): SPEC_ID ',TRIM(SPEC_ID),' for SURFACE DEPOSITION is not an aerosol species.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (SPECIES(Y_INDEX)%AWM_INDEX < 0) THEN
@@ -15537,7 +15536,7 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
             ENDIF
          ELSE
             IF(.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
-               WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
+               WRITE(MESSAGE,'(3A)')'ERROR(1033): SPEC_ID ',TRIM(SPEC_ID),' for SURFACE DEPOSITION is not aerosol tracked species.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX < 0) THEN
@@ -15551,11 +15550,11 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
           TRIM(QUANTITY)=='QABS_Z' .OR. TRIM(QUANTITY)=='QSCA_Z' .OR. TRIM(QUANTITY)=='MPUA_Z' .OR. TRIM(QUANTITY)=='CPUA_Z' .OR. &
           TRIM(QUANTITY)=='AMPUA_Z') THEN
          IF (N_LAGRANGIAN_CLASSES==0) THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' requires liquid droplets'
+            WRITE(MESSAGE,'(3A)') 'ERROR(1034): QUANTITY ',TRIM(QUANTITY),' requires liquid droplets.'
             CALL SHUTDOWN(MESSAGE)             ; RETURN
          ELSE
             IF (.NOT. ALL(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
-               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' requires liquid droplets'
+               WRITE(MESSAGE,'(3A)')  'ERROR(1034): QUANTITY ',TRIM(QUANTITY),' requires liquid droplets.'
                CALL SHUTDOWN(MESSAGE)             ; RETURN
             ENDIF
          ENDIF
@@ -15565,38 +15564,38 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          CASE ('SLCF')
             ! Throw out bad slices
             IF (.NOT. OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for SLCF'
+               WRITE(MESSAGE,'(3A)')  'ERROR(1035): QUANTITY ',TRIM(QUANTITY),' is not appropriate for SLCF.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          CASE ('DEVC')
             IF (.NOT.OUTPUT_QUANTITY(ND)%DEVC_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for DEVC'
+               WRITE(MESSAGE,'(3A)')  'ERROR(1036): QUANTITY ',TRIM(QUANTITY),' is not appropriate for DEVC.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (QUANTITY=='AMPUA' .OR. QUANTITY=='AMPUA_Z') ACCUMULATE_WATER = .TRUE.
          CASE ('PART')
             IF (.NOT. OUTPUT_QUANTITY(ND)%PART_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)') 'ERROR: ',TRIM(QUANTITY),' is not a particle output QUANTITY'
+               WRITE(MESSAGE,'(3A)') 'ERROR(1037): ',TRIM(QUANTITY),' is not a particle output QUANTITY.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          CASE ('BNDF')
             IF (.NOT. OUTPUT_QUANTITY(ND)%BNDF_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for BNDF'
+               WRITE(MESSAGE,'(3A)') 'ERROR(1038): QUANTITY ',TRIM(QUANTITY),' is not appropriate for BNDF.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (QUANTITY=='AMPUA' .OR. QUANTITY=='AMPUA_Z') ACCUMULATE_WATER = .TRUE.
          CASE('ISOF')
             IF (.NOT.OUTPUT_QUANTITY(ND)%ISOF_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)')  'ERROR: ISOF quantity ',TRIM(QUANTITY),' not appropriate for isosurface'
+               WRITE(MESSAGE,'(3A)') 'ERROR(1039): QUANTITY ',TRIM(QUANTITY),' not appropriate for isosurface.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          CASE ('PLOT3D')
              IF (OUTPUT_QUANTITY(ND)%SOLID_PHASE) THEN
-                WRITE(MESSAGE,'(5A)') 'ERROR: ',TRIM(OUTTYPE),'_QUANTITY ',TRIM(QUANTITY), ' not appropriate for gas phase'
+                WRITE(MESSAGE,'(3A)') 'ERROR(1040): QUANTITY ',TRIM(QUANTITY),' not appropriate for gas phase.'
                 CALL SHUTDOWN(MESSAGE) ; RETURN
              ENDIF
              IF (.NOT.OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-                WRITE(MESSAGE,'(5A)') 'ERROR: ',TRIM(OUTTYPE),'_QUANTITY ',TRIM(QUANTITY), ' not appropriate for Plot3D'
+                WRITE(MESSAGE,'(3A)') 'ERROR(1041): QUANTITY ',TRIM(QUANTITY),' not appropriate for Plot3D.'
                 CALL SHUTDOWN(MESSAGE) ; RETURN
              ENDIF
          CASE DEFAULT
@@ -15639,7 +15638,7 @@ ENDDO QUANTITY_INDEX_LOOP
 
 ! If no match for desired QUANTITY is found, stop the job
 
-WRITE(MESSAGE,'(5A)') 'ERROR: ',TRIM(OUTTYPE),' QUANTITY ',TRIM(QUANTITY), ' not found'
+WRITE(MESSAGE,'(3A)') 'ERROR(1042): QUANTITY ',TRIM(QUANTITY),' not found.'
 CALL SHUTDOWN(MESSAGE) ; RETURN
 
 END SUBROUTINE GET_QUANTITY_INDEX
@@ -15669,7 +15668,7 @@ DO NN=1,N_PROP
   ENDIF
 ENDDO
 
-WRITE(MESSAGE,'(5A)')  'ERROR: ',TRIM(OUTTYPE),' PROP_ID ',TRIM(PROP_ID),' not found'
+WRITE(MESSAGE,'(3A)')  'ERROR(1043): PROP_ID ',TRIM(PROP_ID),' not found.'
 CALL SHUTDOWN(MESSAGE) ; RETURN
 
 END SUBROUTINE GET_PROPERTY_INDEX
@@ -15697,7 +15696,7 @@ COUNT_CSVF_LOOP: DO
    IF (IOS==1) EXIT COUNT_CSVF_LOOP
    READ(LU_INPUT,NML=CSVF,END=16,ERR=17,IOSTAT=IOS)
    N_CSVF=N_CSVF+1
-   16 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: problem with CSVF line') ; RETURN ; ENDIF
+   16 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR(101): Problem with CSVF line') ; RETURN ; ENDIF
 ENDDO COUNT_CSVF_LOOP
 17 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
