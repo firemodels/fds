@@ -2650,7 +2650,11 @@ DO N=1,N_TRACKED_SPECIES
    IF (SM%SC_T_USER>0._EB) &
       WRITE(LU_OUTPUT,'(A,F8.3)') '   User Turbulent Schmidt Number    ',SM%SC_T_USER
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES10.3)')  '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   IF (N_REACTIONS > 0) THEN
+      IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) &
+         WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Finite Rate Relative Error       ',SM%ODE_REL_ERROR
+   ENDIF
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -2742,16 +2746,10 @@ ENDDO
 
 ! Print out Stoichiometric parameters for reactions
 
-IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
+IF (N_REACTIONS>0) THEN
+   
+   WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   SELECT CASE (COMBUSTION_ODE_SOLVER)
-      CASE (EXPLICIT_EULER)
-         ODE_SOLVER = 'EXPLICIT EULER'
-      CASE (RK2_RICHARDSON)
-         ODE_SOLVER = 'RK2 RICHARDSON'
-   END SELECT
    SELECT CASE (EXTINCT_MOD)
       CASE (EXTINCTION_1)
          EXTINCTION_MODEL = 'EXTINCTION 1'
@@ -2759,108 +2757,142 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 2'
    END SELECT
 
-   IF (N_REACTIONS>1) THEN
-      IF (RN%ID/='null')  THEN
-         WRITE(LU_OUTPUT,'(/3X,A,A)')    'Reaction ID:  ', TRIM(RN%ID)
-      ELSE
-         WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',NR
-      ENDIF
-                      WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
-      IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(REACTION(RN%REVERSE_INDEX)%ID)
-   ENDIF
+! Set ODE solver
+   SELECT CASE (COMBUSTION_ODE_SOLVER)
+      CASE (EXPLICIT_EULER)
+         ODE_SOLVER = 'EXPLICIT EULER'
+      CASE (RK2_RICHARDSON)
+         ODE_SOLVER = 'RK2 RICHARDSON'
+      CASE (CVODE_SOLVER)
+         ODE_SOLVER = 'CVODE'
+   END SELECT
 
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
-   WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
-   IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
-                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
-
-   IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
-      WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
-         RN%HOC_COMPLETE/1000._EB
-   ENDIF
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                                          Molar'
-   DO NN=1,N_SPECIES
-      IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
-      WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-   ENDDO
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                             Molar         Mass'
-   DO NN=1,N_TRACKED_SPECIES
-      IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
-         MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW))+1)),')'
-      WRITE(LU_OUTPUT,OUTFORM) SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
-         RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-   ENDDO
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Reaction Kinetics'
-
-   IF (RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(/6X,A)')           'Fast chemistry'
-   ELSE
-      WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
-      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
-      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
-      WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
-      DO NN=1,RN%N_SPEC
-         WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(RN%N_S_INDEX(NN))%ID,RN%N_S(NN)
-      ENDDO
-      IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
-      IF (RN%THIRD_BODY) THEN
-         WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
-         IF (RN%N_THIRD > 0) THEN
-            WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
-            WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
-            DO NN=1,N_SPECIES
-               IF (ABS(RN%THIRD_EFF(NN)-1._EB)>TWO_EPSILON_EB) &
-                  WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%THIRD_EFF(NN)
-            ENDDO
-         ENDIF
-      ENDIF
-   ENDIF
-
+   WRITE(LU_OUTPUT,'(/3X,A)')    'Solver Details:  '
    WRITE(LU_OUTPUT,'(/6X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
-   IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
+   IF (N_FIXED_CHEMISTRY_SUBSTEPS>0 .AND. &
+       (COMBUSTION_ODE_SOLVER==EXPLICIT_EULER .OR. COMBUSTION_ODE_SOLVER==RK2_RICHARDSON)) THEN
       WRITE(LU_OUTPUT,'(/6X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
    ENDIF
-   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
-      WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
+   IF (COMBUSTION_ODE_SOLVER/=EXPLICIT_EULER) THEN
+      WRITE(LU_OUTPUT,'(/6X,A,ES13.6)')  'Global aboslute error tolerance:  ', ODE_MIN_ATOL
+      WRITE(LU_OUTPUT,'(6X,A,ES13.6)')   'Global relative error tolerance:  ', GLOBAL_ODE_REL_ERROR
    ENDIF
-   IF (SIM_MODE/=DNS_MODE) THEN
-      WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
-   ENDIF
-   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
-      ! first, create a stoichiometric mixture for current REACTION
-      ZZ_REAC=0._EB
-      ZZ_PROD=0._EB
-      DO NN=1,N_TRACKED_SPECIES
-         IF (RN%NU(NN) < -TWO_EPSILON_EB) ZZ_REAC(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-         IF (RN%NU(NN) >  TWO_EPSILON_EB) ZZ_PROD(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-      ENDDO
-      ! add background diluents
-      DO NN=1,N_TRACKED_SPECIES
-         IF (ABS(RN%NU(NN)) > TWO_EPSILON_EB) CYCLE
-         IF (SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0>TWO_EPSILON_EB) THEN
-            ZZ_REAC(NN) = SPECIES_MIXTURE(NN)%ZZ0/SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0 * ZZ_REAC(RN%AIR_SMIX_INDEX)
-            ZZ_PROD(NN) = -ZZ_REAC(NN)
+
+   REACTION_LOOP: DO NR=1,N_REACTIONS
+      RN => REACTION(NR)
+
+      IF (N_REACTIONS>1) THEN
+         IF (RN%ID/='null')  THEN
+            WRITE(LU_OUTPUT,'(/3X,A,A)')    'Reaction ID:  ', TRIM(RN%ID)
+         ELSE
+            WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',NR
          ENDIF
+                         WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
+         IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(REACTION(RN%REVERSE_INDEX)%ID)
+      ENDIF
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
+      WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+      IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
+                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
+
+      IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
+         WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
+            RN%HOC_COMPLETE/1000._EB
+      ENDIF
+
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
+      WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                                          Molar'
+      DO NN=1,N_SPECIES
+         IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
+         WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
+         WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
       ENDDO
-      ! normalize stoichiometric mixture compositions
-      IF (ABS(SUM(ZZ_REAC))>TWO_EPSILON_EB) ZZ_REAC = ZZ_REAC/SUM(ZZ_REAC)
-      IF (ABS(SUM(ZZ_PROD))>TWO_EPSILON_EB) ZZ_PROD = ZZ_PROD/SUM(ZZ_PROD)
-      CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA,NR)
-      WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Check of equivalence ratio at stoich:   ', PHI_TILDE
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)')  'Stoich adiabatic flame temperature (C): ', TMP_FLAME - TMPM
-   ENDIF
 
-ENDDO REACTION_LOOP
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
+      WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                             Molar         Mass'
+      DO NN=1,N_TRACKED_SPECIES
+         IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
+         WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
+            MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW))+1)),')'
+         WRITE(LU_OUTPUT,OUTFORM) SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
+            RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+      ENDDO
 
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Reaction Kinetics'
+
+      IF (RN%FAST_CHEMISTRY) THEN
+         WRITE(LU_OUTPUT,'(/6X,A)')           'Fast chemistry'
+      ELSE
+         WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
+         WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
+         WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
+         WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
+         DO NN=1,RN%N_SPEC
+            WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(RN%N_S_INDEX(NN))%ID,RN%N_S(NN)
+         ENDDO
+         IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
+         IF (RN%THIRD_BODY) THEN
+            WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
+            IF (RN%N_THIRD > 0) THEN
+               WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
+               WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
+               DO NN=1,N_SPECIES
+                  IF (ABS(RN%THIRD_EFF(NN)-1._EB)>TWO_EPSILON_EB) &
+                     WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%THIRD_EFF(NN)
+               ENDDO
+            ENDIF
+            IF (RN%REACTYPE==FALLOFF_TROE_TYPE .OR. RN%REACTYPE==FALLOFF_LINDEMANN_TYPE) THEN
+               WRITE(LU_OUTPUT,'(/6X,A)') 'Falloff Reaction'
+               IF (RN%REACTYPE==FALLOFF_TROE_TYPE) WRITE(LU_OUTPUT,'(6X,A)') 'Troe Falloff'
+               IF (RN%REACTYPE==FALLOFF_LINDEMANN_TYPE) WRITE(LU_OUTPUT,'(6X,A)') 'LINDEMANN Falloff'
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'Low pressure pre-exponential:           ',RN%A_LOW_PR
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'Low pressure activation energy (J/mol): ',RN%E_LOW_PR
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'Low pressure temperature exponent       ',RN%N_T_LOW_PR
+            ENDIF
+            IF (RN%REACTYPE==FALLOFF_TROE_TYPE) THEN
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'TROE A:                                 ',RN%A_TROE
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'TROE T1 (K):                            ',1._EB/RN%RT1_TROE
+               IF (RN%T2_TROE > -1.E20_EB) &
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'TROE T2 (K):                            ',RN%T2_TROE
+               WRITE(LU_OUTPUT,'(6X,ES13.6)') 'TROE T3 (K):                            ',1._EB/RN%RT3_TROE
+            ENDIF
+         ENDIF
+      ENDIF
+
+      IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
+         WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
+      ENDIF
+      IF (SIM_MODE/=DNS_MODE) THEN
+         WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
+      ENDIF
+      IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
+         ! first, create a stoichiometric mixture for current REACTION
+         ZZ_REAC=0._EB
+         ZZ_PROD=0._EB
+         DO NN=1,N_TRACKED_SPECIES
+            IF (RN%NU(NN) < -TWO_EPSILON_EB) ZZ_REAC(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+            IF (RN%NU(NN) >  TWO_EPSILON_EB) ZZ_PROD(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+         ENDDO
+         ! add background diluents
+         DO NN=1,N_TRACKED_SPECIES
+            IF (ABS(RN%NU(NN)) > TWO_EPSILON_EB) CYCLE
+            IF (SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0>TWO_EPSILON_EB) THEN
+               ZZ_REAC(NN) = SPECIES_MIXTURE(NN)%ZZ0/SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0 * ZZ_REAC(RN%AIR_SMIX_INDEX)
+               ZZ_PROD(NN) = -ZZ_REAC(NN)
+            ENDIF
+         ENDDO
+         ! normalize stoichiometric mixture compositions
+         IF (ABS(SUM(ZZ_REAC))>TWO_EPSILON_EB) ZZ_REAC = ZZ_REAC/SUM(ZZ_REAC)
+         IF (ABS(SUM(ZZ_PROD))>TWO_EPSILON_EB) ZZ_PROD = ZZ_PROD/SUM(ZZ_PROD)
+         CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA,NR)
+         WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Check of equivalence ratio at stoich:   ', PHI_TILDE
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)')  'Stoich adiabatic flame temperature (C): ', TMP_FLAME - TMPM
+      ENDIF
+
+   ENDDO REACTION_LOOP
+ENDIF
 ! Print out information about agglomeration
 
 IF (N_AGGLOMERATION_SPECIES > 0) THEN
