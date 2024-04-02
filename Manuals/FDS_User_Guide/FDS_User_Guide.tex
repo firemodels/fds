@@ -4429,6 +4429,7 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
 \subsubsection{Diffusivity}
+\label{info:diffusivity}
 
 Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivity can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
@@ -11035,7 +11036,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
-{\ct DIFFUSIVITY}$^1$                           & Species diffusivity, $D_\alpha$                   & m$^2$/s           & D,I,P,S      \\ \hline
+{\ct DIFFUSIVITY}$^1$                           & Section~\ref{info:diffusivity}                    & m$^2$/s           & D,I,P,S      \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
 {\ct EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
@@ -12920,7 +12921,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct COPY\_LUMPED}                  & Logical           & Section~\ref{info:lumped}               &                   & {\ct F} \\ \hline
 {\ct DENSITY\_LIQUID}               & Real              & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
 {\ct DENSITY\_SOLID}                & Real              & Section~\ref{info:deposition}           & kg/m$^3$          &  1800.        \\ \hline
-{\ct DIFFUSIVITY}                   & Real              & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
+{\ct DIFFUSIVITY}                   & Real              & Section~\ref{info:diffusivity}          & m$^2$/s           &               \\ \hline
 {\ct ENTHALPY\_OF\_FORMATION}       & Real              & Section~\ref{thermal_part_props}        & kJ/mol            &               \\ \hline
 {\ct EPSILONKLJ}                    & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct FIC\_CONCENTRATION}            & Real              & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
@@ -13369,7 +13370,7 @@ Keyword             & Type     & Description                      & Units       
 
 
 \begin{tabbing}
-\hspace{0.3in}  \= \hspace{5.2in} \= \hspace{1in}  \\
+\hspace{0.4in}  \= \hspace{5.2in} \= \hspace{1in}  \\
 101  \> {\ct Problem with \ldots\ line.                                             } \> Chapter~\ref{info:namelists}  \\
 102  \> {\ct Input file \ldots\ not found in the current directory.                 } \> Section~\ref{info:launching}  \\
 103  \> {\ct CATF file \ldots\ not found.                                           } \> Section~\ref{info:CATF}  \\
@@ -13862,6 +13863,50 @@ Keyword             & Type     & Description                      & Units       
     \>                                                                                \>                          \\
 961 \> {\ct CELL\_CENTERED not allowed with AGL\_SLICE.                             } \> Section~\ref{info:complex_terrain} \\
 962 \> {\ct BNDF \ldots\ CPUA\_Z, MPUA\_Z, and AMPUA\_Z require liquid droplets.    } \> Section~\ref{bucket_test_1} \\
+    \>                                                                                \>                          \\
+1001 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. must be a tracked species.       } \> Section~\ref{info:soot} \\
+1002 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. cannot be a lumped species.      } \> Section~\ref{info:soot} \\
+1003 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. is not an AEROSOL.               } \> Section~\ref{info:soot} \\
+1004 \> {\ct SPEC\_ID \ldots\ is not explicitly specified for QUANTITY \ldots\      } \> Section~\ref{info:gasoutputquantities} \\
+1005 \> {\ct Output QUANTITY \ldots\ requires a DUCT\_ID.                           } \> Section~\ref{info:hvacoutputquantities} \\
+1006 \> {\ct CELL\_L used for output QUANTITY \ldots\ is outside of DUCT\_ID \ldots } \> Section~\ref{info:hvacoutputquantities} \\
+1007 \> {\ct SPEC\_ID \ldots\ for FILTER LOADING is not a tracked species.          } \> Section~\ref{info:hvacoutputquantities} \\
+1008 \> {\ct SPEC\_ID \ldots\ for EQUIL. VAP. FRAC. is not a tracked species.       } \> Section~\ref{info:hvacoutputquantities} \\
+1009 \> {\ct SPEC\_ID \ldots\ for EQUIL. VAP. FRAC. is not an evap. species.        } \> Section~\ref{info:hvacoutputquantities} \\
+1010 \> {\ct REAC \ldots\ MIXTURE FRACTION requires reaction A + B -> C.            } \> Section~\ref{info:gasoutputquantities} \\
+1011 \> {\ct HRRPUV REAC requires a REAC\_ID.                                       } \> Section~\ref{info:gasoutputquantities} \\
+1012 \> {\ct REAC\_ID \ldots\ not found for HRRPUV REAC.                            } \> Section~\ref{info:gasoutputquantities} \\
+1013 \> {\ct Output QUANTITY2 \ldots\ requires a SPEC\_ID.                          } \> Section~\ref{info:gasoutputquantities} \\
+1014 \> {\ct Output QUANTITY2 \ldots\ is not appropriate for SLCF.                  } \> Section~\ref{info:gasoutputquantities} \\
+1015 \> {\ct Output QUANTITY \ldots\ requires a QUANTITY2.                          } \> Section~\ref{info:gasoutputquantities} \\
+1016 \> {\ct Output QUANTITY \ldots\ requires a SPEC\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1017 \> {\ct Output QUANTITY \ldots\ SPEC\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1018 \> {\ct Output QUANTITY \ldots\ requires a MATL\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1019 \> {\ct Output QUANTITY \ldots\ MATL\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1020 \> {\ct Output QUANTITY \ldots\ requires a PART\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1021 \> {\ct Output QUANTITY \ldots\ PART\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1022 \> {\ct Output QUANTITY \ldots\ requires a DUCT\_ID.                           } \> Section~\ref{info:hvacoutputquantities} \\
+1023 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ not found.                    } \> Section~\ref{info:hvacoutputquantities} \\
+1024 \> {\ct Output QUANTITY \ldots\ requires a positive CELL\_L.                   } \> Section~\ref{info:hvacoutputquantities} \\
+1025 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ requires pos. CELL\_L.        } \> Section~\ref{info:hvacoutputquantities} \\
+1026 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ requires HVAC\_MASS\_TRAN.    } \> Section~\ref{info:hvacoutputquantities} \\
+1027 \> {\ct Output QUANTITY \ldots\ requires a NODE\_ID'                           } \> Section~\ref{info:hvacoutputquantities} \\
+1028 \> {\ct Output QUANTITY \ldots\ NODE\_ID \ldots\ not found.                    } \> Section~\ref{info:hvacoutputquantities} \\
+1029 \> {\ct HUMIDITY requires SPEC\_ID WATER VAPOR.                                } \> Section~\ref{info:humidity} \\
+1030 \> {\ct DIFFUSIVITY requires a tracked SPEC\_ID when using DNS.                } \> Section~\ref{info:diffusivity} \\
+1031 \> {\ct BACKGROUND species inappropriate for deposition.                       } \> Section~\ref{info:deposition} \\
+1032 \> {\ct SPEC\_ID \ldots\ for SURF. DEP. is not an aerosol species.             } \> Section~\ref{info:deposition} \\
+1033 \> {\ct SPEC\_ID \ldots\ for SURF. DEP. is not an aerosol tracked species.     } \> Section~\ref{info:deposition} \\
+1034 \> {\ct QUANTITY \ldots\ requires liquid droplets.                             } \> Section~\ref{info:solidoutputquantities} \\
+1035 \> {\ct QUANTITY \ldots\ is not appropriate for SLCF.                          } \> Section~\ref{info:gasoutputquantities} \\
+1036 \> {\ct QUANTITY \ldots\ is not appropriate for DEVC.                          } \> Section~\ref{info:gasoutputquantities} \\
+1037 \> {\ct QUANTITY \ldots\ is not a particle output QUANTITY.                    } \> Section~\ref{info:particleoutputquantities} \\
+1038 \> {\ct QUANTITY \ldots\ is not appropriate for BNDF.                          } \> Section~\ref{info:solidoutputquantities} \\
+1039 \> {\ct QUANTITY \ldots\ is not appropriate for isosurface.                    } \> Section~\ref{info:gasoutputquantities} \\
+1040 \> {\ct QUANTITY \ldots\ is not appropriate for gas phase.                     } \> Section~\ref{info:gasoutputquantities} \\
+1041 \> {\ct QUANTITY \ldots\ is not appropriate for Plot3D.                        } \> Section~\ref{info:gasoutputquantities} \\
+1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
+1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 
 \end{tabbing}
 
