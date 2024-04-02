@@ -595,7 +595,7 @@ $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
 $QFDS -d Sprinklers_and_Sprays cannon_ball.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
-$QFDS -p 4 -d Sprinklers_and_Sprays cascadempi.fds
+$QFDS -p 6 -d Sprinklers_and_Sprays cascadempi.fds
 $QFDS -p 2 -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds

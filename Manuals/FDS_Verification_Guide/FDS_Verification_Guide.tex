@@ -6001,12 +6001,12 @@ This test case is a modified version of {\ct Radiation/adiabatic\_surface\_tempe
 \subsection{Droplet Movement on Solid Surfaces with MPI (\texorpdfstring{{\textct{cascadempi}}}{cascadempi}) }
 \label{cascadempi}
 
-This test case is a modified version of {\ct cascade}. The single mesh is replaced with 4 meshes to verify that particles crossing mesh boundaries in the gas phase and along solid surfaces are handled correctly. The plots show the total water mass with and without mpi.
+This test case is a modified version of {\ct cascade}. The single mesh is replaced with 4 meshed regions to verify that particles crossing mesh boundaries in the gas phase and along solid surfaces are handled correctly. The first meshed region uses OBST definitions for the boxes with a single mesh. The second region replaces the OBST definition with a GEOM definition. The third and fourth region use the same geometry but separate the regions into 2 meshes. The plots show the total water mass for the four meshed regions.
 
 \begin{figure}[ht]
-\includegraphics[height=2.2in]{../FDS_User_Guide/SCRIPT_FIGURES/cascade}
+\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/cascadempi}
-\caption[Results of the {\ct cascadempi} test case]{(Left) Case without mpi {\ct cascade} (Right) Case with mpi {\ct cascadempi}.}
+\caption[Results of the {\ct cascadempi} test case]{Results of the {\ct cascadempi} test case.}
 \label{cascadempi_image}
 \end{figure}
 
