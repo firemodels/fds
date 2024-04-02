@@ -1,6 +1,6 @@
+#!$FIREMODELS/fds/.github/fds_python_env/bin/python3
 # McDermott
 # 2 April 2024
-# FDS_verification_script.py
 
 import subprocess
 
