@@ -767,6 +767,8 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
 
          BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
 
+         BC%IOR = 0  ! Particle is not stuck to a wall
+
          IF (PRESENT(WALL_INDEX)) THEN
             WC    => MESHES(NM)%WALL(WALL_INDEX)
             B1    => MESHES(NM)%BOUNDARY_PROP1(WC%B1_INDEX)
@@ -1206,6 +1208,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
 
       BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
 
+      BC%IOR = 0
       BC%X = LP_X
       BC%Y = LP_Y
       BC%Z = LP_Z
@@ -1293,6 +1296,8 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                LP%CLASS_INDEX = ILPC
 
                BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+
+               BC%IOR = 0  ! Particle is not stuck to a wall
 
                PARTICLE_TAG = PARTICLE_TAG + NMESHES
                LP%TAG = PARTICLE_TAG
