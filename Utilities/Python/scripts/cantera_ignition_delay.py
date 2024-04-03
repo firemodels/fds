@@ -75,7 +75,7 @@ for i, state in enumerate(ignition_delays):
     ignition_delays[i].tau = tau
 
 #csvdata = csvdata.rename(columns={0: 'Time', 1: 'OH', 2: 'T'})
-csvdata.to_csv('CANTERA.csv',index=False)
+csvdata.to_csv('../../../Verification/Chemistry/cantera_ignition_delay.csv',index=False)
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
