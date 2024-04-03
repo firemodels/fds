@@ -605,6 +605,8 @@ ENDDO
 
 #ifdef WITH_SUNDIALS
 CALL  CVODE_SERIAL(CC,TMP_IN,PRES_IN, TCUR,TEND, GLOBAL_ODE_REL_ERROR, ATOL)
+! Avoid unused build error
+XXX = 1._EB
 #else
 ! Avoid unused build error
 XXX = MINVAL(ATOL)
