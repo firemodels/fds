@@ -1,0 +1,95 @@
+import numpy as np
+import time
+import cantera as ct
+import matplotlib.pyplot as plt
+import pandas as pd
+
+print(f"Runnning Cantera version: {ct.__version__}")
+
+gas = ct.Solution("./mechanisms/GRIMECH/grimech30.yaml")
+reactor_pressure = 101325  # Pascals
+reference_species = "OH"
+
+# Make a list of all the temperatures we would like to run simulations at
+#T = np.hstack((np.arange(1273.15, 1573.15, 100)))
+T = np.array([1273.15, 1373.15, 1473.15, 1573.15])
+
+estimated_ignition_delay_times = np.ones_like(T, dtype=float)
+estimated_ignition_delay_times[:] = 10
+
+
+# Now create a SolutionArray out of these
+ignition_delays = ct.SolutionArray(
+    gas, shape=T.shape, extra={"tau": estimated_ignition_delay_times}
+)
+ignition_delays.set_equivalence_ratio(
+    1.0, fuel="CH4", oxidizer={"O2": 1.0, "N2": 3.76}
+)
+ignition_delays.TP = T, reactor_pressure
+
+
+csvdata = pd.DataFrame()
+
+for i, state in enumerate(ignition_delays):
+    stateArr = []
+    # Setup the gas and reactor
+    gas.TPX = state.TPX
+    r = ct.IdealGasReactor(contents=gas, name="Batch Reactor")
+    reactor_network = ct.ReactorNet([r])
+
+    reference_species_history = []
+    time_history = []
+
+    t0 = time.time()
+
+    t = 0
+    while t < estimated_ignition_delay_times[i]:
+        t = reactor_network.step()
+        time_history.append(t)
+        reference_species_history.append(gas[reference_species].X[0])
+        stateArr.append([t*1000, gas[reference_species].X[0],gas.T-273.15 ]) # Time in ms and TMP in Centigrade
+
+    i_ign = np.array(reference_species_history).argmax()
+    tau = time_history[i_ign]
+    t1 = time.time()
+    stateArrDF = pd.DataFrame(stateArr)
+    
+    caseIndx = str(i+1)
+    if i ==0:
+        csvdata = stateArrDF
+    else:    
+        # Pad the smaller DataFrame with NaNs to match the number of rows
+        if csvdata.shape[0] > stateArrDF.shape[0]:
+            pad_rows = csvdata.shape[0] - stateArrDF.shape[0]
+            stateArrDF = pd.concat([stateArrDF, pd.DataFrame(np.full((pad_rows, stateArrDF.shape[1]), np.nan))], axis=0, ignore_index=True)
+        elif stateArrDF.shape[0] > csvdata.shape[0]:
+            pad_rows = stateArrDF.shape[0] - csvdata.shape[0]
+            csvdata = pd.concat([csvdata, pd.DataFrame(np.full((pad_rows, csvdata.shape[1]), np.nan))], axis=0, ignore_index=True)
+        csvdata = pd.concat([csvdata, stateArrDF], axis=1)
+        
+    csvdata = csvdata.rename(columns={0: 'Time'+caseIndx, 1: 'OH'+caseIndx, 2: 'TMP'+caseIndx})
+    print(
+        f"Computed Ignition Delay: {tau:.3e} seconds for T={ignition_delays[i].T}K. Took {t1 - t0:3.2f}s to compute"
+    )
+
+    ignition_delays[i].tau = tau
+
+#csvdata = csvdata.rename(columns={0: 'Time', 1: 'OH', 2: 'T'})
+csvdata.to_csv('CANTERA.csv',index=False)
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.semilogy(10000/ ignition_delays.T, ignition_delays.tau, "o-")
+# ax.set_ylabel("Ignition Delay (s)")
+# ax.set_xlabel(r"$\frac{10000}{T (K)}$", fontsize=18)
+
+# # Add a second axis on top to plot the temperature for better readability
+# ax2 = ax.twiny()
+# ticks = ax.get_xticks()
+# ax2.set_xticks(ticks)
+# ax2.set_xticklabels((1000 / ticks).round(1))
+# ax2.set_xlim(ax.get_xlim())
+# ax2.set_xlabel("Temperature: $T(K)$");
+
+# plt.savefig('ignDelay_temp_sweep.png')
+#plt.show();
