@@ -401,7 +401,6 @@ REAL(EB) :: MW_SOOT                                                 !< Molecular
 REAL(EB) :: VISIBILITY_FACTOR=3._EB                                 !< Parameter in light extinction calculation
 REAL(EB) :: EC_LL                                                   !< Extinction Coefficient, Lower Limit (1/m)
 REAL(EB) :: ZZ_MIN_GLOBAL=1.E-10_EB                                 !< Minimum lumped species mass fraction
-REAL(EB) :: ODE_MIN_ATOL=-1._EB                                     !< Minimum absolute error for ODE solvers
 REAL(EB) :: FIXED_MIX_TIME=-1._EB                                   !< User-specified reaction mixing time (s)
 REAL(EB) :: INITIAL_UNMIXED_FRACTION=1._EB                          !< Initial amount of mixed air-fuel in combustion chamber
 REAL(EB) :: GLOBAL_ODE_REL_ERROR=1.E-4_EB                           !< Error tolerance in Richardson extrapolation
@@ -849,3 +848,14 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA
 CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
 
 END MODULE RADCONS
+
+!> \brief Variables for DVODE solver usage
+MODULE DVODECONS
+USE PRECISION_PARAMETERS
+
+INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
+DOUBLE PRECISION :: ODE_MIN_ATOL=DBLE(-1._EB)
+
+END MODULE DVODECONS
+
+   
