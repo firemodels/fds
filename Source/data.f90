@@ -2197,55 +2197,92 @@ TYPE(ELEMENT_TYPE):: ELEMENT(118)
 
 CONTAINS
 
-SUBROUTINE THERMO_TABLE_GAS(I_TMP,CP,SPEC_INDEX,RCON,G_F)
+SUBROUTINE THERMO_TABLE_GAS(I_TMP,CP,SPEC_INDEX,SS_INDEX,RCON,G_F)
 
 USE GLOBAL_CONSTANTS, ONLY: GAMMA,CONSTANT_SPECIFIC_HEAT_RATIO,R0
-INTEGER,INTENT(IN) ::SPEC_INDEX, I_TMP
+USE TYPES, ONLY : SPECIES
+INTEGER,INTENT(IN) ::SPEC_INDEX, SS_INDEX, I_TMP
 REAL(EB),INTENT(IN) :: RCON
 REAL(EB),INTENT(OUT) :: CP,G_F
-REAL(EB) :: TE,H,S
-INTEGER :: B
+REAL(EB) :: TE,H,S,TB(4),A(7,3),BC(2,3)
+INTEGER :: B,BANDS
+CHARACTER(LABEL_LENGTH):: POLY
 TYPE (THERMO_DATA_TYPE), POINTER :: TD=>NULL()
 
 G_F = 0._EB !kJ/mol
 IF (SPEC_INDEX==-1 .OR. CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-   CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
-   RETURN
+   IF (SS_INDEX >= 0) THEN
+      IF (SPECIES(SS_INDEX)%POLYNOMIAL=='null') THEN
+         CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
+         RETURN
+      ENDIF
+   ENDIF
 ENDIF
 
-TD=>THERMO_DATA(SPEC_INDEX)
+POLY='null'
+
+IF (SS_INDEX>0) THEN
+   IF (SPECIES(SS_INDEX)%POLYNOMIAL/='null') THEN
+      POLY = SPECIES(SS_INDEX)%POLYNOMIAL
+      BANDS = SPECIES(SS_INDEX)%POLYNOMIAL_BANDS
+      TB = SPECIES(SS_INDEX)%POLYNOMIAL_TEMP
+      IF (SPECIES(SS_INDEX)%POLYNOMIAL=='NASA7') THEN
+         BC(1,1:BANDS) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(6,1:BANDS)
+         BC(2,1:BANDS) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(7,1:BANDS)
+         DO B=1,BANDS
+            A(1:5,B) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(1:5,B)
+         ENDDO
+      ELSE
+         BC(1,1:BANDS) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(8,1:BANDS)
+         BC(2,1:BANDS) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(9,1:BANDS)
+         DO B=1,BANDS
+            A(1:7,B) = SPECIES(SS_INDEX)%POLYNOMIAL_COEFF(1:7,B)
+         ENDDO
+      ENDIF
+   ENDIF
+ENDIF
+
+IF (POLY=='null') THEN
+   TD=>THERMO_DATA(SPEC_INDEX)
+   POLY = TD%POLY
+   BANDS = TD%BANDS
+   TB = TD%T
+   A = TD%A
+   BC = TD%B
+ENDIF
+
 TE = REAL(I_TMP,EB)
 
-SELECT CASE (TD%POLY)
+SELECT CASE (POLY)
    CASE ('NASA9')
-      TE = MIN(MAXVAL(TD%T),MAX(TD%T(1),TE))
-      DO B=1,TD%BANDS
-         IF (TE<=TD%T(B+1)) EXIT
+      TE = MIN(MAXVAL(TB),MAX(TB(1),TE))
+      DO B=1,BANDS
+         IF (TE<=TB(B+1)) EXIT
       ENDDO
-      CP = TD%A(1,B)/TE**2 + TD%A(2,B)/TE + TD%A(3,B) + TD%A(4,B)*TE + TD%A(5,B)*TE**2 + TD%A(6,B)*TE**3 + TD%A(7,B)*TE**4
+      CP = A(1,B)/TE**2 + A(2,B)/TE + A(3,B) + A(4,B)*TE + A(5,B)*TE**2 + A(6,B)*TE**3 + A(7,B)*TE**4
       CP = CP * RCON
-      H =  -TD%A(1,B)/TE + TD%A(2,B)*LOG(TE) + TD%A(3,B)*TE + 0.5_EB*TD%A(4,B)*TE**2 + ONTH*TD%A(5,B)*TE**3 + &
-           0.25_EB*TD%A(6,B)*TE**4 + 0.2_EB*TD%A(7,B)*TE**5 + TD%B(1,B)
-      S =  -0.5_EB*TD%A(1,B)/TE**2 - TD%A(2,B)/TE + TD%A(3,B)*LOG(TE) + TD%A(4,B)*TE + 0.5_EB*TD%A(5,B)*TE**2 + &
-           ONTH*TD%A(6,B)*TE**3 + 0.25_EB*TD%A(7,B)*TE**4 + TD%B(2,B)
+      H =  -A(1,B)/TE + A(2,B)*LOG(TE) + A(3,B)*TE + 0.5_EB*A(4,B)*TE**2 + ONTH*A(5,B)*TE**3 + &
+            0.25_EB*A(6,B)*TE**4 + 0.2_EB*A(7,B)*TE**5 + BC(1,B)
+      S =  -0.5_EB*A(1,B)/TE**2 - A(2,B)/TE + A(3,B)*LOG(TE) + A(4,B)*TE + 0.5_EB*A(5,B)*TE**2 + &
+            ONTH*A(6,B)*TE**3 + 0.25_EB*A(7,B)*TE**4 + BC(2,B)
       G_F = (H - TE * S)*R0*1.E-6_EB !R0 kmol to mol and G_F J to kJ
    CASE ('NASA7')
-      TE = MIN(MAXVAL(TD%T),MAX(TD%T(1),TE))
-      DO B=1,TD%BANDS
-         IF (TE<=TD%T(B+1)) EXIT
+      TE = MIN(MAXVAL(TB),MAX(TB(1),TE))
+      DO B=1,BANDS
+         IF (TE<=TB(B+1)) EXIT
       ENDDO
-      CP = TD%A(1,B) + TD%A(2,B)*TE + TD%A(3,B)*TE**2 + TD%A(4,B)*TE**3 + TD%A(5,B)*TE**4
+      CP = A(1,B) + A(2,B)*TE + A(3,B)*TE**2 + A(4,B)*TE**3 + A(5,B)*TE**4
       CP = CP * RCON
-      H =  TD%A(1,B)*TE + 0.5_EB*TD%A(2,B)*TE**2 + ONTH*TD%A(3,B)*TE**3 + 0.25_EB*TD%A(4,B)*TE**4 + &
-           0.2_EB*TD%A(5,B)*TE**5 + TD%B(1,B)
-      S =  TD%A(1,B)*LOG(TE) + TD%A(2,B)*TE + 0.5_EB*TD%A(3,B)*TE**2 + ONTH*TD%A(4,B)*TE**3 + 0.25_EB*TD%A(5,B)*TE**4 + TD%B(2,B)
+      H =  A(1,B)*TE + 0.5_EB*A(2,B)*TE**2 + ONTH*A(3,B)*TE**3 + 0.25_EB*A(4,B)*TE**4 + &
+            0.2_EB*A(5,B)*TE**5 + BC(1,B)
+      S =  A(1,B)*LOG(TE) + A(2,B)*TE + 0.5_EB*A(3,B)*TE**2 + ONTH*A(4,B)*TE**3 + 0.25_EB*A(5,B)*TE**4 + BC(2,B)
       G_F = (H - TE * S)*R0*1.E-6_EB !R0 kmol to mol and G_F J to kJ
    CASE ('MOSKVA')
-      TE = MIN(TD%T(2),MAX(TD%T(1),TE))
-      CP= (TD%A(1,1) + TD%A(2,1)*TE**0.25_EB + TD%A(3,1)*TE + TD%A(4,1)*LOG(TE))*1000._EB
+      TE = MIN(TB(2),MAX(TB(1),TE))
+      CP= (A(1,1) + A(2,1)*TE**0.25_EB + A(3,1)*TE + A(4,1)*LOG(TE))*1000._EB
    CASE ('WEBBOOK')
-      TE = MIN(TD%T(2),MAX(TD%T(1),TE))
-      CP = TD%A(1,1) + TD%A(2,1)*TE + TD%A(3,1)*TE**2 + TD%A(4,1) * TE**3 + TD%A(5,1)*TE**4
+      TE = MIN(TB(2),MAX(TB(1),TE))
+      CP = A(1,1) + A(2,1)*TE + A(3,1)*TE**2 + A(4,1) * TE**3 + A(5,1)*TE**4
 END SELECT
 
 END SUBROUTINE THERMO_TABLE_GAS
@@ -2456,7 +2493,7 @@ ENDIF
 IF (SS%SPECIFIC_HEAT > 0._EB) THEN
    CP_TMP = SS%SPECIFIC_HEAT
 ELSE
-   CALL THERMO_TABLE_GAS(J,CP_TMP,SS%PROP_INDEX,SS%RCON,G_F_TMP)
+   CALL THERMO_TABLE_GAS(J,CP_TMP,SS%PROP_INDEX,N,SS%RCON,G_F_TMP)
 ENDIF
 
 IF (SS%K_USER>=0._EB) THEN
