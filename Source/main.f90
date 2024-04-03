@@ -2149,10 +2149,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL ADJUST_HT3D_WALL_CELLS(NM)
 ENDDO
 
-! Allocate arrays that are used in the 1-D or 3-D heat conduction routine
-
-CALL ALLOCATE_HT1D_UTILITY_ARRAYS
-
 ! Current mesh sends to neighboring meshes the number of WALL and THIN_WALL cells that it expects to be SENT
 
 CALL POST_RECEIVES(8)
