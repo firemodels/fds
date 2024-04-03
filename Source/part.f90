@@ -519,6 +519,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             LP%V = 0._EB
             BC%Y = DV%Y
          ENDIF
+         BC%IOR = 0
 
          ! If the particle position is outside the current mesh, exit the loop and the particle will be sent to another mesh
          ! or eliminated by the call to REMOVE_PARTICLES at the end of the subroutine.
@@ -765,6 +766,8 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          ! Reassign pointers after calling ALLOCATE
 
          BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+
+         BC%IOR = 0  ! Particle is not stuck to a wall
 
          IF (PRESENT(WALL_INDEX)) THEN
             WC    => MESHES(NM)%WALL(WALL_INDEX)
@@ -1205,6 +1208,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
 
       BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
 
+      BC%IOR = 0
       BC%X = LP_X
       BC%Y = LP_Y
       BC%Z = LP_Z
@@ -1292,6 +1296,8 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                LP%CLASS_INDEX = ILPC
 
                BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+
+               BC%IOR = 0  ! Particle is not stuck to a wall
 
                PARTICLE_TAG = PARTICLE_TAG + NMESHES
                LP%TAG = PARTICLE_TAG
