@@ -3537,7 +3537,7 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             LP => M%LAGRANGIAN_PARTICLE(IP)
             CALL PACK_PARTICLE(NM,OS,LP,IPC,RC,IC,LC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.)
             LP%WALL_INDEX  = 0  ! If the droplet was stuck to a wall, unstick it when it arrives in the new mesh
-            LP%CFACE_INDEX = 0
+            IF(LP%CFACE_INDEX/=EXTERNAL_CFACE) LP%CFACE_INDEX = 0
             BC=>M%BOUNDARY_COORD(LP%BC_INDEX)
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
             BC%II=BC%IIG ; BC%JJ=BC%JJG ; BC%KK=BC%KKG
