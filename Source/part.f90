@@ -1770,7 +1770,7 @@ TYPE(CFACE_TYPE), POINTER :: CFA,CFA2
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC,CFA_BC,CFA2_BC
 REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
-LOGICAL :: TEST_POS, BOUNCE_CF, IN_CFACE, SLIDE_CF
+LOGICAL :: TEST_POS, BOUNCE_CF, IN_CFACE, SLIDE_CF, EXT_CFACE
 INTEGER :: DIND, MADD(3,3)
 INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
@@ -1819,6 +1819,12 @@ PARTICLE_LOOP: DO IP=1,NLP
    ! Save value of IOR to determine if the particle hit any surface during the time step
 
    IOR_ORIGINAL = BC%IOR
+
+   ! Note if Particle was attached to an external CFACE:
+   EXT_CFACE = .FALSE.
+   IF(LP%CFACE_INDEX==EXTERNAL_CFACE) THEN
+      EXT_CFACE = .TRUE.; LP%CFACE_INDEX = 0
+   ENDIF
 
    ! Sub-timesteps
 
@@ -1985,7 +1991,9 @@ PARTICLE_LOOP: DO IP=1,NLP
 
             ! Drop if cell with boundary cut-faces found is outside mesh, no CFACEs defined.
             ICF=CELL_INDEX(CUT_FACE(INDCF)%IJK(1),CUT_FACE(INDCF)%IJK(2),CUT_FACE(INDCF)%IJK(3))
-            IF (CELL(ICF)%EXTERIOR) CYCLE PARTICLE_LOOP
+            IF (CELL(ICF)%EXTERIOR) THEN
+               IF(LP%CFACE_INDEX>0) LP%CFACE_INDEX = EXTERNAL_CFACE; CYCLE PARTICLE_LOOP
+            ENDIF
 
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
@@ -2133,11 +2141,17 @@ PARTICLE_LOOP: DO IP=1,NLP
                DIST2 = TWO_EPSILON_EB; IF(ALLOW_UNDERSIDE_PARTICLES) DIST2 = 1._EB
                CFACE_ATTACH : IF (DOT_PRODUCT(CFA_BC%NVEC,GVEC/(NORM2(GVEC)+TWO_EPSILON_EB))>DIST2 .OR. TEST_POS) THEN
 
-                  ! Normal points down or particle in gas phase. Let particle move freely:
-
+                  ! Normal points down or particle in gas phase.
+                  ! If particle is coming from another mesh, attach to ICF.
+                  IF(EXT_CFACE .AND. BC%IOR>0) THEN
+                     LP%CFACE_INDEX = ICF
+                     HIT_SOLID = .TRUE.
+                  ENDIF
+                  ! If solid particle let particle move freely.
                   IF (LPC%SOLID_PARTICLE) THEN
                      LP%CFACE_INDEX = 0
                      BC%IOR = 0
+                     HIT_SOLID = .FALSE.
                   ENDIF
 
                ELSE  CFACE_ATTACH ! normal points up; determine direction for particle to move
