@@ -53,7 +53,7 @@ jobs:
         ./fds_impi_intel_linux
 
     # Setup python
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         cache: 'pip' # caching pip dependencies
@@ -65,6 +65,7 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/Utilities/Python
         python hello_world.py
+        python FDS_verification_script.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on
