@@ -2197,10 +2197,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL ADJUST_HT3D_WALL_CELLS(NM)
 ENDDO
 
-! Allocate arrays that are used in the 1-D or 3-D heat conduction routine
-
-CALL ALLOCATE_HT1D_UTILITY_ARRAYS
-
 ! Current mesh sends to neighboring meshes the number of WALL and THIN_WALL cells that it expects to be SENT
 
 CALL POST_RECEIVES(8)
@@ -3589,10 +3585,11 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             LP => M%LAGRANGIAN_PARTICLE(IP)
             CALL PACK_PARTICLE(NM,OS,LP,IPC,RC,IC,LC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.)
             LP%WALL_INDEX  = 0  ! If the droplet was stuck to a wall, unstick it when it arrives in the new mesh
-            LP%CFACE_INDEX = 0
+            IF(LP%CFACE_INDEX/=EXTERNAL_CFACE) LP%CFACE_INDEX = 0
             BC=>M%BOUNDARY_COORD(LP%BC_INDEX)
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
             BC%II=BC%IIG ; BC%JJ=BC%JJG ; BC%KK=BC%KKG
+            CALL GET_RVC(NM,BC%IIG,BC%JJG,BC%KKG,LP%RVC)
             IF (LP%INIT_INDEX>0) THEN
                DO NN=1,N_DEVC
                   IF (DEVICE(NN)%INIT_ID==INITIALIZATION(LP%INIT_INDEX)%ID .AND. DEVICE(NN)%INIT_ID/='null') THEN

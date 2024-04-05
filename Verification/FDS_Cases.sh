@@ -170,7 +170,7 @@ $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
 $QFDS -p 4 -d Fires box_burn_away9.fds
 $QFDS -p 4 -d Fires box_burn_away10.fds
-$QFDS -d Fires box_burn_away11.fds
+$QFDS -p 4 -d Fires box_burn_away11.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -p 4 -d Fires couch.fds
@@ -595,6 +595,7 @@ $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
 $QFDS -d Sprinklers_and_Sprays cannon_ball.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
+$QFDS -p 6 -d Sprinklers_and_Sprays cascadempi.fds
 $QFDS -p 2 -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds
