@@ -95,7 +95,7 @@ for i in range(caseCount):
     caseIndx = str(i+1)
     csvdata = csvdata.rename(columns={i*colPerCase: 'Time'+caseIndx, i*colPerCase+1: 'OH'+caseIndx, i*colPerCase+2: 'TMP'+caseIndx})
 #csvdata = csvdata.rename(columns={0: 'Time', 1: 'OH', 2: 'T'})
-csvdata.to_csv('CANTERA.csv',index=False)
+csvdata.to_csv('../../../Verification/Chemistry/cantera_ignition_delay.csv',index=False)
 
 # Show plot legend
 plt.legend() 
