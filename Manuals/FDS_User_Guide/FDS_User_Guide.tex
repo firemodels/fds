@@ -2424,7 +2424,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX(NL)} (default 1000), where {\ct NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
-If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
+If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS(N)}, where {\ct N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is 0.0001~m or 0.1 times the specified {\ct THICKNESS}, whichever is less. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Sec.~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -3108,6 +3108,7 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away8}
 \label{box_burn_away9}
 \label{box_burn_away10}
+\label{box_burn_away11}
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
@@ -3188,6 +3189,18 @@ Note that the 3-D heat conduction equation is solved via 1-D segments in all thr
 \end{tabular*}
 \caption[Results of the {\ct box\_burn\_away9} and {\ct box\_burn\_away10} test cases]{Output of {\ct box\_burn\_away9} and {\ct box\_burn\_away10} test cases.}
 \label{box_burn_away_2}
+\end{figure}
+
+\FloatBarrier
+
+\paragraph{Case 11} ({\ct box\_burn\_away11}) The ``box'' in this case consists of 0.4~m by 0.4~m by 1~cm plates forming a collection of 10~cm cubical compartments. There are 15 plates in all, each with a density of 20~kg/m$^3$. The total mass is 0.48~kg.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away11} &
+\end{tabular*}
+\caption[Results of the {\ct box\_burn\_away11} test case]{Output of {\ct box\_burn\_away11} test case.}
+\label{box_burn_away_11}
 \end{figure}
 
 \FloatBarrier
@@ -4416,6 +4429,7 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
 \subsubsection{Diffusivity}
+\label{info:diffusivity}
 
 Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivity can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
@@ -9206,6 +9220,28 @@ The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressur
 
 
 
+\section{Pressure Considerations in Stairwells}
+\label{stairwell}
+
+Another common fire protection application is smoke movement and pressurization within stairwells. A stairwell can be thought of as a vertical tunnel, with similar issues related to the pressure solver. Unlike tunnels, there is no special algorithm to increase the accuracy and stability of simulations within a stairwell, but there are some steps you can take to improve the simulation:
+\begin{enumerate}
+\item As with any tall building, the pressure stratification of the atmosphere can have an impact on the flow field and ventilation. A useful output quantity to include in any building simulation is {\ct 'ABSOLUTE PRESSURE'}. This displays the background pressure field along with the relatively small perturbation induced by changes in ventilation or a fire. You typically do not see this background pressure field when you invoke the output quantity {\ct PRESSURE}, which displays only the perturbation to the background. 
+\item It may be necessary to tighten the tolerance of the pressure solver when simulating a stairwell scenario. If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. Increase the {\ct MAX\_PRESSURE\_ITERATIONS} beyond the default value of 10.  Experiment with the optional {\ct SOLVER='GLMAT'} on the {\ct PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or {\ct 'UGLMAT'} to do what {\ct 'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above, but keep in mind that these solvers can be expensive. Try a simple case first to determine how much CPU time the pressure solver consumes.
+\end{enumerate}
+A sample input file called {\ct Pressure\_Solver/stairwell.fds} demonstrates some of the important issues discussed in this chapter. The case consists of an eighteen story stairwell that opens to a lobby area. Doors are situated at various locations and are programmed to open when the pressure differential exceeds 20~Pa. A 1~m by 1~m hatch at the top of the stairwell draws air out at a rate of 0.5~m$^3$/s, triggering doors to open one after the other until a path is opened up between an open door in the lobby and the extract vent. The plot in Fig.~\ref{stairwell_plot} demonstrates that once the path is opened, the flow equilibritaes to 0.5~m$^3$/s.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/stairwell}
+\caption[Results of the {\ct stairwell} test case]{Results of the {\ct stairwell} test case showing the volume flow of air through a tall stairwell.}
+\label{stairwell_plot}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=8in]{FIGURES/stairwell_0001}
+\caption[Smokeview rendering of a stairwell]{Smokeview rendering of a stairwell. The contour plot indicates the {\ct ABSOLUTE PRESSURE}, which in this case ranges from approximately $101\,600$~Pa at the bottom to $101\,000$~Pa at the top. Ground level is approximately halfway up.}
+\label{fig:stairwell}
+\end{figure}
 
 
 
@@ -11004,7 +11040,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
-{\ct DIFFUSIVITY}$^1$                           & Species diffusivity, $D_\alpha$                   & m$^2$/s           & D,I,P,S      \\ \hline
+{\ct DIFFUSIVITY}$^1$                           & Section~\ref{info:diffusivity}                    & m$^2$/s           & D,I,P,S      \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
 {\ct EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
@@ -12890,7 +12926,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct COPY\_LUMPED}                  & Logical           & Section~\ref{info:lumped}               &                   & {\ct F} \\ \hline
 {\ct DENSITY\_LIQUID}               & Real              & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
 {\ct DENSITY\_SOLID}                & Real              & Section~\ref{info:deposition}           & kg/m$^3$          &  1800.        \\ \hline
-{\ct DIFFUSIVITY}                   & Real              & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
+{\ct DIFFUSIVITY}                   & Real              & Section~\ref{info:diffusivity}          & m$^2$/s           &               \\ \hline
 {\ct ENTHALPY\_OF\_FORMATION}       & Real              & Section~\ref{thermal_part_props}        & kJ/mol            &               \\ \hline
 {\ct EPSILONKLJ}                    & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct FIC\_CONCENTRATION}            & Real              & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
@@ -13011,7 +13047,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct MATL\_MASS\_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MAXIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
 {\ct MINIMUM\_BURNOUT\_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
-{\ct MINIMUM\_LAYER\_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
+{\ct MINIMUM\_LAYER\_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
 {\ct MINIMUM\_SCALING\_HEAT\_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
 {\ct MLRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
@@ -13339,7 +13375,7 @@ Keyword             & Type     & Description                      & Units       
 
 
 \begin{tabbing}
-\hspace{0.3in}  \= \hspace{5.2in} \= \hspace{1in}  \\
+\hspace{0.4in}  \= \hspace{5.2in} \= \hspace{1in}  \\
 101  \> {\ct Problem with \ldots\ line.                                             } \> Chapter~\ref{info:namelists}  \\
 102  \> {\ct Input file \ldots\ not found in the current directory.                 } \> Section~\ref{info:launching}  \\
 103  \> {\ct CATF file \ldots\ not found.                                           } \> Section~\ref{info:CATF}  \\
@@ -13492,6 +13528,7 @@ Keyword             & Type     & Description                      & Units       
 263  \> {\ct MATL \ldots\ can only specify one SPEC\_ID for a liquid.               } \> Section~\ref{info:liquid_fuels}  \\
 264  \> {\ct MATL \ldots\ SPEC\_ID \ldots\ not a tracked.                           } \> Section~\ref{info:solid_pyrolysis}  \\
 265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
+266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
      \>                                                                               \>                                     \\
 301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
 302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\
@@ -13558,6 +13595,7 @@ Keyword             & Type     & Description                      & Units       
 365  \> {\ct SURF \ldots\ cannot specify mass fraction and outflow velocity.        } \> Section~\ref{info:MASS_FLUX}  \\
 366  \> {\ct SURF \ldots\ cannot leak and specify flow or pyrolysis \ldots\         } \> Section~\ref{info:Leaks}  \\
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
+368  \> {\ct SURF \ldots\ has a problem with VARIABLE\_THICKNESS or HT3D.           } \> Section~\ref{info:HT3D_Limitations}  \\
      \>                                                                               \>                                     \\
 371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
@@ -13830,6 +13868,50 @@ Keyword             & Type     & Description                      & Units       
     \>                                                                                \>                          \\
 961 \> {\ct CELL\_CENTERED not allowed with AGL\_SLICE.                             } \> Section~\ref{info:complex_terrain} \\
 962 \> {\ct BNDF \ldots\ CPUA\_Z, MPUA\_Z, and AMPUA\_Z require liquid droplets.    } \> Section~\ref{bucket_test_1} \\
+    \>                                                                                \>                          \\
+1001 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. must be a tracked species.       } \> Section~\ref{info:soot} \\
+1002 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. cannot be a lumped species.      } \> Section~\ref{info:soot} \\
+1003 \> {\ct SPEC\_ID \ldots\ for AERO. VOL. FRAC. is not an AEROSOL.               } \> Section~\ref{info:soot} \\
+1004 \> {\ct SPEC\_ID \ldots\ is not explicitly specified for QUANTITY \ldots\      } \> Section~\ref{info:gasoutputquantities} \\
+1005 \> {\ct Output QUANTITY \ldots\ requires a DUCT\_ID.                           } \> Section~\ref{info:hvacoutputquantities} \\
+1006 \> {\ct CELL\_L used for output QUANTITY \ldots\ is outside of DUCT\_ID \ldots } \> Section~\ref{info:hvacoutputquantities} \\
+1007 \> {\ct SPEC\_ID \ldots\ for FILTER LOADING is not a tracked species.          } \> Section~\ref{info:hvacoutputquantities} \\
+1008 \> {\ct SPEC\_ID \ldots\ for EQUIL. VAP. FRAC. is not a tracked species.       } \> Section~\ref{info:hvacoutputquantities} \\
+1009 \> {\ct SPEC\_ID \ldots\ for EQUIL. VAP. FRAC. is not an evap. species.        } \> Section~\ref{info:hvacoutputquantities} \\
+1010 \> {\ct REAC \ldots\ MIXTURE FRACTION requires reaction A + B -> C.            } \> Section~\ref{info:gasoutputquantities} \\
+1011 \> {\ct HRRPUV REAC requires a REAC\_ID.                                       } \> Section~\ref{info:gasoutputquantities} \\
+1012 \> {\ct REAC\_ID \ldots\ not found for HRRPUV REAC.                            } \> Section~\ref{info:gasoutputquantities} \\
+1013 \> {\ct Output QUANTITY2 \ldots\ requires a SPEC\_ID.                          } \> Section~\ref{info:gasoutputquantities} \\
+1014 \> {\ct Output QUANTITY2 \ldots\ is not appropriate for SLCF.                  } \> Section~\ref{info:gasoutputquantities} \\
+1015 \> {\ct Output QUANTITY \ldots\ requires a QUANTITY2.                          } \> Section~\ref{info:gasoutputquantities} \\
+1016 \> {\ct Output QUANTITY \ldots\ requires a SPEC\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1017 \> {\ct Output QUANTITY \ldots\ SPEC\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1018 \> {\ct Output QUANTITY \ldots\ requires a MATL\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1019 \> {\ct Output QUANTITY \ldots\ MATL\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1020 \> {\ct Output QUANTITY \ldots\ requires a PART\_ID.                           } \> Section~\ref{info:gasoutputquantities} \\
+1021 \> {\ct Output QUANTITY \ldots\ PART\_ID \ldots\ not found.                    } \> Section~\ref{info:gasoutputquantities} \\
+1022 \> {\ct Output QUANTITY \ldots\ requires a DUCT\_ID.                           } \> Section~\ref{info:hvacoutputquantities} \\
+1023 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ not found.                    } \> Section~\ref{info:hvacoutputquantities} \\
+1024 \> {\ct Output QUANTITY \ldots\ requires a positive CELL\_L.                   } \> Section~\ref{info:hvacoutputquantities} \\
+1025 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ requires pos. CELL\_L.        } \> Section~\ref{info:hvacoutputquantities} \\
+1026 \> {\ct Output QUANTITY \ldots\ DUCT\_ID \ldots\ requires HVAC\_MASS\_TRAN.    } \> Section~\ref{info:hvacoutputquantities} \\
+1027 \> {\ct Output QUANTITY \ldots\ requires a NODE\_ID'                           } \> Section~\ref{info:hvacoutputquantities} \\
+1028 \> {\ct Output QUANTITY \ldots\ NODE\_ID \ldots\ not found.                    } \> Section~\ref{info:hvacoutputquantities} \\
+1029 \> {\ct HUMIDITY requires SPEC\_ID WATER VAPOR.                                } \> Section~\ref{info:humidity} \\
+1030 \> {\ct DIFFUSIVITY requires a tracked SPEC\_ID when using DNS.                } \> Section~\ref{info:diffusivity} \\
+1031 \> {\ct BACKGROUND species inappropriate for deposition.                       } \> Section~\ref{info:deposition} \\
+1032 \> {\ct SPEC\_ID \ldots\ for SURF. DEP. is not an aerosol species.             } \> Section~\ref{info:deposition} \\
+1033 \> {\ct SPEC\_ID \ldots\ for SURF. DEP. is not an aerosol tracked species.     } \> Section~\ref{info:deposition} \\
+1034 \> {\ct QUANTITY \ldots\ requires liquid droplets.                             } \> Section~\ref{info:solidoutputquantities} \\
+1035 \> {\ct QUANTITY \ldots\ is not appropriate for SLCF.                          } \> Section~\ref{info:gasoutputquantities} \\
+1036 \> {\ct QUANTITY \ldots\ is not appropriate for DEVC.                          } \> Section~\ref{info:gasoutputquantities} \\
+1037 \> {\ct QUANTITY \ldots\ is not a particle output QUANTITY.                    } \> Section~\ref{info:particleoutputquantities} \\
+1038 \> {\ct QUANTITY \ldots\ is not appropriate for BNDF.                          } \> Section~\ref{info:solidoutputquantities} \\
+1039 \> {\ct QUANTITY \ldots\ is not appropriate for isosurface.                    } \> Section~\ref{info:gasoutputquantities} \\
+1040 \> {\ct QUANTITY \ldots\ is not appropriate for gas phase.                     } \> Section~\ref{info:gasoutputquantities} \\
+1041 \> {\ct QUANTITY \ldots\ is not appropriate for Plot3D.                        } \> Section~\ref{info:gasoutputquantities} \\
+1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
+1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 
 \end{tabbing}
 
