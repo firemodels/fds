@@ -5063,6 +5063,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Normalize the stoichiometric coefficients by that of the fuel.
    RN%NU_FUEL_0 = -RN%NU(RN%FUEL_SMIX_INDEX)
+   RN%NU_NN = RN%NU
    RN%NU = -RN%NU/RN%NU(RN%FUEL_SMIX_INDEX)
 
    ! Find AIR index
