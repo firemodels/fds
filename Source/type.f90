@@ -691,7 +691,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: C0_EXP=0._EB                 !< Exponent for C0 factor in reverse equilibirium constant
    REAL(EB) :: NU_FUEL_0                    !< Original fuel NU needed for G_F calculations
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU              !< Array of stoichiometric coefficients for lumped species equation
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_NN           !< Array of non-normalized stoichiometric coefficients for lumped species equation
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_NN           !< Array of non-normalized stoich. coeff. for lumped species equation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_READ         !< Holding array of stoichiometric coefficients
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SPECIES      !< Array of stoichiometric coefficients for primitive species equation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
