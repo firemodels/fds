@@ -214,11 +214,12 @@ CC_IBM_IF: IF (CC_IBM) THEN
          !***************************************************************************************
          ! Call combustion integration routine for CUT_CELL(ICC)%XX(JCC)
          PRES = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ! Note AUTO_IGNITION_TEMPERATURE here will apply to all cut-cells in Cartesian cell, currently 1.
          CALL COMBUSTION_MODEL( T,DT,ZZ_GET,CUT_CELL(ICC)%Q(JCC),CUT_CELL(ICC)%MIX_TIME(JCC),&
                                 CUT_CELL(ICC)%CHI_R(JCC),&
                                 CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
                                 CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),PRES,MU(I,J,K),&
-                                LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC))
+                                LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC),IIC=I,JJC=J,KKC=K)
          !***************************************************************************************
          IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
              CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)
@@ -554,7 +555,7 @@ IF (ANY(Q_REAC_SUM>TWO_EPSILON_EB)) THEN
    DO NR=1,N_REACTIONS
       RN=>REACTION(NR)
       IF (Q_REAC_SUM(NR) > TWO_EPSILON_EB) THEN
-         TIME_RAMP_FACTOR = EVALUATE_RAMP(T,RN%RAMP_CHI_R_INDEX)      
+         TIME_RAMP_FACTOR = EVALUATE_RAMP(T,RN%RAMP_CHI_R_INDEX)
          CHI_R_SUM = CHI_R_SUM + Q_REAC_SUM(NR)*RN%CHI_R*TIME_RAMP_FACTOR
          Q_SUM_CHI_R = Q_SUM_CHI_R + Q_REAC_SUM(NR)
       ENDIF
