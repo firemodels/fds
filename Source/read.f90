@@ -5021,11 +5021,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE
          DO NS2=1,N_TRACKED_SPECIES
             IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
-               IF (SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX < 0) THEN
-                  WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(XXX): REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
-                     ' used in a finite rate reaction without N_S defined is not a primitive species.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+               !IF (SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX < 0) THEN
+               !   WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(XXX): REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
+               !      ' used in a finite rate reaction without N_S defined is not a primitive species.'
+               !   CALL SHUTDOWN(MESSAGE) ; RETURN
+               !ENDIF
                IF (RN%NU_READ(NS)<0._EB) NU_Y(SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX) = -RN%NU_READ(NS)
                EXIT
             ENDIF
