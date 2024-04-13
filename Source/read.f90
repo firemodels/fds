@@ -5026,7 +5026,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                !      ' used in a finite rate reaction without N_S defined is not a primitive species.'
                !   CALL SHUTDOWN(MESSAGE) ; RETURN
                !ENDIF
-               IF (RN%NU_READ(NS)<0._EB) NU_Y(SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX) = -RN%NU_READ(NS)
+               IF (RN%NU_READ(NS)<0._EB .AND. SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX > 0) &
+                  NU_Y(SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX) = -RN%NU_READ(NS)
                EXIT
             ENDIF
          ENDDO
