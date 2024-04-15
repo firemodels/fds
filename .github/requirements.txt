@@ -8,3 +8,6 @@ pandas
 scipy
 seaborn
 pygments
+ipython
+cantera
+
