@@ -729,15 +729,15 @@ TYPE REACTION_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: N_S_FLAG !< N_S exponent is an integer
    TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
    INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
-   INTEGER :: REACTYPE                      !< Type of reaction in a chemical mechanism. 
-   REAL(EB) :: A_LOW_PR                     !< Unajusted falloff reaction high pressure pre-exponent parameter. 
-   REAL(EB) :: E_LOW_PR                     !< Unajusted falloff reaction high pressure activation energy (J/mol). 
-   REAL(EB) :: N_T_LOW_PR=0._EB             !< Falloff reaction high pressure temperature exponent. 
+   INTEGER :: REACTYPE                      !< Type of reaction in a chemical mechanism.
+   REAL(EB) :: A_LOW_PR                     !< Unajusted falloff reaction high pressure pre-exponent parameter.
+   REAL(EB) :: E_LOW_PR                     !< Unajusted falloff reaction high pressure activation energy (J/mol).
+   REAL(EB) :: N_T_LOW_PR=0._EB             !< Falloff reaction high pressure temperature exponent.
    REAL(EB) :: A_TROE                       !< TROE reaction A
    REAL(EB) :: RT1_TROE                     !< TROE reaction 1/T1
    REAL(EB) :: T2_TROE                      !< TROE reaction T2
    REAL(EB) :: RT3_TROE                     !< TROE reaction 1/T3
-   
+
 END TYPE REACTION_TYPE
 
 TYPE (REACTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: REACTION
@@ -1394,10 +1394,10 @@ TYPE CC_REGFACEZ_TYPE
    INTEGER                               ::                IWC=0 !< WALL CELL index (if present) in location of REG Face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::               NOMICF !< OMESH face info for mesh boundary REG face.
    REAL(EB)                              ::         FN_H_S=0._EB !< Stores components FX_H_S, FY_H_S, FZ_H_S as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::        RHOZZ_U=0._EB !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::          FN_ZZ=0._EB !< Stores computed FX_ZZ(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::     RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in REG face.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::   H_RHO_D_DZDN=0._EB !< OMESH face info for mesh boundary REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::              RHOZZ_U !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::                FN_ZZ !< Stores computed FX_ZZ(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           RHO_D_DZDN !< Species diffusive mass fluxes in REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         H_RHO_D_DZDN !< OMESH face info for mesh boundary REG face.
 END TYPE CC_REGFACEZ_TYPE
 
 !> \brief Regular faces type, contains information for reg faces connecting regular and cut-cells.
@@ -1414,9 +1414,9 @@ TYPE CC_RCFACE_TYPE
    INTEGER,  DIMENSION(1:2,1:2)                    ::                JDH !< Index matrix for H Poisson matrix coefficients.
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND) ::          CELL_LIST !< Cell type/location of connected cells. [RC_TYPE I J K ]
    REAL(EB)                                        ::     TMP_FACE=0._EB !< Temperature in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::      ZZ_FACE=0._EB !< Species mass fractions in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::   RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                :: H_RHO_D_DZDN=0._EB !< Species heat fluxes due to RHO_D_DZDN in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::            ZZ_FACE !< Species mass fractions in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::         RHO_D_DZDN !< Species diffusive mass fluxes in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::       H_RHO_D_DZDN !< Species heat fluxes due to RHO_D_DZDN in RC face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::             NOMICF !< OMESH face info for mesh boundary RC face.
 END TYPE CC_RCFACE_TYPE
 
