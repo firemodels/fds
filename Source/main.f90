@@ -416,6 +416,7 @@ ENDIF
 ! Initialize output clocks
 
 CALL INITIALIZE_OUTPUT_CLOCKS(T)
+CALL STOP_CHECK(SETUP_STOP)
 
 ! Initialize output files that are mesh-specific
 
