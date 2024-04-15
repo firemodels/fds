@@ -10415,17 +10415,23 @@ MESH_LOOP: DO NM=1,NMESHES
                ! If desired, thicken small obstructions
 
                IF (THICKEN_LOC) THEN
-                  IF(OB%I1==OB%I2) THEN
+                  IF (OB%I1==OB%I2) THEN
                      OB%I1 = INT(GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI)
                      OB%I2 = MIN(OB%I1+1,IBAR)
+                     OB%X1 = X(OB%I1)
+                     OB%X2 = X(OB%I2)
                   ENDIF
                   IF (OB%J1==OB%J2) THEN
                      OB%J1 = INT(GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA)
                      OB%J2 = MIN(OB%J1+1,JBAR)
+                     OB%Y1 = Y(OB%J1)
+                     OB%Y2 = Y(OB%J2)
                   ENDIF
                   IF (OB%K1==OB%K2) THEN
                      OB%K1 = INT(GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA)
                      OB%K2 = MIN(OB%K1+1,KBAR)
+                     OB%Z1 = Z(OB%K1)
+                     OB%Z2 = Z(OB%K2)
                   ENDIF
                ELSE
                   !Don't allow thickening if an OBST straddles the midpoint and is small compared to grid cell
@@ -10660,7 +10666,9 @@ MESH_LOOP: DO NM=1,NMESHES
                      OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*OB%UNDIVIDED_INPUT_LENGTH(2)*(OB%Z2-OB%Z1)
                   IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) &
                      OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*OB%UNDIVIDED_INPUT_LENGTH(3)
-                  IF (OB%MASS<TWO_EPSILON_EB) THEN
+                  IF ((OB%UNDIVIDED_INPUT_LENGTH(1)<TWO_EPSILON_EB .OR. &
+                       OB%UNDIVIDED_INPUT_LENGTH(2)<TWO_EPSILON_EB .OR. &
+                       OB%UNDIVIDED_INPUT_LENGTH(3)<TWO_EPSILON_EB) .AND. .NOT.THICKEN) THEN
                      WRITE(MESSAGE,'(A,A,A)')  'ERROR(611): OBST ',TRIM(OB%ID),' has a BULK_DENSITY but zero volume.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
