@@ -10660,6 +10660,10 @@ MESH_LOOP: DO NM=1,NMESHES
                      OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*OB%UNDIVIDED_INPUT_LENGTH(2)*(OB%Z2-OB%Z1)
                   IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) &
                      OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*OB%UNDIVIDED_INPUT_LENGTH(3)
+                  IF (OB%MASS<TWO_EPSILON_EB) THEN
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(611): OBST ',TRIM(OB%ID),' has a BULK_DENSITY but zero volume.'
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  ENDIF
                ENDIF
 
                ! Check for inconsistencies in specification of BULK_DENSITY
