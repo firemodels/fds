@@ -1,4 +1,4 @@
-&HEAD CHID='ignition_delay_T1000K_Phi0.6', TITLE='ignition_delay_T1000K_Phi0.6' /
+&HEAD CHID='ignition_delay_T1000K_PhiLean', TITLE='ignition_delay_T1000K_Phi0.6' /
 
 &MISC GVEC(3)=0.0, NOISE=F, STRATIFICATION=F, SIMULATION_MODE='DNS' /
 
