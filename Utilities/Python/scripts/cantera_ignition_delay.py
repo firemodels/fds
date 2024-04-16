@@ -57,7 +57,7 @@ for phi in equivRatios:
             t = reactor_network.step()
             time_history.append(t)
             reference_species_history.append(gas[reference_species].X[0])
-            stateArr.append([t*1000, gas[reference_species].X[0],gas.T-273.15 ]) # Time in ms and TMP in Centigrade
+            stateArr.append([t, gas[reference_species].X[0],gas.T ]) 
     
         i_ign = np.array(reference_species_history).argmax()
         tau = time_history[i_ign]
@@ -94,7 +94,7 @@ colPerCase = 3 # Time, OH, TMP
 for i in range(caseCount):
     caseIndx = str(i+1)
     csvdata = csvdata.rename(columns={i*colPerCase: 'Time'+caseIndx, i*colPerCase+1: 'OH'+caseIndx, i*colPerCase+2: 'TMP'+caseIndx})
-#csvdata = csvdata.rename(columns={0: 'Time', 1: 'OH', 2: 'T'})
+
 csvdata.to_csv('../../../Verification/Chemistry/cantera_ignition_delay.csv',index=False)
 
 # Show plot legend
