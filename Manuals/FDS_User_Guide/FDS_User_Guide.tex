@@ -8472,7 +8472,7 @@ It should be noted that devices are updated sequentially in the order that they 
 \label{info:external_control}
 \label{external_control}
 
-It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
+It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} (except for the output time ramps on {\ct DUMP} such as {\ct RAMP\_BNDF}) or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
 
 When external control is selected, FDS will set the value of the {\ct RAMP} or the logical state of the {\ct CTRL} based on values contained in a csv file whose name is given by {\ct EXTERNAL\_FILENAME} on {\ct MISC}. This file will be checked for new values every {\ct DT\_EXTERNAL} on {\ct TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either {\ct INITIAL\_VALUE} on {\ct RAMP} or {\ct INITIAL\_STATE} on {\ct CTRL}.
 
@@ -13729,6 +13729,7 @@ Keyword             & Type     & Description                      & Units       
 608 \> {\ct MATL\_ID \ldots\ not found.                                             } \> Section~\ref{info:ht1d}  \\
 609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
+611 \> {\ct OBST \ldots\ has a BULK\_DENSITY but zero volume.                       } \> Section~\ref{info:BURN_AWAY}  \\
     \>                                                                                \>                          \\
 701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
 702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\
@@ -13907,6 +13908,7 @@ Keyword             & Type     & Description                      & Units       
 1041 \> {\ct QUANTITY \ldots\ is not appropriate for Plot3D.                        } \> Section~\ref{info:gasoutputquantities} \\
 1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
+1044 \> {\ct Cannot set EXTERNAL\_FILE=T for a RAMP used for an output clock \ldots } \> Section~\ref{info:external_control} \\
 
 \end{tabbing}
 
