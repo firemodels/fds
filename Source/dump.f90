@@ -59,7 +59,7 @@ PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STA
        TIMINGS,FLUSH_GLOBAL_BUFFERS,FLUSH_LOCAL_BUFFERS,READ_RESTART,WRITE_DIAGNOSTICS, &
        WRITE_SMOKEVIEW_FILE,DUMP_MESH_OUTPUTS,UPDATE_GLOBAL_OUTPUTS,DUMP_DEVICES,DUMP_HRR,DUMP_MASS,DUMP_CONTROLS,&
        INITIALIZE_DIAGNOSTIC_FILE,DUMP_RESTART,DUMP_HVAC,&
-       DUMP_UVW,DUMP_GEOM,UPDATE_DEVICES_2,WRITE_DEVC_CTRL_LOG,WRITE_STL_FILE
+       DUMP_GEOM,UPDATE_DEVICES_2,WRITE_DEVC_CTRL_LOG,WRITE_STL_FILE
 
 CONTAINS
 
@@ -74,6 +74,8 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB),INTENT(IN) :: T,DT
 
 TNOW = CURRENT_TIME()
+
+CALL POINT_TO_MESH(NM)
 
 CALL UPDATE_HRR(DT,NM)
 CALL UPDATE_MASS(DT,NM)
@@ -95,6 +97,8 @@ INTEGER, INTENT(IN) :: NM
 CHARACTER(80) :: FN_UVW,FN_MMS,FN_SPECTRUM,FN_TMP,FN_SPEC
 
 TNOW = CURRENT_TIME()
+
+CALL POINT_TO_MESH(NM)
 
 IF (T>=PART_CLOCK(PART_COUNTER(NM)) .AND. PARTICLE_FILE) THEN
    CALL DUMP_PART(T,NM,0)
@@ -225,10 +229,10 @@ ENDIF
 IF (T>=UVW_CLOCK(UVW_COUNTER(NM))) THEN
    IF (PERIODIC_TEST==9) THEN
       WRITE(FN_SPECTRUM,'(A,A,I0,A)') TRIM(CHID),'_spec_',UVW_COUNTER(NM),'.csv'
-      CALL DUMP_UVW(NM,FN_SPECTRUM)
+      CALL DUMP_UVW(FN_SPECTRUM)
    ELSE
       WRITE(FN_UVW,'(A,A,I0,A,I0,A)') TRIM(CHID),'_uvw_t',UVW_COUNTER(NM),'_m',NM,'.csv'
-      CALL DUMP_UVW(NM,FN_UVW)
+      CALL DUMP_UVW(FN_UVW)
    ENDIF
    DO WHILE(UVW_COUNTER(NM)<SIZE(UVW_CLOCK)-1)
       UVW_COUNTER(NM) = UVW_COUNTER(NM) + 1
@@ -238,7 +242,7 @@ ENDIF
 
 IF (T>=TMP_CLOCK(TMP_COUNTER(NM))) THEN
    WRITE(FN_TMP,'(A,A,I0,A,I0,A)') TRIM(CHID),'_tmp_t',TMP_COUNTER(NM),'_m',NM,'.csv'
-   CALL DUMP_TMP(NM,FN_TMP)
+   CALL DUMP_TMP(FN_TMP)
    DO WHILE(TMP_COUNTER(NM)<SIZE(TMP_CLOCK)-1)
       TMP_COUNTER(NM) = TMP_COUNTER(NM) + 1
       IF (TMP_CLOCK(TMP_COUNTER(NM))>=T) EXIT
@@ -247,7 +251,7 @@ ENDIF
 
 IF (T>=SPEC_CLOCK(SPEC_COUNTER(NM))) THEN
    WRITE(FN_SPEC,'(A,A,I0,A,I0,A)') TRIM(CHID),'_spec_t',SPEC_COUNTER(NM),'_m',NM,'.csv'
-   CALL DUMP_SPEC(NM,FN_SPEC)
+   CALL DUMP_SPEC(FN_SPEC)
    DO WHILE(SPEC_COUNTER(NM)<SIZE(SPEC_CLOCK)-1)
       SPEC_COUNTER(NM) = SPEC_COUNTER(NM) + 1
       IF (SPEC_CLOCK(SPEC_COUNTER(NM))>=T) EXIT
@@ -258,7 +262,7 @@ PERIODIC_TEST_SELECT: SELECT CASE(PERIODIC_TEST)
    CASE(7,11)
       IF (T>=MMS_TIMER .AND. NM==1) THEN
          WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
-         CALL DUMP_MMS(NM,FN_MMS,T)
+         CALL DUMP_MMS(FN_MMS,T)
          MMS_TIMER=HUGE_EB
       ENDIF
    CASE(21,22,23)
@@ -1880,11 +1884,11 @@ IF (N_GEOMETRY>0) THEN
       IS_TERRAIN_INT = 0
       IF (G%IS_TERRAIN) IS_TERRAIN_INT = 1
       IF (TRIM(G%SURF_ID(1))=='null') THEN
-         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),I2,1X,A,1X,3(I3,1X),1X,E13.6)') TRIM(G%TEXTURE_MAPPING), G%TEXTURE_ORIGIN, &
-                                                    IS_TERRAIN_INT, '!', G%RGB, G%TRANSPARENCY
+         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),I2,1X,A,1X,3(I3,1X),1X,E13.6,1x,I7)') TRIM(G%TEXTURE_MAPPING), &
+                                  G%TEXTURE_ORIGIN, IS_TERRAIN_INT, '!', G%RGB, G%TRANSPARENCY, G%N_FACES
       ELSE
-         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),I2,1X,A,1X,A,1X,A,1X,3(I3,1X),1X,E13.6)') TRIM(G%TEXTURE_MAPPING), G%TEXTURE_ORIGIN, &
-                                                    IS_TERRAIN_INT, '%',TRIM(G%SURF_ID(1)), '!', G%RGB, G%TRANSPARENCY
+         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),I2,1X,A,1X,A,1X,A,1X,3(I3,1X),1X,E13.6,1x,I7)') TRIM(G%TEXTURE_MAPPING), &
+                                  G%TEXTURE_ORIGIN, IS_TERRAIN_INT, '%',TRIM(G%SURF_ID(1)), '!', G%RGB, G%TRANSPARENCY, G%N_FACES
       ENDIF
    ENDDO
    WRITE(LU_SMV,'(/A,1X,I6)') 'BOXGEOM',N_GEOMETRY
@@ -2718,6 +2722,7 @@ USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,PATH_LENGTH
 USE MISC_FUNCTIONS, ONLY : WRITE_SUMMARY_INFO
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY, GET_CONDUCTIVITY, GET_SPECIFIC_HEAT, GET_ENTHALPY
 USE SOOT_ROUTINES, ONLY: PARTICLE_RADIUS
+USE DVODECONS, ONLY: ODE_MIN_ATOL
 USE FIRE, ONLY: GET_FLAME_TEMPERATURE
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT,KK
@@ -2906,7 +2911,11 @@ DO N=1,N_TRACKED_SPECIES
    IF (SM%SC_T_USER>0._EB) &
       WRITE(LU_OUTPUT,'(A,F8.3)') '   User Turbulent Schmidt Number    ',SM%SC_T_USER
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES10.3)')  '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
+   IF (N_REACTIONS > 0) THEN
+      IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) &
+         WRITE(LU_OUTPUT,'(A,ES10.3)')   '   Finite Rate Relative Error       ',SM%ODE_REL_ERROR
+   ENDIF
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -2998,16 +3007,10 @@ ENDDO
 
 ! Print out Stoichiometric parameters for reactions
 
-IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
+IF (N_REACTIONS>0) THEN
+   
+   WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   SELECT CASE (COMBUSTION_ODE_SOLVER)
-      CASE (EXPLICIT_EULER)
-         ODE_SOLVER = 'EXPLICIT EULER'
-      CASE (RK2_RICHARDSON)
-         ODE_SOLVER = 'RK2 RICHARDSON'
-   END SELECT
    SELECT CASE (EXTINCT_MOD)
       CASE (EXTINCTION_1)
          EXTINCTION_MODEL = 'EXTINCTION 1'
@@ -3015,108 +3018,142 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 2'
    END SELECT
 
-   IF (N_REACTIONS>1) THEN
-      IF (RN%ID/='null')  THEN
-         WRITE(LU_OUTPUT,'(/3X,A,A)')    'Reaction ID:  ', TRIM(RN%ID)
-      ELSE
-         WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',NR
-      ENDIF
-                      WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
-      IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(REACTION(RN%REVERSE_INDEX)%ID)
-   ENDIF
+! Set ODE solver
+   SELECT CASE (COMBUSTION_ODE_SOLVER)
+      CASE (EXPLICIT_EULER)
+         ODE_SOLVER = 'EXPLICIT EULER'
+      CASE (RK2_RICHARDSON)
+         ODE_SOLVER = 'RK2 RICHARDSON'
+      CASE (CVODE_SOLVER)
+         ODE_SOLVER = 'CVODE'
+   END SELECT
 
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
-   WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
-   IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
-                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
-
-   IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
-      WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
-         RN%HOC_COMPLETE/1000._EB
-   ENDIF
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                                          Molar'
-   DO NN=1,N_SPECIES
-      IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
-      WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-   ENDDO
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                             Molar         Mass'
-   DO NN=1,N_TRACKED_SPECIES
-      IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
-         MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW))+1)),')'
-      WRITE(LU_OUTPUT,OUTFORM) SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
-         RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-   ENDDO
-
-   WRITE(LU_OUTPUT,'(/6X,A)')     'Reaction Kinetics'
-
-   IF (RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(/6X,A)')           'Fast chemistry'
-   ELSE
-      WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
-      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
-      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
-      WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
-      DO NN=1,RN%N_SPEC
-         WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(RN%N_S_INDEX(NN))%ID,RN%N_S(NN)
-      ENDDO
-      IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
-      IF (RN%THIRD_BODY) THEN
-         WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
-         IF (RN%N_THIRD > 0) THEN
-            WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
-            WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
-            DO NN=1,N_SPECIES
-               IF (ABS(RN%THIRD_EFF(NN)-1._EB)>TWO_EPSILON_EB) &
-                  WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%THIRD_EFF(NN)
-            ENDDO
-         ENDIF
-      ENDIF
-   ENDIF
-
+   WRITE(LU_OUTPUT,'(/3X,A)')    'Solver Details:  '
    WRITE(LU_OUTPUT,'(/6X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
-   IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
+   IF (N_FIXED_CHEMISTRY_SUBSTEPS>0 .AND. &
+       (COMBUSTION_ODE_SOLVER==EXPLICIT_EULER .OR. COMBUSTION_ODE_SOLVER==RK2_RICHARDSON)) THEN
       WRITE(LU_OUTPUT,'(/6X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
    ENDIF
-   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
-      WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
+   IF (COMBUSTION_ODE_SOLVER/=EXPLICIT_EULER) THEN
+      WRITE(LU_OUTPUT,'(/6X,A,ES13.6)')  'Global aboslute error tolerance:  ', ODE_MIN_ATOL
+      WRITE(LU_OUTPUT,'(6X,A,ES13.6)')   'Global relative error tolerance:  ', GLOBAL_ODE_REL_ERROR
    ENDIF
-   IF (SIM_MODE/=DNS_MODE) THEN
-      WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
-   ENDIF
-   IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
-      ! first, create a stoichiometric mixture for current REACTION
-      ZZ_REAC=0._EB
-      ZZ_PROD=0._EB
-      DO NN=1,N_TRACKED_SPECIES
-         IF (RN%NU(NN) < -TWO_EPSILON_EB) ZZ_REAC(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-         IF (RN%NU(NN) >  TWO_EPSILON_EB) ZZ_PROD(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-      ENDDO
-      ! add background diluents
-      DO NN=1,N_TRACKED_SPECIES
-         IF (ABS(RN%NU(NN)) > TWO_EPSILON_EB) CYCLE
-         IF (SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0>TWO_EPSILON_EB) THEN
-            ZZ_REAC(NN) = SPECIES_MIXTURE(NN)%ZZ0/SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0 * ZZ_REAC(RN%AIR_SMIX_INDEX)
-            ZZ_PROD(NN) = -ZZ_REAC(NN)
+
+   REACTION_LOOP: DO NR=1,N_REACTIONS
+      RN => REACTION(NR)
+
+      IF (N_REACTIONS>1) THEN
+         IF (RN%ID/='null')  THEN
+            WRITE(LU_OUTPUT,'(/3X,A,A)')    'Reaction ID:  ', TRIM(RN%ID)
+         ELSE
+            WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',NR
          ENDIF
+                         WRITE(LU_OUTPUT,'(/6X,A,45X,I3)')  'Priority:                ', RN%PRIORITY
+         IF (RN%REVERSE) WRITE(LU_OUTPUT,'(/6X,A,A)'     )  'Reverse Reaction of ID:  ', TRIM(REACTION(RN%REVERSE_INDEX)%ID)
+      ENDIF
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
+      WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+      IF (RN%SIMPLE_CHEMISTRY) WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') &
+                                  'EPUMO2:                                                     ', RN%EPUMO2/1000._EB
+
+      IF (RN%PAIR_INDEX > NR .AND. RN%PAIR_INDEX <=N_REACTIONS) THEN
+         WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') '2-step reaction,  Total Heat of Combustion                  ',&
+            RN%HOC_COMPLETE/1000._EB
+      ENDIF
+
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
+      WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                                          Molar'
+      DO NN=1,N_SPECIES
+         IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
+         WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
+         WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
       ENDDO
-      ! normalize stoichiometric mixture compositions
-      IF (ABS(SUM(ZZ_REAC))>TWO_EPSILON_EB) ZZ_REAC = ZZ_REAC/SUM(ZZ_REAC)
-      IF (ABS(SUM(ZZ_PROD))>TWO_EPSILON_EB) ZZ_PROD = ZZ_PROD/SUM(ZZ_PROD)
-      CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA,NR)
-      WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Check of equivalence ratio at stoich:   ', PHI_TILDE
-      WRITE(LU_OUTPUT,'(6X,A,F8.1)')  'Stoich adiabatic flame temperature (C): ', TMP_FLAME - TMPM
-   ENDIF
 
-ENDDO REACTION_LOOP
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
+      WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                             Molar         Mass'
+      DO NN=1,N_TRACKED_SPECIES
+         IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
+         WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
+            MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW))+1)),')'
+         WRITE(LU_OUTPUT,OUTFORM) SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
+            RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+      ENDDO
 
+      WRITE(LU_OUTPUT,'(/6X,A)')     'Reaction Kinetics'
+
+      IF (RN%FAST_CHEMISTRY) THEN
+         WRITE(LU_OUTPUT,'(/6X,A)')           'Fast chemistry'
+      ELSE
+         WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
+         WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
+         WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
+         WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
+         DO NN=1,RN%N_SPEC
+            WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(RN%N_S_INDEX(NN))%ID,RN%N_S(NN)
+         ENDDO
+         IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
+         IF (RN%THIRD_BODY) THEN
+            WRITE(LU_OUTPUT,'(/6X,A)') 'Third body reaction'
+            IF (RN%N_THIRD > 0) THEN
+               WRITE(LU_OUTPUT,'(/6X,A)') 'Non-unity third body efficiencies'
+               WRITE(LU_OUTPUT,'(6X,A)') 'Species ID                                                     Efficiency'
+               DO NN=1,N_SPECIES
+                  IF (ABS(RN%THIRD_EFF(NN)-1._EB)>TWO_EPSILON_EB) &
+                     WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%THIRD_EFF(NN)
+               ENDDO
+            ENDIF
+            IF (RN%REACTYPE==FALLOFF_TROE_TYPE .OR. RN%REACTYPE==FALLOFF_LINDEMANN_TYPE) THEN
+               WRITE(LU_OUTPUT,'(/6X,A)') 'Falloff Reaction'
+               IF (RN%REACTYPE==FALLOFF_TROE_TYPE) WRITE(LU_OUTPUT,'(6X,A)') 'Troe Falloff'
+               IF (RN%REACTYPE==FALLOFF_LINDEMANN_TYPE) WRITE(LU_OUTPUT,'(6X,A)') 'LINDEMANN Falloff'
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'Low pressure pre-exponential:           ',RN%A_LOW_PR
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'Low pressure activation energy (J/mol): ',RN%E_LOW_PR
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'Low pressure temperature exponent       ',RN%N_T_LOW_PR
+            ENDIF
+            IF (RN%REACTYPE==FALLOFF_TROE_TYPE) THEN
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'TROE A:                                 ',RN%A_TROE
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'TROE T1 (K):                            ',1._EB/RN%RT1_TROE
+               IF (RN%T2_TROE > -1.E20_EB) &
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'TROE T2 (K):                            ',RN%T2_TROE
+               WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)') 'TROE T3 (K):                            ',1._EB/RN%RT3_TROE
+            ENDIF
+         ENDIF
+      ENDIF
+
+      IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY .AND. RN%PRIORITY==1) THEN
+         WRITE(LU_OUTPUT,'(/6X,A,A)')   'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (C):          ', RN%AUTO_IGNITION_TEMPERATURE - TMPM
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (C):         ', RN%CRITICAL_FLAME_TEMPERATURE - TMPM
+      ENDIF
+      IF (SIM_MODE/=DNS_MODE) THEN
+         WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:          ', RN%CHI_R
+      ENDIF
+      IF (COMPUTE_ADIABATIC_FLAME_TEMPERATURE .AND. RN%FAST_CHEMISTRY) THEN
+         ! first, create a stoichiometric mixture for current REACTION
+         ZZ_REAC=0._EB
+         ZZ_PROD=0._EB
+         DO NN=1,N_TRACKED_SPECIES
+            IF (RN%NU(NN) < -TWO_EPSILON_EB) ZZ_REAC(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+            IF (RN%NU(NN) >  TWO_EPSILON_EB) ZZ_PROD(NN)=RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+         ENDDO
+         ! add background diluents
+         DO NN=1,N_TRACKED_SPECIES
+            IF (ABS(RN%NU(NN)) > TWO_EPSILON_EB) CYCLE
+            IF (SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0>TWO_EPSILON_EB) THEN
+               ZZ_REAC(NN) = SPECIES_MIXTURE(NN)%ZZ0/SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%ZZ0 * ZZ_REAC(RN%AIR_SMIX_INDEX)
+               ZZ_PROD(NN) = -ZZ_REAC(NN)
+            ENDIF
+         ENDDO
+         ! normalize stoichiometric mixture compositions
+         IF (ABS(SUM(ZZ_REAC))>TWO_EPSILON_EB) ZZ_REAC = ZZ_REAC/SUM(ZZ_REAC)
+         IF (ABS(SUM(ZZ_PROD))>TWO_EPSILON_EB) ZZ_PROD = ZZ_PROD/SUM(ZZ_PROD)
+         CALL GET_FLAME_TEMPERATURE(TMP_FLAME,PHI_TILDE,ZZ_GET,ZZ_REAC,ZZ_PROD,TMPA,NR)
+         WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Check of equivalence ratio at stoich:   ', PHI_TILDE
+         WRITE(LU_OUTPUT,'(6X,A,F8.1)')  'Stoich adiabatic flame temperature (C): ', TMP_FLAME - TMPM
+      ENDIF
+
+   ENDDO REACTION_LOOP
+ENDIF
 ! Print out information about agglomeration
 
 IF (N_AGGLOMERATION_SPECIES > 0) THEN
@@ -4124,8 +4161,6 @@ TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(VTK_FILE)     :: A_VTK_FILE                    ! A VTK file.
 INTEGER  :: VTK_ERROR                    !< IO Error status.
 
-CALL POINT_TO_MESH(NM)
-
 ! Write the current time to the prt5 file, then start looping through the particle classes
 
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
@@ -4283,8 +4318,6 @@ INTEGER :: II, JJ, KK
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
 DRY=.FALSE.
-
-CALL POINT_TO_MESH(NM)
 
 ! Create arrays, B and IBLK, that are 1 in open cells and 0 in solid cells.
 
@@ -6132,8 +6165,6 @@ END SELECT
 
 IF (MESHES(NM)%N_SLCF==0 .AND. .NOT.PLOT3D) RETURN
 
-CALL POINT_TO_MESH(NM)
-
 ! Create an array, B, that is 1 in any cell that is to be included in the 8-cell corner average, 0 otherwise.
 
 B => WORK1
@@ -6168,11 +6199,11 @@ ENDDO
 ! If sprinkler diagnostic on, pre-compute various PARTICLE flux output
 
 IF (.NOT.PLOT3D .AND. .NOT.VTK3D)  THEN
-   IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM)
+   IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES
 ELSEIF (.NOT.VTK3D) THEN
-   IF (PL3D_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM)
+   IF (PL3D_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES
 ELSE
-   IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM) ! TODO Not sure what we need for VTK here
+   IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES ! TODO Not sure what we need for VTK here
 ENDIF
 
 ! Determine slice or Plot3D indicies
@@ -6855,11 +6886,9 @@ INTEGER :: N,I,J,K,IW,ICC,ICF,SURF_INDEX,LP_INDEX,IP,AXIS
 TYPE (BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 
-CALL POINT_TO_MESH(NM)
-
 ! If any device has QUANTITY='PARTICLE FLUX N', pre-compute PARTICLE fluxes
 
-IF (DEVC_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES(NM)
+IF (DEVC_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES
 
 ! Loop over all devices, calculate quantity, and perform spatial averaging, min/max, etc.
 
@@ -6956,6 +6985,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   IF (DV%IOR/=0 .AND. DV%IOR/=BC%IOR) CYCLE WALL_CELL_LOOP
                   SURF_INDEX = WC%SURF_INDEX
                   IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE WALL_CELL_LOOP
+                  IF (DV%PART_ID/='null' .AND. DV%PART_CLASS_INDEX>0) THEN
+                     IF (SURF_INDEX/=LAGRANGIAN_PARTICLE_CLASS(DV%PART_CLASS_INDEX)%SURF_INDEX) CYCLE WALL_CELL_LOOP
+                  ENDIF
                   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
                   X_CENTER = BC%X ; Y_CENTER = BC%Y ; Z_CENTER = BC%Z
 
@@ -10681,8 +10713,6 @@ INTEGER :: I,J,K,IW,IIG,JJG,KKG,N,IND1,IND2,ICF,ICC,JCC,IP
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 
-CALL POINT_TO_MESH(NM)
-
 ! Compute volume integral of certain quantities like the HRR
 
 ENTHALPY_SUM_OLD = ENTHALPY_SUM(NM)
@@ -10911,7 +10941,7 @@ INTEGER :: I,J,K,ICC,JCC,NCELL
 IF (.NOT.MASS_FILE) RETURN
 
 MASS_INTEGRAL = 0._EB
-CALL POINT_TO_MESH(NM)
+
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -11706,16 +11736,12 @@ END SUBROUTINE GET_LAYER_HEIGHT_INTEGRALS
 
 
 !> \brief Compute the mass flux (kg/m2/s) of particles needed by certain output quantities
-!> \param NM Mesh number
 
-SUBROUTINE COMPUTE_PARTICLE_FLUXES(NM)
+SUBROUTINE COMPUTE_PARTICLE_FLUXES
 
-INTEGER, INTENT(IN) :: NM
 INTEGER :: IP,IC,IW
 REAL(EB) :: DROPMASS
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-
-CALL POINT_TO_MESH(NM)
 
 WFX => WORK4 ; WFX = 0._EB
 WFY => WORK5 ; WFY = 0._EB
@@ -11862,18 +11888,14 @@ END FUNCTION SUBGRID_KINETIC_ENERGY
 
 
 !> \brief Dump UVW file
-!> \param NM Mesh number
 !> \param FN_UVW File name
 
-SUBROUTINE DUMP_UVW(NM,FN_UVW)
+SUBROUTINE DUMP_UVW(FN_UVW)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,LU_UVW,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
-INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_UVW
 CHARACTER(3) :: S1,S2,S3,S4,S5,S6
-
-CALL POINT_TO_MESH(NM)
 
 SELECT CASE (PERIODIC_TEST)
    CASE(2,9)
@@ -11918,15 +11940,12 @@ END SUBROUTINE DUMP_UVW
 !> \param NM Mesh number
 !> \param FN_TMP File name
 
-SUBROUTINE DUMP_TMP(NM,FN_TMP)
+SUBROUTINE DUMP_TMP(FN_TMP)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,LU_TMP,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
-INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_TMP
 CHARACTER(3) :: S1,S2,S3,S4,S5,S6
-
-CALL POINT_TO_MESH(NM)
 
 IMIN=1
 JMIN=1
@@ -11961,19 +11980,15 @@ END SUBROUTINE DUMP_TMP
 
 
 !> \brief Dump SPEC file
-!> \param NM Mesh number
 !> \param FN_SPEC File name
 
-SUBROUTINE DUMP_SPEC(NM,FN_SPEC)
+SUBROUTINE DUMP_SPEC(FN_SPEC)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,N,LU_SPEC,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
-INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_SPEC
 CHARACTER(3) :: S1,S2,S3,S4,S5,S6,S7
 CHARACTER(20) :: FMT
-
-CALL POINT_TO_MESH(NM)
 
 IMIN=1
 JMIN=1
@@ -12024,8 +12039,6 @@ REAL(EB), INTENT(IN) :: T
 CHARACTER(80), INTENT(IN) :: FN_MMS
 
 INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX,NTOT_U,NTOT_W,NTOT_C,AXIS,ICC,ICF,JCC,JCF
-
-CALL POINT_TO_MESH(NM)
 
 IMIN=1
 JMIN=1
@@ -12232,20 +12245,16 @@ END SUBROUTINE DUMP_ROTCUBE_MMS
 
 
 !> \brief Dump MMS file (manufactured solution raw data)
-!> \param NM Mesh number
 !> \param FN_MMS File name
 !> \param T Current simulation time (s)
 
-SUBROUTINE DUMP_MMS(NM,FN_MMS,T)
+SUBROUTINE DUMP_MMS(FN_MMS,T)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
-INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 CHARACTER(80), INTENT(IN) :: FN_MMS
 CHARACTER(4) :: S1,S2,S3,S4,S5,S6
-
-CALL POINT_TO_MESH(NM)
 
 IMIN=1
 JMIN=1
