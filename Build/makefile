@@ -144,6 +144,7 @@ pres.o: FFLAGS += $(FOPENMPFLAGS)
 turb.o: FFLAGS += $(FOPENMPFLAGS)
 velo.o: FFLAGS += $(FOPENMPFLAGS)
 radi.o: FFLAGS += $(FOPENMPFLAGS)
+wall.o: FFLAGS += $(FOPENMPFLAGS)
 main.o: FFLAGS += $(FOPENMPFLAGS)
 
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -153,6 +154,7 @@ pres.obj: FFLAGS += $(FOPENMPFLAGS)
 turb.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
 radi.obj: FFLAGS += $(FOPENMPFLAGS)
+wall.obj: FFLAGS += $(FOPENMPFLAGS)
 main.obj: FFLAGS += $(FOPENMPFLAGS)
 
 # Windows Intel Fortran Compiler and Intel MPI
