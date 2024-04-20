@@ -55,7 +55,6 @@ echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-r - run restart test cases"
 echo "-s - stop FDS runs"
 echo "-W - wait for cases to complete before returning"
-exit
 }
 
 function get_full_path {
@@ -110,6 +109,7 @@ case $OPTION in
    ;;
   h)
    usage;
+   exit
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -141,6 +141,10 @@ case $OPTION in
    ;;
   W)
    WAIT="1"
+   ;;
+  *)
+   usage
+   exit 1
    ;;
 esac
 done
