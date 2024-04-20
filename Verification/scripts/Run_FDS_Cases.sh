@@ -159,7 +159,7 @@ if [ "$JOBPREFIX" == "" ]; then
 fi
 export JOBPREFIX
 
-export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh"
+QFDSSH="$(pwd)/../../Utilities/Scripts/qfds.sh"
 
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
@@ -173,10 +173,11 @@ if [ "$DEBUG" != "" ]; then
 fi
 
 if [ "$CHECKCASES" == "1" ]; then
-  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
+  QFDS="$(pwd)/Check_FDS_Cases.sh"
 else
-  export QFDS="$QFDSSH $INTEL2 $QUEUE $DEBUG" 
+  QFDS="$QFDSSH $INTEL2 $QUEUE $DEBUG $FDSEXEC"
 fi
+export QFDS
 
 cd $CURDIR
 cd ..
