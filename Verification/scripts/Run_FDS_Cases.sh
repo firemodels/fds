@@ -36,6 +36,7 @@ fi
 WAIT=
 CHECKCASES=
 RESTART=
+FDSEXEC=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -q queue_name -s "
@@ -44,6 +45,7 @@ echo ""
 echo "Options"
 echo "-C - check that cases ran (used by firebot)"
 echo "-d - use debug version of FDS"
+echo "-e exe - override the full path of FDS used to run cases"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-J - use Intel MPI version of FDS"
@@ -97,7 +99,7 @@ export SVNROOT=`pwd`
 cd $CURDIR
 RUN_PICTURES=
 
-while getopts 'Cdhj:Jm:Opq:rsW' OPTION
+while getopts 'Cdhj:e:Jm:Opq:rsW' OPTION
 do
 case $OPTION in
   C)
@@ -106,6 +108,9 @@ case $OPTION in
   d)
    DEBUG="1"
    SINGLE="1"
+   ;;
+  e)
+   FDSEXEC="-e $OPTARG"
    ;;
   h)
    usage;
