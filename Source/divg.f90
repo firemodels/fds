@@ -39,7 +39,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,DZDX,DZDY,DZDZ,TMP_G,DIV_DIFF_HEAT_FLUX,H_S,XHAT,ZHAT,TT,Q_Z,&
-            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
+            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
 INTEGER :: IW,N,I,J,K,IPZ,N_ZZ_MAX,ICF
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -85,7 +85,7 @@ DP = 0._EB
 
 ! Determine if pressure ZONEs have merged
 
-CALL MERGE_PRESSURE_ZONES(NM)
+IF (N_ZONE>0) CALL MERGE_PRESSURE_ZONES(NM)
 
 ! Compute normal component of velocity at boundaries, U_NORMAL_S in the PREDICTOR step, U_NORMAL in the CORRECTOR.
 
@@ -283,61 +283,29 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
       H_RHO_D_DZDY => WORK6
       H_RHO_D_DZDZ => WORK7
 
-      !$OMP PARALLEL DO PRIVATE(TMP_G, H_S) SCHEDULE(guided)
+      !$OMP PARALLEL
+
+      !$OMP DO PRIVATE(TMP_G,H_S) SCHEDULE(GUIDED)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               ! H_RHO_D_DZDX
                TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
                H_RHO_D_DZDX(I,J,K) = H_S*RHO_D_DZDX(I,J,K,N)
-
-               ! H_RHO_D_DZDY
                TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
                H_RHO_D_DZDY(I,J,K) = H_S*RHO_D_DZDY(I,J,K,N)
-
-               ! H_RHO_D_DZDZ
                TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
                H_RHO_D_DZDZ(I,J,K) = H_S*RHO_D_DZDZ(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END PARALLEL DO
-
-      !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-
-               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                    (     H_RHO_D_DZDY(I,J,K)-       H_RHO_D_DZDY(I,J-1,K))*RDY(J)        + &
-                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-               DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END PARALLEL DO
-
-      ! Compute div rho*D grad Z_n
-
-      !$OMP PARALLEL DO SCHEDULE(STATIC)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
-                                          (     RHO_D_DZDY(I,J,K,N)-       RHO_D_DZDY(I,J-1,K,N))*RDY(J)        + &
-                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END PARALLEL DO
+      !$OMP END DO
 
       ! Correct rho*D_n grad Z_n and h_n*rho*D_n grad Z_n at boundaries
 
+      !$OMP DO PRIVATE(IW,WC,BC,B1,N_ZZ_MAX,RHO_D_DZDN,RHO_D_DZDN_GET,UN_P,TMP_F_GAS,H_S) SCHEDULE(GUIDED)
       WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
@@ -390,18 +358,54 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_F_GAS,H_S)
 
          SELECT CASE(BC%IOR)
-            CASE( 1) ; JCOR = RHO_D_DZDN*RDX(BC%IIG)*RRN(BC%IIG)*R(BC%IIG-1)
-            CASE(-1) ; JCOR = RHO_D_DZDN*RDX(BC%IIG)*RRN(BC%IIG)*R(BC%IIG)
-            CASE( 2) ; JCOR = RHO_D_DZDN*RDY(BC%JJG)
-            CASE(-2) ; JCOR = RHO_D_DZDN*RDY(BC%JJG)
-            CASE( 3) ; JCOR = RHO_D_DZDN*RDZ(BC%KKG)
-            CASE(-3) ; JCOR = RHO_D_DZDN*RDZ(BC%KKG)
+            CASE( 1) ; RHO_D_DZDX(BC%IIG-1,BC%JJG  ,BC%KKG  ,N) =  RHO_D_DZDN
+                     H_RHO_D_DZDX(BC%IIG-1,BC%JJG  ,BC%KKG    ) =  RHO_D_DZDN*H_S
+            CASE(-1) ; RHO_D_DZDX(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = -RHO_D_DZDN
+                     H_RHO_D_DZDX(BC%IIG  ,BC%JJG  ,BC%KKG    ) = -RHO_D_DZDN*H_S
+            CASE( 2) ; RHO_D_DZDY(BC%IIG  ,BC%JJG-1,BC%KKG  ,N) =  RHO_D_DZDN
+                     H_RHO_D_DZDY(BC%IIG  ,BC%JJG-1,BC%KKG    ) =  RHO_D_DZDN*H_S
+            CASE(-2) ; RHO_D_DZDY(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = -RHO_D_DZDN
+                     H_RHO_D_DZDY(BC%IIG  ,BC%JJG  ,BC%KKG    ) = -RHO_D_DZDN*H_S
+            CASE( 3) ; RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG-1,N) =  RHO_D_DZDN
+                     H_RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG-1  ) =  RHO_D_DZDN*H_S
+            CASE(-3) ; RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = -RHO_D_DZDN
+                     H_RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG    ) = -RHO_D_DZDN*H_S
          END SELECT
 
-         DEL_RHO_D_DEL_Z(BC%IIG,BC%JJG,BC%KKG,N) = DEL_RHO_D_DEL_Z(BC%IIG,BC%JJG,BC%KKG,N) - JCOR
-         DP(BC%IIG,BC%JJG,BC%KKG) = DP(BC%IIG,BC%JJG,BC%KKG) - H_S*JCOR
-
       ENDDO WALL_LOOP_2
+      !$OMP END DO
+
+      !$OMP DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+
+               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                    (     H_RHO_D_DZDY(I,J,K)-       H_RHO_D_DZDY(I,J-1,K))*RDY(J)        + &
+                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+
+               DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
+
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+
+      ! Compute div rho*D grad Z_n
+
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DZDY(I,J,K,N)-       RHO_D_DZDY(I,J-1,K,N))*RDY(J)        + &
+                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+
+      !$OMP END PARALLEL
 
    ENDDO SPECIES_LOOP
 
@@ -625,7 +629,6 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
       SM  => SPECIES_MIXTURE(N)
       !$OMP PARALLEL DO PRIVATE(H_S) SCHEDULE(guided)
-
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -660,6 +663,7 @@ ENDIF
 ! Atmospheric stratification term
 
 IF (STRATIFICATION) THEN
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -667,6 +671,7 @@ IF (STRATIFICATION) THEN
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 ENDIF
 
 ! Manufactured solution
