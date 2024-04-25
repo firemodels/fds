@@ -1,12 +1,21 @@
 import numpy as np
 import time
+import os
 import cantera as ct
 import matplotlib.pyplot as plt
 import pandas as pd
 
 print(f"Runnning Cantera version: {ct.__version__}")
 
-gas = ct.Solution("./mechanisms/GRIMECH/grimech30.yaml")
+# get the current working directory
+current_working_directory = os.getcwd()
+
+# print(current_working_directory)
+Cantera_DIR = current_working_directory+"/../../Input_Libraries/Chemical_Mechanisms/Cantera/"
+Chemistry_DIR = current_working_directory+"/../../../Verification/Chemistry/"
+
+
+gas = ct.Solution(Cantera_DIR+"grimech30.yaml")
 reactor_pressure = 101325  # Pascals
 reference_species = "OH"
 
@@ -95,7 +104,7 @@ for i in range(caseCount):
     caseIndx = str(i+1)
     csvdata = csvdata.rename(columns={i*colPerCase: 'Time'+caseIndx, i*colPerCase+1: 'OH'+caseIndx, i*colPerCase+2: 'TMP'+caseIndx})
 
-csvdata.to_csv('../../../Verification/Chemistry/cantera_ignition_delay.csv',index=False)
+csvdata.to_csv(Chemistry_DIR+"cantera_ignition_delay.csv",index=False)
 
 # Show plot legend
 plt.legend() 
