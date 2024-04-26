@@ -3,26 +3,60 @@
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
-if [ "$STOPFDS" != "" ]; then
-  echo "stopping case: $in"
- touch $stopfile $stopcatfile
- exit
-fi
+if [ "$OPENMPCASES" == "" ]; then
+  if [ "$STOPFDS" != "" ]; then
+   echo "stopping case: $in"
+   touch $stopfile $stopcatfile
+   exit
+  fi
 
-if [ "$STOPFDSMAXITER" != "" ]; then
-  echo "creating delayed stop file: $infile"
-  echo $STOPFDSMAXITER > $stopfile
-  echo $STOPFDSMAXITER > $stopcatfile
-fi
+  if [ "$STOPFDSMAXITER" != "" ]; then
+    echo "creating delayed stop file: $infile"
+    echo $STOPFDSMAXITER > $stopfile
+    echo $STOPFDSMAXITER > $stopcatfile
+  fi
 
-if [ "$stopjob" == "1" ]; then
-  echo "stopping case: $in"
-  touch $stopfile $stopcatfile
-  exit
-fi
+  if [ "$stopjob" == "1" ]; then
+    echo "stopping case: $in"
+    touch $stopfile $stopcatfile
+    exit
+  fi
 
-if [ "$STOPFDSMAXITER" == "" ]; then
-  rm -f $stopfile $stopcatfile
+  if [ "$STOPFDSMAXITER" == "" ]; then
+    rm -f $stopfile $stopcatfile
+  fi
+else
+  for i in `seq 1 $OPENMPCASES`; do
+    stopfile=${filebase[$i]}.stop
+    stopcatfile=${filebase[$i]}_cat.stop
+    if [ "$STOPFDS" != "" ]; then
+      echo "stopping case: ${files[$i]}"
+      touch $stopfile $stopcatfile
+    fi
+
+    if [ "$STOPFDSMAXITER" != "" ]; then
+      echo "creating delayed stop file: $stopfile and $stopcatfile"
+      echo $STOPFDSMAXITER > $stopfile
+      echo $STOPFDSMAXITER > $stopcatfile
+    fi
+
+    if [ "$stopjob" == "1" ]; then
+      echo "stopping case: ${files[$i]}"
+      touch $stopfile $stopcatfile
+    fi
+
+    if [ "$STOPFDSMAXITER" == "" ]; then
+      if [ "$STOPFDS" == "" ]; then
+        rm -f $stopfile $stopcatfile
+      fi
+    fi
+  done
+  if [ "$STOPFDS" != "" ]; then
+    exit
+  fi
+  if [ "$stopjob" == "1" ]; then
+    exit
+  fi
 fi
 }
 
@@ -37,22 +71,32 @@ function usage {
   echo "Usage: qfds.sh [-p n_mpi_processes] [-o nthreads] [-e fds_command] [-q queue]  casename.fds"
   echo ""
   echo "qfds.sh runs FDS using an executable from the repository or one specified with the -e option."
+  echo "A parallel version of FDS is invoked by using -p to specify the number of MPI processes and/or"
+  echo "-o to specify the number of OpenMP threads."
+  echo ""
+  echo "qfds.sh loads the modules that were loaded when fds was built unless the -C option is specified"
+  echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_linux$DB/fds_${MPI}_intel_linux$DB]"
+  echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_${platform}$DB/fds_${MPI}_intel_${platform}$DB]"
   echo " -h   - show commonly used options"
   echo " -H   - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
   echo " -v   - output generated script to standard output"
+  echo "input_file - input file"
   if [ "$HELP" == "" ]; then
     exit
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
+  echo " -B use fds installed in /usr/local/bin/FDS/FDS6/bin"
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
+  echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -g   - only run if input file and executable are not dirty"
+  echo " -i use installed fds"
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
@@ -65,9 +109,12 @@ function usage {
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
+  echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - maximum run time, where time is dd-hh:mm:ss [default: $walltime]"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
+  echo " -z   - use --hint=nomultithread on srun line"
+  echo " -Z smokezip_path - compress fds output using smokezip found at smokezip_path" 
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
   exit
@@ -89,8 +136,9 @@ cd $CURDIR
 
 SLEEP=
 
-#*** qfds.sh only works on a linux OS
+#*** determine platform
 
+platform="linux"
 if [ "$WINDIR" != "" ]; then
   echo "***Error: only Linux platforms are supported"
   exit
@@ -116,17 +164,21 @@ fi
 
 #*** set default parameter values
 
+showcommandline=
 HELP=
 MPIRUN=
 ABORTRUN=n
 DB=
 OUT2ERROR=
 stopjob=0
+OPENMPCASES=
+OPENMPTEST=
 
 n_mpi_processes=1
 n_mpi_processes_per_node=2
 max_processes_per_node=`cat /proc/cpuinfo | grep cores | wc -l`
 n_openmp_threads=1
+use_installed=
 use_debug=
 use_devel=
 use_intel_mpi=1
@@ -134,6 +186,7 @@ EMAIL=
 CHECK_DIRTY=
 casedir=
 use_default_casedir=
+MULTITHREAD=
 USERMAX=
 
 # use maximum number of mpi procceses possible per node
@@ -160,10 +213,15 @@ if [ "$SLURM_MEMPERCPU" != "" ]; then
  SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
 fi
 
+# the mac doesn't have Intel MPI
+if [ "`uname`" == "Darwin" ]; then
+  use_intel_mpi=
+fi
 dir=.
 benchmark=no
 showinput=0
 exe=
+SMVZIP=
 walltime=99-99:99:99
 
 if [ $# -lt 1 ]; then
@@ -174,17 +232,27 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:ghHIj:Lm:n:o:p:q:stT:U:vw:y:Y' OPTION
+while getopts 'Ab:Bd:e:EghHiIj:Lm:n:o:O:p:Pq:stT:U:vVw:y:YzZ:' OPTION
 do
 case $OPTION  in
+  A) # used by timing scripts to identify benchmark cases
+   DUMMY=1
+   ;;
   b)
    EMAIL="$OPTARG"
+   ;;
+  B)
+   use_installed=
+   exe=/usr/local/bin/FDS/FDS6/bin/fds
    ;;
   d)
    dir="$OPTARG"
    ;;
   e)
    exe="$OPTARG"
+   ;;
+  E)
+   TCP=1
    ;;
   g)
    CHECK_DIRTY=1
@@ -197,6 +265,10 @@ case $OPTION  in
    HELP=ALL
    usage
    exit
+   ;;
+  i)
+   use_installed=1
+   use_local_installed=
    ;;
   I)
    use_intel_mpi=1
@@ -217,8 +289,22 @@ case $OPTION  in
   o)
    n_openmp_threads="$OPTARG"
    ;;
+  O)
+   OPENMPCASES="$OPTARG"
+   if [ $OPENMPCASES -gt 9 ]; then
+     OPENMPCASES=9
+   fi
+   n_mpi_process=1
+   benchmark="yes"
+   ;;
   p)
    n_mpi_processes="$OPTARG"
+   ;;
+  P)
+   OPENMPCASES="2"
+   OPENMPTEST="1"
+   benchmark="yes"
+   n_mpi_process=1
    ;;
   q)
    queue="$OPTARG"
@@ -246,6 +332,9 @@ case $OPTION  in
   v)
    showinput=1
    ;;
+  V)
+   showcommandline=1
+   ;;
   w)
    walltime="$OPTARG"
    ;;
@@ -255,9 +344,20 @@ case $OPTION  in
   Y)
    use_default_casedir=1
    ;;
+  z)
+   MULTITHREAD="--hint=nomultithread"
+   ;;
+  Z)
+   SMVZIP="$OPTARG"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$showcommandline" == "1" ]; then
+  echo $0 $commandline
+  exit
+fi
 
 if [ "$n_mpi_processes" == "1" ]; then
   n_mpi_processes_per_node=1
@@ -288,28 +388,62 @@ if [ "$casedir" != "" ]; then
   cd $casedir
 fi
 
-files[1]=$in
-filebase[1]=$infile
-nthreads[1]=$n_openmp_threads
+if [[ "$TCP" != "" ]] && [[ "$use_intel_mpi" == "" ]]; then
+  echo "***error: The -E option for specifying tcp transport is only available"
+  echo "          with Intel compiled versions of fds"
+  exit
+fi
+
+if [ "$OPENMPCASES" == "" ]; then
+  files[1]=$in
+  filebase[1]=$infile
+  nthreads[1]=$n_openmp_threads
+else
+  for i in `seq 1 $OPENMPCASES`; do
+    nthreads[$i]=$i
+    if [[ "$OPENMPTEST" == "1" ]] && [[ "$i" == "2" ]]; then
+      nthreads[$i]=4
+    fi
+    arg=`echo ${nthreads[$i]} | tr 123456789 abcdefghi`
+    filebase[$i]=$in$arg
+    files[$i]=$in$arg.fds
+  done
+fi
 
 #*** define executable
 
-if [ "$use_debug" == "1" ]; then
-  DB=_db
-fi
-if [ "$use_devel" == "1" ]; then
-  DB=_dv
-fi
-if [ "$use_intel_mpi" == "1" ]; then
+if [ "$use_installed" == "1" ]; then
+  notfound=`echo | fds 2>&1 >/dev/null | tail -1 | grep "not found" | wc -l`
+  if [ $notfound -eq 1 ]; then
+    echo "fds is not installed. Run aborted."
+    ABORTRUN=y
+    exe=
+  else
+    fdspath=`which fds`
+    fdsdir=$(dirname "${fdspath}")
+    curdir=`pwd`
+    cd $fdsdir
+    exe=`pwd`/fds
+    cd $curdir
+  fi
+else
+  if [ "$use_debug" == "1" ]; then
+    DB=_db
+  fi
+  if [ "$use_devel" == "1" ]; then
+    DB=_dv
+  fi
+  if [ "$use_intel_mpi" == "1" ]; then
+    if [ "$exe" == "" ]; then
+      exe=$FDSROOT/fds/Build/impi_intel_${platform}$DB/fds_impi_intel_${platform}$DB
+    fi
+    if [[ $n_openmp_threads > 1 ]]; then
+      exe=$FDSROOT/fds/Build/impi_intel_${platform}_openmp$DB/fds_impi_intel_${platform}_openmp$DB
+    fi
+  fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/impi_intel_linux$DB/fds_impi_intel_linux$DB
+    exe=$FDSROOT/fds/Build/ompi_intel_${platform}$DB/fds_ompi_intel_${platform}$DB
   fi
-  if [[ $n_openmp_threads > 1 ]]; then
-    exe=$FDSROOT/fds/Build/impi_intel_linux_openmp$DB/fds_impi_intel_linux_openmp$DB
-  fi
-fi
-if [ "$exe" == "" ]; then
-  exe=$FDSROOT/fds/Build/ompi_intel_linux$DB/fds_ompi_intel_linux$DB
 fi
 
 #*** check to see if fds was built using Intel MPI
@@ -399,22 +533,44 @@ if [ "$queue" == "none" ]; then
  REPORT_BINDINGS=
 fi
 
+if [ "$SMVZIP" != "" ]; then
+  if [ ! -e $SMVZIP ]; then
+    echo "smokezip not found at $SMVZIP"
+    SMVZIP=
+    ABORTRUN=y
+  fi
+fi
+
 #*** define MPIRUNEXE and do some error checking
 
 if [ "$use_intel_mpi" == "1" ]; then
-  if [ "$I_MPI_ROOT" == "" ]; then
-    echo "Intel MPI environment not setup. Run aborted."
-    ABORTRUN=y
-  else
-    MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
-    if [ ! -e "$MPIRUNEXE" ]; then
-      MPIRUNEXE="$I_MPI_ROOT/bin/mpiexec"
-      if [ ! -e "$MPIRUNEXE" ]; then
+  if [ "$use_installed" == "1" ]; then
+    MPIRUNEXE=$fdsdir/INTEL/mpi/intel64/bin/mpiexec
+    if [ ! -e $MPIRUNEXE ]; then
+      MPIRUNEXE=$fdsdir/INTEL/bin/mpiexec
+      if [ ! -e $MPIRUNEXE ]; then
         echo "Intel mpiexec not found at:"
-        echo "$I_MPI_ROOT/intel64/bin/mpiexec or"
-        echo "$I_MPI_ROOT/bin/mpiexec"
-        ABORTRUN=y
+        echo "$fdsdir/INTEL/mpi/intel64/bin/mpiexec or"
+        echo "$fdsdir/bin/mpiexec"
         echo "Run aborted"
+        ABORTRUN=y
+      fi
+    fi
+  else
+    if [ "$I_MPI_ROOT" == "" ]; then
+      echo "Intel MPI environment not setup. Run aborted."
+      ABORTRUN=y
+    else
+      MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
+      if [ ! -e "$MPIRUNEXE" ]; then
+        MPIRUNEXE="$I_MPI_ROOT/bin/mpiexec"
+        if [ ! -e "$MPIRUNEXE" ]; then
+          echo "Intel mpiexec not found at:"
+          echo "$I_MPI_ROOT/intel64/bin/mpiexec or"
+          echo "$I_MPI_ROOT/bin/mpiexec"
+          ABORTRUN=y
+          echo "Run aborted"
+        fi
       fi
     fi
   fi
@@ -493,11 +649,26 @@ in_full_file=$fulldir/$in
 
 #*** make sure various files exist before running the case
 
-if ! [ -e $in_full_file ]; then
-  if [ "$showinput" == "0" ]; then
-    echo "The input file, $in_full_file, does not exist. Run aborted."
-    ABORTRUN=y
+if [ "$OPENMPCASES" == "" ]; then
+  if ! [ -e $in_full_file ]; then
+    if [ "$showinput" == "0" ]; then
+      echo "The input file, $in_full_file, does not exist. Run aborted."
+      ABORTRUN=y
+    fi
   fi
+else
+for i in `seq 1 $OPENMPCASES`; do
+  in_full_file=$fulldir/${files[$i]}
+  if ! [ -e $in_full_file ]; then
+    if [ "$showinput" == "0" ]; then
+      echo "The input file, $in_full_file, does not exist."
+      ABORTRUN=y
+    fi
+  fi
+done
+if [ "$ABORTRUN" == "y" ]; then
+  echo "Run aborted."
+fi
 fi
 
 if [ "$STOPFDS" == "" ]; then
@@ -565,6 +736,11 @@ if [ "$EMAIL" != "" ]; then
 #SBATCH --mail-type=ALL
 EOF
 fi
+if [ "$MULTITHREAD" != "" ]; then
+    cat << EOF >> $scriptfile
+#SBATCH $MULTITHREAD
+EOF
+fi
 
 if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
@@ -592,9 +768,11 @@ if [ "$walltimestring_slurm" != "" ]; then
 EOF
 fi
 
+if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$n_openmp_threads
 EOF
+fi
 
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
@@ -605,6 +783,12 @@ fi
 if [[ $n_openmp_threads -gt 1 ]] && [[ "$use_intel_mpi" == "1" ]]; then
 cat << EOF >> $scriptfile
 export I_MPI_PIN_DOMAIN=omp
+EOF
+fi
+
+if [ "$TCP" != "" ]; then
+  cat << EOF >> $scriptfile
+export I_MPI_FABRICS=shm:tcp
 EOF
 fi
 
@@ -621,6 +805,7 @@ echo
 echo \`date\`
 EOF
 
+if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 echo "    Input file: $in"
 EOF
@@ -628,6 +813,16 @@ if [ "$casedir" != "" ]; then
 cat << EOF >> $scriptfile
 echo "     Input dir: $casedir"
 EOF
+fi
+else
+cat << EOF >> $scriptfile
+echo "    Input files: "
+EOF
+for i in `seq 1 $OPENMPCASES`; do
+cat << EOF >> $scriptfile
+echo "       ${files[$i]}"
+EOF
+done
 fi
 
 cat << EOF >> $scriptfile
@@ -637,9 +832,23 @@ echo "----------------" >> $qlog
 echo "started running at \`date\`" >> $qlog
 EOF
 
+if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+if [ "$SMVZIP" != "" ]; then
+cat << EOF >> $scriptfile
+$SMVZIP -t $n_mpi_processes_per_node $infile
+EOF
+fi
+else
+for i in `seq 1 $OPENMPCASES`; do
+cat << EOF >> $scriptfile
+export OMP_NUM_THREADS=${nthreads[$i]}
+$MPIRUN $exe ${files[$i]} $OUT2ERROR
+EOF
+done
+fi
 
 cat << EOF >> $scriptfile
 echo "finished running at \`date\`" >> $qlog
@@ -672,11 +881,17 @@ fi
 #*** output info to screen
 echo "submitted at `date`"                          > $qlog
 if [ "$queue" != "none" ]; then
+if [ "$OPENMPCASES" == "" ]; then
   echo "         Input file:$in"             | tee -a $qlog
 if [ "$casedir" != "" ]; then
   echo "          Input dir:$casedir"             | tee -a $qlog
 fi
-
+else
+  echo "         Input files:"               | tee -a $qlog
+for i in `seq 1 $OPENMPCASES`; do
+  echo "            ${files[$i]}"            | tee -a $qlog
+done
+fi
   echo "         Executable:$exe"            | tee -a $qlog
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH" | tee -a $qlog
