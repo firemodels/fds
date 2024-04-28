@@ -56,7 +56,6 @@ function usage {
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
-  echo " -m m - reserve m processes per node [default: 1]"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
@@ -86,8 +85,6 @@ FDSROOT=$QFDS_DIR/../../..
 cd $FDSROOT
 FDSROOT=`pwd`
 cd $CURDIR
-
-SLEEP=
 
 #*** qfds.sh only works on a linux OS
 
@@ -124,8 +121,7 @@ OUT2ERROR=
 stopjob=0
 
 n_mpi_processes=1
-n_mpi_processes_per_node=2
-max_processes_per_node=`cat /proc/cpuinfo | grep cores | wc -l`
+max_mpi_processes_per_node=1000
 n_openmp_threads=1
 use_debug=
 use_devel=
@@ -135,9 +131,6 @@ CHECK_DIRTY=
 casedir=
 use_default_casedir=
 USERMAX=
-
-# use maximum number of mpi procceses possible per node
-MAX_MPI_PROCESSES_PER_NODE=1
 
 # determine which resource manager is running (or none)
 
@@ -174,7 +167,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:ghHIj:Lm:n:o:p:q:stT:U:vw:y:Y' OPTION
+while getopts 'b:d:e:ghHIj:Ln:o:p:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   b)
@@ -207,12 +200,8 @@ case $OPTION  in
   L)
    use_intel_mpi=
    ;;
-  m)
-   max_processes_per_node="$OPTARG"
-   ;;
   n)
-   n_mpi_processes_per_node="$OPTARG"
-   MAX_MPI_PROCESSES_PER_NODE=
+   max_mpi_processes_per_node="$OPTARG"
    ;;
   o)
    n_openmp_threads="$OPTARG"
@@ -259,24 +248,13 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [ "$n_mpi_processes" == "1" ]; then
-  n_mpi_processes_per_node=1
-fi
-
-# use as many processes per node as possible (fewest number of nodes)
-if [ "$MAX_MPI_PROCESSES_PER_NODE" == "1" ]; then
-   n_mpi_processes_per_node=$n_mpi_processes
-   if test $n_mpi_processes_per_node -gt $ncores ; then
-     n_mpi_processes_per_node=$ncores
-   fi
-fi
-
 #*** define input file
 
 in=$1
 infile=${in%.*}
 
-# run case in a sub-directory
+#*** run case in a sub-directory
+
 if [ "$use_default_casedir" != "" ]; then
   casedir=$infile
 fi
@@ -287,10 +265,6 @@ if [ "$casedir" != "" ]; then
   cp $in $casedir/.
   cd $casedir
 fi
-
-files[1]=$in
-filebase[1]=$infile
-nthreads[1]=$n_openmp_threads
 
 #*** define executable
 
@@ -331,42 +305,11 @@ MODULES=$CURRENT_LOADED_MODULES
 
 #*** define number of nodes
 
-if test $n_mpi_processes_per_node -gt $ncores ; then
-  n_mpi_processes_per_node=$ncores
+let "n_mpi_processes_per_node=($ncores)/($n_openmp_threads)"
+if [ $n_mpi_processes_per_node -gt $max_mpi_processes_per_node ]; then
+  n_mpi_processes_per_node=$max_mpi_processes_per_node
 fi
-
-if test $n_mpi_processes_per_node = -1 ; then
-  if test $n_mpi_processes -gt 1 ; then
-    n_mpi_processes_per_node=2
-  else
-    n_mpi_processes_per_node=1
-  fi
-fi
-
-let "nodes=($n_mpi_processes-1)/$n_mpi_processes_per_node+1"
-if test $nodes -lt 1 ; then
-  nodes=1
-fi
-
-# don't let other jobs run on nodes used by this job if you are using psm and more than 1 node
-if [ "$USE_PSM" != "" ]; then
-  if test $nodes -gt 1 ; then
-    SLURM_PSM="#SBATCH --exclusive"
-  else
-    PROVIDER="export I_MPI_FABRICS=shm"
-  fi
-fi
-
-#*** define processes per node
-
-let ppn="$n_mpi_processes_per_node*n_openmp_threads"
-if [ $ppn -gt $max_processes_per_node ]; then
-  ppn=$max_processes_per_node
-fi
-
-if [[ $n_openmp_threads -gt 1 ]] && [[ "$use_intel_mpi" == "1" ]]; then
-  ppn=2
-fi
+let nodes="($n_mpi_processes+$n_mpi_processes_per_node-1)/$n_mpi_processes_per_node"
 
 # Socket or node bindings
 
@@ -446,6 +389,7 @@ cd $dir
 fulldir=`pwd`
 
 #*** check if exe and/or input file is dirty before running
+
 if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
   if [ -e $exe ]; then
     is_dirty_exe=`echo "" | $exe |& grep dirty |& wc -l`
@@ -528,9 +472,9 @@ stop_fds_if_requested
 
 QSUB="sbatch -p $queue"
 if [ "$use_intel_mpi" == "1" ]; then
-   MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node --mpi=pmi2"
+   MPIRUN="srun --mpi=pmi2"
 else
-   MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
+   MPIRUN="srun "
 fi
 
 #*** Set walltime parameter only if walltime is specified as input argument
@@ -693,7 +637,6 @@ fi
   echo "              Queue:$queue"                        | tee -a $qlog
   echo "              Nodes:$nodes"                        | tee -a $qlog
   echo "          Processes:$n_mpi_processes"              | tee -a $qlog
-  echo " Processes per node:$n_mpi_processes_per_node"     | tee -a $qlog
   if test $n_openmp_threads -gt 1 ; then
     echo "Threads per process:$n_openmp_threads"           | tee -a $qlog
   fi
