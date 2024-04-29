@@ -47,7 +47,7 @@ function usage {
   echo " -q q - name of queue. [default: batch]"
   echo " -v   - output generated script to standard output"
   if [ "$HELP" == "" ]; then
-    exit
+    return
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
@@ -69,7 +69,6 @@ function usage {
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
-  exit
 }
 
 #*** get directory containing qfds.sh
@@ -161,6 +160,7 @@ walltime=99-99:99:99
 
 if [ $# -lt 1 ]; then
   usage
+  exit
 fi
 
 commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
@@ -243,6 +243,10 @@ case $OPTION  in
    ;;
   Y)
    use_default_casedir=1
+   ;;
+  *)
+   usage
+   exit 1
    ;;
 esac
 done
@@ -336,7 +340,6 @@ else
 fi
 
 # The "none" queue does not use the queing system
-
 if [ "$queue" == "none" ]; then
  SOCKET_OPTION=
  REPORT_BINDINGS=
@@ -446,7 +449,7 @@ fi
 
 if [ "$STOPFDS" == "" ]; then
   if [ "$exe" != "" ]; then
-    if ! [ -e "$exe" ]; then
+    if ! [ -e $exe ]; then
       if [ "$showinput" == "0" ]; then
         echo "The program, $exe, does not exist. Run aborted."
         ABORTRUN=y
@@ -644,7 +647,7 @@ fi
 
 #*** run script
 
-echo 
+echo
 chmod +x $scriptfile
 
 if [ "$queue" != "none" ]; then
