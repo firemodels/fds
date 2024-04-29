@@ -52,13 +52,10 @@ function usage {
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -g   - only run if input file and executable are not dirty"
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
   echo " -n n - number of MPI processes per node [default: 1]"
-  echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
-  echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
@@ -113,12 +110,9 @@ fi
 #*** set default parameter values
 
 HELP=
-MPIRUN=
-ABORTRUN=n
+ABORT_RUN=n
 DB=
-OUT2ERROR=
 stopjob=0
-
 n_mpi_processes=1
 max_mpi_processes_per_node=1000
 n_openmp_threads=1
@@ -126,12 +120,11 @@ use_debug=
 use_devel=
 use_intel_mpi=1
 EMAIL=
-CHECK_DIRTY=
 casedir=
 use_default_casedir=
 USERMAX=
 
-# determine which resource manager is running (or none)
+# determine which resource manager is running
 
 STATUS_FILE=status_file.$$
 srun -V >& $STATUS_FILE
@@ -167,7 +160,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:ghHIj:Ln:o:p:q:stT:U:vw:y:Y' OPTION
+while getopts 'b:d:e:hHIj:Ln:o:p:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   b)
@@ -178,9 +171,6 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
-   ;;
-  g)
-   CHECK_DIRTY=1
    ;;
   h)
    usage
@@ -301,12 +291,6 @@ if [ -e $exe ]; then
   fi
 fi
 
-#*** modules loaded currently
-
-CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
-
-MODULES=$CURRENT_LOADED_MODULES
-
 #*** define number of nodes
 
 let "n_mpi_processes_per_node=($ncores)/($n_openmp_threads)"
@@ -315,118 +299,8 @@ if [ $n_mpi_processes_per_node -gt $max_mpi_processes_per_node ]; then
 fi
 let nodes="($n_mpi_processes+$n_mpi_processes_per_node-1)/$n_mpi_processes_per_node"
 
-# Socket or node bindings
-
-if test $n_mpi_processes -gt 1 ; then
- if test $n_openmp_threads -gt 1 ; then
-  SOCKET_OPTION="--map-by socket:PE=$n_openmp_threads"
- else
-  SOCKET_OPTION=" "
- fi
-else
- SOCKET_OPTION="--map-by node:PE=$n_openmp_threads"
-fi
-
-if [ "$use_intel_mpi" == "1" ]; then
-  SOCKET_OPTION=" "
-fi
-
-# Report bindings in the .err or .log file
-
-if [ "$use_intel_mpi" == "1" ]; then
- REPORT_BINDINGS=" "
-else
- REPORT_BINDINGS="--report-bindings"
-fi
-
-# The "none" queue does not use the queing system
-if [ "$queue" == "none" ]; then
- SOCKET_OPTION=
- REPORT_BINDINGS=
-fi
-
-#*** define MPIRUNEXE and do some error checking
-
-if [ "$use_intel_mpi" == "1" ]; then
-  if [ "$I_MPI_ROOT" == "" ]; then
-    echo "Intel MPI environment not setup. Run aborted."
-    ABORTRUN=y
-  else
-    MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
-    if [ ! -e "$MPIRUNEXE" ]; then
-      MPIRUNEXE="$I_MPI_ROOT/bin/mpiexec"
-      if [ ! -e "$MPIRUNEXE" ]; then
-        echo "Intel mpiexec not found at:"
-        echo "$I_MPI_ROOT/intel64/bin/mpiexec or"
-        echo "$I_MPI_ROOT/bin/mpiexec"
-        ABORTRUN=y
-        echo "Run aborted"
-      fi
-    fi
-  fi
-else                                 # using OpenMPI
-  if [ "$OPENMPI_PATH" != "" ]; then
-    if [ -e $OPENMPI_PATH/bin ]; then
-      mpibindir=$OPENMPI_PATH/bin/
-    fi
-  fi
-  MPIRUNEXE=${mpibindir}mpirun
-  if [ "$mpibindir" == "" ]; then  # OPENMPI_PATH blank so mpirun needs to be in path
-    notfound=`$MPIRUNEXE -h 2>&1 >/dev/null | head -1 | grep "not found" | wc -l`
-    if [ $notfound -eq 1 ]; then
-      echo "*** error: $MPIRUNEXE not in PATH"
-      ABORTRUN=y
-    fi
-  else                             # use full path to mpirun
-    if [ ! -e $MPIRUNEXE ]; then
-      echo "*** error: $MPIRUNEXE does not exist"
-      ABORTRUN=y
-    fi
-  fi
-fi
-
-TITLE="$infile"
-MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $n_mpi_processes"
-
 cd $dir
 fulldir=`pwd`
-
-#*** check if exe and/or input file is dirty before running
-
-if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
-  if [ -e $exe ]; then
-    is_dirty_exe=`echo "" | $exe |& grep dirty |& wc -l`
-    dirty_exe=`   echo "" | $exe |& grep dirty |& awk '{print $3}'`
-    is_dirty_input=`git diff $in   |& wc -l`
-
-    is_dirty=
-    if [ $is_dirty_exe -gt 0 ]; then
-      is_dirty=1
-    fi
-    if [ $is_dirty_input -gt 0 ]; then
-      is_dirty=1
-    fi
-
-    if [ "$is_dirty" == "1" ]; then
-      echo ""
-      if [ $is_dirty_exe -gt 0 ]; then
-        echo "***error: source used to build FDS is dirty."
-      fi
-      echo "executable: $exe"
-      echo "          $dirty_exe"
-      if [ $is_dirty_input -gt 0 ]; then
-        echo "***error: input file $in is dirty."
-      else
-        echo "input file: $in"
-      fi
-    fi
-    if [ "$is_dirty" == "1" ]; then
-      echo "Use the -g option to ignore this error"
-      echo "Exiting."
-      exit 1
-    fi
-  fi
-fi
 
 #*** define files
 
@@ -443,7 +317,7 @@ in_full_file=$fulldir/$in
 if ! [ -e $in_full_file ]; then
   if [ "$showinput" == "0" ]; then
     echo "The input file, $in_full_file, does not exist. Run aborted."
-    ABORTRUN=y
+    ABORT_RUN=y
   fi
 fi
 
@@ -452,7 +326,7 @@ if [ "$STOPFDS" == "" ]; then
     if ! [ -e $exe ]; then
       if [ "$showinput" == "0" ]; then
         echo "The program, $exe, does not exist. Run aborted."
-        ABORTRUN=y
+        ABORT_RUN=y
       fi
     fi
   fi
@@ -462,7 +336,7 @@ if [ "$STOPFDS" == "" ]; then
     rm $outlog
   fi
 
-  if [ "$ABORTRUN" == "y" ]; then
+  if [ "$ABORT_RUN" == "y" ]; then
     if [ "$showinput" == "0" ]; then
       exit
     fi
@@ -526,16 +400,9 @@ $SLURM_MEM
 EOF
 fi
 
-if [ "$SLURM_PSM" != "" ]; then
-cat << EOF >> $scriptfile
-$SLURM_PSM
-EOF
-fi
-
 if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
-
 EOF
 fi
 
@@ -552,12 +419,6 @@ fi
 if [[ $n_openmp_threads -gt 1 ]] && [[ "$use_intel_mpi" == "1" ]]; then
 cat << EOF >> $scriptfile
 export I_MPI_PIN_DOMAIN=omp
-EOF
-fi
-
-if [ "$PROVIDER" != "" ]; then
-cat << EOF >> $scriptfile
-$PROVIDER
 EOF
 fi
 
@@ -585,18 +446,12 @@ echo "started running at \`date\`" >> $qlog
 EOF
 
 cat << EOF >> $scriptfile
-$MPIRUN $exe $in $OUT2ERROR
+$MPIRUN $exe $in 
 EOF
 
 cat << EOF >> $scriptfile
 echo "finished running at \`date\`" >> $qlog
 EOF
-
-if [ "$queue" == "none" ]; then
-cat << EOF >> $scriptfile
-rm -f $scriptfile
-EOF
-fi
 
 #*** output script file to screen if -v option was selected
 
@@ -606,7 +461,8 @@ if [ "$showinput" == "1" ]; then
   exit
 fi
 
-# wait until number of jobs running alread by user is less than USERMAX
+#*** wait until number of jobs running already by user is less than USERMAX
+
 if [ "$USERMAX" != "" ]; then
   nuser=`squeue | grep -v JOBID | awk '{print $4}' | grep $USER | wc -l`
   while [ $nuser -gt $USERMAX ]
@@ -617,32 +473,33 @@ if [ "$USERMAX" != "" ]; then
 fi
 
 #*** output info to screen
+
 echo "submitted at `date`"                          > $qlog
-if [ "$queue" != "none" ]; then
-  echo "         Input file:$in"             | tee -a $qlog
+
+echo "         Input file:$in"             | tee -a $qlog
 if [ "$casedir" != "" ]; then
-  echo "          Input dir:$casedir"             | tee -a $qlog
+  echo "         Input dir:$casedir"             | tee -a $qlog
 fi
 
-  echo "         Executable:$exe"            | tee -a $qlog
-  if [ "$OPENMPI_PATH" != "" ]; then
-    echo "            OpenMPI:$OPENMPI_PATH" | tee -a $qlog
-  fi
-  if [ "$use_intel_mpi" != "" ]; then
-    echo "           Intel MPI"              | tee -a $qlog
-  fi
+echo "         Executable:$exe"            | tee -a $qlog
+if [ "$use_intel_mpi" != "" ]; then
+  echo "         Intel MPI"              | tee -a $qlog
+fi
 
 #*** output modules used when fds is run
-  if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
+
+CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+MODULES=$CURRENT_LOADED_MODULES
+
+if [ "$MODULES" != "" ]; then
     echo "            Modules:$MODULES"                    | tee -a $qlog
-  fi
-  echo "   Resource Manager:$RESOURCE_MANAGER"             | tee -a $qlog
-  echo "              Queue:$queue"                        | tee -a $qlog
-  echo "              Nodes:$nodes"                        | tee -a $qlog
-  echo "          Processes:$n_mpi_processes"              | tee -a $qlog
-  if test $n_openmp_threads -gt 1 ; then
-    echo "Threads per process:$n_openmp_threads"           | tee -a $qlog
-  fi
+fi
+echo "   Resource Manager:$RESOURCE_MANAGER"             | tee -a $qlog
+echo "              Queue:$queue"                        | tee -a $qlog
+echo "              Nodes:$nodes"                        | tee -a $qlog
+echo "          Processes:$n_mpi_processes"              | tee -a $qlog
+if test $n_openmp_threads -gt 1 ; then
+  echo "Threads per process:$n_openmp_threads"           | tee -a $qlog
 fi
 
 #*** run script
@@ -650,13 +507,8 @@ fi
 echo
 chmod +x $scriptfile
 
-if [ "$queue" != "none" ]; then
-  $QSUB $scriptfile | tee -a $qlog
-else
-  $QSUB $scriptfile
-fi
-if [ "$queue" != "none" ]; then
-  cat $scriptfile > $scriptlog
-  echo "#$QSUB $scriptfile" >> $scriptlog
-  rm $scriptfile
-fi
+$QSUB $scriptfile | tee -a $qlog
+
+cat $scriptfile > $scriptlog
+echo "#$QSUB $scriptfile" >> $scriptlog
+rm $scriptfile
