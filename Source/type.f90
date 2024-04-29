@@ -172,7 +172,6 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 TYPE MATL_COMP_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION  !< (1:N_LAYERS) Mass Fraction
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO            !< (1:NWP) Solid density (kg/m3)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT        !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
 !> \brief Radiation intensity at a boundary for a given wavelength band
@@ -215,6 +214,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_TMP           !< Temperature change (K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:ONE_D\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_THICKNESS !< (1:ONE_D\%N_LAYERS) Minimum thickness of layer (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY     !< (1:ONE_D\%N_LAYERS) Min diffusivity of all matls in layer (m2/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
@@ -386,7 +386,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
 
-
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
    LOGICAL :: EMBER=.FALSE.        !< The particle can break away and become a burning ember
@@ -521,6 +520,10 @@ TYPE SPECIES_TYPE
    REAL(EB) :: K_LIQUID                           !< Conductivity of the liquid (W/m/K)
    REAL(EB) :: PR_LIQUID                          !< Prandtl number of the liquid
    REAL(EB) :: THERMOPHORETIC_DIAMETER=0.03E-6_EB !< For use in aerosol deposition (m)
+   REAL(EB) :: ODE_ABS_ERROR                      !< Absolute error for finite rate chemistry
+   REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
+   REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
+   REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -536,7 +539,8 @@ TYPE SPECIES_TYPE
    CHARACTER(LABEL_LENGTH) :: RAMP_MU             !< Name of viscosity rame
    CHARACTER(LABEL_LENGTH) :: RAMP_D              !< Name of diffusivity ramp
    CHARACTER(LABEL_LENGTH) :: RADCAL_ID           !< Name of closest species with RADCAL properties
-   CHARACTER(LABEL_LENGTH) :: RAMP_G_F
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F            !< Name of Gibbs energy ramp
+   CHARACTER(LABEL_LENGTH) :: POLYNOMIAL          !< Polynomial type for user specified data
    CHARACTER(LABEL_LENGTH) :: PROP_ID             !< Name of PROPerty parameters
    CHARACTER(FORMULA_LENGTH) :: FORMULA           !< Chemical formula
    INTEGER :: MODE=2
@@ -549,6 +553,7 @@ TYPE SPECIES_TYPE
    INTEGER :: RAMP_G_F_INDEX=-1                   !< Index of Gibbs energy ramp
    INTEGER :: PROP_INDEX=-1                       !< Index of species in THERMO_DAT
    INTEGER :: AWM_INDEX=-1                        !< Index of species in wall deposition arrays
+   INTEGER :: POLYNOMIAL_BANDS                     !< Number of temperature bands in used polynomial
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V       !< Heat of vaporization as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L     !< Liquid specific heat as a function of temperature
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L_BAR !< Average liquid specific heat as a function of temperture
@@ -592,6 +597,8 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: CONDUCTIVITY_SOLID                  !< Conductivity for aerosol particle (W/m/K)
    REAL(EB) :: H_F = -1.E30_EB                     !< Heat of formation (J/kg)
    REAL(EB) :: H_F_HOC = -1.E30_EB                 !< Heat of formation used in RN%HEAT_OF_COMBUSTION calculation (J/kg)
+   REAL(EB) :: ODE_ABS_ERROR                       !< Absolute error for finite rate chemistry
+   REAL(EB) :: ODE_REL_ERROR                       !< Relative error for finite rate chemistry
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
@@ -659,6 +666,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: HOC_COMPLETE                 !< Complete heat of combustion for two step SIMPLE_CHEMISTRY (J/kg)
    REAL(EB) :: A_PRIME                      !< Adjusted pre-exponential reaction kinetic parameter
    REAL(EB) :: A_IN                         !< Unajusted pre-exponential reaction kinetic parameter
+   REAL(EB) :: A_SI                         !< Pre-exponential reaction kinetic parameter in units of (kmol/m3)^(1-sum(nu))
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
@@ -687,6 +695,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: C0_EXP=0._EB                 !< Exponent for C0 factor in reverse equilibirium constant
    REAL(EB) :: NU_FUEL_0                    !< Original fuel NU needed for G_F calculations
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU              !< Array of stoichiometric coefficients for lumped species equation
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_NN           !< Array of non-normalized stoich. coeff. for lumped species equation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_READ         !< Holding array of stoichiometric coefficients
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SPECIES      !< Array of stoichiometric coefficients for primitive species equation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
@@ -697,6 +706,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INT          !< Array of species exponents
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: REACTANT_INDEX   !< Lumped species indices of reactants
    INTEGER :: FUEL_SPEC_INDEX=-1            !< Primitive species index for fuel
@@ -720,8 +730,18 @@ TYPE REACTION_TYPE
    LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.      !< Indicator of a sipmle chemistry reaction
    LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
    LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of third body reaction
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: N_S_FLAG !< N_S exponent is an integer
    TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
    INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
+   INTEGER :: REACTYPE                      !< Type of reaction in a chemical mechanism.
+   REAL(EB) :: A_LOW_PR                     !< Unajusted falloff reaction high pressure pre-exponent parameter.
+   REAL(EB) :: E_LOW_PR                     !< Unajusted falloff reaction high pressure activation energy (J/mol).
+   REAL(EB) :: N_T_LOW_PR=0._EB             !< Falloff reaction high pressure temperature exponent.
+   REAL(EB) :: A_TROE                       !< TROE reaction A
+   REAL(EB) :: RT1_TROE                     !< TROE reaction 1/T1
+   REAL(EB) :: T2_TROE                      !< TROE reaction T2
+   REAL(EB) :: RT3_TROE                     !< TROE reaction 1/T3
+
 END TYPE REACTION_TYPE
 
 TYPE (REACTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: REACTION
@@ -839,7 +859,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: CONV_LENGTH                             ! Length used in heat transfer correlations
    REAL(EB) :: XYZ(3)                                  ! Starting point for a spreading fire
    REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
-   REAL(EB) :: MINIMUM_LAYER_THICKNESS                 ! Smallest layer size before layer is removed (m)
    REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
    REAL(EB) :: VEL_BULK
@@ -900,6 +919,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_THICKNESS  ! Smallest layer size before layer is removed (m)
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE                               !< Specified constant cell size (m)
@@ -1378,10 +1398,10 @@ TYPE CC_REGFACEZ_TYPE
    INTEGER                               ::                IWC=0 !< WALL CELL index (if present) in location of REG Face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::               NOMICF !< OMESH face info for mesh boundary REG face.
    REAL(EB)                              ::         FN_H_S=0._EB !< Stores components FX_H_S, FY_H_S, FZ_H_S as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::        RHOZZ_U=0._EB !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::          FN_ZZ=0._EB !< Stores computed FX_ZZ(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::     RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in REG face.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::   H_RHO_D_DZDN=0._EB !< OMESH face info for mesh boundary REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::              RHOZZ_U !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::                FN_ZZ !< Stores computed FX_ZZ(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           RHO_D_DZDN !< Species diffusive mass fluxes in REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         H_RHO_D_DZDN !< OMESH face info for mesh boundary REG face.
 END TYPE CC_REGFACEZ_TYPE
 
 !> \brief Regular faces type, contains information for reg faces connecting regular and cut-cells.
@@ -1398,9 +1418,9 @@ TYPE CC_RCFACE_TYPE
    INTEGER,  DIMENSION(1:2,1:2)                    ::                JDH !< Index matrix for H Poisson matrix coefficients.
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND) ::          CELL_LIST !< Cell type/location of connected cells. [RC_TYPE I J K ]
    REAL(EB)                                        ::     TMP_FACE=0._EB !< Temperature in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::      ZZ_FACE=0._EB !< Species mass fractions in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::   RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                :: H_RHO_D_DZDN=0._EB !< Species heat fluxes due to RHO_D_DZDN in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::            ZZ_FACE !< Species mass fractions in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::         RHO_D_DZDN !< Species diffusive mass fluxes in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::       H_RHO_D_DZDN !< Species heat fluxes due to RHO_D_DZDN in RC face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::             NOMICF !< OMESH face info for mesh boundary RC face.
 END TYPE CC_RCFACE_TYPE
 
