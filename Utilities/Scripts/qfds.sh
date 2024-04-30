@@ -138,12 +138,6 @@ else
   echo "***error: The slurm resource manager was not found and is required."
   exit
 fi
-if [ "$SLURM_MEM" != "" ]; then
- SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
-fi
-if [ "$SLURM_MEMPERCPU" != "" ]; then
- SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
-fi
 
 dir=.
 benchmark=no
@@ -391,12 +385,6 @@ if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --exclusive
 #SBATCH --cpu-freq=Performance
-EOF
-fi
-
-if [ "$SLURM_MEM" != "" ]; then
-cat << EOF >> $scriptfile
-$SLURM_MEM
 EOF
 fi
 
