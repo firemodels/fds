@@ -2829,7 +2829,7 @@ X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
 \ee
 where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
-You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $r_{ij}$, below a specified value.
+You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
 
 \subsubsection{Estimating Kinetic Parameters}
@@ -6892,7 +6892,7 @@ This model is invoked by setting {\ct SURFACE\_OXIDATION\_MODEL} to {\ct T} on t
   h_m \, \ln(B+1) &=& Y_{\rm O_2,surf} \, \sigma \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \\[.1in]
   B  &=& \frac{Y_{\rm O_2,\infty} - Y_{\rm O_2,surf}}{\nu_{\rm O_2,char}+Y_{\rm O_2,surf}}
 \end{eqnarray}
-The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the {\ct SURFACE\_OXIDATION\_MODEL}.
+The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the {\ct SURFACE\_OXIDATION\_MODEL}. Also note that because this model depends on full-scale parameters $\sigma$ and $h_m$ it is not necessarily appropriate to compare directly with micro-scale TGA data via {\ct TGA\_ANALYSIS}.
 
 
 \begin{table}[!ht]
@@ -12134,7 +12134,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct HEAT\_OF\_REACTION(:)}         & Real Array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.            \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      &                   & $\infty$      \\ \hline
+{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      & \si{kg/(m^3.s)}   & $\infty$      \\ \hline
 {\ct MW}                            & Real            & Section~\ref{info:liquid_fuels}       & g/mol             &               \\ \hline
 {\ct N\_O2(:)}                      & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0             \\ \hline
