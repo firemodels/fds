@@ -56,17 +56,22 @@ function usage {
   echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
   echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -P use PBS/Torque"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
-  echo " -w time - maximum run time, where time is dd-hh:mm:ss [default: $walltime]"
+  echo " -w time - maximum run time: SLURM dd-hh:mm:ss ; PBS/Torque hh:mm:ss "
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
 }
+
+#*** Define the default resource manager
+
+RESOURCE_MANAGER="SLURM"
 
 #*** get directory containing qfds.sh
 
@@ -93,22 +98,22 @@ if [ "`uname`" == "Darwin" ] ; then
   exit
 fi
 
-#*** determine number of cores and default queue
+#*** determine number of cores
 
-queue=batch
 if [ "$QFDS_NCORES" == "" ]; then
-  ncores=`grep processor /proc/cpuinfo | wc -l`
+  n_cores=`grep processor /proc/cpuinfo | wc -l`
 else
-  ncores=$QFDS_NCORES
+  n_cores=$QFDS_NCORES
 fi
 if [ "$NCORES_COMPUTENODE" == "" ]; then
-  NCORES_COMPUTENODE=$ncores
+  NCORES_COMPUTENODE=$n_cores
 else
-  ncores=$NCORES_COMPUTENODE
+  n_cores=$NCORES_COMPUTENODE
 fi
 
 #*** set default parameter values
 
+queue=batch
 HELP=
 ABORT_RUN=n
 DB=
@@ -123,27 +128,16 @@ EMAIL=
 casedir=
 use_default_casedir=
 USERMAX=
-
-# determine which resource manager is running
-
-STATUS_FILE=status_file.$$
-srun -V >& $STATUS_FILE
-missing_slurm=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
-rm -f $STATUS_FILE
-
-RESOURCE_MANAGER="NONE"
-if [ $missing_slurm -eq 0 ]; then
-  RESOURCE_MANAGER="SLURM"
-else
-  echo "***error: The slurm resource manager was not found and is required."
-  exit
-fi
-
 dir=.
 benchmark=no
 showinput=0
 exe=
-walltime=99-99:99:99
+
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+   walltime=99-99:99:99
+else
+   walltime=999:99:99
+fi
 
 if [ $# -lt 1 ]; then
   usage
@@ -154,7 +148,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:hHIj:Ln:o:p:q:stT:U:vw:y:Y' OPTION
+while getopts 'b:d:e:hHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   b)
@@ -189,6 +183,9 @@ case $OPTION  in
    ;;
   o)
    n_openmp_threads="$OPTARG"
+   ;;
+  P)
+   RESOURCE_MANAGER="PBS/Torque"
    ;;
   p)
    n_mpi_processes="$OPTARG"
@@ -287,7 +284,7 @@ fi
 
 #*** define number of nodes
 
-let "n_mpi_processes_per_node=($ncores)/($n_openmp_threads)"
+let "n_mpi_processes_per_node=($n_cores)/($n_openmp_threads)"
 if [ $n_mpi_processes_per_node -gt $max_mpi_processes_per_node ]; then
   n_mpi_processes_per_node=$max_mpi_processes_per_node
 fi
@@ -339,20 +336,18 @@ fi
 
 stop_fds_if_requested
 
-#*** setup for SLURM
+#*** define the execute command and the submit command
 
-QSUB="sbatch -p $queue"
-if [ "$use_intel_mpi" == "1" ]; then
-   MPIRUN="srun --mpi=pmi2"
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  QSUB="sbatch -p $queue"
+  if [ "$use_intel_mpi" == "1" ]; then
+     MPIRUN="srun --mpi=pmi2"
+  else
+     MPIRUN="srun "
+  fi
 else
-   MPIRUN="srun "
-fi
-
-#*** Set walltime parameter only if walltime is specified as input argument
-
-walltimestring_slurm=
-if [ "$walltime" != "" ]; then
-  walltimestring_slurm="--time=$walltime"
+  QSUB="qsub -q $queue"
+  MPIRUN="mpiexec -n $n_mpi_processes"
 fi
 
 #*** create a random script filename for submitting jobs
@@ -364,6 +359,7 @@ cat << EOF > $scriptfile
 # $0 $commandline
 EOF
 
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
 cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH -e $outerr
@@ -373,6 +369,7 @@ cat << EOF >> $scriptfile
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
 #SBATCH --ntasks-per-node=$n_mpi_processes_per_node
+#SBATCH --time=$walltime
 EOF
 if [ "$EMAIL" != "" ]; then
     cat << EOF >> $scriptfile
@@ -380,18 +377,33 @@ if [ "$EMAIL" != "" ]; then
 #SBATCH --mail-type=ALL
 EOF
 fi
-
 if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --exclusive
 #SBATCH --cpu-freq=Performance
 EOF
 fi
-
-if [ "$walltimestring_slurm" != "" ]; then
-      cat << EOF >> $scriptfile
-#SBATCH $walltimestring_slurm
+else # PBS/Torque
+cat << EOF >> $scriptfile
+#PBS -N $JOBPREFIX$infile
+#PBS -e $outerr
+#PBS -o $outlog
+#PBS -q $queue
+#PBS -l ppn=$n_mpi_processes
+#PBS -l nodes=$nodes
+#PBS -l walltime=$walltime
 EOF
+if [ "$EMAIL" != "" ]; then
+    cat << EOF >> $scriptfile
+#PBS -M $EMAIL
+#PBS -m abe
+EOF
+fi
+if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#PBS l naccesspolicy=singlejob
+EOF
+fi
 fi
 
 cat << EOF >> $scriptfile
@@ -500,3 +512,4 @@ $QSUB $scriptfile | tee -a $qlog
 cat $scriptfile > $scriptlog
 echo "#$QSUB $scriptfile" >> $scriptlog
 rm $scriptfile
+
