@@ -132,12 +132,7 @@ dir=.
 benchmark=no
 showinput=0
 exe=
-
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-   walltime=99-99:99:99
-else
-   walltime=999:99:99
-fi
+walltime=99-99:99:99
 
 if [ $# -lt 1 ]; then
   usage
@@ -186,6 +181,9 @@ case $OPTION  in
    ;;
   P)
    RESOURCE_MANAGER="PBS/Torque"
+   if [ "$walltime" == "99-99:99:99" ]; then
+     walltime=999:99:99
+   fi
    ;;
   p)
    n_mpi_processes="$OPTARG"
@@ -389,8 +387,7 @@ cat << EOF >> $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -q $queue
-#PBS -l ppn=$n_mpi_processes
-#PBS -l nodes=$nodes
+#PBS -l nodes=$nodes:ppn=$n_mpi_processes
 #PBS -l walltime=$walltime
 EOF
 if [ "$EMAIL" != "" ]; then
