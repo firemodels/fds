@@ -286,6 +286,9 @@ let "n_mpi_processes_per_node=($n_cores)/($n_openmp_threads)"
 if [ $n_mpi_processes_per_node -gt $max_mpi_processes_per_node ]; then
   n_mpi_processes_per_node=$max_mpi_processes_per_node
 fi
+if [ $n_mpi_processes_per_node -gt $n_mpi_processes ]; then
+  n_mpi_processes_per_node=$n_mpi_processes
+fi
 let nodes="($n_mpi_processes+$n_mpi_processes_per_node-1)/$n_mpi_processes_per_node"
 
 cd $dir
