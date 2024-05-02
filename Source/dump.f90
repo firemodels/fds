@@ -10934,7 +10934,7 @@ IF (IFRMT.EQ.0) THEN
                   IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. &
                       WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. .NOT.CELL(IC)%SOLID) THEN
                      IBK(L,N) = 1
-                     PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW,&
+                     PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW,&
                                                         OPT_BNDF_INDEX=NF),FB)
                   ENDIF
                ENDDO
@@ -10967,7 +10967,7 @@ IF (IFRMT.EQ.0) THEN
                   IF (ISUM>0) THEN
                      PPN(L,N) = PPN(L,N)/REAL(ISUM,FB)
                   ELSE
-                     PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
+                     PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
                                                         OPT_BNDF_INDEX=NF),FB)
                   ENDIF
                ENDDO
