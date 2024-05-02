@@ -92,15 +92,9 @@ endif
 
 else
 
-<<<<<<< HEAD
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
 
-=======
-
-FFLAGS_SUNDIALS =
-LFLAGS_SUNDIALS =
->>>>>>> firex/FireX
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -143,10 +137,6 @@ endif # MKLROOT test
 endif # PETSc test
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> firex/FireX
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    FFLAGS_SUNDIALS = -DWITH_SUNDIALS -I"${SUNDIALS_HOME}/fortran"
    LFLAGS_SUNDIALS = -L${SUNDIALS_HOME}/lib64 -l:libsundials_fcvode_mod.a -l:libsundials_fnvecserial_mod.a -l:libsundials_cvode.a
@@ -157,15 +147,9 @@ endif
 $(info SUNDIALS_HOME="$(SUNDIALS_HOME)")
 $(info LFLAGS_SUNDIALS="$(LFLAGS_SUNDIALS)")
 
-<<<<<<< HEAD
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
           pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o imkl.o \
           wall.o fire.o velo.o pres.o init.o vtkf.o dump.o read.o divg.o main.o
-=======
-obj_mpi = prec.o cons.o imkl.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
-          pois.o vtkf.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
-          wall.o fire.o velo.o pres.o init.o dump.o read.o divg.o main.o
->>>>>>> firex/FireX
 
 objwin_mpi = $(obj_mpi:.o=.obj)
 
@@ -400,11 +384,7 @@ ompi_gnu_linux_db : FFLAGS += -Wno-maybe-uninitialized -Wno-uninitialized -Wno-u
 ompi_gnu_linux_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-<<<<<<< HEAD
-ompi_gnu_osx : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_SUNDIALS)
-=======
 ompi_gnu_osx : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(FFLAGS_PETSC) $(GFORTRAN_OPTIONS) $(FFLAGS_SUNDIALS)
->>>>>>> firex/FireX
 ompi_gnu_osx : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(LFLAGS_PETSC) $(CLT_VERSION) $(LFLAGS_SUNDIALS_OSX)
 ompi_gnu_osx : FCOMPL = mpifort
 ompi_gnu_osx : FOPENMPFLAGS = -fopenmp
