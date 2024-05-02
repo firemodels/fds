@@ -1255,7 +1255,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          B1%RHO_F = PBAR_P(BC%KK,B1%PRESSURE_ZONE)/(RSUM0*B1%TMP_F)
          B1%ZZ_F(1) = 1._EB
          UN = MFT/B1%RHO_F
-      ELSEIF (PRESENT(WALL_INDEX) .AND. .NOT.CELL(IC)%SOLID .AND. .NOT.CELL(IC)%EXTERIOR) THEN  ! this is a thin obstruction
+      ELSEIF (B1%LAYER_REMOVED .OR. (PRESENT(WALL_INDEX) .AND. .NOT.CELL(IC)%SOLID .AND. .NOT.CELL(IC)%EXTERIOR)) THEN
+         ! this is a thin obstruction or a layer has been slated for removal
          UN = 0._EB
          B1%ZZ_F(:) = B1%ZZ_G(:)
          IF (CORRECTOR) THEN  ! calculate the mass production rate of gases in the adjacent gas cell
@@ -1848,6 +1849,10 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
    W_SURF=LP%W
 
 ENDIF UNPACK_WALL_PARTICLE
+
+! Assume that no layers have been slated for removal
+
+B1%LAYER_REMOVED = .FALSE.
 
 ! Evaluate any heat transfer coefficient ramp
 
@@ -2767,6 +2772,7 @@ POINT_LOOP1: DO I=1,NWP
 
    IF (ONE_D%LAYER_THICKNESS(LAYER_INDEX(I))<ONE_D%MINIMUM_LAYER_THICKNESS(LAYER_INDEX(I))) THEN
       REMOVE_LAYER = .TRUE.
+      B1%LAYER_REMOVED = .TRUE.
    ELSE
       REMOVE_LAYER = .FALSE.
    ENDIF
