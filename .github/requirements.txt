@@ -9,4 +9,5 @@ scipy
 seaborn
 pygments
 ipython
+cantera
 

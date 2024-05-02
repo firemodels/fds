@@ -2821,6 +2821,7 @@ CALL KSPCREATE(PETSC_COMM_SELF,ZM%PETSC_MZ%LS,PETSC_IERR)
 CALL KSPSETOPERATORS(ZM%PETSC_MZ%LS,ZM%PETSC_MZ%A_H,ZM%PETSC_MZ%A_H,PETSC_IERR) ! A_H Preconditioning Matrix.
 CALL KSPGETPC(ZM%PETSC_MZ%LS,ZM%PETSC_MZ%PR,PETSC_IERR)
 CALL PCSETTYPE(ZM%PETSC_MZ%PR,PCCHOLESKY,PETSC_IERR) ! Default direct LU factorization of solution.
+CALL PCFACTORSETMATSOLVERTYPE(ZM%PETSC_MZ%PR,MATSOLVERCHOLMOD,PETSC_IERR) ! Suitesparse CHOLMOD solver.
 
 ! Runtime options: -ksp_type <type> -pc_type <type> -ksp_monitor -ksp_rtol <rtol>
 CALL KSPSETFROMOPTIONS(ZM%PETSC_MZ%LS,PETSC_IERR)
@@ -2874,6 +2875,15 @@ IF (ERROR /= 0) THEN
    STOP_STATUS = SETUP_STOP
    RETURN
 END IF
+
+! This test assumes all MPI processes have meshes with relatively similar number of cells.
+IF(MY_RANK==0) THEN
+  I=SUM(IPARM((/15,17/)))/1000000
+  IF(I>5) THEN
+     WRITE(LU_ERR,*) 'WARNING: Mesh',NM,', ULMAT PARDISO Numerical Factorization Memory: ',I,' GB'
+     WRITE(LU_ERR,*) 'It is recommended to use more meshes and reduce the number of cells per mesh.'
+  ENDIF
+ENDIF
 
 ! Numerical Factorization.
 PHASE = 22 ! only factorization

@@ -1287,18 +1287,18 @@ END SUBROUTINE WALL_MODEL
 !> \brief Calculate the Nusselt number for natural/free convection
 !> \param NUSSELT Nusselt number
 !> \param RA Rayleigh number
-!> \param SURF_INDEX Indicator of the surface type
-!> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
+!> \param SF Pointer to SURFACE derived type variable
 !> \param IOR Index of the surface orientation
 !> \param DELTA_TMP Temperature difference between gas and surface (K)
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,DELTA_TMP)
+SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SF,IOR,DELTA_TMP)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
 REAL(EB), INTENT(IN) :: RA,DELTA_TMP
-INTEGER, INTENT(IN) :: SURF_INDEX,SURF_GEOMETRY_INDEX,IOR
+INTEGER, INTENT(IN) :: IOR
+TYPE(SURFACE_TYPE), POINTER, INTENT(IN) :: SF
 
-SELECT CASE(SURF_GEOMETRY_INDEX)
+SELECT CASE(SF%GEOMETRY)
    CASE (SURF_CARTESIAN)
       SELECT CASE(ABS(IOR))
          CASE(0:2)
@@ -1315,7 +1315,7 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
             ENDIF
       END SELECT
    CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
-      IF (SURFACE(SURF_INDEX)%HORIZONTAL) THEN
+      IF (SF%HORIZONTAL) THEN
          NUSSELT = (0.6_EB + 0.321_EB*RA**ONSI)**2   ! Incropera and DeWitt, 7th edition, Eq. 9.34
       ELSE
          NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2 ! Incropera and DeWitt, 7th edition, Eq. 9.26
