@@ -3723,6 +3723,7 @@ CHARACTER(30) :: FRMT
 
 T_USED(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS-1))
 WRITE(FRMT,'(A,I2.2,A)') '(I5,',N_TIMERS+1,'(",",ES10.3))'
+WRITE(LINE, FMT='(a)') ''
 WRITE(LINE,FRMT) MY_RANK,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS-1))
 
 ! All MPI processes except root send their timings to the root process. The root process then writes them out to a file.

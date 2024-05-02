@@ -3008,7 +3008,7 @@ ENDDO
 ! Print out Stoichiometric parameters for reactions
 
 IF (N_REACTIONS>0) THEN
-   
+
    WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
    SELECT CASE (EXTINCT_MOD)
@@ -10938,7 +10938,7 @@ IF (IFRMT.EQ.0) THEN
                   IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. &
                       WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. .NOT.CELL(IC)%SOLID) THEN
                      IBK(L,N) = 1
-                     PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW,&
+                     PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW,&
                                                         OPT_BNDF_INDEX=NF),FB)
                   ENDIF
                ENDDO
@@ -10971,7 +10971,7 @@ IF (IFRMT.EQ.0) THEN
                   IF (ISUM>0) THEN
                      PPN(L,N) = PPN(L,N)/REAL(ISUM,FB)
                   ELSE
-                     PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
+                     PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
                                                         OPT_BNDF_INDEX=NF),FB)
                   ENDIF
                ENDDO
@@ -11095,7 +11095,7 @@ ELSEIF ((IFRMT.EQ.1).AND.(MESHES(NM)%N_PATCH > 0)) THEN
    ELSE
       VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_BNDF_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
    ENDIF ! do not change capitalization on mesh topology
-   
+
    PATCH_LOOP1: DO IP=1,N_PATCH
       PA => PATCH(IP)
       ! Initialize piece
