@@ -20,7 +20,6 @@
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
-      MINIMUM_LAYER_THICKNESS = 0.001
       VARIABLE_THICKNESS   = T
       BURN_AWAY            = T /
 
