@@ -436,6 +436,7 @@ ENDIF
 ! Initialize output clocks
 
 CALL INITIALIZE_OUTPUT_CLOCKS(T)
+CALL STOP_CHECK(SETUP_STOP)
 
 ! Initialize output files that are mesh-specific
 
@@ -1798,6 +1799,8 @@ IF (MY_RANK==0) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
       CASE(CLOCK_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Clock Time exceeded - FDS stopped'
+      CASE(ODE_STOP)
+         WRITE(MESSAGE,'(A)') 'ERROR: Combustion ODE Solver Failure - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
@@ -3718,10 +3721,9 @@ CHARACTER(30) :: FRMT
 
 ! T_USED(1) is the time spent in the main routine; i.e. the time not spent in a subroutine.
 
-T_USED(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS))
+T_USED(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS-1))
 WRITE(FRMT,'(A,I2.2,A)') '(I5,',N_TIMERS+1,'(",",ES10.3))'
-WRITE(LINE, FMT='(a)') ''
-WRITE(LINE,FRMT) MY_RANK,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS))
+WRITE(LINE,FRMT) MY_RANK,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS-1))
 
 ! All MPI processes except root send their timings to the root process. The root process then writes them out to a file.
 
@@ -3737,7 +3739,7 @@ ELSE
    ENDDO
    FN_CPU = TRIM(CHID)//'_cpu.csv'
    OPEN(LU_CPU,FILE=FN_CPU,STATUS='REPLACE',FORM='FORMATTED')
-   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,BLNK,HVAC,GEOM,VEGE,Total T_USED (s)'
+   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,BLNK,HVAC,GEOM,VEGE,CHEM,Total T_USED (s)'
    DO N=0,N_MPI_PROCESSES-1
       WRITE(LU_CPU,'(A)') TRIM(LINE_ARRAY(N))
    ENDDO

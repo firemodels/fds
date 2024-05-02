@@ -2875,6 +2875,15 @@ IF (ERROR /= 0) THEN
    RETURN
 END IF
 
+! This test assumes all MPI processes have meshes with relatively similar number of cells.
+IF(MY_RANK==0) THEN
+  I=SUM(IPARM((/15,17/)))/1000000
+  IF(I>5) THEN
+     WRITE(LU_ERR,*) 'WARNING: Mesh',NM,', ULMAT PARDISO Numerical Factorization Memory: ',I,' GB'
+     WRITE(LU_ERR,*) 'It is recommended to use more meshes and reduce the number of cells per mesh.'
+  ENDIF
+ENDIF
+
 ! Numerical Factorization.
 PHASE = 22 ! only factorization
 CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
