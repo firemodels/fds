@@ -92,9 +92,9 @@ endif
 
 else
 
-
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
+
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -137,7 +137,6 @@ endif # MKLROOT test
 endif # PETSc test
 
 
-
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    FFLAGS_SUNDIALS = -DWITH_SUNDIALS -I"${SUNDIALS_HOME}/fortran"
    LFLAGS_SUNDIALS = -L${SUNDIALS_HOME}/lib64 -l:libsundials_fcvode_mod.a -l:libsundials_fnvecserial_mod.a -l:libsundials_cvode.a
@@ -148,9 +147,9 @@ endif
 $(info SUNDIALS_HOME="$(SUNDIALS_HOME)")
 $(info LFLAGS_SUNDIALS="$(LFLAGS_SUNDIALS)")
 
-obj_mpi = prec.o cons.o imkl.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
-          pois.o vtkf.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
-          wall.o fire.o velo.o pres.o init.o dump.o read.o divg.o main.o
+obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
+          pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o imkl.o \
+          wall.o fire.o velo.o pres.o init.o vtkf.o dump.o read.o divg.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
 
@@ -475,7 +474,7 @@ vtkf.o  : func.o prec.o cons.o type.o mesh.o data.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o data.o radi.o soot.o geom.o ccib.o fire.o vtkf.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o prop.o
 divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o prop.o vtkf.o chem.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o prop.o chem.o vtkf.o
 
 prec.obj :
 imkl.obj : prec.obj
@@ -510,7 +509,7 @@ vtkf.obj  : func.obj prec.obj cons.obj type.obj mesh.obj data.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj turb.obj data.obj radi.obj soot.obj geom.obj ccib.obj fire.obj vtkf.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj hvac.obj data.obj geom.obj mass.obj soot.obj prop.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj ccib.obj
-main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj data.obj geom.obj ccib.obj soot.obj prop.obj vtkf.obj chem.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj radi.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj data.obj geom.obj ccib.obj soot.obj prop.obj chem.obj vtkf.obj
 
 #*** Clean Target to remove Object and Module files ***
 
