@@ -137,6 +137,7 @@ DO ICC=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
    IF(J < 0 .OR. J > JBP1) CYCLE
    IF(K < 0 .OR. K > KBP1) CYCLE
    IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE ! Cycle in case Cartesian cell inside OBSTS.
+   IF (.NOT.ALLOCATED(MESHES(NM)%D_SOURCE)) CYCLE
    VOL=DX(I)*DY(J)*DZ(K); D_SOURCE(I,J,K) =0._EB; M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES)=0._EB
    DO JCC=1,CC%NCELL
       D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + CUT_CELL(ICC)%D_SOURCE(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
@@ -7816,14 +7817,16 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CC%M_DOT_PPP(:,JCC) = 0._EB
          IF(RESTART) THEN
             CC%D(JCC)        = D(I,J,K)/CC%ALPHA_CC
-            CC%D_SOURCE(JCC) = D_SOURCE(I,J,K)/CC%ALPHA_CC
+            IF (ALLOCATED(MESHES(NM)%D_SOURCE)) CC%D_SOURCE(JCC) = D_SOURCE(I,J,K)/CC%ALPHA_CC
             CC%Q(JCC)        = Q(I,J,K)/CC%ALPHA_CC
             CC%QR(JCC)       = QR(I,J,K) ! Not needed for radiation.
             CC%M_DOT_PPP(1:N_TRACKED_SPECIES,JCC) = M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES)/CC%ALPHA_CC
          ENDIF
       ENDDO
-      D_SOURCE(I,J,K) = 0._EB
-      M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+      IF (ALLOCATED(MESHES(NM)%D_SOURCE)) THEN
+         D_SOURCE(I,J,K) = 0._EB
+         M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+      ENDIF
    ENDDO
 
    ! Init guardcell cut-cells:
@@ -7855,14 +7858,16 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CC%M_DOT_PPP(:,JCC) = 0._EB
          IF(RESTART) THEN
             CC%D(JCC)        = D(I,J,K)/CC%ALPHA_CC
-            CC%D_SOURCE(JCC) = D_SOURCE(I,J,K)/CC%ALPHA_CC
+            IF (ALLOCATED(MESHES(NM)%D_SOURCE)) CC%D_SOURCE(JCC) = D_SOURCE(I,J,K)/CC%ALPHA_CC
             CC%Q(JCC)        = Q(I,J,K)/CC%ALPHA_CC
             CC%QR(JCC)       = QR(I,J,K) ! Not needed for radiation.
             CC%M_DOT_PPP(1:N_TRACKED_SPECIES,JCC) = M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES)/CC%ALPHA_CC
          ENDIF
       ENDDO
-      D_SOURCE(I,J,K) = 0._EB
-      M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+      IF (ALLOCATED(MESHES(NM)%D_SOURCE)) THEN
+         D_SOURCE(I,J,K) = 0._EB
+         M_DOT_PPP(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+      ENDIF
    ENDDO
 
    ! Gasphase Cut-faces inherit underlying Cartesian face values of Velocity (flux matched or not):
