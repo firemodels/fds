@@ -6,7 +6,7 @@ import subprocess
 
 # Scripts to run prior to dataplot
 
-print("ignition_delay...");   subprocess.run(["python","./scripts/ignition_delay.py"])
+print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
 
 # Dataplot and scatplot options
 
