@@ -77,8 +77,6 @@ for phi in equivRatios:
         # print(f"Computed Ignition Delay: {tau:.3e} seconds for phi={phi} T={ignition_delays[i].T}K. Took {t1 - t0:3.2f}s to compute")
     
         ignition_delays[i].tau = tau
-        
-    ax.semilogy(10000/ ignition_delays.T, ignition_delays.tau, "o-",label = "Phi = {}".format(phi))
    
 # Set Dataframe column headers
 colPerCase = 3 # Time, OH, TMP
