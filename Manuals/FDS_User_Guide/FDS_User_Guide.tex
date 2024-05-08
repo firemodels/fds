@@ -875,6 +875,7 @@ The diagnostic output file called {\ct CHID.out} contains information about the 
 In some special circumstances controlling the final time step of the calculation may be necessary.  By default, FDS sets the last time step to be {\ct T\_END - T} where {\ct T} is the current time.  Because of floating point arithmetic, this final time step may be very small and cause unintended consequences.  You can control this final time step in two ways, using the parameters {\ct DT\_END\_MINIMUM} or {\ct DT\_END\_FILL} (you should not need both).  Using {\ct DT\_END\_MINIMUM} has the effect of setting a minimum for the final time step and so {\ct T\_END} is not strictly observed (hence our default {\ct DT\_END\_MINIMUM} is roughly the machine epsilon).  The final simulation time will be {\ct T + DT\_END\_MINIMUM}.  Alternatively, you could set {\ct DT\_END\_FILL} to some value (should be less than the last time step).  Then if {\ct T+DT+DT\_END\_FILL > T\_END}, where {\ct DT} is the computed stable time step (or specified time step), FDS will recompute the time step to be {\ct DT = T\_END - T}.  If you set one of these parameters, double check the {\ct CHID.out} file to make sure the expected behavior has been observed.
 
 \subsubsection{Simulation Time Ramp}
+\label{info:simulation_time_ramp}
 \label{ramp_time}
 
 \begin{warning}
@@ -13218,8 +13219,9 @@ Keyword             & Type     & Description                      & Units       
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
 {\ct DT\_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
-{\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
-{\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline
+{\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}         \\ \hline
+{\ct RAMP\_TIME}                & Character  & Section~\ref{info:simulation_time_ramp}   &             &                 \\ \hline
+{\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}         \\ \hline
 {\ct T\_BEGIN}                  & Real       & Section~\ref{info:TIME_Basics}            & s           & 0.              \\ \hline
 {\ct T\_END}                    & Real       & Section~\ref{info:TIME_Basics}            & s           & 1.              \\ \hline
 {\ct TIME\_SHRINK\_FACTOR}      & Real       & Section~\ref{info:steady_state}           &             & 1.              \\ \hline
