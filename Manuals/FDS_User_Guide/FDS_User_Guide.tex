@@ -5620,10 +5620,12 @@ When using the wide band model, the electromagnetic spectrum is divided in a rel
 
 It is possible to set your own band limits by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
 
-\subsection{Weighted Sum of Gray Gases (WSGG)}
+\subsection{Weighted Sum of Gray Gases (WSGG) Model (Experimental)}
 \label{info:RADI_WSGG}
 
 To activate the WSGG model, set {\ct WSGG\_MODEL=T} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. Do not set {\ct BAND\_LIMITS}.
+
+Note that the WSGG model is an experimental feature. It has very limited verification and validation that is focused mainly on simple fuels and geometric configurations.
 
 \section{Radiative Absorption and Scattering by Particles}
 
