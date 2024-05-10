@@ -784,84 +784,28 @@ def dataplot(config_filename,**kwargs):
         if irow not in plot_range:
             continue
 
-        # define plot parameters and return them in an object called pp
-        pp = define_plot_parameters(C,irow)
+        try:
 
-        # print(pp.__dict__) # helpful for debug
+            # define plot parameters and return them in an object called pp
+            pp = define_plot_parameters(C,irow)
 
-        if 'all' not in plot_list:
-            if pp.Plot_Filename not in plot_list:
-                continue
+            # print(pp.__dict__) # helpful for debug
 
-        if pp.Plot_Filename!=Plot_Filename_Last:
+            if 'all' not in plot_list:
+                if pp.Plot_Filename not in plot_list:
+                    continue
 
-            if verbose:
-                print('Generating plot ' + pltdir + pp.Plot_Filename + '...')
+            if pp.Plot_Filename!=Plot_Filename_Last:
 
-            if close_figs:
-                plt.close('all')
+                if verbose:
+                    print('Generating plot ' + pltdir + pp.Plot_Filename + '...')
 
-            # read data from exp file
-            # set header to the row where column names are stored (Python is 0 based)
-            E = pd.read_csv(expdir+pp.Exp_Filename, header=pp.Exp_Header_Row-1, sep=' *, *', engine='python')
-            if (pp.Exp_Data_Row-pp.Exp_Header_Row==1):
-                x = E[pp.Exp_x_Col_Name].values[:].astype(float)
-                y = E[pp.Exp_y_Col_Name].values[:].astype(float)
-                if (pp.Exp_y_Error_Col_Name):
-                    y_error = E[pp.Exp_y_Error_Col_Name].values[:].astype(float)
-                else:
-                    y_error = 0.
-            else:
-                # don't exactly understand this, but df.values behave differently if they are object type
-                # when the header and data rows are separated, then there are usually strings in the df.values
-                x = E[pp.Exp_x_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
-                y = E[pp.Exp_y_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
-                if (pp.Exp_y_Error_Col_Name):
-                    y_error = E[pp.Exp_y_Error_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
-                else:
-                    y_error = 0.
-
-            # plot the exp data
-            f = plot_to_fig(x_data=x, y_data=y,
-                data_markevery=pp.Exp_Data_Markevery,
-                data_label=pp.Exp_Data_Label,
-                y_error_absolute=pp.Exp_Error_Absolute,
-                y_error_relative=pp.Exp_Error_Relative,
-                y_error_vector=y_error,
-                x_label=pp.Plot_x_Label,
-                y_label=pp.Plot_y_Label,
-                marker_style=pp.Exp_Marker_Style,
-                marker_fill_color=pp.Exp_Marker_Fill_Color,
-                marker_edge_color=pp.Exp_Marker_Edge_Color,
-                marker_size=pp.Exp_Marker_Size,
-                line_style=pp.Exp_Line_Style,
-                line_color=pp.Exp_Line_Color,
-                line_width=pp.Exp_Line_Width,
-                x_min=pp.Plot_x_Min,x_max=pp.Plot_x_Max,x_nticks=pp.Plot_x_Nticks,
-                y_min=pp.Plot_y_Min,y_max=pp.Plot_y_Max,y_nticks=pp.Plot_y_Nticks,
-                show_legend=pp.Plot_Show_Legend,legend_location=pp.Plot_Legend_Location,
-                figure_size=(pp.Plot_Figure_Width,pp.Plot_Figure_Height),
-                figure_left_adjust=pp.Plot_Left_Adjust,
-                figure_right_adjust=pp.Plot_Right_Adjust,
-                figure_bottom_adjust=pp.Plot_Bottom_Adjust,
-                figure_top_adjust=pp.Plot_Top_Adjust,
-                figure_x_axis_exponent_min=pp.Plot_x_Axis_Exponent_Min,
-                figure_x_axis_exponent_max=pp.Plot_x_Axis_Exponent_Max,
-                figure_y_axis_exponent_min=pp.Plot_y_Axis_Exponent_Min,
-                figure_y_axis_exponent_max=pp.Plot_y_Axis_Exponent_Max
-                )
-
-            # plt.figure(f.number) # make figure current
-            # plt.show()
-        else:
-            f = f_Last
-
-            if pp.Exp_Data_Label!=Exp_Data_Label_Last:
+                if close_figs:
+                    plt.close('all')
 
                 # read data from exp file
                 # set header to the row where column names are stored (Python is 0 based)
                 E = pd.read_csv(expdir+pp.Exp_Filename, header=pp.Exp_Header_Row-1, sep=' *, *', engine='python')
-
                 if (pp.Exp_Data_Row-pp.Exp_Header_Row==1):
                     x = E[pp.Exp_x_Col_Name].values[:].astype(float)
                     y = E[pp.Exp_y_Col_Name].values[:].astype(float)
@@ -881,7 +825,6 @@ def dataplot(config_filename,**kwargs):
 
                 # plot the exp data
                 f = plot_to_fig(x_data=x, y_data=y,
-                    figure_handle=f,
                     data_markevery=pp.Exp_Data_Markevery,
                     data_label=pp.Exp_Data_Label,
                     y_error_absolute=pp.Exp_Error_Absolute,
@@ -910,56 +853,120 @@ def dataplot(config_filename,**kwargs):
                     figure_y_axis_exponent_max=pp.Plot_y_Axis_Exponent_Max
                     )
 
-        # get the model results
-        M = pd.read_csv(cmpdir+pp.Cmp_Filename, header=pp.Cmp_Header_Row-1, sep=' *, *', engine='python')
+                # plt.figure(f.number) # make figure current
+                # plt.show()
+            else:
+                f = f_Last
 
-        if (pp.Cmp_Data_Row-pp.Cmp_Header_Row==1):
-            x = M[pp.Cmp_x_Col_Name].values[:].astype(float)
-            y = M[pp.Cmp_y_Col_Name].values[:].astype(float)
-        else:
-            x = M[pp.Cmp_x_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
-            y = M[pp.Cmp_y_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
+                if pp.Exp_Data_Label!=Exp_Data_Label_Last:
 
-        f = plot_to_fig(x_data=x, y_data=y,
-            institute_label=institute,
-            revision_label=revision,
-            figure_handle=f,
-            data_markevery=pp.Cmp_Data_Markevery,
-            x_label=pp.Plot_x_Label,
-            y_label=pp.Plot_y_Label,
-            data_label=pp.Cmp_Data_Label,
-            marker_style=pp.Cmp_Marker_Style,
-            marker_fill_color=pp.Cmp_Marker_Fill_Color,
-            marker_edge_color=pp.Cmp_Marker_Edge_Color,
-            marker_size=pp.Cmp_Marker_Size,
-            line_style=pp.Cmp_Line_Style,
-            line_color=pp.Cmp_Line_Color,
-            line_width=pp.Cmp_Line_Width,
-            x_min=pp.Plot_x_Min,x_max=pp.Plot_x_Max,x_nticks=pp.Plot_x_Nticks,
-            y_min=pp.Plot_y_Min,y_max=pp.Plot_y_Max,y_nticks=pp.Plot_y_Nticks,
-            show_legend=pp.Plot_Show_Legend,legend_location=pp.Plot_Legend_Location,
-            plot_title=pp.Plot_Title,
-            plot_subtitle=pp.Plot_Subtitle,
-            figure_left_adjust=pp.Plot_Left_Adjust,
-            figure_right_adjust=pp.Plot_Right_Adjust,
-            figure_bottom_adjust=pp.Plot_Bottom_Adjust,
-            figure_top_adjust=pp.Plot_Top_Adjust,
-            figure_x_axis_exponent_min=pp.Plot_x_Axis_Exponent_Min,
-            figure_x_axis_exponent_max=pp.Plot_x_Axis_Exponent_Max,
-            figure_y_axis_exponent_min=pp.Plot_y_Axis_Exponent_Min,
-            figure_y_axis_exponent_max=pp.Plot_y_Axis_Exponent_Max
-            )
+                    # read data from exp file
+                    # set header to the row where column names are stored (Python is 0 based)
+                    E = pd.read_csv(expdir+pp.Exp_Filename, header=pp.Exp_Header_Row-1, sep=' *, *', engine='python')
 
-        plt.figure(f.number) # make figure current
-        # plt.show()
+                    if (pp.Exp_Data_Row-pp.Exp_Header_Row==1):
+                        x = E[pp.Exp_x_Col_Name].values[:].astype(float)
+                        y = E[pp.Exp_y_Col_Name].values[:].astype(float)
+                        if (pp.Exp_y_Error_Col_Name):
+                            y_error = E[pp.Exp_y_Error_Col_Name].values[:].astype(float)
+                        else:
+                            y_error = 0.
+                    else:
+                        # don't exactly understand this, but df.values behave differently if they are object type
+                        # when the header and data rows are separated, then there are usually strings in the df.values
+                        x = E[pp.Exp_x_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
+                        y = E[pp.Exp_y_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
+                        if (pp.Exp_y_Error_Col_Name):
+                            y_error = E[pp.Exp_y_Error_Col_Name].values[pp.Exp_Data_Row-2:].astype(float)
+                        else:
+                            y_error = 0.
 
-        # create plot directory if it does not exist
-        isDir = os.path.isdir(pltdir)
-        if not isDir:
-            os.mkdir(pltdir)
+                    # plot the exp data
+                    f = plot_to_fig(x_data=x, y_data=y,
+                        figure_handle=f,
+                        data_markevery=pp.Exp_Data_Markevery,
+                        data_label=pp.Exp_Data_Label,
+                        y_error_absolute=pp.Exp_Error_Absolute,
+                        y_error_relative=pp.Exp_Error_Relative,
+                        y_error_vector=y_error,
+                        x_label=pp.Plot_x_Label,
+                        y_label=pp.Plot_y_Label,
+                        marker_style=pp.Exp_Marker_Style,
+                        marker_fill_color=pp.Exp_Marker_Fill_Color,
+                        marker_edge_color=pp.Exp_Marker_Edge_Color,
+                        marker_size=pp.Exp_Marker_Size,
+                        line_style=pp.Exp_Line_Style,
+                        line_color=pp.Exp_Line_Color,
+                        line_width=pp.Exp_Line_Width,
+                        x_min=pp.Plot_x_Min,x_max=pp.Plot_x_Max,x_nticks=pp.Plot_x_Nticks,
+                        y_min=pp.Plot_y_Min,y_max=pp.Plot_y_Max,y_nticks=pp.Plot_y_Nticks,
+                        show_legend=pp.Plot_Show_Legend,legend_location=pp.Plot_Legend_Location,
+                        figure_size=(pp.Plot_Figure_Width,pp.Plot_Figure_Height),
+                        figure_left_adjust=pp.Plot_Left_Adjust,
+                        figure_right_adjust=pp.Plot_Right_Adjust,
+                        figure_bottom_adjust=pp.Plot_Bottom_Adjust,
+                        figure_top_adjust=pp.Plot_Top_Adjust,
+                        figure_x_axis_exponent_min=pp.Plot_x_Axis_Exponent_Min,
+                        figure_x_axis_exponent_max=pp.Plot_x_Axis_Exponent_Max,
+                        figure_y_axis_exponent_min=pp.Plot_y_Axis_Exponent_Min,
+                        figure_y_axis_exponent_max=pp.Plot_y_Axis_Exponent_Max
+                        )
 
-        plt.savefig(pltdir + pp.Plot_Filename)
+            # get the model results
+            M = pd.read_csv(cmpdir+pp.Cmp_Filename, header=pp.Cmp_Header_Row-1, sep=' *, *', engine='python')
 
-        Plot_Filename_Last = pp.Plot_Filename
-        Exp_Data_Label_Last = pp.Exp_Data_Label
-        f_Last = f
+            if (pp.Cmp_Data_Row-pp.Cmp_Header_Row==1):
+                x = M[pp.Cmp_x_Col_Name].values[:].astype(float)
+                y = M[pp.Cmp_y_Col_Name].values[:].astype(float)
+            else:
+                x = M[pp.Cmp_x_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
+                y = M[pp.Cmp_y_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
+
+            f = plot_to_fig(x_data=x, y_data=y,
+                institute_label=institute,
+                revision_label=revision,
+                figure_handle=f,
+                data_markevery=pp.Cmp_Data_Markevery,
+                x_label=pp.Plot_x_Label,
+                y_label=pp.Plot_y_Label,
+                data_label=pp.Cmp_Data_Label,
+                marker_style=pp.Cmp_Marker_Style,
+                marker_fill_color=pp.Cmp_Marker_Fill_Color,
+                marker_edge_color=pp.Cmp_Marker_Edge_Color,
+                marker_size=pp.Cmp_Marker_Size,
+                line_style=pp.Cmp_Line_Style,
+                line_color=pp.Cmp_Line_Color,
+                line_width=pp.Cmp_Line_Width,
+                x_min=pp.Plot_x_Min,x_max=pp.Plot_x_Max,x_nticks=pp.Plot_x_Nticks,
+                y_min=pp.Plot_y_Min,y_max=pp.Plot_y_Max,y_nticks=pp.Plot_y_Nticks,
+                show_legend=pp.Plot_Show_Legend,legend_location=pp.Plot_Legend_Location,
+                plot_title=pp.Plot_Title,
+                plot_subtitle=pp.Plot_Subtitle,
+                figure_left_adjust=pp.Plot_Left_Adjust,
+                figure_right_adjust=pp.Plot_Right_Adjust,
+                figure_bottom_adjust=pp.Plot_Bottom_Adjust,
+                figure_top_adjust=pp.Plot_Top_Adjust,
+                figure_x_axis_exponent_min=pp.Plot_x_Axis_Exponent_Min,
+                figure_x_axis_exponent_max=pp.Plot_x_Axis_Exponent_Max,
+                figure_y_axis_exponent_min=pp.Plot_y_Axis_Exponent_Min,
+                figure_y_axis_exponent_max=pp.Plot_y_Axis_Exponent_Max
+                )
+
+            plt.figure(f.number) # make figure current
+            # plt.show()
+
+            # create plot directory if it does not exist
+            isDir = os.path.isdir(pltdir)
+            if not isDir:
+                os.mkdir(pltdir)
+
+            plt.savefig(pltdir + pp.Plot_Filename)
+
+            Plot_Filename_Last = pp.Plot_Filename
+            Exp_Data_Label_Last = pp.Exp_Data_Label
+            f_Last = f
+
+        except:
+            print("Error in row {whichrow}, skipping case...".format(whichrow=irow+1))
+            continue
+
