@@ -3043,8 +3043,9 @@ SURFLOOP: DO N=0,N_SURF
          IF (SF%BACKING==INSULATED) WRITE(LU_OUTPUT,'(A)') '     Insulated Backing'
          IF (SF%BACKING==EXPOSED)   WRITE(LU_OUTPUT,'(A)') '     Exposed Backing'
       ENDIF
-      IF (SF%GEOMETRY==SURF_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed cylindrical symmetry'
-      IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical symmetry'
+      IF (SF%GEOMETRY==SURF_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed cylindrical surface'
+      IF (SF%GEOMETRY==SURF_INNER_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed (inner) cylindrical surface'
+      IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical surface'
    ELSEIF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1)) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Internal noding and material information taken from underlying obstructions'
    ENDIF THICK
@@ -8690,8 +8691,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          RADIUS = SF%INNER_RADIUS + ONE_D%X(SUM(ONE_D%N_LAYER_CELLS)) - ONE_D%X(0)
          IF (RADIUS>TWO_EPSILON_EB) THEN
             SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CYLINDRICAL) ; SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT* SF%THICKNESS/RADIUS
-               CASE(SURF_SPHERICAL)   ; SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT*(SF%THICKNESS/RADIUS)**2
+               CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL) ; SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT* SF%THICKNESS/RADIUS
+               CASE(SURF_SPHERICAL)                          ; SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT*(SF%THICKNESS/RADIUS)**2
             END SELECT
          ELSE
             SOLID_PHASE_OUTPUT = 0._EB
@@ -9172,7 +9173,9 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                CASE DEFAULT
                   VOL = B1%AREA*(ONE_D%X(I)-ONE_D%X(I-1))
                CASE (SURF_CYLINDRICAL)
-                  VOL = SF%LENGTH*PI*((X0-ONE_D%X(I-1))**2-(X0-ONE_D%X(I))**2)
+                  VOL = SF%LENGTH*PI*((SF%INNER_RADIUS+X0-ONE_D%X(I-1))**2-(SF%INNER_RADIUS+X0-ONE_D%X(I))**2)
+               CASE (SURF_INNER_CYLINDRICAL)
+                  VOL = SF%LENGTH*PI*((SF%INNER_RADIUS+ONE_D%X(I))**2-(SF%INNER_RADIUS+ONE_D%X(I-1))**2)
                CASE (SURF_SPHERICAL)
                   VOL = FOTHPI*((X0-ONE_D%X(I-1))**3-(X0-ONE_D%X(I))**3)
             END SELECT
