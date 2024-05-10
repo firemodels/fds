@@ -771,7 +771,7 @@ def dataplot(config_filename,**kwargs):
         plot_range = range(plot_range_in[0]-2,plot_range_in[-1])
 
     # read the config file
-    df = pd.read_csv(configdir+config_filename, sep=' *, *', engine='python', comment='#')
+    df = pd.read_csv(configdir+config_filename, sep=' *, *', engine='python', comment='#', quotechar='"')
     C = df.where(pd.notnull(df), None)
 
     Plot_Filename_Last = None
