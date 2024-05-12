@@ -243,6 +243,7 @@ $QFDS -d Heat_Transfer heat_conduction_d.fds
 $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
+$QFDS -d Heat_Transfer insulated_steel_pipe_2d.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
 $QFDS -d Heat_Transfer ht1d_pile.fds
 $QFDS -d Heat_Transfer ht3d_pile.fds

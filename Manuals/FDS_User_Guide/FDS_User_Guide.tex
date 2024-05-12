@@ -946,6 +946,8 @@ The governing equations solved in FDS are written in terms of a three dimensiona
 
 When processing results for a {\ct CYLINDRICAL} simulation, note that integrated output quantities with the {\ct SPATIAL\_STATISTIC} attribute apply only to the specified 2-D or cylindrical coordinates. Thus, the cylindrical coordinates define a cylindrical sector, like a slice of cake, even though Smokeview will not render it this way. The fully integrated quantity can be calculated by multiplying the reported value by $2 \pi \, \delta\theta$, where $\delta\theta$ is the difference between {\ct YMAX} and {\ct YMIN} in radians. The values chosen for {\ct YMAX} and {\ct YMIN} do not matter as long as the rendering in Smokeview is to your liking.
 
+When performing solid phase heat transfer while using a 2-D {\ct CYLINDRICAL} coordinate system, you must designate {\ct GEOMETRY='CYLINDRICAL'} on a surface ({\ct SURF} line) that is facing radially outward (positive $r$ direction) or {\ct GEOMETRY='INNER CYLINDRICAL'} on a surface that is facing radially inward (negative $r$ direction). In the latter instance, you must also specify the {\ct INNER\_RADIUS} (m) of the cylinder. For the outer cylindrical boundary, specify an {\ct INNER\_RADIUS} if appropriate. Its default value is 0~m. Because your inward and outward facing boundaries might occur at various radii, you must create separate {\ct SURF} lines for each with the appropriate values of {\ct GEOMETRY} and {\ct INNER\_RADIUS}. For an obstruction ({\ct OBST}), use {\ct SURF\_ID6} to assign individual {\ct SURF ID}s to each of the six faces. Because this is a 2-D simulation, the third and fourth entries representing the {\ct SURF ID}s in the $y$ or angular direction can just be designated {\ct 'INERT'}.
+
 
 \subsection{Multiple Meshes}
 \label{info:multimesh}
@@ -2432,6 +2434,8 @@ All obstructions in FDS are assumed to conform to the rectilinear mesh, and all 
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{lstlisting}
 can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS.
+
+To represent the {\em inner} surface of a cylinder, specify {\ct GEOMETRY='INNER CYLINDRICAL'} along with an {\ct INNER\_RADIUS} (m). 
 
 Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object. Add {\ct HORIZONTAL=T} to the {\ct SURF} line if you have specified a cylindrical geometry and you want to ensure that the heat transfer coefficient is appropriate for a horizontal cylinder.
 
