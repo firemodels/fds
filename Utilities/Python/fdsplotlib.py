@@ -301,6 +301,11 @@ def define_plot_parameters(C,irow):
             return str(self)
 
         try:
+            VerStr_Filename       = C.values[irow,C.columns.get_loc('VerStr_Filename')]
+        except:
+            VerStr_Filename       = None
+
+        try:
             Exp_Filename          = C.values[irow,C.columns.get_loc('Exp_Filename')]
         except:
             sys.exit('Required column header missing: Exp_Filename')
@@ -922,9 +927,16 @@ def dataplot(config_filename,**kwargs):
                 x = M[pp.Cmp_x_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
                 y = M[pp.Cmp_y_Col_Name].values[pp.Cmp_Data_Row-2:].astype(float)
 
+            version_string = revision
+            if (pp.VerStr_Filename):
+                file1 = open(cmpdir+pp.VerStr_Filename,"r")
+                Lines = file1.readlines()
+                version_string = Lines[0].strip()
+                file1.close()
+
             f = plot_to_fig(x_data=x, y_data=y,
                 institute_label=institute,
-                revision_label=revision,
+                revision_label=version_string,
                 figure_handle=f,
                 data_markevery=pp.Cmp_Data_Markevery,
                 x_label=pp.Plot_x_Label,
