@@ -11,6 +11,7 @@ Collection of functions for plotting and analysis
 
 import sys
 import math
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -299,6 +300,16 @@ def define_plot_parameters(C,irow):
 
         def __repr__(self):
             return str(self)
+
+        try:
+            Switch_id      = C.values[irow,C.columns.get_loc('Switch_id')]
+        except:
+            Switch_id      = 's'
+
+        try:
+            Dataname       = C.values[irow,C.columns.get_loc('Dataname')]
+        except:
+            Dataname       = 'null'
 
         try:
             VerStr_Filename       = C.values[irow,C.columns.get_loc('VerStr_Filename')]
@@ -797,7 +808,7 @@ def dataplot(config_filename,**kwargs):
             # print(pp.__dict__) # helpful for debug
 
             if 'all' not in plot_list:
-                if pp.Plot_Filename not in plot_list:
+                if pp.Dataname not in plot_list:
                     continue
 
             if pp.Plot_Filename!=Plot_Filename_Last:
@@ -972,7 +983,7 @@ def dataplot(config_filename,**kwargs):
             if not isDir:
                 os.mkdir(pltdir)
 
-            plt.savefig(pltdir + pp.Plot_Filename)
+            plt.savefig(pltdir + pp.Plot_Filename, backend='pdf')
 
             Plot_Filename_Last = pp.Plot_Filename
             Exp_Data_Label_Last = pp.Exp_Data_Label
