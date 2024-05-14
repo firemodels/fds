@@ -18,13 +18,12 @@ print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_igniti
 # Run dataplot and scatplot scripts
 
 fdsplotlib.dataplot(config_filename='FDS_verification_dataplot_config.csv',
-                    revision='test',
                     expdir='../../Verification/',
                     cmpdir='../../Verification/',
-                    pltdir='../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',
+                    pltdir='../../Manuals/',
                     close_figs=True,
                     verbose=True,
-                    plot_list=['all'])
+                    plot_list=['cantera_ignition_delay'])
 
 # Special cases
 
