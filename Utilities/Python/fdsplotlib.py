@@ -740,6 +740,7 @@ def dataplot(config_filename,**kwargs):
     plt.rcParams['pdf.compression'] = 6 # 0 to 9 (file size was no smaller with 9)
     plt.rcParams['pdf.fonttype'] = 3 # 42 embeds true type fonts into pdf (large file size)
     # plt.rcParams['text.usetex'] = True # supports latex math
+    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather then embed
 
     # defaults
     institute = ''
