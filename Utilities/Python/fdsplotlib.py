@@ -302,11 +302,6 @@ def define_plot_parameters(C,irow):
             return str(self)
 
         try:
-            Switch_id      = C.values[irow,C.columns.get_loc('Switch_id')]
-        except:
-            Switch_id      = 's'
-
-        try:
             Dataname       = C.values[irow,C.columns.get_loc('Dataname')]
         except:
             Dataname       = 'null'
