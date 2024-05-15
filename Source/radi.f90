@@ -3327,6 +3327,9 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
 ENDIF MAKE_KAPPA_ARRAYS
 
+! Reference: Bordbar, Wecel, Hyppanen.  A line by line based weighted sum of gray gases model for inhomogeneous
+!            CO2-H2O mixture in oxy-fired comustion.  Combustion and Flame, 161 (2014) 2435-2445.
+
 MAKE_WSGG_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. WSGG_MODEL) THEN
    ALLOCATE(WSGG_B1_ARRAY(1:4,0:4))
    ALLOCATE(WSGG_B2_ARRAY(1:4,0:4))
