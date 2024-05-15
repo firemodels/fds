@@ -539,12 +539,20 @@ def define_plot_parameters(C,irow):
                 Plot_x_Label = 'x'
         except:
             Plot_x_Label = 'x'
+
         try:
             Plot_y_Label = C.values[irow,C.columns.get_loc('Plot_y_Label')]
             if pd.isnull(Plot_y_Label):
                 Plot_y_Label = 'y'
         except:
             Plot_y_Label = 'y'
+
+        try:
+            Plot_Use_TeX = C.values[irow,C.columns.get_loc('Plot_Use_TeX')]
+            if pd.isnull(Plot_Use_TeX):
+                Plot_Use_TeX = False
+        except:
+            Plot_Use_TeX = False
 
         try:
             Plot_x_Min = C.values[irow,C.columns.get_loc('Plot_x_Min')]
@@ -732,15 +740,10 @@ def dataplot(config_filename,**kwargs):
     import os
     import matplotlib.pyplot as plt
     import pandas as pd
-    # from matplotlib import rc
-    # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-    # rc('font',**{'family':'serif','serif':['Palatino']})
 
-    plt.rcParams['mathtext.fontset'] = 'dejavusans' # valid strings are ['dejavusans', 'dejavuserif', 'cm', 'stix', 'stixsans', 'custom']
-    plt.rcParams['pdf.compression'] = 6 # 0 to 9 (file size was no smaller with 9)
-    plt.rcParams['pdf.fonttype'] = 3 # 42 embeds true type fonts into pdf (large file size)
-    # plt.rcParams['text.usetex'] = True # supports latex math
-    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather then embed
+    plt.rcParams["font.family"] = 'Times'
+    # plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
+    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
 
     # defaults
     institute = ''
@@ -806,6 +809,12 @@ def dataplot(config_filename,**kwargs):
             if 'all' not in plot_list:
                 if pp.Dataname not in plot_list:
                     continue
+
+            # text.usetex=T results in much larger file size (embedded Times LaTeX fonts), so only use when necessary
+            if (pp.Plot_Use_TeX):
+                plt.rcParams['text.usetex'] = True
+            else:
+                plt.rcParams['text.usetex'] = False
 
             if pp.Plot_Filename!=Plot_Filename_Last:
 
