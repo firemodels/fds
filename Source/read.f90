@@ -6801,12 +6801,12 @@ READ_MATL_LOOP: DO N=1,N_MATL
    NOT_BOILING: IF (BOILING_TEMPERATURE>4000._EB) THEN
 
       IF ( ( ANY(REFERENCE_TEMPERATURE>-TMPM) .OR. ANY(A>=0._EB) .OR. ANY(E>=0._EB) .OR. &
-             ANY(ABS(HEAT_OF_REACTION)<HUGE(1._EB))) .AND. N_REACTIONS==0) THEN
+             ANY(ABS(HEAT_OF_REACTION)<1.E12_EB)) .AND. N_REACTIONS==0) THEN
          N_REACTIONS = 1
       ENDIF
 
       DO NR=1,N_REACTIONS
-         IF (HEAT_OF_REACTION(NR) <=-HUGE(1._EB)) THEN
+         IF (HEAT_OF_REACTION(NR)<=-1.E12_EB) THEN
             HEAT_OF_REACTION(NR) = 0._EB
             ADJUST_H = .FALSE.
          ENDIF
@@ -6824,7 +6824,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ELSE NOT_BOILING ! Is liquid
 
       N_REACTIONS = 1
-      IF (ABS(HEAT_OF_REACTION(1))<=TWO_EPSILON_EB) THEN
+      IF (HEAT_OF_REACTION(1)<=TWO_EPSILON_EB) THEN
          WRITE(MESSAGE,'(A,A,A)') 'ERROR(252): MATL ',TRIM(ID),', HEAT_OF_REACTION should be greater than 0.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
@@ -7079,7 +7079,7 @@ EMISSIVITY             = 0.9_EB
 FYI                    = 'null'
 GAS_DIFFUSION_DEPTH    = 0.001_EB    ! m
 HEAT_OF_COMBUSTION     = -1._EB      ! kJ/kg
-HEAT_OF_REACTION       = -HUGE(1._EB) ! kJ/kg
+HEAT_OF_REACTION       = -1.E15_EB   ! kJ/kg
 ID                     = 'null'
 MAX_REACTION_RATE      = HUGE(1._EB)
 MW                     = -1._EB
