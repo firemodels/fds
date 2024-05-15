@@ -17169,11 +17169,11 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IEC = EDGE(IE)%AXIS
 
       ! Edge nodes location:
-      XYZ1 = (/ X(I), Y(J), Z(K) /); XYZ2 = XYZ1
+      XYZ1 = (/ X(II), Y(JJ), Z(KK) /); XYZ2 = XYZ1
       SELECT CASE(IEC)
-         CASE(IAXIS); XYZ1(IAXIS) = X(I-1)
-         CASE(JAXIS); XYZ1(JAXIS) = Y(J-1)
-         CASE(KAXIS); XYZ1(KAXIS) = Z(K-1)
+         CASE(IAXIS); XYZ1(IAXIS) = X(II-1)
+         CASE(JAXIS); XYZ1(JAXIS) = Y(JJ-1)
+         CASE(KAXIS); XYZ1(KAXIS) = Z(KK-1)
       END SELECT
 
       ! First: Loop over all possible face orientations of edge to define XB_IB, SURF_INDEX, PROCESS_EDGE_ORIENTATION:
