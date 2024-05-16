@@ -38,12 +38,10 @@ Qdot=[151 303 756 1513 3025 7564 15127 30255 75636 151273 302545 756363 1512725 
 for i=1:16 % hrr loop
     for j=1:3 % resolution loop
         M = csvread([outdir,filename{i,j}],2,0);
-        L(j) = M(end,2);
+        L(j) = M(end,4);  % 99th percentile
         Qstar = Qdot(i)/(rho_inf*cp*T_inf*sqrt(g)*D^(5/2));
-        LfD = 3.7*Qstar^(2/5)-1.02; % Heskestad correlation Lf/D
     end
     W(i,1:4) = [Qstar L(1)/D L(2)/D L(3)/D];
-    H(i,1:2) = [Qstar LfD];
 end
 
 fclose('all');
@@ -56,17 +54,6 @@ fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s\n',header1{:});
 for i=1:16
     fprintf(fid,'%f, %f, %f, %f\n',W(i,:));
-end
-fclose(fid);
-
-% Write a file with Heskestad correlation
-  
-header2 = {'Q*','L/D'};
-filename2 = [expdir,'Heskestad_Correlation.csv'];
-fid = fopen(filename2,'wt');
-fprintf(fid,'%s, %s\n',header2{:});
-for i=1:16
-    fprintf(fid,'%f, %f\n',H(i,:));
 end
 fclose(fid);
 
