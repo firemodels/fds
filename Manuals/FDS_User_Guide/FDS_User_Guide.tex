@@ -2435,7 +2435,7 @@ All obstructions in FDS are assumed to conform to the rectilinear mesh, and all 
 \end{lstlisting}
 can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS.
 
-To represent the {\em inner} surface of a cylinder, specify {\ct GEOMETRY='INNER CYLINDRICAL'} along with an {\ct INNER\_RADIUS} (m). 
+To represent the {\em inner} surface of a cylinder, specify {\ct GEOMETRY='INNER CYLINDRICAL'} along with an {\ct INNER\_RADIUS} (m).
 
 Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object. Add {\ct HORIZONTAL=T} to the {\ct SURF} line if you have specified a cylindrical geometry and you want to ensure that the heat transfer coefficient is appropriate for a horizontal cylinder.
 
@@ -9889,6 +9889,8 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE TOTAL HEAT FLUX'} (\si{kW/m^2}) \\
 \\
 If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on {\ct SURF} then the default solid particle color will revert to black.  You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
+
+The {\ct 'PARTICLE TEMPERATURE'} is the surface temperature.  For thermally thin particles, like droplets, this temperature represents the whole particle, but for thermally thick particles it is just the surface temperature.  For in-depth temperature of thermally thick particles you need to use a profile {\ct PROF}, as discussed in Sec.~\ref{info:PROF}.  In practice, you should designate only a small subset of particles (use a separate {\ct PART} line) for monintoring internal temperatures, as the amount of data can become large, and there is no way to visualize this in Smokeview.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
