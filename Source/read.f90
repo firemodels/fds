@@ -14096,8 +14096,12 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          DZ = 0.5_EB*(DEVICE(DEVC_INDEX+NN)%Z - DEVICE(DEVC_INDEX+NN-2)%Z)
          CF%DL(NN) = SQRT(DX**2+DY**2+DZ**2)
       ENDDO
-      CF%DL(1)           = DEVICE(DEVC_INDEX+1)%X - DEVICE(DEVC_INDEX)%X
-      CF%DL(DV%N_POINTS) = DEVICE(DEVC_INDEX+DV%N_POINTS-1)%X - DEVICE(DEVC_INDEX+DV%N_POINTS-2)%X
+      CF%DL(1)           = SQRT((DEVICE(DEVC_INDEX+1            )%X - DEVICE(DEVC_INDEX              )%X)**2 + &
+                                (DEVICE(DEVC_INDEX+1            )%Y - DEVICE(DEVC_INDEX              )%Y)**2 + &
+                                (DEVICE(DEVC_INDEX+1            )%Z - DEVICE(DEVC_INDEX              )%Z)**2)
+      CF%DL(DV%N_POINTS) = SQRT((DEVICE(DEVC_INDEX+DV%N_POINTS-1)%X - DEVICE(DEVC_INDEX+DV%N_POINTS-2)%X)**2 + &
+                                (DEVICE(DEVC_INDEX+DV%N_POINTS-1)%Y - DEVICE(DEVC_INDEX+DV%N_POINTS-2)%Y)**2 + &
+                                (DEVICE(DEVC_INDEX+DV%N_POINTS-1)%Z - DEVICE(DEVC_INDEX+DV%N_POINTS-2)%Z)**2)
       CF%LSUM(0) = 0._EB
       DO NN=1,DV%N_POINTS
          CF%LSUM(NN) = CF%LSUM(NN-1) + CF%DL(NN)
