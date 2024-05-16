@@ -25,7 +25,6 @@ resource_manager=
 walltime=
 showcommandline=
 showscript=
-CHECK_DIRTY=-g
 CHECK=
 
 INTEL="-I"
@@ -58,7 +57,6 @@ echo "-b - use debug version of FDS"
 echo "-C - check that case has run"
 echo "-e exe - run using exe (full path to fds)."
 echo "      Note: environment must be defined to use this executable"
-echo "-g - run even if input files or executable is dirty"
 echo "-h - display this message"
 echo "-I - run with Intel MPI version of fds"
 echo "-j job_prefix - specify job prefix"
@@ -68,7 +66,7 @@ echo "     default: Current_Results"
 echo "-O - run with Open MPI version of fds"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
-echo "-r resource_manager - default: PBS, other options: SLURM"
+echo "-r resource_manager - default: SLURM, other options: PBS/Torque"
 echo "-s - stop FDS runs"
 echo "-u - use development version of FDS"
 echo "-v - show script run by qfds.sh for each validation case"
@@ -79,12 +77,12 @@ echo "-y - overwrite existing files"
 exit
 }
 
-DEBUG=$OPENMP
-while getopts 'bCe:EghIj:m:o:Oq:r:suvVw:xy' OPTION
+DEBUG=
+while getopts 'bCe:EhIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
-   DEBUG="-b $OPENMP"
+   DEBUG="-b "
    ;;
   C)
    CHECK=1
@@ -97,9 +95,6 @@ case $OPTION in
    ;;
   E)
    TCP="-E "
-   ;;
-  g)
-   CHECK_DIRTY=
    ;;
   h)
   usage;
@@ -156,7 +151,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh $CHECK_DIRTY $walltime $showcommandline $showscript $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh $walltime $showcommandline $showscript $DV $INTEL $EXE"
 if [ "$CHECK" != "" ]; then
   export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 fi
@@ -170,38 +165,9 @@ DEBUG="$DEBUG $TCP"
 if [ "$resource_manager" == "SLURM" ]; then
    export RESOURCE_MANAGER="SLURM"
 else
-   export RESOURCE_MANAGER="PBS"
+   export RESOURCE_MANAGER="PBS/Torque"
 fi
 ##############################################################
-
-# abort if repo is dirty
-
-if [ ! $STOPFDS ] ; then
-  ABORT=
-  if [ "$CHECK_DIRTY" != "" ]; then
-    ndiffs=`git diff --shortstat FDS_Input_Files/*.fds | wc -l`
-    nsourcediffs=`git diff --shortstat ../../Source/*.f90 | wc -l`
-    if [ $ndiffs -gt 0 ]; then
-       echo ""
-       echo "***error: One or more input files are dirty."
-       git status -uno | grep FDS_Input_Files  | grep -v \/FDS_Input_Files
-       ABORT=1
-    fi
-    if [ $nsourcediffs -gt 0 ]; then
-       echo ""
-       echo "***error: One or more source files are dirty."
-       cd ../..
-       git status -uno | grep Source
-       ABORT=1
-    fi
-    if [ "$ABORT" == "1" ]; then
-       echo ""
-       echo "Use the -g option to run anyway."
-       echo "Exiting."
-       exit 1
-    fi
-  fi
-fi
 
 # Skip if STOPFDS (-s option) is specified
 if [ ! $STOPFDS ] ; then
