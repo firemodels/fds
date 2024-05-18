@@ -321,6 +321,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: VEL_ERR_NEW=0._EB     !< Velocity mismatch at mesh or solid boundary (m/s)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
+   LOGICAL :: LAYER_REMOVED=.FALSE.  !< Indicator that at least one layer has been removed during the time step
 
 END TYPE BOUNDARY_PROP1_TYPE
 

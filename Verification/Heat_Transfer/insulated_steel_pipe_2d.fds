@@ -1,0 +1,53 @@
+&HEAD CHID='insulated_steel_pipe_2d', TITLE='Insulated steel pipe gets hot' /
+
+&MESH IJK=7,1,15, XB=0.0,0.07,-0.01,0.01,0.0,0.15, CYLINDRICAL=T /
+
+&TIME T_END=36000., WALL_INCREMENT=1, DT=1.0 /
+
+&MISC SOLID_PHASE_ONLY=.TRUE. /
+
+&RADI RADIATION=.FALSE. /
+
+&MATL ID            = 'STEEL'
+      SPECIFIC_HEAT = 0.5
+      CONDUCTIVITY  = 50.
+      DENSITY       = 7500. /
+
+&MATL ID            = 'INSULATION'
+      EMISSIVITY    = 0.
+      CONDUCTIVITY  = 0.2
+      SPECIFIC_HEAT = 1.0
+      DENSITY       = 200. /
+
+&OBST XB=0.01,0.06,-0.01,0.01,0.0,0.15, SURF_ID6='INNER WALL','OUTER WALL','INERT','INERT','INERT','INERT' /
+
+&SURF ID                        = 'OUTER WALL'
+      MATL_ID                   = 'INSULATION','STEEL','INSULATION'
+      TMP_GAS_FRONT             = 480.
+      TMP_GAS_BACK              = 20.
+      HEAT_TRANSFER_COEFFICIENT = 10.
+      HEAT_TRANSFER_COEFFICIENT_BACK = 10.
+      GEOMETRY                  = 'CYLINDRICAL'
+      INNER_RADIUS              = 0.01
+      THICKNESS                 = 0.02,0.01,0.02 /
+
+&SURF ID                        = 'INNER WALL'
+      MATL_ID                   = 'INSULATION','STEEL','INSULATION'
+      TMP_GAS_FRONT             = 20.
+      TMP_GAS_BACK              = 480.
+      HEAT_TRANSFER_COEFFICIENT = 10.
+      HEAT_TRANSFER_COEFFICIENT_BACK = 10.
+      GEOMETRY                  = 'INNER CYLINDRICAL'
+      INNER_RADIUS              = 0.01
+      THICKNESS                 = 0.02,0.01,0.02 /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&PROF XYZ=0.06,0.0,0.07, QUANTITY='TEMPERATURE', IOR= 1, FORMAT_INDEX=2, ID='T_out' /
+&PROF XYZ=0.01,0.0,0.07, QUANTITY='TEMPERATURE', IOR=-1, FORMAT_INDEX=2, ID='T_in'  /
+
+&TAIL /
+
+
