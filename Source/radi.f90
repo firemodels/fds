@@ -3327,6 +3327,9 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
 ENDIF MAKE_KAPPA_ARRAYS
 
+! Reference: Bordbar, Wecel, Hyppanen.  A line by line based weighted sum of gray gases model for inhomogeneous
+!            CO2-H2O mixture in oxy-fired comustion.  Combustion and Flame, 161 (2014) 2435-2445.
+
 MAKE_WSGG_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. WSGG_MODEL) THEN
    ALLOCATE(WSGG_B1_ARRAY(1:4,0:4))
    ALLOCATE(WSGG_B2_ARRAY(1:4,0:4))
@@ -3562,7 +3565,10 @@ IF (INIT_HRRPUV .AND. RAD_ITER>1) CALL ADD_VOLUMETRIC_HEAT_SOURCE(2)
 
 ! Initialize the radiative loss to zero for special case models that loop over wavelength bands
 
-IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) QR = 0._EB
+IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) THEN
+   QR = 0._EB
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) QR_W = 0._EB
+ENDIF
 
 ! Zero out radiation flux to wall, particles, facets if the intensity is to be updated
 
@@ -3622,6 +3628,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
          BBF = 1._EB
+         QR_W = 0._EB
       ELSEIF (WSGG_MODEL) THEN
          ! Computing the temperature coefficient in the WSGG model at ambient temperature
          Z_ARRAY(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0     ! Mass frac of the tracked species in ambient
@@ -3654,8 +3661,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO
       ENDDO PC_LOOP
 
-      QR_W = 0._EB
-
    ENDIF IF_PARTICLES_INCLUDED
 
    ! Compute the absorption coefficient, KAPPA_PART, for a collection of solid particles
@@ -3670,7 +3675,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XID,YJD,ZKD,IID,JJD,KKD)
          KAPPA_PART_SINGLE = 0.25_EB*LP%PWT*B1%AREA*LP%RVC*B1%EMISSIVITY
          KAPPA_PART(IID,JJD,KKD) = KAPPA_PART(IID,JJD,KKD) + KAPPA_PART_SINGLE
-         KFST4_PART(IID,JJD,KKD) = KFST4_PART(IID,JJD,KKD) + KAPPA_PART_SINGLE*FOUR_SIGMA*B1%TMP_F**4
+         KFST4_PART(IID,JJD,KKD) = KFST4_PART(IID,JJD,KKD) + BBF*KAPPA_PART_SINGLE*FOUR_SIGMA*B1%TMP_F**4
       ENDDO
    ENDIF
 

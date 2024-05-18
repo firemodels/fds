@@ -1314,7 +1314,7 @@ SELECT CASE(SF%GEOMETRY)
                NUSSELT = 0.52_EB*RA**0.2     ! Incropera and DeWitt, 7th edition, Eq. 9.32
             ENDIF
       END SELECT
-   CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
+   CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
       IF (SF%HORIZONTAL) THEN
          NUSSELT = (0.6_EB + 0.321_EB*RA**ONSI)**2   ! Incropera and DeWitt, 7th edition, Eq. 9.34
       ELSE
@@ -1351,7 +1351,7 @@ ELSE
    SELECT CASE(SURF_GEOMETRY_INDEX)
       CASE (SURF_CARTESIAN)
          NUSSELT = 0.0296_EB*RE**0.8_EB*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.36, Table 7.7
-      CASE (SURF_CYLINDRICAL)
+      CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)
          ! Incropera and DeWitt, 7th, Eq. 7.52
          IF (RE >= 40000._EB) THEN
             NUSSELT = 0.027_EB*RE**0.805_EB*PR_ONTH_IN

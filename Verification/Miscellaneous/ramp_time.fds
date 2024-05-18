@@ -1,0 +1,17 @@
+&HEAD CHID='ramp_time', TITLE='Test RAMP_TIME feature'/
+
+&MESH IJK=10,10,10, XB=0,1,0,1,0,1/
+
+&TIME T_BEGIN=0., T_END=10., RAMP_TIME='time-ramp' /
+
+&DUMP RAMP_DEVC='time-ramp'/
+
+&RAMP ID='time-ramp', T=1 /
+&RAMP ID='time-ramp', T=2 /
+&RAMP ID='time-ramp', T=5 /
+&RAMP ID='time-ramp', T=9 /
+
+&DEVC XYZ=0.5,0.5,0.5, QUANTITY='TIME', ID='time'/
+&DEVC XYZ=0.5,0.5,0.5, QUANTITY='TEMPERATURE', ID='tmp'/
+
+&TAIL /

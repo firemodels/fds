@@ -5,6 +5,6 @@ This folder contains the Python scripts that process the output from the FDS ver
 Make sure the FDS python environment is activated and run the main script from this top level of this folder.  For example:
 
 ```
-(fds_python_env) $ python3 FDS_verification_script.py
+(fds_python_env) $ python FDS_verification_script.py
 ...
 ```
