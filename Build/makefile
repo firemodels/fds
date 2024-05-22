@@ -155,7 +155,7 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 
 impi_intel_win : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win : FFLAGS = -D_WIN32 /O2 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
+impi_intel_win : FFLAGS = -D_WIN32 /O2 /wrap-margin- /I$(MPIINCLUDE) $(GITINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win : FCOMPL = ifx
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
@@ -163,7 +163,7 @@ impi_intel_win : setup_win $(objwin_mpi)
 
 impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_vt : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_vt : FFLAGS = -D_WIN32 /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) /Zi /D "TBB_USE_THREADING_TOOLS"
+impi_intel_win_vt : FFLAGS = -D_WIN32 /O2 /I$(MPIINCLUDE) /wrap-margin- /I$(MPIINCLUDE) $(GITINFO) $(FFLAGSMKL_INTEL) /Zi /D "TBB_USE_THREADING_TOOLS"
 impi_intel_win_vt : FCOMPL = ifx
 impi_intel_win_vt : obj = fds_impi_intel_win_vt
 impi_intel_win_vt : setup_win $(objwin_mpi)
@@ -172,7 +172,7 @@ impi_intel_win_vt : setup_win $(objwin_mpi)
 
 impi_intel_win_openmp : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_openmp : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_openmp : FFLAGS = -D_WIN32 /O2 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
+impi_intel_win_openmp : FFLAGS = -D_WIN32 /O2 /wrap-margin- /I$(MPIINCLUDE) $(GITINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_openmp : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp : FCOMPL = ifx
 impi_intel_win_openmp : obj = fds_impi_intel_win_openmp
