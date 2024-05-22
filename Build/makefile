@@ -153,51 +153,65 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 # Windows Intel Fortran Compiler and Intel MPI
 #*** Note: the script, Build\Scripts\setup_intel_compilers.bat, must be run before running make with this target
 
+impi_intel_win : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win : FFLAGS = -D_WIN32 /O2 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
-impi_intel_win : FCOMPL = mpiifx
+impi_intel_win : FCOMPL = ifx
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
+impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_vt : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_vt : FFLAGS = -D_WIN32 /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) /Zi /D "TBB_USE_THREADING_TOOLS"
-impi_intel_win_vt : FCOMPL = mpiifx
+impi_intel_win_vt : FCOMPL = ifx
 impi_intel_win_vt : obj = fds_impi_intel_win_vt
 impi_intel_win_vt : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 
+impi_intel_win_openmp : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_openmp : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_openmp : FFLAGS = -D_WIN32 /O2 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_openmp : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_openmp : FCOMPL = mpiifx
+impi_intel_win_openmp : FCOMPL = ifx
 impi_intel_win_openmp : obj = fds_impi_intel_win_openmp
 impi_intel_win_openmp : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL_OPENMP)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
+impi_intel_win_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_dv : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_dv : FFLAGS = -D_WIN32 /O1 /I$(MPIINCLUDE) /Z7 /traceback /debug:full /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
-impi_intel_win_dv : FCOMPL = mpiifx
+impi_intel_win_dv : FCOMPL = ifx
 impi_intel_win_dv : obj = fds_impi_intel_win_dv
 impi_intel_win_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
+impi_intel_win_openmp_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_openmp_dv : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_openmp_dv : FFLAGS = -D_WIN32 /O1 /I$(MPIINCLUDE) /Z7 /traceback /debug:full /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_openmp_dv : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_openmp_dv : FCOMPL = mpiifx
+impi_intel_win_openmp_dv : FCOMPL = ifx
 impi_intel_win_openmp_dv : obj = fds_impi_intel_win_openmp_dv
 impi_intel_win_openmp_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL_OPENMP)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
+impi_intel_win_db : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
-impi_intel_win_db : FCOMPL = mpiifx
+impi_intel_win_db : FCOMPL = ifx
 impi_intel_win_db : obj = fds_impi_intel_win_db
 impi_intel_win_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL)
 
+impi_intel_win_openmp_db : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_openmp_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
 impi_intel_win_openmp_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_openmp_db : FOPENMPFLAGS = /Qopenmp_INTEL
-impi_intel_win_openmp_db : FCOMPL = mpiifx
+impi_intel_win_openmp_db : FCOMPL = ifx
 impi_intel_win_openmp_db : obj = fds_impi_intel_win_openmp_db
 impi_intel_win_openmp_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(LFLAGSMKL_INTEL_OPENMP)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 # Linux Intel Fortran Compiler and Intel MPI
 
