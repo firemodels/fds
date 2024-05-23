@@ -1,0 +1,82 @@
+
+&MATL ID                 = 'PINE 1'
+      DENSITY            = 360.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      N_REACTIONS        = 2.
+      N_S                = 0.56,0.3
+      N_O2               = 0.0,0.61
+      A                  = 4.9E+09,8.9E+09
+      E                  = 1.46E+05,1.16E+05
+      MATL_ID(1,1)       = 'CHAR'
+      NU_MATL(1,1)       = 0.25
+      MATL_ID(1,2)       = 'CHAR'
+      NU_MATL(1,2)       = 0.25
+      SPEC_ID(1,1)       = 'FUEL VAPOR'
+      NU_SPEC(1,1)       = 0.75
+      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
+      NU_SPEC(1:2,2)     = -0.1, 0.85
+      HEAT_OF_REACTION   = 416. /
+
+&MATL ID                 = 'PINE 2'
+      DENSITY            = 360.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      N_REACTIONS        = 2.
+      N_S                = 1,1
+      N_O2               = 0.0,0.49
+      A                  = 5.0E+10,2.0E+04
+      E                  = 1.44E+05,7.5E+04
+      MATL_ID(1,1)       = 'CHAR'
+      NU_MATL(1,1)       = 0.25
+      MATL_ID(1,2)       = 'CHAR'
+      NU_MATL(1,2)       = 0.25
+      SPEC_ID(1,1)       = 'FUEL VAPOR'
+      NU_SPEC(1,1)       = 0.75
+      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
+      NU_SPEC(1:2,2)     = -0.1, 0.85
+      HEAT_OF_REACTION   = 416. /
+
+&MATL ID                 = 'PINE 3'
+      DENSITY            = 360.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      N_REACTIONS        = 2.
+      N_S                = 1.25,5.67
+      N_O2               = 0.0,0.66
+      A                  = 2.9E+11,2.6
+      E                  = 1.64E+05,1.64E+05
+      MATL_ID(1,1)       = 'CHAR'
+      NU_MATL(1,1)       = 0.25
+      MATL_ID(1,2)       = 'CHAR'
+      NU_MATL(1,2)       = 0.25
+      SPEC_ID(1,1)       = 'FUEL VAPOR'
+      NU_SPEC(1,1)       = 0.75
+      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
+      NU_SPEC(1:2,2)     = -0.1, 0.85
+      HEAT_OF_REACTION   = 416. /
+
+&MATL ID                 = 'CHAR'
+      DENSITY            = 90.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      N_REACTIONS        = 1.
+      N_S                = 0.56
+      N_O2               = 0.68
+      A                  = 7.55E+07
+      E                  = 1.24E+05
+      MATL_ID            = 'ASH'
+      NU_MATL            = 0.02
+      SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
+      NU_SPEC            = -2.67,3.65
+      HEAT_OF_REACTION   = -32000. /
+
+&MATL ID                 = 'ASH'
+      DENSITY            = 2.2
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'/
+
+&RAMP ID='c_v', T=  0., F=1.1 /
+&RAMP ID='c_v', T=200., F=2.0 /
+&RAMP ID='c_v', T=800., F=2.0 /
+
