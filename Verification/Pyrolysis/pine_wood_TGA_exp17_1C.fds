@@ -20,6 +20,6 @@
 &PART ID='FUEL', SAMPLING_FACTOR=1, SURF_ID='FUEL' /
 &INIT PART_ID='FUEL', XYZ=0.0,0.0,0.3, N_PARTICLES=1/
 
-&CATF OTHER_FILES='../../Utilities/Input_Libraries/MATL/pine_wood_1C_MATL.fds'
+&CATF OTHER_FILES='../../Utilities/Input_Libraries/MATL/pine_wood_1C_MATL.fds'/
 
 &TAIL /
