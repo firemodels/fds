@@ -3,7 +3,7 @@
       DENSITY            = 360.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT_RAMP = 'c_v'
-      N_REACTIONS        = 2.
+      N_REACTIONS        = 2
       N_S                = 0.87,0.63
       N_O2               = 0.0,0.72
       A                  = 4.70E+6,1.45E+10
@@ -22,7 +22,7 @@
       DENSITY            = 112.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT_RAMP = 'c_v'
-      N_REACTIONS        = 1.
+      N_REACTIONS        = 1
       N_S                = 0.56
       N_O2               = 0.68
       A                  = 8.31E+07
