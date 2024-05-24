@@ -392,6 +392,15 @@ $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis part_baking_soda_420K.fds
 $QFDS -d Pyrolysis part_baking_soda_450K.fds
 $QFDS -d Pyrolysis part_baking_soda_500K.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp03_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp16_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp17_1C.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
