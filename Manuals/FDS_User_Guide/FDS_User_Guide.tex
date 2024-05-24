@@ -8787,7 +8787,7 @@ Clipping of density and mass fractions violates mass conservation, so it is pref
 
 Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the first of the overlapping regions that takes precedence (i.e., first come first serve) for all commonly defined inputs. That is, it is not possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the initial conditions explicitly defined by the second {\ct INIT} line. However, inputs defined in the second {\ct INIT} line which were not defined in the first will still be applied.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence.
 
 \section{Gas Species}
 \label{info:init_species}
@@ -8802,6 +8802,7 @@ where {\ct XB} indicates a rectangular volume within the domain where the initia
 \begin{itemize}
 \item The indices of {\ct SPEC\_ID} and {\ct MASS\_FRACTION} are not necessarily indicative of the order in which the species are listed in the input file, but rather should come in consecutive order starting from 1.
 \item {\ct VOLUME\_FRACTION(N)} can be used instead of {\ct MASS\_FRACTION(N)} as long as they are not used together on the same input line.
+\item Instead of specifying a {\ct MASS\_FRACTION(N)} or {\ct VOLUME\_FRACTION(N)}, you can specify a {\ct RAMP\_MF\_Z(N)} or {\ct RAMP\_VF\_Z(N)} to indicate a vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the mass or volume fraction. A single {\ct INIT} line can have both fixed and ramped values, but they must refer to either mass or volume fraction.
 \item Specify all species components on the same {\ct INIT} line.
 \item The initial concentration of the background gas species cannot be specified this way.  The mass or volume fraction of the background species will be set to account for the unspecified fraction.
 \item All gas species must be specified using the {\ct SPEC} or {\ct REAC} namelist groups. In other words, any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
@@ -8822,25 +8823,13 @@ To modify the local initial temperature in certain regions of the domain, add li
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
-This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
+This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. To initialize both temperature and species concentration in the same volume, use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
 \end{lstlisting}
-
-\section{Density}
-\label{info:init_density}
-
-When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
-\begin{lstlisting}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
-      MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
-      TEMPERATURE=60., DENSITY=1.13 /
-\end{lstlisting}
-This is a case where we have over-specified the parameters. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
@@ -12055,7 +12044,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
-{\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
 {\ct DRY}                         & Logical           & Section~\ref{pine_needles}                    &                & {\ct F}       \\ \hline
@@ -12080,8 +12068,10 @@ Keyword             & Type     & Description                      & Units       
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & {\ct TMPA}    \\ \hline
