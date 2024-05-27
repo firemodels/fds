@@ -23,12 +23,7 @@ permissions:
   contents: read
 
 
-env:
-  # update url for openmpi package according to
-  OPENMPI_URL: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
-
 jobs:
-
   osx-gnu-openmpi:
     # debug build on osx using gfortran with openmpi
   
