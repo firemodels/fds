@@ -53,7 +53,7 @@ AGL_ONLY: IF (LEVEL_SET_MODE==0) THEN
 
    ! TIME OF ARRIVAL for non-level set
    IF (FIRE_ARRIVAL_SLICE) THEN
-      ALLOCATE(M%TOA(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('VEGE:TOA','TOA',IZERO) ; TOA  => M%TOA  ; TOA = T_END + 1._EB
+      ALLOCATE(M%TOA(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('VEGE:TOA','TOA',IZERO) ; TOA  => M%TOA  ; TOA = 1.E10_EB
    ENDIF
 
    IF (CC_IBM) THEN
@@ -116,7 +116,7 @@ AGL_ONLY: IF (LEVEL_SET_MODE==0) THEN
    ALLOCATE(M%PHI1_LS(0:IBP1,0:JBP1)); CALL ChkMemErr('VEGE:LEVEL SET','PHI1_LS',IZERO)
    PHI1_LS => M%PHI1_LS ; PHI1_LS = PHI_LS_MIN
 
-   ALLOCATE(M%TOA(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:TOA','TOA',IZERO)   ; TOA  => M%TOA  ; TOA = T_END + 1._EB
+   ALLOCATE(M%TOA(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:TOA','TOA',IZERO)   ; TOA  => M%TOA  ; TOA = 1.E10_EB
 
    ! Wind speed components in the center of the first gas phsae cell above the ground.
 
@@ -1364,7 +1364,7 @@ TYPE(SLICE_TYPE), POINTER :: SL
 CALL POINT_TO_MESH(NM)
 
 IF (LEVEL_SET_MODE>0) THEN
-   WHERE (PHI_LS>=0._EB .AND. TOA>T_END) TOA = T
+   WHERE (PHI_LS>=0._EB .AND. TOA>(1.E10_EB-1._EB)) TOA = T
 ELSE
    HRRPUVCUT = 1.E3_EB*MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
 
@@ -1383,9 +1383,9 @@ ELSE
          ELSE
             FIRE_PRESENT=.FALSE.
          ENDIF
-         IF(FIRE_PRESENT .AND. TOA(I,J)>T_END) TOA(I,J) = T
+         IF(FIRE_PRESENT .AND. TOA(I,J)>(1.E10_EB-1._EB)) TOA(I,J) = T
          ! reset if residence time test not met
-         IF(TOA(I,J)<T_END .AND. ABS(TOA(I,J)-T)<0.5_EB .AND. .NOT. FIRE_PRESENT) TOA(I,I) = T_END+1._EB
+         IF(TOA(I,J)<1.E10_EB .AND. ABS(TOA(I,J)-T)<0.5_EB .AND. .NOT. FIRE_PRESENT) TOA(I,I) = 1.E10_EB
       ENDDO
    ENDDO
 ENDIF
