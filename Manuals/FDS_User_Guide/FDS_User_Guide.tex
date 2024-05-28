@@ -874,6 +874,32 @@ The diagnostic output file called {\ct CHID.out} contains information about the 
 
 In some special circumstances controlling the final time step of the calculation may be necessary.  By default, FDS sets the last time step to be {\ct T\_END - T} where {\ct T} is the current time.  Because of floating point arithmetic, this final time step may be very small and cause unintended consequences.  You can control this final time step in two ways, using the parameters {\ct DT\_END\_MINIMUM} or {\ct DT\_END\_FILL} (you should not need both).  Using {\ct DT\_END\_MINIMUM} has the effect of setting a minimum for the final time step and so {\ct T\_END} is not strictly observed (hence our default {\ct DT\_END\_MINIMUM} is roughly the machine epsilon).  The final simulation time will be {\ct T + DT\_END\_MINIMUM}.  Alternatively, you could set {\ct DT\_END\_FILL} to some value (should be less than the last time step).  Then if {\ct T+DT+DT\_END\_FILL > T\_END}, where {\ct DT} is the computed stable time step (or specified time step), FDS will recompute the time step to be {\ct DT = T\_END - T}.  If you set one of these parameters, double check the {\ct CHID.out} file to make sure the expected behavior has been observed.
 
+\subsubsection{Simulation Time Ramp}
+\label{info:simulation_time_ramp}
+\label{ramp_time}
+
+\begin{warning}
+\centering
+WARNING: This feature should only be used for verification purposes.
+\end{warning}
+
+There may be situations where you would like to specify the time step sequence in FDS, most likely to make a comparison with another application.  You can add a {\ct TIME\_RAMP} to the {\ct TIME} line where the independent variable, {\ct T}, specifies the \emph{end-of-time-step} value of the \emph{time} (s).  The simulation time steps will then take on the value of the increments between the ramp values.  The first time step will be the first value of the ramp minus {\ct T\_BEGIN}.  For example, the following code snippet specifies the time values for the plot in Fig.~\ref{fig:ramp_time}, which simply outputs ambient temperature values at the specified time snapshots.
+
+\begin{lstlisting}
+&TIME T_BEGIN=0., T_END=10., RAMP_TIME='time-ramp' /
+&RAMP ID='time-ramp', T=1 /
+&RAMP ID='time-ramp', T=2 /
+&RAMP ID='time-ramp', T=5 /
+&RAMP ID='time-ramp', T=9 /
+\end{lstlisting}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ramp_time}
+\caption{An example of ramping the simulation time values.}
+\label{fig:ramp_time}
+\end{figure}
+
 
 \subsection{Steady-State Applications}
 \label{info:steady_state}
@@ -919,6 +945,8 @@ The pressure solver in FDS employs Fast Fourier Transforms (FFTs) in the $y$ and
 The governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the {\ct J} in the {\ct IJK} triplet to 1 on the {\ct MESH} line. For axial symmetry, add {\ct CYLINDRICAL=T} to the {\ct MESH} line, and the coordinate $x$ is then interpreted as the radial coordinate $r$. If more than one mesh is used, all the meshes must be specified as 2-D or {\ct CYLINDRICAL}---you cannot mix 2-D, 3-D and cylindrical geometries. No boundary conditions should be set at the planes $y=\hbox{\ct YMIN=XB(3)}$ or $y=\hbox{\ct YMAX=XB(4)}$, nor at $r=\hbox{\ct XMIN=XB(1)}$ in an axially-symmetric calculation if $r=\hbox{\ct XB(1)=0}$ (Note that {\ct XB(1)} does not have to be 0). For better visualizations, the difference between {\ct XB(4)} and {\ct XB(3)} should be small so that the Smokeview rendering appears to be in 2-D. An example of an axially-symmetric helium plume is given in Sec.~\ref{baroclinic_torque}.
 
 When processing results for a {\ct CYLINDRICAL} simulation, note that integrated output quantities with the {\ct SPATIAL\_STATISTIC} attribute apply only to the specified 2-D or cylindrical coordinates. Thus, the cylindrical coordinates define a cylindrical sector, like a slice of cake, even though Smokeview will not render it this way. The fully integrated quantity can be calculated by multiplying the reported value by $2 \pi \, \delta\theta$, where $\delta\theta$ is the difference between {\ct YMAX} and {\ct YMIN} in radians. The values chosen for {\ct YMAX} and {\ct YMIN} do not matter as long as the rendering in Smokeview is to your liking.
+
+When performing solid phase heat transfer while using a 2-D {\ct CYLINDRICAL} coordinate system, you must designate {\ct GEOMETRY='CYLINDRICAL'} on a surface ({\ct SURF} line) that is facing radially outward (positive $r$ direction) or {\ct GEOMETRY='INNER CYLINDRICAL'} on a surface that is facing radially inward (negative $r$ direction). In the latter instance, you must also specify the {\ct INNER\_RADIUS} (m) of the cylinder. For the outer cylindrical boundary, specify an {\ct INNER\_RADIUS} if appropriate. Its default value is 0~m. Because your inward and outward facing boundaries might occur at various radii, you must create separate {\ct SURF} lines for each with the appropriate values of {\ct GEOMETRY} and {\ct INNER\_RADIUS}. For an obstruction ({\ct OBST}), use {\ct SURF\_ID6} to assign individual {\ct SURF ID}s to each of the six faces. Because this is a 2-D simulation, the third and fourth entries representing the {\ct SURF ID}s in the $y$ or angular direction can just be designated {\ct 'INERT'}.
 
 
 \subsection{Multiple Meshes}
@@ -2407,6 +2435,8 @@ All obstructions in FDS are assumed to conform to the rectilinear mesh, and all 
 \end{lstlisting}
 can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS.
 
+To represent the {\em inner} surface of a cylinder, specify {\ct GEOMETRY='INNER CYLINDRICAL'} along with an {\ct INNER\_RADIUS} (m).
+
 Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object. Add {\ct HORIZONTAL=T} to the {\ct SURF} line if you have specified a cylindrical geometry and you want to ensure that the heat transfer coefficient is appropriate for a horizontal cylinder.
 
 
@@ -2473,6 +2503,7 @@ You can specify an internal source for the solid obstruction using {\ct INTERNAL
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, FDS uses a special algorithm to identify all the meshes where this obstruction lives, and also those obstructions connected to it. However, if this algorithm fails to detect all the meshes and you recieve an error stating that there is a problem, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation. If you set this parameter to a value larger than the width of the computational domain, then all meshes will establish communication channels for exchanging boundary information.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} or {\ct OBST} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically chosen to be comparable to the gas phase cells. If the obstruction is thin; that is, less than one gas phase cell thick, the specified {\ct CELL\_SIZE} will only apply to the heat conduction in the transverse, not normal, direction. The normal direction gridding will be controlled by the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. This may be useful in cases where the specified {\ct CELL\_SIZE} is too coarse to resolve variations in surface definition along the normal dimension (see Section~\ref{checkerboard} for an example).
+\item {\ct HT3D} cannot be applied to an {\ct OBST} that is to {\ct BURN\_AWAY}.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -2829,7 +2860,7 @@ X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
 \ee
 where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
-You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $r_{ij}$, below a specified value.
+You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
 
 \subsubsection{Estimating Kinetic Parameters}
@@ -3117,7 +3148,7 @@ If a combustible solid is to disappear from the simulation once it is consumed, 
 \item Use {\ct BURN\_AWAY} cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional information for newly exposed surfaces.
 \item The heat conduction into an {\ct OBST} that can {\ct BURN\_AWAY} is limited to 1-D. On the {\ct SURF} line, specify the {\ct THICKNESS} to be approximately that of a single cell, and also set {\ct BACKING='VOID'}. It is assumed that the solid is relatively well-insulated and that the in-depth temperature profile drops off relatively quickly at the surface. When a cell is removed, the newly exposed surface is initially at ambient temperature but heats up quickly at the surface.
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction. You can visualize the decrease in the bulk density of a burning solid using the output quantity {\ct 'BULK DENSITY'} with a slice ({\ct SLCF}) or device ({\ct DEVC}).
 \item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
 \item By default, newly exposed surfaces take on the same {\ct SURF\_ID} that has been applied to the original obstruction. However, you can specify an optional {\ct SURF\_ID\_INTERIOR} on the {\ct OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
@@ -4023,8 +4054,8 @@ The localized leakage approach addresses situations where the leakage is not nec
 specify a 0.001 m$^2$ leak between the {\ct VENT}s named {\ct 'VENT 1'} and {\ct 'VENT 2'}. If the leakage path is to outside of the domain, set {\ct VENT2\_ID='AMBIENT'}, in which case the second node will be assigned the name of the first with {\ct 'AMB'} added, e.g. {\ct 'VENT 1 AMB'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}. Wall heat transfer will be computed based upon the specified {\ct SURF\_ID}. Following are some rules and practices regarding localized leakage:
 \begin{itemize}
 \item The {\ct SURF\_ID} for a {\ct VENT} with localized leakage is {\em not} {\ct 'HVAC'}. Each {\ct VENT} must be given an explicit {\ct SURF\_ID}.
-\item Each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. 
-\item You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and \linebreak {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}). 
+\item Each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}.
+\item You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and \linebreak {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}).
 \item All localized leakage HVAC components are given the {\ct NETWORK\_ID='LEAK'}.
 \item A {\ct VENT} used for localized leakage should not be given a {\ct SURF\_ID} with a {\ct LEAK\_PATH} input.
 \item The localized leakage area should not also be part of the {\ct LEAK\_AREA} defined on a {\ct ZONE} line.
@@ -5594,10 +5625,12 @@ When using the wide band model, the electromagnetic spectrum is divided in a rel
 
 It is possible to set your own band limits by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
 
-\subsection{Weighted Sum of Gray Gases (WSGG)}
+\subsection{Weighted Sum of Gray Gases (WSGG) Model (Experimental)}
 \label{info:RADI_WSGG}
 
 To activate the WSGG model, set {\ct WSGG\_MODEL=T} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. Do not set {\ct BAND\_LIMITS}.
+
+Note that the WSGG model is an experimental feature. It has very limited verification and validation that is focused mainly on simple fuels and geometric configurations.
 
 \section{Radiative Absorption and Scattering by Particles}
 
@@ -6889,10 +6922,10 @@ r_{\rm char} = Y_{\rm O_2,surf} \, \sigma \, A_{\rm char} \exp \left(  -\frac{E_
 \ee
 This model is invoked by setting {\ct SURFACE\_OXIDATION\_MODEL} to {\ct T} on the {\ct MATL} line. Use of this model automatically assumes the reaction is zeroth order for the solid phase density ({\ct N\_S=0}) and first order for the oxygen mass fraction ({\ct N\_O2=1}), and FDS will override any values provided by the user. Suggested kinetic constants are given in Table~\ref{tab:veg_kinetics}. The reaction rate depends on the surface area to volume ratio of the solid, $\sigma$. It also depends on the oxygen mass fraction at the material surface, $Y_{\rm O_2,surf}$. This is determined from a mass conservation approach which assumes the oxygen consumed by the reaction must be supplied by transport to the surface from the oxygen in the surrounding gas ($Y_{\rm O_2,\infty}$). This produces the following balance between transport and kinetics~\cite{Turns:1996}:
 \begin{eqnarray}
-  h_m \, \ln(B+1) &=& Y_{\rm O_2,surf} \, \sigma \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \\[.1in]
+  h_m \, \ln(B+1) &=& Y_{\rm O_2,surf} \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \\[.1in]
   B  &=& \frac{Y_{\rm O_2,\infty} - Y_{\rm O_2,surf}}{\nu_{\rm O_2,char}+Y_{\rm O_2,surf}}
 \end{eqnarray}
-The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the {\ct SURFACE\_OXIDATION\_MODEL}.
+The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the {\ct SURFACE\_OXIDATION\_MODEL}. Also note that because this model depends on full-scale parameters $\sigma$ and $h_m$ it is not necessarily appropriate to compare directly with micro-scale TGA data via {\ct TGA\_ANALYSIS}.
 
 
 \begin{table}[!ht]
@@ -8472,7 +8505,7 @@ It should be noted that devices are updated sequentially in the order that they 
 \label{info:external_control}
 \label{external_control}
 
-It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
+It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a {\ct RAMP\_ID} (except for the output time ramps on {\ct DUMP} such as {\ct RAMP\_BNDF}) or a {\ct CTRL\_ID} as one of its inputs can be externally controlled. A {\ct RAMP} can be externally controlled by setting {\ct EXTERNAL\_FILE} on {\ct RAMP}. A {\ct CTRL} can be externally controlled by setting {\ct FUNCTION\_TYPE='EXTERNAL'}.
 
 When external control is selected, FDS will set the value of the {\ct RAMP} or the logical state of the {\ct CTRL} based on values contained in a csv file whose name is given by {\ct EXTERNAL\_FILENAME} on {\ct MISC}. This file will be checked for new values every {\ct DT\_EXTERNAL} on {\ct TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either {\ct INITIAL\_VALUE} on {\ct RAMP} or {\ct INITIAL\_STATE} on {\ct CTRL}.
 
@@ -8754,7 +8787,7 @@ Clipping of density and mass fractions violates mass conservation, so it is pref
 
 Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the first of the overlapping regions that takes precedence (i.e., first come first serve) for all commonly defined inputs. That is, it is not possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the initial conditions explicitly defined by the second {\ct INIT} line. However, inputs defined in the second {\ct INIT} line which were not defined in the first will still be applied.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence.
 
 \section{Gas Species}
 \label{info:init_species}
@@ -8769,6 +8802,7 @@ where {\ct XB} indicates a rectangular volume within the domain where the initia
 \begin{itemize}
 \item The indices of {\ct SPEC\_ID} and {\ct MASS\_FRACTION} are not necessarily indicative of the order in which the species are listed in the input file, but rather should come in consecutive order starting from 1.
 \item {\ct VOLUME\_FRACTION(N)} can be used instead of {\ct MASS\_FRACTION(N)} as long as they are not used together on the same input line.
+\item Instead of specifying a {\ct MASS\_FRACTION(N)} or {\ct VOLUME\_FRACTION(N)}, you can specify a {\ct RAMP\_MF\_Z(N)} or {\ct RAMP\_VF\_Z(N)} to indicate a vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the mass or volume fraction. A single {\ct INIT} line can have both fixed and ramped values, but they must refer to either mass or volume fraction.
 \item Specify all species components on the same {\ct INIT} line.
 \item The initial concentration of the background gas species cannot be specified this way.  The mass or volume fraction of the background species will be set to account for the unspecified fraction.
 \item All gas species must be specified using the {\ct SPEC} or {\ct REAC} namelist groups. In other words, any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
@@ -8789,25 +8823,13 @@ To modify the local initial temperature in certain regions of the domain, add li
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
-This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
+This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. To initialize both temperature and species concentration in the same volume, use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
 \end{lstlisting}
-
-\section{Density}
-\label{info:init_density}
-
-When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
-\begin{lstlisting}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
-      MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
-      TEMPERATURE=60., DENSITY=1.13 /
-\end{lstlisting}
-This is a case where we have over-specified the parameters. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
@@ -9225,7 +9247,7 @@ The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressur
 
 Another common fire protection application is smoke movement and pressurization within stairwells. A stairwell can be thought of as a vertical tunnel, with similar issues related to the pressure solver. Unlike tunnels, there is no special algorithm to increase the accuracy and stability of simulations within a stairwell, but there are some steps you can take to improve the simulation:
 \begin{enumerate}
-\item As with any tall building, the pressure stratification of the atmosphere can have an impact on the flow field and ventilation. A useful output quantity to include in any building simulation is {\ct 'ABSOLUTE PRESSURE'}. This displays the background pressure field along with the relatively small perturbation induced by changes in ventilation or a fire. You typically do not see this background pressure field when you invoke the output quantity {\ct PRESSURE}, which displays only the perturbation to the background. 
+\item As with any tall building, the pressure stratification of the atmosphere can have an impact on the flow field and ventilation. A useful output quantity to include in any building simulation is {\ct 'ABSOLUTE PRESSURE'}. This displays the background pressure field along with the relatively small perturbation induced by changes in ventilation or a fire. You typically do not see this background pressure field when you invoke the output quantity {\ct PRESSURE}, which displays only the perturbation to the background.
 \item It may be necessary to tighten the tolerance of the pressure solver when simulating a stairwell scenario. If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. Increase the {\ct MAX\_PRESSURE\_ITERATIONS} beyond the default value of 10.  Experiment with the optional {\ct SOLVER='GLMAT'} on the {\ct PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or {\ct 'UGLMAT'} to do what {\ct 'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above, but keep in mind that these solvers can be expensive. Try a simple case first to determine how much CPU time the pressure solver consumes.
 \end{enumerate}
 A sample input file called {\ct Pressure\_Solver/stairwell.fds} demonstrates some of the important issues discussed in this chapter. The case consists of an eighteen story stairwell that opens to a lobby area. Doors are situated at various locations and are programmed to open when the pressure differential exceeds 20~Pa. A 1~m by 1~m hatch at the top of the stairwell draws air out at a rate of 0.5~m$^3$/s, triggering doors to open one after the other until a path is opened up between an open door in the lobby and the extract vent. The plot in Fig.~\ref{stairwell_plot} demonstrates that once the path is opened, the flow equilibritaes to 0.5~m$^3$/s.
@@ -9858,6 +9880,8 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 \\
 If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on {\ct SURF} then the default solid particle color will revert to black.  You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
 
+The {\ct 'PARTICLE TEMPERATURE'} is the surface temperature.  For thermally thin particles, like droplets, this temperature represents the whole particle, but for thermally thick particles it is just the surface temperature.  For in-depth temperature of thermally thick particles you need to use a profile {\ct PROF}, as discussed in Sec.~\ref{info:PROF}.  In practice, you should designate only a small subset of particles (use a separate {\ct PART} line) for monintoring internal temperatures, as the amount of data can become large, and there is no way to visualize this in Smokeview.
+
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
 For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:particleoutputquantities}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
@@ -10282,7 +10306,7 @@ The units for {\ct 'RADIANCE'} are \unit{kW/m^2}/sr.
 
 \end{labeling}
 
-For {\ct QUANTITY} types ending in {\ct GAS}, a view angle for the radiation component of the device can be set using {\ct VIEW\_ANGLE} on {\ct PROP}. Wall devices can only have a 180$^\circ$ view angle. 
+For {\ct QUANTITY} types ending in {\ct GAS}, a view angle for the radiation component of the device can be set using {\ct VIEW\_ANGLE} on {\ct PROP}. Wall devices can only have a 180$^\circ$ view angle.
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -11021,7 +11045,8 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct ADVECTIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                           & mol/mol           & D,I,P,S      \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                        & Pa                & D,I,P,S      \\ \hline
-{\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
+{\ct BULK DENSITY}                              & Section~\ref{info:BURN_AWAY}                      & kg/m$^3$          & D,I,P,S      \\ \hline
+{\ct CELL REYNOLDS NUMBER}                      & Section~\ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s               & D,I,P,S      \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s               & D,I,P,S      \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s               & D,I,P,S      \\ \hline
@@ -11526,7 +11551,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                       & Integer    & Section~\ref{info:chem_integration}          &           & 20                   \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
 {\ct ODE\_SOLVER}                                    & Character  & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-{\ct RICHARDSON\_ERROR\_TOLERANCE}                   & Real       & Section~\ref{info:chem_integration}          &           & 1.0 E-6              \\ \hline
 {\ct SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & {\ct T}              \\ \hline
 {\ct TAU\_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
@@ -12020,7 +12044,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
-{\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
 {\ct DRY}                         & Logical           & Section~\ref{pine_needles}                    &                & {\ct F}       \\ \hline
@@ -12045,8 +12068,10 @@ Keyword             & Type     & Description                      & Units       
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & {\ct TMPA}    \\ \hline
@@ -12129,7 +12154,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct HEAT\_OF\_REACTION(:)}         & Real Array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.            \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      &                   & $\infty$      \\ \hline
+{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      & \si{kg/(m^3.s)}   & $\infty$      \\ \hline
 {\ct MW}                            & Real            & Section~\ref{info:liquid_fuels}       & g/mol             &               \\ \hline
 {\ct N\_O2(:)}                      & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0             \\ \hline
@@ -13194,8 +13219,9 @@ Keyword             & Type     & Description                      & Units       
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
 {\ct DT\_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
-{\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
-{\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline
+{\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}         \\ \hline
+{\ct RAMP\_TIME}                & Character  & Section~\ref{info:simulation_time_ramp}   &             &                 \\ \hline
+{\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}         \\ \hline
 {\ct T\_BEGIN}                  & Real       & Section~\ref{info:TIME_Basics}            & s           & 0.              \\ \hline
 {\ct T\_END}                    & Real       & Section~\ref{info:TIME_Basics}            & s           & 1.              \\ \hline
 {\ct TIME\_SHRINK\_FACTOR}      & Real       & Section~\ref{info:steady_state}           &             & 1.              \\ \hline
@@ -13591,6 +13617,7 @@ Keyword             & Type     & Description                      & Units       
 366  \> {\ct SURF \ldots\ cannot leak and specify flow or pyrolysis \ldots\         } \> Section~\ref{info:Leaks}  \\
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
 368  \> {\ct SURF \ldots\ has a problem with VARIABLE\_THICKNESS or HT3D.           } \> Section~\ref{info:HT3D_Limitations}  \\
+369  \> {\ct SURF \ldots\ cannot have both HT3D and BURN\_AWAY.                     } \> Section~\ref{info:HT3D_Limitations}  \\
      \>                                                                               \>                                     \\
 371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
@@ -13729,6 +13756,7 @@ Keyword             & Type     & Description                      & Units       
 608 \> {\ct MATL\_ID \ldots\ not found.                                             } \> Section~\ref{info:ht1d}  \\
 609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
+611 \> {\ct OBST \ldots\ has a BULK\_DENSITY but zero volume.                       } \> Section~\ref{info:BURN_AWAY}  \\
     \>                                                                                \>                          \\
 701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
 702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\
@@ -13907,6 +13935,7 @@ Keyword             & Type     & Description                      & Units       
 1041 \> {\ct QUANTITY \ldots\ is not appropriate for Plot3D.                        } \> Section~\ref{info:gasoutputquantities} \\
 1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
+1044 \> {\ct Cannot set EXTERNAL\_FILE=T for a RAMP used for an output clock \ldots } \> Section~\ref{info:external_control} \\
 
 \end{tabbing}
 

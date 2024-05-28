@@ -32,10 +32,11 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIF
 USE RADCONS, ONLY: UIIDIM
 USE CONTROL_VARIABLES
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS
+INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS,NS
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,INTEGRAL,TEMP,ZSW
+REAL(EB) :: MU_N,CS,DELTA,INTEGRAL,TEMP,ZSW
+REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: ZZ_GET,VF
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
@@ -265,7 +266,7 @@ IF (N_LP_ARRAY_INDICES>0) THEN
 ENDIF
 
 IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING) .OR. &
-    ANY(SPECIES_MIXTURE%CONDENSATION_SMIX_INDEX>0) .OR. REACTING_THIN_OBSTRUCTIONS) THEN
+    ANY(SPECIES_MIXTURE%CONDENSATION_SMIX_INDEX>0) .OR. REACTING_THIN_OBSTRUCTIONS .OR. INCLUDE_PYROLYSIS) THEN
    ALLOCATE(M%D_SOURCE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','D_SOURCE',IZERO)
    M%D_SOURCE = 0._EB
@@ -423,69 +424,6 @@ DO N=N_TRACKED_SPECIES+1,N_TOTAL_SCALARS
    M%ZZS(:,:,:,N) = INITIAL_UNMIXED_FRACTION
 ENDDO
 
-! Over-ride default ambient gas species mass fractions if defined in INIT
-
-M%IWORK1=0
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-! Over-ride default ambient temperature and density if defined in INIT
-
-M%IWORK1=0
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE)) CYCLE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%TMP(I,J,K)            = IN%TEMPERATURE
-                  M%RHO(I,J,K)            = IN%DENSITY
-                  M%RHOS(I,J,K)           = IN%DENSITY
-                  IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,M%RSUM(I,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-
 ! Allocate and Initialize Mesh-Dependent Radiation Arrays
 
 M%QR  = 0._EB
@@ -498,28 +436,51 @@ IF (RADIATION) THEN
    M%UIID = 4._EB*SIGMA*TMPA4/REAL(UIIDIM,EB)
 ENDIF
 
-! Over-ride default ambient conditions with user-prescribed INITializations
+! Over-ride default ambient gas species mass fractions, temperatuer and density
 
-M%IWORK1=0
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE .OR. IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
+   IF (.NOT. (IN%ADJUST_INITIAL_CONDITIONS)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%RHO(I,J,K)  = M%P_0(K)/(M%TMP(I,J,K)*M%RSUM(I,J,K))
-                  M%RHOS(I,J,K) = M%RHO(I,J,K)
-                  IF (RADIATION) THEN
-                     M%UII(I,J,K) = 4._EB*SIGMA*M%TMP(I,J,K)**4
-                     M%UIID(I,J,K,1:UIIDIM) = M%UII(I,J,K)/REAL(UIIDIM,EB)
+            IF (M%XC(I)<IN%X1.OR.M%XC(I)>IN%X2.OR.M%YC(J)<IN%Y1.OR.M%YC(J)>IN%Y2.OR.M%ZC(K)<IN%Z1.OR.M%ZC(K)>IN%Z2) CYCLE
+            IF (IN%VOLUME_FRACTIONS_SPECIFIED) THEN
+               VF = 0._EB
+               DO NS=2,N_TRACKED_SPECIES
+                  IF (IN%RAMP_VF_Z_INDEX(NS)>0) THEN
+                     VF(NS) = EVALUATE_RAMP(M%ZC(K),IN%RAMP_VF_Z_INDEX(NS))
+                  ELSE
+                     VF(NS) = IN%VOLUME_FRACTION(NS)
                   ENDIF
-               ENDIF
+               ENDDO
+               VF(1) = 1._EB - SUM(VF)
+               M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = VF(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW / &
+                                             SUM(VF(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW)
+            ELSEIF (IN%MASS_FRACTIONS_SPECIFIED) THEN
+               DO NS=2,N_TRACKED_SPECIES
+                  IF (IN%RAMP_MF_Z_INDEX(NS)>0) THEN
+                     M%ZZ(I,J,K,NS) = EVALUATE_RAMP(M%ZC(K),IN%RAMP_MF_Z_INDEX(NS))
+                  ELSE
+                     M%ZZ(I,J,K,NS) = IN%MASS_FRACTION(NS)
+                  ENDIF
+               ENDDO
+               M%ZZ(I,J,K,1) = 1._EB - SUM(M%ZZ(I,J,K,2:N_TRACKED_SPECIES))
+            ENDIF
+            M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            IF (IN%RAMP_TMP_Z_INDEX>0) THEN
+               M%TMP(I,J,K) = TMPM + EVALUATE_RAMP(M%ZC(K),IN%RAMP_TMP_Z_INDEX)
+            ELSEIF (IN%TEMPERATURE>0._EB) THEN
+               M%TMP(I,J,K) = IN%TEMPERATURE
+            ENDIF
+            ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,M%RSUM(I,J,K))
+            M%RHO(I,J,K)  = M%P_0(K)/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+            M%RHOS(I,J,K) = M%RHO(I,J,K)
+            IF (RADIATION) THEN
+               M%UII(I,J,K) = 4._EB*SIGMA*M%TMP(I,J,K)**4
+               M%UIID(I,J,K,1:UIIDIM) = M%UII(I,J,K)/REAL(UIIDIM,EB)
             ENDIF
          ENDDO
       ENDDO
@@ -1772,7 +1733,7 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: I,IW,IW2,ITW,ITW2,NWP,NWP2,I2,IWA,DM,IOR,NOM,II,JJ,KK,NN,IC,NL
 LOGICAL :: IOR_AVOID(-3:3)
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,XX1,XX2,YY1,YY2,ZZ1,ZZ2,PRIMARY_VOLUME,OVERLAP_VOLUME,DXX,DYY,DZZ,WEIGHT_FACTOR,&
-            SUM_WGT(3),XX,YY,ZZ
+            SUM_WGT(3),XX,YY,ZZ,WEIGHT,TARGET_WEIGHT
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(THIN_WALL_TYPE), POINTER :: TW
 TYPE(SURFACE_TYPE), POINTER :: SF,SF2
@@ -1890,6 +1851,7 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
       DO IOR=1,3
          IF (ABS(BC%IOR)==IOR) CYCLE
+         IF (TWO_D .AND. IOR==2) CYCLE
          IF (.NOT.IOR_AVOID(-IOR) .AND. .NOT.IOR_AVOID(IOR)) THEN
             WRITE(LU_ERR,'(7(A,I0))') 'ERROR(423): HT3D solid must have at least one face exposed in direction ',IOR,&
                                       ': Mesh=',NM,', IOR=',BC%IOR,', IIG=',BC%IIG,', JJG=',BC%JJG,', KKG=',BC%KKG,', I=',I
@@ -1912,7 +1874,13 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             IF (SUM_WGT(ABS(IOR))>0._EB) THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA) = &
                                          THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA)/SUM_WGT(ABS(IOR))
          ENDDO
-         IF (ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN  ! Something is wrong
+         WEIGHT = SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
+         IF (TWO_D) THEN
+            TARGET_WEIGHT = 1._EB
+         ELSE
+            TARGET_WEIGHT = 2._EB
+         ENDIF
+         IF (ABS(WEIGHT-TARGET_WEIGHT)>0.001_EB) THEN  ! Something is wrong
             WRITE(0,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,F6.3)') 'WARNING: Mesh=',NM,' WALL=',IW,' IJK=',BC%IIG,',',&
                BC%JJG,',',BC%KKG,' IOR=',BC%IOR,' NODE=',I,' WEIGHT=',SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
          ENDIF
@@ -2010,7 +1978,13 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
             IF (SUM_WGT(ABS(IOR))>0._EB) THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA) = &
                                          THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(IWA)/SUM_WGT(ABS(IOR))
          ENDDO
-         IF (ABS(SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))-2._EB)>0.001_EB) THEN  ! Something is wrong
+         WEIGHT = SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
+         IF (TWO_D) THEN
+            TARGET_WEIGHT = 1._EB
+         ELSE
+            TARGET_WEIGHT = 2._EB
+         ENDIF
+         IF (ABS(WEIGHT-TARGET_WEIGHT)>0.001_EB) THEN  ! Something is wrong
             WRITE(0,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,F6.3)') 'WARNING: Mesh=',NM,' THIN_WALL=',ITW,' IJK=',BC%IIG,',',&
                BC%JJG,',',BC%KKG,' IOR=',BC%IOR,' NODE=',I,' WEIGHT=',SUM(THR_D%NODE(I)%ALTERNATE_WALL_WEIGHT(:))
          ENDIF
@@ -3718,6 +3692,7 @@ WC => M%WALL(IW)
 SF => SURFACE(WC%SURF_INDEX)
 IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) RETURN
 BC => M%BOUNDARY_COORD(WC%BC_INDEX)
+IF (TWO_D .AND. (ABS(BC%IOR)==2.OR.(CYLINDRICAL.AND.BC%IOR==1)) .AND. IW<=M%N_EXTERNAL_WALL_CELLS) RETURN
 ICG = M%CELL_INDEX(BC%IIG,BC%JJG,BC%KKG)
 IF (M%CELL(ICG)%SOLID) RETURN
 ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
@@ -3983,7 +3958,7 @@ IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
    DO NL=1,N_LAYERS_OBST
       N_LAYERS = N_LAYERS + 1
       LAYER_THICKNESS(N_LAYERS)  = LAYER_THICKNESS_OBST(NL)
-      MINIMUM_LAYER_THICKNESS(N_LAYERS)  = 0.01_EB*LAYER_THICKNESS_OBST(NL)
+      MINIMUM_LAYER_THICKNESS(N_LAYERS) = SF%MINIMUM_LAYER_THICKNESS(1)
       HT3D_LAYER(N_LAYERS)       = .TRUE.
       HEAT_SOURCE(N_LAYERS)      = HEAT_SOURCE_OBST(NL)
       STRETCH_FACTOR(N_LAYERS)   = STRETCH_FACTOR_OBST(NL)
@@ -4904,6 +4879,12 @@ IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
    CALL INIT_WALL_CELL(NM,BC%II,BC%JJ,BC%KK,WC%OBST_INDEX,IW,BC%IOR,WC%SURF_INDEX,IERR,T)
    WC => MESHES(NM)%WALL(IW)
    IF (IW<=N_EXTERNAL_WALL_CELLS) EWC%PRESSURE_BC_TYPE = PRESSURE_BC_TYPE
+! This code is under construction
+!  SF => SURFACE(WC%SURF_INDEX)
+!  IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
+!     CALL FIND_WALL_BACK_INDEX(NM,IW)
+!     CALL REALLOCATE_ONE_D_ARRAYS(NM,WALL_CELL=IW)
+!  ENDIF
 ENDIF
 
 ! Special cases 1: BURNed_AWAY obstruction exposes a surface that also burns, in which case the surface is to ignite immediately.
