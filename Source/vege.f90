@@ -1385,7 +1385,7 @@ ELSE
          ENDIF
          IF(FIRE_PRESENT .AND. TOA(I,J)>(1.E10_EB-1._EB)) TOA(I,J) = T
          ! reset if residence time test not met
-         IF(TOA(I,J)<1.E10_EB .AND. ABS(TOA(I,J)-T)<0.5_EB .AND. .NOT. FIRE_PRESENT) TOA(I,I) = 1.E10_EB
+         IF(TOA(I,J)<1.E10_EB .AND. ABS(TOA(I,J)-T)<0.5_EB .AND. .NOT. FIRE_PRESENT) TOA(I,J) = 1.E10_EB
       ENDDO
    ENDDO
 ENDIF
