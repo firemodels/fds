@@ -11992,13 +11992,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
       K1 = VT%K1
       K2 = VT%K2
 
-      VT%GHOST_CELLS_ONLY = .TRUE.
-
       SELECT CASE(ABS(VT%IOR))
          CASE(1)
             DO K=K1+1,K2
                DO J=J1+1,J2
-                  IF (J>=1 .AND. J<=JBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   IF ( VT%RADIUS>0._EB) THEN
                      VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%Y0,VT%Z0,VT%RADIUS,Y(J-1),Y(J),Z(K-1),Z(K))
                      IF (((YC(J)-VT%Y0)**2+(ZC(K)-VT%Z0)**2)>VT%RADIUS**2) CYCLE
@@ -12009,7 +12006,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
          CASE(2)
             DO K=K1+1,K2
                DO I=I1+1,I2
-                  IF (I>=1 .AND. I<=IBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   IF ( VT%RADIUS>0._EB) THEN
                      VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%X0,VT%Z0,VT%RADIUS,X(I-1),X(I),Z(K-1),Z(K))
                      IF (((XC(I)-VT%X0)**2+(ZC(K)-VT%Z0)**2)>VT%RADIUS**2) CYCLE
@@ -12020,7 +12016,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
          CASE(3)
             DO J=J1+1,J2
                DO I=I1+1,I2
-                  IF (I>=1 .AND. I<=IBAR .AND. J>=1 .AND. J<=JBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   IF ( VT%RADIUS>0._EB) THEN
                      VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%X0,VT%Y0,VT%RADIUS,X(I-1),X(I),Y(J-1),Y(J))
                      IF (((XC(I)-VT%X0)**2+(YC(J)-VT%Y0)**2)>VT%RADIUS**2) CYCLE
