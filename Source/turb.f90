@@ -1287,18 +1287,18 @@ END SUBROUTINE WALL_MODEL
 !> \brief Calculate the Nusselt number for natural/free convection
 !> \param NUSSELT Nusselt number
 !> \param RA Rayleigh number
-!> \param SURF_INDEX Indicator of the surface type
-!> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
+!> \param SF Pointer to SURFACE derived type variable
 !> \param IOR Index of the surface orientation
 !> \param DELTA_TMP Temperature difference between gas and surface (K)
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,DELTA_TMP)
+SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SF,IOR,DELTA_TMP)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
 REAL(EB), INTENT(IN) :: RA,DELTA_TMP
-INTEGER, INTENT(IN) :: SURF_INDEX,SURF_GEOMETRY_INDEX,IOR
+INTEGER, INTENT(IN) :: IOR
+TYPE(SURFACE_TYPE), POINTER, INTENT(IN) :: SF
 
-SELECT CASE(SURF_GEOMETRY_INDEX)
+SELECT CASE(SF%GEOMETRY)
    CASE (SURF_CARTESIAN)
       SELECT CASE(ABS(IOR))
          CASE(0:2)
@@ -1314,8 +1314,8 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
                NUSSELT = 0.52_EB*RA**0.2     ! Incropera and DeWitt, 7th edition, Eq. 9.32
             ENDIF
       END SELECT
-   CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
-      IF (SURFACE(SURF_INDEX)%HORIZONTAL) THEN
+   CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
+      IF (SF%HORIZONTAL) THEN
          NUSSELT = (0.6_EB + 0.321_EB*RA**ONSI)**2   ! Incropera and DeWitt, 7th edition, Eq. 9.34
       ELSE
          NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2 ! Incropera and DeWitt, 7th edition, Eq. 9.26
@@ -1351,7 +1351,7 @@ ELSE
    SELECT CASE(SURF_GEOMETRY_INDEX)
       CASE (SURF_CARTESIAN)
          NUSSELT = 0.0296_EB*RE**0.8_EB*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.36, Table 7.7
-      CASE (SURF_CYLINDRICAL)
+      CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)
          ! Incropera and DeWitt, 7th, Eq. 7.52
          IF (RE >= 40000._EB) THEN
             NUSSELT = 0.027_EB*RE**0.805_EB*PR_ONTH_IN

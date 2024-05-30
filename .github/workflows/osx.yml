@@ -24,115 +24,13 @@ permissions:
 
 
 env:
-  # update urls for oneapi and openmpi packages according to
-  # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  # https://open-mpi.org/software/ompi/
-  MACOS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/cd013e6c-49c4-488b-8b86-25df6693a9b7/m_BaseKit_p_2023.2.0.49398_offline.dmg
-  MACOS_BASEKIT_COMPONENTS: intel.oneapi.mac.mkl.devel
-  MACOS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/edb4dc2f-266f-47f2-8d56-21bc7764e119/m_HPCKit_p_2023.2.0.49443_offline.dmg
-  MACOS_HPCKIT_COMPONENTS: intel.oneapi.mac.cpp-compiler:intel.oneapi.mac.ifort-compiler
+  # update url for openmpi package according to
   OPENMPI_URL: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
 
-
 jobs:
-  osx-intel-openmpi:
-    # build on osx using ifort with openmpi and mkl based on
-    # https://github.com/oneapi-src/oneapi-ci
-  
-    name: osx intel openmpi
-    runs-on: [macos-latest]
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-    - uses: actions/checkout@v4
-
-      # install oneapi components from web installer based on
-      # oneapi-ci/scripts/install_macos.sh
-    - name: prepare for cache restore
-      run: |
-        sudo mkdir -p /opt/intel
-        sudo chown $USER /opt/intel
-        sudo mkdir -p /opt/openmpi
-        sudo chown $USER /opt/openmpi
-    - name: cache install oneapi, openmpi
-      id: cache-install
-      uses: actions/cache@v4
-      with:
-        path: |
-          /opt/intel/oneapi
-          /opt/openmpi
-        key: install-${{ env.MACOS_BASEKIT_URL }}-${{ env.MACOS_BASEKIT_COMPONENTS }}-${{ env.MACOS_HPCKIT_URL }}-${{ env.MACOS_HPCKIT_COMPONENTS }}-${{ env.OPENMPI_URL }}
-    - name: install oneapi compilers
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        curl --output webimage_hpc.dmg --url "$MACOS_HPCKIT_URL" --retry 5 --retry-delay 5
-        hdiutil attach webimage_hpc.dmg
-        sudo /Volumes/"$(basename "$MACOS_HPCKIT_URL" .dmg)"/bootstrapper.app/Contents/MacOS/bootstrapper -s --action install --components="$MACOS_HPCKIT_COMPONENTS" --eula=accept --log-dir=.installer_exit_code=$?
-        hdiutil detach /Volumes/"$(basename "$MACOS_HPCKIT_URL" .dmg)" -quiet
-        exit $installer_exit_code
-
-    - name: install openmpi
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        curl --output openmpi.tar.gz --url "$OPENMPI_URL"
-        mkdir openmpi
-        tar xf openmpi.tar.gz -C ./openmpi --strip-components 1
-        cd openmpi
-        ./configure \
-          CC=icc CXX=icpc F77=ifort FC=ifort \
-          CFLAGS=-m64 CXXFLAGS=-m64 FFLAGS=-m64 FCFLAGS=-m64 LDFLAGS=-m64 \
-          --prefix=/opt/openmpi \
-          --with-hwloc=internal \
-          --with-libevent=internal \
-          --without-psm \
-          --without-tm \
-          --without-verbs \
-          --enable-static \
-          --disable-shared
-        make all install
-    - name: set openmpi environment variables
-      run: |
-        echo "PATH=/opt/openmpi/bin:$PATH" >> $GITHUB_ENV
-        echo "LD_LIBRARY_PATH=/opt/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-        echo "OMPI_CC=icc" >> $GITHUB_ENV
-        echo "OMPI_CXX=icpc" >> $GITHUB_ENV
-        echo "OMPI_F77=ifort" >> $GITHUB_ENV
-        echo "OMPI_FC=ifort" >> $GITHUB_ENV
-
-    - name: install oneapi mkl
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        curl --output webimage_base.dmg --url "$MACOS_BASEKIT_URL" --retry 5 --retry-delay 5
-        hdiutil attach webimage_base.dmg
-        sudo /Volumes/"$(basename "$MACOS_BASEKIT_URL" .dmg)"/bootstrapper.app/Contents/MacOS/bootstrapper -s --action install --components="$MACOS_BASEKIT_COMPONENTS" --eula=accept --log-dir=.installer_exit_code=$?
-        hdiutil detach /Volumes/"$(basename "$MACOS_BASEKIT_URL" .dmg)" -quiet
-        exit $installer_exit_code
-    - name: install oneapi mklmpi wrapper
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        cd ${MKLROOT}/interfaces/mklmpi/
-        sudo make libintel64
-
-    - name: build fds debug
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        cd ./Build/ompi_intel_osx_db
-        sh ./make_fds.sh
-        ./fds_ompi_intel_osx_db
-    - name: build fds release
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        cd ./Build/ompi_intel_osx
-        sh ./make_fds.sh
-        ./fds_ompi_intel_osx
-
 
   osx-gnu-openmpi:
-    # debug build on osx using gfortran with openmpi and mkl
+    # debug build on osx using gfortran with openmpi
   
     name: osx gnu openmpi
     runs-on: [macos-latest]
@@ -147,42 +45,13 @@ jobs:
         brew install open-mpi
         echo "OMPI_FC=gfortran-11" >> $GITHUB_ENV
 
-      # install oneapi components from web installer based on
-      # oneapi-ci/scripts/install_macos.sh
-    - name: prepare for cache restore
-      run: |
-        sudo mkdir -p /opt/intel
-        sudo chown $USER /opt/intel
-    - name: cache install oneapi
-      id: cache-install
-      uses: actions/cache@v4
-      with:
-        path: /opt/intel/oneapi
-        key: install-${{ env.MACOS_BASEKIT_URL }}-${{ env.MACOS_BASEKIT_COMPONENTS }}
-    - name: install oneapi mkl
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        curl --output webimage_base.dmg --url "$MACOS_BASEKIT_URL" --retry 5 --retry-delay 5
-        hdiutil attach webimage_base.dmg
-        sudo /Volumes/"$(basename "$MACOS_BASEKIT_URL" .dmg)"/bootstrapper.app/Contents/MacOS/bootstrapper -s --action install --components="$MACOS_BASEKIT_COMPONENTS" --eula=accept --log-dir=.installer_exit_code=$?
-        hdiutil detach /Volumes/"$(basename "$MACOS_BASEKIT_URL" .dmg)" -quiet
-        exit $installer_exit_code
-    - name: install oneapi mklmpi wrapper
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        cd ${MKLROOT}/interfaces/mklmpi/
-        sudo make libintel64
-
     - name: build fds debug
       run: |
-        source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_osx_db
         sh ./make_fds.sh
         ./fds_ompi_gnu_osx_db
     - name: build fds release
       run: |
-        source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_osx
         sh ./make_fds.sh
         ./fds_ompi_gnu_osx
