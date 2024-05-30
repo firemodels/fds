@@ -1232,7 +1232,7 @@ Obstructions can be protected from the {\ct HOLE} punching feature. Sometimes cr
 If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=F} This is sometimes needed to stop
 FDS from removing the obstruction if it is embedded within another, like a door within a wall.
 
-In rare cases, you might not want to allow a {\ct VENT} to be attached to a particular obstruction, in which case set {\ct ALLOW\_VENT=F}
+In rare cases, you might not want to allow a {\ct VENT} to be attached to a particular obstruction, in which case set {\ct ALLOW\_VENT=F}.
 
 \subsection{Transparent or Outlined Obstructions}
 
@@ -6394,7 +6394,7 @@ When a liquid droplet hits a solid surface, it transfers heat over the area of t
 
 The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K.
 
-There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=T} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=T} on the {\ct SURF} line(s). It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}. To stop particles or droplets from ``sticking'' to surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=F} on the {\ct SURF} line.
 
 A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct Sprinklers\_and\_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity.
 
@@ -12236,8 +12236,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct F}           \\ \hline
 {\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct T}           \\ \hline
 {\ct ALIGNMENT\_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
-{\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct T}           \\ \hline
-{\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct F}           \\ \hline
 {\ct BNDF\_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & {\ct T}           \\ \hline
 {\ct C\_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 {\ct CFL\_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
@@ -13012,6 +13010,8 @@ Keyword             & Type     & Description                      & Units       
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}                 \\ \hline
+{\ct ALLOW\_SURFACE\_PARTICLES}                           & Logical         & Section~\ref{info:surface_droplets}       &            & {\ct T}                          \\ \hline
+{\ct ALLOW\_UNDERSIDE\_PARTICLES}                         & Logical         & Section~\ref{info:surface_droplets}       &            & {\ct F}                          \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
 {\ct BLOWING}                                             & Logical         & Section~\ref{blowing}                     &                     &                         \\ \hline
@@ -13104,7 +13104,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_V\_Y}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RAMP\_V\_Z}                                          & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct REFERENCE\_HEAT\_FLUX}                               & Real Array      & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
-{\ct REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
+{\ct \footnotesize REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 {\ct REFERENCE\_THICKNESS}                                & Real Array      & Section~\ref{info:scaled_burning}         & m                   &                         \\ \hline
 {\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
