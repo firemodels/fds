@@ -10620,6 +10620,10 @@ MESH_LOOP: DO NM=1,NMESHES
                      ML => MATERIAL(SF%MATL_INDEX(NNN))
                      IF (ML%N_REACTIONS>0 .AND. OB%THIN) REACTING_THIN_OBSTRUCTIONS = .TRUE.
                   ENDDO
+                  IF (ANY(OB%UNDIVIDED_INPUT_LENGTH<TWO_EPSILON_EB) .AND. SF%HT_DIM>1) THEN
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(612): OBST_ID ',TRIM(ID),' must have a volume to be assigned HT3D.'
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  ENDIF
                ENDDO
 
                ! Determine if the OBST is CONSUMABLE
