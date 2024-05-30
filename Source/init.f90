@@ -32,10 +32,11 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIF
 USE RADCONS, ONLY: UIIDIM
 USE CONTROL_VARIABLES
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS
+INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST,N_EXTERNAL_CELLS,NS
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,INTEGRAL,TEMP,ZSW
+REAL(EB) :: MU_N,CS,DELTA,INTEGRAL,TEMP,ZSW
+REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: ZZ_GET,VF
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
@@ -423,69 +424,6 @@ DO N=N_TRACKED_SPECIES+1,N_TOTAL_SCALARS
    M%ZZS(:,:,:,N) = INITIAL_UNMIXED_FRACTION
 ENDDO
 
-! Over-ride default ambient gas species mass fractions if defined in INIT
-
-M%IWORK1=0
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-! Over-ride default ambient temperature and density if defined in INIT
-
-M%IWORK1=0
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE)) CYCLE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%TMP(I,J,K)            = IN%TEMPERATURE
-                  M%RHO(I,J,K)            = IN%DENSITY
-                  M%RHOS(I,J,K)           = IN%DENSITY
-                  IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
-                  IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,M%RSUM(I,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-
 ! Allocate and Initialize Mesh-Dependent Radiation Arrays
 
 M%QR  = 0._EB
@@ -498,28 +436,51 @@ IF (RADIATION) THEN
    M%UIID = 4._EB*SIGMA*TMPA4/REAL(UIIDIM,EB)
 ENDIF
 
-! Over-ride default ambient conditions with user-prescribed INITializations
+! Over-ride default ambient gas species mass fractions, temperatuer and density
 
-M%IWORK1=0
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
    IF ((IN%NODE_ID/='null')) CYCLE
-   IF (.NOT. (IN%ADJUST_DENSITY .OR. IN%ADJUST_TEMPERATURE .OR. IN%ADJUST_SPECIES_CONCENTRATION)) CYCLE
+   IF (.NOT. (IN%ADJUST_INITIAL_CONDITIONS)) CYCLE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            IF (M%XC(I) > IN%X1 .AND. M%XC(I) < IN%X2 .AND. &
-                M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
-                M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
-               IF (M%IWORK1(I,J,K)==0) THEN
-                  M%IWORK1(I,J,K) = N
-                  M%RHO(I,J,K)  = M%P_0(K)/(M%TMP(I,J,K)*M%RSUM(I,J,K))
-                  M%RHOS(I,J,K) = M%RHO(I,J,K)
-                  IF (RADIATION) THEN
-                     M%UII(I,J,K) = 4._EB*SIGMA*M%TMP(I,J,K)**4
-                     M%UIID(I,J,K,1:UIIDIM) = M%UII(I,J,K)/REAL(UIIDIM,EB)
+            IF (M%XC(I)<IN%X1.OR.M%XC(I)>IN%X2.OR.M%YC(J)<IN%Y1.OR.M%YC(J)>IN%Y2.OR.M%ZC(K)<IN%Z1.OR.M%ZC(K)>IN%Z2) CYCLE
+            IF (IN%VOLUME_FRACTIONS_SPECIFIED) THEN
+               VF = 0._EB
+               DO NS=2,N_TRACKED_SPECIES
+                  IF (IN%RAMP_VF_Z_INDEX(NS)>0) THEN
+                     VF(NS) = EVALUATE_RAMP(M%ZC(K),IN%RAMP_VF_Z_INDEX(NS))
+                  ELSE
+                     VF(NS) = IN%VOLUME_FRACTION(NS)
                   ENDIF
-               ENDIF
+               ENDDO
+               VF(1) = 1._EB - SUM(VF)
+               M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = VF(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW / &
+                                             SUM(VF(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW)
+            ELSEIF (IN%MASS_FRACTIONS_SPECIFIED) THEN
+               DO NS=2,N_TRACKED_SPECIES
+                  IF (IN%RAMP_MF_Z_INDEX(NS)>0) THEN
+                     M%ZZ(I,J,K,NS) = EVALUATE_RAMP(M%ZC(K),IN%RAMP_MF_Z_INDEX(NS))
+                  ELSE
+                     M%ZZ(I,J,K,NS) = IN%MASS_FRACTION(NS)
+                  ENDIF
+               ENDDO
+               M%ZZ(I,J,K,1) = 1._EB - SUM(M%ZZ(I,J,K,2:N_TRACKED_SPECIES))
+            ENDIF
+            M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            IF (IN%RAMP_TMP_Z_INDEX>0) THEN
+               M%TMP(I,J,K) = TMPM + EVALUATE_RAMP(M%ZC(K),IN%RAMP_TMP_Z_INDEX)
+            ELSEIF (IN%TEMPERATURE>0._EB) THEN
+               M%TMP(I,J,K) = IN%TEMPERATURE
+            ENDIF
+            ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,M%RSUM(I,J,K))
+            M%RHO(I,J,K)  = M%P_0(K)/(M%TMP(I,J,K)*M%RSUM(I,J,K))
+            M%RHOS(I,J,K) = M%RHO(I,J,K)
+            IF (RADIATION) THEN
+               M%UII(I,J,K) = 4._EB*SIGMA*M%TMP(I,J,K)**4
+               M%UIID(I,J,K,1:UIIDIM) = M%UII(I,J,K)/REAL(UIIDIM,EB)
             ENDIF
          ENDDO
       ENDDO
@@ -4918,6 +4879,12 @@ IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
    CALL INIT_WALL_CELL(NM,BC%II,BC%JJ,BC%KK,WC%OBST_INDEX,IW,BC%IOR,WC%SURF_INDEX,IERR,T)
    WC => MESHES(NM)%WALL(IW)
    IF (IW<=N_EXTERNAL_WALL_CELLS) EWC%PRESSURE_BC_TYPE = PRESSURE_BC_TYPE
+! This code is under construction
+!  SF => SURFACE(WC%SURF_INDEX)
+!  IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
+!     CALL FIND_WALL_BACK_INDEX(NM,IW)
+!     CALL REALLOCATE_ONE_D_ARRAYS(NM,WALL_CELL=IW)
+!  ENDIF
 ENDIF
 
 ! Special cases 1: BURNed_AWAY obstruction exposes a surface that also burns, in which case the surface is to ignite immediately.

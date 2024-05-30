@@ -2503,6 +2503,7 @@ You can specify an internal source for the solid obstruction using {\ct INTERNAL
 \item Avoid contact between 3-D and 1-D solids. If two sides of a 3-D solid touch 1-D solids, there will be no lateral heat conduction computed in that particular direction.
 \item If your 3-D obstruction extends beyond meshes that abut, FDS uses a special algorithm to identify all the meshes where this obstruction lives, and also those obstructions connected to it. However, if this algorithm fails to detect all the meshes and you recieve an error stating that there is a problem, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation. If you set this parameter to a value larger than the width of the computational domain, then all meshes will establish communication channels for exchanging boundary information.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} or {\ct OBST} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically chosen to be comparable to the gas phase cells. If the obstruction is thin; that is, less than one gas phase cell thick, the specified {\ct CELL\_SIZE} will only apply to the heat conduction in the transverse, not normal, direction. The normal direction gridding will be controlled by the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. This may be useful in cases where the specified {\ct CELL\_SIZE} is too coarse to resolve variations in surface definition along the normal dimension (see Section~\ref{checkerboard} for an example).
+\item {\ct HT3D} cannot be applied to an {\ct OBST} that is to {\ct BURN\_AWAY}.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -3147,7 +3148,7 @@ If a combustible solid is to disappear from the simulation once it is consumed, 
 \item Use {\ct BURN\_AWAY} cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional information for newly exposed surfaces.
 \item The heat conduction into an {\ct OBST} that can {\ct BURN\_AWAY} is limited to 1-D. On the {\ct SURF} line, specify the {\ct THICKNESS} to be approximately that of a single cell, and also set {\ct BACKING='VOID'}. It is assumed that the solid is relatively well-insulated and that the in-depth temperature profile drops off relatively quickly at the surface. When a cell is removed, the newly exposed surface is initially at ambient temperature but heats up quickly at the surface.
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be specified on the {\ct OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the {\ct BULK\_DENSITY} refers to the mass of the solid that is converted to gas upon reaction. You can visualize the decrease in the bulk density of a burning solid using the output quantity {\ct 'BULK DENSITY'} with a slice ({\ct SLCF}) or device ({\ct DEVC}).
 \item If {\ct BURN\_AWAY} is prescribed on a {\ct SURF} line, that single {\ct SURF\_ID} should be applied to the entire {\ct OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different {\ct SURF\_ID}s on different faces. An exception to this rule is where a {\ct BULK\_DENSITY} is applied to the {\ct OBST}, in which case the {\ct OBST} will disappear when the mass of fuel designated by {\ct BULK\_DENSITY} is consumed rather than that of any particular face.
 \item By default, newly exposed surfaces take on the same {\ct SURF\_ID} that has been applied to the original obstruction. However, you can specify an optional {\ct SURF\_ID\_INTERIOR} on the {\ct OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
@@ -8787,7 +8788,7 @@ Clipping of density and mass fractions violates mass conservation, so it is pref
 
 Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the first of the overlapping regions that takes precedence (i.e., first come first serve) for all commonly defined inputs. That is, it is not possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the initial conditions explicitly defined by the second {\ct INIT} line. However, inputs defined in the second {\ct INIT} line which were not defined in the first will still be applied.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence.
 
 \section{Gas Species}
 \label{info:init_species}
@@ -8802,6 +8803,7 @@ where {\ct XB} indicates a rectangular volume within the domain where the initia
 \begin{itemize}
 \item The indices of {\ct SPEC\_ID} and {\ct MASS\_FRACTION} are not necessarily indicative of the order in which the species are listed in the input file, but rather should come in consecutive order starting from 1.
 \item {\ct VOLUME\_FRACTION(N)} can be used instead of {\ct MASS\_FRACTION(N)} as long as they are not used together on the same input line.
+\item Instead of specifying a {\ct MASS\_FRACTION(N)} or {\ct VOLUME\_FRACTION(N)}, you can specify a {\ct RAMP\_MF\_Z(N)} or {\ct RAMP\_VF\_Z(N)} to indicate a vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the mass or volume fraction. A single {\ct INIT} line can have both fixed and ramped values, but they must refer to either mass or volume fraction.
 \item Specify all species components on the same {\ct INIT} line.
 \item The initial concentration of the background gas species cannot be specified this way.  The mass or volume fraction of the background species will be set to account for the unspecified fraction.
 \item All gas species must be specified using the {\ct SPEC} or {\ct REAC} namelist groups. In other words, any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
@@ -8822,25 +8824,13 @@ To modify the local initial temperature in certain regions of the domain, add li
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
-This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
+This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. To initialize both temperature and species concentration in the same volume, use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
 \end{lstlisting}
-
-\section{Density}
-\label{info:init_density}
-
-When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
-\begin{lstlisting}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
-      MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
-      TEMPERATURE=60., DENSITY=1.13 /
-\end{lstlisting}
-This is a case where we have over-specified the parameters. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
@@ -11056,7 +11046,8 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct ADVECTIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                           & mol/mol           & D,I,P,S      \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                        & Pa                & D,I,P,S      \\ \hline
-{\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
+{\ct BULK DENSITY}                              & Section~\ref{info:BURN_AWAY}                      & kg/m$^3$          & D,I,P,S      \\ \hline
+{\ct CELL REYNOLDS NUMBER}                      & Section~\ref{info:meshquality}                    &                   & D,I,P,S      \\ \hline
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s               & D,I,P,S      \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s               & D,I,P,S      \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s               & D,I,P,S      \\ \hline
@@ -12053,7 +12044,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
-{\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
 {\ct DRY}                         & Logical           & Section~\ref{pine_needles}                    &                & {\ct F}       \\ \hline
@@ -12078,8 +12068,10 @@ Keyword             & Type     & Description                      & Units       
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & {\ct TMPA}    \\ \hline
@@ -13625,6 +13617,7 @@ Keyword             & Type     & Description                      & Units       
 366  \> {\ct SURF \ldots\ cannot leak and specify flow or pyrolysis \ldots\         } \> Section~\ref{info:Leaks}  \\
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
 368  \> {\ct SURF \ldots\ has a problem with VARIABLE\_THICKNESS or HT3D.           } \> Section~\ref{info:HT3D_Limitations}  \\
+369  \> {\ct SURF \ldots\ cannot have both HT3D and BURN\_AWAY.                     } \> Section~\ref{info:HT3D_Limitations}  \\
      \>                                                                               \>                                     \\
 371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
@@ -13764,6 +13757,7 @@ Keyword             & Type     & Description                      & Units       
 609 \> {\ct MULT\_ID \ldots\ not found on HOLE line \ldots\                         } \> Section~\ref{info:MULT}  \\
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
 611 \> {\ct OBST \ldots\ has a BULK\_DENSITY but zero volume.                       } \> Section~\ref{info:BURN_AWAY}  \\
+612 \> {\ct OBST \ldots\ must have a volume to be assigned HT3D.                    } \> Section~\ref{checkerboard}  \\
     \>                                                                                \>                          \\
 701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
 702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\
