@@ -5,7 +5,7 @@
 
 &TIME T_END=1800. /
 
-&MISC TMPA=19., ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
+&MISC TMPA=19. /
 
 &SPEC ID='WATER VAPOR' /
 
@@ -101,26 +101,28 @@ Commodity
       HEAT_OF_COMBUSTION    = 11500. /
       EMISSIVITY            = 0.8 /
 
-&SURF ID                    = 'PLASTIC A'
-      FYI                   = 'FMRC Standard Plastic Commodity'
-      COLOR                 = 'TAN'
-      HRRPUA                = 500.
-      IGNITION_TEMPERATURE  = 370.
-      RAMP_Q                = 'GAP'
-      MATL_ID               = 'CORRUGATED PAPER'
-      BURN_AWAY             = .TRUE.
-      THICKNESS             = 0.005
-      E_COEFFICIENT         =  0.5 /
+&SURF ID                        = 'PLASTIC A'
+      FYI                       = 'FMRC Standard Plastic Commodity'
+      COLOR                     = 'TAN'
+      HRRPUA                    = 500.
+      IGNITION_TEMPERATURE      = 370.
+      RAMP_Q                    = 'GAP'
+      MATL_ID                   = 'CORRUGATED PAPER'
+      BURN_AWAY                 = T
+      THICKNESS                 = 0.005
+      ALLOW_UNDERSIDE_PARTICLES = T
+      E_COEFFICIENT             =  0.5 /
 &RAMP ID='GAP',T=   0.0,F=0.0 /
 &RAMP ID='GAP',T=   1.0,F=0.6 /
 &RAMP ID='GAP',T=  30.0,F=0.2 /
 &RAMP ID='GAP',T=  80.0,F=1.6 /
 &RAMP ID='GAP',T= 100.0,F=1.0 /
 
-&SURF ID                    = 'PALLET'
-      MATL_ID               = 'YELLOW PINE'
-      COLOR                 = 'BROWN'
-      THICKNESS             = 0.012 /
+&SURF ID                        = 'PALLET'
+      MATL_ID                   = 'YELLOW PINE'
+      COLOR                     = 'BROWN'
+      ALLOW_UNDERSIDE_PARTICLES = T
+      THICKNESS                 = 0.012 /
 
 &SURF ID='IGNITOR', HRRPUA=1000., TAU_Q=60., COLOR='RED' /
 

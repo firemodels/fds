@@ -2109,7 +2109,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                            LP%CFACE_INDEX = 0
                            BC%IOR = 0
                            SLIDE_CF  = .TRUE.
-                        ELSEIF (.NOT.ALLOW_UNDERSIDE_PARTICLES) THEN
+                        ELSEIF (.NOT.SURFACE(CFACE(ICF_NEW)%SURF_INDEX)%ALLOW_UNDERSIDE_PARTICLES) THEN
                            CFA_NEW => CFACE(ICF_NEW); CFA_NEW_BC => BOUNDARY_COORD(CFA_NEW%BC_INDEX)
                            DOT_NVECOLD_NEW = DOT_PRODUCT(CFA_OLD_BC%NVEC,CFA_NEW_BC%NVEC)
                            IF (DOT_NVECOLD_NEW>0.99_EB) THEN ! ICF_NEW also vertical, particle movin on side wall.
@@ -2181,7 +2181,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                P_VECTOR = (/BC%X-CFA_NEW_BC%X, BC%Y-CFA_NEW_BC%Y, BC%Z-CFA_NEW_BC%Z/) ! NEW CFACE to particle position vector.
                PVEC_L   = NORM2(P_VECTOR)
                TEST_POS = .FALSE.; IF (ICF_OLD == 0) TEST_POS = DOT_PRODUCT(CFA_NEW_BC%NVEC,P_VECTOR) > TWO_EPSILON_EB
-               DIST = TWO_EPSILON_EB; IF(ALLOW_UNDERSIDE_PARTICLES) DIST = 1._EB
+               DIST = TWO_EPSILON_EB; IF (SURFACE(CFACE(ICF_NEW)%SURF_INDEX)%ALLOW_UNDERSIDE_PARTICLES) DIST = 1._EB
                CFACE_ATTACH : IF (DOT_NVECNEW_GVEC>DIST .OR. TEST_POS) THEN
 
                   ! Normal points down or particle in gas phase.
@@ -2367,7 +2367,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                CASE (-3) DIRECTION
                   IF (LPC%SOLID_PARTICLE) THEN
                      BC%IOR = 0
-                  ELSEIF (.NOT.ALLOW_UNDERSIDE_PARTICLES) THEN
+                  ELSEIF (.NOT.SURFACE(WALL(IW)%SURF_INDEX)%ALLOW_UNDERSIDE_PARTICLES) THEN
                      LP%U = 0._EB
                      LP%V = 0._EB
                      LP%W = -LPC%VERTICAL_VELOCITY
@@ -2412,7 +2412,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! Remove the particle if it is not allowed on a surface
 
-         IF (.NOT.ALLOW_SURFACE_PARTICLES) THEN
+         IF (IW>0 .AND. .NOT.SURFACE(WALL(IW)%SURF_INDEX)%ALLOW_SURFACE_PARTICLES) THEN
             LP%RADIUS = 0.9_EB*LPC%KILL_RADIUS
             EXIT TIME_STEP_LOOP
          ENDIF
