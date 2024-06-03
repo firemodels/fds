@@ -1397,11 +1397,11 @@ ELSE
                   CASE(1) ! ARRIVAL TIME
                      IF(FIRE_PRESENT .AND. ABS(T_ARR(I,J)-1.E10_EB)<TWO_EPSILON_EB) T_ARR(I,J) = T
                      ! reset if residence time test not met
-                     IF(T_ARR(I,J)<1.E10_EB .AND. ABS(T_ARR(I,J)-T)<0.5_EB .AND. .NOT. FIRE_PRESENT) T_ARR(I,J) = 1.E10_EB
+                     IF(T_ARR(I,J)<1.E10_EB .AND. ABS(T_ARR(I,J)-T)<0.05_EB .AND. .NOT. FIRE_PRESENT) T_ARR(I,J) = 1.E10_EB
                   CASE(2) ! RESIDENCE TIME
                      IF(FIRE_PRESENT) T_RES(I,J) = T_RES(I,J) + DT
                      ! reset if residence time test not met
-                     IF(.NOT. FIRE_PRESENT .AND. T_RES(I,J)<0.5_EB) T_RES(I,J) = 0._EB
+                     IF(.NOT. FIRE_PRESENT .AND. T_RES(I,J)<0.05_EB) T_RES(I,J) = 0._EB
                END SELECT
             ENDDO
          ENDDO
