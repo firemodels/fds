@@ -8007,7 +8007,13 @@ When using a {\ct DEVC} output to control FDS, the instantaneous value of the {\
 \ee
 where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.  Note that {\ct SMOOTHING\_FACTOR} only changes the value passed to control functions; it has no effect on the value of the {\ct DEVC} written to the {\ct CHID\_devc.csv} file.
 
-Each state change of a device is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+An alternative to {\ct SMOOTHING\_FACTOR} is to instead use a {\ct SMOOTHING\_TIME} (units of seconds [s]), which may provide a more intuitive time scale over which the function is to be smoothed.  The two parameters are mathematically related by,
+\be
+\mbox{\ct SMOOTHING\_FACTOR} = \left(1-\frac{\delta t}{\mbox{\ct SMOOTHING\_TIME}} \right)
+\ee
+where $\delta t$ is the local time step in the simulation.  With a constant {\ct SMOOTHING\_TIME} used on the {\ct DEVC} line, the {\ct SMOOTHING\_FACTOR} dynamically adjusts with the local time step.
+
+Note that each state change of a device is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
@@ -11692,6 +11698,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
+{\ct SMOOTHING\_TIME}       & Real            & Section~\ref{info:basic_control}                                & s     &               \\ \hline
 {\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 {\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
