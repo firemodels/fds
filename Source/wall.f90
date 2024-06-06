@@ -3141,6 +3141,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                ! Get oxygen mass fraction
                ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
                CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               !======== Mass transfer resistance to surface O2 concentration =============
+               IF (TEST_CHAR_MASS_TRANSFER_MODEL) THEN
+                  TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
+                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
+                  D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),O2_INDEX)
+                  H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
+                  Y_O2 = Y_O2*(H_MASS/(H_MASS + D_FILM/ML%GAS_DIFFUSION_DEPTH(J)))
+               ENDIF
+               !===========================================================================
                ! Calculate oxygen volume fraction in the gas cell
                X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
                ! Calculate oxygen concentration inside the material, assuming decay function
