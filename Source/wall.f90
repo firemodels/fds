@@ -2756,12 +2756,10 @@ CONTAINS
 
 SUBROUTINE PERFORM_PYROLYSIS
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
 REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL
 REAL(EB), DIMENSION(MAX_MATERIALS) :: RHO_TEMP,M_DOT_S_PPP
-REAL(EB) :: Q_DOT_G_PPP,Q_DOT_O2_PPP,Y_O2_GAS,X_O2_GAS
+REAL(EB) :: Q_DOT_G_PPP,Q_DOT_O2_PPP
 REAL(EB), DIMENSION(MAX_LPC) :: Q_DOT_PART,M_DOT_PART
-REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: ZZ_GET
 LOGICAL :: REMOVE_LAYER
 
 ! Set mass and energy fluxes to zero for this time sub-iteration
@@ -2773,16 +2771,6 @@ Q_DOT_G_PP                             = 0._EB
 Q_DOT_O2_PP                            = 0._EB
 M_DOT_PART_S                           = 0._EB
 Q_DOT_PART_S                           = 0._EB
-
-! If there is surface or interior char oxidation, compute gas phase oxygen concentration here.
-
-IF (SF%OXIDATION .AND. O2_INDEX>0) THEN
-   ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES))
-   CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2_GAS)
-   X_O2_GAS = SPECIES(O2_INDEX)%RCON*Y_O2_GAS/RSUM(BC%IIG,BC%JJG,BC%KKG)
-ELSE
-   X_O2_GAS = 0._EB
-ENDIF
 
 ! Loop over all solid cells and compute the reaction rate of each material component, N, in each cell, I, RHO_DOT(N,I)
 
@@ -2805,14 +2793,13 @@ POINT_LOOP1: DO I=1,NWP
       CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,BC%IOR,&
                      RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
                      M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
-                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,X_O2_GAS,&
-                     SOLID_CELL_INDEX=I,R_DROP=R_SURF,LPU=U_SURF,LPV=V_SURF,LPW=W_SURF)
+                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I,&
+                     R_DROP=R_SURF,LPU=U_SURF,LPV=V_SURF,LPW=W_SURF)
    ELSE
       CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,BC%IOR,&
                      RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
                      M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
-                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,X_O2_GAS,&
-                     SOLID_CELL_INDEX=I)
+                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I)
    ENDIF
 
    ! Sum the mass and heat generation within the solid layers (PPP) and transfer result to the surface (PP).
@@ -2872,7 +2859,6 @@ END SUBROUTINE SOLID_HEAT_TRANSFER
 !> \param REMOVE_LAYER Indicates if the entire layer is being removed
 !> \param ONE_D Pointer to collection of variables for the interior of the solid
 !> \param B1 Pointer to surface variables
-!> \param X_O2_GAS Volume fraction of oxygen in the nearest gas phase cell
 !> \param SOLID_CELL_INDEX (OPTIONAL) Index of the interior solid cell
 !> \param R_DROP (OPTIONAL) Radius of liquid droplet
 !> \param LPU (OPTIONAL) x component of droplet velocity (m/s)
@@ -2881,7 +2867,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER
 
 SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,IOR,RHO_DOT_OUT,RHO_S,DEPTH,DX_S,DT_BC,&
                      M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_S_PPP,Q_DOT_G_PPP,Q_DOT_O2_PPP,&
-                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B_NUMBER,LAYER_INDEX,REMOVE_LAYER,ONE_D,B1,X_O2_GAS,SOLID_CELL_INDEX,&
+                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B_NUMBER,LAYER_INDEX,REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX,&
                      R_DROP,LPU,LPV,LPW)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_VISCOSITY,GET_PARTICLE_ENTHALPY,GET_SPECIFIC_HEAT,&
@@ -2892,7 +2878,7 @@ INTEGER, INTENT(IN) :: N_MATS,SURF_INDEX,IIG,JJG,KKG,IOR,LAYER_INDEX
 INTEGER, INTENT(IN), OPTIONAL :: SOLID_CELL_INDEX
 LOGICAL, INTENT(IN) :: REMOVE_LAYER
 REAL(EB), INTENT(OUT), DIMENSION(:,:) :: RHO_DOT_OUT(N_MATS)
-REAL(EB), INTENT(IN) :: TMP_S,TMP_F,DT_BC,DEPTH,X_O2_GAS
+REAL(EB), INTENT(IN) :: TMP_S,TMP_F,DT_BC,DEPTH
 REAL(EB), INTENT(IN), OPTIONAL :: R_DROP,LPU,LPV,LPW
 REAL(EB), INTENT(IN), DIMENSION(NWP_MAX) :: DX_S
 REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES),Y_ALL(1:N_SPECIES)
@@ -3149,17 +3135,20 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
             IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
 
-            ! Oxidation reaction? If so, calculate oxygen concentration inside the material, assuming decay function.
+            ! Oxidation reaction?
 
-            IF (ML%N_O2(J)>0._EB) THEN
-               X_O2 = X_O2_GAS * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
+            IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+               ! Get oxygen mass fraction
+               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               ! Calculate oxygen volume fraction in the gas cell
+               X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
+               ! Calculate oxygen concentration inside the material, assuming decay function
+               X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
             ENDIF
-
-            ! Calculate reaction rate with a user-specified limiter. Do not allow more material to react than is present.
-
-            REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))
-            RHO_DOT = MIN(REACTION_RATE,RHO_S(N)/DT_BC)
+            REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
+            RHO_DOT = MIN(REACTION_RATE,RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
          CASE (PYROLYSIS_SURFACE_OXIDATION)
 

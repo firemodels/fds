@@ -8424,7 +8424,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE(MESSAGE,'(3A)') 'ERROR(335): SURF ',TRIM(SF%ID),' cannot have a reacting MATL and IGNITION_TEMPERATURE.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
-      IF (ANY(ML%N_O2>TWO_EPSILON_EB)) SF%OXIDATION = .TRUE.
    ENDDO
 
    ! Specified source term
