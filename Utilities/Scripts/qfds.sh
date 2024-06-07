@@ -341,13 +341,12 @@ stop_fds_if_requested
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue"
-  if [ "$PMI2" == "" ]; then
-#  use on spark
-     MPIRUN="mpirun "
-  else
-# use on blaze (PMI2 variable is set to 1 in /etc/profile )
-# note this if can be removed once blaze goes away
+  if [ "$USE_MPIRUN" == "" ]; then
+# use on blaze  note this if statement can be removed once blaze goes away
      MPIRUN="srun --mpi=pmi2 "
+  else
+#  use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
+     MPIRUN="mpirun "
   fi
 else
   QSUB="qsub -q $queue"
