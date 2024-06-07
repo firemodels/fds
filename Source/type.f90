@@ -702,6 +702,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_S         !< The DELTA_S(T) array for a reverse reaction pair (entropy)
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INT          !< Array of species exponents
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
@@ -1605,8 +1606,8 @@ TYPE INITIALIZATION_TYPE
    INTEGER :: RAMP_Q_INDEX=0                                     !< Ramp index for HRRPUV
    INTEGER :: RAMP_PART_INDEX=0                                  !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
    INTEGER :: RAMP_TMP_Z_INDEX=0                                 !< Ramp index for temperature vertical profile (K)
-   INTEGER :: RAMP_MF_Z_INDEX(MAX_SPECIES)=0                     !< Ramp index for species mass fraction vertical profile
-   INTEGER :: RAMP_VF_Z_INDEX(MAX_SPECIES)=0                     !< Ramp index for species volume fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_MF_Z_INDEX         !< Ramp index for species mass fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_VF_Z_INDEX         !< Ramp index for species volume fraction vertical profile
    LOGICAL :: ADJUST_INITIAL_CONDITIONS=.FALSE.
    LOGICAL :: VOLUME_FRACTIONS_SPECIFIED=.FALSE.
    LOGICAL :: MASS_FRACTIONS_SPECIFIED=.FALSE.
