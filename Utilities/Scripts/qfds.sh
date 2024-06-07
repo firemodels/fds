@@ -341,8 +341,12 @@ stop_fds_if_requested
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue"
+  # only used on blaze - once blaze is gone the following lines can be removed
+  if [ "$PMI2" != "" ]; then
+    PMI2="--mpi=pmi2"
+  fi
   if [ "$use_intel_mpi" == "1" ]; then
-     MPIRUN="srun --mpi=pmi2"
+     MPIRUN="srun $PMI2"
   else
      MPIRUN="srun "
   fi
