@@ -265,6 +265,7 @@ LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that of
 LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
 LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
+LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test mass transfer resistence in char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -442,6 +443,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
 !< MU_RSQMW_Z(I,J) Viscosity (m^2/s)  of lumped species J at temperature I (K) divided by SM%MW^0.5
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temp I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: S_Z          !< Entropy (J/K) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Sensible enthalpy (J/kg) of lumped species J at temp I (K)
 REAL(EB) :: DZZ_CLIP                                  !< Value for processing DZZ in combustion
 
@@ -598,7 +600,7 @@ INTEGER, PARAMETER :: RM_NO_B        = -1 !< Ranz-Marshall no B number
 INTEGER, PARAMETER :: RM_B           =  0 !< Ranz-Marshall with B number
 INTEGER, PARAMETER :: RM_LEWIS_B     =  1 !< Ranz-Marshall with Lewis number based B Number
 INTEGER, PARAMETER :: RM_FL_LEWIS_B  =  2 !< Ranz-Marshall with flux limited, Lewis number based B Number
-LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
+LOGICAL :: POROUS_FLOOR=.TRUE.
 
 ! Particles
 
@@ -852,11 +854,11 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
 END MODULE RADCONS
 
 !> \brief Variables for DVODE solver usage
-MODULE DVODECONS
+MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
 DOUBLE PRECISION :: ODE_MIN_ATOL=DBLE(-1._EB)
 
-END MODULE DVODECONS
+END MODULE CHEMCONS
 
