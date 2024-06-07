@@ -3976,8 +3976,9 @@ SPEC_LOOP: DO N=1,N_SPECIES
       
    ENDIF
 
+! Populate entropy from enthalpy and Gibbs function
    DO I = 1, I_MAX_TEMP
-      SS_S(N,I) = (SS%H_G(I)*1.E-6_EB*SS%MW - SS%G_F(I))/REAL(I,EB)
+      SS_S(N,I) = (SS%H_G(I)*1.E-6_EB*SS%MW - SS%G_F(I))/REAL(I,EB) ! Convert H_G to kJ/mol
    ENDDO
 
    
