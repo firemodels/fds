@@ -2389,9 +2389,12 @@
 &RAMP ID='t', T=    2.0 /
 &RAMP ID='t', T=    2.25 /
 &RAMP ID='t', T=    2.55 /
+&RAMP ID='t', T=    2.85 /
 &RAMP ID='t', T=    3.0 /
 &RAMP ID='t', T=    3.803899537889 /
 &RAMP ID='t', T=    4.1 /
+&RAMP ID='t', T=    4.4 /
+&RAMP ID='t', T=    4.7 /
 &RAMP ID='t', T=   10.0 /
 
 
