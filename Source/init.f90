@@ -2577,9 +2577,8 @@ PROF_LOOP: DO N=1,N_PROF
    ELSE
       OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
       IF (PF%FORMAT_INDEX==1) THEN
-         WRITE(LU_PROF(N),'(A)') PF%ID
+         WRITE(LU_PROF(N),'(A,A,E16.9,A,E16.9,A,E16.9)') TRIM(PF%ID),", ",PF%X,", ",PF%Y,", ",PF%Z
          WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
-         WRITE(LU_PROF(N),*)
       ENDIF
    ENDIF
 
