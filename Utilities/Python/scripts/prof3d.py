@@ -30,7 +30,7 @@ X = float(XYZ[0]) #; print(X)
 Y = float(XYZ[1]) #; print(Y)
 Z = float(XYZ[2]) #; print(Z)
 
-df = pd.read_csv('pine_21O2_40_1C_cat_prof_1.csv',skiprows=2,header=None)
+df = pd.read_csv(filename,skiprows=2,header=None)
 df.fillna(tmpa, inplace=True)
 
 t = df.values[:,0]
