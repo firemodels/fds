@@ -46,7 +46,6 @@ scatter = ax.scatter([], [], [], c=[], cmap=plt.hot(), vmin=20, vmax=500)
 cbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=5)
 cbar.set_label('Scalar Values')
 
-
 def update(frame):
     n = int(df.values[frame,1])
     x = df.values[frame,2:2+n]
@@ -67,16 +66,9 @@ def update(frame):
     # Display current time
     ax.text(0,0,0.02,'Time: {:.2f}'.format(t[frame]),size=16, zorder=1,color='black')
 
-    # Calculate interval dynamically based on time differences
-    if frame > 0:
-        interval = time_diff[frame - 1] * 1000  # Convert time difference from seconds to milliseconds
-    else:
-        interval = 100  # Default interval if frame is 0
-
-    return interval
-
 # Create the animation
-ani = animation.FuncAnimation(fig, update, frames=n_points, interval=100, blit=False, repeat=False)
+interval = 200 # milliseconds
+ani = animation.FuncAnimation(fig, update, frames=n_points, interval=interval, blit=False, repeat=False)
 
 
 plt.show()
