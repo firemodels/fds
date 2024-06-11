@@ -4,7 +4,14 @@ McDermott
 
 Animate a 3D scatterplot of FDS in-depth profile (CHID_prof_n.csv)
 
-Usage: Copy this script to your working directory, change the filename.
+Usage: Copy this script to your working directory and add your
+       profiles to the filenames list.
+
+       Use option --with_slider to control the animation with a time slider
+       Use option --save_animation to save the animation (no slider) to a movie file
+
+Example:
+$ python prof3d.py --with_slider
 """
 
 import sys
@@ -12,7 +19,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
+from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--with_slider', action='store_true', help='Control animation with a time slider')
+parser.add_argument('--save_animation', action='store_true', help='Save animation')
+
+args = parser.parse_args()
+
+# if args.with_slider:
+#     print("Flag is present")
+# else:
+#     print("Flag is not present")
+
+# sys.exit()
 
 # Close all previously opened figures
 plt.close('all')
@@ -72,6 +94,11 @@ scatter = ax.scatter([], [], [], c=[], cmap=colormap, vmin=scalar_min, vmax=scal
 cbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=5)
 cbar.set_label('Scalar Values')
 
+if args.with_slider:
+    # Create a slider for controlling time
+    axslider = plt.axes([0.1, 0.02, 0.8, 0.03])
+    time_slider = Slider(axslider, 'Time', t[0], t[-1], valinit=t[0])
+
 def update(frame):
     # Clear the previous plot
     ax.cla()
@@ -102,9 +129,24 @@ def update(frame):
     # Display current time
     ax.text2D(0.05, 0.95, 'Time: {:.2f}'.format(t[frame]), size=16, zorder=1, transform=ax.transAxes)
 
-# Create the animation
-interval = 200 # milliseconds
-ani = animation.FuncAnimation(fig, update, frames=n_points, interval=interval, blit=False, repeat=False)
+if args.with_slider:
+    # Function to update the plot when the slider is moved
+    def update_slider(val):
+        time = time_slider.val
+        index = np.abs(t - time).argmin()  # Find the index closest to the current time
+        update(index)
+        fig.canvas.draw_idle()  # Redraw the plot
+
+    # Connect the slider to the update_slider function
+    time_slider.on_changed(update_slider)
+else:
+    # Create the animation
+    interval = 200 # milliseconds
+    ani = animation.FuncAnimation(fig, update, frames=n_points, interval=interval, blit=False, repeat=False)
+
+    if args.save_animation:
+        # Save the animation as an mp4 file
+        ani.save('animation.mp4', writer='ffmpeg')
 
 plt.show()
 
