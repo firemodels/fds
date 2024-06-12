@@ -187,7 +187,7 @@ Z_LS(IBP1,   0) = Z_LS(IBAR,   1)
 Z_LS(   0,JBP1) = Z_LS(   1,JBAR)
 Z_LS(IBP1,JBP1) = Z_LS(IBAR,JBAR)
 
-! AGL_SLICE timers for non-level set
+! AGL_SLICE timers
 IF (AGL_TIMERS(1)) THEN
    ALLOCATE(M%T_ARR(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('VEGE:T_ARR','T_ARR',IZERO)
    T_ARR  => M%T_ARR  ; T_ARR = 1.E10_EB
@@ -1357,10 +1357,12 @@ END FUNCTION ROS_NO_WIND_NO_SLOPE
 !> \details: Use the phi value (PHI_LS) for level set and heat release (Q) for non-level set
 !> \param NM Mesh number
 !> \param T Current time
+!> \param DT Current time step
+!> \param MODE update within mesh (0) or update ghost cells after exchange (1)
 
-SUBROUTINE UPDATE_AGL_TIMERS(T,DT,NM)
+SUBROUTINE UPDATE_AGL_TIMERS(T,DT,NM,MODE)
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,MODE
 INTEGER :: I,J,IND,IQ,NTSL,TI,TIMER_NTSL(2)
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: HRRPUVCUT
@@ -1369,44 +1371,52 @@ TYPE(SLICE_TYPE), POINTER :: SL
 
 CALL POINT_TO_MESH(NM)
 
-IF (LEVEL_SET_MODE>0) THEN
-   IF(AGL_TIMERS(1)) WHERE (PHI_LS>=0._EB .AND. T_ARR>(1.E10_EB-1._EB)) T_ARR = T
-ELSE
-   HRRPUVCUT = 1.E3_EB*MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
+IF (MODE==0) THEN
 
-   NTSL=0
-   QUANTITY_LOOP: DO IQ=1,N_SLCF
-      SL => SLICE(IQ)
-      IND  = SL%INDEX
-      IF (SL%TERRAIN_SLICE) NTSL = NTSL +1
-      IF (SL%INDEX==78) TIMER_NTSL(1) = NTSL
-      IF (SL%INDEX==79) TIMER_NTSL(2) = NTSL
-   ENDDO QUANTITY_LOOP
+   IF (LEVEL_SET_MODE>0) THEN
+      IF(AGL_TIMERS(1)) WHERE (PHI_LS>=0._EB .AND. T_ARR>(1.E10_EB-1._EB)) T_ARR = T
+   ELSE
+      HRRPUVCUT = 1.E3_EB*MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
 
-   DO TI=1,2
-      IF (AGL_TIMERS(TI)) THEN
-         DO I=0,IBP1
-            DO J=0,JBP1
-               IF (Q(I,J,K_AGL_SLICE(I,J,TIMER_NTSL(TI)))>HRRPUVCUT) THEN
-                  FIRE_PRESENT=.TRUE.
-               ELSE
-                  FIRE_PRESENT=.FALSE.
-               ENDIF
+      NTSL=0
+      QUANTITY_LOOP: DO IQ=1,N_SLCF
+         SL => SLICE(IQ)
+         IND  = SL%INDEX
+         IF (SL%TERRAIN_SLICE) NTSL = NTSL +1
+         IF (SL%INDEX==78) TIMER_NTSL(1) = NTSL
+         IF (SL%INDEX==79) TIMER_NTSL(2) = NTSL
+      ENDDO QUANTITY_LOOP
 
-               SELECT CASE(TI)
-                  CASE(1) ! ARRIVAL TIME
-                     IF(FIRE_PRESENT .AND. ABS(T_ARR(I,J)-1.E10_EB)<TWO_EPSILON_EB) T_ARR(I,J) = T
-                     ! reset if residence time test not met
-                     IF(T_ARR(I,J)<1.E10_EB .AND. ABS(T_ARR(I,J)-T)<0.05_EB .AND. .NOT. FIRE_PRESENT) T_ARR(I,J) = 1.E10_EB
-                  CASE(2) ! RESIDENCE TIME
-                     IF(FIRE_PRESENT) T_RES(I,J) = T_RES(I,J) + DT
-                     ! reset if residence time test not met
-                     IF(.NOT. FIRE_PRESENT .AND. T_RES(I,J)<0.05_EB) T_RES(I,J) = 0._EB
-               END SELECT
+      DO TI=1,2
+         IF (AGL_TIMERS(TI)) THEN
+            DO I=0,IBP1
+               DO J=0,JBP1
+                  IF (Q(I,J,K_AGL_SLICE(I,J,TIMER_NTSL(TI)))>HRRPUVCUT) THEN
+                     FIRE_PRESENT=.TRUE.
+                  ELSE
+                     FIRE_PRESENT=.FALSE.
+                  ENDIF
+
+                  SELECT CASE(TI)
+                     CASE(1) ! ARRIVAL TIME
+                        IF(FIRE_PRESENT .AND. ABS(T_ARR(I,J)-1.E10_EB)<TWO_EPSILON_EB) T_ARR(I,J) = T
+                        ! reset if residence time test not met
+                        IF(T_ARR(I,J)<1.E10_EB .AND. ABS(T_ARR(I,J)-T)<0.05_EB .AND. .NOT. FIRE_PRESENT) T_ARR(I,J) = 1.E10_EB
+                     CASE(2) ! RESIDENCE TIME
+                        IF(FIRE_PRESENT) T_RES(I,J) = T_RES(I,J) + DT
+                        ! reset if residence time test not met
+                        IF(.NOT. FIRE_PRESENT .AND. T_RES(I,J)<0.05_EB) T_RES(I,J) = 0._EB
+                  END SELECT
+               ENDDO
             ENDDO
-         ENDDO
-      ENDIF
-   ENDDO
+         ENDIF
+      ENDDO
+
+   ENDIF
+
+ELSEIF (MODE==1) THEN
+
+   CALL GET_BOUNDARY_VALUES
 
 ENDIF
 

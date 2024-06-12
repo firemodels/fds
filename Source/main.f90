@@ -836,7 +836,6 @@ MAIN_LOOP: DO
    ! Exchange species mass fractions.
 
    IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(4)
-   IF (TERRAIN_CASE) CALL MESH_EXCHANGE(14)
 
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
 
@@ -986,6 +985,20 @@ MAIN_LOOP: DO
 
    CALL UPDATE_CONTROLS(T,DT,CTRL_STOP_STATUS,.FALSE.)
    IF (CTRL_STOP_STATUS) STOP_STATUS = CTRL_STOP
+
+   IF (TERRAIN_CASE) THEN
+      IF (ANY(AGL_TIMERS)) THEN
+         DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            CALL UPDATE_AGL_TIMERS(T,DT,NM,0)
+         ENDDO
+      ENDIF
+      CALL MESH_EXCHANGE(14)
+      IF (ANY(AGL_TIMERS)) THEN
+         DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            CALL UPDATE_AGL_TIMERS(T,DT,NM,1)
+         ENDDO
+      ENDIF
+   ENDIF
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL DUMP_MESH_OUTPUTS(T,DT,NM)
