@@ -5056,9 +5056,9 @@ To set the initial concentration of fuel, an {\ct INIT} line is used:
 Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
 \begin{lstlisting}
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
-      NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
+      NU=-1,-1,1 /
 \end{lstlisting}
-Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion_fig} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion_fig} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time ({\ct FIXED\_MIXED\_TIME}) of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 \begin{figure}[ht]
 \centering \includegraphics[height=2.2in]{SCRIPT_FIGURES/pvc_combustion_spec}
