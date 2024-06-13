@@ -477,8 +477,8 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          ENDIF
          ZETA_0     = ZETA
       CASE (CVODE_SOLVER)
-         T1 = T
-         T2 = T + DT
+         T1 = 0._EB
+         T2 = DT
          DO NS =1,N_TRACKED_SPECIES
             ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
          ENDDO
