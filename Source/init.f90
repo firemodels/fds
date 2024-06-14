@@ -2557,6 +2557,7 @@ TYPE (PROFILE_TYPE), POINTER :: PF
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 CHARACTER(LABEL_LENGTH) :: HEADING
 
 M => MESHES(NM)
@@ -2572,42 +2573,42 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
 
    IF (PF%MESH/=NM) CYCLE PROF_LOOP
-   IF (APPEND .AND. PF%FORMAT_INDEX==1) THEN
-      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
-   ELSE
-      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
-      IF (PF%FORMAT_INDEX==1) THEN
-         WRITE(LU_PROF(N),'(A)') PF%ID
-         WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
-         WRITE(LU_PROF(N),*)
-      ENDIF
-   ENDIF
 
-   IF (NM/=PF%MESH) CYCLE PROF_LOOP
    II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
    JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
    KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
 
    IF (PF%IOR/=0) THEN
-
       ! The PROFile is for a WALL cell
-
       IOR = PF%IOR
       CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
       IF (IW>0) THEN
          PF%WALL_INDEX = IW
          SF => SURFACE(M%WALL(IW)%SURF_INDEX)
          ONE_D => M%BOUNDARY_ONE_D(M%WALL(IW)%OD_INDEX)
+         BC => M%BOUNDARY_COORD(M%WALL(IW)%BC_INDEX)
       ELSE
          WRITE(LU_ERR,'(A,I0,A)') 'ERROR(429): PROF ',PF%ORDINAL,' requires repositioning.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
-
    ELSE  ! The PROFile is for a Lagrangian PARTicle
-
       SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(PF%PART_CLASS_INDEX)%SURF_INDEX)
+   ENDIF
 
+   IF (APPEND .AND. PF%FORMAT_INDEX==1) THEN
+      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+   ELSE
+      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
+      IF (PF%FORMAT_INDEX==1) THEN
+         IF (PF%IOR/=0) THEN ! Wall cell
+            WRITE(LU_PROF(N),'(A)') "ID, IOR, face center x(m), face center y(m), face center z(m)"
+            WRITE(LU_PROF(N),'(A,A,I3,A,E16.9,A,E16.9,A,E16.9)') TRIM(PF%ID),", ",PF%IOR,", ",BC%X,", ",BC%Y,", ",BC%Z
+         ELSE
+            WRITE(LU_PROF(N),'(A)') TRIM(PF%ID)
+         ENDIF
+         WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
+      ENDIF
    ENDIF
 
    IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
