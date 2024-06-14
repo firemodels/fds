@@ -30,6 +30,19 @@ $QFDS -p 32 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
+$QFDS -d Chemistry ignition_delay_T900K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T900K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T900K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi1p4.fds
+
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
 $QFDS -d Complex_Geometry geom_channel_tmp.fds
@@ -392,6 +405,15 @@ $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis part_baking_soda_420K.fds
 $QFDS -d Pyrolysis part_baking_soda_450K.fds
 $QFDS -d Pyrolysis part_baking_soda_500K.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp03_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp16_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp17_1C.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds

@@ -53,7 +53,7 @@ for phi in equivRatios:
             t = reactor_network.step()
             time_history.append(t)
             reference_species_history.append(gas[reference_species].X[0])
-            stateArr.append([t, gas[reference_species].X[0],gas.T ]) 
+            stateArr.append([t, gas[reference_species].Y[0],gas.T ]) 
     
         i_ign = np.array(reference_species_history).argmax()
         tau = time_history[i_ign]
