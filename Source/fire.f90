@@ -597,8 +597,6 @@ REAL(EB) :: CC(N_TRACKED_SPECIES)
 REAL(EB) :: MW, RHO_IN, RHO_OUT, XXX, EQUIV
 INTEGER :: NS
 
-CALL GET_REALIZABLE_MF(ZZ)
-
 ! Check equivalence ratio of the mixture. Avoid chemistry calculation for very lean and rich cases.
 IF (EQUIV_RATIO_CHECK) THEN
    CALL CALC_EQUIV_RATIO(ZZ(1:N_TRACKED_SPECIES), EQUIV)
@@ -627,13 +625,11 @@ XXX = TEND
 XXX = GLOBAL_ODE_REL_ERROR
 #endif
 
-! Convert back to mass fraction
+! Convert back to mass fraction (Check for negative concentration)
+WHERE(CC<0._EB) CC=0._EB
 ZZ(1:N_TRACKED_SPECIES) = CC(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW
 RHO_OUT = SUM(ZZ)
-
-! Check for negative mass fraction, and rescale to accomodate negative values
-WHERE(ZZ<0._EB) ZZ=0._EB
-ZZ = ZZ / SUM(ZZ)
+ZZ = ZZ/RHO_OUT
 
 END SUBROUTINE CVODE
 
