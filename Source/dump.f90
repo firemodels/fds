@@ -339,6 +339,8 @@ IF (RESULTS_DIR/='') THEN
       CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
 #endif
    ENDIF
+ELSE
+   WORKING_DIR = ''
 ENDIF
 
 ! GIT ID file
