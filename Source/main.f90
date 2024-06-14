@@ -671,7 +671,7 @@ MAIN_LOOP: DO
 
       ! Exchange level set values, if necessary
 
-      IF (LEVEL_SET_MODE>0) CALL MESH_EXCHANGE(14)
+      IF (TERRAIN_CASE) CALL MESH_EXCHANGE(14)
 
       ! Exchange newly inserted particles, if necessary
 
@@ -836,7 +836,7 @@ MAIN_LOOP: DO
    ! Exchange species mass fractions.
 
    IF (LEVEL_SET_MODE/=1) CALL MESH_EXCHANGE(4)
-   IF (LEVEL_SET_MODE>0) CALL MESH_EXCHANGE(14)
+   IF (TERRAIN_CASE) CALL MESH_EXCHANGE(14)
 
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
 
@@ -1025,6 +1025,11 @@ MAIN_LOOP: DO
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CALL DUMP_RESTART(T,DT,NM)
       ENDDO
+      IF (ANY(AGL_TIMERS)) THEN
+         DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            CALL DUMP_AGL_TIMERS(T,NM)
+         ENDDO
+      ENDIF
       RSRT_COUNTER(1) = RSRT_COUNTER(1) + 1
    ENDIF
 
@@ -1767,7 +1772,13 @@ CHARACTER(255) :: MESSAGE
 
 IF (ANY(STOP_STATUS==(/NO_STOP,USER_STOP,CLOCK_STOP/))) CALL DUMP_TIMERS
 
-! IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MY_RANK,' has completed'
+IF (ANY(STOP_STATUS==(/NO_STOP,USER_STOP,CLOCK_STOP/)) .AND. ANY(AGL_TIMERS)) THEN
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL DUMP_AGL_TIMERS(T,NM)
+   ENDDO
+ENDIF
+
+!IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MY_RANK,' has completed'
 
 IF (MY_RANK==0) THEN
 
@@ -2105,13 +2116,18 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       OM%ZZS(:,:,:,N) = INITIAL_UNMIXED_FRACTION
    ENDDO
 
-   IF (LEVEL_SET_MODE>0 .OR. TERRAIN_CASE) THEN
+   IF (LEVEL_SET_MODE>0) THEN
       ALLOCATE(OM%PHI_LS(IMIN:IMAX,JMIN:JMAX))  ; OM%PHI_LS   = -1._EB
       ALLOCATE(OM%PHI1_LS(IMIN:IMAX,JMIN:JMAX)) ; OM%PHI1_LS  = -1._EB
-      ALLOCATE(OM%TOA(IMIN:IMAX,JMIN:JMAX))     ; OM%TOA      = T_END + 1._EB
+      ALLOCATE(OM%T_ARR(IMIN:IMAX,JMIN:JMAX))   ; OM%T_ARR    =  1.E10_EB
+      ALLOCATE(OM%T_RES(IMIN:IMAX,JMIN:JMAX))   ; OM%T_RES    =  0._EB
       ALLOCATE(OM%U_LS(IMIN:IMAX,JMIN:JMAX))    ; OM%U_LS     =  0._EB
       ALLOCATE(OM%V_LS(IMIN:IMAX,JMIN:JMAX))    ; OM%V_LS     =  0._EB
       ALLOCATE(OM%Z_LS(IMIN:IMAX,JMIN:JMAX))    ; OM%Z_LS     =  0._EB
+   ELSEIF (LEVEL_SET_MODE==0 .AND. TERRAIN_CASE) THEN
+      ALLOCATE(OM%Z_LS(IMIN:IMAX,JMIN:JMAX))    ; OM%Z_LS     =  0._EB
+      IF (AGL_TIMERS(1)) ALLOCATE(OM%T_ARR(IMIN:IMAX,JMIN:JMAX)) ; OM%T_ARR = 1.E10_EB
+      IF (AGL_TIMERS(2)) ALLOCATE(OM%T_RES(IMIN:IMAX,JMIN:JMAX)) ; OM%T_RES = 0._EB
    ENDIF
 
 ENDDO OTHER_MESH_LOOP
@@ -2760,7 +2776,11 @@ RECEIVING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
             ALLOCATE(M3%REAL_RECV_PKG8(M3%NIC_R*2))
 
-            IF (LEVEL_SET_MODE>0 .OR. TERRAIN_CASE) ALLOCATE(M3%REAL_RECV_PKG14(5*M3%NIC_R))
+            IF (LEVEL_SET_MODE==0 .AND. TERRAIN_CASE) THEN
+               ALLOCATE(M3%REAL_RECV_PKG14((1+COUNT(AGL_TIMERS))*M3%NIC_R))
+            ELSEIF (LEVEL_SET_MODE>0) THEN
+               ALLOCATE(M3%REAL_RECV_PKG14((4+COUNT(AGL_TIMERS))*M3%NIC_R))
+            ENDIF
 
          ENDIF
 
@@ -2967,7 +2987,11 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_SEND_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_S))
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
 
-            IF (LEVEL_SET_MODE>0 .OR. TERRAIN_CASE) ALLOCATE(M3%REAL_SEND_PKG14(5*M3%NIC_S))
+            IF (LEVEL_SET_MODE==0 .AND. TERRAIN_CASE) THEN
+               ALLOCATE(M3%REAL_SEND_PKG14((1+COUNT(AGL_TIMERS))*M3%NIC_R))
+            ELSEIF (LEVEL_SET_MODE>0) THEN
+               ALLOCATE(M3%REAL_SEND_PKG14((4+COUNT(AGL_TIMERS))*M3%NIC_R))
+            ENDIF
 
          ENDIF
 
@@ -3304,33 +3328,53 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Send LEVEL_SET boundary values
 
       IF (CODE==14 .AND. M3%NIC_S>0) THEN
-         IF (PREDICTOR) THEN
-            PHI_LS_P => M%PHI1_LS
-         ELSE
-            PHI_LS_P => M%PHI_LS
-         ENDIF
-         IF (RNODE/=SNODE) THEN
-            NQT2 = 5
-            PACK_REAL_SEND_PKG14: DO LL=1,M3%NIC_S
-               II1 = M3%IIO_S(LL)
-               JJ1 = M3%JJO_S(LL)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+1) = PHI_LS_P(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = M%U_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%V_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%Z_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+5) = M%TOA(II1,JJ1)
-            ENDDO PACK_REAL_SEND_PKG14
-         ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            IF (PREDICTOR) THEN
-               M2%PHI1_LS(IMIN:IMAX,JMIN:JMAX) = PHI_LS_P(IMIN:IMAX,JMIN:JMAX)
+         IF (LEVEL_SET_MODE==0) THEN ! AGL_SLICE only
+            IF (RNODE/=SNODE) THEN
+               NQT2 = 1 + COUNT(AGL_TIMERS)
+               DO LL=1,M3%NIC_S
+                  II1 = M3%IIO_S(LL)
+                  JJ1 = M3%JJO_S(LL)
+                  M3%REAL_SEND_PKG14(NQT2*(LL-1)+1) = M%Z_LS(II1,JJ1)
+                  IF (AGL_TIMERS(1)) M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = M%T_ARR(II1,JJ1)
+                  IF (AGL_TIMERS(2)) M3%REAL_SEND_PKG14(NQT2*(LL-1)+NQT2) = M%T_RES(II1,JJ1)
+               ENDDO
             ELSE
-               M2%PHI_LS(IMIN:IMAX,JMIN:JMAX)  = PHI_LS_P(IMIN:IMAX,JMIN:JMAX)
+               M2=>MESHES(NOM)%OMESH(NM)
+               M2%Z_LS(IMIN:IMAX,JMIN:JMAX) = M%Z_LS(IMIN:IMAX,JMIN:JMAX)
+               IF (AGL_TIMERS(1)) M2%T_ARR(IMIN:IMAX,JMIN:JMAX) = M%T_ARR(IMIN:IMAX,JMIN:JMAX)
+               IF (AGL_TIMERS(2)) M2%T_RES(IMIN:IMAX,JMIN:JMAX) = M%T_RES(IMIN:IMAX,JMIN:JMAX)
             ENDIF
-            M2%U_LS(IMIN:IMAX,JMIN:JMAX) = M%U_LS(IMIN:IMAX,JMIN:JMAX)
-            M2%V_LS(IMIN:IMAX,JMIN:JMAX) = M%V_LS(IMIN:IMAX,JMIN:JMAX)
-            M2%Z_LS(IMIN:IMAX,JMIN:JMAX) = M%Z_LS(IMIN:IMAX,JMIN:JMAX)
-            M2%TOA(IMIN:IMAX,JMIN:JMAX)  = M%TOA(IMIN:IMAX,JMIN:JMAX)
+         ELSE
+            IF (PREDICTOR) THEN
+               PHI_LS_P => M%PHI1_LS
+            ELSE
+               PHI_LS_P => M%PHI_LS
+            ENDIF
+            IF (RNODE/=SNODE) THEN
+               NQT2 = 4 + COUNT(AGL_TIMERS)
+               PACK_REAL_SEND_PKG14: DO LL=1,M3%NIC_S
+                  II1 = M3%IIO_S(LL)
+                  JJ1 = M3%JJO_S(LL)
+                  M3%REAL_SEND_PKG14(NQT2*(LL-1)+1) = PHI_LS_P(II1,JJ1)
+                  M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = M%U_LS(II1,JJ1)
+                  M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%V_LS(II1,JJ1)
+                  M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%Z_LS(II1,JJ1)
+                  IF (AGL_TIMERS(1)) M3%REAL_SEND_PKG14(NQT2*(LL-1)+5) = M%T_ARR(II1,JJ1)
+                  IF (AGL_TIMERS(2)) M3%REAL_SEND_PKG14(NQT2*(LL-1)+NQT2) = M%T_RES(II1,JJ1)
+               ENDDO PACK_REAL_SEND_PKG14
+            ELSE
+               M2=>MESHES(NOM)%OMESH(NM)
+               IF (PREDICTOR) THEN
+                  M2%PHI1_LS(IMIN:IMAX,JMIN:JMAX) = PHI_LS_P(IMIN:IMAX,JMIN:JMAX)
+               ELSE
+                  M2%PHI_LS(IMIN:IMAX,JMIN:JMAX)  = PHI_LS_P(IMIN:IMAX,JMIN:JMAX)
+               ENDIF
+               M2%U_LS(IMIN:IMAX,JMIN:JMAX) = M%U_LS(IMIN:IMAX,JMIN:JMAX)
+               M2%V_LS(IMIN:IMAX,JMIN:JMAX) = M%V_LS(IMIN:IMAX,JMIN:JMAX)
+               M2%Z_LS(IMIN:IMAX,JMIN:JMAX) = M%Z_LS(IMIN:IMAX,JMIN:JMAX)
+               IF (AGL_TIMERS(1)) M2%T_ARR(IMIN:IMAX,JMIN:JMAX)  = M%T_ARR(IMIN:IMAX,JMIN:JMAX)
+               IF (AGL_TIMERS(2)) M2%T_RES(IMIN:IMAX,JMIN:JMAX)  = M%T_RES(IMIN:IMAX,JMIN:JMAX)
+            ENDIF
          ENDIF
       ENDIF
 
@@ -3607,21 +3651,33 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF IF_RECEIVE_PARTICLES
 
       IF (CODE==14 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-            NQT2 = 5
+         IF (LEVEL_SET_MODE==0) THEN !AGL_SLICE only
+            NQT2 = 1 + COUNT(AGL_TIMERS)
+            DO LL=1,M2%NIC_R
+               II1 = M2%IIO_R(LL)
+               JJ1 = M2%JJO_R(LL)
+               M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+1)
+               IF (AGL_TIMERS(1)) M2%T_ARR(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
+               IF (AGL_TIMERS(2)) M2%T_RES(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+NQT2)
+            ENDDO
+         ELSE
+            NQT2 = 4 + COUNT(AGL_TIMERS)
             IF (PREDICTOR) THEN
                PHI_LS_P => M2%PHI1_LS
             ELSE
                PHI_LS_P => M2%PHI_LS
             ENDIF
-            UNPACK_REAL_RECV_PKG14: DO LL=1,M2%NIC_R
+            DO LL=1,M2%NIC_R
                II1 = M2%IIO_R(LL)
                JJ1 = M2%JJO_R(LL)
                PHI_LS_P(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+1)
                M2%U_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
                M2%V_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+3)
                M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+4)
-               M2%TOA(II1,JJ1)   = M2%REAL_RECV_PKG14(NQT2*(LL-1)+5)
-            ENDDO UNPACK_REAL_RECV_PKG14
+               IF (AGL_TIMERS(1)) M2%T_ARR(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+5)
+               IF (AGL_TIMERS(2)) M2%T_RES(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+NQT2)
+            ENDDO
+         ENDIF
       ENDIF
 
       ! Unpack mass losses from OBST WALL cells in neighboring meshes
@@ -4361,7 +4417,7 @@ IF (MESHES(1)%N_UNIQUE_SLCF>0) THEN
    ENDDO
    ! Send slice topology info from rank 0 to other ranks
    DO IPROC=1,N_MPI_PROCESSES-1
-      IF (MY_RANK==IPROC) THEN 
+      IF (MY_RANK==IPROC) THEN
          IF (MY_RANK/=0) THEN
             IF (.NOT.ALLOCATED(MESHES(1)%UNIQUE_SLICE_IS_SL3D)) THEN
                ALLOCATE(MESHES(1)%UNIQUE_SLICE_IS_SL3D(MESHES(1)%N_UNIQUE_SLCF))
