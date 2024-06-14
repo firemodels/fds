@@ -628,6 +628,9 @@ TYPE SPECIES_MIXTURE_TYPE
    LOGICAL :: EXPLICIT_G_F=.FALSE.        !< All subspecies have an explicitly defined G_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
+   REAL(EB) :: OXR                  !< Required oxygen for complete combustion (gm/gm-species)
+   REAL(EB) :: OXA                  !< Available oxygen for combustion (gm/gm-species)
+   
 
 END TYPE SPECIES_MIXTURE_TYPE
 
@@ -706,6 +709,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_S         !< The DELTA_S(T) array for a reverse reaction pair (entropy)
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INT          !< Array of species exponents
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
@@ -756,7 +760,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
-   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (K)
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid
@@ -948,6 +952,8 @@ TYPE SURFACE_TYPE
    LOGICAL :: EMISSIVITY_SPECIFIED=.FALSE.           !< Indicates if user has specified a surface emissivity
    LOGICAL :: EMISSIVITY_BACK_SPECIFIED=.FALSE.      !< Indicates if user has specified a back surface emissivity
    LOGICAL :: INERT_Q_REF                            !< Treat REFERENCE_HEAT_FLUX as an inert atmosphere test
+   LOGICAL :: ALLOW_UNDERSIDE_PARTICLES=.FALSE.      !< Allow droplets to move along downward facing surfaces
+   LOGICAL :: ALLOW_SURFACE_PARTICLES=.TRUE.         !< Allow particles to live on a solid surface
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
    CHARACTER(LABEL_LENGTH) :: PART_ID
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
@@ -1455,7 +1461,7 @@ TYPE VENTS_TYPE
                X1_ORIG=0._EB,X2_ORIG=0._EB,Y1_ORIG=0._EB,Y2_ORIG=0._EB,Z1_ORIG=0._EB,Z2_ORIG=0._EB, &
                X0=-9.E6_EB,Y0=-9.E6_EB,Z0=-9.E6_EB,FIRE_SPREAD_RATE,UNDIVIDED_INPUT_AREA=0._EB,INPUT_AREA=0._EB,&
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
-   LOGICAL :: ACTIVATED=.TRUE.,GHOST_CELLS_ONLY=.FALSE.,GEOM=.FALSE.
+   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
@@ -1567,7 +1573,6 @@ TYPE (PROFILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: PROFILE
 
 TYPE INITIALIZATION_TYPE
    REAL(EB) :: TEMPERATURE      !< Temperature (K) of the initialized region
-   REAL(EB) :: DENSITY          !< Density (kg/m3) of the initialized region
    REAL(EB) :: X1               !< Lower x boundary of the initialized region (m)
    REAL(EB) :: X2               !< Upper x boundary of the initialized region (m)
    REAL(EB) :: Y1               !< Lower y boundary of the initialized region (m)
@@ -1597,19 +1602,23 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_FRACTION        !< Volume fraction of gas components
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_ADJUST          !< Multiplicative factor to account for FDS grid snap
-   INTEGER  :: PART_INDEX=0     !< Particle class index of inserted particles
-   INTEGER  :: N_PARTICLES      !< Number of particles to insert
-   INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
-   INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
-   INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
-   INTEGER  :: ORIENTATION_RAMP_INDEX(3)=0 !< Ramp index for particle orientation
-   INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
-   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
-   INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
-   LOGICAL :: ADJUST_DENSITY=.FALSE.
-   LOGICAL :: ADJUST_TEMPERATURE=.FALSE.
-   LOGICAL :: ADJUST_SPECIES_CONCENTRATION=.FALSE.
+   INTEGER :: PART_INDEX=0                                       !< Particle class index of inserted particles
+   INTEGER :: N_PARTICLES                                        !< Number of particles to insert
+   INTEGER :: DEVC_INDEX=0                                       !< Index of the device that uses this INITIALIZATION variable
+   INTEGER :: CTRL_INDEX=0                                       !< Index of the controller that uses this INITIALIZATION variable
+   INTEGER :: N_PARTICLES_PER_CELL=0                             !< Number of particles to insert in each cell
+   INTEGER :: ORIENTATION_RAMP_INDEX(3)=0                        !< Ramp index for particle orientation
+   INTEGER :: PATH_RAMP_INDEX(3)=0                               !< Ramp index of a particle path
+   INTEGER :: RAMP_Q_INDEX=0                                     !< Ramp index for HRRPUV
+   INTEGER :: RAMP_PART_INDEX=0                                  !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
+   INTEGER :: RAMP_TMP_Z_INDEX=0                                 !< Ramp index for temperature vertical profile (K)
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_MF_Z_INDEX         !< Ramp index for species mass fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_VF_Z_INDEX         !< Ramp index for species volume fraction vertical profile
+   LOGICAL :: ADJUST_INITIAL_CONDITIONS=.FALSE.
+   LOGICAL :: VOLUME_FRACTIONS_SPECIFIED=.FALSE.
+   LOGICAL :: MASS_FRACTIONS_SPECIFIED=.FALSE.
    LOGICAL :: SINGLE_INSERTION=.TRUE.
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
