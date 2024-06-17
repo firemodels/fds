@@ -243,7 +243,7 @@ X_fds_ext_o2=np.zeros((num_samp,2))
 inds = [1, 0]
 for ifile in inds:
     
-    if os.path.exists(fds_file[ifile]):
+    if os.path.exists(fds_file[ifile]) is False:
         print('Error: File %s does not exist. Skipping case.'%(fds_file[ifile]))
     
     extinct = pd.read_csv(fds_file[ifile], header=1)
