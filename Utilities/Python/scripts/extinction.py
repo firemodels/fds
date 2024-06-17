@@ -112,7 +112,7 @@ for jj in range(0,num_samp):
             phi_r[i] = phi[jj,i]/phi_sum
     for i in range(0, len(RR)):
         if phi_st[i] > 0:
-            RR[i] == phi_r[i]/phi_st[i]
+            RR[i] = phi_r[i]/phi_st[i]
             
     ILR = 2
     for i in range(2, len(nu)):
