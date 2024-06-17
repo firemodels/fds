@@ -59,6 +59,7 @@ phi = np.zeros((num_samp,5))
 T0 = np.zeros((num_samp,))
 phi_st = np.zeros((3,))
 phi_r = np.zeros((3,))
+RR = np.zeros((3,))
 d_phi = np.zeros((num_samp,5))
 phi_new = np.zeros((num_samp,5))
 coeff_ref = np.zeros((7,5))
@@ -109,8 +110,10 @@ for jj in range(0,num_samp):
         if nu[i] < 0:
             phi_st[i] = abs(nu[i])*y_MW[i]/nu_mw_sum
             phi_r[i] = phi[jj,i]/phi_sum
-
-    RR = phi_r/phi_st
+    for i in range(0, len(RR)):
+        if phi_st[i] > 0:
+            RR[i] == phi_r[i]/phi_st[i]
+            
     ILR = 2
     for i in range(2, len(nu)):
         if nu[i] < 0:
