@@ -2949,7 +2949,7 @@ PRIMITIVE_LOOP: DO N1=1,N_SPECIES - N_COPY_PRIMITIVE
    ENDIF
    IF (.NOT.SS%LISTED) THEN
       WRITE(MESSAGE,'(A,A,A)') 'WARNING: SPEC ',TRIM(ID),' is not in the table of pre-defined species. '// &
-                               'Any unassigned SPEC variables in the input were assigned the properties of nitrogen.'
+                               'See the Users Guide chapter on species for the treatment of any undefined properties.'
       IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF
 
