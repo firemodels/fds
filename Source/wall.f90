@@ -2436,7 +2436,7 @@ SUB_TIMESTEP_LOOP: DO
          ! Check that NWP_NEW has not exceeded the allocated space N_CELLS_MAX
 
          IF (NWP_NEW > ONE_D%N_CELLS_MAX) THEN
-            WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: N_CELLS_MAX should be at least ',NWP_NEW,' for surface ',TRIM(SF%ID)
+            WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(300): N_LAYER_CELLS_MAX should be at least ',NWP_NEW,' for ',TRIM(SF%ID)
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          ENDIF
 
@@ -3601,7 +3601,7 @@ ELSEIF (TGA_PARTICLE_INDEX>0) THEN
    ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
    B1 => BOUNDARY_PROP1(LP%B1_INDEX)
 ELSE
-   WRITE(MESSAGE,'(A)') 'ERROR: No wall or particle to which to apply the TGA analysis'
+   WRITE(MESSAGE,'(3A)') 'ERROR(370): SURF ',TRIM(SF%ID),' No wall or particle for TGA_ANALYSIS.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
