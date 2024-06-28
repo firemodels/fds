@@ -407,7 +407,7 @@ IF (RESTART) THEN
    ENDDO
    IF (ABS(T-T_END)<TWO_EPSILON_EB) THEN
       STOP_STATUS = SETUP_STOP
-      IF (MY_RANK==0) WRITE(LU_ERR,*) 'ERROR: RESTART initial time equals T_END'
+      IF (MY_RANK==0) WRITE(LU_ERR,*) 'ERROR(1051): RESTART initial time equals T_END.'
    ENDIF
    IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT,FIRST_CALL=.FALSE.)  ! Init centroid data (rho,zz) on cut-cells and cut-faces.
    CALL STOP_CHECK(1)
@@ -1736,7 +1736,7 @@ IF (MY_RANK==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS completed successfully'
          IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
       CASE(INSTABILITY_STOP)
-         WRITE(MESSAGE,'(A)') 'ERROR: Numerical Instability - FDS stopped'
+         WRITE(MESSAGE,'(A)') 'ERROR(374): Numerical Instability - FDS stopped'
       CASE(USER_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
       CASE(SETUP_STOP)
@@ -2358,7 +2358,7 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (NOM/=NM) CYCLE ZONE_LOOP
       CALL ASSIGN_PRESSURE_ZONE(NM,I,J,K,N,N_OVERLAP)
       IF (N_OVERLAP>0) THEN
-         WRITE(LU_ERR,'(A,I2,A,I2,A,I4)') 'ERROR: ZONE ',N,' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
+         WRITE(LU_ERR,'(A,I2,A,I2,A,I4)') 'ERROR(872): ZONE ',N,' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
          STOP_STATUS = SETUP_STOP
          EXIT MESH_LOOP_1
       ENDIF
@@ -2598,7 +2598,7 @@ DO WHILE (ANY(SETUP_PRESSURE_ZONES_INDEX==0))
          IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. M%PRESSURE_ZONE(IIG,JJG,KKG)<0) THEN
             CALL ASSIGN_PRESSURE_ZONE(NM,IIG,JJG,KKG,0,N_OVERLAP)
             IF (N_OVERLAP>=0) THEN
-               WRITE(LU_ERR,'(A,I2,A,I2,A,I4)') 'ERROR: ZONE ',0,' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
+               WRITE(LU_ERR,'(A,I2,A,I2,A,I4)') 'ERROR(872): ZONE ',0,' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
                STOP_STATUS = SETUP_STOP
                EXIT MESH_LOOP
             ENDIF
@@ -2611,7 +2611,7 @@ DO WHILE (ANY(SETUP_PRESSURE_ZONES_INDEX==0))
             OM => MESHES(NOM)
             IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. M%PRESSURE_ZONE(IIG,JJG,KKG)>=0 .AND. &
                OM%PRESSURE_ZONE(IIO,JJO,KKO)>=0 .AND. M%PRESSURE_ZONE(IIG,JJG,KKG)/=OM%PRESSURE_ZONE(IIO,JJO,KKO)) THEN
-               WRITE(LU_ERR,'(10(A,I0),A)') 'ERROR: ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' meets ZONE ',&
+               WRITE(LU_ERR,'(10(A,I0),A)') 'ERROR(873): ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' meets ZONE ',&
                   M%PRESSURE_ZONE(IIG,JJG,KKG),' at the boundary of MESH ',NOM,' (',IIO,',',JJO,',',KKO,') and MESH ',&
                   NM,' (',IIG,',',JJG,',',KKG,')'
                STOP_STATUS = SETUP_STOP
@@ -2622,7 +2622,7 @@ DO WHILE (ANY(SETUP_PRESSURE_ZONES_INDEX==0))
                CALL ASSIGN_PRESSURE_ZONE(NM,IIG,JJG,KKG,OM%PRESSURE_ZONE(IIO,JJO,KKO),N_OVERLAP)
                IF (N_OVERLAP>0) THEN
                   WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') &
-                     'ERROR: ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
+                     'ERROR(872): ZONE ',OM%PRESSURE_ZONE(IIO,JJO,KKO),' overlaps ZONE ',N_OVERLAP,' in MESH ',NM
                   STOP_STATUS = SETUP_STOP
                   EXIT MESH_LOOP
                ENDIF
@@ -3639,7 +3639,7 @@ IF (.NOT.PROFILING) THEN
       CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
-         WRITE(LU_ERR,'(/A,A,A,I0,A,A,A/)') 'ERROR: ',TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',&
+         WRITE(LU_ERR,'(/A,A,A,I0,A,A,A/)') 'ERROR(123): ',TRIM(RNAME),' timed out for MPI process ',MY_RANK,' running on ',&
                                             PNAME(1:PNAMELEN),'. FDS will abort.'
          ERRORCODE = 1
          CALL MPI_ABORT(MPI_COMM_WORLD,ERRORCODE,IERR)

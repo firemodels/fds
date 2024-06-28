@@ -13429,7 +13429,8 @@ Keyword             & Type     & Description                      & Units       
 120  \> {\ct XB(1)<0 with CYLINDRICAL on MESH \ldots\                               } \> Section~\ref{info:2D}  \\
 121  \> {\ct J>1 with CYLINDRICAL on MESH \ldots\                                   } \> Section~\ref{info:2D}  \\
 122  \> {\ct Too many MPI processes have been assigned to this job.                 } \> Section~\ref{info:parallelprocessing}  \\
-%123  \> {\ct TENSOR\_DIFFUSIVITY requires SIMULATION\_MODE='LES'.                   } \> Section~\ref{} \\
+123  \> {\ct \ldots\ timed out for MPI process \ldots\                              } \> Section~\ref{info:Errors}  \\
+
 124  \> {\ct Problem with grid transformation.                                      } \> Section~\ref{info:TRNX}  \\
 125  \> {\ct Do not specify endpoints in linear grid transformation.                } \> Section~\ref{info:TRNX}  \\
 126  \> {\ct x (y,z) transformation not monotonic, MESH \ldots\                     } \> Section~\ref{info:TRNX}  \\
@@ -13563,6 +13564,7 @@ Keyword             & Type     & Description                      & Units       
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
      \>                                                                               \>                                     \\
+300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
 301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
 302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\
 303  \> {\ct MOISTURE\_FRACTION on SURF \ldots\ exceeds theoretical limit.          } \> Section~\ref{info:vegetation}  \\
@@ -13630,10 +13632,12 @@ Keyword             & Type     & Description                      & Units       
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
 368  \> {\ct SURF \ldots\ has a problem with VARIABLE\_THICKNESS or HT3D.           } \> Section~\ref{info:HT3D_Limitations}  \\
 369  \> {\ct SURF \ldots\ cannot have both HT3D and BURN\_AWAY.                     } \> Section~\ref{info:HT3D_Limitations}  \\
+370  \> {\ct SURF \ldots\ No wall or particle for TGA\_ANALYSIS.                    } \> Section~\ref{tga_analysis}  \\
      \>                                                                               \>                                     \\
 371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
 373  \> {\ct Cannot have FISHPAK\_BC>0.                                             } \> Section~\ref{sec:periodic}  \\
+374  \> {\ct Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
      \>                                                                               \>                                     \\
 381  \> {\ct Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> {\ct Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -13848,6 +13852,8 @@ Keyword             & Type     & Description                      & Units       
 858 \> {\ct INIT \ldots\ PARTicle class \ldots\ requires a \ldots\                  } \> Section~\ref{info:initial_droplets} \\
     \>                                                                                \>                          \\
 871 \> {\ct LEAK\_AREA specified twice for ZONE \ldots\ and \ldots\                 } \> Section~\ref{info:Leaks} \\
+872 \> {\ct ZONE \ldots\ overlaps ZONE \ldots\ in MESH \ldots\                      } \> Section~\ref{info:ZONE_Basics} \\
+873 \> {\ct ZONE \ldots\ meets ZONE \ldots\ at the boundary of MESH \ldots\         } \> Section~\ref{info:ZONE_Basics} \\
     \>                                                                                \>                          \\
 881 \> {\ct DEVC \ldots\ has QUANTITY\_RANGE(2) <= QUANTITY\_RANGE(1).              } \> Section~\ref{info:statistics} \\
 882 \> {\ct DEVC \ldots\ MOVE\_ID is not recognized.                                } \> Section~\ref{info:MOVE_ID} \\
@@ -13949,6 +13955,8 @@ Keyword             & Type     & Description                      & Units       
 1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1044 \> {\ct Cannot set EXTERNAL\_FILE=T for a RAMP used for an output clock \ldots } \> Section~\ref{info:external_control} \\
+     \>                                                                               \>                                     \\
+1051 \> {\ct RESTART initial time equals T\_END.                                    } \> Section~\ref{info:restart} \\
 
 \end{tabbing}
 
