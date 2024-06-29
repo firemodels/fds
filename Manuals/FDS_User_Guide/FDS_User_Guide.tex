@@ -4409,6 +4409,8 @@ The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\unit{kg
 \label{gas_filling_fig}
 \end{figure}
 
+A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see if species properties are predefined, FDS will only use {\ct ID}, but when looking for a species specified in the input file with {\ct SPEC\_ID} for any input other than {\ct SPEC}, FDS will use both {\ct ID} and {\ct ALT\_ID}. One use of this is being able to use predefined properties for species while also being able to use an abbreviated name or formula for complex chemistry reaction inputs. 
+
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
 
@@ -4979,7 +4981,7 @@ FDS assumes the following reaction:
 \end{lstlisting}
 
 \noindent
-The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a negative value for {\ct NU}. There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
+The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a net negative value for {\ct NU} (i.e., if a species appeared on both sides of the reaction as a collision species it would not be used as the {\ct FUEL}). There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
 \item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
@@ -6392,7 +6394,7 @@ When a liquid\footnote{Solid particles do not stick to solid surfaces by default
 
 When a liquid droplet hits a solid surface, it transfers heat over the area of the cross section of a hemisphere of equal volume. When enough liquid pools on the surface to form a layer, the area governing heat transfer is based on the film, not the individual droplet. The diameter of the droplet, once a film layer is formed, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter can be specified via {\ct SURFACE\_DIAMETER} on the {\ct PART} line in units of $\mu$m.
 
-The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K.
+The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified {\ct HORIZONTAL\_VELOCITY} or {\ct VERTICAL\_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles,'' section ``Heating and Evaporation of Liquid Droplets.'' Alternatively, you may specify a constant value on the {\ct PART} line, {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}, in units of W/m$^2$/K.
 
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=T} on the {\ct SURF} line(s). It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}. To stop particles or droplets from ``sticking'' to surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=F} on the {\ct SURF} line.
 
@@ -12516,7 +12518,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS}   & Real        & Section~\ref{thermal_part_props}                                      & W/m$^2$/K         &                       \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         & 300                   \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         &                       \\ \hline
 {\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.2                  \\ \hline
 {\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
 {\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C         & {\ct TMPA}            \\ \hline
@@ -12942,6 +12944,7 @@ Keyword             & Type     & Description                      & Units       
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct AEROSOL}                       & Logical           & Section~\ref{info:deposition}           &                   & {\ct F} \\ \hline
+{\ct ALT\_ID }                      & Character         & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
@@ -13426,7 +13429,8 @@ Keyword             & Type     & Description                      & Units       
 120  \> {\ct XB(1)<0 with CYLINDRICAL on MESH \ldots\                               } \> Section~\ref{info:2D}  \\
 121  \> {\ct J>1 with CYLINDRICAL on MESH \ldots\                                   } \> Section~\ref{info:2D}  \\
 122  \> {\ct Too many MPI processes have been assigned to this job.                 } \> Section~\ref{info:parallelprocessing}  \\
-%123  \> {\ct TENSOR\_DIFFUSIVITY requires SIMULATION\_MODE='LES'.                   } \> Section~\ref{} \\
+123  \> {\ct \ldots\ timed out for MPI process \ldots\                              } \> Section~\ref{info:Errors}  \\
+
 124  \> {\ct Problem with grid transformation.                                      } \> Section~\ref{info:TRNX}  \\
 125  \> {\ct Do not specify endpoints in linear grid transformation.                } \> Section~\ref{info:TRNX}  \\
 126  \> {\ct x (y,z) transformation not monotonic, MESH \ldots\                     } \> Section~\ref{info:TRNX}  \\
@@ -13540,6 +13544,7 @@ Keyword             & Type     & Description                      & Units       
 240  \> {\ct PART\_ID for PROP \ldots\ not found.                                   } \> Section~\ref{info:sprinklers}  \\
 241  \> {\ct PART\_ID for PROP \ldots\ cannot refer to MASSLESS particles.          } \> Section~\ref{info:sprinklers}  \\
 242  \> {\ct Spray Pattern Table \ldots\ massflux <= 0 for line \ldots\             } \> Section~\ref{info:sprinklers}  \\
+243  \> {\ct PROP \ldots\ VIEW\_ANGLE must be between 0 and 180                     } \> Section~\ref{info:sprinklers}  \\
      \>                                                                               \>                                     \\
 251  \> {\ct MATL \ldots\ REAC \ldots\ Set REFERENCE\_TEMPERATURE or E, A.          } \> Section~\ref{info:kinetic_parameters}  \\
 252  \> {\ct MATL \ldots\ HEAT\_OF\_REACTION should be greater than 0.              } \> Section~\ref{info:HEAT_OF_REACTION}  \\
@@ -13557,7 +13562,9 @@ Keyword             & Type     & Description                      & Units       
 264  \> {\ct MATL \ldots\ SPEC\_ID \ldots\ not a tracked.                           } \> Section~\ref{info:solid_pyrolysis}  \\
 265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
+267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
      \>                                                                               \>                                     \\
+300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
 301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
 302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\
 303  \> {\ct MOISTURE\_FRACTION on SURF \ldots\ exceeds theoretical limit.          } \> Section~\ref{info:vegetation}  \\
@@ -13625,10 +13632,12 @@ Keyword             & Type     & Description                      & Units       
 367  \> {\ct SURF \ldots\ cannot have both a mass flux and specified velocity.      } \> Section~\ref{info:MASS_FLUX}  \\
 368  \> {\ct SURF \ldots\ has a problem with VARIABLE\_THICKNESS or HT3D.           } \> Section~\ref{info:HT3D_Limitations}  \\
 369  \> {\ct SURF \ldots\ cannot have both HT3D and BURN\_AWAY.                     } \> Section~\ref{info:HT3D_Limitations}  \\
+370  \> {\ct SURF \ldots\ No wall or particle for TGA\_ANALYSIS.                    } \> Section~\ref{tga_analysis}  \\
      \>                                                                               \>                                     \\
 371  \> {\ct Pressure solver \ldots\ not known.                                     } \> Section~\ref{optional_pressure_solver}  \\
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
 373  \> {\ct Cannot have FISHPAK\_BC>0.                                             } \> Section~\ref{sec:periodic}  \\
+374  \> {\ct Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
      \>                                                                               \>                                     \\
 381  \> {\ct Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> {\ct Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -13843,6 +13852,8 @@ Keyword             & Type     & Description                      & Units       
 858 \> {\ct INIT \ldots\ PARTicle class \ldots\ requires a \ldots\                  } \> Section~\ref{info:initial_droplets} \\
     \>                                                                                \>                          \\
 871 \> {\ct LEAK\_AREA specified twice for ZONE \ldots\ and \ldots\                 } \> Section~\ref{info:Leaks} \\
+872 \> {\ct ZONE \ldots\ overlaps ZONE \ldots\ in MESH \ldots\                      } \> Section~\ref{info:ZONE_Basics} \\
+873 \> {\ct ZONE \ldots\ meets ZONE \ldots\ at the boundary of MESH \ldots\         } \> Section~\ref{info:ZONE_Basics} \\
     \>                                                                                \>                          \\
 881 \> {\ct DEVC \ldots\ has QUANTITY\_RANGE(2) <= QUANTITY\_RANGE(1).              } \> Section~\ref{info:statistics} \\
 882 \> {\ct DEVC \ldots\ MOVE\_ID is not recognized.                                } \> Section~\ref{info:MOVE_ID} \\
@@ -13944,6 +13955,8 @@ Keyword             & Type     & Description                      & Units       
 1042 \> {\ct QUANTITY \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1043 \> {\ct PROP\_ID \ldots\ not found.                                            } \> Section~\ref{info:gasoutputquantities} \\
 1044 \> {\ct Cannot set EXTERNAL\_FILE=T for a RAMP used for an output clock \ldots } \> Section~\ref{info:external_control} \\
+     \>                                                                               \>                                     \\
+1051 \> {\ct RESTART initial time equals T\_END.                                    } \> Section~\ref{info:restart} \\
 
 \end{tabbing}
 
