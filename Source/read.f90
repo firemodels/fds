@@ -6995,15 +6995,15 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
 
-   ! If oxygen is consumed in the charring process, set a global variable for
+   ! If oxygen is consumed in the reaction, set a global variable for
    ! use in calculating the heat release rate based on oxygen consumption
 
-   IF (N_REACTIONS > 0 .AND. SURFACE_OXIDATION_MODEL) THEN
+   IF (N_REACTIONS > 0 .AND. ANY(ML%N_O2 > 0._EB)) THEN
       IF (O2_INDEX <= 0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR(256): MATL ',TRIM(ID),', SURFACE_OXIDATION_MODEL set but OXYGEN not a defined species.'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(256): MATL ',TRIM(ID),', oxidation reaction set but OXYGEN not a defined species.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
-      CHAR_OXIDATION = .TRUE.
+      OXIDATION_REACTION = .TRUE.
    ENDIF
 
    ! Conductivity and specific heat temperature ramps
@@ -8652,7 +8652,7 @@ MATL_MASS_FRACTION(:,1) = 1._EB
 MINIMUM_SCALING_HEAT_FLUX = 0._EB
 MAXIMUM_SCALING_HEAT_FLUX = 1.E9_EB
 MINIMUM_BURNOUT_TIME    = 1.E6_EB
-MINIMUM_LAYER_THICKNESS = -1.E-5_EB  ! The absolute value is the default, m
+MINIMUM_LAYER_THICKNESS = -1.E-6_EB  ! The absolute value is the default, m
 MLRPUA                  = 0._EB
 MOISTURE_FRACTION       = 0._EB
 N_LAYER_CELLS_MAX       = 999
