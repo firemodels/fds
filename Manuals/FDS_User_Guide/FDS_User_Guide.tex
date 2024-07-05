@@ -8324,11 +8324,12 @@ It is assumed that the values $x_i$ are mid-points of the discretized function; 
 
 The {\ct PERCENTILE} function is useful for computing flame heights. Consider the following input lines:
 \begin{lstlisting}
-&DEVC XB=0,0,0,0,0.05,4.95, QUANTITY='HRRPUL', POINTS=50, Z_ID='z', ID='qdot' /
+&DEVC XB=0,0,0,0,0.05,4.95, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL'
+      DX=1., DY=1., DZ=0.05, POINTS=50, Z_ID='z', ID='qdot' /
 &CTRL ID='pct', FUNCTION_TYPE='PERCENTILE', INPUT_ID='qdot', PERCENTILE=0.95 /
 &DEVC ID='L_F', XYZ=0,0,0, QUANTITY='CONTROL VALUE', CTRL_ID='pct', UNITS='m' /
 \end{lstlisting}
-The first {\ct DEVC} line represents a vertical profile of {\ct 'HRRPUL'} or Heat Release Rate Per Unit Length (kW/m). These 50 values result from integrating the heat release rate per unit volume over the two horizontal directions. The {\ct CTRL} function takes these 50 values at 50 uniformly spaced heights between 0.05~m and 4.95~m and calculates the height at which 95~\% of the fire's energy has been released. Note that for a 10~cm grid, the vertical array of points are located at cell centers, which is why the discretized integration is done the way it is described above. The second {\ct DEVC} line simply takes the value calculated by the control function and prints it out in the file of time histories, {\ct CHID\_devc.csv}. The 50 values of {\ct 'HRRPUL'} are time-averaged and written to the file, {\ct CHID\_line.csv}. Note that the flame heights written to {\ct CHID\_devc.csv} are time-averaged over the time interval between printouts. If you set {\ct DT\_DEVC} to a very small value (i.e. less than the time step), you will obtain a time-history of instantaneous flame heights.
+The first {\ct DEVC} line represents a vertical profile of the heat release rate per unit volume integrated over horizontal slices of dimension {\ct 2*DX}, {\ct 2*DY}, and {\ct 2*DZ}. The {\ct CTRL} function takes these 50 values at 50 uniformly spaced heights between 0.05~m and 4.95~m and calculates the height at which 95~\% of the fire's energy has been released. Note that for a 10~cm grid, the vertical array of points are located at cell centers, which is why the discretized integration is done the way it is described above. The second {\ct DEVC} line simply takes the value calculated by the control function and prints it out in the file of time histories, {\ct CHID\_devc.csv}. The 50 integrals of {\ct 'HRRPUV'} are time-averaged and written to the file, {\ct CHID\_line.csv}. Note that the flame heights written to {\ct CHID\_devc.csv} are time-averaged over the time interval between printouts. If you set {\ct DT\_DEVC} to a very small value (i.e. less than the time step), you will obtain a time-history of instantaneous flame heights.
 
 
 
@@ -11081,7 +11082,6 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$         & D,I,P,S      \\ \hline
-{\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m              & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                          & kW/m$^3$          & D,I,P,S      \\ \hline
 {\ct HRRPUV REAC}$^6$                           & $\dq'''$ for {\ct REAC\_ID}                       & kW/m$^3$          & D,S          \\ \hline
 {\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa                & D,I,P,S      \\ \hline
