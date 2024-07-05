@@ -799,7 +799,7 @@ The namelist group {\ct CATF} allows for the inclusion of input information from
 \begin{lstlisting}
 &CATF OTHER_FILES='file_1.txt','file_2.txt' /
 \end{lstlisting}
-adds the contents of the two listed files into the current input file. Up to 20 files can be listed on one {\ct CATF} line, and multiple {\ct CATF} lines can be included in the input file. After reading the input file, FDS creates a new input file, {\ct CHID\_cat.fds}, and then runs the case.
+adds the contents of the two listed files into the current input file. The contents of the other files will be inserted at the location of each respective {\ct CATF} line in the input file. Up to 20 files can be listed on one {\ct CATF} line, and multiple {\ct CATF} lines can be included in the input file. After reading the input file, FDS creates a new input file, {\ct CHID\_cat.fds}, and then runs the case.
 
 When using this feature, limit the number of characters per line in both the original and added input files to 400.
 
