@@ -575,7 +575,7 @@ LOGICAL :: FILE_EXISTS
 FAILED = .FALSE.
 EXTERNAL_RAMP = RAMPS%LAST
 EXTERNAL_CTRL = CONTROL%CURRENT_STATE
-IF (EXTERNAL_PAUSE==.TRUE.) THEN
+IF (EXTERNAL_PAUSE) THEN
    ! Check if the file exists
    INQUIRE(FILE=EXTERNAL_WAKE, exist=FILE_EXISTS)
    ! If the file does not exist, pause for 10 seconds and recheck
