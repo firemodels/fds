@@ -10334,6 +10334,16 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
                ENDIF
 
+               ! Save the original, undivided obstruction lengths and face areas.
+
+               UNDIVIDED_INPUT_LENGTH(1) = ABS(XB2-XB1)
+               UNDIVIDED_INPUT_LENGTH(2) = ABS(XB4-XB3)
+               UNDIVIDED_INPUT_LENGTH(3) = ABS(XB6-XB5)
+
+               UNDIVIDED_INPUT_AREA(1) = (XB4-XB3)*(XB6-XB5)
+               UNDIVIDED_INPUT_AREA(2) = (XB2-XB1)*(XB6-XB5)
+               UNDIVIDED_INPUT_AREA(3) = (XB2-XB1)*(XB4-XB3)
+
                ! Increase the OBST counter
 
                N = N + 1
@@ -10441,16 +10451,6 @@ MESH_LOOP: DO NM=1,NMESHES
                      THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-
-               ! Save the original, undivided obstruction lengths and face areas.
-
-               UNDIVIDED_INPUT_LENGTH(1) = ABS(XB2-XB1)
-               UNDIVIDED_INPUT_LENGTH(2) = ABS(XB4-XB3)
-               UNDIVIDED_INPUT_LENGTH(3) = ABS(XB6-XB5)
-
-               UNDIVIDED_INPUT_AREA(1) = (XB4-XB3)*(XB6-XB5)
-               UNDIVIDED_INPUT_AREA(2) = (XB2-XB1)*(XB6-XB5)
-               UNDIVIDED_INPUT_AREA(3) = (XB2-XB1)*(XB4-XB3)
 
                ! Throw out obstructions that are not within computational domain
 
