@@ -1788,7 +1788,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
    INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
    INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
-   INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
+   INTEGER :: DUCTRUN=-1                                   !< Ductrun node belongs to
    INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER :: CONNECTIVITY_INDEX=-1                        !< Index of node connectivity for Smokeview display
