@@ -90,14 +90,8 @@ H(4)=loglog(Qstar,Heskestad,'k-');
 H(5)=loglog(Qstar(3:16),Hasemi_and_Tokunaga(3:16),'m-');
 H(6)=loglog(Qstar,Cetegen,'-','Color',[.5 .5 0]);
 H(7)=loglog(Qstar,Delichatsios,'-','Color',[0 .5 .5]);
-
 H(8)=loglog(Qstar,max(L_99(:,1:3),[],2),'r--','Linewidth',2);
-% H(9)=loglog(Qstar,L_99(:,2),'r^--');
-% H(10)=loglog(Qstar,L_99(:,3),'ro--');
-
 H(9)=loglog(Qstar,min(L_95(:,1:3),[],2),'b--','Linewidth',2);
-% H(12)=loglog(Qstar,L_95(:,2),'b^--');
-% H(13)=loglog(Qstar,L_95(:,3),'bo--');
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
