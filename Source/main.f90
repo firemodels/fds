@@ -194,6 +194,7 @@ IF (READ_EXTERNAL) THEN
    ALLOCATE(EXTERNAL_CTRL(N_CTRL))
    EXTERNAL_CTRL = CONTROL%INITIAL_STATE
    LU_EXTERNAL  = GET_FILE_NUMBER()
+   IF (DT_EXTERNAL_HEARTBEAT > 0._EB) LU_EXTERNAL_HEARTBEAT = GET_FILE_NUMBER()
 ENDIF
 
 ! Allocate and initialize mesh-specific variables, and check to see if the code should stop
@@ -597,12 +598,13 @@ MAIN_LOOP: DO
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
 
-   ! Process externall controlled variables
+   ! Process externally controlled variables
    IF (READ_EXTERNAL) THEN
       IF (MY_RANK==0 .AND. T > T_EXTERNAL) THEN
          CALL READ_EXTERNAL_FILE(EXTERNAL_FAIL)
          IF (.NOT. EXTERNAL_FAIL) T_EXTERNAL = T + DT_EXTERNAL
       ENDIF
+      IF (HEARTBEAT_FAIL) CALL STOP_CHECK(1)
       CALL EXCHANGE_EXTERNAL
    ENDIF
    ! Begin the finite differencing of the PREDICTOR step
@@ -1752,7 +1754,9 @@ IF (MY_RANK==0) THEN
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
       CASE(ODE_STOP)
-         WRITE(MESSAGE,'(A)') 'ERROR: Combustion ODE Solver Failure - FDS stopped'
+         WRITE(MESSAGE,'(A)') 'ERROR: Combustion ODE solver failure - FDS stopped'
+      CASE(HEARTBEAT_STOP)
+         WRITE(MESSAGE,'(A)') 'ERROR: External program failure - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
