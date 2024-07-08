@@ -1477,11 +1477,11 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE OUTPUT_CLOCKS, ONLY: RAMP_TIME_INDEX
 REAL(EB), INTENT(OUT) :: DT
 CHARACTER(LABEL_LENGTH) :: RAMP_TIME
-NAMELIST /TIME/ DT,DT_END_FILL,DT_END_MINIMUM,DT_EXTERNAL,FYI,LIMITING_DT_RATIO,LOCK_TIME_STEP,&
+NAMELIST /TIME/ DT,DT_END_FILL,DT_END_MINIMUM,DT_EXTERNAL,DT_EXTERNAL_HEARTBEAT,EXTERNAL_HEARTBEAT_FILENAME,HEARTBEAT_FAIL,&
+                FYI,LIMITING_DT_RATIO,LOCK_TIME_STEP,&
                 RAMP_TIME,RESTRICT_TIME_STEP,T_BEGIN,T_END,TIME_SHRINK_FACTOR,WALL_INCREMENT
 
 DT                   = -1._EB
-DT_EXTERNAL          = 0._EB
 TIME_SHRINK_FACTOR   = 1._EB
 T_BEGIN              = 0._EB
 T_END                = 1._EB
@@ -1506,6 +1506,12 @@ IF (T_END>TWO_EPSILON_EB) CHECK_MESH_ALIGNMENT=.FALSE. ! overwrite user-specifie
 ! Set up time ramp if specified
 
 IF (RAMP_TIME /='null') CALL GET_RAMP_INDEX(RAMP_TIME,'TIME',RAMP_TIME_INDEX)
+
+IF (DT_EXTERNAL_HEARTBEAT <= TWO_EPSILON_EB .NEQV. EXTERNAL_HEARTBEAT_FILENAME=='null') THEN
+   WRITE(MESSAGE,'(A)') &
+      'ERROR(XXX): On TIME, if one of DT_EXTERNAL_HEARTBEAT or EXTERNAL_HEARTBEAT_FILENAME is set, both must be set.'
+   CALL SHUTDOWN(MESSAGE) ; RETURN  
+ENDIF
 
 END SUBROUTINE READ_TIME
 
@@ -10328,6 +10334,16 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
                ENDIF
 
+               ! Save the original, undivided obstruction lengths and face areas.
+
+               UNDIVIDED_INPUT_LENGTH(1) = ABS(XB2-XB1)
+               UNDIVIDED_INPUT_LENGTH(2) = ABS(XB4-XB3)
+               UNDIVIDED_INPUT_LENGTH(3) = ABS(XB6-XB5)
+
+               UNDIVIDED_INPUT_AREA(1) = (XB4-XB3)*(XB6-XB5)
+               UNDIVIDED_INPUT_AREA(2) = (XB2-XB1)*(XB6-XB5)
+               UNDIVIDED_INPUT_AREA(3) = (XB2-XB1)*(XB4-XB3)
+
                ! Increase the OBST counter
 
                N = N + 1
@@ -10435,16 +10451,6 @@ MESH_LOOP: DO NM=1,NMESHES
                      THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-
-               ! Save the original, undivided obstruction lengths and face areas.
-
-               UNDIVIDED_INPUT_LENGTH(1) = ABS(XB2-XB1)
-               UNDIVIDED_INPUT_LENGTH(2) = ABS(XB4-XB3)
-               UNDIVIDED_INPUT_LENGTH(3) = ABS(XB6-XB5)
-
-               UNDIVIDED_INPUT_AREA(1) = (XB4-XB3)*(XB6-XB5)
-               UNDIVIDED_INPUT_AREA(2) = (XB2-XB1)*(XB6-XB5)
-               UNDIVIDED_INPUT_AREA(3) = (XB2-XB1)*(XB4-XB3)
 
                ! Throw out obstructions that are not within computational domain
 
