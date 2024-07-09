@@ -769,61 +769,72 @@ FLUX_ILOOP: DO J=1,JBAR
 
       IF (LEVEL_SET_ELLIPSE) THEN
 
-         ! Effective wind direction (theta) is clockwise from y-axis (Richards 1990)
-         COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
-         SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
+         ! ROS does not change with wind or slope
+         IF (SURFACE(LS_SURF_INDEX(I,J))%VEG_LSET_ROS_FIXED) THEN
 
-         ROS_TMP = ROS_HEAD(I,J)
+            MAG_SR=SURFACE(LS_SURF_INDEX(I,J))%VEG_LSET_ROS_00
+            SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) !spread rate components
+            SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2)
 
-         ! Magnitude of wind speed at midflame height must be in units of m/s here
-
-         UMF_DUM = UMF(I,J)/60.0_EB
-
-         ! Length to breadth ratio of ellipse based on effective UMF (Bova et al., Eq. A6)
-
-         LB = 0.936_EB * EXP(0.2566_EB * UMF_DUM) + 0.461_EB * EXP(-0.1548_EB * UMF_DUM) - 0.397_EB
-
-         ! Constraint LB max = 8 from Finney 2004
-
-         LB = MAX(1.0_EB,MIN(LB,8.0_EB))  ! (Bova et al., Eq. A7)
-
-         ! Head to back ratio based on LB
-
-         LBD = SQRT(LB**2 - 1.0_EB)
-         HB = (LB + LBD) / (LB - LBD)
-
-         ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards
-
-         B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
-         B_ELPS2 = B_ELPS**2
-         A_ELPS =  B_ELPS / LB
-         A_ELPS2=  A_ELPS**2
-         C_ELPS =  B_ELPS - (ROS_TMP/HB)
-
-         ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990
-         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015
-
-         AROS  = XSF*COS_THETA - YSF*SIN_THETA
-         BROS  = XSF*SIN_THETA + YSF*COS_THETA
-         DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
-
-         IF (DENOM > 0._EB) THEN
-            DENOM = 1._EB / SQRT(DENOM)
          ELSE
-            DENOM = 0._EB
+
+            ! Effective wind direction (theta) is clockwise from y-axis (Richards 1990)
+            COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
+            SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
+
+            ROS_TMP = ROS_HEAD(I,J)
+
+            ! Magnitude of wind speed at midflame height must be in units of m/s here
+
+            UMF_DUM = UMF(I,J)/60.0_EB
+
+            ! Length to breadth ratio of ellipse based on effective UMF (Bova et al., Eq. A6)
+
+            LB = 0.936_EB * EXP(0.2566_EB * UMF_DUM) + 0.461_EB * EXP(-0.1548_EB * UMF_DUM) - 0.397_EB
+
+            ! Constraint LB max = 8 from Finney 2004
+
+            LB = MAX(1.0_EB,MIN(LB,8.0_EB))  ! (Bova et al., Eq. A7)
+
+            ! Head to back ratio based on LB
+
+            LBD = SQRT(LB**2 - 1.0_EB)
+            HB = (LB + LBD) / (LB - LBD)
+
+            ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards
+
+            B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
+            B_ELPS2 = B_ELPS**2
+            A_ELPS =  B_ELPS / LB
+            A_ELPS2=  A_ELPS**2
+            C_ELPS =  B_ELPS - (ROS_TMP/HB)
+
+            ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990
+            ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015
+
+            AROS  = XSF*COS_THETA - YSF*SIN_THETA
+            BROS  = XSF*SIN_THETA + YSF*COS_THETA
+            DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
+
+            IF (DENOM > 0._EB) THEN
+               DENOM = 1._EB / SQRT(DENOM)
+            ELSE
+               DENOM = 0._EB
+            ENDIF
+
+            ! This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in Bova et al. 2015 IJWF 2015
+
+            SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA  ! Bova et al., Eq. A8
+            SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA  ! Bova et al., Eq. A9
+
+            ! Project spread rates from slope to horizontal plane
+
+            IF (ABS(DZTDX(I,J)) > 0._EB) SR_X_LS(I,J) = SR_X_LS(I,J) * ABS(COS(ATAN(DZTDX(I,J))))
+            IF (ABS(DZTDY(I,J)) > 0._EB) SR_Y_LS(I,J) = SR_Y_LS(I,J) * ABS(COS(ATAN(DZTDY(I,J))))
+
+            MAG_SR = SQRT(SR_X_LS(I,J)**2 + SR_Y_LS(I,J)**2)
+
          ENDIF
-
-         ! This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in Bova et al. 2015 IJWF 2015
-
-         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA  ! Bova et al., Eq. A8
-         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA  ! Bova et al., Eq. A9
-
-         ! Project spread rates from slope to horizontal plane
-
-         IF (ABS(DZTDX(I,J)) > 0._EB) SR_X_LS(I,J) = SR_X_LS(I,J) * ABS(COS(ATAN(DZTDX(I,J))))
-         IF (ABS(DZTDY(I,J)) > 0._EB) SR_Y_LS(I,J) = SR_Y_LS(I,J) * ABS(COS(ATAN(DZTDY(I,J))))
-
-         MAG_SR = SQRT(SR_X_LS(I,J)**2 + SR_Y_LS(I,J)**2)
 
       ELSE ! McArthur Spread Model
 
