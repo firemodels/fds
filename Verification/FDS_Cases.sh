@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# add -A to any case that you wish to be a part of the benchmark timing suite
-
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
 $QFDS -d Aerosols aerosol_agglomeration.fds
@@ -31,6 +29,19 @@ $QFDS -p 8 -d Atmospheric_Effects wind_example_10.fds
 $QFDS -p 32 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
+
+$QFDS -d Chemistry ignition_delay_T900K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T900K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T900K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1000K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1100K_Phi1p4.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi0p6.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi1p0.fds
+$QFDS -d Chemistry ignition_delay_T1200K_Phi1p4.fds
 
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
@@ -170,6 +181,7 @@ $QFDS -d Fires box_burn_away7.fds
 $QFDS -d Fires box_burn_away8.fds
 $QFDS -p 4 -d Fires box_burn_away9.fds
 $QFDS -p 4 -d Fires box_burn_away10.fds
+$QFDS -p 4 -d Fires box_burn_away11.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -p 4 -d Fires couch.fds
@@ -244,6 +256,7 @@ $QFDS -d Heat_Transfer heat_conduction_d.fds
 $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
+$QFDS -d Heat_Transfer insulated_steel_pipe_2d.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
 $QFDS -d Heat_Transfer ht1d_pile.fds
 $QFDS -d Heat_Transfer ht3d_pile.fds
@@ -328,6 +341,7 @@ $QFDS -d Miscellaneous devc_interpolation_velocity.fds
 $QFDS -d Miscellaneous devc_interpolation_temperature.fds
 $QFDS -d Miscellaneous init_overlap.fds
 $QFDS -p 2 -d Miscellaneous external_test.fds
+$QFDS -d Miscellaneous ramp_time.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -371,6 +385,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 16 -d Pressure_Solver random_obstructions_fft.fds
+$QFDS -p 4 -d Pressure_Solver stairwell.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 
@@ -381,9 +396,6 @@ $QFDS -d Pyrolysis cable_11_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_23_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_701_jacket_mcc.fds
 $QFDS -d Pyrolysis cell_burn_away.fds
-$QFDS -d Pyrolysis cone_demo.fds
-$QFDS -d Pyrolysis cone_demo_2.fds
-$QFDS -d Pyrolysis cone_demo_3.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
@@ -393,10 +405,22 @@ $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis part_baking_soda_420K.fds
 $QFDS -d Pyrolysis part_baking_soda_450K.fds
 $QFDS -d Pyrolysis part_baking_soda_500K.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp03_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp13_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp14_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp15_3C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp16_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp17_1C.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
 $QFDS -d Pyrolysis shrink_swell.fds
+$QFDS -d Pyrolysis spyro_cone_demo.fds
+$QFDS -d Pyrolysis spyro_cone_demo_2.fds
+$QFDS -d Pyrolysis spyro_cone_demo_3.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel_nonconforming.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds
@@ -519,6 +543,8 @@ $QFDS -p 4 -d Restart device_restart_base_case.fds
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart geom_restart_a.fds
 $QFDS -d Restart geom_restart_base_case.fds
+$QFDS -d Restart geom_ls_restart_a.fds
+$QFDS -d Restart geom_ls_restart_base_case.fds
 $QFDS -d Restart clocks_restart_a.fds
 $QFDS -d Restart clocks_restart_base_case.fds
 $QFDS -p 4 -d Restart restart_ulmat_a.fds
@@ -591,6 +617,7 @@ $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
 $QFDS -d Sprinklers_and_Sprays cannon_ball.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
+$QFDS -p 6 -d Sprinklers_and_Sprays cascadempi.fds
 $QFDS -p 2 -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds
@@ -717,22 +744,22 @@ $QFDS -p 4 -d Scalar_Analytical_Solution soborot_mp5_cos_wave_128.fds
 $QFDS -o 1 -d Thread_Check race_test_1.fds
 $QFDS -o 4 -d Thread_Check race_test_4.fds
 
-$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test64a.fds
-$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test64b.fds
-$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test64c.fds
-$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test64d.fds
-$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test64e.fds
-$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test64f.fds
-$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test64g.fds
-$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test64h.fds
-$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test128a.fds
-$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test128b.fds
-$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test128c.fds
-$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test128d.fds
-$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test128e.fds
-$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test128f.fds
-$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test128g.fds
-$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test128h.fds
+$QFDS -t -o 1 -d Timing_Benchmarks openmp_test64a.fds
+$QFDS -t -o 2 -d Timing_Benchmarks openmp_test64b.fds
+$QFDS -t -o 3 -d Timing_Benchmarks openmp_test64c.fds
+$QFDS -t -o 4 -d Timing_Benchmarks openmp_test64d.fds
+$QFDS -t -o 5 -d Timing_Benchmarks openmp_test64e.fds
+$QFDS -t -o 6 -d Timing_Benchmarks openmp_test64f.fds
+$QFDS -t -o 7 -d Timing_Benchmarks openmp_test64g.fds
+$QFDS -t -o 8 -d Timing_Benchmarks openmp_test64h.fds
+$QFDS -t -o 1 -d Timing_Benchmarks openmp_test128a.fds
+$QFDS -t -o 2 -d Timing_Benchmarks openmp_test128b.fds
+$QFDS -t -o 3 -d Timing_Benchmarks openmp_test128c.fds
+$QFDS -t -o 4 -d Timing_Benchmarks openmp_test128d.fds
+$QFDS -t -o 5 -d Timing_Benchmarks openmp_test128e.fds
+$QFDS -t -o 6 -d Timing_Benchmarks openmp_test128f.fds
+$QFDS -t -o 7 -d Timing_Benchmarks openmp_test128g.fds
+$QFDS -t -o 8 -d Timing_Benchmarks openmp_test128h.fds
 
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds

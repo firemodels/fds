@@ -2787,7 +2787,8 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MIEV
 USE RADCAL_CALC
 USE WSGG_ARRAYS
-REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,YY2,BBF,AP0,AMEAN,RADIANCE,TRANSMISSIVITY,X_N2
+REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,YY2,BBF,AP0,AMEAN,RADIANCE,TRANSMISSIVITY,X_N2,&
+            THETA,PHI
 INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NS2,NRA,NSB,RADCAL_TEMP(16)=0,RCT_SKIP=-1,OR_IN,I1,I2,IO
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
@@ -2821,6 +2822,8 @@ ALLOCATE(DLN(-3:3,1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','DLN',IZERO)
 ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
+ALLOCATE(DLANG(3,1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','DLANG',IZERO)
 
 ! Determine mean direction normals and sweeping orders
 ! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
@@ -2832,6 +2835,7 @@ DO I=1,NRT
       THETALOW  = PI*REAL(I-1)/REAL(NRT)
       THETAUP   = PI*REAL(I)/REAL(NRT)
       F_THETA   = 0.5_EB*(THETAUP-THETALOW  - COS(THETAUP)*SIN(THETAUP) + COS(THETALOW)*SIN(THETALOW))
+      THETA = 0.5_EB*(THETAUP+THETALOW)
       IF (CYLINDRICAL) THEN
          PHILOW = PI*REAL(J-1)/REAL(NRP(I))
          PHIUP  = PI*REAL(J)/REAL(NRP(I))
@@ -2842,21 +2846,31 @@ DO I=1,NRT
          PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I))
          PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))
       ENDIF
+      PHI=0.5_EB*(PHILOW+PHIUP)
       RSA(N) = (PHIUP-PHILOW)*(COS(THETALOW)-COS(THETAUP))
       IF (CYLINDRICAL) THEN
          DLX(N) =  (SIN(PHIUP)-SIN(PHILOW)) *F_THETA
          DLY(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLB(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
+         DLANG(1,N)  = SIN(THETA)*COS(PHI)
+         DLANG(2,N)  = SIN(THETA)*SIN(PHI)
+         DLANG(3,N)  = COS(THETA)
          IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
       ELSEIF (TWO_D) THEN
          DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
          DLY(N) = 0._EB
          DLZ(N) = (COS(PHILOW)-COS(PHIUP))*F_THETA
+         DLANG(1,N)  = COS(PHI)
+         DLANG(2,N)  = 0._EB
+         DLANG(3,N)  = SIN(PHI)
       ELSE
          DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
          DLY(N) = (COS(PHILOW)-COS(PHIUP))*F_THETA
          DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)      * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
+         DLANG(1,N)  = SIN(THETA)*COS(PHI)
+         DLANG(2,N)  = SIN(THETA)*SIN(PHI)
+         DLANG(3,N)  = COS(THETA)
       ENDIF
    ENDDO
 ENDDO
@@ -3313,6 +3327,9 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
 ENDIF MAKE_KAPPA_ARRAYS
 
+! Reference: Bordbar, Wecel, Hyppanen.  A line by line based weighted sum of gray gases model for inhomogeneous
+!            CO2-H2O mixture in oxy-fired comustion.  Combustion and Flame, 161 (2014) 2435-2445.
+
 MAKE_WSGG_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. WSGG_MODEL) THEN
    ALLOCATE(WSGG_B1_ARRAY(1:4,0:4))
    ALLOCATE(WSGG_B2_ARRAY(1:4,0:4))
@@ -3392,14 +3409,22 @@ IF (SOLID_PARTICLES) THEN
 
    ALLOCATE(COSINE_ARRAY(1:NRA))
    ALLOCATE(NEAREST_RADIATION_ANGLE(N_ORIENTATION_VECTOR))
+   ALLOCATE(VIEW_ANGLE_AREA(N_ORIENTATION_VECTOR))
+   VIEW_ANGLE_AREA = 0._EB
    DO IO=1,N_ORIENTATION_VECTOR
       DO N=1,NRA
          COSINE_ARRAY(N) = ORIENTATION_VECTOR(1,IO)*DLX(N) + &
                            ORIENTATION_VECTOR(2,IO)*DLY(N) + &
                            ORIENTATION_VECTOR(3,IO)*DLZ(N)
+         IF (-(ORIENTATION_VECTOR(1,IO)*DLANG(1,N) + &
+               ORIENTATION_VECTOR(2,IO)*DLANG(2,N) + &
+               ORIENTATION_VECTOR(3,IO)*DLANG(3,N)) > ORIENTATION_VIEW_ANGLE(IO)) &
+            VIEW_ANGLE_AREA(IO) = VIEW_ANGLE_AREA(IO) - COSINE_ARRAY(N)
       ENDDO
       NEAREST_RADIATION_ANGLE(IO) = MINLOC(COSINE_ARRAY,DIM=1)
+      VIEW_ANGLE_AREA(IO) = PI/VIEW_ANGLE_AREA(IO)
    ENDDO
+
    DEALLOCATE(COSINE_ARRAY)
 
 ENDIF
@@ -3540,7 +3565,10 @@ IF (INIT_HRRPUV .AND. RAD_ITER>1) CALL ADD_VOLUMETRIC_HEAT_SOURCE(2)
 
 ! Initialize the radiative loss to zero for special case models that loop over wavelength bands
 
-IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) QR = 0._EB
+IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) THEN
+   QR = 0._EB
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) QR_W = 0._EB
+ENDIF
 
 ! Zero out radiation flux to wall, particles, facets if the intensity is to be updated
 
@@ -3600,6 +3628,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
          BBF = 1._EB
+         QR_W = 0._EB
       ELSEIF (WSGG_MODEL) THEN
          ! Computing the temperature coefficient in the WSGG model at ambient temperature
          Z_ARRAY(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0     ! Mass frac of the tracked species in ambient
@@ -3632,8 +3661,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO
       ENDDO PC_LOOP
 
-      QR_W = 0._EB
-
    ENDIF IF_PARTICLES_INCLUDED
 
    ! Compute the absorption coefficient, KAPPA_PART, for a collection of solid particles
@@ -3648,7 +3675,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XID,YJD,ZKD,IID,JJD,KKD)
          KAPPA_PART_SINGLE = 0.25_EB*LP%PWT*B1%AREA*LP%RVC*B1%EMISSIVITY
          KAPPA_PART(IID,JJD,KKD) = KAPPA_PART(IID,JJD,KKD) + KAPPA_PART_SINGLE
-         KFST4_PART(IID,JJD,KKD) = KFST4_PART(IID,JJD,KKD) + KAPPA_PART_SINGLE*FOUR_SIGMA*B1%TMP_F**4
+         KFST4_PART(IID,JJD,KKD) = KFST4_PART(IID,JJD,KKD) + BBF*KAPPA_PART_SINGLE*FOUR_SIGMA*B1%TMP_F**4
       ENDDO
    ENDIF
 
@@ -3982,7 +4009,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ! Boundary conditions: Intensities leaving the boundaries.
 
-            !$OMP PARALLEL DO PRIVATE(WC,BC,BR,B1,IOR,II,JJ,KK,LL,NOM,VT) SCHEDULE(GUIDED)
+            !$OMP PARALLEL DO PRIVATE(WC,BC,BR,B1,IOR,II,JJ,KK,LL,NOM,VT,TSI,TMP_EXTERIOR,IC) SCHEDULE(GUIDED)
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                WC => WALL(IW)
                IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
@@ -4171,7 +4198,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                   !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, AILFU, &
                   !$OMP& ILZU, VC, AY, AZ, AXU, AYU, AZU, AXD, AYD, AZD, AFD, &
-                  !$OMP& IW, WC, BR, CF, CFA, DLF, A_SUM, AIU_SUM, RAP, &
+                  !$OMP& IW, WC, BR, CF, CFA, BC, DLF, A_SUM, AIU_SUM, RAP, &
                   !$OMP& ICF, INDCF, IADD, IFACE )
 
                   SLICE_LOOP: DO IJK = 1, M_IJK
@@ -4391,18 +4418,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         TEMP_ORIENTATION = TEMP_ORIENTATION / &
                                            (SQRT(TEMP_ORIENTATION(1)**2+TEMP_ORIENTATION(2)**2+TEMP_ORIENTATION(3)**2) &
                                            +TWO_EPSILON_EB)
-                        COS_DL = -(TEMP_ORIENTATION(1)*DLX(N) + &
-                                   TEMP_ORIENTATION(2)*DLY(N) + &
-                                   TEMP_ORIENTATION(3)*DLZ(N))
-                        IF (COS_DL>0._EB) THEN
+                        COS_DL = -DOT_PRODUCT(TEMP_ORIENTATION(1:3),DLANG(1:3,N))
+                        IF (COS_DL>ORIENTATION_VIEW_ANGLE(LP%ORIENTATION_INDEX)) THEN
+                           COS_DL = -(TEMP_ORIENTATION(1)*DLX(N) + &
+                                      TEMP_ORIENTATION(2)*DLY(N) + &
+                                      TEMP_ORIENTATION(3)*DLZ(N))
                            BR => BOUNDARY_RADIA(LP%BR_INDEX)
                            IF (LPC%MASSLESS_TARGET) THEN
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG)
+                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
                               IF (N==NEAREST_RADIATION_ANGLE(LP%ORIENTATION_INDEX)) &
                                  BR%IL(IBND) = IL(BC%IIG,BC%JJG,BC%KKG)
                            ELSE
                               ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG)
+                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
                            ENDIF
                         ENDIF
                         CYCLE PARTICLE_RADIATION_LOOP
@@ -4412,18 +4440,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      CASE(0)
                         CYCLE PARTICLE_RADIATION_LOOP
                      CASE(1)
-                        COS_DL = -(ORIENTATION_VECTOR(1,LP%ORIENTATION_INDEX)*DLX(N) + &
-                                   ORIENTATION_VECTOR(2,LP%ORIENTATION_INDEX)*DLY(N) + &
-                                   ORIENTATION_VECTOR(3,LP%ORIENTATION_INDEX)*DLZ(N))
-                        IF (COS_DL>0._EB) THEN
+                        COS_DL = -DOT_PRODUCT(ORIENTATION_VECTOR(1:3,LP%ORIENTATION_INDEX),DLANG(1:3,N))
+                        IF (COS_DL>ORIENTATION_VIEW_ANGLE(LP%ORIENTATION_INDEX)) THEN
+                           COS_DL = -(ORIENTATION_VECTOR(1,LP%ORIENTATION_INDEX)*DLX(N) + &
+                                      ORIENTATION_VECTOR(2,LP%ORIENTATION_INDEX)*DLY(N) + &
+                                      ORIENTATION_VECTOR(3,LP%ORIENTATION_INDEX)*DLZ(N))
                            BR => BOUNDARY_RADIA(LP%BR_INDEX)
                            IF (LPC%MASSLESS_TARGET) THEN
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG)
+                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
                               IF (N==NEAREST_RADIATION_ANGLE(LP%ORIENTATION_INDEX)) &
                                  BR%IL(IBND) = IL(BC%IIG,BC%JJG,BC%KKG)
                            ELSE
                               ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG)
+                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
                            ENDIF
                         ENDIF
                   END SELECT
@@ -4663,24 +4692,27 @@ BLACKBODY_FRACTION = BBFHIGH - BBFLOW
 END FUNCTION BLACKBODY_FRACTION
 
 
-FUNCTION GET_KAPPA(Z_IN,TMP,IBND)
+!> \brief Compute the radiative absorption coefficient, KAPPA
+!> \param Z_IN Array of tracked species
+!> \param TMP Temperature (K)
+!> \param IBND Radiation band
+
+REAL(EB) FUNCTION GET_KAPPA(Z_IN,TMP,IBND)
 
 ! Returns the radiative absorption
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 REAL(EB), INTENT(IN) :: Z_IN(1:N_TRACKED_SPECIES),TMP
-REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,SCALED_Y_RADCAL_SPECIES,MWA
+REAL(EB) :: KAPPA_TEMP,INT_FAC,KAPPA_SUM,SCALED_Y_RADCAL_SPECIES,MWA
 INTEGER, INTENT(IN) :: IBND
 INTEGER :: LBND,UBND,N,TYY
 
-GET_KAPPA = 0._EB
+KAPPA_SUM = 0._EB
 
 TYY = MAX(0 , MIN(N_KAPPA_T,INT((TMP - RTMPMIN) * TYY_FAC)))
 
 CALL GET_MOLECULAR_WEIGHT(Z_IN,MWA)
 
-!$OMP PARALLEL
-!$OMP DO PRIVATE(SCALED_Y_RADCAL_SPECIES, INT_FAC, LBND, UBND, KAPPA_TEMP) REDUCTION(+:GET_KAPPA)
 DO N = 1, N_RADCAL_ARRAY_SIZE
    SCALED_Y_RADCAL_SPECIES = DOT_PRODUCT(Z2RADCAL_SPECIES(N,:),Z_IN)
    IF (SCALED_Y_RADCAL_SPECIES<TWO_EPSILON_EB) CYCLE
@@ -4694,10 +4726,10 @@ DO N = 1, N_RADCAL_ARRAY_SIZE
    LBND = MIN(LBND,N_KAPPA_Y)
    UBND = MIN(LBND+1,N_KAPPA_Y)
    KAPPA_TEMP = RADCAL_SPECIES2KAPPA(N,LBND,TYY,IBND)
-   GET_KAPPA = GET_KAPPA + KAPPA_TEMP + INT_FAC*(RADCAL_SPECIES2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
+   KAPPA_SUM  = KAPPA_SUM + KAPPA_TEMP + INT_FAC*(RADCAL_SPECIES2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
 ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
+
+GET_KAPPA = KAPPA_SUM
 
 END FUNCTION GET_KAPPA
 

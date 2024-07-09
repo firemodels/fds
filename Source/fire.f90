@@ -1,18 +1,26 @@
-MODULE FIRE
+!> \brief Routines for computing combustion
 
-! Compute combustion
+MODULE FIRE
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE SOOT_ROUTINES, ONLY: SOOT_SURFACE_OXIDATION
+#ifdef WITH_SUNDIALS
+USE CVODE_INTERFACE
+#endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
+
 PRIVATE
 
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: DZ_F0,KG
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DZ_F0
+REAL(EB) :: RRTMP0,MOLPCM3
+DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ATOL,RTOL
+LOGICAL :: CVODE_INIT=.FALSE.
+INTEGER :: I0,J0,K0,NM0
 
 PUBLIC COMBUSTION,COMBUSTION_BC,CONDENSATION_EVAPORATION,GET_FLAME_TEMPERATURE
 
@@ -20,6 +28,8 @@ CONTAINS
 
 SUBROUTINE COMBUSTION(T,DT,NM)
 
+USE SOOT_ROUTINES, ONLY: SOOT_SURFACE_OXIDATION
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: ICC,JCC
@@ -28,6 +38,14 @@ REAL(EB) :: TNOW
 TNOW=CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
+
+
+! Set CVODES options
+IF (.NOT. CVODE_INIT) THEN
+   CVODE_INIT = .TRUE.
+   ALLOCATE(ATOL(N_TRACKED_SPECIES))
+   ALLOCATE(RTOL(N_TRACKED_SPECIES))
+ENDIF
 
 Q     = 0._EB
 CHI_R = 0._EB
@@ -42,12 +60,7 @@ ENDIF
 
 IF (N_REACTIONS==0) RETURN
 
-IF (N_REACTIONS>0) THEN
-   IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) THEN
-      ALLOCATE(DZ_F0(N_REACTIONS))
-      ALLOCATE(KG(N_REACTIONS))
-   ENDIF
-ENDIF
+IF (.NOT.ALL(REACTION%FAST_CHEMISTRY)) ALLOCATE(DZ_F0(N_REACTIONS))
 
 ! Call combustion ODE solver
 
@@ -58,7 +71,6 @@ CALL COMBUSTION_GENERAL(T,DT,NM)
 IF (DEPOSITION .AND. SOOT_OXIDATION) CALL SOOT_SURFACE_OXIDATION(DT,NM)
 
 IF (ALLOCATED(DZ_F0)) DEALLOCATE(DZ_F0)
-IF (ALLOCATED(KG))    DEALLOCATE(KG)
 
 T_USED(10)=T_USED(10)+CURRENT_TIME()-TNOW
 
@@ -72,16 +84,14 @@ SUBROUTINE COMBUSTION_GENERAL(T,DT,NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
                               GET_SENSIBLE_ENTHALPY_Z,IS_REALIZABLE
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC, CC_GASPHASE
-INTEGER :: I,J,K,NS,NR,IW,N,CHEM_SUBIT_TMP, ICC, JCC, NCELL
+INTEGER :: I,J,K,NS,NR,N,CHEM_SUBIT_TMP, ICC, JCC, NCELL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),DZZ(1:N_TRACKED_SPECIES),CP,H_S_N,&
-            REAC_SOURCE_TERM_TMP(N_TRACKED_SPECIES),Q_REAC_TMP(N_REACTIONS),RSUM_LOC,VCELL
+            REAC_SOURCE_TERM_TMP(N_TRACKED_SPECIES),Q_REAC_TMP(N_REACTIONS),RSUM_LOC,VCELL,PRES
 LOGICAL :: Q_EXISTS
 TYPE (REACTION_TYPE), POINTER :: RN
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-TYPE (WALL_TYPE), POINTER :: WC
-TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 LOGICAL :: DO_REACTION,REALIZABLE
 
 Q_EXISTS =  .FALSE.
@@ -116,18 +126,25 @@ DO K=1,KBAR
                WRITE(LU_ERR,*) SUM(ZZ_GET)
                WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions input to COMBUSTION_MODEL'
                STOP_STATUS=REALIZABILITY_STOP
+               RETURN
             ENDIF
          ENDIF
          CALL CHECK_REACTION
          IF (.NOT.DO_REACTION) CYCLE ILOOP ! Check whether any reactions are possible.
          DZZ = ZZ_GET ! store old ZZ for divergence term
+         NM0 = NM
+         I0 = I
+         J0 = J
+         K0 = K
          !***************************************************************************************
          ! Call combustion integration routine for Cartesian cell (I,J,K)
+         PRES = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
          CALL COMBUSTION_MODEL( T,DT,ZZ_GET,Q(I,J,K),MIX_TIME(I,J,K),CHI_R(I,J,K),&
                                 CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
-                                TMP(I,J,K),RHO(I,J,K),MU(I,J,K),&
+                                TMP(I,J,K),RHO(I,J,K),PRES, MU(I,J,K),&
                                 LES_FILTER_WIDTH(I,J,K),DX(I)*DY(J)*DZ(K),IIC=I,JJC=J,KKC=K )
          !***************************************************************************************
+         IF (STOP_STATUS/=NO_STOP) RETURN
          IF (OUTPUT_CHEM_IT) CHEM_SUBIT(I,J,K) = CHEM_SUBIT_TMP
          IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
             REAC_SOURCE_TERM(I,J,K,:) = REAC_SOURCE_TERM_TMP
@@ -139,11 +156,12 @@ DO K=1,KBAR
                WRITE(LU_ERR,*) ZZ_GET,SUM(ZZ_GET)
                WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions after COMBUSTION_MODEL'
                STOP_STATUS=REALIZABILITY_STOP
+               RETURN
             ENDIF
          ENDIF
          DZZ = ZZ_GET - DZZ
          ! Update RSUM and ZZ
-         DZZ_IF: IF ( ANY(ABS(DZZ) > TWO_EPSILON_EB) ) THEN
+         DZZ_IF: IF ( ANY(ABS(DZZ) > DZZ_CLIP) ) THEN
             IF (ABS(Q(I,J,K)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
             ! Divergence term
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
@@ -158,17 +176,6 @@ DO K=1,KBAR
       ENDDO ILOOP
    ENDDO
 ENDDO
-
-IF (Q_EXISTS) THEN
-   ! Set Q and CHI_R in the ghost cell, just for better visualization.
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE
-      BC => BOUNDARY_COORD(WC%BC_INDEX)
-      Q(BC%II,BC%JJ,BC%KK) = Q(BC%IIG,BC%JJG,BC%KKG)
-      CHI_R(BC%II,BC%JJ,BC%KK) = CHI_R(BC%IIG,BC%JJG,BC%KKG)
-   ENDDO
-ENDIF
 
 CC_IBM_IF: IF (CC_IBM) THEN
    ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -206,11 +213,13 @@ CC_IBM_IF: IF (CC_IBM) THEN
          DZZ = ZZ_GET ! store old ZZ for divergence term
          !***************************************************************************************
          ! Call combustion integration routine for CUT_CELL(ICC)%XX(JCC)
+         PRES = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ! Note AUTO_IGNITION_TEMPERATURE here will apply to all cut-cells in Cartesian cell, currently 1.
          CALL COMBUSTION_MODEL( T,DT,ZZ_GET,CUT_CELL(ICC)%Q(JCC),CUT_CELL(ICC)%MIX_TIME(JCC),&
                                 CUT_CELL(ICC)%CHI_R(JCC),&
                                 CHEM_SUBIT_TMP,REAC_SOURCE_TERM_TMP,Q_REAC_TMP,&
-                                CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),MU(I,J,K),&
-                                LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC))
+                                CUT_CELL(ICC)%TMP(JCC),CUT_CELL(ICC)%RHO(JCC),PRES,MU(I,J,K),&
+                                LES_FILTER_WIDTH(I,J,K),CUT_CELL(ICC)%VOLUME(JCC),IIC=I,JJC=J,KKC=K)
          !***************************************************************************************
          IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
              CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)
@@ -229,7 +238,7 @@ CC_IBM_IF: IF (CC_IBM) THEN
          DZZ = ZZ_GET - DZZ
 
          ! Update RSUM and ZZ
-         DZZ_IF2: IF ( ANY(ABS(DZZ) > TWO_EPSILON_EB) ) THEN
+         DZZ_IF2: IF ( ANY(ABS(DZZ) > DZZ_CLIP) ) THEN
             IF (ABS(CUT_CELL(ICC)%Q(JCC)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
             ! Divergence term
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,CUT_CELL(ICC)%TMP(JCC))
@@ -303,26 +312,29 @@ END SUBROUTINE COMBUSTION_GENERAL
 
 
 SUBROUTINE COMBUSTION_MODEL(T,DT,ZZ_GET,Q_OUT,MIX_TIME_OUT,CHI_R_OUT,CHEM_SUBIT_OUT,REAC_SOURCE_TERM_OUT,Q_REAC_OUT,&
-                            TMP_IN,RHO_IN,MU_IN,DELTA,CELL_VOLUME,IIC,JJC,KKC)
+                            TMP_IN,RHO_IN,PRES_IN,MU_IN,DELTA,CELL_VOLUME,IIC,JJC,KKC)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,&
-                              GET_MOLECULAR_WEIGHT,GET_SENSIBLE_ENTHALPY,GET_ENTHALPY
+USE PHYSICAL_FUNCTIONS, ONLY: GET_REALIZABLE_MF
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
+USE CHEMCONS, ONLY: ODE_MIN_ATOL
 INTEGER, INTENT(IN), OPTIONAL :: IIC,JJC,KKC
-REAL(EB), INTENT(IN) :: T,DT,RHO_IN,MU_IN,DELTA,CELL_VOLUME
+REAL(EB), INTENT(IN) :: T,DT,RHO_IN,PRES_IN,MU_IN,DELTA,CELL_VOLUME
 REAL(EB), INTENT(OUT) :: Q_OUT,MIX_TIME_OUT,CHI_R_OUT,REAC_SOURCE_TERM_OUT(N_TRACKED_SPECIES),Q_REAC_OUT(N_REACTIONS)
 INTEGER, INTENT(OUT) :: CHEM_SUBIT_OUT
 REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB) :: ERR_EST,ERR_TOL,A1(1:N_TRACKED_SPECIES),A2(1:N_TRACKED_SPECIES),A4(1:N_TRACKED_SPECIES),ZETA,ZETA_0,&
+REAL(EB) :: A1(1:N_TRACKED_SPECIES),A2(1:N_TRACKED_SPECIES),A4(1:N_TRACKED_SPECIES),ZETA,ZETA_0,&
             DT_SUB,DT_SUB_NEW,DT_ITER,ZZ_STORE(1:N_TRACKED_SPECIES,1:4),TV(1:3,1:N_TRACKED_SPECIES),CELL_MASS,&
             ZZ_0(1:N_TRACKED_SPECIES),ZZ_DIFF(1:3,1:N_TRACKED_SPECIES),ZZ_MIXED(1:N_TRACKED_SPECIES),&
             ZZ_MIXED_NEW(1:N_TRACKED_SPECIES),TAU_D,TAU_G,TAU_U,TAU_MIX,DT_SUB_MIN,RHO_HAT,&
             Q_REAC_SUB(1:N_REACTIONS),Q_REAC_1(1:N_REACTIONS),Q_REAC_2(1:N_REACTIONS),Q_REAC_4(1:N_REACTIONS),&
             Q_REAC_SUM(1:N_REACTIONS),Q_SUM_CHI_R,CHI_R_SUM,TIME_RAMP_FACTOR,&
             TOTAL_MIXED_MASS_1,TOTAL_MIXED_MASS_2,TOTAL_MIXED_MASS_4,TOTAL_MIXED_MASS,&
-            ZETA_1,ZETA_2,ZETA_4,D_F,TMP_IN,C_U,DT_SUB_OLD
+            ZETA_1,ZETA_2,ZETA_4,D_F,TMP_IN,C_U,DT_SUB_OLD,TNOW2,ERR_EST(N_TRACKED_SPECIES),ERR_TOL(N_TRACKED_SPECIES),ERR_TINY,&
+            ZZ_TEMP(1:N_TRACKED_SPECIES)
 INTEGER :: NR,NS,ITER,TVI,RICH_ITER,TIME_ITER,RICH_ITER_MAX
 INTEGER, PARAMETER :: TV_ITER_MIN=5
 LOGICAL :: TV_FLUCT(1:N_TRACKED_SPECIES),EXTINCT,NO_REACTIONS
+DOUBLE PRECISION :: T1,T2
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL() !,R1=>NULL()
 
 ZZ_0 = ZZ_GET
@@ -330,6 +342,7 @@ EXTINCT = .FALSE.
 NO_REACTIONS = .FALSE.
 
 ! Determine the mixing time for this cell
+
 
 IF (FIXED_MIX_TIME>0._EB) THEN
    MIX_TIME_OUT=FIXED_MIX_TIME
@@ -383,9 +396,14 @@ ZETA = ZETA_0
 RHO_HAT = RHO_IN
 TAU_MIX = MIX_TIME_OUT
 
-IF (ALLOCATED(DZ_F0)) DZ_F0 = -1._EB
-IF (ALLOCATED(KG))    KG    = -1._EB
+ERR_TINY = TINY_EB / ODE_MIN_ATOL
 
+IF (ALLOCATED(DZ_F0)) THEN
+   DZ_F0 = -1._EB
+   MOLPCM3 = - 1._EB
+ENDIF
+
+TNOW2 = CURRENT_TIME()
 INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
 
    IF (SUPPRESSION) THEN
@@ -415,11 +433,9 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
 
          ! May be used with N_FIXED_CHEMISTRY_SUBSTEPS, but default mode is to use error estimator and variable DT_SUB
 
-         ERR_TOL = RICHARDSON_ERROR_TOLERANCE
          RICH_EX_LOOP: DO RICH_ITER = 1,RICH_ITER_MAX
 
             DT_SUB = MIN(DT_SUB_NEW,DT-DT_ITER)
-
             ! FDS Tech Guide (E.3), (E.4), (E.5)
             CALL FIRE_RK2(A1,ZZ_MIXED,ZZ_0,ZETA_1,ZETA_0,DT_SUB,1,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
                         Q_REAC_1,TOTAL_MIXED_MASS_1,NO_REACTIONS)
@@ -428,14 +444,17 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
                         Q_REAC_2,TOTAL_MIXED_MASS_2,NO_REACTIONS)
             CALL FIRE_RK2(A4,ZZ_MIXED,ZZ_0,ZETA_4,ZETA_0,DT_SUB,4,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
                         Q_REAC_4,TOTAL_MIXED_MASS_4,NO_REACTIONS)
-
             ! Species Error Analysis
-            ERR_EST = MAXVAL(ABS((4._EB*A4-5._EB*A2+A1)))/45._EB ! FDS Tech Guide (E.8)
+            ERR_EST = ABS((4._EB*A4-5._EB*A2+A1))/45._EB ! FDS Tech Guide (E.8)
+            ZZ_TEMP = (4._EB*A4-A2)*ONTH ! FDS Tech Guide (E.7)
+            DO NS = 1,N_TRACKED_SPECIES
+               ERR_TOL(NS) = MAX(0.1_EB*ZZ_MIN_GLOBAL,SPECIES_MIXTURE(NS)%ODE_REL_ERROR*ZZ_TEMP(NS),ODE_MIN_ATOL)
+            ENDDO
 
             IF (N_FIXED_CHEMISTRY_SUBSTEPS<0) THEN
                DT_SUB_OLD = DT_SUB_NEW
-               DT_SUB_NEW = MIN(MAX(DT_SUB*(ERR_TOL/(ERR_EST+TWO_EPSILON_EB))**(0.25_EB),DT_SUB_MIN),DT-DT_ITER) ! (E.9)
-               IF (ERR_EST<ERR_TOL .OR. ABS(DT_SUB_OLD/DT_SUB_NEW-1._EB) < 1.E-3_EB) EXIT RICH_EX_LOOP
+               DT_SUB_NEW = MIN(MAX(DT_SUB*MINVAL(ERR_TOL/(ERR_EST+ERR_TINY))**(0.25_EB),DT_SUB_MIN),DT-DT_ITER) ! (E.9)
+               IF (ALL(ERR_EST<=ERR_TOL) .OR. ABS(DT_SUB_OLD/DT_SUB_NEW-1._EB) <= 0.1_EB) EXIT RICH_EX_LOOP
             ENDIF
 
          ENDDO RICH_EX_LOOP
@@ -445,14 +464,29 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
             Q_REAC_SUB = 0._EB
             ZETA = ZETA_1
          ELSE
-            ZZ_MIXED   = (4._EB*A4-A2)*ONTH ! FDS Tech Guide (E.7)
-            Q_REAC_SUB = (4._EB*Q_REAC_4-Q_REAC_2)*ONTH
-            ZETA       = (4._EB*ZETA_4-ZETA_2)*ONTH
+            IF (ANY(ZZ_TEMP < -TWO_EPSILON_EB))THEN
+               ZZ_TEMP=A4
+               ZZ_MIXED   = ZZ_TEMP
+               Q_REAC_SUB = Q_REAC_4
+               ZETA       = ZETA_4
+            ELSE
+               ZZ_MIXED   = ZZ_TEMP
+               Q_REAC_SUB = (4._EB*Q_REAC_4-Q_REAC_2)*ONTH
+               ZETA       = (4._EB*ZETA_4-ZETA_2)*ONTH
+            ENDIF
          ENDIF
          ZETA_0     = ZETA
-
+      CASE (CVODE_SOLVER)
+         T1 = 0._EB
+         T2 = DT
+         DO NS =1,N_TRACKED_SPECIES
+            ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
+         ENDDO
+         CALL  CVODE(ZZ_MIXED,TMP_IN,PRES_IN, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL)
+         Q_REAC_SUB = 0._EB
    END SELECT INTEGRATOR_SELECT
 
+   CALL GET_REALIZABLE_MF(ZZ_MIXED)
    ZZ_GET = ZETA*ZZ_0 + (1._EB-ZETA)*ZZ_MIXED ! FDS Tech Guide (5.19)
    IF (NO_REACTIONS) DT_ITER = DT
    DT_ITER = DT_ITER + DT_SUB
@@ -478,18 +512,17 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
                TV(TVI,NS) = ABS(ZZ_STORE(NS,TVI+1)-ZZ_STORE(NS,TVI))
                ZZ_DIFF(TVI,NS) = ZZ_STORE(NS,TVI+1)-ZZ_STORE(NS,TVI)
             ENDDO
-            IF (SUM(TV(:,NS)) < ERR_TOL .OR. SUM(TV(:,NS)) >= ABS(2.9_EB*SUM(ZZ_DIFF(:,NS)))) THEN ! FDS Tech Guide (E.10)
+            IF (SUM(TV(:,NS)) < ERR_TOL(NS) .OR. SUM(TV(:,NS)) >= ABS(2.9_EB*SUM(ZZ_DIFF(:,NS)))) THEN ! FDS Tech Guide (E.10)
                TV_FLUCT(NS) = .TRUE.
             ENDIF
             IF (ALL(TV_FLUCT)) EXIT INTEGRATION_LOOP
          ENDDO SPECIES_LOOP_TV
       ENDIF
    ENDIF
-
    IF ( DT_ITER > (DT-TWO_EPSILON_EB) ) EXIT INTEGRATION_LOOP
 
 ENDDO INTEGRATION_LOOP
-
+T_USED(16) = T_USED(16) + CURRENT_TIME() - TNOW2
 ! Compute heat release rate
 
 Q_OUT = -RHO_IN*SUM(SPECIES_MIXTURE%H_F*(ZZ_GET-ZZ_0))/DT ! FDS Tech Guide (5.47)
@@ -522,7 +555,7 @@ IF (ANY(Q_REAC_SUM>TWO_EPSILON_EB)) THEN
    DO NR=1,N_REACTIONS
       RN=>REACTION(NR)
       IF (Q_REAC_SUM(NR) > TWO_EPSILON_EB) THEN
-         TIME_RAMP_FACTOR = EVALUATE_RAMP(T,RN%RAMP_CHI_R_INDEX)      
+         TIME_RAMP_FACTOR = EVALUATE_RAMP(T,RN%RAMP_CHI_R_INDEX)
          CHI_R_SUM = CHI_R_SUM + Q_REAC_SUM(NR)*RN%CHI_R*TIME_RAMP_FACTOR
          Q_SUM_CHI_R = Q_SUM_CHI_R + Q_REAC_SUM(NR)
       ENDIF
@@ -541,6 +574,65 @@ IF (REAC_SOURCE_CHECK) THEN
 ENDIF
 
 END SUBROUTINE COMBUSTION_MODEL
+
+!> \call cvode_interface after converting mass fraction to molar concentration.
+!> \during return revert back the molar concentration to mass fraction. 
+!> \param ZZ species mass fraction array
+!> \param TMP_IN is the temperature
+!> \param PR_IN is the pressure
+!> \param TCUR is the start time in seconds
+!> \param TEND is the end time in seconds
+!> \param GLOBAL_ODE_REL_ERROR is the relative error for all the species (REAL_EB)
+!> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
+
+SUBROUTINE CVODE(ZZ, TMP_IN, PRES_IN,  TCUR,TEND, GLOBAL_ODE_REL_ERROR, ATOL)
+USE PHYSICAL_FUNCTIONS, ONLY :  GET_MOLECULAR_WEIGHT, CALC_EQUIV_RATIO
+USE CHEMCONS, ONLY: EQUIV_RATIO_CHECK, MIN_EQUIV_RATIO, MAX_EQUIV_RATIO
+
+REAL(EB), INTENT(INOUT) :: ZZ(N_TRACKED_SPECIES)
+REAL(EB), INTENT(IN) :: ATOL(N_TRACKED_SPECIES)
+REAL(EB), INTENT(IN) :: TMP_IN, PRES_IN, TCUR, TEND, GLOBAL_ODE_REL_ERROR
+
+REAL(EB) :: CC(N_TRACKED_SPECIES)
+REAL(EB) :: MW, RHO_IN, RHO_OUT, XXX, EQUIV
+INTEGER :: NS
+
+! Check equivalence ratio of the mixture. Avoid chemistry calculation for very lean and rich cases.
+IF (EQUIV_RATIO_CHECK) THEN
+   CALL CALC_EQUIV_RATIO(ZZ(1:N_TRACKED_SPECIES), EQUIV)
+   IF(EQUIV <  MIN_EQUIV_RATIO .OR. EQUIV > MAX_EQUIV_RATIO) RETURN
+ENDIF
+
+CALL GET_MOLECULAR_WEIGHT(ZZ,MW)
+RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K, [RHO]= kg/m3
+
+! Convert to concentration
+CC = 0._EB
+DO NS =1,N_TRACKED_SPECIES
+  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = gm/mol = kg/kmol, [CC] = kmol/m3
+ENDDO
+WHERE(CC<0._EB) CC=0._EB
+
+#ifdef WITH_SUNDIALS
+CALL  CVODE_SERIAL(CC,TMP_IN,PRES_IN, TCUR,TEND, GLOBAL_ODE_REL_ERROR, ATOL)
+! Avoid unused build error
+XXX = 1._EB
+#else
+! Avoid unused build error
+XXX = MINVAL(ATOL)
+XXX = TCUR
+XXX = TEND
+XXX = GLOBAL_ODE_REL_ERROR
+#endif
+
+! Convert back to mass fraction (Check for negative concentration)
+WHERE(CC<0._EB) CC=0._EB
+ZZ(1:N_TRACKED_SPECIES) = CC(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW
+RHO_OUT = SUM(ZZ)
+ZZ = ZZ/RHO_OUT
+
+END SUBROUTINE CVODE
+
 
 
 SUBROUTINE CHECK_AUTO_IGNITION(EXTINCT,TMP_IN,AIT,IIC,JJC,KKC,REAC_INDEX)
@@ -697,7 +789,6 @@ INTEGER, PARAMETER :: INFINITELY_FAST=1,FINITE_RATE=2
 INTEGER :: PTY
 
 ! Determine initial state of mixed reactor zone
-
 TOTAL_MIXED_MASS_0  = (1._EB-ZETA_IN)*CELL_MASS
 MIXED_MASS_0  = ZZ_IN*TOTAL_MIXED_MASS_0
 
@@ -798,8 +889,9 @@ REAL(EB), INTENT(IN) :: ZZ_OLD(1:N_TRACKED_SPECIES),DT_SUB,RHO_0,TMP_0
 LOGICAL, INTENT(OUT) :: NO_REACTIONS
 INTEGER, INTENT(IN) :: KINETICS
 INTEGER, INTENT(IN), OPTIONAL :: PRIORITY
-REAL(EB) :: DZ_F,YY_PRIMITIVE(1:N_SPECIES),MW,MOLPCM3,DT_TMP(1:N_TRACKED_SPECIES),DT_MIN,DT_LOC,RRTMP0,&
-            ZZ_TMP(1:N_TRACKED_SPECIES),ZZ_NEW(1:N_TRACKED_SPECIES),Q_REAC_TMP(1:N_REACTIONS),AA,X_Y(1:N_SPECIES),X_Y_SUM
+REAL(EB) :: DZ_F,YY_PRIMITIVE(1:N_SPECIES),MW,DT_TMP(1:N_TRACKED_SPECIES),DT_MIN,DT_LOC,&
+            ZZ_TMP(1:N_TRACKED_SPECIES),ZZ_NEW(1:N_TRACKED_SPECIES),Q_REAC_TMP(1:N_REACTIONS),AA,X_Y(1:N_SPECIES),X_Y_SUM,&
+            K_INF,K_0,P_RI,FCENT,C_I
 INTEGER :: I,NS,OUTER_IT
 LOGICAL :: REACTANTS_PRESENT
 INTEGER, PARAMETER :: INFINITELY_FAST=1,FINITE_RATE=2
@@ -852,33 +944,55 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
       NO_REACTIONS = .TRUE.
       SLOW_REAC_LOOP: DO OUTER_IT=1,N_REACTIONS
          ZZ_TMP = ZZ_NEW
+         CALL GET_MASS_FRACTION_ALL(ZZ_TMP,YY_PRIMITIVE)
          DZZ = 0._EB
          REACTANTS_PRESENT = .FALSE.
-         YY_PRIMITIVE(1) = -2._EB
-         MW = -1._EB
          REACTION_LOOP_2: DO I=1,N_REACTIONS
             RN => REACTION(I)
             IF (RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP_2
-            IF (ZZ_TMP(RN%FUEL_SMIX_INDEX) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
-            IF (RN%AIR_SMIX_INDEX > -1) THEN
-               IF (ZZ_TMP(RN%AIR_SMIX_INDEX) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2 ! no expected air
-            ENDIF
-            NO_REACTIONS = .FALSE.
-            IF (YY_PRIMITIVE(1) < -1._EB) CALL GET_MASS_FRACTION_ALL(ZZ_TMP,YY_PRIMITIVE)
+            ! Check for consumed species
+            DO NS=1,RN%N_SMIX_FR
+               IF (RN%NU_MW_O_MW_F_FR(NS) < 0._EB .AND. ZZ_TMP(RN%NU_INDEX(NS)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
+            ENDDO
+            ! Check for species with concentration exponents
             DO NS=1,RN%N_SPEC
                IF(YY_PRIMITIVE(RN%N_S_INDEX(NS)) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
             ENDDO
+            NO_REACTIONS = .FALSE.
             ! dZ/dt, FDS Tech Guide, Eq. (5.38)
-            IF (DZ_F0(I) < 0._EB) DZ_F0(I) = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E*RRTMP0)
-            DZ_F = DZ_F0(I)
-            DO NS=1,RN%N_SPEC
-               DZ_F = YY_PRIMITIVE(RN%N_S_INDEX(NS))**RN%N_S(NS)*DZ_F
-            ENDDO
-            IF (RN%THIRD_BODY) THEN
-               IF (MW < 0._EB) THEN
-                  CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
-                  MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
+
+            ! T doesn't change, MOLPCM3 should not have a large absolute change, and third collision species with non-unity 
+            ! efficiencies are generally species with high expected mass fractions which should not have large absolute changes.
+            ! We can make a constant term for each reaction to hold A T^N_T e^-(E/RT) * Gibbs * Third body
+            IF (DZ_F0(I) < 0._EB) THEN
+               K_INF = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E*RRTMP0)
+               DZ_F0(I) = K_INF
+               IF (RN%THIRD_BODY) THEN
+                  IF (RN%N_THIRD <=0) THEN
+                     IF (MOLPCM3 < 0._EB) THEN
+                        CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
+                        MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
+                     ENDIF
+                     DZ_F0(I) = DZ_F0(I)*MOLPCM3
+                  ENDIF
+                  IF (RN%REACTYPE==FALLOFF_LINDEMANN_TYPE .OR. RN%REACTYPE==FALLOFF_TROE_TYPE) THEN
+                     K_0 = RN%A_LOW_PR*TMP_0**(RN%N_T_LOW_PR)*EXP(-RN%E_LOW_PR*RRTMP0)
+                     P_RI = K_0/K_INF
+                     FCENT = CALC_FCENT(TMP_0,P_RI,I)
+                     C_I = P_RI/(1._EB+P_RI)*FCENT
+                     DZ_F0(I) = DZ_F0(I)*C_I                     
+                  ENDIF
                ENDIF
+               IF (RN%REVERSE) THEN ! compute equilibrium constant
+                  IF (MOLPCM3 < 0._EB) THEN
+                     CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
+                     MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
+                  ENDIF
+                  DZ_F0(I) = DZ_F0(I)*EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)*MOLPCM3**RN%C0_EXP
+               ENDIF
+            ENDIF
+            DZ_F = DZ_F0(I)
+            IF (RN%THIRD_BODY) THEN
                IF (RN%N_THIRD > 0) THEN
                   X_Y_SUM = 0._EB
                   DO NS=1,N_SPECIES
@@ -887,20 +1001,15 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
                      X_Y(NS) = X_Y(NS)*RN%THIRD_EFF(NS)
                   ENDDO
                   DZ_F = DZ_F * MOLPCM3 * SUM(X_Y)/X_Y_SUM
+               ENDIF
+            ENDIF
+            DO NS=1,RN%N_SPEC
+               IF (RN%N_S_FLAG(NS)) THEN
+                  DZ_F = YY_PRIMITIVE(RN%N_S_INDEX(NS))**RN%N_S_INT(NS)*DZ_F
                ELSE
-                  DZ_F = DZ_F * MOLPCM3
+                  DZ_F = DZ_F*YY_PRIMITIVE(RN%N_S_INDEX(NS))**RN%N_S(NS)
                ENDIF
-            ENDIF
-            IF(RN%REVERSE) THEN ! compute equilibrium constant
-               IF (KG(I) < 0._EB) THEN
-                  IF (MW < 0._EB) THEN
-                     CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
-                     MOLPCM3 = RHO_0/MW*0.001_EB ! mol/cm^3
-                  ENDIF
-                  KG(I) = EXP(RN%DELTA_G(MIN(I_MAX_TEMP,NINT(TMP_0)))/TMP_0)*MOLPCM3**RN%C0_EXP
-               ENDIF
-               DZ_F = DZ_F*KG(I)
-            ENDIF
+            ENDDO
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
             Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
             DZ_F = DZ_F*DT_LOC
@@ -931,7 +1040,7 @@ END SELECT KINETICS_SELECT
 END SUBROUTINE REACTION_RATE
 
 
-!> \brief Compute adiabatic flame temperature for reaction mixture
+!> \brief Compute adiabatic flame tmperature for reaction mixture
 !>
 !> \param TMP_FLAME  Adiabatic flame temperature in stoichiometric reaction pocket (K)
 !> \param PHI_TILDE  Equivalence ratio in stoich reaction pocket
@@ -1058,6 +1167,7 @@ SUBROUTINE COMBUSTION_BC(NM)
 
 ! Specify ghost cell values of the HRRPUV, Q
 
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: Q_OTHER,TNOW
 INTEGER :: IW,IIO,JJO,KKO,NOM,N_INT_CELLS
@@ -1394,6 +1504,40 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
 ENDDO SPEC_LOOP
 
 END SUBROUTINE CONDENSATION_EVAPORATION
+
+
+!> \brief Calculate fall-off function 
+!> \param TMP is the current temperature.
+!> \param P_RI is the reduced pressure
+!> \param RN is the reaction
+
+REAL(EB) FUNCTION CALC_FCENT(TMP, P_RI, I)
+REAL(EB), INTENT(IN) :: TMP, P_RI
+INTEGER, INTENT(IN) :: I
+TYPE(REACTION_TYPE), POINTER :: RN => NULL()
+REAL(EB) :: LOGFCENT, C, N, LOGPRC
+REAL(EB), PARAMETER :: D=0.14_EB
+
+RN=>REACTION(I)
+IF(RN%REACTYPE==FALLOFF_TROE_TYPE) THEN
+   IF (RN%T2_TROE <-1.E20_EB) THEN
+      LOGFCENT = LOG10(MAX((1 - RN%A_TROE)*EXP(-TMP*RN%RT3_TROE) + &
+                 RN%A_TROE*EXP(-TMP*RN%RT1_TROE),TWO_EPSILON_EB))
+   ELSE
+      LOGFCENT = LOG10(MAX((1 - RN%A_TROE)*EXP(-TMP*RN%RT3_TROE) + &
+                 RN%A_TROE*EXP(-TMP*RN%RT1_TROE) + EXP(-RN%T2_TROE/TMP),TWO_EPSILON_EB))
+   ENDIF
+   C = -0.4_EB - 0.67_EB*LOGFCENT
+   N = 0.75_EB - 1.27_EB*LOGFCENT
+   LOGPRC = LOG10(MAX(P_RI, TWO_EPSILON_EB)) + C
+   CALC_FCENT = 10._EB**(LOGFCENT/(1._EB + (LOGPRC/(N - D*LOGPRC))**2))
+ELSE
+   CALC_FCENT = 1._EB  !FALLOFF-LINDEMANNN
+ENDIF
+
+RETURN
+
+END FUNCTION CALC_FCENT
 
 END MODULE FIRE
 

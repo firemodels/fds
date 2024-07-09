@@ -4366,15 +4366,16 @@ where $r_1$ is the inner radius of the inner layer of insulation, $r_2$ is the i
 \be
    T(r) = T_{s,i} + \frac{ T_{s,i-1} - T_{s,i} }{ \ln (r_{i-1}/r_i) } \ln \frac{r}{r_i} \quad \quad i=2,3,4
 \ee
-where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1 through 4. Note that the position of the symbols in Fig.~\ref{insulated_steel_fig} indicates the default finite difference nodes of the solid. Also note that the spatial coordinate refers to the distance from the outer (hot) surface of insulation.
+where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1 through 4. Note that the position of the symbols in Fig.~\ref{insulated_steel_fig} indicates the default finite difference nodes of the solid.
 
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_plate} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe_2d}}
 \end{tabular*}
-\caption[The \textct{insulated\_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe.}
+\caption[The \textct{insulated\_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe. Note that the pipe conduction case has been performed as part of a 3-D calculation (upper right) and a 2-D, axi-symmetric calculation (bottom).}
 \label{insulated_steel_fig}
 \end{figure}
 
@@ -5439,26 +5440,27 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \newpage
 
-\section{Cone Data Extrapolation Model (\texorpdfstring{\textct{cone\_demo\_2}}{cone\_demo\_2})}
-\label{cone_demo_2}
-\label{cone_demo_3}
+\section{Scaling Pyrolysis (SPyro) Model \\
+(\texorpdfstring{\textct{spyro\_cone\_demo\_2} and \textct{spyro\_cone\_demo\_3}}{spyro\_cone\_demo\_2 and spyro\_cone\_demo\_3})}
+\label{spyro_cone_demo_2}
+\label{spyro_cone_demo_3}
 
-This section uses two cases to test a model for extrapolating heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:cone_demo_2}.
+This section uses two cases to test a model for scaling heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an {\ct HRRPUA} and {\ct RAMP\_Q} from an inert cone test performed at 50~\si{kW/m^2}. The surface is given an {\ct IGNITION\_TEMPERATURE} of 0~$^\circ$C so it ignites immediately. The surface is exposed to a sawtooth {\ct EXTERNAL\_FLUX} that varies between 10~\si{kW/m^2} and 110~\si{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_2}
-    \caption[Extrapolating a single set of cone data to a time varying heat flux (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
-    \label{fig:cone_demo_2}
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_2}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_2} case)]{Extrapolating a single set of cone data to a time varying heat flux (the {\ct spyro\_cone\_demo\_2} case).}
+    \label{fig:spyro_cone_demo_2}
 \end{figure}
 
-The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:cone_demo_3}.
+The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:spyro_cone_demo_3}.
 
 \begin{figure}[!ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_3}
-	\caption[Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct cone\_demo\_3} case)]{Check of the cone data interpolation model.}
-	\label{fig:cone_demo_3}
+    \centering
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_3}
+    \caption[Check of the Scaling Pyrolysis (SPryo) model (the \textct{spyro\_cone\_demo\_3} case)]{Interpolating a set of cone data to an intermediate surface thickness and exposure (the {\ct spyro\_cone\_demo\_3} case).}
+    \label{fig:spyro_cone_demo_3}
 \end{figure}
 
 \section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
@@ -5673,7 +5675,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/position_convergence}
 \end{tabular*}
-\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{ terminal\_velocity} case.}
+\caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{terminal\_velocity} case.}
 \label{fig_terminal_velocity_convergence}
 \end{figure}
 
@@ -5995,6 +5997,18 @@ This test case is a modified version of {\ct Radiation/adiabatic\_surface\_tempe
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_surf_temp_spray}
 \caption[The {\ct adiabatic\_surface\_temperature\_spray} test case]{Adiabatic and true surface temperatures under radiative heating (0 - 50 s), heating and spray  cooling (50-100 s) and only spray cooling (100-150 s).}
 \label{adiabatic_surf_temp_spray}
+\end{figure}
+
+\subsection{Droplet Movement on Solid Surfaces with MPI (\texorpdfstring{{\textct{cascadempi}}}{cascadempi}) }
+\label{cascadempi}
+
+This test case is a modified version of {\ct cascade} (see FDS User's Guide \cite{FDS_Users_Guide}). The single mesh is replaced with 4 meshed regions to verify that particles crossing mesh boundaries in the gas phase and along solid surfaces are handled correctly. The first meshed region uses OBST definitions for the boxes with a single mesh. The second region replaces the OBST definition with a GEOM definition. The third and fourth region use the same geometry but separate the regions into 2 meshes. The plots show the total water mass for the four meshed regions.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascadempi}
+\caption[Results of the {\ct cascadempi} test case]{Results of the {\ct cascadempi} test case.}
+\label{cascadempi_image}
 \end{figure}
 
 
@@ -6391,7 +6405,7 @@ We undertake a convergence study to demonstrate that the adopted numerical metho
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
       \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
    \end{tabular*}
-\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e., decreasing cell size).}
 \label{fig_HVAC_mass_transport_conv_2}
 \end{figure}
 
@@ -6553,7 +6567,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
 
-This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~kg/m$^2$ and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
 \begin{lstlisting}
 &SURF ID                    = 'fuel'
 VEG_LSET_ROS_00             = 0.15
@@ -6580,11 +6594,11 @@ where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the prope
 \subsection{Ember ignition (\texorpdfstring{\textct{LS4\_ember\_ignition}}{LS4\_ember\_ignition})}
 \label{LS4_ember_ignition}
 
-This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~kg/m$^2$ and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
+This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
 \be
-\dot{q}_{ember} = A_s \, \left[h_c \, \left( T_{ember} - T_\infty \right) + \sigma \, \epsilon \, \left( T^4_{ember} - T^4_\infty \right) \right].
+\dot{q}_{\rm ember} = A_s \left[h_c \left( T_{\rm ember} - T_\infty \right) + \sigma \epsilon \left( T^4_{\rm ember} - T^4_\infty \right) \right]
 \ee
-Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
+Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
 
 \begin{figure}[h]
 \begin{center}
@@ -7152,6 +7166,7 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 
 \section{Restart Function}
 \label{geom_restart}
+\label{geom_ls_restart}
 
 In this test, a {\ct GEOM} cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]

@@ -223,73 +223,9 @@ and the volume fraction of component $\alpha$ is computed as
 where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
 
 
-\subsection{Solid Heat Transfer 3D (Beta)}
-\label{sec:ht3d}
-
-This section describes the governing equations for heat transfer in the 3D solver, which may be implemented in FDS by setting {\ct HT3D=.TRUE.} on an {\ct OBST} line.  In-depth radiation may be treated using an optically thick approximation \cite{Modest:2003}, as discussed below.
-
-Let $k_{\mathrm{s}}$, $\rho_{\mathrm{s}}$, and $c_{\mathrm{s}}$ denote, respectively, the thermal conductivity, density, and specific heat of the solid. The thermal properties may be functions of temperature.  The mean temperature of an Eulerian cell in the solid phase is denoted $T_{\mathrm{s}}$.  The heat flux vector is $\dot{\mathbf{q}}''$ and the volumetric heat source, either specified or from chemical reaction, is denoted $\dot{q}_{\mathrm{s}}'''$.  The governing equation for heat transfer is
-\begin{equation}
-  \rho_{\mathrm{s}} c_{\mathrm{s}} \; \dod{T_{\mathrm{s}}}{t} = - \Div\dot{\mathbf{q}}'' + \dot{q}_{\mathrm{s}}'''
-  \label{eq:3dheat}
-\end{equation}
-
-\subsubsection*{Heat Flux}
-\label{sec:heat_flux1}
-{}
-The intercell fluxes are continuous.  If the {\ct OBST} material properties of neighboring cells are the same, then thermal properties at face centers are taken as linear averages when computing the intercell flux. The intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
-\begin{equation}
-\label{eq:intercell_flux}
-\dot{q}_{x,i+\frac{1}{2}}'' = - \left. k_{\mathrm{s}} \dod{T_{\mathrm{s}}}{x} \right|_{i+\frac{1}{2}} \approx - k_{{\mathrm{s}},i} \frac{T_{{\mathrm{s}},i+\frac{1}{2}}^n - T_{{\mathrm{s}},i}^n}{\frac{1}{2}\delta x_i} = - k_{{\mathrm{s}},i+1} \frac{T_{{\mathrm{s}},i+1}^n - T_{{\mathrm{s}},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
-\end{equation}
-
-If the neighboring cells have different material properties (consider the $x$ direction with cell indices $i$ and $i+1$), then the cell interface temperature, $T_{s,i+\frac{1}{2}}$, is computed using
-\begin{equation}
-\label{eq:interface_tmp}
-T_{{\mathrm{s}},i+\frac{1}{2}}^n = \frac{T_{{\mathrm{s}},i}^n + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\mathrm{s}},i+1}^n}{1 + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
-\end{equation}
-which reduces to a simple linear average if $k_{{\mathrm{s}},i}=k_{{\mathrm{s}},i+1}$ and $\delta x_i=\delta x_{i+1}$.
-
-\subsubsection*{Heat Flux with Local Material Deformation}
-\label{sec:heat_flux2}
-
-As a material shrinks or swells, the distance between material points decreases or increases.  It is challenging to handle this behavior on a static Eulerian grid.  Consider the situation depicted in Fig.~\ref{fig:flux_deform} where the material is shrinking.  As the temperature points move closer, the effect is to increase the intercell heat flux.  The flux becomes
-\begin{equation}
-\label{eq:fluxdef}
-\dot{q}_{x,i+\frac{1}{2}}'' \approx - k_{i+\frac{1}{2}} \frac{ T_{s,i+1}-T_{s,i}}{\frac{1}{2}(\delta \tilde{x}_i + \delta \tilde{x}_{i+1})}
-\end{equation}
-
-\begin{figure}
-\centering
-\includegraphics[height=1.25in]{FIGURES/flux_deform}
-\caption{Diagram of intercell heat flux with a shrinking material.}
-\label{fig:flux_deform}
-\end{figure}
-
-\noindent Calculation of the cell volumes, $\delta \tilde{x}$, etc., for pyrolysis with material deformation is discussed below.
-
-\subsubsection*{Boundary Conditions}
-\label{sec:boundary_conditions}
-
-For two-way coupling between the gas and solid phase the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\mathrm{w}}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall cell''.  The flux continuity boundary condition implies
-\begin{equation}
-\label{eq:fluxcontinuity}
-\dot{q}_{{\mathrm{r}}, in}'' - \dot{q}_{{\mathrm{r}}, out}'' + \dot{q}_{\mathrm{c}}'' = -k_{\mathrm{s}} \left. \frac{\partial T_{\mathrm{s}}}{\partial n} \right|_{\mathrm{w}}
-\end{equation}
-To obtain the surface temperature, we take $\dot{q}_{{\mathrm{r}}, in}''$ from the radiation solver, linearize $\dot{q}_{{\mathrm{r}}, out}''$, and use Newton's law of cooling for $\dot{q}_{\mathrm{c}}''$. The flux condition may then be discretized as
-\begin{equation}
-\label{eq:discflux}
-( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 \, T_{\mathrm{w}}^{n+1} + h^n (T_{\mathrm{g}}^n - T_{\mathrm{w}}^{n+1}) = -2 \, k_{\mathrm{s}}^n \, \frac{T_{\mathrm{s}}^n - T_{\mathrm{w}}^{n+1}}{\delta}
-\end{equation}
-where $T_{\mathrm{g}}$ is the gas temperature in the first off-wall grid cell and $n$ indicates the time level in the simulation.  Our result for the updated boundary temperature is
-\begin{equation}
-\label{eq:tmpwall}
-T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 + h^n \, T_{\mathrm{g}}^n + 2 \, k_{\mathrm{s}}^n \, T_{\mathrm{s}}^n/\delta }{ 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 + h^n + 2 \, k_{\mathrm{s}}^n / \delta}
-\end{equation}
-
-
 
 \newpage
+
 \section{Pyrolysis Models}
 \label{pyrosection}
 
@@ -359,7 +295,7 @@ The mass per unit volume of material component $\alpha$, $\rho_{\rm s,\alpha}(\b
   \dod{\rho_{\rm s,\alpha} }{t}  = -\sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta} + S_\alpha
   \label{solid_species_conservation}
 \ee
-where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{1/s}, and $S_\alpha$ is the production rate of material component $\alpha$ as a result of the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius and power functions:
+where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{kg/m^3 s}, and $S_\alpha$ is the production rate of material component $\alpha$ as a result of the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius and power functions:
 \be
 r_{\alpha \beta} =
     \underbrace{ \rho_{\rm s,\alpha}^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
@@ -368,7 +304,7 @@ r_{\alpha \beta} =
     \underbrace{T_{\rm s}^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
+The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.  Note that the units of $A_{\alpha \beta}$ depend on the order of the reaction, that is, the value of $n_{\rm s,\alpha\beta}$, and must be consistent with the reaction rate having units of \si{kg/m^3 s}.  For first-order reactions ($n_{\rm s,\alpha\beta}=1$) the units of $A_{\alpha \beta}$ are simply 1/s.
 
 The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
 The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
