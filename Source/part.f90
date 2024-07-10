@@ -1912,6 +1912,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! HIT_SOLID indicates that it has.
 
       HIT_SOLID = .FALSE.
+      IW = 0
 
       ! Determine if the particle is near a CFACE, and if so, change its trajectory
 

@@ -2,7 +2,7 @@
 
 # User's minimal environment for FDS
 
-numpy
+numpy<2
 matplotlib
 pandas
 scipy

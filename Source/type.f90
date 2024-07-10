@@ -534,6 +534,7 @@ TYPE SPECIES_TYPE
    LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
 
    CHARACTER(LABEL_LENGTH) :: ID                  !< Species name
+   CHARACTER(LABEL_LENGTH) :: ALT_ID              !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L           !< Name of liquid specific heat rame
    CHARACTER(LABEL_LENGTH) :: RAMP_K              !< Name of conductivity ramp
@@ -603,6 +604,7 @@ TYPE SPECIES_MIXTURE_TYPE
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
+   CHARACTER(LABEL_LENGTH) :: ALT_ID='null'                       !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP                             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L                           !< Name of liquid specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_K                              !< Name of conductivity ramp
@@ -630,7 +632,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
    REAL(EB) :: OXR                  !< Required oxygen for complete combustion (gm/gm-species)
    REAL(EB) :: OXA                  !< Available oxygen for combustion (gm/gm-species)
-   
+
 
 END TYPE SPECIES_MIXTURE_TYPE
 
@@ -967,7 +969,7 @@ TYPE SURFACE_TYPE
 
    ! Level Set Firespread
 
-   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2
+   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2,VEG_LSET_ROS_FIXED
    REAL(EB) :: VEG_LSET_IGNITE_T,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_00,VEG_LSET_QCON,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_BACK, &
                VEG_LSET_WIND_EXP,VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,&
                VEG_LSET_M1,VEG_LSET_M10,VEG_LSET_M100,VEG_LSET_MLW,VEG_LSET_MLH,VEG_LSET_SURF_LOAD,VEG_LSET_FIREBASE_TIME, &
@@ -1803,7 +1805,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
    INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
    INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
-   INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
+   INTEGER :: DUCTRUN=-1                                   !< Ductrun node belongs to
    INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER :: CONNECTIVITY_INDEX=-1                        !< Index of node connectivity for Smokeview display
