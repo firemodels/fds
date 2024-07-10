@@ -3156,6 +3156,7 @@ If a combustible solid is to disappear from the simulation once it is consumed, 
 \item By default, newly exposed surfaces take on the same {\ct SURF\_ID} that has been applied to the original obstruction. However, you can specify an optional {\ct SURF\_ID\_INTERIOR} on the {\ct OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
 \item To compensate for the inaccurate obstruction area, an additional parameter {\ct AREA\_MULTIPLIER} can be added on the {\ct SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the {\ct BURN\_AWAY} works as expected if these two features are combined.
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
+\item The remaining combustible mass in a cell can be output with a solid phase device for {\ct 'COMBUSTIBLE MASS'}.
 \end{itemize}
 
 \subsubsection{Examples}
@@ -11186,6 +11187,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct AMPUA\_Z}$^1$                              & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
 {\ct BURNING RATE}                              & Mass loss rate of fuel                        & \unit{kg/(m^2.s)}  & B,D          \\ \hline
+{\ct COMBUSTIBLE MASS}                          & Section~\ref{info:BURN_AWAY}                  & \unit{kg}          & B,D          \\ \hline
 {\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & \unit{kW/m^2}           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX GAUGE}                & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
