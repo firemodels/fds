@@ -260,7 +260,8 @@
 -----------------------------------------------------------------------------------------  
 &SURF ID='Orange_Combi', COLOR='ORANGE' /
 
-&OBST XB=0.1,0.4,0.3,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /    biggest block disappears
+ OBST XB=0.1,0.4,0.3,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /    biggest block disappears
+&OBST XB=0.1,0.35,0.45,0.6,0.45,0.55, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /    biggest block disappears
 
 &OBST XB=0.20,0.25,0.30,0.35,0.0,0.4, SURF_ID='Orange_Combi' /
 
