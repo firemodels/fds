@@ -1220,10 +1220,13 @@ The {\ct OBST} dimensions specified by {\ct XB} in the input file may not (usual
 When the {\ct OBST} snaps to the Cartesian mesh, the area of the cell face is changed, and therefore the total area of a {\ct SURF} may slightly change.  If a specified mass flux boundary (including {\ct HRRPUA}) is given, then FDS will automatically adjust this mass flux so that total of the \emph{specified area} times the \emph{specified mass flux} is maintained.
 
 \subsection{Overlapping Obstructions}
+\label{info:OVERLAY}
 
 If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified second in the input file. If this is unwanted, add {\ct OVERLAY=F} to the {\ct OBST} line of the second obstruction, in which case the surface properties of the first obstruction will be applied. The default value of {\ct OVERLAY} is {\ct T}
 
 When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the obstruction you do not wish to take precedence by slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
+
+The simulation will be stopped with an error if all of the following occur: (1) surfaces of two obstructions overlap, (2) the surface properties are different, and (3) one or both of the obstructions can be removed or created during the simulation.
 
 \subsection{Preventing Obstruction Removal}
 
@@ -12457,7 +12460,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct N\_LAYER\_CELLS\_MAX}    & Integer         & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct ORIENTATION(3)}          & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct F}       \\ \hline
-{\ct OVERLAY}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct T}       \\ \hline
+{\ct OVERLAY}                 & Logical         & Section~\ref{info:OVERLAY}              &           & {\ct T}       \\ \hline
 {\ct PERMIT\_HOLE}            & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RADIUS}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct REMOVABLE}               & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
@@ -13783,6 +13786,7 @@ Keyword             & Type     & Description                      & Units       
 610 \> {\ct HOLE \ldots\ Cannot overlap HOLEs with a DEVC or CTRL\_ID.              } \> Section~\ref{info:HOLE}  \\
 611 \> {\ct OBST \ldots\ has a BULK\_DENSITY but zero volume.                       } \> Section~\ref{info:BURN_AWAY}  \\
 612 \> {\ct OBST \ldots\ must have a volume to be assigned HT3D.                    } \> Section~\ref{checkerboard}  \\
+613 \> {\ct OBST \ldots\ and OBST \dots\ cannot overlap in Mesh \ldots\             } \> Section~\ref{info:OVERLAY}  \\
     \>                                                                                \>                          \\
 701 \> {\ct problem with GEOM, local SURF\_ID index \ldots\ out of bounds.          } \> Section~\ref{info:GEOM_Basics}  \\
 702 \> {\ct problem with GEOM, SURF\_IDS not defined properly.                      } \> Section~\ref{info:first_geom}  \\

@@ -7711,7 +7711,9 @@ IND_SELECT: SELECT CASE(IND)
          CASE(3)
             SGN = SIGN(1._EB,W(II,JJ,KK))*SIGN(1,VELO_INDEX)
       END SELECT
-      GAS_PHASE_OUTPUT_RES = SGN*SQRT(2._EB*KRES(II,JJ,KK))
+      GAS_PHASE_OUTPUT_RES = SGN*SQRT(0.25_EB*((U(II-1,JJ,KK)+U(II,JJ,KK))**2+&
+                                               (V(II,JJ-1,KK)+V(II,JJ,KK))**2+&
+                                               (W(II,JJ,KK-1)+W(II,JJ,KK))**2))
    CASE(11)  ! HRRPUV
       GAS_PHASE_OUTPUT_RES = Q(II,JJ,KK)*0.001_EB
    CASE(12)  ! H
