@@ -60,8 +60,6 @@
 
 &OBST XB=0.20,0.20,0.15,0.80,0.70,0.75, SURF_ID='GrayPipe'  /   PART1
 &OBST XB=0.25,0.25,0.15,0.80,0.70,0.75, SURF_ID='GrayPipe'  /
- OBST XB=0.20,0.25,0.15,0.15,0.70,0.75, SURF_ID='GrayPipe'  /   y-front open
- OBST XB=0.20,0.25,0.80,0.80,0.70,0.75, SURF_ID='GrayPipe'  /   y-back open (adjacent to mesh border)
 &OBST XB=0.20,0.25,0.15,0.80,0.70,0.70, SURF_ID='GrayPipe'  /
 &OBST XB=0.20,0.25,0.15,0.80,0.75,0.75, SURF_ID='GrayPipe'  /
 
@@ -74,7 +72,6 @@
 
 &OBST XB=0.65,0.65,0.15,0.55,0.70,0.75, SURF_ID='GrayPipe'  /  PART3
 &OBST XB=0.70,0.70,0.15,0.55,0.70,0.75, SURF_ID='GrayPipe'  /
- OBST XB=0.65,0.70,0.15,0.15,0.70,0.75, SURF_ID='GrayPipe'  /  y-front towards PART2 open
 &OBST XB=0.65,0.70,0.55,0.55,0.70,0.75, SURF_ID='GrayPipe'  /
 &OBST XB=0.65,0.70,0.15,0.50,0.70,0.70, SURF_ID='GrayPipe'  /  z-bottom towards PART4 open
 &OBST XB=0.65,0.70,0.15,0.55,0.75,0.75, SURF_ID='GrayPipe'  /
@@ -84,9 +81,7 @@
 &OBST XB=0.65,0.70,0.50,0.50,0.15,0.70, SURF_ID='GrayPipe'  /
 &OBST XB=0.65,0.70,0.55,0.55,0.15,0.70, SURF_ID='GrayPipe'  /
 &OBST XB=0.65,0.70,0.50,0.55,0.15,0.15, SURF_ID='GrayPipe'  /
- OBST XB=0.65,0.70,0.50,0.55,0.70,0.70, SURF_ID='GrayPipe'  / z-top towards PART3 open
 
- OBST XB=0.70,0.70,0.50,0.55,0.15,0.20, SURF_ID='GrayPipe'  /  PART5    x-left towards PART4 open
 &OBST XB=1.30,1.30,0.50,0.55,0.15,0.20, SURF_ID='GrayPipe'  /
 &OBST XB=0.70,1.25,0.50,0.50,0.15,0.20, SURF_ID='GrayPipe'  /  y-front towards PART6 open
 &OBST XB=0.70,1.30,0.55,0.55,0.15,0.20, SURF_ID='GrayPipe'  /
@@ -96,7 +91,6 @@
 &OBST XB=1.25,1.25,0.10,0.50,0.15,0.20, SURF_ID='GrayPipe'  /  PART6
 &OBST XB=1.30,1.30,0.10,0.50,0.15,0.20, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.10,0.10,0.15,0.20, SURF_ID='GrayPipe'  /
- OBST XB=1.25,1.30,0.50,0.50,0.15,0.20, SURF_ID='GrayPipe'  /  y-back towards PART5 open
 &OBST XB=1.25,1.30,0.10,0.50,0.15,0.15, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.15,0.50,0.20,0.20, SURF_ID='GrayPipe'  /  z-top towards PART7 open
 
@@ -104,12 +98,10 @@
 &OBST XB=1.30,1.30,0.10,0.15,0.20,0.75, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.10,0.10,0.20,0.75, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.15,0.15,0.20,0.70, SURF_ID='GrayPipe'  /  y-back towards PART8 open
- OBST XB=1.25,1.30,0.10,0.15,0.20,0.20, SURF_ID='GrayPipe'  /  z-bottom towards PART6 open
 &OBST XB=1.25,1.30,0.10,0.15,0.75,0.75, SURF_ID='GrayPipe'  /
 
 &OBST XB=1.25,1.25,0.15,0.80,0.70,0.75, SURF_ID='GrayPipe'  /  PART8
 &OBST XB=1.30,1.30,0.15,0.80,0.70,0.75, SURF_ID='GrayPipe'  /
- OBST XB=1.25,1.30,0.15,0.15,0.70,0.75, SURF_ID='GrayPipe'  /  y-front towards PART7 open
 &OBST XB=1.25,1.30,0.80,0.80,0.70,0.75, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.15,0.80,0.70,0.70, SURF_ID='GrayPipe'  /
 &OBST XB=1.25,1.30,0.15,0.80,0.75,0.75, SURF_ID='GrayPipe'  /
@@ -119,11 +111,6 @@
 -----------------------------------------------------------------------------------------  
 &SURF ID='Golden_Bar', COLOR='GOLD', TRANSPARENCY=1.0 / 
 
-&OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
-&OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
-&OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
-&OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
-&OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
 &OBST XB=0.00,1.60,0.65,0.70,0.00,0.05, SURF_ID='Golden_Bar' /
 
 -----------------------------------------------------------------------------------------  
@@ -173,19 +160,12 @@
 &OBST XB=0.15,0.20,0.50,0.55,0.25,0.25, SURF_ID='Tan_Stairs' /
 &OBST XB=0.15,0.20,0.50,0.55,0.30,0.30, SURF_ID='Tan_Stairs' /
 
-&OBST XB=0.15,0.15,0.45,0.50,0.30,0.35, SURF_ID='Tan_Stairs' /
-&OBST XB=0.20,0.20,0.45,0.50,0.30,0.35, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.45,0.45,0.30,0.35, SURF_ID='Tan_Stairs' /
+&OBST XB=0.15,0.15,0.40,0.50,0.30,0.35, SURF_ID='Tan_Stairs' /
+&OBST XB=0.20,0.20,0.40,0.50,0.30,0.35, SURF_ID='Tan_Stairs' /
+&OBST XB=0.15,0.20,0.40,0.40,0.30,0.35, SURF_ID='Tan_Stairs' /
 &OBST XB=0.15,0.20,0.50,0.50,0.30,0.35, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.45,0.50,0.30,0.30, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.45,0.50,0.35,0.35, SURF_ID='Tan_Stairs' /
-
-&OBST XB=0.15,0.15,0.40,0.45,0.35,0.40, SURF_ID='Tan_Stairs' /
-&OBST XB=0.20,0.20,0.40,0.45,0.35,0.40, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.40,0.40,0.35,0.40, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.45,0.45,0.35,0.40, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.40,0.45,0.35,0.35, SURF_ID='Tan_Stairs' /
-&OBST XB=0.15,0.20,0.40,0.45,0.40,0.40, SURF_ID='Tan_Stairs' /
+&OBST XB=0.15,0.20,0.40,0.50,0.30,0.30, SURF_ID='Tan_Stairs' /
+&OBST XB=0.15,0.20,0.40,0.50,0.35,0.35, SURF_ID='Tan_Stairs' /
 
 -----------------------------------------------------------------------------------------  
 - Beige and pink little cubes
@@ -280,19 +260,9 @@
 -----------------------------------------------------------------------------------------  
 &SURF ID='Orange_Combi', COLOR='ORANGE' /
 
-&OBST XB=0.1,0.1,0.3,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /    biggest block disappears
-&OBST XB=0.4,0.4,0.3,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /
-&OBST XB=0.1,0.4,0.3,0.3,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /
-&OBST XB=0.1,0.4,0.5,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /
-&OBST XB=0.1,0.4,0.3,0.5,0.4,0.4, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /
-&OBST XB=0.1,0.4,0.3,0.5,0.5,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /
+&OBST XB=0.1,0.4,0.3,0.5,0.4,0.5, SURF_ID='Orange_Combi', DEVC_ID='clock_2' /    biggest block disappears
 
-&OBST XB=0.20,0.20,0.30,0.35,0.0,0.4, SURF_ID='Orange_Combi' /
-&OBST XB=0.25,0.25,0.30,0.35,0.0,0.4, SURF_ID='Orange_Combi' /
-&OBST XB=0.20,0.25,0.30,0.30,0.0,0.4, SURF_ID='Orange_Combi' /
-&OBST XB=0.20,0.25,0.35,0.35,0.0,0.4, SURF_ID='Orange_Combi' /
-&OBST XB=0.20,0.25,0.30,0.35,0.0,0.0, SURF_ID='Orange_Combi' /
-&OBST XB=0.20,0.25,0.30,0.35,0.4,0.4, SURF_ID='Orange_Combi' /
+&OBST XB=0.20,0.25,0.30,0.35,0.0,0.4, SURF_ID='Orange_Combi' /
 
 &OBST XB=0.35,0.45,0.25,0.30,0.35,0.50, SURF_ID='Orange_Combi'/
 
@@ -319,15 +289,12 @@
 &OBST XB=1.3,1.3,0.1,0.2,0.0,0.1, SURF_ID='Mint_Pipe' /
 &OBST XB=0.6,1.3,0.1,0.1,0.0,0.1, SURF_ID='Mint_Pipe' /
 &OBST XB=0.6,1.2,0.2,0.2,0.0,0.1, SURF_ID='Mint_Pipe' /                       y-back open towards second part 
- OBST XB=0.6,1.3,0.1,0.2,0.0,0.0, SURF_ID='Mint_Pipe' /                       no obst adjacent to bottom
 &OBST XB=0.6,1.3,0.1,0.2,0.1,0.1, SURF_ID='Mint_Pipe' /
 
-&OBST XB=1.2,1.2,0.20,0.65,0.0,0.1, SURF_ID='Mint_Pipe' /
-&OBST XB=1.3,1.3,0.20,0.65,0.0,0.1, SURF_ID='Mint_Pipe' /
- OBST XB=1.2,1.3,0.20,0.20,0.0,0.1, SURF_ID='Mint_Pipe' /                     y-front open towards first part 
-&OBST XB=1.2,1.3,0.65,0.65,0.0,0.1, SURF_ID='Mint_Pipe', DEVC_ID='clock_5' /  y-back opens at T=1.5
- OBST XB=1.2,1.3,0.20,0.65,0.0,0.0, SURF_ID='Mint_Pipe' /                     no obst adjacent to bottom
-&OBST XB=1.2,1.3,0.20,0.65,0.1,0.1, SURF_ID='Mint_Pipe' /
+&OBST XB=1.2,1.2,0.20,0.60,0.0,0.1, SURF_ID='Mint_Pipe' /
+&OBST XB=1.3,1.3,0.20,0.60,0.0,0.1, SURF_ID='Mint_Pipe' /
+&OBST XB=1.2,1.3,0.60,0.60,0.0,0.1, SURF_ID='Mint_Pipe', DEVC_ID='clock_5' /  y-back opens at T=1.5
+&OBST XB=1.2,1.3,0.20,0.60,0.1,0.1, SURF_ID='Mint_Pipe' /
 
 -----------------------------------------------------------------------------------------  
 - Indigo block made of thin obstructions adjacent to outflow, left and right
