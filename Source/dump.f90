@@ -2720,7 +2720,7 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 1500 K: ', D_Z(1500,N)
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                 2000 K: ', D_Z(2000,N)
    IF (SM%EXPLICIT_G_F) THEN
-      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  ' Gibbs Energy Amb. (kJ/mol), ',ITMP,' K: ', G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)')  '     Gibbs Energy Amb. (kJ/mol), ',ITMP,' K: ', G_F_Z(ITMP,N)
       WRITE(LU_OUTPUT,'(A,ES10.3)') '                                  500 K: ', G_F_Z( 500,N)
       WRITE(LU_OUTPUT,'(A,ES10.3)') '                                 1000 K: ', G_F_Z(1000,N)
       WRITE(LU_OUTPUT,'(A,ES10.3)') '                                 1500 K: ', G_F_Z(1500,N)
