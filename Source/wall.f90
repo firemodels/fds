@@ -2087,8 +2087,10 @@ SUB_TIMESTEP_LOOP: DO
    ENDIF PYROLYSIS_PREDICTED_IF
 
    ! Add internal heat source specified by user
-
-   Q_S(1:NWP) = Q_S(1:NWP) + ONE_D%HEAT_SOURCE(LAYER_INDEX(1:NWP))
+   
+   DO I=1,NWP
+      Q_S(I) = Q_S(I) + ONE_D%HEAT_SOURCE(LAYER_INDEX(I))*EVALUATE_RAMP(T-T_BEGIN,ONE_D%RAMP_IHS_INDEX(LAYER_INDEX(I)))
+   ENDDO
 
    ! Add special convection term for Boundary Fuel Model
 
