@@ -10903,7 +10903,15 @@ MESH_LOOP_2: DO NM=1,NMESHES
                      IF (OB%I1==OB%I2) THEN ; OBT%X1=OB%X1 ; OBT%X2=OB%X2 ; ENDIF
                      IF (OB%J1==OB%J2) THEN ; OBT%Y1=OB%Y1 ; OBT%Y2=OB%Y2 ; ENDIF
                      IF (OB%K1==OB%K2) THEN ; OBT%Z1=OB%Z1 ; OBT%Z2=OB%Z2 ; ENDIF
-                     IF (OB%BULK_DENSITY > 0._EB) OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*(OBT%Y2-OBT%Y1)*(OBT%Z2-OBT%Z1)
+                     IF (OB%BULK_DENSITY > 0._EB) THEN
+                        OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*(OBT%Y2-OBT%Y1)*(OBT%Z2-OBT%Z1)
+                        IF (OB%I1==OB%I2 .AND. OB%UNDIVIDED_INPUT_LENGTH(1)<0.5_EB*DX(OB%I1)) &
+                           OBT%MASS = OB%BULK_DENSITY*OB%UNDIVIDED_INPUT_LENGTH(1)*(OBT%Y2-OBT%Y1)*(OBT%Z2-OBT%Z1)
+                        IF (OB%J1==OB%J2 .AND. OB%UNDIVIDED_INPUT_LENGTH(2)<0.5_EB*DY(OB%J1)) &
+                           OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*OB%UNDIVIDED_INPUT_LENGTH(2)*(OBT%Z2-OBT%Z1)
+                        IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) &
+                           OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*(OBT%Y2-OBT%Y1)*OB%UNDIVIDED_INPUT_LENGTH(3)
+                     ENDIF
                   ENDDO
                 ENDDO
             ENDDO
