@@ -916,7 +916,7 @@ USE HVAC_ROUTINES, ONLY : DUCT_MF
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT, GET_REALIZABLE_MF, Q_REF_FIT
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, BOX_MULLER, INTERPOLATE1D_UNIFORM
 REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: UN,DD,MFT,TSI,RSUM_F,MPUA_SUM,RHO_F_PREVIOUS,RN1,RN2,TWOMFT,Q_NEW(MAX_QDOTPP_REF)
+REAL(EB) :: UN,DD,MFT,TSI,RSUM_F,MPUA_SUM,RHO_F_PREVIOUS,RN1,RN2,MFT_UNIFORM,Q_NEW(MAX_QDOTPP_REF)
 REAL(EB) :: T_SCALE(MAX_QDOTPP_REF),QDOTPP_REF(MAX_QDOTPP_REF),QDOTPP_T(MAX_QDOTPP_REF), &
             QDOTPP,QDOTPP1,QDOTPP2,DT_SPYRO(MAX_QDOTPP_REF),CP,H_G,MW_RATIO
 REAL(EB) :: RVC,M_DOT_PPP_SINGLE,ZZ_GET(1:N_TRACKED_SPECIES),DENOM
@@ -1189,9 +1189,16 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       IF (SF%MASS_FLUX_VAR > TWO_EPSILON_EB) THEN
          ! generate pairs of standard Gaussian random variables
          CALL BOX_MULLER(RN1,RN2)
-         TWOMFT = 2._EB*MFT
+         MFT_UNIFORM = MFT
          MFT = MFT*(1._EB + RN1*SF%MASS_FLUX_VAR)
-         MFT = MAX(0._EB,MIN(TWOMFT,MFT))
+         MFT = MAX(0._EB,MIN(2._EB*MFT_UNIFORM,MFT))
+         ! rescale species boundary fluxes with variation
+         IF (MFT_UNIFORM>TWO_EPSILON_EB) THEN
+            DO N=1,N_TRACKED_SPECIES
+               B1%M_DOT_G_PP_ADJUST(N) = B1%M_DOT_G_PP_ADJUST(N) * MFT/MFT_UNIFORM
+               B1%M_DOT_G_PP_ACTUAL(N) = B1%M_DOT_G_PP_ACTUAL(N) * MFT/MFT_UNIFORM
+            ENDDO
+         ENDIF
       ENDIF
 
       ! Apply water suppression coefficient (EW) at a WALL cell
@@ -2429,7 +2436,7 @@ SUB_TIMESTEP_LOOP: DO
          ! Check that NWP_NEW has not exceeded the allocated space N_CELLS_MAX
 
          IF (NWP_NEW > ONE_D%N_CELLS_MAX) THEN
-            WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: N_CELLS_MAX should be at least ',NWP_NEW,' for surface ',TRIM(SF%ID)
+            WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(300): N_LAYER_CELLS_MAX should be at least ',NWP_NEW,' for ',TRIM(SF%ID)
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          ENDIF
 
@@ -3134,6 +3141,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                ! Get oxygen mass fraction
                ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
                CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               !======== Mass transfer resistance to surface O2 concentration =============
+               IF (TEST_CHAR_MASS_TRANSFER_MODEL) THEN
+                  TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
+                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
+                  D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),O2_INDEX)
+                  H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
+                  Y_O2 = Y_O2*(H_MASS/(H_MASS + D_FILM/ML%GAS_DIFFUSION_DEPTH(J)))
+               ENDIF
+               !===========================================================================
                ! Calculate oxygen volume fraction in the gas cell
                X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
                ! Calculate oxygen concentration inside the material, assuming decay function
@@ -3585,7 +3601,7 @@ ELSEIF (TGA_PARTICLE_INDEX>0) THEN
    ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
    B1 => BOUNDARY_PROP1(LP%B1_INDEX)
 ELSE
-   WRITE(MESSAGE,'(A)') 'ERROR: No wall or particle to which to apply the TGA analysis'
+   WRITE(MESSAGE,'(3A)') 'ERROR(370): SURF ',TRIM(SF%ID),' No wall or particle for TGA_ANALYSIS.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 

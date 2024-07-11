@@ -131,7 +131,8 @@ INTEGER, PARAMETER :: LEVELSET_STOP=7                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: ODE_STOP=11                      !< Flag for STATUS_STOP
-INTEGER, PARAMETER :: CLOCK_STOP=12                  !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: HEARTBEAT_STOP=12                !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: CLOCK_STOP=13                    !< Flag for STATUS_STOP
 
 INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
 INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
@@ -257,7 +258,7 @@ LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
 LOGICAL :: STORE_PRESSURE_POISSON_RESIDUAL=.FALSE.
-LOGICAL :: CHAR_OXIDATION=.FALSE.
+LOGICAL :: OXIDATION_REACTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
@@ -275,6 +276,7 @@ LOGICAL :: VTK_BINARY=.TRUE.                        !< Flag that indicates VTK o
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
 LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
 LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vtk files should be generated
+LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test mass transfer resistence in char model
 LOGICAL :: AGL_TIMERS(1:2)=(/.FALSE.,.FALSE./)      !< AGL_TIMERS(1) for TIME OF ARRIVAL, AGL_TIMERS(2) for RESIDENCE TIME
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
@@ -460,6 +462,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
 !< MU_RSQMW_Z(I,J) Viscosity (m^2/s)  of lumped species J at temperature I (K) divided by SM%MW^0.5
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temp I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: S_Z          !< Entropy (J/K) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Sensible enthalpy (J/kg) of lumped species J at temp I (K)
 REAL(EB) :: DZZ_CLIP                                  !< Value for processing DZZ in combustion
 
@@ -767,9 +770,9 @@ REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB  !< Final Temperature (C) to use for s
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
 ! External file control
-CHARACTER(250) :: EXTERNAL_FILENAME
-LOGICAL :: READ_EXTERNAL = .FALSE.
-INTEGER :: LU_EXTERNAL
+CHARACTER(250) :: EXTERNAL_FILENAME='null',EXTERNAL_HEARTBEAT_FILENAME='null'
+LOGICAL :: READ_EXTERNAL = .FALSE.,HEARTBEAT_FAIL=.TRUE.
+INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
@@ -894,11 +897,15 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
 END MODULE RADCONS
 
 !> \brief Variables for DVODE solver usage
-MODULE DVODECONS
+MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
-DOUBLE PRECISION :: ODE_MIN_ATOL=DBLE(-1._EB)
+REAL(EB)  :: ODE_MIN_ATOL= -1._EB
+LOGICAL  :: EQUIV_RATIO_CHECK = .TRUE.
+REAL(EB) :: MIN_EQUIV_RATIO=0.2_EB
+REAL(EB) :: MAX_EQUIV_RATIO=10._EB
 
-END MODULE DVODECONS
+
+END MODULE CHEMCONS
 

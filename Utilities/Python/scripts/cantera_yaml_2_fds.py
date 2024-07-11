@@ -1,8 +1,9 @@
 #Converts a yaml file into FDS SPEC and REAC inputs.
 #yaml file must have thermodynamic data inlcuding NASA7 or NASA9 polynomial and diameter and well-depth.
-#run from command line as:
-#python cantera2fds.py yamlfile.yaml background_species> fdsfile.fds
-# where yamlfile.yaml is the name of the yaml file to process and background spcecies is the species name to set as BACKGROUND
+#usage:
+#$ python cantera_yaml_2_fds.py canterafile.yaml str_background_species > fdsfile.fds
+#example:
+#$ python cantera_yaml_2_fds.py grimech30.yaml 'N2' > fdsfile.fds
 
 import cantera as ct
 import numpy as np

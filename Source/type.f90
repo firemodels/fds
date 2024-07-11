@@ -534,6 +534,7 @@ TYPE SPECIES_TYPE
    LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
 
    CHARACTER(LABEL_LENGTH) :: ID                  !< Species name
+   CHARACTER(LABEL_LENGTH) :: ALT_ID              !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L           !< Name of liquid specific heat rame
    CHARACTER(LABEL_LENGTH) :: RAMP_K              !< Name of conductivity ramp
@@ -603,6 +604,7 @@ TYPE SPECIES_MIXTURE_TYPE
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
+   CHARACTER(LABEL_LENGTH) :: ALT_ID='null'                       !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP                             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L                           !< Name of liquid specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_K                              !< Name of conductivity ramp
@@ -628,6 +630,9 @@ TYPE SPECIES_MIXTURE_TYPE
    LOGICAL :: EXPLICIT_G_F=.FALSE.        !< All subspecies have an explicitly defined G_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
+   REAL(EB) :: OXR                  !< Required oxygen for complete combustion (gm/gm-species)
+   REAL(EB) :: OXA                  !< Available oxygen for combustion (gm/gm-species)
+
 
 END TYPE SPECIES_MIXTURE_TYPE
 
@@ -706,6 +711,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_S         !< The DELTA_S(T) array for a reverse reaction pair (entropy)
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INT          !< Array of species exponents
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
@@ -963,7 +969,7 @@ TYPE SURFACE_TYPE
 
    ! Level Set Firespread
 
-   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2
+   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2,VEG_LSET_ROS_FIXED
    REAL(EB) :: VEG_LSET_IGNITE_T,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_00,VEG_LSET_QCON,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_BACK, &
                VEG_LSET_WIND_EXP,VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,&
                VEG_LSET_M1,VEG_LSET_M10,VEG_LSET_M100,VEG_LSET_MLW,VEG_LSET_MLH,VEG_LSET_SURF_LOAD,VEG_LSET_FIREBASE_TIME, &
@@ -1610,8 +1616,8 @@ TYPE INITIALIZATION_TYPE
    INTEGER :: RAMP_Q_INDEX=0                                     !< Ramp index for HRRPUV
    INTEGER :: RAMP_PART_INDEX=0                                  !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
    INTEGER :: RAMP_TMP_Z_INDEX=0                                 !< Ramp index for temperature vertical profile (K)
-   INTEGER :: RAMP_MF_Z_INDEX(MAX_SPECIES)=0                     !< Ramp index for species mass fraction vertical profile
-   INTEGER :: RAMP_VF_Z_INDEX(MAX_SPECIES)=0                     !< Ramp index for species volume fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_MF_Z_INDEX         !< Ramp index for species mass fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_VF_Z_INDEX         !< Ramp index for species volume fraction vertical profile
    LOGICAL :: ADJUST_INITIAL_CONDITIONS=.FALSE.
    LOGICAL :: VOLUME_FRACTIONS_SPECIFIED=.FALSE.
    LOGICAL :: MASS_FRACTIONS_SPECIFIED=.FALSE.
@@ -1799,7 +1805,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
    INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
    INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
-   INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
+   INTEGER :: DUCTRUN=-1                                   !< Ductrun node belongs to
    INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER :: CONNECTIVITY_INDEX=-1                        !< Index of node connectivity for Smokeview display
