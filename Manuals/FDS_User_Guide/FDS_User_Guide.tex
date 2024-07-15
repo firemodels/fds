@@ -2416,7 +2416,7 @@ heats of reaction for the pyrolysis (see Sec.~\ref{info:solid_pyrolysis}),
 internal absorption and emission of radiation (see Sec.~\ref{info:liquid_fuels}), and the source specified by the user.
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
-The internal source term for each layer of the surface is specified using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
+The internal source term for each layer of the surface is specified using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified for each layer's heat source using {\ct RAMP\_IHS}. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
 \begin{lstlisting}
 &SURF ID                     = 'Cable'
       THICKNESS              = 0.002,0.008
@@ -2496,7 +2496,7 @@ To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in th
 \end{lstlisting}
 Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
 
-You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero.
+You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified using {\ct RAMP\_IHS}.
 
 \subsection{Limitations}
 \label{info:HT3D_Limitations}
@@ -12459,6 +12459,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct OVERLAY}                 & Logical         & Section~\ref{info:OVERLAY}              &           & {\ct T}       \\ \hline
 {\ct PERMIT\_HOLE}            & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RADIUS}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
+{\ct RAMP\_IHS}               & Character       & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct REMOVABLE}               & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RGB(3)}                  & Integer Array   & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SHAPE}                   & Character       & Section~\ref{info:multobst}             &           &               \\ \hline
@@ -13108,6 +13109,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_EF}                                            & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct RAMP\_IHS}                                           & Character       & Section~\ref{info:INTERNAL_HEAT_SOURCE}   &                     &                         \\ \hline
 {\ct RAMP\_MF(:)}                                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
