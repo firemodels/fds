@@ -21,7 +21,7 @@
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 73.
-      CONDUCTIVITY       = 'k + k_r char'
+      CONDUCTIVITY_RAMP  = 'k + k_r char'
       SPECIFIC_HEAT_RAMP = 'c_v char'
       N_REACTIONS        = 1
       N_S                = 0.56
