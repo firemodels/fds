@@ -73,7 +73,7 @@
 
 &MATL ID                 = 'ASH'
       DENSITY            = 5.7
-      CONDUCTIVITY       = 'k + k_r ash'
+      CONDUCTIVITY_RAMP  = 'k + k_r ash'
       SPECIFIC_HEAT_RAMP = 'c_v ash'/
 
 &RAMP ID='k dry wood', T=  20.0, F=0.173549 /
