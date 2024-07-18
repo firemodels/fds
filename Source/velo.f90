@@ -2391,8 +2391,13 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                   VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
                   VEL_GHOST = VEL_GAS
                   DUIDXJ(ICD_SGN) = 0._EB
-                  MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
-                                       SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+                  IF (SF%VEG_LSET_SPREAD) THEN
+                     MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%VEG_LSET_HT*&
+                                             SF%VEG_LSET_BETA*(SF%VEG_LSET_SIGMA*100._EB)*VEL_GAS*VEL_T
+                  ELSE
+                     MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
+                                          SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+                  ENDIF
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
             END SELECT BOUNDARY_CONDITION
