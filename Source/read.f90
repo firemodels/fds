@@ -8272,7 +8272,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
          DO NN=1,MAX_SPECIES
             IF (TRIM(SPEC_ID(NN))=='null') EXIT
             DO NNN=1,N_TRACKED_SPECIES
-               IF (TRIM(SPECIES_MIXTURE(NNN)%ID)==TRIM(SPEC_ID(NN))) THEN
+               IF (TRIM(SPECIES_MIXTURE(NNN)%ID)==TRIM(SPEC_ID(NN)) .OR. TRIM(SPECIES_MIXTURE(NNN)%ALT_ID)==TRIM(SPEC_ID(NN))) THEN
                   SF%MASS_FLUX(NNN)    = MASS_FLUX(NN)
                   SF%MASS_FRACTION(NNN)= MASS_FRACTION(NN)
                   SF%RAMP(NNN)%TAU     = TAU_MF(NN)/TIME_SHRINK_FACTOR
@@ -9029,8 +9029,10 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                FUEL_MF = 0._EB
                DO NS=1,N_TRACKED_SPECIES
                   IF (SF%MASS_FRACTION(NS) > 0._EB) THEN
-                     IF (ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID)) THEN
+                     IF (ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID) .OR. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ALT_ID)) THEN
+                        NR = -1
                         NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
+                        IF (NR==-1) NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ALT_ID,1)
                         RN => REACTION(NR)
                         IF (DUPLICATE_FUEL(NR)) THEN
                            WRITE(MESSAGE,'(5A)') 'ERROR(360): SURF ',TRIM(SF%ID),' uses HRRPUA but SPEC ', &
@@ -9071,8 +9073,11 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
             IF (ANY(SF%MASS_FRACTION > 0._EB)) THEN
                FUEL_MF = 0._EB
                DO NS=1,N_TRACKED_SPECIES
-                  IF (SF%MASS_FRACTION(NS) > 0._EB .AND. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID)) THEN
+                  IF (SF%MASS_FRACTION(NS) > 0._EB .AND. &
+                     (ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ID).OR. ANY(REAC_FUEL==SPECIES_MIXTURE(NS)%ALT_ID))) THEN
+                     NR = -1
                      NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ID,1)
+                     IF (NR==-1) NR = FINDLOC(REAC_FUEL,SPECIES_MIXTURE(NS)%ALT_ID,1)
                      RN => REACTION(NR)
                      IF (DUPLICATE_FUEL(NR)) THEN
                         WRITE(MESSAGE,'(5A)') 'ERROR(362): SURF ',TRIM(SF%ID),' uses MLRPUA and species ', &
