@@ -2416,7 +2416,7 @@ heats of reaction for the pyrolysis (see Sec.~\ref{info:solid_pyrolysis}),
 internal absorption and emission of radiation (see Sec.~\ref{info:liquid_fuels}), and the source specified by the user.
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
-The internal source term for each layer of the surface is specified using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
+The internal source term for each layer of the surface is specified using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified for each layer's heat source using {\ct RAMP\_IHS}. In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. The metal core is heated with a power of 300 {\si kW/m$^3$}.
 \begin{lstlisting}
 &SURF ID                     = 'Cable'
       THICKNESS              = 0.002,0.008
@@ -2453,7 +2453,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Make the node spacing more uniform] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line, where {\ct NL} designates a particular layer. This will generate a perfectly uniform mesh. Values between 1 and 2 give different levels of stretching. The default value of 2 indicates that the second cell is twice as thick as the first, the third is twice the second, and so on until the mid-depth of the layer is reached, at which point the cells shrink following the same pattern.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR(NL)} less than 1, where {\ct NL} designates a particular layer. For example, a value of 0.5 makes the mesh cells in the layer half the size.
 \item[Specify the desired cell size] by specifying {\ct CELL\_SIZE(NL)} directly, where {\ct NL} designates a particular layer. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}.
-\item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type using the parameter {\ct TIME\_STEP\_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.
+\item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type using the parameter {\ct TIME\_STEP\_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.  You can also ask FDS to use a solid phase time step that obeys the Fourier number constraint, $\mathrm{Fo}=\delta t \alpha/\delta x^2=1$; this is done by setting {\ct CHECK\_FO=T} on {\ct MISC}.
 \item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX(NL)} (default 1000), where {\ct NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
@@ -2496,7 +2496,7 @@ To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in th
 \end{lstlisting}
 Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
 
-You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero.
+You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified using {\ct RAMP\_IHS}.
 
 \subsection{Limitations}
 \label{info:HT3D_Limitations}
@@ -4412,7 +4412,7 @@ The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\unit{kg
 \label{gas_filling_fig}
 \end{figure}
 
-A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see if species properties are predefined, FDS will only use {\ct ID}, but when looking for a species specified in the input file with {\ct SPEC\_ID} for any input other than {\ct SPEC}, FDS will use both {\ct ID} and {\ct ALT\_ID}. One use of this is being able to use predefined properties for species while also being able to use an abbreviated name or formula for complex chemistry reaction inputs. 
+A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see if species properties are predefined, FDS will only use {\ct ID}, but when looking for a species specified in the input file with {\ct SPEC\_ID} for any input other than {\ct SPEC}, FDS will use both {\ct ID} and {\ct ALT\_ID}. One use of this is being able to use predefined properties for species while also being able to use an abbreviated name or formula for complex chemistry reaction inputs.
 
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
@@ -7459,7 +7459,7 @@ In this second option, you create your own custom fuel type as follows:
 \be
    \dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \hbox{s}
 \ee
-Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 0.3~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).   
+Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 0.3~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
 
 It is possible to set a custom fuel for which the spread rate does not vary with slope or wind speed. This is done by specifying {\ct VEG\_LSET\_ROS\_FIXED=T} on the {\ct SURF} line. The spread rate is then fixed at the no-wind, no-slope value. The main purpose of this feature is for reproduction of manual ignition patterns (e.g. ignition with a drip torch at a fixed walking speed).
 
@@ -8726,7 +8726,7 @@ In some cases with extremely fast particles, however, the stability of the overa
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \unit{W/m^2}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
+Note that the heat flux has units of \unit{W/m^2}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall and $\dot{q}''_{\rm w}$ is the total heat flux (convective plus net radiative) at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=T} on the {\ct MISC} line. It is {\ct F} by default.
 
 
 
@@ -12261,6 +12261,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct CFL\_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
 {\ct CFL\_MIN}                                      & Real         & Section~\ref{info:CFL}                  &            & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                           & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
+{\ct CHECK\_FO}                                     & Logical      & Section~\ref{info:solid_phase_stability}&            & {\ct F}           \\ \hline
 {\ct CHECK\_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & {\ct F}           \\ \hline
 {\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct T}           \\ \hline
 {\ct CNF\_CUTOFF}                                   & Real         & Section~\ref{info:particle_size}        &            & 0.005             \\ \hline
@@ -12463,6 +12464,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct OVERLAY}                 & Logical         & Section~\ref{info:OVERLAY}              &           & {\ct T}       \\ \hline
 {\ct PERMIT\_HOLE}            & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RADIUS}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
+{\ct RAMP\_IHS}               & Character       & Section~\ref{info:HT3D_Basics}          &           &               \\ \hline
 {\ct REMOVABLE}               & Logical         & Section~\ref{info:HOLE}                 &           & {\ct T}       \\ \hline
 {\ct RGB(3)}                  & Integer Array   & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SHAPE}                   & Character       & Section~\ref{info:multobst}             &           &               \\ \hline
@@ -13112,6 +13114,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_EF}                                            & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct \footnotesize RAMP\_HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct RAMP\_IHS}                                           & Character       & Section~\ref{info:INTERNAL_HEAT_SOURCE}   &                     &                         \\ \hline
 {\ct RAMP\_MF(:)}                                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_PART}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                                             & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
@@ -13821,6 +13824,7 @@ Keyword             & Type     & Description                      & Units       
 731 \> {\ct GEOM ID=, Non manifold geometry in adjacent faces at edge \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 732 \> {\ct GEOM ID=, Opposite normals on triangles sharing edge with \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 733 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
+734 \> {\ct Mismatched mesh boundary location between meshes \ldots\                } \> Section~\ref{info:GEOM_Basics} \\                 
     \>                                                                                \>                          \\
 801 \> {\ct VENT \ldots\ cannot use MULT\_ID because it involves HVAC.              } \> Section~\ref{info:HVAC} \\
 802 \> {\ct VENT \ldots\ needs an explicit ID because it involves HVAC.             } \> Section~\ref{info:HVAC} \\

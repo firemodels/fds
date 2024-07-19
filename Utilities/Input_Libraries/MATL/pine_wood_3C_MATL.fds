@@ -1,8 +1,8 @@
 
 &MATL ID                 = 'PINE 1'
       DENSITY            = 360.
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'
+      CONDUCTIVITY_RAMP  = 'k dry wood'
+      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
       N_REACTIONS        = 2
       N_S                = 0.56,0.3
       N_O2               = 0.0,0.61
@@ -20,8 +20,8 @@
 
 &MATL ID                 = 'PINE 2'
       DENSITY            = 360.
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'
+      CONDUCTIVITY_RAMP  = 'k dry wood'
+      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
       N_REACTIONS        = 2
       N_S                = 1,1
       N_O2               = 0.0,0.49
@@ -39,8 +39,8 @@
 
 &MATL ID                 = 'PINE 3'
       DENSITY            = 360.
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'
+      CONDUCTIVITY_RAMP  = 'k dry wood'
+      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
       N_REACTIONS        = 2
       N_S                = 1.25,5.67
       N_O2               = 0.0,0.66
@@ -57,9 +57,9 @@
       HEAT_OF_REACTION   = 416. /
 
 &MATL ID                 = 'CHAR'
-      DENSITY            = 90.
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'
+      DENSITY            = 73.
+      CONDUCTIVITY_RAMP  = 'k + k_r char'
+      SPECIFIC_HEAT_RAMP = 'c_v char'
       N_REACTIONS        = 1
       N_S                = 0.56
       N_O2               = 0.68
@@ -72,11 +72,45 @@
       HEAT_OF_REACTION   = -32000. /
 
 &MATL ID                 = 'ASH'
-      DENSITY            = 2.2
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'/
+      DENSITY            = 5.7
+      CONDUCTIVITY_RAMP  = 'k + k_r ash'
+      SPECIFIC_HEAT_RAMP = 'c_v ash'/
 
-&RAMP ID='c_v', T=  0., F=1.1 /
-&RAMP ID='c_v', T=200., F=2.0 /
-&RAMP ID='c_v', T=800., F=2.0 /
+&RAMP ID='k dry wood', T=  20.0, F=0.173549 /
+&RAMP ID='k dry wood', T= 300.0, F=0.258492 /
+&RAMP ID='k dry wood', T= 600.0, F=0.331944 /
+&RAMP ID='k dry wood', T= 900.0, F=0.395609 /
+&RAMP ID='k dry wood', T=1200.0, F=0.452913 /
+
+&RAMP ID='c_v dry wood', T=  20.0, F=1.638272 /
+&RAMP ID='c_v dry wood', T= 300.0, F=2.550559 /
+&RAMP ID='c_v dry wood', T= 600.0, F=3.367617 /
+&RAMP ID='c_v dry wood', T= 900.0, F=4.092512 /
+&RAMP ID='c_v dry wood', T=1200.0, F=4.756277 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r char', T=  20.0, F=0.069043 /
+&RAMP ID='k + k_r char', T= 300.0, F=0.121335 /
+&RAMP ID='k + k_r char', T= 600.0, F=0.227944 /
+&RAMP ID='k + k_r char', T= 900.0, F=0.419637 /
+&RAMP ID='k + k_r char', T=1200.0, F=0.727922 /
+
+&RAMP ID='c_v char', T=  20.0, F=1.210882 /
+&RAMP ID='c_v char', T= 300.0, F=1.463983 /
+&RAMP ID='c_v char', T= 600.0, F=1.649246 /
+&RAMP ID='c_v char', T= 900.0, F=1.793039 /
+&RAMP ID='c_v char', T=1200.0, F=1.912405 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r ash', T=  20.0, F=0.066647 /
+&RAMP ID='k + k_r ash', T= 300.0, F=0.141158 /
+&RAMP ID='k + k_r ash', T= 600.0, F=0.326017 /
+&RAMP ID='k + k_r ash', T= 900.0, F=0.679571 /
+&RAMP ID='k + k_r ash', T=1200.0, F=1.261558 /
+
+&RAMP ID='c_v ash', T=  20.0, F=1.234783 /
+&RAMP ID='c_v ash', T= 300.0, F=1.525267 /
+&RAMP ID='c_v ash', T= 600.0, F=1.741593 /
+&RAMP ID='c_v ash', T= 900.0, F=1.911420 /
+&RAMP ID='c_v ash', T=1200.0, F=2.053577 /
 

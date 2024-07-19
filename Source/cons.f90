@@ -216,6 +216,7 @@ LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perfo
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
+LOGICAL :: CHECK_FO=.FALSE.                 !< Check the solid phase Fourier number
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
 LOGICAL :: BAROCLINIC=.TRUE.                !< Include the baroclinic terms in the momentum equation

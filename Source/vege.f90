@@ -387,7 +387,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR,&
-            SIN_THETA,COS_THETA
+            SIN_THETA,COS_THETA,THETA
 
 T_NOW = CURRENT_TIME()
 
@@ -416,24 +416,30 @@ DO JJG=1,JBAR
 
       ! Establish the wind field
 
-      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND) THEN  ! The wind speed is derived from the CFD computation
+      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND .AND. .NOT. LEVEL_SET_MODE==5) THEN  ! The wind speed is derived from the CFD
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
          V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
       ELSE IF_CFD_COUPLED  ! The wind velocity is specified by the user
 
-         ! Either there is a time varying direciton, or the components have already been scaled
-         IF (I_RAMP_DIRECTION_T/=0) THEN
-            SIN_THETA = -SIN(EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD)
-            COS_THETA = -COS(EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD)
+         ! Evaluate time and height varying profiles, using 6.1 m reference height
+         IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
+            IF (I_RAMP_DIRECTION_T==0) THEN
+               THETA=EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)*DEG2RAD
+            ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
+               THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
+             ELSE
+               THETA=(EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)+EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
+             ENDIF
+            SIN_THETA = -SIN(THETA)
+            COS_THETA = -COS(THETA)
          ELSE
             SIN_THETA = 1._EB
             COS_THETA = 1._EB
          ENDIF
-
-         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
-         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
+         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
+         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
 
       ENDIF IF_CFD_COUPLED
 
@@ -454,11 +460,6 @@ DO JJG=1,JBAR
             U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
             V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
 
-         ENDIF
-
-         IF (LEVEL_SET_MODE == 5) THEN
-           U_LS(IIG,JJG) = U0
-           V_LS(IIG,JJG) = V0
          ENDIF
 
          ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
