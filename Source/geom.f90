@@ -802,6 +802,9 @@ CC_NCUTCELL   = 0
 
 IF (FIRST_CALL) THEN
 
+   ! Check Meshes Boundaries match, requirement to get consistent ghost and internal cut-cells.
+   CALL CHECK_WALL_CELL_PLANE_MATCH; IF (STOP_STATUS==SETUP_STOP) RETURN
+
    ! Get geometry triangle bins in Cartesian directions:
    CALL GET_GEOM_TRIBIN
 
@@ -809,8 +812,7 @@ IF (FIRST_CALL) THEN
    CALL SNAP_GEOM_NODES
 
    ! Initialize GEOMETRY fields used by CC_IBM:
-   CALL CC_INIT_GEOM
-   IF (STOP_STATUS==SETUP_STOP) RETURN
+   CALL CC_INIT_GEOM; IF (STOP_STATUS==SETUP_STOP) RETURN
    FIRST_CALL = .FALSE.
 
 ENDIF
@@ -4905,6 +4907,63 @@ ENDIF
 END SUBROUTINE SNAP_GEOM_NODES
 
 END SUBROUTINE SET_CUTCELLS_3D
+
+! ----------------------- CHECK_WALL_CELL_PLANE_MATCH ----------------------------
+
+SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
+
+! Routine checks that external boundaries match among neighboring meshes. This is not strictly enforced 
+! by FDS but is required to compute same cut-cells on mesh ghost-cells and other mesh internal cells.
+
+USE MPI_F08
+
+! Local variables:
+INTEGER :: NM,NOM,IW,IOR,IERR
+REAL(EB):: XM,XOM
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: BUFF
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(MESH_TYPE), POINTER :: M2
+
+ALLOCATE(BUFF(2,NMESHES)); BUFF=0
+MESH_LP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   EXT_WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC=>WALL(IW)
+      EWC=>EXTERNAL_WALL(IW)
+      BC =>BOUNDARY_COORD(WC%BC_INDEX)
+      IOR = BC%IOR; NOM = EWC%NOM; IF(NOM<1 .OR. NOM==NM) CYCLE EXT_WALL_LOOP_1
+      M2 => MESHES(NOM)
+      SELECT CASE(IOR)
+         CASE( IAXIS); XM=X(0);    XOM=M2%X(M2%IBAR) ! Low X for mesh NM, high X for mesh NOM
+         CASE(-IAXIS); XM=X(IBAR); XOM=M2%X(0)       ! High X for mesh NM, low X for mesh NOM
+         CASE( JAXIS); XM=Y(0);    XOM=M2%Y(M2%JBAR) ! Low Y for mesh NM, high Y for mesh NOM
+         CASE(-JAXIS); XM=Y(JBAR); XOM=M2%Y(0)       ! High Y for mesh NM, low Y for mesh NOM
+         CASE( KAXIS); XM=Z(0);    XOM=M2%Z(M2%KBAR) ! Low Z for mesh NM, high Z for mesh NOM
+         CASE(-KAXIS); XM=Z(KBAR); XOM=M2%Z(0)       ! High Z for mesh NM, low Z for mesh NOM
+      END SELECT
+      IF(ABS(XM-XOM)>10._EB*GEOMEPS) THEN
+         BUFF(1:2,NM) = (/NM,NOM/)
+         CYCLE MESH_LP
+      ENDIF
+   ENDDO EXT_WALL_LOOP_1
+ENDDO MESH_LP
+   
+! Now All-Reduce mismatch
+CALL MPI_ALLREDUCE(MPI_IN_PLACE,BUFF(1,1),2*NMESHES,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+DO NM=1,NMESHES
+   IF(BUFF(1,NM)>0) THEN ! First Mismatched meshes found.
+      IF (MY_RANK==0) THEN
+        WRITE(LU_ERR,'(A,I5,A,I5,A)') "ERROR(734): Mismatched mesh boundary location between meshes ",BUFF(1,NM),&
+        " and ",BUFF(2,NM),". Check your mesh MULT line. Mesh boundary locations must strictly match with &GEOM."
+      ENDIF
+      DEALLOCATE(BUFF)
+      CALL SHUTDOWN("") ; RETURN
+   ENDIF
+ENDDO
+DEALLOCATE(BUFF)
+END SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
 
 ! ----------------------- EXCHANGE_CC_NOADVANCE_INFO ----------------------------
 
