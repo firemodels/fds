@@ -1,40 +1,105 @@
 #Converts a yaml file into FDS SPEC and REAC inputs.
-#yaml file must have thermodynamic data inlcuding NASA7 or NASA9 polynomial and diameter and well-depth.
-#usage:
-#$ python cantera_yaml_2_fds.py canterafile.yaml str_background_species > fdsfile.fds
+#yaml file must have thermodynamic data including NASA7 or NASA9 polynomial and diameter and well-depth.
+#run from command line as:
+#python cantera2fds.py yamlfile.yaml background_species optional fds optional species lookup file prop_flag> fdsfile.fds
+# where yamlfile.yaml is the name of the yaml file to process
+#opitonal fds prop_flag is True or False where True will use the predefined FDS properties and False will have the script write the yaml file properties. The default is True.
+# background_spcecies is the species name in the yaml file to set as BACKGROUND
+# species lookup file is an optional input for a file to create an equivalence between cantera and FDS species. The default name is yamlfile.spec
+#the file is a comma separated value file with the first row being
+#FORMULA,NAME
+#and follow on rows being
+#yaml file species formula as written in the yaml file, equivalent predefined FDS SPEC ID
+#do not list species without an FDS equivalent
+#
+#when using optional values, if you specify command line arguement N, then you must also give optional values for arguements < N
+#
 #example:
-#$ python cantera_yaml_2_fds.py grimech30.yaml 'N2' > fdsfile.fds
+#$ python cantera_yaml_2_fds.py grimech30.yaml N2 > fdsfile.fds
+#the above example with the default values for optional items
+#$ python cantera_yaml_2_fds.py grimech30.yaml N2 grimech30.spec True> fdsfile.fds
 
 import cantera as ct
 import numpy as np
+import pandas as pd
 import sys
 import math
 
-gas = ct.Solution(sys.argv[1])
-bg = sys.argv[2]
+try: #check for yaml file
+   sys.argv[1]
+except:
+   print('specify a yaml file')
+   quit()
+else:
+   yaml_file=sys.argv[1]
+gas = ct.Solution(yaml_file)
 
-#gas = ct.Solution('./mechanisms/GRIMECH/grimech30.yaml')
-#bg = 'N2'
+try: #check for background species
+   sys.argv[2]
+except:
+   print('specify a background species')
+   quit()
+else:
+   bg = sys.argv[2]
+
+try: #check if spec file is given
+   sys.argv[3]
+except:
+   rootname = yaml_file.split('.')[0]
+   spec_file=rootname+'.spec'
+else:
+   spec_file = sys.argv[3]
+try:
+   spec_data=pd.read_csv(spec_file, keep_default_na=False, na_values=['_'])
+except:
+   spec_data_flag = False
+else:
+   spec_data=pd.read_csv(spec_file, keep_default_na=False, na_values=['_'])
+   spec_data_flag = True
+   try: #check if prop_flag is set
+      sys.argv[4]
+   except:
+      prop_flag = True
+   else:
+      prop_flag = eval(sys.argv[4])
 
 k_b = 1.380649E-23
 t_r = 298.15
 r0 = 8.314472
 
 n_species = len(gas.species())
-
+if (spec_data_flag): l_species = len(spec_data['FORMULA'])
 for i in range(n_species):
    if (bg==gas.species(i).name):
       bg_index = i
       break
 
+if (spec_data_flag):
+   spec_index = [-1]*n_species
+   for i in range(n_species):
+      for i2 in range(l_species):
+         if (gas.species(i).name==spec_data['FORMULA'][i2]):
+            spec_index[i]=i2
+
 for i2 in range(n_species):
+   write_props = True
+   write_alt = False
    if (i2==0):
       i=bg_index
    elif (i2<=bg_index):
       i=i2-1
    elif (i2>bg_index):
       i=i2
-   name = gas.species(i).name
+   if (spec_data_flag):
+      if (spec_index[i]>-1):
+         write_alt = True
+         name = spec_data['NAME'][spec_index[i]]
+         if (prop_flag):
+            write_props = False
+      else:
+         name = gas.species(i).name
+   else:
+      name = gas.species(i).name
    element_list = list(gas.species(i).composition.keys())
    atoms_list = list(gas.species(i).composition.values())
    sigma = gas.species(i).transport.diameter*1E10
@@ -58,56 +123,60 @@ for i2 in range(n_species):
    if (i2==0):
       outstr+="BACKGROUND=T,"
    print(outstr)
-   print("      PR_GAS=",int(Pr*1000)/1000,",")
-   outstr="      FORMULA='"+formula+"',"
-   print(outstr)
-   print("      SIGMALJ=",int(sigma*1000)/1000,",")
-   print("      EPSILONKLJ=",epsok,",")
-   outstr="      POLYNOMIAL='"+poly+"',"
-   print(outstr)
-   band_l = len(temp_bands)
-   outstr = ''
-   for j in range(band_l):
-      outstr+=str(temp_bands[j])+','
-   print("      POLYNOMIAL_TEMP=",outstr)
-   poly_len=9
-   if (poly=='NASA7'):
-      poly_len=7
-   for j in range(band_l-1):
-     if (j==0 and temp_bands[j]>t_r):
-        t_r2 = t_r
-        t_r = temp_bands[j]
-        if (poly=='NASA7'):
-           c_p = gas_list[2][j][0]+gas_list[2][j][1]*t_r+\
-           gas_list[2][j][2]*t_r**2+gas_list[2][j][3]*t_r**3+gas_list[2][j][4]*t_r**4
-           h_f = gas_list[2][j][0]*t_r+0.5*gas_list[2][j][1]*t_r**2+\
-           1./3.*gas_list[2][j][2]*t_r**3+0.25*gas_list[2][j][3]*t_r**4+0.2*gas_list[2][j][4]*t_r**5+gas_list[2][j][5]
-           h_f = h_f - c_p * (t_r - t_r2)
-           h_f = int(h_f * r0 * 100)/100000.
-           t_r = t_r2
-        else:
-           c_p = gas_list[2][j][0]/t_r**2+gas_list[2][j][1]/t_r+gas_list[2][j][2]+gas_list[2][j][3]*t_r+\
-           gas_list[2][j][4]*t_r**2+gas_list[2][j][5]*t_r**3+gas_list[2][j][6]*t_r**4
-           h_f = -gas_list[2][j][0]/t_r+gas_list[2][j][1]*math.log(t_r)+gas_list[2][j][2]*t_r+0.5*gas_list[2][j][3]*t_r**2+\
-           1./3.*gas_list[2][j][4]*t_r**3+0.25*gas_list[2][j][5]*t_r**4+0.2*gas_list[2][j][6]*t_r**5+gas_list[2][j][7]
-           h_f = h_f - c_p * (t_r - t_r2)
-           h_f = int(h_f * r0 * 100)/100000.
-           t_r = t_r2
-     if (temp_bands[j]<t_r):
-        if (poly=='NASA7'):
-           h_f = gas_list[2][j][0]*t_r+0.5*gas_list[2][j][1]*t_r**2+\
-           1./3.*gas_list[2][j][2]*t_r**3+0.25*gas_list[2][j][3]*t_r**4+0.2*gas_list[2][j][4]*t_r**5+gas_list[2][j][5]
-           h_f = int(h_f * r0 * 100)/100000.
-        else:
-           h_f = -gas_list[2][j][0]/t_r+gas_list[2][j][1]*math.log(t_r)+gas_list[2][j][2]*t_r+0.5*gas_list[2][j][3]*t_r**2+\
-           1./3.*gas_list[2][j][4]*t_r**3.+0.25*gas_list[2][j][5]*t_r**4+0.2*gas_list[2][j][6]*t_r**5+gas_list[2][j][7]
-           h_f = int(h_f * r0 * 100)/100000.
-     outstr = ''
-     for k in range(poly_len):
-        outstr+=str(gas_list[2][j][k])+','
-     namestr='      POLYNOMIAL_COEFF(1:'+str(k+1)+','+str(j+1)+")="
-     print(namestr,outstr)
-   print("      ENTHALPY_OF_FORMATION=",h_f,"/")
+   if (write_alt):
+      print("      ALT_ID='"+spec_data['FORMULA'][spec_index[i]]+"'")
+   if (write_props):
+      print("      PR_GAS=",int(Pr*1000)/1000,",")
+      outstr="      FORMULA='"+formula+"',"
+      print(outstr)
+      print("      SIGMALJ=",int(sigma*1000)/1000,",")
+      print("      EPSILONKLJ=",epsok,",")
+      outstr="      POLYNOMIAL='"+poly+"',"
+      print(outstr)
+      band_l = len(temp_bands)
+      outstr = ''
+      for j in range(band_l):
+         outstr+=str(temp_bands[j])+','
+      print("      POLYNOMIAL_TEMP=",outstr)
+      poly_len=9
+      if (poly=='NASA7'):
+         poly_len=7
+      for j in range(band_l-1):
+        if (j==0 and temp_bands[j]>t_r):
+           t_r2 = t_r
+           t_r = temp_bands[j]
+           if (poly=='NASA7'):
+              c_p = gas_list[2][j][0]+gas_list[2][j][1]*t_r+\
+              gas_list[2][j][2]*t_r**2+gas_list[2][j][3]*t_r**3+gas_list[2][j][4]*t_r**4
+              h_f = gas_list[2][j][0]*t_r+0.5*gas_list[2][j][1]*t_r**2+\
+              1./3.*gas_list[2][j][2]*t_r**3+0.25*gas_list[2][j][3]*t_r**4+0.2*gas_list[2][j][4]*t_r**5+gas_list[2][j][5]
+              h_f = h_f - c_p * (t_r - t_r2)
+              h_f = int(h_f * r0 * 100)/100000.
+              t_r = t_r2
+           else:
+              c_p = gas_list[2][j][0]/t_r**2+gas_list[2][j][1]/t_r+gas_list[2][j][2]+gas_list[2][j][3]*t_r+\
+              gas_list[2][j][4]*t_r**2+gas_list[2][j][5]*t_r**3+gas_list[2][j][6]*t_r**4
+              h_f = -gas_list[2][j][0]/t_r+gas_list[2][j][1]*math.log(t_r)+gas_list[2][j][2]*t_r+0.5*gas_list[2][j][3]*t_r**2+\
+              1./3.*gas_list[2][j][4]*t_r**3+0.25*gas_list[2][j][5]*t_r**4+0.2*gas_list[2][j][6]*t_r**5+gas_list[2][j][7]
+              h_f = h_f - c_p * (t_r - t_r2)
+              h_f = int(h_f * r0 * 100)/100000.
+              t_r = t_r2
+        if (temp_bands[j]<t_r):
+           if (poly=='NASA7'):
+              h_f = gas_list[2][j][0]*t_r+0.5*gas_list[2][j][1]*t_r**2+\
+              1./3.*gas_list[2][j][2]*t_r**3+0.25*gas_list[2][j][3]*t_r**4+0.2*gas_list[2][j][4]*t_r**5+gas_list[2][j][5]
+              h_f = int(h_f * r0 * 100)/100000.
+           else:
+              h_f = -gas_list[2][j][0]/t_r+gas_list[2][j][1]*math.log(t_r)+gas_list[2][j][2]*t_r+0.5*gas_list[2][j][3]*t_r**2+\
+              1./3.*gas_list[2][j][4]*t_r**3.+0.25*gas_list[2][j][5]*t_r**4+0.2*gas_list[2][j][6]*t_r**5+gas_list[2][j][7]
+              h_f = int(h_f * r0 * 100)/100000.
+        outstr = ''
+        for k in range(poly_len):
+           outstr+=str(gas_list[2][j][k])+','
+        namestr='      POLYNOMIAL_COEFF(1:'+str(k+1)+','+str(j+1)+")="
+        print(namestr,outstr)
+      print("      ENTHALPY_OF_FORMATION=",h_f,",")
+   print('/')
 
 numreac = len(gas.reactions())
 
@@ -201,15 +270,6 @@ for i in range(numreac):
         T3_Troe.append(rate['T3'])
 
 for i in range(len(rlist)):
-
-    for ri in range(len(rlist[i])):
-        spName1 = rlist[i][ri][0]
-        nu1 = rlist[i][ri][1]
-        for pi in  range(len(plist[i])):
-            spName2 = plist[i][pi][0]
-            nu2 = plist[i][pi][1]
-            if (spName1 == spName2):
-                print(" Reaction with same element both side:", i)
 
     print(f"&REAC ID='R{i+1}',")
     print("     REACTYPE='",reactType[i],"',", sep='')
