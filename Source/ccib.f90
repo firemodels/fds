@@ -23492,6 +23492,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! X Face in high K
                      ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE IAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE IAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
@@ -23555,6 +23556,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! Indexes of other Cartesian face @ K+1
                      ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE JAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE JAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
@@ -23617,6 +23619,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(JJ==J) THEN; IIO = I; JJO = J+1; KKO = K ! Indexes of other Cartesian face @ J+1
                      ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE KAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE KAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
