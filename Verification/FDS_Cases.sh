@@ -791,7 +791,7 @@ $QFDS -d WUI char_oxidation_1.fds
 $QFDS -p 2 -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_conv.fds
-$QFDS -p 2 -d WUI ground_vegetation_drag.fds
+$QFDS -p 3 -d WUI ground_vegetation_drag.fds
 $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
