@@ -5063,7 +5063,7 @@ Since this is not a simple chemistry problem, either the enthalpy of formation o
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
       NU=-1,-1,1 /
 \end{lstlisting}
-Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion_fig} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time ({\ct FIXED\_MIXED\_TIME}) of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion_fig} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would req22uire {\ct NU=-2,-1,1}. A fixed turbulent mixing time ({\ct FIXED\_MIXED\_TIME}) of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 \begin{figure}[ht]
 \centering \includegraphics[height=2.2in]{SCRIPT_FIGURES/pvc_combustion_spec}
@@ -11132,7 +11132,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-{\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}                   & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
