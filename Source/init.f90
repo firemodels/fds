@@ -3195,7 +3195,10 @@ B1%AREA   = AW
 
 ! If the simulation is only a TGA analysis, get the wall index
 
-IF (WC%SURF_INDEX==TGA_SURF_INDEX) TGA_WALL_INDEX = IW
+IF (WC%SURF_INDEX==TGA_SURF_INDEX) THEN
+   TGA_WALL_INDEX = IW
+   TGA_MESH_INDEX = NM
+ENDIF
 
 ! Assign internal values of temp, density, and mass fraction
 
