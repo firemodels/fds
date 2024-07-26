@@ -36,6 +36,7 @@ INTEGER :: ICC,JCC
 REAL(EB) :: TNOW
 
 TNOW=CURRENT_TIME()
+T_USED(16) = 0._EB ! Zero out in case there is no chem integration this timestep
 
 CALL POINT_TO_MESH(NM)
 
