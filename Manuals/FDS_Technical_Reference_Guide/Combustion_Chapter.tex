@@ -342,14 +342,14 @@ For reactions other than single step, mixing controlled chemistry, a fourth-orde
 \label{detailed_chemistry_using_mechanism}
 A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in CHEMKIN or CANTERA YAML formats. Such a mechanism can be represented as:
 \begin{equation}\label{eq:chemistry_mechanism}
-\sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
+\sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
 \end{equation}
 Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{sp}}$ and ${N_{reac}}$ are the total number of species and total number of reactions, respectively.
 The rate of change of the molar concentration $\mathrm{(moles/m^3)}$ of each species can be represented using the following system of ordinary differential equations (ODEs):
 \begin{equation}\label{eq:chemistry_ode_system}
-\frac{dC_j}{dt} =  \dot{\omega_j} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ji} \ r_i
+\frac{dC_k}{dt} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
-The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_j$ is the molar concentration of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ji} = {\nu}_{ji}^{''} - {\nu}_{ji}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
+The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate}
 r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
@@ -360,32 +360,32 @@ The reaction rate modification coefficient, $b_i$, varies depending on the type 
 \begin{aligned}
 b_i &= 1, \ \text{for elementary reaction} \\
     &= \eta_{\mathrm{tb},i}, \ \text{for third body reactions} \\
-    &= \eta_{\mathrm{falloff},i}, \ \text{for falloff reactions} \\
+    &= \eta_{\mathrm{falloff},i}, \ \text{for fall-off reactions} \\
 \end{aligned}
 \end{equation}
-For third-body reactions, if the third-body efficiency of species $j$ in reaction $i$ (denoted as $\alpha_{ij}$) is provided, then
+For third-body reactions, presence of (or collission with) a third body (any other molecule) modify the reaction rate. If the third-body efficiency of species $j$ in reaction $i$ (denoted as $\alpha_{ij}$) is provided, then
 \be
 \eta_{\mathrm{tb},i} = \sum_{j=1}^{N_{sp}} \alpha_{ij}C_{j}
 \ee
 If the third-body efficiency is not provided, the default value of $\alpha_{ij}$ is 1.0.
 
-For falloff reactions:
+For fall-off reactions, reaction rates depend on both pressure and temperature:
 \be
-\eta_{\mathrm{falloff},i} =  \frac{P_{i}}{1+P_{i}} F_i
+\eta_{\mathrm{fall-off},i} =  \frac{P_{i}}{1+P_{i}} F_i
 \ee
 Here, $\mathrm{P_{i}}$ is the reduced pressure, calculated as follows:
 \be
 P_{i} =  \frac{k_{low,i}}{k_{f,i}} \eta_{\mathrm{tb},i}
 \ee
-Here, $k_{low,i}$ is calculated using an equation similar to Eq.~(\ref{eq:rate_cons}). The $A_{low,i}$, $n_{low,i}$, and $E_{a,low,i}$ should be available in the mechanism file for the given falloff reaction.
+Here, $k_{low,i}$ is the low pressure limit reaction rate, calculated using an equation similar to Eq.~(\ref{eq:rate_cons}). The $A_{low,i}$, $n_{low,i}$, and $E_{a,low,i}$ should be available in the mechanism file for the given fall-off reaction.
 \begin{equation}\label{eq:low_rate_cons}
 k_{low,i} = A_{low,i}\;T^{n_{low,i}}\;\mathrm{e}^{-E_{a,low,i}/RT}
 \end{equation}
-And, $\mathrm{F_{i}}$ is the falloff blending factor:
+And, $\mathrm{F_{i}}$ is the fall-off blending factor:
 \begin{equation}\label{eq:falloff_Fi}
 \begin{aligned}
-F_i &= 1, \ \text{for Lindermann falloff reaction} \\
-    &= exp\left( {\left[1+ {\left[\frac{log P_{r,i} + c}{n-d(log P_{r,i} + c)} \right]}^2 \right]^{-1} {log \ F_{cent} }} \right) , \ \text{for Troe falloff reaction} \\
+F_i &= 1, \ \text{for Lindermann fall-off reaction} \\
+    &= exp\left( {\left[1+ {\left[\frac{log P_{r,i} + c}{n-d(log P_{r,i} + c)} \right]}^2 \right]^{-1} {log \ F_{cent} }} \right) , \ \text{for Troe fall-off reaction} \\
 \end{aligned}
 \end{equation}
 Where, 
@@ -394,7 +394,7 @@ F_{\text{cent}} = (1 - A_{troe}) \exp\left(-\frac{T}{T_3}\right) + A_{troe} \exp
 \ee
 Here, $A_{troe}$, $T_1$, $T_2$, and $T_3$ are the specified parameters in the mechanism file. Additionally, $d=0.14$, $c=-0.4 - 0.67 \log F_{cent}$, and $n=0.75 - 1.27\log F_{cent}$.
 
-Please note, the SRI falloff reaction is not yet implemented and will be incorporated in the future. Also, other pressure-dependent reactions, except falloff reactions, are not yet implemented and will be incorporated if the need arises.
+Please note, the SRI fall-off reaction is not yet implemented and will be incorporated in the future. Also, other pressure-dependent reactions, except fall-off reactions, are not yet implemented and will be incorporated if the need arises.
 
 To solve the reactive system, we assume a constant pressure reactor. For that, the concentration ODEs in the form of Eq.~(\ref{eq:chemistry_ode_system}) need to be solved along with a ODE of temperature given by:
 \begin{equation}\label{eq:TemperatureDerivative}
