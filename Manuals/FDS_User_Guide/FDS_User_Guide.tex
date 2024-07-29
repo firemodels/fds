@@ -890,6 +890,7 @@ There may be situations where you would like to specify the time step sequence i
 &RAMP ID='time-ramp', T=1 /
 &RAMP ID='time-ramp', T=2 /
 &RAMP ID='time-ramp', T=5 /
+&RAMP ID='time-ramp', T=7 /
 &RAMP ID='time-ramp', T=9 /
 \end{lstlisting}
 
@@ -3325,7 +3326,7 @@ There are a number of techniques to measure the thermo-physical properties of a 
 The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct F}.
 
 \begin{warning}
-Note: If applying {\ct TGA\_ANALYSIS} to a multi-mesh case or a case where the {\ct SURF} is associated with a {\ct PART} class yet to be inserted into the calculation, FDS may not find the {\ct SURF} and hence throw an error.  It is best to simplify the domain to a single particle or wall cell in a single mesh.
+Note: If applying {\ct TGA\_ANALYSIS} to a case where the {\ct SURF} is associated with a {\ct PART} class yet to be inserted into the calculation, FDS may not find the {\ct SURF} and hence throw an error. In this case, create a simple case with a single particle that is inserted at the start.
 \end{warning}
 
 The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
@@ -7621,6 +7622,9 @@ It is possible to set a custom fuel for which the spread rate does not vary with
 For all models, the total mineral content $S_{\rm t}=0.056$, the effective mineral content $S_{\rm e}=0.01$, the heat of combustion $\Delta H=18600$~kW/kg, density $\rho_{\rm p}=510$~kg/m$^3$, moisture content of fine, medium, and large dead vegetation, $M_{\rm d,1}=0.03$, $M_{\rm d,2}=0.04$, $M_{\rm d,3}=0.05$, moisture content of live woody and herbaceous vegetation $M_{\rm l,w}=M_{\rm l,h}= 0.70$.
 \end{sidewaystable}
 
+\subsection{Level Set Vegetation Drag}
+When a surface is defined using level set fuel parameters, a drag force is applied in the gas phase grid cell adjacent to the boundary following the same approach described for the Boundary Fuel Model in Section~\ref{info:boundary_fuel_model}. In this case, the fuel surface-area to volume ratio ({\ct VEG\_LSET\_SIGMA}), packing ratio ({\ct VEG\_LSET\_BETA}), and depth ({\ct VEG\_LSET\_HT}) are either obtained from the default fuel models or specified by the user for a custom fuel. The shape factor ({\ct SHAPE\_FACTOR}) and drag coefficient ({\ct DRAG\_COEFFICIENT}) can also be modified from their default values of 0.25 and 2.8, respectively. A comparison of the consistency of the level set drag with the particle and boundary models is included in Figure~\ref{ground_vegetation_drag_fig}.
+
 \subsection{Simple Test Cases}
 
 \subsubsection{Examples of Uncoupled Level Set Calculations}
@@ -11257,7 +11261,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-{\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}                   & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
@@ -13719,6 +13723,7 @@ Keyword             & Type     & Description                      & Units       
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
      \>                                                                               \>                                     \\
+299  \> {\ct SURF \ldots\ has no solid or particle for TGA.                         } \> Section~\ref{info:TGA_DSC_MCC} \\
 300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
 301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
 302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\
