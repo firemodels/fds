@@ -5379,7 +5379,7 @@ A detailed chemical mechanism file can be specified to solve finite rate chemist
 \begin{lstlisting}
 &CATF OTHER_FILES= '<path to the fds chemical mechanism file>' /
 \end{lstlisting} 
-FDS-formatted chemical mechanism files can be generated from Chemkin \cite{chemkin:1989,chemkin:2000} or Cantera YAML format mechanism files following the instructions described below. For user convenience, a few example mechanism files are already included in the {\ct utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory of the GitHub repository {\ct firemodels/fds}. The steps to generate the FDS chemical mechanism file are as follows:
+FDS-formatted chemical mechanism files can be generated from Chemkin \cite{chemkin:1989,chemkin:2000} or Cantera YAML format mechanism files following the instructions described below. For user convenience, a few example mechanism files are already included in the {\ct Utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory of the GitHub repository {\ct firemodels/fds}. The steps to generate the FDS chemical mechanism file are as follows:
 \begin{enumerate}
 \item Ensure that the chemistry reactions file, thermodynamic properties file, and transport properties file are available in Chemkin format.
 \item Use the following Cantera \cite{cantera:2023} command to convert these three files to a YAML file

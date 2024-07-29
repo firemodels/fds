@@ -338,7 +338,7 @@ Note that the Gibbs free energy as a function of temperature is defined for any 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed. The change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
 
 
-\subsection{Finite-Rate Chemistry using a Detailed Chemical Mechanism}
+\subsection{Finite-Rate Chemistry (Detailed Chemical Mechanism)}
 \label{detailed_chemistry_using_mechanism}
 A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in CHEMKIN or CANTERA YAML formats. Such a mechanism can be represented as:
 \begin{equation}\label{eq:chemistry_mechanism}
@@ -347,7 +347,7 @@ A chemical mechanism represents different chemical pathways using multiple speci
 Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{sp}}$ and ${N_{reac}}$ are the total number of species and total number of reactions, respectively.
 The rate of change of the molar concentration $\mathrm{(moles/m^3)}$ of each species can be represented using the following system of ordinary differential equations (ODEs):
 \begin{equation}\label{eq:chemistry_ode_system}
-\frac{dC_k}{dt} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
+\frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
 The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate}
@@ -398,10 +398,10 @@ Please note, the SRI fall-off reaction is not yet implemented and will be incorp
 
 To solve the reactive system, we assume a constant pressure reactor. For that, the concentration ODEs in the form of Eq.~(\ref{eq:chemistry_ode_system}) need to be solved along with a ODE of temperature given by:
 \begin{equation}\label{eq:TemperatureDerivative}
-\frac{dT}{dt} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega_j} 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega_j} 
 \end{equation} 
-Here,  $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/mole) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
-To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the appendix \ref{chemistry_analytical_jacobian}.
+Here,  $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
+To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
 
 
 \subsection{Heat Release Rate}

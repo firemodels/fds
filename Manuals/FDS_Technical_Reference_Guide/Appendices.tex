@@ -846,21 +846,21 @@ The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which
 
 The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref{eq:chemistry_ode_system}) and (\ref{eq:TemperatureDerivative})
 \begin{equation}\label{eq:chemistry_ode_system_appendix}
-\frac{dC_k}{dt} =  \dot{\omega}_k = \sum_{i=1}^{N_{reac}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{sp}
+\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{reac}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{sp}
 \end{equation}
 \begin{equation}\label{eq:TemperatureDerivativeAppendix}
-\frac{dT}{dt} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j 
 \end{equation}
 For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate_appendix}
 r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
-For Eq.~(\ref{eq:TemperatureDerivativeAppendix}), $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/mole) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system_appendix}).
+For Eq.~(\ref{eq:TemperatureDerivativeAppendix}), $\rho$  is the density \si{(kg/m^3)}, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system_appendix}).
 
 The system of ODEs can be represented by:
 \be
 \begin{aligned}
-f &= \left[ \frac{dC_1}{dt} \ \frac{dC_2}{dt} \ldots \ \frac{dC_{N_{sp}}}{dt} \ \frac{dT}{dt} \right]^T \
+f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{sp}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
   &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{sp}} \ \dot{T} \right]^T \
 \end{aligned}
 \ee
