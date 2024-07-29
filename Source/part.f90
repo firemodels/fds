@@ -1565,7 +1565,10 @@ B1 => MESHES(NM)%BOUNDARY_PROP1(LP%B1_INDEX)
 
 IF (LPC%SOLID_PARTICLE) THEN
 
-   IF (LPC%SURF_INDEX==TGA_SURF_INDEX) TGA_PARTICLE_INDEX = NLP
+   IF (LPC%SURF_INDEX==TGA_SURF_INDEX) THEN
+      TGA_PARTICLE_INDEX = NLP
+      TGA_MESH_INDEX = NM
+   ENDIF
 
    LP%MASS = 0._EB
    SCALE_FACTOR = 1._EB
@@ -1912,6 +1915,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! HIT_SOLID indicates that it has.
 
       HIT_SOLID = .FALSE.
+      IW = 0
 
       ! Determine if the particle is near a CFACE, and if so, change its trajectory
 

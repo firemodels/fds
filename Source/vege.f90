@@ -331,7 +331,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR,&
-            SIN_THETA,COS_THETA
+            SIN_THETA,COS_THETA,THETA
 
 T_NOW = CURRENT_TIME()
 
@@ -360,24 +360,30 @@ DO JJG=1,JBAR
 
       ! Establish the wind field
 
-      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND) THEN  ! The wind speed is derived from the CFD computation
+      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND .AND. .NOT. LEVEL_SET_MODE==5) THEN  ! The wind speed is derived from the CFD
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
          V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
       ELSE IF_CFD_COUPLED  ! The wind velocity is specified by the user
 
-         ! Either there is a time varying direciton, or the components have already been scaled
-         IF (I_RAMP_DIRECTION_T/=0) THEN
-            SIN_THETA = -SIN(EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD)
-            COS_THETA = -COS(EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD)
+         ! Evaluate time and height varying profiles, using 6.1 m reference height
+         IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
+            IF (I_RAMP_DIRECTION_T==0) THEN
+               THETA=EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)*DEG2RAD
+            ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
+               THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
+             ELSE
+               THETA=(EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)+EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
+             ENDIF
+            SIN_THETA = -SIN(THETA)
+            COS_THETA = -COS(THETA)
          ELSE
             SIN_THETA = 1._EB
             COS_THETA = 1._EB
          ENDIF
-
-         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
-         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
+         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
+         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
 
       ENDIF IF_CFD_COUPLED
 
@@ -398,11 +404,6 @@ DO JJG=1,JBAR
             U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
             V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
 
-         ENDIF
-
-         IF (LEVEL_SET_MODE == 5) THEN
-           U_LS(IIG,JJG) = U0
-           V_LS(IIG,JJG) = V0
          ENDIF
 
          ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
@@ -769,61 +770,72 @@ FLUX_ILOOP: DO J=1,JBAR
 
       IF (LEVEL_SET_ELLIPSE) THEN
 
-         ! Effective wind direction (theta) is clockwise from y-axis (Richards 1990)
-         COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
-         SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
+         ! ROS does not change with wind or slope
+         IF (SURFACE(LS_SURF_INDEX(I,J))%VEG_LSET_ROS_FIXED) THEN
 
-         ROS_TMP = ROS_HEAD(I,J)
+            MAG_SR=SURFACE(LS_SURF_INDEX(I,J))%VEG_LSET_ROS_00
+            SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) !spread rate components
+            SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2)
 
-         ! Magnitude of wind speed at midflame height must be in units of m/s here
-
-         UMF_DUM = UMF(I,J)/60.0_EB
-
-         ! Length to breadth ratio of ellipse based on effective UMF (Bova et al., Eq. A6)
-
-         LB = 0.936_EB * EXP(0.2566_EB * UMF_DUM) + 0.461_EB * EXP(-0.1548_EB * UMF_DUM) - 0.397_EB
-
-         ! Constraint LB max = 8 from Finney 2004
-
-         LB = MAX(1.0_EB,MIN(LB,8.0_EB))  ! (Bova et al., Eq. A7)
-
-         ! Head to back ratio based on LB
-
-         LBD = SQRT(LB**2 - 1.0_EB)
-         HB = (LB + LBD) / (LB - LBD)
-
-         ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards
-
-         B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
-         B_ELPS2 = B_ELPS**2
-         A_ELPS =  B_ELPS / LB
-         A_ELPS2=  A_ELPS**2
-         C_ELPS =  B_ELPS - (ROS_TMP/HB)
-
-         ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990
-         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015
-
-         AROS  = XSF*COS_THETA - YSF*SIN_THETA
-         BROS  = XSF*SIN_THETA + YSF*COS_THETA
-         DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
-
-         IF (DENOM > 0._EB) THEN
-            DENOM = 1._EB / SQRT(DENOM)
          ELSE
-            DENOM = 0._EB
+
+            ! Effective wind direction (theta) is clockwise from y-axis (Richards 1990)
+            COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
+            SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
+
+            ROS_TMP = ROS_HEAD(I,J)
+
+            ! Magnitude of wind speed at midflame height must be in units of m/s here
+
+            UMF_DUM = UMF(I,J)/60.0_EB
+
+            ! Length to breadth ratio of ellipse based on effective UMF (Bova et al., Eq. A6)
+
+            LB = 0.936_EB * EXP(0.2566_EB * UMF_DUM) + 0.461_EB * EXP(-0.1548_EB * UMF_DUM) - 0.397_EB
+
+            ! Constraint LB max = 8 from Finney 2004
+
+            LB = MAX(1.0_EB,MIN(LB,8.0_EB))  ! (Bova et al., Eq. A7)
+
+            ! Head to back ratio based on LB
+
+            LBD = SQRT(LB**2 - 1.0_EB)
+            HB = (LB + LBD) / (LB - LBD)
+
+            ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards
+
+            B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
+            B_ELPS2 = B_ELPS**2
+            A_ELPS =  B_ELPS / LB
+            A_ELPS2=  A_ELPS**2
+            C_ELPS =  B_ELPS - (ROS_TMP/HB)
+
+            ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990
+            ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015
+
+            AROS  = XSF*COS_THETA - YSF*SIN_THETA
+            BROS  = XSF*SIN_THETA + YSF*COS_THETA
+            DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
+
+            IF (DENOM > 0._EB) THEN
+               DENOM = 1._EB / SQRT(DENOM)
+            ELSE
+               DENOM = 0._EB
+            ENDIF
+
+            ! This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in Bova et al. 2015 IJWF 2015
+
+            SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA  ! Bova et al., Eq. A8
+            SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA  ! Bova et al., Eq. A9
+
+            ! Project spread rates from slope to horizontal plane
+
+            IF (ABS(DZTDX(I,J)) > 0._EB) SR_X_LS(I,J) = SR_X_LS(I,J) * ABS(COS(ATAN(DZTDX(I,J))))
+            IF (ABS(DZTDY(I,J)) > 0._EB) SR_Y_LS(I,J) = SR_Y_LS(I,J) * ABS(COS(ATAN(DZTDY(I,J))))
+
+            MAG_SR = SQRT(SR_X_LS(I,J)**2 + SR_Y_LS(I,J)**2)
+
          ENDIF
-
-         ! This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in Bova et al. 2015 IJWF 2015
-
-         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA  ! Bova et al., Eq. A8
-         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA  ! Bova et al., Eq. A9
-
-         ! Project spread rates from slope to horizontal plane
-
-         IF (ABS(DZTDX(I,J)) > 0._EB) SR_X_LS(I,J) = SR_X_LS(I,J) * ABS(COS(ATAN(DZTDX(I,J))))
-         IF (ABS(DZTDY(I,J)) > 0._EB) SR_Y_LS(I,J) = SR_Y_LS(I,J) * ABS(COS(ATAN(DZTDY(I,J))))
-
-         MAG_SR = SQRT(SR_X_LS(I,J)**2 + SR_Y_LS(I,J)**2)
 
       ELSE ! McArthur Spread Model
 
@@ -1045,7 +1057,7 @@ END FUNCTION SCALAR_FACE_VALUE_LS
 REAL(EB) FUNCTION ROS_NO_WIND_NO_SLOPE(ROTHERMEL_FUEL_INDEX,SURF_INDEX)
 
 INTEGER, INTENT(IN) :: ROTHERMEL_FUEL_INDEX,SURF_INDEX
-REAL(EB) :: w0d1, w0d2, w0d3, w0lh, w0lw, md1, md2, md3, mlh, mlw, svd1, svd2, svd3, svlh, svlw, depth, rhop, heat, st, se, mx
+REAL(EB) :: w0, w0d1, w0d2, w0d3, w0lh, w0lw, md1, md2, md3, mlh, mlw, svd1, svd2, svd3, svlh, svlw, depth, rhop, heat, st, se, mx
 REAL(EB) :: swd1, swd2, swd3, swlh, swlw, swd, swl, swt, s2wt, sw2d, sw2l, swmd, swml, sigma, rhob, beta, &
             betaOpt, wnd, wnl, hnd1, hnd2, hnd3, hnlh, hnlw, hnd, hnl, bigW, hnmd, mfdead, mxlive, rml, rmd, etaMd, etaMl, etaM, &
             etas, gammaMax, bigA, gamma, bigIr, xi, epsd1, epsd2, epsd3, epslh, epslw, bigQd1, bigQd2, &
@@ -1114,7 +1126,19 @@ SELECT CASE(ROTHERMEL_FUEL_INDEX)
       mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
 END SELECT
 
+IF (SF%VEG_LSET_HT>0._EB) depth = SF%VEG_LSET_HT
 SF%VEG_LSET_HT = depth
+
+w0 = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)
+! Rescale loading if user-specified
+IF (SF%VEG_LSET_SURF_LOAD>0._EB) THEN
+   w0d1 = SF%VEG_LSET_SURF_LOAD/w0*w0d1
+   w0d2 = SF%VEG_LSET_SURF_LOAD/w0*w0d2
+   w0d3 = SF%VEG_LSET_SURF_LOAD/w0*w0d3
+   w0lh = SF%VEG_LSET_SURF_LOAD/w0*w0lh
+   w0lw = SF%VEG_LSET_SURF_LOAD/w0*w0lw
+   w0 = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)
+ENDIF
 
 ! Auxiliary functions
 
@@ -1139,11 +1163,13 @@ SF%VEG_LSET_SIGMA = sigma*0.01_EB  ! Convert from 1/m to 1/cm
 
 ! Mean bulk density [R(74)]
 
-rhob = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)/depth
+rhob = w0/depth
 
 ! Mean packing ratio [R(31,73)]
 
 beta = rhob/rhop
+! Specification of load, depth AND beta implies different material density
+IF (SF%VEG_LSET_BETA>0._EB) beta = SF%VEG_LSET_BETA
 SF%VEG_LSET_BETA = beta
 
 ! Optimal packing ratio [R(37)]
@@ -1249,9 +1275,11 @@ hsk  = rhob*hskz/swt
 
 bigIr = gamma*heat*etas*etaM
 
+IF (SF%VEG_LSET_FIREBASE_TIME<0._EB) SF%VEG_LSET_FIREBASE_TIME = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
+SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
+
 IF (LEVEL_SET_COUPLED_FIRE) THEN
    SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
-   SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
 ENDIF
 
 ! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
