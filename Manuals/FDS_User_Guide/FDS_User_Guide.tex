@@ -890,6 +890,7 @@ There may be situations where you would like to specify the time step sequence i
 &RAMP ID='time-ramp', T=1 /
 &RAMP ID='time-ramp', T=2 /
 &RAMP ID='time-ramp', T=5 /
+&RAMP ID='time-ramp', T=7 /
 &RAMP ID='time-ramp', T=9 /
 \end{lstlisting}
 
@@ -3325,7 +3326,7 @@ There are a number of techniques to measure the thermo-physical properties of a 
 The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct F}.
 
 \begin{warning}
-Note: If applying {\ct TGA\_ANALYSIS} to a multi-mesh case or a case where the {\ct SURF} is associated with a {\ct PART} class yet to be inserted into the calculation, FDS may not find the {\ct SURF} and hence throw an error.  It is best to simplify the domain to a single particle or wall cell in a single mesh.
+Note: If applying {\ct TGA\_ANALYSIS} to a case where the {\ct SURF} is associated with a {\ct PART} class yet to be inserted into the calculation, FDS may not find the {\ct SURF} and hence throw an error. In this case, create a simple case with a single particle that is inserted at the start.
 \end{warning}
 
 The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
@@ -4500,6 +4501,53 @@ The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed o
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies. Specifying either {\ct SPECIFIC\_HEAT} or {\ct RAMP\_CP} is considered to have explicitly defined $h(T_{\rm ref})$. If you still wish to use the default {\ct EPUMO2} or 13,100~kJ/kg, then you will need to explicitly define it on the {\ct REAC} input.
 
+The thermodynamic properties (specific heat, enthalpy, entropy, and other derived properties) of a species can also be specified using NASA polynomials, as shown below. Two sets of {\ct POLYNOMIAL\_COEFF} are specified: the first set is valid for the temperature range of 200 K to 1000 K, and the second set is valid for the temperature range of 1000 K to 5000 K, as indicated by the {\ct POLYNOMIAL\_TEMP} parameter. In general, detailed mechanisms (see Section \ref{info:detailedChemMech}) specify species properties using NASA polynomials. 
+
+\begin{lstlisting}
+&SPEC ID='OH',
+      PR_GAS= 0.763 ,
+      FORMULA='H1.0O1.0',
+      SIGMALJ= 2.75 ,
+      EPSILONKLJ= 80.0 ,
+      POLYNOMIAL='NASA7',
+      POLYNOMIAL_TEMP= 200.0,1000.0,5000.0,
+      POLYNOMIAL_COEFF(1:7,1)= 3.99,-0.002,4.61e-06,-3.88e-09,1.36e-12,3615.08,-0.104,
+      POLYNOMIAL_COEFF(1:7,2)= 3.09,0.0005,1.26e-07,-8.79e-11,1.17e-14,3858.65,4.47,
+      ENTHALPY_OF_FORMATION= 39.34692 /
+
+&SPEC ID='NAOH',
+      PR_GAS= 0.79 ,
+      FORMULA='H1.0Na1.0O1.0',
+      SIGMALJ= 3.804 ,
+      EPSILONKLJ= 1962.0 ,
+      POLYNOMIAL='NASA9',
+      POLYNOMIAL_TEMP= 200.0,1000.0,5000.0,
+      POLYNOMIAL_COEFF(1:9,1)= 34420.36,-792.32,8.99,-0.004,3.06e-06,-5.11e-10,-1.54e-13,-20869.51,-25.10,
+      POLYNOMIAL_COEFF(1:9,2)= 875378.77,-2342.51,7.97,0.0001,-6.26e-08,1.02e-11,-5.71e-16,-9509.90,-22.02,
+      ENTHALPY_OF_FORMATION= -190.99912 /    
+\end{lstlisting}
+For NASA7 polynomials, the molar specific heat (J/mol/K), molar specific enthalpy (J/mol), and molar specific entropy (J/mol/K) are calculated as follows
+\be
+\label{eq:NASA7}
+\begin{aligned}
+\frac{C_{p,\alpha}(T)}{R} = a_1 + a_2 T + a_3 T^2 + a_4 T^3 + a_5 T^4  \\
+\frac{H_{p,\alpha}(T)}{R} = a_1 T + \frac{a_2}{2} T^2 + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4 + \frac{a_5}{5} T^5 + a_6 \\
+\frac{S_{p,\alpha}(T)}{R} = a_1 \ln(T) + a_2 T + \frac{a_3}{2} T^2 + \frac{a_4}{3} T^3 + \frac{a_5}{4} T^4 + a_7
+\end{aligned}
+\ee
+Where $a_1, a_2, a_3, a_4, a_5, a_6, a_7$ are the polynomial coefficients specified by {\ct POLYNOMIAL\_COEFF}.
+
+For NASA9 polynomials, the same values are calculated as follows:
+\be
+\label{eq:NASA9}
+\begin{aligned}
+\frac{C_{p,\alpha}(T)}{R} = a_1 T^{-2} + a_2 T^{-1} + a_3 + a_4 T + a_5 T^2 + a_6 T^3 + a_7 T^4 \\
+\frac{H_{p,\alpha}(T)}{R} = -\frac{a_1}{T} + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 + \frac{a_7}{5} T^5 + a_8 \\
+\frac{S_{p,\alpha}(T)}{R} = -\frac{a_1}{2 T^2} - \frac{a_2}{T} + a_3 \ln(T) + a_4 T + \frac{a_5}{2} T^2 + \frac{a_6}{3} T^3 + \frac{a_7}{4} T^4 + a_9
+\end{aligned}
+\ee
+Where $a_1, a_2, a_3, a_4, a_5, a_6, a_7, a_8, \text{and} \ a_9$ are the polynomial coefficients specified by {\ct POLYNOMIAL\_COEFF}.
+
 Also note that if a predefined species name is used and any enthalpy related input in this section is specified for that species, FDS will not use the predefined enthalpy of formation.
 
 \subsubsection{Viscosity}
@@ -5325,6 +5373,26 @@ However, for the purposes of inputting into FDS, since H$_2$O is neither a produ
 
 As discussed previously (Sec.~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
+\subsection{Finite Rate Chemistry using a Detailed Chemical Mechanism }
+\label{info:detailedChemMech}
+A detailed chemical mechanism file can be specified to solve finite rate chemistry problems. For example, the GRI-3.0 \cite{gri3:1999} mechanism can be used to simulate methane combustion. Such a mechanism file contains various species and the relevant reactions representing the chemical pathways of fuel combustion. Users must ensure that the chosen mechanism is well-suited for their specific problem. In FDS, an FDS-formatted mechanism file can be specified using the following line:
+\begin{lstlisting}
+&CATF OTHER_FILES= '<path to the fds chemical mechanism file>' /
+\end{lstlisting} 
+FDS-formatted chemical mechanism files can be generated from Chemkin \cite{chemkin:1989,chemkin:2000} or Cantera YAML format mechanism files following the instructions described below. For user convenience, a few example mechanism files are already included in the {\ct Utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory of the GitHub repository {\ct firemodels/fds}. The steps to generate the FDS chemical mechanism file are as follows:
+\begin{enumerate}
+\item Ensure that the chemistry reactions file, thermodynamic properties file, and transport properties file are available in Chemkin format.
+\item Use the following Cantera \cite{cantera:2023} command to convert these three files to a YAML file
+\begin{lstlisting}
+ck2yaml --input=<reactions file> --thermo=<thermodynamic properties file> --transport=<transport properties file> --output=<output.yaml>
+\end{lstlisting} 
+\item Using the utility Python script {\ct Utilities/Python/scripts/cantera\_yaml\_2\_fds.py} from the {\ct firemodels/fds} GitHub repository, convert the output.yaml file to an FDS-formatted chemical mechanism file. Refer to the comments in the Python script for detailed usage.
+\begin{lstlisting}
+python Utilities/Python/scripts/cantera_yaml_2_fds.py output.yaml N2 > output.fds
+\end{lstlisting} 
+\end{enumerate}
+If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped. 
+
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
@@ -5354,6 +5422,52 @@ Some reactions require collision with a third body (any other molecule) to activ
 \mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
 \end{equation}
 This type of reaction is specified by adding {\ct THIRD\_BODY=T} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined. In some third body reactions one or more gas species may be more or less effective as a collision species. Any species with a non-unity collision efficiency can be listed using {\ct THIRD\_EFF\_ID(N)} and {\ct THIRD\_EFF(N)} to define the collision efficiencies of specific species.
+
+\subsection{Fall-off Reactions}
+\label{info:falloff_reactions}
+Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Folowing are the example of Lindermann-fall-off and Troe-fall-off reaction entires from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future. 
+
+\begin{lstlisting}
+&REAC ID='R12',
+     REACTYPE='FALLOFF-LINDEMANN',
+     REVERSE=T,
+     RADIATIVE_FRACTION=0,
+     A= 1.80000e+10 ,
+     THIRD_BODY=T, 
+     THIRD_EFF_ID= 'AR','C2H6','CH4','CO','CO2','H2','H2O','O2' ,
+     THIRD_EFF= 0.5,3.0,2.0,1.5,3.5,2.0,6.0,6.0 ,
+     E= 9978.84 , 
+     N_T= 0.0 ,
+     A_LOW_PR= 6.02000e+14 ,
+     E_LOW_PR= 12552.0 ,
+     N_T_LOW_PR= 0.0 ,
+     SPEC_ID_NU= 'CO','O' , 'CO2' ,
+     NU= -1.0,-1.0 , 1.0 /
+\end{lstlisting} 
+\begin{lstlisting}
+ &REAC ID='R50',
+     REACTYPE='FALLOFF-TROE',
+     REVERSE=T,
+     RADIATIVE_FRACTION=0,
+     A= 6.00000e+14 ,
+     THIRD_BODY=T, 
+     THIRD_EFF_ID= 'AR','C2H6','CH4','CO','CO2','H2','H2O' ,
+     THIRD_EFF= 0.7,3.0,2.0,1.5,2.0,2.0,6.0 ,
+     E= 0.0 ,
+     N_T= 0.0 ,
+     A_LOW_PR= 1.04000e+26 ,
+     E_LOW_PR= 6694.4 ,
+     N_T_LOW_PR= -2.76 ,
+     A_TROE= 0.562 ,
+     T1_TROE= 5836.0 ,
+     T2_TROE= 8552.0 ,
+     T3_TROE= 91.0 ,
+     SPEC_ID_NU= 'CH2','H' , 'CH3' ,
+     NU= -1.0,-1.0 , 1.0 /    
+\end{lstlisting} 
+For all fall-off reactions, {\ct REACTYPE} need to be specified as shown above. The low-pressure reaction rate coefficient is specified using {\ct A\_LOW\_PR}, {\ct N\_T\_LOW\_PR}, and {\ct E\_LOW\_PR}, similar to Eq.~(\ref{eq:reac_rate}). In the case of Troe reactions, the fall-off blending factor is calculated using {\ct A\_TROE}, {\ct T1\_TROE}, {\ct T2\_TROE}, and {\ct T3\_TROE}. For details, please refer to the FDS Tech Guide \cite{FDS_Math_Guide}.
+
+
 \subsection{Catalysts}
 
 Some reactions require the presence of a specific molecule to stabilize the reaction rather than any species as in a third body reaction. An example is given below:
@@ -5361,6 +5475,9 @@ Some reactions require the presence of a specific molecule to stabilize the reac
       \mathrm{a \, X + b \, Y + \, Z \rightarrow X_aY_b + Z }
 \end{equation}
 A catalyst can be specified by listing the catalyst species twice in {\ct SPEC\_ID\_NU} and giving the {\ct NU} values for each side of the equation. The reaction will move forward in FDS using the net {\ct NU} and the default value for {\ct NU\_S} will be the left-hand side stoichiometric coefficient. For a reverse reaction, the value or {\ct NU\_S} for the catalyst will be the right-hand side stoichiometric coefficient.
+
+
+
 
 \subsection{Chemical Time Integration}
 \label{info:chem_integration}
@@ -5371,6 +5488,18 @@ An important consideration for the time integration of chemical reactions is the
 
 If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]{\ct CHECK\_REALIZABILITY} to be {\ct T} on the {\ct COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
 
+For solving the chemistry with a detailed chemical mechanism (see Section \ref{info:detailedChemMech}), the recommended ODE solver is CVODE from Sundials \cite{cvodeDoc:2024}. The following line instructs FDS to solve the chemistry with the CVODE solver using an absolute error tolerance of $10^{-10}$ and a relative error tolerance of $10^{-8}$:
+\begin{lstlisting}
+&COMB 
+   FINITE_RATE_MIN_TEMP=300,
+   ODE_SOLVER='CVODE', 
+   ODE_MIN_ATOL=1E-10, 
+   ODE_REL_ERROR=1E-8, 
+   EQUIV_RATIO_CHECK=T, 
+   MIN_EQUIV_RATIO=0.2, 
+   MAX_EQUIV_RATIO=10.0 /
+\end{lstlisting}
+However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits.
 
 
 \newpage
@@ -7492,6 +7621,9 @@ It is possible to set a custom fuel for which the spread rate does not vary with
 \flushleft
 For all models, the total mineral content $S_{\rm t}=0.056$, the effective mineral content $S_{\rm e}=0.01$, the heat of combustion $\Delta H=18600$~kW/kg, density $\rho_{\rm p}=510$~kg/m$^3$, moisture content of fine, medium, and large dead vegetation, $M_{\rm d,1}=0.03$, $M_{\rm d,2}=0.04$, $M_{\rm d,3}=0.05$, moisture content of live woody and herbaceous vegetation $M_{\rm l,w}=M_{\rm l,h}= 0.70$.
 \end{sidewaystable}
+
+\subsection{Level Set Vegetation Drag}
+When a surface is defined using level set fuel parameters, a drag force is applied in the gas phase grid cell adjacent to the boundary following the same approach described for the Boundary Fuel Model in Section~\ref{info:boundary_fuel_model}. In this case, the fuel surface-area to volume ratio ({\ct VEG\_LSET\_SIGMA}), packing ratio ({\ct VEG\_LSET\_BETA}), and depth ({\ct VEG\_LSET\_HT}) are either obtained from the default fuel models or specified by the user for a custom fuel. The shape factor ({\ct SHAPE\_FACTOR}) and drag coefficient ({\ct DRAG\_COEFFICIENT}) can also be modified from their default values of 0.25 and 2.8, respectively. A comparison of the consistency of the level set drag with the particle and boundary models is included in Figure~\ref{ground_vegetation_drag_fig}.
 
 \subsection{Simple Test Cases}
 
@@ -11133,7 +11265,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-{\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}                   & $^\circ$C         & D,I,P,S      \\ \hline
+{\ct TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
@@ -11561,14 +11693,19 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 {\ct CHECK\_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & {\ct F}              \\ \hline
 {\ct COMPUTE\_ADIABATIC\_FLAME\_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & {\ct F}              \\ \hline
+{\ct EQUIV\_RATIO\_CHECK}                            & Logical    & Section~\ref{info:chem_integration}          &           & {\ct T}              \\ \hline
 {\ct EXTINCTION\_MODEL}                              & Character  & Section~\ref{info:extinction}                &           &                      \\ \hline
 {\ct FINITE\_RATE\_MIN\_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15              \\ \hline
 {\ct FIXED\_MIX\_TIME}                               & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                      \\ \hline
 {\ct FREE\_BURN\_TEMPERATURE}                        & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                       & Integer    & Section~\ref{info:chem_integration}          &           & 20                   \\ \hline
+{\ct MAX\_EQUIV\_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 10.0                 \\ \hline
+{\ct MIN\_EQUIV\_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 0.2.                 \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
 {\ct ODE\_SOLVER}                                    & Character  & Section~\ref{info:chem_integration}          &           &                      \\ \hline
+{\ct ODE\_MIN\_ATOL}                                 & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
+{\ct ODE\_REL\_ERROR}                                & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
 {\ct SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & {\ct T}              \\ \hline
 {\ct TAU\_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
@@ -12836,6 +12973,8 @@ Keyword             & Type     & Description                      & Units       
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                    &                   &                   \\ \hline
+{\ct A\_LOW\_PR}                          & Real           & Section~\ref{info:falloff_reactions}         &                   &                   \\ \hline
+{\ct A\_TROE}                             & Real           & Section~\ref{info:falloff_reactions}         &                   &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
@@ -12844,6 +12983,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real           & Section~\ref{info:extinction}                &   $^\circ$C       & 1427              \\ \hline
 {\ct E}                                   & Real           & Section~\ref{info:finite}                    &   J/mol           &                   \\ \hline
+{\ct E\_LOW\_PR}                          & Real           & Section~\ref{info:falloff_reactions}         &   J/mol           &                   \\ \hline
 {\ct EPUMO2}                              & Real           & Section~\ref{info:heat_of_combustion}        &   kJ/kg           & 13100             \\ \hline
 {\ct EQUATION}                            & Character      & Section~\ref{info:EQUATION}                  &                   &                   \\ \hline
 {\ct FUEL}                                & Character      & Section~\ref{info:simple_chemistry}          &                   &                   \\ \hline
@@ -12866,10 +13006,14 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-5             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
+{\ct REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
 {\ct REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & {\ct F}           \\ \hline
 {\ct SOOT\_YIELD}                         & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0.0               \\ \hline
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
+{\ct T1\_TROE}                            & Real           & Section~\ref{info:falloff_reactions}         & K                 &                   \\ \hline
+{\ct T2\_TROE}                            & Real           & Section~\ref{info:falloff_reactions}         & K                 &                   \\ \hline
+{\ct T3\_TROE}                            & Real           & Section~\ref{info:falloff_reactions}         & K                 &                   \\ \hline
 {\ct THIRD\_BODY}                         & Logical        & Section~\ref{info:finite}                    &                   & {\ct F}           \\ \hline
 {\ct THIRD\_EFF(:)}                       & Real Array     & Section~\ref{info:third_body}                &                   &                   \\ \hline
 {\ct THIRD\_EFF\_ID(:)}                   & Char.~Array    & Section~\ref{info:third_body}                &                   &                   \\ \hline
@@ -12990,6 +13134,11 @@ Keyword             & Type     & Description                      & Units       
 {\ct N}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct N\_BINS}                       & Integer           & Section~\ref{info:agglomeration}        &                   &               \\ \hline
 {\ct O}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct ODE\_ABS\_ERROR}               & Real              & Section~\ref{info:chem_integration}     &                   &               \\ \hline
+{\ct ODE\_REL\_ERROR}               & Real              & Section~\ref{info:chem_integration}     &                   &               \\ \hline
+{\ct POLYNOMIAL}                    & Character         & Section~\ref{info:Enthalpy}             &                   &               \\ \hline
+{\ct POLYNOMIAL\_COEFF(:)}          & Real Array        & Section~\ref{info:Enthalpy}             &                   &               \\ \hline
+{\ct POLYNOMIAL\_TEMP(:)}           & Real Array        & Section~\ref{info:Enthalpy}             &  K                &               \\ \hline
 {\ct PR\_GAS}                       & Real              & Section~\ref{gas_species_props}         &                   & {\ct PR}      \\ \hline
 {\ct PRIMITIVE}                     & Logical           & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character         & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
@@ -13579,6 +13728,7 @@ Keyword             & Type     & Description                      & Units       
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
      \>                                                                               \>                                     \\
+299  \> {\ct SURF \ldots\ has no solid or particle for TGA.                         } \> Section~\ref{info:TGA_DSC_MCC} \\
 300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
 301  \> {\ct SURF line must have an ID.                                             } \> Section~\ref{info:SURF}  \\
 302  \> {\ct SURF ID \ldots\ is used more than once.                                } \> Section~\ref{info:SURF}  \\

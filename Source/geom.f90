@@ -4928,14 +4928,14 @@ END SUBROUTINE SET_CUTCELLS_3D
 
 SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
 
-! Routine checks that external boundaries match among neighboring meshes. This is not strictly enforced 
+! Routine checks that external boundaries match among neighboring meshes. This is not strictly enforced
 ! by FDS but is required to compute same cut-cells on mesh ghost-cells and other mesh internal cells.
 
 USE MPI_F08
 
 ! Local variables:
 INTEGER :: NM,NOM,IW,IOR,IERR
-REAL(EB):: XM,XOM
+REAL(EB):: XM,XOM,MSIZE
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: BUFF
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -4945,26 +4945,26 @@ ALLOCATE(BUFF(2,NMESHES)); BUFF=0
 MESH_LP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    EXT_WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
+      WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP_1
       EWC=>EXTERNAL_WALL(IW)
       BC =>BOUNDARY_COORD(WC%BC_INDEX)
       IOR = BC%IOR; NOM = EWC%NOM; IF(NOM<1 .OR. NOM==NM) CYCLE EXT_WALL_LOOP_1
       M2 => MESHES(NOM)
       SELECT CASE(IOR)
-         CASE( IAXIS); XM=X(0);    XOM=M2%X(M2%IBAR) ! Low X for mesh NM, high X for mesh NOM
-         CASE(-IAXIS); XM=X(IBAR); XOM=M2%X(0)       ! High X for mesh NM, low X for mesh NOM
-         CASE( JAXIS); XM=Y(0);    XOM=M2%Y(M2%JBAR) ! Low Y for mesh NM, high Y for mesh NOM
-         CASE(-JAXIS); XM=Y(JBAR); XOM=M2%Y(0)       ! High Y for mesh NM, low Y for mesh NOM
-         CASE( KAXIS); XM=Z(0);    XOM=M2%Z(M2%KBAR) ! Low Z for mesh NM, high Z for mesh NOM
-         CASE(-KAXIS); XM=Z(KBAR); XOM=M2%Z(0)       ! High Z for mesh NM, low Z for mesh NOM
+         CASE( IAXIS); XM=X(0);    XOM=M2%X(M2%IBAR); MSIZE=X(IBAR)-X(0) ! Low X for mesh NM, high X for mesh NOM
+         CASE(-IAXIS); XM=X(IBAR); XOM=M2%X(0)      ; MSIZE=X(IBAR)-X(0) ! High X for mesh NM, low X for mesh NOM
+         CASE( JAXIS); XM=Y(0);    XOM=M2%Y(M2%JBAR); MSIZE=Y(JBAR)-Y(0) ! Low Y for mesh NM, high Y for mesh NOM
+         CASE(-JAXIS); XM=Y(JBAR); XOM=M2%Y(0)      ; MSIZE=Y(JBAR)-Y(0) ! High Y for mesh NM, low Y for mesh NOM
+         CASE( KAXIS); XM=Z(0);    XOM=M2%Z(M2%KBAR); MSIZE=Z(KBAR)-Z(0) ! Low Z for mesh NM, high Z for mesh NOM
+         CASE(-KAXIS); XM=Z(KBAR); XOM=M2%Z(0)      ; MSIZE=Z(KBAR)-Z(0) ! High Z for mesh NM, low Z for mesh NOM
       END SELECT
-      IF(ABS(XM-XOM)>10._EB*GEOMEPS) THEN
+      IF(ABS(XM-XOM)>10._EB*GEOMEPS .AND. ABS(XM-XOM)<0.5_EB*MSIZE) THEN
          BUFF(1:2,NM) = (/NM,NOM/)
          CYCLE MESH_LP
       ENDIF
    ENDDO EXT_WALL_LOOP_1
 ENDDO MESH_LP
-   
+
 ! Now All-Reduce mismatch
 CALL MPI_ALLREDUCE(MPI_IN_PLACE,BUFF(1,1),2*NMESHES,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
 
@@ -4986,14 +4986,14 @@ END SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
 SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
 
    USE MPI_F08
-   
+
    ! Local Variables:
    INTEGER :: NM,NOM,N,IERR,I,J,K,ICC,JCC
    TYPE(MESH_TYPE), POINTER :: M
    TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
    INTEGER :: N_REQ0
    LOGICAL :: PROCESS_SENDREC
-   
+
    ! Define cut-cells to be blocked for exchange:
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL POINT_TO_MESH(NM)
@@ -5023,7 +5023,7 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
          ENDDO
       ENDIF
    ENDDO
-   
+
    ! MPI Exchange:
    IF (N_MPI_PROCESSES>1) THEN
       ALLOCATE(REQ0(NMESHES)); N_REQ0 = 0
@@ -5055,7 +5055,7 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
          ENDDO
       ENDDO
       IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-   
+
       ! At this point values of MESHES(NM)%N_CC_BLOCKED are populated for PROCESSSED and NEIGNBORING meshes.
       DO NM=1,NMESHES
          IF (PROCESS(NM)==MY_RANK) CYCLE ! already done for this mesh at the beginning of the routine.
@@ -5064,7 +5064,7 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
             ALLOCATE(MESHES(NM)%JBT_CC_BLOCKED(2,MESHES(NM)%N_CC_BLOCKED))
          ENDIF
       ENDDO
-   
+
       ! Exchange blocked cutcells lists:
       ! Receive from neighbors:
       N_REQ0 = 0
@@ -5102,11 +5102,11 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
          ENDDO
       ENDDO
       IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-   
+
       ! Deallocate REQ0:
       IF(ALLOCATED(REQ0)) DEALLOCATE(REQ0)
    ENDIF
-   
+
    CONTAINS
    SUBROUTINE CHECK_REQ0_SIZE
    IF(N_REQ0>SIZE(REQ0,DIM=1)) THEN
@@ -5115,7 +5115,7 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
       CALL MOVE_ALLOC(REQ0DUM,REQ0)
    ENDIF
    END SUBROUTINE CHECK_REQ0_SIZE
-   
+
    END SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
 
 ! ----------------------- BLOCK_SMALL_UNLINKED_CUTCELLS ----------------------------

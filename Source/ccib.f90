@@ -14679,8 +14679,13 @@ ORIENTATION_LOOP: DO IS=1,3
             END SELECT
             VEL_T = SQRT(U1_T+U2_T)
             DUIDXJ(ICD_SGN)    = 0._EB
-            MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_FACE*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
-                                 SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+            IF (SF%VEG_LSET_SPREAD) THEN
+               MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_FACE*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%VEG_LSET_HT*&
+                                    SF%VEG_LSET_BETA*(SF%VEG_LSET_SIGMA*100._EB)*VEL_GAS*VEL_T
+            ELSE
+               MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_FACE*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
+                     SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+            ENDIF
             ALTERED_GRADIENT(ICD_SGN) = .TRUE.
       END SELECT
 
@@ -23539,6 +23544,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! X Face in high K
                      ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE IAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE IAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
@@ -23602,6 +23608,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(KK==K) THEN; IIO = I; JJO = J; KKO = K+1 ! Indexes of other Cartesian face @ K+1
                      ENDIF; IF(KKO<1 .OR. KKO>M%KBAR) CYCLE JAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE JAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))
@@ -23664,6 +23671,7 @@ ICF_LOOP_3 : DO ICF=1,M%N_CUTFACE_MESH
                      ELSEIF(JJ==J) THEN; IIO = I; JJO = J+1; KKO = K ! Indexes of other Cartesian face @ J+1
                      ENDIF; IF(JJO<1 .OR. JJO>M%JBAR) CYCLE KAXIS_IEC_LOOP_2
                   ENDIF
+               CASE DEFAULT; CYCLE KAXIS_IEC_LOOP_2
                END SELECT
                IF(COUNT+1>SIZE_FACE) THEN
                   ALLOCATE(FACELAUX(4,SIZE_FACE+20),FACEARAUX(SIZE_FACE+20))

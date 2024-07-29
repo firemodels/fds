@@ -451,7 +451,7 @@ $QFDS -d Pyrolysis surf_mass_part_specified.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cart.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cyl.fds
 $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
-$QFDS -d Pyrolysis tga_analysis.fds
+$QFDS -p 2 -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_pool.fds
@@ -791,7 +791,7 @@ $QFDS -d WUI char_oxidation_1.fds
 $QFDS -p 2 -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_conv.fds
-$QFDS -p 2 -d WUI ground_vegetation_drag.fds
+$QFDS -p 3 -d WUI ground_vegetation_drag.fds
 $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
