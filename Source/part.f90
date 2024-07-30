@@ -1440,7 +1440,7 @@ IF (IN%ID/='null') THEN
 
    DO ND=1,N_DEVC
       DV => DEVICE(ND)
-      IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
+      IF ((IN%ID==DV%INIT_ID .AND. IP==DV%POINT) .OR. DV%LP_TAG==PARTICLE_TAG) THEN
          IF (DV%LP_TAG>0 .AND. DV%LP_TAG/=PARTICLE_TAG) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: INIT_ID on DEVC ',TRIM(DV%ID),' cannot have more than one particle'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)

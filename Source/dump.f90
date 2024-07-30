@@ -6251,7 +6251,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ! particle is in the current mesh.
 
    LP_INDEX = 0
-   IF (DV%INIT_ID/='null') THEN
+   IF (DV%INIT_ID/='null' .OR. DV%LP_TAG>0) THEN
       IF (DV%LP_TAG>0) THEN
          CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%LP_TAG,LP_INDEX)
          IF (LP_INDEX==0) THEN
