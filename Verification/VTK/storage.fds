@@ -1,0 +1,188 @@
+&HEAD CHID='storage', TITLE='storage' /
+
+&MESH IJK=15,15,15, XB=-4.5,0,-4.5,0,0.0,4.5, MULT_ID='mesh' /
+&MULT ID='mesh', DX=4.5, DY=4.5, DZ=4.5, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+
+&TIME T_END=300. /
+
+&MISC TMPA=20., ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
+
+&SPEC ID='WATER VAPOR' /
+
+&DUMP NFRAMES=100, DT_CTRL=1., DT_DEVC=10., DT_HRR=10., SIG_FIGS=4, WRITE_VTK=T, RESULTS_DIR='storage_results' /
+
+&REAC FUEL = 'POLYSTYRENE'
+      FYI  = 'Styrene, C_8 H_8'
+      RADIATIVE_FRACTION=0.5
+      H    = 8.
+      C    = 8.
+      HEAT_OF_COMBUSTION = 40000.
+      SOOT_YIELD = 0.164
+      CO_YIELD   = 0.06 /
+
+&PART ID='water drops', SPEC_ID='WATER VAPOR', DIAMETER=1000. /
+
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74.,
+      PART_ID='water drops', FLOW_RATE=189.3, PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'  /
+
+&MATL ID            = 'CONCRETE'                                                                    
+      FYI           = 'Quintiere, Fire Behavior'                                                    
+      SPECIFIC_HEAT = 0.88                                                                          
+      DENSITY       = 2100.                                                                         
+      CONDUCTIVITY  = 1.0 /                                                                         
+
+&MATL ID            = 'STEEL'                                                        
+      FYI           = 'Quintiere, Fire Behavior'                                     
+      EMISSIVITY    = 0.8                                                            
+      DENSITY       = 7850.                                                          
+      CONDUCTIVITY  = 45.8                                                           
+      SPECIFIC_HEAT = 0.46 /                      
+
+&MATL ID            = 'TILE MATERIAL'                                                                                      
+      FYI           = 'UL Report NC987-96NK37863'
+      DENSITY       = 313.                                                                                              
+      SPECIFIC_HEAT = 0.753
+      CONDUCTIVITY  = 0.0611 /
+
+
+&SURF ID        = 'FLOOR'                                                              
+      COLOR     = 'GRAY'                                                                
+      MATL_ID   = 'CONCRETE'                                                                    
+      THICKNESS = 0.1 /   
+
+&SURF ID        = 'SHEET METAL'
+      MATL_ID   = 'STEEL'
+      COLOR     = 'BLACK'
+      THICKNESS = 0.0013 /
+
+&SURF ID        = 'CEILING TILE'
+      COLOR     = 'IVORY 2'
+      MATL_ID   = 'TILE MATERIAL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.016 /
+
+Commodity
+
+&MATL ID                    = 'YELLOW PINE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 640.
+      CONDUCTIVITY          = 0.14
+      SPECIFIC_HEAT         = 2.85
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'CORRUGATED PAPER'
+      DENSITY               = 200.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT         = 1.5
+      HEAT_OF_COMBUSTION    = 11500. /
+      EMISSIVITY            = 0.8 /
+
+&SURF ID                    = 'PLASTIC A'
+      FYI                   = 'FMRC Standard Plastic Commodity'
+      COLOR                 = 'TAN'
+      HRRPUA                = 500.
+      IGNITION_TEMPERATURE  = 370.
+      RAMP_Q                = 'GAP'
+      MATL_ID               = 'CORRUGATED PAPER'
+      THICKNESS             = 0.005
+      E_COEFFICIENT         =  0.5 /
+&RAMP ID='GAP',T=   0.0,F=0.0 /
+&RAMP ID='GAP',T=   1.0,F=0.6 /
+&RAMP ID='GAP',T=  30.0,F=0.2 /
+&RAMP ID='GAP',T=  80.0,F=1.6 /
+&RAMP ID='GAP',T= 100.0,F=1.0 /
+
+&SURF ID                    = 'PALLET'
+      MATL_ID               = 'YELLOW PINE'
+      COLOR                 = 'BROWN'
+      THICKNESS             = 0.012 /
+
+&SURF ID='IGNITOR', HRRPUA=1000., TAU_Q=60., COLOR='RED' /
+
+&MULT ID='pallet spacing', DX0=-0.525, DX=1.20, DY0=-1.125, DY=1.20, DZ=1.50, I_LOWER=-2, I_UPPER=2, J_UPPER=1, K_UPPER=3 /
+&MULT ID='ignitor spacing', DX0=-0.525, DY0=-1.125 /
+
+&OBST XB= 0.00, 0.9, 0.00, 0.9,  .3, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 0.9, 0.00, 0.9, 0.00, 0.3, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+
+&OBST XB= 0.9, 1.20, 0.30, 0.60, 0.00, 0.30, SURF_IDS='IGNITOR','PALLET','PALLET', MULT_ID='ignitor spacing' /
+
+Boundaries
+
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='CEILING TILE' /
+&VENT DB='ZMIN', SURF_ID='FLOOR' /
+
+&SLCF PBZ= 7.4,QUANTITY='TEMPERATURE' /
+
+Sprinklers
+
+&DEVC XYZ= -4,-4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_01' /
+&DEVC XYZ= -2,-4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_02' /
+&DEVC XYZ=  0,-4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_03' /
+&DEVC XYZ=  2,-4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_04' /
+&DEVC XYZ=  4,-4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_05' /
+&DEVC XYZ= -4,-2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_11' /
+&DEVC XYZ= -2,-2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_12' /
+&DEVC XYZ=  0,-2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_13' /
+&DEVC XYZ=  2,-2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_14' /
+&DEVC XYZ=  4,-2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_15' /
+&DEVC XYZ= -4, 0,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_21' /
+&DEVC XYZ= -2, 0,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_22' /
+&DEVC XYZ=  0, 0,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_23' /
+&DEVC XYZ=  2, 0,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_24' /
+&DEVC XYZ=  4, 0,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_25' /
+&DEVC XYZ= -4, 2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_31' /
+&DEVC XYZ= -2, 2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_32' /
+&DEVC XYZ=  0, 2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_33' /
+&DEVC XYZ=  2, 2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_34' /
+&DEVC XYZ=  4, 2,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_35' /
+&DEVC XYZ= -4, 4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_41' /
+&DEVC XYZ= -2, 4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_42' /
+&DEVC XYZ=  0, 4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_43' /
+&DEVC XYZ=  2, 4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_44' /
+&DEVC XYZ=  4, 4,8.85, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_45' /
+
+&CTRL ID='Act01', FUNCTION_TYPE='ANY', INPUT_ID='Spr_01' /
+&CTRL ID='Act02', FUNCTION_TYPE='ANY', INPUT_ID='Spr_02' /
+&CTRL ID='Act03', FUNCTION_TYPE='ANY', INPUT_ID='Spr_03' /
+&CTRL ID='Act04', FUNCTION_TYPE='ANY', INPUT_ID='Spr_04' /
+&CTRL ID='Act05', FUNCTION_TYPE='ANY', INPUT_ID='Spr_05' /
+&CTRL ID='Act11', FUNCTION_TYPE='ANY', INPUT_ID='Spr_11' /
+&CTRL ID='Act12', FUNCTION_TYPE='ANY', INPUT_ID='Spr_12' /
+&CTRL ID='Act13', FUNCTION_TYPE='ANY', INPUT_ID='Spr_13' /
+&CTRL ID='Act14', FUNCTION_TYPE='ANY', INPUT_ID='Spr_14' /
+&CTRL ID='Act15', FUNCTION_TYPE='ANY', INPUT_ID='Spr_15' /
+&CTRL ID='Act21', FUNCTION_TYPE='ANY', INPUT_ID='Spr_21' /
+&CTRL ID='Act22', FUNCTION_TYPE='ANY', INPUT_ID='Spr_22' /
+&CTRL ID='Act23', FUNCTION_TYPE='ANY', INPUT_ID='Spr_23' /
+&CTRL ID='Act24', FUNCTION_TYPE='ANY', INPUT_ID='Spr_24' /
+&CTRL ID='Act25', FUNCTION_TYPE='ANY', INPUT_ID='Spr_25' /
+&CTRL ID='Act31', FUNCTION_TYPE='ANY', INPUT_ID='Spr_31' /
+&CTRL ID='Act32', FUNCTION_TYPE='ANY', INPUT_ID='Spr_32' /
+&CTRL ID='Act33', FUNCTION_TYPE='ANY', INPUT_ID='Spr_33' /
+&CTRL ID='Act34', FUNCTION_TYPE='ANY', INPUT_ID='Spr_34' /
+&CTRL ID='Act35', FUNCTION_TYPE='ANY', INPUT_ID='Spr_35' /
+&CTRL ID='Act41', FUNCTION_TYPE='ANY', INPUT_ID='Spr_41' /
+&CTRL ID='Act42', FUNCTION_TYPE='ANY', INPUT_ID='Spr_42' /
+&CTRL ID='Act43', FUNCTION_TYPE='ANY', INPUT_ID='Spr_43' /
+&CTRL ID='Act44', FUNCTION_TYPE='ANY', INPUT_ID='Spr_44' /
+&CTRL ID='Act45', FUNCTION_TYPE='ANY', INPUT_ID='Spr_45' /
+
+Actuated Sprinklers
+
+&DEVC ID='Acts', XYZ=0.0,0.0,1.0, QUANTITY='ACTUATED SPRINKLERS' / 
+
+&BNDF QUANTITY='AMPUA', PART_ID='water drops', /
+&BNDF QUANTITY='WALL TEMPERATURE', /
+&BNDF QUANTITY='HRRPUA', /
+
+&SLCF XB=-4.5,4.5,-4.5,4.5,0.0,9.0, QUANTITY='TEMPERATURE', /
+&SLCF XB=-4.5,4.5,-4.5,4.5,0.0,9.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN' /
+&SLCF XB=-4.5,4.5,-4.5,4.5,0.0,9.0, QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT' /
+&SLCF XB=-4.5,4.5,-4.5,4.5,0.0,9.0, QUANTITY='VISIBILITY', /
+
+&TAIL /
