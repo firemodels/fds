@@ -1461,7 +1461,7 @@ IF (IN%ID/='null') THEN
 
    DO ND=1,N_PROF
       PF => PROFILE(ND)
-      IF (IN%ID==PF%INIT_ID) THEN
+      IF (IN%ID==PF%INIT_ID .OR. PF%LP_TAG==PARTICLE_TAG) THEN
          IF (PF%LP_TAG>0 .AND. PF%LP_TAG/=PARTICLE_TAG) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: INIT_ID on PROF ',TRIM(PF%ID),' cannot have more than one particle'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
