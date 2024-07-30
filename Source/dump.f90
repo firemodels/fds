@@ -6543,6 +6543,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE DEFAULT
 
+               VALUE = HUGE(1._EB)
+
                PARTICLE_LOOP2: DO IP=1,NLP
                   LP=>LAGRANGIAN_PARTICLE(IP)
                   IF (LP%CLASS_INDEX/=DV%PART_CLASS_INDEX) CYCLE PARTICLE_LOOP2
@@ -6555,6 +6557,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   B1 => BOUNDARY_PROP1(LP%B1_INDEX)
                   CALL SELECT_SPATIAL_STATISTIC(OPT_LP_INDEX=IP)
                ENDDO PARTICLE_LOOP2
+
+               ! If no appropriate particles are found, set the value of the device to 0
+
+               IF (ABS(VALUE)>1.E+100_EB) SDV%VALUE_1 = 0._EB
 
          END SELECT
 
