@@ -2597,27 +2597,17 @@ TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 CHARACTER(LABEL_LENGTH) :: HEADING
 
-M => MESHES(NM)
-
 PROF_LOOP: DO N=1,N_PROF
 
    PF => PROFILE(N)
 
-   IF (PF%ID/='null') THEN
-      HEADING = PF%ID
-   ELSE
-      HEADING = OUTPUT_QUANTITY(PF%QUANTITY_INDEX)%SHORT_NAME
-   ENDIF
-
-   IF (PF%MESH/=NM) CYCLE PROF_LOOP
-
-   II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
-   JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
-   KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
-
-   IF (PF%IOR/=0) THEN
-      ! The PROFile is for a WALL cell
+   IF (PF%IOR/=0) THEN  ! The PROFile is for a WALL cell
+      IF (PF%MESH/=NM) CYCLE PROF_LOOP
+      M => MESHES(NM)
       IOR = PF%IOR
+      II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
+      JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
+      KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
       CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
       IF (IW>0) THEN
          PF%WALL_INDEX = IW
@@ -2633,20 +2623,7 @@ PROF_LOOP: DO N=1,N_PROF
       SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(PF%PART_CLASS_INDEX)%SURF_INDEX)
    ENDIF
 
-   IF (APPEND .AND. PF%FORMAT_INDEX==1) THEN
-      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
-   ELSE
-      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
-      IF (PF%FORMAT_INDEX==1) THEN
-         IF (PF%IOR/=0) THEN ! Wall cell
-            WRITE(LU_PROF(N),'(A)') "ID, IOR, face center x(m), face center y(m), face center z(m)"
-            WRITE(LU_PROF(N),'(A,A,I3,A,E16.9,A,E16.9,A,E16.9)') TRIM(PF%ID),", ",PF%IOR,", ",BC%X,", ",BC%Y,", ",BC%Z
-         ELSE
-            WRITE(LU_PROF(N),'(A)') TRIM(PF%ID)
-         ENDIF
-         WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
-      ENDIF
-   ENDIF
+   ! Check for potential errors
 
    IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
       WRITE(LU_ERR,'(A,I0,A)') 'ERROR(430): PROF ',N,' must be associated with a heat-conducting surface.'
@@ -2669,6 +2646,33 @@ PROF_LOOP: DO N=1,N_PROF
          RETURN
       ENDIF
    ENDIF
+
+   ! If the PROFile is applied to a particle, let the root MPI process open and close the file. Other MPI processes can then
+   ! open and write to the file if the particle moves from mesh to mesh.
+
+   IF (PF%IOR==0 .AND. NM>1) CYCLE PROF_LOOP
+
+   IF (APPEND .AND. PF%FORMAT_INDEX==1) THEN
+      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+   ELSE
+      OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
+      IF (PF%FORMAT_INDEX==1) THEN
+         IF (PF%IOR/=0) THEN ! Wall cell
+            WRITE(LU_PROF(N),'(A)') "ID, IOR, face center x(m), face center y(m), face center z(m)"
+            WRITE(LU_PROF(N),'(A,A,I3,A,E16.9,A,E16.9,A,E16.9)') TRIM(PF%ID),", ",PF%IOR,", ",BC%X,", ",BC%Y,", ",BC%Z
+         ELSE
+            WRITE(LU_PROF(N),'(A)') TRIM(PF%ID)
+         ENDIF
+         IF (PF%ID/='null') THEN
+            HEADING = PF%ID
+         ELSE
+            HEADING = OUTPUT_QUANTITY(PF%QUANTITY_INDEX)%SHORT_NAME
+         ENDIF
+         WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
+      ENDIF
+   ENDIF
+
+   CLOSE(LU_PROF(N))
 
 ENDDO PROF_LOOP
 
