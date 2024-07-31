@@ -340,7 +340,7 @@ For reactions other than single step, mixing controlled chemistry, a fourth-orde
 
 \subsection{Finite-Rate Chemistry (Detailed Chemical Mechanism)}
 \label{detailed_chemistry_using_mechanism}
-A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in CHEMKIN or CANTERA YAML formats. Such a mechanism can be represented as:
+A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in Chemkin or Cantera YAML formats. Such a mechanism can be represented as:
 \begin{equation}\label{eq:chemistry_mechanism}
 \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
 \end{equation}
@@ -349,7 +349,7 @@ The rate of change of the molar concentration $\mathrm{(moles/m^3)}$ of each spe
 \begin{equation}\label{eq:chemistry_ode_system}
 \frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
-The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
+The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration \si {(kmol/m^3)} of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate}
 r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
