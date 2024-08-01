@@ -345,7 +345,7 @@ A chemical mechanism represents different chemical pathways using multiple speci
 \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
 \end{equation}
 Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{sp}}$ and ${N_{reac}}$ are the total number of species and total number of reactions, respectively.
-The rate of change of the molar concentration $\mathrm{(moles/m^3)}$ of each species can be represented using the following system of ordinary differential equations (ODEs):
+The rate of change of the molar concentration \si{(kmol/m^3/s)} of each species can be represented using the following system of ordinary differential equations (ODEs):
 \begin{equation}\label{eq:chemistry_ode_system}
 \frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
