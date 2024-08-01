@@ -3757,7 +3757,7 @@ In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:
 
 
 \section{Ignition Delay verification with Cantera (\textct{ignition\_delay})}
-\label{ignition_delay_verification}
+\label{ignition_delay}
 Twelve constant volume ignition delay cases are compared with the output from Cantera \cite{cantera:2023} to verify the implementation of detailed chemical mechanisms, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. Cantera, an open-source software suite, is widely used for modeling chemical systems. These cases use methane ($\mathrm{CH_4}$) as fuel, with chemical kinetics represented by the GRI-3 mechanism \cite{gri3:1999}. They are configured for equivalence ratios of 0.6, 1.0, and 1.4, with initial temperatures of 626.85~$^\circ$C (900 K), 726.85~$^\circ$C (1000 K), 826.85~$^\circ$C (1100 K), and 926.85~$^\circ$C (1200 K) at standard atmospheric pressure.  The comparisons of temperature and OH mass fraction between FDS and Cantera are shown in Figs. ~\ref{fig:ignition_delay_phi_0.6}-\ref{fig:ignition_delay_phi_1.4}.
 
 
