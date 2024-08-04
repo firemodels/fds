@@ -1160,11 +1160,11 @@ DO N=1,M%N_SLCF
          CC_VAL = 0
       ENDIF
       IF (SL%ID/='null') THEN
-         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6,1X,I6,1X)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),&
-                                                 ' ! ',SL%SLCF_INDEX, CC_VAL
+         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6,1X,I6,1X,I6,1X)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),&
+                                                 ' ! ',SL%SLCF_INDEX, CC_VAL, SL%IOR
       ELSE
-         WRITE(SLICELABEL,'(A,A,A,A,I6,1X,I6,1X)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),&
-                                             ' ! ',SL%SLCF_INDEX, CC_VAL
+         WRITE(SLICELABEL,'(A,A,A,A,I6,1X,I6,1X,I6,1X)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),&
+                                             ' ! ',SL%SLCF_INDEX, CC_VAL, SL%IOR
       ENDIF
       IF (SL%SLICETYPE=='STRUCTURED') THEN
          IF (SL%CELL_CENTERED) THEN
