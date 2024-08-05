@@ -23,6 +23,7 @@ T = np.array([900, 1000, 1100, 1200])
 
 csvdata = pd.DataFrame()
 caseCount = 0
+writeInterval = 20
 
 for phi in equivRatios:
     estimated_ignition_delay_times = np.ones_like(T, dtype=float)
@@ -38,6 +39,7 @@ for phi in equivRatios:
     for i, state in enumerate(ignition_delays):
         caseCount = caseCount +1
         stateArr = []
+        stateArrReduced = []
         # Setup the gas and reactor
         gas.TPX = state.TPX
         r = ct.IdealGasReactor(contents=gas, name="Batch Reactor")
@@ -54,11 +56,23 @@ for phi in equivRatios:
             time_history.append(t)
             reference_species_history.append(gas[reference_species].X[0])
             stateArr.append([t, gas[reference_species].Y[0],gas.T-273.15 ]) 
-    
         i_ign = np.array(reference_species_history).argmax()
         tau = time_history[i_ign]
         t1 = time.time()
-        stateArrDF = pd.DataFrame(stateArr)
+        
+        # Reduce number of timesteps to reduce file size
+        # Before ignition delay+0.1 s write after every writeInterval variable 
+        # After that write all the times.
+        tCount = 0
+        for j in range(len(stateArr)):
+            t= stateArr[j][0]
+            if (t < tau + 0.1):
+                if (tCount%writeInterval ==0):
+                    stateArrReduced.append(stateArr[j])
+            else:
+                stateArrReduced.append(stateArr[j])
+            tCount = tCount+1
+        stateArrDF = pd.DataFrame(stateArrReduced)
         
         caseIndx = str(caseCount)
         if caseCount ==1:
