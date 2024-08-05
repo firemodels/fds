@@ -92,11 +92,17 @@ for phi in equivRatios:
     
         ignition_delays[i].tau = tau
    
-# Set Dataframe column headers
+# Set Dataframe column headers and writing format
+timeFormat = '{:10.5f}'
+OHFormat = '{:.3E}'
+TMPFormat = '{:10.2f}'
 colPerCase = 3 # Time, OH, TMP
 for i in range(caseCount):
     caseIndx = str(i+1)
     csvdata = csvdata.rename(columns={i*colPerCase: 'Time'+caseIndx, i*colPerCase+1: 'OH'+caseIndx, i*colPerCase+2: 'TMP'+caseIndx})
+    csvdata['Time'+caseIndx] = csvdata['Time'+caseIndx].map(lambda x: timeFormat.format(x))
+    csvdata['OH'+caseIndx] = csvdata['OH'+caseIndx].map(lambda x: OHFormat.format(x))
+    csvdata['TMP'+caseIndx] = csvdata['TMP'+caseIndx].map(lambda x: TMPFormat.format(x))
 
 csvdata.to_csv(Chemistry_DIR+"cantera_ignition_delay.csv",index=False)
 
