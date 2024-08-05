@@ -2312,9 +2312,9 @@ SUB_TIMESTEP_LOOP: DO
       DO I=NWP-1,0,-1
          R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
       ENDDO
-
       X_S_NEW(0) = 0._EB
       CELL_ZERO = .FALSE.
+
       DO I=1,NWP
          X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
          ! If Cell disappears we must remesh
@@ -2360,22 +2360,24 @@ SUB_TIMESTEP_LOOP: DO
          ENDDO
       ENDIF
 
+      ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
+
       REMESH_CHECK = ANY(ABS(REGRID_FACTOR-1._EB)>TWO_EPSILON_EB)
-      
+      WRITE(*,*) 'RM ',REMESH_CHECK,REGRID_FACTOR(1),REMESH_LAYER(1:ONE_D%N_LAYERS),ALL(.NOT. REMESH_LAYER(1:ONE_D%N_LAYERS))
+
       ! Some node changes size but no layer trips remesh check. Just redo node weight with X_S_NEW      
      
-      IF (REMESH_CHECK .AND. ALL(.NOT. REMESH_LAYER)) THEN
-         ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
+      IF (REMESH_CHECK .AND. ALL(.NOT. REMESH_LAYER(1:ONE_D%N_LAYERS))) THEN
          X_S_NEW = 0._EB
          CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS(1:ONE_D%N_LAYERS),SF%GEOMETRY, &
                                    ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB, &
                                    LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS)
       ENDIF
-      
+
       ! Some layer needs to be checked for a remesh.
       
-      REMESH_LAYER_1: IF (ANY(REMESH_LAYER)) THEN
-
+      REMESH_LAYER_1: IF (ANY(REMESH_LAYER(1:ONE_D%N_LAYERS))) THEN
+         WRITE(*,*) 'RM1'
          NWP_NEW = 0
          THICKNESS = 0._EB
          I = 0
@@ -2388,7 +2390,7 @@ SUB_TIMESTEP_LOOP: DO
             
             IF (ONE_D%LAYER_THICKNESS(NL) < 0.1_EB*ONE_D%MINIMUM_LAYER_THICKNESS(NL)) THEN
                N_LAYER_CELLS_NEW(NL) = 0._EB
-               X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP) = X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP)-ONE_D%LAYER_THICKNESS(NL)
+               ONE_D%X(I+ONE_D%N_LAYER_CELLS(NL):NWP) = ONE_D%X(I+ONE_D%N_LAYER_CELLS(NL):NWP)-ONE_D%LAYER_THICKNESS(NL)
                ONE_D%LAYER_THICKNESS(NL) = 0._EB
                CYCLE LAYER_LOOP
             ENDIF
@@ -2414,7 +2416,7 @@ SUB_TIMESTEP_LOOP: DO
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                DO N = I,I+ONE_D%N_LAYER_CELLS(NL)-1
-                  IF (X_S_NEW(I+1)-X_S_NEW(I) < ONE_D%SMALLEST_CELL_SIZE(NL)) ONE_D%SMALLEST_CELL_SIZE(NL) = X_S_NEW(I+1)-X_S_NEW(I)
+                  IF (ONE_D%X(I+1)-ONE_D%X(I) < ONE_D%SMALLEST_CELL_SIZE(NL)) ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%X(I+1)-ONE_D%X(I)
                ENDDO
                THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
                ONE_D%LAYER_THICKNESS(NL) = 1.E9_EB
@@ -2427,20 +2429,21 @@ SUB_TIMESTEP_LOOP: DO
             CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),ONE_D%STRETCH_FACTOR(NL),&
                                    ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
                                    N_LAYER_CELLS_NEW(NL),ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
-
             THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
             I = I + ONE_D%N_LAYER_CELLS(NL)       
-            NWP_NEW = NWP_NEW + ONE_D%LAYER_THICKNESS(NL)
+            NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
             
          ENDDO LAYER_LOOP
 
       ELSE
-         
+         WRITE(*,*) 'RM2'
          NWP_NEW = NWP
          THICKNESS = SUM(ONE_D%LAYER_THICKNESS)
       
       ENDIF REMESH_LAYER_1
 
+
+      WRITE(*,*) 'NWPN',NWP_NEW,ONE_D%LAYER_THICKNESS(1),ONE_D%SMALLEST_CELL_SIZE(1),REMESH_LAYER(1:ONE_D%N_LAYERS)
       ! Shrinking wall has gone to zero thickness.
 
       IF (THICKNESS<=TWO_EPSILON_EB) THEN
@@ -2466,12 +2469,9 @@ SUB_TIMESTEP_LOOP: DO
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
       ENDIF
 
-      ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
-      X_S_NEW = 0._EB
-      
       ! Re-generate grid for a wall changing thickness
       
-      REMESH_LAYER_2: IF (ANY(REMESH_LAYER)) THEN
+      REMESH_LAYER_2: IF (ANY(REMESH_LAYER(1:ONE_D%N_LAYERS))) THEN
          RHO_H_S = 0._EB
          TMP_S = 0._EB
 
@@ -2492,20 +2492,28 @@ SUB_TIMESTEP_LOOP: DO
             ENDDO
             TMP_S(I)=ONE_D%TMP(I)*VOL
          ENDDO
-
+         WRITE(*,*) 'NN2',NWP,NWP_NEW
+         WRITE(*,*) 'RHS',RHO_H_S(1:NWP)
+         WRITE(*,*) 'TMP',ONE_D%TMP(1:NWP)
+         WRITE(*,*) 'TMS',TMP_S(1:NWP)
          CALL GET_WALL_NODE_COORDINATES(NWP_NEW,NWP,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%N_LAYER_CELLS, &
             ONE_D%SMALLEST_CELL_SIZE,ONE_D%STRETCH_FACTOR,REMESH_LAYER(1:ONE_D%N_LAYERS),&
             X_S_NEW(0:NWP_NEW),ONE_D%X(0:NWP),ONE_D%LAYER_THICKNESS(1:ONE_D%N_LAYERS))
+         WRITE(*,*) 'XS2',X_S_NEW(0:NWP_NEW)
+         WRITE(*,*) 'ODX',ONE_D%X(0:NWP)
          CALL GET_WALL_NODE_WEIGHTS(NWP_NEW,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
             X_S_NEW(0:NWP_NEW),LAYER_DIVIDE,DX_S(1:NWP_NEW),RDX_S(0:NWP_NEW+1),RDXN_S(0:NWP_NEW),&
             DX_WGT_S(0:NWP_NEW),DXF,DXB,LAYER_INDEX(0:NWP_NEW+1),MF_FRAC(1:NWP_NEW),SF%INNER_RADIUS)
-
+         IF(NWP_NEW < NWP) ONE_D%DX_OLD(NWP_NEW:NWP) = 0._EB ! Zero out old values if needed 
+         ONE_D%DX_OLD(1:NWP_NEW) = DX_S(1:NWP_NEW)
          ! Interpolate densities and temperature from old grid to new grid
 
          ALLOCATE(INT_WGT(NWP_NEW,NWP),STAT=IZERO)
          CALL GET_INTERPOLATION_WEIGHTS(SF%GEOMETRY,NWP,NWP_NEW,SF%INNER_RADIUS,ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)
          N_CELLS = MAX(NWP,NWP_NEW)
-
+         DO I=1,NWP
+            WRITE(*,*) 'IWT',INT_WGT(:,I)
+         ENDDO
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,TMP_S(1:N_CELLS))
@@ -2514,6 +2522,8 @@ SUB_TIMESTEP_LOOP: DO
             VOL = (THICKNESS+SF%INNER_RADIUS-X_S_NEW(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-X_S_NEW(I))**I_GRAD
             TMP_S(I) = TMP_S(I) / VOL
          ENDDO
+         WRITE(*,*) 'RHS',RHO_H_S(1:NWP)
+         WRITE(*,*) 'TMS',TMP_S(1:NWP)
 
          DO N=1,ONE_D%N_MATL
             ML  => MATERIAL(ONE_D%MATL_INDEX(N))
@@ -2528,6 +2538,7 @@ SUB_TIMESTEP_LOOP: DO
             H_NODE = RHO_H_S(I)
             T_NODE = TMP_S(I)
             ITER = 0
+            WRITE(*,*) I,H_NODE,T_NODE
             T_SEARCH: DO
                ITER = ITER + 1
                C_S = 0._EB
@@ -2569,16 +2580,7 @@ SUB_TIMESTEP_LOOP: DO
          ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS) = N_LAYER_CELLS_NEW(1:ONE_D%N_LAYERS)
          NWP = NWP_NEW
          ONE_D%X(0:NWP) = X_S_NEW(0:NWP)      ! Note: X(NWP+1...) are not set to zero.
-       
-      ELSE REMESH_LAYER_2
-
-         ! Only need new node weight if some cell changed size.
-         
-         IF (REMESH_CHECK) CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,N_LAYER_CELLS_NEW, &
-                           ONE_D%LAYER_THICKNESS(1:ONE_D%N_LAYERS),SF%GEOMETRY,ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),&
-                           RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),&
-                           SF%INNER_RADIUS)
-        
+     
       ENDIF REMESH_LAYER_2
 
 !      REMESH_GRID: IF (CHANGE_THICKNESS) THEN

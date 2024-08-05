@@ -223,6 +223,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE           !< Specified constant cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: STRETCH_FACTOR      !< Amount to stretch cells away from the surface
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE         !< Heat addition within solid (W/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SWELL_RATIO         !< Maximum possible swelling for layer.
 
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
@@ -771,6 +772,7 @@ TYPE MATERIAL_TYPE
    INTEGER :: I_RAMP_C_S=-1                             !< Index of specific heat RAMP
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LPC         !< Number of particle classes
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CHILD_MATL     !< Array giving all materials incorporated by successive reactions
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
@@ -909,14 +911,23 @@ TYPE SURFACE_TYPE
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1,RAMP_H_FIXED_INDEX=-1,RAMP_H_FIXED_B_INDEX=-1
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
-   INTEGER :: N_LAYERS,N_MATL,N_SPEC=0,N_LPC=0,N_CONE_CURVES=0
+   INTEGER :: N_LAYERS        !< Number of layers in the surface
+   INTEGER :: N_SPEC=0        !< Number of tracked species emitted by the surface
+   INTEGER :: N_LPC=0         !< Number of particle classes emitted by the surface
+   INTEGER :: N_CONE_CURVES=0 !< Total number of time vs. heat release rate curves specified for the S-pyro model
+   INTEGER :: N_MATL          !< Total number of unique materials over all layers
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX    !< Index for Spyro integrated TIME_HEAT arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX          !< Index for Spyro reference heat flux arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX           !< Index for Spyro integrated TIME_HEAT to time arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: THICK2QREF        !< Map of refernce flux and thicknesses
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX      !< Index to internal heat source ramp
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS      !< Number of wall cells per material layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX        !< The layer each wall cell belongs to
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX         !< Indices of the unique materials of all layers
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_PART_INDEX    !< The particle classes the surface emits
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_CHILD_MATL       !< Number of unique materials per layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX   !< Index for Spyro integrated TIME_HEAT arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX         !< Index for Spyro reference heat flux arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX          !< Index for Spyro integrated TIME_HEAT to time arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: THICK2QREF       !< Map of refernce flux and thicknesses
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LAYER_CHILD_INDEX !< Indices of the unique materials for each layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX     !< Index to internal heat source ramp
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
    INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL
    INTEGER :: N_QDOTPP_REF=0                           !< Number of reference heat fluxes provided for S_Pyro method
