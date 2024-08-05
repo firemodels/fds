@@ -15007,7 +15007,7 @@ SUBROUTINE READ_SLCF
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
 REAL(EB) :: AGL_SLICE
 INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,GEOM_INDEX,IOR
-LOGICAL :: VECTOR,CELL_CENTERED,DEBUG
+LOGICAL :: VECTOR,CELL_CENTERED,DEBUG,CULL_SLICE
 CHARACTER(LABEL_LENGTH) :: QUANTITY,SPEC_ID,PART_ID,QUANTITY2,PROP_ID,REAC_ID,SLICETYPE
 REAL(EB), PARAMETER :: TOL=1.E-10_EB
 REAL(FB) :: RLE_MIN, RLE_MAX
@@ -15144,13 +15144,36 @@ MESH_LOOP: DO NM=1,NMESHES
 
       ! Reject a slice if it is beyond the bounds of the current mesh
 
-      IF (XB(1)>=XF .OR. XB(2)<=XS .OR. XB(3)>=YF .OR. XB(4)<=YS .OR. XB(5)>=ZF .OR. XB(6)<=ZS) THEN
+      CULL_SLICE = .FALSE.
+      SELECT CASE (IOR)
+         CASE(1)
+            IF (XB(3)>=YF .OR. XB(4)<=YS .OR. XB(5)>=ZF .OR. XB(6)<=ZS) THEN
+               CULL_SLICE = .TRUE.
+            ELSE
+               IF (XB(1)>XF .OR. XB(2)<XS) CULL_SLICE =.TRUE.
+            ENDIF
+         CASE(2)
+            IF (XB(1)>=XF .OR. XB(2)<=XS .OR. XB(5)>=ZF .OR. XB(6)<=ZS) THEN
+               CULL_SLICE = .TRUE.
+            ELSE
+               IF (XB(3)>YF .OR. XB(4)<YS) CULL_SLICE =.TRUE.
+            ENDIF
+         CASE(3)
+            IF (XB(1)>=XF .OR. XB(2)<=XS .OR. XB(3)>=YF .OR. XB(4)<=YS) THEN
+               CULL_SLICE = .TRUE.
+            ELSE
+               IF (XB(5)>ZF .OR. XB(6)<ZS) CULL_SLICE =.TRUE.
+            ENDIF
+         CASE DEFAULT
+            IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) CULL_SLICE = .TRUE.
+      END SELECT      
+      IF (CULL_SLICE) THEN
          N_SLCF = N_SLCF - 1
          IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF - 2
          IF (VECTOR .AND. .NOT. TWO_D) N_SLCF = N_SLCF - 3
          CYCLE SLCF_LOOP
       ENDIF
-
+      
       ! Process vector quantities
 
       NITER = 1
