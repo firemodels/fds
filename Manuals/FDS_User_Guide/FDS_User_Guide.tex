@@ -2543,10 +2543,10 @@ The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved 
 
 Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
 \begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /  Web
-&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB' /  Upper Flange
-&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB' /  Lower Flange
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
 \end{lstlisting}
 
 \begin{figure}[!ht]
@@ -9530,23 +9530,25 @@ To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+The parameter {\ct DEPTH} (m) indicates a location inside the solid. A positive value indicates the distance from the front surface; a negative value indicates the distance (in absolute value) from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point moves towards the back side of the solid. Eventually, the point may emerge from the solid, in which case it returns the ambient temperature. Measuring the distance from the back surface may be more appropriate in this case.
 
-Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the center corresponding to the solid cell temperature being output by {\ct 'INSIDE WALL TEMPERATURE'}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
+In general, the discrete points within a solid are stretched starting at the surface. If the solid cell center position is needed, it may be output using
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
 \end{lstlisting}
-The output should lie within half a solid grid cell distance from the specified {\ct DEPTH}.
+The output value should lie within half a solid cell distance from the specified {\ct DEPTH}.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
+This produces a time history of the density of the material referred to as {\ct 'wood'}. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given. 
 
-To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
+To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'}. This quantity requires a {\ct MATL\_ID}.
 
-Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
+To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities do not take the optional {\ct MATL\_ID} keyword. 
+
+Note that these inner solid quantities are allowed only for devices ({\ct DEVC}) or profiles ({\ct PROF}), not contoured boundares ({\ct BNDF}).
 
 \subsubsection{Back Surface Temperature}
 \label{info:BACK}
@@ -11816,7 +11818,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
 {\ct DB}                    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
-{\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
+{\ct DEPTH}                 & Real            & Section~\ref{info:DEPTH}                                        & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
 {\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F}       \\ \hline
