@@ -24,12 +24,11 @@ There is an extra flat plate attached to the box adding to the fuel mass.
 
 &SURF ID                   = 'FOAM SLAB'
       COLOR                = 'TOMATO 3'
-      MATL_ID              = 'FOAM'
       VARIABLE_THICKNESS   = T
       BURN_AWAY            = T /
 
-&OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB', BULK_DENSITY=20. /
-&OBST XB=0.29,0.30,0.20,0.80,0.20,0.80, SURF_ID='FOAM SLAB', BULK_DENSITY=20. /
+&OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB', BULK_DENSITY=20., MATL_ID='FOAM' /
+&OBST XB=0.29,0.30,0.20,0.80,0.20,0.80, SURF_ID='FOAM SLAB', BULK_DENSITY=20., MATL_ID='FOAM' /
 
 &SURF ID='HOT', TMP_FRONT=1100., COLOR='RED' /
 
