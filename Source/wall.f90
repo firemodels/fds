@@ -1842,6 +1842,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
    LP => LAGRANGIAN_PARTICLE(PARTICLE_INDEX)
    ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
    B1 => BOUNDARY_PROP1(LP%B1_INDEX)
+   IF (TEST_CHAR_MASS_TRANSFER_MODEL) B2 => BOUNDARY_PROP2(LP%B2_INDEX)
    BC => BOUNDARY_COORD(LP%BC_INDEX)
    SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
    SF => SURFACE(SURF_INDEX)
@@ -2800,73 +2801,138 @@ CONTAINS
 
 SUBROUTINE PERFORM_PYROLYSIS
 
-REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_SPECIFIC_HEAT
+REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,ZZ_GET
 REAL(EB), DIMENSION(MAX_MATERIALS) :: RHO_TEMP,M_DOT_S_PPP
-REAL(EB) :: Q_DOT_G_PPP,Q_DOT_O2_PPP
+REAL(EB) :: Q_DOT_G_PPP,Q_DOT_O2_PPP,CP_FILM,TMP_FILM,H_MASS,&
+            Y_O2_G,Y_O2_F,M_DOT_O2_PP,Y_LOWER,Y_UPPER,M_DOT_ERROR,M_DOT_ERROR_OLD,Y_O2_F_OLD,DEDY,DY,DE
 REAL(EB), DIMENSION(MAX_LPC) :: Q_DOT_PART,M_DOT_PART
+INTEGER :: ITER,MAX_ITER
 LOGICAL :: REMOVE_LAYER
+REAL(EB), PARAMETER :: M_DOT_ERROR_TOL=1.E-6_EB
 
-! Set mass and energy fluxes to zero for this time sub-iteration
+! Get surface oxygen mass fraction
 
-M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
-M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
-M_DOT_S_PP(1:ONE_D%N_MATL)             = 0._EB
-Q_DOT_G_PP                             = 0._EB
-Q_DOT_O2_PP                            = 0._EB
-M_DOT_PART_S                           = 0._EB
-Q_DOT_PART_S                           = 0._EB
+IF (O2_INDEX>0) THEN
+   ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES))
+   CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2_F)
+ELSE
+   Y_O2_F = 0._EB
+ENDIF
 
-! Loop over all solid cells and compute the reaction rate of each material component, N, in each cell, I, RHO_DOT(N,I)
+MAX_ITER=1
 
-POINT_LOOP1: DO I=1,NWP
+! Initialize parameters for oxidative pyrolysis mass transfer model
 
-   ! Create a temporary array to hold the material component densities at the current depth layer, I
+IF (TEST_CHAR_MASS_TRANSFER_MODEL) THEN
+   MAX_ITER=20
+   Y_O2_G  = Y_O2_F
+   Y_LOWER = 0._EB
+   Y_UPPER = Y_O2_G
+   Y_O2_F  = MIN(B2%Y_O2_F,Y_O2_G) ! initial guess for Newton method (B2 only available for wall cell right now)
+   TMP_FILM = (B1%TMP_F+TMP(BC%IIG,BC%JJG,BC%KKG))/2._EB
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
+   H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
+   M_DOT_ERROR = 0._EB
+   DY = 0._EB
+ENDIF
 
-   DO N=1,ONE_D%N_MATL
-      RHO_TEMP(N) = ONE_D%MATL_COMP(N)%RHO(I)
-   ENDDO
+O2_LOOP: DO ITER=1,MAX_ITER
 
-   IF (ONE_D%LAYER_THICKNESS(LAYER_INDEX(I))<ONE_D%MINIMUM_LAYER_THICKNESS(LAYER_INDEX(I))) THEN
-      REMOVE_LAYER = .TRUE.
-      B1%LAYER_REMOVED = .TRUE.
-   ELSE
-      REMOVE_LAYER = .FALSE.
-   ENDIF
+   ! Set mass and energy fluxes to zero for this time sub-iteration
 
-   IF (PRESENT(PARTICLE_INDEX)) THEN
-      CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,BC%IOR,&
-                     RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
-                     M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
-                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I,&
-                     R_DROP=R_SURF,LPU=U_SURF,LPV=V_SURF,LPW=W_SURF)
-   ELSE
-      CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,BC%IOR,&
-                     RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
-                     M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
-                     Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I)
-   ENDIF
+   M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+   M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+   M_DOT_S_PP(1:ONE_D%N_MATL)             = 0._EB
+   Q_DOT_G_PP                             = 0._EB
+   Q_DOT_O2_PP                            = 0._EB
+   M_DOT_PART_S                           = 0._EB
+   Q_DOT_PART_S                           = 0._EB
 
-   ! Sum the mass and heat generation within the solid layers (PPP) and transfer result to the surface (PP).
+   ! Loop over all solid cells and compute the reaction rate of each material component, N, in each cell, I, RHO_DOT(N,I)
 
-   IF (ONE_D%N_LAYERS==1 .AND. REMOVE_LAYER) MF_FRAC(I) = 1._EB
-   GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
+   POINT_LOOP1: DO I=1,NWP
 
-   Q_DOT_G_PP  = Q_DOT_G_PP  + Q_DOT_G_PPP *GEOM_FACTOR
-   Q_DOT_O2_PP = Q_DOT_O2_PP + Q_DOT_O2_PPP*GEOM_FACTOR
+      ! Create a temporary array to hold the material component densities at the current depth layer, I
 
-   M_DOT_G_PP_ADJUST = M_DOT_G_PP_ADJUST + M_DOT_G_PPP_ADJUST*GEOM_FACTOR
-   M_DOT_G_PP_ACTUAL = M_DOT_G_PP_ACTUAL + M_DOT_G_PPP_ACTUAL*GEOM_FACTOR
+      DO N=1,ONE_D%N_MATL
+         RHO_TEMP(N) = ONE_D%MATL_COMP(N)%RHO(I)
+      ENDDO
 
-   M_DOT_S_PP(1:ONE_D%N_MATL) = M_DOT_S_PP(1:ONE_D%N_MATL)  + M_DOT_S_PPP(1:ONE_D%N_MATL)*GEOM_FACTOR
+      IF (ONE_D%LAYER_THICKNESS(LAYER_INDEX(I))<ONE_D%MINIMUM_LAYER_THICKNESS(LAYER_INDEX(I))) THEN
+         REMOVE_LAYER = .TRUE.
+         B1%LAYER_REMOVED = .TRUE.
+      ELSE
+         REMOVE_LAYER = .FALSE.
+      ENDIF
 
-   ! Compute particle mass flux at the surface
+      IF (PRESENT(PARTICLE_INDEX)) THEN
+         CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,Y_O2_F,BC%IOR,&
+                        RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
+                        M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
+                        Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I,&
+                        R_DROP=R_SURF,LPU=U_SURF,LPV=V_SURF,LPW=W_SURF)
+      ELSE
+         CALL PYROLYSIS(ONE_D%N_MATL,ONE_D%MATL_INDEX,SURF_INDEX,BC%IIG,BC%JJG,BC%KKG,ONE_D%TMP(I),B1%TMP_F,Y_O2_F,BC%IOR,&
+                        RHO_DOT(1:ONE_D%N_MATL,I),RHO_TEMP(1:ONE_D%N_MATL),ONE_D%X(I-1),DX_S,DT_BC_SUB,&
+                        M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),Q_DOT_G_PPP,Q_DOT_O2_PPP,&
+                        Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B1%B_NUMBER,LAYER_INDEX(I),REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX=I)
+      ENDIF
 
-   IF (ONE_D%N_LPC > 0) THEN
-      M_DOT_PART_S(1:ONE_D%N_LPC) = M_DOT_PART_S(1:ONE_D%N_LPC) + GEOM_FACTOR * M_DOT_PART(1:ONE_D%N_LPC)
-      Q_DOT_PART_S(1:ONE_D%N_LPC) = Q_DOT_PART_S(1:ONE_D%N_LPC) + GEOM_FACTOR * Q_DOT_PART(1:ONE_D%N_LPC)
-   ENDIF
+      ! Sum the mass and heat generation within the solid layers (PPP) and transfer result to the surface (PP).
 
-ENDDO POINT_LOOP1
+      IF (ONE_D%N_LAYERS==1 .AND. REMOVE_LAYER) MF_FRAC(I) = 1._EB
+      GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
+
+      Q_DOT_G_PP  = Q_DOT_G_PP  + Q_DOT_G_PPP *GEOM_FACTOR
+      Q_DOT_O2_PP = Q_DOT_O2_PP + Q_DOT_O2_PPP*GEOM_FACTOR
+
+      M_DOT_G_PP_ADJUST = M_DOT_G_PP_ADJUST + M_DOT_G_PPP_ADJUST*GEOM_FACTOR
+      M_DOT_G_PP_ACTUAL = M_DOT_G_PP_ACTUAL + M_DOT_G_PPP_ACTUAL*GEOM_FACTOR
+
+      M_DOT_S_PP(1:ONE_D%N_MATL) = M_DOT_S_PP(1:ONE_D%N_MATL)  + M_DOT_S_PPP(1:ONE_D%N_MATL)*GEOM_FACTOR
+
+      ! Compute particle mass flux at the surface
+
+      IF (ONE_D%N_LPC > 0) THEN
+         M_DOT_PART_S(1:ONE_D%N_LPC) = M_DOT_PART_S(1:ONE_D%N_LPC) + GEOM_FACTOR * M_DOT_PART(1:ONE_D%N_LPC)
+         Q_DOT_PART_S(1:ONE_D%N_LPC) = Q_DOT_PART_S(1:ONE_D%N_LPC) + GEOM_FACTOR * Q_DOT_PART(1:ONE_D%N_LPC)
+      ENDIF
+
+   ENDDO POINT_LOOP1
+
+   !======== Mass transfer resistance to surface O2 concentration =============
+   CHAR_MASS_TRANSFER_MODEL_IF: IF (TEST_CHAR_MASS_TRANSFER_MODEL) THEN
+      ! Solve for Y_O2_F using bounded Newton method
+      M_DOT_O2_PP = H_MASS*(Y_O2_F - Y_O2_G)
+      M_DOT_ERROR_OLD = M_DOT_ERROR
+      M_DOT_ERROR = M_DOT_G_PP_ACTUAL(O2_INDEX)-M_DOT_O2_PP
+
+      IF (ABS(M_DOT_ERROR)<M_DOT_ERROR_TOL) THEN
+         B2%Y_O2_F = Y_O2_F
+         B2%Y_O2_ITER = ITER
+         EXIT O2_LOOP
+      ENDIF
+
+      IF (M_DOT_ERROR<0._EB) THEN
+         Y_UPPER = Y_O2_F
+      ELSE
+         Y_LOWER = Y_O2_F
+      ENDIF
+      Y_O2_F_OLD = Y_O2_F
+      DE = M_DOT_ERROR-M_DOT_ERROR_OLD
+      IF (ABS(DE)>TWO_EPSILON_EB) THEN
+         ! use Newton
+         Y_O2_F = MIN(Y_UPPER,MAX(Y_LOWER, Y_O2_F_OLD - M_DOT_ERROR*DY/DE ))
+      ELSE
+         ! bisect
+         Y_O2_F = 0.5_EB*(Y_LOWER+Y_UPPER)
+      ENDIF
+      DY = Y_O2_F - Y_O2_F_OLD
+   ENDIF CHAR_MASS_TRANSFER_MODEL_IF
+   !===========================================================================
+
+ENDDO O2_LOOP
 
 END SUBROUTINE PERFORM_PYROLYSIS
 
@@ -2883,6 +2949,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER
 !> \param KKG K index of nearest gas phase cell
 !> \param TMP_S Solid interior temperature (K)
 !> \param TMP_F Solid surface temperature (K)
+!> \param Y_O2_F Solid surface value of oxygen mass fraction
 !> \param IOR Index of orientation of the surface with the liquid droplet, if appropropriate (0 for gas phase droplet)
 !> \param RHO_DOT_OUT (1:N_MATS) Array of component reaction rates (kg/m3/s)
 !> \param RHO_S (1:N_MATS) Array of component densities (kg/m3)
@@ -2909,7 +2976,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER
 !> \param LPV (OPTIONAL) y component of droplet velocity (m/s)
 !> \param LPW (OPTIONAL) z component of droplet velocity (m/s)
 
-SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,IOR,RHO_DOT_OUT,RHO_S,DEPTH,DX_S,DT_BC,&
+SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,Y_O2_F,IOR,RHO_DOT_OUT,RHO_S,DEPTH,DX_S,DT_BC,&
                      M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_S_PPP,Q_DOT_G_PPP,Q_DOT_O2_PPP,&
                      Q_DOT_PART,M_DOT_PART,T_BOIL_EFF,B_NUMBER,LAYER_INDEX,REMOVE_LAYER,ONE_D,B1,SOLID_CELL_INDEX,&
                      R_DROP,LPU,LPV,LPW)
@@ -2922,7 +2989,7 @@ INTEGER, INTENT(IN) :: N_MATS,SURF_INDEX,IIG,JJG,KKG,IOR,LAYER_INDEX
 INTEGER, INTENT(IN), OPTIONAL :: SOLID_CELL_INDEX
 LOGICAL, INTENT(IN) :: REMOVE_LAYER
 REAL(EB), INTENT(OUT), DIMENSION(:,:) :: RHO_DOT_OUT(N_MATS)
-REAL(EB), INTENT(IN) :: TMP_S,TMP_F,DT_BC,DEPTH
+REAL(EB), INTENT(IN) :: TMP_S,TMP_F,DT_BC,DEPTH,Y_O2_F
 REAL(EB), INTENT(IN), OPTIONAL :: R_DROP,LPU,LPV,LPW
 REAL(EB), INTENT(IN), DIMENSION(NWP_MAX) :: DX_S
 REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES),Y_ALL(1:N_SPECIES)
@@ -2936,9 +3003,9 @@ TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
-REAL(EB) :: REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
+REAL(EB) :: REACTION_RATE,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
             D_FILM,H_MASS,RE_L,SHERWOOD,MFLUX,MU_FILM,SC_FILM,TMP_FILM,TMP_G,U2,V2,W2,VEL,&
-            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_Y_GAS,SUM_Y_SV,NU_O2_CHAR,Y_O2_S,&
+            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_Y_GAS,SUM_Y_SV,NU_O2_CHAR,Y_O2,Y_O2_S,&
             SUM_Y_SV_SMIX(N_TRACKED_SPECIES),X_L_SUM,RHO_DOT_EXTRA,MFLUX_MAX,RHO_FILM,CP_FILM,PR_FILM,K_FILM,EVAP_FILM_FAC
 LOGICAL :: LIQUID(N_MATS),SPEC_ID_ALREADY_USED(N_MATS),DO_EVAPORATION
 
@@ -3093,6 +3160,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
       IF (PRESENT(R_DROP)) THEN
          LENGTH_SCALE = 2._EB*R_DROP
       ELSE
+
          LENGTH_SCALE = SF%CONV_LENGTH
       ENDIF
       RE_L     = RHO_FILM*VEL*LENGTH_SCALE/MU_FILM
@@ -3181,21 +3249,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
             ! Oxidation reaction?
 
-            IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-               ! Get oxygen mass fraction
-               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
-               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-               !======== Mass transfer resistance to surface O2 concentration =============
-               IF (TEST_CHAR_MASS_TRANSFER_MODEL) THEN
-                  TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
-                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
-                  D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),O2_INDEX)
-                  H_MASS = B1%HEAT_TRANS_COEF/CP_FILM
-                  Y_O2 = Y_O2*(H_MASS/(H_MASS + D_FILM/ML%GAS_DIFFUSION_DEPTH(J)))
-               ENDIF
-               !===========================================================================
-               ! Calculate oxygen volume fraction in the gas cell
-               X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
+            IF ( ML%N_O2(J)>0._EB .AND. O2_INDEX>0 ) THEN
+               ! Calculate oxygen volume fraction at the surface
+               X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2_F/RSUM(IIG,JJG,KKG)
                ! Calculate oxygen concentration inside the material, assuming decay function
                X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
