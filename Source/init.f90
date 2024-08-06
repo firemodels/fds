@@ -2631,17 +2631,17 @@ PROF_LOOP: DO N=1,N_PROF
       RETURN
    ENDIF
 
-   IF (PF%MATL_ID/='null') THEN
+   IF (PF%MATL_INDEX>0) THEN
       SUCCESS = .FALSE.
       DO NN=1,SF%N_MATL
-         IF (PF%MATL_ID==SF%MATL_NAME(NN)) THEN
+         IF (PF%MATL_INDEX==SF%MATL_INDEX(NN)) THEN
             SUCCESS = .TRUE.
             EXIT
          ENDIF
       ENDDO
       IF (.NOT. SUCCESS) THEN
-         WRITE(LU_ERR,'(A,I3,A,A,A,A,A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(PF%MATL_ID),' not part of surface type ',&
-                      TRIM(SF%ID),' at the profile location.'
+         WRITE(LU_ERR,'(A,I3,5A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(MATERIAL(PF%MATL_INDEX)%ID),&
+                              ' not part of surface type ',TRIM(SF%ID),' at the profile location.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
@@ -4268,9 +4268,11 @@ END SUBROUTINE FIND_THIN_WALL_BACK_INDEX
 
 
 !> \brief Update list of material indices
+!> \details The list of materials on the search list are checked against the X list and added if not there. Then the residues
+!> of the materials added to the X list are checked, and the residues of the residues, etc.
 !> \param N_MATLS_SEARCH Number of materials in the array to be searched
-!> \param MATL_INDEX_SEARCH Array of material indices
-!> \param N_MATLS_X Number of materials on the list
+!> \param MATL_INDEX_SEARCH Array of material indices on the search list
+!> \param N_MATLS_X Number of materials on the new list
 !> \param MATL_INDEX_X Array of new material indices
 
 SUBROUTINE ADD_MATERIAL(N_MATLS_SEARCH,MATL_INDEX_SEARCH,N_MATLS_X,MATL_INDEX_X)
@@ -4279,10 +4281,12 @@ INTEGER, INTENT(IN) :: N_MATLS_SEARCH
 INTEGER, INTENT(IN), DIMENSION(N_MATLS_SEARCH) :: MATL_INDEX_SEARCH
 INTEGER, INTENT(INOUT) :: N_MATLS_X
 INTEGER, INTENT(INOUT), DIMENSION(MAX_MATERIALS) :: MATL_INDEX_X
-INTEGER :: JJ,MI,JJJ,NR,NRE
+INTEGER :: JJ,MI,JJJ,NR,NRE,NEXT_MI
 TYPE (MATERIAL_TYPE), POINTER :: ML
 
 MATL_LOOP: DO JJ=1,N_MATLS_SEARCH
+
+   ! For each material, JJ, on the search list, determine if it has already been added to the X list. If not, add it.
 
    MI = MATL_INDEX_SEARCH(JJ)
    IF (MI<1) EXIT MATL_LOOP
@@ -4292,16 +4296,25 @@ MATL_LOOP: DO JJ=1,N_MATLS_SEARCH
    N_MATLS_X = N_MATLS_X + 1
    MATL_INDEX_X(N_MATLS_X) = MI
 
-   ML => MATERIAL(MI)
-   REACTION_LOOP: DO NR=1,ML%N_REACTIONS
-      RESIDUE_LOOP: DO NRE=1,ML%N_RESIDUE(NR)
-         DO JJJ=1,N_MATLS_X
-            IF (ML%RESIDUE_MATL_INDEX(NRE,NR)==MATL_INDEX_X(JJJ)) CYCLE RESIDUE_LOOP
-         ENDDO
-         N_MATLS_X = N_MATLS_X + 1
-         MATL_INDEX_X(N_MATLS_X) = ML%RESIDUE_MATL_INDEX(NRE,NR)
-      ENDDO RESIDUE_LOOP
-   ENDDO REACTION_LOOP
+   ! For a new material index, MI, on the X list, loop over its reactions and add all of its residues to the list.
+   ! For each new residue added to the list, check it for residues of its own. Continue until no new residues are found.
+
+   NEXT_MI = MI
+   NEXT_MATERIAL_LOOP: DO
+      IF (NEXT_MI==0) EXIT NEXT_MATERIAL_LOOP
+      ML => MATERIAL(NEXT_MI)
+      NEXT_MI = 0
+      REACTION_LOOP: DO NR=1,ML%N_REACTIONS
+         RESIDUE_LOOP: DO NRE=1,ML%N_RESIDUE(NR)
+            DO JJJ=1,N_MATLS_X
+               IF (ML%RESIDUE_MATL_INDEX(NRE,NR)==MATL_INDEX_X(JJJ)) CYCLE RESIDUE_LOOP
+            ENDDO
+            N_MATLS_X = N_MATLS_X + 1
+            MATL_INDEX_X(N_MATLS_X) = ML%RESIDUE_MATL_INDEX(NRE,NR)
+            NEXT_MI = MATL_INDEX_X(N_MATLS_X)
+         ENDDO RESIDUE_LOOP
+      ENDDO REACTION_LOOP
+   ENDDO NEXT_MATERIAL_LOOP
 
 ENDDO MATL_LOOP
 
