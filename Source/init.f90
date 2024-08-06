@@ -2631,17 +2631,17 @@ PROF_LOOP: DO N=1,N_PROF
       RETURN
    ENDIF
 
-   IF (PF%MATL_ID/='null') THEN
+   IF (PF%MATL_INDEX>0) THEN
       SUCCESS = .FALSE.
       DO NN=1,SF%N_MATL
-         IF (PF%MATL_ID==SF%MATL_NAME(NN)) THEN
+         IF (PF%MATL_INDEX==SF%MATL_INDEX(NN)) THEN
             SUCCESS = .TRUE.
             EXIT
          ENDIF
       ENDDO
       IF (.NOT. SUCCESS) THEN
-         WRITE(LU_ERR,'(A,I3,A,A,A,A,A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(PF%MATL_ID),' not part of surface type ',&
-                      TRIM(SF%ID),' at the profile location.'
+         WRITE(LU_ERR,'(A,I3,5A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(MATERIAL(PF%MATL_INDEX)%ID),&
+                              ' not part of surface type ',TRIM(SF%ID),' at the profile location.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
@@ -4294,6 +4294,8 @@ END SUBROUTINE FIND_THIN_WALL_BACK_INDEX
 
 
 !> \brief Update list of material indices
+!> \details The list of materials on the search list are checked against the X list and added if not there. Then the residues
+!> of the materials added to the X list are checked, and the residues of the residues, etc.
 !> \param N_MATLS_SEARCH Number of materials in the array to be searched
 !> \param MATL_INDEX_SEARCH Array of material indices
 !> \param MATL_INDEX_X Array of new material indices
