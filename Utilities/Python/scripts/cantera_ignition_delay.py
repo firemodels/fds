@@ -20,7 +20,6 @@ reference_species = "OH"
 equivRatios = np.array([0.6, 1.0,  1.4])
 T = np.array([900, 1000, 1100, 1200])
 
-
 csvdata = pd.DataFrame()
 caseCount = 0
 writeInterval = 20
@@ -78,7 +77,7 @@ for phi in equivRatios:
         if caseCount ==1:
             csvdata = stateArrDF
         else:    
-            # Pad the smaller DataFrame with NaNs to match the number of rows
+            #Pad the smaller DataFrame with NaNs to match the number of rows
             if csvdata.shape[0] > stateArrDF.shape[0]:
                 pad_rows = csvdata.shape[0] - stateArrDF.shape[0]
                 stateArrDF = pd.concat([stateArrDF, pd.DataFrame(np.full((pad_rows, stateArrDF.shape[1]), np.nan))], axis=0, ignore_index=True)
@@ -104,5 +103,8 @@ for i in range(caseCount):
     csvdata['OH'+caseIndx] = csvdata['OH'+caseIndx].map(lambda x: OHFormat.format(x))
     csvdata['TMP'+caseIndx] = csvdata['TMP'+caseIndx].map(lambda x: TMPFormat.format(x))
 
+csvdata = csvdata.apply(lambda x: x.str.strip() if x.dtype == 'object' else x)
+csvdata.replace('nan','',inplace=True)
+csvdata.replace('NAN','',inplace=True)
 csvdata.to_csv(Chemistry_DIR+"cantera_ignition_delay.csv",index=False)
 
