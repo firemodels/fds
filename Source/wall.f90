@@ -1688,11 +1688,11 @@ REAL(EB), INTENT(IN) :: DT_BC,T
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL:: WALL_INDEX,PARTICLE_INDEX,CFACE_INDEX,THIN_WALL_INDEX
 REAL(EB) :: RDT,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2,Q_RAD_IN_B,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
-            VOLSUM,KAPSUM,REGRID_MAX,REGRID_SUM,DXF,DXB,HTCF,HTCB,Q_RAD_OUT,Q_RAD_OUT_OLD,Q_CON_F,Q_CON_B,&
+            VOLSUM,KAPSUM,DXF,DXB,HTCF,HTCB,Q_RAD_OUT,Q_RAD_OUT_OLD,Q_CON_F,Q_CON_B,&
             Q_WATER_F,Q_WATER_B,LAYER_DIVIDE,TMP_GAS_BACK,GEOM_FACTOR,DT_BC_SUB_OLD,&
             DEL_DOT_Q_SC,Q_DOT_G_PP,Q_DOT_G_PP_NET,Q_DOT_O2_PP,Q_DOT_O2_PP_NET,R_SURF,U_SURF,V_SURF,W_SURF,T_BC_SUB,DT_BC_SUB,&
             Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,VOL,T_BOIL_EFF,&
-            RADIUS,HTC_LIMIT,CP1,CP2,DENOM,SF_HTC_F,SF_HTC_B,THICKNESS,DT_FO,DDSUM
+            RADIUS,HTC_LIMIT,CP1,CP2,DENOM,SF_HTC_F,SF_HTC_B,THICKNESS,DT_FO,DDSUM,NODE_RDT(NWP_MAX)
 REAL(EB), DIMENSION(N_TRACKED_SPECIES) :: M_DOT_G_PP_ADJUST,M_DOT_G_PP_ADJUST_NET,M_DOT_G_PP_ACTUAL,M_DOT_G_PP_ACTUAL_NET
 REAL(EB), DIMENSION(MAX_MATERIALS) :: M_DOT_S_PP,M_DOT_S_PP_NET
 REAL(EB), DIMENSION(MAX_LPC) :: Q_DOT_PART_S,M_DOT_PART_S
@@ -2256,24 +2256,26 @@ SUB_TIMESTEP_LOOP: DO
       CHANGE_THICKNESS = .FALSE.
 
       POINT_LOOP2: DO I=1,NWP
-
-         REGRID_FACTOR(I) = 1._EB
-
-         IF (ALL(ABS(RHO_DOT(:,I))<TWO_EPSILON_EB)) CYCLE POINT_LOOP2 ! No need for a computation if no reactions
          
-         REGRID_MAX       = 0._EB
-         REGRID_SUM       = 0._EB
+         NODE_RDT(I) = 1.E9_EB
+
+         ! No need for a computation if no reactions
          
+         IF (ALL(ABS(RHO_DOT(:,I))<TWO_EPSILON_EB)) THEN
+            REGRID_FACTOR(I) = 1._EB   
+            CYCLE POINT_LOOP2 
+         ELSE
+            REGRID_FACTOR(I) = 0._EB
+         ENDIF
+
          ! Compute regrid factors
 
          MATERIAL_LOOP1a: DO N=1,ONE_D%N_MATL
             ONE_D%MATL_COMP(N)%RHO(I) = MAX( 0._EB , ONE_D%MATL_COMP(N)%RHO(I) - DT_BC_SUB*RHO_DOT(N,I) )
-            !REGRID_MAX = MAX(REGRID_MAX,ONE_D%MATL_COMP(N)%RHO(I)/RHO_ADJUSTED(LAYER_INDEX(I),N))
-            REGRID_SUM = REGRID_SUM + ONE_D%MATL_COMP(N)%RHO(I)/RHO_ADJUSTED(LAYER_INDEX(I),N)
+            IF (RHO_DOT(N,I) > TWO_EPSILON_EB) NODE_RDT(I) = MIN(NODE_RDT(I),MATERIAL(ONE_D%MATL_INDEX(N))%RENODE_DELTA_T)
+            REGRID_FACTOR(I) = REGRID_FACTOR(I) + ONE_D%MATL_COMP(N)%RHO(I)/RHO_ADJUSTED(LAYER_INDEX(I),N)
          ENDDO MATERIAL_LOOP1a
-         REGRID_FACTOR(I) = REGRID_SUM
-         
-         IF (I==1) WRITE(*,*) 'RG',REGRID_FACTOR(I),RHO_DOT(1,I),RHO_DOT(2,I),ONE_D%MATL_COMP(1)%RHO(I),ONE_D%MATL_COMP(2)%RHO(I),TRIM(SF%ID)
+        
          ! If there is any non-shrinking material, the material matrix will remain, and no shrinking is allowed
 
          MATERIAL_LOOP1b: DO N=1,ONE_D%N_MATL
@@ -2298,13 +2300,11 @@ SUB_TIMESTEP_LOOP: DO
 
          ! In points that change thickness, update the density
 
-         IF (I==1) WRITE(*,*) 'RH1',ONE_D%MATL_COMP(1)%RHO(1),ONE_D%MATL_COMP(2)%RHO(1),REGRID_FACTOR(1)
          IF (ABS(REGRID_FACTOR(I)-1._EB)>=TWO_EPSILON_EB) THEN
             MATERIAL_LOOP1d: DO N=1,ONE_D%N_MATL
                IF(REGRID_FACTOR(I)>TWO_EPSILON_EB) ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I)/REGRID_FACTOR(I)
             ENDDO MATERIAL_LOOP1d
          ENDIF
-         IF (I==1) WRITE(*,*) 'RH2',ONE_D%MATL_COMP(1)%RHO(1),ONE_D%MATL_COMP(2)%RHO(1),REGRID_FACTOR(1)
 
       ENDDO POINT_LOOP2
 
@@ -2315,11 +2315,9 @@ SUB_TIMESTEP_LOOP: DO
       DO I=NWP-1,0,-1
          R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
       ENDDO
+
       X_S_NEW(0) = 0._EB
       CELL_ZERO = .FALSE.
-      WRITE(*,*) 'DX',ONE_D%DX_OLD(1:NWP)
-      WRITE(*,*) 'XO',ONE_D%X(0:NWP)
-      
       DO I=1,NWP
          X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
          ! If Cell disappears we must remesh
@@ -2329,11 +2327,17 @@ SUB_TIMESTEP_LOOP: DO
          ELSE
             ! If cell size changes enough compared to prior remseh size, remesh
             IF (ABS((X_S_NEW(I)-X_S_NEW(I-1))/ONE_D%DX_OLD(I)-1._EB) > SF%REMESH_RATIO) REMESH_LAYER(LAYER_INDEX(I)) = .TRUE.
+            IF (I > 1 .AND. REMESH_LAYER(LAYER_INDEX(I))) THEN
+               IF (LAYER_INDEX(I-1)==LAYER_INDEX(I) .AND. ABS(ONE_D%TMP(I)-ONE_D%TMP(I-1)) > NODE_RDT(I)) &
+                  REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
+            ENDIF
+            IF (I < NWP .AND. REMESH_LAYER(LAYER_INDEX(I))) THEN
+               IF (LAYER_INDEX(I+1)==LAYER_INDEX(I) .AND. ABS(ONE_D%TMP(I+1)-ONE_D%TMP(I)) > NODE_RDT(I)) &
+                  REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
+            ENDIF               
          ENDIF
       ENDDO
 
-      WRITE(*,*) 'XN',X_S_NEW(0:NWP)
- 
       ! Check for layers that are too small
       I = 0
       DO NL=1,ONE_D%N_LAYERS
@@ -2369,9 +2373,6 @@ SUB_TIMESTEP_LOOP: DO
       ENDIF
 
       REMESH_CHECK = ANY(ABS(REGRID_FACTOR(1:NWP)-1._EB)>TWO_EPSILON_EB)
-      WRITE(*,*) 'RG',REGRID_FACTOR(1:NWP)
-      WRITE(*,*) 'RM',REMESH_CHECK
-      WRITE(*,*) 'RL',REMESH_LAYER(1:ONE_D%N_LAYERS)
       
       ! Some node changes size but no layer trips remesh check. Just redo node weight with X_S_NEW      
      
@@ -2382,23 +2383,23 @@ SUB_TIMESTEP_LOOP: DO
                                    SF%INNER_RADIUS)
       ENDIF
 
+      N_LAYER_CELLS_NEW(1:ONE_D%N_LAYERS) = ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS)      
+
       ! Some layer needs to be checked for a remesh.
-      
+
       REMESH_LAYER_1: IF (ANY(REMESH_LAYER(1:ONE_D%N_LAYERS))) THEN
-         WRITE(*,*) 'RM1'
          NWP_NEW = 0
          THICKNESS = 0._EB
          I = 0
-         N_LAYER_CELLS_NEW = 0
          DX_MIN = 0._EB
          ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
       
          LAYER_LOOP: DO NL=1,ONE_D%N_LAYERS
-            
+
             ! Layer is too small. Delete it and shift any following nodes up in x-distance
-            
+
             IF (ONE_D%LAYER_THICKNESS(NL) < 0.1_EB*ONE_D%MINIMUM_LAYER_THICKNESS(NL)) THEN
-               N_LAYER_CELLS_NEW(NL) = 0._EB
+               N_LAYER_CELLS_NEW(NL) = 0
                ONE_D%X(I+ONE_D%N_LAYER_CELLS(NL):NWP) = ONE_D%X(I+ONE_D%N_LAYER_CELLS(NL):NWP)-ONE_D%LAYER_THICKNESS(NL)
                ONE_D%LAYER_THICKNESS(NL) = 0._EB
                CYCLE LAYER_LOOP
@@ -2433,11 +2434,10 @@ SUB_TIMESTEP_LOOP: DO
             ENDIF
       
             ! Layer passes all checks for a possible remesh
-            
+
             CALL GET_N_LAYER_CELLS(ONE_D%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL),ONE_D%STRETCH_FACTOR(NL),&
                                    ONE_D%CELL_SIZE_FACTOR(NL),ONE_D%CELL_SIZE(NL),ONE_D%N_LAYER_CELLS_MAX(NL),&
                                    N_LAYER_CELLS_NEW(NL),ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
-
             
             LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
@@ -2461,18 +2461,16 @@ SUB_TIMESTEP_LOOP: DO
             THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
             I = I + N_LAYER_CELLS_NEW(NL)       
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
-            
+
          ENDDO LAYER_LOOP
 
          IF (NWP_NEW > ONE_D%N_CELLS_MAX) THEN
             WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR(300): N_LAYER_CELLS_MAX should be at least ',NWP_NEW,' for ',TRIM(SF%ID)
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          ENDIF
-         
-         WRITE(*,*) 'NWPN',NWP_NEW,ONE_D%LAYER_THICKNESS(1),ONE_D%SMALLEST_CELL_SIZE(1),REMESH_LAYER(1:ONE_D%N_LAYERS)
-         
+                
       ELSE
-         WRITE(*,*) 'RM2'
+
          THICKNESS = SUM(ONE_D%LAYER_THICKNESS)
          ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
          
