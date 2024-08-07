@@ -2968,7 +2968,7 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S:                          ',ML%N_S(NR)
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T:                          ',ML%N_T(NR)
          IF (ML%N_O2(NR)>0._EB) THEN
-            WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
+            WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2:                         ',ML%N_O2(NR)
             WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
          ENDIF
       ENDDO
