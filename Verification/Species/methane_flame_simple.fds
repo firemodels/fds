@@ -6,7 +6,7 @@ All material properties etc. are completely fabricated.
 
 &TIME T_END=10.0 DT = 0.01 /
 
-&DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
+&DUMP &DUMP FLUSH_FILE_BUFFERS=F, MASS_FILE=.TRUE., DT_DEVC=0.5 /
 
 &MISC SUPPRESSION=.FALSE. /
 

@@ -8,7 +8,7 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 
 &SURF ID='DOOR CRACK', LEAK_PATH=1,0/
 
-&DUMP DT_DEVC=15., DT_HRR=30. /
+&DUMP &DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC=15., DT_HRR=30. /
 
 &SURF ID='BURNER', COLOR='YELLOW', HRRPUA=1000. /
 &REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
