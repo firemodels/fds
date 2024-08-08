@@ -10354,7 +10354,10 @@ MESH_LOOP: DO NM=1,NMESHES
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-               IF (MR%SKIP(II,JJ,KK)) CYCLE I_MULT_LOOP
+               IF (MR%SKIP(II,JJ,KK)) THEN
+                  N_OBST = N_OBST - 1
+                  CYCLE I_MULT_LOOP
+               ENDIF
 
                IF (.NOT.MR%SEQUENTIAL) THEN
                   XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
