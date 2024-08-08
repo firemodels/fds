@@ -21,7 +21,7 @@ value of dT should be equal to the time averaged Q_abs.
 
 &MISC GVEC=0,0,0, Y_CO2_INFTY=0.,HUMIDITY=0./
 
-&DUMP NFRAMES=100 /
+&DUMP &DUMP FLUSH_FILE_BUFFERS=F, NFRAMES=100 /
 
 &RADI RADTMP=1000.
       NUMBER_RADIATION_ANGLES = 40

@@ -6,7 +6,7 @@ cell should be the same.
 
 &MESH IJK=10,10,20, XB=2.3,3.3,0.0,1.0,0.0,2.0 /
 &TIME T_END=1800. /
-&DUMP DT_PROF=60. /
+&DUMP &DUMP FLUSH_FILE_BUFFERS=F, DT_PROF=60. /
 
 &MATL ID                 = 'STEEL'
       FYI                = 'A242 Steel'
