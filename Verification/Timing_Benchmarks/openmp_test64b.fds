@@ -9,7 +9,7 @@ REM 3. commit updated openmp_test64...fds and openmp_test128...fds input files
 
 &TIME T_END=10.0 /
 
-&DUMP &DUMP FLUSH_FILE_BUFFERS=F, NFRAMES=2,DT_DEVC=0.1 /
+&DUMP FLUSH_FILE_BUFFERS=F, NFRAMES=2,DT_DEVC=0.1 /
 
 &SPEC ID='METHANE' /
 &SPEC ID='WATER VAPOR' /

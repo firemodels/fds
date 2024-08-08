@@ -9,6 +9,8 @@ Note that the time and space bounds are 2*pi.
 
 &TIME T_END=30.0 /
 
+&DUMP FLUSH_FILE_BUFFERS=F /
+
 &MISC SIMULATION_MODE='DNS', 
       STRATIFICATION=.FALSE., NOISE=.FALSE., CFL_MAX=0.25,
       PERIODIC_TEST=1 /
