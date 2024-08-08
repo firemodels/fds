@@ -13107,6 +13107,16 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       XB(6) = ZF_MAX
    ENDIF
 
+   IF (POINTS==1 .AND. SPATIAL_STATISTIC=='null' .AND. ALL(XB>-1E6_EB) .AND. ALL(XYZ<=-1E6_EB)) THEN
+      XYZ(1) = 0.5_EB*(XB(1)+XB(2))
+      XYZ(2) = 0.5_EB*(XB(3)+XB(4))
+      XYZ(3) = 0.5_EB*(XB(5)+XB(6))
+      XB = -1E6_EB
+      WRITE(MESSAGE,'(4A)') 'WARNING: DEVC ',TRIM(ID),' is a single point device using XB instead of XYZ.', &
+                            ' XYZ will be set to the center of XB.'
+      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+   ENDIF
+   
    ! Check the QUANTITY_RANGE
 
    IF (QUANTITY_RANGE(2) <= QUANTITY_RANGE(1)) THEN
