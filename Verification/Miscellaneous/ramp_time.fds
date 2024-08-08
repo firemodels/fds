@@ -4,7 +4,7 @@
 
 &TIME T_BEGIN=0., T_END=10., RAMP_TIME='time-ramp' /
 
-&DUMP RAMP_DEVC='time-ramp'/
+&DUMP FLUSH_FILE_BUFFERS=F, RAMP_DEVC='time-ramp'/
 
 &RAMP ID='time-ramp', T=1 /
 &RAMP ID='time-ramp', T=2 /
