@@ -3165,18 +3165,18 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
    IF (RHO_S(N) < TWO_EPSILON_EB) CYCLE MATERIAL_LOOP  ! If component alpha density is zero, go on to the next material.
    ML => MATERIAL(MATL_INDEX(N))
 
-   RHO_DOT_REAC = 0._EB
-   RHO_DOT_OUT_REAC = 0._EB
-   M_DOT_G_PPP_ADJUST_REAC = 0._EB
-   M_DOT_G_PPP_ACTUAL_REAC = 0._EB
-   M_DOT_S_PPP_REAC = 0._EB
-   Q_DOT_S_PPP_REAC = 0._EB
-   Q_DOT_G_PPP_REAC = 0._EB
-   Q_DOT_O2_PPP_REAC = 0._EB
-   Q_DOT_PART_REAC = 0._EB
-   M_DOT_PART_REAC = 0._EB
+!   RHO_DOT_REAC = 0._EB
+!   RHO_DOT_OUT_REAC = 0._EB
+!   M_DOT_G_PPP_ADJUST_REAC = 0._EB
+!   M_DOT_G_PPP_ACTUAL_REAC = 0._EB
+!   M_DOT_S_PPP_REAC = 0._EB
+!   Q_DOT_S_PPP_REAC = 0._EB
+!   Q_DOT_G_PPP_REAC = 0._EB
+!   Q_DOT_O2_PPP_REAC = 0._EB
+!   Q_DOT_PART_REAC = 0._EB
+!   M_DOT_PART_REAC = 0._EB
    
-   REACTION_LOOP: DO J=1,ML%N_REACTIONS  ! Loop over the reactions (beta subscript)
+   REACTION_LOOP_1: DO J=1,ML%N_REACTIONS  ! Loop over the reactions (beta subscript)
 
       SELECT CASE (ML%PYROLYSIS_MODEL)
 
@@ -3294,57 +3294,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             RHO_DOT_REAC(J) = MAX(REACTION_RATE,0._EB)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
       END SELECT
+   ENDDO REACTION_LOOP_1
 
-      RHO_DOT_OUT_REAC(N,J) = RHO_DOT_OUT_REAC(N,J) + RHO_DOT_REAC(J)        
-
-      DO NN=1,ML%N_RESIDUE(J) ! Get residue production (alpha' represents the other materials)
-         NNN = FINDLOC(MATL_INDEX,ML%RESIDUE_MATL_INDEX(NN,J),1)
-         RHO_DOT_OUT_REAC(NNN,J) = RHO_DOT_OUT_REAC(NNN,J) - ML%NU_RESIDUE(NN,J)*RHO_DOT_REAC(J)
-         M_DOT_S_PPP_REAC(NNN,J) = M_DOT_S_PPP_REAC(NNN,J) + ML%NU_RESIDUE(NN,J)*RHO_DOT_REAC(J) ! (m_dot_alpha')'''
-      ENDDO
-
-      ! Optional variable heat of reaction
-
-      ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
-      H_R = ML%H_R(J,ITMP)
-
-      ! Calculate various energy and mass source terms
-
-      Q_DOT_S_PPP_REAC(J)   = Q_DOT_S_PPP_REAC(J)   - RHO_DOT_REAC(J)*H_R ! Tech Guide: q_dot_s'''
-      M_DOT_S_PPP_REAC(N,J) = M_DOT_S_PPP_REAC(N,J) - RHO_DOT_REAC(J)     ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
-      TMP_G = TMP(IIG,JJG,KKG)
-      ! Tech Guide: m_dot_gamma'''
-      M_DOT_G_PPP_ACTUAL_REAC(:,J) = M_DOT_G_PPP_ACTUAL_REAC(:,J) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J)
-      M_DOT_G_PPP_ADJUST_REAC(:,J) = M_DOT_G_PPP_ADJUST_REAC(:,J) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J) * ML%ADJUST_BURN_RATE(:,J)
-      DO NS=1,N_SPECIES
-         IF (ML%NU_GAS_P(NS,J) <= 0._EB .AND. ML%NU_GAS_M(NS,J) <= 0._EB) CYCLE
-         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_S,H_S_B)
-         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_G,H_S)
-         IF (ML%NU_GAS_P(NS,J) > 0._EB) &
-            Q_DOT_G_PPP_REAC(J) = Q_DOT_G_PPP_REAC(J) + ML%ADJUST_BURN_RATE_P(NS,J)*ML%NU_GAS_P(NS,J)*RHO_DOT_REAC(J)*(H_S-H_S_B)
-         IF (ML%NU_GAS_M(NS,J) > 0._EB) &
-            Q_DOT_G_PPP_REAC(J) = Q_DOT_G_PPP_REAC(J) -                             ML%NU_GAS_M(NS,J)*RHO_DOT_REAC(J)*(H_S-H_S_B)
-      ENDDO
-
-      IF (ANY(ML%NU_LPC(:,J)>0._EB)) THEN
-         DO NP=1,ML%N_LPC(J)
-            IF (ML%NU_LPC(NP,J)<=0._EB) CYCLE
-            DO NP2=1,SF%N_LPC
-               IF (SF%MATL_PART_INDEX(NP2)==NP) THEN
-                  M_DOT_PART_REAC(NP2,J)=ML%NU_LPC(NP,J)*RHO_DOT_REAC(J)
-                  Q_DOT_PART_REAC(NP2,J)=GET_PARTICLE_ENTHALPY(NP,TMP_S)*M_DOT_PART_REAC(NP2,J)
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDIF
-
-      ! If there is char oxidation, save the HRR per unit volume generated
-
-      IF (ML%N_O2(J)>0._EB) Q_DOT_O2_PPP_REAC(J) = Q_DOT_O2_PPP_REAC(J) - RHO_DOT_REAC(J)*H_R
-
-   ENDDO REACTION_LOOP
-   
-   RHO_DOT_REAC_SUM = SUM(RHO_DOT_REAC)
+   RHO_DOT_REAC_SUM = SUM(RHO_DOT_REAC(1:ML%N_REACTIONS))
    IF (RHO_DOT_REAC_SUM < TWO_EPSILON_EB .AND. .NOT. REMOVE_LAYER) CYCLE MATERIAL_LOOP
 
    IF (REMOVE_LAYER) THEN
@@ -3355,34 +3307,62 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       RHO_DOT = MIN(RHO_DOT_REAC_SUM,RHO_S(N)/DT_BC)
    ENDIF
 
-   RHO_DOT_REAC = RHO_DOT_REAC/RHO_DOT_REAC_SUM
-   
+   RHO_DOT_REAC(1:ML%N_REACTIONS) = RHO_DOT_REAC(1:ML%N_REACTIONS)*RHO_DOT/RHO_DOT_REAC_SUM
+
    ! Optional limiting of mass loss rate based on specified fuel burnout time
 
    IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,SF%LAYER_DENSITY(LAYER_INDEX)/SF%MINIMUM_BURNOUT_TIME)
 
-   RHO_RATIO = RHO_DOT/RHO_DOT_REAC_SUM
+   REACTION_LOOP_2:DO J=1,ML%N_REACTIONS
 
-   ! Compute new component density, RHO_S(N)
+      RHO_DOT_OUT(N) = RHO_DOT_OUT(N) + RHO_DOT_REAC(J)        
 
-   DO NN = 1,N_TRACKED_SPECIES
-      M_DOT_G_PPP_ADJUST(NN) = M_DOT_G_PPP_ADJUST(NN) + DOT_PRODUCT(M_DOT_G_PPP_ADJUST_REAC(NN,:),RHO_DOT_REAC) * RHO_RATIO
-      M_DOT_G_PPP_ACTUAL(NN) = M_DOT_G_PPP_ACTUAL(NN) + DOT_PRODUCT(M_DOT_G_PPP_ACTUAL_REAC(NN,:),RHO_DOT_REAC) * RHO_RATIO
-   ENDDO
-   DO NN = 1,N_MATS
-      RHO_DOT_OUT(NN) = RHO_DOT_OUT(NN) + DOT_PRODUCT(RHO_DOT_OUT_REAC(NN,:),RHO_DOT_REAC) * RHO_RATIO
-      M_DOT_S_PPP(NN) = M_DOT_S_PPP(NN) + DOT_PRODUCT(M_DOT_S_PPP_REAC(NN,:),RHO_DOT_REAC) * RHO_RATIO
-   ENDDO
-   IF (ANY(ML%NU_LPC(:,J)>0._EB)) THEN
-      DO NP=1,SF%N_LPC
-         Q_DOT_PART = Q_DOT_PART + DOT_PRODUCT(Q_DOT_PART_REAC(NP,:),RHO_DOT_REAC) * RHO_RATIO
-         M_DOT_PART = M_DOT_PART + DOT_PRODUCT(M_DOT_PART_REAC(NP,:),RHO_DOT_REAC) * RHO_RATIO
+      DO NN=1,ML%N_RESIDUE(J) ! Get residue production (alpha' represents the other materials)
+         NNN = FINDLOC(MATL_INDEX,ML%RESIDUE_MATL_INDEX(NN,J),1)
+         RHO_DOT_OUT(NNN) = RHO_DOT_OUT(NNN) - ML%NU_RESIDUE(NN,J)*RHO_DOT_REAC(J)
+         M_DOT_S_PPP(NNN) = M_DOT_S_PPP(NNN) + ML%NU_RESIDUE(NN,J)*RHO_DOT_REAC(J) ! (m_dot_alpha')'''
       ENDDO
-   ENDIF
-   Q_DOT_G_PPP  = Q_DOT_G_PPP  + SUM(Q_DOT_G_PPP_REAC)  * RHO_RATIO
-   Q_DOT_O2_PPP = Q_DOT_O2_PPP + SUM(Q_DOT_O2_PPP_REAC) * RHO_RATIO      
-   Q_DOT_S_PPP  = Q_DOT_S_PPP  + SUM(Q_DOT_S_PPP_REAC)  * RHO_RATIO
 
+      ! Optional variable heat of reaction
+
+      ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
+      H_R = ML%H_R(J,ITMP)
+
+      ! Calculate various energy and mass source terms
+
+      Q_DOT_S_PPP    = Q_DOT_S_PPP    - RHO_DOT_REAC(J)*H_R ! Tech Guide: q_dot_s'''
+      M_DOT_S_PPP(N) = M_DOT_S_PPP(N) - RHO_DOT_REAC(J)     ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
+      TMP_G = TMP(IIG,JJG,KKG)
+      ! Tech Guide: m_dot_gamma'''
+      M_DOT_G_PPP_ACTUAL(:) = M_DOT_G_PPP_ACTUAL(:) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J)
+      M_DOT_G_PPP_ADJUST(:) = M_DOT_G_PPP_ADJUST(J) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J) * ML%ADJUST_BURN_RATE(:,J)
+      DO NS=1,N_SPECIES
+         IF (ML%NU_GAS_P(NS,J) <= 0._EB .AND. ML%NU_GAS_M(NS,J) <= 0._EB) CYCLE
+         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_S,H_S_B)
+         CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_G,H_S)
+         IF (ML%NU_GAS_P(NS,J) > 0._EB) &
+            Q_DOT_G_PPP = Q_DOT_G_PPP + ML%ADJUST_BURN_RATE_P(NS,J)*ML%NU_GAS_P(NS,J)*RHO_DOT_REAC(J)*(H_S-H_S_B)
+         IF (ML%NU_GAS_M(NS,J) > 0._EB) &
+            Q_DOT_G_PPP = Q_DOT_G_PPP -                             ML%NU_GAS_M(NS,J)*RHO_DOT_REAC(J)*(H_S-H_S_B)
+      ENDDO
+
+      IF (ANY(ML%NU_LPC(:,J)>0._EB)) THEN
+         DO NP=1,ML%N_LPC(J)
+            IF (ML%NU_LPC(NP,J)<=0._EB) CYCLE
+            NP2 = ML%LPC_INDEX(NP,J)
+            IF (SF%MATL_PART_INDEX(NP2)==NP) THEN
+               M_DOT_PART(NP2)=ML%NU_LPC(NP,J)*RHO_DOT_REAC(J)
+               Q_DOT_PART(NP2)=GET_PARTICLE_ENTHALPY(NP,TMP_S)*M_DOT_PART(NP2)
+            ENDIF
+         ENDDO
+      ENDIF
+
+      ! If there is char oxidation, save the HRR per unit volume generated
+
+      IF (ML%N_O2(J)>0._EB) Q_DOT_O2_PPP = Q_DOT_O2_PPP - RHO_DOT_REAC(J)*H_R
+
+   ENDDO REACTION_LOOP_2
+   
 ENDDO MATERIAL_LOOP
 
 END SUBROUTINE PYROLYSIS
