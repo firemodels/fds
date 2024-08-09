@@ -14,7 +14,7 @@ Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progre
 
 &SPEC ID='WATER VAPOR' /
 
-&DUMP DT_DEVC=2 /
+&DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC=2 /
 
 &SURF ID           = 'MY DROPLET'
       MATL_ID      = 'WATER'

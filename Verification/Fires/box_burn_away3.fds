@@ -26,7 +26,7 @@ The gas species here is mixture fraction fuel, burning rate specified.
 
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=10000. /
 
-&DUMP SMOKE3D = .FALSE. 
+&DUMP FLUSH_FILE_BUFFERS=F, SMOKE3D = .FALSE. 
       DT_HRR = 0.01
       DT_DEVC = 0.01 /
 

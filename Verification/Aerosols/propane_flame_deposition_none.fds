@@ -5,7 +5,7 @@ Propane burner test case to check basic chemistry model and soot deposition
 &MESH IJK=10,10,20, XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
 &TIME T_END=10.0, DT=0.01 /
-&DUMP MASS_FILE=.TRUE., DT_DEVC=0.5, DT_MASS=0.5 /
+&DUMP FLUSH_FILE_BUFFERS=F, MASS_FILE=.TRUE., DT_DEVC=0.5, DT_MASS=0.5 /
 
 &MISC SUPPRESSION=.FALSE.
       GRAVITATIONAL_DEPOSITION  = .FALSE.

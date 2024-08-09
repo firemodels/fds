@@ -34,7 +34,7 @@
 &BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T /
 &BNDF QUANTITY='EMISSIVITY'      , CELL_CENTERED=T /
 
-&DUMP DT_DEVC=1 /
+&DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC=1 /
 
 'WALL ENTHALPY' is the energy (kJ) of the volume of solid bounded by the surface cell. The CONVERSION_FACTOR is intended to
 cancel out the cell area 0.025 m x 0.025 m

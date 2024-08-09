@@ -3682,15 +3682,18 @@ END SUBROUTINE TIMEOUT
 SUBROUTINE DUMP_TIMERS
 
 INTEGER, PARAMETER :: LINE_LENGTH = 5 + (N_TIMERS+1)*11
+REAL(EB) :: T_USED_COPY(N_TIMERS)
 CHARACTER(LEN=LINE_LENGTH) :: LINE
 CHARACTER(LEN=LINE_LENGTH), DIMENSION(0:N_MPI_PROCESSES-1) :: LINE_ARRAY
 CHARACTER(30) :: FRMT
 
-! T_USED(1) is the time spent in the main routine; i.e. the time not spent in a subroutine.
+! T_USED_COPY(1) is the time spent in the main routine; i.e. the time not spent in a subroutine.
+! T_USED_COPY so not overwriting T_USED(1) when multiple CPU dumps happen.
 
-T_USED(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS-1))
+T_USED_COPY(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS))
+T_USED_COPY(2:N_TIMERS) = T_USED(2:N_TIMERS)
 WRITE(FRMT,'(A,I2.2,A)') '(I5,',N_TIMERS+1,'(",",ES10.3))'
-WRITE(LINE,FRMT) MY_RANK,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS-1))
+WRITE(LINE,FRMT) MY_RANK,(T_USED_COPY(I),I=1,N_TIMERS),SUM(T_USED_COPY(1:N_TIMERS))
 
 ! All MPI processes except root send their timings to the root process. The root process then writes them out to a file.
 

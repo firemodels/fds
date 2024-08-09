@@ -11,7 +11,7 @@ The emissivity is measured using EMISSIVITY output quantity.
 
 &TIME T_END=10 DT = 0.01 WALL_INCREMENT = 1/
 
-&DUMP DT_DEVC = 0.2
+&DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC = 0.2
       DT_PL3D=10000000./
 
 &SURF ID='TEST'

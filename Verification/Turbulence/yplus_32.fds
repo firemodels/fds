@@ -4,7 +4,7 @@
 
 &TIME T_END=10.0 / needs to be roughly (.5*H)^2/VISCOSITY (here H=1)
 
-&DUMP DT_DEVC=1/
+&DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC=1/
 
 &MISC SIMULATION_MODE='DNS' /
 
