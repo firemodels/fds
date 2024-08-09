@@ -232,6 +232,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX           !< (1:ONE_D\%N_MATL) Number of materials
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS_MAX    !< (1:SF\%N_LAYERS) Maximum possible number of cells in the layer
    INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX       !< (1:SF\%N_LAYERS) RAMP index for HEAT_SOURCE
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: REMESH_NWP           !< Store target NWP value in case it reduces by more than one cell
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
