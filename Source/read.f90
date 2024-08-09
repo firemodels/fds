@@ -8772,7 +8772,7 @@ RAMP_V_Z                = 'null'
 REFERENCE_HEAT_FLUX     = -1._EB
 REFERENCE_HEAT_FLUX_TIME_INTERVAL = 1.0_EB
 REFERENCE_THICKNESS     = -1._EB
-REMESH_RATIO            = 0.05_EB
+REMESH_RATIO            = 0.25_EB
 RGB                     = -1
 IF (SIM_MODE==DNS_MODE) THEN
    ROUGHNESS = 0._EB
