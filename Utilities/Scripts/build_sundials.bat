@@ -10,6 +10,7 @@ echo ----------------------------------------------------------
 echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 call ..\..\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
@@ -23,6 +24,7 @@ echo ----------------------------------------------------------
 echo cloning sundials from https://github.com/LLNL/sundials.git
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 
   cd ..\..\..
   git clone https://github.com/LLNL/sundials.git
@@ -32,6 +34,7 @@ echo ----------------------------------------------------------
 echo checking out version %SUNDIALSVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
   git checkout %SUNDIALSVERSION%
   cd %CURDIR%
 :endif1
@@ -41,6 +44,7 @@ echo ----------------------------------------------------------
 echo cleaning sundials repo
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 
 cd %SUNDIALS%
 set SUNDIALS=%CD%
@@ -56,6 +60,7 @@ echo ----------------------------------------------------------
 echo configuring sundials version %SUNDIALSVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 
 cmake ..\  ^
 -G "MinGW Makefiles" ^
@@ -78,6 +83,7 @@ echo ----------------------------------------------------------
 echo building sundials version %SUNDIALSVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 make 
 
 echo ----------------------------------------------------------
@@ -85,8 +91,21 @@ echo ----------------------------------------------------------
 echo installing sundials version %SUNDIALSVERSION% in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
+echo.
 make install
+
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo setting SUNDIALSHOME environment variable to %INSTALLDIR%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+setx SUNDIALSHOME %INSTALLDIR%
 
 echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
 
 cd %CURDIR%
+
+goto eof
+
+:eof
