@@ -1,5 +1,13 @@
 @echo off
 
+set abort=0
+
+call :is_file_installed cmake || set abort=1
+if %abort% == 1 exit /b
+
+call :getopts %*
+if %stopscript% == 1 exit /b
+
 set INSTALLDIR=C:\sundials_test
 set SUNDIALSVERSION=v6.7.0
 
@@ -107,5 +115,53 @@ echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
 cd %CURDIR%
 
 goto eof
+
+:: -------------------------------------------------------------
+:is_file_installed
+:: -------------------------------------------------------------
+
+  set program=%1
+  where %program% 1> installed_error.txt 2>&1
+  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
+  set /p nothave=<installed_error_count.txt
+  erase installed_error_count.txt installed_error.txt
+  if %nothave% == 1 (
+    echo "***Fatal error: %program% not present"
+    exit /b 1
+  )
+  exit /b 0
+
+:: -------------------------------------------------------------
+:getopts
+:: -------------------------------------------------------------
+ set stopscript=0
+ if (%1)==() exit /b
+ set valid=0
+ set arg=%1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+ shift
+ if %valid% == 0 (
+   echo.
+   echo ***Error: the input argument %arg% is invalid
+   echo.
+   echo Usage:
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+if not (%1)==() goto getopts
+exit /b
+
+:: -------------------------------------------------------------
+:usage  
+:: -------------------------------------------------------------
+echo build sundials
+echo. 
+echo -help           - display this message
+exit /b
 
 :eof
