@@ -1,12 +1,23 @@
 @echo off
-
 set abort=0
-
-call :is_file_installed cmake || set abort=1
-if %abort% == 1 exit /b
+set have_setx=1
 
 call :getopts %*
 if %stopscript% == 1 exit /b
+
+call :have_program setx       || set have_setx=0
+
+call :is_file_installed cmake || set abort=1
+call :is_file_installed gcc   || set abort=1
+if %abort% == 1 exit /b
+
+:: don't checkout for 32 bit gcc for now
+:: gcc -v 1> find.out 2>&1
+:: type find.out | find /i /c "Target: mingw32" > find_count.out
+:: set /p have_gcc32=<find_count.out
+:: erase find.out find_count.out
+:: if %have_gcc32% == 0 echo ***error: Installed version of MinGW is not 32 bit
+:: if %have_gcc32% == 0 exit /b
 
 set INSTALLDIR=C:\sundials_test
 set SUNDIALSVERSION=v6.7.0
@@ -102,34 +113,35 @@ echo ----------------------------------------------------------
 echo.
 make install
 
+if %have_setx% == 0 goto else_setx
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting SUNDIALSHOME environment variable to %INSTALLDIR%
+setx SUNDIALSHOME %INSTALLDIR%
+echo note: the environment variable SUNDIALSHOME takes effect after opening a new command shell
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-setx SUNDIALSHOME %INSTALLDIR%
+goto endif_setx
+:else_setx
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo set environment variable SUNDIALSHOME to %INSTALLDIR%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+:endif_setx
 
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
 echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
 
 cd %CURDIR%
 
 goto eof
-
-:: -------------------------------------------------------------
-:is_file_installed
-:: -------------------------------------------------------------
-
-  set program=%1
-  where %program% 1> installed_error.txt 2>&1
-  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
-  set /p nothave=<installed_error_count.txt
-  erase installed_error_count.txt installed_error.txt
-  if %nothave% == 1 (
-    echo "***Fatal error: %program% not present"
-    exit /b 1
-  )
-  exit /b 0
 
 :: -------------------------------------------------------------
 :getopts
@@ -155,6 +167,36 @@ goto eof
  )
 if not (%1)==() goto getopts
 exit /b
+
+:: -------------------------------------------------------------
+:is_file_installed
+:: -------------------------------------------------------------
+
+  set program=%1
+  where %program% 1> installed_error.txt 2>&1
+  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
+  set /p nothave=<installed_error_count.txt
+  erase installed_error_count.txt installed_error.txt
+  if %nothave% == 1 (
+    echo "***Fatal error: %program% not present"
+    exit /b 1
+  )
+  exit /b 0
+
+:: -------------------------------------------------------------
+:have_program
+:: -------------------------------------------------------------
+:: same as is_file_installed except does not abort script if program is not insstalled
+
+  set program=%1
+  where %program% 1> installed_error.txt 2>&1
+  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
+  set /p nothave=<installed_error_count.txt
+  erase installed_error_count.txt installed_error.txt
+  if %nothave% == 1 (
+    exit /b 1
+  )
+  exit /b 0
 
 :: -------------------------------------------------------------
 :usage  
