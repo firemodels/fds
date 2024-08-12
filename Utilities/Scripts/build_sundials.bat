@@ -1,4 +1,7 @@
 @echo off
+set INSTALLDIR=C:\sundials-6.7.0
+set SUNDIALSVERSION=v6.7.0
+
 call :getopts %*
 if %stopscript% == 1 exit /b
 
@@ -9,17 +12,6 @@ set abort=0
 call :is_file_installed cmake || set abort=1
 call :is_file_installed gcc   || set abort=1
 if %abort% == 1 exit /b
-
-:: don't check for 32 bit gcc for now
-:: gcc -v 1> find.out 2>&1
-:: type find.out | find /i /c "Target: mingw32" > find_count.out
-:: set /p have_gcc32=<find_count.out
-:: erase find.out find_count.out
-:: if %have_gcc32% == 0 echo ***error: Installed version of MinGW is not 32 bit
-:: if %have_gcc32% == 0 exit /b
-
-set INSTALLDIR=C:\sundials_test
-set SUNDIALSVERSION=v6.7.0
 
 set CURDIR=%CD%
 
