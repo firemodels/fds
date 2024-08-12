@@ -425,6 +425,7 @@ EOF
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
 export I_MPI_DEBUG=5
+export I_MPI_PMI_VALUE_LENGTH_MAX=512
 EOF
 fi
 
