@@ -19,7 +19,7 @@ if %abort% == 1 exit /b
 :: if %have_gcc32% == 0 echo ***error: Installed version of MinGW is not 32 bit
 :: if %have_gcc32% == 0 exit /b
 
-set INSTALLDIR=C:\sundials_test
+set INSTALLDIR=C:\sundials-6.7.0
 set SUNDIALSVERSION=v6.7.0
 
 set CURDIR=%CD%
@@ -116,9 +116,9 @@ make install
 if %have_setx% == 0 goto else_setx
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo setting SUNDIALSHOME environment variable to %INSTALLDIR%
-setx SUNDIALSHOME %INSTALLDIR%
-echo note: the environment variable SUNDIALSHOME takes effect after opening a new command shell
+echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
+setx SUNDIALS_HOME %INSTALLDIR%
+echo note: the environment variable SUNDIALS_HOME takes effect after opening a new command shell
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -126,7 +126,7 @@ goto endif_setx
 :else_setx
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo set environment variable SUNDIALSHOME to %INSTALLDIR%
+echo set environment variable SUNDIALS_HOME to %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
