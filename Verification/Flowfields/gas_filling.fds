@@ -11,7 +11,7 @@ Ensure that the right amount of mass has been added.
 &RAMP ID='leak_ramp', T=180., F=1.0 /
 &RAMP ID='leak_ramp', T=181., F=0.0 /
 &VENT XB=-0.5,0.5,-0.5,0.5,0.0,0.0, SURF_ID='LEAK', COLOR='RED' / 
-&DUMP FLUSH_FILE_BUFFERS=F, MASS_FILE=.TRUE. /
+&DUMP FLUSH_FILE_BUFFERS=T, MASS_FILE=.TRUE. /
 &SLCF PBY=0.0, QUANTITY='MASS FRACTION',SPEC_ID='HYDROGEN' /
 &TAIL /
 

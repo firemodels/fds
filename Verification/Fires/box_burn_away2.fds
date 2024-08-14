@@ -28,7 +28,7 @@ The gas species here is additional SPEC.
       VARIABLE_THICKNESS   = T
       BURN_AWAY            = T /
 
-&DUMP FLUSH_FILE_BUFFERS=F, SMOKE3D = .FALSE. 
+&DUMP FLUSH_FILE_BUFFERS=T, SMOKE3D = .FALSE. 
       DT_HRR = 0.01
       DT_DEVC = 0.01 /
 
