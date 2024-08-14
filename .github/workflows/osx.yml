@@ -38,7 +38,7 @@ jobs:
     - name: install openmpi
       run: |
         brew install open-mpi
-        echo "OMPI_FC=gfortran-11" >> $GITHUB_ENV
+        echo "OMPI_FC=gfortran-13" >> $GITHUB_ENV
 
     - name: build fds debug
       run: |
