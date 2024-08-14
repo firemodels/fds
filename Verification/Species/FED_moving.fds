@@ -9,7 +9,7 @@
  The expected FED is compared with analytical calculations.
    
 &TIME T_END=0.4, DT=0.01, /
-&DUMP FLUSH_FILE_BUFFERS=F, DT_DEVC=0.05, /
+&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=0.05, /
 
 &MESH ID='MESH', IJK= 11, 11, 11, MPI_PROCESS=0, XB= 0., 3., 0., 3., 0., 3.,  /
 &MISC GVEC=0.,0.,0., /
