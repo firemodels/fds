@@ -2935,7 +2935,7 @@ O2_LOOP: DO ITER=1,MAX_ITER
    ENDDO POINT_LOOP1
 
    !======== Mass transfer resistance to surface O2 concentration =============
-   CHAR_MASS_TRANSFER_MODEL_IF: IF (OXPYRO_MODEL) THEN
+   OXPYRO_MODEL_IF: IF (OXPYRO_MODEL) THEN
       ! Solve for Y_O2_F using bounded Newton method
       M_DOT_ERROR_OLD = M_DOT_ERROR
       M_DOT_O2_PP = DOT_PRODUCT(Z2Y(O2_INDEX,1:N_TRACKED_SPECIES),M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))
@@ -2962,7 +2962,7 @@ O2_LOOP: DO ITER=1,MAX_ITER
          Y_O2_F = 0.5_EB*(Y_LOWER+Y_UPPER)
       ENDIF
       DY = Y_O2_F - Y_O2_F_OLD
-   ENDIF CHAR_MASS_TRANSFER_MODEL_IF
+   ENDIF OXPYRO_MODEL_IF
    !===========================================================================
 
 ENDDO O2_LOOP
