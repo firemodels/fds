@@ -1734,8 +1734,8 @@ INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_CELLS_NEW
 INTEGER  :: NWP_NEW,I_GRAD,IZERO,SURF_INDEX,BACKING,NWP,I,NL,N,OBST_INDEX,&
             N_CELLS,ITMP,ITER,BACK_MESH,BACK_INDEX,BACK_WALL_INDEX
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-LOGICAL :: ISOLATED_THIN_WALL,ISOLATED_THIN_WALL_BACK,E_FOUND,CHANGE_THICKNESS,REMESH_LAYER(MAX_LAYERS),REMESH_CHECK,CELL_ZERO,&
-           TMP_CHECK(MAX_LAYERS)
+LOGICAL :: ISOLATED_THIN_WALL,ISOLATED_THIN_WALL_BACK,E_FOUND,CHANGE_THICKNESS,REMESH_LAYER(MAX_LAYERS),REMESH_CHECK,&
+           CELL_ZERO(MAX_LAYERS),TMP_CHECK(MAX_LAYERS)
 TYPE(WALL_TYPE), POINTER :: WC,WC_BACK
 TYPE(THIN_WALL_TYPE), POINTER :: TW,TW_BACK
 TYPE(CFACE_TYPE), POINTER :: CFA,CFA_BACK
@@ -2346,30 +2346,31 @@ SUB_TIMESTEP_LOOP: DO
 
       X_S_NEW(0) = 0._EB
       CELL_ZERO = .FALSE.
+
       DO I=1,NWP
          X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
          ! If Cell disappears we must remesh
          IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) THEN
             REMESH_LAYER(LAYER_INDEX(I)) = .TRUE.
-            CELL_ZERO = .TRUE.
+            CELL_ZERO(LAYER_INDEX(I)) = .TRUE.
          ELSE
             ! If cell size changes enough compared to prior remseh size, remesh
             IF (ABS((X_S_NEW(I)-X_S_NEW(I-1))/ONE_D%DX_OLD(I)-1._EB) > SF%REMESH_RATIO) REMESH_LAYER(LAYER_INDEX(I)) = .TRUE.
             IF (I > 1 .AND. REMESH_LAYER(LAYER_INDEX(I))) THEN
                IF (LAYER_INDEX(I-1)==LAYER_INDEX(I) .AND. ABS(ONE_D%TMP(I)-ONE_D%TMP(I-1)) > NODE_RDT(I)) THEN
-                  REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
+                  IF (.NOT. CELL_ZERO(LAYER_INDEX(I))) REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
                   TMP_CHECK(LAYER_INDEX(I)) = .TRUE.
                ENDIF
             ENDIF
             IF (I < NWP .AND. REMESH_LAYER(LAYER_INDEX(I))) THEN
                IF (LAYER_INDEX(I+1)==LAYER_INDEX(I) .AND. ABS(ONE_D%TMP(I+1)-ONE_D%TMP(I)) > NODE_RDT(I)) THEN
-                  REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
+                  IF (.NOT. CELL_ZERO(LAYER_INDEX(I))) REMESH_LAYER(LAYER_INDEX(I)) = .FALSE.
                   TMP_CHECK(LAYER_INDEX(I)) = .TRUE.
                ENDIF
             ENDIF               
          ENDIF
       ENDDO
-      
+
       ! Check for layers that are too small, layer thickness dropping too much, or couldn't drop enough nodes last remesh
       I = 0
       DO NL=1,ONE_D%N_LAYERS
@@ -2389,7 +2390,7 @@ SUB_TIMESTEP_LOOP: DO
       
       ! If any nodes go to zero, apportion Q_S to surrounding nodes.
 
-      IF (CELL_ZERO .AND. NWP > 1) THEN
+      IF (ANY(CELL_ZERO(1:ONE_D%N_LAYERS)) .AND. NWP > 1) THEN
          IF (X_S_NEW(1)-X_S_NEW(0) < TWO_EPSILON_EB) Q_S(2) = Q_S(2) + Q_S(1)
          IF (X_S_NEW(NWP)-X_S_NEW(NWP-1) < TWO_EPSILON_EB) Q_S(NWP-1) = Q_S(NWP-1) + Q_S(NWP)
          DO I=2,NWP-1
@@ -2413,7 +2414,7 @@ SUB_TIMESTEP_LOOP: DO
       ENDIF
 
       REMESH_CHECK = ANY(ABS(REGRID_FACTOR(1:NWP)-1._EB)>TWO_EPSILON_EB)
-      
+
       ! Some node changes size but no layer trips remesh check. Just redo node weight with X_S_NEW      
      
       IF (REMESH_CHECK .AND. ALL(.NOT. REMESH_LAYER(1:ONE_D%N_LAYERS))) THEN
@@ -3374,8 +3375,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
       M_DOT_S_PPP(N) = M_DOT_S_PPP(N) - RHO_DOT_REAC(J)     ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
       TMP_G = TMP(IIG,JJG,KKG)
       ! Tech Guide: m_dot_gamma'''
+
       M_DOT_G_PPP_ACTUAL(:) = M_DOT_G_PPP_ACTUAL(:) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J)
-      M_DOT_G_PPP_ADJUST(:) = M_DOT_G_PPP_ADJUST(J) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J) * ML%ADJUST_BURN_RATE(:,J)
+      M_DOT_G_PPP_ADJUST(:) = M_DOT_G_PPP_ADJUST(:) + ML%NU_GAS(:,J)*RHO_DOT_REAC(J) * ML%ADJUST_BURN_RATE(:,J)
       DO NS=1,N_SPECIES
          IF (ML%NU_GAS_P(NS,J) <= 0._EB .AND. ML%NU_GAS_M(NS,J) <= 0._EB) CYCLE
          CALL INTERPOLATE1D_UNIFORM(0,SPECIES(NS)%H_G,TMP_S,H_S_B)
