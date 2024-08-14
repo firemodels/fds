@@ -90,6 +90,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: SHAPE_FACTOR               !< Ratio of particle cross sectional area to surface area
    REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember
    REAL(EB) :: EMBER_VELOCITY_THRESHOLD   !< Velocity at which vegetative particle becomes a flying ember
+   REAL(EB) :: EMBER_SNAG_FACTOR          !< Scaling factor for probability of ember snaging in a collection of particles
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
