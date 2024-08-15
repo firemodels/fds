@@ -1,4 +1,4 @@
-&HEAD CHID='ignition_delay_T900K_Phi0p6', TITLE='ignition_delay T=900K Phi=0.6' /
+&HEAD CHID='ign_delay_Methane_grimech30_T900K_Phi0p6', TITLE='ign_delay Methane_grimech30 T=900K Phi=0.6' /
 
 &MISC GVEC(3)=0.0, NOISE=F, STRATIFICATION=F, SIMULATION_MODE='DNS' /
 
@@ -9,7 +9,7 @@
 &TIME T_END=10, RAMP_TIME='t' /
 &DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=1e-20/
 
-&CATF OTHER_FILES='../../Utilities/Input_Libraries/Chemical_Mechanisms/FDS/grimech30.fds' /
+&CATF OTHER_FILES='../../Utilities/Input_Libraries/Chemical_Mechanisms/FDS/Methane_grimech30.fds' /
 
 &MESH IJK=5,1,5, XB=0.0,1.0,0.0,0.2,0.0,1.0 /
 &OBST XB=0.0,1.0,0.0,0.2,0.0,1.0/
