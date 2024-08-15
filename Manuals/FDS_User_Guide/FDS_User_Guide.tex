@@ -2492,10 +2492,16 @@ For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is 
 To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
 &SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK' /
-&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=..., SURF_ID='STEEL SLAB', MATL_ID='STEEL', CELL_SIZE=0.003 /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
+Parameters that are used to control the solid phase gridding are preferably given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
+
+An appropriate {\ct CELL\_SIZE}, $\delta$, for 3-D heat conduction is based on the material thermal diffusivity, $\alpha=k/(\rho \, c)$:
+\be
+   \delta \approx \min \left( \dx , \sqrt \frac{ \tau \, k}{\rho \, c} \right) \quad ; \quad \tau=1 \; \hbox{s} 
+\ee
+Here, $\tau$ is just a unity time scale for the purpose of unit consistency. The gas phase grid cell size is $\dx$. In the example above, the {\ct 'STEEL'} has a conductivity of 0.05~kW/(m K), specific heat 0.5~kJ/(kg K), and density 7500~kg/m$^3$; thus, an appropriate {\ct CELL\_SIZE} would be on the order of 0.004~m. FDS will adjust this value so that an integral number of cells will span the width of the solid object. Choosing a {\ct CELL\_SIZE} much lower than this recommended value might lead to spurious results, especially if materials of very different thermal diffusivities are components of the solid object. 
 
 You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified using {\ct RAMP\_IHS}.
 
