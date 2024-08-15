@@ -225,7 +225,6 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE           !< Specified constant cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: STRETCH_FACTOR      !< Amount to stretch cells away from the surface
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE         !< Heat addition within solid (W/m3)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SWELL_RATIO         !< Maximum possible swelling for layer.
 
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
