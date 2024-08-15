@@ -6,7 +6,7 @@ Inputs based on Fig 6, Li and Chow, Fire Technology, 44, 351-381, 2008.
 
 &TIME T_END=16, DT=0.002 /
 
-&DUMP FLUSH_FILE_BUFFERS=F, NFRAMES=40 /
+&DUMP FLUSH_FILE_BUFFERS=T, NFRAMES=40 /
 
 &MISC TMPA=60 /
 

@@ -9,7 +9,7 @@
       UVW_FILE='cbc64_uvw.csv'
       TURBULENCE_MODEL='DYNAMIC SMAGORINSKY'/
 
-&DUMP FLUSH_FILE_BUFFERS=F, RAMP_UVW='times' /
+&DUMP FLUSH_FILE_BUFFERS=T, RAMP_UVW='times' /
 &RAMP ID='times', T=0.00 /
 &RAMP ID='times', T=0.28 /
 &RAMP ID='times', T=0.67 /

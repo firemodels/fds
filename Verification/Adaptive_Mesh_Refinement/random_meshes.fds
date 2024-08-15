@@ -10,7 +10,7 @@ This case just tests general functionality when multiple meshes are overlapping 
 
 &TIME T_END=300. /
 
-&DUMP FLUSH_FILE_BUFFERS=F /
+&DUMP FLUSH_FILE_BUFFERS=T /
 
 &PRES VELOCITY_TOLERANCE=1.E-4, MAX_PRESSURE_ITERATIONS=100 /
 
