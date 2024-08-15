@@ -429,12 +429,6 @@ export I_MPI_PMI_VALUE_LENGTH_MAX=512
 EOF
 fi
 
-if [ "$USE_MPIRUN" == "1" ]; then
-cat << EOF >> $scriptfile
-export I_MPI_PIN_RESPECT_CPUSET=0
-EOF
-fi
-
 if [[ $n_openmp_threads -gt 1 ]] && [[ "$use_intel_mpi" == "1" ]]; then
 cat << EOF >> $scriptfile
 export I_MPI_PIN_DOMAIN=omp
