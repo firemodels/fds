@@ -3758,59 +3758,116 @@ In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:
 
 \section{Ignition Delay verification with Cantera (\textct{ignition\_delay})}
 \label{ignition_delay}
-Twelve constant volume ignition delay cases are compared with the output from Cantera \cite{cantera:2023} to verify the implementation of detailed chemical mechanisms, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. Cantera, an open-source software suite, is widely used for modeling chemical systems. These cases use methane ($\mathrm{CH_4}$) as fuel, with chemical kinetics represented by the GRI-3 mechanism \cite{gri3:1999}. They are configured for equivalence ratios of 0.6, 1.0, and 1.4, with initial temperatures of 626.85~$^\circ$C (900 K), 726.85~$^\circ$C (1000 K), 826.85~$^\circ$C (1100 K), and 926.85~$^\circ$C (1200 K) at standard atmospheric pressure.  The comparisons of temperature and OH mass fraction between FDS and Cantera are shown in Figs. ~\ref{fig:ignition_delay_phi_0.6}-\ref{fig:ignition_delay_phi_1.4}.
 
+Constant volume ignition delay cases are compared with output from Cantera \cite{cantera:2023} to verify the implementation of detailed chemical mechanisms, as described in the FDS Technical Guide \cite{FDS_Math_Guide}. Cantera, a widely used open-source software suite for modeling chemical systems, serves as a benchmark for verification. Various chemical mechanisms are considered for this purpose. These mechanisms, formatted for FDS, can be found in the {\ct Utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory. The FDS User Guide \cite{FDS_Users_Guide} provides detailed instructions on generating these FDS-formatted mechanism files.
 
+Twelve constant volume ignition delay cases are configured using chemical kinetics based on the GRI-3 mechanism \cite{gri3:1999}, stored as "Methane\_grimech30" in the FDS repository. Methane ($\mathrm{CH_4}$) is used as the fuel. They are configured for equivalence ratios of 0.6, 1.0, and 1.4, with initial temperatures of 626.85~$^\circ$C (900 K), 726.85~$^\circ$C (1000 K), 826.85~$^\circ$C (1100 K), and 926.85~$^\circ$C (1200 K) at standard atmospheric pressure. Timestep ramps are derived from Cantera-3.0 to speed up the computation. The comparisons of temperature and OH mass fraction between FDS and Cantera are shown in Figs. ~\ref{fig:ign_delay_Methane_grimech30_phi_0.6}-\ref{fig:ign_delay_Methane_grimech30_phi_1.4}.
+
+Six additional constant volume ignition delay cases are configured using the following chemical mechanisms: Methane\_TianfengLu \cite{TianfengLu:2008}, Methane\_Smooke \cite{Smooke:1995}, Ethylene\_TianfengLu \cite{Luo:2012}, Propane\_USC \cite{Qin:20001}, Propane\_Z66 \cite{Zettervall2017}, and nHeptane\_Chalmers \cite{Tao:2007}. These cases are set with an equivalence ratio of 1.0, an initial temperature of 826.85~$^\circ$C (1100 K), and standard atmospheric pressure. A constant timestep of $10^{-4}$ seconds is applied. Comparisons of temperature and OH mass fraction between FDS and Cantera are illustrated in Figs. ~\ref{fig:ign_delay_Methane_TianfengLu_phi_1.0}-\ref{fig:ign_delay_nHeptane_Chalmers_phi_1.0}. 
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_0p6_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_0p6_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_0p6_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_0p6_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_0p6_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_0p6_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_0p6_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_0p6_OH}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_0p6_OH}
 \end{tabular*}
-\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for {\ct ignition\_delay}  test case at an equivalence ratio of 0.6.}
-\label{fig:ignition_delay_phi_0.6}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 0.6.}
+\label{fig:ign_delay_Methane_grimech30_phi_0.6}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_1p0_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_1p0_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_1p0_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_1p0_OH}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p0_OH}
 \end{tabular*}
-\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for {\ct ignition\_delay}  test case at an equivalence ratio of 1.0.}
-\label{fig:ignition_delay_phi_1.0}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_grimech30_phi_1.0}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_1p4_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_900_1p4_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_1p4_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1000_1p4_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_1p4_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1100_1p4_OH} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_1p4_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ignition_delay_1200_1p4_OH}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_OH}
 \end{tabular*}
-\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for {\ct ignition\_delay}  test case at an equivalence ratio of 1.4.}
-\label{fig:ignition_delay_phi_1.4}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 1.4.}
+\label{fig:ign_delay_Methane_grimech30_phi_1.4}
 \end{figure}
 
 
-\section{Mixture Fraction (\textct{burke\_schumann})}
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_TianfengLu_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_Smooke mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_Smooke_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Ethylene\_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Ethylene_TianfengLu_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_USC mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Propane_USC_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_Z66 mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Propane_Z66_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_OH} 
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for nHeptane\_Chalmers mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_nHeptane_Chalmers_phi_1.0}
+\end{figure}
+
+\section{Mixture Fraction (\textct{burke\_schumann})}{}
 \label{Mix_Frac}
-\label{burke_schumann_spec}
+\label{burke_schumann_spec} 
 \label{burke_schumann_temp}
 
 For simple one-step reactions of the form F + O $\rightarrow$ P, there is an optional output quantity called the mixture fraction. To test that this output is correctly implemented we consider a set of methane-air mixtures in a test chamber that span the entire range of equivalence ratio. The complete combustion of methane is given by:

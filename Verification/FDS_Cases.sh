@@ -30,18 +30,24 @@ $QFDS -p 32 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
-$QFDS -d Chemistry ignition_delay_T900K_Phi0p6.fds
-$QFDS -d Chemistry ignition_delay_T900K_Phi1p0.fds
-$QFDS -d Chemistry ignition_delay_T900K_Phi1p4.fds
-$QFDS -d Chemistry ignition_delay_T1000K_Phi0p6.fds
-$QFDS -d Chemistry ignition_delay_T1000K_Phi1p0.fds
-$QFDS -d Chemistry ignition_delay_T1000K_Phi1p4.fds
-$QFDS -d Chemistry ignition_delay_T1100K_Phi0p6.fds
-$QFDS -d Chemistry ignition_delay_T1100K_Phi1p0.fds
-$QFDS -d Chemistry ignition_delay_T1100K_Phi1p4.fds
-$QFDS -d Chemistry ignition_delay_T1200K_Phi0p6.fds
-$QFDS -d Chemistry ignition_delay_T1200K_Phi1p0.fds
-$QFDS -d Chemistry ignition_delay_T1200K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_TianfengLu_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_Smooke_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Ethylene_TianfengLu_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Propane_USC_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Propane_Z66_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_nHeptane_Chalmers_T1100K_Phi1p0.fds
 
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
