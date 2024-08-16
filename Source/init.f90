@@ -2520,7 +2520,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (DV%QUANTITY_INDEX(1)>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
 
-   IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a WALL cell or CFACE
+   IF (DV%INIT_ID=='null' .AND. DV%LP_TAG==0) THEN ! Assume the device is tied to a WALL cell or CFACE
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
       II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
@@ -2597,27 +2597,17 @@ TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 CHARACTER(LABEL_LENGTH) :: HEADING
 
-M => MESHES(NM)
-
 PROF_LOOP: DO N=1,N_PROF
 
    PF => PROFILE(N)
 
-   IF (PF%ID/='null') THEN
-      HEADING = PF%ID
-   ELSE
-      HEADING = OUTPUT_QUANTITY(PF%QUANTITY_INDEX)%SHORT_NAME
-   ENDIF
-
-   IF (PF%MESH/=NM) CYCLE PROF_LOOP
-
-   II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
-   JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
-   KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
-
-   IF (PF%IOR/=0) THEN
-      ! The PROFile is for a WALL cell
+   IF (PF%IOR/=0) THEN  ! The PROFile is for a WALL cell
+      IF (PF%MESH/=NM) CYCLE PROF_LOOP
+      M => MESHES(NM)
       IOR = PF%IOR
+      II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
+      JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
+      KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
       CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
       IF (IW>0) THEN
          PF%WALL_INDEX = IW
@@ -2633,6 +2623,35 @@ PROF_LOOP: DO N=1,N_PROF
       SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(PF%PART_CLASS_INDEX)%SURF_INDEX)
    ENDIF
 
+   ! Check for potential errors
+
+   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
+      WRITE(LU_ERR,'(A,I0,A)') 'ERROR(430): PROF ',N,' must be associated with a heat-conducting surface.'
+      STOP_STATUS = SETUP_STOP
+      RETURN
+   ENDIF
+
+   IF (PF%MATL_INDEX>0) THEN
+      SUCCESS = .FALSE.
+      DO NN=1,SF%N_MATL
+         IF (PF%MATL_INDEX==SF%MATL_INDEX(NN)) THEN
+            SUCCESS = .TRUE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF (.NOT. SUCCESS) THEN
+         WRITE(LU_ERR,'(A,I3,5A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(MATERIAL(PF%MATL_INDEX)%ID),&
+                              ' not part of surface type ',TRIM(SF%ID),' at the profile location.'
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ENDIF
+   ENDIF
+
+   ! If the PROFile is applied to a particle, let the root MPI process open and close the file. Other MPI processes can then
+   ! open and write to the file if the particle moves from mesh to mesh.
+
+   IF (PF%IOR==0 .AND. NM>1) CYCLE PROF_LOOP
+
    IF (APPEND .AND. PF%FORMAT_INDEX==1) THEN
       OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
@@ -2644,31 +2663,16 @@ PROF_LOOP: DO N=1,N_PROF
          ELSE
             WRITE(LU_PROF(N),'(A)') TRIM(PF%ID)
          ENDIF
+         IF (PF%ID/='null') THEN
+            HEADING = PF%ID
+         ELSE
+            HEADING = OUTPUT_QUANTITY(PF%QUANTITY_INDEX)%SHORT_NAME
+         ENDIF
          WRITE(LU_PROF(N),'(A,A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x ",TRIM(HEADING)
       ENDIF
    ENDIF
 
-   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
-      WRITE(LU_ERR,'(A,I0,A)') 'ERROR(430): PROF ',N,' must be associated with a heat-conducting surface.'
-      STOP_STATUS = SETUP_STOP
-      RETURN
-   ENDIF
-
-   IF (PF%MATL_ID/='null') THEN
-      SUCCESS = .FALSE.
-      DO NN=1,SF%N_MATL
-         IF (PF%MATL_ID==SF%MATL_NAME(NN)) THEN
-            SUCCESS = .TRUE.
-            EXIT
-         ENDIF
-      ENDDO
-      IF (.NOT. SUCCESS) THEN
-         WRITE(LU_ERR,'(A,I3,A,A,A,A,A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(PF%MATL_ID),' not part of surface type ',&
-                      TRIM(SF%ID),' at the profile location.'
-         STOP_STATUS = SETUP_STOP
-         RETURN
-      ENDIF
-   ENDIF
+   CLOSE(LU_PROF(N))
 
 ENDDO PROF_LOOP
 
@@ -3844,8 +3848,13 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
 
       IF (OBST_INDEX>0) THEN
          IF (OB%MATL_INDEX(1)<1) THEN
-            OB%MATL_INDEX(1:SF%N_MATL) = SF%MATL_INDEX(1:SF%N_MATL)
-            OB%MATL_MASS_FRACTION(1:SF%N_LAYER_MATL(1)) = SF%MATL_MASS_FRACTION(1,1:SF%N_LAYER_MATL(1))
+            IF (ITER==1.AND.SF%N_MATL>0) THEN
+               OB%MATL_INDEX(1:SF%N_MATL) = SF%MATL_INDEX(1:SF%N_MATL)
+               OB%MATL_MASS_FRACTION(1:SF%N_LAYER_MATL(1)) = SF%MATL_MASS_FRACTION(1,1:SF%N_LAYER_MATL(1))
+            ELSE
+               WRITE(MESSAGE,'(3A)') 'ERROR(375): OBST ',TRIM(OB%ID),' is VARIABLE_THICKNESS or HT3D and needs a MATL_ID.'
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+            ENDIF
          ENDIF
          HEAT_SOURCE_OBST(N_LAYERS_OBST) = OB%HEAT_SOURCE
          RAMP_IHS_INDEX_OBST(N_LAYERS_OBST) = OB%RAMP_IHS_INDEX
@@ -4259,9 +4268,11 @@ END SUBROUTINE FIND_THIN_WALL_BACK_INDEX
 
 
 !> \brief Update list of material indices
+!> \details The list of materials on the search list are checked against the X list and added if not there. Then the residues
+!> of the materials added to the X list are checked, and the residues of the residues, etc.
 !> \param N_MATLS_SEARCH Number of materials in the array to be searched
-!> \param MATL_INDEX_SEARCH Array of material indices
-!> \param N_MATLS_X Number of materials on the list
+!> \param MATL_INDEX_SEARCH Array of material indices on the search list
+!> \param N_MATLS_X Number of materials on the new list
 !> \param MATL_INDEX_X Array of new material indices
 
 SUBROUTINE ADD_MATERIAL(N_MATLS_SEARCH,MATL_INDEX_SEARCH,N_MATLS_X,MATL_INDEX_X)
@@ -4270,10 +4281,12 @@ INTEGER, INTENT(IN) :: N_MATLS_SEARCH
 INTEGER, INTENT(IN), DIMENSION(N_MATLS_SEARCH) :: MATL_INDEX_SEARCH
 INTEGER, INTENT(INOUT) :: N_MATLS_X
 INTEGER, INTENT(INOUT), DIMENSION(MAX_MATERIALS) :: MATL_INDEX_X
-INTEGER :: JJ,MI,JJJ,NR,NRE
+INTEGER :: JJ,MI,JJJ,NR,NRE,NEXT_MI
 TYPE (MATERIAL_TYPE), POINTER :: ML
 
 MATL_LOOP: DO JJ=1,N_MATLS_SEARCH
+
+   ! For each material, JJ, on the search list, determine if it has already been added to the X list. If not, add it.
 
    MI = MATL_INDEX_SEARCH(JJ)
    IF (MI<1) EXIT MATL_LOOP
@@ -4283,16 +4296,25 @@ MATL_LOOP: DO JJ=1,N_MATLS_SEARCH
    N_MATLS_X = N_MATLS_X + 1
    MATL_INDEX_X(N_MATLS_X) = MI
 
-   ML => MATERIAL(MI)
-   REACTION_LOOP: DO NR=1,ML%N_REACTIONS
-      RESIDUE_LOOP: DO NRE=1,ML%N_RESIDUE(NR)
-         DO JJJ=1,N_MATLS_X
-            IF (ML%RESIDUE_MATL_INDEX(NRE,NR)==MATL_INDEX_X(JJJ)) CYCLE RESIDUE_LOOP
-         ENDDO
-         N_MATLS_X = N_MATLS_X + 1
-         MATL_INDEX_X(N_MATLS_X) = ML%RESIDUE_MATL_INDEX(NRE,NR)
-      ENDDO RESIDUE_LOOP
-   ENDDO REACTION_LOOP
+   ! For a new material index, MI, on the X list, loop over its reactions and add all of its residues to the list.
+   ! For each new residue added to the list, check it for residues of its own. Continue until no new residues are found.
+
+   NEXT_MI = MI
+   NEXT_MATERIAL_LOOP: DO
+      IF (NEXT_MI==0) EXIT NEXT_MATERIAL_LOOP
+      ML => MATERIAL(NEXT_MI)
+      NEXT_MI = 0
+      REACTION_LOOP: DO NR=1,ML%N_REACTIONS
+         RESIDUE_LOOP: DO NRE=1,ML%N_RESIDUE(NR)
+            DO JJJ=1,N_MATLS_X
+               IF (ML%RESIDUE_MATL_INDEX(NRE,NR)==MATL_INDEX_X(JJJ)) CYCLE RESIDUE_LOOP
+            ENDDO
+            N_MATLS_X = N_MATLS_X + 1
+            MATL_INDEX_X(N_MATLS_X) = ML%RESIDUE_MATL_INDEX(NRE,NR)
+            NEXT_MI = MATL_INDEX_X(N_MATLS_X)
+         ENDDO RESIDUE_LOOP
+      ENDDO REACTION_LOOP
+   ENDDO NEXT_MATERIAL_LOOP
 
 ENDDO MATL_LOOP
 

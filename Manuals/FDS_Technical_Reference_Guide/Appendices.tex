@@ -851,7 +851,7 @@ The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref
 \begin{equation}\label{eq:TemperatureDerivativeAppendix}
 \frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j 
 \end{equation}
-For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
+For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration \si{(kmol/m^3)} of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate_appendix}
 r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
@@ -905,7 +905,7 @@ Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}
 \end{equation}
 \begin{equation}\label{eq:krTmpDerivative}
 \begin{aligned}
-\frac{\partial k_{r,i}}{\partial T} &= \frac{\partial}{\partial T} \left( \frac{k_{f,i}}{K_i} ) \right) \
+\frac{\partial k_{r,i}}{\partial T} &= \frac{\partial}{\partial T} \left( \frac{k_{f,i}}{K_i}  \right) \
 &= k_{r,i} \left( \frac{1}{k_{f,i}} \frac{\partial k_{f,i}}{\partial T} - \frac{1}{K_i} \frac{\partial K_i}{\partial T} \right)
 \end{aligned}
 \end{equation}
@@ -918,8 +918,8 @@ Here, $K_i$ is the concentration equilibrium constant obtained using Eq.~(\ref{e
 Here, $\Delta S_{\mathrm{rxn}}$ is the change in entropy, and can be calculated similar to the process described in Section \ref{sec:equilChem}.
 \begin{equation}\label{eq:ConcTmpDerivative}
 \begin{aligned}
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
 \end{aligned}
 \end{equation}
 In the above derivation, the relation $\frac{\partial C_j}{\partial T} = - \frac{C_j}{T}$ is used.
