@@ -267,7 +267,7 @@ LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that of
 LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
 LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
-LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test mass transfer resistence in char model
+LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step

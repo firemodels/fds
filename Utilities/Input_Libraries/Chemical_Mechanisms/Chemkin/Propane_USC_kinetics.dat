@@ -1,0 +1,963 @@
+!
+! Reference:
+!
+! Z. Qin, V. V. Lissianski, H. Yang, W. C. Gardiner, Jr., S. G. Davis 
+! and H. Wang, “Combustion Chemistry Of Propane: A Case Study of Detailed
+! Reaction Mechanism Optimization,”  Proceedings of the Combustion Institute, 
+! Volume 28, 2000.  p. 1663–1669.
+!
+ELEMENTS
+C H O N AR
+END
+SPECIES
+H2      H       O       O2      OH      H2O     HO2     H2O2
+C       CH      CH2     CH2*    CH3     CH4     CO      CO2
+HCO     CH2O    CH2OH   CH3O    CH3OH   C2H     C2H2    C2H3
+C2H4    C2H5    C2H6    HCCO    CH2CO   HCCOH
+!
+AR      N2
+CH2CHO  C3H2    C3H3    pC3H4   aC3H4   cC3H4
+C4H2    H2C4O   n-C4H3  i-C4H3  C4H4    n-C4H5  i-C4H5
+C4H6    C4H612  C4H81   C4H7
+C6H2    C6H3    l-C6H4  c-C6H4
+A1      A1-
+C6H5O   C6H5OH  C5H6    C5H5    C5H5O   C5H4OH  C5H4O
+C3H8    nC3H7   iC3H7   C3H6    aC3H5   CH3CCH2
+CH3CHO          C2H3CHO
+END
+! GRI-Mech Version 3.0 7/30/99  CHEMKIN-II format (C < 3) and ( Qin&Scott C3 & Scott C4-C6 )
+REACTIONS
+2O+M<=>O2+M                              1.200E+17   -1.000        .00
+H2/ 2.40/ H2O/15.40/ CH4/ 2.00/ CO/ 1.75/ CO2/ 3.60/ C2H6/ 3.00/ AR/  .83/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+O+H+M<=>OH+M                             5.000E+17   -1.000        .00
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+O+H2<=>H+OH                              3.870E+04    2.700    6260.00
+O+HO2<=>OH+O2                            2.000E+13     .000        .00
+O+H2O2<=>OH+HO2                          9.630E+06    2.000    4000.00
+O+CH<=>H+CO                              5.700E+13     .000        .00
+O+CH2<=>H+HCO                            8.000E+13     .000        .00
+O+CH2*<=>H2+CO                         1.500E+13     .000        .00
+O+CH2*<=>H+HCO                         1.500E+13     .000        .00
+O+CH3<=>H+CH2O                           5.060E+13     .000        .00
+O+CH4<=>OH+CH3                           1.020E+09    1.500    8600.00
+O+CO(+M)<=>CO2(+M)                       1.800E+10     .000    2385.00
+   LOW/ 6.020E+14     .000    3000.00/
+H2/2.00/ O2/6.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/3.50/ C2H6/3.00/ AR/ .50/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+O+HCO<=>OH+CO                            3.000E+13     .000        .00
+O+HCO<=>H+CO2                            3.000E+13     .000        .00
+O+CH2O<=>OH+HCO                          3.900E+13     .000    3540.00
+O+CH2OH<=>OH+CH2O                        1.000E+13     .000        .00
+O+CH3O<=>OH+CH2O                         1.000E+13     .000        .00
+O+CH3OH<=>OH+CH2OH                       3.880E+05    2.500    3100.00
+O+CH3OH<=>OH+CH3O                        1.300E+05    2.500    5000.00
+O+C2H<=>CH+CO                            5.000E+13     .000        .00
+O+C2H2<=>H+HCCO                          1.350E+07    2.000    1900.00
+O+C2H2<=>OH+C2H                          4.600E+19   -1.410   28950.00
+O+C2H2<=>CO+CH2                          6.940E+06    2.000    1900.00
+O+C2H3<=>H+CH2CO                         3.000E+13     .000        .00
+O+C2H4<=>CH3+HCO                         2.500E+07    1.830     220.00  ! k_opt=2*ko
+O+C2H5<=>CH3+CH2O                        2.240E+13     .000        .00
+O+C2H6<=>OH+C2H5                         8.980E+07    1.920    5690.00
+O+HCCO<=>H+2CO                           1.000E+14     .000        .00
+O+CH2CO<=>OH+HCCO                        1.000E+13     .000    8000.00
+O+CH2CO<=>CH2+CO2                        1.750E+12     .000    1350.00
+O2+CO<=>O+CO2                            2.500E+12     .000   47800.00
+O2+CH2O<=>HO2+HCO                        1.000E+14     .000   40000.00
+H+O2+M<=>HO2+M                           2.800E+18    -.860        .00
+O2/ .00/ H2O/ .00/ CO/ .75/ CO2/1.50/ C2H6/1.50/ N2/ .00/ AR/ .00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+2O2<=>HO2+O2                           2.080E+19   -1.240        .00
+H+O2+H2O<=>HO2+H2O                       11.26E+18    -.760        .00
+H+O2+N2<=>HO2+N2                         2.600E+19   -1.240        .00
+H+O2+AR<=>HO2+AR                         7.000E+17    -.800        .00
+H+O2<=>O+OH                              2.650E+16    -.6707  17041.00
+2H+M<=>H2+M                              1.000E+18   -1.000        .00
+H2/ .00/ H2O/ .00/ CH4/2.00/ CO2/ .00/ C2H6/3.00/ AR/ .63/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+2H+H2<=>2H2                              9.000E+16    -.600        .00
+2H+H2O<=>H2+H2O                          6.000E+19   -1.250        .00
+2H+CO2<=>H2+CO2                          5.500E+20   -2.000        .00
+H+OH+M<=>H2O+M                           2.200E+22   -2.000        .00
+H2/ .73/ H2O/3.65/ CH4/2.00/ C2H6/3.00/ AR/ .38/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+HO2<=>O+H2O                            3.970E+12     .000     671.00
+H+HO2<=>O2+H2                            7.750E+13     .000    1068.00  ! k_opt=1.73*ko
+H+HO2<=>2OH                              0.420E+14     .000     635.00  ! k_opt=0.5*ko
+H+H2O2<=>HO2+H2                          1.210E+07    2.000    5200.00
+H+H2O2<=>OH+H2O                          1.000E+13     .000    3600.00
+H+CH<=>C+H2                              1.650E+14     .000        .00
+H+CH2(+M)<=>CH3(+M)                      6.000E+14     .000        .00
+     LOW  /  1.040E+26   -2.760   1600.00/
+     TROE/   .5620  91.00  5836.00  8552.00/
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH2*<=>CH+H2                         3.000E+13     .000        .00
+H+CH3(+M)<=>CH4(+M)                      13.90E+15    -.534     536.00
+     LOW  /  2.620E+33   -4.760   2440.00/
+     TROE/   .7830   74.00  2941.00  6964.00 /
+H2/2.00/ H2O/6.00/ CH4/3.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH4<=>CH3+H2                           6.600E+08    1.620   10840.00
+H+HCO(+M)<=>CH2O(+M)                     1.090E+12     .480    -260.00
+     LOW  /  2.470E+24   -2.570    425.00/
+     TROE/   .7824  271.00  2755.00  6570.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+HCO<=>H2+CO                            7.340E+13     .000        .00
+H+CH2O(+M)<=>CH2OH(+M)                   5.400E+11     .454    3600.00
+     LOW  /  1.270E+32   -4.820   6530.00/
+     TROE/   .7187  103.00  1291.00  4160.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH2O(+M)<=>CH3O(+M)                    5.400E+11     .454    2600.00
+     LOW  /  2.200E+30   -4.800   5560.00/
+     TROE/   .7580   94.00  1555.00  4200.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH2O<=>HCO+H2                          5.740E+07    1.900    2742.00
+H+CH2OH(+M)<=>CH3OH(+M)                  1.055E+12     .500      86.00
+     LOW  /  4.360E+31   -4.650   5080.00/
+     TROE/   .600  100.00  90000.0  10000.0 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH2OH<=>H2+CH2O                        2.000E+13     .000        .00
+H+CH2OH<=>OH+CH3                         1.650E+11     .650    -284.00
+H+CH2OH<=>CH2*+H2O                     3.280E+13    -.090     610.00
+H+CH3O(+M)<=>CH3OH(+M)                   2.430E+12     .515      50.00
+     LOW  /  4.660E+41   -7.440   14080.0/
+     TROE/   .700  100.00  90000.0 10000.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+CH3O<=>H+CH2OH                         4.150E+07    1.630    1924.00
+H+CH3O<=>H2+CH2O                         2.000E+13     .000        .00
+H+CH3O<=>OH+CH3                          1.500E+12     .500    -110.00
+H+CH3O<=>CH2*+H2O                      2.620E+14    -.230    1070.00
+H+CH3OH<=>CH2OH+H2                       1.700E+07    2.100    4870.00
+H+CH3OH<=>CH3O+H2                        4.200E+06    2.100    4870.00
+H+C2H(+M)<=>C2H2(+M)                     1.000E+17   -1.000        .00
+     LOW  /  3.750E+33   -4.800   1900.00/
+     TROE/   .6464  132.00  1315.00  5566.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+C2H2(+M)<=>C2H3(+M)                    5.600E+12     .000    2400.00
+     LOW  /  3.800E+40   -7.270   7220.00/
+     TROE/   .7507   98.50  1302.00  4167.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+C2H3(+M)<=>C2H4(+M)                    6.080E+12     .270     280.00
+     LOW  /  1.400E+30   -3.860   3320.00/
+     TROE/   .7820  207.50  2663.00  6095.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+C2H3<=>H2+C2H2                         3.030E+13     .000        .00  ! k_opt=1.01*ko
+H+C2H4(+M)<=>C2H5(+M)                    0.783E+12     .454    1820.00  ! k_opt=1.45*ko
+     LOW  /  0.600E+42   -7.620   6970.00/
+     TROE/   .9753  210.00   984.00  4374.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+C2H4<=>C2H3+H2                         1.325E+06    2.530   12240.00
+H+C2H5(+M)<=>C2H6(+M)                    5.210E+17    -.990    1580.00
+     LOW  /  1.990E+41   -7.080   6685.00/
+     TROE/   .8422  125.00  2219.00  6882.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+H+C2H5<=>H2+C2H4                         2.000E+12     .000        .00
+H+C2H6<=>C2H5+H2                         1.150E+08    1.900    7530.00
+H+HCCO<=>CH2*+CO                       1.000E+14     .000        .00
+H+CH2CO<=>HCCO+H2                        5.000E+13     .000    8000.00
+H+CH2CO<=>CH3+CO                         1.130E+13     .000    3428.00
+H+HCCOH<=>H+CH2CO                        1.000E+13     .000        .00
+H2+CO(+M)<=>CH2O(+M)                     4.300E+07    1.500   79600.00
+     LOW  /  5.070E+27   -3.420  84350.00/
+     TROE/   .9320  197.00  1540.00 10300.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+OH+H2<=>H+H2O                            2.160E+08    1.510    3430.00
+2OH(+M)<=>H2O2(+M)                       7.400E+13    -.370        .00
+     LOW  /  2.300E+18    -.900  -1700.00/
+     TROE/   .7346   94.00  1756.00  5182.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+2OH<=>O+H2O                              3.570E+04    2.400   -2110.00
+OH+HO2<=>O2+H2O                          1.450E+13     .000    -500.00
+ DUPLICATE
+OH+H2O2<=>HO2+H2O                        2.000E+12     .000     427.00
+ DUPLICATE
+OH+H2O2<=>HO2+H2O                        1.700E+18     .000   29410.00
+ DUPLICATE
+OH+C<=>H+CO                              5.000E+13     .000        .00
+OH+CH<=>H+HCO                            3.000E+13     .000        .00
+OH+CH2<=>H+CH2O                          2.000E+13     .000        .00
+OH+CH2<=>CH+H2O                          1.130E+07    2.000    3000.00
+OH+CH2*<=>H+CH2O                       3.000E+13     .000        .00
+OH+CH3(+M)<=>CH3OH(+M)                   2.790E+18   -1.430    1330.00
+     LOW  /  4.000E+36   -5.920   3140.00/
+     TROE/   .4120  195.0  5900.00  6394.00/ 
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+OH+CH3<=>CH2+H2O                         5.600E+07    1.600    5420.00
+OH+CH3<=>CH2*+H2O                      6.440E+17   -1.340    1417.00
+OH+CH4<=>CH3+H2O                         1.000E+08    1.600    3120.00
+OH+CO<=>H+CO2                            4.760E+07    1.228      70.00
+OH+HCO<=>H2O+CO                          5.000E+13     .000        .00
+OH+CH2O<=>HCO+H2O                        3.430E+09    1.180    -447.00
+OH+CH2OH<=>H2O+CH2O                      5.000E+12     .000        .00
+OH+CH3O<=>H2O+CH2O                       5.000E+12     .000        .00
+OH+CH3OH<=>CH2OH+H2O                     1.440E+06    2.000    -840.00
+OH+CH3OH<=>CH3O+H2O                      6.300E+06    2.000    1500.00
+OH+C2H<=>H+HCCO                          2.000E+13     .000        .00
+OH+C2H2<=>H+CH2CO                        2.180E-04    4.500   -1000.00
+OH+C2H2<=>H+HCCOH                        5.040E+05    2.300   13500.00
+OH+C2H2<=>C2H+H2O                        3.370E+07    2.000   14000.00
+OH+C2H2<=>CH3+CO                         4.830E-04    4.000   -2000.00
+OH+C2H3<=>H2O+C2H2                       5.000E+12     .000        .00
+OH+C2H4<=>C2H3+H2O                       1.800E+06    2.000    2500.00  ! k_opt=0.5*ko
+OH+C2H6<=>C2H5+H2O                       3.540E+06    2.120     870.00
+OH+CH2CO<=>HCCO+H2O                      7.500E+12     .000    2000.00
+2HO2<=>O2+H2O2                           1.300E+11     .000   -1630.00
+ DUPLICATE
+2HO2<=>O2+H2O2                           4.200E+14     .000   12000.00
+ DUPLICATE
+HO2+CH2<=>OH+CH2O                        2.000E+13     .000        .00
+HO2+CH3<=>O2+CH4                         1.000E+12     .000        .00
+HO2+CH3<=>OH+CH3O                        2.870E+13     .000        .00  ! k_opt=0.76*ko
+HO2+CO<=>OH+CO2                          1.500E+14     .000   23600.00
+HO2+CH2O<=>HCO+H2O2                      5.600E+06    2.000   12000.00
+C+O2<=>O+CO                              5.800E+13     .000     576.00
+C+CH2<=>H+C2H                            5.000E+13     .000        .00
+C+CH3<=>H+C2H2                           5.000E+13     .000        .00
+CH+O2<=>O+HCO                            6.710E+13     .000        .00
+CH+H2<=>H+CH2                            1.080E+14     .000    3110.00
+CH+H2O<=>H+CH2O                          5.710E+12     .000    -755.00
+CH+CH2<=>H+C2H2                          4.000E+13     .000        .00
+CH+CH3<=>H+C2H3                          3.000E+13     .000        .00
+CH+CH4<=>H+C2H4                          6.000E+13     .000        .00
+CH+CO(+M)<=>HCCO(+M)                     5.000E+13     .000        .00
+     LOW  /  2.690E+28   -3.740   1936.00/
+     TROE/   .5757  237.00  1652.00  5069.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+CH+CO2<=>HCO+CO                          1.900E+14     .000   15792.00
+CH+CH2O<=>H+CH2CO                        9.460E+13     .000    -515.00
+CH+HCCO<=>CO+C2H2                        5.000E+13     .000        .00
+CH2+O2=>OH+H+CO                          5.000E+12     .000    1500.00
+CH2+H2<=>H+CH3                           5.000E+05    2.000    7230.00
+2CH2<=>H2+C2H2                           1.600E+15     .000   11944.00
+CH2+CH3<=>H+C2H4                         4.000E+13     .000        .00
+CH2+CH4<=>2CH3                           2.460E+06    2.000    8270.00
+CH2+CO(+M)<=>CH2CO(+M)                   8.100E+11     .500    4510.00
+     LOW  /  2.690E+33   -5.110   7095.00/
+     TROE/   .5907  275.00  1226.00  5185.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+CH2+HCCO<=>C2H3+CO                       3.000E+13     .000        .00
+CH2*+N2<=>CH2+N2                       1.500E+13     .000     600.00
+CH2*+AR<=>CH2+AR                       9.000E+12     .000     600.00
+CH2*+O2<=>H+OH+CO                      2.800E+13     .000        .00
+CH2*+O2<=>CO+H2O                       1.200E+13     .000        .00
+CH2*+H2<=>CH3+H                        7.000E+13     .000        .00
+CH2*+H2O(+M)<=>CH3OH(+M)               4.820E+17   -1.160    1145.00
+     LOW  /  1.880E+38   -6.360   5040.00/
+     TROE/   .6027  208.00  3922.00  10180.0 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+CH2*+H2O<=>CH2+H2O                     3.000E+13     .000        .00
+CH2*+CH3<=>H+C2H4                      1.200E+13     .000    -570.00
+CH2*+CH4<=>2CH3                        1.600E+13     .000    -570.00
+CH2*+CO<=>CH2+CO                       9.000E+12     .000        .00
+CH2*+CO2<=>CH2+CO2                     7.000E+12     .000        .00
+CH2*+CO2<=>CO+CH2O                     1.400E+13     .000        .00
+CH2*+C2H6<=>CH3+C2H5                   4.000E+13     .000    -550.00
+CH3+O2<=>O+CH3O                          3.560E+13     .000   30480.00
+CH3+O2<=>OH+CH2O                         2.310E+12     .000   20315.00
+CH3+H2O2<=>HO2+CH4                       2.450E+04    2.470    5180.00
+2CH3(+M)<=>C2H6(+M)                      6.770E+16   -1.180     654.00
+     LOW  /  3.400E+41   -7.030   2762.00/
+     TROE/   .6190  73.20  1180.00  9999.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+2CH3<=>H+C2H5                            6.840E+12     .100   10600.00
+CH3+HCO<=>CH4+CO                         2.648E+13     .000        .00
+CH3+CH2O<=>HCO+CH4                       3.320E+03    2.810    5860.00
+CH3+CH3OH<=>CH2OH+CH4                    3.000E+07    1.500    9940.00
+CH3+CH3OH<=>CH3O+CH4                     1.000E+07    1.500    9940.00
+CH3+C2H4<=>C2H3+CH4                      2.270E+05    2.000    9200.00
+CH3+C2H6<=>C2H5+CH4                      6.140E+06    1.740   10450.00
+HCO+H2O<=>H+CO+H2O                       1.500E+18   -1.000   17000.00
+HCO+M<=>H+CO+M                           1.870E+17   -1.000   17000.00
+H2/2.00/ H2O/ .00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ 
+HCO+O2<=>HO2+CO                          13.45E+12     .000     400.00
+CH2OH+O2<=>HO2+CH2O                      1.800E+13     .000     900.00
+CH3O+O2<=>HO2+CH2O                       4.280E-13    7.600   -3530.00
+C2H+O2<=>HCO+CO                          1.000E+13     .000    -755.00
+C2H+H2<=>H+C2H2                          5.680E+10    0.900    1993.00
+C2H3+O2<=>HCO+CH2O                       4.580E+16   -1.390    1015.00
+C2H4(+M)<=>H2+C2H2(+M)                   8.000E+12     .440   86770.00
+     LOW  /  1.580E+51   -9.300  97800.00/
+     TROE/   .7345  180.00  1035.00  5417.00 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+C2H5+O2<=>HO2+C2H4                       8.400E+11     .000    3875.00
+HCCO+O2<=>OH+2CO                         3.200E+12     .000     854.00
+2HCCO<=>2CO+C2H2                         1.000E+13     .000        .00
+O+CH3=>H+H2+CO                           3.370E+13     .000        .00
+O+C2H4<=>H+CH2CHO                        3.350E+06    1.830     220.00  ! k_opt=0.5*ko
+O+C2H5<=>H+CH3CHO                        1.096E+14     .000        .00
+OH+HO2<=>O2+H2O                          0.500E+16     .000   17330.00
+  DUPLICATE
+OH+CH3=>H2+CH2O                          8.000E+09     .500   -1755.00
+CH+H2(+M)<=>CH3(+M)                      1.970E+12     .430    -370.00
+   LOW/ 4.820E+25  -2.80  590.0 /
+   TROE/ .578  122.0  2535.0  9365.0 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+CH2+O2=>2H+CO2                           5.800E+12     .000    1500.00
+CH2+O2<=>O+CH2O                          2.400E+12     .000    1500.00
+CH2+CH2=>2H+C2H2                         2.000E+14     .000   10989.00
+CH2*+H2O=>H2+CH2O                      6.820E+10     .250    -935.00
+C2H3+O2<=>O+CH2CHO                       1.212E+11     .290      11.00  ! k_opt=0.4*ko
+C2H3+O2<=>HO2+C2H2                       1.337E+06    1.610    -384.00
+O+CH3CHO<=>OH+CH2CHO                     2.920E+12     .000    1808.00
+O+CH3CHO=>OH+CH3+CO                      2.920E+12     .000    1808.00
+O2+CH3CHO=>HO2+CH3+CO                    3.010E+13     .000   39150.00
+H+CH3CHO<=>CH2CHO+H2                     2.050E+09    1.160    2405.00
+H+CH3CHO=>CH3+H2+CO                      2.050E+09    1.160    2405.00
+OH+CH3CHO=>CH3+H2O+CO                    2.343E+10    0.730   -1113.00
+HO2+CH3CHO=>CH3+H2O2+CO                  3.010E+12     .000   11923.00
+CH3+CH3CHO=>CH3+CH4+CO                   2.720E+06    1.770    5920.00
+H+CH2CO(+M)<=>CH2CHO(+M)                 4.865E+11    0.422   -1755.00
+    LOW/ 1.012E+42  -7.63  3854.0/
+    TROE/ 0.465  201.0  1773.0  5333.0 /
+H2/2.00/ H2O/6.00/ CH4/2.00/ CO/1.50/ CO2/2.00/ C2H6/3.00/ AR/ .70/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+O+CH2CHO=>H+CH2+CO2                      1.500E+14     .000       .00
+O2+CH2CHO=>OH+CO+CH2O                    1.810E+10     .000       .00
+O2+CH2CHO=>OH+2HCO                       2.350E+10     .000       .00
+H+CH2CHO<=>CH3+HCO                       2.200E+13     .000       .00
+H+CH2CHO<=>CH2CO+H2                      1.100E+13     .000       .00
+OH+CH2CHO<=>H2O+CH2CO                    1.200E+13     .000       .00
+OH+CH2CHO<=>HCO+CH2OH                    3.010E+13     .000       .00
+!  File 2a:  A set of Qin (commented) & Scott's  C3 (C=3) reactions.
+!
+!=====================!
+!                     !
+! C3 chemistry        !
+!                     !
+!=====================!
+!
+! *****   C2H3O chemistry and additional reactions for C<3 removed. ******
+!
+ CH3 + C2H <=> C3H3 + H             2.41E+13    0.0      0.0  ! Tsang-Hampson
+!
+ C2H2 + CH <=> C3H2 + H             3.00E+13    0.0      0.0  ! Warnatz 83
+ C2H2 + CH2 <=> C3H3 + H            1.20E+13    0.0   6620.0  ! Bohland 86
+ C2H2 + CH2* <=> C3H3 + H           2.00E+13    0.0      0.0  ! Estimated
+ C2H2 + HCCO <=> C3H3 + CO          1.00E+11    0.0   3000.0  ! Miller-Bowman
+!
+! *****   Four C1 and C2 reactions removed. *****
+!
+!
+! Reactions of C3Hx species
+!
+ C3H2 + O <=> C2H2 + CO             6.80E+13    0.0      0.0  ! Warnatz 82
+!C3H2 + OH <=> H + CO + C2H2        6.80E+13    0.0      0.0  ! Warnatz 82
+ C3H2 + OH <=> HCO + C2H2           6.80E+13    0.0      0.0  ! War82 Prod/Miller
+!C3H2 + O2 <=> HCCO + H + CO        2.00E+13    0.0      0.0  ! Miller-Melius
+ C3H2 + O2 <=> HCCO + H + CO        2.00E+12    0.0   1000.0  ! Miller
+ C3H2 + H <=> C3H3                  1.00E+13    0.0      0.0  ! Estimated
+!
+! Propargyl Reactions 
+!
+ C3H3 + H <=> pC3H4                 0.855E+13   0.0      0.0  ! Est.  ! k_opt=0.57*ko
+! pC3H4+AR<=>C3H3+H+AR           4.7e+18  0.00      80000.        ! Qin_hidaka89
+ C3H3 + H <=> aC3H4                 0.825E+12   0.0      0.0  ! Est.  ! k_opt=0.33*ko
+! aC3H4+AR<=>C3H3+H+AR           2.00e+18   0.00   80000.         ! Qin_hidaka89
+!
+! Products reassigned to avoid C3H3 and C3H2 build-up
+!
+ C3H3 + H <=> C3H2 + H2             5.00E+13    0.0   1000.0  ! Miller
+ C3H3 + O <=> CH2O + C2H            2.00E+13    0.0      0.0  ! Miller-Bowman
+ C3H3 + OH <=> C3H2 + H2O           1.42E+13    0.0      0.0  ! Miller-Bowman  ! k_opt=0.71*ko
+ C3H3 + O2 <=> CH2CO + HCO          4.17E+10    0.0   2868.0  ! Gutman  ! k_opt=1.39*ko
+! C3H3+O2<=>CH2CO+HCO           1.1e+12  0.00   9219.           ! Qin_est 
+ C3H3 + HO2 <=> OH + CO + C2H3      8.00E+11    0.0      0.0  ! Estimated
+ C3H3 + HO2 <=> aC3H4 + O2          9.00E+11    0.0      0.0  ! EST-NEW   ! k_opt=3*ko
+ C3H3 + HO2 <=> pC3H4 + O2          1.10E+12    0.0      0.0  ! EST-NEw   ! k_opt=0.44*ko
+ C3H3 + HCO <=> aC3H4 + CO          2.50E+13    0.0      0.0  ! Estimated
+ C3H3 + HCO <=> pC3H4 + CO          2.50E+13    0.0      0.0  ! Estimated
+!
+ aC3H4 + H <=> C3H3 + H2            1.30E+06    2.0   5500.0  ! <=> pC3H4 + H
+! aC3H4+H<=>C3H3+H2              1.00e+12   0.00   1500.          ! Qin_hidaka89
+ aC3H4 + H <=> CH3CCH2              9.46E+42   -9.43 11190.0  ! WD 1 atm
+!aC3H4 + H <=> CH3CCH2              8.47E+43   -9.59 12462.0  ! WD 2 atm
+!aC3H4 + H <=> CH3CCH2              6.98E+44   -9.70 14032.0  ! WD 5 atm
+ aC3H4 + H <=> aC3H5                1.52E+59  -13.54 26949.0  ! WD 1 atm
+!aC3H4 + H <=> aC3H5                3.78E+57  -12.98 26785.0  ! WD 2 atm
+!aC3H4 + H <=> aC3H5                7.34E+54  -12.09 26187.0  ! WD 5 atm
+! aC3H5<=>aC3H4+H                  1.40e+13  0.00  59992.          ! Qin_tsang91
+ aC3H4 + O <=> C2H4 + CO            2.00E+07    1.8   1000.0  ! Est. See notes
+! aC3H4+O<=>CO+C2H4             7.8e+12  0.00      1600.          ! Qin_Westbrook84
+! aC3H4+O<=>HCO+C2H3              1.10e-02  4.613 -4243.          ! Qin_dagaut92
+! aC3H4+O2<=>C3H3+HO2             4.00e+13  0.00  61500.          ! Qin_dagaut92
+ aC3H4 + OH <=> C3H3 + H2O          5.30E+06    2.0   2000.0  ! Refit to Liu(note
+! aC3H4+OH<=>CH2CO+CH3            3.12e+12  0.00   -397.          ! Qin_dagaut94
+! aC3H4+OH<=>C3H3+H2O             2.00e+07  2.00   1000.          ! Qin_dagaut94
+ aC3H4 + CH3 <=> C3H3 + CH4         1.30E+12   0.00   7700.0  ! Wu & Kern
+! aC3H4+CH3<=>C3H3+CH4           2.00e+12  0.00   7700.           ! Qin_hidaka89
+ aC3H4 + C2H <=> C2H2 + C3H3        1.00E+13    0.0      0.0  ! Estimated/
+!
+!pC3H4 <=> cC3H4               1.73E+12   0.31   60015.0  ! WD kinf
+!pC3H4 <=> cC3H4               2.84E+45 -10.45   69284.0  ! WD 0.4 atm
+ pC3H4 <=> cC3H4               1.20E+44  -9.92   69250.0  ! WD 1 atm
+!pC3H4 <=> cC3H4               5.47E+42  -9.43   69089.0  ! WD 2 atm
+!pC3H4 <=> cC3H4               3.92E+40  -8.69   68706.0  ! WD 5 atm
+!
+!pC3H4 <=> aC3H4               5.81E+62 -14.63   91211.0  ! WD 0.4 atm 
+ pC3H4 <=> aC3H4               10.3E+60 -13.93   91117.0  ! WD 1 atm   ! k_opt=2*ko
+!pC3H4 <=> aC3H4               7.64E+59 -13.59   91817.0  ! WD 2 atm 
+!pC3H4 <=> aC3H4               3.12E+58 -13.07   92680.0  ! WD 5 atm 
+! pC3H4<=>aC3H4                   2.10e+12  0.00  60000.      ! Qin_hidaka89
+!
+!cC3H4 <=> aC3H4               1.98E+12   0.56   42240.0  ! WD kinf
+!cC3H4 <=> aC3H4               7.59E+40  -9.07   48831.0  ! WD 0.4 atm
+ cC3H4 <=> aC3H4               4.89E+41  -9.17   49594.0  ! WD 1 atm
+!cC3H4 <=> aC3H4               8.81E+41  -9.15   50073.0  ! WD 2 atm
+!cC3H4 <=> aC3H4               4.33E+41  -8.93   50475.0  ! WD 5 atm
+!
+ pC3H4 + H <=> aC3H4 + H            6.27E+17  -0.91  10079.0  ! WD 1 atm
+!pC3H4 + H <=> aC3H4 + H            1.50E+18  -1.00  10756.0  ! WD 2 atm
+!pC3H4 + H <=> aC3H4 + H            1.93E+18  -1.01  11523.0  ! WD 5 atm
+ pC3H4 + H <=> CH3CCH2              1.66E+47 -10.58  13690.0  ! WD 1 atm
+!pC3H4 + H <=> CH3CCH2              5.04E+47 -10.61  14707.0  ! WD 2 atm
+!pC3H4 + H <=> CH3CCH2              9.62E+47 -10.55  15910.0  ! WD 5 atm
+ pC3H4 + H <=> aC3H5                4.91E+60 -14.37  31644.0  ! WD 1 atm
+!pC3H4 + H <=> aC3H5                3.04E+60 -14.19  32642.0  ! WD 2 atm
+!pC3H4 + H <=> aC3H5                9.02E+59 -13.89  33953.0  ! WD 5 atm
+!pC3H4 + H <=> C3H3 + H2            1.15E+08    1.9   7530.0  ! <=> C2H6 + H
+ pC3H4 + H <=> C3H3 + H2            1.30E+06    2.0   5500.0  ! Estimated (from Wu and Kern)
+! pC3H4+H<=>C3H3+H2              1.0e+12  0.00      1500.        ! Qin_hidaka89
+! pC3H4+H<=>C2H2+CH3             1.30e+05  2.5     1000.         ! Qin_hidaka89
+!
+!pC3H4 + C3H3 <=> aC3H4 + C3H3      6.140E+06  1.740  10450.  ! Estimate(CH3+C2H6)
+!pC3H4 + H <=> CH3 + C2H2           1.30E+05    2.5   1000.0  ! Hidaka
+ pC3H4 + O <=> HCCO + CH3           2.04E+13    0.0   2250.0  ! Fontijn/split  ! k_opt=2.79*ko
+! pC3H4+O<=>HCCO+CH3             6.30e+12  0.00    2010.         ! Qin_dagaut94
+ pC3H4 + O <=> C2H4 + CO            0.58E+13    0.0   2250.0  ! Fontijn/split  ! k_opt=0.58*ko
+!pC3H4 + O <=> C2H3 + HCO           0.73E+13    0.0   2250.0  ! Fontijn/split
+! pC3H4+O<=>C2H3+HCO             3.20e+12  0.00    2010.         ! Qin_dagaut94
+!pC3H4 + O <=> C3H3 + OH            3.45e+04    2.16  4830.0  ! Fontijn
+! pC3H4+O<=>CH2CO+CH2            6.40e+12  0.00    2010.         ! Qin_dagaut94
+! pC3H4+O2<=>C3H3+HO2            5.00e+12  0.00  51000.          ! Qin_dagaut94
+!pC3H4 + OH <=> C3H3 + H2O          3.54E+06    2.12   870.0  ! <=> C2H6 + OH (too high)
+ pC3H4 + OH <=> C3H3 + H2O          1.00E+06    2.0    100.0  ! This work 
+! pC3H4+OH<=>C3H3+H2O            2.00e+07  2.00  1000.           ! Qin_dagaut94
+! pC3H4+OH<=>CH2CO+CH3            5.00e-04  4.50  -1000.         ! Qin_dagaut94
+ pC3H4 + C2H <=> C2H2 + C3H3        1.00E+13    0.0      0.0  ! Estimated
+ pC3H4 + CH3 <=> C3H3 + CH4         1.80E+12    0.0   7700.0  ! Wu & Kern
+! pC3H4+CH3<=>C3H3+CH4           2.00e+12  0.00   7700.          ! Qin_hidaka89
+!
+!
+! Reactions of propane
+!
+ C3H8+H <=> H2+nC3H7            1.30E+06   2.54   6756.0  ! TS3
+ C3H8+H <=> H2+iC3H7            2.60E+06   2.40   4471.0  ! TS3  ! k_opt=2*ko
+! C3H8+H<=>iC3H7+H2              1.26e+08  1.735   4864.      ! Qin_yang98
+! C3H8+H<=>nC3H7+H2              1.95e+08  1.827   7463.      ! Qin_yang98
+ C3H8+O <=> nC3H7+OH            1.90E+05   2.68   3716.0  ! TS3
+ C3H8+O <=> iC3H7+OH            4.76E+04   2.71   2106.0  ! TS3
+! C3H8+O<=>iC3H7+OH              4.77e+04  2.71   2106.       ! Qin_tsang88
+! C3H8+O<=>nC3H7+OH              1.93e+05  2.68   3716.       ! Qin_tsang88
+ C3H8+OH <=> nC3H7+H2O          1.40E+03   2.66    527.0  ! TS3
+ C3H8+OH <=> iC3H7+H2O          2.70E+04   2.39    393.0  ! TS3
+! C3H8+OH<=>iC3H7+H2O            1.84e+05  2.38   -573.       ! Qin_dagaut92
+! C3H8+OH<=>nC3H7+H2O            4.16e+07  1.74    540.       ! Qin_dagaut92
+ C3H8+O2 <=> nC3H7+HO2          4.00E+13   0.00  50930.0  ! TS3
+ C3H8+O2 <=> iC3H7+HO2          4.00E+13   0.00  47590.0  ! TS3
+! C3H8+O2<=>iC3H7+HO2             3.97e+13     0.00   47688.  ! Qin_tsang88
+! C3H8+O2<=>nC3H7+HO2             3.97e+13     0.00   50867.  ! Qin_tsang88
+ C3H8+HO2 <=> nC3H7+H2O2        4.76E+04   2.55  16490.0  ! TS3
+ C3H8+HO2 <=> iC3H7+H2O2        9.64E+03   2.60  13910.0  ! TS3
+! C3H8+HO2<=>iC3H7+H2O2          9.63e+03  2.60  13909.       ! Qin_tsang88
+! C3H8+HO2<=>nC3H7+H2O2          4.76e+04  2.55  16492.       ! Qin_tsang88
+ C3H8+CH3 <=> CH4+nC3H7         9.03E-01   3.65   7153.0  ! TS3
+ C3H8+CH3 <=> CH4+iC3H7         1.51E+00   3.46   5480.0  ! TS3
+! CH3+C3H8<=>iC3H7+CH4           1.51e+00  3.46   5480.       ! Qin_tsang88
+! CH3+C3H8<=>nC3H7+CH4           9.03e-01  3.65   7153.       ! Qin_tsang88
+! C2H3+C3H8<=>C2H4+iC3H7         1.02e+03  3.10   8828.       ! Qin_tsang88
+! C2H3+C3H8<=>C2H4+nC3H7         6.03e+02  3.30  10501.       ! Qin_tsang88
+! C2H5+C3H8<=>C2H6+iC3H7         1.20e+00  3.46   7467.       ! Qin_tsang88
+! C2H5+C3H8<=>C2H6+nC3H7         9.04e-01  3.65   9140.       ! Qin_tsang88
+! C3H8+aC3H5<=>iC3H7+C3H6         7.87e+01  3.30  18169.      ! Qin_tsang91
+! C3H8+aC3H5<=>nC3H7+C3H6         2.35e+02  3.30  19842.      ! Qin_tsang91
+! iC3H7+C3H8<=>nC3H7+C3H8        8.44e-03  4.20   8684.       ! Qin_tsang88
+! CH3O+C3H8<=>CH3OH+iC3H7        1.45e+11  0.00   4570.       ! Qin_tsang88
+! CH3O+C3H8<=>CH3OH+nC3H7        4.34e+11  0.00   6458.       ! Qin_tsang88
+!
+! Reactions of n-propyl
+!
+ nC3H7+H(+M) <=> C3H8(+M)       3.60E+13   0.00      0.0  ! TS3 600 cm-1
+                       LOW  / 3.01E+48  -9.32   5833.6      /
+                       TROE / 0.498  1314.0  1314.0 50000.0 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!nC3H7+H <=> C2H5+CH3           3.40E+18  -1.33    5386.0 ! TS3 0.1 atm
+ nC3H7+H <=> C2H5+CH3           3.70E+24  -2.92   12505.0 ! TS3 1 atm
+!nC3H7+H <=> C2H5+CH3           3.10E+27  -3.59   19059.0 ! TS3 10 atm
+!
+ nC3H7+H <=> C3H6+H2            1.80E+12   0.00      0.0  ! TS3
+ nC3H7+O <=> C2H5+CH2O          9.60E+13   0.00      0.0  ! TS3 ka+kb
+ nC3H7+OH <=> C3H6+H2O          2.40E+13   0.00      0.0  ! TS3
+ nC3H7+O2 <=> C3H6+HO2          9.00E+10   0.00      0.0  ! TS3
+! nC3H7+O2<=>C3H6+HO2            1.00e+12  0.00   5019.          ! Qin_tsang88
+ nC3H7+HO2 <=> C2H5+OH+CH2O     2.40E+13   0.00      0.0  ! TS3
+ nC3H7+HCO <=> C3H8+CO          6.00E+13   0.00      0.0  ! TS3
+ nC3H7+CH3 <=> CH4+C3H6         1.10E+13   0.00      0.0  ! TS3
+!
+! kinf : TS3 recommendation
+! ko: scaled such that Pr(nC3H7+CH3) <=> Pr(C2H5+CH3)  500cm-1
+! Fc: assumed equal to Fc(C2H5+CH3)
+!
+! Reactions of i-propyl
+!
+ iC3H7+H(+M) <=> C3H8(+M)       2.40E+13   0.00      0.0  ! TS3 600 cm-1
+                       LOW  / 1.70E+58 -12.08  11263.7      /
+                       TROE / 0.649  1213.1  1213.1 13369.7 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!iC3H7+H <=> CH3+C2H5           5.90E+23  -2.81  10009.0  ! TS3 0.1 atm
+ iC3H7+H <=> CH3+C2H5           1.40E+28  -3.94  15916.0  ! TS3 1 atm
+!iC3H7+H <=> CH3+C2H5           4.00E+24  -2.83  17542.0  ! TS3 10 atm
+!
+ iC3H7+H <=> C3H6+H2            3.20E+12   0.00      0.0  ! TS3
+ iC3H7+O <=> CH3CHO+CH3         9.60E+13   0.00      0.0  ! TS3 ka+kb
+ iC3H7+OH <=> C3H6+H2O          2.40E+13   0.00      0.0  ! TS3
+ iC3H7+O2 <=> C3H6+HO2          1.30E+11   0.00      0.0  ! TS3
+! iC3H7+O2<=>C3H6+HO2            1.26e+11  0.00      0.          ! Qin_tsang88
+ iC3H7+HO2 <=> CH3CHO+CH3+OH    2.40E+13   0.00      0.0  ! TS3
+ iC3H7+HCO <=> C3H8+CO          1.20E+14   0.00      0.0  ! TS3
+ iC3H7+CH3 <=> CH4 + C3H6       2.20E+14  -0.68      0.0  ! TS3
+!
+! Reactions of propene
+!
+ C3H6+H(+M) <=> nC3H7(+M)       1.33E+13   0.00   3260.7  ! TS5 600 cm-1
+                       LOW  / 6.26E+38  -6.66   7000.0      /
+                       TROE / 1.000  1000.0  1310.0 48097.0 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! nC3H7<=>H+C3H6                 1.26e+14  0.00  37000.          ! Qin_westbrook84
+! nC3H7<=>CH3+C2H4               1.20e+13  0.00  30300.          ! Qin_tsang88
+ C3H6+H(+M) <=> iC3H7(+M)       1.33E+13   0.00   1559.8  ! TS5 600cm-1
+                       LOW  / 8.70E+42  -7.50   4721.8      /
+                       TROE / 1.000  1000.0   645.4  6844.3 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! iC3H7<=>H+C3H6                 1.60e+13  0.00  35766.         ! Qin_tsang88
+! iC3H7<=>CH3+C2H4               2.00e+10  0.00  29500.         ! Qin_westbrook84
+!
+!C3H6+H <=> C2H4+CH3            17.6E+16  -1.05   6461.0  ! TS5 0.1 atm*2
+ C3H6+H <=> C2H4+CH3            25.76E+21  -2.39  11180.0  ! TS5 1 atm*2  ! k_opt=1.61*ko
+!C3H6+H <=> C2H4+CH3            6.60E+24  -3.04  15610.0  ! TS5 10 atm*2
+! C3H6+H<=>CH3+C2H4               7.23e+12  0.00  1301.        ! Qin_tsang91
+!
+ C3H6+H <=> aC3H5+H2            0.85E+05   2.50   2490.0  ! TS5 k(a)  ! k_opt=0.5*ko
+! C3H6+H<=>aC3H5+H2               1.70e+05  2.50   2492.       ! Qin_tsang92
+ C3H6+H <=> CH3CCH2+H2            4.00E+05   2.50   9790.0  ! TS5 k(b)
+ C3H6+O <=> CH2CO+CH3+H         1.20E+08   1.65    327.0  ! TS5 k(a+b) tot
+ C3H6+O <=> C2H5+HCO            3.50E+07   1.65   -972.0  ! TS5 k(c)
+! C3H6+O<=>C2H5+HCO              1.20e+11  0.70   8959.        ! Qin_tsang91
+ C3H6+O <=> aC3H5+OH            1.80E+11   0.70   5880.0  ! TS5 k(d)
+ C3H6+O <=> CH3CCH2+OH            6.00E+10   0.70   7630.0  ! TS5 K(f)
+! C3H6+O<=>C2H4+CH2O             5.89e+13  0.00   5000.        ! Qin_westbrook84
+! C3H6+O<=>CH3+CH3+CO             1.17e+13  0.00    600.        ! Qin_westbrook84
+ C3H6+OH <=> aC3H5+H2O          3.97E+06   2.00   -298.0  ! TS5  ! k_opt=1.28*ko
+ C3H6+OH <=> CH3CCH2+H2O          1.10E+06   2.00   1450.0  ! TS5
+! C3H6+OH<=>C2H5+CH2O            7.90e+12  0.00      0.        ! Qin_cathonnet81
+! C3H6+OH<=>CH3+CH3CHO           3.47e+11  0.00      0.        ! Qin_westbrook84
+! C3H6+OH<=>aC3H5+H2O             3.12e+06  2.00   -298.       ! Qin_tsang91
+! C3H6+OH<=>CH3CHCH+H2O             2.14e+06  2.00  2778.      ! Qin_tsang91
+! C3H6+OH<=>CH3CCH2+H2O             1.11e+06  2.00  1451.      ! Qin_tsang91
+! CH3CHCH+H<=>aC3H4+H2               3.33e+12  0.00     0.     ! Qin_dagaut88
+! CH3CHCH+O<=>CH2CO+CH3             1.807e+14 0.00     0.      ! Qin_dagaut88
+! CH3CHCH+CH3<=>aC3H4+CH4           1.000e+11 0.00     0.      ! Qin_dagaut88
+! CH3CHCH+C2H3<=>aC3H4+C2H4         1.000e+11 0.00     0.      ! Qin_dagaut88
+! CH3CHCH+C2H5<=>aC3H4+C2H6         1.000e+11 0.00     0.      ! Qin_dagaut88
+! CH3CCH2+H<=>aC3H4+H2               3.33e+12  0.00     0.     ! Qin_dagaut88
+ C3H6+HO2 <=> aC3H5+H2O2        9.60E+03   2.60  13910.0  ! TS5
+ C3H6+CH3 <=> aC3H5+CH4         2.20E+00   3.50   5675.0  ! TS5 k(c)
+! C3H6+CH3<=>aC3H5+CH4            2.21e+00  3.50   5675.       ! Qin_tsang91
+ C3H6+CH3 <=> CH3CCH2+CH4         8.40E-01   3.50  11660.0  ! TS5 k(e)
+! C3H6+C2H5<=>aC3H5+C2H6          2.23e+00  3.50   6637.       ! Qin_tsang91
+!
+! Reactions of allyl
+!
+ aC3H5+H(+M) <=> C3H6(+M)       3.70E+14   0.00      0.0  ! TS5 600cm-1  ! k_opt=1.85*ko
+                       LOW  / 1.33E+60 -12.00   5967.8      /
+                       TROE / 0.020  1096.6  1096.6  6859.5 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! C3H6<=>aC3H5+H                 2.50e+15  0.00  86679.          ! Qin_tsang91
+!
+ aC3H5+H <=> aC3H4+H2           1.80E+13   0.00      0.0  ! TS5 k(c)
+! aC3H5+H<=>aC3H4+H2               1.81e+13  0.00      0.        ! Qin_tsang91
+ aC3H5+O <=> C2H3CHO+H          6.00E+13   0.00      0.0  ! TS5
+!aC3H5+OH <=> C2H3CHO+H+H       5.30E+37  -6.71  29306.0  ! TS5, 0.1 atm
+ aC3H5+OH <=> C2H3CHO+H+H       4.20E+32  -5.16  30126.0  ! TS5, 1 atm
+!aC3H5+OH <=> C2H3CHO+H+H       1.60E+20  -1.56  26330.0  ! TS5, 10 atm
+!
+ C2H3+HCO <=> C2H3CHO           1.80E+13   0.00      0.0  ! TS5
+ C2H3CHO+H <=> C2H4+HCO         1.08E+12   0.454  1820.00 ! <=>C2H4+H (kinf)
+ C2H3CHO+O <=> C2H3+OH+CO       3.00E+13   0.00   3540.00 ! <=>CH2O+O
+ C2H3CHO+O <=> CH2O+CH2CO       1.90E+07   1.80    220.00 ! <=>C2H4+O
+ C2H3CHO+OH <=> C2H3+H2O+CO     3.43E+09   1.18   -447.00 ! <=>CH2O+OH
+!
+ aC3H5+OH <=> aC3H4+H2O         6.00E+12   0.00      0.0  ! TS5 k(a)
+ aC3H5+O2 <=> aC3H4+HO2         4.99E+15  -1.40  22428.0  ! Bozzelli, 1 atm
+!aC3H5+O2 <=> aC3H4+HO2         2.18E+21  -2.85  30755.0  ! Bozzelli, 10 atm
+! aC3H5+O2<=>aC3H4+HO2             1.21e+12  0.00  13551.      ! Qin_tsang91
+ aC3H5+O2 <=> CH3+CO+CH2O       1.19E+15  -1.01  20128.0  ! Bozzelli, 1 atm
+!aC3H5+O2 <=> CH3+CO+CH2O       7.14E+15  -1.21  21046.0  ! Bozzelli, 10 atm
+ aC3H5+O2 <=> C2H3CHO+OH        1.82E+13  -0.41  22859.0  ! Bozzelli, 1 atm
+!aC3H5+O2 <=> C2H3CHO+OH        2.47E+13  -0.45  23017.0  ! Bozzelli, 10 atm
+!
+ aC3H5+HO2 <=> C3H6+O2          2.66E+12   0.00      0.0  ! CEC 
+ aC3H5+HO2 <=> OH+C2H3+CH2O     6.60E+12   0.00      0.0  ! CEC
+!aC3H5+HO2 <=> OH+C2H3+CH2O     3.00E+12   0.00      0.0  ! CEC/2.21
+!
+ aC3H5+HCO <=> C3H6+CO          6.00E+13   0.00      0.0  ! TS5
+!
+ aC3H5+CH3 <=> aC3H4+CH4        3.00E+12  -0.32   -131.0  ! TS5 k(a)
+! aC3H5+CH3<=>aC3H4+CH4            3.01e+12 -0.32   -131.      ! Qin_tsang91
+ aC3H5+aC3H5 <=> C3H6 + aC3H4   1.00E+13   0.00      0.0  ! Estimated
+ aC3H5 <=> CH3CCH2              7.06E+56 -14.08  75868.0 ! WD 1 atm
+!aC3H5 <=> CH3CCH2              4.80E+55 -13.59  75949.0 ! WD 2 atm
+!aC3H5 <=> CH3CCH2              4.86E+53 -12.81  75883.0 ! WD 5 atm
+! aC3H5+C2H3<=>aC3H4+C2H4            2.41+12  0.00     0.       ! Qin_tsang91
+! aC3H5+C2H3<=>C3H6+C2H2            4.82+12  0.00     0.        ! Qin_tsang91
+! aC3H5+C2H5<=>aC3H4+C2H6            9.64e+11  0.00   -131.     ! Qin_tsang91
+! aC3H5+C2H5<=>C3H6+C2H4            2.59e+12  0.00   -131.      ! Qin_tsang91
+!
+! Reactions of propen-2-yl
+!
+ CH3CCH2+H <=> pC3H4+H2           3.34E+12   0.00      0.0  ! PW
+ CH3CCH2+O <=> CH3+CH2CO          6.00E+13   0.00      0.0  ! Estimated
+ CH3CCH2+OH <=> CH3+CH2CO+H       5.00E+12   0.00      0.0  ! Estimated
+!CH3CCH2+O2 <=> CH3CHO+HCO        1.00E+11   0.00      0.0  ! PW/changed
+ CH3CCH2+O2 <=> CH3+CO+CH2O       1.00E+11   0.00      0.0  ! PW/changed
+ CH3CCH2+HO2 <=> CH3+CH2CO+OH     2.00E+13   0.00      0.0  ! Estimated
+ CH3CCH2+HCO <=> C3H6+CO          9.00E+13   0.00      0.0  ! Estimated
+ CH3CCH2+CH3 <=> pC3H4+CH4        1.00E+11   0.00      0.0  ! PW
+!
+! ***** Five reactions of CH3CHO removed. *****
+!
+!
+! ***** Eight reactions of CH3CO removed. *****
+!
+!
+! Recombination reactions of C1 and C2 species
+!
+! ***** Reaction CH3+HCO <=> CH3CHO removed. *****
+!
+ CH3+C2H2 <=> pC3H4+H      1.28E+09  1.10  13644.0  ! WD 1 atm  ! k_opt=0.5*ko
+!CH3+C2H2 <=> pC3H4+H      2.07E+10  0.85  14415.0  ! WD 2 atm
+!CH3+C2H2 <=> pC3H4+H      2.51E+11  0.56  15453.0  ! WD 5 atm
+ CH3+C2H2 <=> aC3H4+H      5.14E+09  0.86  22153.0  ! WD 1 atm
+!CH3+C2H2 <=> aC3H4+H      1.33E+10  0.75  22811.0  ! WD 2 atm
+!CH3+C2H2 <=> aC3H4+H      9.20E+10  0.54  23950.0  ! WD 5 atm
+ CH3+C2H2 <=> CH3CCH2      4.99E+22 -4.39  18850.0  ! WD 1 atm
+!CH3+C2H2 <=> CH3CCH2      6.00E+23 -4.60  19571.0  ! WD 2 atm
+!CH3+C2H2 <=> CH3CCH2      7.31E+25 -5.06  21150.0  ! WD 5 atm
+ CH3+C2H2 <=> aC3H5        2.68E+53 -12.82 35730.0  ! WD 1 atm
+!CH3+C2H2 <=> aC3H5        3.64E+52 -12.46 36127.0  ! WD 2 atm
+!CH3+C2H2 <=> aC3H5        1.04E+51 -11.89 36476.0  ! WD 5 atm
+!
+ CH3+C2H3(+M) <=> C3H6(+M)      2.50E+13   0.00      0.0  ! TS1 600cm-1
+                       LOW  / 4.27E+58 -11.94   9769.8      /
+                       TROE / 0.175  1340.6 60000.0 10139.8 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! C3H6<=>C2H3+CH3                8.39e+14  0.00  87990.       ! Qin_hidaka92
+!
+!CH3+C2H3 <=> aC3H5+H           1.00E+36  -6.28  22442.0  ! TS1 0.1 atm
+ CH3+C2H3 <=> aC3H5+H           1.50E+24  -2.83  18618.0  ! TS1 1 atm
+!CH3+C2H3 <=> aC3H5+H           3.00E+08   1.65  12027.0  ! TS1 10 atm
+!
+ CH3+C2H4 <=> nC3H7             3.30E+11   0.00   7700.0  ! KP
+ CH3+C2H5(+M) <=> C3H8(+M)      9.60E+14  -0.50      0.0  ! TS3 TS1 500cm-1  ! k_opt=1.96*ko
+                       LOW  / 6.80E+61 -13.42   6000.0      /
+                       TROE / 1.000  1000.0  1433.9  5328.8 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! C3H8<=>CH3+C2H5                  2.58d+232  -60.2   254600.  ! Qin_2.6_to_4.2_atm
+!C2H3+C2H5 <=> aC3H5+CH3        8.00E+25  -3.46  11775.0  ! TS1 0.1 atm
+ C2H3+C2H5 <=> aC3H5+CH3        3.90E+32  -5.22  19747.0  ! TS1 1 atm
+!C2H3+C2H5 <=> aC3H5+CH3        3.90E+29  -4.24  22311.0  ! TS1 10 atm
+!
+!  File 3a:  A set of Scott's  C>3 (C <=> 4, 5, 6) reactions.
+!
+!<=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=>!
+!                                                                         !
+! C4-up chemistry    !
+!                                                                         !
+!<=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=><=>!
+!
+ C2H2 + C2H <=> C4H2 + H            9.60E+13    0.0      0.0  ! See notes
+ C2H2 + C2H <=> n-C4H3              4.50E+37   -7.68  7100.0  ! RRKM, 760 t
+ C2H2 + C2H <=> i-C4H3              2.60E+44   -9.47 14650.0  ! RRKM, 760 t
+ C2H2 + C2H3 <=> C4H4 + H            2.00E+18  -1.68  10600. ! 760 t
+ C2H2 + C2H3 <=> n-C4H5              9.3E+38   -8.76  12000. ! 760 t
+ C2H2 + C2H3 <=> i-C4H5              1.6E+46  -10.98  18600. ! 760 t
+ C2H4 + C2H <=> C4H4 + H            1.20E+13    0.0      0.0  ! Tsang
+ C2H4 + C2H3 <=> C4H6 + H           2.8E+21    -2.44 14720.0  ! 760 t
+ C2H3 + C2H3 <=> C4H6              1.5E+42   -8.84     12483.  ! RRKM 760 t
+ C2H3 + C2H3 <=> i-C4H5 + H        1.2E+22   -2.44     13654.  ! RRKM 760 t
+ C2H3 + C2H3 <=> n-C4H5 + H        2.4E+20   -2.04     15361.  ! RRKM 760 t
+!
+! Reactions of C3Hx species
+!
+ C3H2 + CH <=> C4H2 + H             5.00E+13    0.0      0.0  ! Estimated
+ C3H2 + CH2 <=> n-C4H3 + H          5.00E+13    0.0      0.0  ! Estimated
+ C3H2 + CH3 <=> C4H4 + H            5.00E+12    0.0      0.0  ! Estimated
+ C3H2 + HCCO <=> n-C4H3 + CO        1.00E+13    0.0      0.0  ! Estimated
+!
+! Products reassigned to avoid C3H3 and C3H2 build-up
+!
+ C3H3 + HCCO <=> C4H4 + CO          2.50E+13    0.0      0.0  ! Estimated
+ C3H3 + CH <=> i-C4H3 + H           5.00E+13    0.0      0.0  ! Estimated
+ C3H3 + CH2 <=> C4H4 + H            5.00E+13    0.0      0.0  ! Estimated
+ i-C4H5 + H <=> C3H3 + CH3          2.00E+13    0.0   2000.0  ! Estimated
+ C3H3 + CH3 (+M) <=> C4H612 (+M)    1.50E+12    0.0      0.0  ! kinf assumed falloff<=>C2H3+CH3 TS1 600 cm-1
+                         LOW /2.60E+57 -11.94 9770.0/
+                         TROE /0.175 1340.6 60000.0 9769.8/
+   H2/2.0/ H2O/6.0/ CH4/2.0/ CO/1.5/ CO2/2.0/ C2H6/3.0/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!
+ A1- + pC3H4 <=> A1 + C3H3          2.000E+12    0.0    15000.0
+ A1- + aC3H4 <=> A1 + C3H3          2.000E+12    0.0    15000.0
+!
+! Reactions of C4H2
+!
+ C4H2 + H <=> n-C4H3                1.10E+42   -8.72 15300.0  ! RRKM, 760 t
+ C4H2 + H <=> i-C4H3                1.10E+30   -4.92 10800.0  ! RRKM, 760 t
+ C4H2 + O <=> C3H2 + CO             2.70E+13    0.0   1720.0  ! Wellman
+ C4H2 + OH <=> H2C4O + H            6.60E+12    0.0   -410.0  ! Perry?
+ H2C4O + H <=> C2H2 + HCCO          5.00E+13    0.0   3000.0  ! Miller-Melius
+ H2C4O + OH <=> CH2CO + HCCO        1.00E+07    2.0   2000.0  ! Miller-Melius
+!
+! Reactions of C4H3 and C4H4
+!
+ n-C4H3 <=> i-C4H3                  4.10E+43   -9.49 53000.0  ! RRKM, 760 t
+ n-C4H3 + H <=> i-C4H3 + H          2.50E+20   -1.67 10800.0  ! RRKM, 760 t
+ n-C4H3 + H <=> C2H2 + C2H2         6.30E+25   -3.34 10014.0  ! RRKM, 760 t
+ i-C4H3 + H <=> C2H2 + C2H2         2.80E+23   -2.55 10780.0  ! RRKM, 760 t
+ n-C4H3 + H <=> C4H4                2.00E+47  -10.26 13070.0  ! RRKM, 760 t
+ i-C4H3 + H <=> C4H4                3.40E+43   -9.01 12120.0  ! RRKM, 760 t
+ n-C4H3 + H <=> C4H2 + H2           3.00E+13    0.00     0.0  ! 0.5*C2H3+H
+ i-C4H3 + H <=> C4H2 + H2           6.00E+13    0.00     0.0  ! C2H3+H
+ n-C4H3 + OH <=> C4H2 + H2O         2.00E+12    0.00     0.0
+ i-C4H3 + OH <=> C4H2 + H2O         4.00E+12    0.00     0.0
+ i-C4H3 + O2 <=> HCCO + CH2CO       7.86E+16   -1.80     0.0  ! Gutman
+!
+ C4H4 + H <=> n-C4H5                 1.3E+51  -11.92  16500. ! 760 t
+ C4H4 + H <=> i-C4H5                 4.9E+51  -11.92  17700. ! 760 t
+ C4H4 + H <=> n-C4H3 + H2           6.65E+05    2.53 12240.0  ! <=>(C2H4+H)/2
+ C4H4 + H <=> i-C4H3 + H2           3.33E+05    2.53  9240.0  ! -3kcal/mol, /4
+ C4H4 + OH <=> n-C4H3 + H2O         3.10E+07    2.0   3430.0  ! <=> C4H6 + OH
+ C4H4 + OH <=> i-C4H3 + H2O         1.55E+07    2.0    430.0  ! -3kcal/mol, /2
+!
+! Reactions of C4H5 and 1,3-C4H6
+!
+ n-C4H5 <=> i-C4H5                   1.5E+67  -16.89  59100. ! 760 t
+ n-C4H5 + H <=> i-C4H5 + H         3.1E+26   -3.35     17423.  ! RRKM 760 t
+ C4H6 <=> i-C4H5 + H               5.7E+36   -6.27    112353.  ! RRKM 760 t
+ C4H6 <=> n-C4H5 + H               5.3E+44   -8.62    123608.  ! RRKM 760 t
+ n-C4H5 + H <=> C4H4 + H2            1.5E+13    0.00      0.
+ i-C4H5 + H <=> C4H4 + H2            3.0E+13    0.00      0.
+ n-C4H5 + OH <=> C4H4 + H2O          2.0E+12    0.00      0.
+ i-C4H5 + OH <=> C4H4 + H2O          4.0E+12    0.00      0.
+ n-C4H5 + O2 <=> C2H4 + CO + HCO    4.16E+10   0.00   2500.  ! Gutman
+ i-C4H5 + O2 <=> CH2CO + CH2CHO      7.86E+16   -1.80     0.0 ! <=>i-C4H3+O2
+ n-C4H5 + HCO <=> C4H6 + CO          9.00E+13   0.0        0.  ! Estimated
+ i-C4H5 + HCO <=> C4H6 + CO          9.00E+13   0.0       0.  ! Estimated
+!
+ C4H6 + H <=> n-C4H5 + H2           1.33E+06    2.53 12240.0  ! <=> C2H4 + H
+ C4H6 + H <=> i-C4H5 + H2           6.65E+05    2.53  9240.0  ! -3kcal/mol,/2
+ C4H6 + H <=> pC3H4 + CH3           7.00E+12    0.0   2000.0  ! Est.
+ C4H6+O <=> HCO+aC3H5               6.00E+08    1.45  -860.0  ! Fontijn
+ C4H6 + OH <=> n-C4H5 + H2O         6.20E+06    2.0   3430.0  ! refit to Liu
+ C4H6 + OH <=> i-C4H5 + H2O         3.10E+06    2.0    430.0  ! -3kcal/mol
+!
+! Reactions of 1,2-C4H6
+!
+ C4H612 + H <=> C4H6 + H            2.00E+13    0.0   4000.0  ! Estimated
+ C4H612 + H <=> i-C4H5 + H2         1.70E+05    2.5   2490.0  ! <=> C3H6+H TS5
+ C4H612 + H <=> aC3H4 + CH3         2.00E+13    0.0   2000.0  ! Estimated
+ C4H612 + H <=> pC3H4 + CH3         2.00E+13    0.0   2000.0  ! Estimated
+ C4H612 + O <=> CH2CO + C2H4        1.20E+08    1.65   327.0  ! C3H6+O TS5
+ C4H612 + O <=> i-C4H5 + OH         1.80E+11    0.70  5880.0  ! C3H6+O TS5
+ C4H612 + OH <=> i-C4H5 + H2O       3.10E+06    2.00  -298.0  ! C3H6+OH
+ C4H612 <=> C4H6                    1.00E+13    0.0  65000.0  ! Estimated
+!
+! Reactions up to benzene formation and oxidation
+!
+!
+ C4H2 + C2H <=> C6H2 + H            9.60E+13    0.0      0.0  ! <=> C2H2 + C2H
+ C4H2 + C2H <=> C6H3                4.50E+37   -7.68  7100.0  ! RRKM, 760 t
+ C3H3 + C3H3 <=> A1-  + H           10.20E+12    0.0     0.0  ! k_opt=2.04*ko
+ C3H3 + C3H3 <=> A1                 5.780E+12    0.0     0.0  ! k_opt=2.89*ko
+ n-C4H3 + C2H2 <=> l-C6H4 + H        2.5E+14   -0.56  10600. ! 760 t
+ n-C4H3 + C2H2 <=> A1-               9.6E+70  -17.77  31300. ! 760 t
+ n-C4H3 + C2H2 <=> c-C6H4 + H        6.9E+46  -10.01  30100. ! 760 t
+ C4H4 + C2H <=> l-C6H4 + H          1.20E+13    0.0      0.0  ! <=> C2H+C2H4
+ n-C4H5 + C2H2 <=> A1 + H            1.6E+16   -1.33   5400. ! 760 t
+!
+! Reactions of C6H2
+!
+ C6H2 + H <=> C6H3                  1.10E+30   -4.92 10800.0  ! RRKM, 760 t
+!
+! Reactions of C6H3 and C6H4
+!
+ C6H3 + H <=> C4H2 + C2H2           2.80E+23   -2.55 10780.0  ! RRKM, 760 t
+ C6H3 + H <=> l-C6H4                3.40E+43   -9.01 12120.0  ! RRKM, 760 t
+ C6H3 + H <=> C6H2 + H2             3.00E+13    0.00     0.0  ! C2H3+H
+ C6H3 + OH <=> C6H2 + H2O           4.00E+12    0.00     0.0
+ C6H3+O2 <=> CO+C3H2+HCCO          5.00E+11    0.00     0.0  ! Estimated
+ l-C6H4 + H <=> A1-                  1.7E+78  -19.72  31400. ! 760 t
+ l-C6H4 + H <=> c-C6H4+ H            1.4E+54  -11.70  34500. ! 760 t
+ l-C6H4 + H <=> C6H3 + H2           1.33E+06    2.53  9240.0  ! <=> C4H4+H
+ l-C6H4 + OH <=> C6H3 + H2O         3.10E+06    2.0    430.0  ! see notes
+ c-C6H4 + H <=> A1-                  2.4E+60  -13.66  29500. ! 760 t
+!
+! Reactions of benzene and phenyl
+!
+ A1 + H <=> A1- + H2                 2.50E+14   0.0   16000. ! Kiefer
+ A1 + OH <=> A1- + H2O               1.60E+08  1.42  1450.0 ! CEC
+!
+ A1- + H (+M) <=> A1 (+M)            1.0E+14    0.00      0.
+     LOW/ 6.6E+75  -16.30   7000. /
+     TROE / 1.0 0.1 584.9 6113. /
+   H2/2.0/ H2O/6.0/ CH4/2.0/ CO/1.5/ CO2/2.0/ C2H6/3.0/ 
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!
+! Benzene oxidation
+!
+ A1 + O <=> C6H5O + H           2.20E+13  0.0   4530.0 ! CEC
+ A1 + OH <=> C6H5OH + H         1.30E+13  0.0  10600.0 ! CEC
+!A1- + O2 <=> C6H5O + O         2.10E+12  0.0   7470.0 ! LIN
+ A1- + O2 <=> C6H5O + O         2.60E+13  0.00  6120.0 ! (Frank et al.)
+!
+!C6H5O <=> CO + C5H5            2.51E+11  0.0  43900.0 ! LIN
+ C6H5O <=> CO + C5H5            7.41E+11  0.0  43900.0 ! Frank et al.
+ C6H5O + H <=> CO + C5H6        3.00E+13  0.0      0.0 ! Est.
+ C6H5O + O <=> HCO + 2C2H2 + CO 3.00E+13  0.0      0.0 ! Est.
+ C6H5O + H (+M) <=> C6H5OH (+M) 2.50E+14  0.0      0.0 ! (He et al.)
+    LOW/1.00E+94 -21.84 13880.0/                     ! (HW, RRKM needs exam)
+    TROE/0.043 304.2 60000. 5896.4/
+   H2/2.0/ H2O/6.0/ CH4/2.0/ CO/1.5/ CO2/2.0/ C2H6/3.0/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!
+ C6H5OH + H <=> C6H5O + H2      1.15E+14  0.0  12400.0 ! LIN
+ C6H5OH + O <=> C6H5O + OH      2.80E+13  0.0   7352.0 ! Brezinski
+ C6H5OH + OH <=> C6H5O + H2O    6.00E+12  0.0      0.0 ! LIN
+!
+ C5H5 + H (+M)<=> C5H6 (+M)     1.00E+14  0.0      0.0 ! (est. EBG)
+      LOW/4.4E+80 -18.28 12994.0/                    ! (HW, RRKM)
+     TROE/0.068 400.7 4135.8 5501.9/
+   H2/2.0/ H2O/6.0/ CH4/2.0/ CO/1.5/ CO2/2.0/ C2H6/3.0/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+ C5H5 + O <=> n-C4H5 + CO       1.00E+14  0.0      0.0 ! Brezinsky
+ C5H5 + OH <=> C5H4OH + H       5.00E+12  0.0      0.0 ! Est.
+ C5H5 + HO2 <=> C5H5O + OH      3.00E+13  0.0      0.0 ! Brezinsky
+!
+ C5H6 + H <=> C5H5 + H2         2.20E+08  1.77  3000.0 ! Brezinsky
+ C5H6 + O <=> C5H5 + OH         1.80E+13  0.0   3080.0 ! Brezinsky
+ C5H6 + OH <=> C5H5 + H2O       3.43E+09  1.18  -447.0 ! Brezinsky
+!
+ C5H5O <=> n-C4H5 + CO          2.50E+11  0.0  43900.0 ! Brezinsky
+ C5H5O + H <=> CH2O + 2C2H2     3.00E+13  0.0      0.0 ! Est.
+ C5H5O + O <=> CO2 + n-C4H5     3.00E+13  0.0      0.0 ! Est.
+!
+ C5H4OH <=> C5H4O + H           2.10E+13  0.0  48000.0 ! Brezinsky
+ C5H4OH + H <=> CH2O + 2C2H2    3.00E+13  0.0      0.0 ! Est.
+ C5H4OH + O <=> CO2 + n-C4H5    3.00E+13  0.0      0.0 ! Est.
+!
+ C5H4O <=> CO + C2H2 + C2H2     1.00E+15  0.0  78000.0 ! Brezinsky
+ C5H4O + O <=> CO2 + 2C2H2      3.00E+13  0.0      0.0 ! Est
+!
+ aC3H5+CH3(+M) <=> C4H81(+M)    1.00E+14  -0.32   -262.3  ! TS5 300CM-1
+                       LOW  / 3.51E+60 -12.97   6000.0      /
+                       TROE / 0.896 60000.0  1606.0  6118.4 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+!
+! Reactions of 1-butene
+!
+!C4H81+H <=> C2H4+C2H5          17.6E+16  -1.05   6461.0  ! <=>(C3H6+H) TS5 0.1 atm*2
+ C4H81+H <=> C2H4+C2H5          16.0E+21  -2.39  11180.0  ! <=>(C3H6+H) TS5 1 atm*2
+!C4H81+H <=> C2H4+C2H5          6.60E+24  -3.04  15610.0  ! <=>(C3H6+H) TS5 10 atm*2
+ C4H81+H <=> C3H6+CH3           32.0E+21  -2.39  11180.0  ! <=>(C4H81+H)*2
+!
+ C4H81+H <=> C4H7+H2            6.50E+05   2.54   6756.0  ! <=>(C3H8+H)/2 TS5 k(a)
+ C4H81+O <=> nC3H7+HCO          3.30E+08   1.45   -402.0  ! Refit to Fontijn kadd
+ C4H81+O <=> C4H7+OH            1.50E+13   0.00   5760.0  ! Fontijn
+ duplicate
+ C4H81+O <=> C4H7+OH            2.60E+13   0.00   4470.0  ! Fontijn
+ duplicate
+ C4H81+OH <=> C4H7+H2O          7.00E+02   2.66    527.0  ! <=>(C3H8+OH)/2 TS5
+ C4H81+O2 <=> C4H7+HO2          2.00E+13   0.00  50930.0  ! <=>(C3H8+O2)/2 TS5
+!C4H81+HO2 <=> C4H7+H2O2        2.40E+04   2.55  16490.0  ! <=>(C3H8+HO2)/2 TS3
+ C4H81+HO2 <=> C4H7+H2O2        1.50E+11   0.00  14900.0  ! Walker 77 (/2)
+ C4H81+CH3 <=> C4H7+CH4         4.50E-01   3.65   7153.0  ! <=>(C3H8+CH3)/2 TS5 k(c)
+!
+! Reactions of 1-buten-3-yl
+!
+!C4H7 <=> C4H6+H                1.55E+56 -13.46  50860.0  ! HW 0.1 atm &
+ C4H7 <=> C4H6+H                2.28E+52 -12.01  51230.0  ! HW   1 atm
+!C4H7 <=> C4H6+H                2.25E+44  -9.39  49150.0  ! HW  10 atm
+!
+ C4H7+H(+M) <=> C4H81(+M)       3.60E+13   0.00      0.0  ! <=>(nC3H7+H) TS3 600 cm-1
+                       LOW  / 3.01E+48  -9.32   5833.6      /
+                       TROE / 0.498  1314.0  1314.0 50000.0 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+ C4H7+H <=> CH3+aC3H5           2.00E+21  -2.00  11000.0  ! Estimated
+ C4H7+H <=> C4H6+H2             1.80E+12   0.00      0.0  ! <=>(nC3H7+H) TS3
+ C4H7+O2 <=> C4H6+HO2           1.00E+11   0.00      0.0  ! Estimated
+ C4H7+HO2 <=> CH2O+OH+aC3H5     2.40E+13   0.00      0.0  ! <=>(nC3H7+HO2) TS3
+ C4H7+HCO <=> C4H81+CO          6.00E+13   0.00      0.0  ! <=>(nC3H7+HCO) TS3
+ C4H7+CH3 <=> C4H6+CH4          1.10E+13   0.00      0.0  ! <=>(nC3H7+CH3)
+!
+! Recombination reactions of C1 and C2 species
+!
+!C2H3+C2H4 <=> C4H7             1.21E+05   2.33   3680.0  ! HW     inf &
+!C2H3+C2H4 <=> C4H7             1.23E+35  -7.76   9930.0  ! HW 0.1 atm
+ C2H3+C2H4 <=> C4H7             7.93E+38  -8.47  14220.0  ! HW   1 atm
+!C2H3+C2H4 <=> C4H7             2.99E+36  -7.40  15480.0  ! HW  10 atm
+!
+ C2H3+C2H5(+M) <=> C4H81(+M)    1.50E+13   0.00      0.0  ! TS1 450cm-1
+                       LOW  / 1.55E+56 -11.79   8984.5      /
+                       TROE / 0.198  2277.9 60000.0  5723.2 /
+    H2/2/ H2O/6/ CH4/2/ CO/1.5/ CO2/2/ C2H6/3/ AR/0.7/
+C2H4/3.0/ pC3H4/4.0/ C3H6/4.0/ C3H8/4.0/
+! kinf: -0.5 T power = CH3+C2H5, kinf(300K) = TS1 recommendation
+! ko: scaled such that Pr(C2H5+C2H5) = Pr(CH3+C2H5) at (T,P), 500 cm-1
+! Fc: assumed equal to Fc(CH3+C2H5)
+!
+! PW    Pitz and Westbrook
+! HW    Wang RRKM calcl
+! CEC   EC compilation
+! TS1   Tsang, methane compilation
+! TS3   Tsang, propane compilation
+! TS4   Tsang, isobutane compilation
+! TS5   Tsang, propene compilation
+! TW    Tsang, W. and Walker, J. A. J. Phys. Chem. 96:8378-8384 (1992).
+! CW    Cohen, N. and Westberg, K. R., Int. J. Chem. Kinet. 18:99 (1986)
+! C     Cohen, N. Int. J. Chem. Kinet. 23:397-417 (1991)
+! KP    Kerr and Parsonage 1972 review
+! Cvetanovic   Cvetanovic, R.J. J. Phys. Chem. Ref. Data 16:261, 1987.
+!
+END
+
+
+

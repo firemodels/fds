@@ -1,10 +1,10 @@
 
-&HEAD CHID='box_burn_away11', TITLE='Test BURN_AWAY feature' / 
+&HEAD CHID='box_burn_away11', TITLE='Test BURN_AWAY feature' /
 
 &MESH IJK=10,10,10 XB=-0.3,0.7,-0.4,0.6,0.0,1.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=1.0, DY=1.0, I_UPPER=1, J_UPPER=1 /
 
-&TIME T_END=30. DT = 0.01/
+&TIME T_END=30. DT = 0.01,WALL_INCREMENT=1/
 
 &SPEC ID='METHANE' /
 

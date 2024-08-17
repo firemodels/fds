@@ -342,10 +342,10 @@ stop_fds_if_requested
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue"
   if [ "$USE_MPIRUN" == "" ]; then
-# use on blaze  note this if statement can be removed once blaze goes away
+# use the native Slurm process allocator
      MPIRUN="srun --mpi=pmi2 "
   else
-#  use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
+# use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
      MPIRUN="mpirun "
   fi
 else
