@@ -4468,8 +4468,18 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 
 
 \subsubsection{Conductivity}
+\label{info:CONDUCTIVITY}
 
-Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+Gas phase thermal conductivity, $k$, can be specified in one of four ways. First, it can be defined as a constant, {\ct CONDUCTIVITY} (\si{W/(m.K)}), on the {\ct SPEC} line. Second, it can be defined as a function of temperature via the ramp, {\ct RAMP\_K}, on the {\ct SPEC} line. Third, it can be computed by FDS using the parameters {\ct MW} and {\ct PR\_GAS} given on the {\ct SPEC} line (the default value {\ct PR\_GAS} is {\ct PR} given on the {\ct MISC} line). Fourth, it can be computed using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}) given on the {\ct SPEC} line.  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+
+These methods of specifying the thermal conductivity are less important in LES simulations where the effective value is the sum of the molecular value, $k$, and a turbulent component, $k_{\rm t}$:
+\be
+   k_{\rm {\tiny LES}} = k + k_{\rm t} \quad ; \quad  k_{\rm t} = \frac{c_p \, \mu_{\rm t}}{\PR_{\rm t}}
+\ee
+The turbulent visosity, $\mu_{\rm t}$, is a function of the local flow field and grid size. The turbulent Prandtl number, $\PR_{\rm t}$, is a specified constant. The specific heat, $c_p$, is a function of the gas temperature and composition for {\ct SIMULATION\_MODE='LES'}, and it is the constant value of the background gas species at ambient temperature for {\ct 'VLES'} and {\ct 'SVLES'}. 
+
+The gas phase output quantity {\ct 'CONDUCTIVITY'} denotes that which is actually used in the simulation, $k_{\rm {\tiny LES}}$, while {\ct 'MOLECULAR CONDUCTIVITY'} is the molecular value, $k$, only; that is, the actual thermal conductivity of the gas with no turbulent component added.
+
 
 \subsubsection{Diffusivity}
 \label{info:diffusivity}
@@ -11223,7 +11233,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
 {\ct CHI\_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
-{\ct CONDUCTIVITY}                              & Thermal conductivity                              & \si{W/(m.K)}      & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
 {\ct DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
@@ -11256,6 +11266,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s               & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time, $\tau_{\rm mix}$          & s                 & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                               & kg/kg             & D,I,P,S      \\ \hline
+{\ct MOLECULAR CONDUCTIVITY}                    & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
 {\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}     & D,I,P,S      \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
 {\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                       & m/s               & D            \\ \hline
