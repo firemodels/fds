@@ -8,7 +8,7 @@ Using default value of extinction coefficient, 45.6 % at T_END.
 &MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
 &RADI RADIATION=.FALSE./
 &TIME T_END=200. /
-&DUMP NFRAMES=200 /
+&DUMP FLUSH_FILE_BUFFERS=T, NFRAMES=200 /
 
 &REAC FUEL='PROPANE', SOOT_YIELD=0.001 /
 

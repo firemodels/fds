@@ -561,7 +561,7 @@ By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, 
 \end{lstlisting}
 Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY ERROR'}, if necessary.
 
-To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
+To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview. 
 
 Since calculations can extend to hours or days, there is a restart feature in FDS. Details of how to use this feature are given in Sec.~\ref{info:restart}. Briefly, specify at the beginning of calculation how often a ``restart'' file should be saved. Should something happen to disrupt the calculation, like a power outage, the calculation can be restarted from the time the last restart file was saved.
 
@@ -811,7 +811,7 @@ When you run a job that has been run previously, FDS will automatically overwrit
 \section{Stopping and Restarting Calculations ({\tt .restart})}
 \label{info:restart}
 
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=T} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off you will need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation and add {\ct RESTART=T} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct F} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. If you have a {\ct CATF} line in your input, you will need to use {\ct CHID\_cat.stop}. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=T} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off you will need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation and add {\ct RESTART=T} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct F} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
 
 There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
 The control function feature (see Sec.~\ref{info:CTRL}) can be used to stop a calculation or dump a restart file when the computation reaches some measurable condition such as the first sprinkler activation.
@@ -2492,10 +2492,16 @@ For the 3-D algorithm, each obstruction ({\ct OBST}) that makes up the solid is 
 To invoke the 3-D solver, specify {\ct {HT3D=T}} on a {\ct {SURF}} line as in this example:
 \begin{lstlisting}
 &SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK' /
-&OBST XB= 0.08, 0.12,-0.12,-0.08,-0.07, 0.17, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=..., SURF_ID='STEEL SLAB', MATL_ID='STEEL', CELL_SIZE=0.003 /
 &MATL ID='STEEL', DENSITY=7500, SPECIFIC_HEAT=0.5, CONDUCTIVITY=50 /
 \end{lstlisting}
-Parameters that are used to control the solid phase gridding are typically given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
+Parameters that are used to control the solid phase gridding are preferably given on the {\ct OBST} line instead of the {\ct SURF} line. In this example, the {\ct MATL\_ID} is specified on the {\ct OBST} line. You can specify a uniformly-spaced grid using the parameter {\ct CELL\_SIZE} (m) or you can stretch the grid using the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. You can also limit the number of grid cells using {\ct N\_LAYER\_CELLS\_MAX}. These parameters are explained in Sec.~\ref{info:solid_phase_stability}, but when specified on an {\ct OBST} line, these parameters are scalars and refer to the single layer formed by that particular obstruction. If these parameters are not specified on the {\ct OBST} line, they will be taken from the first layer specified on the {\ct SURF} line, and if not specified there, they will take on the default values listed in Sec.~\ref{info:solid_phase_stability}.
+
+An appropriate {\ct CELL\_SIZE}, $\delta$, for 3-D heat conduction is based on the material thermal diffusivity, $\alpha=k/(\rho \, c)$:
+\be
+   \delta \approx \min \left( \dx , \sqrt \frac{ \tau \, k}{\rho \, c} \right) \quad ; \quad \tau=1 \; \hbox{s} 
+\ee
+Here, $\tau$ is just a unity time scale for the purpose of unit consistency. The gas phase grid cell size is $\dx$. In the example above, the {\ct 'STEEL'} has a conductivity of 0.05~kW/(m K), specific heat 0.5~kJ/(kg K), and density 7500~kg/m$^3$; thus, an appropriate {\ct CELL\_SIZE} would be on the order of 0.004~m. FDS will adjust this value so that an integral number of cells will span the width of the solid object. Choosing a {\ct CELL\_SIZE} much lower than this recommended value might lead to spurious results, especially if materials of very different thermal diffusivities are components of the solid object. 
 
 You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified using {\ct RAMP\_IHS}.
 
@@ -2543,10 +2549,10 @@ The quantity {\ct 'WALL ENTHALPY'} is the total energy within the volume carved 
 
 Structural steel members like I-beams are difficult to model for two reasons. First, the underlying grid must be reasonably well-resolved to capture the cross-sectional shape, and second, the lateral heat transfer can be important. At best, I-beams are typically modeled as a collection of thin (i.e. zero cell thick) obstructions representing the web and flanges.
 \begin{lstlisting}
-&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB' /  Web
-&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB' /  Upper Flange
-&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB' /  Lower Flange
-&SURF ID='STEEL SLAB', MATL_ID='STEEL', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
+&OBST XB=0.12,1.88,0.51,0.53,0.21,0.79, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=0.12,1.88,0.41,0.63,0.76,0.79, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&OBST XB=0.12,1.88,0.41,0.63,0.21,0.24, SURF_ID='STEEL SLAB', MATL_ID='STEEL' /
+&SURF ID='STEEL SLAB', HT3D=T, COLOR='BLACK', CELL_SIZE=0.1 /
 \end{lstlisting}
 
 \begin{figure}[!ht]
@@ -9530,23 +9536,25 @@ To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+The parameter {\ct DEPTH} (m) indicates a location inside the solid. A positive value indicates the distance from the front surface; a negative value indicates the distance (in absolute value) from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point moves towards the back side of the solid. Eventually, the point may emerge from the solid, in which case it returns the ambient temperature. Measuring the distance from the back surface may be more appropriate in this case.
 
-Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the center corresponding to the solid cell temperature being output by {\ct 'INSIDE WALL TEMPERATURE'}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
+In general, the discrete points within a solid are stretched starting at the surface. If the solid cell center position is needed, it may be output using
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
 \end{lstlisting}
-The output should lie within half a solid grid cell distance from the specified {\ct DEPTH}.
+The output value should lie within half a solid cell distance from the specified {\ct DEPTH}.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
+This produces a time history of the density of the material referred to as {\ct 'wood'}. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given. 
 
-To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities can take an optional {\ct MATL\_ID} keyword. To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'} which requires a {\ct MATL\_ID}.
+To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'}. This quantity requires a {\ct MATL\_ID}.
 
-Note that these quantities are allowed only as a {\ct DEVC} or {\ct PROF}, not a {\ct BNDF}, output.
+To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities do not take the optional {\ct MATL\_ID} keyword. 
+
+Note that these inner solid quantities are allowed only for devices ({\ct DEVC}) or profiles ({\ct PROF}), not contoured boundares ({\ct BNDF}).
 
 \subsubsection{Back Surface Temperature}
 \label{info:BACK}
@@ -9837,12 +9845,16 @@ The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a w
 \begin{lstlisting}
 &PROF ID='T-1', XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', IOR=3 /
 \end{lstlisting}
-For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
+For a particle, there are two options. The first is to reference the {\ct INIT} line used to place the particle within the domain:
 \begin{lstlisting}
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
 &PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
-For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
+The second option is to specify the particle using its unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labelled ``Show selected particle tag.'' Then click on the desired particle.}. Once you have determined the tag, add the following line to the input file:
+\begin{lstlisting}
+&PROF LP_TAG=..., PART_ID='...', QUANTITY='INSIDE WALL TEMPERATURE' /
+\end{lstlisting}
+Note that you must specify the {\ct PART\_ID} so that the appropriate inner noding structure can be determined. With either option for designating a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
 The {\ct QUANTITY} is the physical quantity to record. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries. The {\ct ID} is an optional input which, if provided, is used in the file header.
 
@@ -9881,7 +9893,9 @@ You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smoke
 
 The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
 
-{\ct BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF}, or discrete times, {\ct RAMP\_BNDF}, on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=F} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=T} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=T} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
+{\ct BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF}, or discrete times, {\ct RAMP\_BNDF}, on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=F} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=T} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Another way is to disable {\ct BNDF} output for specific meshes by setting {\ct BNDF\_MESH=F} on the {\ct MESH} lines where no {\ct BNDF} output is desired. Disabling output for a {\ct MESH} includes all wall cells at the exterior boundary of that {\ct MESH}.
+
+Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=T} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
 Applying boundary files to complex geometries can be controlled with the {\ct BNDF\_GEOM} logical on the {\ct GEOM} line.  Note that {\ct BNDF} output for {\ct GEOM} uses face centered values only (node centered is not available; the user need not set {\ct CELL\_CENTERED=T}).
 
@@ -10039,13 +10053,14 @@ For solid particles with a specified {\ct SURF\_ID}, you may specify any of the 
 
 
 \subsection{Detailed Properties of Solid Particles}
+\label{info:tagging_particles}
 
 You may output properties of a single solid particle using a {\ct DEVC} (device) line. For example, the lines:
 \begin{lstlisting}
 &INIT ID='my particle', PART_ID='...', XB=..., N_PARTICLES=1 /
 &DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
-output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line.
+adds a column to the {\ct CHID\_devc.csv} file for the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line.
 
 If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is introduced via this single {\ct INIT} line, then the {\ct INIT\_ID} for each takes the form {\ct '[ID]-00308'}, where {\ct ID} is that of the {\ct INIT} line, and 308 refers to the 308-th {\ct INIT} line generated by the multiplicative sequence. The {\ct INIT} lines are generated by looping over the $x$ indices, then $y$, then $z$. For example, the following input lines
 \begin{lstlisting}
@@ -10057,14 +10072,20 @@ If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is i
 \end{lstlisting}
 specify an array of 10 by 10 by 4 particles. We want to record the surface temperature of the 307-th particle. See Sec.~\ref{info:MULT} for details of how the {\ct MULT} line is interpreted.
 
-Solid particles can be used as a surrogate targets. For example, the following lines of input create a massless particle that can be used to record a heat flux at a given location away from a solid wall. In this case, the mock heat flux gauge is pointing in the $-x$ direction:
+If you know the unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labelled ``Show selected particle tag.'' Then click on the desired particle.} of a particular particle, you can output a solid phase quantity via the following line:
+\begin{lstlisting}
+&DEVC ID='...', LP_TAG=..., QUANTITY='WALL TEMPERATURE' /
+\end{lstlisting}
+The {\ct QUANTITY} in the case of a solid (i.e. non-liquid) particle would be taken from Table~\ref{tab:solidoutputquantities}. Note that some of the listed quantities are not appropriate for particles.
+
+Solid particles can be used as surrogate targets. For example, the following lines of input create a massless particle that can be used to record the heat flux at a given location away from a solid wall. In this case, the mock heat flux gauge is pointing in the $-x$ direction:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=..., N_PARTICLES=1, PART_ID='rad gauge' /
 &PART ID='rad gauge', STATIC=T, ORIENTATION=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
 \end{lstlisting}
-Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''  Its volume is meaningless. The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
+Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency---FDS needs to know something about the particle's geometry even though it is really just a ``target.''  Its volume is meaningless. The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
 &INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
@@ -11807,7 +11828,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
 {\ct DB}                    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
-{\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
+{\ct DEPTH}                 & Real            & Section~\ref{info:DEPTH}                                        & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
 {\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F}       \\ \hline
@@ -11823,6 +11844,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct INIT\_ID}              & Character       & Section~\ref{info:PART_SURF}                                    &       &               \\ \hline
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct T}       \\ \hline
+{\ct LP\_TAG}               & Integer         & Section~\ref{info:tagging_particles}                            &       &               \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
 {\ct MOVE\_ID}              & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 {\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
@@ -12354,6 +12376,7 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
+{\ct BNDF\_MESH}                     & Logical                       & Section~\ref{info:BNDF}                   &    & {\ct T}          \\ \hline
 {\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}         &    & {\ct F}          \\ \hline
 {\ct COLOR}                          & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL}                    & Logical                       & Section~\ref{info:2D}                     &    & {\ct F}          \\ \hline
@@ -12766,7 +12789,9 @@ Keyword             & Type     & Description                      & Units       
 {\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct LP\_TAG}               & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
 {\ct MATL\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct PART\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
 \end{longtable}
@@ -13803,6 +13828,7 @@ Keyword             & Type     & Description                      & Units       
 372  \> {\ct Cannot use FISHPAK\_BC for multiple mesh simulations.                  } \> Section~\ref{sec:periodic}  \\
 373  \> {\ct Cannot have FISHPAK\_BC>0.                                             } \> Section~\ref{sec:periodic}  \\
 374  \> {\ct Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
+375  \> {\ct OBST \ldots\ is VARIABLE\_THICKNESS or HT3D and needs a MATL\_ID.      } \> Section~\ref{info:HT3D_Limitations}  \\
      \>                                                                               \>                                     \\
 381  \> {\ct Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> {\ct Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -14074,6 +14100,7 @@ Keyword             & Type     & Description                      & Units       
     \>                                                                                \>                          \\
 951 \> {\ct PROF \ldots\ requires an orientation index, IOR.                        } \> Section~\ref{info:PROF} \\
 952 \> {\ct PROF \ldots\ is not valid.                                              } \> Section~\ref{info:PROF} \\
+953 \> {\ct PROF \ldots\ requires a PART\_ID.                                       } \> Section~\ref{info:PROF} \\
     \>                                                                                \>                          \\
 961 \> {\ct CELL\_CENTERED not allowed with AGL\_SLICE.                             } \> Section~\ref{info:complex_terrain} \\
 962 \> {\ct BNDF \ldots\ CPUA\_Z, MPUA\_Z, and AMPUA\_Z require liquid droplets.    } \> Section~\ref{bucket_test_1} \\
@@ -14247,33 +14274,16 @@ Following the completion of a successful run, a summary of the CPU usage per sub
 \section{Heat Release Rate and Related Quantities ({\tt \_hrr.csv})}
 \label{out:hrr}
 
-The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
-called {\ct CHID\_hrr.csv}. The format of the file is as follows
-\begin{lstlisting}
-s    , kW       , kW       , ... , kg/s      , Pa       , Pa        , ...
-Time , HRR      , Q_RADI   , ... , BURN_RATE , ZONE_01  , ZONE_02   , ...
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ...
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...
-            .
-            .
-\end{lstlisting}
-Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you. The background pressure is discussed in Section~\ref{info:ZONE}.
+The heat release rate of the fire, mass production rate of gas species, and zonal background pressures are automatically written into a comma-delimited spreadsheet file called {\ct CHID\_hrr.csv} every {\ct DT\_HRR} s. Details of the integrated energy quantities (columns with units of kW) can be found in Section~\ref{info:HRR}. The production rate (kg/s) of the tracked gas species are labeled {\ct MLR\_XXX} for ``Mass Loss Rate.'' A positive value means that this particular gas species is being generated at a boundary or by a particle; a negative value indicates depletion. The background pressure (Pa) of each pressure zone is discussed in Section~\ref{info:ZONE}.
 
 
 \section{Device Output Data ({\tt \_devc.csv})}
 \label{out:DEVC}
 
-Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma delimited format in a file called {\ct CHID\_devc.csv}. The format of the file is as follows:
-\begin{lstlisting}
-s    , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
-Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
-                      .
-                      .
-\end{lstlisting}
-where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+The output of devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma-delimited format to a file called {\ct CHID\_devc.csv}.
+
+If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+
 
 \section{Control Output Data}
 \label{out:CTRL}

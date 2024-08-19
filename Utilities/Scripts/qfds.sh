@@ -342,10 +342,10 @@ stop_fds_if_requested
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue"
   if [ "$USE_MPIRUN" == "" ]; then
-# use on blaze  note this if statement can be removed once blaze goes away
+# use the native Slurm process allocator
      MPIRUN="srun --mpi=pmi2 "
   else
-#  use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
+# use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
      MPIRUN="mpirun "
   fi
 else
@@ -363,30 +363,40 @@ cat << EOF > $scriptfile
 EOF
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+
 cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH --partition=$queue
 #SBATCH --ntasks=$n_mpi_processes
-#SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
-#SBATCH --ntasks-per-node=$n_mpi_processes_per_node
 #SBATCH --time=$walltime
 EOF
+
+if [[ $n_openmp_threads -gt 1 ]] || [[ $max_mpi_processes_per_node -lt 1000 ]] ; then
+cat << EOF >> $scriptfile
+#SBATCH --nodes=$nodes
+#SBATCH --ntasks-per-node=$n_mpi_processes_per_node
+EOF
+fi
+
 if [ "$EMAIL" != "" ]; then
-    cat << EOF >> $scriptfile
+cat << EOF >> $scriptfile
 #SBATCH --mail-user=$EMAIL
 #SBATCH --mail-type=ALL
 EOF
 fi
+
 if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --exclusive
 #SBATCH --cpu-freq=Performance
 EOF
 fi
+
 else # PBS/Torque
+
 cat << EOF >> $scriptfile
 #PBS -N $JOBPREFIX$infile
 #PBS -e $outerr
@@ -415,6 +425,7 @@ EOF
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
 export I_MPI_DEBUG=5
+export I_MPI_PMI_VALUE_LENGTH_MAX=512
 EOF
 fi
 

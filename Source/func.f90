@@ -5979,6 +5979,46 @@ ENDIF
 END SUBROUTINE SEARCH_CONTROLLER
 
 
+!> \brief Return the index of a material
+!> \param ID Material identifier
+
+INTEGER FUNCTION GET_MATL_INDEX(ID)
+
+USE GLOBAL_CONSTANTS, ONLY: N_MATL
+USE TYPES, ONLY: MATERIAL
+CHARACTER(LABEL_LENGTH), INTENT(IN) :: ID
+INTEGER :: N
+
+DO N=1,N_MATL
+   IF (MATERIAL(N)%ID/=ID) CYCLE
+   GET_MATL_INDEX = N
+   RETURN
+ENDDO
+GET_MATL_INDEX = 0
+
+END FUNCTION GET_MATL_INDEX
+
+
+!> \brief Return the index of a surface
+!> \param ID Surface identifier
+
+INTEGER FUNCTION GET_SURF_INDEX(ID)
+
+USE GLOBAL_CONSTANTS, ONLY: N_SURF
+USE TYPES, ONLY: SURFACE
+CHARACTER(LABEL_LENGTH), INTENT(IN) :: ID
+INTEGER :: N
+
+DO N=1,N_SURF
+   IF (SURFACE(N)%ID/=ID) CYCLE
+   GET_SURF_INDEX = N
+   RETURN
+ENDDO
+GET_SURF_INDEX = 0
+
+END FUNCTION GET_SURF_INDEX
+
+
 !> \brief Returns true if current MPI process MY_RANK controls mesh NM or its neighbors.
 !> \param NM Mesh number.
 

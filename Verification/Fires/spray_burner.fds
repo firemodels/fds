@@ -38,7 +38,7 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
       MATL_ID   = 'GYPSUM'
       THICKNESS = 0.0254 /
 
-&DUMP DT_HRR=1. /
+&DUMP FLUSH_FILE_BUFFERS=T, DT_HRR=1. /
 
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
