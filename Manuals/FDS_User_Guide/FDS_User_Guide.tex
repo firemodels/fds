@@ -14269,33 +14269,16 @@ Following the completion of a successful run, a summary of the CPU usage per sub
 \section{Heat Release Rate and Related Quantities ({\tt \_hrr.csv})}
 \label{out:hrr}
 
-The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
-called {\ct CHID\_hrr.csv}. The format of the file is as follows
-\begin{lstlisting}
-s    , kW       , kW       , ... , kg/s      , Pa       , Pa        , ...
-Time , HRR      , Q_RADI   , ... , BURN_RATE , ZONE_01  , ZONE_02   , ...
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ...
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...
-            .
-            .
-\end{lstlisting}
-Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you. The background pressure is discussed in Section~\ref{info:ZONE}.
+The heat release rate of the fire, mass production rate of gas species, and zonal background pressures are automatically written into a comma-delimited spreadsheet file called {\ct CHID\_hrr.csv} every {\ct DT\_HRR} s. Details of the integrated energy quantities (columns with units of kW) can be found in Section~\ref{info:HRR}. The production rate (kg/s) of the tracked gas species are labeled {\ct MLR\_XXX} for ``Mass Loss Rate.'' A positive value means that this particular gas species is being generated at a boundary or by a particle; a negative value indicates depletion. The background pressure (Pa) of each pressure zone is discussed in Section~\ref{info:ZONE}.
 
 
 \section{Device Output Data ({\tt \_devc.csv})}
 \label{out:DEVC}
 
-Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma delimited format in a file called {\ct CHID\_devc.csv}. The format of the file is as follows:
-\begin{lstlisting}
-s    , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
-Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
-                      .
-                      .
-\end{lstlisting}
-where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+The output of devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma-delimited format to a file called {\ct CHID\_devc.csv}.
+
+If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+
 
 \section{Control Output Data}
 \label{out:CTRL}
