@@ -7604,7 +7604,7 @@ In this second option, you create your own custom fuel type as follows:
 \be
    \dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \hbox{s}
 \ee
-Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 0.3~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
+Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 1.0~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
 
 It is possible to set a custom fuel for which the spread rate does not vary with slope or wind speed. This is done by specifying {\ct VEG\_LSET\_ROS\_FIXED=T} on the {\ct SURF} line. The spread rate is then fixed at the no-wind, no-slope value. The main purpose of this feature is for reproduction of manual ignition patterns (e.g. ignition with a drip torch at a fixed walking speed).
 
@@ -13340,11 +13340,11 @@ Keyword             & Type     & Description                      & Units       
 {\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VARIABLE\_THICKNESS}                                 & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
-{\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 6.E-4                   \\ \hline
+{\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.01                   \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
 {\ct VEG\_LSET\_FIREBASE\_TIME}                           & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_FUEL\_INDEX}                              & Integer         & Section~\ref{info:level_set}              &                     &                         \\ \hline
-{\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              & m                   & 1.                      \\ \hline
+{\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              & m                   & 0.2                      \\ \hline
 {\ct VEG\_LSET\_IGNITE\_TIME}                             & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_M1}                                       & Real            & Section~\ref{info:level_set}              &                     & 0.03                    \\ \hline
 {\ct VEG\_LSET\_M10}                                      & Real            & Section~\ref{info:level_set}              &                     & 0.04                    \\ \hline
@@ -13358,7 +13358,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct VEG\_LSET\_ROS\_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_ROS\_FIXED}                               & Logical         & Section~\ref{info:level_set}              &                     & {\ct F}                        \\ \hline
 {\ct VEG\_LSET\_SIGMA}                                    & Real            & Section~\ref{info:level_set}              & 1/m                 & 5000.                    \\ \hline
-{\ct VEG\_LSET\_SURF\_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 0.3                     \\ \hline
+{\ct VEG\_LSET\_SURF\_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 1.0                     \\ \hline
 {\ct VEG\_LSET\_TAN2}                                     & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
 {\ct VEG\_LSET\_WIND\_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
 {\ct VEL    }                                             & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
