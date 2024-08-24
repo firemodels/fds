@@ -13351,7 +13351,7 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    !INTEGER(HID_T) :: FILESPACE     ! Dataspace identifier in file
    INTEGER(HID_T) :: PLIST_ID      ! Property list identifier
    INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
-   INTEGER(HSIZE_T), DIMENSION(2) :: dimsf
+   !INTEGER(HSIZE_T), DIMENSION(2) :: dimsf
    !INTEGER :: RANK = 2
    !INTEGER :: RANK_1 = 1 ! Dataset rank
    !REAL(FB), ALLOCATABLE :: DATA(:,:)   ! Data to write
@@ -13365,19 +13365,20 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    !INTEGER(HID_T) :: atype_id      ! Attribute Dataspace identifier
    !INTEGER, DIMENSION(2) ::  attr_data  ! Attribute data
    !INTEGER(HSIZE_T), DIMENSION(1) :: data_dims
-   INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi
-   INTEGER(HID_T) :: dset_id       ! Dataset identifier
-   CHARACTER(LEN=80) :: dsetname ! Dataset name
-   INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
-   INTEGER :: rank ! Dataset rank
-   INTEGER(HSIZE_T),  DIMENSION(2) :: count
-   INTEGER(HSSIZE_T), DIMENSION(2) :: offset
+   !INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi
+   INTEGER(HID_T) :: dset_id_clr, dset_id_con, dset_id_ncells, dset_id_ncon, dset_id_off, dset_id_pts, dset_id_typ       ! Dataset identifier
+   !CHARACTER(LEN=80) :: dsetname ! Dataset name
+   !INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
+   !INTEGER :: rank ! Dataset rank
+   !INTEGER(HSIZE_T),  DIMENSION(2) :: count
+   !INTEGER(HSSIZE_T), DIMENSION(2) :: offset
    INTEGER(HID_T) :: crp_list      ! Dataset creation property identifier
-   INTEGER(HSIZE_T), DIMENSION(1:2) :: data_dims
+   !INTEGER(HSIZE_T), DIMENSION(1:2) :: data_dims
    INTEGER(HID_T) :: dataspace     ! Dataspace identifier
    INTEGER(HID_T) :: memspace      ! Memory dataspace identifier
-   INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims
-   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsm 
+   !INTEGER(HSIZE_T), DIMENSION(1:2) :: max_cells_dims_r2
+   !INTEGER(HSIZE_T), DIMENSION(1) :: max_con_dims_r1
+   !INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsm 
    
    COLOR = INT((/0,0,0/),IB8)
    
@@ -13421,29 +13422,14 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    CALL H5PCLOSE_F(PLIST_ID, ERROR)
    
    CALL H5GCREATE_F(FILE_ID, "VTKHDF", GROUP_ID1, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/CELL_DATA", GROUP_ID2, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/FIELD_DATA", GROUP_ID3, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/POINT_DATA", GROUP_ID4, ERROR)
-   !CALL H5SCREATE_SIMPLE_F(RANK_1, DIMSF_1, FILESPACE, ERROR)
-   !CALL ADD_ATTR(filename, "VTKHDF", "VERSION")
-   !H5Screate(H5S_SCALAR)
-   !H5Pcreate(H5P_ATTRIBUTE_CREATE)
-   IF (MY_RANK==0) THEN
-      !CALL h5screate_simple_f(1, (/INT8(2)/), aspace_id, error)
-      !CALL h5tcopy_f(H5T_NATIVE_INTEGER, atype_id, error)
-      !CALL h5tset_size_f(atype_id, INT8(2), error)
-      !CALL H5ACREATE_F(GROUP_ID1, "VERSION", atype_id, aspace_id, attr_id, ERROR)
-      DIMSFI_1(1) = 1
-      !CALL H5AWRITE_F(attr_id, atype_id, (/INT8(2),INT8(2)/), DIMSFI_1, ERROR)
-      !CALL H5ACLOSE_F(attr_id, ERROR)
-      !CALL h5tclose_f(atype_id, error)
-      !CALL h5sclose_f(aspace_id, error)
-      !CALL WRITE_ATTR_TO_GROUP(GROUP_ID,ADIMS,DATA_DIMS,ARANK,ANAME,ATTR_DATA,ATTR_LEN)
-      CALL ADD_VERSION(GROUP_ID1,(/INT8(2)/),DIMSFI_1,1,"Version",(/INT8(2),INT8(2)/),INT8(2))
-      CALL ADD_TYPE(GROUP_ID1,DIMSFI_1,"Type","UnstructuredData",INT8(16))
-      !CALL ADD_ATTR_TO_GROUP(GROUP_ID1,(/INT8(1)/),DIMSFI_1,1,"Type","Unstructured Grid",INT8(80),H5T_STRING)
-      
-   ENDIF
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/CellData", GROUP_ID2, ERROR)
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/FieldData", GROUP_ID3, ERROR)
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/PointData", GROUP_ID4, ERROR)
+ 
+   DIMSFI_1(1) = 1
+
+   CALL ADD_VERSION(GROUP_ID1,(/INT8(2)/),(/INT8(2)/),1,"Version",(/INT8(2),INT8(2)/),INT8(2))
+   CALL ADD_TYPE(GROUP_ID1,DIMSFI_1,"Type","UnstructuredGrid",INT8(16))
    
    NPOINTS_TOTAL=0
    NCELLS_TOTAL=0
@@ -13456,24 +13442,63 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    ENDDO MESH_LOOP_HDF_COUNT
    
    !maxdims = (/H5S_UNLIMITED_F, H5S_UNLIMITED_F/)
-   maxdims = (/3, NCELLS_TOTAL/)
-   dsetname = "Color" ! Dataset name
-   rank = 2
-   CALL h5screate_simple_f(RANK, maxdims, dataspace, error, maxdims)
+   ! Color
+   CALL h5screate_simple_f(2, INT8((/3, NCELLS_TOTAL/)), dataspace, error, INT8((/3, NCELLS_TOTAL/)))
    CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
-   CALL h5pset_chunk_f(crp_list, RANK, INT8((/3, NCELLS_TOTAL/)), error)
-   CALL h5dcreate_f(GROUP_ID2, TRIM(dsetname), H5T_IEEE_F32LE, dataspace,&
-      dset_id, error, crp_list)
+   CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NCELLS_TOTAL/)), error)
+   CALL h5dcreate_f(GROUP_ID2, TRIM("Color"), H5T_IEEE_F32LE, dataspace, dset_id_clr, error, crp_list)
    CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
    CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
    CALL h5sclose_f(dataspace, error)
+   
+   ! Connectivity
+   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL*4/)), dataspace, error, INT8((/NCELLS_TOTAL*4/)))
+   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL*4/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("Connectivity"), H5T_STD_I32LE, dataspace, dset_id_con, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   ! NumberOfCells
+   CALL h5screate_simple_f(1, INT8((/NMESHES/)), dataspace, error, INT8((/NMESHES/)))
+   CALL h5pset_chunk_f(crp_list, 1, INT8((/NMESHES/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("NumberOfCells"), H5T_STD_I32LE, dataspace, dset_id_ncells, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   ! NumberOfConnectivityIds
+   CALL h5screate_simple_f(1, INT8((/NMESHES/)), dataspace, error, INT8((/NMESHES/)))
+   CALL h5pset_chunk_f(crp_list, 1, INT8((/NMESHES/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("NumberOfConnectivityIds"), H5T_STD_I32LE, dataspace, dset_id_ncon, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   ! Offsets
+   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL/)), dataspace, error, INT8((/NCELLS_TOTAL/)))
+   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("Offsets"), H5T_STD_I32LE, dataspace, dset_id_off, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   ! Points
+   CALL h5screate_simple_f(2, INT8((/3, NPOINTS_TOTAL/)), dataspace, error, INT8((/3, NPOINTS_TOTAL/)))
+   CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NPOINTS_TOTAL/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("Points"), H5T_IEEE_F32LE, dataspace, dset_id_pts, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   ! Types
+   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL/)), dataspace, error, INT8((/NCELLS_TOTAL/)))
+   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL/)), error)
+   CALL h5dcreate_f(GROUP_ID1, TRIM("Types"), H5T_STD_U8LE, dataspace, dset_id_typ, error, crp_list)
+   CALL h5sclose_f(dataspace, error)
+   
+   !CALL h5screate_simple_f (2, maxdims, memspace, error)
    
    MESH_LOOP_HDF: DO NM=1,NMESHES
       M => MESHES(NM)
       NPOINTS = M%N_OBST*8
       NCELLS = M%N_OBST*6
-      IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP_HDF
-      WRITE(*,*) "MESH ", NM, "NPOINTS ", NPOINTS, "NCELLS ", NCELLS
+      IF (PROCESS(NM)/=MY_RANK) THEN
+         NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS
+         NCELLS_ACCUM = NCELLS_ACCUM + NCELLS
+         CYCLE MESH_LOOP_HDF
+      ENDIF
+      !WRITE(*,*) "MESH ", NM, "NPOINTS ", NPOINTS, "NCELLS ", NCELLS, "ACCUM", NCELLS_ACCUM
       M => MESHES(NM)
       ! Output OBST geometry data
       NPOINTS = M%N_OBST*8
@@ -13524,28 +13549,81 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
          VTKC_TYPE(I) = 8_IB8
       ENDDO
       
-      dimsf = (/3,NCELLS/)
-      !CALL h5screate_simple_f(rank, dimsf, filespace, error)
-      !
-      ! Create property list for collective dataset write
-      !
-      offset(1:2) = (/0,NCELLS_ACCUM/)
-      count(1:2)  = (/3,NCELLS/)
+      !dimsf = (/3,NCELLS/)
+      !offset(1:2) = (/0,NCELLS_ACCUM/)
+      !count(1:2)  = (/3,NCELLS/)
       
-      CALL h5pset_chunk_f(crp_list, RANK, INT8((/3, NCELLS/)), error)
-      dimsm = (/3,NCELLS/)
-      CALL h5screate_simple_f (2, dimsm, memspace, error)
-      CALL h5dget_space_f(dset_id, dataspace, error)
+      ! Write color data to file
+      CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NCELLS/)), error)
+      !dimsm = (/3,NCELLS/)
+      CALL h5screate_simple_f (2, INT8((/3,NCELLS/)), memspace, error)
+      CALL h5dget_space_f(dset_id_clr, dataspace, error)
       CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           offset, count, error)
-      data_dims(1:2) = INT8((/3,NCELLS/))
-      CALL H5dwrite_f(dset_id, H5T_IEEE_F32LE, TRANSPOSE(COLORS), data_dims, error, &
-           memspace, dataspace, xfer_prp = plist_id)
-      !CALL h5dwrite_f(dset_id, H5T_IEEE_F32LE, COLORS, dimsfi, error,memspace,&
-      !   xfer_prp = plist_id)
-      !CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, dimsfi, error, xfer_prp = plist_id)
+           INT8((/0,NCELLS_ACCUM/)), INT8((/3,NCELLS/)), error)
+      !data_dims(1:2) = INT8((/3,NCELLS/))
+      CALL H5dwrite_f(dset_id_clr, H5T_IEEE_F32LE, TRANSPOSE(COLORS), INT8((/3,NCELLS/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
       
-      CALL h5sclose_f(memspace, error)
+      ! Write connectivity data to file
+      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS*4/)), error)
+      CALL h5screate_simple_f (1, INT8((/NCELLS*4/)), memspace, error)
+      CALL h5dget_space_f(dset_id_con, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/NCELLS_ACCUM*4/)), INT8((/NCELLS*4/)), error)
+      CALL H5dwrite_f(dset_id_con, H5T_STD_I32LE, CONNECT, INT8((/NCELLS*4/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      
+      ! Write number of cells data to file
+      CALL h5pset_chunk_f(crp_list, 1, INT8((/1/)), error)
+      CALL h5screate_simple_f (1, INT8((/1/)), memspace, error)
+      CALL h5dget_space_f(dset_id_ncells, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/NM-1/)), INT8((/1/)), error)
+      CALL H5dwrite_f(dset_id_ncells, H5T_STD_I32LE, (/NCELLS/), INT8((/1/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+           
+      ! Write NumberOfConnectivityIds data to file
+      CALL h5pset_chunk_f(crp_list, 1, INT8((/1/)), error)
+      CALL h5screate_simple_f (1, INT8((/1/)), memspace, error)
+      CALL h5dget_space_f(dset_id_ncon, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/NM-1/)), INT8((/1/)), error)
+      CALL H5dwrite_f(dset_id_ncon, H5T_STD_I32LE, INT((/NCELLS*4/)), INT8((/1/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+          
+      ! Write offsets data to file
+      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS/)), error)
+      CALL h5screate_simple_f (1, INT8((/NCELLS/)), memspace, error)
+      CALL h5dget_space_f(dset_id_off, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/NCELLS_ACCUM/)), INT8((/NCELLS/)), error)
+      CALL H5dwrite_f(dset_id_off, H5T_STD_I32LE, OFFSETS, INT8((/NCELLS/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      
+      ! Write point data to file
+      CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NPOINTS/)), error)
+      CALL h5screate_simple_f (2, INT8((/3,NPOINTS/)), memspace, error)
+      CALL h5dget_space_f(dset_id_pts, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/0,NPOINTS_ACCUM/)), INT8((/3,NPOINTS/)), error)
+      CALL H5dwrite_f(dset_id_pts, H5T_IEEE_F32LE, TRANSPOSE(VERTICES), INT8((/3,NPOINTS/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      
+      ! Write types data to file
+      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS/)), error)
+      CALL h5screate_simple_f (1, INT8((/NCELLS/)), memspace, error)
+      CALL h5dget_space_f(dset_id_typ, dataspace, error)
+      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
+           INT8((/NCELLS_ACCUM/)), INT8((/NCELLS/)), error)
+      CALL H5dwrite_f(dset_id_typ, H5T_STD_U8LE, VTKC_TYPE, INT8((/NCELLS/)), error, &
+           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      
+      
+      
+      
+      
+      
+      
       
       
       
@@ -13563,10 +13641,18 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    ENDDO MESH_LOOP_HDF
    
    CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   WRITE(*,*) "RANK ", MY_RANK, "PA"
+   CALL h5sclose_f(memspace, error)
    WRITE(*,*) "RANK ", MY_RANK, "P0"
    CALL h5sclose_f(dataspace, error)
    WRITE(*,*) "RANK ", MY_RANK, "P1"
-   CALL h5dclose_f(dset_id, error)
+   CALL h5dclose_f(dset_id_clr, error)
+   CALL h5dclose_f(dset_id_con, error)
+   CALL h5dclose_f(dset_id_ncells, error)
+   CALL h5dclose_f(dset_id_ncon, error)
+   CALL h5dclose_f(dset_id_off, error)
+   CALL h5dclose_f(dset_id_pts, error)
+   CALL h5dclose_f(dset_id_typ, error)
    WRITE(*,*) "RANK ", MY_RANK, "P2"
    CALL H5PCLOSE_F(PLIST_ID, ERROR)
    
@@ -13830,12 +13916,14 @@ CONTAINS
       INTEGER     ::   error ! Error flag
       INTEGER(HID_T) :: GROUP_ID
       CHARACTER(LEN=*), INTENT(IN) :: aname
-      INTEGER(HSIZE_T), INTENT(IN) :: attr_data(:)
+      INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN) :: attr_data(:)
       
       CALL h5screate_simple_f(arank, adims, aspace_id, error)
-      CALL h5tcopy_f(H5T_NATIVE_INTEGER, atype_id, error)
+      CALL h5tcopy_f(H5T_STD_I32LE, atype_id, error)
       CALL h5tset_size_f(atype_id, alen, error)
-      CALL H5ACREATE_F(GROUP_ID, TRIM(aname), atype_id, aspace_id, attr_id, ERROR)
+      CALL H5ACREATE_F(GROUP_ID, TRIM(aname), H5T_STD_I32LE, aspace_id, attr_id, ERROR)
+      WRITE(*,*) "DATA_DIMS ", DATA_DIMS
+      WRITE(*,*) "DATA ", attr_data
       CALL H5AWRITE_F(attr_id, atype_id, attr_data, data_dims, ERROR)
       CALL H5ACLOSE_F(attr_id, ERROR)
       CALL h5tclose_f(atype_id, error)
