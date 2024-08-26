@@ -3763,7 +3763,7 @@ Constant volume ignition delay cases are compared with output from Cantera \cite
 
 Twelve constant volume ignition delay cases are configured using chemical kinetics based on the GRI-3 mechanism \cite{gri3:1999}, stored as "Methane\_grimech30" in the FDS repository. Methane ($\mathrm{CH_4}$) is used as the fuel. They are configured for equivalence ratios of 0.6, 1.0, and 1.4, with initial temperatures of 626.85~$^\circ$C (900 K), 726.85~$^\circ$C (1000 K), 826.85~$^\circ$C (1100 K), and 926.85~$^\circ$C (1200 K) at standard atmospheric pressure. Timestep ramps are derived from Cantera-3.0 to speed up the computation. The comparisons of temperature and OH mass fraction between FDS and Cantera are shown in Figs. ~\ref{fig:ign_delay_Methane_grimech30_phi_0.6}-\ref{fig:ign_delay_Methane_grimech30_phi_1.4}.
 
-Six additional constant volume ignition delay cases are configured using the following chemical mechanisms: Methane\_TianfengLu \cite{TianfengLu:2008}, Methane\_Smooke \cite{Smooke:1995}, Ethylene\_TianfengLu \cite{Luo:2012}, Propane\_USC \cite{Qin:20001}, Propane\_Z66 \cite{Zettervall2017}, and nHeptane\_Chalmers \cite{Tao:2007}. These cases are set with an equivalence ratio of 1.0, an initial temperature of 826.85~$^\circ$C (1100 K), and standard atmospheric pressure. A constant timestep of $10^{-4}$ seconds is applied. Comparisons of temperature and OH mass fraction between FDS and Cantera are illustrated in Figs. ~\ref{fig:ign_delay_Methane_TianfengLu_phi_1.0}-\ref{fig:ign_delay_nHeptane_Chalmers_phi_1.0}. 
+Six additional constant volume ignition delay cases are configured using the following chemical mechanisms: Methane\_TianfengLu \cite{TianfengLu:2008}, Methane\_Smooke \cite{Smooke:1995}, Ethylene\_TianfengLu \cite{Luo:2012}, Propane\_USC \cite{Qin:20001}, Propane\_Z66 \cite{Zettervall2017}, and nHeptane\_Chalmers \cite{Tao:2007}. These cases are set with an equivalence ratio of 1.0, an initial temperature of 826.85~$^\circ$C (1100 K), and standard atmospheric pressure. A constant timestep of $10^{-4}$ seconds is applied. Comparisons of temperature and OH mass fraction between FDS and Cantera are illustrated in Figs. ~\ref{fig:ign_delay_Methane_TianfengLu_phi_1.0}-\ref{fig:ign_delay_nHeptane_Chalmers_phi_1.0}.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
@@ -3814,7 +3814,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_TianfengLu mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Methane_TianfengLu_phi_1.0}
@@ -3823,7 +3823,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_Smooke mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Methane_Smooke_phi_1.0}
@@ -3832,7 +3832,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Ethylene\_TianfengLu mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Ethylene_TianfengLu_phi_1.0}
@@ -3841,7 +3841,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_USC mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Propane_USC_phi_1.0}
@@ -3850,7 +3850,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_Z66 mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Propane_Z66_phi_1.0}
@@ -3859,7 +3859,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_TMP} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_OH} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_OH}
 \end{tabular*}
 \caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for nHeptane\_Chalmers mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_nHeptane_Chalmers_phi_1.0}
@@ -6647,7 +6647,7 @@ In the simplest configuration of a static uniform wind field ({\ct LEVEL\_SET\_M
   \item {\ct LS\_ellipse\_5ms\_30deg.fds}: a \SI[per-mode=symbol]{5}{\meter\per\second} wind from the west and a \SI{30}{\degree} slope oriented to the northeast.
 \end{itemize}
 
-The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{1}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}.
+The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{0.2}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}.
 
 The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. The relative errors between the FDS cases and the empirical model are shown in Figure~\ref{fig:level_set_ellipse_error}.
 
@@ -6675,7 +6675,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
 
-This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 1.0~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
 \begin{lstlisting}
 &SURF ID                    = 'fuel'
 VEG_LSET_ROS_00             = 0.15
@@ -6702,11 +6702,11 @@ where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the prope
 \subsection{Ember ignition (\texorpdfstring{\textct{LS4\_ember\_ignition}}{LS4\_ember\_ignition})}
 \label{LS4_ember_ignition}
 
-This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
+This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 1.0~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
 \be
 \dot{q}_{\rm ember} = A_s \left[h_c \left( T_{\rm ember} - T_\infty \right) + \sigma \epsilon \left( T^4_{\rm ember} - T^4_\infty \right) \right]
 \ee
-Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
+Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 20~kg of fuel available to burn.
 
 \begin{figure}[h]
 \begin{center}

@@ -7884,9 +7884,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Set defaults for custom fuel model (for indexed fuels they are either user-specified or calculated later)
    IF (SF%VEG_LSET_FUEL_INDEX==0._EB) THEN
       IF (SF%VEG_LSET_SIGMA<0._EB) SF%VEG_LSET_SIGMA = 50._EB
-      IF (SF%VEG_LSET_HT<0._EB) SF%VEG_LSET_HT = 1._EB
-      IF (SF%VEG_LSET_SURF_LOAD<0._EB) SF%VEG_LSET_SURF_LOAD = 0.3_EB
-      IF (SF%VEG_LSET_BETA<0._EB) SF%VEG_LSET_BETA = 0.0006_EB
+      IF (SF%VEG_LSET_HT<0._EB) SF%VEG_LSET_HT = 0.2_EB
+      IF (SF%VEG_LSET_SURF_LOAD<0._EB) SF%VEG_LSET_SURF_LOAD = 1.0_EB
+      IF (SF%VEG_LSET_BETA<0._EB) SF%VEG_LSET_BETA = 0.01_EB
       IF (SF%VEG_LSET_FIREBASE_TIME<0._EB)  SF%VEG_LSET_FIREBASE_TIME = 756._EB/SF%VEG_LSET_SIGMA
    ENDIF
 
@@ -11859,9 +11859,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ! Parameters for specified spread of a fire over a VENT
 
                IF (ALL(XYZ<-1.E5_EB) .AND. SPREAD_RATE>0._EB) THEN
-                  XYZ(1)=0.5_EB*(VT%X1+VT%X2)
-                  XYZ(2)=0.5_EB*(VT%Y1+VT%Y2)
-                  XYZ(3)=0.5_EB*(VT%Z1+VT%Z2)
+                  XYZ(1)=0.5_EB*(VT%X1_ORIG+VT%X2_ORIG)
+                  XYZ(2)=0.5_EB*(VT%Y1_ORIG+VT%Y2_ORIG)
+                  XYZ(3)=0.5_EB*(VT%Z1_ORIG+VT%Z2_ORIG)
                ENDIF
                VT%X0 = XYZ(1)
                VT%Y0 = XYZ(2)
@@ -13116,9 +13116,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    CALL CHECK_STATISTIC_NAME(STATISTICS,1,ERROR_CODE)         ; IF (ERROR_CODE>0) THEN ; CALL SHUTDOWN(MESSAGE) ; RETURN ; ENDIF
    CALL CHECK_STATISTIC_NAME(TEMPORAL_STATISTIC,2,ERROR_CODE) ; IF (ERROR_CODE>0) THEN ; CALL SHUTDOWN(MESSAGE) ; RETURN ; ENDIF
    CALL CHECK_STATISTIC_NAME(SPATIAL_STATISTIC,3,ERROR_CODE)  ; IF (ERROR_CODE>0) THEN ; CALL SHUTDOWN(MESSAGE) ; RETURN ; ENDIF
-   
+
    ! Check to see if a domain boundary has been set
-   
+
    IF (DB/='null') THEN
       ! any string will work, but suggest DB='WHOLE DOMAIN'
       XB(1) = XS_MIN
