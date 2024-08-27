@@ -3897,6 +3897,7 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
             ENDDO
          ENDDO
       ENDIF
+!if (bc%iig==3.and.bc%jjg==3.and.bc%kkg==5.and.bc%ior==3) write(0,*) KK,OBST_INDEX,MATL_INDEX_OBST(1:N_MATL_OBST)
 
    ENDIF
 
@@ -4067,6 +4068,7 @@ IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
       ONE_D%MATL_INDEX(NN) = MATL_INDEX(NN)
       DO NL=1,ONE_D%N_LAYERS
          ONE_D%MATL_COMP(NN)%MASS_FRACTION(NL) = MATL_MASS_FRACTION(NL,NN)
+if (bc%iig==3.and.bc%jjg==3.and.bc%kkg==5.and.bc%ior==3) write(0,*) NN,NL,TRIM(MATERIAL(ONE_D%MATL_INDEX(NN))%ID),MATL_MASS_FRACTION(NL,NN)
       ENDDO
    ENDDO
    DEALLOCATE(ONE_D%HEAT_SOURCE)       ; ALLOCATE(ONE_D%HEAT_SOURCE(ONE_D%N_LAYERS))       ; ONE_D%HEAT_SOURCE = 0._EB
