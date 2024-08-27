@@ -13316,7 +13316,52 @@ SUBROUTINE ADD_ATTR(filename, dsetname, aname)
 
 END SUBROUTINE ADD_ATTR
 
+SUBROUTINE OPEN_VTKHDF(FILENAME,&
+                       FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   CHARACTER(*), INTENT(IN) :: FILENAME
+   INTEGER(HID_T), INTENT(OUT) :: FILE_ID, PLIST_ID       ! Identifiers
+   INTEGER(HID_T), INTENT(OUT) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
+   INTEGER  :: ERROR                    !< IO Error status.
+   INTEGER(KIND=MPI_INTEGER_KIND) :: MPI_SIZE, MPI_RANK, MPIERROR
+   
+   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, MPI_SIZE, MPIERROR)
+   CALL MPI_COMM_RANK(MPI_COMM_WORLD, MPI_RANK, MPIERROR)
+   
+   ! Initialize HDF5 interface
+   CALL H5OPEN_F(ERROR) ! Initialize FORTRAN interface
+   
+   ! Setup file access property list with parallel I/O access.
+   CALL H5PCREATE_F(H5P_FILE_ACCESS_F, PLIST_ID, ERROR)
+   CALL H5PSET_FAPL_MPIO_F(PLIST_ID, MPI_COMM_WORLD, MPI_INFO_NULL, ERROR)
+   
+   ! Create the file collectively.
+   CALL H5FCREATE_F(FILENAME, H5F_ACC_TRUNC_F, FILE_ID, ERROR, ACCESS_PRP = PLIST_ID)
+   CALL H5PCLOSE_F(PLIST_ID, ERROR)
+   
+   ! Create VTKHDF groups
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF", GROUP_ID1, ERROR)
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/CellData", GROUP_ID2, ERROR)
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/FieldData", GROUP_ID3, ERROR)
+   CALL H5GCREATE_F(FILE_ID, "VTKHDF/PointData", GROUP_ID4, ERROR)
+   
+   ! Add VTKHDF header information
+   CALL ADD_VERSION(GROUP_ID1,(/INT8(2)/),1,"Version",INT8((/2,2/)))
+   CALL ADD_TYPE(GROUP_ID1,(/INT8(1)/),"Type","UnstructuredGrid",INT8(16))
 
+END SUBROUTINE OPEN_VTKHDF
+
+SUBROUTINE CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   INTEGER(HID_T), INTENT(IN) :: FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4
+   INTEGER  :: ERROR                    !< IO Error status.
+   CALL H5GCLOSE_F(GROUP_ID4, ERROR)
+   CALL H5GCLOSE_F(GROUP_ID3, ERROR)
+   CALL H5GCLOSE_F(GROUP_ID2, ERROR)
+   CALL H5GCLOSE_F(GROUP_ID1, ERROR)
+   
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   CALL H5FCLOSE_F(FILE_ID, ERROR)
+   CALL H5CLOSE_F(ERROR)
+END SUBROUTINE CLOSE_VTKHDF
 
 SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    ! Parts of this subroutine use content from stack overflow
@@ -13334,51 +13379,22 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    REAL(FB), DIMENSION(:), ALLOCATABLE :: X_PTS, Y_PTS, Z_PTS
    INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
    INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
-   INTEGER :: NPOINTS, NCELLS, NPOINTS_TOTAL, NCELLS_TOTAL, NCELLS_ACCUM, NPOINTS_ACCUM !, NFACES
-   TYPE(VTK_FILE)          :: A_VTK_FILE       !< A parallel (partioned) VTK file.
-   TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
+   INTEGER :: NPOINTS, NCELLS, NPOINTS_TOTAL, NCELLS_TOTAL, NCELLS_ACCUM, NPOINTS_ACCUM
+   INTEGER :: NCONN_TOTAL, NPIECES, NCONN_ACCUM, NPIECES_ACCUM
+   INTEGER :: NOFFSETS_TOTAL, NOFFSETS_ACCUM !, NFACES
+   !TYPE(VTK_FILE)          :: A_VTK_FILE       !< A parallel (partioned) VTK file.
+   !TYPE(PVTK_FILE)          :: A_PVTK_FILE       !< A parallel (partioned) VTK file.
    TYPE (MESH_TYPE), POINTER :: M
    TYPE (GEOMETRY_TYPE), POINTER :: G=>NULL()
    TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-   INTEGER  :: VTK_ERROR, ERROR                    !< IO Error status.
-   CHARACTER(200) :: TMP_FILE,FILENAME
+   INTEGER  :: ERROR                    !< IO Error status.
+   CHARACTER(200) :: FILENAME
    !TYPE (SURFACE_TYPE),POINTER :: SF=>NULL()
-   INTEGER(KIND=MPI_INTEGER_KIND) :: MPIERROR       ! MPI ERROR flag
-   !INTEGER(KIND=MPI_INTEGER_KIND) :: COMM, INFO
-   INTEGER(KIND=MPI_INTEGER_KIND) :: MPI_SIZE, MPI_RANK
-   INTEGER(HID_T) :: FILE_ID       ! File identifier
-   !INTEGER(HID_T) :: DSET_ID       ! Dataset identifier
-   !INTEGER(HID_T) :: FILESPACE     ! Dataspace identifier in file
-   INTEGER(HID_T) :: PLIST_ID      ! Property list identifier
+   !INTEGER(KIND=MPI_INTEGER_KIND) :: MPI_SIZE, MPI_RANK, MPIERROR 
+   INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
    INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
-   !INTEGER(HSIZE_T), DIMENSION(2) :: dimsf
-   !INTEGER :: RANK = 2
-   !INTEGER :: RANK_1 = 1 ! Dataset rank
-   !REAL(FB), ALLOCATABLE :: DATA(:,:)   ! Data to write
-   !INTEGER(HSIZE_T), DIMENSION(2) :: DIMSF = (/5,8/) ! Dataset dimensions.
-   !INTEGER(HSIZE_T), DIMENSION(2) :: DIMSFI
-   !INTEGER(HSIZE_T), DIMENSION(1) :: DIMSF_1 = (/2/) ! Dataset dimensions.
-   INTEGER(HSIZE_T), DIMENSION(1) :: DIMSFI_1
-   !CHARACTER(LEN=8), PARAMETER :: DSETNAME = "IntArray" ! Dataset name
-   !INTEGER(HID_T) :: attr_id       ! Attribute identifier
-   !INTEGER(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-   !INTEGER(HID_T) :: atype_id      ! Attribute Dataspace identifier
-   !INTEGER, DIMENSION(2) ::  attr_data  ! Attribute data
-   !INTEGER(HSIZE_T), DIMENSION(1) :: data_dims
-   !INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi
-   INTEGER(HID_T) :: dset_id_clr, dset_id_con, dset_id_ncells, dset_id_ncon, dset_id_off, dset_id_pts, dset_id_typ       ! Dataset identifier
-   !CHARACTER(LEN=80) :: dsetname ! Dataset name
-   !INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
-   !INTEGER :: rank ! Dataset rank
-   !INTEGER(HSIZE_T),  DIMENSION(2) :: count
-   !INTEGER(HSSIZE_T), DIMENSION(2) :: offset
-   INTEGER(HID_T) :: crp_list      ! Dataset creation property identifier
-   !INTEGER(HSIZE_T), DIMENSION(1:2) :: data_dims
-   INTEGER(HID_T) :: dataspace     ! Dataspace identifier
-   INTEGER(HID_T) :: memspace      ! Memory dataspace identifier
-   !INTEGER(HSIZE_T), DIMENSION(1:2) :: max_cells_dims_r2
-   !INTEGER(HSIZE_T), DIMENSION(1) :: max_con_dims_r1
-   !INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsm 
+   INTEGER(HID_T) :: DSET_ID_CLR, DSET_ID_CON, DSET_ID_NCELLS, DSET_ID_NCON    ! Dataset identifiers
+   INTEGER(HID_T) :: DSET_ID_NPTS, DSET_ID_OFF, DSET_ID_PTS, DSET_ID_TYP       ! Dataset identifiers
    
    COLOR = INT((/0,0,0/),IB8)
    
@@ -13389,105 +13405,45 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    FACES(5,:) = (/0,3,1,2/)
    FACES(6,:) = (/4,7,5,6/)
    
-   
-   
-   
-   
-   
-   
-   WRITE(FILENAME,'(A,A,A)') "",TRIM(CHID),'_GEOM.vtkhdf'
-   
-   !
-   ! Initialize data buffer with trivial data.
-   !
-   !ALLOCATE ( DATA(DIMSF(1),DIMSF(2)))
-   !do i = 1, DIMSF(2)
-   !  do j = 1, DIMSF(1)
-   !     DATA(j,i) = j - 1 + (i-1)*DIMSF(1)
-   !  enddo
-   !enddo
-   !COMM = MPI_COMM_WORLD
-   !INFO = MPI_INFO_NULL
-   !CALL MPI_INIT(MPIERROR)
-   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, MPI_SIZE, MPIERROR)
-   CALL MPI_COMM_RANK(MPI_COMM_WORLD, MPI_RANK, MPIERROR)
-   
-   WRITE(*,*) "TRYING TO WRITE TO FILE ", FILENAME
-   CALL H5OPEN_F(ERROR) ! Initialize FORTRAN interface
-   ! Setup file access property list with parallel I/O access.
-   CALL H5PCREATE_F(H5P_FILE_ACCESS_F, PLIST_ID, ERROR)
-   CALL H5PSET_FAPL_MPIO_F(PLIST_ID, MPI_COMM_WORLD, MPI_INFO_NULL, ERROR)
-   ! Create the file collectively.
-   CALL H5FCREATE_F(FILENAME, H5F_ACC_TRUNC_F, FILE_ID, ERROR, ACCESS_PRP = PLIST_ID)
-   CALL H5PCLOSE_F(PLIST_ID, ERROR)
-   
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF", GROUP_ID1, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/CellData", GROUP_ID2, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/FieldData", GROUP_ID3, ERROR)
-   CALL H5GCREATE_F(FILE_ID, "VTKHDF/PointData", GROUP_ID4, ERROR)
- 
-   DIMSFI_1(1) = 1
-
-   CALL ADD_VERSION(GROUP_ID1,(/INT8(2)/),(/INT8(2)/),1,"Version",(/INT8(2),INT8(2)/),INT8(2))
-   CALL ADD_TYPE(GROUP_ID1,DIMSFI_1,"Type","UnstructuredGrid",INT8(16))
-   
    NPOINTS_TOTAL=0
    NCELLS_TOTAL=0
    NCELLS_ACCUM=0
    NPOINTS_ACCUM=0
+   NOFFSETS_TOTAL=0
+   NOFFSETS_ACCUM = 0
+   NCONN_TOTAL = 0
+   NPIECES = 0
+   NCONN_ACCUM = 0
+   NPIECES_ACCUM = 0
    
    MESH_LOOP_HDF_COUNT: DO NM=1,NMESHES
       NPOINTS_TOTAL = NPOINTS_TOTAL + MESHES(NM)%N_OBST*8
       NCELLS_TOTAL = NCELLS_TOTAL + MESHES(NM)%N_OBST*6
+      NOFFSETS_TOTAL = NOFFSETS_TOTAL + MESHES(NM)%N_OBST*6 + 1
+      NCONN_TOTAL = NCONN_TOTAL + MESHES(NM)%N_OBST*6*4
+      NPIECES = NPIECES + 1
    ENDDO MESH_LOOP_HDF_COUNT
    
-   !maxdims = (/H5S_UNLIMITED_F, H5S_UNLIMITED_F/)
-   ! Color
-   CALL h5screate_simple_f(2, INT8((/3, NCELLS_TOTAL/)), dataspace, error, INT8((/3, NCELLS_TOTAL/)))
-   CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
-   CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NCELLS_TOTAL/)), error)
-   CALL h5dcreate_f(GROUP_ID2, TRIM("Color"), H5T_IEEE_F32LE, dataspace, dset_id_clr, error, crp_list)
-   CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-   CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
-   CALL h5sclose_f(dataspace, error)
+   DO I= 1,N_GEOMETRY
+      G=>GEOMETRY(I)
+      NPOINTS_TOTAL = NPOINTS_TOTAL + NVERTS
+      NCELLS_TOTAL = NCELLS_TOTAL + NFACES
+      NOFFSETS_TOTAL = NOFFSETS_TOTAL + NFACES + 1
+      NCONN_TOTAL = NCONN_TOTAL + NFACES*3
+      NPIECES = NPIECES + 1
+   ENDDO
    
-   ! Connectivity
-   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL*4/)), dataspace, error, INT8((/NCELLS_TOTAL*4/)))
-   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL*4/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("Connectivity"), H5T_STD_I32LE, dataspace, dset_id_con, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   ! NumberOfCells
-   CALL h5screate_simple_f(1, INT8((/NMESHES/)), dataspace, error, INT8((/NMESHES/)))
-   CALL h5pset_chunk_f(crp_list, 1, INT8((/NMESHES/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("NumberOfCells"), H5T_STD_I32LE, dataspace, dset_id_ncells, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   ! NumberOfConnectivityIds
-   CALL h5screate_simple_f(1, INT8((/NMESHES/)), dataspace, error, INT8((/NMESHES/)))
-   CALL h5pset_chunk_f(crp_list, 1, INT8((/NMESHES/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("NumberOfConnectivityIds"), H5T_STD_I32LE, dataspace, dset_id_ncon, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   ! Offsets
-   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL/)), dataspace, error, INT8((/NCELLS_TOTAL/)))
-   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("Offsets"), H5T_STD_I32LE, dataspace, dset_id_off, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   ! Points
-   CALL h5screate_simple_f(2, INT8((/3, NPOINTS_TOTAL/)), dataspace, error, INT8((/3, NPOINTS_TOTAL/)))
-   CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NPOINTS_TOTAL/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("Points"), H5T_IEEE_F32LE, dataspace, dset_id_pts, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   ! Types
-   CALL h5screate_simple_f(1, INT8((/NCELLS_TOTAL/)), dataspace, error, INT8((/NCELLS_TOTAL/)))
-   CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS_TOTAL/)), error)
-   CALL h5dcreate_f(GROUP_ID1, TRIM("Types"), H5T_STD_U8LE, dataspace, dset_id_typ, error, crp_list)
-   CALL h5sclose_f(dataspace, error)
-   
-   !CALL h5screate_simple_f (2, maxdims, memspace, error)
+   ! Initialize HDF5 datafiles
+   WRITE(FILENAME,'(A,A,A)') "",TRIM(CHID),'_GEOM.vtkhdf'
+   CALL OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   CALL PARALLEL_INIT_F32(GROUP_ID2, TRIM("Color"), CRP_LIST, 2, INT8((/3, NCELLS_TOTAL/)), DSET_ID_CLR, PLIST_ID) ! Color
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("Connectivity"), CRP_LIST, 1, INT8((/NCONN_TOTAL/)), DSET_ID_CON, PLIST_ID) ! Connectivity
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfCells"), CRP_LIST, 1, INT8((/NPIECES/)), DSET_ID_NCELLS, PLIST_ID) ! NumberOfCells
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfPoints"), CRP_LIST, 1, INT8((/NPIECES/)), DSET_ID_NPTS, PLIST_ID) ! NumberOfPoints
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfConnectivityIds"), CRP_LIST, 1, INT8((/NPIECES/)), DSET_ID_NCON, PLIST_ID) ! NumberOfConnectivityIds
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("Offsets"), CRP_LIST, 1, INT8((/NOFFSETS_TOTAL/)), DSET_ID_OFF, PLIST_ID) ! Offsets
+   CALL PARALLEL_INIT_F32(GROUP_ID1, TRIM("Points"), CRP_LIST, 2, INT8((/3, NPOINTS_TOTAL/)), DSET_ID_PTS, PLIST_ID) ! Points
+   CALL PARALLEL_INIT_U8(GROUP_ID1, TRIM("Types"), CRP_LIST, 1, INT8((/NCELLS_TOTAL/)), DSET_ID_TYP, PLIST_ID) ! Types
    
    MESH_LOOP_HDF: DO NM=1,NMESHES
       M => MESHES(NM)
@@ -13496,44 +13452,40 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
       IF (PROCESS(NM)/=MY_RANK) THEN
          NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS
          NCELLS_ACCUM = NCELLS_ACCUM + NCELLS
+         NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS + 1
+         NCONN_ACCUM = NCONN_ACCUM + NCELLS*4
+         NPIECES_ACCUM = NPIECES_ACCUM+1
          CYCLE MESH_LOOP_HDF
       ENDIF
-      !WRITE(*,*) "MESH ", NM, "NPOINTS ", NPOINTS, "NCELLS ", NCELLS, "ACCUM", NCELLS_ACCUM
       M => MESHES(NM)
       ! Output OBST geometry data
       NPOINTS = M%N_OBST*8
       NCELLS = M%N_OBST*6
-      ALLOCATE(COLORS(NCELLS,3))
+      ALLOCATE(COLORS(3,NCELLS))
       ALLOCATE(FACES_OUT(NCELLS,4))
-      ALLOCATE(VERTICES(NPOINTS,3))
-      ALLOCATE(X_PTS(NPOINTS))
-      ALLOCATE(Y_PTS(NPOINTS))
-      ALLOCATE(Z_PTS(NPOINTS))
-      ALLOCATE(OFFSETS(NCELLS))
+      ALLOCATE(VERTICES(3,NPOINTS))
+      ALLOCATE(OFFSETS(NCELLS+1))
       ALLOCATE(CONNECT(NCELLS*4))
       ALLOCATE(VTKC_TYPE(NCELLS))
       DO N=1,M%N_OBST
          OB=>M%OBSTRUCTION(N)
          XB(:) = REAL((/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/),FB)
          IF (OB%RGB(1)==-1) THEN
-            COLORS((N-1)*6+1,1:3) = REAL(SURFACE(OB%SURF_INDEX(-1))%RGB,FB)/255._FB
-            COLORS((N-1)*6+2,1:3) = REAL(SURFACE(OB%SURF_INDEX(1))%RGB,FB)/255._FB
-            COLORS((N-1)*6+3,1:3) = REAL(SURFACE(OB%SURF_INDEX(-2))%RGB,FB)/255._FB
-            COLORS((N-1)*6+4,1:3) = REAL(SURFACE(OB%SURF_INDEX(2))%RGB,FB)/255._FB
-            COLORS((N-1)*6+5,1:3) = REAL(SURFACE(OB%SURF_INDEX(-3))%RGB,FB)/255._FB
-            COLORS((N-1)*6+6,1:3) = REAL(SURFACE(OB%SURF_INDEX(3))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+1) = REAL(SURFACE(OB%SURF_INDEX(-1))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+2) = REAL(SURFACE(OB%SURF_INDEX(1))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+3) = REAL(SURFACE(OB%SURF_INDEX(-2))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+4) = REAL(SURFACE(OB%SURF_INDEX(2))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+5) = REAL(SURFACE(OB%SURF_INDEX(-3))%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+6) = REAL(SURFACE(OB%SURF_INDEX(3))%RGB,FB)/255._FB
          ELSE
-            COLORS((N-1)*6+1,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+2,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+3,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+4,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+5,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+6,1:3) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+1) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+2) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+3) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+4) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+5) = REAL(OB%RGB,FB)/255._FB
+            COLORS(1:3,(N-1)*6+6) = REAL(OB%RGB,FB)/255._FB
          ENDIF
-         VERTICES((N-1)*8+1:N*8,1:3) = GET_VERTICES(XB)
-         X_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,1)
-         Y_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,2)
-         Z_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,3)
+         VERTICES(1:3,(N-1)*8+1:N*8) = TRANSPOSE(GET_VERTICES(XB))
          FACES_OUT((N-1)*6+1:N*6,1:4) = FACES + (N-1)*8
       END DO
       IFACT = 0
@@ -13544,300 +13496,70 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
          IFACT = IFACT+1
       ENDDO
       
+      OFFSETS(1) = 0
       DO I=1,NCELLS
-         OFFSETS(I) = (I)*4_IB32
+         OFFSETS(I+1) = (I)*4_IB32
          VTKC_TYPE(I) = 8_IB8
       ENDDO
       
-      !dimsf = (/3,NCELLS/)
-      !offset(1:2) = (/0,NCELLS_ACCUM/)
-      !count(1:2)  = (/3,NCELLS/)
-      
       ! Write color data to file
-      CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NCELLS/)), error)
-      !dimsm = (/3,NCELLS/)
-      CALL h5screate_simple_f (2, INT8((/3,NCELLS/)), memspace, error)
-      CALL h5dget_space_f(dset_id_clr, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/0,NCELLS_ACCUM/)), INT8((/3,NCELLS/)), error)
-      !data_dims(1:2) = INT8((/3,NCELLS/))
-      CALL H5dwrite_f(dset_id_clr, H5T_IEEE_F32LE, TRANSPOSE(COLORS), INT8((/3,NCELLS/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      CALL PARALLEL_WRITE_F32(CRP_LIST, 2, INT8((/3, NCELLS/)), DSET_ID_CLR,&
+         PLIST_ID, INT8((/0,NCELLS_ACCUM/)), INT8((/3,NCELLS/)), COLORS)
       
       ! Write connectivity data to file
-      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS*4/)), error)
-      CALL h5screate_simple_f (1, INT8((/NCELLS*4/)), memspace, error)
-      CALL h5dget_space_f(dset_id_con, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/NCELLS_ACCUM*4/)), INT8((/NCELLS*4/)), error)
-      CALL H5dwrite_f(dset_id_con, H5T_STD_I32LE, CONNECT, INT8((/NCELLS*4/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      CALL PARALLEL_WRITE_I32(CRP_LIST, 1, INT8((/NCELLS*4/)), DSET_ID_CON,&
+         PLIST_ID, INT8((/NCELLS_ACCUM*4/)), INT8((/NCELLS*4/)), CONNECT)
       
       ! Write number of cells data to file
-      CALL h5pset_chunk_f(crp_list, 1, INT8((/1/)), error)
-      CALL h5screate_simple_f (1, INT8((/1/)), memspace, error)
-      CALL h5dget_space_f(dset_id_ncells, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/NM-1/)), INT8((/1/)), error)
-      CALL H5dwrite_f(dset_id_ncells, H5T_STD_I32LE, (/NCELLS/), INT8((/1/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
-           
+      CALL PARALLEL_WRITE_I32(CRP_LIST, 1, INT8((/1/)), DSET_ID_NCELLS,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS/))
+      
+      ! Write number of points data to file
+      CALL PARALLEL_WRITE_I32(CRP_LIST, 1, INT8((/1/)), DSET_ID_NPTS,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NPOINTS/))
+      
       ! Write NumberOfConnectivityIds data to file
-      CALL h5pset_chunk_f(crp_list, 1, INT8((/1/)), error)
-      CALL h5screate_simple_f (1, INT8((/1/)), memspace, error)
-      CALL h5dget_space_f(dset_id_ncon, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/NM-1/)), INT8((/1/)), error)
-      CALL H5dwrite_f(dset_id_ncon, H5T_STD_I32LE, INT((/NCELLS*4/)), INT8((/1/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
-          
+      CALL PARALLEL_WRITE_I32(CRP_LIST, 1, INT8((/1/)), DSET_ID_NCON,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS*4/))
+      
       ! Write offsets data to file
-      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS/)), error)
-      CALL h5screate_simple_f (1, INT8((/NCELLS/)), memspace, error)
-      CALL h5dget_space_f(dset_id_off, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/NCELLS_ACCUM/)), INT8((/NCELLS/)), error)
-      CALL H5dwrite_f(dset_id_off, H5T_STD_I32LE, OFFSETS, INT8((/NCELLS/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      CALL PARALLEL_WRITE_I32(CRP_LIST, 1, INT8((/NCELLS+1/)), DSET_ID_OFF,&
+         PLIST_ID, INT8((/NOFFSETS_ACCUM/)), INT8((/NCELLS+1/)), OFFSETS)
       
       ! Write point data to file
-      CALL h5pset_chunk_f(crp_list, 2, INT8((/3, NPOINTS/)), error)
-      CALL h5screate_simple_f (2, INT8((/3,NPOINTS/)), memspace, error)
-      CALL h5dget_space_f(dset_id_pts, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/0,NPOINTS_ACCUM/)), INT8((/3,NPOINTS/)), error)
-      CALL H5dwrite_f(dset_id_pts, H5T_IEEE_F32LE, TRANSPOSE(VERTICES), INT8((/3,NPOINTS/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
+      CALL PARALLEL_WRITE_F32(CRP_LIST, 2, INT8((/3, NPOINTS/)), DSET_ID_PTS,&
+         PLIST_ID, INT8((/0,NPOINTS_ACCUM/)), INT8((/3,NPOINTS/)), VERTICES)
       
       ! Write types data to file
-      CALL h5pset_chunk_f(crp_list, 1, INT8((/NCELLS/)), error)
-      CALL h5screate_simple_f (1, INT8((/NCELLS/)), memspace, error)
-      CALL h5dget_space_f(dset_id_typ, dataspace, error)
-      CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
-           INT8((/NCELLS_ACCUM/)), INT8((/NCELLS/)), error)
-      CALL H5dwrite_f(dset_id_typ, H5T_STD_U8LE, VTKC_TYPE, INT8((/NCELLS/)), error, &
-           mem_space_id = memspace, file_space_id = dataspace, xfer_prp = plist_id)
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      CALL PARALLEL_WRITE_U8(CRP_LIST, 1, INT8((/NCELLS/)), DSET_ID_TYP,&
+         PLIST_ID, INT8((/NCELLS_ACCUM/)), INT8((/NCELLS/)), VTKC_TYPE)
       
       DEALLOCATE(COLORS)
       DEALLOCATE(FACES_OUT)
       DEALLOCATE(VERTICES)
-      DEALLOCATE(X_PTS)
-      DEALLOCATE(Y_PTS)
-      DEALLOCATE(Z_PTS)
       DEALLOCATE(OFFSETS)
       DEALLOCATE(CONNECT)
       DEALLOCATE(VTKC_TYPE)
       NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS
       NCELLS_ACCUM = NCELLS_ACCUM + NCELLS
+      NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS + 1
+      NCONN_ACCUM = NCONN_ACCUM + NCELLS*4
+      NPIECES_ACCUM = NPIECES_ACCUM+1
    ENDDO MESH_LOOP_HDF
    
-   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
-   WRITE(*,*) "RANK ", MY_RANK, "PA"
-   CALL h5sclose_f(memspace, error)
-   WRITE(*,*) "RANK ", MY_RANK, "P0"
-   CALL h5sclose_f(dataspace, error)
-   WRITE(*,*) "RANK ", MY_RANK, "P1"
-   CALL h5dclose_f(dset_id_clr, error)
-   CALL h5dclose_f(dset_id_con, error)
-   CALL h5dclose_f(dset_id_ncells, error)
-   CALL h5dclose_f(dset_id_ncon, error)
-   CALL h5dclose_f(dset_id_off, error)
-   CALL h5dclose_f(dset_id_pts, error)
-   CALL h5dclose_f(dset_id_typ, error)
-   WRITE(*,*) "RANK ", MY_RANK, "P2"
+   ! Close HDF5 datasets
+   CALL H5DCLOSE_F(DSET_ID_CLR, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_CON, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCELLS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NPTS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCON, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_OFF, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_TYP, ERROR)
    CALL H5PCLOSE_F(PLIST_ID, ERROR)
    
-   WRITE(*,*) "RANK ", MY_RANK, "P3"
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   !CALL h5awrite_f(attr_id, atype_id, attr_data, data_dims, error)
-   
-   !H5Acreate(group, "Version", H5T_STD_I64LE, versionDataspace, H5P_DEFAULT, H5P_DEFAULT)
-   CALL H5GCLOSE_F(GROUP_ID4, ERROR)
-   CALL H5GCLOSE_F(GROUP_ID3, ERROR)
-   CALL H5GCLOSE_F(GROUP_ID2, ERROR)
-   CALL H5GCLOSE_F(GROUP_ID1, ERROR)
-   
-   ! Create the data space for the  dataset.
-   !CALL H5SCREATE_SIMPLE_F(RANK, DIMSF, FILESPACE, ERROR)
-   !CALL H5SCREATE_SIMPLE_F(RANK, DIMSF, FILESPACE, ERROR)
-   ! Create the dataset with default properties.
-   !CALL H5DCREATE_F(FILE_ID, DSETNAME, H5T_NATIVE_INTEGER, FILESPACE, &
-                      !DSET_ID, ERROR)
-   ! Create property list for collective dataset write
-   !CALL H5PCREATE_F(H5P_DATASET_XFER_F, PLIST_ID, ERROR)
-   !CALL H5PSET_DXPL_MPIO_F(PLIST_ID, H5FD_MPIO_COLLECTIVE_F, ERROR)
-   ! For independent write use
-   ! CALL h5pset_dxpl_mpio_f(PLIST_ID, H5FD_MPIO_INDEPENDENT_F, ERROR)
-   ! Write the dataset collectively.
-   !CALL H5DWRITE_F(DSET_ID, H5T_NATIVE_INTEGER, DATA, DIMSFI, ERROR, &
-                      !XFER_PRP = PLIST_ID)
-   ! Deallocate data buffer.
-   !DEALLOCATE(data)
-   
-   ! Close resources.
-   !CALL H5SCLOSE_F(FILESPACE, ERROR)
-   !CALL H5DCLOSE_F(DSET_ID, ERROR)
-   !CALL H5PCLOSE_F(PLIST_ID, ERROR)
-   
-   !CALL h5acreate_f(GROUP_ID, "VERSION", H5T_STD_I64LE, aspace_id, attr_id, error)
-   !attr_data(1) = 2
-   !attr_data(2) = 2
-   !data_dims(1) = 1
-   !CALL h5awrite_f(attr_id, atype_id, attr_data, data_dims, error)
-   !CALL h5aclose_f(attr_id, error)
-   !CALL H5GCLOSE_F(GROUP_ID, ERROR)
-   !CALL H5SCREATE_SIMPLE_F(RANK_1, DIMSF_1, FILESPACE, ERROR)
-   !CALL H5DCREATE_F(FILE_ID, 'Version', H5T_NATIVE_INTEGER, FILESPACE, &
-                      !DSET_ID, ERROR)
-   ! Create property list for collective dataset write
-   !CALL H5PCREATE_F(H5P_DATASET_XFER_F, PLIST_ID, ERROR)
-   !CALL H5PSET_DXPL_MPIO_F(PLIST_ID, H5FD_MPIO_COLLECTIVE_F, ERROR)
-   ! For independent write use
-   ! CALL h5pset_dxpl_mpio_f(PLIST_ID, H5FD_MPIO_INDEPENDENT_F, ERROR)
-   ! Write the dataset collectively.
-   !CALL H5DWRITE_F(DSET_ID, H5T_NATIVE_INTEGER, (/2,2/), DIMSFI_1, ERROR, &
-                      !XFER_PRP = PLIST_ID)
-   
-   
-   !CALL H5SCLOSE_F(FILESPACE, ERROR)
-   !CALL H5DCLOSE_F(DSET_ID, ERROR)
-   !CALL H5PCLOSE_F(PLIST_ID, ERROR)
-   
-   WRITE(*,*) "RANK ", MY_RANK, "P4"
-   
-   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
-   
-   WRITE(*,*) "RANK ", MY_RANK, "P5"
-   
-   CALL H5FCLOSE_F(FILE_ID, ERROR)
-   
-   WRITE(*,*) "RANK ", MY_RANK, "P6"
-   
-   ! Close FORTRAN interface
-   CALL H5CLOSE_F(ERROR)
-   
-   WRITE(*,*) "RANK ", MY_RANK, " IS DONE"
-   
-   IF (MY_RANK==0) THEN
-      WRITE(FN_OBST_VTK(NMESHES+1),'(A,A,A)') "",TRIM(CHID),'_GEOM.pvtu'
-      VTK_ERROR = A_PVTK_FILE%INITIALIZE(FILENAME=FN_OBST_VTK(NMESHES+1), MESH_TOPOLOGY='PUnstructuredGrid',&
-                                      MESH_KIND='Float32')
-      VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='OPEN')
-      VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_DATAARRAY(DATA_NAME='Color', &
-                                                              DATA_TYPE='Float32', NUMBER_OF_COMPONENTS=3)
-      VTK_ERROR = A_PVTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL',ACTION='CLOSE')
-      DO NM=1,NMESHES
-         WRITE(TMP_FILE,'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_OBST_',NM,'.vtu'
-         VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
-      ENDDO
-      DO I= 1,N_GEOMETRY
-         WRITE(TMP_FILE,'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_GEOM_',I,'.vtu'
-         VTK_ERROR = A_PVTK_FILE%XML_WRITER%WRITE_PARALLEL_GEO(SOURCE=TMP_FILE)
-      ENDDO
-      VTK_ERROR = A_PVTK_FILE%FINALIZE()
-   ENDIF
-   
-   MESH_LOOP: DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP
-      WRITE(FN_OBST_VTK(NM),'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_OBST_',NM,'.vtu'
-      IF (VTK_BINARY) THEN
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_OBST_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
-      ELSE
-         VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_OBST_VTK(NM), MESH_TOPOLOGY='UnstructuredGrid')
-      ENDIF ! do not change capitalization on mesh topology
-      M => MESHES(NM)
-      ! Output OBST geometry data
-      NPOINTS = M%N_OBST*8
-      NCELLS = M%N_OBST*6
-      ALLOCATE(COLORS(NCELLS,3))
-      ALLOCATE(FACES_OUT(NCELLS,4))
-      ALLOCATE(VERTICES(NPOINTS,3))
-      ALLOCATE(X_PTS(NPOINTS))
-      ALLOCATE(Y_PTS(NPOINTS))
-      ALLOCATE(Z_PTS(NPOINTS))
-      ALLOCATE(OFFSETS(NCELLS))
-      ALLOCATE(CONNECT(NCELLS*4))
-      ALLOCATE(VTKC_TYPE(NCELLS))
-      DO N=1,M%N_OBST
-         OB=>M%OBSTRUCTION(N)
-         XB(:) = REAL((/OB%X1,OB%X2,OB%Y1,OB%Y2,OB%Z1,OB%Z2/),FB)
-         IF (OB%RGB(1)==-1) THEN
-            COLORS((N-1)*6+1,1:3) = REAL(SURFACE(OB%SURF_INDEX(-1))%RGB,FB)/255._FB
-            COLORS((N-1)*6+2,1:3) = REAL(SURFACE(OB%SURF_INDEX(1))%RGB,FB)/255._FB
-            COLORS((N-1)*6+3,1:3) = REAL(SURFACE(OB%SURF_INDEX(-2))%RGB,FB)/255._FB
-            COLORS((N-1)*6+4,1:3) = REAL(SURFACE(OB%SURF_INDEX(2))%RGB,FB)/255._FB
-            COLORS((N-1)*6+5,1:3) = REAL(SURFACE(OB%SURF_INDEX(-3))%RGB,FB)/255._FB
-            COLORS((N-1)*6+6,1:3) = REAL(SURFACE(OB%SURF_INDEX(3))%RGB,FB)/255._FB
-         ELSE
-            COLORS((N-1)*6+1,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+2,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+3,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+4,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+5,1:3) = REAL(OB%RGB,FB)/255._FB
-            COLORS((N-1)*6+6,1:3) = REAL(OB%RGB,FB)/255._FB
-         ENDIF
-         VERTICES((N-1)*8+1:N*8,1:3) = GET_VERTICES(XB)
-         X_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,1)
-         Y_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,2)
-         Z_PTS((N-1)*8+1:N*8) = VERTICES((N-1)*8+1:N*8,3)
-         FACES_OUT((N-1)*6+1:N*6,1:4) = FACES + (N-1)*8
-      END DO
-      IFACT = 0
-      DO I = 1, NCELLS
-         DO J = 1, 4
-            CONNECT((IFACT)*4+J) = FACES_OUT(I, J)
-         ENDDO
-         IFACT = IFACT+1
-      ENDDO
-      
-      DO I=1,NCELLS
-         OFFSETS(I) = (I)*4_IB32
-         VTKC_TYPE(I) = 8_IB8
-      ENDDO
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NPOINTS, NC=NCELLS)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NPOINTS, NC=NCELLS, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NCELLS, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='OPEN')
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME='Color', X=COLORS(:,1),Y=COLORS(:,2),Z=COLORS(:,3))
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='CLOSE')
-      DEALLOCATE(COLORS)
-      DEALLOCATE(FACES_OUT)
-      DEALLOCATE(VERTICES)
-      DEALLOCATE(X_PTS)
-      DEALLOCATE(Y_PTS)
-      DEALLOCATE(Z_PTS)
-      DEALLOCATE(OFFSETS)
-      DEALLOCATE(CONNECT)
-      DEALLOCATE(VTKC_TYPE)
-      VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
-      VTK_ERROR = A_VTK_FILE%FINALIZE()
-   ENDDO MESH_LOOP
+   ! Close VTKHDF interface
+   CALL CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
    
    ! Output GEOM geometry data
    IF ((N_GEOMETRY > 0).AND.(MY_RANK==0)) THEN
@@ -13847,180 +13569,43 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
          G=>GEOMETRY(I)
          NFACES = NFACES + G%N_FACES
          NVERTS = NVERTS + G%N_VERTS
-      ENDDO
-      IF (NVERTS>0 .AND. NFACES>0) THEN
-         DO I= 1,N_GEOMETRY
-            WRITE(FN_GEOM_VTK(I),'(A,A,A,I0,A)') "",TRIM(RESULTS_DIR)//TRIM(CHID),'_GEOM_',I,'.vtu'
-            IF (VTK_BINARY) THEN
-               VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='raw', FILENAME=FN_GEOM_VTK(I), MESH_TOPOLOGY='UnstructuredGrid')
-            ELSE
-               VTK_ERROR = A_VTK_FILE%INITIALIZE(FORMAT='ascii', FILENAME=FN_GEOM_VTK(I), MESH_TOPOLOGY='UnstructuredGrid')
-            ENDIF ! do not change capitalization on mesh topology
-            G=>GEOMETRY(I)
-            ALLOCATE(X_PTS(G%N_VERTS))
-            ALLOCATE(Y_PTS(G%N_VERTS))
-            ALLOCATE(Z_PTS(G%N_VERTS))
-            ALLOCATE(OFFSETS(G%N_FACES))
-            ALLOCATE(CONNECT(G%N_FACES*3))
-            ALLOCATE(VTKC_TYPE(G%N_FACES))
-            DO J=1,G%N_VERTS
-               X_PTS(J) = REAL(G%VERTS((J-1)*3+1),FB)
-               Y_PTS(J) = REAL(G%VERTS((J-1)*3+2),FB)
-               Z_PTS(J) = REAL(G%VERTS((J-1)*3+3),FB)
-            ENDDO
-
-            DO J=1,G%N_FACES
-               OFFSETS(J) = (J)*3_IB32
-               VTKC_TYPE(J) = 5_IB8
-               CONNECT(3*(J-1)+1) = G%FACES(3*(J-1)+1)-1
-               CONNECT(3*(J-1)+2) = G%FACES(3*(J-1)+2)-1
-               CONNECT(3*(J-1)+3) = G%FACES(3*(J-1)+3)-1
-            ENDDO
-            
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=G%N_VERTS, NC=G%N_FACES)
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=G%N_VERTS, NC=G%N_FACES, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=G%N_FACES, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, &
-                                                                 VTKC_TYPE=VTKC_TYPE)
-            CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
-            ALLOCATE(COLORS(NFACES,3))
-            DO J= 1,G%N_FACES
-               IF (G%RGB(1)==-1) THEN
-                  COLORS(J,1:3) = REAL(SURFACE(G%SURFS(J))%RGB,FB)/255._FB
-               ELSE
-                  COLORS(J,1:3) = REAL(G%RGB,FB)/255._FB
-               ENDIF
-            ENDDO
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='OPEN')
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME='Color', X=COLORS(:,1),Y=COLORS(:,2),Z=COLORS(:,3))
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='CLOSE')
-            VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE()
-            VTK_ERROR = A_VTK_FILE%FINALIZE()
-            DEALLOCATE(COLORS)
+         
+         ALLOCATE(X_PTS(G%N_VERTS))
+         ALLOCATE(Y_PTS(G%N_VERTS))
+         ALLOCATE(Z_PTS(G%N_VERTS))
+         ALLOCATE(OFFSETS(G%N_FACES))
+         ALLOCATE(CONNECT(G%N_FACES*3))
+         ALLOCATE(VTKC_TYPE(G%N_FACES))
+         DO J=1,G%N_VERTS
+            X_PTS(J) = REAL(G%VERTS((J-1)*3+1),FB)
+            Y_PTS(J) = REAL(G%VERTS((J-1)*3+2),FB)
+            Z_PTS(J) = REAL(G%VERTS((J-1)*3+3),FB)
          ENDDO
-      ENDIF
+
+         DO J=1,G%N_FACES
+            OFFSETS(J) = (J)*3_IB32
+            VTKC_TYPE(J) = 5_IB8
+            CONNECT(3*(J-1)+1) = G%FACES(3*(J-1)+1)-1
+            CONNECT(3*(J-1)+2) = G%FACES(3*(J-1)+2)-1
+            CONNECT(3*(J-1)+3) = G%FACES(3*(J-1)+3)-1
+         ENDDO
+         
+         ALLOCATE(COLORS(NFACES,3))
+         DO J= 1,G%N_FACES
+            IF (G%RGB(1)==-1) THEN
+               COLORS(J,1:3) = REAL(SURFACE(G%SURFS(J))%RGB,FB)/255._FB
+            ELSE
+               COLORS(J,1:3) = REAL(G%RGB,FB)/255._FB
+            ENDIF
+         ENDDO
+         
+         CALL DEALLOCATE_VTK_GAS_PHASE_GEOMETRY(X_PTS,Y_PTS,Z_PTS,OFFSETS,VTKC_TYPE,CONNECT)
+         DEALLOCATE(COLORS)
+      ENDDO
    ENDIF
 
 
 CONTAINS
-
-   SUBROUTINE ADD_VERSION(GROUP_ID,ADIMS,DATA_DIMS,ARANK,ANAME,ATTR_DATA,ALEN)
-      !INTEGER(HID_T) :: file_id       ! File identifier
-      !INTEGER(HID_T) :: dset_id       ! Dataset identifier
-      INTEGER(HID_T) :: attr_id       ! Attribute identifier
-      INTEGER(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-      INTEGER(HID_T) :: atype_id      ! Attribute Dataspace identifier
-      INTEGER(HSIZE_T), DIMENSION(1), INTENT(IN) :: adims, data_dims ! Attribute dimension
-      INTEGER, INTENT(IN)     ::   arank                      ! Attribute rank
-      INTEGER(SIZE_T), INTENT(IN) :: alen    ! Length of the attribute string
-      !CHARACTER(LEN=80), DIMENSION(2) ::  attr_data  ! Attribute data
-      INTEGER     ::   error ! Error flag
-      INTEGER(HID_T) :: GROUP_ID
-      CHARACTER(LEN=*), INTENT(IN) :: aname
-      INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN) :: attr_data(:)
-      
-      CALL h5screate_simple_f(arank, adims, aspace_id, error)
-      CALL h5tcopy_f(H5T_STD_I32LE, atype_id, error)
-      CALL h5tset_size_f(atype_id, alen, error)
-      CALL H5ACREATE_F(GROUP_ID, TRIM(aname), H5T_STD_I32LE, aspace_id, attr_id, ERROR)
-      WRITE(*,*) "DATA_DIMS ", DATA_DIMS
-      WRITE(*,*) "DATA ", attr_data
-      CALL H5AWRITE_F(attr_id, atype_id, attr_data, data_dims, ERROR)
-      CALL H5ACLOSE_F(attr_id, ERROR)
-      CALL h5tclose_f(atype_id, error)
-      CALL h5sclose_f(aspace_id, error)
-   END SUBROUTINE ADD_VERSION
-
-   SUBROUTINE ADD_TYPE(GROUP_ID,DATA_DIMS,ANAME,ATTR_DATA,ALEN)
-      !INTEGER(HID_T) :: file_id       ! File identifier
-      !INTEGER(HID_T) :: dset_id       ! Dataset identifier
-      INTEGER(HID_T) :: attr_id       ! Attribute identifier
-      INTEGER(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-      INTEGER(HID_T) :: atype_id      ! Attribute Dataspace identifier
-      INTEGER(HSIZE_T), DIMENSION(1), INTENT(IN) :: data_dims ! Attribute dimension
-      !INTEGER, INTENT(IN)     ::   arank                      ! Attribute rank
-      INTEGER(SIZE_T), INTENT(IN) :: alen    ! Length of the attribute string
-      !CHARACTER(LEN=80), DIMENSION(2) ::  attr_data  ! Attribute data
-      INTEGER     ::   error ! Error flag
-      INTEGER(HID_T) :: GROUP_ID
-      CHARACTER(LEN=*), INTENT(IN) :: aname
-      CHARACTER(LEN=*), INTENT(IN) :: attr_data
-      
-      CALL h5screate_f(H5S_SCALAR_F, aspace_id, error)
-      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, atype_id, error)
-      CALL h5tset_size_f(atype_id, alen, error)
-      CALL H5ACREATE_F(GROUP_ID, TRIM(aname), atype_id, aspace_id, attr_id, ERROR)
-      CALL H5AWRITE_F(attr_id, atype_id, attr_data, data_dims, ERROR)
-      CALL H5ACLOSE_F(attr_id, ERROR)
-      CALL h5tclose_f(atype_id, error)
-      CALL h5sclose_f(aspace_id, error)
-   END SUBROUTINE ADD_TYPE
-
-   !SUBROUTINE ADD_PIECE(GROUP_ID,DATA_DIMS,ANAME,ATTR_DATA,ALEN)
-   !NPOINTS, NCELLS, X_PTS, Y_PTS, Z_PTS, CONNECT, OFFSETS, VTKC_TYPE, DATA_NAME, DATA
-      !INTEGER(HID_T) :: file_id       ! File identifier
-      !INTEGER(HID_T) :: dset_id       ! Dataset identifier
-      !INTEGER(HID_T) :: d_id       ! Dataset identifier
-      !INTEGER(HID_T) :: dspace_id     ! Dataset identifier
-      !INTEGER(HID_T) :: dtype_id      ! Dataset identifier
-      !INTEGER(HSIZE_T), DIMENSION(1), INTENT(IN) :: data_dims ! Attribute dimension
-      !INTEGER, INTENT(IN)     ::   arank                      ! Attribute rank
-      !INTEGER(SIZE_T), INTENT(IN) :: alen    ! Length of the attribute string
-      !CHARACTER(LEN=80), DIMENSION(2) ::  attr_data  ! Attribute data
-      !INTEGER     ::   error ! Error flag
-      !INTEGER(HID_T) :: GROUP_ID
-      !CHARACTER(LEN=*), INTENT(IN) :: aname
-      !CHARACTER(LEN=*), INTENT(IN) :: attr_data
-      !INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
-      !INTEGER(HID_T), INTENT(IN) :: PLIST_ID      ! Property list identifier
-      
-      
-
-      
-      
-      !CALL h5screate_simple_f(arank, adims, aspace_id, error)
-      !CALL h5screate_simple_f(H5S_SCALAR_F, aspace_id, error)
-      !CALL h5tcopy_f(H5T_NATIVE_CHARACTER, atype_id, error)
-      !CALL h5tset_size_f(atype_id, alen, error)
-      !CALL H5DCREATE_F(GROUP_ID, TRIM(DATA_NAME), dtype_id, dspace_id, d_id, ERROR)
-      !CALL H5DWRITE_F(d_id, dtype_id, DATA, data_dims, ERROR)
-      !CALL H5DCLOSE_F(d_id, ERROR)
-      !CALL h5tclose_f(atype_id, error)
-      !CALL h5sclose_f(aspace_id, error)
-      
-      
-      
-      
-         !DATASET "Color" {
-         !   DATATYPE  H5T_IEEE_F32LE
-         !   DATASPACE  SIMPLE { ( 360, 3 ) / ( H5S_UNLIMITED, 3 ) }
-         !   DATA {
-         !   (0,0): 1, 0.8, 0.4,
-      
-      
-      
-   !END SUBROUTINE ADD_PIECE
-
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_PIECE(NP=NPOINTS, NC=NCELLS)
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_GEO(NP=NPOINTS, NC=NCELLS, X=X_PTS, Y=Y_PTS, Z=Z_PTS)
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%WRITE_CONNECTIVITY(NC=NCELLS, CONNECTIVITY=CONNECT, OFFSET=OFFSETS, VTKC_TYPE=VTKC_TYPE)
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='OPEN')
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(DATA_NAME='Color', X=COLORS(:,1),Y=COLORS(:,2),Z=COLORS(:,3))
-      !VTK_ERROR = A_VTK_FILE%XML_WRITER%W_DATA(LOCATION='CELL', ACTION='CLOSE')
-
-   !IF (MY_RANK==0) THEN
-      !CALL h5screate_simple_f(1, (/INT8(2)/), aspace_id, error)
-      !CALL h5tcopy_f(H5T_NATIVE_INTEGER, atype_id, error)
-      !CALL h5tset_size_f(atype_id, INT8(2), error)
-      !CALL H5ACREATE_F(GROUP_ID1, "VERSION", atype_id, aspace_id, attr_id, ERROR)
-      !DIMSFI_1(1) = 1
-      !CALL H5AWRITE_F(attr_id, atype_id, (/INT8(2),INT8(2)/), DIMSFI_1, ERROR)
-      !CALL H5ACLOSE_F(attr_id, ERROR)
-      !CALL h5tclose_f(atype_id, error)
-      !CALL h5sclose_f(aspace_id, error)
-      !CALL WRITE_ATTR_TO_GROUP(ADIMS,DATA_DIMS,ARANK,ANAME,ATTR_DATA,ATTR_LEN)
-      !CALL ADD_ATTR_TO_GROUP((/INT8(2)/),DIMSFI_1,1,"VERSION",(/INT8(2),INT8(2)/),INT8(2))
-   !ENDIF
-
 
    FUNCTION GET_VERTICES(XB)
       REAL(FB), INTENT(IN) :: XB(6)
@@ -14037,7 +13622,150 @@ CONTAINS
 
 END SUBROUTINE WRITE_VTKHDF_GEOM_FILE
 
+SUBROUTINE PARALLEL_INIT_F32(GROUP_ID, SNAME, CRP_LIST, RANK, CDIM, DSET_ID, PLIST_ID)
+   INTEGER(HID_T), INTENT(IN) :: GROUP_ID               ! Memory identifiers
+   INTEGER(HID_T), INTENT(INOUT) :: CRP_LIST, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM
+   CHARACTER(LEN=*), INTENT(IN) :: SNAME
+   INTEGER(HID_T), INTENT(OUT) :: DSET_ID  ! Memory identifiers
+   INTEGER(HID_T) :: DATASPACE
+   INTEGER     ::   ERROR ! Error flag
+   CALL H5SCREATE_SIMPLE_F(RANK, CDIM, DATASPACE, ERROR, CDIM)
+   CALL H5PCREATE_F(H5P_DATASET_CREATE_F, CRP_LIST, ERROR)
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5DCREATE_F(GROUP_ID, SNAME, H5T_IEEE_F32LE, DATASPACE, DSET_ID, ERROR, CRP_LIST)
+   CALL H5PCREATE_F(H5P_DATASET_XFER_F, PLIST_ID, error)
+   CALL H5PSET_DXPL_MPIO_F(PLIST_ID, H5FD_MPIO_COLLECTIVE_F, error)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_INIT_F32
 
+SUBROUTINE PARALLEL_INIT_I32(GROUP_ID, SNAME, CRP_LIST, RANK, CDIM, DSET_ID, PLIST_ID)
+   INTEGER(HID_T), INTENT(IN) :: GROUP_ID               ! Memory identifiers
+   INTEGER(HID_T), INTENT(INOUT) :: CRP_LIST, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM
+   CHARACTER(LEN=*), INTENT(IN) :: SNAME
+   INTEGER(HID_T), INTENT(OUT) :: DSET_ID  ! Memory identifiers
+   INTEGER(HID_T) :: DATASPACE
+   INTEGER     ::   ERROR ! Error flag
+   CALL H5SCREATE_SIMPLE_F(RANK, CDIM, DATASPACE, ERROR, CDIM)
+   CALL H5PCREATE_F(H5P_DATASET_CREATE_F, CRP_LIST, error)
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5DCREATE_F(GROUP_ID, SNAME, H5T_STD_I32LE, DATASPACE, DSET_ID, ERROR, CRP_LIST)
+   CALL H5PCREATE_F(H5P_DATASET_XFER_F, PLIST_ID, error)
+   CALL H5PSET_DXPL_MPIO_F(PLIST_ID, H5FD_MPIO_COLLECTIVE_F, error)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_INIT_I32
+
+SUBROUTINE PARALLEL_INIT_U8(GROUP_ID, SNAME, CRP_LIST, RANK, CDIM, DSET_ID, PLIST_ID)
+   INTEGER(HID_T), INTENT(IN) :: GROUP_ID               ! Memory identifiers
+   INTEGER(HID_T), INTENT(INOUT) :: CRP_LIST, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM
+   CHARACTER(LEN=*), INTENT(IN) :: SNAME
+   INTEGER(HID_T), INTENT(OUT) :: DSET_ID  ! Memory identifiers
+   INTEGER(HID_T) :: DATASPACE
+   INTEGER     ::   ERROR ! Error flag
+   CALL H5SCREATE_SIMPLE_F(RANK, CDIM, DATASPACE, ERROR, CDIM)
+   CALL H5PCREATE_F(H5P_DATASET_CREATE_F, CRP_LIST, error)
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5DCREATE_F(GROUP_ID, SNAME, H5T_STD_U8LE, DATASPACE, DSET_ID, ERROR, CRP_LIST)
+   CALL H5PCREATE_F(H5P_DATASET_XFER_F, PLIST_ID, error)
+   CALL H5PSET_DXPL_MPIO_F(PLIST_ID, H5FD_MPIO_COLLECTIVE_F, error)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_INIT_U8
+
+SUBROUTINE PARALLEL_WRITE_F32(CRP_LIST, RANK, CDIM, DSET_ID,&
+   PLIST_ID, OFFSET, COUNT, DATA)
+   INTEGER(HID_T), INTENT(IN) :: CRP_LIST, DSET_ID, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM, OFFSET, COUNT ! Attribute dimension
+   REAL(FB), DIMENSION(*), INTENT(IN) :: DATA
+   INTEGER     ::   ERROR ! Error flag
+   INTEGER(HID_T) :: MEMSPACE, DATASPACE
+   
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5SCREATE_SIMPLE_F (RANK, CDIM, MEMSPACE, ERROR)
+   CALL H5DGET_SPACE_F(DSET_ID, DATASPACE, ERROR)
+   CALL H5SSELECT_HYPERSLAB_F(DATASPACE, H5S_SELECT_SET_F, OFFSET, COUNT, ERROR)
+   CALL H5DWRITE_F(DSET_ID, H5T_IEEE_F32LE, DATA, CDIM, ERROR, &
+        MEM_SPACE_ID = MEMSPACE, FILE_SPACE_ID = DATASPACE, XFER_PRP = PLIST_ID)
+   CALL H5SCLOSE_F(MEMSPACE, ERROR)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_WRITE_F32
+
+SUBROUTINE PARALLEL_WRITE_I32(CRP_LIST, RANK, CDIM, DSET_ID,&
+   PLIST_ID, OFFSET, COUNT, DATA)
+   INTEGER(HID_T), INTENT(IN) :: CRP_LIST, DSET_ID, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM, OFFSET, COUNT ! Attribute dimension
+   INTEGER(IB32), DIMENSION(*), INTENT(IN) :: DATA
+   INTEGER     ::   ERROR ! Error flag
+   INTEGER(HID_T) :: MEMSPACE, DATASPACE
+   
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5SCREATE_SIMPLE_F (RANK, CDIM, MEMSPACE, ERROR)
+   CALL H5DGET_SPACE_F(DSET_ID, DATASPACE, ERROR)
+   CALL H5SSELECT_HYPERSLAB_F(DATASPACE, H5S_SELECT_SET_F, OFFSET, COUNT, ERROR)
+   CALL H5DWRITE_F(DSET_ID, H5T_STD_I32LE, DATA, CDIM, ERROR, &
+        MEM_SPACE_ID = MEMSPACE, FILE_SPACE_ID = DATASPACE, XFER_PRP = PLIST_ID)
+   CALL H5SCLOSE_F(MEMSPACE, ERROR)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_WRITE_I32
+
+SUBROUTINE PARALLEL_WRITE_U8(CRP_LIST, RANK, CDIM, DSET_ID,&
+   PLIST_ID, OFFSET, COUNT, DATA)
+   INTEGER(HID_T), INTENT(IN) :: CRP_LIST, DSET_ID, PLIST_ID  ! Memory identifiers
+   INTEGER, INTENT(IN)     ::   RANK    ! Dataset rank
+   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: CDIM, OFFSET, COUNT ! Attribute dimension
+   INTEGER(IB8), DIMENSION(*), INTENT(IN) :: DATA
+   INTEGER     ::   ERROR ! Error flag
+   INTEGER(HID_T) :: MEMSPACE, DATASPACE
+   
+   CALL H5PSET_CHUNK_F(CRP_LIST, RANK, CDIM, ERROR)
+   CALL H5SCREATE_SIMPLE_F (RANK, CDIM, MEMSPACE, ERROR)
+   CALL H5DGET_SPACE_F(DSET_ID, DATASPACE, ERROR)
+   CALL H5SSELECT_HYPERSLAB_F(DATASPACE, H5S_SELECT_SET_F, OFFSET, COUNT, ERROR)
+   CALL H5DWRITE_F(DSET_ID, H5T_STD_U8LE, DATA, CDIM, ERROR, &
+        MEM_SPACE_ID = MEMSPACE, FILE_SPACE_ID = DATASPACE, XFER_PRP = PLIST_ID)
+   CALL H5SCLOSE_F(MEMSPACE, ERROR)
+   CALL H5SCLOSE_F(DATASPACE, ERROR)
+END SUBROUTINE PARALLEL_WRITE_U8
+
+SUBROUTINE ADD_VERSION(GROUP_ID,ADIMS,ARANK,ANAME,ATTR_DATA)
+   INTEGER(HID_T) :: ATTR_ID, ASPACE_ID, GROUP_ID             ! Identifiers
+   INTEGER(HSIZE_T), DIMENSION(1), INTENT(IN) :: ADIMS        ! Attribute dimension
+   INTEGER, INTENT(IN)     ::   ARANK                         ! Attribute rank
+   INTEGER :: ERROR                                           ! Error flag
+   CHARACTER(LEN=*), INTENT(IN) :: ANAME                      ! Attribute name
+   INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN) :: ATTR_DATA(:) ! Attribute data
+   
+   CALL H5SCREATE_SIMPLE_F(ARANK, ADIMS, ASPACE_ID, ERROR)
+   CALL H5ACREATE_F(GROUP_ID, TRIM(ANAME), H5T_STD_I32LE, ASPACE_ID, ATTR_ID, ERROR)
+   CALL H5AWRITE_F(ATTR_ID, H5T_STD_I32LE, ATTR_DATA, ADIMS, ERROR)
+   CALL H5ACLOSE_F(ATTR_ID, ERROR)
+   CALL H5SCLOSE_F(ASPACE_ID, ERROR)
+END SUBROUTINE ADD_VERSION
+
+SUBROUTINE ADD_TYPE(GROUP_ID,DATA_DIMS,ANAME,ATTR_DATA,ALEN)
+   INTEGER(HID_T) :: ATTR_ID, ASPACE_ID, GROUP_ID, ATYPE_ID   ! Identifiers
+   INTEGER(HSIZE_T), DIMENSION(1), INTENT(IN) :: DATA_DIMS    ! Attribute dimension
+   INTEGER(SIZE_T), INTENT(IN) :: ALEN     ! Length of the attribute string
+   INTEGER     ::   ERROR                                     ! Error flag
+   CHARACTER(LEN=*), INTENT(IN) :: ANAME
+   CHARACTER(LEN=*), INTENT(IN) :: ATTR_DATA
+   
+   CALL H5SCREATE_F(H5S_SCALAR_F, ASPACE_ID, ERROR)
+   CALL H5TCOPY_F(H5T_NATIVE_CHARACTER, ATYPE_ID, ERROR)
+   CALL H5TSET_SIZE_F(ATYPE_ID, ALEN, ERROR)
+   CALL H5TSET_STRPAD_F(ATYPE_ID, H5T_STR_NULLPAD_F, ERROR)
+   CALL H5ACREATE_F(GROUP_ID, TRIM(ANAME), ATYPE_ID, ASPACE_ID, ATTR_ID, ERROR)
+   CALL H5AWRITE_F(ATTR_ID, ATYPE_ID, ATTR_DATA, DATA_DIMS, ERROR)
+   CALL H5ACLOSE_F(ATTR_ID, ERROR)
+   CALL H5TCLOSE_F(ATYPE_ID, ERROR)
+   CALL H5SCLOSE_F(ASPACE_ID, ERROR)
+END SUBROUTINE ADD_TYPE
 
 
 
