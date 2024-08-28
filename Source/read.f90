@@ -13318,11 +13318,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             OVERLAPPING_Y = .TRUE.
             OVERLAPPING_Z = .TRUE.
             IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
-            IF (XB(1)/=XB(2) .AND. ((XB(1)>=M%XF.AND.XB(2)>=M%XF) .OR. (XB(1)<=M%XS.AND.XB(2)<=M%XS))) OVERLAPPING_X = .FALSE.
+            IF (XB(1)/=XB(2) .AND. (MIN(XB(2),M%XF)-MAX(XB(1),M%XS)<TWO_EPSILON_EB)) OVERLAPPING_X = .FALSE.
             IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
-            IF (XB(3)/=XB(4) .AND. ((XB(3)>=M%YF.AND.XB(4)>=M%YF) .OR. (XB(3)<=M%YS.AND.XB(4)<=M%YS))) OVERLAPPING_Y = .FALSE.
+            IF (XB(3)/=XB(4) .AND. (MIN(XB(4),M%YF)-MAX(XB(3),M%YS)<TWO_EPSILON_EB)) OVERLAPPING_Y = .FALSE.
             IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
-            IF (XB(5)/=XB(6) .AND. ((XB(5)>=M%ZF.AND.XB(6)>=M%ZF) .OR. (XB(5)<=M%ZS.AND.XB(6)<=M%ZS))) OVERLAPPING_Z = .FALSE.
+            IF (XB(5)/=XB(6) .AND. (MIN(XB(6),M%ZF)-MAX(XB(5),M%ZS)<TWO_EPSILON_EB)) OVERLAPPING_Z = .FALSE.
 
             ! Handle the case of XB plane on interpolated mesh boundary
             ! This block is necessary so that XB statistics are not double counted at mesh interfaces.
