@@ -205,7 +205,6 @@ LOGICAL :: MASS_FILE=.FALSE.                !< Output a comma-delimited file of 
 LOGICAL :: STRATIFICATION=.TRUE.            !< Assume that the atmosphere decreases in pressure with height
 LOGICAL :: SOLID_PHASE_ONLY=.FALSE.         !< Only perform a solid phase heat transfer and pyrolysis simulation
 LOGICAL :: AEROSOL_AL2O3=.FALSE.            !< Assume that the SOOT is Al_2 O_3
-LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on computers with a shared file system
 LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
