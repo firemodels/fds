@@ -147,6 +147,7 @@ TYPE MESH_TYPE
    INTEGER :: N_NEIGHBORING_MESHES !< Number of meshing abutting the current one
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBORING_MESH  !< Array listing the indices of neighboring meshes
    INTEGER, ALLOCATABLE, DIMENSION(:) :: RGB               !< Color indices of the mesh for Smokeview
+   INTEGER :: NP=0, NC=0 ! Number of points and number of cells in mesh
 
    ! Mesh coordinate variables
 
