@@ -26,6 +26,7 @@ cd FM_SNL;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
+cd JH_FRA; ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LEMTA_UGent_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
