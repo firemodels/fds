@@ -1744,7 +1744,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 OVERWRITE,PARTICLE_CFL,PARTICLE_CFL_MAX,PARTICLE_CFL_MIN,PERIODIC_TEST,POSITIVE_ERROR_TEST,&
                 POROUS_FLOOR,PR,PROFILING,&
                 P_INF,RAMP_GX,RAMP_GY,RAMP_GZ,RESTART,RESTART_CHID,SC,&
-                RND_SEED,SHARED_FILE_SYSTEM,SIMULATION_MODE,SMOKE3D_16,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_DENSITY,SOOT_OXIDATION,&
+                RND_SEED,SIMULATION_MODE,SMOKE3D_16,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_DENSITY,SOOT_OXIDATION,&
                 TAU_DEFAULT,TENSOR_DIFFUSIVITY,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
                 THERMOPHORETIC_DEPOSITION,THERMOPHORETIC_SETTLING,THICKEN_OBSTRUCTIONS,&
                 TMPA,TURBULENCE_MODEL,TURBULENT_DEPOSITION,UVW_FILE,&
@@ -11900,9 +11900,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ! Parameters for specified spread of a fire over a VENT
 
                IF (ALL(XYZ<-1.E5_EB) .AND. SPREAD_RATE>0._EB) THEN
-                  XYZ(1)=0.5_EB*(VT%X1+VT%X2)
-                  XYZ(2)=0.5_EB*(VT%Y1+VT%Y2)
-                  XYZ(3)=0.5_EB*(VT%Z1+VT%Z2)
+                  XYZ(1)=0.5_EB*(VT%X1_ORIG+VT%X2_ORIG)
+                  XYZ(2)=0.5_EB*(VT%Y1_ORIG+VT%Y2_ORIG)
+                  XYZ(3)=0.5_EB*(VT%Z1_ORIG+VT%Z2_ORIG)
                ENDIF
                VT%X0 = XYZ(1)
                VT%Y0 = XYZ(2)
@@ -13362,11 +13362,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             OVERLAPPING_Y = .TRUE.
             OVERLAPPING_Z = .TRUE.
             IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
-            IF (XB(1)/=XB(2) .AND. ((XB(1)>=M%XF.AND.XB(2)>=M%XF) .OR. (XB(1)<=M%XS.AND.XB(2)<=M%XS))) OVERLAPPING_X = .FALSE.
+            IF (XB(1)/=XB(2) .AND. (MIN(XB(2),M%XF)-MAX(XB(1),M%XS)<TWO_EPSILON_EB)) OVERLAPPING_X = .FALSE.
             IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
-            IF (XB(3)/=XB(4) .AND. ((XB(3)>=M%YF.AND.XB(4)>=M%YF) .OR. (XB(3)<=M%YS.AND.XB(4)<=M%YS))) OVERLAPPING_Y = .FALSE.
+            IF (XB(3)/=XB(4) .AND. (MIN(XB(4),M%YF)-MAX(XB(3),M%YS)<TWO_EPSILON_EB)) OVERLAPPING_Y = .FALSE.
             IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
-            IF (XB(5)/=XB(6) .AND. ((XB(5)>=M%ZF.AND.XB(6)>=M%ZF) .OR. (XB(5)<=M%ZS.AND.XB(6)<=M%ZS))) OVERLAPPING_Z = .FALSE.
+            IF (XB(5)/=XB(6) .AND. (MIN(XB(6),M%ZF)-MAX(XB(5),M%ZS)<TWO_EPSILON_EB)) OVERLAPPING_Z = .FALSE.
 
             ! Handle the case of XB plane on interpolated mesh boundary
             ! This block is necessary so that XB statistics are not double counted at mesh interfaces.
