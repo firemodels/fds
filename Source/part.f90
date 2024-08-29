@@ -3412,7 +3412,7 @@ INTEGER :: ARRAY_CASE !< Heat transfer conditions 1=gas only, 2=isothermal wall 
 INTEGER(1), ALLOCATABLE, DIMENSION(:) :: PART_WARNING !< Tracks WARNING messages
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-LOGICAL :: SF_FIXED
+LOGICAL :: SF_FIXED,SURFACE_DROPLETS
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
@@ -3499,6 +3499,7 @@ ENDDO
 ! Loop over all types of evaporative species
 
 SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
+
    Z_INDEX_A(1) = Z_INDEX
    ! Initialize quantities common to the evaporation index
 
@@ -3525,6 +3526,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ! Loop through all PARTICLEs in the class and determine the depth of the liquid film on each surface cell
 
+   SURFACE_DROPLETS = .FALSE.
+
    FILM_SUMMING_LOOP: DO IP=1,NLP
       LP  => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
@@ -3542,24 +3545,29 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       ELSE
          CYCLE FILM_SUMMING_LOOP
       ENDIF
-      B2%WORK2 = B2%WORK2 + LP%PWT*FOTHPI*LP%RADIUS**3/B1%AREA  ! Depth of liquid film
-      B2%WORK3 = B2%WORK3 + LP%PWT*PI*(CR2*LP%RADIUS)**2        ! Droplet/surface contact area
+      B2%WORK2 = B2%WORK2 + LP%PWT*FOTHPI*LP%RADIUS**3/B1%AREA  ! WORK2 stores the depth of liquid film
+      B2%WORK3 = B2%WORK3 + LP%PWT*PI*(CR2*LP%RADIUS)**2        ! WORK3 stores total droplet/surface contact area
+      SURFACE_DROPLETS = .TRUE.
    ENDDO FILM_SUMMING_LOOP
 
    ! If the total droplet/surface contact area is less than the wall cell area, do not assume a film layer.
 
-   DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-      B2 => BOUNDARY_PROP2(WC%B2_INDEX)
-      IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
-   ENDDO
-   DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-      CFA => CFACE(ICF)
-      B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-      B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
-      IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
-   ENDDO
+   IF (SURFACE_DROPLETS) THEN
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+         B2 => BOUNDARY_PROP2(WC%B2_INDEX)
+         IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
+         B2%WORK3 = 0._EB  ! WORK3 now represents the sum of absorbed radiation at the WALL cell
+      ENDDO
+      DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA => CFACE(ICF)
+         B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+         B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+         IF (B2%WORK3<B1%AREA) B2%WORK2 = 0._EB
+         B2%WORK3 = 0._EB  ! WORK3 represents the sum of absorbed radiation at the CFACE
+      ENDDO
+   ENDIF
 
    ! Loop through all PARTICLEs within the class and determine mass/energy transfer
 
@@ -3677,7 +3685,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ELSE
                   A_DROP = PI*(CR2*LP%RADIUS)**2          ! If no assumed film layer, use the droplet/surface contact area directly
                ENDIF
-               Q_DOT_RAD = MIN(A_DROP,B1%AREA/LP%PWT)*B1%Q_RAD_IN
+               Q_DOT_RAD = MIN(A_DROP,B1%AREA/WGT)*B1%Q_RAD_IN
+               B2%WORK3 = B2%WORK3 + Q_DOT_RAD*WGT
                TMP_WALL = MAX(TMPMIN,B2%WORK1)
             ELSE SOLID_OR_GAS_PHASE_1
                VEL = SQRT((U2-LP%U)**2+(V2-LP%V)**2+(W2-LP%W)**2)
@@ -4128,12 +4137,26 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          B2%LP_TEMP(LPC%ARRAY_INDEX) = B2%LP_TEMP(LPC%ARRAY_INDEX) + A_DROP*0.5_EB*(TMP_DROP+TMP_DROP_NEW)
          B2%LP_CPUA(LPC%ARRAY_INDEX) = B2%LP_CPUA(LPC%ARRAY_INDEX) + &
                                        (1._EB-LPC%RUNNING_AVERAGE_FACTOR_WALL)*WGT*Q_CON_WALL/(B1%AREA*DT)
-         IF (RADIATION) &
-         B1%Q_RAD_IN = MAX(0._EB,(B1%AREA*DT*B1%Q_RAD_IN-WGT*DT*Q_DOT_RAD*B1%Q_RAD_IN / &
-                           (B1%Q_RAD_IN+B1%Q_RAD_OUT+TWO_EPSILON_EB))/(B1%AREA*DT))
       ENDIF
 
    ENDDO PARTICLE_LOOP
+
+   ! Subtract off the incoming radiation absorbed by all surface droplets of this type on each wall cell (B2%WORK3).
+
+   IF (SURFACE_DROPLETS) THEN
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         B1 => BOUNDARY_PROP1(WC%B1_INDEX)
+         B2 => BOUNDARY_PROP2(WC%B2_INDEX)
+         B1%Q_RAD_IN = MAX(0._EB,(B1%AREA*B1%Q_RAD_IN-B2%WORK3)/(B1%AREA))
+      ENDDO
+      DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA => CFACE(ICF)
+         B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+         B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+         B1%Q_RAD_IN = MAX(0._EB,(B1%AREA*B1%Q_RAD_IN-B2%WORK3)/(B1%AREA))
+      ENDDO
+   ENDIF
 
 ENDDO SPECIES_LOOP
 

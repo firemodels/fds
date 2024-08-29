@@ -497,7 +497,6 @@ MPI is the better choice when using multiple meshes since it more efficiently di
 Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one-to-one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
 \begin{enumerate}
 \item Use MPI only. OpenMP will probably not speed up the run time appreciably, and it will consume cores that could be put to better use running more MPI processes.
-\item For jobs using thousands of meshes/processes, add the parameter {\ct SHARED\_FILE\_SYSTEM=F} to the {\ct MISC} line. This directs FDS to break up the Smokeview ({\ct .smv}) file according to MPI process. This will greatly speed up the preliminary part of the simulation because the Smokeview file is written serially, not in parallel. For a modest number of meshes, this serial write is not a problem, but for thousands of meshes, the initialization routines can take hours. When the job completes, you can reconstruct the Smokeview file by appending the numbered files, {\ct CHID\_n.smv}, to the main Smokeview file, {\ct CHID.smv}.
 \item Set {\ct DT\_CPU} to some convenient time interval on the {\ct DUMP} line. This parameter directs FDS to periodically write out a file ({\ct CHID\_cpu.csv}) that records the wall clock time that each MPI process consumes in the major subroutines. This can help you determine if any of the MPI processes spend an inordinate amount of time idling. Note that the CPU file is written out automatically at the end of the simulation.
 \item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly.
 \item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until reaching a point where the increased number of meshes/processes does not provide a significant speed up.
@@ -983,7 +982,7 @@ The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Sec.~\ref{info:MULT} for details.
 
-Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct F} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct F}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct T} for MPI jobs involving 50 or less processes, and {\ct F} for larger jobs.
+One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct T} for MPI jobs involving 50 or less processes, and {\ct F} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -4468,8 +4467,18 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 
 
 \subsubsection{Conductivity}
+\label{info:CONDUCTIVITY}
 
-Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+Gas phase thermal conductivity, $k$, can be specified in one of four ways. First, it can be defined as a constant, {\ct CONDUCTIVITY} (\si{W/(m.K)}), on the {\ct SPEC} line. Second, it can be defined as a function of temperature via the ramp, {\ct RAMP\_K}, on the {\ct SPEC} line. Third, it can be computed by FDS using the parameters {\ct MW} and {\ct PR\_GAS} given on the {\ct SPEC} line (the default value {\ct PR\_GAS} is {\ct PR} given on the {\ct MISC} line). Fourth, it can be computed using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}) given on the {\ct SPEC} line.  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
+
+These methods of specifying the thermal conductivity are less important in LES simulations where the effective value is the sum of the molecular value, $k$, and a turbulent component, $k_{\rm t}$:
+\be
+   k_{\rm {\tiny LES}} = k + k_{\rm t} \quad ; \quad  k_{\rm t} = \frac{c_p \, \mu_{\rm t}}{\PR_{\rm t}}
+\ee
+The turbulent visosity, $\mu_{\rm t}$, is a function of the local flow field and grid size. The turbulent Prandtl number, $\PR_{\rm t}$, is a specified constant. The specific heat, $c_p$, is a function of the gas temperature and composition for {\ct SIMULATION\_MODE='LES'}, and it is the constant value of the background gas species at ambient temperature for {\ct 'VLES'} and {\ct 'SVLES'}. 
+
+The gas phase output quantity {\ct 'CONDUCTIVITY'} denotes that which is actually used in the simulation, $k_{\rm {\tiny LES}}$, while {\ct 'MOLECULAR CONDUCTIVITY'} is the molecular value, $k$, only; that is, the actual thermal conductivity of the gas with no turbulent component added.
+
 
 \subsubsection{Diffusivity}
 \label{info:diffusivity}
@@ -7594,7 +7603,7 @@ In this second option, you create your own custom fuel type as follows:
 \be
    \dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \hbox{s}
 \ee
-Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 0.3~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
+Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 1.0~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
 
 It is possible to set a custom fuel for which the spread rate does not vary with slope or wind speed. This is done by specifying {\ct VEG\_LSET\_ROS\_FIXED=T} on the {\ct SURF} line. The spread rate is then fixed at the no-wind, no-slope value. The main purpose of this feature is for reproduction of manual ignition patterns (e.g. ignition with a drip torch at a fixed walking speed).
 
@@ -11223,7 +11232,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
 {\ct CHI\_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
-{\ct CONDUCTIVITY}                              & Thermal conductivity                              & \si{W/(m.K)}      & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
 {\ct DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
 {\ct DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
@@ -11256,6 +11265,7 @@ The {\ct ID} is just a label in the output file. When an output quantity is rela
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s               & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time, $\tau_{\rm mix}$          & s                 & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                               & kg/kg             & D,I,P,S      \\ \hline
+{\ct MOLECULAR CONDUCTIVITY}                    & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
 {\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}     & D,I,P,S      \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
 {\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                       & m/s               & D            \\ \hline
@@ -12471,7 +12481,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
 {\ct RND\_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
 {\ct SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
-{\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}           \\ \hline
 {\ct SIMULATION\_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & {\ct 'VLES'}      \\ \hline
 {\ct SMOKE3D\_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & {\ct F}           \\ \hline
 {\ct SMOKE\_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
@@ -13329,11 +13338,11 @@ Keyword             & Type     & Description                      & Units       
 {\ct TMP\_INNER}                                          & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VARIABLE\_THICKNESS}                                 & Logical         & Section~\ref{info:ht1d}                   &                     & {\ct F}                 \\ \hline
-{\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 6.E-4                   \\ \hline
+{\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.01                   \\ \hline
 {\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
 {\ct VEG\_LSET\_FIREBASE\_TIME}                           & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_FUEL\_INDEX}                              & Integer         & Section~\ref{info:level_set}              &                     &                         \\ \hline
-{\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              & m                   & 1.                      \\ \hline
+{\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              & m                   & 0.2                      \\ \hline
 {\ct VEG\_LSET\_IGNITE\_TIME}                             & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_M1}                                       & Real            & Section~\ref{info:level_set}              &                     & 0.03                    \\ \hline
 {\ct VEG\_LSET\_M10}                                      & Real            & Section~\ref{info:level_set}              &                     & 0.04                    \\ \hline
@@ -13347,7 +13356,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct VEG\_LSET\_ROS\_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_ROS\_FIXED}                               & Logical         & Section~\ref{info:level_set}              &                     & {\ct F}                        \\ \hline
 {\ct VEG\_LSET\_SIGMA}                                    & Real            & Section~\ref{info:level_set}              & 1/m                 & 5000.                    \\ \hline
-{\ct VEG\_LSET\_SURF\_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 0.3                     \\ \hline
+{\ct VEG\_LSET\_SURF\_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 1.0                     \\ \hline
 {\ct VEG\_LSET\_TAN2}                                     & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
 {\ct VEG\_LSET\_WIND\_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
 {\ct VEL    }                                             & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
@@ -14269,33 +14278,16 @@ Following the completion of a successful run, a summary of the CPU usage per sub
 \section{Heat Release Rate and Related Quantities ({\tt \_hrr.csv})}
 \label{out:hrr}
 
-The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
-called {\ct CHID\_hrr.csv}. The format of the file is as follows
-\begin{lstlisting}
-s    , kW       , kW       , ... , kg/s      , Pa       , Pa        , ...
-Time , HRR      , Q_RADI   , ... , BURN_RATE , ZONE_01  , ZONE_02   , ...
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ...
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...
-            .
-            .
-\end{lstlisting}
-Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you. The background pressure is discussed in Section~\ref{info:ZONE}.
+The heat release rate of the fire, mass production rate of gas species, and zonal background pressures are automatically written into a comma-delimited spreadsheet file called {\ct CHID\_hrr.csv} every {\ct DT\_HRR} s. Details of the integrated energy quantities (columns with units of kW) can be found in Section~\ref{info:HRR}. The production rate (kg/s) of the tracked gas species are labeled {\ct MLR\_XXX} for ``Mass Loss Rate.'' A positive value means that this particular gas species is being generated at a boundary or by a particle; a negative value indicates depletion. The background pressure (Pa) of each pressure zone is discussed in Section~\ref{info:ZONE}.
 
 
 \section{Device Output Data ({\tt \_devc.csv})}
 \label{out:DEVC}
 
-Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma delimited format in a file called {\ct CHID\_devc.csv}. The format of the file is as follows:
-\begin{lstlisting}
-s    , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
-Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
-                      .
-                      .
-\end{lstlisting}
-where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+The output of devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma-delimited format to a file called {\ct CHID\_devc.csv}.
+
+If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+
 
 \section{Control Output Data}
 \label{out:CTRL}
