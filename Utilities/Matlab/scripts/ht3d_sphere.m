@@ -99,6 +99,11 @@ t60 =  plot(r2,T_fds3,'--or');
 t120 = plot(r2,T_fds4,'--oc');
 t180 = plot(r2,T_fds5,'--om');
 
+ERROR = abs(M.data(end,64)-DT2(2))/(DT2(2)-20);
+if ERROR > 0.01
+   display(['Matlab Warning: ht3d_sphere cases out of tolerance. ERROR = ',num2str(ERROR)])
+end
+
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 

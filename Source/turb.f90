@@ -13,13 +13,14 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
-          WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
-          SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, &
+          WALL_MODEL, COMPRESSION_WAVE, TENSOR_DIFFUSIVITY_MODEL, &
+          SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
           LOGLAW_HEAT_FLUX_MODEL, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, &
-          WALE_VISCOSITY, TAU_WALL_IJ, RAYLEIGH_MASS_FLUX_MODEL, TEST_FILTER_LOCAL
+          WALE_VISCOSITY, TAU_WALL_IJ, RAYLEIGH_MASS_FLUX_MODEL, FM_HEAT_FLUX_MODEL, TEST_FILTER_LOCAL
+
 
 CONTAINS
 
@@ -1286,18 +1287,18 @@ END SUBROUTINE WALL_MODEL
 !> \brief Calculate the Nusselt number for natural/free convection
 !> \param NUSSELT Nusselt number
 !> \param RA Rayleigh number
-!> \param SURF_INDEX Indicator of the surface type
-!> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
+!> \param SF Pointer to SURFACE derived type variable
 !> \param IOR Index of the surface orientation
 !> \param DELTA_TMP Temperature difference between gas and surface (K)
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,DELTA_TMP)
+SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SF,IOR,DELTA_TMP)
 
 REAL(EB), INTENT(OUT) :: NUSSELT
 REAL(EB), INTENT(IN) :: RA,DELTA_TMP
-INTEGER, INTENT(IN) :: SURF_INDEX,SURF_GEOMETRY_INDEX,IOR
+INTEGER, INTENT(IN) :: IOR
+TYPE(SURFACE_TYPE), POINTER, INTENT(IN) :: SF
 
-SELECT CASE(SURF_GEOMETRY_INDEX)
+SELECT CASE(SF%GEOMETRY)
    CASE (SURF_CARTESIAN)
       SELECT CASE(ABS(IOR))
          CASE(0:2)
@@ -1313,8 +1314,8 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
                NUSSELT = 0.52_EB*RA**0.2     ! Incropera and DeWitt, 7th edition, Eq. 9.32
             ENDIF
       END SELECT
-   CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
-      IF (SURFACE(SURF_INDEX)%HORIZONTAL) THEN
+   CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
+      IF (SF%HORIZONTAL) THEN
          NUSSELT = (0.6_EB + 0.321_EB*RA**ONSI)**2   ! Incropera and DeWitt, 7th edition, Eq. 9.34
       ELSE
          NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2 ! Incropera and DeWitt, 7th edition, Eq. 9.26
@@ -1350,7 +1351,7 @@ ELSE
    SELECT CASE(SURF_GEOMETRY_INDEX)
       CASE (SURF_CARTESIAN)
          NUSSELT = 0.0296_EB*RE**0.8_EB*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.36, Table 7.7
-      CASE (SURF_CYLINDRICAL)
+      CASE (SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)
          ! Incropera and DeWitt, 7th, Eq. 7.52
          IF (RE >= 40000._EB) THEN
             NUSSELT = 0.027_EB*RE**0.805_EB*PR_ONTH_IN
@@ -1371,7 +1372,7 @@ ENDIF
 END SUBROUTINE FORCED_CONVECTION_MODEL
 
 
-SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
+SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,REGIME,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G,VEL_G,UIMP)
 
 !!!!! EXPERIMENTAL !!!!!
 
@@ -1381,63 +1382,128 @@ SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
 ! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
 
 REAL(EB), INTENT(OUT) :: H,Z_STAR
-REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G
-REAL(EB) :: NUSSELT,Q,ZC,NU_G,D_STAR,ALPHA,THETA,Q_OLD,ERROR,DTMP
+REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G,VEL_G,UIMP
+REAL(EB) :: NUSSELT,Q,ZC,NU_G,ALPHA_G,PR_G,D_STAR_FORCED,D_STAR_NATURAL,D_STAR_IMPACT,THETA_NATURAL,THETA_FORCED,THETA_IMPACT,&
+            Q_OLD,ERROR,DTMP,EXPON_D_IMPACT,EXPON_L_IMPACT,EXPON_T_IMPACT !,DTDN(3)
+INTEGER, INTENT(OUT) :: REGIME
 INTEGER :: ITER
-INTEGER, PARAMETER :: MAX_ITER=10
-! C_L = Z_L**(-0.8_EB)
-! C_T = C_L*Z_T**(-0.2_EB)
-REAL(EB), PARAMETER :: Z_L = 3.2_EB, Z_T=17._EB
-REAL(EB), PARAMETER :: C_L = 3.2_EB**(-0.8_EB), C_T = C_L*17._EB**(-0.2_EB)
+INTEGER, PARAMETER :: MAX_ITER=10,NATURAL=1,FORCED=2,IMPACT=3
+REAL(EB), PARAMETER :: EIGHT_NINETHS = 8._EB/9._EB
+
+REAL(EB), PARAMETER :: Z_L_NATURAL = 3.2_EB, Z_T_NATURAL=17._EB
+REAL(EB), PARAMETER :: C_L_NATURAL = Z_L_NATURAL**(-0.8_EB), C_T_NATURAL = C_L_NATURAL*Z_T_NATURAL**(0.8_EB-1._EB)
+
+REAL(EB), PARAMETER :: Z_L_FORCED = 8._EB, Z_T_FORCED = 80._EB
+REAL(EB), PARAMETER :: C_L_FORCED = Z_L_FORCED**(-2._EB/3._EB), C_T_FORCED = C_L_FORCED * Z_T_FORCED**(2._EB/3._EB-8._EB/9._EB)
+
+REAL(EB), PARAMETER :: GAMMA_IMPACT = 1._EB
+REAL(EB), PARAMETER :: M_L_IMPACT = 0.87_EB, M_T_IMPACT = 0.87_EB
+REAL(EB), PARAMETER :: Z_L_IMPACT = 12._EB, Z_T_IMPACT = 1.E20_EB
+REAL(EB) :: C_L_IMPACT, C_T_IMPACT
 
 IF (ABS(TMP_W-TMP_G)<TWO_EPSILON_EB) THEN
    H = 0._EB
    Z_STAR = 0._EB
+   REGIME = 0
    RETURN
 ENDIF
 
 ZC = 0.5_EB*DZ
 NU_G = MU_G/RHO_G
-ALPHA = K_G/(RHO_G*CP_G)
-THETA = TMP_W*K_G*ALPHA*NU_G/GRAV
+ALPHA_G = K_G/(RHO_G*CP_G)
+PR_G = NU_G/ALPHA_G
+
+THETA_NATURAL = 0.5_EB*(TMP_W+TMP_G)*K_G*ALPHA_G*NU_G/(GRAV+TWO_EPSILON_EB)
+THETA_FORCED  =     ABS(TMP_W-TMP_G)*K_G*ALPHA_G/(VEL_G+TWO_EPSILON_EB)
+THETA_IMPACT  =     ABS(TMP_W-TMP_G)*K_G*(ALPHA_G/(UIMP +TWO_EPSILON_EB))**GAMMA_IMPACT
+
+EXPON_D_IMPACT = 1._EB/(1._EB+GAMMA_IMPACT)
+EXPON_L_IMPACT = M_L_IMPACT/(1._EB+M_L_IMPACT) * (1._EB+GAMMA_IMPACT)
+EXPON_T_IMPACT = M_T_IMPACT/(1._EB+M_T_IMPACT) * (1._EB+GAMMA_IMPACT)
+
+C_L_IMPACT = Z_L_IMPACT**(-EXPON_L_IMPACT)
+C_T_IMPACT = C_L_IMPACT * Z_T_IMPACT**(EXPON_L_IMPACT-EXPON_T_IMPACT)
+
+! ! needed if NATURAL
+! DTDN = (TMP_G-TMP_W)/ZC * NVEC
+! IF (DOT_PRODUCT(DTDN,GVEC) > -TWO_EPSILON_EB) THEN
+!    EXPON_TURB=1._EB
+! ELSE
+!    EXPON_TURB=0.8_EB
+! ENDIF
 
 ! Step 1: assume a heat transfer coefficient
 
 H = K_G/ZC ! initial guess
 DTMP = ABS(TMP_W-TMP_G)
-Q = H*DTMP
+Q = H*DTMP ! Q > 0. in this routine
 
-RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
+Q_LOOP: DO ITER=1,MAX_ITER
 
-   ! Step 2: compute new thermal diffusive length scale, delta*, from modified Grashof number * Pr
+   ! Step 2: compute new thermal diffusive length scale, delta*
+   D_STAR_NATURAL = (THETA_NATURAL/Q)**0.25_EB
+   D_STAR_FORCED  = SQRT(THETA_FORCED/Q)
+   D_STAR_IMPACT  = (THETA_IMPACT/Q)**EXPON_D_IMPACT
 
-   D_STAR = (THETA/Q)**0.25_EB
+   REGIME=MINLOC((/D_STAR_NATURAL,D_STAR_FORCED,D_STAR_IMPACT/),DIM=1)
 
-   ! Step 3: compute new z* (thermal)
+   ! Set REGIME based on minimum delta*
 
-   Z_STAR = ZC/D_STAR ! Ra* = (z*)**4
+   REGIME_SELECT: SELECT CASE(REGIME)
 
-   ! Step 4: based on z*, choose Ra scaling law
+      CASE(NATURAL)
 
-   IF (Z_STAR<=Z_L) THEN
-      NUSSELT = 1._EB
-   ELSEIF (Z_STAR>Z_L .AND. Z_STAR<=Z_T) THEN
-      NUSSELT = C_L * Z_STAR**0.8_EB
-   ELSE
-      NUSSELT = C_T * Z_STAR
-   ENDIF
+         ! Step 3: compute new z* (thermal)
+         Z_STAR = ZC/D_STAR_NATURAL
+
+         ! Step 4: based on z*, choose scaling law
+         IF (Z_STAR<=Z_L_NATURAL) THEN
+            NUSSELT = 1._EB
+         ELSEIF (Z_STAR>Z_L_NATURAL .AND. Z_STAR<=Z_T_NATURAL) THEN
+            NUSSELT = C_L_NATURAL * Z_STAR**0.8_EB
+         ELSE
+            NUSSELT = C_T_NATURAL * Z_STAR !**EXPON_TURB
+         ENDIF
+
+      CASE(FORCED)
+
+         ! Step 3: compute new z* (thermal)
+         Z_STAR = ZC/D_STAR_FORCED
+
+         ! Step 4: based on z*, choose scaling law
+         IF (Z_STAR<=Z_L_FORCED) THEN
+            NUSSELT = 1._EB
+         ELSEIF (Z_STAR>Z_L_FORCED .AND. Z_STAR<=Z_T_FORCED) THEN
+            NUSSELT = C_L_FORCED * Z_STAR**TWTH
+         ELSE
+            NUSSELT = C_T_FORCED * Z_STAR**EIGHT_NINETHS
+         ENDIF
+
+      CASE(IMPACT)
+
+         ! Step 3: compute new z* (thermal)
+         Z_STAR = ZC/D_STAR_IMPACT
+
+         ! Step 4: based on z*, choose scaling law
+         IF (Z_STAR<=Z_L_IMPACT) THEN
+            NUSSELT = 1._EB
+         ELSEIF (Z_STAR>Z_L_IMPACT .AND. Z_STAR<=Z_T_IMPACT) THEN
+            NUSSELT = C_L_IMPACT * Z_STAR**EXPON_L_IMPACT
+         ELSE
+            NUSSELT = C_T_IMPACT * Z_STAR**EXPON_T_IMPACT
+         ENDIF
+
+   END SELECT REGIME_SELECT
 
    ! Step 5: update heat transfer coefficient
-
    H = NUSSELT*K_G/ZC
    Q_OLD = Q
    Q = H*DTMP
 
    ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
+   IF (ERROR<0.001_EB) EXIT Q_LOOP
 
-   IF (ERROR<0.001_EB) EXIT RAYLEIGH_LOOP
-
-ENDDO RAYLEIGH_LOOP
+ENDDO Q_LOOP
 
 END SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL
 
@@ -1537,199 +1603,217 @@ H = RHO_G*U_TAU*CP_G/TPLUS
 END SUBROUTINE LOGLAW_HEAT_FLUX_MODEL
 
 
-REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
+SUBROUTINE FM_HEAT_FLUX_MODEL(H,DN,TMP_W,TMP_G,K_G,RHO_G,CP_G)
 
-REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
-INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY(3),&
-            U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN,RDN
-INTEGER :: SUBIT
+! Reference:
+! N. Ren, Y. Wang. A convective heat transfer model for LES fire modeling.
+! Proc. Combustion Institute, 38 (2021) 4535-4542.
 
-! Cartesian grid coordinate system orthonormal basis vectors
-REAL(EB), DIMENSION(2), PARAMETER :: XX=(/1._EB, 0._EB/),YY=(/0._EB, 1._EB/)
+REAL(EB), INTENT(OUT) :: H
+REAL(EB), INTENT(IN) :: DN,TMP_W,TMP_G,K_G,RHO_G,CP_G
+REAL(EB) :: DTDN,ALPHA_W,Q,DD,C_GRAD
+REAL(EB), PARAMETER :: C1=175._EB, C2=-800._EB, LR=0.0015_EB
 
-! streamwise unit vector
-SS = (/NN(2),-NN(1)/)
-
-! direction cosines (see Pope, Eq. A.11)
-C(1,1) = DOT_PRODUCT(XX,SS)
-C(1,2) = DOT_PRODUCT(XX,NN)
-C(2,1) = DOT_PRODUCT(YY,SS)
-C(2,2) = DOT_PRODUCT(YY,NN)
-
-! transform velocity (see Pope, Eq. A.17)
-U_STRM = C(1,1)*U_VELO(1) + C(2,1)*U_VELO(2)
-U_NORM = C(1,2)*U_VELO(1) + C(2,2)*U_VELO(2)
-
-! transform wall velocity
-U_STRM_WALL = C(1,1)*U_SURF(1) + C(2,1)*U_SURF(2)
-U_NORM_WALL = C(1,2)*U_SURF(1) + C(2,2)*U_SURF(2)
-
-! transform pressure gradient
-DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
-
-! transform velocity gradient tensor (Pope A.23)
-DUSDS = C(1,1)*C(1,1)*GRADU(1,1) + C(1,1)*C(2,1)*GRADU(1,2) &
-      + C(2,1)*C(1,1)*GRADU(2,1) + C(2,1)*C(2,1)*GRADU(2,2)
-
-DUSDN = C(1,1)*C(1,2)*GRADU(1,1) + C(1,1)*C(2,2)*GRADU(1,2) &
-      + C(2,1)*C(1,2)*GRADU(2,1) + C(2,1)*C(2,2)*GRADU(2,2)
-
-! transform stress tensor
-TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
-    + C(2,1)*C(1,2)*TAU_IJ(2,1) + C(2,1)*C(2,2)*TAU_IJ(2,2)
-
-! update boundary layer equations
-
-! update wall-normal velocity
-U_NORM = U_NORM_WALL + DN*(DIVU-0.5_EB*DUSDS)
-
-RDN = 1._EB/DN
-
-! ODE solution
-IF (SIM_MODE==DNS_MODE) THEN
-   ETA = U_NORM + RRHO*MU*RDN
-   AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
-   BB  = (TWTH*U_STRM_WALL*RDN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
-   !AA  = -0.5_EB*(DUSDS + ETA/DN)
-   !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
-ELSE
-   U_STRM_0 = U_STRM
-   DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),MU*RRHO,0._EB,0.5_EB*DN,U_STRM-U_STRM_WALL)
-      !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
-      !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
-      !ENDIF
-      ETA = RRHO*(1-SLIP_COEF)*MU*0.5_EB*RDN**2
-      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM*RDN + ETA)
-      BB  = ETA*U_STRM_WALL - (U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
-      U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
-   ENDDO
+IF (ABS(TMP_W-TMP_G)<TWO_EPSILON_EB) THEN
+   H = 0._EB
+   RETURN
 ENDIF
 
-! transform velocity back to Cartesian component I_VEL
-VELTAN2D = C(I_VEL,1)*U_STRM + C(I_VEL,2)*U_NORM
+! Currently, this model only contains the gradient correction.
+! Blowing correction will be added later.
 
-END FUNCTION VELTAN2D
+DTDN  = 2._EB*(TMP_W-TMP_G)/DN
+ALPHA_W = K_G/(RHO_G*CP_G)
+DD = MAX(0._EB,DN-LR)
+C_GRAD = 1._EB + MAX(0._EB, C1*DD + C2*DD**2)
+Q = RHO_G*CP_G*ALPHA_W*C_GRAD*DTDN
+H = Q/(TMP_W-TMP_G)
+
+END SUBROUTINE FM_HEAT_FLUX_MODEL
 
 
-REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS,U_INT)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+SUBROUTINE TENSOR_DIFFUSIVITY_MODEL(NM,OPT_N)
 
-REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS,U_INT
-INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,U_RELA(3),DUMMY(3),&
-            U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN,RDN
-INTEGER :: SUBIT,I,J
+INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN), OPTIONAL :: OPT_N
+INTEGER :: I,J,K,N
+REAL(EB) :: DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DTDX,DTDY,DTDZ
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_D_DZDX=>NULL(),RHO_D_DZDY=>NULL(),RHO_D_DZDZ=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UU=>NULL(),VV=>NULL(),WW=>NULL(),KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
+REAL(EB), PARAMETER :: C_NL=0.083_EB ! C_NL=1/12, See Pope Exercise 13.28
 
-! Cartesian grid coordinate system orthonormal basis vectors
-REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
+CALL POINT_TO_MESH(NM)
 
-! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
-U_RELA = U_VELO-U_SURF
-CALL CROSS_PRODUCT(PP,NN,U_RELA) ! PP = NN x U_RELA
-IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
-   ! tangent vector is completely arbitrary, just perpendicular to NN
-   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
-   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
-ENDIF
-PP = PP/NORM2(PP) ! normalize to unit vector
-CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
+SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
 
-!! check unit normal vectors
-!print *,DOT_PRODUCT(SS,SS) ! should be 1
-!print *,DOT_PRODUCT(SS,PP) ! should be 0
-!print *,DOT_PRODUCT(SS,NN) ! should be 0
-!print *,DOT_PRODUCT(PP,PP) ! should be 1
-!print *,DOT_PRODUCT(PP,NN) ! should be 0
-!print *,DOT_PRODUCT(NN,NN) ! should be 1
-!print *                    ! blank line
+   N = OPT_N
 
-! directional cosines (see Pope, Eq. A.11)
-C(1,1) = DOT_PRODUCT(E1,SS)
-C(1,2) = DOT_PRODUCT(E1,PP)
-C(1,3) = DOT_PRODUCT(E1,NN)
-C(2,1) = DOT_PRODUCT(E2,SS)
-C(2,2) = DOT_PRODUCT(E2,PP)
-C(2,3) = DOT_PRODUCT(E2,NN)
-C(3,1) = DOT_PRODUCT(E3,SS)
-C(3,2) = DOT_PRODUCT(E3,PP)
-C(3,3) = DOT_PRODUCT(E3,NN)
+   ! SGS scalar flux
+   ! CAUTION: The flux arrays must point to the same work arrays used in DIVERGENCE_PART_1
+   ! Note: Do not reinitialize!  RHO_D_DZDX, etc., already store molecular diffusive flux
+   RHO_D_DZDX=>SCALAR_WORK1
+   RHO_D_DZDY=>SCALAR_WORK2
+   RHO_D_DZDZ=>SCALAR_WORK3
 
-! transform velocity (see Pope, Eq. A.17)
-U_STRM = C(1,1)*U_RELA(1) + C(2,1)*U_RELA(2) + C(3,1)*U_RELA(3)
-U_ORTH = C(1,2)*U_RELA(1) + C(2,2)*U_RELA(2) + C(3,2)*U_RELA(3)
-U_NORM = C(1,3)*U_RELA(1) + C(2,3)*U_RELA(2) + C(3,3)*U_RELA(3)
-
-!! check UP, should be zero
-!print *, U_ORTH
-
-! transform pressure gradient
-DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2) + C(3,1)*GRADP(3)
-
-! transform tensors (Pope A.23)
-DUSDS = 0._EB
-DUPDP = 0._EB
-DUNDN = 0._EB
-DUSDN = 0._EB
-TSN = 0._EB
-DO I=1,3
-   DO J=1,3
-      DUSDS = DUSDS + C(I,1)*C(J,1)*GRADU(I,J)
-      DUPDP = DUPDP + C(I,2)*C(J,2)*GRADU(I,J)
-      DUNDN = DUNDN + C(I,3)*C(J,3)*GRADU(I,J)
-
-      DUSDN = DUSDN + C(I,1)*C(J,3)*GRADU(I,J)
-      TSN   = TSN   + C(I,1)*C(J,3)*TAU_IJ(I,J)
-   ENDDO
-ENDDO
-
-!! check trace of transformed tensor
-!print *
-!print *,DIVU,DUSDS+DUPDP+DUNDN
-!print *,GRADU
-
-! update boundary layer equations
-
-! update wall-normal velocity
-U_NORM = DN*(DIVU-0.5_EB*DUSDS)
-RDN = 1._EB/DN
-! ODE solution
-IF (SIM_MODE==DNS_MODE) THEN
-   ETA = U_NORM + RRHO*MU*RDN
-   AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
-   BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
-   IF (ABS(AA)>=TWO_EPSILON_EB) THEN
-      U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
+   IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+      RHOP=>RHOS
+      ZZP=>ZZS
    ELSE
-      VELTAN3D = U_INT
-      RETURN
+      UU=>US
+      VV=>VS
+      WW=>WS
+      RHOP=>RHO
+      ZZP=>ZZ
    ENDIF
-ELSE
-   U_STRM_0 = U_STRM
-   DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),MU*RRHO,ROUGHNESS,0.5_EB*DN,U_STRM)
-      !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
-      !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
-      !ENDIF
-      ETA = RRHO*(1-SLIP_COEF)*MU*0.5_EB*RDN**2
-      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM*RDN + ETA)
-      BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN))
-      !print *,MU*RRHO*DT/(DN**2)
-      IF (ABS(AA)>=TWO_EPSILON_EB) THEN
-         U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
-      ELSE
-         VELTAN3D = U_INT
-         RETURN
-      ENDIF
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+
+            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
+            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J)+DYN(J+1))
+            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K)+DZN(K+1))
+
+            DRHOZDX = RDXN(I)*(RHOP(I+1,J,K)*ZZP(I+1,J,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+
+            DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
+                                     - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I+1,J-1,K)*ZZP(I+1,J-1,K,N) )
+
+            DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
+                                     - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I+1,J,K-1)*ZZP(I+1,J,K-1,N) )
+
+            RHO_D_DZDX(I,J,K,N) = RHO_D_DZDX(I,J,K,N) &
+                                + C_NL*(DX(I)**2*DUDX*DRHOZDX+DY(J)**2*DUDY*DRHOZDY+DZ(K)**2*DUDZ*DRHOZDZ)
+
+         ENDDO
+      ENDDO
    ENDDO
-ENDIF
 
-! transform velocity back to Cartesian component I_VEL
-VELTAN3D = C(I_VEL,1)*U_STRM + C(I_VEL,3)*U_NORM + U_SURF(I_VEL)
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
 
-END FUNCTION VELTAN3D
+            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I)+DXN(I+1))
+            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
+            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K)+DZN(K+1))
+
+            DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
+                                     - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J+1,K)*ZZP(I-1,J+1,K,N) )
+
+            DRHOZDY = RDYN(J)*(RHOP(I,J+1,K)*ZZP(I,J+1,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+
+            DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
+                                     - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I,J+1,K-1)*ZZP(I,J+1,K-1,N) )
+
+            RHO_D_DZDY(I,J,K,N) = RHO_D_DZDY(I,J,K,N) &
+                                + C_NL*(DX(I)**2*DVDX*DRHOZDX+DY(J)**2*DVDY*DRHOZDY+DZ(K)**2*DVDZ*DRHOZDZ)
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+
+            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I+1)+DXN(I) )
+            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J+1)+DYN(J) )
+            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)   +DZ(K+1))
+
+            DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
+                                     - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J,K+1)*ZZP(I-1,J,K+1,N) )
+
+            DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
+                                     - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I,J-1,K+1)*ZZP(I,J-1,K+1,N) )
+
+            DRHOZDZ = RDZN(K)*(RHOP(I,J,K+1)*ZZP(I,J,K+1,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+
+            RHO_D_DZDZ(I,J,K,N) = RHO_D_DZDZ(I,J,K,N) &
+                                + C_NL*(DX(I)**2*DWDX*DRHOZDX+DY(J)**2*DWDY*DRHOZDY+DZ(K)**2*DWDZ*DRHOZDZ)
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+ELSE SCALAR_FLUX_IF
+
+   ! SGS thermal energy flux
+   ! CAUTION: The flux arrays must point to the same work arrays used in DIVERGENCE_PART_1
+   ! Note: Do not reinitialize!  KDTDX, etc., already store molecular diffusive flux
+   KDTDX=>WORK1
+   KDTDY=>WORK2
+   KDTDZ=>WORK3
+
+   IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+   ELSE
+      UU=>US
+      VV=>VS
+      WW=>WS
+   ENDIF
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+
+            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
+            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J)+DYN(J+1))
+            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K)+DZN(K+1))
+
+            DTDX = RDXN(I)*(TMP(I+1,J,K)-TMP(I,J,K))
+            DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I+1,J+1,K) - TMP(I,J-1,K) - TMP(I+1,J-1,K) )
+            DTDZ = 0.25_EB*RDZ(K)*( TMP(I,J,K+1) + TMP(I+1,J,K+1) - TMP(I,J,K-1) - TMP(I+1,J,K-1) )
+
+            KDTDX(I,J,K) = KDTDX(I,J,K) + C_NL*(DX(I)**2*DUDX*DTDX + DY(J)**2*DUDY*DTDY + DZ(K)**2*DUDZ*DTDZ)
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+
+            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I)+DXN(I+1))
+            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
+            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K)+DZN(K+1))
+
+            DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J+1,K) - TMP(I-1,J,K) - TMP(I-1,J+1,K) )
+            DTDY = RDYN(J)*(TMP(I,J+1,K)-TMP(I,J,K))
+            DTDZ = 0.25_EB*RDZ(K)*( TMP(I,J,K+1) + TMP(I,J+1,K+1) - TMP(I,J,K-1) - TMP(I,J+1,K-1) )
+
+            KDTDY(I,J,K) = KDTDY(I,J,K) + C_NL*(DX(I)**2*DVDX*DTDX + DY(J)**2*DVDY*DTDY + DZ(K)**2*DVDZ*DTDZ)
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+
+            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I+1)+DXN(I) )
+            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J+1)+DYN(J) )
+            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)   +DZ(K+1))
+
+            DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J,K+1) - TMP(I-1,J,K) - TMP(I-1,J,K+1) )
+            DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I,J+1,K+1) - TMP(I,J-1,K) - TMP(I,J-1,K+1) )
+            DTDZ = RDZN(K)*(TMP(I,J,K+1)-TMP(I,J,K))
+
+            KDTDZ(I,J,K) = KDTDZ(I,J,K) + C_NL*(DX(I)**2*DWDX*DTDX + DY(J)**2*DWDY*DTDY + DZ(K)**2*DWDZ*DTDZ)
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF SCALAR_FLUX_IF
+
+END SUBROUTINE TENSOR_DIFFUSIVITY_MODEL
 
 
 SUBROUTINE TAU_WALL_IJ(TAU_IJ,SS,U_VELO,U_SURF,NN,DN,DIVU,MU,RHO,ROUGHNESS)

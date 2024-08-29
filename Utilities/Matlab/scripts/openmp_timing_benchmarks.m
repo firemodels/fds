@@ -7,7 +7,8 @@ clear all
 
 plot_style
 
-dir = '../../Verification/Timing_Benchmarks/';
+% dir = '../../Verification/Timing_Benchmarks/';
+dir = '../../../out/OMP_Scaling_Tests/';
 
 ncores = [1,2,3,4,5,6,7,8];
 a = {'a','b','c','d','e','f','g','h'};
@@ -50,7 +51,7 @@ axis([1 8 0 100])
 xlabel('Number of OpenMP threads')
 ylabel('Relative clock time (%)')
 
-h=legend(H,'64^3','128^3');
+h=legend(H,'64³','128³');
 set(h,'Interpreter',Font_Interpreter)
 set(h,'FontSize',Key_Font_Size)
 

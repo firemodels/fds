@@ -2,8 +2,19 @@
 
 &TIME T_END=90. /
 
+&MISC LEVEL_SET_MODE=4/
+
+&REAC FUEL='WOOD FUEL VAPOR'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17260. /
+
 &MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,0.0,0.5 /
-&MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,1.5,2.0 /
+&MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,1.0,1.5 /
+&MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,2.0,2.5 /
 
 &VENT MB='XMIN', SURF_ID='BLOW' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -15,7 +26,11 @@
 &VENT SURF_ID='GRASS',  XB=1.0,5.0,-0.5,0.5,0,0 /
 &VENT SURF_ID='GROUND', XB=5.0,6.0,-0.5,0.5,0,0 /
 
-&VENT SURF_ID='GROUND', XB=0.0,6.0,-0.5,0.5,1.5,1.5 /
+&VENT SURF_ID='GROUND', XB=0.0,6.0,-0.5,0.5,1.0,1.0 /
+
+&VENT SURF_ID='GROUND', XB=0.0,1.0,-0.5,0.5,2.0,2.0 /
+&VENT SURF_ID='LS GRASS',  XB=1.0,5.0,-0.5,0.5,2.0,2.0 /
+&VENT SURF_ID='GROUND', XB=5.0,6.0,-0.5,0.5,2.0,2.0 /
 
 &SURF ID='BLOW', VEL=-2., RAMP_V='wind', COLOR='BLUE' /
 &RAMP ID='wind', T= 0., F=0. /
@@ -26,8 +41,8 @@
 &RAMP ID='wind', T=70., F=3. /
 
 &MATL ID = 'SOIL'
-      CONDUCTIVITY = 0.25             
-      SPECIFIC_HEAT = 2.                   
+      CONDUCTIVITY = 0.25
+      SPECIFIC_HEAT = 2.
       DENSITY = 1300. /
 
 &SURF ID = 'GROUND'
@@ -36,13 +51,22 @@
       THICKNESS = 0.1 /
 
 &SURF ID = 'GRASS'
-      MATL_ID = 'Dry Grass','SOIL' 
+      MATL_ID = 'Dry Grass','SOIL'
       MOISTURE_FRACTION(1) = 0.1
       MASS_PER_VOLUME(1) = 4.
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
-      SURFACE_VOLUME_RATIO(1) = 3092. 
+      SURFACE_VOLUME_RATIO(1) = 3092.
       THICKNESS(1:2) = 0.025,0.1 /
+
+&SURF ID = 'LS GRASS'
+      VEG_LSET_ROS_00=0.01
+      VEG_LSET_HT = 0.025
+      VEG_LSET_SURF_LOAD = 0.1
+      VEG_LSET_SIGMA = 3092.
+      VEG_LSET_BETA = 0.01
+      COLOR = 'FOREST GREEN'
+      DRAG_COEFFICIENT = 2.8 /
 
 &SURF ID = 'Blade of Grass'
       MATL_ID = 'Dry Grass'
@@ -59,7 +83,7 @@
       STATIC         = .TRUE. /
 
 &INIT PART_ID              = 'Blade of Grass'
-      XB                   = 1.0,5.0,-0.5,0.5,1.5,1.525
+      XB                   = 1.0,5.0,-0.5,0.5,1.0,1.025
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
       MASS_PER_VOLUME      = 4.
@@ -71,11 +95,12 @@
       DENSITY            = 400.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT      = 1.5 /
- 
-&DUMP DT_DEVC=1. /
+
+&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=1. /
 
 &DEVC ID='pres 1',  XYZ=0.3,0.0,0.2, QUANTITY='PRESSURE' /
-&DEVC ID='pres 2',  XYZ=0.3,0.0,1.7, QUANTITY='PRESSURE' /
+&DEVC ID='pres 2',  XYZ=0.3,0.0,1.2, QUANTITY='PRESSURE' /
+&DEVC ID='pres 3',  XYZ=0.3,0.0,2.2, QUANTITY='PRESSURE' /
 
 &SLCF PBY= 0.0, QUANTITY='PRESSURE', VECTOR=.TRUE. /
 

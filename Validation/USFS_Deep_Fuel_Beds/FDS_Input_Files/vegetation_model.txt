@@ -1,14 +1,14 @@
 &MATL ID                    = 'GENERIC VEGETATION'
-      DENSITY               = 513.6179
+      DENSITY               = 398.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 1040.
-      E                     = 61041.
+      A                     = 4.61E4
+      E                     = 83000.
       NU_SPEC               = 0.8672
       SPEC_ID               = 'FUEL VAPOR'
       NU_MATL               = 0.1328
       MATL_ID               = 'CHAR'
-      HEAT_OF_REACTION      = 418. /
+      HEAT_OF_REACTION      = 711. /
 
 &MATL ID                    = 'CHAR'
       DENSITY               = 300.

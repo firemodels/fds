@@ -286,7 +286,7 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\si{mol-$\alpha$/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\unit{mol-\alpha/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and combined with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
 A^{\prime}_{i} = A_{i} \, \bigg( \prod \, [W_{\alpha} \times 1000]^{\,-a_{\alpha,i}} \bigg) \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
@@ -314,6 +314,7 @@ At low pressures, it is common to see so-called \emph{third body} reactions.  Th
 The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$. Some molecules may be more or less efficient as a collision species. This non-unity effect may be specified in the input file. If non-unity species are present, then the concentration of M is taken as the sum of all the individual species concentrations times their weighting factor (if all species have a weighting factor of 1, then the result is $C_{\si{M}}$).
 
 \subsubsection{Equilibrium Chemistry}
+\label{sec:equilChem}
 
 Consider the reversible chemical reaction
 
@@ -323,9 +324,9 @@ a \, \mathrm{A} + b \, \mathrm{B} \overset{r_1}{\underset{r_2}{\leftrightharpoon
 \ee
 
 \noindent At equilibrium, the forward and reverse reaction rates are equal, $r_{1} = r_{2}$.  The rate constants for each direction are the $k$s in Eq.~(\ref{eq:generic_rate}).  The equilibrium constant is defined as $K \equiv k_{1}/k_{2}$.  The equilibrium constant is computed via
-\be
+\begin{equation}\label{eq:equilibrium_const}
 K(T) = C_{\si{M}}^{\nu_n} \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
-\ee
+\end{equation}
 where $\nu_n$ is the net reaction order (for Eq.~\ref{eq:reverse} $\nu_n = a + b - c - d$) and
 \be                                                               
 G_{\mathrm{rxn}}^\circ = d \, G_\mathrm{D}^\circ + c \, G_\mathrm{C}^\circ - b \, G_\mathrm{B}^\circ - a \, G_\mathrm{A}^\circ
@@ -335,6 +336,72 @@ Note that the Gibbs free energy as a function of temperature is defined for any 
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed. The change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
+
+
+\subsection{Finite-Rate Chemistry (Detailed Chemical Mechanism)}
+\label{detailed_chemistry_using_mechanism}
+A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in Chemkin or Cantera YAML formats. Such a mechanism can be represented as:
+\begin{equation}\label{eq:chemistry_mechanism}
+\sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
+\end{equation}
+Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{sp}}$ and ${N_{reac}}$ are the total number of species and total number of reactions, respectively.
+The rate of change of the molar concentration \si{(kmol/m^3/s)} of each species can be represented using the following system of ordinary differential equations (ODEs):
+\begin{equation}\label{eq:chemistry_ode_system}
+\frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
+\end{equation}
+The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration \si {(kmol/m^3)} of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
+\begin{equation}\label{eq:reaction_progress_rate}
+r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
+\end{equation}
+Here, $k_{f,i}$ and $k_{r,i}$ are the forward and reverse reaction rate coefficients, respectively. The $k_{f,i}$ can be calculated using Eq.~(\ref{eq:rate_cons}), and the $k_{r,i}$ can be calculated by obtaining the equilibrium constant, as shown in Eq.~(\ref{eq:equilibrium_const}).
+
+The reaction rate modification coefficient, $b_i$, varies depending on the type of reaction.
+\begin{equation}\label{eq:reac_mod_coeff}
+\begin{aligned}
+b_i &= 1, \ \text{for elementary reaction} \\
+    &= \eta_{\mathrm{tb},i}, \ \text{for third body reactions} \\
+    &= \eta_{\mathrm{falloff},i}, \ \text{for fall-off reactions} \\
+\end{aligned}
+\end{equation}
+For third-body reactions, presence of (or collission with) a third body (any other molecule) modify the reaction rate. If the third-body efficiency of species $j$ in reaction $i$ (denoted as $\alpha_{ij}$) is provided, then
+\be
+\eta_{\mathrm{tb},i} = \sum_{j=1}^{N_{sp}} \alpha_{ij}C_{j}
+\ee
+If the third-body efficiency is not provided, the default value of $\alpha_{ij}$ is 1.0.
+
+For fall-off reactions, reaction rates depend on both pressure and temperature:
+\be
+\eta_{\mathrm{fall-off},i} =  \frac{P_{i}}{1+P_{i}} F_i
+\ee
+Here, $\mathrm{P_{i}}$ is the reduced pressure, calculated as follows:
+\be
+P_{i} =  \frac{k_{low,i}}{k_{f,i}} \eta_{\mathrm{tb},i}
+\ee
+Here, $k_{low,i}$ is the low pressure limit reaction rate, calculated using an equation similar to Eq.~(\ref{eq:rate_cons}). The $A_{low,i}$, $n_{low,i}$, and $E_{a,low,i}$ should be available in the mechanism file for the given fall-off reaction.
+\begin{equation}\label{eq:low_rate_cons}
+k_{low,i} = A_{low,i}\;T^{n_{low,i}}\;\mathrm{e}^{-E_{a,low,i}/RT}
+\end{equation}
+And, $\mathrm{F_{i}}$ is the fall-off blending factor:
+\begin{equation}\label{eq:falloff_Fi}
+\begin{aligned}
+F_i &= 1, \ \text{for Lindermann fall-off reaction} \\
+    &= exp\left( {\left[1+ {\left[\frac{log P_{r,i} + c}{n-d(log P_{r,i} + c)} \right]}^2 \right]^{-1} {log \ F_{cent} }} \right) , \ \text{for Troe fall-off reaction} \\
+\end{aligned}
+\end{equation}
+Where, 
+\be
+F_{\text{cent}} = (1 - A_{troe}) \exp\left(-\frac{T}{T_3}\right) + A_{troe} \exp\left(-\frac{T}{T_1}\right) + \exp\left(-\frac{T_2}{T}\right) \
+\ee
+Here, $A_{troe}$, $T_1$, $T_2$, and $T_3$ are the specified parameters in the mechanism file. Additionally, $d=0.14$, $c=-0.4 - 0.67 \log F_{cent}$, and $n=0.75 - 1.27\log F_{cent}$.
+
+Please note, the SRI fall-off reaction is not yet implemented and will be incorporated in the future. Also, other pressure-dependent reactions, except fall-off reactions, are not yet implemented and will be incorporated if the need arises.
+
+To solve the reactive system, we assume a constant pressure reactor. For that, the concentration ODEs in the form of Eq.~(\ref{eq:chemistry_ode_system}) need to be solved along with a ODE of temperature given by:
+\begin{equation}\label{eq:TemperatureDerivative}
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega_j} 
+\end{equation} 
+Here,  $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
+To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
 
 
 \subsection{Heat Release Rate}

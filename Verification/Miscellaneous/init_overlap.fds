@@ -3,10 +3,8 @@
  All concentrations etc. are completely fabricated.
 
  This is a verifiaction test case for the overlapping of INIT regions.
- The intended behavior is only specified quantities are updated for each
- line. Overlapping sections are first come first server; however, an
- INIT which partially overlaps with a previous INIT will still take
- effect in the unique cells.
+ The intended behavior is that only specified quantities are updated for each INIT line. 
+ Overlapping sections replace existing values. 
 
 &MESH XB=0,2,0,2,0,2,IJK=10,10,10/
 
@@ -15,14 +13,10 @@
 &TIME T_END=1./
 
 &INIT XB=0,1,0,1,0,1,PART_ID='P0',N_PARTICLES=10/
-
-&INIT XB=0,1,0,1,0,2,SPEC_ID='PROPANE',VOLUME_FRACTION=0.5/
-
-&INIT XB=0,1,0,1,0,1,TEMPERATURE=200/
-
+&INIT XB=0,1,0,2,0,1,TEMPERATURE=427./
 &INIT XB=0,2,0,1,0,1,TEMPERATURE=700,VOLUME_FRACTION=0.3, SPEC_ID='PROPANE'/
-&INIT XB=0,1,0,2,0,1,DENSITY=0.5/
-
+&INIT XB=0,1,0,1,0,1,TEMPERATURE=200/
+&INIT XB=0,1,0,1,0,2,SPEC_ID='PROPANE',VOLUME_FRACTION=0.5/
 &INIT XB=0,1,0,1,0,1,PART_ID='P1',N_PARTICLES=10/
 &INIT XB=0,1,0,1,0,1,PART_ID='P2',N_PARTICLES=10/
 
@@ -41,23 +35,23 @@
 &DEVC XB=0,1,1,2,0,2,QUANTITY='VOLUME FRACTION',SPEC_ID='PROPANE',ID='P0p0',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=0,1,0,1,1,2,QUANTITY='INTEGRATED INTENSITY',ID='I6p0',SPATIAL_STATISTIC='MEAN'/
 
-! Should be initialized to 200 C, 0.896 density based on INIT NUMBER 3 (count starting at 1)
+! Should be initialized to 200 C, 0.896 density based on INIT NUMBER 4 (count starting at 1)
 &DEVC XB=0,1,0,1,0,1,QUANTITY='TEMPERATURE',ID='T200',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=0,1,0,1,0,1,QUANTITY='DENSITY',ID='D0p938',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=0,1,0,1,0,1,QUANTITY='INTEGRATED INTENSITY',ID='I15p6',SPATIAL_STATISTIC='MEAN'/
 
-! Should be initialized to 427 C, 0.50 density based on INIT NUMBER 5 (count starting at 1)
+! Should be initialized to 427 C, 0.50 density based on INIT NUMBER 2 (count starting at 1)
 &DEVC XB=0,1,1,2,0,1,QUANTITY='TEMPERATURE',ID='T427',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=0,1,1,2,0,1,QUANTITY='DENSITY',ID='D0p50',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=0,1,1,2,0,1,QUANTITY='INTEGRATED INTENSITY',ID='I9p9',SPATIAL_STATISTIC='MEAN'/
 
-! Should be initialized to 700 C, 0.40 density based on INIT NUMBER 4 (count starting at 1)
+! Should be initialized to 700 C, 0.40 density based on INIT NUMBER 3 (count starting at 1)
 &DEVC XB=1,2,0,1,0,1,QUANTITY='TEMPERATURE',ID='T700',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=1,2,0,1,0,1,QUANTITY='DENSITY',ID='D0p42',SPATIAL_STATISTIC='MEAN'/
 &DEVC XB=1,2,0,1,0,1,QUANTITY='INTEGRATED INTENSITY',ID='I81p6',SPATIAL_STATISTIC='MEAN'/
 
-! Should be initialized to 0.5 based on INIT NUMBER 2 (count starting at 1)
+! Should be initialized to 0.5 based on INIT NUMBER 5 (count starting at 1)
 &DEVC XB=0,1,0,1,0,2,QUANTITY='VOLUME FRACTION',SPEC_ID='PROPANE',ID='P0p5',SPATIAL_STATISTIC='MEAN'/
 
-! Should be initialized to 0.3 based on INIT NUMBER 4 (count starting at 1)
+! Should be initialized to 0.3 based on INIT NUMBER 3 (count starting at 1)
 &DEVC XB=1,2,0,1,0,1,QUANTITY='VOLUME FRACTION',SPEC_ID='PROPANE',ID='P0p3',SPATIAL_STATISTIC='MEAN'/

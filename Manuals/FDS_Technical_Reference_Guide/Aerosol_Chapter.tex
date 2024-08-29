@@ -165,7 +165,7 @@ Inertial agglomeration results from particles departing from the flow streamline
 
 Scrubbing is the removal of aerosols from the gas phase. In FDS, aerosols can be scrubbed by water sprays. The correlations used to define the scrubbing efficiency are based on the containment spray scrubbing model in MELCOR~\cite{MELCOR}. The rate of aerosol scrubbing in a grid cell is based on the volume of the grid cell swept by a droplet over a timestep and the removal efficiency, $\epsilon$, for that droplet. The fraction of a grid cell's volume swept during a time step, $F$, is determined by the projected surface area of the droplet and its velocity:
 \be
-F = \frac {\min \left(C \pi r^2_p (\delta x_i \delta y_j \delta z_k)^{2/3} \right) u_p \Delta t_p } {\delta x_i \delta y_j \delta z_k}
+F = \frac {\min \left(C \pi r^2_p, (\delta x_i \delta y_j \delta z_k)^{2/3} \right) u_p \Delta t_p } {\delta x_i \delta y_j \delta z_k}
 \ee
 where $r_p$ is the droplet radius, $C$ is the weighting factor for the droplet, $u_p$ is the droplet velocity, and $\Delta t_p$ is the time step for the current path segment of the droplet (droplet movement may be evaluated using a smaller time steps than the global time step, $\Delta t$ if the droplet will cross a cell boundary over the global time step).
 

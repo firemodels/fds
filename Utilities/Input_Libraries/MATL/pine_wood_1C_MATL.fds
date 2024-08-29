@@ -1,0 +1,89 @@
+
+&MATL ID                 = 'PINE'
+      FYI                = 'Properties from Lautenberger and Pello CNF 2009'
+      DENSITY            = 360.
+      CONDUCTIVITY_RAMP  = 'k dry wood'
+      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
+      N_REACTIONS        = 2
+      N_S                = 0.87,0.63
+      N_O2               = 0.0,0.72
+      A                  = 4.70E+6,1.45E+10
+      E                  = 1.05E+05,1.27E+05
+      MATL_ID(1,1)       = 'CHAR'
+      NU_MATL(1,1)       = 0.31
+      MATL_ID(1,2)       = 'CHAR'
+      NU_MATL(1,2)       = 0.31
+      SPEC_ID(1,1)       = 'FUEL VAPOR'
+      NU_SPEC(1,1)       = 0.69
+      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
+      NU_SPEC(1:2,2)     = -0.1, 0.79
+      HEAT_OF_REACTION   = 416. /
+
+&MATL ID                 = 'CHAR'
+      DENSITY            = 73.
+      CONDUCTIVITY_RAMP  = 'k + k_r char'
+      SPECIFIC_HEAT_RAMP = 'c_v char'
+      N_REACTIONS        = 1
+      N_S                = 0.56
+      N_O2               = 0.68
+      A                  = 8.31E+07
+      E                  = 1.24E+05
+      MATL_ID            = 'ASH'
+      NU_MATL            = 0.02
+      SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
+      NU_SPEC            = -2.67,3.65
+      HEAT_OF_REACTION   = -32000. /
+
+&MATL ID                 = 'ASH'
+      DENSITY            = 5.7
+      CONDUCTIVITY_RAMP  = 'k + k_r ash'
+      SPECIFIC_HEAT_RAMP = 'c_v ash'/
+
+&RAMP ID='k dry wood', T=  20.0, F=0.173549 /
+&RAMP ID='k dry wood', T= 300.0, F=0.258492 /
+&RAMP ID='k dry wood', T= 600.0, F=0.331944 /
+&RAMP ID='k dry wood', T= 900.0, F=0.395609 /
+&RAMP ID='k dry wood', T=1200.0, F=0.452913 /
+
+&RAMP ID='c_v dry wood', T=  20.0, F=1.638272 /
+&RAMP ID='c_v dry wood', T= 300.0, F=2.550559 /
+&RAMP ID='c_v dry wood', T= 600.0, F=3.367617 /
+&RAMP ID='c_v dry wood', T= 900.0, F=4.092512 /
+&RAMP ID='c_v dry wood', T=1200.0, F=4.756277 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r char', T=  20.0, F=0.069043 /
+&RAMP ID='k + k_r char', T= 300.0, F=0.121335 /
+&RAMP ID='k + k_r char', T= 600.0, F=0.227944 /
+&RAMP ID='k + k_r char', T= 900.0, F=0.419637 /
+&RAMP ID='k + k_r char', T=1200.0, F=0.727922 /
+
+&RAMP ID='c_v char', T=  20.0, F=1.210882 /
+&RAMP ID='c_v char', T= 300.0, F=1.463983 /
+&RAMP ID='c_v char', T= 600.0, F=1.649246 /
+&RAMP ID='c_v char', T= 900.0, F=1.793039 /
+&RAMP ID='c_v char', T=1200.0, F=1.912405 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r ash', T=  20.0, F=0.066647 /
+&RAMP ID='k + k_r ash', T= 300.0, F=0.141158 /
+&RAMP ID='k + k_r ash', T= 600.0, F=0.326017 /
+&RAMP ID='k + k_r ash', T= 900.0, F=0.679571 /
+&RAMP ID='k + k_r ash', T=1200.0, F=1.261558 /
+
+&RAMP ID='c_v ash', T=  20.0, F=1.234783 /
+&RAMP ID='c_v ash', T= 300.0, F=1.525267 /
+&RAMP ID='c_v ash', T= 600.0, F=1.741593 /
+&RAMP ID='c_v ash', T= 900.0, F=1.911420 /
+&RAMP ID='c_v ash', T=1200.0, F=2.053577 /
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+# requirements.txt for pip install
+
+# User's minimal environment for FDS
+
+numpy<2
+matplotlib
+pandas
+scipy
+seaborn
+pygments
+ipython
+cantera
+

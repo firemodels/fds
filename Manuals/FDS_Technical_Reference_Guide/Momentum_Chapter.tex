@@ -70,7 +70,7 @@ There are a few more modifications we need to make in order to get Eq.~(\ref{eqn
 \label{eqn_newtons_law_sgs}
 \tau_{ij}^{\rm dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{\rm sgs} - \frac{1}{3}\tau_{kk}^{\rm sgs}\delta_{ij} = - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
 \end{equation}
-Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$).  The turbulent viscosity, $\mu_t$, requires modeling, as discussed below.
+Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$).  The turbulent viscosity, $\mu_{\rm t}$, requires modeling, as discussed below.
 
 \subsubsection*{Modified Pressure Term}
 
@@ -392,25 +392,18 @@ An open boundary is where fluid is allowed to flow into or out of the computatio
   {\mathtt{BXS(J,K)}} \equiv \cH_{\ha,jk} = \left\{ \begin{array}{ll} \displaystyle
           \displaystyle \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
           \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
-          \end{array} \right.
+          \end{array} \right.  \label{open_general}
 \ee
 {\ct BXS} is the name of the array sent to the pressure solver. The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
 
 \subsubsection{Open Boundary Conditions (Wind)}
 
-If {\ct SPEED} is specified on the {\ct WIND} line this invokes a slightly different type of {\ct OPEN} boundary condition that enforces a spatially (vertical only presently) and temporally varying external wind field on the boundaries.  This field also initializes the velocity throughout the domain.
-
-Let $\mathbf{n}$ denote a unit normal vector pointing \emph{into} the domain.  Boundary values at an interface are denoted with a subscript ``$I$''.  Then $\bu_I\cdot\mathbf{n}>0$ is an inflow and $\bu_I\cdot\mathbf{n}<0$ is an outflow condition. At an inflow, generally the mean viscous and convective forces are small and a simplified momentum equation may be used to develop a boundary value for $H$, namely, $\partial u_i/\partial t = -\partial H/\partial x_i$. To develop the boundary condition, let $u$ denote the $x$-component of velocity and consider an interface normal to $x$ pointing into the domain.  The prescribed external wind field velocity component at height $z$ and time $t$ is denoted $\bu_\infty(z,t)$.  Using a one-sided difference for $H$ and an explicit Euler approximation of the velocity time derivative.  Considering a left side boundary normal to the $x$ direction, at an outflow boundary, $H$ is set equal to the local kinetic energy per unit mass from the cell just upwind of the boundary:
-\begin{equation}
-\label{eq:Hout}
-\mathtt{BXS(J,K)} = \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha\,(\bar{u}^n \bar{u}^n + \bar{v}^n \bar{v}^n + \bar{w}^n \bar{w}^n)_{1,jk} \quad \mbox{if} \quad u_{0,jk}^n<=0 \quad \mbox{(outflow)}
-\end{equation}
-The overbar on the velocity components denotes a linear interpolation of the primitive staggered component values to the cell center.  At an inflow, the boundary value of $H$ is set to approximate a Neumann boundary with a specified velocity component normal to the boundary:
+If the user specifies a wind {\ct SPEED}, a slightly different {\ct OPEN} boundary condition is invoked. The outflow boundary condition is the same as that shown in Eq.~(\ref{open_general}). At the inflow boundary, the mean viscous and convective forces are assumed small, and a simplified momentum equation is used to develop a boundary value for $H$, namely, $\partial u_i/\partial t = -\partial H/\partial x_i$. For example, the value of $H$ at the lower $x$ boundary, $\cH_{\ha,jk}$, is set so as to approximate a Neumann boundary with a specified velocity component normal to the boundary:
 \begin{equation}
 \label{eq:Hin}
-\mathtt{BXS(J,K)} = \frac{\tp_{\rm ext}}{\rho_{\infty,jk}} + \cH_{\ha,jk}^n + \frac{\dx}{2}\left[\frac{u_\infty(z,t) - u_{0,jk}^n}{\dt}\right] \quad \mbox{if} \quad \mathbf{u}_I\cdot\mathbf{n}>0 \quad \mbox{(inflow)}
+\mathtt{BXS(J,K)} \equiv \cH_{\ha,jk} =  \cH_{1,jk}^n + \frac{\dx}{2}\left[\frac{u_\infty(z,t) - u_{0,jk}^n}{\dt}\right] 
 \end{equation}
-Note that the tangential components of the velocity vector specified by the wind field are also applied on external domain boundaries as discussed in Sec.~\ref{sec:opentang}.
+where $u_\infty(z,t)$ is the prescribed external wind field velocity component at height $z$ and time $t$. Note that the tangential components of the velocity vector specified by the wind field are also applied on external domain boundaries as discussed in Sec.~\ref{sec:opentang}.
 
 
 \subsubsection{Solid Boundary Conditions}
@@ -745,7 +738,7 @@ Note that this is the analog of the positive mass density constraint when the di
 
 \subsection{Heat Transfer Constraint}
 
-Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$.  This check is an option. It is not done by default.
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \unit{W/m^2}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$.  This check is an option. It is not done by default.
 
 \subsection{Adjusting the Time Step}
 
