@@ -352,7 +352,6 @@ FN_GIT = TRIM(CHID)//'_git.txt'
 ! Smokeview File
 
 FN_SMV = TRIM(CHID)//'.smv'
-IF (N_MPI_PROCESSES>1 .AND. .NOT. SHARED_FILE_SYSTEM) FN_SMV = TRIM(CHID)//'_000000.smv'
 LU_INFO  = GET_FILE_NUMBER()
 
 ! Diagnostic Output File
