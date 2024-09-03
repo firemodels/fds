@@ -12474,7 +12474,8 @@ PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLI
        WRITE_VTK_PART_WRAPPER,WRITE_PARAVIEW_STATE_FILE,&
        DEALLOCATE_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_GEOM_GEOMETRY,WRITE_VTK_GEOM_FILE,&
        WRITE_VTKHDF_GEOM_FILE,WRITE_VTKHDF_RECT_GAS_FILE,ADD_3F32_DATA_TO_VTKHDF_RECT_GAS_FILE,&
-       ADD_1F32_DATA_TO_VTKHDF_RECT_GAS_FILE
+       ADD_1F32_DATA_TO_VTKHDF_RECT_GAS_FILE,INITIALIZE_VTKHDF_SLCF,INITIALIZE_VTKHDF_FILES,&
+       WRITE_VTKHDF_SLICE_DATA_FILE,WRITE_VTKHDF_SLICE_CELL_FILE
 
 CONTAINS
 
@@ -12952,6 +12953,143 @@ ELSE
 ENDIF
          
 ENDSUBROUTINE BUILD_VTK_SLICE_GEOMETRY
+
+
+SUBROUTINE BUILD_VTK_SLICE_GEOMETRY2(NM, SL, &
+                                        NC, NP, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
+
+INTEGER :: NX, NY, NZ, NC, NP, I, J, K, IFACT, JFACT, KFACT
+INTEGER :: I1,I2,J1,J2,K1,K2,L1,L2,N1,N2
+REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: VERTICES
+INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
+INTEGER, INTENT(IN) :: NM
+TYPE(SLICE_TYPE), POINTER, INTENT(IN) :: SL
+
+I1  = SL%I1
+I2  = SL%I2
+J1  = SL%J1
+J2  = SL%J2
+K1  = SL%K1
+K2  = SL%K2
+
+NX = I2 + 1 - I1
+NY = J2 + 1 - J1
+NZ = K2 + 1 - K1
+
+NP = NX*NY*NZ
+NC = MAX((NX-1),1)*MAX((NY-1),1)*MAX((NZ-1),1)
+
+! Fill point data
+ALLOCATE(VERTICES(3,NP))
+IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
+   IFACT = 1
+   IF (I2-I1==0) THEN
+      DO K = K1, K2
+         DO J = J1, J2
+            VERTICES(1,IFACT)=REAL(MESHES(NM)%X(I1),FB)
+            VERTICES(2,IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ELSEIF (J2-J1==0) THEN
+      DO K = K1, K2
+         DO I = I1, I2
+            VERTICES(1,IFACT)=REAL(MESHES(NM)%X(I),FB)
+            VERTICES(2,IFACT)=REAL(MESHES(NM)%Y(J1),FB)
+            VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ELSEIF (K2-K1==0) THEN
+      DO J = J1, J2
+         DO I = I1, I2
+            VERTICES(1,IFACT)=REAL(MESHES(NM)%X(I),FB)
+            VERTICES(2,IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K1),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ENDIF
+ELSE
+   IFACT = 1
+   DO K = K1, K2
+      DO J = J1, J2
+         DO I = I1, I2
+            VERTICES(1,IFACT)=REAL(MESHES(NM)%X(I),FB)
+            VERTICES(2,IFACT)=REAL(MESHES(NM)%Y(J),FB)
+            VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K),FB)
+            IFACT = IFACT + 1
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+! Fill cell data
+ALLOCATE(OFFSETS(NC+1))
+ALLOCATE(VTKC_TYPE(NC))
+IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
+   !2-D slice
+   ALLOCATE(CONNECT(NC*4))
+   
+   IF (I2-I1==0) THEN
+      L1=J1 ; L2=J2
+      N1=K1 ; N2=K2;
+   ELSEIF (J2-J1==0) THEN
+      L1=I1 ; L2=I2
+      N1=K1 ; N2=K2;
+   ELSEIF (K2-K1==0) THEN
+      L1=I1 ; L2=I2
+      N1=J1 ; N2=J2;
+   ENDIF
+   
+   IFACT = 0
+   DO I = 1, (L2-L1)
+      DO J = 1, (N2-N1)
+         CONNECT((IFACT)*4+1) = (L2-L1+1)*(J-1)+(I-1)
+         CONNECT((IFACT)*4+2) = (L2-L1+1)*(J-1)+(I)
+         CONNECT((IFACT)*4+3) = (L2-L1+1)*(J)+(I-1)
+         CONNECT((IFACT)*4+4) = (L2-L1+1)*(J)+(I)
+         IFACT = IFACT+1
+      ENDDO
+   ENDDO
+   OFFSETS(1) = 0
+   DO I=1,NC
+      OFFSETS(I+1) = (I)*4_IB32
+      VTKC_TYPE(I) = 8_IB8
+   ENDDO
+   
+ELSE
+   !3-D slice
+   ALLOCATE(CONNECT(NC*8))
+   DO I = 1, NX-1
+      IFACT = (I-1)
+      DO J = 1, NY-1
+         JFACT = (J-1)*(NX-1)
+         DO K = 1, NZ-1
+            KFACT = (K - 1)*(NY-1)*(NX-1)
+            CONNECT((IFACT+JFACT+KFACT)*8+1) = (K-1)*(NY*NX) + (J-1)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+2) = (K-1)*(NY*NX) + (J-1)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+3) = (K-1)*(NY*NX) + (J)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+4) = (K-1)*(NY*NX) + (J)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+5) = (K)*(NY*NX) + (J-1)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+6) = (K)*(NY*NX) + (J-1)*NX + I
+            CONNECT((IFACT+JFACT+KFACT)*8+7) = (K)*(NY*NX) + (J)*NX + I-1
+            CONNECT((IFACT+JFACT+KFACT)*8+8) = (K)*(NY*NX) + (J)*NX + I
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   OFFSETS(1) = 0
+   DO I=1,NC
+      OFFSETS(I+1) = (I)*8_IB32
+      VTKC_TYPE(I) = 11_IB8
+   ENDDO
+   
+ENDIF
+         
+ENDSUBROUTINE BUILD_VTK_SLICE_GEOMETRY2
 
 
 SUBROUTINE BUILD_VTK_SOLID_PHASE_GEOMETRY(NM, PA, &
@@ -13580,7 +13718,6 @@ SUBROUTINE ADD_1F32_DATA_TO_VTKHDF_RECT_GAS_FILE(FILENAME, DATANAME, DATA)
    MESH_LOOP_HDF_COUNT: DO NM=1,NMESHES
       NCELLS = MESHES(NM)%NC
       NPOINTS = MESHES(NM)%NP
-      !WRITE(*,*) "RANK ", MY_RANK, "MESH ", NM, "NP ", NPOINTS, "NC ", NCELLS
       NPOINTS_TOTAL = NPOINTS_TOTAL + NPOINTS !+ NVERTS*3
       NCELLS_TOTAL = NCELLS_TOTAL + NCELLS !+ NFACES*3
       NOFFSETS_TOTAL = NOFFSETS_TOTAL + NCELLS + 1
@@ -13599,8 +13736,6 @@ SUBROUTINE ADD_1F32_DATA_TO_VTKHDF_RECT_GAS_FILE(FILENAME, DATANAME, DATA)
    
    CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM(DATANAME), CRP_LIST, 1,&
       INT8((/NPOINTS_MAX/)),INT8((/NPOINTS_TOTAL/)), DSET_ID, PLIST_ID) ! Color
-   
-   !WRITE(*,*) "INITIALIZING ", TRIM(DATANAME), "DSET_ID ", DSET_ID
    
    MESH_LOOP_HDF: DO NM=1,NMESHES
       NCELLS = MESHES(NM)%NC
@@ -13679,7 +13814,6 @@ SUBROUTINE WRITE_VTKHDF_RECT_GAS_FILE(FILENAME)
       NPOINTS_MAX = MAX(NPOINTS_MAX,NPOINTS)
       NOFFSETS_MAX = MAX(NOFFSETS_MAX,NCELLS + 1)
       NCONN_MAX = MAX(NCONN_MAX,NCELLS*8)
-      !WRITE(*,*) "RANK ", MY_RANK, "MESH ", NM, "NP ", NPOINTS, "NC ", NCELLS, "NOFF", NOFFSETS_TOTAL
    ENDDO MESH_LOOP_HDF_COUNT
    
    ! Initialize HDF5 datafiles
@@ -13710,11 +13844,8 @@ SUBROUTINE WRITE_VTKHDF_RECT_GAS_FILE(FILENAME)
          NPIECES_ACCUM = NPIECES_ACCUM+1
          CYCLE MESH_LOOP_HDF
       ENDIF
-      !CYCLE MESH_LOOP_HDF
       M => MESHES(NM)
-      !WRITE(*,*) "BEFORE", NM, NCELLS, NPOINTS
       CALL BUILD_VTK_GAS_PHASE_GEOMETRY2(NM, NCELLS, NPOINTS, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
-      !WRITE(*,*) "AFTER", NM, NCELLS, NPOINTS, SIZE(CONNECT)
       
       ! Write connectivity data to file
       CALL PARALLEL_WRITE_I32(1, INT8((/NCELLS*8/)), DSET_ID_CON,&
@@ -13772,6 +13903,419 @@ SUBROUTINE WRITE_VTKHDF_RECT_GAS_FILE(FILENAME)
    
 END SUBROUTINE WRITE_VTKHDF_RECT_GAS_FILE
 
+SUBROUTINE INITIALIZE_VTKHDF_FILES(T)
+   REAL(EB), INTENT(IN) :: T
+   INTEGER :: II, ERROR
+   ! Initialize slice hdfs
+   DO II=1,MESHES(1)%N_UNIQUE_SLCF
+      CALL INITIALIZE_VTKHDF_SLCF(T,II)
+   ENDDO
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   !WRITE(*,*) "FINISHED INITIALIZE SLCF AT T=", T
+END SUBROUTINE INITIALIZE_VTKHDF_FILES
+
+SUBROUTINE INITIALIZE_VTKHDF_SLCF(T,II)
+   INTEGER, INTENT(IN) :: II
+   INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
+   INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
+   INTEGER(HID_T) :: DSET_ID_NCELLS, DSET_ID_NCON, DSET_ID_NPTS    ! Dataset identifiers
+   INTEGER :: NPOINTS, NCELLS, IQ, NQT
+   INTEGER :: NM, ERROR, ITM, ITM1, NX, NY, NZ, NCONNECTIONS
+   TYPE(SLICE_TYPE), POINTER :: SL
+   REAL(EB), INTENT(IN) :: T
+   REAL(EB) :: TT
+   REAL(FB) :: STIME
+   CHARACTER(200) :: FILENAME, SLCFNAME
+   
+   SLCFNAME = TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(II))
+   STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+   TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+   ITM  = INT(TT)
+   ITM1 = NINT(ABS(TT-ITM)*100)
+   IF (ITM1==100) THEN
+      ITM = ITM+1
+      ITM1 = 0
+   ENDIF
+   WRITE(FILENAME,'(A,A,A,A,I8.8,I2.2,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_',&
+                         TRIM(SLCFNAME),'_',ITM,ITM1,'.vtkhdf'
+   !WRITE(*,*) "STARTING ", FILENAME, " RANK ", MY_RANK
+   ! Initialize file
+   CALL CREATE_OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfCells"), CRP_LIST, 1,&
+      INT8((/NMESHES/)), INT8((/NMESHES/)), DSET_ID_NCELLS, PLIST_ID) ! NumberOfCells
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfPoints"), CRP_LIST, 1,&
+      INT8((/NMESHES/)),INT8((/NMESHES/)), DSET_ID_NPTS, PLIST_ID) ! NumberOfPoints
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfConnectivityIds"), CRP_LIST, 1,&
+      INT8((/NMESHES/)), INT8((/NMESHES/)), DSET_ID_NCON, PLIST_ID) ! NumberOfConnectivityIds
+   
+   NQT = MESHES(1)%N_UNIQUE_SLCF
+   ! Fill metadata
+   MESH_LOOP: DO NM=1,NMESHES
+      CALL POINT_TO_MESH(NM)
+      IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP
+      NCELLS = 0
+      NPOINTS = 0
+      !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, " EMP ", MESHES(NM)%EMPTY_UNIQUE_SLICE(II)
+      IF (MESHES(NM)%EMPTY_UNIQUE_SLICE(II)) THEN
+         NCELLS = 0
+         NPOINTS = 0
+         NCONNECTIONS = 0
+      ELSE
+         QUANTITY_LOOP: DO IQ=1,MESHES(1)%N_SLCF_VTK
+            SL => SLICE(IQ)
+            !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, " S1 ", TRIM(SL%SLCF_NAME), " S2 ", TRIM(SLCFNAME)
+            IF (TRIM(SL%SLCF_NAME).NE.TRIM(SLCFNAME)) CYCLE QUANTITY_LOOP
+            NX = SL%I2 + 1 - SL%I1
+            NY = SL%J2 + 1 - SL%J1
+            NZ = SL%K2 + 1 - SL%K1
+            IF (SL%I2-SL%I1==0 .OR. SL%J2-SL%J1==0 .OR. SL%K2-SL%K1==0) THEN
+               NCONNECTIONS=4 ! 2-D slice
+            ELSE
+               NCONNECTIONS=8 ! 3-D slice
+            ENDIF
+            NPOINTS = NX*NY*NZ
+            NCELLS = MAX((NX-1),1)*MAX((NY-1),1)*MAX((NZ-1),1)
+            EXIT
+         ENDDO QUANTITY_LOOP
+      ENDIF
+      !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, " NCELLS ", NCELLS
+      ! Write number of cells data to file
+      CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NCELLS,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS/))
+      
+      ! Write number of points data to file
+      CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NPTS,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NPOINTS/))
+      
+      ! Write NumberOfConnectivityIds data to file
+      CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NCON,&
+         PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS*NCONNECTIONS/))
+   ENDDO MESH_LOOP
+   ! Close VTKHDF interface
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCELLS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NPTS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCON, ERROR)
+   CALL H5PCLOSE_F(PLIST_ID, ERROR)
+   CALL CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   
+   !WRITE(*,*) "FINISHED ", FILENAME, " RANK ", MY_RANK
+   
+END SUBROUTINE INITIALIZE_VTKHDF_SLCF
+
+
+
+
+
+SUBROUTINE INITIALIZE_VTKHDF_SLCF_OLD(T,II)
+   INTEGER, INTENT(IN) :: II
+   INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
+   INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
+   INTEGER(HID_T) :: DSET_ID_NCELLS, DSET_ID_NCON, DSET_ID_NPTS    ! Dataset identifiers
+   INTEGER :: NPOINTS, NCELLS, IQ, NQT
+   INTEGER :: NM, ERROR, ITM, ITM1, NX, NY, NZ, NCONNECTIONS
+   TYPE(SLICE_TYPE), POINTER :: SL
+   REAL(EB), INTENT(IN) :: T
+   REAL(EB) :: TT
+   REAL(FB) :: STIME
+   CHARACTER(200) :: FILENAME,SLCFNAME
+   
+   SLCFNAME = TRIM(MESHES(1)%UNIQUE_SLICE_NAMES(II))
+   
+   STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
+   TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+   ITM  = INT(TT)
+   ITM1 = NINT(ABS(TT-ITM)*100)
+   IF (ITM1==100) THEN
+      ITM = ITM+1
+      ITM1 = 0
+   ENDIF
+   WRITE(FILENAME,'(A,A,A,A,I8.8,I2.2,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_',&
+                         TRIM(SLCFNAME),'_',ITM,ITM1,'.vtkhdf'
+   
+   ! Initialize file
+   CALL CREATE_OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfCells"), CRP_LIST, 1,&
+      INT8((/NMESHES/)), INT8((/NMESHES/)), DSET_ID_NCELLS, PLIST_ID) ! NumberOfCells
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfPoints"), CRP_LIST, 1,&
+      INT8((/NMESHES/)),INT8((/NMESHES/)), DSET_ID_NPTS, PLIST_ID) ! NumberOfPoints
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("NumberOfConnectivityIds"), CRP_LIST, 1,&
+      INT8((/NMESHES/)), INT8((/NMESHES/)), DSET_ID_NCON, PLIST_ID) ! NumberOfConnectivityIds
+   
+   NQT = MESHES(1)%N_SLCF_VTK
+   ! Fill metadata
+   MESH_LOOP: DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP
+      QUANTITY_LOOP: DO IQ=1,NQT
+         IF (MESHES(1)%ALL_SLICE_NAMES(IQ).NE.SLCFNAME) CYCLE QUANTITY_LOOP
+         IF (MESHES(NM)%EMPTY_UNIQUE_SLICE(IQ)) THEN
+            NCELLS = 0
+            NPOINTS = 0
+         ELSE
+            SL => SLICE(IQ)
+            NX = SL%I2 + 1 - SL%I1
+            NY = SL%J2 + 1 - SL%J1
+            NZ = SL%K2 + 1 - SL%K1
+            IF (SL%I2-SL%I1==0 .OR. SL%J2-SL%J1==0 .OR. SL%K2-SL%K1==0) THEN
+               NCONNECTIONS=4 ! 2-D slice
+            ELSE
+               NCONNECTIONS=8 ! 3-D slice
+            ENDIF
+            NPOINTS = NX*NY*NZ
+            NCELLS = MAX((NX-1),1)*MAX((NY-1),1)*MAX((NZ-1),1)
+         ENDIF
+         ! Write number of cells data to file
+         CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NCELLS,&
+            PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS/))
+         
+         ! Write number of points data to file
+         CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NPTS,&
+            PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NPOINTS/))
+         
+         ! Write NumberOfConnectivityIds data to file
+         CALL PARALLEL_WRITE_I32(1, INT8((/1/)), DSET_ID_NCON,&
+            PLIST_ID, INT8((/NM-1/)), INT8((/1/)), (/NCELLS*NCONNECTIONS/))
+         
+         CYCLE MESH_LOOP
+      ENDDO QUANTITY_LOOP
+   ENDDO MESH_LOOP
+   ! Close VTKHDF interface
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCELLS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NPTS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCON, ERROR)
+   CALL H5PCLOSE_F(PLIST_ID, ERROR)
+   CALL CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+END SUBROUTINE INITIALIZE_VTKHDF_SLCF_OLD
+
+
+
+
+
+SUBROUTINE WRITE_VTKHDF_SLICE_DATA_FILE(FILENAME,DATASET,NM,NCELLS,NPOINTS,DATA)
+   CHARACTER(*), INTENT(IN) :: FILENAME, DATASET
+   INTEGER, INTENT(IN) :: NM
+   INTEGER(IB32), DIMENSION(1:NMESHES), INTENT(IN) :: NCELLS, NPOINTS
+   REAL(FB), DIMENSION(*), INTENT(IN) :: DATA
+   INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
+   INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
+   INTEGER(HID_T) :: DSET_ID    ! Dataset identifiers
+   INTEGER :: NPOINTS_TOTAL, NCELLS_TOTAL
+   INTEGER :: NCELLS_MAX, NPOINTS_MAX
+   INTEGER :: ERROR, NMNM
+   TYPE (MESH_TYPE), POINTER :: M
+   INTEGER(IB32), DIMENSION(1:NMESHES) :: NCELLS_ACCUM, NPOINTS_ACCUM
+   
+   NPOINTS_TOTAL=0
+   NCELLS_TOTAL=0
+   NCELLS_ACCUM=0
+   NPOINTS_ACCUM=0
+   NCELLS_MAX = 0
+   NPOINTS_MAX = 0
+   
+   MESH_LOOP_HDF_COUNT: DO NMNM=1,NMESHES
+      NPOINTS_TOTAL = NPOINTS_TOTAL + NPOINTS(NMNM) !+ NVERTS*3
+      NCELLS_TOTAL = NCELLS_TOTAL + NCELLS(NMNM) !+ NFACES*3
+      NCELLS_MAX = MAX(NCELLS_MAX,NCELLS(NMNM))
+      NPOINTS_MAX = MAX(NPOINTS_MAX,NPOINTS(NMNM))
+   ENDDO MESH_LOOP_HDF_COUNT
+   
+   CALL OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   CALL PARALLEL_INIT_F32(GROUP_ID4, DATASET, CRP_LIST, 1,&
+      INT8((/NPOINTS_MAX/)),INT8((/NPOINTS_TOTAL/)), DSET_ID, PLIST_ID) ! Data
+      
+   MESH_LOOP_HDF: DO NMNM=1,NMESHES
+      IF (NMNM/=NM) THEN
+         NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS(NMNM)
+         NCELLS_ACCUM = NCELLS_ACCUM + NCELLS(NMNM)
+         CYCLE MESH_LOOP_HDF
+      ENDIF
+      M => MESHES(NM)
+      IF (NCELLS(NM)==0) THEN
+
+      ENDIF
+      
+      ! Write point data to file
+      CALL PARALLEL_WRITE_F32(1, INT8((/NPOINTS(NM)/)), DSET_ID,&
+         PLIST_ID, INT8((/NPOINTS_ACCUM/)), INT8((/NPOINTS(NM)/)), DATA)
+      
+      NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS(NM)
+      NCELLS_ACCUM = NCELLS_ACCUM + NCELLS(NM)
+   ENDDO MESH_LOOP_HDF
+   
+   ! Close HDF5 datasets
+   CALL H5DCLOSE_F(DSET_ID, ERROR)
+   CALL H5PCLOSE_F(PLIST_ID, ERROR)
+
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   
+   ! Close VTKHDF interface
+   CALL CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   
+END SUBROUTINE WRITE_VTKHDF_SLICE_DATA_FILE
+
+
+SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE(FILENAME,SLCFNAME,SL3D,NM,NCELLS,NPOINTS,NCONNECTIONS)
+   CHARACTER(*), INTENT(IN) :: FILENAME, SLCFNAME
+   INTEGER, INTENT(IN) :: NM
+   LOGICAL, INTENT(IN) :: SL3D
+   INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
+   INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
+   INTEGER(HID_T) :: DSET_ID_CON, DSET_ID_NCELLS    ! Dataset identifiers
+   INTEGER(HID_T) :: DSET_ID_NPTS, DSET_ID_OFF, DSET_ID_PTS, DSET_ID_TYP       ! Dataset identifiers
+   INTEGER :: NPOINTS_TOTAL, NCELLS_TOTAL, NOFFSETS_TOTAL
+   INTEGER :: NCONN_TOTAL, NPIECES
+   INTEGER :: NCONN_ACCUM, NPIECES_ACCUM
+   INTEGER :: NCONN_MAX, NOFFSETS_MAX, NCELLS_MAX, NPOINTS_MAX
+   INTEGER :: NMNM, ERROR, NC, NP, IQ, NQT
+   TYPE (MESH_TYPE), POINTER :: M
+   REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: VERTICES
+   INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
+   INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
+   INTEGER(IB32), DIMENSION(1:NMESHES), INTENT(OUT) :: NCELLS, NPOINTS
+   INTEGER(IB32), DIMENSION(1:NMESHES) :: NCELLS_ACCUM, NPOINTS_ACCUM, NOFFSETS_ACCUM
+   TYPE(SLICE_TYPE), POINTER :: SL
+   INTEGER, INTENT(OUT) :: NCONNECTIONS
+   
+   CALL OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   
+   ! Read number of cells
+   CALL H5DOPEN_F(GROUP_ID1, "NumberOfCells", DSET_ID_NCELLS, ERROR)
+   CALL H5DREAD_F(DSET_ID_NCELLS, H5T_STD_I32LE, NCELLS, INT((/NMESHES/),HSIZE_T), ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NCELLS, ERROR)
+
+   ! Read number of points
+   CALL H5DOPEN_F(GROUP_ID1, "NumberOfPoints", DSET_ID_NPTS, ERROR)
+   CALL H5DREAD_F(DSET_ID_NPTS, H5T_STD_I32LE, NPOINTS, INT((/NMESHES/),HSIZE_T), ERROR)
+   CALL H5DCLOSE_F(DSET_ID_NPTS, ERROR)
+   
+   IF (SL3D) THEN
+      NCONNECTIONS=8 ! 3-D slice
+   ELSE
+      NCONNECTIONS=4 ! 2-D slice
+   ENDIF
+   
+   NPOINTS_TOTAL=0
+   NCELLS_TOTAL=0
+   NCELLS_ACCUM=0
+   NPOINTS_ACCUM=0
+   NOFFSETS_TOTAL=0
+   NOFFSETS_ACCUM = 0
+   NCONN_TOTAL = 0
+   NPIECES = 0
+   NCONN_ACCUM = 0
+   NPIECES_ACCUM = 0
+   NCELLS_MAX = 0
+   NPOINTS_MAX = 0
+   NCONN_MAX = 0
+   NOFFSETS_MAX = 0
+   
+   MESH_LOOP_HDF_COUNT: DO NMNM=1,NMESHES
+      NPOINTS_TOTAL = NPOINTS_TOTAL + NPOINTS(NMNM) !+ NVERTS*3
+      NCELLS_TOTAL = NCELLS_TOTAL + NCELLS(NMNM) !+ NFACES*3
+      !IF (NCELLS(NMNM) > 0) NOFFSETS_TOTAL = NOFFSETS_TOTAL + NCELLS(NMNM) + 1
+      NOFFSETS_TOTAL = NOFFSETS_TOTAL + NCELLS(NMNM) + 1
+      NCONN_TOTAL = NCONN_TOTAL + NCELLS(NMNM)*NCONNECTIONS
+      !WRITE(*,*) "NMNM ", NMNM, " NCELLS ", NCELLS(NMNM), " NCONN_T ", NCONN_TOTAL, " NC ", NCONNECTIONS
+      NPIECES = NPIECES + 1
+      NCELLS_MAX = MAX(NCELLS_MAX,NCELLS(NMNM))
+      NPOINTS_MAX = MAX(NPOINTS_MAX,NPOINTS(NMNM))
+      !IF (NCELLS(NMNM) > 0) NOFFSETS_MAX = MAX(NOFFSETS_MAX,NCELLS(NMNM) + 1)
+      NOFFSETS_MAX = MAX(NOFFSETS_MAX,NCELLS(NMNM) + 1)
+      NCONN_MAX = MAX(NCONN_MAX,NCELLS(NMNM)*NCONNECTIONS)
+   ENDDO MESH_LOOP_HDF_COUNT
+   
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("Connectivity"), CRP_LIST, 1,&
+      INT8((/NCONN_MAX/)),INT8((/NCONN_TOTAL/)), DSET_ID_CON, PLIST_ID) ! Connectivity
+   CALL PARALLEL_INIT_I32(GROUP_ID1, TRIM("Offsets"), CRP_LIST, 1,&
+      INT8((/NOFFSETS_MAX/)),INT8((/NOFFSETS_TOTAL/)), DSET_ID_OFF, PLIST_ID) ! Offsets
+   CALL PARALLEL_INIT_F32(GROUP_ID1, TRIM("Points"), CRP_LIST, 2,&
+      INT8((/3, NPOINTS_MAX/)),INT8((/3, NPOINTS_TOTAL/)), DSET_ID_PTS, PLIST_ID) ! Points
+   CALL PARALLEL_INIT_U8(GROUP_ID1, TRIM("Types"), CRP_LIST, 1,&
+      INT8((/NCELLS_MAX/)),INT8((/NCELLS_TOTAL/)), DSET_ID_TYP, PLIST_ID) ! Types
+   
+   NQT = MESHES(1)%N_SLCF_VTK
+   MESH_LOOP_HDF: DO NMNM=1,NMESHES
+      IF (NMNM/=NM) THEN
+         NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS(NMNM)
+         NCELLS_ACCUM = NCELLS_ACCUM + NCELLS(NMNM)
+         !IF (NCELLS(NMNM) > 0) NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS(NMNM) + 1
+         NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS(NMNM) + 1
+         NCONN_ACCUM = NCONN_ACCUM + NCELLS(NMNM)*NCONNECTIONS
+         NPIECES_ACCUM = NPIECES_ACCUM+1
+         CYCLE MESH_LOOP_HDF
+      ENDIF
+      M => MESHES(NM)
+      IF (NCELLS(NM)==0) THEN
+         ALLOCATE(VERTICES(3,NCELLS(NM)))
+         ALLOCATE(OFFSETS(NCELLS(NM)))
+         ALLOCATE(VTKC_TYPE(NCELLS(NM)))
+         ALLOCATE(CONNECT(NCELLS(NM)*NCONNECTIONS))
+      ELSE
+         QUANTITY_LOOPB: DO IQ=1,NQT
+            SL => SLICE(IQ)
+            IF (TRIM(SL%SLCF_NAME)/=TRIM(SLCFNAME)) CYCLE QUANTITY_LOOPB
+            CALL BUILD_VTK_SLICE_GEOMETRY2(NM, SL, NC, NP, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
+            EXIT
+         ENDDO QUANTITY_LOOPB
+      ENDIF
+      
+      IF (NCELLS(NM)>0) THEN
+         !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, " NCONN_ACCUM ", NCONN_ACCUM, " SZ ", NCELLS(NM)*NCONNECTIONS
+      ENDIF
+      ! Write connectivity data to file
+      CALL PARALLEL_WRITE_I32(1, INT8((/NCELLS(NM)*NCONNECTIONS/)), DSET_ID_CON,&
+         PLIST_ID, INT8((/NCONN_ACCUM/)), INT8((/NCELLS(NM)*NCONNECTIONS/)), CONNECT)
+         
+      ! Write offsets data to file
+      CALL PARALLEL_WRITE_I32(1, INT8((/NCELLS(NM)+1/)), DSET_ID_OFF,&
+         PLIST_ID, INT8((/NOFFSETS_ACCUM/)), INT8((/NCELLS(NM)+1/)), OFFSETS)
+      
+      ! Write point data to file
+      CALL PARALLEL_WRITE_F32(2, INT8((/3, NPOINTS(NM)/)), DSET_ID_PTS,&
+         PLIST_ID, INT8((/0,NPOINTS_ACCUM/)), INT8((/3,NPOINTS(NM)/)), VERTICES)
+      
+      ! Write types data to file
+      CALL PARALLEL_WRITE_U8(1, INT8((/NCELLS(NM)/)), DSET_ID_TYP,&
+         PLIST_ID, INT8((/NCELLS_ACCUM/)), INT8((/NCELLS(NM)/)), VTKC_TYPE)
+      
+      DEALLOCATE(VERTICES)
+      DEALLOCATE(OFFSETS)
+      DEALLOCATE(CONNECT)
+      DEALLOCATE(VTKC_TYPE)
+      NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS(NM)
+      NCELLS_ACCUM = NCELLS_ACCUM + NCELLS(NM)
+      !IF (NCELLS(NM)>0) NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS(NM) + 1
+      NOFFSETS_ACCUM = NOFFSETS_ACCUM + NCELLS(NM) + 1
+      NCONN_ACCUM = NCONN_ACCUM + NCELLS(NM)*NCONNECTIONS
+      NPIECES_ACCUM = NPIECES_ACCUM+1
+   ENDDO MESH_LOOP_HDF
+   
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   
+   ! Close HDF5 datasets
+   CALL H5DCLOSE_F(DSET_ID_CON, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_OFF, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
+   CALL H5DCLOSE_F(DSET_ID_TYP, ERROR)
+   CALL H5PCLOSE_F(PLIST_ID, ERROR)
+
+   CALL MPI_BARRIER(MPI_COMM_WORLD, ERROR)
+   
+   ! Close VTKHDF interface
+   CALL CLOSE_VTKHDF(FILE_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
+   
+END SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE
+
+
+
+
+
+
+
+
+
+
 
 SUBROUTINE ADD_1F32_DATA_TO_VTKHDF_USTR_GAS_FILE(FILENAME, DATANAME, DATA)
    CHARACTER(*), INTENT(IN) :: FILENAME, DATANAME
@@ -13808,7 +14352,6 @@ SUBROUTINE ADD_1F32_DATA_TO_VTKHDF_USTR_GAS_FILE(FILENAME, DATANAME, DATA)
    MESH_LOOP_HDF_COUNT: DO NM=1,NMESHES
       NCELLS = MESHES(NM)%NC
       NPOINTS = MESHES(NM)%NP
-      !WRITE(*,*) "RANK ", MY_RANK, "MESH ", NM, "NP ", NPOINTS, "NC ", NCELLS
       NPOINTS_TOTAL = NPOINTS_TOTAL + NPOINTS !+ NVERTS*3
       NCELLS_TOTAL = NCELLS_TOTAL + NCELLS !+ NFACES*3
       NOFFSETS_TOTAL = NOFFSETS_TOTAL + NCELLS + 1
@@ -13827,8 +14370,6 @@ SUBROUTINE ADD_1F32_DATA_TO_VTKHDF_USTR_GAS_FILE(FILENAME, DATANAME, DATA)
    
    CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM(DATANAME), CRP_LIST, 1,&
       INT8((/NPOINTS_MAX/)),INT8((/NPOINTS_TOTAL/)), DSET_ID, PLIST_ID) ! Color
-   
-   !WRITE(*,*) "INITIALIZING ", TRIM(DATANAME), "DSET_ID ", DSET_ID
    
    MESH_LOOP_HDF: DO NM=1,NMESHES
       NCELLS = MESHES(NM)%NC
@@ -13907,7 +14448,6 @@ SUBROUTINE WRITE_VTKHDF_USTR_GAS_FILE(FILENAME)
       NPOINTS_MAX = MAX(NPOINTS_MAX,NPOINTS)
       NOFFSETS_MAX = MAX(NOFFSETS_MAX,NCELLS + 1)
       NCONN_MAX = MAX(NCONN_MAX,NCELLS*8)
-      !WRITE(*,*) "RANK ", MY_RANK, "MESH ", NM, "NP ", NPOINTS, "NC ", NCELLS, "NOFF", NOFFSETS_TOTAL
    ENDDO MESH_LOOP_HDF_COUNT
    
    ! Initialize HDF5 datafiles
@@ -13938,11 +14478,8 @@ SUBROUTINE WRITE_VTKHDF_USTR_GAS_FILE(FILENAME)
          NPIECES_ACCUM = NPIECES_ACCUM+1
          CYCLE MESH_LOOP_HDF
       ENDIF
-      !CYCLE MESH_LOOP_HDF
       M => MESHES(NM)
-      !WRITE(*,*) "BEFORE", NM, NCELLS, NPOINTS
       CALL BUILD_VTK_GAS_PHASE_GEOMETRY2(NM, NCELLS, NPOINTS, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
-      !WRITE(*,*) "AFTER", NM, NCELLS, NPOINTS, SIZE(CONNECT)
       
       ! Write connectivity data to file
       CALL PARALLEL_WRITE_I32(1, INT8((/NCELLS*8/)), DSET_ID_CON,&
@@ -14060,9 +14597,6 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
    NOFFSETS_MAX = 0
    
    MESH_LOOP_HDF_COUNT: DO NM=1,NMESHES
-      !CALL POINT_TO_MESH(NM)
-      !CALL GET_GEOMSIZES('INBOUND_FACES',0,0,0,0,0,0,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
-      
       NPOINTS_TOTAL = NPOINTS_TOTAL + MESHES(NM)%N_OBST*8 !+ NVERTS*3
       NCELLS_TOTAL = NCELLS_TOTAL + MESHES(NM)%N_OBST*6 !+ NFACES*3
       NOFFSETS_TOTAL = NOFFSETS_TOTAL + MESHES(NM)%N_OBST*6 + 1
@@ -14072,7 +14606,6 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE
       NCONN_MAX = MAX(NCONN_MAX, MESHES(NM)%N_OBST*6*4)
       NOFFSETS_MAX = MAX(NOFFSETS_MAX, MESHES(NM)%N_OBST*6+1)
       NPIECES = NPIECES + 1
-      !WRITE(*,*) "NM ", NM, "RANK ", MY_RANK, "NPOINTS ", MESHES(NM)%N_OBST*8, "NCELLS ", MESHES(NM)%N_OBST*6
    ENDDO MESH_LOOP_HDF_COUNT
    
    DO I= 1,N_GEOMETRY
@@ -14571,23 +15104,35 @@ WRITE(LU_PARAVIEW,'(A)') "    namespace=indir+sep+rdir+sep+chid"
 WRITE(LU_PARAVIEW,'(A)') "pxm = servermanager.ProxyManager()"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy = pxm.NewProxy('misc', 'ListDirectory')"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy.List(indir+sep+rdir)"
-WRITE(LU_PARAVIEW,'(A)') "directory_proxy.UpdatePropertyINFOrmation()"
+WRITE(LU_PARAVIEW,'(A)') 'if version_num <= 5.12:'
+WRITE(LU_PARAVIEW,'(A)') "    directory_proxy.UpdatePropertyINFOrmation()"
+WRITE(LU_PARAVIEW,'(A)') 'else:'
+WRITE(LU_PARAVIEW,'(A)') "    directory_proxy.UpdatePropertyInformation()"
 WRITE(LU_PARAVIEW,'(A,A)') "fileList = sorted(servermanager.VectorProperty(",&
                                "directory_proxy,directory_proxy.GetProperty('FileList')))"
 WRITE(LU_PARAVIEW,'(A,A)') "directoryList = servermanager.VectorProperty(",&
                                "directory_proxy,directory_proxy.GetProperty('DirectoryList'))"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root = pxm.NewProxy('misc', 'ListDirectory')"
 WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.List(indir+sep)"
-WRITE(LU_PARAVIEW,'(A)') "directory_proxy_root.UpdatePropertyINFOrmation()"
+WRITE(LU_PARAVIEW,'(A)') 'if version_num <= 5.12:'
+WRITE(LU_PARAVIEW,'(A)') "    directory_proxy_root.UpdatePropertyINFOrmation()"
+WRITE(LU_PARAVIEW,'(A)') 'else:'
+WRITE(LU_PARAVIEW,'(A)') "    directory_proxy_root.UpdatePropertyInformation()"
 WRITE(LU_PARAVIEW,'(A,A)') "fileList_root = sorted(servermanager.VectorProperty(",&
                                "directory_proxy_root,directory_proxy_root.GetProperty('FileList')))"
 WRITE(LU_PARAVIEW,'(A,A)') "directoryList_root = servermanager.VectorProperty(",&
                                "directory_proxy_root,directory_proxy_root.GetProperty('DirectoryList'))"
 
 WRITE(LU_PARAVIEW,'(A)') "# add geometry data"
-WRITE(LU_PARAVIEW,'(A)') "if chid + '_GEOM.pvtu' in fileList_root:"
-WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(registrationName='Geometry',",&
+IF(.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A)') "if chid + '_GEOM.pvtu' in fileList_root:"
+   WRITE(LU_PARAVIEW,'(A,A)') "    geom = XMLPartitionedUnstructuredGridReader(registrationName='Geometry',",&
                          "FileName=[indir + sep + chid + '_GEOM.pvtu'])"
+ELSE
+   WRITE(LU_PARAVIEW,'(A)') "if chid + '_GEOM.vtkhdf' in fileList_root:"
+   WRITE(LU_PARAVIEW,'(A,A)') "    geom = VTKHDFReader(registrationName='Geometry',",&
+                         "FileName=[indir + sep + chid + '_GEOM.vtkhdf'])"
+ENDIF
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay = Show(geom, renderView1, 'UnstructuredGridRepresentation')"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.MapScalars = 0"
 WRITE(LU_PARAVIEW,'(A)') "    geomDisplay.Representation = 'Surface'"
@@ -14628,8 +15173,13 @@ WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
 WRITE(LU_PARAVIEW,'(A)') "# Load data files"
 WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_BNDF_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+IF(.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.pvtu' in x)]"
+ELSE
+   WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_SM3D_' in x) and ('.vtkhdf' in x)]"
+ENDIF
 WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_X_' in x) and ('.pvtu' in x)]"
 WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+sep+rdir+sep+x for x in fileList ",&
@@ -14662,16 +15212,29 @@ WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGri
                                         "registrationName='Boundary', FileName=[outname])"
 WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
-WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
+IF (.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
                                         "registrationName='Raw Smoke 3D', FileName=sm3dFiles)"
-WRITE(LU_PARAVIEW,'(A)') "    else:"
-WRITE(LU_PARAVIEW,'(A)') "        sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
-WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sm3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sm3d.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sm3dFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sm3dFiles, '.pvtu')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sm3d.pvtu.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sm3dFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = XMLPartitionedUnstructuredGridReader(",&
                                         "registrationName='Raw Smoke 3D', FileName=[outname])"
+ELSE
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = VTKHDFReader(",&
+                                        "registrationName='Raw Smoke 3D', FileName=sm3dFiles)"
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        sm3dFiles = [rdir + x.split(sep)[-1] for x in sm3dFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sm3dFiles, '.vtkhdf')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sm3d.vtkhdf.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sm3dFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sm3dData = VTKHDFReader(",&
+                                        "registrationName='Raw Smoke 3D', FileName=[outname])"
+ENDIF
 WRITE(LU_PARAVIEW,'(A)') "    smokeName = None"
 WRITE(LU_PARAVIEW,'(A)') "    fireName = None"
 WRITE(LU_PARAVIEW,'(A)') "    for s in sm3dData.PointArrayStatus:"
