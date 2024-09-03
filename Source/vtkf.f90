@@ -15176,18 +15176,26 @@ WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList 
 IF(.NOT.VTK_HDF) THEN
    WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_X_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_Y_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_Z_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_SL3D_' in x) and ('.pvtu' in x)]"
 ELSE
    WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_X_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_Y_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_Z_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_SL3D_' in x) and ('.vtkhdf' in x)]"
 ENDIF
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dxFiles = [indir+sep+rdir+sep+x for x in fileList ",&
-                               "if ('_X_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dyFiles = [indir+sep+rdir+sep+x for x in fileList ",&
-                               "if ('_Y_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
-                               "if ('_Z_' in x) and ('.pvtu' in x)]"
-WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
-                               "if ('_SL3D_' in x) and ('.pvtu' in x)]"
 WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_PART_' in x) and ('.pvtp' in x)]"
 !WRITE(LU_PARAVIEW,'(A)') "bndfFiles = sorted(glob.glob(namespace+'_BNDF_*.pvtu'))"
@@ -15244,16 +15252,29 @@ WRITE(LU_PARAVIEW,'(A)') "        if ('hrrpuv' in s.lower()):"
 WRITE(LU_PARAVIEW,'(A)') "            fireName = s"
 WRITE(LU_PARAVIEW,'(A)') "# Add 3d slice data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sl3dFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
-WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
-                                        "registrationName='Raw 3D Slice', FileName=sl3dFiles)"
-WRITE(LU_PARAVIEW,'(A)') "    else:"
-WRITE(LU_PARAVIEW,'(A)') "        sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
-WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sl3dFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sl3d.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sl3dFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
+IF (.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
+                                           "registrationName='Raw 3D Slice', FileName=sl3dFiles)"
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sl3dFiles, '.pvtu')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sl3d.pvtu.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sl3dFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = XMLPartitionedUnstructuredGridReader(",&
                                         "registrationName='Raw 3D Slice', FileName=[outname])"
+ELSE
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = VTKHDFReader(",&
+                                           "registrationName='Raw 3D Slice', FileName=sl3dFiles)"
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        sl3dFiles = [rdir + x.split(sep)[-1] for x in sl3dFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(sl3dFiles, '.vtkhdf')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'sl3d.vtkhdf.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(sl3dFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        sl3dData = VTKHDFReader(",&
+                                        "registrationName='Raw 3D Slice', FileName=[outname])"
+ENDIF
 WRITE(LU_PARAVIEW,'(A,A)') "    sl3dImage = ResampleToImage(",&
                                     "registrationName='Sampled 3D Slice', Input=sl3dData)"
 WRITE(LU_PARAVIEW,'(A,A)') "    sl3dSlice = Slice(",&
@@ -15275,19 +15296,35 @@ WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).r
 WRITE(LU_PARAVIEW,'(A)') "        uniqueSlcfTypes = sorted(list(set(slcfTypes)))"
 WRITE(LU_PARAVIEW,'(A)') "        for slcfType in uniqueSlcfTypes:"
 WRITE(LU_PARAVIEW,'(A)') "            axis=float(slcfType)/100"
-WRITE(LU_PARAVIEW,'(A)') "            if remoteConnection:"
-WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([x for x,y in zip(sl2dFiles, slcfTypes)",&
-                                                "if y == slcfType])"
-WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
-                                                "registrationName='%s=%0.4f'%(axis_name,axis), FileName=slcf_files)"
-WRITE(LU_PARAVIEW,'(A)') "            else:"
-WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
-                                                "zip(sl2dFiles, slcfTypes) if y == slcfType])"
-WRITE(LU_PARAVIEW,'(A)') "                times = parseTimes(slcf_files, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "                outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "                writeSeries(slcf_files, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
-                                                "registrationName='%s=%0.4f'%(axis_name,axis), FileName=[outname])"
+IF (.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A)') "            if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([x for x,y in zip(sl2dFiles, slcfTypes)",&
+                                                   "if y == slcfType])"
+   WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
+                                                   "registrationName='%s=%0.4f'%(axis_name,axis), FileName=slcf_files)"
+   WRITE(LU_PARAVIEW,'(A)') "            else:"
+   WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
+                                                   "zip(sl2dFiles, slcfTypes) if y == slcfType])"
+   WRITE(LU_PARAVIEW,'(A)') "                times = parseTimes(slcf_files, '.pvtu')"
+   WRITE(LU_PARAVIEW,'(A)') "                outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.pvtu.series'"
+   WRITE(LU_PARAVIEW,'(A)') "                writeSeries(slcf_files, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = XMLPartitionedUnstructuredGridReader(",&
+                                                   "registrationName='%s=%0.4f'%(axis_name,axis), FileName=[outname])"
+ELSE
+   WRITE(LU_PARAVIEW,'(A)') "            if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([x for x,y in zip(sl2dFiles, slcfTypes)",&
+                                                   "if y == slcfType])"
+   WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = VTKHDFReader(",&
+                                                   "registrationName='%s=%0.4f'%(axis_name,axis), FileName=slcf_files)"
+   WRITE(LU_PARAVIEW,'(A)') "            else:"
+   WRITE(LU_PARAVIEW,'(A,A)') "                slcf_files = sorted([rdir + x.split(sep)[-1] for x,y in ",&
+                                                   "zip(sl2dFiles, slcfTypes) if y == slcfType])"
+   WRITE(LU_PARAVIEW,'(A)') "                times = parseTimes(slcf_files, '.vtkhdf')"
+   WRITE(LU_PARAVIEW,'(A)') "                outname = indir+sep+'sl2d-'+slcfType.replace(' ','-')+'.vtkhdf.series'"
+   WRITE(LU_PARAVIEW,'(A)') "                writeSeries(slcf_files, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "                sl2dData = VTKHDFReader(",&
+                                                   "registrationName='%s=%0.4f'%(axis_name,axis), FileName=[outname])"
+ENDIF
 WRITE(LU_PARAVIEW,'(A)') "# Add particle data"
 WRITE(LU_PARAVIEW,'(A)') "if len(partFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "    partTypes = [x.split('_PART_')[1] for x in partFiles]"
