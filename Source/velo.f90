@@ -1885,9 +1885,6 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
    ED%OMEGA    = -1.E6_EB
    ED%TAU      = -1.E6_EB
-   ED%U_AVG    = -1.E6_EB
-   ED%V_AVG    = -1.E6_EB
-   ED%W_AVG    = -1.E6_EB
    INTERPOLATED_EDGE = .FALSE.
 
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
@@ -2265,7 +2262,8 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_B1%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
-            IF (SYNTHETIC_EDDY_METHOD) VELOCITY_BC_INDEX=NO_SLIP_BC
+            IF (SYNTHETIC_EDDY_METHOD)         VELOCITY_BC_INDEX=NO_SLIP_BC
+            IF (SF%ROUGHNESS>2._EB/WCM_B1%RDN) VELOCITY_BC_INDEX=NO_SLIP_BC ! see Basu et al. BLM 2017
 
             ! Compute the viscosity by averaging the two adjacent gas cells
 
@@ -3105,10 +3103,12 @@ RAMP_TIME_IF: IF (RAMP_TIME_INDEX>0) THEN
    ! User-specified time increments
 
    RP=>RAMPS(RAMP_TIME_INDEX)
-   IF (ICYC+1>RP%NUMBER_DATA_POINTS) THEN
+   IF (ICYC==RP%NUMBER_DATA_POINTS) THEN
       DT_NEW(NM) = T_END - RP%INDEPENDENT_DATA(ICYC)
-   ELSE
+   ELSEIF (ICYC<=RP%NUMBER_DATA_POINTS-1) THEN
       DT_NEW(NM) = RP%INDEPENDENT_DATA(ICYC+1) - RP%INDEPENDENT_DATA(ICYC)
+   ELSE
+      DT_NEW(NM) = MAX(0._EB,T_END - T)
    ENDIF
    CHANGE_TIME_STEP_INDEX(NM) = 1
 
