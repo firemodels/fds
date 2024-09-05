@@ -1,5 +1,7 @@
 &HEAD CHID='stairwell', TITLE='Test of stairwell pressurization' /
 
+&MISC VERBOSE=T /
+
 &TIME T_END=60. /
 
 &MESH ID='Level 01 to 05', IJK=59,27,178, XB= 3.5, 9.4, 5.1, 7.8,  7.5, 25.3, MPI_PROCESS=0 /
