@@ -187,6 +187,9 @@ TYPE BOUNDARY_COORD_TYPE
    INTEGER :: IIG            !< Gas cell x index
    INTEGER :: JJG            !< Gas cell y index
    INTEGER :: KKG            !< Gas cell z index
+   INTEGER :: IIS            !< Free stream cell x index
+   INTEGER :: JJS            !< Free stream cell y index
+   INTEGER :: KKS            !< Free stream cell z index
    INTEGER :: IOR=0          !< Index of orientation of the WALL cell
 
    REAL(EB) :: X             !< x coordinate of boundary cell center
@@ -307,6 +310,9 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: TMP_G                 !< Near-surface gas temperature (K)
    REAL(EB) :: TMP_F_OLD             !< Holding value for surface temperature (K)
    REAL(EB) :: TMP_B                 !< Back surface temperature (K)
+   REAL(EB) :: TMP_FS                !< Free stream temperature (K)
+   REAL(EB) :: RHO_FS                !< Free stream density (kg/m3)
+   REAL(EB) :: U_TANG_FS             !< Free stream velocity (m/s)
    REAL(EB) :: U_NORMAL=0._EB        !< Normal component of velocity (m/s) at surface, start of time step
    REAL(EB) :: U_NORMAL_S=0._EB      !< Estimated normal component of velocity (m/s) at next time step
    REAL(EB) :: U_NORMAL_0=0._EB      !< Initial or specified normal component of velocity (m/s) at surface
@@ -314,6 +320,8 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: U_IMPACT=0._EB        !< Impact velocity from stagnation pressure
    REAL(EB) :: RHO_F                 !< Gas density at the wall (kg/m3)
    REAL(EB) :: RHO_G                 !< Gas density in near wall cell (kg/m3)
+   REAL(EB) :: MU_G                  !< Gas viscosity near wall cell (kg/m/s)
+   REAL(EB) :: RSUM_G                !< R/W near wall cell
    REAL(EB) :: RDN=1._EB             !< \f$ 1/ \delta n \f$ at the surface (1/m)
    REAL(EB) :: K_G=0.025_EB          !< Thermal conductivity of gas in adjacent gas phase cell near wall
    REAL(EB) :: Q_DOT_G_PP=0._EB      !< Heat release rate per unit area (W/m2)
@@ -903,6 +911,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
    REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
+   REAL(EB) :: BOUNDARY_LAYER_THICKNESS=0.051_EB       !< Nominal thickness (m) of the boundary layer
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
