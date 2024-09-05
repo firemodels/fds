@@ -818,6 +818,16 @@ $QFDS -d WUI Needle_TGA_E.fds
 $QFDS -d WUI Needle_TGA_F.fds
 $QFDS -d WUI Needle_TGA_G.fds
 $QFDS -d WUI Needle_TGA_H.fds
+$QFDS -d WUI part_drag_prof_ux.fds
+$QFDS -d WUI part_drag_prof_uy.fds
+$QFDS -d WUI part_drag_prof_uz.fds
+$QFDS -d WUI part_drag_prof_vx.fds
+$QFDS -d WUI part_drag_prof_vy.fds
+$QFDS -d WUI part_drag_prof_vz.fds
+$QFDS -d WUI part_drag_prof_wx.fds
+$QFDS -d WUI part_drag_prof_wy.fds
+$QFDS -d WUI part_drag_prof_wz.fds
+$QFDS -d WUI part_drag_stretched.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds
