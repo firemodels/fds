@@ -1007,6 +1007,8 @@ MAIN_LOOP: DO
 
    ! Stop the run normally
 
+   IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('End of time step')
+
    IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
