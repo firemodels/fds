@@ -8998,6 +8998,8 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
       TEMPERATURE=60. /
 \end{lstlisting}
 
+You can also specify a {\ct RAMP\_TMP\_Z} vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the temperature ($^\circ$C).
+
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
 
@@ -9012,8 +9014,6 @@ indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$, 25~\
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000., RAMP_Q='q1' /
 \end{lstlisting}
 ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
-
-
 
 \section{Velocity Field}
 \label{info:velo_restart}
@@ -9030,6 +9030,16 @@ FDS uses a predefined random seed for the random number generator which ensures 
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
+\subsection{One-Dimensional Velocity Component Fields}
+\label{info:ramp_velocity_1d}
+
+For diagnostic or verification purpuses it may be useful to initialize velocity components with 1D fields.  This can be used in combination with {\ct FREEZE\_VELOCITY=T}, for example, to control precisely the amount of drag a particle sees, and so on.  The linear fields are specified with the {\ct RAMP} functionality and the ramp is identified using {\ct RAMP\_UX}, for example, on {\ct MISC} to specify variation of the $u$ component of velocity in the $x$ direction.  Other velocity components and directions are specified similarly (see Table \ref{tbl:MISC}).
+\begin{lstlisting}
+&MISC FREEZE_VELOCITY=T, RAMP_UX='u1'/
+&RAMP ID='u1', X= 0, F=0 /
+&RAMP ID='u1', X= 2, F=4 /
+&RAMP ID='u1', X= 4, F=16/
+\end{lstlisting}
 
 \section{Nonuniform Initial Fields: Velocity, Temperature, Species}
 \label{info:CSVF}
@@ -12260,6 +12270,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_TMP\_Z}                & Character         & Section~\ref{info:init_temperature}           &                &               \\ \hline
 {\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
@@ -12483,6 +12494,15 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GZ}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
+{\ct RAMP\_UX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 {\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}           \\ \hline
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
 {\ct RND\_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
