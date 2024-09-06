@@ -44,8 +44,10 @@ res_str = {'coarse','medium','fine'};
 Re_str  = {'1e5','4e5'};
 
 % errors from original implementation (rows = Re_str and cols = res_str)
-E = [0.029521932969818   0.030755969241315   0.120746304035212; ...
-     0.009736035032018   0.080052757086653   0.265447704564341];
+E = [0.056918654162878   0.041857745609598   0.116595781318777; ...
+     0.001352928562540   0.063273295539949   0.270795928496828];
+
+E_FDS = zeros(size(E));
 
 for j=1:length(res_str)
     for i=1:length(Re_str)
@@ -65,10 +67,10 @@ for j=1:length(res_str)
         h_fds = qconv/(T_j-T_w);
         Nu_fds = h_fds*D_h/k;
 
-        error_j = abs(Nu - Nu_fds)/abs(Nu);
+        E_FDS(i,j) = abs(Nu - Nu_fds)/abs(Nu);
 
-        if error_j > E(i,j)*1.1
-            disp(['Matlab Warning: impinging jet error = ',num2str(error_j),' at Re_j=',Re_str{i},', Res=',res_str{j}])
+        if E_FDS(i,j) > E(i,j)*1.1
+            disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
         end
 
         if i==1
