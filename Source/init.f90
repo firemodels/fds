@@ -363,6 +363,56 @@ DO K=0,M%KBP1
    M%W(:,:,K)   = M%W_WIND(K)
 ENDDO
 
+! Custom velocity RAMPS (for verification)
+
+IF (I_RAMP_UX>0) THEN
+   DO I=0,M%IBAR
+      M%U(I,:,:) = EVALUATE_RAMP(M%X(I),I_RAMP_UX)
+   ENDDO
+ENDIF
+IF (I_RAMP_UY>0) THEN
+   DO J=0,M%JBP1
+      M%U(:,J,:) = EVALUATE_RAMP(M%YC(J),I_RAMP_UY)
+   ENDDO
+ENDIF
+IF (I_RAMP_UZ>0) THEN
+   DO K=0,M%KBP1
+      M%U(:,:,K) = EVALUATE_RAMP(M%ZC(K),I_RAMP_UZ)
+   ENDDO
+ENDIF
+
+IF (I_RAMP_VX>0) THEN
+   DO I=0,M%IBP1
+      M%V(I,:,:) = EVALUATE_RAMP(M%XC(I),I_RAMP_VX)
+   ENDDO
+ENDIF
+IF (I_RAMP_VY>0) THEN
+   DO J=0,M%JBAR
+      M%V(:,J,:) = EVALUATE_RAMP(M%Y(J),I_RAMP_VY)
+   ENDDO
+ENDIF
+IF (I_RAMP_VZ>0) THEN
+   DO K=0,M%KBP1
+      M%V(:,:,K) = EVALUATE_RAMP(M%ZC(K),I_RAMP_VZ)
+   ENDDO
+ENDIF
+
+IF (I_RAMP_WX>0) THEN
+   DO I=0,M%IBP1
+      M%W(I,:,:) = EVALUATE_RAMP(M%XC(I),I_RAMP_WX)
+   ENDDO
+ENDIF
+IF (I_RAMP_WY>0) THEN
+   DO J=0,M%JBP1
+      M%W(:,J,:) = EVALUATE_RAMP(M%YC(J),I_RAMP_WY)
+   ENDDO
+ENDIF
+IF (I_RAMP_WZ>0) THEN
+   DO K=0,M%KBAR
+      M%W(:,:,K) = EVALUATE_RAMP(M%Z(K),I_RAMP_WZ)
+   ENDDO
+ENDIF
+
 M%US    = M%U
 M%VS    = M%V
 M%WS    = M%W
@@ -436,7 +486,7 @@ IF (RADIATION) THEN
    M%UIID = 4._EB*SIGMA*TMPA4/REAL(UIIDIM,EB)
 ENDIF
 
-! Over-ride default ambient gas species mass fractions, temperatuer and density
+! Over-ride default ambient gas species mass fractions, temperature and density
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)

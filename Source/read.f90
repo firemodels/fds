@@ -1723,7 +1723,8 @@ SUBROUTINE READ_MISC
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 REAL(EB) :: MAXIMUM_VISIBILITY
 CHARACTER(LABEL_LENGTH) :: RAMP_GX,RAMP_GY,RAMP_GZ,TURBULENCE_MODEL,&
-                           SIMULATION_MODE,FLUX_LIMITER,LES_FILTER_TYPE
+                           SIMULATION_MODE,FLUX_LIMITER,LES_FILTER_TYPE,&
+                           RAMP_UX,RAMP_UY,RAMP_UZ,RAMP_VX,RAMP_VY,RAMP_VZ,RAMP_WX,RAMP_WY,RAMP_WZ
 
 NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANCE, &
                 BNDF_DEFAULT,CC_IBM,CCVOL_LINK,C_DEARDORFF,&
@@ -1739,7 +1740,9 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 NOISE,NOISE_VELOCITY,NO_PRESSURE_ZONES,NUCLEATION_SITES,ORIGIN_LAT,ORIGIN_LON,&
                 OVERWRITE,PARTICLE_CFL,PARTICLE_CFL_MAX,PARTICLE_CFL_MIN,PERIODIC_TEST,POSITIVE_ERROR_TEST,&
                 POROUS_FLOOR,PR,PROFILING,&
-                P_INF,RAMP_GX,RAMP_GY,RAMP_GZ,RESTART,RESTART_CHID,SC,&
+                P_INF,RAMP_GX,RAMP_GY,RAMP_GZ,&
+                RAMP_UX,RAMP_UY,RAMP_UZ,RAMP_VX,RAMP_VY,RAMP_VZ,RAMP_WX,RAMP_WY,RAMP_WZ,&
+                RESTART,RESTART_CHID,SC,&
                 RND_SEED,SIMULATION_MODE,SMOKE3D_16,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_DENSITY,SOOT_OXIDATION,&
                 TAU_DEFAULT,TENSOR_DIFFUSIVITY,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
                 THERMOPHORETIC_DEPOSITION,THERMOPHORETIC_SETTLING,THICKEN_OBSTRUCTIONS,&
@@ -1749,7 +1752,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
 
 ! Physical constants
 
-TMPA         = 20._EB                                              ! Ambient temperature (C)
+TMPA         = 20._EB           ! Ambient temperature (C)
 
 ! Empirical heat transfer constants
 
@@ -1775,9 +1778,18 @@ SC                   = -1.0_EB  ! Turbulent Schmidt number
 RAMP_GX              = 'null'
 RAMP_GY              = 'null'
 RAMP_GZ              = 'null'
-GVEC(1)              = 0._EB        ! x-component of gravity
-GVEC(2)              = 0._EB        ! y-component of gravity
-GVEC(3)              = -GRAV        ! z-component of gravity
+GVEC(1)              = 0._EB    ! x-component of gravity
+GVEC(2)              = 0._EB    ! y-component of gravity
+GVEC(3)              = -GRAV    ! z-component of gravity
+RAMP_UX              = 'null'
+RAMP_UY              = 'null'
+RAMP_UZ              = 'null'
+RAMP_VX              = 'null'
+RAMP_VY              = 'null'
+RAMP_VZ              = 'null'
+RAMP_WX              = 'null'
+RAMP_WY              = 'null'
+RAMP_WZ              = 'null'
 THICKEN_OBSTRUCTIONS = .FALSE.
 N_TERRAIN_IMAGES     = 0
 DO I = 1, MAX_TERRAIN_IMAGES
@@ -1895,6 +1907,25 @@ ALLOCATE(RAMP_TYPE(MAX_RAMPS))
 IF (RAMP_GX/='null') CALL GET_RAMP_INDEX(RAMP_GX,'TIME',I_RAMP_GX)
 IF (RAMP_GY/='null') CALL GET_RAMP_INDEX(RAMP_GY,'TIME',I_RAMP_GY)
 IF (RAMP_GZ/='null') CALL GET_RAMP_INDEX(RAMP_GZ,'TIME',I_RAMP_GZ)
+
+I_RAMP_UX   = 0
+I_RAMP_UY   = 0
+I_RAMP_UZ   = 0
+I_RAMP_VX   = 0
+I_RAMP_VY   = 0
+I_RAMP_VZ   = 0
+I_RAMP_WX   = 0
+I_RAMP_WY   = 0
+I_RAMP_WZ   = 0
+IF (RAMP_UX/='null') CALL GET_RAMP_INDEX(RAMP_UX,'TIME',I_RAMP_UX)
+IF (RAMP_UY/='null') CALL GET_RAMP_INDEX(RAMP_UY,'TIME',I_RAMP_UY)
+IF (RAMP_UZ/='null') CALL GET_RAMP_INDEX(RAMP_UZ,'TIME',I_RAMP_UZ)
+IF (RAMP_VX/='null') CALL GET_RAMP_INDEX(RAMP_VX,'TIME',I_RAMP_VX)
+IF (RAMP_VY/='null') CALL GET_RAMP_INDEX(RAMP_VY,'TIME',I_RAMP_VY)
+IF (RAMP_VZ/='null') CALL GET_RAMP_INDEX(RAMP_VZ,'TIME',I_RAMP_VZ)
+IF (RAMP_WX/='null') CALL GET_RAMP_INDEX(RAMP_WX,'TIME',I_RAMP_WX)
+IF (RAMP_WY/='null') CALL GET_RAMP_INDEX(RAMP_WY,'TIME',I_RAMP_WY)
+IF (RAMP_WZ/='null') CALL GET_RAMP_INDEX(RAMP_WZ,'TIME',I_RAMP_WZ)
 
 ! Prandtl and Schmidt numbers
 
@@ -11859,7 +11890,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
                IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC') VT%TYPE_INDICATOR = -2
-               IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR=-2
+               IF ((DB/='null' .OR. MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) &
+                    .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR=-2
                IF (SURF_ID=='PERIODIC FLOW ONLY') VT%SURF_INDEX = PERIODIC_FLOW_ONLY_SURF_INDEX
 
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY

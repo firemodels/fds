@@ -220,8 +220,8 @@ TYPE MESH_TYPE
 
    INTEGER :: NREGFACE_H(MAX_DIM)=0
    TYPE(CC_REGFACE_TYPE), ALLOCATABLE, DIMENSION(:) :: REGFACE_IAXIS_H, &
-                                                        REGFACE_JAXIS_H, &
-                                                        REGFACE_KAXIS_H
+                                                       REGFACE_JAXIS_H, &
+                                                       REGFACE_KAXIS_H
 
    ! CC_IBM mesh arrays
 
