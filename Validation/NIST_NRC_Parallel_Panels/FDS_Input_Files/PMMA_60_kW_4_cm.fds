@@ -1,7 +1,7 @@
-&HEAD CHID='PMMA_60_kW_1_cm', TITLE='Parallel Panel Test, Black PMMA, Propane, 60 kW' /
+&HEAD CHID='PMMA_60_kW_4_cm', TITLE='Parallel Panel Test, Black PMMA, Propane, 60 kW' /
 
-&MESH IJK=30,40,40, XB=-0.60,-0.30,-0.40,0.00,-0.30,0.10, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.3, DY=0.4, DZ=0.4, I_UPPER=3, J_UPPER=1, K_UPPER=11 /
+&MESH IJK=15,20,20, XB=-0.60, 0.00,-0.40,0.40,-0.32,0.48, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.6, DY=0.8, DZ=0.8, I_UPPER=1, J_UPPER=0, K_UPPER=5 /
 
 &TIME T_END=600.0 /
 
