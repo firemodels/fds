@@ -4999,6 +4999,14 @@ You can also simulate a spark ignition using the following lines of input:
 \end{lstlisting}
 In this case, methane and air will not combust unless the grid cell temperature exceeds 540~$^\circ$C. However, within the grid cell containing the specified point {\ct XYZ}, a ``spark'' is generated at 10~s which effectively causes the AIT to go to 0~K and ignition of fuel and air is allowed, assuming a suitable amount of fuel and air is present.
 
+\subsection{Local Quenching (AIT per ZONE)}
+\label{info:ait_per_zone}
+
+There may be special circumstances where you would like to specify that a localized region of the domain cannot support combustion.  In this case, you may use the {\ct AIT\_EXCLUSION\_ZONE} construct to specify a locally high value of the ignition temperature threshold, which will prevent combustion in this region.  For example,
+\begin{lstlisting}
+&REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(1)=1000.
+           AIT_EXCLUSION_ZONE(1:6,2)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(2)=3000./
+\end{lstlisting}
 
 \newpage
 
@@ -13033,6 +13041,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_TEMPERATURE}   & Real           & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
