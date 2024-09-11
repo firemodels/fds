@@ -660,6 +660,7 @@ TYPE AIT_EXCLUSION_ZONE_TYPE
    REAL(EB) :: Y2            !< Upper y bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: AIT=0._EB     !< Auto-Ignition Temperature per Zone (K)
    INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
    INTEGER :: CTRL_INDEX=0   !< Index of control controlling the status of the zone
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
