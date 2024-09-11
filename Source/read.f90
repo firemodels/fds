@@ -8101,9 +8101,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
                                            ' REFERENCE_THICKNESS values must increase for each new group of REFERENCE_HEAT_FLUX.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               IF (SF%N_THICK_REF==0) SF%N_THICK_REF = 1
-               SF%N_THICK_REF = SF%N_THICK_REF + 1
             ENDIF
+            IF (SF%N_THICK_REF==0) SF%N_THICK_REF = 1
+            IF (REFERENCE_THICKNESS(NN) > REFERENCE_THICKNESS(NN-1)) SF%N_THICK_REF = SF%N_THICK_REF + 1
          ENDIF
          SF%N_QDOTPP_REF = SF%N_QDOTPP_REF + 1
       ENDIF
