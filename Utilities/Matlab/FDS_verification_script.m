@@ -107,5 +107,6 @@ disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
 disp('tree_shapes...');                   tree_shapes
 disp('impinging_jet...');                 impinging_jet
+disp('part_drag_profile...');             part_drag_profile
 
 display('verification scripts completed successfully!')
