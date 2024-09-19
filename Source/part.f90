@@ -2512,7 +2512,7 @@ END SUBROUTINE MOVE_ON_SOLID
 SUBROUTINE MOVE_IN_GAS
 
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY, SURFACE_DENSITY
-USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, RANDOM_CHOICE, BOX_MULLER, MESH_TO_PARTICLE, PARTICLE_TO_MESH
+USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, RANDOM_CHOICE, BOX_MULLER
 USE SOOT_ROUTINES, ONLY: DROPLET_SCRUBBING
 REAL(EB) :: UBAR,VBAR,WBAR,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_FILM, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
@@ -2521,10 +2521,9 @@ REAL(EB) :: UBAR,VBAR,WBAR,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_FILM, &
             GX_LOC,GY_LOC,GZ_LOC,DRAG_MAX(3)=0._EB,K_SGS,U_P,KN,M_DOT,&
             EMBER_DENSITY,EMBER_VOLUME=0._EB,ACCEL_X,ACCEL_Y,ACCEL_Z,&
             LP_FORCE,FACE_VOLS(2,2,2),VEL_G_INT(3),VOL_WGT(2,2,2),&
-            EMBER_PACKING_RATIO,LOCAL_PACKING_RATIO,LPC_GEOM_FACTOR,&
-            X_WGT,Y_WGT,Z_WGT,X_WGT2,Y_WGT2,Z_WGT2
-REAL(EB) :: WGT(2,2,2,3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FV_D=>NULL(),VEL_G=>NULL()
+            EMBER_PACKING_RATIO,LOCAL_PACKING_RATIO,LPC_GEOM_FACTOR
+REAL(EB) :: WGT(2,2,2,3),VEL_G(2,2,2)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FV_D=>NULL()
 REAL(EB), SAVE :: BETA
 INTEGER :: IIX,JJY,KKZ,IL,JL,KL,AXIS,N_LPC2
 LOGICAL :: STUCK=.FALSE.
@@ -2556,46 +2555,29 @@ IF (CC_IBM) THEN
    ENDIF
 ENDIF
 
-IF (ICC>0) THEN
-   WGT=0._EB
-   DO AXIS=IAXIS,KAXIS
-      IL = IIX; JL = JJY; KL = KKZ
-      IF (AXIS==IAXIS) THEN
-         VEL_G => U
-         IL = FLOOR(XI)
-      ELSEIF (AXIS==JAXIS) THEN
-         VEL_G => V
-         JL = FLOOR(YJ)
-      ELSEIF (AXIS==KAXIS) THEN
-         VEL_G => W
-         KL = FLOOR(ZK)
-      ENDIF
+WGT=0._EB
+DO AXIS=IAXIS,KAXIS
+   IL = IIX; JL = JJY; KL = KKZ
+   IF (AXIS==IAXIS) THEN
+      IL = FLOOR(XI)
+      VEL_G = U(IL:IL+1,JL:JL+1,KL:KL+1)
+   ELSEIF (AXIS==JAXIS) THEN
+      JL = FLOOR(YJ)
+      VEL_G = V(IL:IL+1,JL:JL+1,KL:KL+1)
+   ELSEIF (AXIS==KAXIS) THEN
+      KL = FLOOR(ZK)
+      VEL_G = W(IL:IL+1,JL:JL+1,KL:KL+1)
+   ENDIF
+   IF (ICC>0) THEN
       CALL GET_FACE_IDW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
-      VEL_G_INT(AXIS) = SUM(VEL_G(IL:IL+1,JL:JL+1,KL:KL+1)*WGT(:,:,:,AXIS))
-   ENDDO
-   UBAR = VEL_G_INT(IAXIS)
-   VBAR = VEL_G_INT(JAXIS)
-   WBAR = VEL_G_INT(KAXIS)
-ELSE
-   X_WGT  = XI+.5_EB-IIX
-   Y_WGT  = YJ+.5_EB-JJY
-   Z_WGT  = ZK+.5_EB-KKZ
-   X_WGT2 = XI-FLOOR(XI)
-   Y_WGT2 = YJ-FLOOR(YJ)
-   Z_WGT2 = ZK-FLOOR(ZK)
-
-   IF (X_WGT>=0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX(-1)>0) X_WGT = 1._EB
-   IF (X_WGT< 0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX( 1)>0) X_WGT = 0._EB
-   IF (Y_WGT>=0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX(-2)>0) Y_WGT = 1._EB
-   IF (Y_WGT< 0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX( 2)>0) Y_WGT = 0._EB
-   IF (Z_WGT>=0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX(-3)>0) Z_WGT = 1._EB
-   IF (Z_WGT< 0.5_EB .AND. CELL(IC_OLD)%WALL_INDEX( 3)>0) Z_WGT = 0._EB
-
-   CALL MESH_TO_PARTICLE(UBAR,U,IIG_OLD-1,JJY,KKZ,X_WGT2,Y_WGT,Z_WGT)
-   CALL MESH_TO_PARTICLE(VBAR,V,IIX,JJG_OLD-1,KKZ,X_WGT,Y_WGT2,Z_WGT)
-   CALL MESH_TO_PARTICLE(WBAR,W,IIX,JJY,KKG_OLD-1,X_WGT,Y_WGT,Z_WGT2)
-ENDIF
-
+   ELSE
+      CALL GET_FACE_TLW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
+   ENDIF
+   VEL_G_INT(AXIS) = SUM(VEL_G*WGT(:,:,:,AXIS))
+ENDDO
+UBAR = VEL_G_INT(IAXIS)
+VBAR = VEL_G_INT(JAXIS)
+WBAR = VEL_G_INT(KAXIS)
 
 
 ! If the particle has a path, just follow the path and return
@@ -2962,32 +2944,26 @@ LP%ACCEL_X = LP%ACCEL_X + ACCEL_X
 LP%ACCEL_Y = LP%ACCEL_Y + ACCEL_Y
 LP%ACCEL_Z = LP%ACCEL_Z + ACCEL_Z
 
-IF (ICC>0) THEN
-   DO AXIS=IAXIS,KAXIS
-      IL = IIX; JL = JJY; KL = KKZ
-      IF (AXIS == IAXIS) THEN
-         LP_FORCE = ACCEL_X/LP%RVC
-         IL       = FLOOR(XI)
-         FV_D     => FVX_D
-      ELSEIF (AXIS == JAXIS) THEN
-         LP_FORCE = ACCEL_Y/LP%RVC
-         JL       = FLOOR(YJ)
-         FV_D     => FVY_D
-      ELSEIF (AXIS == KAXIS) THEN
-         LP_FORCE = ACCEL_Z/LP%RVC
-         KL       = FLOOR(ZK)
-         FV_D     => FVZ_D
-      ENDIF
-      CALL GET_FACE_VOLUMES(AXIS,IL,JL,KL,FACE_VOLS)
-      VOL_WGT = FACE_VOLS*WGT(:,:,:,AXIS)
-      IF (ANY(VOL_WGT>TWO_EPSILON_EB)) VOL_WGT=WGT(:,:,:,AXIS)/SUM(VOL_WGT)
-      FV_D(IL:IL+1, JL:JL+1, KL:KL+1) = FV_D(IL:IL+1, JL:JL+1, KL:KL+1) - LP_FORCE*VOL_WGT
-   ENDDO
-ELSE
-   CALL PARTICLE_TO_MESH(ACCEL_X,FVX_D,IIG_OLD-1,JJY,KKZ,X_WGT2,Y_WGT,Z_WGT)
-   CALL PARTICLE_TO_MESH(ACCEL_Y,FVY_D,IIX,JJG_OLD-1,KKZ,X_WGT,Y_WGT2,Z_WGT)
-   CALL PARTICLE_TO_MESH(ACCEL_Z,FVZ_D,IIX,JJY,KKG_OLD-1,X_WGT,Y_WGT,Z_WGT2)
-ENDIF
+DO AXIS=IAXIS,KAXIS
+   IL = IIX; JL = JJY; KL = KKZ
+   IF (AXIS == IAXIS) THEN
+      LP_FORCE = ACCEL_X/LP%RVC
+      IL       = FLOOR(XI)
+      FV_D     => FVX_D
+   ELSEIF (AXIS == JAXIS) THEN
+      LP_FORCE = ACCEL_Y/LP%RVC
+      JL       = FLOOR(YJ)
+      FV_D     => FVY_D
+   ELSEIF (AXIS == KAXIS) THEN
+      LP_FORCE = ACCEL_Z/LP%RVC
+      KL       = FLOOR(ZK)
+      FV_D     => FVZ_D
+   ENDIF
+   CALL GET_FACE_VOLUMES(AXIS,IL,JL,KL,FACE_VOLS)
+   VOL_WGT = FACE_VOLS*WGT(:,:,:,AXIS)
+   IF (ANY(VOL_WGT>TWO_EPSILON_EB)) VOL_WGT=WGT(:,:,:,AXIS)/SUM(VOL_WGT)
+   FV_D(IL:IL+1, JL:JL+1, KL:KL+1) = FV_D(IL:IL+1, JL:JL+1, KL:KL+1) - LP_FORCE*VOL_WGT
+ENDDO
 
 ! store C_DRAG for output
 
@@ -3219,25 +3195,21 @@ FACE_LOOP: DO KK=K,K+1
          ELSE
             XYZ_INT = (/X_F(II),Y_F(JJ),Z_F(KK)/)
          ENDIF
-         IF (DIST>TWO_EPSILON_EB) THEN
-            IDW(II-I+1,JJ-J+1,KK-K+1) = 0._EB
+         DIST = NORM2((/P_X,P_Y,P_Z/)-XYZ_INT)
+         ! Special case where location is directly on face
+         IF (DIST<TWO_EPSILON_EB) THEN
+            IDW = 0._EB
+            IDW(II-I+1,JJ-J+1,KK-K+1) = 1._EB
+            EXIT FACE_LOOP
          ELSE
-            DIST = NORM2((/P_X,P_Y,P_Z/)-XYZ_INT)
-            ! Special case where location is directly on face
-            IF (DIST<TWO_EPSILON_EB) THEN
-               IDW = 0._EB
-               IDW(II-I+1,JJ-J+1,KK-K+1) = 1._EB
-               EXIT FACE_LOOP
-            ELSE
-               D_WGT = 1._EB/DIST**6._EB
-            ENDIF
-            ! face is solid
-            IF(CELL(CELL_INDEX(II,JJ,KK))%WALL_INDEX(AXIS)>0) D_WGT = 0._EB
-            IF (CC_IBM .AND. D_WGT>0._EB) THEN
-               IF(FCVAR(II,JJ,KK,CC_FGSC,AXIS)==CC_SOLID) D_WGT = 0._EB
-            ENDIF
-            IDW(II-I+1,JJ-J+1,KK-K+1) = D_WGT
+            D_WGT = 1._EB/DIST**6._EB
          ENDIF
+         ! face is solid
+         IF(CELL(CELL_INDEX(II,JJ,KK))%WALL_INDEX(AXIS)>0) D_WGT = 0._EB
+         IF (CC_IBM .AND. D_WGT>0._EB) THEN
+            IF(FCVAR(II,JJ,KK,CC_FGSC,AXIS)==CC_SOLID) D_WGT = 0._EB
+         ENDIF
+         IDW(II-I+1,JJ-J+1,KK-K+1) = D_WGT
       ENDDO
    ENDDO
 ENDDO FACE_LOOP
@@ -3263,6 +3235,61 @@ ENDIF
 IF (ANY(IDW>TWO_EPSILON_EB)) IDW = IDW/SUM(IDW)
 
 END SUBROUTINE GET_FACE_IDW
+
+!> \brief Get Tri-Linear interpolation Weight (TLW) values for nearest gas faces
+!> \param AXIS The axis of the face quantity
+!> \param I The lower x index
+!> \param J The lower y index
+!> \param K The lower z index
+!> \param P_X Sample point location in x
+!> \param P_Y Sample point location in y
+!> \param P_Z Sample point location in z
+!> \param TLW 2x2x2 matrix of weights for cartesian faces
+
+SUBROUTINE GET_FACE_TLW(AXIS,I,J,K,P_X,P_Y,P_Z,TLW)
+
+REAL(EB), INTENT(IN) :: P_X,P_Y,P_Z
+REAL(EB), INTENT(OUT) :: TLW(0:1,0:1,0:1)
+INTEGER, INTENT(IN) :: AXIS,I,J,K
+REAL(EB) :: P,PP,R,RR,S,SS
+REAL(EB), POINTER :: X_F(:),Y_F(:),Z_F(:)
+
+TLW=0._EB
+
+X_F=>XC
+Y_F=>YC
+Z_F=>ZC
+SELECT CASE(AXIS)
+   CASE(IAXIS); X_F=>X
+   CASE(JAXIS); Y_F=>Y
+   CASE(KAXIS); Z_F=>Z
+END SELECT
+
+P = (P_X-X_F(I))/(X_F(I+1)-X_F(I))
+R = (P_Y-Y_F(J))/(Y_F(J+1)-Y_F(J))
+S = (P_Z-Z_F(K))/(Z_F(K+1)-Z_F(K))
+
+IF (AXIS/=IAXIS .AND. IIG_OLD> I .AND. CELL(IC_OLD)%WALL_INDEX(-1)>0) P = 1._EB
+IF (AXIS/=IAXIS .AND. IIG_OLD==I .AND. CELL(IC_OLD)%WALL_INDEX( 1)>0) P = 0._EB
+IF (AXIS/=JAXIS .AND. JJG_OLD> J .AND. CELL(IC_OLD)%WALL_INDEX(-2)>0) R = 1._EB
+IF (AXIS/=JAXIS .AND. JJG_OLD==J .AND. CELL(IC_OLD)%WALL_INDEX( 2)>0) R = 0._EB
+IF (AXIS/=KAXIS .AND. KKG_OLD> K .AND. CELL(IC_OLD)%WALL_INDEX(-3)>0) S = 1._EB
+IF (AXIS/=KAXIS .AND. KKG_OLD==K .AND. CELL(IC_OLD)%WALL_INDEX( 3)>0) S = 0._EB
+
+PP = 1._EB-P
+RR = 1._EB-R
+SS = 1._EB-S
+
+TLW(0,0,0) = PP * RR * SS
+TLW(1,0,0) = P  * RR * SS
+TLW(0,1,0) = PP * R  * SS
+TLW(0,0,1) = PP * RR * S
+TLW(1,0,1) = P  * RR * S
+TLW(0,1,1) = PP * R  * S
+TLW(1,1,0) = P  * R  * SS
+TLW(1,1,1) = P  * R  * S
+
+END SUBROUTINE GET_FACE_TLW
 
 !> \brief Return face volumes for distribution of quantity onto faces
 !> \param AXIS The axis for the face centered quantity
