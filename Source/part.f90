@@ -2522,8 +2522,8 @@ REAL(EB) :: UBAR,VBAR,WBAR,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_FILM, &
             EMBER_DENSITY,EMBER_VOLUME=0._EB,ACCEL_X,ACCEL_Y,ACCEL_Z,&
             LP_FORCE,FACE_VOLS(2,2,2),VEL_G_INT(3),VOL_WGT(2,2,2),&
             EMBER_PACKING_RATIO,LOCAL_PACKING_RATIO,LPC_GEOM_FACTOR
-REAL(EB) :: WGT(2,2,2,3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FV_D=>NULL(),VEL_G=>NULL()
+REAL(EB) :: WGT(2,2,2,3),VEL_G(2,2,2)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FV_D=>NULL()
 REAL(EB), SAVE :: BETA
 INTEGER :: IIX,JJY,KKZ,IL,JL,KL,AXIS,N_LPC2
 LOGICAL :: STUCK=.FALSE.
@@ -2542,6 +2542,7 @@ IIX = FLOOR(XI+.5_EB)
 JJY = FLOOR(YJ+.5_EB)
 KKZ = FLOOR(ZK+.5_EB)
 ! For cut cells base nearest points on cell centroid
+ICC = 0
 IF (CC_IBM) THEN
    ICC = CCVAR(IIG_OLD,JJG_OLD,KKG_OLD,CC_IDCC)
    IF (ICC>0) THEN
@@ -2558,21 +2559,26 @@ WGT=0._EB
 DO AXIS=IAXIS,KAXIS
    IL = IIX; JL = JJY; KL = KKZ
    IF (AXIS==IAXIS) THEN
-      VEL_G => U
       IL = FLOOR(XI)
+      VEL_G = U(IL:IL+1,JL:JL+1,KL:KL+1)
    ELSEIF (AXIS==JAXIS) THEN
-      VEL_G => V
       JL = FLOOR(YJ)
+      VEL_G = V(IL:IL+1,JL:JL+1,KL:KL+1)
    ELSEIF (AXIS==KAXIS) THEN
-      VEL_G => W
       KL = FLOOR(ZK)
+      VEL_G = W(IL:IL+1,JL:JL+1,KL:KL+1)
    ENDIF
-   CALL GET_FACE_IDW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
-   VEL_G_INT(AXIS) = SUM(VEL_G(IL:IL+1,JL:JL+1,KL:KL+1)*WGT(:,:,:,AXIS))
+   IF (ICC>0) THEN
+      CALL GET_FACE_IDW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
+   ELSE
+      CALL GET_FACE_TLW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
+   ENDIF
+   VEL_G_INT(AXIS) = SUM(VEL_G*WGT(:,:,:,AXIS))
 ENDDO
 UBAR = VEL_G_INT(IAXIS)
 VBAR = VEL_G_INT(JAXIS)
 WBAR = VEL_G_INT(KAXIS)
+
 
 ! If the particle has a path, just follow the path and return
 
@@ -3189,25 +3195,21 @@ FACE_LOOP: DO KK=K,K+1
          ELSE
             XYZ_INT = (/X_F(II),Y_F(JJ),Z_F(KK)/)
          ENDIF
-         IF (DIST>TWO_EPSILON_EB) THEN
-            IDW(II-I+1,JJ-J+1,KK-K+1) = 0._EB
+         DIST = NORM2((/P_X,P_Y,P_Z/)-XYZ_INT)
+         ! Special case where location is directly on face
+         IF (DIST<TWO_EPSILON_EB) THEN
+            IDW = 0._EB
+            IDW(II-I+1,JJ-J+1,KK-K+1) = 1._EB
+            EXIT FACE_LOOP
          ELSE
-            DIST = NORM2((/P_X,P_Y,P_Z/)-XYZ_INT)
-            ! Special case where location is directly on face
-            IF (DIST<TWO_EPSILON_EB) THEN
-               IDW = 0._EB
-               IDW(II-I+1,JJ-J+1,KK-K+1) = 1._EB
-               EXIT FACE_LOOP
-            ELSE
-               D_WGT = 1._EB/DIST**6._EB
-            ENDIF
-            ! face is solid
-            IF(CELL(CELL_INDEX(II,JJ,KK))%WALL_INDEX(AXIS)>0) D_WGT = 0._EB
-            IF (CC_IBM .AND. D_WGT>0._EB) THEN
-               IF(FCVAR(II,JJ,KK,CC_FGSC,AXIS)==CC_SOLID) D_WGT = 0._EB
-            ENDIF
-            IDW(II-I+1,JJ-J+1,KK-K+1) = D_WGT
+            D_WGT = 1._EB/DIST**6._EB
          ENDIF
+         ! face is solid
+         IF(CELL(CELL_INDEX(II,JJ,KK))%WALL_INDEX(AXIS)>0) D_WGT = 0._EB
+         IF (CC_IBM .AND. D_WGT>0._EB) THEN
+            IF(FCVAR(II,JJ,KK,CC_FGSC,AXIS)==CC_SOLID) D_WGT = 0._EB
+         ENDIF
+         IDW(II-I+1,JJ-J+1,KK-K+1) = D_WGT
       ENDDO
    ENDDO
 ENDDO FACE_LOOP
@@ -3233,6 +3235,61 @@ ENDIF
 IF (ANY(IDW>TWO_EPSILON_EB)) IDW = IDW/SUM(IDW)
 
 END SUBROUTINE GET_FACE_IDW
+
+!> \brief Get Tri-Linear interpolation Weight (TLW) values for nearest gas faces
+!> \param AXIS The axis of the face quantity
+!> \param I The lower x index
+!> \param J The lower y index
+!> \param K The lower z index
+!> \param P_X Sample point location in x
+!> \param P_Y Sample point location in y
+!> \param P_Z Sample point location in z
+!> \param TLW 2x2x2 matrix of weights for cartesian faces
+
+SUBROUTINE GET_FACE_TLW(AXIS,I,J,K,P_X,P_Y,P_Z,TLW)
+
+REAL(EB), INTENT(IN) :: P_X,P_Y,P_Z
+REAL(EB), INTENT(OUT) :: TLW(0:1,0:1,0:1)
+INTEGER, INTENT(IN) :: AXIS,I,J,K
+REAL(EB) :: P,PP,R,RR,S,SS
+REAL(EB), POINTER :: X_F(:),Y_F(:),Z_F(:)
+
+TLW=0._EB
+
+X_F=>XC
+Y_F=>YC
+Z_F=>ZC
+SELECT CASE(AXIS)
+   CASE(IAXIS); X_F=>X
+   CASE(JAXIS); Y_F=>Y
+   CASE(KAXIS); Z_F=>Z
+END SELECT
+
+P = (P_X-X_F(I))/(X_F(I+1)-X_F(I))
+R = (P_Y-Y_F(J))/(Y_F(J+1)-Y_F(J))
+S = (P_Z-Z_F(K))/(Z_F(K+1)-Z_F(K))
+
+IF (AXIS/=IAXIS .AND. IIG_OLD> I .AND. CELL(IC_OLD)%WALL_INDEX(-1)>0) P = 1._EB
+IF (AXIS/=IAXIS .AND. IIG_OLD==I .AND. CELL(IC_OLD)%WALL_INDEX( 1)>0) P = 0._EB
+IF (AXIS/=JAXIS .AND. JJG_OLD> J .AND. CELL(IC_OLD)%WALL_INDEX(-2)>0) R = 1._EB
+IF (AXIS/=JAXIS .AND. JJG_OLD==J .AND. CELL(IC_OLD)%WALL_INDEX( 2)>0) R = 0._EB
+IF (AXIS/=KAXIS .AND. KKG_OLD> K .AND. CELL(IC_OLD)%WALL_INDEX(-3)>0) S = 1._EB
+IF (AXIS/=KAXIS .AND. KKG_OLD==K .AND. CELL(IC_OLD)%WALL_INDEX( 3)>0) S = 0._EB
+
+PP = 1._EB-P
+RR = 1._EB-R
+SS = 1._EB-S
+
+TLW(0,0,0) = PP * RR * SS
+TLW(1,0,0) = P  * RR * SS
+TLW(0,1,0) = PP * R  * SS
+TLW(0,0,1) = PP * RR * S
+TLW(1,0,1) = P  * RR * S
+TLW(0,1,1) = PP * R  * S
+TLW(1,1,0) = P  * R  * SS
+TLW(1,1,1) = P  * R  * S
+
+END SUBROUTINE GET_FACE_TLW
 
 !> \brief Return face volumes for distribution of quantity onto faces
 !> \param AXIS The axis for the face centered quantity
