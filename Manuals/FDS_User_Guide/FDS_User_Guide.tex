@@ -2455,7 +2455,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Specify the desired cell size] by specifying {\ct CELL\_SIZE(NL)} directly, where {\ct NL} designates a particular layer. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type using the parameter {\ct TIME\_STEP\_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.  You can also ask FDS to use a solid phase time step that obeys the Fourier number constraint, $\mathrm{Fo}=\delta t \alpha/\delta x^2=1$; this is done by setting {\ct CHECK\_FO=T} on {\ct MISC}.
 \item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX(NL)} (default 1000), where {\ct NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
-\item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
+\item[Change when a wall cell is renoded] by setting {\ct REMESH\_RATIO} on the {\ct SURF} line and/or {\ct REAC\_RATE\_DELTA} on the {\ct MATL} line. If nodes changes size during pyrolysis, FDS will try and renode layers with changing cell size to optimize the number of nodes. This renoding process is costly if it is done frequently. The parameter {\ct REMESH\_RATIO} sets the fractional change in the size of a wall cell before FDS will check for renoding. For example, with the default value of 0.15, FDS will not attempt the first renode of a wall cell that is initially all 0.1~m nodes unless one node has either increased to 0.115~m or decreased to 0.085~m. A second potential challenge with renoding occurs when there are large cell-to-cell temperature differences inside a pyrolyzing layer. Renoding will combine cells causing changes in temperature. If there is a large enough temperature difference, this can cause large swings in the pyrolysis rate. The parameter {\ct REAC\_RATE\_DELTA}, default value of 0.05, sets the fractional change in the pyrolysis rate for a material that is considered acceptable. If renoding of a layer could cause a temperature change large enough to achieve that change in pyrolysis rate, then FDS will not renode that layer.
 \end{description}
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS(N)}, where {\ct N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is 0.0001~m or 0.1 times the specified {\ct THICKNESS}, whichever is less. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
 
@@ -2863,11 +2863,11 @@ The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$
 
 The pre-exponential factor\footnote{For versions of FDS up to and including 6.7.7, the form of the reaction rate expression was slightly different than the one currently used. In these older versions, the density term on the right hand side of Eq.~(\ref{rr}) was divided by the initial density of the layer. For first-order reactions ($n_{{\rm s},ij}=1$), this older form is equivalent to the current form. However, for reactions that are not first-order ($n_{{\rm s},ij}\neq 1$), the new value of $A_{ij}=A_{ij}^{\rm old}/\rho_{\rm s}(0)^{n_{{\rm s},ij}-1}$, where $\rho_{\rm s}(0)$ is the initial density of the layer.}, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
-The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by
+The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium. The concentration at depth $x$ is given by
 \be
-X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
+X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g})
 \ee
-where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
+where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
 You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
@@ -4999,6 +4999,14 @@ You can also simulate a spark ignition using the following lines of input:
 \end{lstlisting}
 In this case, methane and air will not combust unless the grid cell temperature exceeds 540~$^\circ$C. However, within the grid cell containing the specified point {\ct XYZ}, a ``spark'' is generated at 10~s which effectively causes the AIT to go to 0~K and ignition of fuel and air is allowed, assuming a suitable amount of fuel and air is present.
 
+\subsection{Local Quenching (AIT per ZONE)}
+\label{info:ait_per_zone}
+
+There may be special circumstances where you would like to specify that a localized region of the domain cannot support combustion.  In this case, you may use the {\ct AIT\_EXCLUSION\_ZONE} construct to specify a locally high value of the ignition temperature threshold, which will prevent combustion in this region.  For example,
+\begin{lstlisting}
+&REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(1)=1000.
+           AIT_EXCLUSION_ZONE(1:6,2)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(2)=3000./
+\end{lstlisting}
 
 \newpage
 
@@ -8998,6 +9006,8 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
       TEMPERATURE=60. /
 \end{lstlisting}
 
+You can also specify a {\ct RAMP\_TMP\_Z} vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the temperature ($^\circ$C).
+
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
 
@@ -9012,8 +9022,6 @@ indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$, 25~\
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000., RAMP_Q='q1' /
 \end{lstlisting}
 ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
-
-
 
 \section{Velocity Field}
 \label{info:velo_restart}
@@ -9030,6 +9038,16 @@ FDS uses a predefined random seed for the random number generator which ensures 
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
+\subsection{One-Dimensional Velocity Component Fields}
+\label{info:ramp_velocity_1d}
+
+For diagnostic or verification purpuses it may be useful to initialize velocity components with 1D fields.  This can be used in combination with {\ct FREEZE\_VELOCITY=T}, for example, to control precisely the amount of drag a particle sees, and so on.  The linear fields are specified with the {\ct RAMP} functionality and the ramp is identified using {\ct RAMP\_UX}, for example, on {\ct MISC} to specify variation of the $u$ component of velocity in the $x$ direction.  Other velocity components and directions are specified similarly (see Table \ref{tbl:MISC}).
+\begin{lstlisting}
+&MISC FREEZE_VELOCITY=T, RAMP_UX='u1'/
+&RAMP ID='u1', X= 0, F=0 /
+&RAMP ID='u1', X= 2, F=4 /
+&RAMP ID='u1', X= 4, F=16/
+\end{lstlisting}
 
 \section{Nonuniform Initial Fields: Velocity, Temperature, Species}
 \label{info:CSVF}
@@ -12260,6 +12278,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_TMP\_Z}                & Character         & Section~\ref{info:init_temperature}           &                &               \\ \hline
 {\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
@@ -12354,6 +12373,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct NU\_SPEC(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct PART\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real Array      & Section~\ref{info:kinetic_parameters} & $^\circ$C         & 80.           \\ \hline
+{\ct REAC\_RATE\_DELTA}             & Real            & Section~\ref{info:solid_phase_stability}  &                  & 0.05          \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real            & Section~\ref{solid_phase_energy_conservation}    & kJ/kg               &               \\ \hline
 {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} & Real            & Section~\ref{solid_phase_energy_conservation}    & K                   &               \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
@@ -12482,6 +12502,15 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GZ}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
+{\ct RAMP\_UX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 {\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}           \\ \hline
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
 {\ct RND\_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
@@ -13012,6 +13041,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_TEMPERATURE}   & Real           & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -13313,7 +13343,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct REFERENCE\_HEAT\_FLUX}                               & Real Array      & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
 {\ct \footnotesize REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 {\ct REFERENCE\_THICKNESS}                                & Real Array      & Section~\ref{info:scaled_burning}         & m                   &                         \\ \hline
-{\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
+{\ct REMESH\_RATIO}                                       & Real            & Section~\ref{info:solid_phase_stability}  &                     & 0.15                    \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
 {\ct SHAPE\_FACTOR}                                       & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 0.25                    \\ \hline
