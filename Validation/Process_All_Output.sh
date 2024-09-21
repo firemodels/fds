@@ -72,6 +72,7 @@ PROCESS Harrison_Spill_Plumes
 PROCESS Heated_Channel_Flow
 PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
+PROCESS JH_FRA
 PROCESS Juelich_SETCOM
 PROCESS LEMTA_Spray
 PROCESS LEMTA_UGent_Pool_Fires
