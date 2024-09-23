@@ -371,6 +371,7 @@ cat << EOF >> $scriptfile
 #SBATCH --partition=$queue
 #SBATCH --ntasks=$n_mpi_processes
 #SBATCH --cpus-per-task=$n_openmp_threads
+#SBATCH --nodes=$nodes
 #SBATCH --time=$walltime
 EOF
 
