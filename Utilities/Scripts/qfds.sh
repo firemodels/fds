@@ -377,7 +377,6 @@ EOF
 
 if [[ $n_openmp_threads -gt 1 ]] || [[ $max_mpi_processes_per_node -lt 1000 ]] ; then
 cat << EOF >> $scriptfile
-#SBATCH --nodes=$nodes
 #SBATCH --ntasks-per-node=$n_mpi_processes_per_node
 EOF
 fi
