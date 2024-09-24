@@ -1215,7 +1215,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
       LP%DX = DX(II)
       LP%DY = DY(JJ)
       LP%DZ = DZ(KK)
-      LP%INITIALIZATION_INDEX = INIT_INDEX
+      LP%INIT_INDEX = INIT_INDEX
 
       ! Initialize particle properties
 
@@ -1399,7 +1399,6 @@ IF (N_INSERT>0) THEN
          LP%PWT = LP%PWT*PWT0
       ENDIF
       IF (ANY(IN%PATH_RAMP_INDEX>0)) LP%PATH_PARTICLE=.TRUE.
-      LP%INIT_INDEX = INIT_INDEX
    ENDDO
 
 ENDIF

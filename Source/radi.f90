@@ -4402,15 +4402,17 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
 
-            ! Compute projected intensity on particles
+            ! Compute projected intensity on particles with a specified ORIENTATION
 
-            IF (SOLID_PARTICLES) THEN
+            IF (ORIENTED_PARTICLES) THEN
                PARTICLE_RADIATION_LOOP: DO IP=1,NLP
                   LP => LAGRANGIAN_PARTICLE(IP)
                   LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+                  IF (LPC%N_ORIENTATION==0) CYCLE PARTICLE_RADIATION_LOOP
                   BC => BOUNDARY_COORD(LP%BC_INDEX)
-                  IF (LP%INITIALIZATION_INDEX > 0) THEN
-                     IN => INITIALIZATION(LP%INITIALIZATION_INDEX)
+                  TEMP_ORIENTATION(1:3) = ORIENTATION_VECTOR(1:3,LP%ORIENTATION_INDEX)
+                  IF (LP%INIT_INDEX > 0) THEN
+                     IN => INITIALIZATION(LP%INIT_INDEX)
                      IF (ANY(IN%ORIENTATION_RAMP_INDEX > 0)) THEN
                         TEMP_ORIENTATION(1) = EVALUATE_RAMP(T,IN%ORIENTATION_RAMP_INDEX(1))
                         TEMP_ORIENTATION(2) = EVALUATE_RAMP(T,IN%ORIENTATION_RAMP_INDEX(2))
@@ -4418,44 +4420,21 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         TEMP_ORIENTATION = TEMP_ORIENTATION / &
                                            (SQRT(TEMP_ORIENTATION(1)**2+TEMP_ORIENTATION(2)**2+TEMP_ORIENTATION(3)**2) &
                                            +TWO_EPSILON_EB)
-                        COS_DL = -DOT_PRODUCT(TEMP_ORIENTATION(1:3),DLANG(1:3,N))
-                        IF (COS_DL>ORIENTATION_VIEW_ANGLE(LP%ORIENTATION_INDEX)) THEN
-                           COS_DL = -(TEMP_ORIENTATION(1)*DLX(N) + &
-                                      TEMP_ORIENTATION(2)*DLY(N) + &
-                                      TEMP_ORIENTATION(3)*DLZ(N))
-                           BR => BOUNDARY_RADIA(LP%BR_INDEX)
-                           IF (LPC%MASSLESS_TARGET) THEN
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
-                              IF (N==NEAREST_RADIATION_ANGLE(LP%ORIENTATION_INDEX)) &
-                                 BR%IL(IBND) = IL(BC%IIG,BC%JJG,BC%KKG)
-                           ELSE
-                              ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
-                           ENDIF
-                        ENDIF
-                        CYCLE PARTICLE_RADIATION_LOOP
                      ENDIF
                   ENDIF
-                  SELECT CASE(LPC%N_ORIENTATION)
-                     CASE(0)
-                        CYCLE PARTICLE_RADIATION_LOOP
-                     CASE(1)
-                        COS_DL = -DOT_PRODUCT(ORIENTATION_VECTOR(1:3,LP%ORIENTATION_INDEX),DLANG(1:3,N))
-                        IF (COS_DL>ORIENTATION_VIEW_ANGLE(LP%ORIENTATION_INDEX)) THEN
-                           COS_DL = -(ORIENTATION_VECTOR(1,LP%ORIENTATION_INDEX)*DLX(N) + &
-                                      ORIENTATION_VECTOR(2,LP%ORIENTATION_INDEX)*DLY(N) + &
-                                      ORIENTATION_VECTOR(3,LP%ORIENTATION_INDEX)*DLZ(N))
-                           BR => BOUNDARY_RADIA(LP%BR_INDEX)
-                           IF (LPC%MASSLESS_TARGET) THEN
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
-                              IF (N==NEAREST_RADIATION_ANGLE(LP%ORIENTATION_INDEX)) &
-                                 BR%IL(IBND) = IL(BC%IIG,BC%JJG,BC%KKG)
-                           ELSE
-                              ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
-                              BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
-                           ENDIF
-                        ENDIF
-                  END SELECT
+                  COS_DL = -DOT_PRODUCT(TEMP_ORIENTATION(1:3),DLANG(1:3,N))
+                  IF (COS_DL > ORIENTATION_VIEW_ANGLE(LP%ORIENTATION_INDEX)) THEN
+                     COS_DL = -(TEMP_ORIENTATION(1)*DLX(N) + TEMP_ORIENTATION(2)*DLY(N) + TEMP_ORIENTATION(3)*DLZ(N))
+                     BR => BOUNDARY_RADIA(LP%BR_INDEX)
+                     IF (LPC%MASSLESS_TARGET) THEN
+                        BR%BAND(IBND)%ILW(N) = COS_DL * IL(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
+                        IF (N==NEAREST_RADIATION_ANGLE(LP%ORIENTATION_INDEX)) &
+                           BR%IL(IBND) = IL(BC%IIG,BC%JJG,BC%KKG)
+                     ELSE
+                        ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
+                        BR%BAND(IBND)%ILW(N) = COS_DL * IL_UP(BC%IIG,BC%JJG,BC%KKG) * VIEW_ANGLE_AREA(LP%ORIENTATION_INDEX)
+                     ENDIF
+                  ENDIF
                ENDDO PARTICLE_RADIATION_LOOP
             ENDIF
 
