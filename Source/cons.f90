@@ -211,6 +211,7 @@ LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a functi
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
 LOGICAL :: CHECK_FO=.FALSE.                 !< Check the solid phase Fourier number
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
+LOGICAL :: ORIENTED_PARTICLES=.FALSE.       !< Indicates the existence of particles with a specified orientation
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
 LOGICAL :: BAROCLINIC=.TRUE.                !< Include the baroclinic terms in the momentum equation
 LOGICAL :: GRAVITATIONAL_DEPOSITION=.TRUE.  !< Allow aerosol gravitational deposition
