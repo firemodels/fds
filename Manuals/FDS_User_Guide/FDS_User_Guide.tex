@@ -3066,11 +3066,12 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
 
-An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65$~$^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. The evaporation rate of a burning liquid in steady state is approximately
+An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65$~$^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. At steady state, the heat balance at the pool surface is
 \be
-   \dot{m}'' \approx \frac{\dot{q}''}{h_{\rm g}}  \quad ; \quad  h_{\rm g} = c (T_{\rm b}-T_\infty) + h_{\rm v}
+   \dot{q}''_{total} - \dot{q}''_{c}= \dot{m}'' h_{\rm v}(T_s)
 \ee
-In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''/h_{\rm g}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
+
+where $ \dot{q}''_{c}$ is the heat being conducted away from the surface. If $ \dot{q}''_{c}$ is made zero, which can be done by using {\ct BACKING='INSULATED'} and a high thermal conductivity, then the pool surface temperature,$T_s$, will approach the boiling temperature,$T_b$. In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''_{}total}/h_{\rm v}(T_b)$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
 \begin{figure}[!ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_mdot}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_temp}
