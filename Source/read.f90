@@ -7568,7 +7568,10 @@ DO N=1,N_MATL
       DO NS=1,N_TRACKED_SPECIES
          IF (ML%NU_GAS(NS,1) > 0._EB) THEN
             ! drr/dT = H_V/(R T_BOIL) and rr = 1
-            ML%RENODE_DELTA_T = ML%REAC_RATE_DELTA/(SPECIES(NS)%H_V(INT(ML%TMP_REF(1)))*SPECIES(NS)%MW/(R0*ML%TMP_REF(1)**2))
+            ML%RENODE_DELTA_T = ML%H_R(1,INT(ML%TMP_REF(1)))*SPECIES(NS)%MW/R0
+            ML%RENODE_DELTA_T = ML%RENODE_DELTA_T * EXP(ML%RENODE_DELTA_T/ML%TMP_REF(1)) * &
+                                 EXP(-ML%RENODE_DELTA_T/ML%TMP_REF(1))/ML%TMP_REF(1)**2
+            ML%RENODE_DELTA_T = ML%REAC_RATE_DELTA/ML%RENODE_DELTA_T
             EXIT
          ENDIF
       ENDDO
