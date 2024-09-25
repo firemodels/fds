@@ -2168,7 +2168,8 @@ SUB_TIMESTEP_LOOP: DO
    ! Determine additional heat sources
    
    Q_ADD = 0._EB
-   
+   Q_IR = 0._EB
+
    ! Add internal heat source specified by user
 
    DO I=1,NWP
@@ -2204,7 +2205,6 @@ SUB_TIMESTEP_LOOP: DO
    ! Calculate internal radiation for Cartesian geometry only
 
    IF (SF%INTERNAL_RADIATION) THEN
-      Q_IR = 0._EB
       DO I=1,NWP
          IF (SF%KAPPA_S(LAYER_INDEX(I))<0._EB) THEN
             VOLSUM = 0._EB
