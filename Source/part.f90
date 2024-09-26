@@ -4157,7 +4157,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     TMP_G_NEW == 1._EB
+                     TMP_G_NEW = 1._EB
                      IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
                         WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < 0. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
                         PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
