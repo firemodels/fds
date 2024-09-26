@@ -3557,7 +3557,7 @@ IF (MESHES(NM)%NLP==0) THEN
    RETURN
 ELSE
    ALLOCATE(PART_WARNING(NLP))
-   PART_WARNING(NLP)=0
+   PART_WARNING=0
 ENDIF
 
 ! Working arrays
@@ -4155,7 +4155,16 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL GET_TEMPERATURE(TMP_G_NEW,H_NEW/M_GAS_NEW,ZZ_GET2)
                IF (TMP_G_NEW < 0._EB) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  CYCLE TIME_ITERATION_LOOP
+                  IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
+                     DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                     TMP_G_NEW = 1._EB
+                     IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < 0. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
+                     ENDIF
+                  ELSE
+                     CYCLE TIME_ITERATION_LOOP
+                  ENDIF
                ENDIF
 
                ! Limit gas temperature change
@@ -4164,9 +4173,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
-                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
+                     IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
                      ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
@@ -4180,9 +4189,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
-                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
+                     IF (.NOT. BTEST(PART_WARNING(IP),5)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),5)
                      ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
