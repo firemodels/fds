@@ -1123,30 +1123,44 @@ SUBROUTINE ULMAT_SOLVER_SETUP(NM)
 USE COMPLEX_GEOMETRY, ONLY : CC_GASPHASE,CC_CGSC
 USE CC_SCALARS, ONLY : GET_H_CUTFACES
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
+#ifdef WITH_HYPRE
+USE HYPRE_INTERFACE
+#endif
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
-INTEGER :: I,J,K,IPZ,IOPZ,ICC,JCC,IW,IOR,ZBTYPE_LAST(-3:3),WALL_BTYPE,NZIM,IPZIM,IZERO,JDIM
+INTEGER :: I,J,K,IPZ,IOPZ,ICC,JCC,IW,IOR,ZBTYPE_LAST(-3:3),WALL_BTYPE,NZIM,IPZIM,IZERO,JDIM,IERR
 INTEGER, POINTER :: IBAR=>NULL(),JBAR=>NULL(),KBAR=>NULL(),IBP1=>NULL(),JBP1=>NULL(),KBP1=>NULL(),&
                     ITRN=>NULL(),JTRN=>NULL(),KTRN=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
-TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 INTEGER, PARAMETER :: NULL_BTYPE=0,DIRICHLET_BTYPE=1,NEUMANN_BTYPE=2,PERIODIC_BTYPE=3
 
 IF (FREEZE_VELOCITY)  RETURN ! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FREEZE_VELOCITY=.TRUE.
 IF (SOLID_PHASE_ONLY) RETURN
 TNOW=CURRENT_TIME()
 
-! If MKL library not present stop.
+! If either MKL or HYPRE library not present stop.
 #ifndef WITH_MKL
+#ifndef WITH_HYPRE
 IF (MY_RANK==0) WRITE(LU_ERR,'(A)') &
-'Error: MKL Library compile flag was not defined for ULMAT as pressure solver.'
+'Error: MKL or HYPRE Library compile flag not defined for ULMAT pressure solver.'
 ! Some error - stop flag for CALL STOP_CHECK(1).
 STOP_STATUS = SETUP_STOP
 RETURN
+#endif
+#endif
+
+#ifdef WITH_HYPRE
+CALL HYPRE_INITIALIZE(IERR)
+IF (IERR==1) THEN
+   WRITE(LU_ERR,'(A)') 'Error: HYPRE pressure solver initialization error.'
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
 #endif
 
 ! Factor to drop DY(J) in cylindrical coordinates. Soln assumes DTheta=1.
@@ -1382,8 +1396,8 @@ ZONE_MESH_LOOP_4: DO IPZ=0,N_ZONE
    ! 3.e Make changes to H_MAT due to boundary conditions (i.e. WALL faces with DIRICHLET boundary condition):
    CALL ULMAT_BCS_H_MATRIX(NM,IPZ)
 
-   ! 3.f Pass H_MAT, NNZ_H_MAT, JD_H_MAT to CSR format and invoque LU solver:
-   CALL ULMAT_H_MATRIX_LUDCMP(NM,IPZ)
+   ! 3.f Pass H_MAT, NNZ_H_MAT, JD_H_MAT to CSR format and set up solver:
+   CALL ULMAT_H_MATRIX_SOLVER_SETUP(NM,IPZ)
 
 ENDDO ZONE_MESH_LOOP_4
 
@@ -2686,8 +2700,9 @@ IPARM(27) = 1  ! Check matrix
 RETURN
 END SUBROUTINE ULMAT_DEFINE_IPARM
 
-! ------------------------------- ULMAT_H_MATRIX_LUDCMP ----------------------------------
-SUBROUTINE ULMAT_H_MATRIX_LUDCMP(NM,IPZ)
+! ------------------------------- ULMAT_H_MATRIX_SOLVER_SETUP ----------------------------------
+
+SUBROUTINE ULMAT_H_MATRIX_SOLVER_SETUP(NM,IPZ)
 
 INTEGER, INTENT(IN) :: NM,IPZ
 
@@ -2713,7 +2728,7 @@ IF(CHECK_POISSON) THEN
    MSGLVL = 1
    IF(MY_RANK==0) WRITE(LU_ERR,*) 'ULMAT : PARDISO factorization for MESH,ZONE=',NM,IPZ,ZM%NUNKH
 ENDIF
-ERROR     = 0 ! initialize error flag
+ERROR = 0 ! initialize error flag
 
 ! Each MPI process builds its local set of rows.
 ! Matrix blocks defined on CRS distributed format.
@@ -2784,7 +2799,7 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
 
 IF (ERROR /= 0) THEN
    IF (MY_RANK==0) THEN
-   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
+   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_SOLVER_SETUP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
    IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
    ENDIF
@@ -2808,7 +2823,7 @@ CALL PARDISO (ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
 
 IF (ERROR /= 0) THEN
    IF (MY_RANK==0) THEN
-   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
+   WRITE(LU_ERR,'(A,I5)') 'ULMAT_H_MATRIX_SOLVER_SETUP PARDISO Num Factor: The following ERROR was detected: ', ERROR
    ! Some error - stop flag for CALL STOP_CHECK(1).
    IF(ERROR==-2) WRITE(LU_ERR,'(A)') 'Insufficient Memory for Poisson Matrix Factorization.'
    ENDIF
@@ -2822,7 +2837,7 @@ ENDIF
 IF(CHECK_POISSON) MSGLVL = 0
 
 RETURN
-END SUBROUTINE ULMAT_H_MATRIX_LUDCMP
+END SUBROUTINE ULMAT_H_MATRIX_SOLVER_SETUP
 
 
 SUBROUTINE FINISH_ULMAT_SOLVER(NM)
