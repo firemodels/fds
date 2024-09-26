@@ -15,7 +15,7 @@ USE MKL_PARDISO
 USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 #ifdef WITH_PETSC
-USE PETSC_MESH_ZONE, ONLY : PETSC_MZ_TYPE
+USE PETSC_ZONE_MESH, ONLY : PETSC_ZM_TYPE
 USE PETSC_ZONE_SOLVE, ONLY : PETSC_ZS_TYPE
 #endif
 
@@ -1687,9 +1687,9 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
 #ifdef WITH_PETSC
-   TYPE(PETSC_MZ_TYPE) PETSC_MZ
+   TYPE(PETSC_ZM_TYPE) PETSC_ZM
 #else
-   INTEGER :: PETSC_MZ
+   INTEGER :: PETSC_ZM
 #endif
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
