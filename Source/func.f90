@@ -1477,7 +1477,6 @@ BR_INDEX = LP%BR_INDEX
 
 IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%TAG,UNPACK_IT)
 IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%CLASS_INDEX,UNPACK_IT)
-IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%INITIALIZATION_INDEX,UNPACK_IT)
 IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%ORIENTATION_INDEX,UNPACK_IT)
 IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%WALL_INDEX,UNPACK_IT)
 IC=IC+1 ; IF (.NOT.COUNT_ONLY) CALL EQUATE(OS%INTEGERS(IC),LP%DUCT_INDEX,UNPACK_IT)
@@ -3496,100 +3495,6 @@ INTEGER::IND=0
 IND=MIN(NBINS,MAX(CEILING((VAL-LIMITS(1))/(LIMITS(2)-LIMITS(1))*NBINS),1))
 COUNTS(IND)=COUNTS(IND)+WEIGHT
 END SUBROUTINE UPDATE_HISTOGRAM
-
-
-!> \brief Linearly interpolate the a mesh quantity onto a point
-!> \param X The interpolated value of the 3D array
-!> \param A The 3D array of values
-!> \param I The lower x index of the array
-!> \param J The lower y index of the array
-!> \param K The lower z index of the array
-!> \param P Fraction of the distance from the lower to upper x coordinate
-!> \param R Fraction of the distance from the lower to upper y coordinate
-!> \param S Fraction of the distance from the lower to upper z coordinate
-
-SUBROUTINE MESH_TO_PARTICLE(X,A,I,J,K,P,R,S)
-
-REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A
-INTEGER, INTENT(IN) :: I,J,K
-REAL(EB), INTENT(IN) :: P,R,S
-REAL(EB), INTENT(OUT) :: X
-REAL(EB) :: PP,RR,SS
-
-PP = 1._EB-P
-RR = 1._EB-R
-SS = 1._EB-S
-X  = ((PP*A(I,J,K)  +P*A(I+1,J,K)  )*RR+(PP*A(I,J+1,K)  +P*A(I+1,J+1,K)  )*R)*SS + &
-     ((PP*A(I,J,K+1)+P*A(I+1,J,K+1))*RR+(PP*A(I,J+1,K+1)+P*A(I+1,J+1,K+1))*R)*S
-
-END SUBROUTINE MESH_TO_PARTICLE
-
-
-!> \brief Linearly interpolate the value at a point onto the mesh
-!> \param X The interpolated value of the 3D array
-!> \param A The 3D array of values
-!> \param I The lower x index of the array
-!> \param J The lower y index of the array
-!> \param K The lower z index of the array
-!> \param P Fraction of the distance from the lower to upper x coordinate
-!> \param R Fraction of the distance from the lower to upper y coordinate
-!> \param S Fraction of the distance from the lower to upper z coordinate
-
-SUBROUTINE PARTICLE_TO_MESH(X,A,I,J,K,P,R,S)
-
-REAL(EB), INTENT(INOUT), DIMENSION(0:,0:,0:) :: A
-INTEGER, INTENT(IN) :: I,J,K
-REAL(EB), INTENT(IN) :: P,R,S
-REAL(EB), INTENT(IN) :: X
-REAL(EB) :: PP,RR,SS
-
-PP = 1._EB-P
-RR = 1._EB-R
-SS = 1._EB-S
-A(I  ,J  ,K  ) = A(I  ,J  ,K  ) - X*PP*RR*SS
-A(I+1,J  ,K  ) = A(I+1,J  ,K  ) - X*P *RR*SS
-A(I  ,J+1,K  ) = A(I  ,J+1,K  ) - X*PP*R *SS
-A(I+1,J+1,K  ) = A(I+1,J+1,K  ) - X*P *R *SS
-A(I  ,J  ,K+1) = A(I  ,J  ,K+1) - X*PP*RR*S
-A(I+1,J  ,K+1) = A(I+1,J  ,K+1) - X*P *RR*S
-A(I  ,J+1,K+1) = A(I  ,J+1,K+1) - X*PP*R *S
-A(I+1,J+1,K+1) = A(I+1,J+1,K+1) - X*P *R *S
-
-END SUBROUTINE PARTICLE_TO_MESH
-
-
-!> \brief Trilinear interpolation https://paulbourke.net/miscellaneous/interpolation/
-!> \param V The interpolated value of the 3D array
-!> \param A The 3D array of box corner values
-!> \param X Fractional distance from the lower to upper x coordinate
-!> \param Y Fractional distance from the lower to upper y coordinate
-!> \param Z Fractional distance from the lower to upper z coordinate
-
-SUBROUTINE TRILIN_INTERP(V,A,X,Y,Z)
-
-REAL(EB), INTENT(IN), DIMENSION(0:1,0:1,0:1) :: A
-REAL(EB), INTENT(IN) :: X,Y,Z
-REAL(EB), INTENT(OUT) :: V
-REAL(EB), DIMENSION(0:1,0:1,0:1) :: WGT
-REAL(EB) :: XX,YY,ZZ
-
-XX = 1._EB-X
-YY = 1._EB-Y
-ZZ = 1._EB-Z
-
-WGT(0,0,0) = XX * YY * ZZ
-WGT(1,0,0) = X  * YY * ZZ
-WGT(0,1,0) = XX * Y  * ZZ
-WGT(0,0,1) = XX * YY * Z
-WGT(1,0,1) = X  * YY * Z
-WGT(0,1,1) = XX * Y  * Z
-WGT(1,1,0) = X  * Y  * ZZ
-WGT(1,1,1) = X  * Y  * Z
-
-V = SUM(A*WGT)
-
-END SUBROUTINE TRILIN_INTERP
-
 
 !> \brief Calculate the value of polynomial function.
 !> \param N Number of coefficients in the polynomial
