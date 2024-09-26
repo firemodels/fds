@@ -229,7 +229,7 @@ END MODULE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
 #ifdef WITH_PETSC
-MODULE PETSC_MESH_ZONE
+MODULE PETSC_ZONE_MESH
 #include <petsc/finclude/petsc.h>
 ! #include <petsc/finclude/petscsys.h>
    USE PETSC
@@ -255,7 +255,7 @@ MODULE PETSC_MESH_ZONE
 
    END SUBROUTINE PETSC_ZM_DEALLOC
 
-END MODULE PETSC_MESH_ZONE
+END MODULE PETSC_ZONE_MESH
 
 MODULE PETSC_ZONE_SOLVE
 #include <petsc/finclude/petsc.h>
