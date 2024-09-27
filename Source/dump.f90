@@ -3011,7 +3011,10 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      WRITE(LU_OUTPUT,'(A,ES10.3)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
+      ITMP = NINT(TMPA)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
+      ITMP = NINT(ML%TMP_REF(1))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
    ENDIF
 
 ENDDO MATL_LOOP
