@@ -825,10 +825,13 @@ MAIN_LOOP: DO
 
    IF (HVAC_SOLVE) CALL HVAC_CALC(T,DT,.TRUE.)
 
-   ! Move particles
+   ! Perform droplet mass/energy transfer, then move all particles, then transfer momentum to the gas.
+   ! Solid particle mass/energy transfer is handled by WALL_BC.
 
    COMPUTE_WALL_BC_2A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
       CALL MOVE_PARTICLES(T,DT,NM)
+      IF (PARTICLE_DRAG) CALL PARTICLE_MOMENTUM_TRANSFER(DT,NM)
    ENDDO COMPUTE_WALL_BC_2A
 
    ! Exchange the number of particles sent from mesh to mesh (7), and if non-zero, exchange particles (11)
@@ -839,14 +842,12 @@ MAIN_LOOP: DO
       CALL MESH_EXCHANGE(11)
    ENDIF
 
-   ! Particle heat and mass transfer
+   ! Update the temperature, species and gas density boundary conditions at all surfaces
 
    WALL_COUNTER = WALL_COUNTER + 1
-   COMPUTE_WALL_BC_2B: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      CALL PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL WALL_BC(T,DT,NM)
-      IF (PARTICLE_DRAG) CALL PARTICLE_MOMENTUM_TRANSFER(DT,NM)
-   ENDDO COMPUTE_WALL_BC_2B
+   ENDDO
    IF (WALL_COUNTER==WALL_INCREMENT) WALL_COUNTER = 0
 
    IF (SOLID_HEAT_TRANSFER_3D .AND. WALL_COUNTER==0) THEN
