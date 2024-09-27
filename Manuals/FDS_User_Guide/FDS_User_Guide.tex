@@ -1667,7 +1667,7 @@ There are four reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- 
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be {\ct OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an {\ct OPEN} boundary. You would still have to use the {\ct OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperture ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -3066,12 +3066,11 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
 
-An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65$~$^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. At steady state, the heat balance at the pool surface is
+An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65 \; ^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. At steady state, the heat balance at the pool surface is
 \be
-   \dot{q}''_{total} - \dot{q}''_{c}= \dot{m}'' h_{\rm v}(T_s)
+   \dot{q}''_{\rm total} - \dot{q}''_{\rm c}= \dot{m}'' \, h_{\rm v} \, T_{\rm s}
 \ee
-
-where $ \dot{q}''_{c}$ is the heat being conducted away from the surface. If $ \dot{q}''_{c}$ is made zero, which can be done by using {\ct BACKING='INSULATED'} and a high thermal conductivity, then the pool surface temperature,$T_s$, will approach the boiling temperature,$T_b$. In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''_{}total}/h_{\rm v}(T_b)$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
+where $\dot{q}''_{\rm c}$ is the heat being conducted away from the surface. If $\dot{q}''_{\rm c}$ is made zero, which can be done by using {\ct BACKING='INSULATED'} and a high thermal conductivity, then the pool surface temperature,$T_{\rm s}$, will approach the boiling temperature,$T_{\rm b}$. In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''_{\rm total}/h_{\rm v} T_{\rm b}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
 \begin{figure}[!ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_mdot}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_temp}
@@ -8675,7 +8674,42 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
 
+\subsection{Example Case: Heat Release Rate of a Spreading Fire}
+\label{spreading_fire}
+
+In this example, a fire spreads radially from a single point as directed by the parameters {\ct SPREAD\_RATE} and {\ct XYZ} on a {\ct VENT} line. Usually, the user specifies the heat release rate per unit area ({\ct HRRPUA}) for each burning surface cell on the corresponding {\ct SURF} line, but in this case, a specific time {\ct RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified {\ct RAMP} called {\ct 'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified {\ct RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
+\begin{lstlisting}
+&VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1 /
+
+&SURF ID='FIRE', HRRPUA=1., RAMP_Q='HRRPUA RAMP' /
+&RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
+&DEVC ID='TIMER', XYZ=1,1,1, QUANTITY='TIME' /
+&CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE=0.01,100000.0, 
+      XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
+&CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR','Fire Area' /
+
+&RAMP ID='HRR', T=  0., F=    0.0 /
+&RAMP ID='HRR', T= 10., F=  100.0 /
+&RAMP ID='HRR', T= 20., F=  400.0 /
+...
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/spreading_fire_HRR}
+\caption[HRR curve for a spreading fire]{Specified (circles) and simulated (line) HRR curve for a spreading fire.}
+\label{spreading_fire_hrr}
+\end{figure}
+
+
+
+
+\newpage
+
 \input{smv_objects.tex}
+
+\newpage
 
 \section{External Control of FDS (Beta)}
 \label{info:external_control}
