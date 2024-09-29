@@ -210,6 +210,7 @@ LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
 LOGICAL :: CHECK_FO=.FALSE.                 !< Check the solid phase Fourier number
+LOGICAL :: LIQUID_DROPLETS=.FALSE.          !< Indicates the existence of liquid droplets
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
 LOGICAL :: ORIENTED_PARTICLES=.FALSE.       !< Indicates the existence of particles with a specified orientation
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
