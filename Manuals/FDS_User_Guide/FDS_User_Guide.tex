@@ -8299,11 +8299,13 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 
 If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=F} on the relevant {\ct DEVC} or {\ct CTRL} lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. {\ct LATCH=T} by default for both devices and controls.
 
-If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function.
+If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function. The numerical output in the {\ct CHID\_devc.csv} file will be zero when the logical state is {\ct F} and 1 when the logical state is {\ct T}.
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as {\ct ANY} or {\ct DEADBAND}. For {\ct CUSTOM} the output will be the value of the {\ct RAMP} function, and for {\ct TIME\_DELAY} the value will be the evaluated delay.
 
-Each state change of a control function is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+The outputs {\ct QUANTITY='CONTROL'} and {\ct QUANTITY='CONTROL\_VALUE'} have the default of {\ct TEMPORAL\_STATISTIC='INSTANT VALUE'}.
+
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}. 
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8685,9 +8687,11 @@ In this example, a fire spreads radially from a single point as directed by the 
 &RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
 &DEVC ID='TIMER', XYZ=1,1,1, QUANTITY='TIME' /
 &CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
-&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE=0.01,100000.0, 
+&CTRL ID='HRR+EPS', FUNCTION_TYPE='SUM', INPUT_ID='HRR', 'CONSTANT',
+      CONSTANT=1E-10 / Prevents divide-by-zero
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10, 
       XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
-&CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR','Fire Area' /
+&CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS','Fire Area' /
 
 &RAMP ID='HRR', T=  0., F=    0.0 /
 &RAMP ID='HRR', T= 10., F=  100.0 /
