@@ -8299,11 +8299,11 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 
 If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=F} on the relevant {\ct DEVC} or {\ct CTRL} lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. {\ct LATCH=T} by default for both devices and controls.
 
-If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function.
+If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function. The numerical output in the {\ct CHID\_devc.csv} file will be zero when the logical state is {\ct F} and 1 when the logical state is {\ct T}.
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as {\ct ANY} or {\ct DEADBAND}. For {\ct CUSTOM} the output will be the value of the {\ct RAMP} function, and for {\ct TIME\_DELAY} the value will be the evaluated delay.
 
-Each state change of a control function is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}. 
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
