@@ -206,9 +206,9 @@ MODULE HYPRE_INTERFACE
    INTEGER, PARAMETER :: HYPRE_SOLVER_MAXIT = 1000           ! Max iteratations of PCG solver
    REAL(KIND=8), PARAMETER :: HYPRE_SOLVER_TOL = 1.D-10      ! Solver tolerance
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETTWONORM = 0         ! 0=use L_Infty norm (max error) for convergence, 1=use L2 norm
-   INTEGER, PARAMETER :: HYPRE_SOLVER_SETPRINTLEVEL = 2      ! 0=no output, 1=minimal, 2=verbose
+   INTEGER, PARAMETER :: HYPRE_SOLVER_SETPRINTLEVEL = 0      ! 0=no output, 1=minimal, 2=verbose
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETLOGGING = 1         ! 0=no logging, 1=solver stores intermediate info, norms, etc.
-   INTEGER, PARAMETER :: HYPRE_PRECOND_SETPRINTLEVEL = 2     ! 0=no output, 1=minimal, 2=verbose
+   INTEGER, PARAMETER :: HYPRE_PRECOND_SETPRINTLEVEL = 0     ! 0=no output, 1=minimal, 2=verbose
    INTEGER, PARAMETER :: HYPRE_PRECOND_COARSENINGTYPE = 6    ! 0   CLJP (Cleary-Luby-Jones-Plassmann) parallel coarsening
                                                              ! 1   Classical Ruge-Stüben (RS) coarsening
                                                              ! 3   Modified RS coarsening

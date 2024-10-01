@@ -1732,8 +1732,7 @@ IF (CHECK_POISSON .AND. HYPRE_SOLVER_SETPRINTLEVEL>0) THEN
    write(lu_err,*) "Final Relative Residual Norm = ", ZM%HYPRE_ZM%FINAL_RES_NORM
    write(lu_err,*)
 ENDIF
-write(lu_err,*) 'MESH ', NM, ' SOLVED!'
-! stop
+
 #endif /*---------------------------------------------WITH_HYPRE-------------------------------------------*/
 
 ! For indefinite matrices, substract mean of solution X_H:
@@ -2421,8 +2420,8 @@ ENDDO LOCROW_LOOP
 RETURN
 END SUBROUTINE ADD_INPLACE_NNZ_H
 
-
 ! ---------------------------------- ULMAT_H_MATRIX ----------------------------------
+
 SUBROUTINE ULMAT_H_MATRIX(NM,IPZ)
 
 USE COMPLEX_GEOMETRY, ONLY : CC_GASPHASE
@@ -2517,7 +2516,6 @@ AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
    NULLIFY(REGFACE_H)
 ENDDO AXIS_LOOP_1
 
-
 ! Contribution to Laplacian matrix from Cut-cells:
 CC_IF : IF ( CC_IBM ) THEN
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
@@ -2608,8 +2606,8 @@ ENDIF CC_IF
 RETURN
 END SUBROUTINE ULMAT_H_MATRIX
 
-
 ! -------------------------------- ULMAT_BCS_H_MATRIX ----------------------------------
+
 SUBROUTINE ULMAT_BCS_H_MATRIX(NM,IPZ)
 
 USE COMPLEX_GEOMETRY, ONLY : CC_IDCC, CC_IDRC
@@ -2760,7 +2758,7 @@ MAXFCT = 1
 MNUM   = 1
 
 ! Set level MSG to 1 for factorization:
-IF(CHECK_POISSON) THEN
+IF (CHECK_POISSON) THEN
    MSGLVL = 1
 #ifdef WITH_MKL
    IF(MY_RANK==0) WRITE(LU_ERR,*) 'ULMAT : PARDISO factorization for MESH,ZONE=',NM,IPZ,ZM%NUNKH
