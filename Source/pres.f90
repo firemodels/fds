@@ -2738,19 +2738,21 @@ USE HYPRE_INTERFACE
 INTEGER, INTENT(IN) :: NM,IPZ
 
 ! Local Variables:
-INTEGER :: INNZ, IROW
+INTEGER :: INNZ, IROW, JCOL
 #ifdef WITH_MKL
 INTEGER :: PHASE, PERM(1)
-INTEGER :: I, JCOL
+INTEGER :: I
 #endif
 #ifdef WITH_HYPRE
-INTEGER :: NROWS, NCOLS(1), ROWS(1), COLS(1), JCOL
+INTEGER :: NROWS, NCOLS(1), ROWS(1), COLS(1)
 #endif
 !.. All other variables
 INTEGER MAXFCT, MNUM, NRHS, ERROR, TOT_NNZ_H
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 
 INNZ=NM
+IROW=0 ! prevent unused warning
+JCOL=0 ! prevent unused warning
 ZM=>ZONE_MESH(IPZ)
 ! Define parameters:
 NRHS   = 1
