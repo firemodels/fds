@@ -14,6 +14,10 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 USE MKL_PARDISO
 USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+USE HYPRE_INTERFACE, ONLY : HYPRE_ZM_TYPE
+! USE HYPRE_INTERFACE, ONLY : HYPRE_ZS_TYPE
+#endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -1706,6 +1710,11 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZM
+#else
+   INTEGER :: HYPRE_ZM
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE
