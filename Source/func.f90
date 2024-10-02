@@ -2743,6 +2743,81 @@ DEALLOCATE(Q_K)
 END SUBROUTINE ASSIGN_PRESSURE_ZONE
 
 
+!> \brief Determine distance from a boundary cell to the nearest solid object or mesh boundary
+!> \param NM Mesh number
+!> \param IOR Index of the boundary cell orientation
+!> \param IIG i-coordinate of the point (m)
+!> \param JJG j-coordinate of the point (m)
+!> \param KKG k-coordinate of the point (m)
+!> \param CLEARANCE Distance from boundary to nearest solid
+
+SUBROUTINE COMPUTE_BOUNDARY_CLEARANCE(NM,IOR,IIG,JJG,KKG,CLEARANCE)
+
+INTEGER, INTENT(IN) :: NM,IOR,IIG,JJG,KKG
+REAL(EB), INTENT(OUT) :: CLEARANCE
+INTEGER :: N,IC,II,JJ,KK
+TYPE (MESH_TYPE), POINTER :: M
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB
+
+M => MESHES(NM)
+
+CLEARANCE = 0._EB
+
+II = IIG
+JJ = JJG
+KK = KKG
+
+SEARCH_LOOP: DO
+
+   IC = M%CELL_INDEX(II,JJ,KK)
+   IF (M%CELL(IC)%SOLID) EXIT SEARCH_LOOP
+
+   SELECT CASE(IOR)
+      CASE(-1)
+         CLEARANCE = CLEARANCE + M%DX(II)
+         IF (II==1) EXIT SEARCH_LOOP
+         II = II-1
+      CASE( 1)
+         CLEARANCE = CLEARANCE + M%DX(II)
+         IF (II==M%IBAR) EXIT SEARCH_LOOP
+         II = II+1
+      CASE(-2)
+         CLEARANCE = CLEARANCE + M%DY(JJ)
+         IF (JJ==1) EXIT SEARCH_LOOP
+         JJ = JJ-1
+      CASE( 2)
+         CLEARANCE = CLEARANCE + M%DY(JJ)
+         IF (JJ==M%JBAR) EXIT SEARCH_LOOP
+         JJ = JJ+1
+      CASE(-3)
+         CLEARANCE = CLEARANCE + M%DZ(KK)
+         IF (KK==1) EXIT SEARCH_LOOP
+         KK = KK-1
+      CASE( 3)
+         CLEARANCE = CLEARANCE + M%DZ(KK)
+         IF (KK==M%KBAR) EXIT SEARCH_LOOP
+         KK = KK+1
+   END SELECT
+
+   ! Look for thin obstructions bordering the current cell
+
+   DO N=1,M%N_OBST
+      OB => M%OBSTRUCTION(N)
+      SELECT CASE(IOR)
+         CASE(-1) ; IF (II  ==OB%I1.AND.II  ==OB%I2.AND.JJ>OB%J1.AND.JJ<=OB%J2.AND.KK>OB%K1.AND.KK<=OB%K2) EXIT SEARCH_LOOP
+         CASE( 1) ; IF (II-1==OB%I1.AND.II-1==OB%I2.AND.JJ>OB%J1.AND.JJ<=OB%J2.AND.KK>OB%K1.AND.KK<=OB%K2) EXIT SEARCH_LOOP
+         CASE(-2) ; IF (JJ  ==OB%J1.AND.JJ  ==OB%J2.AND.II>OB%I1.AND.II<=OB%I2.AND.KK>OB%K1.AND.KK<=OB%K2) EXIT SEARCH_LOOP
+         CASE( 2) ; IF (JJ-1==OB%J1.AND.JJ-1==OB%J2.AND.II>OB%I1.AND.II<=OB%I2.AND.KK>OB%K1.AND.KK<=OB%K2) EXIT SEARCH_LOOP
+         CASE(-3) ; IF (KK  ==OB%K1.AND.KK  ==OB%K2.AND.II>OB%I1.AND.II<=OB%I2.AND.JJ>OB%J1.AND.JJ<=OB%J2) EXIT SEARCH_LOOP
+         CASE( 3) ; IF (KK-1==OB%K1.AND.KK-1==OB%K2.AND.II>OB%I1.AND.II<=OB%I2.AND.JJ>OB%J1.AND.JJ<=OB%J2) EXIT SEARCH_LOOP
+      END SELECT
+   ENDDO
+
+ENDDO SEARCH_LOOP
+
+END SUBROUTINE COMPUTE_BOUNDARY_CLEARANCE
+
+
 !> \brief Determine the number of 1-D cells in a layer of solid material
 !> \param DIFFUSIVITY \f$ k/(\rho c) \; (\hbox{m}^2/\hbox{s}) \f$, used to determine cell size
 !> \param LAYER_THICKNESS Thickness of the material layer (m)
