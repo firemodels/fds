@@ -321,6 +321,14 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJVECTORSETVALUES
 
+      SUBROUTINE HYPRE_IJVECTORGETVALUES(X, LOCAL_SIZE, ROWS, VALUES, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: X
+         INTEGER,         INTENT(IN)  :: LOCAL_SIZE
+         INTEGER,         INTENT(IN)  :: ROWS(*)
+         REAL(KIND=8),    INTENT(OUT) :: VALUES(*)
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_IJVECTORGETVALUES
+
       SUBROUTINE HYPRE_IJVECTORASSEMBLE(X, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: X
          INTEGER,         INTENT(OUT) :: IERR
@@ -496,6 +504,7 @@ MODULE HYPRE_INTERFACE
              HYPRE_IJVECTORSETOBJECTTYPE,         &  ! subroutine in HYPRE library
              HYPRE_IJVECTORINITIALIZE,            &  ! subroutine in HYPRE library
              HYPRE_IJVECTORSETVALUES,             &  ! subroutine in HYPRE library
+             HYPRE_IJVECTORGETVALUES,             &  ! subroutine in HYPRE library
              HYPRE_IJVECTORASSEMBLE,              &  ! subroutine in HYPRE library
              HYPRE_IJVECTORGETOBJECT,             &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGCREATE,               &  ! subroutine in HYPRE library
