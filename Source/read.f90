@@ -4644,7 +4644,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          RN%A_LOW_PR = A_LOW_PR
          RN%E_LOW_PR = E_LOW_PR*1000._EB ! Convert from J/mol to J/kmol
          IF (A_LOW_PR < 0._EB .OR. E_LOW_PR < -1.E20_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(XXX): REAC ',NR,' FALLOFF-LINDEMANN reactions must have A_LOW_PR amd E_LOW_PR.'
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(565): REAC ',NR,' FALLOFF-LINDEMANN reactions must have A_LOW_PR amd E_LOW_PR.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          RN%N_T_LOW_PR = N_T_LOW_PR
@@ -4656,7 +4656,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          RN%N_T_LOW_PR = N_T_LOW_PR
          IF (A_LOW_PR < 0._EB .OR. E_LOW_PR < -1.E20_EB .OR. A_TROE < -1.E20_EB .OR. &
              T1_TROE < -1.E20_EB .OR. T3_TROE < -1.E20_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(XXX): REAC ',NR,&
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR(566): REAC ',NR,&
                                       ' FALLOFF-TROE reactions must have A_LOW_PR, E_LOW_PR, A_TROE, T1_TROE, and T3_TROE.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
@@ -5095,42 +5095,44 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
-   NU_Y = 0._EB
-   IF (RN%N_SPEC_READ > 0) THEN
-      DO NS=1,RN%N_SPEC_READ
-         IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
-         NAME_FOUND = .FALSE.
-         DO NS2=1,N_SPECIES
-            IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID) .OR. &
-                TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ALT_ID)) THEN
-               NU_Y(NS2) = RN%N_S_READ(NS)
-               NAME_FOUND = .TRUE.
-               EXIT
+   IF (.NOT. RN%SIMPLE_CHEMISTRY) THEN
+      NU_Y = 0._EB
+      IF (RN%N_SPEC_READ > 0) THEN
+         DO NS=1,RN%N_SPEC_READ
+            IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
+            NAME_FOUND = .FALSE.
+            DO NS2=1,N_SPECIES
+               IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID) .OR. &
+                   TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ALT_ID)) THEN
+                  NU_Y(NS2) = RN%N_S_READ(NS)
+                  NAME_FOUND = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (.NOT. NAME_FOUND) THEN
+               WRITE(MESSAGE,'(A,I0,A,A,A)') &
+                  'ERROR(204): REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDDO
-         IF (.NOT. NAME_FOUND) THEN
-            WRITE(MESSAGE,'(A,I0,A,A,A)') &
-               'ERROR(204): REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
-   ELSE
-      DO NS=1,RN%N_SMIX
-         IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE
-         DO NS2=1,N_TRACKED_SPECIES
-            IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID) .OR. &
-                TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ALT_ID)) THEN
-               !IF (SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX < 0) THEN
-               !   WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(XXX): REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
-               !      ' used in a finite rate reaction without N_S defined is not a primitive species.'
-               !   CALL SHUTDOWN(MESSAGE) ; RETURN
-               !ENDIF
-               IF (RN%NU_READ(NS)<0._EB .AND. SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX > 0) &
-                  NU_Y(SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX) = -RN%NU_READ(NS)
-               EXIT
-            ENDIF
+      ELSE
+         DO NS=1,RN%N_SMIX
+            IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE
+            DO NS2=1,N_TRACKED_SPECIES
+               IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID) .OR. &
+                   TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ALT_ID)) THEN
+                  IF (SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX < 0 .AND. (RN%NU_READ(NS) < 0._EB .OR. RN%REVERSE)) THEN
+                     WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(567): REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
+                        ' used in a finite rate reaction without N_S defined is not a primitive species.'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ENDIF
+                  IF (RN%NU_READ(NS)<0._EB .AND. SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX > 0) &
+                     NU_Y(SPECIES_MIXTURE(NS2)%SINGLE_SPEC_INDEX) = -RN%NU_READ(NS)
+                  EXIT
+               ENDIF
+            ENDDO
          ENDDO
-      ENDDO
+      ENDIF
    ENDIF
 
    RN%N_SPEC=0
