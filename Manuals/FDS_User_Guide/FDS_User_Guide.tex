@@ -4941,6 +4941,8 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct ETHANOL}     & C$_2$H$_6$O      & 0.126        & 1397 \\ \hline
 {\ct ETHYLENE}    & C$_2$H$_4$       & 0.105        & 1337 \\ \hline
 {\ct HYDROGEN}    & H$_2$            & 0.054        & 807  \\ \hline
+{\ct ISOBUTANE}   & C$_4$H$_{10}$    & 0.134        & 1557 \\ \hline
+{\ct ISO-OCTANE}  & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct ISOPROPANOL} & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 {\ct METHANE}     & CH$_4$           & 0.139        & 1507 \\ \hline
 {\ct METHANOL}    & CH$_3$OH         & 0.111        & 1257 \\ \hline
@@ -4950,6 +4952,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
+{\ct PROPANOL}    & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
 \end{center}
@@ -5642,7 +5645,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 \section{Vapor Condensation}
 \label{info:condensation}
 
-If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. Radiative properties should be assigned using {\ct REAL\REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX} unless the species is either {\ct WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
 \begin{lstlisting}
@@ -13208,6 +13211,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real              & Section~\ref{info:condensation}         &                   &  0.01         \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
@@ -13251,6 +13255,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_G\_F}                    & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_K}                       & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_MU}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}       & Real              & Section~\ref{info:condensation}         &                   &  1.33         \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real              & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real              & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline

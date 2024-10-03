@@ -533,6 +533,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
+   REAL(EB) :: REAL_REFRACTIVE_INDEX            
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX            
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
