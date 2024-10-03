@@ -5353,7 +5353,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}).
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants. 
 
 \subsection{Multiple Step Reaction}
 
@@ -14030,7 +14030,13 @@ Keyword             & Type     & Description                      & Units       
 562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
 563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
 564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
-     \>                                                                               \>                          \\
+565 \> {\ct REAC: \ldots FALLOFF-LINDEMANN reactions must have A\_LOW\_PR and       } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct E\_LOW\_PR }   \\
+566 \> {\ct REAC: \ldots FALLOFF-TROE reactions must have A\_LOW\_PR, E\_LOW\_PR,   } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct A\_TROE, T1\_TROE, and T3\_TROE.  }   \\
+567 \> {\ct REAC: \ldots Tracked species \ldots used in a finite rate reaction      } \> Section~\ref{info:finite}  \\
+    \> {\ct without N\_S defined is not a primitive species.  }   \\
+    \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
 603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\
