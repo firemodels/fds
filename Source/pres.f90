@@ -5005,6 +5005,7 @@ USE CC_SCALARS, ONLY : UNSTRUCTURED_POISSON_RESIDUAL, UNSTRUCTURED_POISSON_RESID
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,RHOP,P,RESIDUAL
+REAL(EB), POINTER, DIMENSION(:) :: DUDT_BAR_P
 INTEGER :: I,J,K,IPZ,IC
 REAL(EB) :: LHSS,RHSS,IMFCT,JMFCT,KMFCT,IPFCT,JPFCT,KPFCT
 
@@ -5027,9 +5028,11 @@ CALL POINT_TO_MESH(NM)
 IF (PREDICTOR) THEN
    HP => H
    RHOP => RHO
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR
 ELSE
    HP => HS
    RHOP => RHOS
+   IF (TUNNEL_PRECONDITIONER) DUDT_BAR_P => DUDT_BAR_S
 ENDIF
 
 ! Optional check of the accuracy of the separable pressure solution, del^2 H = -del dot F - dD/dt
@@ -5076,6 +5079,8 @@ IF (CHECK_POISSON) THEN
                     (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1)*R(I-1)*IMFCT                                  )*RDX(I)*RRN(I) &
                  + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J)*JPFCT-(HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1)*JMFCT   )*RDY(J)        &
                  + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K)*KPFCT-(HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1)*KMFCT   )*RDZ(K)
+            IF (TUNNEL_PRECONDITIONER) LHSS = LHSS - (DUDT_BAR_P(I_OFFSET(NM)+I)*IPFCT - &
+                                                      DUDT_BAR_P(I_OFFSET(NM)+I-1)*IMFCT)*RDX(I)
             RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
