@@ -60,6 +60,9 @@ LFLAGSMKL_CUSTOM =
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
 FFLAGS_HDF5 =
+FFLAGS_HYPRE =
+LFLAGS_HYPRE =
+
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -115,8 +118,13 @@ ifdef HDF5_HOME # This assumes the HDF5 libary is available
    LFLAGS_HDF5 = -DWITH_HDF5 -L"${HDF5_HOME}/lib" -lhdf5_fortran
 endif # HDF5_HOME
 
+ifdef HYPRE_HOME # This assumes the HYPRE library is available.
+   FFLAGS_HYPRE = -DWITH_HYPRE -I${HYPRE_HOME}/include
+   LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
+endif
+
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
-          pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
+          pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o imkl.o \
           wall.o fire.o velo.o pres.o init.o vtkf.o dump.o read.o divg.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -327,48 +335,48 @@ ompi_intel_osx_openmp_dv : setup $(obj_mpi)
 
 #*** GNU Compilers ***
 
-ompi_gnu_linux_h5 : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
-ompi_gnu_linux_h5 : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
-ompi_gnu_linux_h5 : FCOMPL = h5pfc
-ompi_gnu_linux_h5 : FOPENMPFLAGS = -fopenmp
-ompi_gnu_linux_h5 : obj = fds_ompi_gnu_linux
-ompi_gnu_linux_h5 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
-
-ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HDF5)
-ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HDF5)
+ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux : FCOMPL = mpifort
 ompi_gnu_linux : FOPENMPFLAGS = -fopenmp
 ompi_gnu_linux : obj = fds_ompi_gnu_linux
 ompi_gnu_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -Wno-maybe-uninitialized -Wno-uninitialized -Wno-unused-function -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HDF5)
-ompi_gnu_linux_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HDF5)
+ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_linux_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux_db : FCOMPL = mpifort
 ompi_gnu_linux_db : FOPENMPFLAGS = -fopenmp
 ompi_gnu_linux_db : obj = fds_ompi_gnu_linux_db
 ompi_gnu_linux_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_osx : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_SUNDIALS)
-ompi_gnu_osx : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_SUNDIALS_OSX)
+ompi_gnu_linux_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_linux_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
+ompi_gnu_linux_dv : FCOMPL = mpifort
+ompi_gnu_linux_dv : FOPENMPFLAGS = -fopenmp
+ompi_gnu_linux_dv : obj = fds_ompi_gnu_linux_dv
+ompi_gnu_linux_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+ompi_gnu_osx : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_osx : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_OSX)
 ompi_gnu_osx : FCOMPL = mpifort
 ompi_gnu_osx : FOPENMPFLAGS = -fopenmp
 ompi_gnu_osx : obj = fds_ompi_gnu_osx
 ompi_gnu_osx : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_osx_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_SUNDIALS)
-ompi_gnu_osx_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_SUNDIALS_OSX)
+ompi_gnu_osx_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_osx_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_OSX)
 ompi_gnu_osx_db : FCOMPL = mpifort
 ompi_gnu_osx_db : FOPENMPFLAGS = -fopenmp
 ompi_gnu_osx_db : obj = fds_ompi_gnu_osx_db
 ompi_gnu_osx_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_osx_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_SUNDIALS)
-ompi_gnu_osx_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_SUNDIALS_OSX)
+ompi_gnu_osx_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_osx_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM) $(CLT_VERSION) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_OSX)
 ompi_gnu_osx_dv : FCOMPL = mpifort
 ompi_gnu_osx_dv : FOPENMPFLAGS = -fopenmp
 ompi_gnu_osx_dv : obj = fds_ompi_gnu_osx_dv

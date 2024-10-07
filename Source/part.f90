@@ -1215,7 +1215,7 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
       LP%DX = DX(II)
       LP%DY = DY(JJ)
       LP%DZ = DZ(KK)
-      LP%INITIALIZATION_INDEX = INIT_INDEX
+      LP%INIT_INDEX = INIT_INDEX
 
       ! Initialize particle properties
 
@@ -1399,7 +1399,6 @@ IF (N_INSERT>0) THEN
          LP%PWT = LP%PWT*PWT0
       ENDIF
       IF (ANY(IN%PATH_RAMP_INDEX>0)) LP%PATH_PARTICLE=.TRUE.
-      LP%INIT_INDEX = INIT_INDEX
    ENDDO
 
 ENDIF
@@ -2571,7 +2570,7 @@ DO AXIS=IAXIS,KAXIS
    IF (ICC>0) THEN
       CALL GET_FACE_IDW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
    ELSE
-      CALL GET_FACE_TLW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS))
+      CALL GET_FACE_TLW(AXIS,IL,JL,KL,BC%X,BC%Y,BC%Z,WGT(:,:,:,AXIS),VEL_G)
    ENDIF
    VEL_G_INT(AXIS) = SUM(VEL_G*WGT(:,:,:,AXIS))
 ENDDO
@@ -3245,13 +3244,16 @@ END SUBROUTINE GET_FACE_IDW
 !> \param P_Y Sample point location in y
 !> \param P_Z Sample point location in z
 !> \param TLW 2x2x2 matrix of weights for cartesian faces
+!> \param V 2x2x2 array of velocity box corner values
 
-SUBROUTINE GET_FACE_TLW(AXIS,I,J,K,P_X,P_Y,P_Z,TLW)
+SUBROUTINE GET_FACE_TLW(AXIS,I,J,K,P_X,P_Y,P_Z,TLW,V)
 
 REAL(EB), INTENT(IN) :: P_X,P_Y,P_Z
 REAL(EB), INTENT(OUT) :: TLW(0:1,0:1,0:1)
 INTEGER, INTENT(IN) :: AXIS,I,J,K
+REAL(EB), INTENT(INOUT) :: V(2,2,2)
 REAL(EB) :: P,PP,R,RR,S,SS
+INTEGER :: IWC(-3:3)
 REAL(EB), POINTER :: X_F(:),Y_F(:),Z_F(:)
 
 TLW=0._EB
@@ -3269,12 +3271,74 @@ P = (P_X-X_F(I))/(X_F(I+1)-X_F(I))
 R = (P_Y-Y_F(J))/(Y_F(J+1)-Y_F(J))
 S = (P_Z-Z_F(K))/(Z_F(K+1)-Z_F(K))
 
-IF (AXIS/=IAXIS .AND. IIG_OLD> I .AND. CELL(IC_OLD)%WALL_INDEX(-1)>0) P = 1._EB
-IF (AXIS/=IAXIS .AND. IIG_OLD==I .AND. CELL(IC_OLD)%WALL_INDEX( 1)>0) P = 0._EB
-IF (AXIS/=JAXIS .AND. JJG_OLD> J .AND. CELL(IC_OLD)%WALL_INDEX(-2)>0) R = 1._EB
-IF (AXIS/=JAXIS .AND. JJG_OLD==J .AND. CELL(IC_OLD)%WALL_INDEX( 2)>0) R = 0._EB
-IF (AXIS/=KAXIS .AND. KKG_OLD> K .AND. CELL(IC_OLD)%WALL_INDEX(-3)>0) S = 1._EB
-IF (AXIS/=KAXIS .AND. KKG_OLD==K .AND. CELL(IC_OLD)%WALL_INDEX( 3)>0) S = 0._EB
+IWC = CELL(IC_OLD)%WALL_INDEX
+IF (NEAR_WALL_PARTICLE_INTERPOLATION) THEN
+
+   IF (AXIS/=IAXIS .AND. IIG_OLD> I .AND. IWC(-1)>0) THEN
+      IF (WALL(IWC(-1))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         P=(P_X-X_F(I))/(BOUNDARY_COORD(WALL(IWC(-1))%BC_INDEX)%X-X_F(I))
+         SELECT CASE(AXIS)
+            CASE(JAXIS); V(1,:,:)=SURFACE(WALL(IWC(-1))%SURF_INDEX)%VEL_T(1)
+            CASE(KAXIS); V(1,:,:)=SURFACE(WALL(IWC(-1))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+   IF (AXIS/=IAXIS .AND. IIG_OLD==I .AND. IWC( 1)>0) THEN
+      IF (WALL(IWC( 1))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         P=(P_X-X_F(I))/(BOUNDARY_COORD(WALL(IWC( 1))%BC_INDEX)%X-X_F(I))
+         SELECT CASE(AXIS)
+            CASE(JAXIS); V(2,:,:)=SURFACE(WALL(IWC( 1))%SURF_INDEX)%VEL_T(1)
+            CASE(KAXIS); V(2,:,:)=SURFACE(WALL(IWC( 1))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+
+   IF (AXIS/=JAXIS .AND. JJG_OLD> J .AND. IWC(-2)>0) THEN
+      IF (WALL(IWC(-2))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         R=(P_Y-Y_F(J))/(BOUNDARY_COORD(WALL(IWC(-2))%BC_INDEX)%Y-Y_F(J))
+         SELECT CASE(AXIS)
+            CASE(IAXIS); V(:,1,:)=SURFACE(WALL(IWC(-2))%SURF_INDEX)%VEL_T(1)
+            CASE(KAXIS); V(:,1,:)=SURFACE(WALL(IWC(-2))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+   IF (AXIS/=JAXIS .AND. JJG_OLD==J .AND. IWC( 2)>0) THEN
+      IF (WALL(IWC( 2))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         R=(P_Y-Y_F(J))/(BOUNDARY_COORD(WALL(IWC( 2))%BC_INDEX)%Y-Y_F(J))
+         SELECT CASE(AXIS)
+            CASE(IAXIS); V(:,2,:)=SURFACE(WALL(IWC( 2))%SURF_INDEX)%VEL_T(1)
+            CASE(KAXIS); V(:,2,:)=SURFACE(WALL(IWC( 2))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+
+   IF (AXIS/=KAXIS .AND. KKG_OLD> K .AND. IWC(-3)>0) THEN
+      IF (WALL(IWC(-3))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         S=(P_Z-Z_F(K))/(BOUNDARY_COORD(WALL(IWC(-3))%BC_INDEX)%Z-Z_F(K))
+         SELECT CASE(AXIS)
+            CASE(IAXIS); V(:,:,1)=SURFACE(WALL(IWC(-3))%SURF_INDEX)%VEL_T(1)
+            CASE(JAXIS); V(:,:,1)=SURFACE(WALL(IWC(-3))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+   IF (AXIS/=KAXIS .AND. KKG_OLD==K .AND. IWC( 3)>0) THEN
+      IF (WALL(IWC( 3))%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         S=(P_Z-Z_F(K))/(BOUNDARY_COORD(WALL(IWC( 3))%BC_INDEX)%Z-Z_F(K))
+         SELECT CASE(AXIS)
+            CASE(IAXIS); V(:,:,2)=SURFACE(WALL(IWC( 3))%SURF_INDEX)%VEL_T(1)
+            CASE(JAXIS); V(:,:,2)=SURFACE(WALL(IWC( 3))%SURF_INDEX)%VEL_T(2)
+         END SELECT
+      ENDIF
+   ENDIF
+
+ELSE
+   IF (AXIS/=IAXIS .AND. IIG_OLD> I .AND. IWC(-1)>0) P = 1._EB
+   IF (AXIS/=IAXIS .AND. IIG_OLD==I .AND. IWC( 1)>0) P = 0._EB
+   IF (AXIS/=JAXIS .AND. JJG_OLD> J .AND. IWC(-2)>0) R = 1._EB
+   IF (AXIS/=JAXIS .AND. JJG_OLD==J .AND. IWC( 2)>0) R = 0._EB
+   IF (AXIS/=KAXIS .AND. KKG_OLD> K .AND. IWC(-3)>0) S = 1._EB
+   IF (AXIS/=KAXIS .AND. KKG_OLD==K .AND. IWC( 3)>0) S = 0._EB
+ENDIF
 
 PP = 1._EB-P
 RR = 1._EB-R
@@ -3309,9 +3373,9 @@ DX1 => DX
 DX2 => DY
 DX3 => DZ
 SELECT CASE (AXIS)
-CASE(IAXIS); DX1 => DXN
-CASE(JAXIS); DX2 => DYN
-CASE(KAXIS); DX3 => DZN
+   CASE(IAXIS); DX1 => DXN
+   CASE(JAXIS); DX2 => DYN
+   CASE(KAXIS); DX3 => DZN
 END SELECT
 
 DO KK=K,K+1
@@ -3487,18 +3551,21 @@ REAL(EB) :: TNOW
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
-IF (MESHES(NM)%NLP==0) THEN
-   IF (N_LP_ARRAY_INDICES > 0) CALL PARTICLE_RUNNING_AVERAGES
+IF (NLP > 0) PARTICLES_EXISTED = .TRUE.
+
+IF (.NOT. PARTICLES_EXISTED .OR. ((.NOT. LIQUID_DROPLETS) .AND. (.NOT. SOLID_PARTICLES))) THEN
+   ! No particles ever existed in the mesh or only MASSLESS defined, then there is nothing to do.
    T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
-   RETURN
-ELSE
-   ALLOCATE(PART_WARNING(NLP))
-   PART_WARNING(NLP)=0
+   RETURN   
 ENDIF
 
-! Working arrays
+IF (LIQUID_DROPLETS) THEN
 
-IF (N_LP_ARRAY_INDICES>0) THEN
+   ALLOCATE(PART_WARNING(NLP))
+   PART_WARNING=0
+
+   ! Working arrays
+
    MVAP_TOT => WORK7
    MVAP_TOT = 0._EB
    DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -3513,19 +3580,18 @@ IF (N_LP_ARRAY_INDICES>0) THEN
       B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
       B2%WORK1 = B1%TMP_F
    ENDDO
-ENDIF
-
-IF (ANY(LAGRANGIAN_PARTICLE_CLASS(:)%LIQUID_DROPLET)) THEN
+   
    RHO_INTERIM => WORK1 ; RHO_INTERIM = RHO
    TMP_INTERIM => WORK2 ; TMP_INTERIM = TMP
    ZZ_INTERIM  => SCALAR_WORK1 ; ZZ_INTERIM = ZZ
+
 ENDIF
 
 ! Keep a running average of surface mass and cooling
 
 DO N_LPC=1,N_LAGRANGIAN_CLASSES
    LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
-   IF (LPC%ARRAY_INDEX>0) THEN
+   IF (LPC%ARRAY_INDEX > 0) THEN
       IF (LPC%LIQUID_DROPLET) THEN
          DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             WC => WALL(IW)
@@ -3552,6 +3618,14 @@ DO N_LPC=1,N_LAGRANGIAN_CLASSES
       ENDDO
    ENDIF
 ENDDO
+
+IF (.NOT. LIQUID_DROPLETS .AND. SOLID_PARTICLES) THEN
+   ! If only solid particles, then no evaporation. Just update averages and remove burned away particles.
+   CALL PARTICLE_RUNNING_AVERAGES
+   CALL REMOVE_PARTICLES(T,NM)
+   T_USED(8)=T_USED(8)+CURRENT_TIME()-TNOW
+   RETURN
+ENDIF
 
 ! Loop over all types of evaporative species
 
@@ -4091,7 +4165,16 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL GET_TEMPERATURE(TMP_G_NEW,H_NEW/M_GAS_NEW,ZZ_GET2)
                IF (TMP_G_NEW < 0._EB) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  CYCLE TIME_ITERATION_LOOP
+                  IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
+                     DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                     TMP_G_NEW = 1._EB
+                     IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < 0. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
+                     ENDIF
+                  ELSE
+                     CYCLE TIME_ITERATION_LOOP
+                  ENDIF
                ENDIF
 
                ! Limit gas temperature change
@@ -4100,9 +4183,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     IF (.NOT. BTEST(PART_WARNING(IP),3)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
-                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),3)
+                     IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
                      ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
@@ -4116,9 +4199,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     IF (.NOT. BTEST(PART_WARNING(IP),4)) THEN
-                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N.Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
-                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),4)
+                     IF (.NOT. BTEST(PART_WARNING(IP),5)) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,'Particle: ',IP,' Tag: ',LP%TAG
+                        PART_WARNING(IP) = IBSET(PART_WARNING(IP),5)
                      ENDIF
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
@@ -4221,7 +4304,7 @@ DEALLOCATE(PART_WARNING)
 
 ! Sum up various quantities used in running averages
 
-IF (N_LP_ARRAY_INDICES > 0) CALL PARTICLE_RUNNING_AVERAGES
+CALL PARTICLE_RUNNING_AVERAGES
 
 ! Remove PARTICLEs that have completely evaporated
 

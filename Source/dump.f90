@@ -3296,7 +3296,10 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      WRITE(LU_OUTPUT,'(A,ES10.3)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
+      ITMP = NINT(TMPA)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
+      ITMP = NINT(ML%TMP_REF(1))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
    ENDIF
 
 ENDDO MATL_LOOP
@@ -10756,7 +10759,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          ! find cut-cell adjacent to CFACE
          IND1 = CFA%CUT_FACE_IND1
          IND2 = CFA%CUT_FACE_IND2
-         CALL GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2)
+         CALL GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2,U,V,W,PREDFCT=1._EB)
          CALL GET_MUDNS_CFACE(MU_WALL,IND1,IND2)
          ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
          IIG = CUT_CELL(ICC)%IJK(1)

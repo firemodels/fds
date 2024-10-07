@@ -1667,7 +1667,7 @@ There are four reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- 
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be {\ct OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an {\ct OPEN} boundary. You would still have to use the {\ct OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperture ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -2513,6 +2513,7 @@ You can specify an internal source for the solid obstruction using {\ct INTERNAL
 \item If your 3-D obstruction extends beyond meshes that abut, FDS uses a special algorithm to identify all the meshes where this obstruction lives, and also those obstructions connected to it. However, if this algorithm fails to detect all the meshes and you recieve an error stating that there is a problem, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation. If you set this parameter to a value larger than the width of the computational domain, then all meshes will establish communication channels for exchanging boundary information.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} or {\ct OBST} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically chosen to be comparable to the gas phase cells. If the obstruction is thin; that is, less than one gas phase cell thick, the specified {\ct CELL\_SIZE} will only apply to the heat conduction in the transverse, not normal, direction. The normal direction gridding will be controlled by the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. This may be useful in cases where the specified {\ct CELL\_SIZE} is too coarse to resolve variations in surface definition along the normal dimension (see Section~\ref{checkerboard} for an example).
 \item {\ct HT3D} cannot be applied to an {\ct OBST} that is to {\ct BURN\_AWAY}.
+\item If a {\ct SURF} line specifies either {\ct HT3D=T} or {\ct VARIABLE\_THICKNESS=T} and also specifies an {\ct HRRPUA}, {\ct MLPUA}, or {\ct MASS\_FLUX}, you must specify a {\ct MATL\_ID} on the {\ct SURF} line and the appropriate {\ct OBST} lines. The reason for doubly specifying the {\ct MATL\_ID} is so that the {\ct SURF} line can be set up properly. Note that the specification of {\ct HRRPUA} or similar on the surface of a 3-D or variably thick solid means that no obstruction making up the solid can have specified internal reactions, i.e. pyrolysis.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -3066,11 +3067,11 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
 
-An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65$~$^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. The evaporation rate of a burning liquid in steady state is approximately
+An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65 \; ^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. At steady state, the heat balance at the pool surface is
 \be
-   \dot{m}'' \approx \frac{\dot{q}''}{h_{\rm g}}  \quad ; \quad  h_{\rm g} = c (T_{\rm b}-T_\infty) + h_{\rm v}
+   \dot{q}''_{\rm total} - \dot{q}''_{\rm c}= \dot{m}'' \, h_{\rm v} \, T_{\rm s}
 \ee
-In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''/h_{\rm g}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
+where $\dot{q}''_{\rm c}$ is the heat being conducted away from the surface. If $\dot{q}''_{\rm c}$ is made zero, which can be done by using {\ct BACKING='INSULATED'} and a high thermal conductivity, then the pool surface temperature,$T_{\rm s}$, will approach the boiling temperature,$T_{\rm b}$. In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''_{\rm total}/h_{\rm v} T_{\rm b}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
 \begin{figure}[!ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_mdot}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_temp}
@@ -4941,6 +4942,8 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct ETHANOL}     & C$_2$H$_6$O      & 0.126        & 1397 \\ \hline
 {\ct ETHYLENE}    & C$_2$H$_4$       & 0.105        & 1337 \\ \hline
 {\ct HYDROGEN}    & H$_2$            & 0.054        & 807  \\ \hline
+{\ct ISOBUTANE}   & C$_4$H$_{10}$    & 0.134        & 1557 \\ \hline
+{\ct ISOOCTANE}  & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct ISOPROPANOL} & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 {\ct METHANE}     & CH$_4$           & 0.139        & 1507 \\ \hline
 {\ct METHANOL}    & CH$_3$OH         & 0.111        & 1257 \\ \hline
@@ -4950,6 +4953,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
+{\ct PROPANOL}    & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
 \end{center}
@@ -5353,7 +5357,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}).
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants. 
 
 \subsection{Multiple Step Reaction}
 
@@ -5642,7 +5646,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 \section{Vapor Condensation}
 \label{info:condensation}
 
-If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. Radiative properties should be assigned using {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX} unless the species is either {\ct WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
 \begin{lstlisting}
@@ -8299,11 +8303,13 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 
 If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=F} on the relevant {\ct DEVC} or {\ct CTRL} lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. {\ct LATCH=T} by default for both devices and controls.
 
-If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function.
+If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function. The numerical output in the {\ct CHID\_devc.csv} file will be zero when the logical state is {\ct F} and 1 when the logical state is {\ct T}.
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as {\ct ANY} or {\ct DEADBAND}. For {\ct CUSTOM} the output will be the value of the {\ct RAMP} function, and for {\ct TIME\_DELAY} the value will be the evaluated delay.
 
-Each state change of a control function is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+The outputs {\ct QUANTITY='CONTROL'} and {\ct QUANTITY='CONTROL\_VALUE'} have the default of {\ct TEMPORAL\_STATISTIC='INSTANT VALUE'}.
+
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}. 
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8674,7 +8680,44 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
 
+\subsection{Example Case: Heat Release Rate of a Spreading Fire}
+\label{spreading_fire}
+
+In this example, a fire spreads radially from a single point as directed by the parameters {\ct SPREAD\_RATE} and {\ct XYZ} on a {\ct VENT} line. Usually, the user specifies the heat release rate per unit area ({\ct HRRPUA}) for each burning surface cell on the corresponding {\ct SURF} line, but in this case, a specific time {\ct RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified {\ct RAMP} called {\ct 'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified {\ct RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
+\begin{lstlisting}
+&VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1 /
+
+&SURF ID='FIRE', HRRPUA=1., RAMP_Q='HRRPUA RAMP' /
+&RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
+&DEVC ID='TIMER', XYZ=1,1,1, QUANTITY='TIME' /
+&CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
+&CTRL ID='HRR+EPS', FUNCTION_TYPE='SUM', INPUT_ID='HRR', 'CONSTANT',
+      CONSTANT=1E-10 / Prevents divide-by-zero
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10, 
+      XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
+&CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS','Fire Area' /
+
+&RAMP ID='HRR', T=  0., F=    0.0 /
+&RAMP ID='HRR', T= 10., F=  100.0 /
+&RAMP ID='HRR', T= 20., F=  400.0 /
+...
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/spreading_fire_HRR}
+\caption[HRR curve for a spreading fire]{Specified (circles) and simulated (line) HRR curve for a spreading fire.}
+\label{spreading_fire_hrr}
+\end{figure}
+
+
+
+
+\newpage
+
 \input{smv_objects.tex}
+
+\newpage
 
 \section{External Control of FDS (Beta)}
 \label{info:external_control}
@@ -13174,6 +13217,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real              & Section~\ref{info:condensation}         &                   &  0.01         \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
@@ -13217,6 +13261,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_G\_F}                    & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_K}                       & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_MU}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}       & Real              & Section~\ref{info:condensation}         &                   &  1.33         \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real              & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real              & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
@@ -13817,6 +13862,7 @@ Keyword             & Type     & Description                      & Units       
 316  \> {\ct SURF \ldots\ N\_LAYER\_CELLS\_MAX must be > 0.                         } \> Section~\ref{info:solid_phase_stability}  \\
 317  \> {\ct SURF \ldots\ Specify either ROUGHNESS or Z\_0, not both.               } \> Section~\ref{info:WALL_MODEL}  \\
 318  \> {\ct SURF \ldots\ MASS\_FLUX\_TOTAL is only for outflow.                    } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+319  \> {\ct SURF \ldots\ must have a MATL\_ID.                                     } \> Section~\ref{info:HT3D_Limitations}  \\
 320  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and MASS\_FRACTION.            } \> Section~\ref{info:MASS_FLUX}  \\
 321  \> {\ct SURF \ldots\ MASS\_FLUX cannot be less than zero.                      } \> Section~\ref{info:MASS_FLUX}  \\
 322  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and VEL.                       } \> Section~\ref{info:MASS_FLUX}  \\
@@ -13996,7 +14042,13 @@ Keyword             & Type     & Description                      & Units       
 562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
 563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
 564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
-     \>                                                                               \>                          \\
+565 \> {\ct REAC: \ldots FALLOFF-LINDEMANN reactions must have A\_LOW\_PR and       } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct E\_LOW\_PR }   \\
+566 \> {\ct REAC: \ldots FALLOFF-TROE reactions must have A\_LOW\_PR, E\_LOW\_PR,   } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct A\_TROE, T1\_TROE, and T3\_TROE.  }   \\
+567 \> {\ct REAC: \ldots Tracked species \ldots used in a finite rate reaction      } \> Section~\ref{info:finite}  \\
+    \> {\ct without N\_S defined is not a primitive species.  }   \\
+    \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
 603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\

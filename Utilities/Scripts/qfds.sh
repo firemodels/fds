@@ -52,9 +52,10 @@ function usage {
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -G use GNU OpenMPI version of fds"
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
-  echo " -L use Open MPI version of fds"
+  echo " -L use Intel Fortran with Open MPI version of fds"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -P use PBS/Torque"
   echo " -s   - stop job"
@@ -124,6 +125,7 @@ n_openmp_threads=1
 use_debug=
 use_devel=
 use_intel_mpi=1
+use_gnu_openmpi=
 EMAIL=
 casedir=
 use_default_casedir=
@@ -143,7 +145,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:hHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
+while getopts 'b:d:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   b)
@@ -154,6 +156,9 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
+   ;;
+  G)
+   use_gnu_openmpi=1
    ;;
   h)
    usage
@@ -265,6 +270,9 @@ if [ "$use_intel_mpi" == "1" ]; then
     exe=$FDSROOT/fds/Build/impi_intel_linux_openmp$DB/fds_impi_intel_linux_openmp$DB
   fi
 fi
+if [ "$use_gnu_openmpi" == "1" ]; then
+  exe=$FDSROOT/fds/Build/ompi_gnu_linux$DB/fds_ompi_gnu_linux$DB
+fi
 if [ "$exe" == "" ]; then
   exe=$FDSROOT/fds/Build/ompi_intel_linux$DB/fds_ompi_intel_linux$DB
 fi
@@ -371,12 +379,12 @@ cat << EOF >> $scriptfile
 #SBATCH --partition=$queue
 #SBATCH --ntasks=$n_mpi_processes
 #SBATCH --cpus-per-task=$n_openmp_threads
+#SBATCH --nodes=$nodes
 #SBATCH --time=$walltime
 EOF
 
 if [[ $n_openmp_threads -gt 1 ]] || [[ $max_mpi_processes_per_node -lt 1000 ]] ; then
 cat << EOF >> $scriptfile
-#SBATCH --nodes=$nodes
 #SBATCH --ntasks-per-node=$n_mpi_processes_per_node
 EOF
 fi

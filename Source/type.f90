@@ -14,6 +14,10 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 USE MKL_PARDISO
 USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+USE HYPRE_INTERFACE, ONLY : HYPRE_ZM_TYPE
+! USE HYPRE_INTERFACE, ONLY : HYPRE_ZS_TYPE
+#endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -380,7 +384,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
-   INTEGER :: INITIALIZATION_INDEX=0 !< Index for INIT that placed the particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
    INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
    INTEGER :: DUCT_INDEX=0           !< Index of duct
@@ -530,6 +533,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
+   REAL(EB) :: REAL_REFRACTIVE_INDEX            
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX            
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -1699,6 +1704,11 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZM
+#else
+   INTEGER :: HYPRE_ZM
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE
