@@ -5086,10 +5086,6 @@ IF (CHECK_POISSON) THEN
       ENDDO
    ENDDO
    !$OMP END PARALLEL DO
-   ! write(lu_err,*) 'mesh:   ', NM
-   ! write(lu_err,*) 'maxloc: ', maxloc(residual)
-   ! write(lu_err,*) 'maxval: ', maxval(residual)
-   ! write(lu_err,*)
    POIS_ERR = MAXVAL(RESIDUAL)
 ENDIF
 
