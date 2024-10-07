@@ -4423,16 +4423,19 @@ A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see 
 
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
+\label{info:BACK}
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
 \begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
 \end{lstlisting}
 
+An alternative means of specifying the initial mass fraction is to use the {\ct BACK} namelist with inputs of {\ct SPEC\_ID} and {\ct MASS\_FRACTION}. One use of this would be to modify or add initial species to a pre-existing set of detailed chemistry inputs referenced via {\ct CATF}.
+
 \subsubsection{Specifying Humidity}
 \label{info:humidity}
 
-If you are using the default background lumped species {\ct AIR}, then you can specify {\ct HUMIDITY} on {\ct MISC} to set the ambient mass fraction of water vapor. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default.
+If you are using the default background lumped species {\ct AIR}, then you can specify {\ct HUMIDITY} on {\ct MISC} to set the ambient mass fraction of water vapor. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default. 
 
 If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_FRACTION\_0} is independent of {\ct HUMIDITY}.  That is setting {\ct MASS\_FRACTION\_0} for the species {\ct WATER VAPOR} will not change the ambient humidity, it will add additional water vapor.
 
@@ -11690,6 +11693,31 @@ properties be specified as well. Simply prescribing as many properties as possib
 %--------------------------------------------------------------------
 
 \needspace{2.5in}
+\section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+	\caption[Background species ({\ct BACK} namelist group)]{For more information see Section~\ref{info:BACK}.}
+	\label{tbl:BACK} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endfirsthead
+	\caption[]{Continued} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endhead
+	{\ct SPEC\_ID}                   & Char. Array  & Section \ref{info:BACK}                      &           &                 \\ \hline
+	{\ct MASS\_FRACTION}             & Real Array   & Section \ref{info:BACK}                      &           &                 \\ \hline
+\end{longtable}
+
+
+
+\vspace{\baselineskip}
+
+\needspace{2.5in}
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -13836,6 +13864,7 @@ Keyword             & Type     & Description                      & Units       
 265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
+268  \> {\ct BACK tracked species \ldots\ not found.                                } \> Section~\ref{info:BACK}  \\
      \>                                                                               \>                                     \\
 299  \> {\ct SURF \ldots\ has no solid or particle for TGA.                         } \> Section~\ref{info:TGA_DSC_MCC} \\
 300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
