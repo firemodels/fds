@@ -6858,9 +6858,11 @@ N_MATL_READ = N_MATL
 
 ! Add reserved materials if necessary
 
-N_MATL_RESERVED = 1
+N_MATL_RESERVED = 3
 ALLOCATE(SEARCH_PHRASE(N_MATL_RESERVED)) ; ALLOCATE(MATL_NAME_RESERVED(N_MATL_RESERVED))
-SEARCH_PHRASE(1) = 'MOISTURE_FRACTION' ; MATL_NAME_RESERVED(1) = 'MOISTURE'
+SEARCH_PHRASE(1) = 'MOISTURE_FRACTION'  ; MATL_NAME_RESERVED(1) = 'MOISTURE'
+SEARCH_PHRASE(2) = 'VARIABLE_THICKNESS' ; MATL_NAME_RESERVED(2) = 'MATERIAL PLACEHOLDER'
+SEARCH_PHRASE(3) = 'HT3D'               ; MATL_NAME_RESERVED(3) = 'MATERIAL PLACEHOLDER'
 
 DO NN=1,N_MATL_RESERVED
    CALL SEARCH_INPUT_FILE(LU_INPUT,TRIM(SEARCH_PHRASE(NN)),FOUND)
@@ -6910,6 +6912,11 @@ READ_MATL_LOOP: DO N=1,N_MATL
             NU_SPEC(1,1)        = 1._EB
             HEAT_OF_REACTION(1) = 2295._EB
             MOISTURE_INDEX      = N
+         CASE('MATERIAL PLACEHOLDER')
+            ID                  = 'MATERIAL PLACEHOLDER'
+            DENSITY             = 1000._EB
+            CONDUCTIVITY        = 1._EB
+            SPECIFIC_HEAT       = 1._EB
       END SELECT
    ENDIF
 
@@ -7070,6 +7077,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! No pyrolysis
 
    IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+
+   IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_NONE) INCLUDE_PYROLYSIS = .TRUE.
 
    ! If oxygen is consumed in the reaction, set a global variable for
    ! use in calculating the heat release rate based on oxygen consumption
@@ -7608,8 +7617,7 @@ END SUBROUTINE PROC_MATL
 
 
 !> \brief Read the SURF namelist lines
-
-!> \brief Read the SURF namelist lines
+!> \param QUICK_READ Flag indicating that this routine is to be run only to search for HT3D surfaces
 
 SUBROUTINE READ_SURF(QUICK_READ)
 
@@ -7806,11 +7814,19 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SURF_DEFAULT = TRIM(ID)
    ENDIF
 
-   ! Set up a dummy surface for VARIABLE_THICKNESS and HT3D. The properties will be changed later.
+   ! Specify a dummy material for a VARIABLE_THICKNESS or HT3D surface unless the user has also specified a mass flux, in which
+   ! case throw an error. If no mass flux is specified, the material properties will be changed later.
 
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. THICKNESS(1)>TWO_EPSILON_EB .AND. MATL_ID(1,1)/='null') SF%LINING = .TRUE.
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. THICKNESS(1)<TWO_EPSILON_EB) THICKNESS(1) = 0.1_EB
-   IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. MATL_ID(1,1)=='null') MATL_ID(1,1) = MATERIAL(1)%ID
+   IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. MATL_ID(1,1)=='null') THEN
+      IF (ANY(MASS_FLUX>0._EB) .OR. HRRPUA>0._EB .OR. MLRPUA>0._EB) THEN
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(319): SURF ',TRIM(SF%ID),' must have a MATL_ID.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ELSE
+         MATL_ID(1,1) = 'MATERIAL PLACEHOLDER'
+      ENDIF
+   ENDIF
 
    ! Load RAMP parameters into appropriate array
 
