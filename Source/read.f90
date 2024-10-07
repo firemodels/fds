@@ -9707,11 +9707,13 @@ SELECT CASE(TRIM(SOLVER))
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
-   CASE('ULMAT')
+   CASE('ULMAT','ULMAT PARDISO','ULMAT HYPRE')
       PRES_METHOD = 'ULMAT'
       PRES_FLAG   = ULMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      ULMAT_SOLVER_LIBRARY = MKL_PARDISO_FLAG
+      IF (TRIM(SOLVER)=='ULMAT HYPRE') ULMAT_SOLVER_LIBRARY = HYPRE_FLAG
 
    CASE('FFT')
       ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
@@ -9719,6 +9721,20 @@ SELECT CASE(TRIM(SOLVER))
       ! Here the user added an unknown name to SOLVER, stop:
       CALL SHUTDOWN('ERROR(371): Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
+
+#ifndef WITH_MKL
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
+   CALL SHUTDOWN('ERROR: MKL PARDISO selected for ULMAT solver without compiling and linking MKL library.')
+   RETURN
+ENDIF
+#endif
+
+#ifndef WITH_HYPRE
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+   CALL SHUTDOWN('ERROR: HYPRE selected for ULMAT solver without compiling and linking HYPRE library.')
+   RETURN
+ENDIF
+#endif
 
 ! Determine how many pressure iterations to perform per half time step.
 

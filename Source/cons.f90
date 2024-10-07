@@ -517,6 +517,9 @@ INTEGER, PARAMETER :: FFT_FLAG=0                                 !< Integer pres
 INTEGER, PARAMETER :: GLMAT_FLAG=1                               !< Integer pressure solver parameter GLMAT
 INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pressure solver parameter UGLMAT
 INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
+INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matrix solver library flag for MKL PARDISO
+INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
+INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
 INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
