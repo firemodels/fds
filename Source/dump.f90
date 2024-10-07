@@ -3854,7 +3854,7 @@ WRITE(LU_OUTPUT,*)
            6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I0,',',I0,',',I0,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I0,',',I0,',',I0,')')
+230 FORMAT(6X,' Max VN number : ',E9.2,' at (',I0,',',I0,',',I0,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 141 FORMAT(6X,' No. of Lagrangian Particles:  ',I0)
@@ -8117,7 +8117,7 @@ IND_SELECT: SELECT CASE(IND)
    CASE(253)  ! ZONE PRESSURE SOLVER TYPE
       GAS_PHASE_OUTPUT_RES = REAL(PRES_FLAG,EB)
       IF (PRES_FLAG==ULMAT_FLAG) THEN
-         IF (ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%USE_FFT) THEN
+         IF (ZONE_MESH(ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%CONNECTED_ZONE_PARENT)%USE_FFT) THEN
             GAS_PHASE_OUTPUT_RES = REAL(FFT_FLAG,EB)
          ELSE
             ! uses PARDISO solver per mesh zone
