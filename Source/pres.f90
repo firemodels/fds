@@ -5155,7 +5155,7 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
                (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1)*IMFCT )*RDX(I)*RRN(I)                                   &
             + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)*JPFCT      -(KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)*JMFCT)*RDY(J)  &
             + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)*KPFCT      -(KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)*KMFCT)*RDZ(K)
-            IF (TUNNEL_PRECONDITIONER .AND. .NOT.CELL(IC)%SOLID) &
+            IF (TUNNEL_PRECONDITIONER) &
                 LHSS = LHSS - (DUDT_BAR_P(I_OFFSET(NM)+I) - DUDT_BAR_P(I_OFFSET(NM)+I-1))*RDX(I)
             RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
