@@ -4423,7 +4423,7 @@ A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see 
 
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
-\label{info:BACK}
+\label{info:BACKGROUND_SPECIES}
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
 \begin{lstlisting}
@@ -4435,7 +4435,7 @@ An alternative means of specifying the initial mass fraction is to use the {\ct 
 \subsubsection{Specifying Humidity}
 \label{info:humidity}
 
-If you are using the default background lumped species {\ct AIR}, then you can specify {\ct HUMIDITY} on {\ct MISC} to set the ambient mass fraction of water vapor. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default. 
+If you are using the default background lumped species {\ct AIR}, then you can specify {\ct HUMIDITY} on {\ct MISC} to set the ambient mass fraction of water vapor. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default.
 
 If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_FRACTION\_0} is independent of {\ct HUMIDITY}.  That is setting {\ct MASS\_FRACTION\_0} for the species {\ct WATER VAPOR} will not change the ambient humidity, it will add additional water vapor.
 
@@ -5360,7 +5360,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants. 
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants.
 
 \subsection{Multiple Step Reaction}
 
@@ -8312,7 +8312,7 @@ The output value of a numerical control function is defined by a {\ct DEVC} line
 
 The outputs {\ct QUANTITY='CONTROL'} and {\ct QUANTITY='CONTROL\_VALUE'} have the default of {\ct TEMPORAL\_STATISTIC='INSTANT VALUE'}.
 
-The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}. 
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8696,7 +8696,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 &CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
 &CTRL ID='HRR+EPS', FUNCTION_TYPE='SUM', INPUT_ID='HRR', 'CONSTANT',
       CONSTANT=1E-10 / Prevents divide-by-zero
-&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10, 
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10,
       XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
 &CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS','Fire Area' /
 
@@ -11696,7 +11696,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-	\caption[Background species ({\ct BACK} namelist group)]{For more information see Section~\ref{info:BACK}.}
+	\caption[Background species ({\ct BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
 	\label{tbl:BACK} \\
 	\hline
 	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
@@ -11709,8 +11709,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 	\hline
 	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
 	\endhead
-	{\ct SPEC\_ID}                   & Char. Array  & Section \ref{info:BACK}                      &           &                 \\ \hline
-	{\ct MASS\_FRACTION}             & Real Array   & Section \ref{info:BACK}                      &           &                 \\ \hline
+	{\ct SPEC\_ID}                   & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+	{\ct MASS\_FRACTION}             & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
 \end{longtable}
 
 
