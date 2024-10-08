@@ -9722,19 +9722,35 @@ SELECT CASE(TRIM(SOLVER))
       CALL SHUTDOWN('ERROR(371): Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
 
+ULMAT_IF: IF (PRES_FLAG==ULMAT_FLAG) THEN
+
+! If library is not specified and only one library is linked, choose the available library
 #ifndef WITH_MKL
-IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
+#ifdef WITH_HYPRE
+ULMAT_SOLVER_LIBRARY=HYPRE_FLAG
+#endif
+#endif
+#ifndef WITH_HYPRE
+#ifdef WITH_MKL
+ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG
+#endif
+#endif
+
+! If neither library is specified, throw an error
+#ifndef WITH_MKL
+IF (ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
    CALL SHUTDOWN('ERROR: MKL PARDISO selected for ULMAT solver without compiling and linking MKL library.')
    RETURN
 ENDIF
 #endif
-
 #ifndef WITH_HYPRE
-IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+IF (ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
    CALL SHUTDOWN('ERROR: HYPRE selected for ULMAT solver without compiling and linking HYPRE library.')
    RETURN
 ENDIF
 #endif
+
+ENDIF ULMAT_IF
 
 ! Determine how many pressure iterations to perform per half time step.
 
