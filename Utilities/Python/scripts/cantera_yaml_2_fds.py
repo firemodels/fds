@@ -1,67 +1,60 @@
-#Converts a yaml file into FDS SPEC and REAC inputs.
-#yaml file must have thermodynamic data including NASA7 or NASA9 polynomial and diameter and well-depth.
-#run from command line as:
-#python cantera2fds.py yamlfile.yaml background_species optional fds optional species lookup file prop_flag> fdsfile.fds
-# where yamlfile.yaml is the name of the yaml file to process
-#opitonal fds prop_flag is True or False where True will use the predefined FDS properties and False will have the script write the yaml file properties. The default is True.
-# background_spcecies is the species name in the yaml file to set as BACKGROUND
-# species lookup file is an optional input for a file to create an equivalence between cantera and FDS species. The default name is yamlfile.spec
-#the file is a comma separated value file with the first row being
-#FORMULA,NAME
-#and follow on rows being
-#yaml file species formula as written in the yaml file, equivalent predefined FDS SPEC ID
-#do not list species without an FDS equivalent
-#
-#when using optional values, if you specify command line arguement N, then you must also give optional values for arguements < N
-#
-#example:
-#$ python cantera_yaml_2_fds.py grimech30.yaml N2 > fdsfile.fds
-#the above example with the default values for optional items
-#$ python cantera_yaml_2_fds.py grimech30.yaml N2 grimech30.spec True> fdsfile.fds
-
+import argparse
 import cantera as ct
 import numpy as np
 import pandas as pd
 import sys
 import math
 
-try: #check for yaml file
-   sys.argv[1]
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--background", help="Background species formula",default='noinput',required=True)
+parser.add_argument("--yaml_file",help="yaml file",default='noinput',required=True)
+parser.add_argument("--spec_file",help="Cantera to FDS species name lookup csv file (default is yaml_file.spec) with column headings FORMULA and NAME ",default='noinput')
+parser.add_argument("--fds_prop",help="Set to True (default) to use FDS properties when species is in spec_file. ",type=bool,default=True)
+parser.add_argument("--mf0_file",help="csv file containing MASS_FRACTION_0 with column headings FORMULA and MF0",default='noinput')
+args = parser.parse_args()
+
+yaml_file = args.yaml_file
+bg = args.background
+prop_flag = False
+spec_data_flag = True
+
+try:
+   gas=ct.Solution(yaml_file)
 except:
-   print('specify a yaml file')
+   print('ERROR: yaml file not found')
    quit()
 else:
-   yaml_file=sys.argv[1]
-gas = ct.Solution(yaml_file)
+   gas=ct.Solution(yaml_file)
 
-try: #check for background species
-   sys.argv[2]
-except:
-   print('specify a background species')
-   quit()
-else:
-   bg = sys.argv[2]
-
-try: #check if spec file is given
-   sys.argv[3]
-except:
+if args.spec_file=='noinput':
    rootname = yaml_file.split('.')[0]
-   spec_file=rootname+'.spec'
+   spec_file = rootname+'.spec'
 else:
-   spec_file = sys.argv[3]
+   spec_file=args.spec_file
+
 try:
    spec_data=pd.read_csv(spec_file, keep_default_na=False, na_values=['_'])
 except:
    spec_data_flag = False
+   if args.spec_file!='noinput':
+      print('ERROR: species file not found')
+      quit()
 else:
    spec_data=pd.read_csv(spec_file, keep_default_na=False, na_values=['_'])
    spec_data_flag = True
-   try: #check if prop_flag is set
-      sys.argv[4]
+   prop_flag = args.fds_prop
+
+mfo_file_flag = False
+if args.mf0_file!='noinput':
+   try:
+      mf0_data=pd.read_csv(args.mf0_file, keep_default_na=False, na_values=['_'])
    except:
-      prop_flag = True
+      print('ERROR: MASS_FRACTION_0 file not found')
+      quit()
    else:
-      prop_flag = eval(sys.argv[4])
+      mf0_data=pd.read_csv(args.mf0_file, keep_default_na=False, na_values=['_'])
+      mf0_file_flag = True
 
 k_b = 1.380649E-23
 t_r = 298.15
@@ -80,6 +73,14 @@ if (spec_data_flag):
       for i2 in range(l_species):
          if (gas.species(i).name==spec_data['FORMULA'][i2]):
             spec_index[i]=i2
+
+mf0_index = [-1]*n_species
+if (mf0_file_flag):
+   l_species=len(mf0_data['FORMULA'])
+   for i in range(l_species):
+      for i2 in range(n_species):
+         if (gas.species(i2).name==mf0_data['FORMULA'][i]):
+            mf0_index[i2] = mf0_data['MF0'][i]
 
 for i2 in range(n_species):
    write_props = True
@@ -125,6 +126,8 @@ for i2 in range(n_species):
    print(outstr)
    if (write_alt):
       print("      ALT_ID='"+spec_data['FORMULA'][spec_index[i]]+"'")
+   if (mf0_index[i]!=-1):
+      print("      MASS_FRACTION_0=",mf0_index[i],",")
    if (write_props):
       print("      PR_GAS=",int(Pr*1000)/1000,",")
       outstr="      FORMULA='"+formula+"',"
@@ -313,22 +316,3 @@ for i in range(len(rlist)):
     rlist2=rlist2.replace('[','-').replace(']','').replace(" ",",-").replace("'","")
     plist2=plist2.replace('[','').replace(']','').replace(" ",",").replace("'","")
     print("     NU=",rlist2,",",plist2,"/")
-
-
-
-#gas.species(1).name
-#gas.species(1).composition
-#{'element':val}
-#list(gas.species().composition)
-#len elements
-#gas.speces().thermo.coeffs
-#gas.species().thermo.min_temp  max_temp
-#gas.species().transport.diameter * 1E10
-#gas.species().transport.well_depth / k_b
-
-
-#x=list(gas.species().thermo.input_data)
-#x[0]=poly
-#x[1]=temp range
-#x[2][0:N] = poly data for range
-
