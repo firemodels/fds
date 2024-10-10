@@ -4949,6 +4949,7 @@ RADIATIVE_FRACTION          = -1._EB
 RAMP_CHI_R                  = 'null'
 REAC_ATOM_ERROR             = 1.E-4_EB
 REAC_MASS_ERROR             = 1.E-4_EB
+REAC_MASS_ERROR             = 1.E-4_EB
 REACTYPE                    = 'ARRHENIUS-TYPE'
 REVERSE                     = .FALSE.
 SOOT_YIELD                  = 0.0_EB
@@ -12929,8 +12930,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                      WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),&
                         ' XB extends beyond domain boundary, full number of particles may not be realized.'
                      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-                  ENDIF                  
-                  IF (MESH_COUNT < N_PARTICLES) THEN
+                  ENDIF   
+                  IF (MESH_COUNT > N_PARTICLES) THEN
                      WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),' XB contains more MESHes than N_PARTICLES.'
                      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)           
                   ENDIF     
