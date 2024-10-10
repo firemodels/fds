@@ -12421,7 +12421,7 @@ USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,DEVICE,N_DEVC
 REAL(EB) :: DIAMETER,TEMPERATURE,MASS_PER_VOLUME,BULK_DENSITY_FACTOR, &
             MASS_PER_TIME,DT_INSERT,UVW(3),HRRPUV,XYZ(3),DX,DY,DZ,HEIGHT,RADIUS,INNER_RADIUS,MASS_FRACTION(MAX_SPECIES), &
             PARTICLE_WEIGHT_FACTOR,VOLUME_FRACTION(MAX_SPECIES),CROWN_BASE_HEIGHT,CROWN_BASE_WIDTH,TREE_HEIGHT
-INTEGER  :: NM,N,NN,NNN,II,JJ,KK,NS,NS2,N_PARTICLES,N_INIT_NEW,N_INIT_READ,N_PARTICLES_PER_CELL,SURF_INDEX,III
+INTEGER  :: NM,N,NN,NNN,II,JJ,KK,NS,NS2,N_PARTICLES,N_INIT_NEW,N_INIT_READ,N_PARTICLES_PER_CELL,SURF_INDEX,III,MESH_COUNT
 LOGICAL  :: CELL_CENTERED,UNIFORM,DRY
 CHARACTER(LABEL_LENGTH) :: ID,CTRL_ID,DEVC_ID,PART_ID,SHAPE,MULT_ID,SPEC_ID(1:MAX_SPECIES),ORIENTATION_RAMP(3),&
                            PATH_RAMP(3),RAMP_Q,RAMP_PART,NODE_ID,RAMP_TMP_Z,RAMP_MF_Z(MAX_SPECIES),RAMP_VF_Z(MAX_SPECIES)
@@ -12908,6 +12908,35 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%U0 = UVW(1)
             IN%V0 = UVW(2)
             IN%W0 = UVW(3)
+            
+            
+            ! Check for possible issues when N_PARTICLES given
+
+            N_PARTICLE_IF: IF (N_PARTICLES > 0) THEN
+              
+               MESH_COUNT = 0
+               DO NM=1,NMESHES
+                  IF (IN%X1>MESHES(NM)%XF .OR. IN%X2<MESHES(NM)%XS .OR. IN%Y1>MESHES(NM)%YF .OR. IN%Y2<MESHES(NM)%YS &
+                     .OR. IN%Z1>MESHES(NM)%ZF .OR. IN%Z2<MESHES(NM)%ZS) CYCLE
+                  MESH_COUNT = MESH_COUNT + 1
+               ENDDO
+            
+               IF (MESH_COUNT == 0) THEN
+                  WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),' XB does not lie in any MESH.'
+                  IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+               ELSE
+                  IF (IN%X2>XF_MAX .OR. IN%X1<XS_MIN .OR. IN%Y2>YF_MAX .OR. IN%Y1<YS_MIN .OR. IN%Z2>ZF_MAX .OR. IN%Z1<ZS_MIN) THEN
+                     WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),&
+                        ' XB extends beyond domain boundary, full number of particles may not be realized.'
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                  ENDIF                  
+                  IF (MESH_COUNT < N_PARTICLES) THEN
+                     WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),' XB contains more MESHes than N_PARTICLES.'
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)           
+                  ENDIF     
+               ENDIF
+               
+            ENDIF N_PARTICLE_IF
 
          ENDDO I_MULT_LOOP
       ENDDO J_MULT_LOOP
