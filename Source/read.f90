@@ -4949,7 +4949,6 @@ RADIATIVE_FRACTION          = -1._EB
 RAMP_CHI_R                  = 'null'
 REAC_ATOM_ERROR             = 1.E-4_EB
 REAC_MASS_ERROR             = 1.E-4_EB
-REAC_MASS_ERROR             = 1.E-4_EB
 REACTYPE                    = 'ARRHENIUS-TYPE'
 REVERSE                     = .FALSE.
 SOOT_YIELD                  = 0.0_EB
