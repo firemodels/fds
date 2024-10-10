@@ -5033,8 +5033,8 @@ Consider a single reaction involving methane. When you specify the {\ct REAC} li
 FDS assumes the following reaction:
 \begin{multline}
 1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
-9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
-10.636 \; \underbrace{\mathrm{(0.0944 \; CO_2 +  0.1966 \; H_2O + 0.7090 \; N_2)}}_\text{Products}
+9.6339 \; \underbrace{ \mathrm{\left( 0.20756 \; O_2 + 0.78257 \; N_2 + 0.00948 \; H_2O + 0.00039 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
+10.6339 \; \underbrace{\mathrm{(0.09440 \; CO_2 +  0.19668 \; H_2O + 0.70891 \; N_2)}}_\text{Products}
 \end{multline}
 
 \noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
@@ -5047,25 +5047,25 @@ FDS assumes the following reaction:
 &SPEC ID='METHANE' /
 
 &SPEC ID='AIR', BACKGROUND=T,
-      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.2076,
-      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.7825,
-      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.0095,
-      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.0004 /
+      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.20756,
+      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.78257,
+      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.00948,
+      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.00039 /
 
 &SPEC ID='PRODUCTS',
-      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.0944,
-      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
-      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
+      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.09438,
+      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.19663,
+      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.70899/
 
 &REAC FUEL='METHANE', SPEC_ID_NU='METHANE','AIR','PRODUCTS',
-      NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
+      NU=-1,-9.6357,10.6357, HEAT_OF_COMBUSTION=50000. /
 \end{lstlisting}
 
 \noindent
 The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a net negative value for {\ct NU} (i.e., if a species appeared on both sides of the reaction as a collision species it would not be used as the {\ct FUEL}). There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
-\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-4)
 \item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
@@ -13139,7 +13139,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct PRIORITY}                            & Integer        & Section~\ref{info:priority}                  &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real           & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-5             \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
 {\ct REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
 {\ct REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & {\ct F}           \\ \hline
