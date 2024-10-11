@@ -343,7 +343,7 @@ ompi_gnu_linux : obj = fds_ompi_gnu_linux
 ompi_gnu_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5)
+ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -Wno-unused-function -Wno-maybe-uninitialized -Wno-uninitialized -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) 
 ompi_gnu_linux_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux_db : FCOMPL = mpifort
 ompi_gnu_linux_db : FOPENMPFLAGS = -fopenmp
@@ -424,7 +424,7 @@ fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o radi.o chem.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o ccib.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o geom.o ccib.o imkl.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o radi.o pois.o data.o pres.o geom.o
-vtkf.o  : func.o prec.o cons.o type.o mesh.o data.o
+vtkf.o : func.o prec.o cons.o type.o mesh.o data.o geom.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o data.o radi.o soot.o geom.o ccib.o fire.o vtkf.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o prop.o
 divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
