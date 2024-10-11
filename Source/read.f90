@@ -2107,7 +2107,7 @@ U0                      = 0._EB     ! m/s
 V0                      = 0._EB     ! m/s
 W0                      = 0._EB     ! m/s
 Z_0                     = -1._EB    ! m
-Z_REF                   = 2._EB     ! m
+Z_REF                   = 10._EB    ! m
 
 ! Read the WIND line
 

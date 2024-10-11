@@ -6771,7 +6771,7 @@ The following input line specifies a southwesterly wind blowing 5~m/s over a rel
 \begin{lstlisting}
 &WIND SPEED=5., Z_REF=3, DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The {\ct SPEED} indicates the wind speed at a height of {\ct Z\_REF} (m) above the ground. If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m above {\ct GROUND\_LEVEL}, which is $z=0$~m by default. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The parameter {\ct SPEED} specifies the wind speed at a distance {\ct Z\_REF} (m) above the ground. The default value of {\ct Z\_REF} is 10~m. You can change the height of the ground by setting {\ct GROUND\_LEVEL}, which is at $z=0$~m by default. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
 &WIND ..., RAMP_DIRECTION_T='dir' /
 
@@ -13668,7 +13668,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct USE\_ATMOSPHERIC\_INTERPOLATION}           & Logical       & FDS Tech Guide~\cite{FDS_Math_Guide}          &               & {\ct T}      \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
-{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
+{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 10.               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
