@@ -2970,7 +2970,7 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%H(500)*0.001_EB
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
-   IF (ML%KAPPA_S<5.0E4_EB) THEN
+   IF (ML%KAPPA_S<4.9E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
 
