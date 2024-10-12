@@ -5,7 +5,7 @@
 
 &TIME T_BEGIN=-5., T_END=300. /
 
-&WIND SPEED=5., Z_0=0.01, L=-100. /
+&WIND SPEED=5., Z_0=0.01, L=-100., Z_REF=2. /
 
 &RADI RADIATION=F /
 
