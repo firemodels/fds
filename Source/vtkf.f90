@@ -12478,7 +12478,7 @@ PUBLIC BUILD_VTK_GAS_PHASE_GEOMETRY,BUILD_VTK_SOLID_PHASE_GEOMETRY,BUILD_VTK_SLI
        WRITE_VTKHDF_GEOM_FILE,WRITE_VTKHDF_RECT_GAS_FILE,ADD_3F32_DATA_TO_VTKHDF_RECT_GAS_FILE,&
        ADD_1F32_DATA_TO_VTKHDF_RECT_GAS_FILE,INITIALIZE_VTKHDF_SLCF,INITIALIZE_VTKHDF_FILES,&
        WRITE_VTKHDF_SLICE_DATA_FILE,WRITE_VTKHDF_SLICE_CELL_FILE,ADD_DATA_TO_SMOKE3D_VTKHDF_FILE,&
-       WRITE_VTKHDF_BNDF_CELL_FILE
+       WRITE_VTKHDF_BNDF_CELL_FILE,PARALLEL_INIT_F32,PARALLEL_WRITE_F32,CLOSE_VTKHDF,OPEN_VTKHDF
 
 CONTAINS
 
@@ -14455,11 +14455,11 @@ END SUBROUTINE INITIALIZE_VTKHDF_BNDF_STEP1
 SUBROUTINE INITIALIZE_VTKHDF_BNDF_STEP2(T)
    INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
    INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
-   INTEGER(HID_T) :: DSET_ID_NCELLS, DSET_ID_NCON, DSET_ID_NPTS    ! Dataset identifiers
+   INTEGER(HID_T) :: DSET_ID_NCELLS, DSET_ID_NCON, DSET_ID_NPTS, DSET_ID    ! Dataset identifiers
    INTEGER(HID_T) :: DSET_ID_CON, DSET_ID_OFF, DSET_ID_PTS, DSET_ID_TYP       ! Dataset identifiers
    INTEGER :: PA_NPOINTS, PA_NCELLS, II, IP
    INTEGER :: NFACES, NFACES_CUTCELLS, NVERTS, NVERTS_CUTCELLS
-   INTEGER :: NM, NMNM, NM1, NM2, ERROR, ITM, ITM1
+   INTEGER :: N, NM, NMNM, NM1, NM2, ERROR, ITM, ITM1
    INTEGER(IB32), DIMENSION(1:2*NMESHES) :: NCELLS, NPOINTS, NCONNECTIONS
    REAL(EB), INTENT(IN) :: T
    CHARACTER(200) :: FILENAME
@@ -14478,6 +14478,7 @@ SUBROUTINE INITIALIZE_VTKHDF_BNDF_STEP2(T)
    INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS, ALL_CONNECT, ALL_OFFSETS
    INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE, ALL_VTKC_TYPE
    REAL(FB) :: STIME
+   TYPE (BOUNDARY_FILE_TYPE), POINTER :: BF=>NULL()
 
    DO NM=1,N_MPI_PROCESSES
       MESHES_PER_PROCESS(NM) = 0
@@ -14546,6 +14547,18 @@ SUBROUTINE INITIALIZE_VTKHDF_BNDF_STEP2(T)
    CALL PARALLEL_INIT_U8(GROUP_ID1, TRIM("Types"), CRP_LIST, 1,&
       INT8((/NCELLS_MAX/)),INT8((/NCELLS_TOTAL/)), DSET_ID_TYP, PLIST_ID) ! Types
    
+   CALL POINT_TO_MESH(1)
+   DO N=1,N_BNDF
+      BF => BOUNDARY_FILE(N)
+      IF (BF%CELL_CENTERED) THEN
+         CALL PARALLEL_INIT_F32(GROUP_ID2, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
+            INT8((/NCELLS_MAX/)),INT8((/NCELLS_TOTAL/)), DSET_ID, PLIST_ID) ! Data
+      ELSE
+         CALL PARALLEL_INIT_F32(GROUP_ID4, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
+            INT8((/NPOINTS_MAX/)),INT8((/NPOINTS_TOTAL/)), DSET_ID, PLIST_ID) ! Data
+      ENDIF
+      CALL H5DCLOSE_F(DSET_ID, ERROR)
+   ENDDO
    
    ! Fill metadata
    N_WRITTEN=0
@@ -16852,8 +16865,6 @@ WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.PolarAxes = polaraxesrep"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.SelectInputVectors = [None, '']"
 WRITE(LU_PARAVIEW,'(A)') "    stlDisplay.WriteLog = ''"
 WRITE(LU_PARAVIEW,'(A)') "# Load data files"
-WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
-                               "if ('_BNDF_' in x) and ('.pvtu' in x)]"
 IF(.NOT.VTK_HDF) THEN
    WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.pvtu' in x)]"
@@ -16865,6 +16876,8 @@ IF(.NOT.VTK_HDF) THEN
                                "if ('_Z_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_BNDF_' in x) and ('.pvtu' in x)]"
 ELSE
    WRITE(LU_PARAVIEW,'(A,A)') "sm3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SM3D_' in x) and ('.vtkhdf' in x)]"
@@ -16876,6 +16889,8 @@ ELSE
                                "if ('_Z_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_BNDF_' in x) and ('.vtkhdf' in x)]"
 ENDIF
 WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_PART_' in x) and ('.pvtp' in x)]"
@@ -16889,16 +16904,29 @@ WRITE(LU_PARAVIEW,'(A,A)') "partFiles = [indir+sep+rdir+sep+x for x in fileList 
 
 WRITE(LU_PARAVIEW,'(A)') "# Add boundary data"
 WRITE(LU_PARAVIEW,'(A)') "if len(bndfFiles) > 0:"
-WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
-WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
-                                        "registrationName='Boundary', FileName=bndfFiles)"
-WRITE(LU_PARAVIEW,'(A)') "    else:"
-WRITE(LU_PARAVIEW,'(A)') "        bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
-WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(bndfFiles, '.pvtu')"
-WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'bndf.pvtu.series'"
-WRITE(LU_PARAVIEW,'(A)') "        writeSeries(bndfFiles, times, outname)"
-WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
-                                        "registrationName='Boundary', FileName=[outname])"
+IF (.NOT.VTK_HDF) THEN
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                                           "registrationName='Boundary', FileName=bndfFiles)"
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(bndfFiles, '.pvtu')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'bndf.pvtu.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(bndfFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = XMLPartitionedUnstructuredGridReader(",&
+                                           "registrationName='Boundary', FileName=[outname])"
+ELSE
+   WRITE(LU_PARAVIEW,'(A)') "    if remoteConnection:"
+   WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = VTKHDFReader(",&
+                                           "registrationName='Boundary', FileName=bndfFiles)"
+   WRITE(LU_PARAVIEW,'(A)') "    else:"
+   WRITE(LU_PARAVIEW,'(A)') "        bndfFiles = [rdir + x.split(sep)[-1] for x in bndfFiles]"
+   WRITE(LU_PARAVIEW,'(A)') "        times = parseTimes(bndfFiles, '.vtkhdf')"
+   WRITE(LU_PARAVIEW,'(A)') "        outname = indir+sep+'bndf.vtkhdf.series'"
+   WRITE(LU_PARAVIEW,'(A)') "        writeSeries(bndfFiles, times, outname)"
+   WRITE(LU_PARAVIEW,'(A,A)') "        BoundaryData = VTKHDFReader(",&
+                                           "registrationName='Boundary', FileName=[outname])"
+ENDIF
 WRITE(LU_PARAVIEW,'(A)') "# Add smoke 3d data"
 WRITE(LU_PARAVIEW,'(A)') "if len(sm3dFiles) > 0:"
 IF (.NOT.VTK_HDF) THEN
