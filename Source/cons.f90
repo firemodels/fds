@@ -582,6 +582,11 @@ CHARACTER(FN_LENGTH)                             :: FN_PARAVIEW
 
 CHARACTER(9) :: FMT_R
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
+#ifdef WITH_HDF5
+! Total number of obst and geom patches in each mesh
+! 2*NMESHES arrays. odds include OBST patches, evens include GEOM patches
+INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: NCELLS_VTK, NPOINTS_VTK, NCONNECTIONS_VTK
+#endif
 
 ! Boundary condition arrays
 
