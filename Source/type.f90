@@ -255,6 +255,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: PYROLYSIS_MODEL=0 !< Indicator of a pyrolysis model used in depth
 
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER           !< (1:ONE_D\%N_LAYERS) Indicator that layer in 3D
+   LOGICAL :: INTERNAL_RADIATION=.FALSE.                      !< Indicator that internal radiation transport done in solid
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
@@ -541,6 +542,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
+   REAL(EB) :: REAL_REFRACTIVE_INDEX            
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX            
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -968,7 +971,7 @@ TYPE SURFACE_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_ID
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_MASS_FRACTION
-   LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
+   LOGICAL :: BURN_AWAY,ADIABATIC,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,&
               BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.,DIRICHLET_FRONT=.FALSE.,DIRICHLET_BACK=.FALSE.,BLOWING=.FALSE.

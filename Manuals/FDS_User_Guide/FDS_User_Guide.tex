@@ -2513,6 +2513,7 @@ You can specify an internal source for the solid obstruction using {\ct INTERNAL
 \item If your 3-D obstruction extends beyond meshes that abut, FDS uses a special algorithm to identify all the meshes where this obstruction lives, and also those obstructions connected to it. However, if this algorithm fails to detect all the meshes and you recieve an error stating that there is a problem, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation. If you set this parameter to a value larger than the width of the computational domain, then all meshes will establish communication channels for exchanging boundary information.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} or {\ct OBST} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically chosen to be comparable to the gas phase cells. If the obstruction is thin; that is, less than one gas phase cell thick, the specified {\ct CELL\_SIZE} will only apply to the heat conduction in the transverse, not normal, direction. The normal direction gridding will be controlled by the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. This may be useful in cases where the specified {\ct CELL\_SIZE} is too coarse to resolve variations in surface definition along the normal dimension (see Section~\ref{checkerboard} for an example).
 \item {\ct HT3D} cannot be applied to an {\ct OBST} that is to {\ct BURN\_AWAY}.
+\item If a {\ct SURF} line specifies either {\ct HT3D=T} or {\ct VARIABLE\_THICKNESS=T} and also specifies an {\ct HRRPUA}, {\ct MLPUA}, or {\ct MASS\_FLUX}, you must specify a {\ct MATL\_ID} on the {\ct SURF} line and the appropriate {\ct OBST} lines. The reason for doubly specifying the {\ct MATL\_ID} is so that the {\ct SURF} line can be set up properly. Note that the specification of {\ct HRRPUA} or similar on the surface of a 3-D or variably thick solid means that no obstruction making up the solid can have specified internal reactions, i.e. pyrolysis.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -4422,11 +4423,14 @@ A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see 
 
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
+\label{info:BACKGROUND_SPECIES}
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
 \begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
 \end{lstlisting}
+
+An alternative means of specifying the initial mass fraction is to use the {\ct BACK} namelist with inputs of {\ct SPEC\_ID} and {\ct MASS\_FRACTION}. One use of this would be to modify or add initial species to a pre-existing set of detailed chemistry inputs referenced via {\ct CATF}.
 
 \subsubsection{Specifying Humidity}
 \label{info:humidity}
@@ -4941,6 +4945,8 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct ETHANOL}     & C$_2$H$_6$O      & 0.126        & 1397 \\ \hline
 {\ct ETHYLENE}    & C$_2$H$_4$       & 0.105        & 1337 \\ \hline
 {\ct HYDROGEN}    & H$_2$            & 0.054        & 807  \\ \hline
+{\ct ISOBUTANE}   & C$_4$H$_{10}$    & 0.134        & 1557 \\ \hline
+{\ct ISOOCTANE}  & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct ISOPROPANOL} & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 {\ct METHANE}     & CH$_4$           & 0.139        & 1507 \\ \hline
 {\ct METHANOL}    & CH$_3$OH         & 0.111        & 1257 \\ \hline
@@ -4950,6 +4956,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
+{\ct PROPANOL}    & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
 \end{center}
@@ -5026,8 +5033,8 @@ Consider a single reaction involving methane. When you specify the {\ct REAC} li
 FDS assumes the following reaction:
 \begin{multline}
 1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
-9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
-10.636 \; \underbrace{\mathrm{(0.0944 \; CO_2 +  0.1966 \; H_2O + 0.7090 \; N_2)}}_\text{Products}
+9.6339 \; \underbrace{ \mathrm{\left( 0.20756 \; O_2 + 0.78257 \; N_2 + 0.00948 \; H_2O + 0.00039 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
+10.6339 \; \underbrace{\mathrm{(0.09440 \; CO_2 +  0.19668 \; H_2O + 0.70891 \; N_2)}}_\text{Products}
 \end{multline}
 
 \noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
@@ -5040,25 +5047,25 @@ FDS assumes the following reaction:
 &SPEC ID='METHANE' /
 
 &SPEC ID='AIR', BACKGROUND=T,
-      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.2076,
-      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.7825,
-      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.0095,
-      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.0004 /
+      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.20756,
+      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.78257,
+      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.00948,
+      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.00039 /
 
 &SPEC ID='PRODUCTS',
-      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.0944,
-      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
-      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
+      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.09438,
+      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.19663,
+      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.70899/
 
 &REAC FUEL='METHANE', SPEC_ID_NU='METHANE','AIR','PRODUCTS',
-      NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
+      NU=-1,-9.6357,10.6357, HEAT_OF_COMBUSTION=50000. /
 \end{lstlisting}
 
 \noindent
 The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a net negative value for {\ct NU} (i.e., if a species appeared on both sides of the reaction as a collision species it would not be used as the {\ct FUEL}). There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
-\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-4)
 \item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
@@ -5353,7 +5360,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}).
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants.
 
 \subsection{Multiple Step Reaction}
 
@@ -5642,7 +5649,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 \section{Vapor Condensation}
 \label{info:condensation}
 
-If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. Radiative properties should be assigned using {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX} unless the species is either {\ct WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
 \begin{lstlisting}
@@ -6402,7 +6409,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \end{lstlisting}
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
-If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
+If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}). 
 
 Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Here is an example of how one might make a tree:
 \begin{lstlisting}
@@ -6764,7 +6771,7 @@ The following input line specifies a southwesterly wind blowing 5~m/s over a rel
 \begin{lstlisting}
 &WIND SPEED=5., Z_REF=3, DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The {\ct SPEED} indicates the wind speed at a height of {\ct Z\_REF} (m). If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m off the ground. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The parameter {\ct SPEED} specifies the wind speed at a distance {\ct Z\_REF} (m) above the ground. The default value of {\ct Z\_REF} is 10~m. You can change the height of the ground by setting {\ct GROUND\_LEVEL}, which is at $z=0$~m by default. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
 &WIND ..., RAMP_DIRECTION_T='dir' /
 
@@ -8305,7 +8312,7 @@ The output value of a numerical control function is defined by a {\ct DEVC} line
 
 The outputs {\ct QUANTITY='CONTROL'} and {\ct QUANTITY='CONTROL\_VALUE'} have the default of {\ct TEMPORAL\_STATISTIC='INSTANT VALUE'}.
 
-The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}. 
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8689,7 +8696,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 &CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
 &CTRL ID='HRR+EPS', FUNCTION_TYPE='SUM', INPUT_ID='HRR', 'CONSTANT',
       CONSTANT=1E-10 / Prevents divide-by-zero
-&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10, 
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10,
       XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
 &CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS','Fire Area' /
 
@@ -10660,13 +10667,13 @@ This quantity should not be taken as the adiabatic flame temperature. More detai
 
 Detailed experimental measurements of sprays\footnote{The {\ct 'PDPA'} output quantities generally apply to liquid droplets. However, they also can be applied to solid particles.} using \underline{P}hase \underline{D}oppler \underline{P}article \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration. A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the measurement are defined using an associated {\ct PROP} line.
 
-By default, the PDPA device output at time $t$ is computed as a time integral
+By default, the PDPA device output at time $t$ is computed as a time integral between $t_{\rm s}$ ({\ct PDPA\_START}) and $t_{\rm e}$ ({\ct PDPA\_END}):
 \be
-F(t) = \frac{1}{\min(t,t_{\rm e})-t_{\rm s}} \int_{t_{\rm s}}^{\min(t,t_{\rm e})} f(t) \, \d t
+   F(t) = \frac{1}{t_{\rm e}-t_{\rm s}} \int_{t_{\rm s}}^{t_{\rm e}} f(t') \, \d t'
 \ee
-but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct F} on the corresponding {\ct PROP} line, in which case
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE=.FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
-F(t) = f(t)
+F(t) \equiv f(t)
 \ee
 The function $f(t)$ has two forms:
 \be
@@ -10674,14 +10681,16 @@ f_1(t) =  \left(\frac{\sum_i n_i D_i^m \, \phi}{\sum_i n_i D_i^n}\right)^{\frac{
 \quad ; \quad
 f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
-where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
+where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the {\ct QUANTITY} to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} centered at the location given by {\ct XYZ} on the {\ct DEVC} line.
 
-The first form $f_1(t)$ is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
+The first function, $f_1(t)$, is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
-\item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
-\item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\item[{\ct PDPA\_M}] is the exponent $m$ in the numerator.
+\item[{\ct PDPA\_N}] is the exponent $n$ in denominator. 
 \end{description}
-The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
+If $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+
+The second function, $f_2(t)$, is used to compute mass and energy-related quantities without the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The options for the {\ct QUANTITY}, $\phi$, are listed in Table~\ref{tbl:pdpa}.
 
 \begin{table}[!ht]
 \caption[Output quantities available for PDPA]{Output quantities available for PDPA.}
@@ -10708,11 +10717,11 @@ The second form ($f_2(t)$) is used for the computation of mass and energy relate
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
+It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices ({\ct DEVC}) associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when the specified histogram {\ct QUANTITY} is {\ct 'DIAMETER'}, the {\ct HISTOGRAM\_LIMITS} must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
 
-The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
+The histogram output file contains two-columns for each device. The first column provides the values of the bin centerpoints, and the second column provides the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
-The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+The properties of the PDPA device are defined using the following parameters on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
 \item[{\ct PDPA\_START}] $t_{\rm s}$, starting time of time integration in seconds. PDPA output is always a running average over time. As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
@@ -10737,7 +10746,7 @@ The following example is used to write out a histogram of droplet size using 20 
 \begin{lstlisting}
 &PROP ID='pdpa_d'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.01
       PDPA_START=0.0
       PDPA_M=1
@@ -10746,6 +10755,22 @@ The following example is used to write out a histogram of droplet size using 20 
       HISTOGRAM_LIMITS=0,2000E-6 /
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{lstlisting}
+The following example provides a normalized distribution of droplet volumes:
+\begin{lstlisting}
+&PROP ID='Droplet volumetric distribution'
+      PART_ID='water-drops'
+      QUANTITY='DIAMETER'
+      PDPA_RADIUS=0.2
+      PDPA_START=2.0
+      PDPA_M=1
+      PDPA_N=3
+      HISTOGRAM=T
+      HISTOGRAM_NBINS=30
+      HISTOGRAM_CUMULATIVE=.FALSE.
+      HISTOGRAM_NORMALIZE=.TRUE.
+      HISTOGRAM_LIMITS=0,500e-6 /
+\end{lstlisting}
+
 
 
 
@@ -10903,13 +10928,13 @@ It is sometimes useful to compile probability distribution functions (PDFs) or h
 &PROP ID='hist'
       HISTOGRAM=T
       HISTOGRAM_NBINS=200
-      HISTOGRAM_LIMITS=0,2000
+      HISTOGRAM_LIMITS=0,2000e-6
       HISTOGRAM_CUMULATIVE=F
       HISTOGRAM_NORMALIZE=T /
 \end{lstlisting}
 When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value file ({\ct CHID\_hist.csv}). The parameter {\ct HISTOGRAM\_NBINS} is the number of bins dividing the quantity range {\ct HISTOGRAM\_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE=F}.
 
-The histogram output file contains two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
+The histogram output file contains two-columns for each device. The first column gives the bin centerpoints, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
 
 
 
@@ -11684,6 +11709,31 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI
 %--------------------------------------------------------------------
+
+\needspace{2.5in}
+\section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+	\caption[Background species ({\ct BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
+	\label{tbl:BACK} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endfirsthead
+	\caption[]{Continued} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endhead
+	{\ct SPEC\_ID}                   & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+	{\ct MASS\_FRACTION}             & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+\end{longtable}
+
+
+
+\vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
@@ -13107,7 +13157,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct PRIORITY}                            & Integer        & Section~\ref{info:priority}                  &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real           & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-5             \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
 {\ct REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
 {\ct REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & {\ct F}           \\ \hline
@@ -13208,6 +13258,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real              & Section~\ref{info:condensation}         &                   &  0.01         \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
@@ -13251,6 +13302,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_G\_F}                    & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_K}                       & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_MU}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}       & Real              & Section~\ref{info:condensation}         &                   &  1.33         \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real              & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real              & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
@@ -13634,7 +13686,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct USE\_ATMOSPHERIC\_INTERPOLATION}           & Logical       & FDS Tech Guide~\cite{FDS_Math_Guide}          &               & {\ct T}      \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
-{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
+{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 10.               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -13830,6 +13882,7 @@ Keyword             & Type     & Description                      & Units       
 265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
+268  \> {\ct BACK tracked species \ldots\ not found.                                } \> Section~\ref{info:BACK}  \\
      \>                                                                               \>                                     \\
 299  \> {\ct SURF \ldots\ has no solid or particle for TGA.                         } \> Section~\ref{info:TGA_DSC_MCC} \\
 300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
@@ -13851,6 +13904,7 @@ Keyword             & Type     & Description                      & Units       
 316  \> {\ct SURF \ldots\ N\_LAYER\_CELLS\_MAX must be > 0.                         } \> Section~\ref{info:solid_phase_stability}  \\
 317  \> {\ct SURF \ldots\ Specify either ROUGHNESS or Z\_0, not both.               } \> Section~\ref{info:WALL_MODEL}  \\
 318  \> {\ct SURF \ldots\ MASS\_FLUX\_TOTAL is only for outflow.                    } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+319  \> {\ct SURF \ldots\ must have a MATL\_ID.                                     } \> Section~\ref{info:HT3D_Limitations}  \\
 320  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and MASS\_FRACTION.            } \> Section~\ref{info:MASS_FLUX}  \\
 321  \> {\ct SURF \ldots\ MASS\_FLUX cannot be less than zero.                      } \> Section~\ref{info:MASS_FLUX}  \\
 322  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and VEL.                       } \> Section~\ref{info:MASS_FLUX}  \\
@@ -14030,7 +14084,13 @@ Keyword             & Type     & Description                      & Units       
 562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
 563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
 564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
-     \>                                                                               \>                          \\
+565 \> {\ct REAC: \ldots FALLOFF-LINDEMANN reactions must have A\_LOW\_PR and       } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct E\_LOW\_PR }   \\
+566 \> {\ct REAC: \ldots FALLOFF-TROE reactions must have A\_LOW\_PR, E\_LOW\_PR,   } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct A\_TROE, T1\_TROE, and T3\_TROE.  }   \\
+567 \> {\ct REAC: \ldots Tracked species \ldots used in a finite rate reaction      } \> Section~\ref{info:finite}  \\
+    \> {\ct without N\_S defined is not a primitive species.  }   \\
+    \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
 603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\

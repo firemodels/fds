@@ -204,10 +204,10 @@ MODULE HYPRE_INTERFACE
    INTEGER, PARAMETER :: HYPRE_SOLVER_ID = 1                 ! Preconditioned Conjugate Gradient (PCG) solver
    INTEGER, PARAMETER :: HYPRE_PRECOND_ID = 2                ! Algebraic Multi-Grid (AMG) preconditioner
    INTEGER, PARAMETER :: HYPRE_SOLVER_MAXIT = 1000           ! Max iteratations of PCG solver
-   REAL(KIND=8), PARAMETER :: HYPRE_SOLVER_TOL = 1.D-10      ! Solver tolerance
-   INTEGER, PARAMETER :: HYPRE_SOLVER_SETTWONORM = 0         ! 0=use L_Infty norm (max error) for convergence, 1=use L2 norm
+   REAL(KIND=8), PARAMETER :: HYPRE_SOLVER_TOL = 1.D-12      ! Solver tolerance
+   INTEGER, PARAMETER :: HYPRE_SOLVER_SETTWONORM = 1         ! 0=use L_Infty norm (max error) for convergence, 1=use L2 norm
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETPRINTLEVEL = 0      ! 0=no output, 1=minimal, 2=verbose
-   INTEGER, PARAMETER :: HYPRE_SOLVER_SETLOGGING = 1         ! 0=no logging, 1=solver stores intermediate info, norms, etc.
+   INTEGER, PARAMETER :: HYPRE_SOLVER_SETLOGGING = 0         ! 0=no logging, 1=solver stores intermediate info, norms, etc.
    INTEGER, PARAMETER :: HYPRE_PRECOND_SETPRINTLEVEL = 0     ! 0=no output, 1=minimal, 2=verbose
    INTEGER, PARAMETER :: HYPRE_PRECOND_COARSENINGTYPE = 6    ! 0   CLJP (Cleary-Luby-Jones-Plassmann) parallel coarsening
                                                              ! 1   Classical Ruge-Stüben (RS) coarsening
@@ -216,8 +216,7 @@ MODULE HYPRE_INTERFACE
                                                              ! 8   PMIS (Parallel Modified Independent Set) coarsening
                                                              ! 10  HMIS (Hybrid Modified Independent Set) coarsening
                                                              ! 21  Falgout coarsening with aggressive coarsening
-   LOGICAL, PARAMETER :: HYPRE_PRECOND_SETOLDDEFAULT=.TRUE.  ! If .TRUE., use old Boomer AMG default settings
-   INTEGER, PARAMETER :: HYPRE_PRECOND_SETRELAXTYPE = 0      ! 0   Jacobi (default)
+   INTEGER, PARAMETER :: HYPRE_PRECOND_SETRELAXTYPE = 6      ! 0   Jacobi (default)
                                                              ! 1   Gauss-Seidel, sequential (very slow in parallel)
                                                              ! 2   Gauss-Seidel, interior points first (parallel variant)
                                                              ! 3   Hybrid Gauss-Seidel or SOR (symmetric in parallel)
@@ -359,6 +358,12 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_PARCSRPCGSETTOL
 
+      SUBROUTINE HYPRE_PARCSRPCGSETATOL(SOLVER, TOL, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: SOLVER
+         REAL(KIND=8),    INTENT(IN)  :: TOL
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_PARCSRPCGSETATOL
+
       SUBROUTINE HYPRE_PARCSRPCGSETTWONORM(SOLVER, IFLAG, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: SOLVER
          INTEGER,         INTENT(IN)  :: IFLAG
@@ -472,7 +477,6 @@ MODULE HYPRE_INTERFACE
              HYPRE_SOLVER_SETLOGGING,             &  ! introduced by FDS interface
              HYPRE_PRECOND_SETPRINTLEVEL,         &  ! introduced by FDS interface
              HYPRE_PRECOND_COARSENINGTYPE,        &  ! introduced by FDS interface
-             HYPRE_PRECOND_SETOLDDEFAULT,         &  ! introduced by FDS interface
              HYPRE_PRECOND_SETRELAXTYPE,          &  ! introduced by FDS interface
              HYPRE_PRECOND_NUMSWEEPS,             &  ! introduced by FDS interface
              HYPRE_PRECOND_TOL,                   &  ! introduced by FDS interface
@@ -510,6 +514,7 @@ MODULE HYPRE_INTERFACE
              HYPRE_PARCSRPCGCREATE,               &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSETMAXITER,           &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSETTOL,               &  ! subroutine in HYPRE library
+             HYPRE_PARCSRPCGSETATOL,              &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSETTWONORM,           &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSETPRINTLEVEL,        &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSETLOGGING,           &  ! subroutine in HYPRE library
