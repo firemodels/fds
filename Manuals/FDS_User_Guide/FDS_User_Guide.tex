@@ -10667,13 +10667,13 @@ This quantity should not be taken as the adiabatic flame temperature. More detai
 
 Detailed experimental measurements of sprays\footnote{The {\ct 'PDPA'} output quantities generally apply to liquid droplets. However, they also can be applied to solid particles.} using \underline{P}hase \underline{D}oppler \underline{P}article \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration. A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the measurement are defined using an associated {\ct PROP} line.
 
-By default, the PDPA device output at time $t$ is computed as a time integral
+By default, the PDPA device output at time $t$ is computed as a time integral between $t_{\rm s}$ ({\ct PDPA\_START}) and $t_{\rm e}$ ({\ct PDPA\_END}):
 \be
-F(t) = \frac{1}{\min(t,t_{\rm e})-t_{\rm s}} \int_{t_{\rm s}}^{\min(t,t_{\rm e})} f(t) \, \d t
+   F(t) = \frac{1}{t_{\rm e}-t_{\rm s}} \int_{t_{\rm s}}^{t_{\rm e}} f(t') \, \d t'
 \ee
-but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct F} on the corresponding {\ct PROP} line, in which case
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE=.FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
-F(t) = f(t)
+F(t) \equiv f(t)
 \ee
 The function $f(t)$ has two forms:
 \be
@@ -10681,14 +10681,16 @@ f_1(t) =  \left(\frac{\sum_i n_i D_i^m \, \phi}{\sum_i n_i D_i^n}\right)^{\frac{
 \quad ; \quad
 f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
-where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
+where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the {\ct QUANTITY} to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} centered at the location given by {\ct XYZ} on the {\ct DEVC} line.
 
-The first form $f_1(t)$ is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
+The first function, $f_1(t)$, is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
-\item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
-\item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\item[{\ct PDPA\_M}] is the exponent $m$ in the numerator.
+\item[{\ct PDPA\_N}] is the exponent $n$ in denominator. 
 \end{description}
-The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
+If $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+
+The second function, $f_2(t)$, is used to compute mass and energy-related quantities without the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The options for the {\ct QUANTITY}, $\phi$, are listed in Table~\ref{tbl:pdpa}.
 
 \begin{table}[!ht]
 \caption[Output quantities available for PDPA]{Output quantities available for PDPA.}
@@ -10715,11 +10717,11 @@ The second form ($f_2(t)$) is used for the computation of mass and energy relate
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
+It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices ({\ct DEVC}) associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when the specified histogram {\ct QUANTITY} is {\ct 'DIAMETER'}, the {\ct HISTOGRAM\_LIMITS} must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
 
-The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
+The histogram output file contains two-columns for each device. The first column provides the values of the bin centerpoints, and the second column provides the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
-The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+The properties of the PDPA device are defined using the following parameters on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
 \item[{\ct PDPA\_START}] $t_{\rm s}$, starting time of time integration in seconds. PDPA output is always a running average over time. As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
@@ -10744,7 +10746,7 @@ The following example is used to write out a histogram of droplet size using 20 
 \begin{lstlisting}
 &PROP ID='pdpa_d'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.01
       PDPA_START=0.0
       PDPA_M=1
@@ -10753,6 +10755,22 @@ The following example is used to write out a histogram of droplet size using 20 
       HISTOGRAM_LIMITS=0,2000E-6 /
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{lstlisting}
+The following example provides a normalized distribution of droplet volumes:
+\begin{lstlisting}
+&PROP ID='Droplet volumetric distribution'
+      PART_ID='water-drops'
+      QUANTITY='DIAMETER'
+      PDPA_RADIUS=0.2
+      PDPA_START=2.0
+      PDPA_M=1
+      PDPA_N=3
+      HISTOGRAM=T
+      HISTOGRAM_NBINS=30
+      HISTOGRAM_CUMULATIVE=.FALSE.
+      HISTOGRAM_NORMALIZE=.TRUE.
+      HISTOGRAM_LIMITS=0,500e-6 /
+\end{lstlisting}
+
 
 
 
@@ -10910,13 +10928,13 @@ It is sometimes useful to compile probability distribution functions (PDFs) or h
 &PROP ID='hist'
       HISTOGRAM=T
       HISTOGRAM_NBINS=200
-      HISTOGRAM_LIMITS=0,2000
+      HISTOGRAM_LIMITS=0,2000e-6
       HISTOGRAM_CUMULATIVE=F
       HISTOGRAM_NORMALIZE=T /
 \end{lstlisting}
 When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value file ({\ct CHID\_hist.csv}). The parameter {\ct HISTOGRAM\_NBINS} is the number of bins dividing the quantity range {\ct HISTOGRAM\_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE=F}.
 
-The histogram output file contains two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
+The histogram output file contains two-columns for each device. The first column gives the bin centerpoints, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
 
 
 
