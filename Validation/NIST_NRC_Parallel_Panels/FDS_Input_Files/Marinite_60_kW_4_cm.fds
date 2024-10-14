@@ -1,14 +1,7 @@
-&HEAD CHID='Marinite_60_kW_5_mm', TITLE='Parallel Panel Test, Marinite only, Propane, 60 kW' /
+&HEAD CHID='Marinite_60_kW_4_cm', TITLE='Parallel Panel Test, Marinite only, Propane, 60 kW' /
 
-&MESH IJK=30,20,40, XB=-0.30,-0.15,-0.20,-0.10,-0.30,-0.10, MULT_ID='mesh1' /
-&MULT ID='mesh1', DX=0.15, DY=0.1, DZ=0.2, I_LOWER=0, I_UPPER=3, J_UPPER=3, K_UPPER=13 /  224 meshes
-
-&MESH IJK=30,20,40, XB=-0.30, 0.00,-0.40,-0.20,-0.30,0.10, MULT_ID='mesh2' /
-&MULT ID='mesh2', DX=0.3, DY=0.2, DZ=0.4, I_UPPER=1, J_LOWER_SKIP=1, J_UPPER_SKIP=2, J_UPPER=3, K_UPPER=6 /  28 meshes
-
-&MESH IJK=30,40,40, XB=-0.60,-0.30,-0.40,0.00,-0.30,0.10, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.3, DY=0.4, DZ=0.4, I_LOWER_SKIP=1, I_UPPER_SKIP=2, I_UPPER=3,
-                                         J_UPPER=1, K_LOWER_SKIP=0, K_UPPER_SKIP=6, K_UPPER=7 /  36 meshes
+&MESH IJK=15,20,20, XB=-0.60, 0.00,-0.40,0.40,-0.32,0.48, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.6, DY=0.8, DZ=0.8, I_UPPER=1, J_UPPER=0, K_UPPER=3 /
 
 &TIME T_END=100.0 /
 
