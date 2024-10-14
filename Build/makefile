@@ -114,7 +114,7 @@ ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
 endif
 
 ifdef HDF5_HOME # This assumes the HDF5 libary is available
-   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/mod/static" -L"${HDF5_HOME}/lib" -lhdf5_fortran
+   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/mod/static" -I"${HDF5_HOME}/include" -L"${HDF5_HOME}/lib" -lhdf5_fortran
    LFLAGS_HDF5 = -DWITH_HDF5 -L"${HDF5_HOME}/lib" -lhdf5_fortran
 endif # HDF5_HOME
 
