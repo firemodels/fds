@@ -278,6 +278,11 @@ LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vt
 LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test mass transfer resistence in char model
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
+LOGICAL :: WROTE_SL3D=.FALSE.                       !< Flag indicating if a SL3D file was written during primary out
+LOGICAL :: WROTE_SL2D=.FALSE.                       !< Flag indicating if a SL2D file was written during primary out
+LOGICAL :: WROTE_SMOKE3D=.FALSE.                    !< Flag indicating if a Smoke3D file was written during primary out
+LOGICAL :: WROTE_BNDF=.FALSE.                       !< Flag indicating if a BNDF file was written during primary out
+LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART file was written during primary out
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs

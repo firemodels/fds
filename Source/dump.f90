@@ -107,7 +107,6 @@ TNOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
-
 IF (WRITE_VTK) THEN
 
    IF (VTK_HDF) THEN
@@ -118,9 +117,12 @@ IF (WRITE_VTK) THEN
          IF (.NOT.FAKEWRITE) THEN
             DO WHILE(SL3D_VTK_COUNTER(NM)<SIZE(SL3D_VTK_CLOCK)-1)
                SL3D_VTK_COUNTER(NM) = SL3D_VTK_COUNTER(NM) + 1
+               WROTE_SL3D = .TRUE.
                IF (SL3D_VTK_CLOCK(SL3D_VTK_COUNTER(NM))>=T) EXIT
             ENDDO
          ENDIF
+      ELSEIF (FAKEWRITE.AND.WROTE_SL3D) THEN
+         CALL DUMP_SLCF_VTK(T,DT,NM,4,FAKEWRITE)
       ENDIF
       
       ! VTK 2-D slices
@@ -129,9 +131,12 @@ IF (WRITE_VTK) THEN
          IF (.NOT.FAKEWRITE) THEN
             DO WHILE(SLCF_VTK_COUNTER(NM)<SIZE(SLCF_VTK_CLOCK)-1)
                SLCF_VTK_COUNTER(NM) = SLCF_VTK_COUNTER(NM) + 1
+               WROTE_SL2D = .TRUE.
                IF (SLCF_VTK_CLOCK(SLCF_VTK_COUNTER(NM))>=T) EXIT
             ENDDO
          ENDIF
+      ELSEIF (FAKEWRITE.AND.WROTE_SL2D) THEN
+         CALL DUMP_SLCF_VTK(T,DT,NM,3,FAKEWRITE)
       ENDIF
       
       ! VTK Smoke 3D slices
@@ -140,9 +145,12 @@ IF (WRITE_VTK) THEN
          IF (.NOT.FAKEWRITE) THEN
             DO WHILE(SM3D_VTK_COUNTER(NM)<SIZE(SM3D_VTK_CLOCK)-1)
                SM3D_VTK_COUNTER(NM) = SM3D_VTK_COUNTER(NM) + 1
+               WROTE_SMOKE3D = .TRUE.
                IF (SM3D_VTK_CLOCK(SM3D_VTK_COUNTER(NM))>=T) EXIT
             ENDDO
          ENDIF
+      ELSEIF (FAKEWRITE.AND.WROTE_SMOKE3D) THEN
+         CALL DUMP_SMOKE3D_VTKHDF(T,DT,NM,1,FAKEWRITE)
       ENDIF
       
       ! VTK Boundary data
@@ -151,9 +159,12 @@ IF (WRITE_VTK) THEN
          IF (.NOT.FAKEWRITE) THEN
             DO WHILE(BNDF_VTK_COUNTER(NM)<SIZE(BNDF_VTK_CLOCK)-1)
                BNDF_VTK_COUNTER(NM) = BNDF_VTK_COUNTER(NM) + 1
+               WROTE_BNDF = .TRUE.
                IF (BNDF_VTK_CLOCK(BNDF_VTK_COUNTER(NM))>=T) EXIT
             ENDDO
          ENDIF
+      ELSEIF (FAKEWRITE.AND.WROTE_BNDF) THEN
+         CALL DUMP_BNDF_VTKHDF(T,DT,NM,FAKEWRITE)
       ENDIF
       
       ! VTK Particle data
@@ -162,9 +173,12 @@ IF (WRITE_VTK) THEN
          IF (.NOT.FAKEWRITE) THEN
             DO WHILE(PART_VTK_COUNTER(NM)<SIZE(PART_VTK_CLOCK)-1)
                PART_VTK_COUNTER(NM) = PART_VTK_COUNTER(NM) + 1
+               WROTE_PART = .TRUE.
                IF (PART_VTK_CLOCK(PART_VTK_COUNTER(NM))>=T) EXIT
             ENDDO
          ENDIF
+      ELSEIF (FAKEWRITE.AND.WROTE_PART) THEN
+         CALL DUMP_PART_VTKHDF(T,NM,1,FAKEWRITE)
       ENDIF
 #endif
    ELSE
@@ -12387,7 +12401,6 @@ MESH_LOOP_HDF: DO NMNM=1,NMESHES
             N_WRITTEN = N_WRITTEN + 1
          ENDIF
       ENDIF
-      
       ! Write fake data in processes that have less meshes than max process
       DO NMNM2=1,MAXVAL(MESHES_PER_PROCESS)*2
          IF (N_WRITTEN < MAXVAL(MESHES_PER_PROCESS)*2) THEN
