@@ -22,6 +22,7 @@ The gas species here is mixture fraction fuel, burning rate specified.
       COLOR                = 'TOMATO 3'
       VARIABLE_THICKNESS   = T
       BURN_AWAY            = T
+      MATL_ID              = 'FOAM'
       HRRPUA               = 4000. /
 
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=10000. /

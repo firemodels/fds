@@ -497,7 +497,6 @@ MPI is the better choice when using multiple meshes since it more efficiently di
 Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one-to-one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
 \begin{enumerate}
 \item Use MPI only. OpenMP will probably not speed up the run time appreciably, and it will consume cores that could be put to better use running more MPI processes.
-\item For jobs using thousands of meshes/processes, add the parameter {\ct SHARED\_FILE\_SYSTEM=F} to the {\ct MISC} line. This directs FDS to break up the Smokeview ({\ct .smv}) file according to MPI process. This will greatly speed up the preliminary part of the simulation because the Smokeview file is written serially, not in parallel. For a modest number of meshes, this serial write is not a problem, but for thousands of meshes, the initialization routines can take hours. When the job completes, you can reconstruct the Smokeview file by appending the numbered files, {\ct CHID\_n.smv}, to the main Smokeview file, {\ct CHID.smv}.
 \item Set {\ct DT\_CPU} to some convenient time interval on the {\ct DUMP} line. This parameter directs FDS to periodically write out a file ({\ct CHID\_cpu.csv}) that records the wall clock time that each MPI process consumes in the major subroutines. This can help you determine if any of the MPI processes spend an inordinate amount of time idling. Note that the CPU file is written out automatically at the end of the simulation.
 \item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly.
 \item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until reaching a point where the increased number of meshes/processes does not provide a significant speed up.
@@ -561,7 +560,7 @@ By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, 
 \end{lstlisting}
 Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY ERROR'}, if necessary.
 
-To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview. 
+To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
 
 Since calculations can extend to hours or days, there is a restart feature in FDS. Details of how to use this feature are given in Sec.~\ref{info:restart}. Briefly, specify at the beginning of calculation how often a ``restart'' file should be saved. Should something happen to disrupt the calculation, like a power outage, the calculation can be restarted from the time the last restart file was saved.
 
@@ -983,7 +982,7 @@ The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Sec.~\ref{info:MULT} for details.
 
-Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct F} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct F}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct T} for MPI jobs involving 50 or less processes, and {\ct F} for larger jobs.
+One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct T} for MPI jobs involving 50 or less processes, and {\ct F} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -1668,7 +1667,7 @@ There are four reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- 
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be {\ct OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an {\ct OPEN} boundary. You would still have to use the {\ct OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperture ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -2456,7 +2455,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Specify the desired cell size] by specifying {\ct CELL\_SIZE(NL)} directly, where {\ct NL} designates a particular layer. This parameter over-rides {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type using the parameter {\ct TIME\_STEP\_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.  You can also ask FDS to use a solid phase time step that obeys the Fourier number constraint, $\mathrm{Fo}=\delta t \alpha/\delta x^2=1$; this is done by setting {\ct CHECK\_FO=T} on {\ct MISC}.
 \item[Limit the number of cells in any layer] by setting {\ct N\_LAYER\_CELLS\_MAX(NL)} (default 1000), where {\ct NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
-\item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T} on the {\ct SURF} line. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
+\item[Change when a wall cell is renoded] by setting {\ct REMESH\_RATIO} on the {\ct SURF} line and/or {\ct REAC\_RATE\_DELTA} on the {\ct MATL} line. If nodes changes size during pyrolysis, FDS will try and renode layers with changing cell size to optimize the number of nodes. This renoding process is costly if it is done frequently. The parameter {\ct REMESH\_RATIO} sets the fractional change in the size of a wall cell before FDS will check for renoding. For example, with the default value of 0.15, FDS will not attempt the first renode of a wall cell that is initially all 0.1~m nodes unless one node has either increased to 0.115~m or decreased to 0.085~m. A second potential challenge with renoding occurs when there are large cell-to-cell temperature differences inside a pyrolyzing layer. Renoding will combine cells causing changes in temperature. If there is a large enough temperature difference, this can cause large swings in the pyrolysis rate. The parameter {\ct REAC\_RATE\_DELTA}, default value of 0.05, sets the fractional change in the pyrolysis rate for a material that is considered acceptable. If renoding of a layer could cause a temperature change large enough to achieve that change in pyrolysis rate, then FDS will not renode that layer.
 \end{description}
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS(N)}, where {\ct N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is 0.0001~m or 0.1 times the specified {\ct THICKNESS}, whichever is less. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_GAS\_BACK}, convective heat flux to zero and burning rate to zero.
 
@@ -2499,9 +2498,9 @@ Parameters that are used to control the solid phase gridding are preferably give
 
 An appropriate {\ct CELL\_SIZE}, $\delta$, for 3-D heat conduction is based on the material thermal diffusivity, $\alpha=k/(\rho \, c)$:
 \be
-   \delta \approx \min \left( \dx , \sqrt \frac{ \tau \, k}{\rho \, c} \right) \quad ; \quad \tau=1 \; \hbox{s} 
+   \delta \approx \min \left( \dx , \sqrt \frac{ \tau \, k}{\rho \, c} \right) \quad ; \quad \tau=1 \; \hbox{s}
 \ee
-Here, $\tau$ is just a unity time scale for the purpose of unit consistency. The gas phase grid cell size is $\dx$. In the example above, the {\ct 'STEEL'} has a conductivity of 0.05~kW/(m K), specific heat 0.5~kJ/(kg K), and density 7500~kg/m$^3$; thus, an appropriate {\ct CELL\_SIZE} would be on the order of 0.004~m. FDS will adjust this value so that an integral number of cells will span the width of the solid object. Choosing a {\ct CELL\_SIZE} much lower than this recommended value might lead to spurious results, especially if materials of very different thermal diffusivities are components of the solid object. 
+Here, $\tau$ is just a unity time scale for the purpose of unit consistency. The gas phase grid cell size is $\dx$. In the example above, the {\ct 'STEEL'} has a conductivity of 0.05~kW/(m K), specific heat 0.5~kJ/(kg K), and density 7500~kg/m$^3$; thus, an appropriate {\ct CELL\_SIZE} would be on the order of 0.004~m. FDS will adjust this value so that an integral number of cells will span the width of the solid object. Choosing a {\ct CELL\_SIZE} much lower than this recommended value might lead to spurious results, especially if materials of very different thermal diffusivities are components of the solid object.
 
 You can specify an internal source for the solid obstruction using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct OBST} line. Its units are {\si kW/m$^3$} and the default value is zero. An optional time ramp can be specified using {\ct RAMP\_IHS}.
 
@@ -2514,6 +2513,7 @@ You can specify an internal source for the solid obstruction using {\ct INTERNAL
 \item If your 3-D obstruction extends beyond meshes that abut, FDS uses a special algorithm to identify all the meshes where this obstruction lives, and also those obstructions connected to it. However, if this algorithm fails to detect all the meshes and you recieve an error stating that there is a problem, add the parameter {\ct NEIGHBOR\_SEPARATION\_DISTANCE} to the {\ct MISC} line. Any mesh within this distance of another mesh will share geometry information for use in the 3-D heat conduction calculation. If you set this parameter to a value larger than the width of the computational domain, then all meshes will establish communication channels for exchanging boundary information.
 \item By default, the interior nodes are clustered near the surface and stretched out deeper within the solid. If you want to maintain uniform spacing, set {\ct CELL\_SIZE} on the {\ct SURF} or {\ct OBST} line to indicate the desired interior node spacing. The {\ct CELL\_SIZE} is typically chosen to be comparable to the gas phase cells. If the obstruction is thin; that is, less than one gas phase cell thick, the specified {\ct CELL\_SIZE} will only apply to the heat conduction in the transverse, not normal, direction. The normal direction gridding will be controlled by the parameters {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. This may be useful in cases where the specified {\ct CELL\_SIZE} is too coarse to resolve variations in surface definition along the normal dimension (see Section~\ref{checkerboard} for an example).
 \item {\ct HT3D} cannot be applied to an {\ct OBST} that is to {\ct BURN\_AWAY}.
+\item If a {\ct SURF} line specifies either {\ct HT3D=T} or {\ct VARIABLE\_THICKNESS=T} and also specifies an {\ct HRRPUA}, {\ct MLPUA}, or {\ct MASS\_FLUX}, you must specify a {\ct MATL\_ID} on the {\ct SURF} line and the appropriate {\ct OBST} lines. The reason for doubly specifying the {\ct MATL\_ID} is so that the {\ct SURF} line can be set up properly. Note that the specification of {\ct HRRPUA} or similar on the surface of a 3-D or variably thick solid means that no obstruction making up the solid can have specified internal reactions, i.e. pyrolysis.
 \end{enumerate}
 
 \subsubsection{Example: Steel Assembly}
@@ -2864,11 +2864,11 @@ The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$
 
 The pre-exponential factor\footnote{For versions of FDS up to and including 6.7.7, the form of the reaction rate expression was slightly different than the one currently used. In these older versions, the density term on the right hand side of Eq.~(\ref{rr}) was divided by the initial density of the layer. For first-order reactions ($n_{{\rm s},ij}=1$), this older form is equivalent to the current form. However, for reactions that are not first-order ($n_{{\rm s},ij}\neq 1$), the new value of $A_{ij}=A_{ij}^{\rm old}/\rho_{\rm s}(0)^{n_{{\rm s},ij}-1}$, where $\rho_{\rm s}(0)$ is the initial density of the layer.}, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
-The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by
+The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium. The concentration at depth $x$ is given by
 \be
-X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
+X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g})
 \ee
-where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
+where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
 You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
@@ -3067,11 +3067,11 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
 
-An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65$~$^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. The evaporation rate of a burning liquid in steady state is approximately
+An example of liquid evaporation is given by the sample case found in the {\ct Pyrolysis} folder called {\ct methanol\_evaporation.fds}. A 1~m by 1~m pan filled with methanol at $T_\infty=20$~$^\circ$C is exposed to a uniform heat flux, $\dot{q}''=20$~\unit{kW/m^2}. The boiling temperature of methanol is $T_{\rm b}=64.65 \; ^\circ$C, its specific heat, $c=2.48$~kJ/(kg$\cdot$K), and heat of vaporization, $h_{\rm v}=1099$~kJ/kg. At steady state, the heat balance at the pool surface is
 \be
-   \dot{m}'' \approx \frac{\dot{q}''}{h_{\rm g}}  \quad ; \quad  h_{\rm g} = c (T_{\rm b}-T_\infty) + h_{\rm v}
+   \dot{q}''_{\rm total} - \dot{q}''_{\rm c}= \dot{m}'' \, h_{\rm v} \, T_{\rm s}
 \ee
-In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''/h_{\rm g}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
+where $\dot{q}''_{\rm c}$ is the heat being conducted away from the surface. If $\dot{q}''_{\rm c}$ is made zero, which can be done by using {\ct BACKING='INSULATED'} and a high thermal conductivity, then the pool surface temperature,$T_{\rm s}$, will approach the boiling temperature,$T_{\rm b}$. In this example, the methanol evaporates in an oxygen-depleted atmosphere and no burning occurs. The left hand plot in Fig.~\ref{methanol_evaporation_plot} displays the computed evaporation rate, $\dot{m}''$, versus the ideal, $\dot{q}''_{\rm total}/h_{\rm v} T_{\rm b}$. The former approaches the latter as all of the absorbed energy is used to evaporate the liquid. The right hand plot shows the computed liquid surface temperature versus the liquid boiling temperature.
 \begin{figure}[!ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_mdot}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/methanol_evaporation_temp}
@@ -4423,11 +4423,14 @@ A species can be given an alternate ID using {\ct ALT\_ID}. When looking to see 
 
 \subsubsection{Initial Conditions}
 \label{info:MASS_FRACTION_0}
+\label{info:BACKGROUND_SPECIES}
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
 \begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
 \end{lstlisting}
+
+An alternative means of specifying the initial mass fraction is to use the {\ct BACK} namelist with inputs of {\ct SPEC\_ID} and {\ct MASS\_FRACTION}. One use of this would be to modify or add initial species to a pre-existing set of detailed chemistry inputs referenced via {\ct CATF}.
 
 \subsubsection{Specifying Humidity}
 \label{info:humidity}
@@ -4476,7 +4479,7 @@ These methods of specifying the thermal conductivity are less important in LES s
 \be
    k_{\rm {\tiny LES}} = k + k_{\rm t} \quad ; \quad  k_{\rm t} = \frac{c_p \, \mu_{\rm t}}{\PR_{\rm t}}
 \ee
-The turbulent visosity, $\mu_{\rm t}$, is a function of the local flow field and grid size. The turbulent Prandtl number, $\PR_{\rm t}$, is a specified constant. The specific heat, $c_p$, is a function of the gas temperature and composition for {\ct SIMULATION\_MODE='LES'}, and it is the constant value of the background gas species at ambient temperature for {\ct 'VLES'} and {\ct 'SVLES'}. 
+The turbulent visosity, $\mu_{\rm t}$, is a function of the local flow field and grid size. The turbulent Prandtl number, $\PR_{\rm t}$, is a specified constant. The specific heat, $c_p$, is a function of the gas temperature and composition for {\ct SIMULATION\_MODE='LES'}, and it is the constant value of the background gas species at ambient temperature for {\ct 'VLES'} and {\ct 'SVLES'}.
 
 The gas phase output quantity {\ct 'CONDUCTIVITY'} denotes that which is actually used in the simulation, $k_{\rm {\tiny LES}}$, while {\ct 'MOLECULAR CONDUCTIVITY'} is the molecular value, $k$, only; that is, the actual thermal conductivity of the gas with no turbulent component added.
 
@@ -4517,7 +4520,7 @@ The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed o
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as {\ct FUEL} on the {\ct REAC} input as long as a {\ct HEAT\_OF\_COMBUSTION} is defined or the reaction is a simple chemistry reaction where {\ct EPUMO2} applies. Specifying either {\ct SPECIFIC\_HEAT} or {\ct RAMP\_CP} is considered to have explicitly defined $h(T_{\rm ref})$. If you still wish to use the default {\ct EPUMO2} or 13,100~kJ/kg, then you will need to explicitly define it on the {\ct REAC} input.
 
-The thermodynamic properties (specific heat, enthalpy, entropy, and other derived properties) of a species can also be specified using NASA polynomials, as shown below. Two sets of {\ct POLYNOMIAL\_COEFF} are specified: the first set is valid for the temperature range of 200 K to 1000 K, and the second set is valid for the temperature range of 1000 K to 5000 K, as indicated by the {\ct POLYNOMIAL\_TEMP} parameter. In general, detailed mechanisms (see Section \ref{info:detailedChemMech}) specify species properties using NASA polynomials. 
+The thermodynamic properties (specific heat, enthalpy, entropy, and other derived properties) of a species can also be specified using NASA polynomials, as shown below. Two sets of {\ct POLYNOMIAL\_COEFF} are specified: the first set is valid for the temperature range of 200 K to 1000 K, and the second set is valid for the temperature range of 1000 K to 5000 K, as indicated by the {\ct POLYNOMIAL\_TEMP} parameter. In general, detailed mechanisms (see Section \ref{info:detailedChemMech}) specify species properties using NASA polynomials.
 
 \begin{lstlisting}
 &SPEC ID='OH',
@@ -4540,7 +4543,7 @@ The thermodynamic properties (specific heat, enthalpy, entropy, and other derive
       POLYNOMIAL_TEMP= 200.0,1000.0,5000.0,
       POLYNOMIAL_COEFF(1:9,1)= 34420.36,-792.32,8.99,-0.004,3.06e-06,-5.11e-10,-1.54e-13,-20869.51,-25.10,
       POLYNOMIAL_COEFF(1:9,2)= 875378.77,-2342.51,7.97,0.0001,-6.26e-08,1.02e-11,-5.71e-16,-9509.90,-22.02,
-      ENTHALPY_OF_FORMATION= -190.99912 /    
+      ENTHALPY_OF_FORMATION= -190.99912 /
 \end{lstlisting}
 For NASA7 polynomials, the molar specific heat (J/mol/K), molar specific enthalpy (J/mol), and molar specific entropy (J/mol/K) are calculated as follows
 \be
@@ -4942,6 +4945,8 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct ETHANOL}     & C$_2$H$_6$O      & 0.126        & 1397 \\ \hline
 {\ct ETHYLENE}    & C$_2$H$_4$       & 0.105        & 1337 \\ \hline
 {\ct HYDROGEN}    & H$_2$            & 0.054        & 807  \\ \hline
+{\ct ISOBUTANE}   & C$_4$H$_{10}$    & 0.134        & 1557 \\ \hline
+{\ct ISOOCTANE}  & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct ISOPROPANOL} & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 {\ct METHANE}     & CH$_4$           & 0.139        & 1507 \\ \hline
 {\ct METHANOL}    & CH$_3$OH         & 0.111        & 1257 \\ \hline
@@ -4951,6 +4956,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
 {\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
+{\ct PROPANOL}    & C$_3$H$_8$O      & 0.128        & 1427 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
 \end{center}
@@ -5000,6 +5006,14 @@ You can also simulate a spark ignition using the following lines of input:
 \end{lstlisting}
 In this case, methane and air will not combust unless the grid cell temperature exceeds 540~$^\circ$C. However, within the grid cell containing the specified point {\ct XYZ}, a ``spark'' is generated at 10~s which effectively causes the AIT to go to 0~K and ignition of fuel and air is allowed, assuming a suitable amount of fuel and air is present.
 
+\subsection{Local Quenching (AIT per ZONE)}
+\label{info:ait_per_zone}
+
+There may be special circumstances where you would like to specify that a localized region of the domain cannot support combustion.  In this case, you may use the {\ct AIT\_EXCLUSION\_ZONE} construct to specify a locally high value of the ignition temperature threshold, which will prevent combustion in this region.  For example,
+\begin{lstlisting}
+&REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(1)=1000.
+           AIT_EXCLUSION_ZONE(1:6,2)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(2)=3000./
+\end{lstlisting}
 
 \newpage
 
@@ -5019,8 +5033,8 @@ Consider a single reaction involving methane. When you specify the {\ct REAC} li
 FDS assumes the following reaction:
 \begin{multline}
 1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
-9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
-10.636 \; \underbrace{\mathrm{(0.0944 \; CO_2 +  0.1966 \; H_2O + 0.7090 \; N_2)}}_\text{Products}
+9.6339 \; \underbrace{ \mathrm{\left( 0.20756 \; O_2 + 0.78257 \; N_2 + 0.00948 \; H_2O + 0.00039 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
+10.6339 \; \underbrace{\mathrm{(0.09440 \; CO_2 +  0.19668 \; H_2O + 0.70891 \; N_2)}}_\text{Products}
 \end{multline}
 
 \noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
@@ -5033,25 +5047,25 @@ FDS assumes the following reaction:
 &SPEC ID='METHANE' /
 
 &SPEC ID='AIR', BACKGROUND=T,
-      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.2076,
-      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.7825,
-      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.0095,
-      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.0004 /
+      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.20756,
+      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.78257,
+      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.00948,
+      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.00039 /
 
 &SPEC ID='PRODUCTS',
-      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.0944,
-      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
-      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
+      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.09438,
+      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.19663,
+      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.70899/
 
 &REAC FUEL='METHANE', SPEC_ID_NU='METHANE','AIR','PRODUCTS',
-      NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
+      NU=-1,-9.6357,10.6357, HEAT_OF_COMBUSTION=50000. /
 \end{lstlisting}
 
 \noindent
 The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct F}} species, {\ct SPEC\_ID\_NU(N)}. If complex stoichiometry is being used, a {\ct FUEL} input is not required. If no {\ct FUEL} input is given, FDS will assume it is the first species in {\ct SPEC\_ID\_NU} with a net negative value for {\ct NU} (i.e., if a species appeared on both sides of the reaction as a collision species it would not be used as the {\ct FUEL}). There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct F} will bypass this check.  (Default {\ct T})
-\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-4)
 \item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
@@ -5346,7 +5360,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}).
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of {\ct SPEC\_ID\_NU} is a lumped species and a reactant (this would include product species when {\ct REVERSE=T}), then {\ct SPEC\_ID\_N\_S} and {\ct N\_S} must be defined to identify which specific species inside the lumped species are reactants.
 
 \subsection{Multiple Step Reaction}
 
@@ -5394,20 +5408,20 @@ As discussed previously (Sec.~\ref{info:heat_of_combustion}), energy release is 
 A detailed chemical mechanism file can be specified to solve finite rate chemistry problems. For example, the GRI-3.0 \cite{gri3:1999} mechanism can be used to simulate methane combustion. Such a mechanism file contains various species and the relevant reactions representing the chemical pathways of fuel combustion. Users must ensure that the chosen mechanism is well-suited for their specific problem. In FDS, an FDS-formatted mechanism file can be specified using the following line:
 \begin{lstlisting}
 &CATF OTHER_FILES= '<path to the fds chemical mechanism file>' /
-\end{lstlisting} 
+\end{lstlisting}
 FDS-formatted chemical mechanism files can be generated from Chemkin \cite{chemkin:1989,chemkin:2000} or Cantera YAML format mechanism files following the instructions described below. For user convenience, a few example mechanism files are already included in the {\ct Utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory of the GitHub repository {\ct firemodels/fds}. The steps to generate the FDS chemical mechanism file are as follows:
 \begin{enumerate}
 \item Ensure that the chemistry reactions file, thermodynamic properties file, and transport properties file are available in Chemkin format.
 \item Use the following Cantera \cite{cantera:2023} command to convert these three files to a YAML file
 \begin{lstlisting}
 ck2yaml --input=<reactions file> --thermo=<thermodynamic properties file> --transport=<transport properties file> --output=<output.yaml>
-\end{lstlisting} 
+\end{lstlisting}
 \item Using the utility Python script {\ct Utilities/Python/scripts/cantera\_yaml\_2\_fds.py} from the {\ct firemodels/fds} GitHub repository, convert the output.yaml file to an FDS-formatted chemical mechanism file. Refer to the comments in the Python script for detailed usage.
 \begin{lstlisting}
 python Utilities/Python/scripts/cantera_yaml_2_fds.py output.yaml N2 > output.fds
-\end{lstlisting} 
+\end{lstlisting}
 \end{enumerate}
-If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped. 
+If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped.
 
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
@@ -5441,7 +5455,7 @@ This type of reaction is specified by adding {\ct THIRD\_BODY=T} to the {\ct REA
 
 \subsection{Fall-off Reactions}
 \label{info:falloff_reactions}
-Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Folowing are the example of Lindermann-fall-off and Troe-fall-off reaction entires from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future. 
+Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Folowing are the example of Lindermann-fall-off and Troe-fall-off reaction entires from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future.
 
 \begin{lstlisting}
 &REAC ID='R12',
@@ -5449,24 +5463,24 @@ Fall-off reactions are a type of reaction where rates depend on both pressure an
      REVERSE=T,
      RADIATIVE_FRACTION=0,
      A= 1.80000e+10 ,
-     THIRD_BODY=T, 
+     THIRD_BODY=T,
      THIRD_EFF_ID= 'AR','C2H6','CH4','CO','CO2','H2','H2O','O2' ,
      THIRD_EFF= 0.5,3.0,2.0,1.5,3.5,2.0,6.0,6.0 ,
-     E= 9978.84 , 
+     E= 9978.84 ,
      N_T= 0.0 ,
      A_LOW_PR= 6.02000e+14 ,
      E_LOW_PR= 12552.0 ,
      N_T_LOW_PR= 0.0 ,
      SPEC_ID_NU= 'CO','O' , 'CO2' ,
      NU= -1.0,-1.0 , 1.0 /
-\end{lstlisting} 
+\end{lstlisting}
 \begin{lstlisting}
  &REAC ID='R50',
      REACTYPE='FALLOFF-TROE',
      REVERSE=T,
      RADIATIVE_FRACTION=0,
      A= 6.00000e+14 ,
-     THIRD_BODY=T, 
+     THIRD_BODY=T,
      THIRD_EFF_ID= 'AR','C2H6','CH4','CO','CO2','H2','H2O' ,
      THIRD_EFF= 0.7,3.0,2.0,1.5,2.0,2.0,6.0 ,
      E= 0.0 ,
@@ -5479,8 +5493,8 @@ Fall-off reactions are a type of reaction where rates depend on both pressure an
      T2_TROE= 8552.0 ,
      T3_TROE= 91.0 ,
      SPEC_ID_NU= 'CH2','H' , 'CH3' ,
-     NU= -1.0,-1.0 , 1.0 /    
-\end{lstlisting} 
+     NU= -1.0,-1.0 , 1.0 /
+\end{lstlisting}
 For all fall-off reactions, {\ct REACTYPE} need to be specified as shown above. The low-pressure reaction rate coefficient is specified using {\ct A\_LOW\_PR}, {\ct N\_T\_LOW\_PR}, and {\ct E\_LOW\_PR}, similar to Eq.~(\ref{eq:reac_rate}). In the case of Troe reactions, the fall-off blending factor is calculated using {\ct A\_TROE}, {\ct T1\_TROE}, {\ct T2\_TROE}, and {\ct T3\_TROE}. For details, please refer to the FDS Tech Guide \cite{FDS_Math_Guide}.
 
 
@@ -5506,13 +5520,13 @@ If you have multiple reactions with widely ranging time-scales, you might want t
 
 For solving the chemistry with a detailed chemical mechanism (see Section \ref{info:detailedChemMech}), the recommended ODE solver is CVODE from Sundials \cite{cvodeDoc:2024}. The following line instructs FDS to solve the chemistry with the CVODE solver using an absolute error tolerance of $10^{-10}$ and a relative error tolerance of $10^{-8}$:
 \begin{lstlisting}
-&COMB 
+&COMB
    FINITE_RATE_MIN_TEMP=300,
-   ODE_SOLVER='CVODE', 
-   ODE_MIN_ATOL=1E-10, 
-   ODE_REL_ERROR=1E-8, 
-   EQUIV_RATIO_CHECK=T, 
-   MIN_EQUIV_RATIO=0.2, 
+   ODE_SOLVER='CVODE',
+   ODE_MIN_ATOL=1E-10,
+   ODE_REL_ERROR=1E-8,
+   EQUIV_RATIO_CHECK=T,
+   MIN_EQUIV_RATIO=0.2,
    MAX_EQUIV_RATIO=10.0 /
 \end{lstlisting}
 However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits.
@@ -5635,7 +5649,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 \section{Vapor Condensation}
 \label{info:condensation}
 
-If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. Radiative properties should be assigned using {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX} unless the species is either {\ct WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
 \begin{lstlisting}
@@ -6395,7 +6409,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \end{lstlisting}
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
-If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
+If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}). 
 
 Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Here is an example of how one might make a tree:
 \begin{lstlisting}
@@ -6676,7 +6690,7 @@ It is assumed that the wind speed profile, $u$, and potential temperature\footno
    u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
    \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm h} \left( \frac{z}{L} \right) \right]
 \end{eqnarray}
-where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Falcon,Dyer:1974}:
 \begin{eqnarray}
    \Psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
    \Psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
@@ -6719,6 +6733,11 @@ $z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
 \label{z0}
 \end{table}
 
+\begin{warning}
+\centering
+WARNING: It is not recommended to use MO theory in highly resolved LES where the grid resolution near the surface is smaller than the sand grain roughness \cite{Basu:2017}.  In this situation, FDS will fall back on using a {\ct NO\_SLIP} boundary to compute the wall stress.
+\end{warning}
+
 The scaling potential temperature, $\theta_*$, can be obtained from the relation:
 \be
    \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}  \quad ; \quad \theta_0 = \theta_{\rm ref} \bigg/ \left( 1 + \frac{u_*^2}{g \kappa^2 L} \big[ \ln(z_{\rm ref}/z_0) - \Psi_{\rm h}(z_{\rm ref}/z_0) \big] \right) \label{thera_star_eq}
@@ -6752,7 +6771,7 @@ The following input line specifies a southwesterly wind blowing 5~m/s over a rel
 \begin{lstlisting}
 &WIND SPEED=5., Z_REF=3, DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The {\ct SPEED} indicates the wind speed at a height of {\ct Z\_REF} (m). If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m off the ground. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The parameter {\ct SPEED} specifies the wind speed at a distance {\ct Z\_REF} (m) above the ground. The default value of {\ct Z\_REF} is 10~m. You can change the height of the ground by setting {\ct GROUND\_LEVEL}, which is at $z=0$~m by default. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
 &WIND ..., RAMP_DIRECTION_T='dir' /
 
@@ -8287,11 +8306,13 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 
 If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=F} on the relevant {\ct DEVC} or {\ct CTRL} lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. {\ct LATCH=T} by default for both devices and controls.
 
-If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function.
+If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} to the {\ct ID} of the control function. The numerical output in the {\ct CHID\_devc.csv} file will be zero when the logical state is {\ct F} and 1 when the logical state is {\ct T}.
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as {\ct ANY} or {\ct DEADBAND}. For {\ct CUSTOM} the output will be the value of the {\ct RAMP} function, and for {\ct TIME\_DELAY} the value will be the evaluated delay.
 
-Each state change of a control function is recorded to a log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+The outputs {\ct QUANTITY='CONTROL'} and {\ct QUANTITY='CONTROL\_VALUE'} have the default of {\ct TEMPORAL\_STATISTIC='INSTANT VALUE'}.
+
+The time dependent logical state of each control function is written to the {\ct CHID\_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a {\ct SETPOINT} is recorded to the {\ct CHID\_devc\_ctrl\_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8662,7 +8683,44 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
 
+\subsection{Example Case: Heat Release Rate of a Spreading Fire}
+\label{spreading_fire}
+
+In this example, a fire spreads radially from a single point as directed by the parameters {\ct SPREAD\_RATE} and {\ct XYZ} on a {\ct VENT} line. Usually, the user specifies the heat release rate per unit area ({\ct HRRPUA}) for each burning surface cell on the corresponding {\ct SURF} line, but in this case, a specific time {\ct RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified {\ct RAMP} called {\ct 'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified {\ct RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
+\begin{lstlisting}
+&VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1 /
+
+&SURF ID='FIRE', HRRPUA=1., RAMP_Q='HRRPUA RAMP' /
+&RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
+&DEVC ID='TIMER', XYZ=1,1,1, QUANTITY='TIME' /
+&CTRL ID='HRR', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='HRR' /
+&CTRL ID='HRR+EPS', FUNCTION_TYPE='SUM', INPUT_ID='HRR', 'CONSTANT',
+      CONSTANT=1E-10 / Prevents divide-by-zero
+&DEVC ID='Fire Area', QUANTITY='HRRPUA', QUANTITY_RANGE(1)=1E-10,
+      XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
+&CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS','Fire Area' /
+
+&RAMP ID='HRR', T=  0., F=    0.0 /
+&RAMP ID='HRR', T= 10., F=  100.0 /
+&RAMP ID='HRR', T= 20., F=  400.0 /
+...
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/spreading_fire_HRR}
+\caption[HRR curve for a spreading fire]{Specified (circles) and simulated (line) HRR curve for a spreading fire.}
+\label{spreading_fire_hrr}
+\end{figure}
+
+
+
+
+\newpage
+
 \input{smv_objects.tex}
+
+\newpage
 
 \section{External Control of FDS (Beta)}
 \label{info:external_control}
@@ -8994,6 +9052,8 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
       TEMPERATURE=60. /
 \end{lstlisting}
 
+You can also specify a {\ct RAMP\_TMP\_Z} vertical profile. The corresponding {\ct RAMP} lines should use the parameter {\ct Z} for the height $z$ (m) and {\ct F} for the value of the temperature ($^\circ$C).
+
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
 
@@ -9008,8 +9068,6 @@ indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$, 25~\
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000., RAMP_Q='q1' /
 \end{lstlisting}
 ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
-
-
 
 \section{Velocity Field}
 \label{info:velo_restart}
@@ -9026,6 +9084,16 @@ FDS uses a predefined random seed for the random number generator which ensures 
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=T} on the {\ct MISC} line.
 
+\subsection{One-Dimensional Velocity Component Fields}
+\label{info:ramp_velocity_1d}
+
+For diagnostic or verification purpuses it may be useful to initialize velocity components with 1D fields.  This can be used in combination with {\ct FREEZE\_VELOCITY=T}, for example, to control precisely the amount of drag a particle sees, and so on.  The linear fields are specified with the {\ct RAMP} functionality and the ramp is identified using {\ct RAMP\_UX}, for example, on {\ct MISC} to specify variation of the $u$ component of velocity in the $x$ direction.  Other velocity components and directions are specified similarly (see Table \ref{tbl:MISC}).
+\begin{lstlisting}
+&MISC FREEZE_VELOCITY=T, RAMP_UX='u1'/
+&RAMP ID='u1', X= 0, F=0 /
+&RAMP ID='u1', X= 2, F=4 /
+&RAMP ID='u1', X= 4, F=16/
+\end{lstlisting}
 
 \section{Nonuniform Initial Fields: Velocity, Temperature, Species}
 \label{info:CSVF}
@@ -9558,11 +9626,11 @@ To record the material component's density with time, use the output quantity {\
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'}. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given. 
+This produces a time history of the density of the material referred to as {\ct 'wood'}. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture. Without a {\ct MATL\_ID}, the total density will be given.
 
 To record the mass fraction of a material in a solid use {\ct QUANTITY='SOLID MASS FRACTION'}. This quantity requires a {\ct MATL\_ID}.
 
-To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities do not take the optional {\ct MATL\_ID} keyword. 
+To record the solid conductivity (\si{W/(m.K)}), use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat (\si{kJ/(kg.K)}), use {\ct QUANTITY='SOLID SPECIFIC HEAT'}.  To record the solid enthalpy (\unit{kJ/m^3}), use {\ct QUANTITY='SOLID ENTHALPY'}. These quantities do not take the optional {\ct MATL\_ID} keyword.
 
 Note that these inner solid quantities are allowed only for devices ({\ct DEVC}) or profiles ({\ct PROF}), not contoured boundares ({\ct BNDF}).
 
@@ -10599,13 +10667,13 @@ This quantity should not be taken as the adiabatic flame temperature. More detai
 
 Detailed experimental measurements of sprays\footnote{The {\ct 'PDPA'} output quantities generally apply to liquid droplets. However, they also can be applied to solid particles.} using \underline{P}hase \underline{D}oppler \underline{P}article \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration. A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the measurement are defined using an associated {\ct PROP} line.
 
-By default, the PDPA device output at time $t$ is computed as a time integral
+By default, the PDPA device output at time $t$ is computed as a time integral between $t_{\rm s}$ ({\ct PDPA\_START}) and $t_{\rm e}$ ({\ct PDPA\_END}):
 \be
-F(t) = \frac{1}{\min(t,t_{\rm e})-t_{\rm s}} \int_{t_{\rm s}}^{\min(t,t_{\rm e})} f(t) \, \d t
+   F(t) = \frac{1}{t_{\rm e}-t_{\rm s}} \int_{t_{\rm s}}^{t_{\rm e}} f(t') \, \d t'
 \ee
-but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct F} on the corresponding {\ct PROP} line, in which case
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE=.FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
-F(t) = f(t)
+F(t) \equiv f(t)
 \ee
 The function $f(t)$ has two forms:
 \be
@@ -10613,14 +10681,16 @@ f_1(t) =  \left(\frac{\sum_i n_i D_i^m \, \phi}{\sum_i n_i D_i^n}\right)^{\frac{
 \quad ; \quad
 f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
-where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
+where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the {\ct QUANTITY} to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} centered at the location given by {\ct XYZ} on the {\ct DEVC} line.
 
-The first form $f_1(t)$ is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
+The first function, $f_1(t)$, is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
-\item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
-\item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\item[{\ct PDPA\_M}] is the exponent $m$ in the numerator.
+\item[{\ct PDPA\_N}] is the exponent $n$ in denominator. 
 \end{description}
-The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
+If $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+
+The second function, $f_2(t)$, is used to compute mass and energy-related quantities without the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The options for the {\ct QUANTITY}, $\phi$, are listed in Table~\ref{tbl:pdpa}.
 
 \begin{table}[!ht]
 \caption[Output quantities available for PDPA]{Output quantities available for PDPA.}
@@ -10647,11 +10717,11 @@ The second form ($f_2(t)$) is used for the computation of mass and energy relate
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
+It is also possible to output histograms of PDPA output quantities. When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices ({\ct DEVC}) associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when the specified histogram {\ct QUANTITY} is {\ct 'DIAMETER'}, the {\ct HISTOGRAM\_LIMITS} must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE} to {\ct F}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Sec.~\ref{info:particle_size}), the counts are not necessarily integers.
 
-The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
+The histogram output file contains two-columns for each device. The first column provides the values of the bin centerpoints, and the second column provides the relative frequency. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
-The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+The properties of the PDPA device are defined using the following parameters on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
 \item[{\ct PDPA\_START}] $t_{\rm s}$, starting time of time integration in seconds. PDPA output is always a running average over time. As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
@@ -10676,7 +10746,7 @@ The following example is used to write out a histogram of droplet size using 20 
 \begin{lstlisting}
 &PROP ID='pdpa_d'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.01
       PDPA_START=0.0
       PDPA_M=1
@@ -10685,6 +10755,22 @@ The following example is used to write out a histogram of droplet size using 20 
       HISTOGRAM_LIMITS=0,2000E-6 /
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{lstlisting}
+The following example provides a normalized distribution of droplet volumes:
+\begin{lstlisting}
+&PROP ID='Droplet volumetric distribution'
+      PART_ID='water-drops'
+      QUANTITY='DIAMETER'
+      PDPA_RADIUS=0.2
+      PDPA_START=2.0
+      PDPA_M=1
+      PDPA_N=3
+      HISTOGRAM=T
+      HISTOGRAM_NBINS=30
+      HISTOGRAM_CUMULATIVE=.FALSE.
+      HISTOGRAM_NORMALIZE=.TRUE.
+      HISTOGRAM_LIMITS=0,500e-6 /
+\end{lstlisting}
+
 
 
 
@@ -10842,13 +10928,13 @@ It is sometimes useful to compile probability distribution functions (PDFs) or h
 &PROP ID='hist'
       HISTOGRAM=T
       HISTOGRAM_NBINS=200
-      HISTOGRAM_LIMITS=0,2000
+      HISTOGRAM_LIMITS=0,2000e-6
       HISTOGRAM_CUMULATIVE=F
       HISTOGRAM_NORMALIZE=T /
 \end{lstlisting}
 When {\ct HISTOGRAM} is set to {\ct T} on the {\ct PROP} line, normalized histogram bin counts are output to a comma-separated value file ({\ct CHID\_hist.csv}). The parameter {\ct HISTOGRAM\_NBINS} is the number of bins dividing the quantity range {\ct HISTOGRAM\_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct HISTOGRAM\_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set {\ct HISTOGRAM\_NORMALIZE=F}.
 
-The histogram output file contains two-columns for each device. The first column gives the bin centers, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
+The histogram output file contains two-columns for each device. The first column gives the bin centerpoints, and the second column gives the relative frequency. The parameter {\ct HIDE\_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
 
 
 
@@ -11625,6 +11711,31 @@ properties be specified as well. Simply prescribing as many properties as possib
 %--------------------------------------------------------------------
 
 \needspace{2.5in}
+\section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+	\caption[Background species ({\ct BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
+	\label{tbl:BACK} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endfirsthead
+	\caption[]{Continued} \\
+	\hline
+	\multicolumn{5}{|c|}{{\ct BACK} (Background Species Parameters)} \\
+	\hline
+	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+	\endhead
+	{\ct SPEC\_ID}                   & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+	{\ct MASS\_FRACTION}             & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+\end{longtable}
+
+
+
+\vspace{\baselineskip}
+
+\needspace{2.5in}
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -12256,6 +12367,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_MF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
+{\ct RAMP\_TMP\_Z}                & Character         & Section~\ref{info:init_temperature}           &                &               \\ \hline
 {\ct RAMP\_VF\_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
@@ -12350,6 +12462,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct NU\_SPEC(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct PART\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real Array      & Section~\ref{info:kinetic_parameters} & $^\circ$C         & 80.           \\ \hline
+{\ct REAC\_RATE\_DELTA}             & Real            & Section~\ref{info:solid_phase_stability}  &                  & 0.05          \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real            & Section~\ref{solid_phase_energy_conservation}    & kJ/kg               &               \\ \hline
 {\ct REFERENCE\_ENTHALPY\_TEMPERATURE} & Real            & Section~\ref{solid_phase_energy_conservation}    & K                   &               \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
@@ -12478,11 +12591,19 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GZ}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
+{\ct RAMP\_UX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_UZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_VZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
+{\ct RAMP\_WZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 {\ct RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & {\ct F}           \\ \hline
 {\ct RESTART\_CHID}                                 & Character    & Section~\ref{info:restart}              &            & {\ct CHID}        \\ \hline
 {\ct RND\_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
 {\ct SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
-{\ct SHARED\_FILE\_SYSTEM}                          & Logical      & Section~\ref{info:multimesh}            &            & {\ct T}           \\ \hline
 {\ct SIMULATION\_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & {\ct 'VLES'}      \\ \hline
 {\ct SMOKE3D\_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & {\ct F}           \\ \hline
 {\ct SMOKE\_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
@@ -13009,6 +13130,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_CTRL\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
 {\ct AIT\_EXCLUSION\_ZONE\_DEVC\_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & {\ct 'null'}      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE\_TEMPERATURE}   & Real           & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & {\ct T}           \\ \hline
 {\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -13035,7 +13157,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct PRIORITY}                            & Integer        & Section~\ref{info:priority}                  &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real           & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-5             \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
 {\ct REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
 {\ct REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & {\ct F}           \\ \hline
@@ -13136,6 +13258,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct F} \\ \hline
 {\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct C}                             & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real              & Section~\ref{info:condensation}         &                   &  0.01         \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
@@ -13179,6 +13302,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct RAMP\_G\_F}                    & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_K}                       & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_MU}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}       & Real              & Section~\ref{info:condensation}         &                   &  1.33         \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real              & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real              & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
@@ -13310,7 +13434,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct REFERENCE\_HEAT\_FLUX}                               & Real Array      & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
 {\ct \footnotesize REFERENCE\_HEAT\_FLUX\_TIME\_INTERVAL}               & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 {\ct REFERENCE\_THICKNESS}                                & Real Array      & Section~\ref{info:scaled_burning}         & m                   &                         \\ \hline
-{\ct RENODE\_DELTA\_T}                                    & Real            & Section~\ref{info:solid_phase_stability}  & K                   & 2                       \\ \hline
+{\ct REMESH\_RATIO}                                       & Real            & Section~\ref{info:solid_phase_stability}  &                     & 0.15                    \\ \hline
 {\ct RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
 {\ct SHAPE\_FACTOR}                                       & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 0.25                    \\ \hline
@@ -13562,7 +13686,7 @@ Keyword             & Type     & Description                      & Units       
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct USE\_ATMOSPHERIC\_INTERPOLATION}           & Logical       & FDS Tech Guide~\cite{FDS_Math_Guide}          &               & {\ct T}      \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
-{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
+{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 10.               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -13758,6 +13882,7 @@ Keyword             & Type     & Description                      & Units       
 265  \> {\ct MATL \ldots\ Sum of NU inputs more than 1.                             } \> Section~\ref{info:solid_pyrolysis}  \\
 266  \> {\ct REAC \ldots\ FUEL \ldots is not a predefined or tracked species.       } \> Section~\ref{info:simple_chemistry}  \\
 267  \> {\ct REAC \ldots\ has no consumed species.                                  } \> Section~\ref{info:REAC_Diagnostics}  \\
+268  \> {\ct BACK tracked species \ldots\ not found.                                } \> Section~\ref{info:BACK}  \\
      \>                                                                               \>                                     \\
 299  \> {\ct SURF \ldots\ has no solid or particle for TGA.                         } \> Section~\ref{info:TGA_DSC_MCC} \\
 300  \> {\ct N\_LAYER\_CELLS\_MAX should be at least \ldots\ for \ldots\            } \> Section~\ref{info:solid_phase_stability} \\
@@ -13779,6 +13904,7 @@ Keyword             & Type     & Description                      & Units       
 316  \> {\ct SURF \ldots\ N\_LAYER\_CELLS\_MAX must be > 0.                         } \> Section~\ref{info:solid_phase_stability}  \\
 317  \> {\ct SURF \ldots\ Specify either ROUGHNESS or Z\_0, not both.               } \> Section~\ref{info:WALL_MODEL}  \\
 318  \> {\ct SURF \ldots\ MASS\_FLUX\_TOTAL is only for outflow.                    } \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
+319  \> {\ct SURF \ldots\ must have a MATL\_ID.                                     } \> Section~\ref{info:HT3D_Limitations}  \\
 320  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and MASS\_FRACTION.            } \> Section~\ref{info:MASS_FLUX}  \\
 321  \> {\ct SURF \ldots\ MASS\_FLUX cannot be less than zero.                      } \> Section~\ref{info:MASS_FLUX}  \\
 322  \> {\ct SURF \ldots\ cannot use both MASS\_FLUX and VEL.                       } \> Section~\ref{info:MASS_FLUX}  \\
@@ -13958,7 +14084,13 @@ Keyword             & Type     & Description                      & Units       
 562 \> {\ct VENT ID \ldots  used for localized leakage has SURF\_ID HVAC.           } \> Section~\ref{info:local_leakage}  \\
 563 \> {\ct VENT ID \ldots  used for localized leakage has a DEVC\_ID or CTRL\_ID.  } \> Section~\ref{info:local_leakage}  \\
 564 \> {\ct VENT: \ldots is used for HVAC and attached to a removable OBST.         } \> Section~\ref{info:HVACnode}  \\
-     \>                                                                               \>                          \\
+565 \> {\ct REAC: \ldots FALLOFF-LINDEMANN reactions must have A\_LOW\_PR and       } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct E\_LOW\_PR }   \\
+566 \> {\ct REAC: \ldots FALLOFF-TROE reactions must have A\_LOW\_PR, E\_LOW\_PR,   } \> Section~\ref{info:falloff_reactions}  \\
+    \> {\ct A\_TROE, T1\_TROE, and T3\_TROE.  }   \\
+567 \> {\ct REAC: \ldots Tracked species \ldots used in a finite rate reaction      } \> Section~\ref{info:finite}  \\
+    \> {\ct without N\_S defined is not a primitive species.  }   \\
+    \>                                                                               \>                          \\
 601 \> {\ct OBST \ldots\ MULT\_ID \ldots\ not found.                                } \> Section~\ref{info:MULT}  \\
 602 \> {\ct OBST \ldots\ SHAPE requires RADIUS.                                     } \> Section~\ref{info:multobst}  \\
 603 \> {\ct OBST \ldots\ SHAPE requires HEIGHT.                                     } \> Section~\ref{info:multobst}  \\
@@ -14006,7 +14138,7 @@ Keyword             & Type     & Description                      & Units       
 731 \> {\ct GEOM ID=, Non manifold geometry in adjacent faces at edge \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 732 \> {\ct GEOM ID=, Opposite normals on triangles sharing edge with \ldots\       } \> Section~\ref{triangulated_surfaces_quality} \\
 733 \> {\ct GEOM ID=, Open geometry at edge with nodes \ldots\                      } \> Section~\ref{triangulated_surfaces_quality} \\
-734 \> {\ct Mismatched mesh boundary location between meshes \ldots\                } \> Section~\ref{info:GEOM_Basics} \\                 
+734 \> {\ct Mismatched mesh boundary location between meshes \ldots\                } \> Section~\ref{info:GEOM_Basics} \\
     \>                                                                                \>                          \\
 801 \> {\ct VENT \ldots\ cannot use MULT\_ID because it involves HVAC.              } \> Section~\ref{info:HVAC} \\
 802 \> {\ct VENT \ldots\ needs an explicit ID because it involves HVAC.             } \> Section~\ref{info:HVAC} \\

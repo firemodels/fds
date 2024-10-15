@@ -26,9 +26,9 @@ permissions:
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/7dff44ba-e3af-4448-841c-0d616c8da6e7/w_BaseKit_p_2024.1.0.595_offline.exe
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d91caaa0-7306-46ea-a519-79a0423e1903/w_BaseKit_p_2024.2.1.101_offline.exe
   WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/c95a3b26-fc45-496c-833b-df08b10297b9/w_HPCKit_p_2024.1.0.561_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/745e923a-3f85-4e1e-b6dd-637c0e9ccba6/w_HPCKit_p_2024.2.1.80_offline.exe
   WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
 
 
@@ -77,9 +77,9 @@ jobs:
     - name: specify oneapi version
       run: |
         (
-          echo compiler=2024.1.0
-          echo mkl=2024.1.0
-          echo mpi=2021.12.0
+          echo compiler=2024.2.1
+          echo mkl=2024.2.1
+          echo mpi=2021.13.1
         ) > oneapi_config.txt
     - name: build fds debug
       run: |

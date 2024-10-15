@@ -156,6 +156,7 @@ $QFDS -d Controls hrr_freeze.fds
 $QFDS -d Controls rms_cov_corr.fds
 $QFDS -d Controls rms_example.fds
 $QFDS -d Controls special_time_ramps.fds
+$QFDS -p 4 -d Controls spreading_fire.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -p 8 -d Detectors beam_detector.fds
@@ -377,6 +378,7 @@ $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
@@ -818,6 +820,16 @@ $QFDS -d WUI Needle_TGA_E.fds
 $QFDS -d WUI Needle_TGA_F.fds
 $QFDS -d WUI Needle_TGA_G.fds
 $QFDS -d WUI Needle_TGA_H.fds
+$QFDS -d WUI part_drag_prof_ux.fds
+$QFDS -d WUI part_drag_prof_uy.fds
+$QFDS -d WUI part_drag_prof_uz.fds
+$QFDS -d WUI part_drag_prof_vx.fds
+$QFDS -d WUI part_drag_prof_vy.fds
+$QFDS -d WUI part_drag_prof_vz.fds
+$QFDS -d WUI part_drag_prof_wx.fds
+$QFDS -d WUI part_drag_prof_wy.fds
+$QFDS -d WUI part_drag_prof_wz.fds
+$QFDS -d WUI part_drag_stretched.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds

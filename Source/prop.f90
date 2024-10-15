@@ -32,7 +32,7 @@ TYPE THERMO_DATA_TYPE
    REAL(EB) :: MU=0.00089_EB                  !< Liquid viscosity  (Ns/m^2) H2O properties as default
    REAL(EB) :: K=0.6_EB                       !< Liquid conductivity (W/m/K) H2O properties default
    LOGICAL :: LIQUID = .FALSE.                !< Species has liquid properties defined
-   LOGICAL :: FUEL=.FALSE.                   !< Use fuel property array for MIE
+   LOGICAL :: FUEL=.FALSE.                    !< Use fuel property array for MIE
 END TYPE THERMO_DATA_TYPE
 
 TYPE(THERMO_DATA_TYPE), TARGET:: THERMO_DATA(-1:368)
@@ -7538,7 +7538,7 @@ THERMO_DATA(366)%EPSOK     =   266.80_EB
 THERMO_DATA(366)%PR        =  0.71_EB ! Assume N2
 
 THERMO_DATA(367)%FORMULA   = 'C8H18'
-THERMO_DATA(367)%NAME      = 'ISO-OCTANE'
+THERMO_DATA(367)%NAME      = 'ISOOCTANE'
 THERMO_DATA(367)%POLY      = 'NASA9'
 THERMO_DATA(367)%BANDS     = 2
 THERMO_DATA(367)%T(1:3)    = (/ 0.200000000E+03_EB, 0.100000000E+04_EB, 0.600000000E+04_EB/)

@@ -205,13 +205,14 @@ LOGICAL :: MASS_FILE=.FALSE.                !< Output a comma-delimited file of 
 LOGICAL :: STRATIFICATION=.TRUE.            !< Assume that the atmosphere decreases in pressure with height
 LOGICAL :: SOLID_PHASE_ONLY=.FALSE.         !< Only perform a solid phase heat transfer and pyrolysis simulation
 LOGICAL :: AEROSOL_AL2O3=.FALSE.            !< Assume that the SOOT is Al_2 O_3
-LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on computers with a shared file system
 LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
 LOGICAL :: CHECK_FO=.FALSE.                 !< Check the solid phase Fourier number
+LOGICAL :: LIQUID_DROPLETS=.FALSE.          !< Indicates the existence of liquid droplets
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
+LOGICAL :: ORIENTED_PARTICLES=.FALSE.       !< Indicates the existence of particles with a specified orientation
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
 LOGICAL :: BAROCLINIC=.TRUE.                !< Include the baroclinic terms in the momentum equation
 LOGICAL :: GRAVITATIONAL_DEPOSITION=.TRUE.  !< Allow aerosol gravitational deposition
@@ -249,6 +250,7 @@ LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
 LOGICAL :: HVAC_QFAN=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
+LOGICAL :: NEAR_WALL_PARTICLE_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
@@ -475,7 +477,8 @@ REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
 CHARACTER(LABEL_LENGTH), POINTER, DIMENSION(:) :: RAMP_ID,RAMP_TYPE
 INTEGER :: MAX_RAMPS=100,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
            I_RAMP_PGF_T,I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
-           I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0
+           I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0,&
+           I_RAMP_UX,I_RAMP_UY,I_RAMP_UZ,I_RAMP_VX,I_RAMP_VY,I_RAMP_VZ,I_RAMP_WX,I_RAMP_WY,I_RAMP_WZ
 INTEGER, PARAMETER :: MAX_QDOTPP_REF=10                    !< Maximum number of REFERENCE_HEAT_FLUX curves for Spyro
 INTEGER, PARAMETER :: TIME_HEAT=-11,TIME_VELO=-2,TIME_TEMP=-3,TIME_EFLUX=-4,TIME_PART=-5,TANH_RAMP=-2,TSQR_RAMP=-1,&
                       VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8,TIME_TGF=-9,TIME_TGB=-10,TIME_TB=-1,&
@@ -514,6 +517,9 @@ INTEGER, PARAMETER :: FFT_FLAG=0                                 !< Integer pres
 INTEGER, PARAMETER :: GLMAT_FLAG=1                               !< Integer pressure solver parameter GLMAT
 INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pressure solver parameter UGLMAT
 INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
+INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matrix solver library flag for MKL PARDISO
+INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
+INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
 INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
@@ -725,8 +731,8 @@ LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
 REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
-REAL(EB), POINTER, DIMENSION(:) :: ORIENTATION_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_AREA        !< View angle area ORIENTATION_VECTOR
+REAL(EB), POINTER, DIMENSION(:) :: COS_HALF_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_FACTOR        !< View angle area ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
 INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calculation
@@ -744,7 +750,7 @@ LOGICAL :: READ_EXTERNAL = .FALSE.,HEARTBEAT_FAIL=.TRUE.
 INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
-LOGICAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
 
 END MODULE GLOBAL_CONSTANTS
 
