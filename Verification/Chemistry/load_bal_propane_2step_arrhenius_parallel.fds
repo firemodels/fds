@@ -1,18 +1,11 @@
 &HEAD CHID='load_bal_propane_2step_arrhenius_parallel', TITLE='Test propane burning around sphere using 2step Arrhenius chemistry.' /
 
-# 1 MESH:
-#& MESH IJK=64,64,96, XB=-2.0,2.0,-2.0,2.0,0.0,6.0 /
-
-# 2 MESHES:
-#& MESH IJK=64,64,48, XB=-2.0,2.0,-2.0,2.0,0.0,3.0, MULT_ID='mesh' /
-#& MULT ID='mesh', DZ=3, K_UPPER=1 /
-
 # 6 MESHES:
 &MESH IJK=32,16,16, XB=-2.0,2.0,-2.0,0.0,0.0,2.0, MULT_ID='mesh' /
 &MULT ID='mesh', DY=2, DZ=2, J_UPPER=1, K_UPPER=2 /
 
 &TIME T_END=5.0 /
-&MISC STRATIFICATION=.FALSE. / 
+&MISC STRATIFICATION=.FALSE., NOISE=.FALSE./
 #&PRES SOLVER='ULMAT HYPRE' /
 &PRES SOLVER='ULMAT' /
 &RADI RADIATION=.FALSE. /
