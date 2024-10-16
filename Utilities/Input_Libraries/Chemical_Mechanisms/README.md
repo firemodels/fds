@@ -9,7 +9,7 @@
 * **Tianfeng Lu (32 Species, 206 Reactions)**:Zhaoyu Luo, Chun Sang Yoo, Edward S. Richardson, Jacqueline H. Chen, Chung K. Law, and Tian- feng Lu. Chemical explosive mode analysis for a turbulent lifted ethylene jet flame in highly-heated coflow. Combustion and Flame, 159(1):265–274, 2012 [doi](https://doi.org/10.1016/j.combustflame.2011.05.023)
 
 ### **Propane (C3H8)**:
-* **Univ. of Southern California - USC (70 Species, 463 Reactions)**: Zhiwei Qin, Vitali V. Lissianski, Huixing Yang, William C. Gardiner, Scott G. Davis, and Hai Wang. Combustion chemistry of propane: A case study of detailed reaction mechanism optimization. Pro- ceedings of the Combustion Institute, 28(2):1663–1669, 2000. [doi](https://doi.org/10.1016/S0082-0784(00)80565-2)
+* **Univ. of Southern California - USC (70 Species, 463 Reactions)**: Zhiwei Qin, Vitali V. Lissianski, Huixing Yang, William C. Gardiner, Scott G. Davis, and Hai Wang. Combustion chemistry of propane: A case study of detailed reaction mechanism optimization. Proceedings of the Combustion Institute, 28(2):1663–1669, 2000. [doi](https://doi.org/10.1016/S0082-0784(00)80565-2)
 * **Z66 (24 Species, 66 Reactions)**:N. Zettervall, K. Nordin-Bates, E.J.K. Nilsson, and C. Fureby. Large eddy simulation of a premixed bluff body stabilized flame using global and skeletal reaction mechanisms. Combustion and Flame, 179:1–22, 2017. [doi](https://doi.org/10.1016/j.combustflame.2016.12.007) 
 
 
