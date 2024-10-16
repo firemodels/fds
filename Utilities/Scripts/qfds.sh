@@ -354,7 +354,11 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
      MPIRUN="srun --mpi=pmi2 "
   else
 # use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
-     MPIRUN="mpirun "
+     if [ "$use_gnu_openmpi" == "1" ]; then
+        MPIRUN="mpirun --bind-to none "
+     else
+        MPIRUN="mpirun "
+     fi
   fi
 else
   QSUB="qsub -q $queue"
