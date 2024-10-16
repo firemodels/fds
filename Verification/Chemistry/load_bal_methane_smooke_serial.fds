@@ -1,11 +1,22 @@
 &HEAD CHID='load_bal_methane_smooke_serial', TITLE='Complex Geometry: Test methane burning around sphere using detailed chemistry.' /
 
+# 1 MESH:
+#& MESH IJK=64,64,96, XB=-2.0,2.0,-2.0,2.0,0.0,6.0 /
+
+# 2 MESHES:
+#& MESH IJK=64,64,48, XB=-2.0,2.0,-2.0,2.0,0.0,3.0, MULT_ID='mesh' /
+#& MULT ID='mesh', DZ=3, K_UPPER=1 /
+
+# 6 MESHES:
+#&MESH IJK=32,16,16, XB=-2.0,2.0,-2.0,0.0,0.0,2.0, MULT_ID='mesh' /
+#&MULT ID='mesh', DY=2, DZ=2, J_UPPER=1, K_UPPER=2 /
+
 # 24 MESHES:
 &MESH IJK=16,16,8, XB=-2.0,0.0,-2.0,0.0,0.0,1.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=2, DY=2, DZ=1, I_UPPER=1, J_UPPER=1, K_UPPER=5 /
 
 &TIME T_END=5.0 /
-&MISC STRATIFICATION=.FALSE., NOISE=.FALSE./
+&MISC STRATIFICATION=.FALSE., NOISE=.FALSE. / 
 #&PRES SOLVER='ULMAT HYPRE' /
 &PRES SOLVER='ULMAT' /
 &RADI RADIATION=.FALSE. /
