@@ -229,33 +229,33 @@ END MODULE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
 #ifdef WITH_PETSC
-MODULE PETSC_MESH_ZONE
+MODULE PETSC_ZONE_MESH
 #include <petsc/finclude/petsc.h>
 ! #include <petsc/finclude/petscsys.h>
    USE PETSC
    IMPLICIT NONE
    PetscErrorCode :: PETSC_IERR
 
-   TYPE PETSC_MZ_TYPE
+   TYPE PETSC_ZM_TYPE
       INTEGER :: NNZ
       Mat :: A_H    ! System Matrix
       Vec :: F_H    ! RHS
       Vec :: X_H    ! Solution vector
       KSP :: LS     ! Linear solver
       PC  :: PR     ! Preconditioner
-   END TYPE PETSC_MZ_TYPE
+   END TYPE PETSC_ZM_TYPE
 
-   ! PETSc info for ZONE_MESH defined in PETSC_MZ, ZONE_MESH_TYPE, type.f90.
+   ! PETSc info for ZONE_MESH defined in PETSC_ZM, ZONE_MESH_TYPE, type.f90.
    PRIVATE
-   PUBLIC :: PETSC_IERR,PETSC_MZ_TYPE,PETSC_MZ_DEALLOC
+   PUBLIC :: PETSC_IERR,PETSC_ZM_TYPE,PETSC_ZM_DEALLOC
 
    CONTAINS
 
-   SUBROUTINE PETSC_MZ_DEALLOC
+   SUBROUTINE PETSC_ZM_DEALLOC
 
-   END SUBROUTINE PETSC_MZ_DEALLOC
+   END SUBROUTINE PETSC_ZM_DEALLOC
 
-END MODULE PETSC_MESH_ZONE
+END MODULE PETSC_ZONE_MESH
 
 MODULE PETSC_ZONE_SOLVE
 #include <petsc/finclude/petsc.h>
