@@ -107,6 +107,7 @@ TNOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
+
 IF (WRITE_VTK) THEN
 
    IF (VTK_HDF) THEN
@@ -4438,28 +4439,31 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (FAKEWRITE) THEN
       ! Write point data to file
       CALL PARALLEL_INIT_F32(GROUP_ID1, TRIM("Points"), CRP_LIST, 2,&
-         INT8((/3, NPOINTS_TOTAL/)),INT8((/3, SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_F32(2, INT8((/0, 0/)), DSET_ID_PTS, PLIST_ID, INT8((/0,0/)), INT8((/0,0/)), REAL((/0,0,0/)))
+         INT((/3, NPOINTS_TOTAL/),HSIZE_T),INT((/3, SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_F32(2, INT((/0, 0/),HSIZE_T), DSET_ID_PTS, PLIST_ID,&
+         INT((/0,0/),HSIZE_T), INT((/0,0/),HSIZE_T), REAL((/0,0,0/)))
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
 
       ! Write tag to file
       CALL PARALLEL_INIT_I32(GROUP_ID4, TRIM("TAG"), CRP_LIST, 1,&
-         INT8((/NPOINTS_TOTAL/)),INT8((/SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_I32(1, INT8((/0/)), DSET_ID_PTS,&
-         PLIST_ID, INT8((/0/)), INT8((/0/)), (/0/))
+         INT((/NPOINTS_TOTAL/),HSIZE_T),INT((/SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_I32(1, (/0_HSIZE_T/), DSET_ID_PTS,&
+         PLIST_ID, (/0_HSIZE_T/), (/0_HSIZE_T/), (/0/))
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       
       ! Write color data to file
       CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM("COLOR"), CRP_LIST, 2,&
-         INT8((/3, NPOINTS_TOTAL/)),INT8((/3, SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_F32(2, INT8((/3, 0/)), DSET_ID_PTS, PLIST_ID, INT8((/0,0/)), INT8((/3,0/)), REAL((/0,0,0/)))
+         INT((/3, NPOINTS_TOTAL/),HSIZE_T),INT((/3, SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_F32(2, INT((/3, 0/),HSIZE_T), DSET_ID_PTS, PLIST_ID,&
+         INT((/0,0/),HSIZE_T), INT((/3,0/),HSIZE_T), REAL((/0,0,0/)))
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       
       ! Write quantities
       DO NN=1,LPC%N_QUANTITIES
          CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM(LPC%SMOKEVIEW_LABEL(NN)), CRP_LIST, 1,&
-            INT8((/NPOINTS_TOTAL/)),INT8((/SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-         CALL PARALLEL_WRITE_F32(1, INT8((/0/)), DSET_ID_PTS, PLIST_ID, INT8((/0/)), INT8((/0/)), REAL((/0/)))
+            INT((/NPOINTS_TOTAL/),HSIZE_T),INT((/SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+         CALL PARALLEL_WRITE_F32(1, (/0_HSIZE_T/), DSET_ID_PTS, PLIST_ID,&
+            (/0_HSIZE_T/), (/0_HSIZE_T/), REAL((/0/)))
          CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       ENDDO
       
@@ -4522,32 +4526,32 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       
       ! Write point data to file
       CALL PARALLEL_INIT_F32(GROUP_ID1, TRIM("Points"), CRP_LIST, 2,&
-         INT8((/3, NPOINTS_TOTAL/)),INT8((/3, SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_F32(2, INT8((/3, NPOINTS(NM)/)), DSET_ID_PTS,&
-         PLIST_ID, INT8((/0,NPOINTS_START/)), INT8((/3,NPOINTS(NM)/)), VERTICES)
+         INT((/3, NPOINTS_TOTAL/),HSIZE_T),INT((/3, SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_F32(2, INT((/3, NPOINTS(NM)/),HSIZE_T), DSET_ID_PTS,&
+         PLIST_ID, INT((/0,NPOINTS_START/),HSIZE_T), INT((/3,NPOINTS(NM)/),HSIZE_T), VERTICES)
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       
       ! Write tag to file
       CALL PARALLEL_INIT_I32(GROUP_ID4, TRIM("TAG"), CRP_LIST, 1,&
-         INT8((/NPOINTS_TOTAL/)),INT8((/SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_I32(1, INT8((/NPOINTS(NM)/)), DSET_ID_PTS,&
-         PLIST_ID, INT8((/NPOINTS_START/)), INT8((/NPOINTS(NM)/)), TA)
+         INT((/NPOINTS_TOTAL/),HSIZE_T),INT((/SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_I32(1, INT((/NPOINTS(NM)/),HSIZE_T), DSET_ID_PTS,&
+         PLIST_ID, INT((/NPOINTS_START/),HSIZE_T), INT((/NPOINTS(NM)/),HSIZE_T), TA)
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       
       ! Write color data to file
       CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM("COLOR"), CRP_LIST, 2,&
-         INT8((/3, NPOINTS_TOTAL/)),INT8((/3, SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-      CALL PARALLEL_WRITE_F32(2, INT8((/3, NPOINTS(NM)/)), DSET_ID_PTS,&
-         PLIST_ID, INT8((/0,NPOINTS_START/)), INT8((/3,NPOINTS(NM)/)), COLORS)
+         INT((/3, NPOINTS_TOTAL/),HSIZE_T),INT((/3, SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+      CALL PARALLEL_WRITE_F32(2, INT((/3, NPOINTS(NM)/),HSIZE_T), DSET_ID_PTS,&
+         PLIST_ID, INT((/0,NPOINTS_START/),HSIZE_T), INT((/3,NPOINTS(NM)/),HSIZE_T), COLORS)
       CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       
       ! Write quantities to file
       DO NN=1,LPC%N_QUANTITIES
          DSET_ID=0
          CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM(LPC%SMOKEVIEW_LABEL(NN)), CRP_LIST, 1,&
-            INT8((/NPOINTS_TOTAL/)),INT8((/SUM(NPOINTS)/)), DSET_ID_PTS, PLIST_ID) ! Points
-         CALL PARALLEL_WRITE_F32(1, INT8((/NPOINTS(NM)/)), DSET_ID_PTS,&
-            PLIST_ID, INT8((/NPOINTS_START/)), INT8((/NPOINTS(NM)/)), REAL(QP(1:NPP,NN)))
+            INT((/NPOINTS_TOTAL/),HSIZE_T),INT((/SUM(NPOINTS)/),HSIZE_T), DSET_ID_PTS, PLIST_ID) ! Points
+         CALL PARALLEL_WRITE_F32(1, INT((/NPOINTS(NM)/),HSIZE_T), DSET_ID_PTS,&
+            PLIST_ID, INT((/NPOINTS_START/),HSIZE_T), INT((/NPOINTS(NM)/),HSIZE_T), REAL(QP(1:NPP,NN)))
          CALL H5DCLOSE_F(DSET_ID_PTS, ERROR)
       ENDDO
       
@@ -12287,6 +12291,9 @@ INTEGER :: NPOINTS_ACCUM, NPOINTS_TOTAL, NPOINTS_START
 INTEGER, ALLOCATABLE, DIMENSION(:) :: LOCATIONS
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK, ALL_DATA
 CHARACTER(200) :: FILENAME
+!INTEGER(IB32), DIMENSION(1) :: DATA_OUT3(3)
+REAL(FB), DIMENSION(1) :: RDATA_OUT3(3)
+INTEGER(HSIZE_T), DIMENSION(1) :: CDIM1(1), DDIM1(1) !, CDIM2(2), DDIM2(2)
 
 DO NMNM=1,N_MPI_PROCESSES
    MESHES_PER_PROCESS(NMNM) = 0
@@ -12365,14 +12372,14 @@ MESH_LOOP_HDF: DO NMNM=1,NMESHES
          ! Write ALL_DATA to file
          IF (BF%CELL_CENTERED) THEN
             CALL PARALLEL_INIT_F32(GROUP_ID2, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-               INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
-            CALL PARALLEL_WRITE_F32(1, INT8((/NCELLS(NM1)/)), DSET_ID,&
-               PLIST_ID, INT8((/NCELLS_START/)), INT8((/NCELLS(NM1)/)), ALL_DATA)
+               (/0_HSIZE_T/),(/0_HSIZE_T/), DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
+            CALL PARALLEL_WRITE_F32(1, INT((/NCELLS(NM1)/),HSIZE_T), DSET_ID,&
+               PLIST_ID, INT((/NCELLS_START/),HSIZE_T), INT((/NCELLS(NM1)/),HSIZE_T), ALL_DATA)
          ELSE
             CALL PARALLEL_INIT_F32(GROUP_ID4, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-               INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
-            CALL PARALLEL_WRITE_F32(1, INT8((/NPOINTS(NM1)/)), DSET_ID,&
-               PLIST_ID, INT8((/NPOINTS_START/)), INT8((/NPOINTS(NM1)/)), ALL_DATA)
+               (/0_HSIZE_T/),(/0_HSIZE_T/), DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
+            CALL PARALLEL_WRITE_F32(1, INT((/NPOINTS(NM1)/),HSIZE_T), DSET_ID,&
+               PLIST_ID, INT((/NPOINTS_START/),HSIZE_T), INT((/NPOINTS(NM1)/),HSIZE_T), ALL_DATA)
          ENDIF
          CALL H5DCLOSE_F(DSET_ID, ERROR)
          DEALLOCATE(ALL_DATA)
@@ -12387,31 +12394,35 @@ MESH_LOOP_HDF: DO NMNM=1,NMESHES
             ! Write ALL_DATA to file
             IF (BF%CELL_CENTERED) THEN
                CALL PARALLEL_INIT_F32(GROUP_ID2, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-                  INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
-               CALL PARALLEL_WRITE_F32(1, INT8((/NCELLS(NM2)/)), DSET_ID,&
-                  PLIST_ID, INT8((/NCELLS_ACCUM/)), INT8((/NCELLS(NM2)/)), ALL_DATA)
+                  (/0_HSIZE_T/),(/0_HSIZE_T/), DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
+               CALL PARALLEL_WRITE_F32(1, INT((/NCELLS(NM2)/),HSIZE_T), DSET_ID,&
+                  PLIST_ID, INT((/NCELLS_ACCUM/),HSIZE_T), INT((/NCELLS(NM2)/),HSIZE_T), ALL_DATA)
             ELSE
                CALL PARALLEL_INIT_F32(GROUP_ID4, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-                  INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
-               CALL PARALLEL_WRITE_F32(1, INT8((/NPOINTS(NM2)/)), DSET_ID,&
-                  PLIST_ID, INT8((/NPOINTS_ACCUM/)), INT8((/NPOINTS(NM2)/)), ALL_DATA)
+                  (/0_HSIZE_T/),(/0_HSIZE_T/), DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
+               CALL PARALLEL_WRITE_F32(1, INT((/NPOINTS(NM2)/),HSIZE_T), DSET_ID,&
+                  PLIST_ID, INT((/NPOINTS_ACCUM/),HSIZE_T), INT((/NPOINTS(NM2)/),HSIZE_T), ALL_DATA)
             ENDIF
             CALL H5DCLOSE_F(DSET_ID, ERROR)
             DEALLOCATE(ALL_DATA)
             N_WRITTEN = N_WRITTEN + 1
          ENDIF
       ENDIF
+      
       ! Write fake data in processes that have less meshes than max process
+      RDATA_OUT3 = 0_FB
+      CDIM1=0
+      DDIM1=0
       DO NMNM2=1,MAXVAL(MESHES_PER_PROCESS)*2
          IF (N_WRITTEN < MAXVAL(MESHES_PER_PROCESS)*2) THEN
             IF (BF%CELL_CENTERED) THEN
                CALL PARALLEL_INIT_F32(GROUP_ID2, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-                  INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
-               CALL PARALLEL_WRITE_F32(1, INT8((/0/)), DSET_ID, PLIST_ID, INT8((/0/)), INT8((/0/)), REAL((/0,0,0/)))
+                  CDIM1,DDIM1, DSET_ID, PLIST_ID) ! Open previously initialized cell centered for writing
+               CALL PARALLEL_WRITE_F32(1, CDIM1, DSET_ID, PLIST_ID, CDIM1,DDIM1, RDATA_OUT3)
             ELSE
                CALL PARALLEL_INIT_F32(GROUP_ID4, BF%SMOKEVIEW_LABEL(1:30), CRP_LIST, 1,&
-                  INT8((/0/)),INT8((/0/)), DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
-               CALL PARALLEL_WRITE_F32(1, INT8((/0/)), DSET_ID, PLIST_ID, INT8((/0/)), INT8((/0/)), REAL((/0,0,0/)))
+                  CDIM1,DDIM1, DSET_ID, PLIST_ID) ! Open previously initialized nodal for writing
+               CALL PARALLEL_WRITE_F32(1, CDIM1, DSET_ID, PLIST_ID, CDIM1,DDIM1, RDATA_OUT3)
             ENDIF
             CALL H5DCLOSE_F(DSET_ID, ERROR)
             N_WRITTEN = N_WRITTEN + 1
