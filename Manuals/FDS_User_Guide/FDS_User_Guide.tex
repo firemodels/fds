@@ -5527,9 +5527,10 @@ For solving the chemistry with a detailed chemical mechanism (see Section \ref{i
    ODE_REL_ERROR=1E-8,
    EQUIV_RATIO_CHECK=T,
    MIN_EQUIV_RATIO=0.2,
-   MAX_EQUIV_RATIO=10.0 /
+   MAX_EQUIV_RATIO=10.0,
+   DO_CHEM_LOAD_BALANCE=T /
 \end{lstlisting}
-However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits.
+However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes.
 
 
 \newpage
@@ -11832,6 +11833,7 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 {\ct CHECK\_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & {\ct F}              \\ \hline
 {\ct COMPUTE\_ADIABATIC\_FLAME\_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & {\ct F}              \\ \hline
+{\ct DO\_CHEM\_LOAD\_BALANCE}                        & Logical    & Section~\ref{info:chem_integration}          &           & {\ct F}              \\ \hline
 {\ct EQUIV\_RATIO\_CHECK}                            & Logical    & Section~\ref{info:chem_integration}          &           & {\ct T}              \\ \hline
 {\ct EXTINCTION\_MODEL}                              & Character  & Section~\ref{info:extinction}                &           &                      \\ \hline
 {\ct FINITE\_RATE\_MIN\_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15              \\ \hline
