@@ -3865,6 +3865,58 @@ Six additional constant volume ignition delay cases are configured using the fol
 \label{fig:ign_delay_nHeptane_Chalmers_phi_1.0}
 \end{figure}
 
+
+\section{Combustion Load Balancing (\textct{comb\_load\_bal})}
+\label{comb_load_bal}
+
+Fire simulations can become computationally expensive due to combustion calculations, especially when detailed chemistry is involved. Often, in parallel simulations, combustion is concentrated in only a few MPI processes, while other MPI processes remain idle, waiting for the combustion-related tasks to finish. To address this, FDS incorporates a load-balancing algorithm that evenly distributes the combustion workload across all MPI processes. This can significantly speed up the detailed chemistry simulations, with performance improvements ranging from 2 to 6 times, depending on the configuration. 
+
+Three cases are considered to verify the load-balancing algorithm: the first uses a detailed chemical mechanism (Methane\_Smooke, see Section ~\ref{ignition_delay}); the second uses two-step Arrhenius reactions; and the third involves two-step fast chemistry reactions. In all cases, gaseous fuel (methane or propane) is injected from the burner. To account for combustion in both regular cells and Immersed Boundary Cut-Cells, a sphere is placed above the burner, allowing the flame to propagate around it.
+
+
+Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane\_Smoke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations. 
+
+Figure \ref{fig:comb_load_bal_2step_Arrhenius} presents a similar load-balancing test for two-step Propane Arrhenius reactions using the FDS-RK2 ODE solver. In this configuration, there are 6 meshes, corresponding to 6 MPI processes. The load-balancing results show similar trends as observed with the detailed chemical mechanism. However, the time spent on combustion (FIRE) is significantly lower compared to the detailed chemistry case (20\% vs. 65\%). As a result, even with combustion load balancing, other processes dominate the total simulation time, limiting the speedup to just 1.2x.
+
+Figure \ref{fig:comb_load_bal_2step_fast} shows a load-balancing test for two-step Methane fast reactions using the FDS-Euler ODE solver. In this configuration, with 6 meshes corresponding to 6 MPI processes, load balancing provides no performance gains, as the time spent on combustion (FIRE) is very small relative to the total simulation time.
+
+Overall, combustion load balancing provides significant speedup for detailed chemistry cases. For small multi-step Arrhenius reactions, the speedup may be limited depending on the stiffness of the reactions. For fast chemistry, combustion load balancing is generally not beneficial.
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_CHEM} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using Methane\_Smooke detailed chemical mechanism.}
+\label{fig:comb_load_bal_methane_smooke}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_FIRE} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Propane Arrhenius reactions.}
+\label{fig:comb_load_bal_2step_Arrhenius}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_FIRE} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Methane fast reactions.}
+\label{fig:comb_load_bal_2step_fast}
+\end{figure}
+
+
 \section{Mixture Fraction (\textct{burke\_schumann})}
 \label{Mix_Frac}
 \label{burke_schumann_spec}
@@ -3905,7 +3957,6 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 \caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
-
 
 
 \section{Ideal and Non-Ideal Heat of Combustion (\textct{HoC})}
