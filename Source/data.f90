@@ -2533,6 +2533,7 @@ SELECT CASE(FUEL)
    CASE('ETHANOL')     ; CHI_R = 0.25_EB  ! Table A.39, Appendix 3
    CASE('ETHYLENE')    ; CHI_R = 0.34_EB  ! Table A.39, Appendix 3
    CASE('HYDROGEN')    ; CHI_R = 0.20_EB  ! Table 66.14, Beyler chapter
+   CASE('ISOOCTANE')   ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
    CASE('ISOPROPANOL') ; CHI_R = 0.29_EB  ! Table A.39, Appendix 3
    CASE('METHANE')     ; CHI_R = 0.20_EB  ! Table 66.14, Beyler chapter
    CASE('METHANOL')    ; CHI_R = 0.21_EB  ! Buch et al., C&F 108: 118-126 (1997)
@@ -2542,6 +2543,7 @@ SELECT CASE(FUEL)
    CASE('N-PENTANE')   ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
    CASE('N-OCTANE')    ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
    CASE('PROPANE')     ; CHI_R = 0.29_EB  ! Table A.39, Appendix 3
+   CASE('PROPANOL')    ; CHI_R = 0.29_EB  ! Table A.39, Appendix 3
    CASE('PROPYLENE')   ; CHI_R = 0.37_EB  ! Table A.39, Appendix 3
    CASE('TOLUENE')     ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
    CASE DEFAULT        ; CHI_R = 0.35_EB

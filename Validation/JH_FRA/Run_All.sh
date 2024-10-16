@@ -5,7 +5,18 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -d $INDIR JH_FRA_compartment_04_cone_raw.fds
-$QFDS $DEBUG $QUEUE -d $INDIR JH_FRA_compartment_04_cone_scaled.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_01.fds
+$QFDS $DEBUG $QUEUE -p 4 -d $INDIR JH_FRA_compartment_02.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_03.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_03A.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_04.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_11.fds
+$QFDS $DEBUG $QUEUE -p 4 -d $INDIR JH_FRA_compartment_12.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_13.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_14.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_21.fds
+$QFDS $DEBUG $QUEUE -p 4 -d $INDIR JH_FRA_compartment_22.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_23.fds
+$QFDS $DEBUG $QUEUE -p 6 -d $INDIR JH_FRA_compartment_24.fds
 
 echo FDS cases submitted

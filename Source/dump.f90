@@ -2869,7 +2869,11 @@ SELECT CASE(PRES_FLAG)
    CASE(FFT_FLAG);    WRITE(LU_OUTPUT,'(3X,A,28X,A)') 'Solver:',    'FFT'
    CASE(GLMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'GLMAT'
    CASE(UGLMAT_FLAG); WRITE(LU_OUTPUT,'(3X,A,25X,A)') 'Solver:', 'UGLMAT'
-   CASE(ULMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT'
+   CASE(ULMAT_FLAG)
+      SELECT CASE(ULMAT_SOLVER_LIBRARY)
+         CASE(MKL_PARDISO_FLAG); WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT with MKL PARDISO'
+         CASE(HYPRE_FLAG);       WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT with HYPRE'
+      END SELECT
 END SELECT
 WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Velocity tolerance (m/s):   ',VELOCITY_TOLERANCE
 WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Press eqn res tol (1/s^2):  ',PRESSURE_TOLERANCE
@@ -3227,7 +3231,7 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%H(500)*0.001_EB
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
-   IF (ML%KAPPA_S<5.0E4_EB) THEN
+   IF (ML%KAPPA_S<4.9E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
 
@@ -3272,7 +3276,10 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      WRITE(LU_OUTPUT,'(A,ES10.3)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
+      ITMP = NINT(TMPA)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMPA,    ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
+      ITMP = NINT(ML%TMP_REF(1))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES10.3)') '        H_R (kJ/kg) TMP_REF, ',ITMP,' K: ',ML%H_R(1,ITMP)/1000._EB
    ENDIF
 
 ENDDO MATL_LOOP
@@ -4116,7 +4123,7 @@ WRITE(LU_OUTPUT,*)
            6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I0,',',I0,',',I0,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I0,',',I0,',',I0,')')
+230 FORMAT(6X,' Max VN number : ',E9.2,' at (',I0,',',I0,',',I0,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 141 FORMAT(6X,' No. of Lagrangian Particles:  ',I0)
@@ -6130,7 +6137,7 @@ INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II,II1,I
            IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO,I_INC,J_INC,&
            DEBUG,IERROR,IFACT,JFACT,KFACT,NX,NY,NZ,KTS,NTSL,ICO
 REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
-REAL(FB) :: ZERO,STIME,SLICE_MIN,SLICE_MAX,UVEL,VVEL,WVEL,VEL,PLOT3D_MIN,PLOT3D_MAX
+REAL(FB) :: ZERO,STIME,SLICE_MIN,SLICE_MAX,UVEL,VVEL,WVEL,VEL,UVW_MAX,PLOT3D_MIN,PLOT3D_MAX
 LOGICAL :: PLOT3D,SLCF3D,VTK3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_INTERP2FACES
 INTEGER :: NC, NP
@@ -6567,10 +6574,11 @@ IF (.NOT.VTK3D) THEN
       DO K = 0, KBAR
          DO J = 0, JBAR
             DO I = 0, IBAR
-              UVEL = MAX(MIN(QQ(I,J,K,2),1E6_FB),-1E6_FB)
-              VVEL = MAX(MIN(QQ(I,J,K,3),1E6_FB),-1E6_FB)
-              WVEL = MAX(MIN(QQ(I,J,K,4),1E6_FB),-1E6_FB)
-              VEL = SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
+              UVW_MAX = MAX(ABS(QQ(I,J,K,2)), ABS(QQ(I,J,K,3)), ABS(QQ(I,J,K,4)), 1.0_FB)
+              UVEL = QQ(I,J,K,2)/UVW_MAX
+              VVEL = QQ(I,J,K,3)/UVW_MAX
+              WVEL = QQ(I,J,K,4)/UVW_MAX
+              VEL = UVW_MAX*SQRT(UVEL*UVEL + VVEL*VVEL + WVEL*WVEL)
               PLOT3D_MIN = MIN(PLOT3D_MIN,VEL)
               PLOT3D_MAX = MAX(PLOT3D_MAX,VEL)
             END DO
@@ -6579,7 +6587,6 @@ IF (.NOT.VTK3D) THEN
       WRITE(LU_PL3D(NM+NMESHES),'(1X,E13.6,1X,E13.6)')PLOT3D_MIN,PLOT3D_MAX
       CLOSE(LU_PL3D(NM+NMESHES))
    ENDIF
-
 ENDIF
 
 ! Dump out the slice file to a .vtk file
@@ -8744,7 +8751,7 @@ IND_SELECT: SELECT CASE(IND)
    CASE(253)  ! ZONE PRESSURE SOLVER TYPE
       GAS_PHASE_OUTPUT_RES = REAL(PRES_FLAG,EB)
       IF (PRES_FLAG==ULMAT_FLAG) THEN
-         IF (ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%USE_FFT) THEN
+         IF (ZONE_MESH(ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%CONNECTED_ZONE_PARENT)%USE_FFT) THEN
             GAS_PHASE_OUTPUT_RES = REAL(FFT_FLAG,EB)
          ELSE
             ! uses PARDISO solver per mesh zone
@@ -9630,7 +9637,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          ! find cut-cell adjacent to CFACE
          IND1 = CFA%CUT_FACE_IND1
          IND2 = CFA%CUT_FACE_IND2
-         CALL GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2)
+         CALL GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2,U,V,W,PREDFCT=1._EB)
          CALL GET_MUDNS_CFACE(MU_WALL,IND1,IND2)
          ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
          IIG = CUT_CELL(ICC)%IJK(1)

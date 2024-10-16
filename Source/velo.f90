@@ -1511,7 +1511,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
             ENDIF
             FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK))*DHFCT - DUUDT
-            IF (TUNNEL_PRECONDITIONER) FVX(II,JJ,KK) = FVX(II,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II)*DHFCT
+            IF (TUNNEL_PRECONDITIONER) FVX(II,JJ,KK) = FVX(II,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II)
          CASE(-1)
             IF (PREDICTOR) THEN
                DUUDT = RFODT*(UN-U(II-1,JJ,KK))
@@ -1519,7 +1519,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
             ENDIF
             FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK))*DHFCT - DUUDT
-            IF (TUNNEL_PRECONDITIONER) FVX(II-1,JJ,KK) = FVX(II-1,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II-1)*DHFCT
+            IF (TUNNEL_PRECONDITIONER) FVX(II-1,JJ,KK) = FVX(II-1,JJ,KK) + DUDT_BAR_P(I_OFFSET(NM)+II-1)
          CASE( 2)
             IF (PREDICTOR) THEN
                DVVDT = RFODT*(UN-V(II,JJ,KK))
@@ -1657,7 +1657,7 @@ ELSE FREEZE_VELOCITY_IF
       T_NOW=CURRENT_TIME()
    ENDIF
    SELECT CASE(PRES_FLAG)
-      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -1735,7 +1735,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
+         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
    END SELECT
 
    !$OMP PARALLEL PRIVATE(I,J,K)
@@ -1787,7 +1787,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -1885,9 +1885,6 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
    ED%OMEGA    = -1.E6_EB
    ED%TAU      = -1.E6_EB
-   ED%U_AVG    = -1.E6_EB
-   ED%V_AVG    = -1.E6_EB
-   ED%W_AVG    = -1.E6_EB
    INTERPOLATED_EDGE = .FALSE.
 
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
@@ -2265,7 +2262,8 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_B1%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
-            IF (SYNTHETIC_EDDY_METHOD) VELOCITY_BC_INDEX=NO_SLIP_BC
+            IF (SYNTHETIC_EDDY_METHOD)         VELOCITY_BC_INDEX=NO_SLIP_BC
+            IF (SF%ROUGHNESS>2._EB/WCM_B1%RDN) VELOCITY_BC_INDEX=NO_SLIP_BC ! see Basu et al. BLM 2017
 
             ! Compute the viscosity by averaging the two adjacent gas cells
 
@@ -3105,10 +3103,12 @@ RAMP_TIME_IF: IF (RAMP_TIME_INDEX>0) THEN
    ! User-specified time increments
 
    RP=>RAMPS(RAMP_TIME_INDEX)
-   IF (ICYC+1>RP%NUMBER_DATA_POINTS) THEN
+   IF (ICYC==RP%NUMBER_DATA_POINTS) THEN
       DT_NEW(NM) = T_END - RP%INDEPENDENT_DATA(ICYC)
-   ELSE
+   ELSEIF (ICYC<=RP%NUMBER_DATA_POINTS-1) THEN
       DT_NEW(NM) = RP%INDEPENDENT_DATA(ICYC+1) - RP%INDEPENDENT_DATA(ICYC)
+   ELSE
+      DT_NEW(NM) = MAX(0._EB,T_END - T)
    ENDIF
    CHANGE_TIME_STEP_INDEX(NM) = 1
 
@@ -3132,7 +3132,7 @@ ELSE RAMP_TIME_IF
                                DT_CLIP)
       CHANGE_TIME_STEP_INDEX(NM) = -1
    ENDIF
-   
+
    IF (RAMP_DT_INDEX > 0) DT_NEW(NM) = MIN(DT_NEW(NM),EVALUATE_RAMP(T,RAMP_DT_INDEX))
 
 ENDIF RAMP_TIME_IF
@@ -3254,8 +3254,9 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 !> \details Ensure that the correct normal derivative of H is used on the projection. It is only used when the Poisson equation
 !> for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
 
-SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
+SUBROUTINE WALL_VELOCITY_NO_GRADH(NM,DT,STORE_UN)
 
+INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
 INTEGER :: II,JJ,KK,IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX,IC,ICG
@@ -3335,8 +3336,10 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
      SELECT CASE(IOR)
      CASE( IAXIS)
         US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+        IF(TUNNEL_PRECONDITIONER) US(IIG-1,JJG,KKG) = US(IIG-1,JJG,KKG) + DT*DUDT_BAR(I_OFFSET(NM)+IIG-1)
      CASE(-IAXIS)
         US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+        IF(TUNNEL_PRECONDITIONER) US(IIG  ,JJG,KKG) = US(IIG  ,JJG,KKG) + DT*DUDT_BAR(I_OFFSET(NM)+IIG)
      CASE( JAXIS)
         VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
      CASE(-JAXIS)
@@ -3381,9 +3384,11 @@ ELSE ! Corrector
                                                   ! V   => Store the untouched U normal on internal WALLs.
          U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
                                         DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+         IF(TUNNEL_PRECONDITIONER) U(IIG-1,JJG,KKG) = U(IIG-1,JJG,KKG) + 0.5_EB*DT*DUDT_BAR_S(I_OFFSET(NM)+IIG-1)
      CASE(-IAXIS)
          U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
                                         DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+         IF(TUNNEL_PRECONDITIONER) U(IIG  ,JJG,KKG) = U(IIG  ,JJG,KKG) + 0.5_EB*DT*DUDT_BAR_S(I_OFFSET(NM)+IIG)
      CASE( JAXIS)
          V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG-1,KKG  ) - &
                                         DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
