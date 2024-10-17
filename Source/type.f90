@@ -14,6 +14,10 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 USE MKL_PARDISO
 USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+USE PETSC_ZONE_MESH, ONLY : PETSC_ZM_TYPE
+USE PETSC_ZONE_SOLVE, ONLY : PETSC_ZS_TYPE
+#endif
 #ifdef WITH_HYPRE
 USE HYPRE_INTERFACE, ONLY : HYPRE_ZM_TYPE
 ! USE HYPRE_INTERFACE, ONLY : HYPRE_ZS_TYPE
@@ -534,8 +538,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
-   REAL(EB) :: REAL_REFRACTIVE_INDEX            
-   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX            
+   REAL(EB) :: REAL_REFRACTIVE_INDEX
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -1038,7 +1042,7 @@ TYPE OMESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
 
    ! Level Set
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS,TOA
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS,T_ARR,T_RES
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_SEND_PKG14,REAL_RECV_PKG14
 
 END TYPE OMESH_TYPE
@@ -1546,6 +1550,7 @@ TYPE SLICE_TYPE
    LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,RLE=.FALSE.,DEBUG=.FALSE.,THREE_D=.FALSE.
    CHARACTER(LABEL_LENGTH) :: SLICETYPE='STRUCTURED',SMOKEVIEW_LABEL
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,ID='null',MATL_ID='null'
+   CHARACTER(200) :: SLCF_NAME='null'
 END TYPE SLICE_TYPE
 
 TYPE RAD_FILE_TYPE
@@ -1704,6 +1709,11 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+   TYPE(PETSC_ZM_TYPE) PETSC_ZM
+#else
+   INTEGER :: PETSC_ZM
+#endif
 #ifdef WITH_HYPRE
    TYPE(HYPRE_ZM_TYPE) HYPRE_ZM
 #else
@@ -1733,6 +1743,11 @@ TYPE ZONE_SOLVE_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_PETSC
+   TYPE(PETSC_ZS_TYPE) :: PETSC_ZS
+#else
+   INTEGER :: PETSC_ZS
+#endif
    INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
@@ -1749,6 +1764,8 @@ TYPE ZONE_SOLVE_TYPE
    INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for pressure zone, up triang part, CSR format.
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for pressure zone.
    REAL(FB),ALLOCATABLE, DIMENSION(:)   :: A_H_FB,F_H_FB,X_H_FB!< Arrays in case of single precision solve.
+   INTEGER :: NUNKH_LOCAL_RS = 0                      ! Total number of unknowns for the resource set.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUNKH_LOC_RS, UNKH_IND_RS ! Arrays for Matrix gathering per resource set (GPUs).
 END TYPE ZONE_SOLVE_TYPE
 
 TYPE (ZONE_SOLVE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ZONE_SOLVE

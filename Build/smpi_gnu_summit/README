@@ -1,0 +1,67 @@
+Instructions to setup your ~/.bash_profile, configure and compile PETSc and compile the smpi_gnu_summit gpu enabled target in the FireX branch.
+
+1. Copy the following lines in your ~/.bash_profile file:
+
+# ----------------------------------------
+# unlimit the stack space:
+ulimit -s unlimited
+ulimit -n 10240
+
+# Modules:
+module load gcc/9.1.0 cuda/11.0.3
+
+# Petsc:
+export PETSC_DIR=/ccs/home/"YOUR_USER"/Software/petsc
+export PETSC_ARCH=arch-linux-c-opt-gcc
+# SYSTEM name:
+export MYSYSTEM=summit
+
+# add colored git branch name to PS1
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+PS1="\u@\h \[\033[32m\]\W\[\033[35m\]\$(parse_git_branch)\[\033[00m\] $ "
+# ----------------------------------------
+
+and replace "YOUR_USER" by your username in Summit. Add the following line in your ~/.bashrc file:
+
+source ~/.bash_profile
+
+then log out of Summit and login again.
+
+2. PETSc:
+First setup your git username, and preferences.
+2.a Make a directory ~/Software, cd to ~/Software and type:
+
+$git clone https://gitlab.com/petsc/petsc.git
+
+2.b cd into the petsc directory and configure the library:
+
+$./configure COPTFLAGS="-O2" CXXOPTFLAGS="-O2" FOPTFLAGS="-O2" FCOPTFLAGS="-O2" CUDAOPTFLAGS="-O2" --with-debugging=0 --download-suitesparse --download-hypre --download-fblaslapack --with-cc=mpicc --with-cxx=mpiCC --with-fc=mpifort --with-cuda --with-cudac=nvcc
+
+2.c Once configured copy and paste the compilation line provided:
+
+$make PETSC_DIR=/ccs/home/"YOUR_USER"/Software/petsc PETSC_ARCH=arch-linux-c-opt-gcc all
+
+You should get a sucessfull cuda enabled PETSc compilation with gnu compiler and mpich MPI library.
+
+3. Clone/pull up the FireX branch from https://github.com/marcosvanella/fds/tree/FireX
+
+4.a Fix issue with gcc in and 16 byte reals in summit. Make this change in Source/prec.f90:
+
+ MODULE PRECISION_PARAMETERS
+ 
++USE ISO_FORTRAN_ENV, ONLY : REAL128
+ IMPLICIT NONE (TYPE,EXTERNAL)
+ 
+ INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)     !< Precision of "Four Byte" reals
+ INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)    !< Precision of "Eight Byte" reals
+-INTEGER, PARAMETER :: QB = SELECTED_REAL_KIND(33,4931) !< Precision of "Sixteen Byte" reals
++INTEGER, PARAMETER :: QB = REAL128                   !< Precision of "Sixteen Byte" reals
+
+4.b cd into this directory (fds/Build/smpi_gnu_summit) and compile fds_smpi_gnu_summit by typing ./make_fds.sh.
+
+- Try the executable typing ./fds_smpi_gnu_summit.
+
+ 
+

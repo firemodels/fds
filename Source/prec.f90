@@ -7,6 +7,9 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)     !< Precision of "Four Byte" reals
 INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)    !< Precision of "Eight Byte" reals
 INTEGER, PARAMETER :: QB = SELECTED_REAL_KIND(33,4931) !< Precision of "Sixteen Byte" reals
+INTEGER, PARAMETER :: IB8 = SELECTED_INT_KIND(2)     !< Precision of "One Byte" ints
+INTEGER, PARAMETER :: IB16 = SELECTED_INT_KIND(3)    !< Precision of "Two Byte" ints
+INTEGER, PARAMETER :: IB32 = SELECTED_INT_KIND(6)    !< Precision of "Four Byte" ints
 INTEGER, PARAMETER :: MAX_LPC=20                     !< Maximum number of declared particle classes
 INTEGER, PARAMETER :: MAX_SPECIES=20                 !< Maximum number of declared species
 INTEGER, PARAMETER :: MAX_LAYERS=20                  !< Maximum number of solid material layers
