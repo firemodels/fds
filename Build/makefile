@@ -56,82 +56,81 @@ FFLAGSMKL_OPENMPI =
 LFLAGSMKL_OPENMPI =
 FFLAGSMKL_CUSTOM =
 LFLAGSMKL_CUSTOM =
-<<<<<<< HEAD
 LFLAGS_PETSC =
 FFLAGS_PETSC =
 ifdef PETSC_DIR # Assumes the PETSc library is available.
-ifeq ("$(MYSYSTEM)", "excess")
- FFLAGS_PETSC = -DWITH_PETSC -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/${PETSC_ARCH}/include/suitesparse
- # fblaslapack
- #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lfblas -lflapack -lc++
- # openblas
- LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lopenblas -lc++
- # mkl
- #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -Wl,-rpath,/opt/intel/oneapi/mkl/latest/lib -L/opt/intel/oneapi/mkl/latest/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lc++
-endif
+  ifeq ("$(MYSYSTEM)", "excess")
+    FFLAGS_PETSC = -DWITH_PETSC -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/${PETSC_ARCH}/include/suitesparse
+    # fblaslapack
+    #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lfblas -lflapack -lc++
+    # openblas
+    LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lopenblas -lc++
+    # mkl
+    #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -Wl,-rpath,/opt/intel/oneapi/mkl/latest/lib -L/opt/intel/oneapi/mkl/latest/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lc++
+  endif
 
-TEST_FLG =
-ifeq ("$(MYSYSTEM)", "enki")
-  TEST_FLG = 1
-endif
-ifeq ("$(MYSYSTEM)", "nisaba")
-  TEST_FLG = 1
-endif
-ifeq ("$(MYSYSTEM)", "polaris")
-  TEST_FLG = 1
-endif
-ifeq ("$(MYSYSTEM)", "summit")
-  TEST_FLG = 1
-endif
-ifeq ("$(MYSYSTEM)", "frontier")
-  TEST_FLG = 1
-endif
-ifdef TEST_FLG
-  FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include"
-  LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lstdc++
-endif
+  TEST_FLG =
+  ifeq ("$(MYSYSTEM)", "enki")
+    TEST_FLG = 1
+  endif
+  ifeq ("$(MYSYSTEM)", "nisaba")
+    TEST_FLG = 1
+  endif
+  ifeq ("$(MYSYSTEM)", "polaris")
+    TEST_FLG = 1
+  endif
+  ifeq ("$(MYSYSTEM)", "summit")
+    TEST_FLG = 1
+  endif
+  ifeq ("$(MYSYSTEM)", "frontier")
+    TEST_FLG = 1
+  endif
+  ifdef TEST_FLG
+    FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include"
+    LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lstdc++
+  endif
 
 else # PETSc or MKL test.
 
-ifdef MKLROOT # This assumes the MKL library is available.
-ifeq ($(shell echo "check_quotes"),"check_quotes")
-# windows
-# mkl libraries has changed location in Intel oneAPI version 2024 and later
-# MKLLIBDIR location is defined in havemkl.bat script
-ifeq ($(shell ..\Scripts\havemkl),1)
-# Use cluster_sparse_solver with intelmpi blacs
-  FFLAGSMKL_INTEL = -DWITH_MKL /I"$(MKLROOT)"\include
-  LFLAGSMKL_INTEL = "$(MKLLIBDIR)"\mkl_intel_lp64.lib "$(MKLLIBDIR)"\mkl_sequential.lib "$(MKLLIBDIR)"\mkl_core.lib "$(MKLLIBDIR)"\mkl_blacs_intelmpi_lp64.lib
-  LFLAGSMKL_INTEL_OPENMP = "$(MKLLIBDIR)"\mkl_intel_lp64.lib "$(MKLLIBDIR)"\mkl_intel_thread.lib "$(MKLLIBDIR)"\mkl_core.lib "$(MKLLIBDIR)"\mkl_blacs_intelmpi_lp64.lib
-endif
-else
-# linux
-ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
-# Use cluster_sparse_solver with intelmpi blacs
-  FFLAGSMKL_INTEL = -DWITH_MKL -I"${MKLROOT}/include"
-  LFLAGSMKL_INTEL = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
-  LFLAGSMKL_INTEL_OPENMP = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
-endif
-ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
-# Use cluster_sparse_solver with openmpi blacs
-  FFLAGSMKL_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
-  LFLAGSMKL_OPENMPI = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
-  FFLAGSMKL_GNU_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
-  LFLAGSMKL_GNU_OPENMPI =  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_lp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lgomp -lpthread -lm -ldl
-endif
-ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
-# Use cluster_sparse_solver with custom blacs
-  FFLAGSMKL_CUSTOM = -DWITH_MKL -I$(MKLROOT)/include
-# MKL_LIBS needs to occur 3 times in order to avoid unresolved external reference warnings
-  MKL_LIBS_OPENMP = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a
-  MKL_LIBS = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a
-  LFLAGSMKL_CUSTOM_OPENMP = ${MKL_LIBS_OPENMP} ${MKL_LIBS_OPENMP} ${MKL_LIBS_OPENMP} -lpthread -lm -ldl
-  LFLAGSMKL_CUSTOM = ${MKL_LIBS} ${MKL_LIBS} ${MKL_LIBS} -lpthread -lm -ldl
-  FFLAGSMKL_GNU_CUSTOM = -DWITH_MKL -I$(MKLROOT)/include
-  LFLAGSMKL_GNU_CUSTOM =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
-endif
-endif # OS test
-endif # MKLROOT test
+  ifdef MKLROOT # This assumes the MKL library is available.
+    ifeq ($(shell echo "check_quotes"),"check_quotes")
+      # windows
+      # mkl libraries has changed location in Intel oneAPI version 2024 and later
+      # MKLLIBDIR location is defined in havemkl.bat script
+      ifeq ($(shell ..\Scripts\havemkl),1)
+        # Use cluster_sparse_solver with intelmpi blacs
+        FFLAGSMKL_INTEL = -DWITH_MKL /I"$(MKLROOT)"\include
+        LFLAGSMKL_INTEL = "$(MKLLIBDIR)"\mkl_intel_lp64.lib "$(MKLLIBDIR)"\mkl_sequential.lib "$(MKLLIBDIR)"\mkl_core.lib "$(MKLLIBDIR)"\mkl_blacs_intelmpi_lp64.lib
+        LFLAGSMKL_INTEL_OPENMP = "$(MKLLIBDIR)"\mkl_intel_lp64.lib "$(MKLLIBDIR)"\mkl_intel_thread.lib "$(MKLLIBDIR)"\mkl_core.lib "$(MKLLIBDIR)"\mkl_blacs_intelmpi_lp64.lib
+      endif
+    else
+      # linux
+      ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
+        # Use cluster_sparse_solver with intelmpi blacs
+        FFLAGSMKL_INTEL = -DWITH_MKL -I"${MKLROOT}/include"
+        LFLAGSMKL_INTEL = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
+        LFLAGSMKL_INTEL_OPENMP = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+      endif
+      ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
+        # Use cluster_sparse_solver with openmpi blacs
+        FFLAGSMKL_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
+        LFLAGSMKL_OPENMPI = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
+        FFLAGSMKL_GNU_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
+        LFLAGSMKL_GNU_OPENMPI =  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_lp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lgomp -lpthread -lm -ldl
+      endif
+      ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
+        # Use cluster_sparse_solver with custom blacs
+        FFLAGSMKL_CUSTOM = -DWITH_MKL -I$(MKLROOT)/include
+        # MKL_LIBS needs to occur 3 times in order to avoid unresolved external reference warnings
+        MKL_LIBS_OPENMP = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a
+        MKL_LIBS = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a
+        LFLAGSMKL_CUSTOM_OPENMP = ${MKL_LIBS_OPENMP} ${MKL_LIBS_OPENMP} ${MKL_LIBS_OPENMP} -lpthread -lm -ldl
+        LFLAGSMKL_CUSTOM = ${MKL_LIBS} ${MKL_LIBS} ${MKL_LIBS} -lpthread -lm -ldl
+        FFLAGSMKL_GNU_CUSTOM = -DWITH_MKL -I$(MKLROOT)/include
+        LFLAGSMKL_GNU_CUSTOM =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
+      endif
+    endif # OS test
+  endif # MKLROOT test
 endif # PETSc test
 
 FFLAGS_SUNDIALS =
