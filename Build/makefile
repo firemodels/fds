@@ -56,6 +56,7 @@ FFLAGSMKL_OPENMPI =
 LFLAGSMKL_OPENMPI =
 FFLAGSMKL_CUSTOM =
 LFLAGSMKL_CUSTOM =
+<<<<<<< HEAD
 LFLAGS_PETSC =
 FFLAGS_PETSC =
 ifdef PETSC_DIR # Assumes the PETSc library is available.
@@ -147,11 +148,18 @@ endif
 FFLAGS_HYPRE =
 LFLAGS_HYPRE =
 ifndef PETSC_DIR # PETSC is exclusive.
+
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    FFLAGS_HYPRE = -DWITH_HYPRE -I${HYPRE_HOME}/include
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
 endif
 endif
+
+FFLAGS_HDF5 =
+ifdef HDF5_HOME # This assumes the HDF5 libary is available
+   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/mod/static" -I"${HDF5_HOME}/include" -L"${HDF5_HOME}/lib" -lhdf5_fortran
+   LFLAGS_HDF5 = -DWITH_HDF5 -L"${HDF5_HOME}/lib" -lhdf5_fortran
+endif # HDF5_HOME
 
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
           pois.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o imkl.o \
@@ -271,8 +279,8 @@ impi_intel_win_openmp_db : setup_win $(objwin_mpi)
 
 # Linux Intel Fortran Compiler and Intel MPI
 
-impi_intel_linux : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) -DUSE_IFPORT  -diag-disable=10448
-impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_INTEL)
+impi_intel_linux : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT  -diag-disable=10448
+impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_INTEL) $(LFLAGS_HDF5)
 impi_intel_linux : FCOMPL = mpiifort
 impi_intel_linux : obj = fds_impi_intel_linux
 impi_intel_linux : setup $(obj_mpi)
@@ -286,8 +294,8 @@ impi_intel_linux_openmp : obj = fds_impi_intel_linux_openmp
 impi_intel_linux_openmp : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) -DUSE_IFPORT -diag-disable=10448_INTEL
-impi_intel_linux_db : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_INTEL)
+impi_intel_linux_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT -diag-disable=10448_INTEL
+impi_intel_linux_db : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_INTEL) $(LFLAGS_HDF5)
 impi_intel_linux_db : FCOMPL = mpiifort
 impi_intel_linux_db : obj = fds_impi_intel_linux_db
 impi_intel_linux_db : setup $(obj_mpi)
@@ -371,8 +379,8 @@ ompi_intel_osx_openmp_dv : setup $(obj_mpi)
 
 #*** GNU Compilers ***
 
-ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
-ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
+ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5)
+ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux : FCOMPL = mpifort
 ompi_gnu_linux : FOPENMPFLAGS = -fopenmp
 ompi_gnu_linux : obj = fds_ompi_gnu_linux
@@ -381,8 +389,8 @@ ompi_gnu_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 # Add ignores for vtk library
 
-ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -Wno-maybe-uninitialized -Wno-uninitialized -Wno-unused-function -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
-ompi_gnu_linux_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
+ompi_gnu_linux_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -Wno-maybe-uninitialized -Wno-uninitialized -Wno-unused-function -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics -fbounds-check $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5)
+ompi_gnu_linux_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux_db : FCOMPL = mpifort
 ompi_gnu_linux_db : FOPENMPFLAGS = -fopenmp
 ompi_gnu_linux_db : obj = fds_ompi_gnu_linux_db
@@ -481,7 +489,7 @@ fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o radi.o chem.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o ccib.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o geom.o ccib.o imkl.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o radi.o pois.o data.o pres.o geom.o
-vtkf.o  : func.o prec.o cons.o type.o mesh.o data.o
+vtkf.o : func.o prec.o cons.o type.o mesh.o data.o geom.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o turb.o data.o radi.o soot.o geom.o ccib.o fire.o vtkf.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o geom.o mass.o soot.o prop.o
 divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
