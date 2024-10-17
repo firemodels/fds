@@ -49,6 +49,13 @@ $QFDS -d Chemistry ign_delay_Propane_USC_T1100K_Phi1p0.fds
 $QFDS -d Chemistry ign_delay_Propane_Z66_T1100K_Phi1p0.fds
 $QFDS -d Chemistry ign_delay_nHeptane_Chalmers_T1100K_Phi1p0.fds
 
+$QFDS -p 24 -d Chemistry load_bal_methane_smooke_serial.fds
+$QFDS -p 24 -d Chemistry load_bal_methane_smooke_parallel.fds
+$QFDS -p 6  -d Chemistry load_bal_propane_2step_arrhenius_serial.fds
+$QFDS -p 6  -d Chemistry load_bal_propane_2step_arrhenius_parallel.fds
+$QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_serial.fds
+$QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_parallel.fds
+
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
 $QFDS -d Complex_Geometry geom_channel_tmp.fds
@@ -378,6 +385,7 @@ $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds

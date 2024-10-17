@@ -781,8 +781,9 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          ENDIF
 
          ! Ember flag to be used for outputs
-         IF (INSERT_TYPE==1 .AND. &
-            (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB) .OR. SF%EMBER_YIELD>0._EB)) LP%EMBER=.TRUE.
+
+         IF (INSERT_TYPE==1 .AND. (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB) .OR. SF%EMBER_YIELD>0._EB)) LP%EMBER=.TRUE.
+
          ! Assign particle position on the cell face
 
          CALL RANDOM_NUMBER(RN)
@@ -871,7 +872,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
 
          CALL INITIALIZE_SINGLE_PARTICLE
 
-         IF (INSERT_TYPE==2) MESHES(NM)%BOUNDARY_ONE_D(LP%OD_INDEX)%TMP = TMP_PART
+         IF (INSERT_TYPE==2 .AND. LPC%SOLID_PARTICLE) MESHES(NM)%BOUNDARY_ONE_D(LP%OD_INDEX)%TMP = TMP_PART
 
          IF (.NOT.LPC%MASSLESS_TRACER .AND. .NOT.LPC%MASSLESS_TARGET) MASS_SUM = MASS_SUM + LP%PWT*LP%MASS
 
@@ -1034,8 +1035,53 @@ Z2 = MIN(IN_Z2,ZF)
 
 ! Compute the volume of the INIT region
 
-SELECT CASE(IN%SHAPE)
+GEOM_SELECT: SELECT CASE(IN%SHAPE)
    CASE('BLOCK')
+      IF (ABS(X2-X1)<TWO_EPSILON_EB) THEN
+         IF (ABS(Y2-Y1)<TWO_EPSILON_EB) THEN
+            INSERT_VOLUME = Z2 - Z1
+            INPUT_VOLUME = IN_Z2 - IN_Z1
+         ELSE
+            IF(ABS(Z2-Z1)<TWO_EPSILON_EB) THEN
+               INSERT_VOLUME = Y2 - Y1
+               INPUT_VOLUME = IN_Y2 - IN_Y1
+            ELSE
+               INSERT_VOLUME = (Y2-Y1)*(Z2-Z1)
+               INPUT_VOLUME = (IN_Y2-IN_Y1)*(IN_Z2-IN_Z1)
+            ENDIF
+         ENDIF
+         EXIT GEOM_SELECT
+      ENDIF
+      IF (ABS(Y2-Y1)<TWO_EPSILON_EB) THEN
+         IF (ABS(X2-X1)<TWO_EPSILON_EB) THEN
+            INSERT_VOLUME = Z2 - Z1
+            INPUT_VOLUME = IN_Z2 - IN_Z1
+         ELSE
+            IF(ABS(Z2-Z1)<TWO_EPSILON_EB) THEN
+               INSERT_VOLUME = X2 - X1
+               INPUT_VOLUME = IN_X2 - IN_X1
+            ELSE
+               INSERT_VOLUME = (X2-X1)*(Z2-Z1)
+               INPUT_VOLUME = (IN_X2-IN_X1)*(IN_Z2-IN_Z1)
+            ENDIF
+         ENDIF
+         EXIT GEOM_SELECT
+      ENDIF
+      IF (ABS(Z2-Z1)<TWO_EPSILON_EB) THEN
+         IF (ABS(Y2-Y1)<TWO_EPSILON_EB) THEN
+            INSERT_VOLUME = X2 - X1
+            INPUT_VOLUME = IN_X2 - IN_X1
+         ELSE
+            IF(ABS(X2-X1)<TWO_EPSILON_EB) THEN
+               INSERT_VOLUME = Y2 - Y1
+               INPUT_VOLUME = IN_Y2 - IN_Y1
+            ELSE
+               INSERT_VOLUME = (X2-X1)*(Y2-Y1)
+               INPUT_VOLUME = (IN_X2-IN_X1)*(IN_Y2-IN_Y1)
+            ENDIF
+         ENDIF
+         EXIT GEOM_SELECT
+      ENDIF
       INSERT_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
       INPUT_VOLUME  = (IN_X2-IN_X1)*(IN_Y2-IN_Y1)*(IN_Z2-IN_Z1)
    CASE('CONE','CYLINDER')
@@ -1068,7 +1114,7 @@ SELECT CASE(IN%SHAPE)
       ! proportion of the circle bounding box within mesh
       INSERT_VOLUME = 0._EB
       INPUT_VOLUME  = 0._EB
-END SELECT
+END SELECT GEOM_SELECT
 
 IF (INSERT_VOLUME<=0._EB .AND. IN%MASS_PER_VOLUME>0._EB) RETURN
 

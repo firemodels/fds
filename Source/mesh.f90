@@ -51,6 +51,8 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE!< Source terms in the expression for the divergence
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2    !< \f$ C_s \Delta^2 \f$ in Smagorinsky turbulence expression
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT  !< Number of chemistry sub-iterations
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CELLS !< I , J ,K info of chemically active cells.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CC !< ICC, JCC of chemically active cells.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME    !< Mixing-controlled combustion reaction time (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE !< Strain rate \f$ |S|_{ijk} \f$ (1/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX     !< \f$ \max D_\alpha \f$
@@ -131,6 +133,8 @@ TYPE MESH_TYPE
    LOGICAL :: BNDF_DUMP=.TRUE.
    LOGICAL :: PARTICLES_EXISTED = .FALSE.
    CHARACTER(LABEL_LENGTH) :: TRNX_ID,TRNY_ID,TRNZ_ID
+   INTEGER     :: NCHEM_ACTIVE_CELLS=0, NCHEM_ACTIVE_CC=0 !< Number of Chemically active cells and cutcells 
+
 
    TYPE(EDGE_TYPE), ALLOCATABLE, DIMENSION(:) :: EDGE
 
@@ -355,6 +359,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z
                                          SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
                                          Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA,M_DOT_PPP, &
                                          ADV_FX,ADV_FY,ADV_FZ,DIF_FX,DIF_FY,DIF_FZ,DIF_FXS,DIF_FYS,DIF_FZS
+INTEGER, POINTER, DIMENSION(:,:)   :: CHEM_ACTIVE_CELLS
+INTEGER, POINTER, DIMENSION(:,:)   :: CHEM_ACTIVE_CC
 REAL(EB), POINTER :: POIS_PTB,POIS_ERR
 REAL(EB), POINTER, DIMENSION(:) :: SAVE1,SAVE2,WORK
 REAL(EB), POINTER, DIMENSION(:,:,:) :: PRHS
@@ -511,6 +517,8 @@ RHO=>M%RHO
 RHOS=>M%RHOS
 TMP=>M%TMP
 CHEM_SUBIT=>M%CHEM_SUBIT
+CHEM_ACTIVE_CELLS=>M%CHEM_ACTIVE_CELLS
+CHEM_ACTIVE_CC=>M%CHEM_ACTIVE_CC
 MU=>M%MU
 MU_DNS=>M%MU_DNS
 D_Z_MAX=>M%D_Z_MAX

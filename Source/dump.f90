@@ -2953,7 +2953,11 @@ SELECT CASE(PRES_FLAG)
    CASE(FFT_FLAG);    WRITE(LU_OUTPUT,'(3X,A,28X,A)') 'Solver:',    'FFT'
    CASE(GLMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'GLMAT'
    CASE(UGLMAT_FLAG); WRITE(LU_OUTPUT,'(3X,A,25X,A)') 'Solver:', 'UGLMAT'
-   CASE(ULMAT_FLAG);  WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT'
+   CASE(ULMAT_FLAG)
+      SELECT CASE(ULMAT_SOLVER_LIBRARY)
+         CASE(MKL_PARDISO_FLAG); WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT with MKL PARDISO'
+         CASE(HYPRE_FLAG);       WRITE(LU_OUTPUT,'(3X,A,26X,A)') 'Solver:',  'ULMAT with HYPRE'
+      END SELECT
 END SELECT
 WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Velocity tolerance (m/s):   ',VELOCITY_TOLERANCE
 WRITE(LU_OUTPUT,'(3X,A,ES10.3)' ) 'Press eqn res tol (1/s^2):  ',PRESSURE_TOLERANCE
@@ -3311,7 +3315,7 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       500 K: ', ML%H(500)*0.001_EB
    WRITE(LU_OUTPUT,'(A,ES10.3)')  '                                       800 K: ', ML%H(800)*0.001_EB
 
-   IF (ML%KAPPA_S<5.0E4_EB) THEN
+   IF (ML%KAPPA_S<4.9E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
 
@@ -4199,7 +4203,7 @@ WRITE(LU_OUTPUT,*)
            6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
            6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I0,',',I0,',',I0,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I0,',',I0,',',I0,')')
+230 FORMAT(6X,' Max VN number : ',E9.2,' at (',I0,',',I0,',',I0,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 141 FORMAT(6X,' No. of Lagrangian Particles:  ',I0)
@@ -9761,7 +9765,7 @@ IND_SELECT: SELECT CASE(IND)
    CASE(253)  ! ZONE PRESSURE SOLVER TYPE
       GAS_PHASE_OUTPUT_RES = REAL(PRES_FLAG,EB)
       IF (PRES_FLAG==ULMAT_FLAG) THEN
-         IF (ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%USE_FFT) THEN
+         IF (ZONE_MESH(ZONE_MESH(PRESSURE_ZONE(II,JJ,KK))%CONNECTED_ZONE_PARENT)%USE_FFT) THEN
             GAS_PHASE_OUTPUT_RES = REAL(FFT_FLAG,EB)
          ELSE
             ! uses PARDISO solver per mesh zone
