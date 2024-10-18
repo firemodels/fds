@@ -53,6 +53,8 @@ GFORTRAN_OPTIONS=
 
 FFLAGSMKL_INTEL =
 LFLAGSMKL_INTEL =
+FFLAGSMKL_INTEL_OPENMPI =
+LFLAGSMKL_INTEL_OPENMPI =
 FFLAGSMKL_OPENMPI =
 LFLAGSMKL_OPENMPI =
 FFLAGSMKL_CUSTOM =
@@ -84,6 +86,8 @@ ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
 endif
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
 # Use cluster_sparse_solver with openmpi blacs
+  FFLAGSMKL_INTEL_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
+  LFLAGSMKL_INTEL_OPENMPI = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
   FFLAGSMKL_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
   LFLAGSMKL_OPENMPI = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
   FFLAGSMKL_GNU_OPENMPI = -DWITH_MKL -I$(MKLROOT)/include
@@ -332,6 +336,15 @@ ompi_intel_osx_openmp_dv : FCOMPL = mpifort
 ompi_intel_osx_openmp_dv : obj = fds_ompi_intel_osx_openmp_dv
 ompi_intel_osx_openmp_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+#*** Intel compiler and OpenMPI in Linux ****
+
+ompi_intel_linux : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL_OPENMPI) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) -DUSE_IFPORT  -diag-disable=10448
+ompi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS_INTEL)
+ompi_intel_linux : FCOMPL = mpifort
+ompi_intel_linux : obj = fds_ompi_intel_linux
+ompi_intel_linux : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 #*** GNU Compilers ***
 
