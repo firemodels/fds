@@ -159,6 +159,7 @@ case $OPTION  in
    ;;
   G)
    use_gnu_openmpi=1
+   use_intel_mpi=
    ;;
   h)
    usage
