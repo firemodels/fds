@@ -5423,6 +5423,8 @@ python Utilities/Python/scripts/cantera_yaml_2_fds.py output.yaml N2 > output.fd
 \end{enumerate}
 If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped.
 
+A detailed chemical mechanism is currently solved using the Sundials CVODE ODE solver \cite{cvodeDoc:2024}. For details on configuring the FDS input for the CVODE solver, please refer to Section \ref{info:chem_integration}.
+
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
@@ -5523,15 +5525,22 @@ For solving the chemistry with a detailed chemical mechanism (see Section \ref{i
 &COMB
    FINITE_RATE_MIN_TEMP=300,
    ODE_SOLVER='CVODE',
-   ODE_MIN_ATOL=1E-10,
-   ODE_REL_ERROR=1E-8,
+   ZZ_MIN_GLOBAL=1E-15,
+   ODE_MIN_ATOL=1E-12,
+   ODE_REL_ERROR=1E-6,
    EQUIV_RATIO_CHECK=T,
-   MIN_EQUIV_RATIO=0.2,
-   MAX_EQUIV_RATIO=10.0,
+   MIN_EQUIV_RATIO=0.0,
+   MAX_EQUIV_RATIO=20.0,
    DO_CHEM_LOAD_BALANCE=T /
 \end{lstlisting}
-However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes.
+However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}, {\ct MIN\_EQUIV\_RATIO}, and {\ct MAX\_EQUIV\_RATIO} are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes. The minimum concentration limit of a species is determined by multiplying {\ct ODE\_REL\_ERROR} to {\ct ZZ\_MIN\_GLOBAL}. Concentrations below this threshold are considered to be zero. 
 
+For CVODE, the default parameter values are as follows: {\ct ZZ\_MIN\_GLOBAL}=1E-10, {\ct ODE\_MIN\_ATOL}=1E-10, {\ct ODE\_REL\_ERROR}=1E-6, {\ct EQUIV\_RATIO\_CHECK}=F, {\ct MIN\_EQUIV\_RATIO}=0.0, {\ct MAX\_EQUIV\_RATIO}=20.0, and {\ct DO\_CHEM\_LOAD\_BALANCE}=T. To use these default values, simply add the following lines to the FDS input file:
+\begin{lstlisting}
+&COMB
+   FINITE_RATE_MIN_TEMP=300,
+   ODE_SOLVER='CVODE'/
+\end{lstlisting}
 
 \newpage
 
