@@ -7,7 +7,7 @@ dir=`pwd`
 target=${dir##*/}
 
 # build hypre
-source ../Scripts/HYPRE/build_hypre.sh
+source ../Scripts/HYPRE/build_hypre.sh confmake_impi_intel_linux.sh
 
 ## build sundials
 #source ../Scripts/SUNDIALS/build_sundials.sh
