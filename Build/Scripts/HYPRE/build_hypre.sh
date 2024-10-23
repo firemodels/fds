@@ -1,7 +1,14 @@
 #!/bin/bash
 CONFMAKE=$1
+CLEAN_HYPRE=$2
 
 dir=`pwd`
+
+echo "CLEAN_HYPRE = $CLEAN_HYPRE"
+if [ "$CLEAN_HYPRE" = true ]; then
+  echo "Removing hypre library ..."
+  rm -r $FIREMODELS/libs/hypre
+fi
 
 echo "Checking for hypre library..."
 
