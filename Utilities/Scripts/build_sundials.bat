@@ -1,5 +1,5 @@
 @echo off
-set INSTALLDIR=C:\sundials-6.7.0
+set INSTALLDIR=sundials-6.7.0
 set SUNDIALSVERSION=v6.7.0
 
 call :getopts %*
@@ -24,6 +24,16 @@ echo.
 call ..\..\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
+
+set LIBS=..\..\..\libs
+if not exist %LIBS% mkdir %LIBS%
+if not exist %LIBS% echo failed to create LIBS directory
+if not exist %LIBS% exit
+cd %LIBS%
+set LIBS=%CD%
+set INSTALLDIR=%LIBS%\%INSTALLDIR%
+cd %CURDIR%
+
 
 set SUNDIALS=..\..\..\sundials
 
