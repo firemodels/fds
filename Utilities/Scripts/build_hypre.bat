@@ -15,7 +15,7 @@ if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
-set LIBS=..\..\..\LIBS
+set LIBS=..\..\..\libs
 if not exist %LIBS% mkdir %LIBS%
 if not exist %LIBS% echo failed to create LIBS directory
 if not exist %LIBS% exit
