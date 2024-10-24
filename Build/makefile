@@ -112,12 +112,14 @@ ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    LFLAGS_SUNDIALS = -L${SUNDIALS_HOME}/lib64 -l:libsundials_fcvode_mod.a -l:libsundials_fnvecserial_mod.a -l:libsundials_cvode.a
    LFLAGS_SUNDIALS_INTEL = ${SUNDIALS_HOME}/lib64/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib64/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib64/libsundials_cvode.a
    LFLAGS_SUNDIALS_OSX = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
-   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}/lib/sundials_fcvode_mod.lib ${SUNDIALS_HOME}/lib/sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}/lib/sundials_cvode.lib  /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
+   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib  /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
 endif
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    FFLAGS_HYPRE = -DWITH_HYPRE -I${HYPRE_HOME}/include
+   FFLAGS_HYPRE_WIN = -DWITH_HYPRE /I"${HYPRE_HOME}\include"
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
+   LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
 endif
 
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
@@ -215,11 +217,11 @@ impi_intel_win_openmp_dv : setup_win $(objwin_mpi)
 
 impi_intel_win_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
 impi_intel_win_db : FCOMPL = $(I_IFORT)
 impi_intel_win_db : obj = fds_impi_intel_win_db
 impi_intel_win_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
 
 impi_intel_win_openmp_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_openmp_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
