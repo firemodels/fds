@@ -1,6 +1,6 @@
 @echo off
-set INSTALLDIR=hypre-2.3.10
-set HYPREVERSION=v2.3.10
+set INSTALLDIR=hypre-2.31.0
+set HYPREVERSION=v2.31.0
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -55,6 +55,18 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
   git checkout %HYPREVERSION%
+
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo modify HYPRE_config.h.cmake.in file
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
+echo after saving file, press enter
+  notepad %CURDIR%\%HYPRE%\src\config\HYPRE_config.h.cmake.in
+
+  pause
   cd %CURDIR%
 :endif1
 
@@ -65,23 +77,9 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %HYPRE%
+cd %CURDIR%\%HYPRE%
 set HYPRE=%CD%
-set BUILDDIR=%HYPRE%\src\cmbuild
 git clean -dxf
-
-cd %BUILDDIR%
-
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo modify HYPRE_config.h.cmake.in file
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
-echo after saving file, press enter
-notepad %HYPRE%\src\config\HYPRE_config.h.cmake.in
-pause
 
 :: configure hypre
 echo ----------------------------------------------------------
@@ -91,6 +89,8 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+set BUILDDIR=%HYPRE%\src\cmbuild
+cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
