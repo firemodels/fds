@@ -64,7 +64,7 @@ echo ----------------------------------------------------------
 echo.
 echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
 echo after saving file, press enter
-notepad %HYPRE%\src\config\HYPRE_config.h.cmake.in
+  notepad %CURDIR%\%HYPRE%\src\config\HYPRE_config.h.cmake.in
 
   pause
   cd %CURDIR%
@@ -77,12 +77,9 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %HYPRE%
+cd %CURDIR%\%HYPRE%
 set HYPRE=%CD%
-set BUILDDIR=%HYPRE%\src\cmbuild
 git clean -dxf
-
-cd %BUILDDIR%
 
 :: configure hypre
 echo ----------------------------------------------------------
@@ -92,6 +89,8 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+set BUILDDIR=%HYPRE%\src\cmbuild
+cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
