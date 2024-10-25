@@ -1,6 +1,6 @@
 @echo off
-set INSTALLDIR=sundials-6.7.0
-set SUNDIALSVERSION=v6.7.0
+set SUNDIALSVERSION=6.7.0
+set SUNDIALSTAG=v6.7.0
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -31,11 +31,15 @@ cd %CURDIR%
 
 set LIBS=%FIREMODELS%\libs
 if not exist %LIBS% mkdir %LIBS%
-if not exist %LIBS% echo failed to create LIBS directory
+if not exist %LIBS% echo failed to create %LIBS% directory
 if not exist %LIBS% exit
+
 cd %LIBS%
+if not exist %LIBS%\sundials mkdir %LIBS%\sundials
+if not exist %LIBS%\sundials echo failed to create %LIBS%\sundials directory
+if not exist %LIBS%\sundials exit
 set LIBS=%CD%
-set INSTALLDIR=%LIBS%\%INSTALLDIR%
+set INSTALLDIR=%LIBS%\sundials\%SUNDIALSVERSION%
 cd %CURDIR%
 
 
@@ -55,11 +59,11 @@ echo.
   cd sundials
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo checking out version %SUNDIALSVERSION%
+echo checking out version %SUNDIALSTAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-  git checkout %SUNDIALSVERSION%
+  git checkout %SUNDIALSTAG%
   cd %CURDIR%
 :endif1
 
@@ -81,7 +85,7 @@ cd %BUILDDIR%
 :: configure sundials
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring sundials version %SUNDIALSVERSION%
+echo configuring sundials version %SUNDIALSTAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -104,7 +108,7 @@ cmake ..\  ^
 :: build and install sundials
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building sundials version %SUNDIALSVERSION%
+echo building sundials version %SUNDIALSTAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -112,7 +116,7 @@ call make
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo installing sundials version %SUNDIALSVERSION% in %INSTALLDIR%
+echo installing sundials version %SUNDIALSTAG% in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -139,7 +143,7 @@ echo.
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
+echo sundials version %SUNDIALSTAG% installed in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
