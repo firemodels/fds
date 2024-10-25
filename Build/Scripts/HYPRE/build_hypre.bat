@@ -15,7 +15,12 @@ if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
-set LIBS=..\..\..\libs
+set FIREMODELS=..\..\..\..
+cd %FIREMODELS%
+set FIREMODELS=%CD%
+cd %CURDIR%
+
+set LIBS=%FIREMODELS%\libs
 if not exist %LIBS% mkdir %LIBS%
 if not exist %LIBS% echo failed to create LIBS directory
 if not exist %LIBS% exit
@@ -30,11 +35,11 @@ echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-call ..\..\Build\Scripts\setup_intel_compilers.bat
+call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
-set HYPRE=..\..\..\hypre
+set HYPRE=%FIREMODELS%\hypre
 
 :: clone hypre repo (at same level as fds, smv etc repos) if it doesn't exist
 if exist %HYPRE% goto endif1
@@ -45,7 +50,7 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-  cd ..\..\..
+  cd %FIREMODELS%
   git clone https://github.com/hypre-space/hypre.git
   cd hypre
 echo ----------------------------------------------------------
@@ -64,7 +69,7 @@ echo ----------------------------------------------------------
 echo.
 echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
 echo after saving file, press enter
-  notepad %CURDIR%\%HYPRE%\src\config\HYPRE_config.h.cmake.in
+  notepad %HYPRE%\src\config\HYPRE_config.h.cmake.in
 
   pause
   cd %CURDIR%
@@ -77,7 +82,7 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %CURDIR%\%HYPRE%
+cd %HYPRE%
 set HYPRE=%CD%
 git clean -dxf
 

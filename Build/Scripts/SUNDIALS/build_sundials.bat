@@ -14,6 +14,10 @@ call :is_file_installed gcc   || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
+set FIREMODELS=..\..\..\..
+cd %FIREMODELS%
+set FIREMODELS=%CD%
+cd %CURDIR%
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -21,11 +25,11 @@ echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-call ..\..\Build\Scripts\setup_intel_compilers.bat
+call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
-set LIBS=..\..\..\libs
+set LIBS=%FIREMODELS%\libs
 if not exist %LIBS% mkdir %LIBS%
 if not exist %LIBS% echo failed to create LIBS directory
 if not exist %LIBS% exit
@@ -35,7 +39,7 @@ set INSTALLDIR=%LIBS%\%INSTALLDIR%
 cd %CURDIR%
 
 
-set SUNDIALS=..\..\..\sundials
+set SUNDIALS=%FIREMODELS%\sundials
 
 :: clone sundials repo (at same level as fds, smv etc repos) if it doesn't exist
 if exist %SUNDIALS% goto endif1
@@ -46,7 +50,7 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-  cd ..\..\..
+  cd %FIREMODELS%
   git clone https://github.com/LLNL/sundials.git
   cd sundials
 echo ----------------------------------------------------------
