@@ -1,6 +1,6 @@
 @echo off
-set INSTALLDIR=C:\sundials-6.7.0
-set SUNDIALSVERSION=v6.7.0
+set INSTALLDIR=hypre-2.31.0
+set HYPREVERSION=v2.31.0
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -15,90 +15,98 @@ if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
+set FIREMODELS=..\..\..\..
+cd %FIREMODELS%
+set FIREMODELS=%CD%
+cd %CURDIR%
+
+set LIBS=%FIREMODELS%\libs
+if not exist %LIBS% mkdir %LIBS%
+if not exist %LIBS% echo failed to create LIBS directory
+if not exist %LIBS% exit
+cd %LIBS%
+set LIBS=%CD%
+set INSTALLDIR=%LIBS%\%INSTALLDIR%
+cd %CURDIR%
+
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-call ..\..\Build\Scripts\setup_intel_compilers.bat
+call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
-set SUNDIALS=..\..\..\sundials
+set HYPRE=%FIREMODELS%\hypre
 
-:: clone sundials repo (at same level as fds, smv etc repos) if it doesn't exist
-if exist %SUNDIALS% goto endif1
+:: clone hypre repo (at same level as fds, smv etc repos) if it doesn't exist
+if exist %HYPRE% goto endif1
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo cloning sundials from https://github.com/LLNL/sundials.git
+echo cloning hypre from https://github.com/LLNL/hypre.git
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-  cd ..\..\..
-  git clone https://github.com/LLNL/sundials.git
-  cd sundials
+  cd %FIREMODELS%
+  git clone https://github.com/hypre-space/hypre.git
+  cd hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo checking out version %SUNDIALSVERSION%
+echo checking out version %HYPREVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-  git checkout %SUNDIALSVERSION%
+  git checkout %HYPREVERSION%
+
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo modify HYPRE_config.h.cmake.in file
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
+echo after saving file, press enter
+  notepad %HYPRE%\src\config\HYPRE_config.h.cmake.in
+
+  pause
   cd %CURDIR%
 :endif1
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo cleaning sundials repo
+echo cleaning hypre repo
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %SUNDIALS%
-set SUNDIALS=%CD%
-set BUILDDIR=%SUNDIALS%\BUILDDIR
+cd %HYPRE%
+set HYPRE=%CD%
 git clean -dxf
 
-mkdir %BUILDDIR%
-cd %BUILDDIR%
-
-:: configure sundials
+:: configure hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring sundials version %SUNDIALSVERSION%
+echo configuring hypre version %HYPREVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+set BUILDDIR=%HYPRE%\src\cmbuild
+cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
--DEXAMPLES_INSTALL_PATH="%INSTALLDIR%\examples" ^
--DBUILD_FORTRAN_MODULE_INTERFACE=ON ^
 -DCMAKE_C_COMPILER=icx ^
--DCMAKE_Fortran_COMPILER=ifort ^
--DEXAMPLES_ENABLE_C=OFF ^
--DEXAMPLES_ENABLE_CXX=OFF ^
--DEXAMPLES_ENABLE_F2003=OFF ^
--DENABLE_OPENMP=ON ^
--DBUILD_SHARED_LIBS=OFF ^
--DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
--DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
+-DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
+-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
 
-:: build and install sundials
+:: build and install hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building sundials version %SUNDIALSVERSION%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-call make 
-
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo installing sundials version %SUNDIALSVERSION% in %INSTALLDIR%
+echo building and installing hypre version %HYPREVERSION%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -107,9 +115,9 @@ call make install
 if %have_setx% == 0 goto else_setx
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
-setx SUNDIALS_HOME %INSTALLDIR%
-echo note: the environment variable SUNDIALS_HOME takes effect after opening a new command shell
+echo setting HYPRE_HOME environment variable to %INSTALLDIR%
+setx HYPRE_HOME %INSTALLDIR%
+echo note: the environment variable HYPRE_HOME takes effect after opening a new command shell
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -117,7 +125,7 @@ goto endif_setx
 :else_setx
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo set environment variable SUNDIALS_HOME to %INSTALLDIR%
+echo set environment variable HYPRE_HOME to %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -125,7 +133,7 @@ echo.
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
+echo hypre version %HYPREVERSION% installed in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -192,7 +200,7 @@ exit /b
 :: -------------------------------------------------------------
 :usage  
 :: -------------------------------------------------------------
-echo build sundials
+echo build hypre
 echo. 
 echo -help           - display this message
 exit /b

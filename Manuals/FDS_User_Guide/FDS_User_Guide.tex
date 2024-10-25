@@ -5423,6 +5423,8 @@ python Utilities/Python/scripts/cantera_yaml_2_fds.py output.yaml N2 > output.fd
 \end{enumerate}
 If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped.
 
+A detailed chemical mechanism is currently solved using the Sundials CVODE ODE solver \cite{cvodeDoc:2024}. For details on configuring the FDS input for the CVODE solver, please refer to Section \ref{info:chem_integration}.
+
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
@@ -5523,15 +5525,20 @@ For solving the chemistry with a detailed chemical mechanism (see Section \ref{i
 &COMB
    FINITE_RATE_MIN_TEMP=300,
    ODE_SOLVER='CVODE',
-   ODE_MIN_ATOL=1E-10,
-   ODE_REL_ERROR=1E-8,
+   ZZ_MIN_GLOBAL=1E-15,
+   ODE_MIN_ATOL=1E-12,
+   ODE_REL_ERROR=1E-6,
    EQUIV_RATIO_CHECK=T,
-   MIN_EQUIV_RATIO=0.2,
-   MAX_EQUIV_RATIO=10.0,
+   MIN_EQUIV_RATIO=0.0,
+   MAX_EQUIV_RATIO=20.0,
    DO_CHEM_LOAD_BALANCE=T /
 \end{lstlisting}
-However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes.
+However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}, {\ct MIN\_EQUIV\_RATIO}, and {\ct MAX\_EQUIV\_RATIO} are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes. The minimum concentration limit of a species is determined by multiplying {\ct ODE\_REL\_ERROR} to {\ct ZZ\_MIN\_GLOBAL}. Concentrations below this threshold are considered to be zero.
 
+For CVODE, the default parameter values are as follows: {\ct FINITE\_RATE\_MIN\_TEMP}=300~$^\circ$C, {\ct ZZ\_MIN\_GLOBAL}=1E-10, {\ct ODE\_MIN\_ATOL}=1E-10, {\ct ODE\_REL\_ERROR}=1E-6, {\ct EQUIV\_RATIO\_CHECK}=F, {\ct MIN\_EQUIV\_RATIO}=0.0, {\ct MAX\_EQUIV\_RATIO}=20.0, and {\ct DO\_CHEM\_LOAD\_BALANCE}=T. To use these default values, simply add the following lines to the FDS input file:
+\begin{lstlisting}
+&COMB ODE_SOLVER='CVODE'/
+\end{lstlisting}
 
 \newpage
 
@@ -6410,7 +6417,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \end{lstlisting}
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
-If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}). 
+If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}).
 
 Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Here is an example of how one might make a tree:
 \begin{lstlisting}
@@ -10691,7 +10698,7 @@ where $n_i$ is the number of real particles represented by the single simulated 
 The first function, $f_1(t)$, is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PDPA\_M}] is the exponent $m$ in the numerator.
-\item[{\ct PDPA\_N}] is the exponent $n$ in denominator. 
+\item[{\ct PDPA\_N}] is the exponent $n$ in denominator.
 \end{description}
 If $m=n$, the exponent $1/(m-n)$ is removed from the formula.
 
@@ -14541,21 +14548,24 @@ The boundary files defined under the namelist group {\ct BNDF} are named {\ct CH
 WRITE(LUBF) QUANTITY
 WRITE(LUBF) SHORT_NAME
 WRITE(LUBF) UNITS
-WRITE(LUBF) NPATCH
-WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
-WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
+WRITE(LUBF) N_PATCH
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
         .
-        . WRITE(LUBF) TIME
+        . 
+WRITE(LUBF) TIME_1
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
         .
-        . WRITE(LUBF) TIME
+        . 
+WRITE(LUBF) TIME_2
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+        .
         .
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
-only program available to view the boundary files.
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct N\_PATCH} is the number of planes (or ``patches'') that correspond to solid surfaces. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell indices of each patch. For example, a patch on the lower $x$ boundary of the domain that spans cells 2 through 5 in the $y$ direction and 7 through 10 in the $z$ direction would have patch indices (0,0,1,5,6,10). Note that the boundary patches are 2-D; thus, one pair of cell indices is the same. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). {\ct OBST\_INDEX} refers to the solid obstruction ({\ct OBST}) to which the patch is affixed. Its value is 0 if the patch is affixed to an external boundary. {\ct NM} is the number of the mesh within which the obstruction lies. It may be different than the mesh containing the boundary data; that is, {\ct NM} is not necessarily equal to the mesh index {\ct M} in the file name.   {\ct TIME\_N} and {\ct QQ} are four-byte reals.
+
 
 \section{Particle Data ({\tt .prt5})}
 \label{out:PART}

@@ -427,14 +427,16 @@ Combustion Efficiency   &               &          1                        & As
 \section{NIST Polymers}
 \label{NIST_Polymers_Properties}
 
-Black PMMA was chosen as the first material to be studied by the MaCFP Condenced Phase Subgroup. Its properties are listed in Table~\ref{NIST_PMMA_Properties}. It is assumed that the solid decomposes in two steps~\cite{Fiola:FSJ2021}.
+Black PMMA was chosen as the first material to be studied by the MaCFP Condensed Phase Subgroup. Its solid properties are listed in Table~\ref{NIST_PMMA_Properties} and its gas phase properties are listed in Table~\ref{MMA_Gas_Properties}. 
+
+It is assumed that solid PMMA decomposes in two steps~\cite{Fiola:FSJ2021}.
 \begin{eqnarray}
    \hbox{PMMA}_{\rm melt}   &\to& 0.98 \, \hbox{PMMA}_{\rm int} + 0.02 \, \hbox{MMA}_{\rm gas}  \label{PMMA1of2} \\
    \hbox{PMMA}_{\rm int}    &\to& 0.002 \, \hbox{Char} +         0.998 \, \hbox{MMA}_{\rm gas}   \label{PMMA2of2}
 \end{eqnarray}
 
 \begin{table}[!h]
-\caption[NIST PMMA properties]{Input parameters for PMMA~\cite{Fiola:FSJ2021}.}
+\caption[Solid phase PMMA properties]{Solid phase properties of PMMA~\cite{Fiola:FSJ2021}.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
@@ -451,6 +453,24 @@ Heat of Reaction            & kJ/kg         & $\begin{array}{ll} 5              
 \end{center}
 \label{NIST_PMMA_Properties}
 \end{table}
+
+\begin{table}[!h]
+\caption[Gas phase MMA properties]{Gas phase properties of MMA.}
+\begin{center}
+\begin{tabular}{|l|c|l|}
+\hline
+Property                                      & Value                                                                                                & Reference                         \\ \hline \hline
+Formula                                       & C$_5$H$_8$O$_2$                                                                                      & Table A.30 in Ref.~\cite{SFPE}    \\ \hline
+Heat of Combustion (MJ/kg)                    & 25.61                                                                                                & Table A.30 in Ref.~\cite{SFPE}    \\ \hline
+Specific Heat (kJ/kg/K)                       & $\begin{array}{l} 1.48 @ 114 \; ^\circ \hbox{C} \\ 1.90 @ 300 \; ^\circ \hbox{C} \end{array}$        & \cite{chemeo}                     \\ \hline
+CO Yield                                      & 0.010                                                                                                & Table A.39 in Ref.~\cite{SFPE}    \\ \hline
+Soot Yield                                    & 0.022                                                                                                & Table A.39 in Ref.~\cite{SFPE}    \\ \hline
+Radiative Fraction                            & 0.33                                                                                                 & \cite{Quintiere:FM2016}           \\ \hline
+\end{tabular}
+\end{center}
+\label{MMA_Gas_Properties}
+\end{table}
+
 
 Figure~\ref{NIST_PMMA} displays the results of measurements performed at NIST and FDS simulations of pyrolyzing black PMMA in the TGA (10~K/min), MCC (60~K/min) and DSC (10~K/min). Figure~\ref{NIST_PMMA_Cone} displays results of the Gasification Apparatus (50~kW/m$^2$) and Cone Calorimeter (25~kW/m$^2$).
 
