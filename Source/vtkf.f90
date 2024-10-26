@@ -13038,6 +13038,7 @@ ENDIF
 ! Fill cell data
 ALLOCATE(OFFSETS(NC+1))
 ALLOCATE(VTKC_TYPE(NC))
+!WRITE(*,*) TRIM(SL%SLCF_NAME), I1, I2, J1, J2, K1, K2, NC, (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0)
 IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
    !2-D slice
    ALLOCATE(CONNECT(NC*4))
@@ -14310,6 +14311,9 @@ SUBROUTINE INITIALIZE_VTKHDF_SLCF(T,II)
             NZ = SL%K2 + 1 - SL%K1
             IF (SL%I2-SL%I1==0 .OR. SL%J2-SL%J1==0 .OR. SL%K2-SL%K1==0) THEN
                NCONNECTIONS=4 ! 2-D slice
+            ELSEIF (MESHES(1)%UNIQUE_SLCF_AGL(II)>0) THEN
+               NCONNECTIONS=4 ! 2-D slice
+               NZ=1
             ELSE
                NCONNECTIONS=8 ! 3-D slice
             ENDIF
@@ -16627,6 +16631,7 @@ SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE(FILENAME,SLCFNAME,SL3D,NM,NCELLS,NPOINTS
    NCONN_MAX = 0
    NOFFSETS_MAX = 0
    
+   !WRITE(*,*) TRIM(SLCFNAME), NCONNECTIONS, "NPOINTS", NPOINTS, "NCELLS", NCELLS
    MESH_LOOP_HDF_COUNT: DO NMNM=1,NMESHES
       NPOINTS_TOTAL = NPOINTS_TOTAL + NPOINTS(NMNM) !+ NVERTS*3
       NCELLS_TOTAL = NCELLS_TOTAL + NCELLS(NMNM) !+ NFACES*3
@@ -17704,6 +17709,8 @@ IF(.NOT.VTK_HDF) THEN
                                "if ('_Y_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Z_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2daFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_AGL_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
@@ -17719,6 +17726,8 @@ ELSE
                                "if ('_Y_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Z_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2daFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_AGL_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
@@ -17828,8 +17837,8 @@ WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceType.Origin = CenterOfRotation"
 WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer.Origin = CenterOfRotation"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add 2d slice data"
-WRITE(LU_PARAVIEW,'(A,A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles],",&
-                           "    ['X','Y','Z']):"
+WRITE(LU_PARAVIEW,'(A,A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles,sl2daFiles],",&
+                           "    ['X','Y','Z','AGL']):"
 WRITE(LU_PARAVIEW,'(A)') "    if len(sl2dFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "        slcfTypes = [x.split(chid+'_'+axis_name+'_')[1] for x in sl2dFiles]"
 WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-')",&

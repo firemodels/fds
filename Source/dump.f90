@@ -7663,12 +7663,13 @@ IF (SLCF_PARTICLE_FLUX) CALL COMPUTE_PARTICLE_FLUXES ! TODO Not sure what we nee
 QUANTITY=>WORK7
 
 ! Dump out the slice file to a .vtk file
-
+NTSL = 0
 NQT = MESHES(1)%N_SLCF_VTK
 
 UNIQUE_LOOPA: DO IQ=1,MESHES(1)%N_UNIQUE_SLCF
    SL3D = MESHES(1)%UNIQUE_SLICE_IS_SL3D(IQ)
-   
+   IF (MESHES(1)%UNIQUE_SLCF_AGL(IQ) > 0) NTSL = NTSL + 1
+   !WRITE(*,*) "SLICE ", IQ, " HAS AGL VALUE ", MESHES(1)%UNIQUE_SLCF_AGL(IQ)
    SLCFNAME = MESHES(1)%UNIQUE_SLICE_NAMES(IQ)
    WRITE(FILENAME,'(A,A,A,A,I8.8,I2.2,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_',&
       TRIM(SLCFNAME),'_',ITM,ITM1,'.vtkhdf'
@@ -7757,7 +7758,7 @@ UNIQUE_LOOPA: DO IQ=1,MESHES(1)%N_UNIQUE_SLCF
             ENDDO
          ENDDO
       ELSE
-         NTSL = NTSL + 1
+         !NTSL = NTSL + 1
          DO I=II1,II2
             DO J=JJ1,JJ2
                KTS = K_AGL_SLICE(I,J,NTSL)
@@ -7832,6 +7833,7 @@ UNIQUE_LOOPA: DO IQ=1,MESHES(1)%N_UNIQUE_SLCF
       NX = I2 + 1 - I1
       NY = J2 + 1 - J1
       NZ = K2 + 1 - K1
+      
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          IF (NX*NY*NZ>0) THEN
             ALLOCATE(QQ_PACK(NX*NY*NZ))
