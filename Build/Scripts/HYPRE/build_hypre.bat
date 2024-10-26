@@ -1,6 +1,6 @@
 @echo off
-set INSTALLDIR=hypre-2.31.0
-set HYPREVERSION=v2.31.0
+set HYPREVERSION=2.31.0
+set HYPRETAG=v2.31.0
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -22,11 +22,16 @@ cd %CURDIR%
 
 set LIBS=%FIREMODELS%\libs
 if not exist %LIBS% mkdir %LIBS%
-if not exist %LIBS% echo failed to create LIBS directory
+if not exist %LIBS% echo failed to create %LIBS% directory
 if not exist %LIBS% exit
+
 cd %LIBS%
 set LIBS=%CD%
-set INSTALLDIR=%LIBS%\%INSTALLDIR%
+if not exist %LIBS%\hypre mkdir %LIBS%\hypre
+if not exist %LIBS%\hypre echo failed to create %LIBS%\hypre directory
+if not exist %LIBS%\hypre exit
+
+set INSTALLDIR=%LIBS%\hypre\%HYPREVERSION%
 cd %CURDIR%
 
 echo ----------------------------------------------------------
@@ -55,11 +60,11 @@ echo.
   cd hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo checking out version %HYPREVERSION%
+echo checking out tag %HYPRETAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-  git checkout %HYPREVERSION%
+  git checkout %HYPRETAG%
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -89,7 +94,7 @@ git clean -dxf
 :: configure hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring hypre version %HYPREVERSION%
+echo configuring hypre version %HYPRETAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -106,7 +111,7 @@ cmake ..\  ^
 :: build and install hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building and installing hypre version %HYPREVERSION%
+echo building and installing hypre version %HYPRETAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -133,7 +138,7 @@ echo.
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo hypre version %HYPREVERSION% installed in %INSTALLDIR%
+echo hypre version %HYPRETAG% installed in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
