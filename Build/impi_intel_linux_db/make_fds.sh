@@ -68,7 +68,7 @@ target=${dir##*/}
 source ../Scripts/HYPRE/build_hypre.sh confmake_impi_intel_linux.sh $clean_hypre
 
 ## build sundials
-#source ../Scripts/SUNDIALS/build_sundials.sh $arg-1 $arg-2 ... $clean_sundials
+source ../Scripts/SUNDIALS/build_sundials.sh confmake_impi_intel_linux.sh $clean_sundials
 
 # build fds
 echo Building $target with Intel MPI and $INTEL_IFORT
