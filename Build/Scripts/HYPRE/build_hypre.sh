@@ -34,7 +34,8 @@ if [ -d "$FIREMODELS/hypre" ]; then
     echo "Checking out v2.32.0"
     $(git checkout v2.32.0)
   fi
-  cd $FIREMODELS/hypre/src
+  cd $FIREMODELS/hypre/src/cmbuild
+  rm -r $FIREMODELS/hypre/src/cmbuild/*
   export HYPRE_VERSION=$(git describe)
   echo "Cleaning hypre repository..."
   make distclean
