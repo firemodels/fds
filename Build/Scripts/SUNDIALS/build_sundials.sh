@@ -30,6 +30,10 @@ echo "Checking for sundials repository..."
 
 if [ -d "$FIREMODELS/sundials" ]; then
   echo "Sundials repository exists. Building sundials library."
+  echo "Checking out version 6.7.0"
+  cd $FIREMODELS/sundials
+  $(git checkout v6.7.0)
+
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
   
@@ -38,10 +42,14 @@ if [ -d "$FIREMODELS/sundials" ]; then
   mkdir $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
   
   echo "Cleaning sundials repository..."
-  rm -r *
+  rm -r $FIREMODELS/sundials/BUILDDIR/*
   cp $FIREMODELS/fds/Build/Scripts/SUNDIALS/$CONFMAKE .
   ./$CONFMAKE
   
+  # get back from detached HEAD state
+  cd $FIREMODELS/sundials
+  $(git checkout main)
+
   cd $dir
   export SUNDIALS_HOME=$FIREMODELS/libs/sundials/$SUNDIALS_VERSION
   echo "Sundials library:" $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
