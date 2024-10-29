@@ -109,7 +109,7 @@ endif # MKLROOT test
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    FFLAGS_SUNDIALS = -DWITH_SUNDIALS -I"${SUNDIALS_HOME}/fortran"
    FFLAGS_SUNDIALS_WIN = -DWITH_SUNDIALS /I"${SUNDIALS_HOME}\fortran"
-   LFLAGS_SUNDIALS = -L${SUNDIALS_HOME}/lib -l:libsundials_fcvode_mod.a -l:libsundials_fnvecserial_mod.a -l:libsundials_cvode.a
+   LFLAGS_SUNDIALS_GNU = -L${SUNDIALS_HOME}/lib -l:libsundials_fcvode_mod.a -l:libsundials_fnvecserial_mod.a -l:libsundials_cvode.a
    LFLAGS_SUNDIALS_INTEL = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
    LFLAGS_SUNDIALS_OSX = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
    LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib  /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
