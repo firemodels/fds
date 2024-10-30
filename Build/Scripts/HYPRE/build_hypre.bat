@@ -1,6 +1,6 @@
 @echo off
-set HYPREVERSION=2.31.0
-set HYPRETAG=v2.31.0
+set HYPREVERSION=v2.32.0
+set HYPRETAG=v2.32.0
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -106,7 +106,8 @@ cmake ..\  ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
 -DCMAKE_C_COMPILER=icx ^
 -DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
--DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
+-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
+-DCMAKE_INSTALL_LIBDIR="lib"
 
 :: build and install hypre
 echo ----------------------------------------------------------
