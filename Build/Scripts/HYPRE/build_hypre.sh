@@ -32,7 +32,7 @@ if [ -d "$FIREMODELS/hypre" ]; then
   cd $FIREMODELS/hypre
   if [[ "$(git tag -l "v2.32.0")" == "v2.32.0" ]]; then
     echo "Checking out v2.32.0"
-    $(git checkout v2.32.0)
+    git checkout v2.32.0
   fi
   cd $FIREMODELS/hypre/src/cmbuild
   export HYPRE_VERSION=$(git describe)
@@ -42,7 +42,7 @@ if [ -d "$FIREMODELS/hypre" ]; then
   ./$CONFMAKE
   # get back from detached HEAD state
   cd $FIREMODELS/hypre
-  $(git checkout master)
+  git checkout master
   cd $dir
   export HYPRE_HOME=$FIREMODELS/libs/hypre/$HYPRE_VERSION
   echo "Hypre library:" $FIREMODELS/libs/hypre/$HYPRE_VERSION

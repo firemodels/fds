@@ -1,5 +1,12 @@
 # PARSE OPTIONS FOR CLEAN LIBRARY BUILDS ####################################
 
+# Set FIREMODELS environment variable if it is not already exists.
+if [ -z "${FIREMODELS}" ]; then
+    export FIREMODELS="$(readlink -f "$(pwd)/../../../")"
+fi 
+
+echo "FIREMODELS=$FIREMODELS"
+
 clean_hypre=false
 clean_sundials=false
 ARG=""
@@ -40,7 +47,6 @@ fi
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
 # Decide compilers
-echo "Before setting tpt comp"
 source ../Scripts/set_thirdparty_compilers.sh
 
 # build hypre

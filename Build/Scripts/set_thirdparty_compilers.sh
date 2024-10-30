@@ -1,24 +1,36 @@
 echo "FDS build target = $FDS_BUILD_TARGET"
 
 # For following variables 1- indicate availble through 
-# environment variable CCCOMP, CXXCOMP, and FCCOMP
+# environment variable FIREMODELS_CC, FIREMODELS_CXX, and FIREMODELS_FC
 set_CC=0 
 set_CXX=0
 set_FC=0
 
-if [ -n "$CCCOMP" ]; then
-   CC=$CCCOMP
-   set_CC=1
+if [ -n "$FIREMODELS_CC" ]; then
+   CC=$FIREMODELS_CC
+   if command -v $CC &> /dev/null; then
+      set_CC=1
+   else
+      echo "The compiler specified by the FIREMODELS_CC environment variable ($CC) is not available on this system. Searching for an alternative compiler."
+   fi
 fi
 
-if [ -n "$CXXCOMP" ]; then
-   CXX=$CXXCOMP
-   set_CXX=1
+if [ -n "$FIREMODELS_CXX" ]; then
+   CXX=$FIREMODELS_CXX
+   if command -v $CXX &> /dev/null; then
+      set_CXX=1
+   else
+      echo "The compiler specified by the FIREMODELS_CXX environment variable ($CXX) is not available on this system. Searching for an alternative compiler."
+   fi
 fi
 
-if [ -n "$FCCOMP" ]; then
-   FC=$FCCOMP
-   set_FC=1
+if [ -n "$FIREMODELS_FC" ]; then
+   FC=$FIREMODELS_FC
+   if command -v $FC &> /dev/null; then
+      set_FC=1
+   else
+      echo "The compiler specified by the FIREMODELS_FC environment variable ($FC) is not available on this system. Searching for an alternative compiler."
+   fi
 fi
 
 
