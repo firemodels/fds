@@ -21,7 +21,49 @@ if [ -n "$FCCOMP" ]; then
    set_FC=1
 fi
 
-if [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
+
+if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
+   # Check for C compiler (mpicc, gcc, clang)
+   if [ $set_CC -eq 0 ]; then
+      if command -v mpicc &> /dev/null; then
+         CC=mpicc
+      elif command -v clang &> /dev/null; then
+         CC=clang
+      elif command -v gcc &> /dev/null; then
+         CC=gcc
+      else
+         echo "Error: Any of mpicc, iclang, or gcc is not available on this system."
+         exit 1
+      fi
+   fi
+
+   # Check for clang C++ compiler (mpicxx, g++, clang ++)
+   if [ $set_CXX -eq 0 ]; then
+      if command -v mpicxx &> /dev/null; then
+         CXX=mpicxx
+      elif command -v clang++ &> /dev/null; then
+         CXX=clang++
+      elif command -v g++ &> /dev/null; then
+         CXX=g++
+      else
+         echo "Error: Any of mpicxx, clang++, or g++ is not available on this system."
+         exit 1
+      fi
+   fi
+
+   # Check for Fortran compiler (gfortran)
+   if [ $set_FC -eq 0 ]; then
+      if command -v mpifort &> /dev/null; then
+         FC=mpifort
+      elif command -v gfortran &> /dev/null; then
+         FC=gfortran
+      else
+         echo "Error: gfortran is not available on this system."
+         exit 1
+      fi
+   fi
+
+elif [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
    # Check for Intel C compiler
    if [ $set_CC -eq 0 ]; then
       if command -v mpiicx &> /dev/null; then
@@ -62,46 +104,6 @@ if [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
          FC=ifort
       else
          echo "Error: Any of mpiifort, or ifort is not available on this system."
-         exit 1
-      fi
-   fi
-elif [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
-   # Check for C compiler (mpicc, gcc, clang)
-   if [ $set_CC -eq 0 ]; then
-      if command -v mpicc &> /dev/null; then
-         CC=mpicc
-      elif command -v gcc &> /dev/null; then
-         CC=gcc
-      elif command -v clang &> /dev/null; then
-         CC=clang
-      else
-         echo "Error: Any of mpicc, gcc, or clang is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for clang C++ compiler (mpicxx, g++, clang ++)
-   if [ $set_CXX -eq 0 ]; then
-      if command -v mpicxx &> /dev/null; then
-         CXX=mpicxx
-      elif command -v g++ &> /dev/null; then
-         CXX=g++
-      elif command -v clang++ &> /dev/null; then
-         CXX=clang++
-      else
-         echo "Error: Any of mpicxx, g++, or clang++ is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Fortran compiler (gfortran)
-   if [ $set_FC -eq 0 ]; then
-      if command -v mpifort &> /dev/null; then
-         FC=mpifort
-      elif command -v gfortran &> /dev/null; then
-         FC=gfortran
-      else
-         echo "Error: gfortran is not available on this system."
          exit 1
       fi
    fi
