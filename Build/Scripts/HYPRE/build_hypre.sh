@@ -35,10 +35,9 @@ if [ -d "$FIREMODELS/hypre" ]; then
     $(git checkout v2.32.0)
   fi
   cd $FIREMODELS/hypre/src/cmbuild
-  rm -r $FIREMODELS/hypre/src/cmbuild/*
   export HYPRE_VERSION=$(git describe)
   echo "Cleaning hypre repository..."
-  make distclean
+  rm -r $FIREMODELS/hypre/src/cmbuild/*
   cp $FIREMODELS/fds/Build/Scripts/HYPRE/$CONFMAKE .
   ./$CONFMAKE
   # get back from detached HEAD state
