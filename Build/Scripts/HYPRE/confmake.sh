@@ -6,12 +6,21 @@ else
    C_FLAGS="-O3"
 fi
 
-cmake ../ \
--DCMAKE_INSTALL_PREFIX=$HYPRE_INSTALL_PREFIX \
--DCMAKE_C_COMPILER=$CC \
--DCMAKE_C_FLAGS=i"$C_FLAGS" \
--DCMAKE_INSTALL_LIBDIR="lib" 
-#-DCMAKE_OSX_DEPLOYMENT_TARGET="14.0"
+cmake_args=(
+  -DCMAKE_INSTALL_PREFIX="$HYPRE_INSTALL_PREFIX"
+  -DCMAKE_C_COMPILER="$CC"
+  -DCMAKE_C_FLAGS="$C_FLAGS"
+  -DCMAKE_INSTALL_LIBDIR="lib"
+)
+
+# Add OSX deployment target if building for macOS
+if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
+  cmake_args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET="14.0")
+fi
+
+
+# Run cmake with the arguments
+cmake ../ "${cmake_args[@]}"
 
 # ./configure CC=$CC FC=mpiifort CFLAGS="-O3 -fno-unsafe-math-optimizations -fp-model=precise" FFLAGS="-O3 -fno-unsafe-math-optimizations -fp-model=precise" \
 #       --prefix=$FIREMODELS/libs/hypre/$HYPRE_VERSION
