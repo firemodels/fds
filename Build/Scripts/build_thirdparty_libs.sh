@@ -1,18 +1,5 @@
 # PARSE OPTIONS FOR CLEAN LIBRARY BUILDS ####################################
 
-# Parse the long options first using getopt
-#OPTIONS=$(getopt -o "" --long clean-hypre,clean-sundials -- "$@")
-
-# Check if getopt parsed successfully
-#if [ $? -ne 0 ]; then
-#    echo "Error parsing options."
-#    exit 1
-#fi
-
-# Evaluate the parsed options
-#eval set -- "$OPTIONS"
-
-# Initialize variables for options
 clean_hypre=false
 clean_sundials=false
 ARG=""
@@ -33,16 +20,14 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         *)
-            echo "Invalid option."
-            exit 1
+	    ARG="${ARG} $1"  # Append unrecognized arguments to ARG
+            shift
             ;;
     esac
 done
 
-# After all options are processed, check for any remaining positional argument (ARG)
-if [ -n "$1" ]; then
-    ARG=$1
-fi
+# Trim leading spaces from ARG, if necessary
+ARG="${ARG#"${ARG%%[![:space:]]*}"}"
 
 if [ "$clean_hypre" = true ]; then
     echo "Option --clean-hypre is set."
