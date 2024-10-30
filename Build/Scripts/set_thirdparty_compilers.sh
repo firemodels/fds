@@ -132,10 +132,12 @@ else #gnu
 
    # Check for Fortran compiler (gfortran)
    if [ $set_FC -eq 0 ]; then
-      if command -v gfortran &> /dev/null; then
+      if command -v mpifort &> /dev/null; then
+         FC=mpifort
+      elif command -v gfortran &> /dev/null; then
          FC=gfortran
       else
-         echo "Error: gfortran is not available on this system."
+         echo "Error: Any of mpifort, gfortran is not available on this system."
          exit 1
       fi
    fi
