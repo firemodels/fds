@@ -33,7 +33,7 @@ if [ -d "$FIREMODELS/sundials" ]; then
   cd $FIREMODELS/sundials
   if [[ "$(git tag -l "v6.7.0")" == "v6.7.0" ]]; then
     echo "Checking out v6.7.0"
-    $(git checkout v6.7.0)
+    git checkout v6.7.0
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
@@ -46,7 +46,7 @@ if [ -d "$FIREMODELS/sundials" ]; then
   ./$CONFMAKE
   # get back from detached HEAD state
   cd $FIREMODELS/sundials
-  $(git checkout main)
+  git checkout main
   cd $dir
   export SUNDIALS_HOME=$FIREMODELS/libs/sundials/$SUNDIALS_VERSION
   echo "Sundials library:" $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
