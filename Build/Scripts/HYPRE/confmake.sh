@@ -17,7 +17,7 @@ cmake_args=(
 
 # Add OSX deployment target if building for macOS
 if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
-  cmake_args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET="14.0")
+  cmake_args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET="10.0")
 fi
 
 
