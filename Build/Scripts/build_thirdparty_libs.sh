@@ -55,9 +55,3 @@ source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
 ## build sundials
 source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
 
-
-# Use ARG and the options
-#echo "ARG is: $ARG"
-if [ "$SOURCE_INTEL_IFORT" -eq 1 ]; then
-   source ../Scripts/set_intel_compiler.sh $ARG
-fi   
