@@ -2868,7 +2868,7 @@ The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g})
 \ee
-where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
+where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default. The heat release rate per unit area associated with oxidation reactions can be output using the solid phase {\ct QUANTITY} called {\ct 'OXIDATIVE HRRPUA'}. This is an integral in depth of the contributions from all reactions and all materials for a given solid surface.
 
 You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
@@ -11472,6 +11472,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
 {\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}        &                    & D            \\ \hline
 {\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}        & 1/s                & D            \\ \hline
+{\ct OXIDATIVE HRRPUA}                          & Section~\ref{sec:reaction_rates}              & \unit{kW/m^2}      & B,D          \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
