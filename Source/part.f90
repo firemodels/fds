@@ -3907,9 +3907,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(7,NM) = Q_DOT(7,NM) - Q_RAD*WGT/DT  ! Q_PART
-               Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(8,NM) = Q_DOT(8,NM) - Q_RAD*WGT/DT  ! Q_PART
+               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
 
                IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
@@ -4282,10 +4282,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
-               Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
-               Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
+               Q_DOT(8,NM) = Q_DOT(8,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
+               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(5,NM) = Q_DOT(5,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
 
                IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
