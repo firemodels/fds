@@ -1425,7 +1425,7 @@ DO NS=1,N_TRACKED_SPECIES
    ZZ_GET(NS) = 1._EB
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,B1%TMP_F)
    !$OMP CRITICAL
-   Q_DOT(3,NM) = Q_DOT(3,NM) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
+   Q_DOT(4,NM) = Q_DOT(4,NM) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
    !$OMP END CRITICAL
 ENDDO
 
@@ -1444,8 +1444,8 @@ D_SOURCE(BC%IIG,BC%JJG,BC%KKG) = D_SOURCE(BC%IIG,BC%JJG,BC%KKG) - B1%Q_CON_F*B1%
 
 ! Add energy losses and gains to overall energy budget array
 
-Q_DOT(7,NM) = Q_DOT(7,NM) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
-Q_DOT(2,NM) = Q_DOT(2,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
+Q_DOT(8,NM) = Q_DOT(8,NM) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
+Q_DOT(3,NM) = Q_DOT(3,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
 !$OMP END CRITICAL
 
 ! Calculate the mass flux of fuel gas from particles

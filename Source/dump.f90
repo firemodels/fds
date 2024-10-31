@@ -799,13 +799,13 @@ IF (APPEND) THEN
    CALL APPEND_FILE(LU_HRR,2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
 ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(TCFORM,'(A,I0,A)') "(",9+N_TRACKED_SPECIES+N_ZONE_TMP,"(A,','),A)"
-   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW',('kg/s',N=1,N_TRACKED_SPECIES),('Pa',N=1,N_ZONE_TMP)
+   WRITE(TCFORM,'(A,I0,A)') "(",N_Q_DOT+1+N_TRACKED_SPECIES+N_ZONE_TMP,"(A,','),A)"
+   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW','kW',('kg/s',N=1,N_TRACKED_SPECIES),('Pa',N=1,N_ZONE_TMP)
    IF (N_ZONE_TMP>0) THEN
-      WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
+      WRITE(LU_HRR,TCFORM) 'Time','HRR','HRR_OX','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
                            ('MLR_'//TRIM(SPECIES_MIXTURE(N)%ID),N=1,N_TRACKED_SPECIES),(TRIM(P_ZONE(N)%ID),N=1,N_ZONE_TMP)
    ELSE
-      WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
+      WRITE(LU_HRR,TCFORM) 'Time','HRR','HRR_OX','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
                            ('MLR_'//TRIM(SPECIES_MIXTURE(N)%ID),N=1,N_TRACKED_SPECIES)
    ENDIF
 ENDIF
@@ -3923,7 +3923,7 @@ DO NM=1,NMESHES
    IF (SIM_MODE==DNS_MODE .OR. CHECK_VN) WRITE(LU_OUTPUT,230) M%VN,M%I_VN,M%J_VN,M%K_VN
    IF (M%NLP>0) WRITE(LU_OUTPUT,141) M%NLP
    IF (ABS(Q_DOT(1,NM))>1._EB) WRITE(LU_OUTPUT,119) Q_DOT(1,NM)/1000._EB
-   IF (ABS(Q_DOT(2,NM))>1._EB) WRITE(LU_OUTPUT,120) Q_DOT(2,NM)/1000._EB
+   IF (ABS(Q_DOT(3,NM))>1._EB) WRITE(LU_OUTPUT,120) Q_DOT(3,NM)/1000._EB
    IF (M%DT_RESTRICT_STORE>0 ) THEN
       WRITE(LU_OUTPUT,121) M%DT_RESTRICT_STORE
       M%DT_RESTRICT_STORE=0
@@ -9935,13 +9935,14 @@ END SUBROUTINE DUMP_HVAC
 !> \param NM Mesh number
 !> \details
 !> Q_DOT(1,NM) = \f$ \int \dot{q}''' \, dV \f$
-!> Q_DOT(2,NM) = \f$ \int \nabla \cdot \mathbf{q}_{\rm r}'' \, dV \f$
-!> Q_DOT(3,NM) = \f$ \int \mathbf{u} \rho h_{\rm s} \cdot \, d\mathbf{S} \f$
-!> Q_DOT(4,NM) = \f$ \int k \nabla T \cdot d\mathbf{S} \f$
-!> Q_DOT(5,NM) = \f$ \int \sum_\alpha h_{{\rm s},\alpha} \rho D_\alpha \nabla Z_\alpha \cdot d\mathbf{S} \f$
-!> Q_DOT(6,NM) = \f$ \int dp/dt \, dV \f$
-!> Q_DOT(7,NM) = \f$ \sum \dot{q}_{\rm p} \f$
-!> Q_DOT(8,NM) = \f$ \int d(\rho h_{\rm s})/dt \, dV \f$
+!> Q_DOT(2,NM) = \f$ \int \dot{q}_{\rm ox}'' \, dS \f$
+!> Q_DOT(3,NM) = \f$ \int \nabla \cdot \mathbf{q}_{\rm r}'' \, dV \f$
+!> Q_DOT(4,NM) = \f$ \int \mathbf{u} \rho h_{\rm s} \cdot \, d\mathbf{S} \f$
+!> Q_DOT(5,NM) = \f$ \int k \nabla T \cdot d\mathbf{S} \f$
+!> Q_DOT(6,NM) = \f$ \int \sum_\alpha h_{{\rm s},\alpha} \rho D_\alpha \nabla Z_\alpha \cdot d\mathbf{S} \f$
+!> Q_DOT(7,NM) = \f$ \int dp/dt \, dV \f$
+!> Q_DOT(8,NM) = \f$ \sum \dot{q}_{\rm p} \f$
+!> Q_DOT(9,NM) = \f$ \int d(\rho h_{\rm s})/dt \, dV \f$
 
 SUBROUTINE UPDATE_HRR(DT,NM)
 
@@ -9973,8 +9974,8 @@ DO K=1,KBAR
          IF (CYLINDRICAL) VC = VC*2._EB*PI
 
          Q_DOT(1,NM) = Q_DOT(1,NM) + Q(I,J,K)*VC
-         Q_DOT(2,NM) = Q_DOT(2,NM) + QR(I,J,K)*VC
-         Q_DOT(6,NM) = Q_DOT(6,NM) + 0.5_EB*(D_PBAR_DT_S(PRESSURE_ZONE(I,J,K))+D_PBAR_DT(PRESSURE_ZONE(I,J,K)))*VC
+         Q_DOT(3,NM) = Q_DOT(3,NM) + QR(I,J,K)*VC
+         Q_DOT(7,NM) = Q_DOT(7,NM) + 0.5_EB*(D_PBAR_DT_S(PRESSURE_ZONE(I,J,K))+D_PBAR_DT(PRESSURE_ZONE(I,J,K)))*VC
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
          CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
          ENTHALPY_SUM(NM) = ENTHALPY_SUM(NM) + RHO(I,J,K)*H_S*VC
@@ -9982,12 +9983,12 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-IF (CC_IBM) CALL ADD_Q_DOT_CUTCELLS(NM,Q_DOT(1,NM),Q_DOT(2,NM),Q_DOT(6,NM),ENTHALPY_SUM(NM))
+IF (CC_IBM) CALL ADD_Q_DOT_CUTCELLS(NM,Q_DOT(1,NM),Q_DOT(3,NM),Q_DOT(7,NM),ENTHALPY_SUM(NM))
 
 IF (ICYC>0) THEN
-   Q_DOT(8,NM) = (ENTHALPY_SUM(NM)-ENTHALPY_SUM_OLD)/DT
+   Q_DOT(9,NM) = (ENTHALPY_SUM(NM)-ENTHALPY_SUM_OLD)/DT
 ELSE
-   Q_DOT(8,NM) = 0._EB
+   Q_DOT(9,NM) = 0._EB
 ENDIF
 
 ! Compute the surface integral of all Del Dot terms
@@ -10036,10 +10037,10 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    AREA_F = B1%AREA
    IF (TWO_D)       AREA_F = AREA_F/DY(BC%JJG)
    IF (CYLINDRICAL) AREA_F = AREA_F*2._EB*PI
-   Q_DOT(3,NM) = Q_DOT(3,NM) - U_N*B1%RHO_F*H_S*AREA_F
-   Q_DOT(4,NM) = Q_DOT(4,NM) - B1%Q_CON_F*AREA_F
-   Q_DOT(5,NM) = Q_DOT(5,NM) - H_S_J_ALPHA*AREA_F
-   IF (.NOT. HRR_GAS_ONLY) Q_DOT(1,NM) = Q_DOT(1,NM) + B1%Q_DOT_O2_PP*AREA_F
+   Q_DOT(2,NM) = Q_DOT(2,NM) + B1%Q_DOT_O2_PP*AREA_F
+   Q_DOT(4,NM) = Q_DOT(4,NM) - U_N*B1%RHO_F*H_S*AREA_F
+   Q_DOT(5,NM) = Q_DOT(5,NM) - B1%Q_CON_F*AREA_F
+   Q_DOT(6,NM) = Q_DOT(6,NM) - H_S_J_ALPHA*AREA_F
 ENDDO WALL_LOOP
 
 CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
@@ -10068,13 +10069,13 @@ CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL
    AREA_F = B1%AREA
    IF (TWO_D)       AREA_F = AREA_F/DY(BC%JJG)
    IF (CYLINDRICAL) AREA_F = AREA_F*2._EB*PI
-   Q_DOT(3,NM) = Q_DOT(3,NM) - U_N*B1%RHO_F*H_S*AREA_F
-   Q_DOT(4,NM) = Q_DOT(4,NM) - B1%Q_CON_F*AREA_F
-   Q_DOT(5,NM) = Q_DOT(5,NM) - H_S_J_ALPHA*AREA_F
+   Q_DOT(4,NM) = Q_DOT(4,NM) - U_N*B1%RHO_F*H_S*AREA_F
+   Q_DOT(5,NM) = Q_DOT(5,NM) - B1%Q_CON_F*AREA_F
+   Q_DOT(6,NM) = Q_DOT(6,NM) - H_S_J_ALPHA*AREA_F
 
 ENDDO CFACE_LOOP
 
-IF (OXIDATION_REACTION .AND. .NOT. HRR_GAS_ONLY) THEN
+IF (OXIDATION_REACTION) THEN
    PARTICLE_LOOP: DO IP=1,NLP
       LP  => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
@@ -10084,7 +10085,7 @@ IF (OXIDATION_REACTION .AND. .NOT. HRR_GAS_ONLY) THEN
       AREA_F = B1%AREA
       IF (TWO_D)       AREA_F = AREA_F/DY(BC%JJG)
       IF (CYLINDRICAL) AREA_F = AREA_F*2._EB*PI
-      Q_DOT(1,NM) = Q_DOT(1,NM) + LP%PWT*B1%Q_DOT_O2_PP*AREA_F
+      Q_DOT(2,NM) = Q_DOT(2,NM) + LP%PWT*B1%Q_DOT_O2_PP*AREA_F
    ENDDO PARTICLE_LOOP
 ENDIF
 
@@ -10152,7 +10153,7 @@ IF (N_ZONE>0) THEN
    ENDDO
 ENDIF
 
-WRITE(TCFORM,'(A,I0,5A)') "(",9+N_TRACKED_SPECIES+N_ZONE_TMP,"(",FMT_R,",','),",FMT_R,")"
+WRITE(TCFORM,'(A,I0,5A)') "(",N_Q_DOT+1+N_TRACKED_SPECIES+N_ZONE_TMP,"(",FMT_R,",','),",FMT_R,")"
 IF (N_ZONE_TMP>0) THEN
    WRITE(LU_HRR,TCFORM) STIME,0.001_EB*Q_DOT_TOTAL(1:N_Q_DOT),0.001_EB*SUM(Q_DOT_TOTAL(1:N_Q_DOT-1)),&
                         M_DOT_TOTAL(1:N_TRACKED_SPECIES),(P_ZONE_P(I),I=1,N_ZONE_TMP)
