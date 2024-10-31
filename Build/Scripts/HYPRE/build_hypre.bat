@@ -19,6 +19,14 @@ cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
+:: hypre library directory exists so use it
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%HYPREVERSION%
+if not exist %INSTALLDIR% goto endif2
+  set HYPRE_HOME=%INSTALLDIR%
+  set buildstatus=prebuilt
+  goto eof
+:endif2
+
 :: directory pointed to by HYPRE_HOME exists so use it
 
 if "x%HYPRE_HOME%" == "x" goto endif1
@@ -27,14 +35,6 @@ if "x%HYPRE_HOME%" == "x" goto endif1
     set buildstatus=prebuilt
     goto eof
 :endif1
-
-:: hypre library directory exists so use it
-set INSTALLDIR=%FIREMODELS%\libs\hypre\%HYPREVERSION%
-if not exist %INSTALLDIR% goto endif2
-  set HYPRE_HOME=%INSTALLDIR%
-  set buildstatus=prebuilt
-  goto eof
-:endif2
 
 :: hypre repo does not exist so we can't build it so exit (and build fds without it)
 set HYPRE=%FIREMODELS%\hypre
