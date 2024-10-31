@@ -5,35 +5,50 @@ set HYPRETAG=v2.32.0
 call :getopts %*
 if %stopscript% == 1 exit /b
 
-set have_setx=1
-call :have_program setx       || set have_setx=0
-
 set abort=0
+set buildstatus=
 call :is_file_installed cmake || set abort=1
 call :is_file_installed gcc   || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
+:: define root level where fds repo and libs directories are located
 set FIREMODELS=..\..\..\..
 cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
-set LIBS=%FIREMODELS%\libs
-if not exist %LIBS% mkdir %LIBS%
-if not exist %LIBS% echo failed to create %LIBS% directory
-if not exist %LIBS% exit
+:: directory pointed to by HYPRE_HOME exists so use it
 
-cd %LIBS%
-set LIBS=%CD%
-if not exist %LIBS%\hypre mkdir %LIBS%\hypre
-if not exist %LIBS%\hypre echo failed to create %LIBS%\hypre directory
-if not exist %LIBS%\hypre exit
+if "x%HYPRE_HOME%" == "x" goto endif1
+  if exist %HYPRE_HOME%  goto endif1
+    echo 111
+    set buildstatus=prebuilt
+    goto eof
+:endif1
 
-set INSTALLDIR=%LIBS%\hypre\%HYPREVERSION%
+:: hypre library directory exists so use it
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%HYPREVERSION%
+if not exist %INSTALLDIR% goto endif2
+  set HYPRE_HOME=%INSTALLDIR%
+  set buildstatus=prebuilt
+  goto eof
+:endif2
+
+:: hypre repo does not exist so we can't build it so exit (and build fds without it)
+set HYPRE=%FIREMODELS%\hypre
+if exist %HYPRE% goto endif3
+  set HYPRE_HOME=
+  set buildstatus=norepo
+  goto eof
+:endif3
+
+:: pre-built hypre libraries were not found, hypre repo was found so build the hypre library
+
 cd %CURDIR%
 
+set buildstatus=build
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting up Intel compilers
@@ -44,26 +59,13 @@ call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
-set HYPRE=%FIREMODELS%\hypre
-
-:: clone hypre repo (at same level as fds, smv etc repos) if it doesn't exist
-if exist %HYPRE% goto endif1
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo cloning hypre from https://github.com/LLNL/hypre.git
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-
-  cd %FIREMODELS%
-  git clone https://github.com/hypre-space/hypre.git
-  cd hypre
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo checking out tag %HYPRETAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
+  if exist %HYPRE%\src\config\HYPRE_config.h.cmake.in git checkout %HYPRE%\src\config\HYPRE_config.h.cmake.in
   git checkout %HYPRETAG%
 
 echo ----------------------------------------------------------
@@ -78,7 +80,6 @@ echo after saving file, press enter
 
   pause
   cd %CURDIR%
-:endif1
 
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -88,7 +89,6 @@ echo ----------------------------------------------------------
 echo.
 
 cd %HYPRE%
-set HYPRE=%CD%
 git clean -dxf
 
 :: configure hypre
@@ -118,30 +118,9 @@ echo ----------------------------------------------------------
 echo.
 call make install
 
-if %have_setx% == 0 goto else_setx
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo setting HYPRE_HOME environment variable to %INSTALLDIR%
-setx HYPRE_HOME %INSTALLDIR%
-echo note: the environment variable HYPRE_HOME takes effect after opening a new command shell
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
-goto endif_setx
-:else_setx
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo set environment variable HYPRE_HOME to %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-:endif_setx
-
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
+set HYPRE_HOME=%INSTALLDIR%
 echo hypre version %HYPRETAG% installed in %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
 
 cd %CURDIR%
@@ -212,3 +191,6 @@ echo -help           - display this message
 exit /b
 
 :eof
+echo.
+if "%buildstatus%" == "norepo"   echo HYPRE library: not built, hypre git repo does not exist
+if "%buildstatus%" == "prebuilt" echo HYPRE library: not built, already exists in %HYPRE_HOME%
