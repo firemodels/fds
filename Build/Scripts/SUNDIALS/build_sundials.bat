@@ -1,24 +1,72 @@
 @echo off
-set SUNDIALSVERSION=6.7.0
-set SUNDIALSTAG=v6.7.0
+set LIB_TAG=v6.7.0
+
+::*** library and tag name are the same
+
+set LIB_DIR=%LIB_TAG%
+
+::*** placehoder for parsing options
 
 call :getopts %*
 if %stopscript% == 1 exit /b
 
-set have_setx=1
-call :have_program setx       || set have_setx=0
+::*** make sure cmake and gcc are installed
 
 set abort=0
+set buildstatus=
 call :is_file_installed cmake || set abort=1
 call :is_file_installed gcc   || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
+
+::*** define root directory where fds repo and libs directories are located
+
 set FIREMODELS=..\..\..\..
 cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
+::*** if sundials library directory exists exit and use it
+
+set INSTALLDIR=%FIREMODELS%\libs\sundials\%LIB_DIR%
+if not exist %INSTALLDIR% goto endif1
+  set SUNDIALS_HOME=%INSTALLDIR%
+  set buildstatus=prebuilt
+  goto eof
+:endif1
+
+::*** if directory pointed to by SUNDIALS_HOME exists exit and use it
+
+if "x%SUNDIALS_HOME%" == "x" goto endif2
+  if not exist %SUNDIALS_HOME%  goto endif2
+    set buildstatus=prebuilt
+    goto eof
+:endif2
+
+::*** if sundials repo does not exist exit and build fds without it
+
+set LIB_REPO=%FIREMODELS%\sundials
+if exist %LIB_REPO% goto endif3
+  set SUNDIALS_HOME=
+  set buildstatus=norepo
+  goto eof
+:endif3
+
+::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the sundials library
+
+cd %LIB_REPO%
+
+set buildstatus=build
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo building Sundials library version %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting up Intel compilers
@@ -27,46 +75,9 @@ echo ----------------------------------------------------------
 echo.
 call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
-cd %CURDIR%
+git checkout %LIB_TAG%
 
-set LIBS=%FIREMODELS%\libs
-if not exist %LIBS% mkdir %LIBS%
-if not exist %LIBS% echo failed to create %LIBS% directory
-if not exist %LIBS% exit
-
-cd %LIBS%
-if not exist %LIBS%\sundials mkdir %LIBS%\sundials
-if not exist %LIBS%\sundials echo failed to create %LIBS%\sundials directory
-if not exist %LIBS%\sundials exit
-set LIBS=%CD%
-set INSTALLDIR=%LIBS%\sundials\%SUNDIALSVERSION%
-cd %CURDIR%
-
-
-set SUNDIALS=%FIREMODELS%\sundials
-
-:: clone sundials repo (at same level as fds, smv etc repos) if it doesn't exist
-if exist %SUNDIALS% goto endif1
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo cloning sundials from https://github.com/LLNL/sundials.git
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
-
-  cd %FIREMODELS%
-  git clone https://github.com/LLNL/sundials.git
-  cd sundials
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo checking out version %SUNDIALSTAG%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-  git checkout %SUNDIALSTAG%
-  cd %CURDIR%
-:endif1
-
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo cleaning sundials repo
@@ -74,15 +85,16 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %SUNDIALS%
-set SUNDIALS=%CD%
-set BUILDDIR=%SUNDIALS%\BUILDDIR
+cd %LIB_REPO%
+set BUILDDIR=%LIB_REPO%\BUILDDIR
 git clean -dxf
 
 mkdir %BUILDDIR%
 cd %BUILDDIR%
 
-:: configure sundials
+::*** configure sundials
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo configuring sundials version %SUNDIALSTAG%
@@ -102,48 +114,38 @@ cmake ..\  ^
 -DEXAMPLES_ENABLE_F2003=OFF ^
 -DENABLE_OPENMP=ON ^
 -DBUILD_SHARED_LIBS=OFF ^
+-DCMAKE_INSTALL_LIBDIR="lib" ^
 -DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
 -DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
 
-:: build and install sundials
+::*** build and install sundials
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building sundials version %SUNDIALSTAG%
+echo building sundials version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 call make 
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo installing sundials version %SUNDIALSTAG% in %INSTALLDIR%
+echo installing sundials version %LIB_TAG% in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 call make install
 
-if %have_setx% == 0 goto else_setx
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
-setx SUNDIALS_HOME %INSTALLDIR%
-echo note: the environment variable SUNDIALS_HOME takes effect after opening a new command shell
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
+set SUNDIALS_HOME=%INSTALLDIR%
 echo.
-goto endif_setx
-:else_setx
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo set environment variable SUNDIALS_HOME to %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-:endif_setx
 
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo sundials version %SUNDIALSTAG% installed in %INSTALLDIR%
+echo sundials version %LIB_TAG% installed in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -216,3 +218,6 @@ echo -help           - display this message
 exit /b
 
 :eof
+echo.
+if "%buildstatus%" == "norepo"   echo Sundials library not built, The sundials git repo does not exist
+if "%buildstatus%" == "prebuilt" echo Sundials library not built. It exists in %SUNDIALS_HOME%
