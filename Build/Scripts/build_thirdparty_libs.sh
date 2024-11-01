@@ -9,6 +9,7 @@ echo "FIREMODELS=$FIREMODELS"
 
 clean_hypre=false
 clean_sundials=false
+clean_hdf5=false
 ARG=""
 
 # Loop through the options
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --clean-sundials)
             clean_sundials=true
+            shift
+            ;;
+        --clean-hdf5)
+            hdf5=true
             shift
             ;;
         --)
@@ -44,6 +49,10 @@ if [ "$clean_sundials" = true ]; then
     echo "Option --clean-sundials is set."
 fi
 
+if [ "$clean_hdf5" = true ]; then
+    echo "Option --clean-hdf5 is set."
+fi
+
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
 # Decide compilers
@@ -54,4 +63,7 @@ source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
 
 ## build sundials
 source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+
+## build hdf5
+source ../Scripts/HDF5/build_hdf5.sh confmake.sh $clean_hdf5
 
