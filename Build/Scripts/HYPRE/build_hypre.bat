@@ -1,9 +1,11 @@
 @echo off
-set HYPREVERSION=v2.32.0
-set HYPRETAG=v2.32.0
+set LIB_TAG=v2.32.0
+set LIB_DIR=%LIB_TAG%
 
 call :getopts %*
 if %stopscript% == 1 exit /b
+
+::*** make sure cmake and gcc are installed
 
 set abort=0
 set buildstatus=
@@ -13,42 +15,53 @@ if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
-:: define root level where fds repo and libs directories are located
+::*** define root directory where fds repo and libs directories are located
+
 set FIREMODELS=..\..\..\..
 cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
-:: hypre library directory exists so use it
-set INSTALLDIR=%FIREMODELS%\libs\hypre\%HYPREVERSION%
-if not exist %INSTALLDIR% goto endif2
+::*** if hypre library directory exists exit and use it
+
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
+if not exist %INSTALLDIR% goto endif1
   set HYPRE_HOME=%INSTALLDIR%
   set buildstatus=prebuilt
   goto eof
-:endif2
-
-:: directory pointed to by HYPRE_HOME exists so use it
-
-if "x%HYPRE_HOME%" == "x" goto endif1
-  if exist %HYPRE_HOME%  goto endif1
-    echo 111
-    set buildstatus=prebuilt
-    goto eof
 :endif1
 
-:: hypre repo does not exist so we can't build it so exit (and build fds without it)
-set HYPRE=%FIREMODELS%\hypre
-if exist %HYPRE% goto endif3
+::*** if directory pointed to by HYPRE_HOME exists exit and use it
+
+if "x%HYPRE_HOME%" == "x" goto endif2
+  if not exist %HYPRE_HOME%  goto endif2
+    set buildstatus=prebuilt
+    goto eof
+:endif2
+
+::*** if hypre repo does not exist exit and build fds without it
+
+set LIB_REPO=%FIREMODELS%\hypre
+if exist %LIB_REPO% goto endif3
   set HYPRE_HOME=
   set buildstatus=norepo
   goto eof
 :endif3
 
-:: pre-built hypre libraries were not found, hypre repo was found so build the hypre library
+::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
 
 cd %CURDIR%
 
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo building Hypre library version %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+
 set buildstatus=build
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting up Intel compilers
@@ -59,15 +72,18 @@ call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo checking out tag %HYPRETAG%
+echo checking out tag %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-  if exist %HYPRE%\src\config\HYPRE_config.h.cmake.in git checkout %HYPRE%\src\config\HYPRE_config.h.cmake.in
-  git checkout %HYPRETAG%
+cd %LIB_REPO%
+git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+git checkout %LIB_TAG%
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo modify HYPRE_config.h.cmake.in file
@@ -76,11 +92,12 @@ echo ----------------------------------------------------------
 echo.
 echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
 echo after saving file, press enter
-  notepad %HYPRE%\src\config\HYPRE_config.h.cmake.in
+notepad %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
 
-  pause
-  cd %CURDIR%
+pause
+cd %CURDIR%
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo cleaning hypre repo
@@ -88,18 +105,18 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-cd %HYPRE%
+cd %LIB_REPO%
 git clean -dxf
 
-:: configure hypre
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring hypre version %HYPRETAG%
+echo configuring hypre version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set BUILDDIR=%HYPRE%\src\cmbuild
+set BUILDDIR=%LIB_REPO%\src\cmbuild
 cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
@@ -109,10 +126,10 @@ cmake ..\  ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_INSTALL_LIBDIR="lib"
 
-:: build and install hypre
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building and installing hypre version %HYPRETAG%
+echo building and installing hypre version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -120,7 +137,7 @@ call make install
 
 echo.
 set HYPRE_HOME=%INSTALLDIR%
-echo hypre version %HYPRETAG% installed in %INSTALLDIR%
+echo Hypre library version %LIB_TAG% built in %INSTALLDIR%
 echo.
 
 cd %CURDIR%
@@ -192,5 +209,5 @@ exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo HYPRE library: not built, hypre git repo does not exist
-if "%buildstatus%" == "prebuilt" echo HYPRE library: not built, already exists in %HYPRE_HOME%
+if "%buildstatus%" == "norepo"   echo HYPRE library not built, The hypre git repo does not exist
+if "%buildstatus%" == "prebuilt" echo HYPRE library not built. It exists in %HYPRE_HOME%
