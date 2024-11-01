@@ -24,7 +24,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --clean-hdf5)
-            hdf5=true
+            clean_hdf5=true
             shift
             ;;
         --)
