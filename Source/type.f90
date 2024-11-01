@@ -1051,9 +1051,10 @@ TYPE OBSTRUCTION_TYPE
    CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
-   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
-   INTEGER :: SURF_INDEX_INTERIOR=0           !< SURFace properties for a newly exposed interior cell
-   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
+   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0          !< SURFace properties for each face
+   INTEGER, DIMENSION(1:6)  :: EXPOSED_FACE_INDEX=0  !< OBST face exposed (1) or blocked (0)
+   INTEGER :: SURF_INDEX_INTERIOR=0                  !< SURFace properties for a newly exposed interior cell
+   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)            !< Color indices for Smokeview
 
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
    REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume

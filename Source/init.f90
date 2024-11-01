@@ -771,7 +771,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==1) CYCLE
+         IF (I==1) THEN ; OB%EXPOSED_FACE_INDEX(1)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I-1,J,K)
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
@@ -794,7 +794,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==M%IBAR) CYCLE
+         IF (I==M%IBAR) THEN ; OB%EXPOSED_FACE_INDEX(2)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I+1,J,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -818,7 +818,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==1) CYCLE
+         IF (J==1) THEN ; OB%EXPOSED_FACE_INDEX(3)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J-1,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -842,7 +842,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==M%JBAR) CYCLE
+         IF (J==M%JBAR) THEN ; OB%EXPOSED_FACE_INDEX(4)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J+1,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -866,7 +866,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==1) CYCLE
+         IF (K==1) THEN ; OB%EXPOSED_FACE_INDEX(5)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J,K-1)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -890,7 +890,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==M%KBAR) CYCLE
+         IF (K==M%KBAR) THEN ; OB%EXPOSED_FACE_INDEX(6)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J,K+1)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -2891,7 +2891,7 @@ INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: TT
 REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
-INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE
+INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE,FI
 LOGICAL :: VENT_FOUND,ALIGNED
 TYPE (MESH_TYPE), POINTER :: M,MM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OBX
@@ -3194,6 +3194,17 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ENDIF FOUND_OTHER_MESH
 
 ENDIF CHECK_MESHES
+
+! If this wall cell is attached to an OBST, check if the OBST face is exposed
+
+IF (OBST_INDEX>0) THEN
+   IF (.NOT.M%CELL(ICG)%SOLID .OR. M%OBSTRUCTION(M%CELL(ICG)%OBST_INDEX)%REMOVABLE) THEN
+      FI = ABS(IOR)*2 ; IF (IOR<0) FI = FI-1
+      M%OBSTRUCTION(OBST_INDEX)%EXPOSED_FACE_INDEX(FI) = 1
+   ENDIF
+ENDIF
+
+! Ensure that the WALL_INDEX and SURF_INDEX can be identified from the abutting gas phase cell, ICG
 
 M%CELL(ICG)%WALL_INDEX(-IOR) = IW
 M%CELL(ICG)%SURF_INDEX(-IOR) = SURF_INDEX_NEW
