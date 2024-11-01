@@ -1,6 +1,12 @@
 @echo off
 set LIB_TAG=v2.32.0
+
+::*** library and tag name are the same
+
 set LIB_DIR=%LIB_TAG%
+
+
+::*** placehoder for parsing options
 
 call :getopts %*
 if %stopscript% == 1 exit /b

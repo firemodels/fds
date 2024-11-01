@@ -1,6 +1,11 @@
 @echo off
 set LIB_TAG=v6.7.0
+
+::*** library and tag name are the same
+
 set LIB_DIR=%LIB_TAG%
+
+::*** placehoder for parsing options
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -52,6 +57,7 @@ if exist %LIB_REPO% goto endif3
 
 cd %LIB_REPO%
 
+set buildstatus=build
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -59,15 +65,19 @@ echo building Sundials library version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo checking out version %LIB_TAG%
+echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
+call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
-  git checkout %LIB_TAG%
+git checkout %LIB_TAG%
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo cleaning sundials repo
@@ -82,7 +92,9 @@ git clean -dxf
 mkdir %BUILDDIR%
 cd %BUILDDIR%
 
-:: configure sundials
+::*** configure sundials
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo configuring sundials version %SUNDIALSTAG%
@@ -106,7 +118,9 @@ cmake ..\  ^
 -DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
 -DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
 
-:: build and install sundials
+::*** build and install sundials
+
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo building sundials version %LIB_TAG%
@@ -115,6 +129,7 @@ echo ----------------------------------------------------------
 echo.
 call make 
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo installing sundials version %LIB_TAG% in %INSTALLDIR%
@@ -123,16 +138,13 @@ echo ----------------------------------------------------------
 echo.
 call make install
 
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
 set SUNDIALS_HOME=%INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
 
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo sundials version %LIB_TAG% installed in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
