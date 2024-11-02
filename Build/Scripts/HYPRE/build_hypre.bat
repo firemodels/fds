@@ -8,6 +8,8 @@ set LIB_DIR=%LIB_TAG%
 
 ::*** placehoder for parsing options
 
+set clean_hypre=
+
 call :getopts %*
 if %stopscript% == 1 exit /b
 
@@ -28,31 +30,44 @@ cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
+
+::*** erase install directory if clean option was specified
+
+if "x%clean_hypre%" == "x" goto endif1
+  if exist %INSTALLDIR% rmdir /s /q %INSTALLDIR%
+:endif1
+
 ::*** if hypre library directory exists exit and use it
 
-set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
-if not exist %INSTALLDIR% goto endif1
+if not exist %INSTALLDIR% goto endif2
   set HYPRE_HOME=%INSTALLDIR%
   set buildstatus=prebuilt
   goto eof
-:endif1
+:endif2
 
 ::*** if directory pointed to by HYPRE_HOME exists exit and use it
 
-if "x%HYPRE_HOME%" == "x" goto endif2
-  if not exist %HYPRE_HOME%  goto endif2
+if "x%HYPRE_HOME%" == "x" goto endif3
+if not exist %HYPRE_HOME%  goto endif3
+if "x%clean_hypre%" == "x" goto endif3
+  rmdir /s /q %HYPRE_HOME%
+:endif3
+
+if "x%HYPRE_HOME%" == "x" goto endif4
+  if not exist %HYPRE_HOME%  goto endif4
     set buildstatus=prebuilt
     goto eof
-:endif2
+:endif4
 
 ::*** if hypre repo does not exist exit and build fds without it
 
 set LIB_REPO=%FIREMODELS%\hypre
-if exist %LIB_REPO% goto endif3
+if exist %LIB_REPO% goto endif5
   set HYPRE_HOME=
   set buildstatus=norepo
   goto eof
-:endif3
+:endif5
 
 ::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
 
@@ -92,15 +107,13 @@ git checkout %LIB_TAG%
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo modify HYPRE_config.h.cmake.in file
+echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
+echo in the file HYPRE_config.h.cmake.in
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
-echo after saving file, press enter
-notepad %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
 
-pause
 cd %CURDIR%
 
 echo.
@@ -157,6 +170,10 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
+ if /I "%1" EQU "--clean-hypre" (
+    set clean_hypre=1
+    set valid=1
+ )
  if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1

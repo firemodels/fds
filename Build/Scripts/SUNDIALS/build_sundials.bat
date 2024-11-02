@@ -7,6 +7,7 @@ set LIB_DIR=%LIB_TAG%
 
 ::*** placehoder for parsing options
 
+set clean_sundials=
 call :getopts %*
 if %stopscript% == 1 exit /b
 
@@ -27,31 +28,46 @@ cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
+set INSTALLDIR=%FIREMODELS%\libs\sundials\%LIB_DIR%
+
+::*** erase directory if it exists and clean option was specified
+
+if "x%clean_sundials%" == "x" goto endif1
+  if exist %INSTALLDIR% rmdir /s /q %INSTALLDIR%
+:endif1
+
 ::*** if sundials library directory exists exit and use it
 
-set INSTALLDIR=%FIREMODELS%\libs\sundials\%LIB_DIR%
-if not exist %INSTALLDIR% goto endif1
+if not exist %INSTALLDIR% goto endif2
   set SUNDIALS_HOME=%INSTALLDIR%
   set buildstatus=prebuilt
   goto eof
-:endif1
+:endif2
+
+::*** erase directory if it exists and clean option was specified
+
+if "x%SUNDIALS_HOME%" == "x" goto endif3
+if not exist %SUNDIALS_HOME%  goto endif3
+if "x%clean_sundials%" == "x" goto endif3
+  rmdir /s /q %SUNDIALS_HOME%
+:endif3
 
 ::*** if directory pointed to by SUNDIALS_HOME exists exit and use it
 
-if "x%SUNDIALS_HOME%" == "x" goto endif2
-  if not exist %SUNDIALS_HOME%  goto endif2
-    set buildstatus=prebuilt
-    goto eof
-:endif2
+if "x%SUNDIALS_HOME%" == "x" goto endif4
+if not exist %SUNDIALS_HOME%  goto endif4
+  set buildstatus=prebuilt
+  goto eof
+:endif4
 
 ::*** if sundials repo does not exist exit and build fds without it
 
 set LIB_REPO=%FIREMODELS%\sundials
-if exist %LIB_REPO% goto endif3
+if exist %LIB_REPO% goto endif5
   set SUNDIALS_HOME=
   set buildstatus=norepo
   goto eof
-:endif3
+:endif5
 
 ::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the sundials library
 
@@ -161,7 +177,11 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
- if /I "%1" EQU "-help" (
+if /I "%1" EQU "--clean-sundials" (
+    set clean_sundials=1
+    set valid=1
+ )
+if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
    exit /b
