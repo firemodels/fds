@@ -53,9 +53,12 @@ exit /b
 :: -------------------------------------------------------------
 :usage  
 :: -------------------------------------------------------------
-echo build hypre
-echo. 
-echo -help           - display this message
+echo build 3rd party libraries
+echo.
+echo --clean-all      - rebuild all libraries
+echo --clean-hypre    - rebuild hypre library
+echo --clean-sundials - rebuild sundials library
+echo -help            - display this message
 exit /b
 
 :eof

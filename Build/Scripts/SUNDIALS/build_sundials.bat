@@ -234,6 +234,7 @@ exit /b
 :: -------------------------------------------------------------
 echo build sundials
 echo. 
+echo -build-sundials - force build of sundials library
 echo -help           - display this message
 exit /b
 

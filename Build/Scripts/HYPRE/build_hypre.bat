@@ -227,6 +227,7 @@ exit /b
 :: -------------------------------------------------------------
 echo build hypre
 echo. 
+echo -clean-hypre    - force build of hypre library
 echo -help           - display this message
 exit /b
 
