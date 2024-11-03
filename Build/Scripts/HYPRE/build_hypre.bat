@@ -6,7 +6,7 @@ set LIB_TAG=v2.32.0
 set LIB_DIR=%LIB_TAG%
 
 
-::*** placehoder for parsing options
+::*** parse options
 
 set clean_hypre=
 
@@ -46,31 +46,27 @@ if not exist %INSTALLDIR% goto endif2
   goto eof
 :endif2
 
-::*** if directory pointed to by HYPRE_HOME exists exit and use it
-
-if "x%HYPRE_HOME%" == "x" goto endif3
-if not exist %HYPRE_HOME%  goto endif3
-if "x%clean_hypre%" == "x" goto endif3
-  rmdir /s /q %HYPRE_HOME%
-:endif3
-
-if "x%HYPRE_HOME%" == "x" goto endif4
-  if not exist %HYPRE_HOME%  goto endif4
-    set buildstatus=prebuilt
-    goto eof
-:endif4
-
-::*** if hypre repo does not exist exit and build fds without it
+::*** if hypre repo exists build library
 
 set LIB_REPO=%FIREMODELS%\hypre
-if exist %LIB_REPO% goto endif5
+if exist %LIB_REPO% goto buildlib
+
+::*** if directory pointed to by HYPRE_HOME exists exit and use it
+::    if it doesn't exist then exit and build fds without the hypre library
+
+if "x%HYPRE_HOME%" == "x" goto else4
+if not exist %HYPRE_HOME%  goto else4
+    set buildstatus=prebuilt
+    goto endif4
+:else4
   set HYPRE_HOME=
   set buildstatus=norepo
-  goto eof
-:endif5
+:endif4
+goto eof
 
 ::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
 
+:buildlib
 cd %CURDIR%
 
 echo.
@@ -174,6 +170,11 @@ goto eof
     set clean_hypre=1
     set valid=1
  )
+ if /I "%1" EQU "--help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
  if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
@@ -227,11 +228,11 @@ exit /b
 :: -------------------------------------------------------------
 echo build hypre
 echo. 
-echo -clean-hypre    - force build of hypre library
-echo -help           - display this message
+echo --clean-hypre    - force build of hypre library
+echo --help           - display this message
 exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo HYPRE library not built, The hypre git repo does not exist
-if "%buildstatus%" == "prebuilt" echo HYPRE library not built. It exists in %HYPRE_HOME%
+if "%buildstatus%" == "norepo"   echo Hypre library not built, The hypre git repo does not exist
+if "%buildstatus%" == "prebuilt" echo Hypre library not built. It exists in %HYPRE_HOME%

@@ -5,7 +5,7 @@ set LIB_TAG=v6.7.0
 
 set LIB_DIR=%LIB_TAG%
 
-::*** placehoder for parsing options
+::*** parse options
 
 set clean_sundials=
 call :getopts %*
@@ -44,33 +44,25 @@ if not exist %INSTALLDIR% goto endif2
   goto eof
 :endif2
 
-::*** erase directory if it exists and clean option was specified
+::*** sundials library doesn't exist, if sundials repo exists build sundials library
 
-if "x%SUNDIALS_HOME%" == "x" goto endif3
-if not exist %SUNDIALS_HOME%  goto endif3
-if "x%clean_sundials%" == "x" goto endif3
-  rmdir /s /q %SUNDIALS_HOME%
-:endif3
+set LIB_REPO=%FIREMODELS%\sundials
+if exist %LIB_REPO% goto buildlib
 
 ::*** if directory pointed to by SUNDIALS_HOME exists exit and use it
 
-if "x%SUNDIALS_HOME%" == "x" goto endif4
-if not exist %SUNDIALS_HOME%  goto endif4
-  set buildstatus=prebuilt
-  goto eof
+if "x%SUNDIALS_HOME%" == "x" goto else4
+if not exist %SUNDIALS_HOME%  goto else4
+    set buildstatus=prebuilt
+    goto endif4
+:else4
+  set build_status=norepo
 :endif4
-
-::*** if sundials repo does not exist exit and build fds without it
-
-set LIB_REPO=%FIREMODELS%\sundials
-if exist %LIB_REPO% goto endif5
-  set SUNDIALS_HOME=
-  set buildstatus=norepo
-  goto eof
-:endif5
+goto eof
 
 ::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the sundials library
 
+:buildlib
 cd %LIB_REPO%
 
 set buildstatus=build
@@ -181,6 +173,11 @@ if /I "%1" EQU "--clean-sundials" (
     set clean_sundials=1
     set valid=1
  )
+if /I "%1" EQU "--help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
 if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
@@ -234,8 +231,8 @@ exit /b
 :: -------------------------------------------------------------
 echo build sundials
 echo. 
-echo -build-sundials - force build of sundials library
-echo -help           - display this message
+echo --clean-sundials - force build of sundials library
+echo --help           - display this message
 exit /b
 
 :eof
