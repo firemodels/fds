@@ -2,6 +2,7 @@
 
 set clean_hypre=
 set clean_sundials=
+set FDS_BUILDDIR=%CD%
 
 call :getopts %*
 if %stopscript% == 1 exit /b
