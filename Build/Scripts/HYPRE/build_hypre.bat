@@ -155,6 +155,17 @@ set HYPRE_HOME=%INSTALLDIR%
 echo The Hypre library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo removing .obj and .mod files from Windows fds build directories
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+for /D %%f in (%FIREMODELS%\fds\Build\*win*) do (
+  cd %%f
+  erase *.obj *.mod > Nul 2> Nul
+)
+
 cd %CURDIR%
 
 goto eof
