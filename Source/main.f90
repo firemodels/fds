@@ -97,23 +97,24 @@ INTEGER :: N_WRITTEN
 
 CALL OPENMP_INIT
 
-! output version info if fds is invoked without any arguments
-! (this must be done before MPI is initialized)
+! Output version info if fds is invoked without any arguments. This must be done before MPI is initialized.
 
 CALL VERSION_INFO
 
-! Initialize MPI (First executable lines of code)
+! Initialize MPI
 
 CALL MPI_INIT_THREAD(REQUIRED,PROVIDED,IERR)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, MY_RANK, IERR)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, N_MPI_PROCESSES, IERR)
 CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
 
-IF (MY_RANK==0) WRITE(LU_ERR,'(/A/)') ' Starting FDS ...'
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+! Write out MPI process info to standard error (LU_ERR=0)
 
-! WRITE(LU_ERR,'(A,I6,A,A)') ' MPI Process ',MY_RANK,' started on ',PNAME(1:PNAMELEN)
-! CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+IF (MY_RANK==0) WRITE(LU_ERR,'(/A/)') ' Starting FDS ...'
+
+!CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+!WRITE(LU_ERR,'(A,I6,A,A)') ' MPI Process ',MY_RANK,' started on ',PNAME(1:PNAMELEN)
+!CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Check that MPI processes and OpenMP threads are working properly
 
@@ -126,14 +127,13 @@ CALL CPU_TIME(CPUTIME)
 CPU_TIME_START = CPUTIME
 ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = CURRENT_TIME()
 
-! Assign a compilation date (All Nodes)
+! Assign a compilation date
 
-CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
+CALL GET_INFO(REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found
 
-CALL READ_DATA(DT)
-CALL STOP_CHECK(1)
+CALL READ_DATA(DT) ; CALL STOP_CHECK(1)
 
 IF (MY_RANK==0) THEN
    CALL WRITE_SUMMARY_INFO(LU_ERR,.TRUE.)
@@ -156,7 +156,7 @@ CALL MPI_ALLGATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,MAX_CELL_ASPECT_RATIO(1:NME
                     COUNTS,DISPLS,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
 IF (MAXVAL(MAX_CELL_ASPECT_RATIO)>3.99_EB .AND. .NOT.CFL_VELOCITY_NORM_USER_SPECIFIED) CFL_VELOCITY_NORM=1
 
-! Open and write to Smokeview and status files
+! Create output file names
 
 CALL ASSIGN_FILE_NAMES
 
@@ -232,14 +232,25 @@ ENDDO
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_VARIABLES_1')
 
+! Write the Smokeview (.smv) file using parallel MPI writes
+
+CALL WRITE_SMOKEVIEW_FILE
+
 ! Stop all the processes if this is just a set-up run
 
-IF (CHECK_MESH_ALIGNMENT) THEN
+IF (SETUP_ONLY .OR. CHECK_MESH_ALIGNMENT) THEN
    IF (MY_RANK==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
    STOP_STATUS = SETUP_ONLY_STOP
    IF (MY_RANK==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
+   CALL STOP_CHECK(1)
 ENDIF
-CALL STOP_CHECK(1)
+
+! MPI process 0 reopens the Smokeview file for additional output
+
+IF (MY_RANK==0) THEN
+   OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
+   CALL WRITE_STATUS_FILES
+ENDIF
 
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
@@ -1108,10 +1119,6 @@ MAIN_LOOP: DO
    IF (FLUSH_FILE_BUFFERS) THEN
       IF (T>=FLSH_CLOCK(FLSH_COUNTER(1))) THEN
          IF (MY_RANK==0) CALL FLUSH_GLOBAL_BUFFERS
-         CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! Force all processes to sync up before dumping buffers
-         DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-            CALL FLUSH_LOCAL_BUFFERS(NM)
-         ENDDO
          FLSH_COUNTER(1) = FLSH_COUNTER(1) + 1
       ENDIF
    ENDIF

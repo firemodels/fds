@@ -529,9 +529,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          ELSE
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,II,JJ,KK)
             IC = CELL_INDEX(II,JJ,KK)
-            BC%IIG = II
-            BC%JJG = JJ
-            BC%KKG = KK
+            BC%IIG = II; BC%JJG = JJ; BC%KKG = KK
+            BC%II  = II; BC%JJ  = JJ; BC%KK  = KK
             IF (.NOT.CELL(IC)%SOLID) EXIT CHOOSE_COORDS
          ENDIF
 
@@ -865,6 +864,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
 
          ! Update idicies in case offset puts location in a different cell
          CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+         BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
@@ -1472,9 +1472,8 @@ USE OUTPUT_DATA, ONLY: N_PROF
 INTEGER :: ND
 TYPE (PROFILE_TYPE), POINTER :: PF
 
-BC%IIG = II
-BC%JJG = JJ
-BC%KKG = KK
+BC%IIG = II; BC%JJG = JJ; BC%KKG = KK
+BC%II  = II; BC%JJ  = JJ; BC%KK  = KK
 LP%U = IN%U0
 LP%V = IN%V0
 LP%W = IN%W0
@@ -1886,6 +1885,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          IF (LP%PATH_PARTICLE) THEN
             CALL MOVE_IN_GAS
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+            BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
          ENDIF
          EXIT TIME_STEP_LOOP
       ENDIF
@@ -1939,6 +1939,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! Determine the cell indices of the new particle location.
 
       CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+      BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
 
       ! If the particle is not near a boundary cell, cycle.
 
@@ -2520,6 +2521,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Store containing volume at new location
       CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+      BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
       CALL GET_RVC(NM,BC%IIG,BC%JJG,BC%KKG,LP%RVC)
 
    ENDDO TIME_STEP_LOOP
@@ -3032,11 +3034,12 @@ END SUBROUTINE MOVE_IN_GAS
 
 SUBROUTINE VENT_PARTICLE_EXTRACTION(HIT_SOLID,EXTRACT,WALL_INDEX,CFACE_INDEX)
 
+USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 LOGICAL, INTENT(OUT) :: EXTRACT
 LOGICAL, INTENT(INOUT) :: HIT_SOLID
 LOGICAL :: SET_EXTRACT
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
-INTEGER :: SURF_INDEX
+INTEGER :: SURF_INDEX,NOM,IIO,JJO,KKO
 TYPE (BOUNDARY_PROP1_TYPE), POINTER :: B1
 TYPE (BOUNDARY_PROP2_TYPE), POINTER :: B2
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BCX
@@ -3065,8 +3068,10 @@ IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%ADHERE_TO_SOLID) THEN
    LP%SPLAT = .TRUE.
 ENDIF
 
-IF ( B1%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
+IF_EXTRACT: IF ( B1%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
      (POROUS_FLOOR .AND. BC%Z<ZS .AND. LPC%LIQUID_DROPLET) ) THEN
+   CALL SEARCH_OTHER_MESHES(BC%X,BC%Y,BC%Z,NOM,IIO,JJO,KKO)
+   IF (POROUS_FLOOR .AND. BC%Z<ZS .AND. LPC%LIQUID_DROPLET .AND. NOM>0) EXIT IF_EXTRACT  ! Do not remove particle still in domain
    IF (B1%NODE_INDEX > 0) THEN
       IF (DUCTNODE(B1%NODE_INDEX)%TRANSPORT_PARTICLES) THEN
          SELECT CASE (BCX%IOR)
@@ -3147,7 +3152,7 @@ IF ( B1%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
       BC%X=-1.E6_EB
       EXTRACT = .TRUE.
    ENDIF
-ENDIF
+ENDIF IF_EXTRACT
 
 END SUBROUTINE VENT_PARTICLE_EXTRACTION
 
@@ -3904,9 +3909,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(7,NM) = Q_DOT(7,NM) - Q_RAD*WGT/DT  ! Q_PART
-               Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(8,NM) = Q_DOT(8,NM) - Q_RAD*WGT/DT  ! Q_PART
+               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
 
                IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
@@ -4279,10 +4284,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
-               Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
-               Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
+               Q_DOT(8,NM) = Q_DOT(8,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
+               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(5,NM) = Q_DOT(5,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
 
                IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
