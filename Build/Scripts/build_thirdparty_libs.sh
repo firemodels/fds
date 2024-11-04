@@ -26,10 +26,12 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --clean-hypre)
+            clean_fds=true
             clean_hypre=true  # Set the flag to true when --clean-hypre is used
             shift
             ;;
         --clean-sundials)
+            clean_fds=true
             clean_sundials=true
             shift
             ;;
