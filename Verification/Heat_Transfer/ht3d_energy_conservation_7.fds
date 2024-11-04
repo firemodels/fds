@@ -26,7 +26,7 @@
 
 &SLCF PBY=0.001, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
 
-&DUMP DT_DEVC=12. /
+&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=12. /
 
 'WALL ENTHALPY' is the energy (kJ) of the volume of solid bounded by the surface cell. The CONVERSION_FACTOR is intended to
 cancel out the cell area 0.01 m x 0.01 m

@@ -61,7 +61,7 @@ for slope=slope_angle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         % Midflame wind speed from Andrews, default FDS fuel depth of 1 m
-        HT=1.0;
+        HT=0.2;
         UMF = U(ui)*1.83/log((20+1.18*HT)/(0.43*HT));
         
         % determine adjustment factors for wind and slope
@@ -160,6 +160,11 @@ for slope=slope_angle
     print(gcf,Image_File_Type,...
         [plot_dir,'level_set_ellipse_',num2str(slope,'%02d'),'deg'])
 
+end
+
+max_err = max(error_table{:,2:end}(:));
+if max_err>.15
+    display(['Matlab Warning: LS_ellipse is out of tolerance. Max error = ',num2str(max_err)])
 end
 
 % plot error_table to be used for verification

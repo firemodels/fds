@@ -30,6 +30,32 @@ $QFDS -p 32 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T900K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1000K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1100K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi0p6.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_grimech30_T1200K_Phi1p4.fds
+$QFDS -d Chemistry ign_delay_Methane_TianfengLu_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Methane_Smooke_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Ethylene_TianfengLu_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Propane_USC_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_Propane_Z66_T1100K_Phi1p0.fds
+$QFDS -d Chemistry ign_delay_nHeptane_Chalmers_T1100K_Phi1p0.fds
+
+$QFDS -p 24 -d Chemistry load_bal_methane_smooke_serial.fds
+$QFDS -p 24 -d Chemistry load_bal_methane_smooke_parallel.fds
+$QFDS -p 6  -d Chemistry load_bal_propane_2step_arrhenius_serial.fds
+$QFDS -p 6  -d Chemistry load_bal_propane_2step_arrhenius_parallel.fds
+$QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_serial.fds
+$QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_parallel.fds
+
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
 $QFDS -d Complex_Geometry geom_channel_tmp.fds
@@ -137,6 +163,7 @@ $QFDS -d Controls hrr_freeze.fds
 $QFDS -d Controls rms_cov_corr.fds
 $QFDS -d Controls rms_example.fds
 $QFDS -d Controls special_time_ramps.fds
+$QFDS -p 4 -d Controls spreading_fire.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -p 8 -d Detectors beam_detector.fds
@@ -358,11 +385,15 @@ $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat_hypre.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_ulmat.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_ulmat_hypre.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
@@ -438,7 +469,7 @@ $QFDS -d Pyrolysis surf_mass_part_specified.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cart.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cyl.fds
 $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
-$QFDS -d Pyrolysis tga_analysis.fds
+$QFDS -p 2 -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_pool.fds
@@ -731,22 +762,22 @@ $QFDS -p 4 -d Scalar_Analytical_Solution soborot_mp5_cos_wave_128.fds
 $QFDS -o 1 -d Thread_Check race_test_1.fds
 $QFDS -o 4 -d Thread_Check race_test_4.fds
 
-$QFDS -t -o 1 -d Timing_Benchmarks openmp_test64a.fds
-$QFDS -t -o 2 -d Timing_Benchmarks openmp_test64b.fds
-$QFDS -t -o 3 -d Timing_Benchmarks openmp_test64c.fds
-$QFDS -t -o 4 -d Timing_Benchmarks openmp_test64d.fds
-$QFDS -t -o 5 -d Timing_Benchmarks openmp_test64e.fds
-$QFDS -t -o 6 -d Timing_Benchmarks openmp_test64f.fds
-$QFDS -t -o 7 -d Timing_Benchmarks openmp_test64g.fds
-$QFDS -t -o 8 -d Timing_Benchmarks openmp_test64h.fds
-$QFDS -t -o 1 -d Timing_Benchmarks openmp_test128a.fds
-$QFDS -t -o 2 -d Timing_Benchmarks openmp_test128b.fds
-$QFDS -t -o 3 -d Timing_Benchmarks openmp_test128c.fds
-$QFDS -t -o 4 -d Timing_Benchmarks openmp_test128d.fds
-$QFDS -t -o 5 -d Timing_Benchmarks openmp_test128e.fds
-$QFDS -t -o 6 -d Timing_Benchmarks openmp_test128f.fds
-$QFDS -t -o 7 -d Timing_Benchmarks openmp_test128g.fds
-$QFDS -t -o 8 -d Timing_Benchmarks openmp_test128h.fds
+$QFDS -o 1 -d Timing_Benchmarks openmp_test64a.fds
+$QFDS -o 2 -d Timing_Benchmarks openmp_test64b.fds
+$QFDS -o 3 -d Timing_Benchmarks openmp_test64c.fds
+$QFDS -o 4 -d Timing_Benchmarks openmp_test64d.fds
+$QFDS -o 5 -d Timing_Benchmarks openmp_test64e.fds
+$QFDS -o 6 -d Timing_Benchmarks openmp_test64f.fds
+$QFDS -o 7 -d Timing_Benchmarks openmp_test64g.fds
+$QFDS -o 8 -d Timing_Benchmarks openmp_test64h.fds
+$QFDS -o 1 -d Timing_Benchmarks openmp_test128a.fds
+$QFDS -o 2 -d Timing_Benchmarks openmp_test128b.fds
+$QFDS -o 3 -d Timing_Benchmarks openmp_test128c.fds
+$QFDS -o 4 -d Timing_Benchmarks openmp_test128d.fds
+$QFDS -o 5 -d Timing_Benchmarks openmp_test128e.fds
+$QFDS -o 6 -d Timing_Benchmarks openmp_test128f.fds
+$QFDS -o 7 -d Timing_Benchmarks openmp_test128g.fds
+$QFDS -o 8 -d Timing_Benchmarks openmp_test128h.fds
 
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds
@@ -778,7 +809,7 @@ $QFDS -d WUI char_oxidation_1.fds
 $QFDS -p 2 -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_conv.fds
-$QFDS -p 2 -d WUI ground_vegetation_drag.fds
+$QFDS -p 3 -d WUI ground_vegetation_drag.fds
 $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
@@ -799,6 +830,16 @@ $QFDS -d WUI Needle_TGA_E.fds
 $QFDS -d WUI Needle_TGA_F.fds
 $QFDS -d WUI Needle_TGA_G.fds
 $QFDS -d WUI Needle_TGA_H.fds
+$QFDS -d WUI part_drag_prof_ux.fds
+$QFDS -d WUI part_drag_prof_uy.fds
+$QFDS -d WUI part_drag_prof_uz.fds
+$QFDS -d WUI part_drag_prof_vx.fds
+$QFDS -d WUI part_drag_prof_vy.fds
+$QFDS -d WUI part_drag_prof_vz.fds
+$QFDS -d WUI part_drag_prof_wx.fds
+$QFDS -d WUI part_drag_prof_wy.fds
+$QFDS -d WUI part_drag_prof_wz.fds
+$QFDS -d WUI part_drag_stretched.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds

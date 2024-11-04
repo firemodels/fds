@@ -8,6 +8,8 @@ if x%arg1% == xbot goto endif1
 call ..\Scripts\setup_intel_compilers.bat
 :endif1
 
+::call ..\Scripts\build_thirdparty_libs %*
+
 Title Building debug OpenMP FDS (Intel MPI/%INTEL_IFORT% OpenMP) for 64 bit Windows %TARGET%
 
 make SHELL="%ComSpec%" VPATH="../../Source" -f ..\makefile %TARGET%

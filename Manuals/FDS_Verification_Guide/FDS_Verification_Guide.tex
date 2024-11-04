@@ -3756,6 +3756,166 @@ In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:
 \end{figure}
 
 
+\section{Ignition Delay verification with Cantera (\textct{ignition\_delay})}
+\label{ignition_delay}
+
+Constant volume ignition delay cases are compared with output from Cantera \cite{cantera:2023} to verify the implementation of detailed chemical mechanisms, as described in the FDS Technical Guide \cite{FDS_Math_Guide}. Cantera, a widely used open-source software suite for modeling chemical systems, serves as a benchmark for verification. Various chemical mechanisms are considered for this purpose. These mechanisms, formatted for FDS, can be found in the {\ct Utilities/Input\_Libraries/Chemical\_Mechanisms/FDS/} directory. The FDS User Guide \cite{FDS_Users_Guide} provides detailed instructions on generating these FDS-formatted mechanism files.
+
+Twelve constant volume ignition delay cases are configured using chemical kinetics based on the GRI-3 mechanism \cite{gri3:1999}, stored as "Methane\_grimech30" in the FDS repository. Methane ($\mathrm{CH_4}$) is used as the fuel. They are configured for equivalence ratios of 0.6, 1.0, and 1.4, with initial temperatures of 626.85~$^\circ$C (900 K), 726.85~$^\circ$C (1000 K), 826.85~$^\circ$C (1100 K), and 926.85~$^\circ$C (1200 K) at standard atmospheric pressure. Timestep ramps are derived from Cantera-3.0 to speed up the computation. The comparisons of temperature and OH mass fraction between FDS and Cantera are shown in Figs. ~\ref{fig:ign_delay_Methane_grimech30_phi_0.6}-\ref{fig:ign_delay_Methane_grimech30_phi_1.4}.
+
+Six additional constant volume ignition delay cases are configured using the following chemical mechanisms: Methane\_TianfengLu \cite{TianfengLu:2008}, Methane\_Smooke \cite{Smooke:1995}, Ethylene\_TianfengLu \cite{Luo:2012}, Propane\_USC \cite{Qin:20001}, Propane\_Z66 \cite{Zettervall2017}, and nHeptane\_Chalmers \cite{Tao:2007}. These cases are set with an equivalence ratio of 1.0, an initial temperature of 826.85~$^\circ$C (1100 K), and standard atmospheric pressure. A constant timestep of $10^{-4}$ seconds is applied. Comparisons of temperature and OH mass fraction between FDS and Cantera are illustrated in Figs. ~\ref{fig:ign_delay_Methane_TianfengLu_phi_1.0}-\ref{fig:ign_delay_nHeptane_Chalmers_phi_1.0}.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_0p6_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_0p6_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_0p6_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 0.6.}
+\label{fig:ign_delay_Methane_grimech30_phi_0.6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p0_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_grimech30_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_900_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1000_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1100_1p4_OH} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_grimech30 mechanism at an equivalence ratio of 1.4.}
+\label{fig:ign_delay_Methane_grimech30_phi_1.4}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_TianfengLu_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Methane\_Smooke mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Methane_Smooke_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Ethylene\_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Ethylene_TianfengLu_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_USC mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Propane_USC_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for Propane\_Z66 mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_Propane_Z66_phi_1.0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_TMP} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_OH}
+\end{tabular*}
+\caption[Results of the {\ct ignition\_delay} test cases]{Comparison of temperature and OH mass fraction for nHeptane\_Chalmers mechanism at an equivalence ratio of 1.0.}
+\label{fig:ign_delay_nHeptane_Chalmers_phi_1.0}
+\end{figure}
+
+
+\section{Combustion Load Balancing (\textct{comb\_load\_bal})}
+\label{comb_load_bal}
+
+Fire simulations can become computationally expensive due to combustion calculations, especially when detailed chemistry is involved. Often, in parallel simulations, combustion is concentrated in only a few MPI processes, while other MPI processes remain idle, waiting for the combustion-related tasks to finish. To address this, FDS incorporates a load-balancing algorithm that evenly distributes the combustion workload across all MPI processes. This can significantly speed up the detailed chemistry simulations, with performance improvements ranging from 2 to 6 times, depending on the configuration. 
+
+Three cases are considered to verify the load-balancing algorithm: the first uses a detailed chemical mechanism (Methane\_Smooke, see Section ~\ref{ignition_delay}); the second uses two-step Arrhenius reactions; and the third involves two-step fast chemistry reactions. In all cases, gaseous fuel (methane or propane) is injected from the burner. To account for combustion in both regular cells and Immersed Boundary Cut-Cells, a sphere is placed above the burner, allowing the flame to propagate around it.
+
+
+Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane\_Smoke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations. 
+
+Figure \ref{fig:comb_load_bal_2step_Arrhenius} presents a similar load-balancing test for two-step Propane Arrhenius reactions using the FDS-RK2 ODE solver. In this configuration, there are 6 meshes, corresponding to 6 MPI processes. The load-balancing results show similar trends as observed with the detailed chemical mechanism. However, the time spent on combustion (FIRE) is significantly lower compared to the detailed chemistry case (20\% vs. 65\%). As a result, even with combustion load balancing, other processes dominate the total simulation time, limiting the speedup to just 1.2x.
+
+Figure \ref{fig:comb_load_bal_2step_fast} shows a load-balancing test for two-step Methane fast reactions using the FDS-Euler ODE solver. In this configuration, with 6 meshes corresponding to 6 MPI processes, load balancing provides no performance gains, as the time spent on combustion (FIRE) is very small relative to the total simulation time.
+
+Overall, combustion load balancing provides significant speedup for detailed chemistry cases. For small multi-step Arrhenius reactions, the speedup may be limited depending on the stiffness of the reactions. For fast chemistry, combustion load balancing is generally not beneficial.
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_CHEM} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using Methane\_Smooke detailed chemical mechanism.}
+\label{fig:comb_load_bal_methane_smooke}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_FIRE} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Propane Arrhenius reactions.}
+\label{fig:comb_load_bal_2step_Arrhenius}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_FIRE} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_DEVC} 
+\end{tabular*}
+\caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Methane fast reactions.}
+\label{fig:comb_load_bal_2step_fast}
+\end{figure}
+
 
 \section{Mixture Fraction (\textct{burke\_schumann})}
 \label{Mix_Frac}
@@ -3797,7 +3957,6 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 \caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
-
 
 
 \section{Ideal and Non-Ideal Heat of Combustion (\textct{HoC})}
@@ -4147,7 +4306,7 @@ This verification case tests the scrubbing of aerosols by droplet. The case cons
 \subsection{Oxidation of Soot on Surfaces (\texorpdfstring{\textct{soot\_oxidation\_wall}}{soot\_oxidation\_wall})}
 \label{soot_oxidation_wall}
 
-This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.28~kJ and the production of 0.3~mg of CO$_2$ and 8.3 ~$\mu$g of H$_2$O.
+This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.28~kJ, and the production of 0.37~g of CO$_2$.
 
 \begin{figure}[ht]
     \centering
@@ -5575,6 +5734,7 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \subsection{Drag Caused by Vegetation (\texorpdfstring{\textct{vegetation\_drag}}{vegetation\_drag})}
 \label{vegetation_drag_1}
 \label{vegetation_drag_2}
+\label{part_drag_stretched}
 
 Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 10000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 10 particles are inserted randomly in each grid cell, for a total of 10000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
 \be
@@ -6539,7 +6699,7 @@ In the simplest configuration of a static uniform wind field ({\ct LEVEL\_SET\_M
   \item {\ct LS\_ellipse\_5ms\_30deg.fds}: a \SI[per-mode=symbol]{5}{\meter\per\second} wind from the west and a \SI{30}{\degree} slope oriented to the northeast.
 \end{itemize}
 
-The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{1}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}.
+The cases involve a point ignition at $(x,y) = (0,0)$ and a fuel with an arbitrary zero-wind zero-slope spread rate ({\ct VEG\_LSET\_ROS\_00}) of \SI[per-mode=symbol]{0.05}{\meter\per\second}. The fuel layer has the default packing ratio ({\ct VEG\_LSET\_BETA}) of 0.01 and surface-to-volume ratio ({\ct VEG\_LSET\_SIGMA}) of \SI[per-mode=reciprocal]{5000}{\per\meter}, which are used to calculate the effect of wind and slope on fire spread~\cite{Rothermel:1972}. The default fuel height ({\ct VEG\_LSET\_HT}) of \SI{0.2}{\meter} is also applied, which is used to calculate the midflame wind speed from the value of the wind aloft~\cite{Andrews:2012}.
 
 The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. The relative errors between the FDS cases and the empirical model are shown in Figure~\ref{fig:level_set_ellipse_error}.
 
@@ -6567,7 +6727,7 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \subsection{Ember Generation (\texorpdfstring{\textct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
 
-This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 0.3~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
+This cases tests the application of an ember yield to a {\ct LEVEL\_SET\_MODE = 4} calculation. A hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default values for fuel properties. These defaults include a fuel load of 1.0~\unit{kg/m^2} and a char yield of 0.2. We set {\ct EMBER\_YIELD} to 0.05~kg/kg and verify this value by integrating the total mass of embers produced and total mass of fuel burned over the duration of the simulation. The inputs are as follows:
 \begin{lstlisting}
 &SURF ID                    = 'fuel'
 VEG_LSET_ROS_00             = 0.15
@@ -6594,11 +6754,11 @@ where the {\ct PART\_ID} corresponds to a {\ct PART} line that defines the prope
 \subsection{Ember ignition (\texorpdfstring{\textct{LS4\_ember\_ignition}}{LS4\_ember\_ignition})}
 \label{LS4_ember_ignition}
 
-This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 0.3~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
+This case tests the ember ignition model intended for use with {\ct LEVEL\_SET\_MODE = 4}. As with the previous example, a hypothetical fuel layer with a no-wind, no-slope spread rate of 0.15~m/s is specified, using the default fuel load of 1.0~\unit{kg/m^2} and char yield of 0.2. {\ct EMBER\_IGNITION\_POWER\_MEAN} is set to 0.005~kW and {\ct EMBER\_IGNITION\_POWER\_SIGMA} is left at the default value of 0.001~kW. Two meshes are configured each with a single ember dropped on the fuel bed. The power of the embers is determined by:
 \be
 \dot{q}_{\rm ember} = A_s \left[h_c \left( T_{\rm ember} - T_\infty \right) + \sigma \epsilon \left( T^4_{\rm ember} - T^4_\infty \right) \right]
 \ee
-Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 6~kg of fuel available to burn.
+Both embers have a surface area of $A_s=5 \times 10^{-5}$~m$^2$, an emissivity of $\epsilon = 1$, and a convective heat transfer coefficient of $h_c = 20$~W/m$^2$/K. The ember in mesh 1 has a surface temperature of $T_{\rm ember} = 500$~$^\circ$C resulting in a power of 0.0018~kW. The ember in mesh 2 has a surface temperature of $T_{\rm ember} = 1000$~$^\circ$C resulting in a power of 0.0087~kW. Based on the ember ignition probability distribution, we expect a 0~\% probability of ignition for the lower temperature particle and a 100~\% probability for the higher temperature. This is confirmed by checking the final amount of fuel consumed, where each mesh has 20~kg of fuel available to burn.
 
 \begin{figure}[h]
 \begin{center}
