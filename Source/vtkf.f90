@@ -12964,15 +12964,15 @@ ENDIF
 ENDSUBROUTINE BUILD_VTK_SLICE_GEOMETRY
 
 
-SUBROUTINE BUILD_VTK_SLICE_GEOMETRY2(NM, SL, &
+SUBROUTINE BUILD_VTK_SLICE_GEOMETRY2(NM, SL, NTSL, &
                                         NC, NP, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
 
-INTEGER :: NX, NY, NZ, NC, NP, I, J, K, IFACT, JFACT, KFACT
+INTEGER :: NX, NY, NZ, NC, NP, I, J, K, IFACT, JFACT, KFACT, KTS
 INTEGER :: I1,I2,J1,J2,K1,K2,L1,L2,N1,N2
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: VERTICES
 INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
 INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM, NTSL
 TYPE(SLICE_TYPE), POINTER, INTENT(IN) :: SL
 
 I1  = SL%I1
@@ -13016,7 +13016,12 @@ IF (I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) THEN
          DO I = I1, I2
             VERTICES(1,IFACT)=REAL(MESHES(NM)%X(I),FB)
             VERTICES(2,IFACT)=REAL(MESHES(NM)%Y(J),FB)
-            VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K1),FB)
+            IF (SL%AGL_SLICE > 0) THEN
+               KTS = MESHES(NM)%K_AGL_SLICE(I,J,NTSL)
+               VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(KTS),FB)
+            ELSE
+               VERTICES(3,IFACT)=REAL(MESHES(NM)%Z(K1),FB)
+            ENDIF
             IFACT = IFACT + 1
          ENDDO
       ENDDO
@@ -13898,12 +13903,9 @@ SUBROUTINE ADD_DATA_TO_SMOKE3D_VTKHDF_FILE(FILENAME, DATANAME, DATA, NM_IN, FAKE
    INTEGER :: NOFFSETS_ACCUM, NCONN_ACCUM, NPIECES_ACCUM, NCELLS_ACCUM, NPOINTS_ACCUM !, NFACES
    INTEGER :: NCONN_MAX, NOFFSETS_MAX, NCELLS_MAX, NPOINTS_MAX
    INTEGER :: NM,ERROR
-   !TYPE (MESH_TYPE), POINTER :: M
-   !REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: VERTICES
-   !INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: CONNECT, OFFSETS
-   !INTEGER(IB8), ALLOCATABLE, DIMENSION(:) :: VTKC_TYPE
    INTEGER, DIMENSION(1:N_MPI_PROCESSES) :: MESHES_PER_PROCESS
    INTEGER :: N_WRITTEN
+   INTEGER(HSIZE_T), DIMENSION(1) :: NPOINTS_MAX_ARRAY(1), NPOINTS_TOTAL_ARRAY(1)
    
    DO NM=1,N_MPI_PROCESSES
       MESHES_PER_PROCESS(NM) = 0
@@ -13944,9 +13946,10 @@ SUBROUTINE ADD_DATA_TO_SMOKE3D_VTKHDF_FILE(FILENAME, DATANAME, DATA, NM_IN, FAKE
    CALL OPEN_VTKHDF(FILENAME, FILE_ID, PLIST_ID, GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4)
    
    ! Data Quantity
-   
+   NPOINTS_MAX_ARRAY(1) = INT(NPOINTS_MAX, HSIZE_T)
+   NPOINTS_TOTAL_ARRAY(1) = INT(NPOINTS_TOTAL, HSIZE_T)
    CALL PARALLEL_INIT_F32(GROUP_ID4, TRIM(DATANAME), CRP_LIST, 1,&
-      INT((/NPOINTS_MAX/),HSIZE_T),INT((/NPOINTS_TOTAL/),HSIZE_T), DSET_ID, PLIST_ID) ! Color
+      NPOINTS_MAX_ARRAY,NPOINTS_TOTAL_ARRAY, DSET_ID, PLIST_ID) ! Color
    
    MESH_LOOP_HDF: DO NM=1,NMESHES
       NCELLS = MESHES(NM)%NC
@@ -13962,11 +13965,15 @@ SUBROUTINE ADD_DATA_TO_SMOKE3D_VTKHDF_FILE(FILENAME, DATANAME, DATA, NM_IN, FAKE
       
       ! Write data to file
       IF (.NOT.FAKE_WRITE) THEN
-         CALL PARALLEL_WRITE_F32(1, INT((/NPOINTS/),HSIZE_T), DSET_ID,&
-            PLIST_ID, INT((/NPOINTS_ACCUM/),HSIZE_T), INT((/NPOINTS/),HSIZE_T), DATA)
+         NPOINTS_MAX_ARRAY(1) = INT(NPOINTS_ACCUM, HSIZE_T)
+         NPOINTS_TOTAL_ARRAY(1) = INT(NPOINTS, HSIZE_T)
+         CALL PARALLEL_WRITE_F32(1, NPOINTS_TOTAL_ARRAY, DSET_ID,&
+            PLIST_ID, NPOINTS_MAX_ARRAY, NPOINTS_TOTAL_ARRAY, DATA)
       ELSE
-         CALL PARALLEL_WRITE_F32(1, INT((/0/),HSIZE_T), DSET_ID,&
-            PLIST_ID, INT((/NPOINTS_ACCUM/),HSIZE_T), INT((/0/),HSIZE_T), DATA)
+         NPOINTS_MAX_ARRAY(1) = 0_HSIZE_T
+         NPOINTS_TOTAL_ARRAY(1) = 0_HSIZE_T
+         CALL PARALLEL_WRITE_F32(1, NPOINTS_TOTAL_ARRAY, DSET_ID,&
+            PLIST_ID, NPOINTS_MAX_ARRAY, NPOINTS_TOTAL_ARRAY, DATA)
       ENDIF
          
       NPOINTS_ACCUM = NPOINTS_ACCUM + NPOINTS
@@ -14294,8 +14301,6 @@ SUBROUTINE INITIALIZE_VTKHDF_SLCF(T,II)
       IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP
       NCELLS = 0
       NPOINTS = 0
-      !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, TRIM(MESHES(1)%ALL_SLICE_NAMES(II)),&
-      !   MESHES(NM)%EMPTY_UNIQUE_SLICE(II)
       IF (MESHES(NM)%EMPTY_UNIQUE_SLICE(II)) THEN
          NCELLS = 0
          NPOINTS = 0
@@ -14303,13 +14308,15 @@ SUBROUTINE INITIALIZE_VTKHDF_SLCF(T,II)
       ELSE
          QUANTITY_LOOP: DO IQ=1,MESHES(1)%N_SLCF_VTK
             SL => SLICE(IQ)
-            !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, " S1 ", TRIM(SL%SLCF_NAME), " S2 ", TRIM(SLCFNAME)
             IF (TRIM(SL%SLCF_NAME).NE.TRIM(SLCFNAME)) CYCLE QUANTITY_LOOP
             NX = SL%I2 + 1 - SL%I1
             NY = SL%J2 + 1 - SL%J1
             NZ = SL%K2 + 1 - SL%K1
             IF (SL%I2-SL%I1==0 .OR. SL%J2-SL%J1==0 .OR. SL%K2-SL%K1==0) THEN
                NCONNECTIONS=4 ! 2-D slice
+            ELSEIF (MESHES(1)%UNIQUE_SLCF_AGL(II)>0) THEN
+               NCONNECTIONS=4 ! 2-D slice
+               NZ=1
             ELSE
                NCONNECTIONS=8 ! 3-D slice
             ENDIF
@@ -14318,8 +14325,6 @@ SUBROUTINE INITIALIZE_VTKHDF_SLCF(T,II)
             EXIT
          ENDDO QUANTITY_LOOP
       ENDIF
-
-      !WRITE(*,*) "RANK ", MY_RANK, " MESH ", NM, "NCELLS", NCELLS, "NPOINTS", NPOINTS
 
       ! Write number of cells data to file
       START1 = NM-1
@@ -16569,9 +16574,9 @@ SUBROUTINE WRITE_VTKHDF_SLICE_DATA_FILE(FILENAME,DATASET,NM,NCELLS,NPOINTS,DATA)
 END SUBROUTINE WRITE_VTKHDF_SLICE_DATA_FILE
 
 
-SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE(FILENAME,SLCFNAME,SL3D,NM,NCELLS,NPOINTS,NCONNECTIONS)
+SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE(FILENAME,SLCFNAME,SL3D,NM,NCELLS,NPOINTS,NCONNECTIONS,NTSL)
    CHARACTER(*), INTENT(IN) :: FILENAME, SLCFNAME
-   INTEGER, INTENT(IN) :: NM
+   INTEGER, INTENT(IN) :: NM, NTSL
    LOGICAL, INTENT(IN) :: SL3D
    INTEGER(HID_T) :: FILE_ID, PLIST_ID, CRP_LIST       ! Identifiers
    INTEGER(HID_T) :: GROUP_ID1,GROUP_ID2,GROUP_ID3,GROUP_ID4 ! Group identifier
@@ -16677,7 +16682,7 @@ SUBROUTINE WRITE_VTKHDF_SLICE_CELL_FILE(FILENAME,SLCFNAME,SL3D,NM,NCELLS,NPOINTS
          QUANTITY_LOOPB: DO IQ=1,NQT
             SL => SLICE(IQ)
             IF (TRIM(SL%SLCF_NAME)/=TRIM(SLCFNAME)) CYCLE QUANTITY_LOOPB
-            CALL BUILD_VTK_SLICE_GEOMETRY2(NM, SL, NC, NP, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
+            CALL BUILD_VTK_SLICE_GEOMETRY2(NM, SL, NTSL, NC, NP, VERTICES, CONNECT, OFFSETS, VTKC_TYPE)
             EXIT
          ENDDO QUANTITY_LOOPB
       ENDIF
@@ -17704,6 +17709,8 @@ IF(.NOT.VTK_HDF) THEN
                                "if ('_Y_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Z_' in x) and ('.pvtu' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2daFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_AGL_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.pvtu' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
@@ -17719,6 +17726,8 @@ ELSE
                                "if ('_Y_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl2dzFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_Z_' in x) and ('.vtkhdf' in x)]"
+   WRITE(LU_PARAVIEW,'(A,A)') "sl2daFiles = [indir+sep+rdir+sep+x for x in fileList ",&
+                               "if ('_AGL_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "sl3dFiles = [indir+sep+rdir+sep+x for x in fileList ",&
                                "if ('_SL3D_' in x) and ('.vtkhdf' in x)]"
    WRITE(LU_PARAVIEW,'(A,A)') "bndfFiles = [indir+sep+rdir+sep+x for x in fileList ",&
@@ -17828,8 +17837,8 @@ WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.SliceType.Origin = CenterOfRotation"
 WRITE(LU_PARAVIEW,'(A)') "    sl3dSlice.HyperTreeGridSlicer.Origin = CenterOfRotation"
 
 WRITE(LU_PARAVIEW,'(A)') "# Add 2d slice data"
-WRITE(LU_PARAVIEW,'(A,A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles],",&
-                           "    ['X','Y','Z']):"
+WRITE(LU_PARAVIEW,'(A,A)') "for sl2dFiles, axis_name in zip([sl2dxFiles,sl2dyFiles,sl2dzFiles,sl2daFiles],",&
+                           "    ['X','Y','Z','AGL']):"
 WRITE(LU_PARAVIEW,'(A)') "    if len(sl2dFiles) > 0:"
 WRITE(LU_PARAVIEW,'(A)') "        slcfTypes = [x.split(chid+'_'+axis_name+'_')[1] for x in sl2dFiles]"
 WRITE(LU_PARAVIEW,'(A,A)') "        slcfTypes = [('_'.join(x.split('_')[:-1])).replace('neg_','-')",&

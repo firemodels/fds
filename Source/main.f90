@@ -90,7 +90,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: REAL_BUFFER_10,REAL_BUFFER_MASS,REA
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MESHES_PER_PROCESS
 INTEGER :: N_WRITTEN
 #ifdef WITH_HDF5
-   INTEGER :: ERROR
+INTEGER :: ERROR
 #endif
 
 ! Initialize OpenMP
@@ -159,6 +159,8 @@ IF (MAXVAL(MAX_CELL_ASPECT_RATIO)>3.99_EB .AND. .NOT.CFL_VELOCITY_NORM_USER_SPEC
 ! Create output file names
 
 CALL ASSIGN_FILE_NAMES
+
+! Write the Smokeview (.smv) file using parallel MPI writes
 
 CALL WRITE_SMOKEVIEW_FILE
 
@@ -231,26 +233,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_VARIABLES_1')
-
-! Write the Smokeview (.smv) file using parallel MPI writes
-
-CALL WRITE_SMOKEVIEW_FILE
-
-! Stop all the processes if this is just a set-up run
-
-IF (SETUP_ONLY .OR. CHECK_MESH_ALIGNMENT) THEN
-   IF (MY_RANK==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
-   STOP_STATUS = SETUP_ONLY_STOP
-   IF (MY_RANK==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
-   CALL STOP_CHECK(1)
-ENDIF
-
-! MPI process 0 reopens the Smokeview file for additional output
-
-IF (MY_RANK==0) THEN
-   OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
-   CALL WRITE_STATUS_FILES
-ENDIF
 
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
