@@ -16,7 +16,7 @@ if %stopscript% == 1 exit /b
 set abort=0
 set buildstatus=
 call :is_file_installed cmake || set abort=1
-call :is_file_installed gcc   || set abort=1
+call :is_file_installed make  || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
@@ -56,7 +56,7 @@ if not exist %SUNDIALS_HOME%  goto else4
     set buildstatus=prebuilt
     goto endif4
 :else4
-  set build_status=norepo
+  set buildstatus=norepo
 :endif4
 goto eof
 
