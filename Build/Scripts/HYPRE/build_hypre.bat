@@ -1,133 +1,158 @@
 @echo off
-set INSTALLDIR=C:\sundials-6.7.0
-set SUNDIALSVERSION=v6.7.0
+set LIB_TAG=v2.32.0
+
+::*** library and tag name are the same
+
+set LIB_DIR=%LIB_TAG%
+
+
+::*** parse options
+
+set clean_hypre=
 
 call :getopts %*
 if %stopscript% == 1 exit /b
 
-set have_setx=1
-call :have_program setx       || set have_setx=0
+::*** make sure cmake and gcc are installed
 
 set abort=0
+set buildstatus=
 call :is_file_installed cmake || set abort=1
 call :is_file_installed gcc   || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
 
+::*** define root directory where fds repo and libs directories are located
+
+set FIREMODELS=..\..\..\..
+cd %FIREMODELS%
+set FIREMODELS=%CD%
+cd %CURDIR%
+
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
+
+::*** erase install directory if clean option was specified
+
+if "x%clean_hypre%" == "x" goto endif1
+  if exist %INSTALLDIR% rmdir /s /q %INSTALLDIR%
+:endif1
+
+::*** if hypre library directory exists exit and use it
+
+if not exist %INSTALLDIR% goto endif2
+  set HYPRE_HOME=%INSTALLDIR%
+  set buildstatus=prebuilt
+  goto eof
+:endif2
+
+::*** if hypre repo exists build library
+
+set LIB_REPO=%FIREMODELS%\hypre
+if exist %LIB_REPO% goto buildlib
+
+::*** if directory pointed to by HYPRE_HOME exists exit and use it
+::    if it doesn't exist then exit and build fds without the hypre library
+
+if "x%HYPRE_HOME%" == "x" goto else4
+if not exist %HYPRE_HOME%  goto else4
+    set buildstatus=prebuilt
+    goto endif4
+:else4
+  set HYPRE_HOME=
+  set buildstatus=norepo
+:endif4
+goto eof
+
+::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
+
+:buildlib
+cd %CURDIR%
+
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo building Hypre library version %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+
+set buildstatus=build
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo setting up Intel compilers
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-call ..\..\Build\Scripts\setup_intel_compilers.bat
+call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 cd %CURDIR%
 
-set SUNDIALS=..\..\..\sundials
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo checking out tag %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+cd %LIB_REPO%
+git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+git checkout %LIB_TAG%
 
-:: clone sundials repo (at same level as fds, smv etc repos) if it doesn't exist
-if exist %SUNDIALS% goto endif1
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo cloning sundials from https://github.com/LLNL/sundials.git
+echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
+echo in the file HYPRE_config.h.cmake.in
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
+
+cd %CURDIR%
+
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo cleaning hypre repo
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-  cd ..\..\..
-  git clone https://github.com/LLNL/sundials.git
-  cd sundials
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo checking out version %SUNDIALSVERSION%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-  git checkout %SUNDIALSVERSION%
-  cd %CURDIR%
-:endif1
-
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo cleaning sundials repo
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-
-cd %SUNDIALS%
-set SUNDIALS=%CD%
-set BUILDDIR=%SUNDIALS%\BUILDDIR
+cd %LIB_REPO%
 git clean -dxf
 
-mkdir %BUILDDIR%
-cd %BUILDDIR%
-
-:: configure sundials
+echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring sundials version %SUNDIALSVERSION%
+echo configuring hypre version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+set BUILDDIR=%LIB_REPO%\src\cmbuild
+cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
--DEXAMPLES_INSTALL_PATH="%INSTALLDIR%\examples" ^
--DBUILD_FORTRAN_MODULE_INTERFACE=ON ^
 -DCMAKE_C_COMPILER=icx ^
--DCMAKE_Fortran_COMPILER=ifort ^
--DEXAMPLES_ENABLE_C=OFF ^
--DEXAMPLES_ENABLE_CXX=OFF ^
--DEXAMPLES_ENABLE_F2003=OFF ^
--DENABLE_OPENMP=ON ^
--DBUILD_SHARED_LIBS=OFF ^
--DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
--DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
+-DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
+-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
+-DCMAKE_INSTALL_LIBDIR="lib"
 
-:: build and install sundials
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo building sundials version %SUNDIALSVERSION%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
-call make 
-
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo installing sundials version %SUNDIALSVERSION% in %INSTALLDIR%
+echo building and installing hypre version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 call make install
 
-if %have_setx% == 0 goto else_setx
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
-setx SUNDIALS_HOME %INSTALLDIR%
-echo note: the environment variable SUNDIALS_HOME takes effect after opening a new command shell
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
 echo.
-goto endif_setx
-:else_setx
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo set environment variable SUNDIALS_HOME to %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-:endif_setx
-
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo sundials version %SUNDIALSVERSION% installed in %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
+set HYPRE_HOME=%INSTALLDIR%
+echo The Hypre library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 cd %CURDIR%
@@ -141,6 +166,15 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
+ if /I "%1" EQU "--clean-hypre" (
+    set clean_hypre=1
+    set valid=1
+ )
+ if /I "%1" EQU "--help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
  if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
@@ -192,9 +226,16 @@ exit /b
 :: -------------------------------------------------------------
 :usage  
 :: -------------------------------------------------------------
-echo build sundials
+echo build hypre
 echo. 
-echo -help           - display this message
+echo --clean-hypre    - force build of hypre library
+echo --help           - display this message
 exit /b
 
 :eof
+echo.
+echo.
+if "%buildstatus%" == "norepo"   echo The Hypre git repo does not exist, The Hypre library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The Hypre library was not built. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo Hypre library in %HYPRE_HOME%
+echo.

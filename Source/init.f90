@@ -138,6 +138,11 @@ IF (OUTPUT_CHEM_IT) THEN
    CALL ChkMemErr('INIT','CHEM_SUBIT',IZERO)
    M%CHEM_SUBIT = 0._EB
 ENDIF
+
+ALLOCATE(M%CHEM_ACTIVE_CELLS(IBP1*JBP1*KBP1,3),STAT=IZERO)
+CALL ChkMemErr('INIT','CHEM_ACTIVE_CELLS',IZERO)
+M%CHEM_ACTIVE_CELLS=-1
+
 ALLOCATE(M%Q(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
 CALL ChkMemErr('INIT','Q',IZERO)
 
@@ -766,7 +771,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==1) CYCLE
+         IF (I==1) THEN ; OB%EXPOSED_FACE_INDEX(1)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I-1,J,K)
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
@@ -789,7 +794,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==M%IBAR) CYCLE
+         IF (I==M%IBAR) THEN ; OB%EXPOSED_FACE_INDEX(2)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I+1,J,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -813,7 +818,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==1) CYCLE
+         IF (J==1) THEN ; OB%EXPOSED_FACE_INDEX(3)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J-1,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -837,7 +842,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==M%JBAR) CYCLE
+         IF (J==M%JBAR) THEN ; OB%EXPOSED_FACE_INDEX(4)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J+1,K)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -861,7 +866,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==1) CYCLE
+         IF (K==1) THEN ; OB%EXPOSED_FACE_INDEX(5)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J,K-1)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -885,7 +890,7 @@ OBST_LOOP_2: DO OBST_INDEX=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==M%KBAR) CYCLE
+         IF (K==M%KBAR) THEN ; OB%EXPOSED_FACE_INDEX(6)=1 ; CYCLE ; ENDIF
          IC = M%CELL_INDEX(I,J,K+1)
          ! Permanently covered face
          IF (M%CELL(IC)%SOLID .AND. .NOT.M%OBSTRUCTION(M%CELL(IC)%OBST_INDEX)%REMOVABLE) CYCLE
@@ -2886,7 +2891,7 @@ INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: TT
 REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
-INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE
+INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE,FI
 LOGICAL :: VENT_FOUND,ALIGNED
 TYPE (MESH_TYPE), POINTER :: M,MM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OBX
@@ -3189,6 +3194,17 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    ENDIF FOUND_OTHER_MESH
 
 ENDIF CHECK_MESHES
+
+! If this wall cell is attached to an OBST, check if the OBST face is exposed
+
+IF (OBST_INDEX>0) THEN
+   IF (.NOT.M%CELL(ICG)%SOLID .OR. M%OBSTRUCTION(M%CELL(ICG)%OBST_INDEX)%REMOVABLE) THEN
+      FI = ABS(IOR)*2 ; IF (IOR<0) FI = FI-1
+      M%OBSTRUCTION(OBST_INDEX)%EXPOSED_FACE_INDEX(FI) = 1
+   ENDIF
+ENDIF
+
+! Ensure that the WALL_INDEX and SURF_INDEX can be identified from the abutting gas phase cell, ICG
 
 M%CELL(ICG)%WALL_INDEX(-IOR) = IW
 M%CELL(ICG)%SURF_INDEX(-IOR) = SURF_INDEX_NEW
@@ -4779,7 +4795,7 @@ USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: N,I1,I2,J1,J2,K1,K2,I,J,K,IW,ICG,IC,OBST_INDEX,NOM,IIO,JJO,KKO
+INTEGER :: I1,I2,J1,J2,K1,K2,I,J,K,IW,ICG,IC,OBST_INDEX,NOM,IIO,JJO,KKO
 REAL(EB) :: TNOW
 LOGICAL :: CREATE,REMOVE
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
@@ -4806,17 +4822,18 @@ DO IW=1,N_EXTERNAL_WALL_CELLS
       IC  = CELL_INDEX(BC%II ,BC%JJ ,BC%KK )
       ICG = CELL_INDEX(BC%IIG,BC%JJG,BC%KKG)
       IF (CELL(ICG)%SOLID) CYCLE
-      OBST_INDEX=0
+      OBST_INDEX = 0
+      REMOVE = .FALSE.
+      CREATE = .FALSE.
       CALL GET_BOUNDARY_TYPE
    ENDIF
 ENDDO
 
 ! Loop over all obstructions in the current mesh and initialize newly exposed or covered wall cell faces
 
-OBSTRUCTION_LOOP: DO N=1,N_OBST
+OBSTRUCTION_LOOP: DO OBST_INDEX=1,N_OBST
 
-OB => OBSTRUCTION(N)
-OBST_INDEX=N
+OB => OBSTRUCTION(OBST_INDEX)
 
 IF (.NOT.OB%SCHEDULED_FOR_REMOVAL .AND. .NOT.OB%SCHEDULED_FOR_CREATION) CYCLE OBSTRUCTION_LOOP
 
@@ -4948,7 +4965,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 WC => MESHES(NM)%WALL(IW)
 BC => MESHES(NM)%BOUNDARY_COORD(WC%BC_INDEX)
 
-IF (IW<=N_EXTERNAL_WALL_CELLS .AND. REMOVE) THEN
+IF (IW<=N_EXTERNAL_WALL_CELLS) THEN
    EWC => MESHES(NM)%EXTERNAL_WALL(IW)
    WC%BOUNDARY_TYPE = SOLID_BOUNDARY
    CELL(IC)%SOLID       = .TRUE.
@@ -5007,12 +5024,6 @@ IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
    CALL INIT_WALL_CELL(NM,BC%II,BC%JJ,BC%KK,WC%OBST_INDEX,IW,BC%IOR,WC%SURF_INDEX,IERR,T)
    WC => MESHES(NM)%WALL(IW)
    IF (IW<=N_EXTERNAL_WALL_CELLS) EWC%PRESSURE_BC_TYPE = PRESSURE_BC_TYPE
-! This code is under construction
-!  SF => SURFACE(WC%SURF_INDEX)
-!  IF (SF%VARIABLE_THICKNESS .OR. SF%HT_DIM>1) THEN
-!     CALL FIND_WALL_BACK_INDEX(NM,IW)
-!     CALL REALLOCATE_ONE_D_ARRAYS(NM,WALL_CELL=IW)
-!  ENDIF
 ENDIF
 
 ! Special cases 1: BURNed_AWAY obstruction exposes a surface that also burns, in which case the surface is to ignite immediately.

@@ -214,7 +214,7 @@ IF (SOLID_PARTICLES) THEN
 
       IF (LPC%SOLID_PARTICLE) THEN
          CALL CALCULATE_ZZ_F(T,DT,PARTICLE_INDEX=IP)
-         IF (CORRECTOR) CALL DEPOSIT_PARTICLE_MASS(NM,LP,LPC,CALL_HT_1D)  ! Add the particle off-gas to the gas phase mesh
+         IF (CORRECTOR) CALL DEPOSIT_PARTICLE_MASS(NM,LP,LPC)  ! Add the particle off-gas to the gas phase mesh
       ENDIF
 
    ENDDO PARTICLE_LOOP
@@ -1364,16 +1364,14 @@ END SUBROUTINE CALCULATE_ZZ_F
 !> \param NM Mesh number
 !> \param LP Pointer to Lagrangian Particle derived type variable
 !> \param LPC Pointer to Lagrangian Particle Class
-!> \param CALL_HT_1D Logical indicating if the 1-D heat transfer routine was called
 !> \details Deposit the particle off-gas onto the mesh
 
-SUBROUTINE DEPOSIT_PARTICLE_MASS(NM,LP,LPC,CALL_HT_1D)
+SUBROUTINE DEPOSIT_PARTICLE_MASS(NM,LP,LPC)
 
 USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
 INTEGER, INTENT(IN) :: NM
-LOGICAL, INTENT(IN) :: CALL_HT_1D
-REAL(EB) :: RADIUS,AREA_SCALING,M_DOT_SINGLE,CP,MW_RATIO,H_G,ZZ_GET(1:N_TRACKED_SPECIES),M_GAS,LENGTH,WIDTH,H_S_B
+REAL(EB) :: RADIUS,M_DOT_SINGLE,CP,MW_RATIO,H_G,ZZ_GET(1:N_TRACKED_SPECIES),M_GAS,LENGTH,WIDTH,H_S_B
 INTEGER :: NS
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
@@ -1396,7 +1394,6 @@ ENDIF
 
 IF (ABS(RADIUS)<TWO_EPSILON_EB) RETURN
 
-AREA_SCALING = 1._EB
 IF (LPC%DRAG_LAW == SCREEN_DRAG .OR. LPC%DRAG_LAW == POROUS_DRAG) THEN
    LENGTH = LP%LENGTH
    WIDTH = LP%LENGTH
@@ -1409,25 +1406,9 @@ SELECT CASE(SF%GEOMETRY)
       B1%AREA = 2._EB*LENGTH*WIDTH
    CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)
       B1%AREA = TWOPI*RADIUS*LENGTH
-      IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) AREA_SCALING = (SF%INNER_RADIUS+SF%THICKNESS)/RADIUS
    CASE(SURF_SPHERICAL)
       B1%AREA = 4._EB*PI*RADIUS**2
-      IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) AREA_SCALING = ((SF%INNER_RADIUS+SF%THICKNESS)/RADIUS)**2
 END SELECT
-
-! In PYROLYSIS, all the mass fluxes are based on the INITIAL surface area.
-! Here, correct the mass flux using the CURRENT surface area.
-
-IF (CALL_HT_1D) THEN
-   B1%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = B1%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)*AREA_SCALING
-   B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)*AREA_SCALING
-   B1%Q_DOT_G_PP                             = B1%Q_DOT_G_PP                            *AREA_SCALING
-   B1%Q_DOT_O2_PP                            = B1%Q_DOT_O2_PP                           *AREA_SCALING
-   IF (LP%OD_INDEX>0) THEN
-      ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
-      ONE_D%M_DOT_S_PP(1:ONE_D%N_MATL)       = ONE_D%M_DOT_S_PP(1:ONE_D%N_MATL)         *AREA_SCALING
-   ENDIF
-ENDIF
 
 ! Add evaporated particle species to gas phase and compute resulting contribution to the divergence
 
@@ -1444,7 +1425,7 @@ DO NS=1,N_TRACKED_SPECIES
    ZZ_GET(NS) = 1._EB
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,B1%TMP_F)
    !$OMP CRITICAL
-   Q_DOT(3,NM) = Q_DOT(3,NM) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
+   Q_DOT(4,NM) = Q_DOT(4,NM) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
    !$OMP END CRITICAL
 ENDDO
 
@@ -1463,8 +1444,8 @@ D_SOURCE(BC%IIG,BC%JJG,BC%KKG) = D_SOURCE(BC%IIG,BC%JJG,BC%KKG) - B1%Q_CON_F*B1%
 
 ! Add energy losses and gains to overall energy budget array
 
-Q_DOT(7,NM) = Q_DOT(7,NM) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
-Q_DOT(2,NM) = Q_DOT(2,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
+Q_DOT(8,NM) = Q_DOT(8,NM) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
+Q_DOT(3,NM) = Q_DOT(3,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
 !$OMP END CRITICAL
 
 ! Calculate the mass flux of fuel gas from particles
@@ -2927,9 +2908,16 @@ O2_LOOP: DO ITER=1,MAX_ITER
       ENDIF
 
       ! Sum the mass and heat generation within the solid layers (PPP) and transfer result to the surface (PP).
+      ! GEOM_FACTOR accounts for cylindrical and spherical geometry. If this is not a Lagrangian particle, scale with
+      ! the original radius (SF%THICKNESS) because the VENT to which the flux is applied does not change in area.
 
       IF (ONE_D%N_LAYERS==1 .AND. REMOVE_LAYER) MF_FRAC(I) = 1._EB
-      GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
+
+      IF (PRESENT(PARTICLE_INDEX)) THEN
+         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*R_S(0)**(I_GRAD-1))
+      ELSE
+         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
+      ENDIF
 
       Q_DOT_G_PP  = Q_DOT_G_PP  + Q_DOT_G_PPP *GEOM_FACTOR
       Q_DOT_O2_PP = Q_DOT_O2_PP + Q_DOT_O2_PPP*GEOM_FACTOR

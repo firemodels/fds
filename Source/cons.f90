@@ -266,7 +266,6 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
@@ -912,10 +911,11 @@ MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
-REAL(EB)  :: ODE_MIN_ATOL= -1._EB
-LOGICAL  :: EQUIV_RATIO_CHECK = .TRUE.
-REAL(EB) :: MIN_EQUIV_RATIO=0.2_EB
-REAL(EB) :: MAX_EQUIV_RATIO=10._EB
+REAL(EB) :: ODE_MIN_ATOL= -1._EB
+LOGICAL  :: EQUIV_RATIO_CHECK = .FALSE.
+REAL(EB) :: MIN_EQUIV_RATIO=0.0_EB
+REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
+LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 
 
 END MODULE CHEMCONS

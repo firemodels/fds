@@ -401,7 +401,7 @@ To solve the reactive system, we assume a constant pressure reactor. For that, t
 \frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega_j} 
 \end{equation} 
 Here,  $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
-To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
+To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials \cite{cvodeDoc:2024} is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
 
 
 \subsection{Heat Release Rate}
