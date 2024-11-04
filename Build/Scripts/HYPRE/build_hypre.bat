@@ -154,14 +154,6 @@ echo.
 set HYPRE_HOME=%INSTALLDIR%
 echo Hypre library version %LIB_TAG% built in %INSTALLDIR%
 echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo cleaning fds build directory
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-cd %FDS_BUILDDIR%
-git clean -dxf > Nul
 
 cd %CURDIR%
 
