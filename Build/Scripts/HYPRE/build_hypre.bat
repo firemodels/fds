@@ -6,7 +6,9 @@ set LIB_TAG=v2.32.0
 set LIB_DIR=%LIB_TAG%
 
 
-::*** placehoder for parsing options
+::*** parse options
+
+set clean_hypre=
 
 call :getopts %*
 if %stopscript% == 1 exit /b
@@ -28,34 +30,43 @@ cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
+set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
+
+::*** erase install directory if clean option was specified
+
+if "x%clean_hypre%" == "x" goto endif1
+  if exist %INSTALLDIR% rmdir /s /q %INSTALLDIR%
+:endif1
+
 ::*** if hypre library directory exists exit and use it
 
-set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
-if not exist %INSTALLDIR% goto endif1
+if not exist %INSTALLDIR% goto endif2
   set HYPRE_HOME=%INSTALLDIR%
   set buildstatus=prebuilt
   goto eof
-:endif1
-
-::*** if directory pointed to by HYPRE_HOME exists exit and use it
-
-if "x%HYPRE_HOME%" == "x" goto endif2
-  if not exist %HYPRE_HOME%  goto endif2
-    set buildstatus=prebuilt
-    goto eof
 :endif2
 
-::*** if hypre repo does not exist exit and build fds without it
+::*** if hypre repo exists build library
 
 set LIB_REPO=%FIREMODELS%\hypre
-if exist %LIB_REPO% goto endif3
+if exist %LIB_REPO% goto buildlib
+
+::*** if directory pointed to by HYPRE_HOME exists exit and use it
+::    if it doesn't exist then exit and build fds without the hypre library
+
+if "x%HYPRE_HOME%" == "x" goto else4
+if not exist %HYPRE_HOME%  goto else4
+    set buildstatus=prebuilt
+    goto endif4
+:else4
   set HYPRE_HOME=
   set buildstatus=norepo
-  goto eof
-:endif3
+:endif4
+goto eof
 
 ::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
 
+:buildlib
 cd %CURDIR%
 
 echo.
@@ -92,15 +103,13 @@ git checkout %LIB_TAG%
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo modify HYPRE_config.h.cmake.in file
+echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
+echo in the file HYPRE_config.h.cmake.in
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-echo change HYPRE_FMANGLE line to #define HYPRE_FMANGLE 4
-echo after saving file, press enter
-notepad %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
 
-pause
 cd %CURDIR%
 
 echo.
@@ -143,7 +152,7 @@ call make install
 
 echo.
 set HYPRE_HOME=%INSTALLDIR%
-echo Hypre library version %LIB_TAG% built in %INSTALLDIR%
+echo The Hypre library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 cd %CURDIR%
@@ -157,6 +166,15 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
+ if /I "%1" EQU "--clean-hypre" (
+    set clean_hypre=1
+    set valid=1
+ )
+ if /I "%1" EQU "--help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
  if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
@@ -210,10 +228,14 @@ exit /b
 :: -------------------------------------------------------------
 echo build hypre
 echo. 
-echo -help           - display this message
+echo --clean-hypre    - force build of hypre library
+echo --help           - display this message
 exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo HYPRE library not built, The hypre git repo does not exist
-if "%buildstatus%" == "prebuilt" echo HYPRE library not built. It exists in %HYPRE_HOME%
+echo.
+if "%buildstatus%" == "norepo"   echo The Hypre git repo does not exist, The Hypre library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The Hypre library was not built. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo Hypre library in %HYPRE_HOME%
+echo.

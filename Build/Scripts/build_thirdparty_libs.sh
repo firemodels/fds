@@ -14,6 +14,11 @@ ARG=""
 # Loop through the options
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --clean-all)
+            clean_hypre=true
+            clean_sundials=true
+            shift
+            ;;
         --clean-hypre)
             clean_hypre=true  # Set the flag to true when --clean-hypre is used
             shift
