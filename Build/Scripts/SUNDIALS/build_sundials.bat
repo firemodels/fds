@@ -153,9 +153,7 @@ echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
 set SUNDIALS_HOME=%INSTALLDIR%
 echo.
 
-echo sundials version %LIB_TAG% installed in %INSTALLDIR%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
+echo The Sundials library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 cd %CURDIR%
@@ -237,5 +235,7 @@ exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo Sundials library not built, The sundials git repo does not exist
-if "%buildstatus%" == "prebuilt" echo Sundials library not built. It exists in %SUNDIALS_HOME%
+if "%buildstatus%" == "norepo"   echo The Sundials git repo does not exist, The Sundials library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The Sundials library was not built. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo Sundials library in %SUNDIALS_HOME%
+echo.

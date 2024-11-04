@@ -152,7 +152,7 @@ call make install
 
 echo.
 set HYPRE_HOME=%INSTALLDIR%
-echo Hypre library version %LIB_TAG% built in %INSTALLDIR%
+echo The Hypre library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 cd %CURDIR%
@@ -234,5 +234,8 @@ exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo Hypre library not built, The hypre git repo does not exist
-if "%buildstatus%" == "prebuilt" echo Hypre library not built. It exists in %HYPRE_HOME%
+echo.
+if "%buildstatus%" == "norepo"   echo The Hypre git repo does not exist, The Hypre library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The Hypre library was not built. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo Hypre library in %HYPRE_HOME%
+echo.
