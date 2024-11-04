@@ -16,7 +16,7 @@ if %stopscript% == 1 exit /b
 set abort=0
 set buildstatus=
 call :is_file_installed cmake || set abort=1
-call :is_file_installed gcc   || set abort=1
+call :is_file_installed make  || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
@@ -56,7 +56,7 @@ if not exist %SUNDIALS_HOME%  goto else4
     set buildstatus=prebuilt
     goto endif4
 :else4
-  set build_status=norepo
+  set buildstatus=norepo
 :endif4
 goto eof
 
@@ -69,7 +69,7 @@ set buildstatus=build
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building Sundials library version %LIB_TAG%
+echo building sundials library version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
@@ -153,7 +153,7 @@ echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
 set SUNDIALS_HOME=%INSTALLDIR%
 echo.
 
-echo The Sundials library version %LIB_TAG% was built and installed in %INSTALLDIR%
+echo The sundials library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 echo ----------------------------------------------------------
@@ -246,7 +246,7 @@ exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo The Sundials git repo does not exist, The Sundials library was not built.  FDS will be built without it.
-if "%buildstatus%" == "prebuilt" echo The Sundials library was not built. FDS will be built using the
-if "%buildstatus%" == "prebuilt" echo Sundials library in %SUNDIALS_HOME%
+if "%buildstatus%" == "norepo"   echo The sundials git repo does not exist, The sundials library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The sundials library exists. Skipping sundials build. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo sundials library in %SUNDIALS_HOME%
 echo.
