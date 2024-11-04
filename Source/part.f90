@@ -529,9 +529,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          ELSE
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,II,JJ,KK)
             IC = CELL_INDEX(II,JJ,KK)
-            BC%IIG = II
-            BC%JJG = JJ
-            BC%KKG = KK
+            BC%IIG = II; BC%JJG = JJ; BC%KKG = KK
+            BC%II  = II; BC%JJ  = JJ; BC%KK  = KK
             IF (.NOT.CELL(IC)%SOLID) EXIT CHOOSE_COORDS
          ENDIF
 
@@ -865,6 +864,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
 
          ! Update idicies in case offset puts location in a different cell
          CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+         BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
@@ -1472,9 +1472,8 @@ USE OUTPUT_DATA, ONLY: N_PROF
 INTEGER :: ND
 TYPE (PROFILE_TYPE), POINTER :: PF
 
-BC%IIG = II
-BC%JJG = JJ
-BC%KKG = KK
+BC%IIG = II; BC%JJG = JJ; BC%KKG = KK
+BC%II  = II; BC%JJ  = JJ; BC%KK  = KK
 LP%U = IN%U0
 LP%V = IN%V0
 LP%W = IN%W0
@@ -1886,6 +1885,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          IF (LP%PATH_PARTICLE) THEN
             CALL MOVE_IN_GAS
             CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+            BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
          ENDIF
          EXIT TIME_STEP_LOOP
       ENDIF
@@ -1939,6 +1939,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! Determine the cell indices of the new particle location.
 
       CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+      BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
 
       ! If the particle is not near a boundary cell, cycle.
 
@@ -2520,6 +2521,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Store containing volume at new location
       CALL GET_IJK(BC%X,BC%Y,BC%Z,NM,XI,YJ,ZK,BC%IIG,BC%JJG,BC%KKG)
+      BC%II = BC%IIG; BC%JJ = BC%JJG; BC%KK = BC%KKG
       CALL GET_RVC(NM,BC%IIG,BC%JJG,BC%KKG,LP%RVC)
 
    ENDDO TIME_STEP_LOOP
