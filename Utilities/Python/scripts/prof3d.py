@@ -11,7 +11,7 @@ Usage: Copy this script to your working directory and add your
        Use option --save_animation to save the animation (no slider) to a movie file
 
 Example:
-$ python prof3d.py --with_slider
+$ python prof3d.py --with-slider
 """
 
 import sys
@@ -24,8 +24,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--with_slider', action='store_true', help='Control animation with a time slider')
-parser.add_argument('--save_animation', action='store_true', help='Save animation')
+parser.add_argument('--with-slider', action='store_true', help='Control animation with a time slider')
+parser.add_argument('--save-animation', action='store_true', help='Save animation')
 
 args = parser.parse_args()
 
@@ -41,12 +41,11 @@ plt.close('all')
 
 tmpa = 20.
 scalar_min = 20.
-scalar_max = 60.
+scalar_max = 360.
 
-filenames = ['pine_21O2_40_1C_cat_prof_1.csv',
-             'pine_21O2_40_1C_cat_prof_5.csv',
-             'pine_21O2_40_1C_cat_prof_9.csv',
-             'pine_21O2_40_1C_cat_prof_13.csv']
+filenames = ['./my_prof_1.csv',
+             './my_prof_2.csv',
+             './my_prof_3.csv]
 
 # create lists to store information about each profile
 IOR = []
