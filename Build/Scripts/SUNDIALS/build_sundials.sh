@@ -1,7 +1,6 @@
 #!/bin/bash
 CONFMAKE=$1
 CLEAN_SUNDIALS=$2
-source ../sundials_version.sh
 
 dir=`pwd`
 

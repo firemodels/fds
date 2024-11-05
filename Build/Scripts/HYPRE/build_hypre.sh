@@ -1,7 +1,6 @@
 #!/bin/bash
 CONFMAKE=$1
 CLEAN_HYPRE=$2
-source ../hypre_version.sh
 
 dir=`pwd`
 
