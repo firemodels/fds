@@ -7,6 +7,7 @@ fi
 
 echo "FIREMODELS=$FIREMODELS"
 
+clean_fds=false
 clean_hypre=false
 clean_sundials=false
 ARG=""
@@ -14,11 +15,23 @@ ARG=""
 # Loop through the options
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --clean-all)
+            clean_fds=true
+            clean_hypre=true
+            clean_sundials=true
+            shift
+            ;;
+        --clean-fds)
+            clean_fds=true
+            shift
+            ;;
         --clean-hypre)
+            clean_fds=true
             clean_hypre=true  # Set the flag to true when --clean-hypre is used
             shift
             ;;
         --clean-sundials)
+            clean_fds=true
             clean_sundials=true
             shift
             ;;
@@ -35,6 +48,11 @@ done
 
 # Trim leading spaces from ARG, if necessary
 ARG="${ARG#"${ARG%%[![:space:]]*}"}"
+
+if [ "$clean_fds" = true ]; then
+    echo "Option --clean-fds is set."
+    rm *.o *.mod >& /dev/null
+fi
 
 if [ "$clean_hypre" = true ]; then
     echo "Option --clean-hypre is set."

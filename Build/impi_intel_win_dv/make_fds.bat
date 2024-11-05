@@ -1,6 +1,11 @@
 @echo off
 set arg1=%1
 
+:: build hypre and/or sundials libraries if necessary
+
+call ..\Scripts\build_thirdparty_libs %*
+if %stopscript% == 1 exit /b
+
 for %%I in (.) do set TARGET=%%~nxI
 
 :: setup compiler environment
