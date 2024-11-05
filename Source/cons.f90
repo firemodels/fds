@@ -275,6 +275,7 @@ LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values us
 LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: VTK_BINARY=.TRUE.                        !< Flag that indicates VTK outputs should be binary or ascii
+LOGICAL :: VTK_HDF=.TRUE.                           !< Flag that indicates VTK outputs should be HDF or XML
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
 LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
 LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vtk files should be generated
@@ -282,6 +283,11 @@ LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test
 LOGICAL :: AGL_TIMERS(1:2)=(/.FALSE.,.FALSE./)      !< AGL_TIMERS(1) for TIME OF ARRIVAL, AGL_TIMERS(2) for RESIDENCE TIME
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
+LOGICAL :: WROTE_SL3D=.FALSE.                       !< Flag indicating if a SL3D file was written during primary out
+LOGICAL :: WROTE_SL2D=.FALSE.                       !< Flag indicating if a SL2D file was written during primary out
+LOGICAL :: WROTE_SMOKE3D=.FALSE.                    !< Flag indicating if a Smoke3D file was written during primary out
+LOGICAL :: WROTE_BNDF=.FALSE.                       !< Flag indicating if a BNDF file was written during primary out
+LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART file was written during primary out
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -595,6 +601,11 @@ CHARACTER(FN_LENGTH)                             :: FN_PARAVIEW
 
 CHARACTER(9) :: FMT_R
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
+#ifdef WITH_HDF5
+! Total number of obst and geom patches in each mesh
+! 2*NMESHES arrays. odds include OBST patches, evens include GEOM patches
+INTEGER(IB32), ALLOCATABLE, DIMENSION(:) :: NCELLS_VTK, NPOINTS_VTK, NCONNECTIONS_VTK
+#endif
 
 ! Boundary condition arrays
 

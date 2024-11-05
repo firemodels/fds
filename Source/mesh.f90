@@ -150,6 +150,7 @@ TYPE MESH_TYPE
    INTEGER :: N_NEIGHBORING_MESHES !< Number of meshing abutting the current one
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBORING_MESH  !< Array listing the indices of neighboring meshes
    INTEGER, ALLOCATABLE, DIMENSION(:) :: RGB               !< Color indices of the mesh for Smokeview
+   INTEGER :: NP=0, NC=0 ! Number of points and number of cells in mesh
 
    ! Mesh coordinate variables
 
@@ -312,6 +313,7 @@ TYPE MESH_TYPE
    CHARACTER(200), ALLOCATABLE, DIMENSION(:) :: UNIQUE_SLICE_NAMES, ALL_SLICE_NAMES, ALL_SLICE_QUANTITIES
    INTEGER, ALLOCATABLE, DIMENSION(:) :: ALL_SLICE_TOPOLOGIES
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: EMPTY_UNIQUE_SLICE, UNIQUE_SLICE_IS_SL3D
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: UNIQUE_SLCF_AGL
 
    INTEGER :: N_RADF=0
    TYPE(RAD_FILE_TYPE), ALLOCATABLE, DIMENSION(:) :: RAD_FILE

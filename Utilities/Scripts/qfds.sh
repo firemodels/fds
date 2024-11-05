@@ -124,8 +124,13 @@ max_mpi_processes_per_node=1000
 n_openmp_threads=1
 use_debug=
 use_devel=
-use_intel_mpi=1
-use_gnu_openmpi=
+if [ "$USE_OMPI_GNU" == "1" ]; then
+  use_gnu_openmpi=1
+  use_intel_mpi=
+else
+  use_intel_mpi=1
+  use_gnu_openmpi=
+fi
 EMAIL=
 casedir=
 use_default_casedir=
