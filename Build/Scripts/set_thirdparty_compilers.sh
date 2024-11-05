@@ -1,161 +1,71 @@
 echo "FDS build target = $FDS_BUILD_TARGET"
 
-# For following variables 1- indicate availble through 
-# environment variable FIREMODELS_LIBS_CC, FIREMODELS_LIBS_CXX, and FIREMODELS_LIBS_FC
-set_CC=0 
+# Initialize variables and check environment variables
+set_compiler_var() {
+    local var_name=$1    # Variable name to set (e.g., CC, CXX, FC)
+    local env_var=$2     # Environment variable to check (e.g., FIREMODELS_LIBS_CC)
+    local set_flag_var=$3 # Flag variable name (e.g., set_CC, set_CXX, set_FC)
+
+    if [ -n "${!env_var}" ]; then
+        eval "$var_name=${!env_var}"
+        if command -v "${!var_name}" &> /dev/null; then
+            eval "$set_flag_var=1"
+        else
+            echo "Warning: ${!env_var} specified by $env_var is not available. Searching for an alternative."
+        fi
+    fi
+}
+
+
+# Set compilers based on the build target
+select_compiler() {
+    local var_name=$1       # Variable to set (CC, CXX, FC)
+    shift
+    local compilers=("$@")  # List of compilers to check in order
+    local set_flag_var="set_$var_name"
+
+    # Only proceed if the compiler flag is not set
+    if [ "$(eval echo \$$set_flag_var)" -eq 0 ]; then
+        for compiler in "${compilers[@]}"; do
+            if command -v "$compiler" &> /dev/null; then
+                # Set the compiler variable
+                eval "$var_name=$compiler"
+                # Set the flag variable to 1 (indicating the compiler was found)
+                eval "$set_flag_var=1"
+                return
+            fi
+        done
+        echo "Error: None of the specified compilers (${compilers[*]}) are available for $var_name on this system."
+        exit 1
+    fi
+}
+
+
+# Following variables indicate if compilers are set using environment variables FIREMODELS_LIBS_XXX.
+set_CC=0
 set_CXX=0
 set_FC=0
 
-if [ -n "$FIREMODELS_LIBS_CC" ]; then
-   CC=$FIREMODELS_LIBS_CC
-   if command -v $CC &> /dev/null; then
-      set_CC=1
-   else
-      echo "The compiler specified by the FIREMODELS_LIBS_CC environment variable ($CC) is not available on this system. Searching for an alternative compiler."
-   fi
-fi
+# Check environment variables for compilers
+set_compiler_var CC FIREMODELS_LIBS_CC set_CC
+set_compiler_var CXX FIREMODELS_LIBS_CXX set_CXX
+set_compiler_var FC FIREMODELS_LIBS_FC set_FC
 
-if [ -n "$FIREMODELS_LIBS_CXX" ]; then
-   CXX=$FIREMODELS_LIBS_CXX
-   if command -v $CXX &> /dev/null; then
-      set_CXX=1
-   else
-      echo "The compiler specified by the FIREMODELS_LIBS_CXX environment variable ($CXX) is not available on this system. Searching for an alternative compiler."
-   fi
-fi
-
-if [ -n "$FIREMODELS_LIBS_FC" ]; then
-   FC=$FIREMODELS_LIBS_FC
-   if command -v $FC &> /dev/null; then
-      set_FC=1
-   else
-      echo "The compiler specified by the FIREMODELS_LIBS_FC environment variable ($FC) is not available on this system. Searching for an alternative compiler."
-   fi
-fi
-
-
+# Determine compiler list based on build target
 if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
-   # Check for C compiler (mpicc, gcc, clang)
-   if [ $set_CC -eq 0 ]; then
-      if command -v mpicc &> /dev/null; then
-         CC=mpicc
-      elif command -v clang &> /dev/null; then
-         CC=clang
-      elif command -v gcc &> /dev/null; then
-         CC=gcc
-      else
-         echo "Error: Any of mpicc, clang, or gcc compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for clang C++ compiler (mpicxx, g++, clang ++)
-   if [ $set_CXX -eq 0 ]; then
-      if command -v mpicxx &> /dev/null; then
-         CXX=mpicxx
-      elif command -v clang++ &> /dev/null; then
-         CXX=clang++
-      elif command -v g++ &> /dev/null; then
-         CXX=g++
-      else
-         echo "Error: Any of mpicxx, clang++, or g++ compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Fortran compiler (gfortran)
-   if [ $set_FC -eq 0 ]; then
-      if command -v mpifort &> /dev/null; then
-         FC=mpifort
-      elif command -v gfortran &> /dev/null; then
-         FC=gfortran
-      else
-         echo "Error: Any of mpifort or gfortran compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
+    select_compiler CC mpicc clang gcc
+    select_compiler CXX mpicxx clang++ g++
+    select_compiler FC mpifort gfortran
 elif [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
-   # Check for Intel C compiler
-   if [ $set_CC -eq 0 ]; then
-      if command -v mpiicx &> /dev/null; then
-         CC=mpiicx
-      elif command -v icx &> /dev/null; then
-         CC=icx
-      elif command -v mpiicc &> /dev/null; then
-         CC=mpiicc
-      elif command -v icc &> /dev/null; then
-         CC=icc
-      else
-         echo "Error: Any of mpiicx, icx, mpiicc, or icc compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Intel C++ compiler
-   if [ $set_CXX -eq 0 ]; then
-      if command -v mpiicpx &> /dev/null; then
-         CXX=mpiicpx
-      elif command -v icpx &> /dev/null; then
-         CXX=icpx
-      elif command -v mpiicpc &> /dev/null; then
-         CXX=mpiicpc
-      elif command -v icpc &> /dev/null; then
-         CXX=icpc
-      else
-         echo "Error: Any of mpiicpx, icpx, mpiicpc, or icpc compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Intel Fortran compiler (ifort). ifx will be added in future.
-   if [ $set_FC -eq 0 ]; then
-      if command -v mpiifort &> /dev/null; then
-         FC=mpiifort
-      elif command -v ifort &> /dev/null; then
-         FC=ifort
-      else
-         echo "Error: Any of mpiifort, or ifort compiler is not available on this system."
-         exit 1
-      fi
-   fi
-else #gnu
-   # Check for gnu C compiler (gcc)
-   if [ $set_CC -eq 0 ]; then
-      if command -v mpicc &> /dev/null; then
-         CC=mpicc
-      elif command -v gcc &> /dev/null; then
-         CC=gcc
-      else
-         echo "Error: Any of mpicc, gcc compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Intel C++ compiler (g++)
-   if [ $set_CXX -eq 0 ]; then
-      if command -v mpicxx &> /dev/null; then
-         CXX=mpicxx
-      elif command -v g++  &> /dev/null; then
-         CXX=g++
-      else
-         echo "Error: Any of mpicxx, g++ compiler is not available on this system."
-         exit 1
-      fi
-   fi
-
-   # Check for Fortran compiler (gfortran)
-   if [ $set_FC -eq 0 ]; then
-      if command -v mpifort &> /dev/null; then
-         FC=mpifort
-      elif command -v gfortran &> /dev/null; then
-         FC=gfortran
-      else
-         echo "Error: Any of mpifort, gfortran compiler is not available on this system."
-         exit 1
-      fi
-   fi
+    select_compiler CC mpiicx icx mpiicc icc
+    select_compiler CXX mpiicpx icpx mpiicpc icpc
+    select_compiler FC mpiifort ifort
+else  # Default to GNU compilers
+    select_compiler CC mpicc gcc
+    select_compiler CXX mpicxx g++
+    select_compiler FC mpifort gfortran
 fi
+
 
 echo "Third-party libs C Compiler=$CC"
 echo "Third-party libs C++ compiler=$CXX"
@@ -164,3 +74,6 @@ echo "Third-party libs Fortran compiler=$FC"
 export CC=$CC
 export CXX=$CXX
 export FC=$FC
+
+
+

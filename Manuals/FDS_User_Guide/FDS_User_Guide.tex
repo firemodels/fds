@@ -9266,11 +9266,11 @@ Because these alternative methods are based on the Intel\textsuperscript{\textre
 FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
 ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
-GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
-UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact      & exact     & iterative \\
-% \rowcolor{lavender}
-% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
-% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
+ULMAT HYPRE$^6$   & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
+GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact     & iterative  & iterative \\
+\rowcolor{lavender}
+UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact     & exact      & iterative \\
+% PFFT$^7$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact     & iterative  & iterative \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -9282,7 +9282,8 @@ UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exac
         \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
         \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
         \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
-        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
+        \item[$^6$] ULMAT HYPRE uses the HYPRE library developed at Lawrence Livermore National Laboratories (LLNL).  Use this variant of ULMAT if the Intel MKL library is not available.
+        % \item[$^7$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
     \end{itemize}
 \end{tablenotes}
 \end{threeparttable}
@@ -10209,7 +10210,7 @@ Quantities associated with the overall energy budget are reported in the comma d
 \end{eqnarray}
 \begin{description}
 \item[{\ct Q\_ENTH}] The change in the sensible enthalpy of the gas. $\rho$ is the density of the gas (kg/m$^3$). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas (kJ/kg). The volume integral is over the entire domain.
-\item[{\ct HRR}] The heat release rate of the fire (kW) resulting from gas phase combustion. 
+\item[{\ct HRR}] The heat release rate of the fire (kW) resulting from gas phase combustion.
 \item[{\ct HRR\_OX}] The heat release rate (kW) of any surface oxidation reactions. This helps when comparing to heat release measurements obtained from oxygen consumption calorimetry, as the additional oxygen sink from surface reactions will be lumped into the measurement.
 \item[{\ct Q\_RADI}] The thermal radiation {\em into} the domain from the exterior boundary or particles.  $\dot{\bq}_{\rm r}''$ is the \underline{r}adiation heat flux vector (\unit{kW/m^2}). Its divergence represents the net radiative emission from a volume of gas. Typically, {\ct Q\_RADI} has a negative value, meaning that a fire or hot gases radiate energy out of the domain. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). This term is added to {\ct Q\_RADI} and subtracted from {\ct Q\_PART} because it is implicitly included in $\nabla \cdot \dot{\bq}_{\rm r}''$ and needs to be separated off for the purpose of explicitly accounting for it in the energy budget.
 \item[{\ct Q\_CONV}] The flow of sensible enthalpy {\em into} the computational domain. $\dm_{\rm p,\alpha}$ is the production rate of gas species $\alpha$ from a solid \underline{p}article or liquid droplet (kg/s). $h_{\rm s,\alpha}$ is the \underline{s}ensible enthalpy of gas species $\alpha$ (kJ/kg). $\rho$ is the gas density (kg/m$^3$), $\bu$ is the velocity vector (m/s). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas. If the gas is flowing out of the domain, $\bu \cdot \d {\bf S}$ is positive.
@@ -14553,12 +14554,12 @@ WRITE(LUBF) N_PATCH
 WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
 WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
         .
-        . 
+        .
 WRITE(LUBF) TIME_1
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
         .
-        . 
+        .
 WRITE(LUBF) TIME_2
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
