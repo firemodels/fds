@@ -14785,7 +14785,10 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE()
             PA => PATCH(IP)
             IF (PA%OBST_INDEX<=0) CYCLE PATCH_LOOP2
             M => MESHES(NM)
-            IF (PA%OBST_INDEX > 0) THEN
+            IF (PA%OBST_INDEX >= SIZE(M%OBSTRUCTION)) THEN
+               COLOR = REAL((/0.5,0.5,0.5/))
+               WRITE(*,*) "RANK", MY_RANK, "MESH", NM, "SZ1", SIZE(M%OBSTRUCTION), "OB1", PA%OBST_INDEX
+            ELSE
                OB=>M%OBSTRUCTION(PA%OBST_INDEX)
                IF (OB%RGB(1)==-1) THEN
                   SELECT CASE(PA%IOR)
@@ -14805,8 +14808,6 @@ SUBROUTINE WRITE_VTKHDF_GEOM_FILE()
                ELSE
                   COLOR = REAL(OB%RGB,FB)/255._FB
                ENDIF
-            ELSE
-               COLOR = REAL((/0.5,0.5,0.5/))
             ENDIF
                
             ! Initialize piece
