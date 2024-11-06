@@ -360,13 +360,22 @@ ALLOCATE(M%W_WIND(0:M%KBP1),STAT=IZERO) ; CALL ChkMemErr('INIT','W_WIND',IZERO)
 CALL COMPUTE_WIND_COMPONENTS(T_BEGIN,NM)
 
 DO K=0,M%KBP1
-   M%RHO(:,:,K) = M%RHO_0(K)
-   M%RHOS(:,:,K)= M%RHO_0(K)
-   M%TMP(:,:,K) = M%TMP_0(K)
-   M%U(:,:,K)   = M%U_WIND(K)
-   M%V(:,:,K)   = M%V_WIND(K)
-   M%W(:,:,K)   = M%W_WIND(K)
+   M%RHO(:,:,K)  = M%RHO_0(K)
+   M%RHOS(:,:,K) = M%RHO_0(K)
+   M%TMP(:,:,K)  = M%TMP_0(K)
 ENDDO
+
+IF (INITIAL_SPEED<0._EB) THEN
+   DO K=0,M%KBP1
+      M%U(:,:,K) = M%U_WIND(K)
+      M%V(:,:,K) = M%V_WIND(K)
+      M%W(:,:,K) = M%W_WIND(K)
+   ENDDO
+ELSE
+   M%U = -INITIAL_SPEED*SIN(INITIAL_DIRECTION*DEG2RAD)
+   M%V = -INITIAL_SPEED*COS(INITIAL_DIRECTION*DEG2RAD)
+   M%W = 0._EB
+ENDIF
 
 ! Custom velocity RAMPS (for verification)
 
@@ -425,13 +434,8 @@ M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
 M%KRES  = 0._EB
-IF (INITIAL_SPEED>0._EB) THEN
-   M%H  = 0._EB
-   M%HS = 0._EB
-ELSE
-   M%H  = 0.5_EB*(U0**2+V0**2+W0**2)
-   M%HS = 0.5_EB*(U0**2+V0**2+W0**2)
-ENDIF
+M%H     = 0.5_EB*(U0**2+V0**2+W0**2)
+M%HS    = 0.5_EB*(U0**2+V0**2+W0**2)
 M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
