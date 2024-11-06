@@ -5,7 +5,6 @@ set LIB_TAG=v2.32.0
 
 set LIB_DIR=%LIB_TAG%
 
-
 ::*** parse options
 
 set clean_hypre=
@@ -13,7 +12,7 @@ set clean_hypre=
 call :getopts %*
 if %stopscript% == 1 exit /b
 
-::*** make sure cmake and gcc are installed
+::*** make sure cmake and make are installed
 
 set abort=0
 set buildstatus=
@@ -215,21 +214,6 @@ exit /b
   erase installed_error_count.txt installed_error.txt
   if %nothave% == 1 (
     echo "***Fatal error: %program% not present"
-    exit /b 1
-  )
-  exit /b 0
-
-:: -------------------------------------------------------------
-:have_program
-:: -------------------------------------------------------------
-:: same as is_file_installed except does not abort script if program is not insstalled
-
-  set program=%1
-  where %program% 1> installed_error.txt 2>&1
-  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
-  set /p nothave=<installed_error_count.txt
-  erase installed_error_count.txt installed_error.txt
-  if %nothave% == 1 (
     exit /b 1
   )
   exit /b 0

@@ -303,6 +303,7 @@ CHARACTER(FORMULA_LENGTH), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE !< Nam
 CHARACTER(CHID_LENGTH) :: CHID                                            !< Job ID
 CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
 CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Custom directory for output
+CHARACTER(FILE_LENGTH) :: VTK_DIR                                         !< Custom directory for output
 CHARACTER(FILE_LENGTH) :: WORKING_DIR                                     !< Current working directory for output
 
 ! Dates, version numbers, revision numbers
@@ -328,6 +329,7 @@ REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ di
 REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
 REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
 REAL(EB) :: INITIAL_SPEED=-1._EB               !< Initial wind speed (m/s) which is assumed to die off
+REAL(EB) :: INITIAL_DIRECTION=270._EB          !< Initial wind direction (deg)
 REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
 REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
 REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
