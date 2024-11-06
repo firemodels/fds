@@ -1,4 +1,6 @@
 #!/bin/bash
+SUNDIALS_LIB_TAG=v6.7.0
+
 CONFMAKE=$1
 CLEAN_SUNDIALS=$2
 
@@ -31,9 +33,9 @@ echo "Checking for sundials repository..."
 if [ -d "$FIREMODELS/sundials" ]; then
   echo "Sundials repository exists. Building sundials library."
   cd $FIREMODELS/sundials
-  if [[ "$(git tag -l "v6.7.0")" == "v6.7.0" ]]; then
-    echo "Checking out v6.7.0"
-    git checkout v6.7.0
+  if [[ "$(git tag -l $SUNDIALS_LIB_TAG)" == $SUNDIALS_LIB_TAG ]]; then
+    echo "Checking out $SUNDIALS_LIB_TAG"
+    git checkout $SUNDIALS_LIB_TAG
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR

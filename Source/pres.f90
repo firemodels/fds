@@ -170,11 +170,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          ! Wind inflow boundary conditions
 
-         IF (INITIAL_SPEED>0._EB) THEN
-            H0 = 0._EB
-         ELSE
-            H0 = 0.5_EB*(U0**2+V0**2+W0**2)
-         ENDIF
+         H0 = 0.5_EB*(U0**2+V0**2+W0**2)
 
          IF (OPEN_WIND_BOUNDARY) THEN
             SELECT CASE(IOR)

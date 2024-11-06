@@ -5932,6 +5932,16 @@ CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
 CALL MPI_GET_VERSION(MPIVERSION,MPISUBVERSION,IERR)
 WRITE(LU,'(/A,I1,A,I1)') ' MPI version: ',MPIVERSION,'.',MPISUBVERSION
 WRITE(LU,'(A,A)') ' MPI library version: ',TRIM(MPILIBVERSION)
+#ifdef HYPRE_PP
+WRITE(LU,'(A,A)') ' Hypre library version: ',TRIM(HYPRE_PP)
+#else
+WRITE(LU,'(A)') ' Hypre library: not used '
+#endif
+#ifdef SUNDIALS_PP
+WRITE(LU,'(A,A)') ' Sundials library version: ',TRIM(SUNDIALS_PP)
+#else
+WRITE(LU,'(A)') ' Sundials library: not used'
+#endif
 
 END SUBROUTINE WRITE_SUMMARY_INFO
 

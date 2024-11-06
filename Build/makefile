@@ -17,6 +17,10 @@ ifdef INTEL_IFORT
    I_IFORT=$(INTEL_IFORT)
 endif
 
+# 3rd part library versions 
+HYPRE_VERSION=v2.32.0
+SUNDIALS_VERSION=v6.7.0
+
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   GIT_HASH := $(shell ..\Scripts\githash)
@@ -42,6 +46,9 @@ else
 # For OSX get CLT version:
   CLT_VERSION := $(shell ../Scripts/osx_clt.sh)
 endif
+
+HYPRE_INFO=-DHYPRE_PP=\"$(HYPRE_VERSION)\"
+SUNDIALS_INFO=-DSUNDIALS_PP=\"$(SUNDIALS_VERSION)\"
 
 GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)$(GIT_STAT)-$(GIT_BRANCH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
@@ -140,8 +147,8 @@ endif # PETSc test
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
-   FFLAGS_SUNDIALS = -DWITH_SUNDIALS -I"${SUNDIALS_HOME}/fortran"
-   FFLAGS_SUNDIALS_WIN = -DWITH_SUNDIALS /I"${SUNDIALS_HOME}\fortran"
+   FFLAGS_SUNDIALS = -DWITH_SUNDIALS ${SUNDIALS_INFO} -I"${SUNDIALS_HOME}/fortran"
+   FFLAGS_SUNDIALS_WIN = -DWITH_SUNDIALS ${SUNDIALS_INFO} /I"${SUNDIALS_HOME}\fortran"
    LFLAGS_SUNDIALS = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
    LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib  /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
 endif
@@ -151,8 +158,8 @@ LFLAGS_HYPRE =
 ifndef PETSC_DIR # PETSC is exclusive.
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
-   FFLAGS_HYPRE = -DWITH_HYPRE -I${HYPRE_HOME}/include
-   FFLAGS_HYPRE_WIN = -DWITH_HYPRE /I"${HYPRE_HOME}\include"
+   FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
+   FFLAGS_HYPRE_WIN = -DWITH_HYPRE ${HYPRE_INFO} /I"${HYPRE_HOME}\include"
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
    LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
 endif
