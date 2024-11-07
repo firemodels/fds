@@ -49,6 +49,7 @@ jobs:
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
+        export INTEL_IFORT=ifx
         sh ./make_fds.sh
         ./fds_impi_intel_linux
 
