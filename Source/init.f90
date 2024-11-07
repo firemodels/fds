@@ -363,19 +363,10 @@ DO K=0,M%KBP1
    M%RHO(:,:,K)  = M%RHO_0(K)
    M%RHOS(:,:,K) = M%RHO_0(K)
    M%TMP(:,:,K)  = M%TMP_0(K)
+   M%U(:,:,K)    = M%U_WIND(K)
+   M%V(:,:,K)    = M%V_WIND(K)
+   M%W(:,:,K)    = M%W_WIND(K)
 ENDDO
-
-IF (INITIAL_SPEED<0._EB) THEN
-   DO K=0,M%KBP1
-      M%U(:,:,K) = M%U_WIND(K)
-      M%V(:,:,K) = M%V_WIND(K)
-      M%W(:,:,K) = M%W_WIND(K)
-   ENDDO
-ELSE
-   M%U = -INITIAL_SPEED*SIN(INITIAL_DIRECTION*DEG2RAD)
-   M%V = -INITIAL_SPEED*COS(INITIAL_DIRECTION*DEG2RAD)
-   M%W = 0._EB
-ENDIF
 
 ! Custom velocity RAMPS (for verification)
 

@@ -308,8 +308,6 @@ REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
 REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ direction (m/s)
 REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
 REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
-REAL(EB) :: INITIAL_SPEED=-1._EB               !< Initial wind speed (m/s) which is assumed to die off
-REAL(EB) :: INITIAL_DIRECTION=270._EB          !< Initial wind direction (deg)
 REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
 REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
 REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
