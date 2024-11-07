@@ -1,4 +1,4 @@
-&HEAD CHID='obst_activation_ulmat', TITLE='Test of various obst activation situations for inseparable ULMAT.' /
+&HEAD CHID='obst_activation_default', TITLE='Test of various obst activation situations for default FFT Poisson solver.' /
 
 &MESH IJK=16,1,16, XB=0.0,0.8,-0.001,0.001,0.0,0.8 /
 &MESH IJK=16,1,16, XB=0.8,1.6,-0.001,0.001,0.0,0.8 /
@@ -7,7 +7,7 @@
 
 &TIME T_END=2.0 /
 
-&PRES CHECK_POISSON=T, SOLVER = 'ULMAT' /
+&PRES CHECK_POISSON=T /
 
 &MISC SIMULATION_MODE='DNS', STRATIFICATION=.FALSE. /
 &RADI RADIATION=F /
