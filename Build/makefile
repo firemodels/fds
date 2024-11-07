@@ -13,7 +13,7 @@ VPATH = ../Source
 
 # set compiler type
 
-I_IFORT=ifort
+I_IFORT=ifx
 ifdef INTEL_IFORT
    I_IFORT=$(INTEL_IFORT)
 endif
