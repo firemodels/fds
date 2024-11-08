@@ -1,4 +1,4 @@
-export HDF5_INSTALL_PREFIX=$FIREMODELS/libs/hdf5/$HDF5_VERSION
+export HDF5_INSTALL_PREFIX=$FIREMODELS/"$FDS_BUILD_TARGET"_libs/hdf5/$HDF5_VERSION
 
 if [[ "$FDS_BUILD_TARGET" == "ompi_intel"* ]]; then
 ../configure --enable-fortran --enable-parallel CXX=$(which mpicxx) CC=$(which mpicc) FC=$(which mpifort) --prefix=$HDF5_INSTALL_PREFIX
