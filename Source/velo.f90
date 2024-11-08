@@ -2597,14 +2597,16 @@ ELSE
 ENDIF
 
 ! Loop over all external wall cells and force adjacent normal components of velocty at interpolated boundaries to match.
+! BOUNDARY_TYPE_PREVIOUS will be used at the next phase of the time step to indicate if the velocity component has been changed.
 
 EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
+   EWC=>EXTERNAL_WALL(IW)
+   EWC%BOUNDARY_TYPE_PREVIOUS = WC%BOUNDARY_TYPE
 
    IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
 
-   EWC=>EXTERNAL_WALL(IW)
    BC =>BOUNDARY_COORD(WC%BC_INDEX)
    II  = BC%II
    JJ  = BC%JJ

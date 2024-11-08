@@ -2911,16 +2911,15 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 \end{figure}
 
 
-\section{Isothermal flow around activated objects (\texorpdfstring{\textct{obst\_activation}}{obst\_activation})}
-\label{obst_activation_default}
-\label{obst_activation_ulmat}
+\section{Isothermal Flow Around Activated Objects (\texorpdfstring{\textct{obst\_activation}}{obst\_activation})}
+\label{obst_activation}
 
-The cases presented here are found in input files {\ct Pressure\_Solver/obst\_activation\_default.fds} and {\ct obst\_activation\_ulmat.fds}. The domain is split in 4 meshes and several obstacles are made to disappear and appear during the simulation. These obstacles can be completely embedded inside meshes, or either overlap or abut mesh boundaries. Default and ULMAT pressure solvers are used. In figure~\ref{obst_act_fig}, maximum simulated temperatures in the domain vs time and ambient (target) temperature are shown.
+The cases presented here are found in input files {\ct Pressure\_Solver/obst\_activation\_default.fds} and {\ct obst\_activation\_ulmat.fds}. The domain is split into four meshes and several obstacles are made to disappear and appear during the simulation. These obstacles can be completely embedded inside meshes, or either overlap or abut mesh boundaries. Default (FFT) and ULMAT pressure solvers are used. Figure~\ref{obst_act_fig} displays the maximum divergence in the domain. These values should be comparable to machine precision for double precision floating point arithmetic.
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/obst_activation}
-\caption[Result of the \textct{obst\_activation} test cases]{Maximum temperature in domain vs time for isothermal flow around activated objects.}
+\caption[Result of the \textct{obst\_activation} test cases]{Maximum divergence for isothermal flow around obstructions that appear and disappear.}
 \label{obst_act_fig}
 \end{figure}
 
@@ -3883,12 +3882,12 @@ Six additional constant volume ignition delay cases are configured using the fol
 \section{Combustion Load Balancing (\textct{comb\_load\_bal})}
 \label{comb_load_bal}
 
-Fire simulations can become computationally expensive due to combustion calculations, especially when detailed chemistry is involved. Often, in parallel simulations, combustion is concentrated in only a few MPI processes, while other MPI processes remain idle, waiting for the combustion-related tasks to finish. To address this, FDS incorporates a load-balancing algorithm that evenly distributes the combustion workload across all MPI processes. This can significantly speed up the detailed chemistry simulations, with performance improvements ranging from 2 to 6 times, depending on the configuration. 
+Fire simulations can become computationally expensive due to combustion calculations, especially when detailed chemistry is involved. Often, in parallel simulations, combustion is concentrated in only a few MPI processes, while other MPI processes remain idle, waiting for the combustion-related tasks to finish. To address this, FDS incorporates a load-balancing algorithm that evenly distributes the combustion workload across all MPI processes. This can significantly speed up the detailed chemistry simulations, with performance improvements ranging from 2 to 6 times, depending on the configuration.
 
 Three cases are considered to verify the load-balancing algorithm: the first uses a detailed chemical mechanism (Methane\_Smooke, see Section ~\ref{ignition_delay}); the second uses two-step Arrhenius reactions; and the third involves two-step fast chemistry reactions. In all cases, gaseous fuel (methane or propane) is injected from the burner. To account for combustion in both regular cells and Immersed Boundary Cut-Cells, a sphere is placed above the burner, allowing the flame to propagate around it.
 
 
-Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane\_Smoke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations. 
+Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane\_Smoke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations.
 
 Figure \ref{fig:comb_load_bal_2step_Arrhenius} presents a similar load-balancing test for two-step Propane Arrhenius reactions using the FDS-RK2 ODE solver. In this configuration, there are 6 meshes, corresponding to 6 MPI processes. The load-balancing results show similar trends as observed with the detailed chemical mechanism. However, the time spent on combustion (FIRE) is significantly lower compared to the detailed chemistry case (20\% vs. 65\%). As a result, even with combustion load balancing, other processes dominate the total simulation time, limiting the speedup to just 1.2x.
 
@@ -3902,7 +3901,7 @@ Overall, combustion load balancing provides significant speedup for detailed che
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_CHEM} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_COMM} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_TOT} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_DEVC} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_DEVC}
 \end{tabular*}
 \caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using Methane\_Smooke detailed chemical mechanism.}
 \label{fig:comb_load_bal_methane_smooke}
@@ -3913,7 +3912,7 @@ Overall, combustion load balancing provides significant speedup for detailed che
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_FIRE} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_COMM} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_TOT} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_DEVC} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_DEVC}
 \end{tabular*}
 \caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Propane Arrhenius reactions.}
 \label{fig:comb_load_bal_2step_Arrhenius}
@@ -3924,7 +3923,7 @@ Overall, combustion load balancing provides significant speedup for detailed che
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_FIRE} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_COMM} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_TOT} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_DEVC} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Fast_DEVC}
 \end{tabular*}
 \caption[Results of the {\ct comb\_load\_balance} test cases]{Combustion load balance case using two-step Methane fast reactions.}
 \label{fig:comb_load_bal_2step_fast}
