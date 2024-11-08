@@ -390,8 +390,8 @@ ompi_intel_osx_openmp_dv : setup $(obj_mpi)
 
 #*** Intel compiler and OpenMPI in Linux ****
 
-ompi_intel_linux : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL_OPENMPI) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) -DUSE_IFPORT  -diag-disable=10448
-ompi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
+ompi_intel_linux : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL_OPENMPI) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT  -diag-disable=10448
+ompi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_intel_linux : FCOMPL = mpifort
 ompi_intel_linux : obj = fds_ompi_intel_linux
 ompi_intel_linux : setup $(obj_mpi)
@@ -399,7 +399,7 @@ ompi_intel_linux : setup $(obj_mpi)
 
 #*** GNU Compilers ***
 
-ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5)
+ompi_gnu_linux : FFLAGS = -R -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_PETSC) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5)
 ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux : FCOMPL = mpifort
 ompi_gnu_linux : FOPENMPFLAGS = -fopenmp
@@ -418,8 +418,8 @@ ompi_gnu_linux_db : FFLAGS += -Wno-maybe-uninitialized -Wno-uninitialized -Wno-u
 ompi_gnu_linux_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-ompi_gnu_linux_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(FFLAGS_PETSC) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
-ompi_gnu_linux_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
+ompi_gnu_linux_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(FFLAGS_PETSC) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) 
+ompi_gnu_linux_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_PETSC) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
 ompi_gnu_linux_dv : FCOMPL = mpifort
 ompi_gnu_linux_dv : FOPENMPFLAGS = -fopenmp
 ompi_gnu_linux_dv : obj = fds_ompi_gnu_linux_dv
