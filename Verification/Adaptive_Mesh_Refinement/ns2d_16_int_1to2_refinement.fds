@@ -1,11 +1,17 @@
 This case is part of a series comparing FDS to an analytical solution of the two-dimensional Navier-Stokes equations.
 Note that the time and space bounds are 2*pi.
 
-&HEAD CHID='ns2d_16_emb_1to2_refinement', TITLE='Analytical solution to the 2d NS with embedded mesh' /
+&HEAD CHID='ns2d_16_int_1to2_refinement', TITLE='Analytical solution to the 2d NS with embedded mesh' /
 
-&MESH IJK=16,1,16, XB=0.0,6.28318530718,-0.05,0.05,0.0,6.28318530718/
+! &MESH IJK=16,1,16, XB=0.0,6.28318530718,-0.05,0.05,0.0,6.28318530718/
 
-&MESH IJK=16,1,16, XB=1.57079632679490,4.71238898038469,-0.05,0.05,1.57079632679490,4.71238898038469/
+&MULT ID='m1', DX=1.57079632679490,DZ=1.57079632679490,
+               I_LOWER=0,I_LOWER_SKIP=1,I_UPPER_SKIP=2,I_UPPER=3,
+               K_LOWER=0,K_LOWER_SKIP=1,K_UPPER_SKIP=2,K_UPPER=3/
+
+&MESH IJK=4,1,4, XB=0.0,1.57079632679490,-0.05,0.05,0.0,1.57079632679490, MULT_ID='m1'/ 12 mesh
+
+&MESH IJK=16,1,16, XB=1.57079632679490,4.71238898038469,-0.05,0.05,1.57079632679490,4.71238898038469/ 1 mesh
 
 &TIME T_END=30.0 /
 

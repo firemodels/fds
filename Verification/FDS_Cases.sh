@@ -1,6 +1,9 @@
 #!/bin/bash
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+# $QFDS -p 2 -d Adaptive_Mesh_Refinement ns2d_16_emb_1to1_refinement.fds
+# $QFDS -p 2 -d Adaptive_Mesh_Refinement ns2d_16_emb_1to2_refinement.fds
+# $QFDS -p 13 -d Adaptive_Mesh_Refinement ns2d_16_int_1to2_refinement.fds
 
 $QFDS -d Aerosols aerosol_agglomeration.fds
 $QFDS -d Aerosols aerosol_agglomeration_2.fds
