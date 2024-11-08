@@ -6835,7 +6835,7 @@ where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relat
 
 The {\ct PRESSURE\_GRADIENT\_FORCE} is input on the {\ct WIND} line in units of Pa/m, for example,
 \begin{lstlisting}
-&WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315, INITIAL_SPEED=5 /
+&WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315 /
 \end{lstlisting}
 The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
@@ -6844,7 +6844,7 @@ The wind {\ct DIRECTION} follows the usual meteorological convention---a norther
 &RAMP ID='dir', T= 600, F=330 /
 &RAMP ID='dir', T=1200, F=350 /
 \end{lstlisting}
-Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. The {\ct INITIAL\_SPEED} and {\ct INITIAL\_DIRECTION} set the horizontal wind components at the start of the simulation. This is provided as a convenience because it may take on the order of hours of simulation time to slowly increase the wind speed via the pressure gradient force alone. The {\ct INITIAL\_SPEED} {\ct INITIAL\_DIRECTION} only set the initial wind speed and direction, but has no longer term effect. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
+Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
 
 There are some applications, like tunnels, where the pressure gradient force is a convenient way to introduce an air flow due to some external force. In such cases, it is sometimes more convenient to use the vector {\ct FORCE\_VECTOR(1:3)} along with the corresponding time ramps {\ct RAMP\_FVX\_T}, {\ct RAMP\_FVY\_T}, and {\ct RAMP\_FVZ\_T} to control each individual component. The {\ct PRESSURE\_GRADIENT\_FORCE} is simply the magnitude of the {\ct FORCE\_VECTOR} with the same units.
 
@@ -13680,8 +13680,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               & Pa/m          & 0.                \\ \hline
 {\ct GEOSTROPHIC\_WIND(2)}                      & Real          & Section~\ref{info:geostrophic_wind}           & m/s           &                   \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
-{\ct INITIAL\_DIRECTION}                        & Real          & Section~\ref{info:force_vector}               & deg           & 270.              \\ \hline
-{\ct INITIAL\_SPEED}                            & Real          & Section~\ref{info:force_vector}               & m/s           & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
