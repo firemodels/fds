@@ -15587,6 +15587,7 @@ MESH_LOOP: DO NM=1,NMESHES
          SL%SLICETYPE = TRIM(SLICETYPE)
          SL%GEOM_INDEX = GEOM_INDEX
          SL%SLCF_NAME = SLCF_NAME
+         SL%AGL_SLICE = AGL_SLICE
          IF (CELL_CENTERED) THEN
             DO I=1,IBAR
                IF ( ABS(XB(1)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I1 = I
