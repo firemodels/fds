@@ -8,7 +8,6 @@ IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
   echo Defining Intel compiler environment
   call "%ONEAPIDIR%\setvars" intel64
-  set INTEL_IFORT=ifort
 
   IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
