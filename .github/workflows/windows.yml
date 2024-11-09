@@ -71,26 +71,14 @@ jobs:
         webimage_hpc_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_HPCKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
         rd /s/q "webimage_hpc_extracted"
 
-      # github-actions does not cache windows symlinks, so we need to specify the version of each component explicitly
-      # https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-windows/use-a-config-file-for-setvars-bat-on-windows.html
-      # https://oneapi-src.github.io/oneapi-ci/
-    - name: specify oneapi version
-      run: |
-        (
-          echo compiler=2024.2.1
-          echo mkl=2024.2.1
-          echo mpi=2021.13.1
-        ) > oneapi_config.txt
     - name: build fds debug
       run: |
-        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
         set INTEL_IFORT=ifx
         cd Build\impi_intel_win_db
         call make_fds.bat
         fds_impi_intel_win_db.exe
     - name: build fds release
       run: |
-        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
         set INTEL_IFORT=ifx
         cd Build\impi_intel_win
         call make_fds.bat
