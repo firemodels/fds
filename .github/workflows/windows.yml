@@ -84,13 +84,14 @@ jobs:
     - name: build fds debug
       run: |
         call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
-        cd Build\impi_intel_win_db
         set INTEL_IFORT=ifx
+        cd Build\impi_intel_win_db
         call make_fds.bat
         fds_impi_intel_win_db.exe
     - name: build fds release
       run: |
         call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        set INTEL_IFORT=ifx
         cd Build\impi_intel_win
         call make_fds.bat
         fds_impi_intel_win.exe
