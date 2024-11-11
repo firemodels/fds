@@ -110,6 +110,24 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+::Check if make.bat or make.exe exists, and set CMAKE_MAKE_PROGRAM accordingly
+set CMAKE_MAKE_PROGRAM=
+for /f "delims=" %%i in ('where make.bat 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
+if not defined CMAKE_MAKE_PROGRAM (
+    for /f "delims=" %%i in ('where make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
+)
+if not defined CMAKE_MAKE_PROGRAM (
+    for /f "delims=" %%i in ('where mingw32-make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
+)
+
+if not defined CMAKE_MAKE_PROGRAM (
+    echo Error: Neither make.bat nor make.exe found in PATH.
+    exit /b 1
+)
+
+echo make proram is %CMAKE_MAKE_PROGRAM%
+
+
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
@@ -123,6 +141,7 @@ cmake ..\  ^
 -DENABLE_OPENMP=ON ^
 -DBUILD_SHARED_LIBS=OFF ^
 -DCMAKE_INSTALL_LIBDIR="lib" ^
+-DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
 -DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
 -DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
 
