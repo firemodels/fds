@@ -141,7 +141,9 @@ if not defined CMAKE_MAKE_PROGRAM (
     exit /b 1
 )
 
+echo.
 echo make proram is %CMAKE_MAKE_PROGRAM%
+echo.
 
 set BUILDDIR=%LIB_REPO%\src\cmbuild
 cd %BUILDDIR%

@@ -121,8 +121,9 @@ if not defined CMAKE_MAKE_PROGRAM (
     exit /b 1
 )
 
+echo.
 echo make proram is %CMAKE_MAKE_PROGRAM%
-
+echo.
 
 cmake ..\  ^
 -G "MinGW Makefiles" ^
