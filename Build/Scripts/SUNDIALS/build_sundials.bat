@@ -117,10 +117,6 @@ if not defined CMAKE_MAKE_PROGRAM (
     for /f "delims=" %%i in ('where make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
 )
 if not defined CMAKE_MAKE_PROGRAM (
-    for /f "delims=" %%i in ('where mingw32-make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
-)
-
-if not defined CMAKE_MAKE_PROGRAM (
     echo Error: Neither make.bat nor make.exe found in PATH.
     exit /b 1
 )
