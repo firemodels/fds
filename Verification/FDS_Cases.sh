@@ -388,6 +388,7 @@ $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
+$QFDS -p 5 -d Pressure_Solver dancing_eddies_embed.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat_hypre.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
