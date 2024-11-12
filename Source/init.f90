@@ -1108,7 +1108,7 @@ ENDDO
 
 IF (N_ZONE > 0) THEN
    ZONE_LOOP: DO IPZ = 1,N_ZONE
-      PSUM(IPZ,NM) = 0._EB
+      PSUM(IPZ) = 0._EB
       DO K=1,M%KBAR
          DO J=1,M%JBAR
             DO I=1,M%IBAR
@@ -1118,7 +1118,7 @@ IF (N_ZONE > 0) THEN
                ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,M%TMP(I,J,K))
                RTRM = M%RSUM(I,J,K)/(CP*M%PBAR(K,IPZ))
-               PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(1._EB/M%PBAR(K,IPZ)-RTRM)
+               PSUM(IPZ) = PSUM(IPZ) + VC*(1._EB/M%PBAR(K,IPZ)-RTRM)
             ENDDO
          ENDDO
       ENDDO
