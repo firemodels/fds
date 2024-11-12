@@ -2805,10 +2805,14 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 
 \newpage
 
-\section{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
+\section{Embedded Meshes}
+
+In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some special circumstances, meshes can overlap. This section has a few examples.
+
+\subsection{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 \label{random_meshes}
 
-In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes_fig}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes_fig} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
+This case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes_fig}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes_fig} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -2817,6 +2821,17 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{tabular*}
 \caption[The \textct{random\_meshes} test case]{Five overlapping meshes (left) and the net volume flow through the domain (right).}
 \label{random_meshes_fig}
+\end{figure}
+
+\subsection{Tracking Eddies (\texorpdfstring{\textct{dancing\_eddies\_embed}}{dancing\_eddies\_embed})}
+\label{dancing_eddies_embed}
+
+This 2-D channel flow tests the ability of the flow solver to track an eddy from a coarse mesh to a fine mesh. Referring to Fig.~\ref{dancing_eddies_embed_fig}, the flow is from left to right, and there is an obstruction upstream that generates a vortex street. The coarse mesh size is 1~mm and the fine is 0.5~mm. The fine mesh is fully embedded within the coarse, and information is transferred from the coarse to the fine mesh via its inflow boundaries. The overlapping region should contain approximately the same flow, as evidenced by the overlapping flow vectors.  
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies_embed.png} 
+\caption[The \textct{dancing\_eddies\_embed} test case]{Close-up of a fine mesh embedded within a coarse mesh with two eddies passing through.}
+\label{dancing_eddies_embed_fig}
 \end{figure}
 
 
