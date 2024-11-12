@@ -466,6 +466,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
    INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
    INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: BOUNDARY_TYPE_PREVIOUS=0                !< Boundary type at previous time step
    INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
    REAL(EB) :: DUNDT=0._EB                            !< \f$ \partial u_n / \partial t \f$

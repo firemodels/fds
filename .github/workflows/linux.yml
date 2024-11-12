@@ -42,17 +42,15 @@ jobs:
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
-        cd ./Build/impi_intel_linux_db
         export INTEL_IFORT=ifx
-        echo "INTEL_IFORT =" $INTEL_IFORT
+        cd ./Build/impi_intel_linux_db
         sh ./make_fds.sh
         ./fds_impi_intel_linux_db
     - name: build fds release
       run: |
         source /opt/intel/oneapi/setvars.sh
-        cd ./Build/impi_intel_linux
         export INTEL_IFORT=ifx
-        echo "INTEL_IFORT =" $INTEL_IFORT
+        cd ./Build/impi_intel_linux
         sh ./make_fds.sh
         ./fds_impi_intel_linux
 
