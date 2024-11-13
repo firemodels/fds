@@ -1,6 +1,6 @@
 &HEAD CHID='obst_single',TITLE='Plume whirl case' /
 
-&MESH IJK=16,16,32, XB=0.0,0.8,0.0,0.8,0.0,1.6 /
+&MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2/
 
 
 &DUMP NFRAMES=400 DT_PL3D=8.0, DT_SL3D=0.1 /

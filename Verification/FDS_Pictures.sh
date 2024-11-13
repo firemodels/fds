@@ -59,6 +59,7 @@ $RUNSMV -d HVAC leak_test_2.fds
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_11
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_12
 $RUNSMV -d Miscellaneous pyramid.fds
+$RUNSMV -d Miscellaneous obst_multi.fds
 $RUNSMV -d Miscellaneous obst_sphere.fds
 $RUNSMV -d Miscellaneous obst_cylinder.fds
 $RUNSMV -d Miscellaneous obst_cone.fds
