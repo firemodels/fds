@@ -85,7 +85,7 @@ DP = 0._EB
 
 ! Determine if pressure ZONEs have merged
 
-IF (N_ZONE>0) CALL MERGE_PRESSURE_ZONES
+IF (N_ZONE>0 .AND. OBST_CREATED_OR_REMOVED) CALL MERGE_PRESSURE_ZONES
 
 ! Compute normal component of velocity at boundaries, U_NORMAL_S in the PREDICTOR step, U_NORMAL in the CORRECTOR.
 
