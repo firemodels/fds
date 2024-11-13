@@ -65,6 +65,7 @@ $RUNSMV -d Miscellaneous obst_cone.fds
 $RUNSMV -d Miscellaneous obst_rotbox.fds
 $RUNSMV -d NS_Analytical_Solution ns2d_64.fds
 $RUNSMV -d Pressure_Effects pressure_boundary.fds
+$RUNSMV -d Pressure_Solver dancing_eddies_embed.fds
 $RUNSMV -d Pressure_Solver dancing_eddies_tight.fds
 $RUNSMV -d Scalar_Analytical_Solution move_slug.fds
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1.fds
