@@ -1243,7 +1243,7 @@ Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on t
 
 Obstructions are typically drawn as solids in Smokeview. To draw an outline representation, set {\ct OUTLINE} equal to {\ct T}
 
-\subsubsection{Trick for avoiding mesh interfaces in outline view}
+\subsection{Method for avoiding mesh interfaces in blockage outline view}
 
 FDS splits a blockage into separate parts, one part for each mesh. As a result when Smokeview draws blockages as outlines it draws extra lines where blockages intersect mesh interfaces. The following procedure can be used to eliminate these extra lines for a case named say casename.fds .
 
@@ -1262,7 +1262,7 @@ Figure \ref{fig:outlinehack} shows an example where blockages are drawn as speci
 \begin{tabular}{cc}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_multi}&
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_single}\\
-outlines also drawn at mesh interfaces&outlines drawn as specified in the input file
+outlines drawn at blockage edges and mesh interfaces&outlines drawn as specified in the input file
 \end{tabular}
 \end{center}
 \caption[Blockage outlines drawn at mesh interfaces and as specified in the input file.]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
