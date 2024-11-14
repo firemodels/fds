@@ -2208,11 +2208,7 @@ CFACE_LOOP_1 : DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTWALL_CFACE_CELLS+N_INTERNAL_
 
          ! Wind inflow boundary conditions
 
-         IF (INITIAL_SPEED>0._EB) THEN
-            H0 = 0._EB
-         ELSE
-            H0 = 0.5_EB*(U0**2+V0**2+W0**2)
-         ENDIF
+         H0 = 0.5_EB*(U0**2+V0**2+W0**2)
          IF (OPEN_WIND_BOUNDARY) &
          H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
 

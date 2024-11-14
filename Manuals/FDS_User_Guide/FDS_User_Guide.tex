@@ -1243,7 +1243,31 @@ Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on t
 
 Obstructions are typically drawn as solids in Smokeview. To draw an outline representation, set {\ct OUTLINE} equal to {\ct T}
 
+\subsection{Method for avoiding mesh interfaces in blockage outline view}
 
+FDS splits a blockage into separate parts, one part for each mesh. As a result when Smokeview draws blockages as outlines it draws extra lines where blockages intersect mesh interfaces. The following procedure can be used to eliminate these extra lines for a case named say casename.fds .
+
+\begin{enumerate}
+\item Create a one mesh version of casename.fds case  . Name it casename\_single.fds (or anything different than casename.fds) . Set T\_END to 0.0 and CHID to casename\_single~.
+\item After running casename\_single.fds with fds, rename the generated casename\_single.smv file casename.smo~.
+\item Run smokeview casename~.
+\item Select the Show/Hide>Geometry>Obstacles>Outline only menu item to view the blockages as outlines.
+\item press the `q' key to toggle between viewing blockages split at mesh boundaries (how fds handles them) and how blockages are defined in the input file.
+\end{enumerate}
+
+Figure \ref{fig:outlinehack} shows an example where blockages are drawn as specified in the input file and drawn split at mesh interfaces.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_multi}&
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_single}\\
+outlines drawn at blockage edges and mesh interfaces&outlines drawn as specified in the input file
+\end{tabular}
+\end{center}
+\caption[Blockage outlines drawn at mesh interfaces and as specified in the input file.]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
+\label{fig:outlinehack}%
+\end{figure}
 
 \subsection{Creating Holes in Obstructions}
 \label{info:HOLE}
@@ -2868,7 +2892,7 @@ The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g})
 \ee
-where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
+where $L_{\rm g}$ is the gas diffusion length scale and $X_{\rm O_2,f}$ is computed to satisfy simultaneous mass transfer and solid phase reaction rates (see FDS Tech Guide \cite{FDS_Math_Guide}). $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default. The heat release rate per unit area associated with oxidation reactions can be output using the solid phase {\ct QUANTITY} called {\ct 'OXIDATIVE HRRPUA'}. This is an integral in depth of the contributions from all reactions and all materials for a given solid surface.
 
 You can specity {\ct MAX\_REACTION\_RATE(j)} (\si{kg/m^3.s}) to limit the reaction rate, $r_{ij}$, below a specified value.
 
@@ -5423,6 +5447,8 @@ python Utilities/Python/scripts/cantera_yaml_2_fds.py output.yaml N2 > output.fd
 \end{enumerate}
 If the YAML file of the mechanism is directly available, steps 1 and 2 can be skipped.
 
+A detailed chemical mechanism is currently solved using the Sundials CVODE ODE solver \cite{cvodeDoc:2024}. For details on configuring the FDS input for the CVODE solver, please refer to Section \ref{info:chem_integration}.
+
 \subsection{Reaction Rates from Equilibrium Constants}
 \label{info:eqbm_reac}
 
@@ -5523,15 +5549,20 @@ For solving the chemistry with a detailed chemical mechanism (see Section \ref{i
 &COMB
    FINITE_RATE_MIN_TEMP=300,
    ODE_SOLVER='CVODE',
-   ODE_MIN_ATOL=1E-10,
-   ODE_REL_ERROR=1E-8,
+   ZZ_MIN_GLOBAL=1E-15,
+   ODE_MIN_ATOL=1E-12,
+   ODE_REL_ERROR=1E-6,
    EQUIV_RATIO_CHECK=T,
-   MIN_EQUIV_RATIO=0.2,
-   MAX_EQUIV_RATIO=10.0,
+   MIN_EQUIV_RATIO=0.0,
+   MAX_EQUIV_RATIO=20.0,
    DO_CHEM_LOAD_BALANCE=T /
 \end{lstlisting}
-However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}  (default true), {\ct MIN\_EQUIV\_RATIO}  (default 0.2), and {\ct MAX\_EQUIV\_RATIO} (default 10.0) are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes.
+However, the relative and absolute tolerances for ODEs can be specified at the species level using the {\ct ODE\_REL\_ERROR} and {\ct ODE\_ABS\_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters {\ct EQUIV\_RATIO\_CHECK}, {\ct MIN\_EQUIV\_RATIO}, and {\ct MAX\_EQUIV\_RATIO} are optional. The purpose of {\ct EQUIV\_RATIO\_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified {\ct MIN\_EQUIV\_RATIO} and {\ct MAX\_EQUIV\_RATIO} limits. Additionally, setting the parameter {\ct DO\_CHEM\_LOAD\_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes. The minimum concentration limit of a species is determined by multiplying {\ct ODE\_REL\_ERROR} to {\ct ZZ\_MIN\_GLOBAL}. Concentrations below this threshold are considered to be zero.
 
+For CVODE, the default parameter values are as follows: {\ct FINITE\_RATE\_MIN\_TEMP}=300~$^\circ$C, {\ct ZZ\_MIN\_GLOBAL}=1E-10, {\ct ODE\_MIN\_ATOL}=1E-10, {\ct ODE\_REL\_ERROR}=1E-6, {\ct EQUIV\_RATIO\_CHECK}=F, {\ct MIN\_EQUIV\_RATIO}=0.0, {\ct MAX\_EQUIV\_RATIO}=20.0, and {\ct DO\_CHEM\_LOAD\_BALANCE}=T. To use these default values, simply add the following lines to the FDS input file:
+\begin{lstlisting}
+&COMB ODE_SOLVER='CVODE'/
+\end{lstlisting}
 
 \newpage
 
@@ -6410,7 +6441,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \end{lstlisting}
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
-If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}). 
+If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh. This is done by multiplying {\ct N\_PARTICLES} by the ratio of the volume of {\ct XB} in each mesh by the total volume of {\ct XB} as specified in the input file (i.e, if the input is larger than the domain, fewer than {\ct N\_PARTICLES} will be inserted) with the result rounded to the nearest integer (with at least one particle inserted for every mesh that contains {\ct XB}).
 
 Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Here is an example of how one might make a tree:
 \begin{lstlisting}
@@ -6828,7 +6859,7 @@ where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relat
 
 The {\ct PRESSURE\_GRADIENT\_FORCE} is input on the {\ct WIND} line in units of Pa/m, for example,
 \begin{lstlisting}
-&WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315, INITIAL_SPEED=5 /
+&WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315 /
 \end{lstlisting}
 The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
@@ -6837,7 +6868,7 @@ The wind {\ct DIRECTION} follows the usual meteorological convention---a norther
 &RAMP ID='dir', T= 600, F=330 /
 &RAMP ID='dir', T=1200, F=350 /
 \end{lstlisting}
-Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. The {\ct INITIAL\_SPEED} sets the horizontal wind components at the start of the simulation. This is provided as a convenience because it may take on the order of hours of simulation time to slowly increase the wind speed via the pressure gradient force alone. The {\ct INITIAL\_SPEED} only sets the initial wind speed, but has no longer term effect. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
+Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
 
 There are some applications, like tunnels, where the pressure gradient force is a convenient way to introduce an air flow due to some external force. In such cases, it is sometimes more convenient to use the vector {\ct FORCE\_VECTOR(1:3)} along with the corresponding time ramps {\ct RAMP\_FVX\_T}, {\ct RAMP\_FVY\_T}, and {\ct RAMP\_FVZ\_T} to control each individual component. The {\ct PRESSURE\_GRADIENT\_FORCE} is simply the magnitude of the {\ct FORCE\_VECTOR} with the same units.
 
@@ -9227,13 +9258,15 @@ It is possible for the pressure interation scheme to seem ``stuck''---the soluti
 \subsection{Optional Pressure Solvers}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver or the HYPRE solver library from Lawrence Livermore National Laboratories (LLNL) \cite{HYPRE}.
 \begin{description}
 \item[{\ct SOLVER='ULMAT'}]  This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
 
 With the {\ct ULMAT} solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
 
 The {\ct ULMAT} solver uses a substantial amount of memory per mesh. Its use should be limited to meshes of at most 150,000 cells. This number depends on the amount of random access memory (RAM) that you can devote to each MPI process, and you might want to experiment with larger meshes if you have, say, tens of gigabytes of RAM per MPI process.
+
+\item[{\ct SOLVER='ULMAT HYPRE'}]  This solver uses the same strategy as ULMAT but the solver is implemented via LLNL's HYPRE library \cite{HYPRE}.  ULMAT HYPRE uses the algebraic multigrid (AMG) preconditioned conjugate gradient (PCG) solver.  This solver does not require LU decomposition and storage of a dense matrix, so the memory requirements are much less than the MKL solver.  Hence, ULMAT HYPRE may be considered as an option for large mesh blocks (larger than 150,000 cells).  Note, however, that for small mesh blocks HYPRE is somewhat slower than MKL.
 
 \item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
 
@@ -9259,11 +9292,11 @@ Because these alternative methods are based on the Intel\textsuperscript{\textre
 FFT (default)     & \checkmark  & 2 directions  & \checkmark & \checkmark & iterative & iterative  & iterative \\
 ULMAT             & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
 \rowcolor{lavender}
-GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact      & iterative & iterative \\
-UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact      & exact     & iterative \\
-% \rowcolor{lavender}
-% USCARC            & $\times$    & \checkmark    & \checkmark & \checkmark & exact      & exact     & exact   \\
-% PFFT$^6$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact      & iterative & iterative \\
+ULMAT HYPRE$^6$   & \checkmark  & \checkmark    & \checkmark & \checkmark & iterative & exact      & iterative \\
+GLMAT             & $\times$    & $\times$      & \checkmark & \checkmark & exact     & iterative  & iterative \\
+\rowcolor{lavender}
+UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exact     & exact      & iterative \\
+% PFFT$^7$ (future) & $\times$    & 1 direction   & \checkmark & \checkmark & exact     & iterative  & iterative \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -9275,7 +9308,8 @@ UGLMAT            & $\times$    & $\times$      & \checkmark & \checkmark & exac
         \item[$^3$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{global} solvers.  ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
         \item[$^4$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.  Solvers listed as ``exact'' are \emph{unstructured} solvers.  ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the pressure Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.
         \item[$^5$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
-        % \item[$^6$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
+        \item[$^6$] ULMAT HYPRE uses the HYPRE library developed at Lawrence Livermore National Laboratories (LLNL).  Use this variant of ULMAT if the Intel MKL library is not available \emph{or} if MKL runs out of memory or is too slow due to memory issues with large mesh blocks.  Our implementation of HYPRE uses an algebraic multigrid (AMG) preconditioned conjugate gradient (PCG) method, which does not require excessive amounts of memory.
+        % \item[$^7$] PFFT stands for Parallel Fast Fourier Transform.  This solver is only possible for block structured domains.  The domain decomposition for the pressure solver differs from the transport solver.  It uses pencil-shaped domains that span each direction and thus perform FFT solves in each direction for the whole domain.  Data is transferred in each stage of the solution to the orthogonal directions.  This solver is \emph{global} but \emph{structured}.  So, mesh to mesh errors are eliminated but immersed boundary errors are not.
     \end{itemize}
 \end{tablenotes}
 \end{threeparttable}
@@ -10198,7 +10232,8 @@ Quantities associated with the overall energy budget are reported in the comma d
 \end{eqnarray}
 \begin{description}
 \item[{\ct Q\_ENTH}] The change in the sensible enthalpy of the gas. $\rho$ is the density of the gas (kg/m$^3$). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas (kJ/kg). The volume integral is over the entire domain.
-\item[{\ct HRR}] The total heat release rate of the fire (kW). By default the effects of any surface oxidation reactions are included in this value. This helps when comparing to heat release measurements obtained from oxygen consumption calorimetry, as the additional oxygen sink from surface reactions will be lumped into the measurement. However, it is possible to output only the contribution from gas-phase combustion by setting {\ct HRR\_GAS\_ONLY=T} on the {\ct DUMP} line.
+\item[{\ct HRR}] The heat release rate of the fire (kW) resulting from gas phase combustion.
+\item[{\ct HRR\_OX}] The heat release rate (kW) of any surface oxidation reactions. This helps when comparing to heat release measurements obtained from oxygen consumption calorimetry, as the additional oxygen sink from surface reactions will be lumped into the measurement.
 \item[{\ct Q\_RADI}] The thermal radiation {\em into} the domain from the exterior boundary or particles.  $\dot{\bq}_{\rm r}''$ is the \underline{r}adiation heat flux vector (\unit{kW/m^2}). Its divergence represents the net radiative emission from a volume of gas. Typically, {\ct Q\_RADI} has a negative value, meaning that a fire or hot gases radiate energy out of the domain. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). This term is added to {\ct Q\_RADI} and subtracted from {\ct Q\_PART} because it is implicitly included in $\nabla \cdot \dot{\bq}_{\rm r}''$ and needs to be separated off for the purpose of explicitly accounting for it in the energy budget.
 \item[{\ct Q\_CONV}] The flow of sensible enthalpy {\em into} the computational domain. $\dm_{\rm p,\alpha}$ is the production rate of gas species $\alpha$ from a solid \underline{p}article or liquid droplet (kg/s). $h_{\rm s,\alpha}$ is the \underline{s}ensible enthalpy of gas species $\alpha$ (kJ/kg). $\rho$ is the gas density (kg/m$^3$), $\bu$ is the velocity vector (m/s). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas. If the gas is flowing out of the domain, $\bu \cdot \d {\bf S}$ is positive.
 \item[{\ct Q\_COND}] The convective heat flux {\em into} the computational domain. $\dq_{\rm c}''$ is the heat \underline{c}onvected from the gas to a surface. If the gas is relatively hot and the surfaces/particles/droplets relatively cool, {\ct Q\_COND} is negative. At {\ct OPEN} boundaries, {\ct Q\_COND} is $\int k \nabla T \cdot \d {\bf S}$, where $k$ (kW/(m$\cdot$K)) is the turbulent thermal conductivity of the gas and $\nabla T$ is the temperature gradient across the open boundary. $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it. Notice that it is subtracted off in {\ct Q\_PART} because it makes no contribution to the energy of the gas.
@@ -10687,7 +10722,7 @@ where $n_i$ is the number of real particles represented by the single simulated 
 The first function, $f_1(t)$, is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PDPA\_M}] is the exponent $m$ in the numerator.
-\item[{\ct PDPA\_N}] is the exponent $n$ in denominator. 
+\item[{\ct PDPA\_N}] is the exponent $n$ in denominator.
 \end{description}
 If $m=n$, the exponent $1/(m-n)$ is removed from the formula.
 
@@ -11465,6 +11500,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
 {\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}        &                    & D            \\ \hline
 {\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}        & 1/s                & D            \\ \hline
+{\ct OXIDATIVE HRRPUA}                          & Section~\ref{sec:reaction_rates}              & \unit{kW/m^2}      & B,D          \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
@@ -12058,7 +12094,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct DT\_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 {\ct DT\_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
-{\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
 {\ct NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
@@ -13664,7 +13699,6 @@ Keyword             & Type     & Description                      & Units       
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               & Pa/m          & 0.                \\ \hline
 {\ct GEOSTROPHIC\_WIND(2)}                      & Real          & Section~\ref{info:geostrophic_wind}           & m/s           &                   \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
-{\ct INITIAL\_SPEED}                            & Real          & Section~\ref{info:force_vector}               & m/s           & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
@@ -14536,21 +14570,24 @@ The boundary files defined under the namelist group {\ct BNDF} are named {\ct CH
 WRITE(LUBF) QUANTITY
 WRITE(LUBF) SHORT_NAME
 WRITE(LUBF) UNITS
-WRITE(LUBF) NPATCH
-WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
-WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
+WRITE(LUBF) N_PATCH
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,OBST_INDEX,NM
         .
-        . WRITE(LUBF) TIME
+        .
+WRITE(LUBF) TIME_1
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
         .
-        . WRITE(LUBF) TIME
+        .
+WRITE(LUBF) TIME_2
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+        .
         .
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
-only program available to view the boundary files.
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct N\_PATCH} is the number of planes (or ``patches'') that correspond to solid surfaces. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell indices of each patch. For example, a patch on the lower $x$ boundary of the domain that spans cells 2 through 5 in the $y$ direction and 7 through 10 in the $z$ direction would have patch indices (0,0,1,5,6,10). Note that the boundary patches are 2-D; thus, one pair of cell indices is the same. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). {\ct OBST\_INDEX} refers to the solid obstruction ({\ct OBST}) to which the patch is affixed. Its value is 0 if the patch is affixed to an external boundary. {\ct NM} is the number of the mesh within which the obstruction lies. It may be different than the mesh containing the boundary data; that is, {\ct NM} is not necessarily equal to the mesh index {\ct M} in the file name.   {\ct TIME\_N} and {\ct QQ} are four-byte reals.
+
 
 \section{Particle Data ({\tt .prt5})}
 \label{out:PART}

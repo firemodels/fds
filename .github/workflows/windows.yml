@@ -26,9 +26,9 @@ permissions:
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d91caaa0-7306-46ea-a519-79a0423e1903/w_BaseKit_p_2024.2.1.101_offline.exe
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/b380d914-366b-4b77-a74a-05e3c38b3514/intel-oneapi-base-toolkit-2025.0.0.882_offline.exe
   WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/745e923a-3f85-4e1e-b6dd-637c0e9ccba6/w_HPCKit_p_2024.2.1.80_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/f07e32fa-b505-4b90-8a79-e328ce9ad9d6/intel-oneapi-hpc-toolkit-2025.0.0.822_offline.exe
   WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
 
 
@@ -71,25 +71,15 @@ jobs:
         webimage_hpc_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_HPCKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
         rd /s/q "webimage_hpc_extracted"
 
-      # github-actions does not cache windows symlinks, so we need to specify the version of each component explicitly
-      # https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-windows/use-a-config-file-for-setvars-bat-on-windows.html
-      # https://oneapi-src.github.io/oneapi-ci/
-    - name: specify oneapi version
-      run: |
-        (
-          echo compiler=2024.2.1
-          echo mkl=2024.2.1
-          echo mpi=2021.13.1
-        ) > oneapi_config.txt
     - name: build fds debug
       run: |
-        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        set INTEL_IFORT=ifx
         cd Build\impi_intel_win_db
         call make_fds.bat
         fds_impi_intel_win_db.exe
     - name: build fds release
       run: |
-        call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" --config="oneapi_config.txt"
+        set INTEL_IFORT=ifx
         cd Build\impi_intel_win
         call make_fds.bat
         fds_impi_intel_win.exe

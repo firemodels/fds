@@ -1,10 +1,12 @@
 #!/bin/bash
-ARG=$1
-
-source ../Scripts/set_intel_compiler.sh $ARG
 
 dir=`pwd`
 target=${dir##*/}
 
-echo Building $target with Intel MPI and $INTEL_IFORT
+# Compile third-party libraries
+export FDS_BUILD_TARGET=$target
+source ../Scripts/build_thirdparty_libs.sh "$@"
+
+# Build fds
+echo Building $target
 make -j4 VPATH="../../Source" -f ../makefile $target

@@ -1,6 +1,9 @@
 #!/bin/bash
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+# $QFDS -p 2 -d Adaptive_Mesh_Refinement ns2d_16_emb_1to1_refinement.fds
+# $QFDS -p 2 -d Adaptive_Mesh_Refinement ns2d_16_emb_1to2_refinement.fds
+# $QFDS -p 13 -d Adaptive_Mesh_Refinement ns2d_16_int_1to2_refinement.fds
 
 $QFDS -d Aerosols aerosol_agglomeration.fds
 $QFDS -d Aerosols aerosol_agglomeration_2.fds
@@ -344,6 +347,8 @@ $QFDS -d Miscellaneous mesh_transformation.fds
 $QFDS -d Miscellaneous obst_sphere.fds
 $QFDS -d Miscellaneous obst_cylinder.fds
 $QFDS -d Miscellaneous obst_cone.fds
+$QFDS -d Miscellaneous obst_multi.fds
+$QFDS -d Miscellaneous obst_single.fds
 $QFDS -d Miscellaneous obst_rotbox.fds
 $QFDS -d Miscellaneous obst_sphere_mass_flux.fds
 $QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
@@ -385,6 +390,7 @@ $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver opening_ulmat.fds
+$QFDS -p 5 -d Pressure_Solver dancing_eddies_embed.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat_hypre.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
@@ -405,6 +411,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 16 -d Pressure_Solver random_obstructions_fft.fds
 $QFDS -p 4 -d Pressure_Solver stairwell.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_default.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds

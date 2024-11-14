@@ -470,6 +470,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
    INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
    INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: BOUNDARY_TYPE_PREVIOUS=0                !< Boundary type at previous time step
    INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
    REAL(EB) :: DUNDT=0._EB                            !< \f$ \partial u_n / \partial t \f$
@@ -1060,9 +1061,10 @@ TYPE OBSTRUCTION_TYPE
    CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
-   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
-   INTEGER :: SURF_INDEX_INTERIOR=0           !< SURFace properties for a newly exposed interior cell
-   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
+   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0          !< SURFace properties for each face
+   INTEGER, DIMENSION(1:6)  :: EXPOSED_FACE_INDEX=0  !< OBST face exposed (1) or blocked (0)
+   INTEGER :: SURF_INDEX_INTERIOR=0                  !< SURFace properties for a newly exposed interior cell
+   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)            !< Color indices for Smokeview
 
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
    REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume
@@ -1563,7 +1565,7 @@ TYPE RAD_FILE_TYPE
 END TYPE RAD_FILE_TYPE
 
 TYPE PATCH_TYPE
-   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR,OBST_INDEX
+   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,VENT_INDEX=0,MESH_INDEX=0
 END TYPE PATCH_TYPE
 
 TYPE BOUNDARY_FILE_TYPE

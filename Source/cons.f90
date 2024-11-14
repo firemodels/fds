@@ -235,7 +235,7 @@ LOGICAL :: TMP_RESTART=.FALSE.              !< Initialize temperature field with
 LOGICAL :: SPEC_RESTART=.FALSE.             !< Initialize tracked species field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
-LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
+LOGICAL :: OBST_CREATED_OR_REMOVED=.TRUE.   !< An obstruction has just been created or removed and wall cells must be reassigned
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
 LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
 LOGICAL :: MAX_DEVICES_EXIST=.FALSE.
@@ -260,7 +260,6 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
@@ -309,7 +308,6 @@ REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
 REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ direction (m/s)
 REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
 REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
-REAL(EB) :: INITIAL_SPEED=-1._EB               !< Initial wind speed (m/s) which is assumed to die off
 REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
 REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
 REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
@@ -538,7 +536,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial inde
 
 ! Miscellaneous integer constants
 
-INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
+INTEGER :: ICYC,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
            STOP_AT_ITER=0,WALL_INCREMENT=2,WALL_COUNTER=0,&
            CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
 
@@ -585,7 +583,7 @@ INTEGER,  ALLOCATABLE, DIMENSION(:) :: EDGE_COUNT
 
 ! Divergence Arrays
 
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSUM,USUM,PSUM
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DSUM,USUM,PSUM
 
 ! Level Set vegetation fire spread
 
@@ -635,7 +633,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_PARTICLE_DIAMETER,MAX_PARTICLE_DIAMET
 ! Number of initial value, pressure zone, and multiplier derived types
 
 INTEGER :: N_INIT,N_ZONE,N_MULT,N_MOVE
-LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CONNECTED_ZONES
+LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES_LOC
 REAL(EB) :: MINIMUM_ZONE_VOLUME=0._EB
 REAL(EB) :: PRESSURE_RELAX_TIME=1._EB
@@ -869,10 +867,10 @@ MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
-REAL(EB)  :: ODE_MIN_ATOL= -1._EB
-LOGICAL  :: EQUIV_RATIO_CHECK = .TRUE.
-REAL(EB) :: MIN_EQUIV_RATIO=0.2_EB
-REAL(EB) :: MAX_EQUIV_RATIO=10._EB
+REAL(EB) :: ODE_MIN_ATOL= -1._EB
+LOGICAL  :: EQUIV_RATIO_CHECK = .FALSE.
+REAL(EB) :: MIN_EQUIV_RATIO=0.0_EB
+REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
 LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 
 
