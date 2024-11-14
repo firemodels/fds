@@ -1243,7 +1243,31 @@ Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on t
 
 Obstructions are typically drawn as solids in Smokeview. To draw an outline representation, set {\ct OUTLINE} equal to {\ct T}
 
+\subsection{Method for avoiding mesh interfaces in blockage outline view}
 
+FDS splits a blockage into separate parts, one part for each mesh. As a result when Smokeview draws blockages as outlines it draws extra lines where blockages intersect mesh interfaces. The following procedure can be used to eliminate these extra lines for a case named say casename.fds .
+
+\begin{enumerate}
+\item Create a one mesh version of casename.fds case  . Name it casename\_single.fds (or anything different than casename.fds) . Set T\_END to 0.0 and CHID to casename\_single~.
+\item After running casename\_single.fds with fds, rename the generated casename\_single.smv file casename.smo~.
+\item Run smokeview casename~.
+\item Select the Show/Hide>Geometry>Obstacles>Outline only menu item to view the blockages as outlines.
+\item press the `q' key to toggle between viewing blockages split at mesh boundaries (how fds handles them) and how blockages are defined in the input file.
+\end{enumerate}
+
+Figure \ref{fig:outlinehack} shows an example where blockages are drawn as specified in the input file and drawn split at mesh interfaces.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_multi}&
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_single}\\
+outlines drawn at blockage edges and mesh interfaces&outlines drawn as specified in the input file
+\end{tabular}
+\end{center}
+\caption[Blockage outlines drawn at mesh interfaces and as specified in the input file.]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
+\label{fig:outlinehack}%
+\end{figure}
 
 \subsection{Creating Holes in Obstructions}
 \label{info:HOLE}
