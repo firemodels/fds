@@ -1180,26 +1180,11 @@ IF (.NOT.ALLOCATED(M%ZONE_MESH)) THEN
    CALL ChkMemErr('INIT','ZONE_MESH',IZERO)
 ENDIF
 
-! Identify connected ZONEs
+! Select the parent zone as the first in the row
 
-! translate logical array to local and fill diagonal
-CONNECTED_ZONES_LOC = 0
-DO IOPZ=0,N_ZONE
-   DO IPZ=0,N_ZONE
-      IF (IPZ==IOPZ .OR. CONNECTED_ZONES(IPZ,IOPZ)) CONNECTED_ZONES_LOC(IPZ,IOPZ) = 1
-   ENDDO
-ENDDO
-
-! establish sets of connected zones
-DO IPZ=1,N_ZONE
-   CONNECTED_ZONES_LOC = MATMUL(CONNECTED_ZONES_LOC,CONNECTED_ZONES_LOC)
-ENDDO
-CONNECTED_ZONES_LOC = MIN(1,CONNECTED_ZONES_LOC)
-
-! select the parent zone as the first in the row
 DO IPZ=0,N_ZONE
    ZM=>MESHES(NM)%ZONE_MESH(IPZ)
-   ZM%CONNECTED_ZONE_PARENT = MINLOC(CONNECTED_ZONES_LOC(IPZ,:), DIM=1, MASK = CONNECTED_ZONES_LOC(IPZ,:)/=0) - 1
+   ZM%CONNECTED_ZONE_PARENT = MINLOC(CONNECTED_ZONES(IPZ,:), DIM=1, MASK=CONNECTED_ZONES(IPZ,:)/=0) - 1
 ENDDO
 
 ! Test if FFT solver can be used for this MESH
@@ -1212,7 +1197,7 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
    IF (ZM%CONNECTED_ZONE_PARENT/=IPZ) CYCLE ZONE_MESH_LOOP
 
    ! Test for multiple zones in MESH
-   NZIM=SUM(CONNECTED_ZONES_LOC(IPZ,:))
+   NZIM=SUM(CONNECTED_ZONES(IPZ,:))
    IF (NZIM>1) ZM%USE_FFT=.FALSE.
    IPZIM=IPZ
 
@@ -4827,24 +4812,11 @@ ALLOCATE(ZONE_SOLVE(0:N_ZONE))
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ! Initialize unknown numbers for H:
    MESHES(NM)%CCVAR(:,:,:,UNKH) = IS_UNDEFINED
-   ! Identify connected ZONEs
-   ! translate logical array to local and fill diagonal
-   CONNECTED_ZONES_LOC = 0
-   DO IOPZ=0,N_ZONE
-      DO IPZ=0,N_ZONE
-         IF (IPZ==IOPZ .OR. CONNECTED_ZONES(IPZ,IOPZ)) CONNECTED_ZONES_LOC(IPZ,IOPZ) = 1
-      ENDDO
-   ENDDO
-   ! establish sets of connected zones
-   DO IPZ=1,N_ZONE
-      CONNECTED_ZONES_LOC = MATMUL(CONNECTED_ZONES_LOC,CONNECTED_ZONES_LOC)
-   ENDDO
-   CONNECTED_ZONES_LOC = MIN(1,CONNECTED_ZONES_LOC)
-   ! select the parent zone as the first in the row
+   ! Select the parent zone as the first in the row
    DO IPZ=0,N_ZONE
       ZSL => ZONE_SOLVE(IPZ)
       IF(.NOT.PRES_ON_WHOLE_DOMAIN) &
-      ZSL%CONNECTED_ZONE_PARENT = MINLOC(CONNECTED_ZONES_LOC(IPZ,:), DIM=1, MASK = CONNECTED_ZONES_LOC(IPZ,:)/=0) - 1
+      ZSL%CONNECTED_ZONE_PARENT = MINLOC(CONNECTED_ZONES(IPZ,:), DIM=1, MASK=CONNECTED_ZONES(IPZ,:)/=0) - 1
    ENDDO
 ENDDO
 
