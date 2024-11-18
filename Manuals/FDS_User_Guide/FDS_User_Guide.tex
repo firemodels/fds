@@ -1243,7 +1243,31 @@ Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on t
 
 Obstructions are typically drawn as solids in Smokeview. To draw an outline representation, set {\ct OUTLINE} equal to {\ct T}
 
+\subsection{Method for avoiding mesh interfaces in blockage outline view}
 
+FDS splits a blockage into separate parts, one part for each mesh. As a result when Smokeview draws blockages as outlines it draws extra lines where blockages intersect mesh interfaces. The following procedure can be used to eliminate these extra lines for a case named say casename.fds .
+
+\begin{enumerate}
+\item Create a one mesh version of casename.fds case  . Name it casename\_single.fds (or anything different than casename.fds) . Set T\_END to 0.0 and CHID to casename\_single~.
+\item After running casename\_single.fds with fds, rename the generated casename\_single.smv file casename.smo~.
+\item Run smokeview casename~.
+\item Select the Show/Hide>Geometry>Obstacles>Outline only menu item to view the blockages as outlines.
+\item press the `q' key to toggle between viewing blockages split at mesh boundaries (how fds handles them) and how blockages are defined in the input file.
+\end{enumerate}
+
+Figure \ref{fig:outlinehack} shows an example where blockages are drawn as specified in the input file and drawn split at mesh interfaces.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_multi}&
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/obst_single}\\
+outlines drawn at blockage edges and mesh interfaces&outlines drawn as specified in the input file
+\end{tabular}
+\end{center}
+\caption[Blockage outlines drawn at mesh interfaces and as specified in the input file.]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
+\label{fig:outlinehack}%
+\end{figure}
 
 \subsection{Creating Holes in Obstructions}
 \label{info:HOLE}
@@ -5202,8 +5226,8 @@ There may be times when your design/model fire is best described by more than on
 \end{multline}
 and the reaction for wood with a soot yield of $y_{\rm s}$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
-1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.021246\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(0.964384141\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.03196\; C + 3.84076 \; N_2)}}_\text{Products\_2}
+1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.02121\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
+1\,\underbrace{\mathrm{(0.96438\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.03196\; C + 3.84076 \; N_2)}}_\text{Products\_2}
 \end{multline}
 Similar to example in Sec.~\ref{info:Complex_Fuel}, we will use the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
 \begin{lstlisting}
@@ -5228,7 +5252,7 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
       SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) =  0.16659,
       SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 21.,
       SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) =  5.08930,
-      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.7111 /
+      SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.7511 /
 
 &SPEC ID = 'PRODUCTS_2',
       SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.96438,
@@ -11638,9 +11662,9 @@ $^2$                 \> Requires the specification of a particle name using {\ct
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutputquantities} summarizes the various Output Quantities for HVAC systems. In the file type column, D indicates a device output specified with a {\ct DEVC} input, and H indicates a Smokeview output specified with an {\ct HVAC} input.
+Table~\ref{tab:hvacoutputquantities} summarizes the various output quantities for HVAC systems. In the file type column, D indicates a device output specified with a {\ct DEVC} input, and H indicates a Smokeview output specified with an {\ct HVAC} input.
 
-All HVAC output quantities can be selected with a {\ct DEVC} input. Do not specify an {\ct XYZ} or {\ct XB} for HVAC outputs. When using a {\ct DEVC}, quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID}, and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+All HVAC output quantities can be selected with a {\ct DEVC} input. Do not specify an {\ct XYZ} or {\ct XB} for HVAC outputs. When using a {\ct DEVC}, quantities for a duct require the specification of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID}, and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT\_CELL\_L} or {\ct N\_CELLS} are specified) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 
 HVAC output quantities beginning with {\ct DUCT} that are not duct cell quantities and output quantities beginning with {\ct NODE} except for {\ct NODE PRESSURE DIFFERENCE} can also be output to the {\ct CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). These are identified in Table~\ref{tab:hvacoutputquantities} as a File Type of H. Smokeview outputs are specified using the {\ct HVAC} namelist. To select duct outputs create a single {\ct HVAC} input with {\ct TYPE\_ID='DUCT QUANTITY LIST'}, and to select node outputs create a single {\ct HVAC} input with {\ct TYPE\_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using {\ct QUANTITY}, and if any quantities require a species also specify {\ct QUANTITY\_SPEC\_ID} for that quantities. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using {\ct DT\_HVAC} on {\ct DUMP}. For example:
 \begin{lstlisting}
