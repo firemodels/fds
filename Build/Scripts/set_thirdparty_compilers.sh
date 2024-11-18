@@ -59,7 +59,7 @@ if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
 elif [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
     select_compiler CC mpiicx icx mpiicc icc
     select_compiler CXX mpiicpx icpx mpiicpc icpc
-    select_compiler FC mpiifort ifort mpiifx ifx
+    select_compiler FC ifort mpiifx ifx
 else  # Default to GNU compilers
     select_compiler CC mpicc gcc
     select_compiler CXX mpicxx g++
