@@ -2929,12 +2929,14 @@ The test cases called \ct{Miscellaneous/layer_1mesh.fds} and \ct{layer_4mesh.fds
 \section{Isothermal Flow Around Activated Objects (\texorpdfstring{\ct{obst_activation}}{obst\_activation})}
 \label{obst_activation}
 
-The cases presented here are found in input files \ct{Pressure_Solver/obst_activation_default.fds} and \ct{obst_activation_ulmat.fds}. The domain is split into four meshes and several obstacles are made to disappear and appear during the simulation. These obstacles can be completely embedded inside meshes, or either overlap or abut mesh boundaries. Default (FFT) and ULMAT pressure solvers are used. Figure~\ref{obst_act_fig} displays the maximum divergence in the domain. These values should be comparable to machine precision for double precision floating point arithmetic.
+The input files for these case are labeled \ct{Pressure_Solver/obst_activation_*.fds}. A 2-D channel flow is split into four meshes and several obstacles are made to disappear and appear during the simulation. These obstacles can be completely embedded inside meshes, or either overlap or abut mesh boundaries. In the first case, only one gas species flows through the channel. Default (FFT) and ULMAT pressure solvers are used. The left hand plot in Fig.~\ref{obst_act_fig} displays the maximum divergence in the domain. These values should be comparable to machine precision for double precision floating point arithmetic.
+
+In the second case, gases of different molecular weights are introduced at the entrance of the channel. There should be no temperature change as the obstructions are created and removed. The right hand plot in Fig.~\ref{obst_act_fig} displays the minimum and maximum temperature, which are not exactly 20~$^\circ$C.
 
 \begin{figure}[!ht]
-\centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/obst_activation}
-\caption[Result of the \ct{obst_activation} test cases]{Maximum divergence for isothermal flow around obstructions that appear and disappear.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/obst_activation_gases}
+\caption[Result of the \ct{obst_activation} test cases]{(Left) Maximum divergence for isothermal flow around obstructions that appear and disappear. (Right) A similar case, but with a mixture of two gases with different molecular weights.}
 \label{obst_act_fig}
 \end{figure}
 
