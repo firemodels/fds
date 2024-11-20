@@ -67,7 +67,7 @@ gnu_osx : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
 intel_linux : FFLAGS    = -O2 -m64 $(GITINFO)
-intel_linux : FC        = ifort
+intel_linux : FC        = ifx
 intel_linux : exe       = fds2ascii_intel_linux
 intel_linux : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
