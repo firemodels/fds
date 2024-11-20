@@ -49,7 +49,7 @@ no_target:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
 intel_win : FFLAGS    = -O2 /nologo /fpscomp:general $(GITINFO)
-intel_win : FC        = ifort
+intel_win : FC        = ifx
 intel_win : exe       = fds2ascii_intel_win.exe
 intel_win : $(objwin)
 	$(FC) -o $(bin)/$(exe) $(objwin)
@@ -67,7 +67,7 @@ gnu_osx : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
 intel_linux : FFLAGS    = -O2 -m64 $(GITINFO)
-intel_linux : FC        = ifort
+intel_linux : FC        = ifx
 intel_linux : exe       = fds2ascii_intel_linux
 intel_linux : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
