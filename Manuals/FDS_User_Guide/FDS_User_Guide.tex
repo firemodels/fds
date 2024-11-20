@@ -5548,11 +5548,11 @@ The parameter \ct{THERMOPHORETIC_DIAMETER} can be used to define a particle diam
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
-The \ct{propane_flame_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.0544. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
+The \ct{propane_flame_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.05. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
 \begin{equation}\label{eq:PROPANE_depo}
-1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow
-1 \; \underbrace{\mathrm{(18.10631 \; N_2 \, + \, 2.8 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
-\,0.2 \; \underbrace{\mathrm{C}}_\text{Soot}
+\underbrace{\mathrm{C_3H_8}}_\text{Fuel} \,+\, 4.81643 \; \underbrace{\mathrm{(O_2\,+\, 3.76 \; N_2})}_\text{Air} \, \longrightarrow
+ \underbrace{\mathrm{(18.10978 \; N_2 \, + \, 2.81643 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
+\,0.18357 \; \underbrace{\mathrm{C}}_\text{Soot}
 \end{equation}
 Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.0544 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining \ct{AEROSOL=T} on the \ct{SPEC} line.
 \begin{lstlisting}
