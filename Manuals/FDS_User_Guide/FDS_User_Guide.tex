@@ -5544,7 +5544,7 @@ To use these default values, simply add the following lines to the FDS input fil
 
 It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter \ct{AEROSOL=T} on the \ct{SPEC} line along with the parameters \ct{DENSITY_SOLID}, \ct{CONDUCTIVITY_SOLID}, and \ct{MEAN_DIAMETER}. By default, with \ct{AEROSOL=T}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each surface deposition mechanism can be selectively disabled by using the logical parameters \ct{GRAVITATIONAL_DEPOSITION}, \ct{THERMOPHORETIC_DEPOSITION}, and \ct{TURBULENT_DEPOSITION}. All surface deposition can be disabled by the logical parameter \ct{DEPOSITION}. In the gas phase, aerosol transport is affected by gravity and temperature gradients. These effects can be selectively disabled with \ct{GRAVITATIONAL_SETTLING} and \ct{THERMOPHORETIC_SETTLING}. All the deposition parameters are on the \ct{MISC} line.  The deposition velocity at the wall can be output using the solid phase output \ct{QUANTITY} called \ct{'DEPOSITION VELOCITY'}.
 
-The parameter \ct{THERMOPHORETIC_DIAMETER} can be used to define a particle diameter to use in lieu of the \ct{MEAN_DIAMETER} when computing the thermophoretic force. This may be appropriate for flaky or string like aerosol particles when the thermophoretic force can operate on each of the primary particles composing the larger aerosol.
+The parameter \ct{THERMOPHORETIC_DIAMETER} can be used to define a particle diameter to use in lieu of the \ct{MEAN_DIAMETER} when computing the thermophoretic force. This may be appropriate for flaky or string like aerosol particles when the thermophoretic force can operate on each of the primary particles composing the larger aerosol. The default value is 0.03~$\mu$m which represents a typical soot primary particle diameter. If this value is set to a negative number, the \ct{MEAN_DIAMETER} will be used (taken as the bin diameter if agglomeration is being modeled) for thermophoresis.
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -13303,7 +13303,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SPEC_ID(:)}                   & Char.~Array       & Section~\ref{info:lumped}               &                   &               \\ \hline
 \ct{SPECIFIC_HEAT}                & Real              & Section~\ref{gas_species_props}         & \si{kJ/(kg.K)}    &               \\ \hline
 \ct{SPECIFIC_HEAT_LIQUID}        & Real              & Section~\ref{thermal_part_props}        & \si{kJ/(kg.K)}    &               \\ \hline
-\ct{THERMOPHORETIC_DIAMETER}      & Real              & Section~\ref{info:deposition}           & m                 &               \\ \hline
+\ct{THERMOPHORETIC_DIAMETER}      & Real              & Section~\ref{info:deposition}           & m                 &  0.03E-6      \\ \hline
 \ct{TURBULENT_SCHMIDT_NUMBER}    & Real              & Section~\ref{gas_species_props}         &                   & 0.5           \\ \hline
 \ct{VAPORIZATION_TEMPERATURE}     & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 \ct{VISCOSITY}                     & Real              & Section~\ref{gas_species_props}         & \si{kg/(m.s)}     &               \\ \hline
