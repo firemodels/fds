@@ -1,5 +1,8 @@
 # PARSE OPTIONS FOR CLEAN LIBRARY BUILDS ####################################
 
+# Decide compilers
+source ../Scripts/set_compilers.sh
+
 # Set FIREMODELS environment variable if it is not already exists.
 if [ -z "${FIREMODELS}" ]; then
     export FIREMODELS="$(readlink -f "$(pwd)/../../../")"
@@ -64,8 +67,6 @@ fi
 
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
-# Decide compilers
-source ../Scripts/set_thirdparty_compilers.sh
 
 # build hypre
 source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre

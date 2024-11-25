@@ -1,5 +1,8 @@
 @echo off
 
+:: Select the compilers
+call ..\Scripts\setup_intel_compilers.bat
+
 set clean_hypre=
 set clean_sundials=
 set clean_fds=
@@ -88,18 +91,6 @@ set SCRIPTDIR=%~dp0
 cd %SCRIPTDIR%
 SET SCRIPTDIR=%CD%
 
-
-:: Decide C and FORTRAN COMPILER for third-party builds
-set CC=icx
-if "x%INTEL_IFORT%" == "x" (
-    set FC=ifx
-) else (
-    set FC=%INTEL_IFORT%
-)
-echo.
-echo Third-party libs C Compiler=%CC%
-echo Third-party libs Fortran Compiler=%FC%
-echo.
 
 
 ::Call HYPRE and SUNDIALS build script
