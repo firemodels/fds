@@ -7,8 +7,11 @@ set set_COMP_FC=0
 :: Check and set C compiler
 if defined FIREMODELS_CC (
     set COMP_CC=%FIREMODELS_CC%
-    where /q %COMP_CC% || echo Warning: %FIREMODELS_CC% is not available. Searching for an alternative.
-    set set_COMP_CC=1
+    where /q %COMP_CC% && (
+        set set_COMP_CC=1
+    ) || (
+        echo Warning: %FIREMODELS_CC% is not available. Searching for an alternative.
+    )
 )
 if %set_COMP_CC%==0 (
     for %%C in (icx icc) do (
@@ -21,8 +24,11 @@ if %set_COMP_CC%==0 (
 :: Check and set Fortran compiler
 if defined FIREMODELS_FC (
     set COMP_FC=%FIREMODELS_FC%
-    where /q %COMP_FC% || echo Warning: %FIREMODELS_FC% is not available. Searching for an alternative.
-    set set_COMP_FC=1
+    where /q %COMP_FC% && (
+        set set_COMP_FC=1
+    ) || (
+        echo Warning: %FIREMODELS_FC% is not available. Searching for an alternative.
+    )
 )
 if %set_COMP_FC%==0 (
     for %%F in (ifx ifort) do (
