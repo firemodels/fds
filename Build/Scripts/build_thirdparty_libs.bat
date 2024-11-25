@@ -1,7 +1,7 @@
 @echo off
 
 :: Select the compilers
-call ..\Scripts\setup_intel_compilers.bat
+call ..\Scripts\setup_compilers.bat
 
 set clean_hypre=
 set clean_sundials=
