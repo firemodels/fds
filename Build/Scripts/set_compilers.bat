@@ -37,3 +37,22 @@ echo.
 echo Third-party libs C Compiler: %COMP_CC%
 echo Firemodels and Third-party libs Fortran Compiler: %COMP_FC%
 echo.
+
+
+::Check if make.bat or make.exe exists, and set CMAKE_MAKE_PROGRAM accordingly
+::------------------------------------------------------------------------------
+set CMAKE_MAKE_PROGRAM=
+for /f "delims=" %%i in ('where make.bat 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
+if not defined CMAKE_MAKE_PROGRAM (
+    for /f "delims=" %%i in ('where make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
+)
+if not defined CMAKE_MAKE_PROGRAM (
+    echo Error: Neither make.bat nor make.exe found in PATH.
+    exit /b 1
+)
+
+echo.
+echo make proram is %CMAKE_MAKE_PROGRAM%
+echo.
+
+
