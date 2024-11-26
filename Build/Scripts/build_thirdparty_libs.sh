@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Decide compilers
 source ../Scripts/set_compilers.sh
 
