@@ -6,7 +6,6 @@ echo "Current shell: $SHELL"
 source ../Scripts/set_compilers.sh
 
 
-
 # PARSE OPTIONS FOR CLEAN LIBRARY BUILDS ####################################
 
 # Set FIREMODELS environment variable if it is not already exists.

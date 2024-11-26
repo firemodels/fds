@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "FDS build target = $FDS_BUILD_TARGET"
 
 # Initialize variables and check environment variables
