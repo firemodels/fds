@@ -43,16 +43,14 @@ jobs:
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux_db
-        sh ./make_fds.sh
+        ./make_fds.sh
         ./fds_impi_intel_linux_db
-      shell: bash
     - name: build fds release
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
-        sh ./make_fds.sh
+        ./make_fds.sh
         ./fds_impi_intel_linux
-      shell: bash
     # Setup python
     - uses: actions/setup-python@v5
       with:
@@ -90,13 +88,11 @@ jobs:
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_linux_db
-        sh ./make_fds.sh
+        ./make_fds.sh
         ./fds_ompi_gnu_linux_db
-      shell: bash
     - name: build fds release
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_linux
-        sh ./make_fds.sh
+        ./make_fds.sh
         ./fds_ompi_gnu_linux
-      shell: bash
