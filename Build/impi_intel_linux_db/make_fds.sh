@@ -5,7 +5,7 @@ target=${dir##*/}
 
 # Compile third-party libraries
 export FDS_BUILD_TARGET=$target
-sh ../Scripts/build_thirdparty_libs.sh "$@"
+source ../Scripts/build_thirdparty_libs.sh "$@"
 
 # Build fds
 echo Building $target

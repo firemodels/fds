@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Current shell: $SHELL"
-
 # Decide compilers
 source ../Scripts/set_compilers.sh
 
