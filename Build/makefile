@@ -147,6 +147,7 @@ setup_win:
 
 # Files which have OpenMP compiler directives are compiled using the FOPENMPFLAG and can be enabled/disabled on a per-file basis.
 
+ccib.o: FFLAGS += $(FOPENMPFLAGS)
 divg.o: FFLAGS += $(FOPENMPFLAGS)
 func.o: FFLAGS += $(FOPENMPFLAGS)
 mass.o: FFLAGS += $(FOPENMPFLAGS)
@@ -157,6 +158,7 @@ radi.o: FFLAGS += $(FOPENMPFLAGS)
 wall.o: FFLAGS += $(FOPENMPFLAGS)
 main.o: FFLAGS += $(FOPENMPFLAGS)
 
+ccib.obj: FFLAGS += $(FOPENMPFLAGS)
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
 func.obj: FFLAGS += $(FOPENMPFLAGS)
 mass.obj: FFLAGS += $(FOPENMPFLAGS)
