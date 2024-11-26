@@ -10,7 +10,7 @@ fi
 
 cmake_args=(
   -DCMAKE_INSTALL_PREFIX="$HYPRE_INSTALL_PREFIX"
-  -DCMAKE_C_COMPILER="$CC"
+  -DCMAKE_C_COMPILER="$COMP_CC"
   -DCMAKE_C_FLAGS="$C_FLAGS"
   -DCMAKE_INSTALL_LIBDIR="lib"
 )
@@ -26,8 +26,5 @@ fi
 
 # Run cmake with the arguments
 cmake ../ "${cmake_args[@]}"
-
-# ./configure CC=$CC FC=mpiifort CFLAGS="-O3 -fno-unsafe-math-optimizations -fp-model=precise" FFLAGS="-O3 -fno-unsafe-math-optimizations -fp-model=precise" \
-#       --prefix=$FIREMODELS/libs/hypre/$HYPRE_VERSION
 
 make install

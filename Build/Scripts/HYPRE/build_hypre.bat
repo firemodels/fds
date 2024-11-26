@@ -76,18 +76,6 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set buildstatus=build
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo setting up Intel compilers
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
-
-cd %CURDIR%
-
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -130,27 +118,12 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-::Check if make.bat or make.exe exists, and set CMAKE_MAKE_PROGRAM accordingly
-set CMAKE_MAKE_PROGRAM=
-for /f "delims=" %%i in ('where make.bat 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
-if not defined CMAKE_MAKE_PROGRAM (
-    for /f "delims=" %%i in ('where make.exe 2^>nul') do set CMAKE_MAKE_PROGRAM=%%i
-)
-if not defined CMAKE_MAKE_PROGRAM (
-    echo Error: Neither make.bat nor make.exe found in PATH.
-    exit /b 1
-)
-
-echo.
-echo make proram is %CMAKE_MAKE_PROGRAM%
-echo.
-
 set BUILDDIR=%LIB_REPO%\src\cmbuild
 cd %BUILDDIR%
 cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
--DCMAKE_C_COMPILER=%CC% ^
+-DCMAKE_C_COMPILER=%COMP_CC% ^
 -DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
