@@ -1,5 +1,8 @@
 @echo off
 
+:: Select the compilers
+call ..\Scripts\set_compilers.bat
+
 set clean_hypre=
 set clean_sundials=
 set clean_fds=
@@ -88,6 +91,9 @@ set SCRIPTDIR=%~dp0
 cd %SCRIPTDIR%
 SET SCRIPTDIR=%CD%
 
+
+
+::Call HYPRE and SUNDIALS build script
 cd %SCRIPTDIR%\HYPRE
 call build_hypre %clean_hypre%
 

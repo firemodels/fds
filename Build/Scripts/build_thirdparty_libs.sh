@@ -1,3 +1,9 @@
+#!/bin/bash
+
+# Decide compilers
+source ../Scripts/set_compilers.sh
+
+
 # PARSE OPTIONS FOR CLEAN LIBRARY BUILDS ####################################
 
 # Set FIREMODELS environment variable if it is not already exists.
@@ -73,8 +79,6 @@ fi
 
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
-# Decide compilers
-source ../Scripts/set_thirdparty_compilers.sh
 
 # build hypre
 source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre

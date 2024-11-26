@@ -288,6 +288,7 @@ LOGICAL :: WROTE_SL2D=.FALSE.                       !< Flag indicating if a SL2D
 LOGICAL :: WROTE_SMOKE3D=.FALSE.                    !< Flag indicating if a Smoke3D file was written during primary out
 LOGICAL :: WROTE_BNDF=.FALSE.                       !< Flag indicating if a BNDF file was written during primary out
 LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART file was written during primary out
+LOGICAL :: TEST_FLUX_LIMITER_FACE_CORRECTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
