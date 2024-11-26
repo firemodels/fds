@@ -1,4 +1,5 @@
 # Decide compilers
+echo "Current directory: $(pwd)"
 source ../Scripts/set_compilers.sh
 
 
