@@ -17,7 +17,7 @@ if %set_COMP_CC%==0 (
     for %%C in (icx icc) do (
         where /q %%C && set COMP_CC=%%C && set set_COMP_CC=1 && goto :found_cc
     )
-    echo Error: Neither icx nor icc is available. & exit /b 1
+    echo Error: Neither icx nor icc is available. Thirdparty libs will not be built.
 )
 :found_cc
 
