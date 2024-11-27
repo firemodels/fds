@@ -1690,7 +1690,6 @@ LIBRARY_SELECT: SELECT CASE(ULMAT_SOLVER_LIBRARY)
 CASE(MKL_PARDISO_FLAG) LIBRARY_SELECT
 #ifdef WITH_MKL
    !.. Back substitution and iterative refinement
-   IPARM(8) =  0 ! max numbers of iterative refinement steps
    PHASE    = 33 ! only solving
    CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
                 ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
@@ -2685,7 +2684,7 @@ IPARM(2)  = 2  ! fill-in reordering from METIS
 IPARM(4)  = 0  ! no iterative-direct algorithm
 IPARM(5)  = 0  ! no user fill-in reducing permutation
 IPARM(6)  = 0  ! =0 solution on the first n components of x
-IPARM(8)  = 0  ! numbers of iterative refinement steps
+IPARM(8)  = 2  ! numbers of iterative refinement steps
 IPARM(10) =13  ! perturb the pivot elements with 1E-13
 IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
 IPARM(13) = 1  ! maximum weighted matching algorithm is switched-off (default for symmetric).
@@ -3156,7 +3155,6 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
    IPARM(41) = ZSL%LOWER_ROW
    IPARM(42) = ZSL%UPPER_ROW
    !.. Back substitution and iterative refinement
-   IPARM(8) =  0 ! max numbers of iterative refinement steps
    PHASE    = 33 ! only solving
 #ifdef SINGLE_PRECISION_PSN_SOLVE
    ZSL%F_H_FB(1:ZSL%NUNKH_LOCAL) = REAL(ZSL%F_H(1:ZSL%NUNKH_LOCAL),FB)
