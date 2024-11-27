@@ -4768,21 +4768,20 @@ IF (CREATE) OBSTRUCTION(OBST_INDEX)%SCHEDULED_FOR_CREATION = .TRUE.
 
 IF (I1/=I2 .AND. J1/=J2 .AND. K1/=K2) CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
 
-! If the OBSTruction is to be removed, set density and mass fractions to ambient value
+! Set density, mass fractions, temperature, and net diffusion to ambient value in cells covered or uncovered by obstruction.
 
-IF (REMOVE) THEN
-   DO K=K1+1,K2
-      DO J=J1+1,J2
-         DO I=I1+1,I2
-            RHOS(I,J,K) = RHO_0(K)
-            RHO(I,J,K)  = RHO_0(K)
-            IF (SOLID_PHASE_ONLY) TMP(I,J,K) = TMP_0(K)
-            ZZ(I,J,K,1:N_TRACKED_SPECIES)  = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-            ZZS(I,J,K,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-         ENDDO
+DO K=K1+1,K2
+   DO J=J1+1,J2
+      DO I=I1+1,I2
+         RHOS(I,J,K) = RHO_0(K)
+         RHO(I,J,K)  = RHO_0(K)
+         IF (SOLID_PHASE_ONLY) TMP(I,J,K) = TMP_0(K)
+         ZZ(I,J,K,1:N_TRACKED_SPECIES)  = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         ZZS(I,J,K,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         IF (I1==0.OR.I2==IBAR.OR.J1==0.OR.J2==JBAR.OR.K1==0.OR.K2==KBAR) DEL_RHO_D_DEL_Z(I,J,K,:) = 0._EB
       ENDDO
    ENDDO
-ENDIF
+ENDDO
 
 END SUBROUTINE CREATE_OR_REMOVE_OBST
 
