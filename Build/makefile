@@ -65,9 +65,9 @@ ifdef PETSC_DIR # Assumes the PETSc library is available.
   ifeq ("$(MYSYSTEM)", "excess")
     FFLAGS_PETSC = -DWITH_PETSC -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/${PETSC_ARCH}/include/suitesparse
     # fblaslapack
-    #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lfblas -lflapack -lc++
+    LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lfblas -lflapack -lc++
     # openblas
-    LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lopenblas -lc++
+    #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lopenblas -lc++
     # mkl
     #LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -Wl,-rpath,/opt/intel/oneapi/mkl/latest/lib -L/opt/intel/oneapi/mkl/latest/lib -lpetsc -lspqr -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig -lHYPRE -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lc++
   endif
@@ -92,8 +92,8 @@ ifdef PETSC_DIR # Assumes the PETSc library is available.
     FFLAGS_PETSC = -DWITH_PETSC -I"${PETSC_DIR}/include/" -I"${PETSC_DIR}/${PETSC_ARCH}/include"
     LFLAGS_PETSC = -Wl,-rpath,${PETSC_DIR}/${PETSC_ARCH}/lib -L${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -lstdc++
   endif
-
-else # PETSc or MKL test.
+endif
+#else # PETSc or MKL test.
 
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
@@ -136,7 +136,7 @@ ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 endif
 endif # OS test
 endif # MKLROOT test
-endif # PETSc test
+#endif # PETSc test
 
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
@@ -149,7 +149,7 @@ endif
 
 FFLAGS_HYPRE =
 LFLAGS_HYPRE =
-ifndef PETSC_DIR # PETSC is exclusive.
+#ifndef PETSC_DIR # PETSC is exclusive.
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
@@ -157,7 +157,7 @@ ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
    LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
 endif
-endif
+#endif
 
 FFLAGS_HDF5 =
 ifdef HDF5_HOME # This assumes the HDF5 libary is available

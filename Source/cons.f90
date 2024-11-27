@@ -544,6 +544,7 @@ INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pres
 INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
 INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matrix solver library flag for MKL PARDISO
 INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
+INTEGER, PARAMETER :: PETSC_FLAG=3                               !< Integer matrix solver library flag for PETSc
 INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels

@@ -4473,7 +4473,7 @@ COMB_LOOP: DO
 ENDDO COMB_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-! Reread the COMB lines to check if user explicitly set DO_CHEM_LOAD_BALANCE to false. 
+! Reread the COMB lines to check if user explicitly set DO_CHEM_LOAD_BALANCE to false.
 ! For CVODE default DO_CHEM_LOAD_BALANCE is TRUE. For others, it is false.
 IF(TRIM(ODE_SOLVER)=='CVODE') THEN
    DO_CHEM_LOAD_BALANCE = .TRUE.
@@ -9764,14 +9764,14 @@ SELECT CASE(TRIM(SOLVER))
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
-   CASE('ULMAT','ULMAT PARDISO','ULMAT HYPRE')
+   CASE('ULMAT','ULMAT PARDISO','ULMAT HYPRE','ULMAT PETSC')
       PRES_METHOD = 'ULMAT'
       PRES_FLAG   = ULMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
       ULMAT_SOLVER_LIBRARY = MKL_PARDISO_FLAG
       IF (TRIM(SOLVER)=='ULMAT HYPRE') ULMAT_SOLVER_LIBRARY = HYPRE_FLAG
-
+      IF (TRIM(SOLVER)=='ULMAT PETSC') ULMAT_SOLVER_LIBRARY = PETSC_FLAG
    CASE('FFT')
       ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
    CASE DEFAULT
@@ -9782,19 +9782,35 @@ END SELECT
 ULMAT_IF: IF (PRES_FLAG==ULMAT_FLAG) THEN
 
 ! If library is not specified and only one library is linked, choose the available library
+#ifndef WITH_PETSC
 #ifndef WITH_MKL
 #ifdef WITH_HYPRE
 ULMAT_SOLVER_LIBRARY=HYPRE_FLAG
 #endif
 #endif
+#endif
+#ifndef WITH_PETSC
 #ifndef WITH_HYPRE
 #ifdef WITH_MKL
 ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG
 #endif
 #endif
+#endif
+#ifndef WITH_MKL
+#ifndef WITH_HYPRE
+#ifdef WITH_PETSC
+ULMAT_SOLVER_LIBRARY=PETSC_FLAG
+#endif
+#endif
+#endif
 
 ! If neither library is specified, throw an error
-#ifndef WITH_PETSC /* PETSc takes precedence over MKL and HYPRE */
+#ifndef WITH_PETSC
+IF (ULMAT_SOLVER_LIBRARY==PETSC_FLAG) THEN
+   CALL SHUTDOWN('ERROR: PETSC selected for ULMAT solver without compiling and linking PETSC library.')
+   RETURN
+ENDIF
+#endif
 #ifndef WITH_MKL
 IF (ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
    CALL SHUTDOWN('ERROR: MKL PARDISO selected for ULMAT solver without compiling and linking MKL library.')
@@ -9806,7 +9822,6 @@ IF (ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
    CALL SHUTDOWN('ERROR: HYPRE selected for ULMAT solver without compiling and linking HYPRE library.')
    RETURN
 ENDIF
-#endif
 #endif
 
 ENDIF ULMAT_IF
@@ -15394,7 +15409,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO
       MESHES(1)%N_SLCF_O = N_SLCF_O
    ENDIF
-   
+
    IF (.NOT.ALLOCATED(MESHES(1)%UNIQUE_SLCF_AGL)) THEN
       ALLOCATE(MESHES(1)%UNIQUE_SLCF_AGL(N_UNIQUE_SLCF))
       MESHES(1)%UNIQUE_SLCF_AGL(1:N_UNIQUE_SLCF) = AGL_SLICES(1:N_UNIQUE_SLCF)
@@ -15511,7 +15526,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
       ! Add slice name information to mesh 1 before rejecting slice out of bounds
       CALL GET_SLCF_NAME(PBX,PBY,PBZ,XS_MIN,XF_MAX,YS_MIN,YF_MAX,ZS_MIN,ZF_MAX,AGL_SLICE,SLCF_NAME)
-      
+
       NITER = 1
       IF (VECTOR .AND. TWO_D) NITER = 3
       IF (VECTOR .AND. .NOT. TWO_D) NITER = 4
@@ -15550,7 +15565,7 @@ MESH_LOOP: DO NM=1,NMESHES
             !WRITE(*,*) TRIM(SLCF_NAME), " ", M%UNIQUE_SLICE_IS_SL3D(I), " ", MESHES(1)%ALL_SLICE_TOPOLOGIES(N1)
          ENDIF
       ENDDO
-      
+
       ! Reject a slice if it is beyond the bounds of the current mesh
 
       CULL_SLICE = .FALSE.
