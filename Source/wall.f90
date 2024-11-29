@@ -2379,8 +2379,9 @@ SUB_TIMESTEP_LOOP: DO
       ! Check for layers that are too small, layer thickness dropping too much, or couldn't drop enough nodes last remesh
       I = 0
       DO NL=1,ONE_D%N_LAYERS
+         IF (ONE_D%N_LAYER_CELLS(NL) == 0) CYCLE
          ONE_D%LAYER_THICKNESS(NL) = X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL)) - X_S_NEW(I)
-         IF (ONE_D%N_LAYER_CELLS(NL) > 0 .AND. ONE_D%LAYER_THICKNESS(NL) < 0.1_EB*ONE_D%MINIMUM_LAYER_THICKNESS(NL)) THEN
+         IF (ONE_D%LAYER_THICKNESS(NL) < 0.1_EB*ONE_D%MINIMUM_LAYER_THICKNESS(NL)) THEN
             REMESH_LAYER(NL) = .TRUE.
          ELSE
             IF (.NOT. TMP_CHECK(NL) .AND. ONE_D%LAYER_THICKNESS_OLD(NL)-ONE_D%LAYER_THICKNESS(NL) > &
