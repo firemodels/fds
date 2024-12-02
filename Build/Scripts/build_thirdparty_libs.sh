@@ -16,6 +16,7 @@ echo "FIREMODELS=$FIREMODELS"
 clean_fds=false
 clean_hypre=false
 clean_sundials=false
+no_libs=false
 ARG=""
 
 # Loop through the options
@@ -39,6 +40,11 @@ while [[ $# -gt 0 ]]; do
         --clean-sundials)
             clean_fds=true
             clean_sundials=true
+            shift
+            ;;
+        --no-libs)
+	    no_libs=true
+            clean_fds=true
             shift
             ;;
         --)
@@ -71,9 +77,15 @@ fi
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
 
-# build hypre
-source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
+if [ "$no_libs" == false ]; then
+   # build hypre
+   source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
 
-## build sundials
-source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+   # build sundials
+   source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+else
+   unset SUNDIALS_HOME
+   unset HYPRE_HOME
+   echo "Building FDS without third-party libraries."
+fi
 
