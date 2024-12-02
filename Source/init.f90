@@ -2893,8 +2893,8 @@ INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: TT
 REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
-INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE,FI
-LOGICAL :: VENT_FOUND,ALIGNED
+INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE,FI,VENT_INDEX_FOUND
+LOGICAL :: ALIGNED
 TYPE (MESH_TYPE), POINTER :: M,MM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OBX
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -2912,7 +2912,7 @@ M=>MESHES(NM)
 
 VENT_INDEX = 0
 SURF_INDEX_NEW = SURF_INDEX
-VENT_FOUND = .FALSE.
+VENT_INDEX_FOUND = 0
 
 VENT_SEARCH_LOOP: DO N=1,M%N_VENT
 
@@ -2948,16 +2948,16 @@ VENT_SEARCH_LOOP: DO N=1,M%N_VENT
 
    ! Check if there are over-lapping VENTs
 
-   IF (VENT_FOUND) THEN
-      WRITE(LU_ERR,'(A,I0,A,3(I0,1X),A,I0,A,I0,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell ',I,J,K,&
-                                                    '. IOR ',IOR,'. VENT ',VT%ORDINAL,' rejected for that cell'
+   IF (VENT_INDEX_FOUND>0) THEN
+      WRITE(LU_ERR,'(7A,2(I0,1X),I0,A,I0,3A)') 'WARNING: VENT ',TRIM(M%VENTS(N)%ID),' overlaps VENT ', &
+                                               TRIM(M%VENTS(VENT_INDEX_FOUND)%ID),' in MESH ',TRIM(MESH_NAME(NM)), &
+                                               ', Cell (',I,J,K,'), IOR ',IOR,'. VENT ',TRIM(M%VENTS(N)%ID),' rejected.'
       EXIT VENT_SEARCH_LOOP
    ENDIF
 
-   VENT_FOUND = .TRUE.
-
    ! Reassign the SURF index to be that of the VENT
 
+   VENT_INDEX_FOUND = N
    VENT_INDEX = N
    SURF_INDEX_NEW = VT%SURF_INDEX
 
@@ -4768,21 +4768,20 @@ IF (CREATE) OBSTRUCTION(OBST_INDEX)%SCHEDULED_FOR_CREATION = .TRUE.
 
 IF (I1/=I2 .AND. J1/=J2 .AND. K1/=K2) CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
 
-! If the OBSTruction is to be removed, set density and mass fractions to ambient value
+! Set density, mass fractions, temperature, and net diffusion to ambient value in cells covered or uncovered by obstruction.
 
-IF (REMOVE) THEN
-   DO K=K1+1,K2
-      DO J=J1+1,J2
-         DO I=I1+1,I2
-            RHOS(I,J,K) = RHO_0(K)
-            RHO(I,J,K)  = RHO_0(K)
-            IF (SOLID_PHASE_ONLY) TMP(I,J,K) = TMP_0(K)
-            ZZ(I,J,K,1:N_TRACKED_SPECIES)  = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-            ZZS(I,J,K,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-         ENDDO
+DO K=K1+1,K2
+   DO J=J1+1,J2
+      DO I=I1+1,I2
+         RHOS(I,J,K) = RHO_0(K)
+         RHO(I,J,K)  = RHO_0(K)
+         IF (SOLID_PHASE_ONLY) TMP(I,J,K) = TMP_0(K)
+         ZZ(I,J,K,1:N_TRACKED_SPECIES)  = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         ZZS(I,J,K,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         IF (I1==0.OR.I2==IBAR.OR.J1==0.OR.J2==JBAR.OR.K1==0.OR.K2==KBAR) DEL_RHO_D_DEL_Z(I,J,K,:) = 0._EB
       ENDDO
    ENDDO
-ENDIF
+ENDDO
 
 END SUBROUTINE CREATE_OR_REMOVE_OBST
 
