@@ -4431,7 +4431,7 @@ COMB_LOOP: DO
 ENDDO COMB_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-! Reread the COMB lines to check if user explicitly set DO_CHEM_LOAD_BALANCE to false. 
+! Reread the COMB lines to check if user explicitly set DO_CHEM_LOAD_BALANCE to false.
 ! For CVODE default DO_CHEM_LOAD_BALANCE is TRUE. For others, it is false.
 IF(TRIM(ODE_SOLVER)=='CVODE') THEN
    DO_CHEM_LOAD_BALANCE = .TRUE.
@@ -5623,7 +5623,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                RN%AIT_EXCLUSION_ZONE(IZ)%DEVC_INDEX,RN%AIT_EXCLUSION_ZONE(IZ)%CTRL_INDEX,IZ)
       ENDIF
    ENDDO
-   
+
    IF (RN%SIMPLE_CHEMISTRY .AND. RN%HOC_COMPLETE > 2E8_EB) THEN
       WRITE(MESSAGE,'(A,I0,A)') 'WARNING: The heat of combustion for REACtion ',NR,' exceeds 200,000 kJ/kg.'
       IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
@@ -7083,7 +7083,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%RAMP_C_S                         = SPECIFIC_HEAT_RAMP
    ML%RAMP_K_S                         = CONDUCTIVITY_RAMP
    ML%RHO_S                            = DENSITY      ! This is bulk density of pure material.
-   ML%REAC_RATE_DELTA                  = REAC_RATE_DELTA 
+   ML%REAC_RATE_DELTA                  = REAC_RATE_DELTA
    ML%REFERENCE_ENTHALPY_TEMPERATURE   = REFERENCE_ENTHALPY_TEMPERATURE + TMPM
    ML%REFERENCE_ENTHALPY               = REFERENCE_ENTHALPY*1000._EB
    ML%RESIDUE_MATL_NAME                = MATL_ID
@@ -8550,7 +8550,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ALLOCATE(SF%RAMP_IHS_INDEX(MAX_LAYERS))          ; SF%RAMP_IHS_INDEX = 0
    ALLOCATE(SF%MINIMUM_LAYER_THICKNESS(MAX_LAYERS)) ; SF%MINIMUM_LAYER_THICKNESS = 0._EB
    ALLOCATE(SF%SWELL_RATIO(MAX_LAYERS))             ; SF%SWELL_RATIO = 1._EB
-   
+
    COUNT_LAYERS: DO NL=1,MAX_LAYERS
       IF (THICKNESS(NL) < 0._EB) EXIT COUNT_LAYERS
       SF%N_LAYERS = SF%N_LAYERS + 1
@@ -8594,7 +8594,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (SF%EMISSIVITY      < 0._EB) SF%EMISSIVITY      = EMISSIVITY_DEFAULT
    IF (SF%EMISSIVITY_BACK < 0._EB) SF%EMISSIVITY_BACK = EMISSIVITY_DEFAULT
-   
+
    ! Define mass flux division point if the user does not specify. For all but
    ! surfaces with exposed backing, all pyrolyzed mass migrates to the front surface.
 
@@ -8628,12 +8628,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
          ENDIF
       ENDDO
    ENDDO
-   
+
    WHERE (CHILD_SURF>1) CHILD_SURF = 1
    SF%N_MATL = SUM(CHILD_SURF)
    ALLOCATE(SF%MATL_INDEX(SF%N_MATL))
    ALLOCATE(SF%MATL_NAME(SF%N_MATL))
-   
+
    I=0
    DO NN=1,N_MATL
       IF (CHILD_SURF(NN)==1) THEN
@@ -8652,7 +8652,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%TMP_GAS_BACK  = TMP_GAS_BACK  + TMPM
 
    IF (SF%TMP_GAS_BACK>0._EB) SF%BACKING = VOID
-   
+
    ! Allocate parameters indexed by layer
 
    THERM_THICK = .FALSE.
@@ -8698,7 +8698,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Thermal boundary conditions
-   
+
    IF (SF%ADIABATIC .AND. (SF%NET_HEAT_FLUX < 1.E12_EB .OR. ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB)) THEN
          WRITE(MESSAGE,'(3A)') 'ERROR(336): SURF ',TRIM(SF%ID),' cannot use both ADIABATIC and NET or CONVECTIVE_HEAT_FLUX.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -9638,7 +9638,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
 
    ! Compute node coordinates
    ! X_S_OLD provides the right size array into GET_WALL_NODE_COORDINATES. REMESH_LAYER defined as .TRUE.
-   
+
    ALLOCATE(X_S_OLD(0:SF%N_CELLS_MAX)); X_S_OLD=0._EB
    CALL GET_WALL_NODE_COORDINATES(SF%N_CELLS_INI,SF%N_CELLS_MAX+1,SF%N_LAYERS,SF%N_LAYER_CELLS, N_LAYER_CELLS_OLD(1:SF%N_LAYERS), &
         SF%SMALLEST_CELL_SIZE(1:SF%N_LAYERS),SF%STRETCH_FACTOR(1:SF%N_LAYERS),REMESH_LAYER(1:SF%N_LAYERS),&
@@ -9709,17 +9709,21 @@ ENDDO READ_LOOP
 
 SELECT CASE(TRIM(SOLVER))
 
-   CASE('UGLMAT')
+   CASE('UGLMAT','UGLMAT PARDISO','UGLMAT HYPRE')
       PRES_METHOD = 'UGLMAT'
       PRES_FLAG   = UGLMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      UGLMAT_SOLVER_LIBRARY = MKL_CPARDISO_FLAG
+      IF (TRIM(SOLVER)=='UGLMAT HYPRE') UGLMAT_SOLVER_LIBRARY = HYPRE_FLAG
 
-   CASE('GLMAT')
+   CASE('GLMAT','GLMAT PARDISO','GLMAT HYPRE')
       PRES_METHOD = 'GLMAT'
       PRES_FLAG   = GLMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      UGLMAT_SOLVER_LIBRARY = MKL_CPARDISO_FLAG
+      IF (TRIM(SOLVER)=='GLMAT HYPRE') UGLMAT_SOLVER_LIBRARY = HYPRE_FLAG
 
    CASE('ULMAT','ULMAT PARDISO','ULMAT HYPRE')
       PRES_METHOD = 'ULMAT'
@@ -9736,35 +9740,39 @@ SELECT CASE(TRIM(SOLVER))
       CALL SHUTDOWN('ERROR(371): Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
 
-ULMAT_IF: IF (PRES_FLAG==ULMAT_FLAG) THEN
-
 ! If library is not specified and only one library is linked, choose the available library
 #ifndef WITH_MKL
 #ifdef WITH_HYPRE
-ULMAT_SOLVER_LIBRARY=HYPRE_FLAG
+IF (PRES_FLAG==ULMAT_FLAG ) ULMAT_SOLVER_LIBRARY =HYPRE_FLAG
+IF (PRES_FLAG==UGLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=HYPRE_FLAG
 #endif
 #endif
 #ifndef WITH_HYPRE
 #ifdef WITH_MKL
-ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG
+IF (PRES_FLAG==ULMAT_FLAG ) ULMAT_SOLVER_LIBRARY =MKL_PARDISO_FLAG
+IF (PRES_FLAG==UGLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=MKL_CPARDISO_FLAG
 #endif
 #endif
 
 ! If neither library is specified, throw an error
 #ifndef WITH_MKL
-IF (ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
    CALL SHUTDOWN('ERROR: MKL PARDISO selected for ULMAT solver without compiling and linking MKL library.')
+   RETURN
+ELSEIF (PRES_FLAG==UGLMAT_FLAG .AND. UGLMAT_SOLVER_LIBRARY==MKL_CPARDISO_FLAG) THEN
+   CALL SHUTDOWN('ERROR: MKL CLUSTER PARDISO selected for UGLMAT solver without compiling and linking MKL library.')
    RETURN
 ENDIF
 #endif
 #ifndef WITH_HYPRE
-IF (ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
    CALL SHUTDOWN('ERROR: HYPRE selected for ULMAT solver without compiling and linking HYPRE library.')
+   RETURN
+ELSEIF (PRES_FLAG==UGLMAT_FLAG .AND. UGLMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+   CALL SHUTDOWN('ERROR: HYPRE selected for UGLMAT solver without compiling and linking HYPRE library.')
    RETURN
 ENDIF
 #endif
-
-ENDIF ULMAT_IF
 
 ! Determine how many pressure iterations to perform per half time step.
 
@@ -12922,19 +12930,19 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%U0 = UVW(1)
             IN%V0 = UVW(2)
             IN%W0 = UVW(3)
-            
-            
+
+
             ! Check for possible issues when N_PARTICLES given
 
             N_PARTICLE_IF: IF (N_PARTICLES > 0) THEN
-              
+
                MESH_COUNT = 0
                DO NM=1,NMESHES
                   IF (IN%X1>MESHES(NM)%XF .OR. IN%X2<MESHES(NM)%XS .OR. IN%Y1>MESHES(NM)%YF .OR. IN%Y2<MESHES(NM)%YS &
                      .OR. IN%Z1>MESHES(NM)%ZF .OR. IN%Z2<MESHES(NM)%ZS) CYCLE
                   MESH_COUNT = MESH_COUNT + 1
                ENDDO
-            
+
                IF (MESH_COUNT == 0) THEN
                   WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),' XB does not lie in any MESH.'
                   IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
@@ -12943,13 +12951,13 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                      WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),&
                         ' XB extends beyond domain boundary, full number of particles may not be realized.'
                      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-                  ENDIF   
+                  ENDIF
                   IF (MESH_COUNT > N_PARTICLES) THEN
                      WRITE(MESSAGE,'(3A)') 'WARNING: INIT ',TRIM(ID),' XB contains more MESHes than N_PARTICLES.'
-                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)           
-                  ENDIF     
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                  ENDIF
                ENDIF
-               
+
             ENDIF N_PARTICLE_IF
 
          ENDDO I_MULT_LOOP
