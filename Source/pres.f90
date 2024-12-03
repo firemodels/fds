@@ -3907,6 +3907,7 @@ REAL(EB) :: ZEROV(1)
 #endif
 
 ! Define parameters:
+INNZ = 0; IROW = 0; JCOL=0
 NRHS   = 1
 MAXFCT = 1
 MNUM   = 1
