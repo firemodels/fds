@@ -3890,24 +3890,21 @@ USE HYPRE_INTERFACE
 #endif
 
 ! Local Variables:
-INTEGER :: INNZ, IROW, JCOL
 #ifdef WITH_MKL
 INTEGER :: PHASE, PERM(1)
 INTEGER :: I, IPROC
-#endif
-!.. All other variables
-INTEGER MAXFCT, MNUM, NRHS, ERROR
-#ifdef WITH_MKL
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MB_FACTOR
-INTEGER :: IERR
 #endif
 #ifdef WITH_HYPRE
 INTEGER :: ONEV(1)
 REAL(EB) :: ZEROV(1)
 #endif
+!.. All other variables
+INTEGER :: INNZ, IROW, JCOL, IERR
+INTEGER MAXFCT, MNUM, NRHS, ERROR
 
 ! Define parameters:
-INNZ = 0; IROW = 0; JCOL=0
+INNZ = 0; IROW = 0; JCOL = 0; IERR = 0
 NRHS   = 1
 MAXFCT = 1
 MNUM   = 1
@@ -3924,7 +3921,7 @@ CASE(MKL_CPARDISO_FLAG)
 #endif
 CASE(HYPRE_FLAG)
 #ifdef WITH_HYPRE
-   IERR=0; CALL HYPRE_INITIALIZE(IERR)
+   CALL HYPRE_INITIALIZE(IERR)
    IF (IERR==1) THEN
       IF(MY_RANK==0) WRITE(LU_ERR,'(A)') 'Error: HYPRE pressure solver initialization error.'
       STOP_STATUS = SETUP_STOP
