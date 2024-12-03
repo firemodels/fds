@@ -279,7 +279,7 @@ MODULE HYPRE_INTERFACE
    INTEGER :: HYPRE_IERR = 0
    INTEGER, PARAMETER :: HYPRE_SOLVER_ID = 1                 ! Preconditioned Conjugate Gradient (PCG) solver
    INTEGER, PARAMETER :: HYPRE_PRECOND_ID = 2                ! Algebraic Multi-Grid (AMG) preconditioner
-   INTEGER, PARAMETER :: HYPRE_SOLVER_MAXIT = 1000           ! Max iteratations of PCG solver
+   INTEGER, PARAMETER :: HYPRE_SOLVER_MAXIT = 1000           ! Max iterations of PCG solver
    REAL(KIND=8), PARAMETER :: HYPRE_SOLVER_TOL = 1.D-12      ! Solver tolerance
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETTWONORM = 1         ! 0=use L_Infty norm (max error) for convergence, 1=use L2 norm
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETPRINTLEVEL = 0      ! 0=no output, 1=minimal, 2=verbose

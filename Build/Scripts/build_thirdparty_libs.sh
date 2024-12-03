@@ -9,7 +9,7 @@ source ../Scripts/set_compilers.sh
 # Set FIREMODELS environment variable if it is not already exists.
 if [ -z "${FIREMODELS}" ]; then
     export FIREMODELS="$(readlink -f "$(pwd)/../../../")"
-fi 
+fi
 
 echo "FIREMODELS=$FIREMODELS"
 
@@ -17,6 +17,7 @@ clean_fds=false
 clean_hypre=false
 clean_sundials=false
 clean_hdf5=false
+no_libs=false
 ARG=""
 
 # Loop through the options
@@ -43,7 +44,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --clean-hdf5)
+            clean_fds=true
             clean_hdf5=true
+            shift
+            ;;
+        --no-libs)
+	        no_libs=true
+            clean_fds=true
             shift
             ;;
         --)
@@ -80,11 +87,17 @@ fi
 # FINISHED WITH CLEANING OPTIONS ###########################################
 
 
-# build hypre
-source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
+if [ "$no_libs" == false ]; then
+   # build hypre
+   source ../Scripts/HYPRE/build_hypre.sh confmake.sh $clean_hypre
 
-## build sundials
-source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+   # build sundials
+   source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+else
+   unset SUNDIALS_HOME
+   unset HYPRE_HOME
+   echo "Building FDS without third-party libraries."
+fi
 
 ## build hdf5
 source ../Scripts/HDF5/build_hdf5.sh confmake.sh $clean_hdf5

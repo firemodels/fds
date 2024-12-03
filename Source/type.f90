@@ -1747,6 +1747,11 @@ TYPE ZONE_SOLVE_TYPE
 #else
    INTEGER :: PETSC_ZS
 #endif
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZSL
+#else
+   INTEGER :: HYPRE_ZSL
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
