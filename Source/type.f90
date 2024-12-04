@@ -14,6 +14,10 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 USE MKL_PARDISO
 USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+USE HYPRE_INTERFACE, ONLY : HYPRE_ZM_TYPE
+! USE HYPRE_INTERFACE, ONLY : HYPRE_ZS_TYPE
+#endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -90,6 +94,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: SHAPE_FACTOR               !< Ratio of particle cross sectional area to surface area
    REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember
    REAL(EB) :: EMBER_VELOCITY_THRESHOLD   !< Velocity at which vegetative particle becomes a flying ember
+   REAL(EB) :: EMBER_SNAG_FACTOR          !< Scaling factor for probability of ember snaging in a collection of particles
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
@@ -126,9 +131,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: NEAREST_RAD_ANGLE_INDEX=0   !< Index of the radiation angle nearest the given orientation vector
    INTEGER :: CNF_RAMP_INDEX=-1           !< Ramp index for Cumulative Number Fraction function
    INTEGER :: BREAKUP_CNF_RAMP_INDEX=-1   !< Ramp index for break-up Cumulative Number Fraction function
-   INTEGER :: N_STORAGE_REALS=0           !< Number of reals to store for this particle class
-   INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
-   INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
+   INTEGER :: N_REALS=0                   !< Number of reals to store for this particle class
+   INTEGER :: N_INTEGERS=0                !< Number of integers to store for this particle class
+   INTEGER :: N_LOGICALS=0                !< Number of logicals to store for this particle class
    INTEGER :: NEW_PARTICLE_INCREMENT=1000 !< Number of new storage slots to allocate when NPLDIM is exceeded
    INTEGER :: EVAP_MODEL                  !< Evaporation correlation
 
@@ -207,9 +212,11 @@ TYPE BOUNDARY_ONE_D_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX_OLD              !< (0:NWP) prior renoding DX
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_TMP           !< Temperature change (K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:ONE_D\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS_OLD !< (1:ONE_D\%N_LAYERS) Thickness of layer (m) at last remesh
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_THICKNESS !< (1:ONE_D\%N_LAYERS) Minimum thickness of layer (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY     !< (1:ONE_D\%N_LAYERS) Min diffusivity of all matls in layer (m2/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
@@ -226,21 +233,26 @@ TYPE BOUNDARY_ONE_D_TYPE
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
 
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX                 !< (1:ONE_D\%N_MATL) Number of materials
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS_MAX
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS        !< (1:SF\%N_LAYERS) Number of cells in the layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX           !< (1:ONE_D\%N_MATL) Number of materials
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS_MAX    !< (1:SF\%N_LAYERS) Maximum possible number of cells in the layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX       !< (1:SF\%N_LAYERS) RAMP index for HEAT_SOURCE
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: REMESH_NWP           !< Store target NWP value in case it reduces by more than one cell
 
    INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: N_CELLS_MAX=0    !< Maximum number of interior cells
    INTEGER :: N_CELLS_INI=0    !< Initial number of interior cells
+   INTEGER :: N_CELLS_OLD=1    !< Maximum number of interior cells for DX_OLD
    INTEGER :: N_LAYERS=0       !< Number of material layers
    INTEGER :: N_MATL=0         !< Number of materials
    INTEGER :: N_LPC=0          !< Number of Lagrangian Particle Classes
    INTEGER :: BACK_INDEX=0     !< WALL index of back side of obstruction or exterior wall cell
    INTEGER :: BACK_MESH=0      !< Mesh number on back side of obstruction or exterior wall cell
    INTEGER :: BACK_SURF=0      !< SURF_INDEX on back side of obstruction or exterior wall cell
+   INTEGER :: PYROLYSIS_MODEL=0 !< Indicator of a pyrolysis model used in depth
 
-   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER             !< (1:ONE_D\%N_LAYERS) Indicator that layer in 3D
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER           !< (1:ONE_D\%N_LAYERS) Indicator that layer in 3D
+   LOGICAL :: INTERNAL_RADIATION=.FALSE.                      !< Indicator that internal radiation transport done in solid
 
 END TYPE BOUNDARY_ONE_D_TYPE
 
@@ -321,6 +333,7 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: VEL_ERR_NEW=0._EB     !< Velocity mismatch at mesh or solid boundary (m/s)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
+   LOGICAL :: LAYER_REMOVED=.FALSE.  !< Indicator that at least one layer has been removed during the time step
 
 END TYPE BOUNDARY_PROP1_TYPE
 
@@ -344,9 +357,11 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: WORK3=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
+   REAL(EB) :: Y_O2_F=0._EB          !< Oxygen mass fraction at the surface
 
    INTEGER :: SURF_INDEX=-1          !< Surface index
    INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection, 4=Resolved
+   INTEGER :: Y_O2_ITER=0            !< Number of iterations for surface O2 solve
 
 END TYPE BOUNDARY_PROP2_TYPE
 
@@ -370,7 +385,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
-   INTEGER :: INITIALIZATION_INDEX=0 !< Index for INIT that placed the particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
    INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
    INTEGER :: DUCT_INDEX=0           !< Index of duct
@@ -378,9 +392,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
-   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
-   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
-   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -448,6 +459,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
    INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
    INTEGER :: PRESSURE_BC_TYPE                        !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: BOUNDARY_TYPE_PREVIOUS=0                !< Boundary type at previous time step
    INTEGER :: SURF_INDEX_ORIG=0                       !< Original SURFace index for this cell
    REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
    REAL(EB) :: DUNDT=0._EB                            !< \f$ \partial u_n / \partial t \f$
@@ -520,6 +532,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
+   REAL(EB) :: REAL_REFRACTIVE_INDEX
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -529,6 +543,7 @@ TYPE SPECIES_TYPE
    LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
 
    CHARACTER(LABEL_LENGTH) :: ID                  !< Species name
+   CHARACTER(LABEL_LENGTH) :: ALT_ID              !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L           !< Name of liquid specific heat rame
    CHARACTER(LABEL_LENGTH) :: RAMP_K              !< Name of conductivity ramp
@@ -598,6 +613,7 @@ TYPE SPECIES_MIXTURE_TYPE
 
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
    CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
+   CHARACTER(LABEL_LENGTH) :: ALT_ID='null'                       !< Alternate species name
    CHARACTER(LABEL_LENGTH) :: RAMP_CP                             !< Name of specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_CP_L                           !< Name of liquid specific heat ramp
    CHARACTER(LABEL_LENGTH) :: RAMP_K                              !< Name of conductivity ramp
@@ -623,6 +639,9 @@ TYPE SPECIES_MIXTURE_TYPE
    LOGICAL :: EXPLICIT_G_F=.FALSE.        !< All subspecies have an explicitly defined G_F
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
+   REAL(EB) :: OXR                  !< Required oxygen for complete combustion (gm/gm-species)
+   REAL(EB) :: OXA                  !< Available oxygen for combustion (gm/gm-species)
+
 
 END TYPE SPECIES_MIXTURE_TYPE
 
@@ -637,6 +656,7 @@ TYPE AIT_EXCLUSION_ZONE_TYPE
    REAL(EB) :: Y2            !< Upper y bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z1            !< Lower z bound of Auto-Ignition Exclusion Zone
    REAL(EB) :: Z2            !< Upper z bound of Auto-Ignition Exclusion Zone
+   REAL(EB) :: AIT=0._EB     !< Auto-Ignition Temperature per Zone (K)
    INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
    INTEGER :: CTRL_INDEX=0   !< Index of control controlling the status of the zone
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
@@ -701,6 +721,7 @@ TYPE REACTION_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF       !< Third body collision efficiencies
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: THIRD_EFF_READ  !< Holding array for THIRD_EFF
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_G         !< The DELTA_G(T) array for a reverse reaction pair
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DELTA_S         !< The DELTA_S(T) array for a reverse reaction pair (entropy)
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INDEX        !< Primitive species indices for N_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_S_INT          !< Array of species exponents
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NU_INDEX         !< Lumped species indices for N_S
@@ -729,15 +750,15 @@ TYPE REACTION_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: N_S_FLAG !< N_S exponent is an integer
    TYPE(AIT_EXCLUSION_ZONE_TYPE), DIMENSION(MAX_AIT_EXCLUSION_ZONES) :: AIT_EXCLUSION_ZONE  !< Coordinates of auto-ignition zone
    INTEGER :: N_AIT_EXCLUSION_ZONES=0       !< Number of auto-ignition exclusion zones
-   INTEGER :: REACTYPE                      !< Type of reaction in a chemical mechanism. 
-   REAL(EB) :: A_LOW_PR                     !< Unajusted falloff reaction high pressure pre-exponent parameter. 
-   REAL(EB) :: E_LOW_PR                     !< Unajusted falloff reaction high pressure activation energy (J/mol). 
-   REAL(EB) :: N_T_LOW_PR=0._EB             !< Falloff reaction high pressure temperature exponent. 
+   INTEGER :: REACTYPE                      !< Type of reaction in a chemical mechanism.
+   REAL(EB) :: A_LOW_PR                     !< Unajusted falloff reaction high pressure pre-exponent parameter.
+   REAL(EB) :: E_LOW_PR                     !< Unajusted falloff reaction high pressure activation energy (J/mol).
+   REAL(EB) :: N_T_LOW_PR=0._EB             !< Falloff reaction high pressure temperature exponent.
    REAL(EB) :: A_TROE                       !< TROE reaction A
    REAL(EB) :: RT1_TROE                     !< TROE reaction 1/T1
    REAL(EB) :: T2_TROE                      !< TROE reaction T2
    REAL(EB) :: RT3_TROE                     !< TROE reaction 1/T3
-   
+
 END TYPE REACTION_TYPE
 
 TYPE (REACTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: REACTION
@@ -751,7 +772,9 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: REFERENCE_ENTHALPY                       !< Reference enthalpy (J/kg)
-   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (J/kg)
+   REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (K)
+   REAL(EB) :: REAC_RATE_DELTA                          !< Allowable jump condition for pyrolysis rate. Determines RENODE_DELTA_T
+   REAL(EB) :: RENODE_DELTA_T=1.E9_EB                   !< Temperature change (K) above which no resmeshing
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid
@@ -762,6 +785,7 @@ TYPE MATERIAL_TYPE
    INTEGER :: I_RAMP_C_S=-1                             !< Index of specific heat RAMP
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_RESIDUE      !< Number of residue materials
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LPC         !< Number of particle classes
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CHILD_MATL     !< Array giving all materials incorporated by successive reactions
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: RESIDUE_MATL_INDEX !< Index of the residue
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX    !< Lagrangian Particle Class for material conversion
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_REF       !< Reference temperature used for calculating kinetic constants (K)
@@ -870,7 +894,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: MAXIMUM_SCALING_HEAT_FLUX=HUGE(1._EB)   !< Maximum computed flux for input into scaling model (kW/m2)
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
    REAL(EB) :: INIT_PER_AREA=0._EB
-   REAL(EB) :: SWELL_RATIO=1._EB
    REAL(EB) :: NUSSELT_C0=-1._EB                       !< Constant term for user defined HTC correlation
    REAL(EB) :: NUSSELT_C1=-1._EB                       !< Re multiplier term for user defined HTC correlation
    REAL(EB) :: NUSSELT_C2=-1._EB                       !< Re adjustment before Pr multiplication for user defined HTC correlation
@@ -884,10 +907,11 @@ TYPE SURFACE_TYPE
    REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro
    REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
+   REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,DDSUM,SMALLEST_CELL_SIZE,SWELL_RATIO
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: REFERENCE_HEAT_FLUX !< Reference flux for the flux scaling pyrolysis model (kW/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: SPYRO_TH_FACTOR     !< Thickness scaling factor for the flux scaling pyrolysis model
 
@@ -900,13 +924,23 @@ TYPE SURFACE_TYPE
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1,RAMP_H_FIXED_INDEX=-1,RAMP_H_FIXED_B_INDEX=-1
    INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
-   INTEGER :: N_LAYERS,N_MATL,N_SPEC=0,N_LPC=0,N_CONE_CURVES=0
+   INTEGER :: N_LAYERS        !< Number of layers in the surface
+   INTEGER :: N_SPEC=0        !< Number of tracked species emitted by the surface
+   INTEGER :: N_LPC=0         !< Number of particle classes emitted by the surface
+   INTEGER :: N_CONE_CURVES=0 !< Total number of time vs. heat release rate curves specified for the S-pyro model
+   INTEGER :: N_MATL          !< Total number of unique materials over all layers
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX    !< Index for Spyro integrated TIME_HEAT arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX          !< Index for Spyro reference heat flux arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX           !< Index for Spyro integrated TIME_HEAT to time arrays
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: THICK2QREF        !< Map of refernce flux and thicknesses
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS      !< Number of wall cells per material layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX        !< The layer each wall cell belongs to
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX         !< Indices of the unique materials of all layers
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_PART_INDEX    !< The particle classes the surface emits
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_CHILD_MATL       !< Number of unique materials per layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: HRRPUA_INT_INDEX   !< Index for Spyro integrated TIME_HEAT arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: QREF_INDEX         !< Index for Spyro reference heat flux arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: E2T_INDEX          !< Index for Spyro integrated TIME_HEAT to time arrays
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: THICK2QREF       !< Map of refernce flux and thicknesses
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LAYER_CHILD_INDEX !< Indices of the unique materials for each layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX     !< Index to internal heat source ramp
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
    INTEGER, DIMENSION(MAX_LAYERS) :: N_LAYER_MATL
    INTEGER :: N_QDOTPP_REF=0                           !< Number of reference heat fluxes provided for S_Pyro method
@@ -926,7 +960,7 @@ TYPE SURFACE_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_ID
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_MASS_FRACTION
-   LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
+   LOGICAL :: BURN_AWAY,ADIABATIC,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,&
               BOUNDARY_FUEL_MODEL=.FALSE.,SET_H=.FALSE.,DIRICHLET_FRONT=.FALSE.,DIRICHLET_BACK=.FALSE.,BLOWING=.FALSE.
@@ -943,6 +977,8 @@ TYPE SURFACE_TYPE
    LOGICAL :: EMISSIVITY_SPECIFIED=.FALSE.           !< Indicates if user has specified a surface emissivity
    LOGICAL :: EMISSIVITY_BACK_SPECIFIED=.FALSE.      !< Indicates if user has specified a back surface emissivity
    LOGICAL :: INERT_Q_REF                            !< Treat REFERENCE_HEAT_FLUX as an inert atmosphere test
+   LOGICAL :: ALLOW_UNDERSIDE_PARTICLES=.FALSE.      !< Allow droplets to move along downward facing surfaces
+   LOGICAL :: ALLOW_SURFACE_PARTICLES=.TRUE.         !< Allow particles to live on a solid surface
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
    CHARACTER(LABEL_LENGTH) :: PART_ID
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
@@ -956,7 +992,7 @@ TYPE SURFACE_TYPE
 
    ! Level Set Firespread
 
-   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2
+   LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2,VEG_LSET_ROS_FIXED
    REAL(EB) :: VEG_LSET_IGNITE_T,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_00,VEG_LSET_QCON,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_BACK, &
                VEG_LSET_WIND_EXP,VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,&
                VEG_LSET_M1,VEG_LSET_M10,VEG_LSET_M100,VEG_LSET_MLW,VEG_LSET_MLH,VEG_LSET_SURF_LOAD,VEG_LSET_FIREBASE_TIME, &
@@ -1013,9 +1049,10 @@ TYPE OBSTRUCTION_TYPE
    CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
    CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
 
-   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
-   INTEGER :: SURF_INDEX_INTERIOR=0           !< SURFace properties for a newly exposed interior cell
-   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
+   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0          !< SURFace properties for each face
+   INTEGER, DIMENSION(1:6)  :: EXPOSED_FACE_INDEX=0  !< OBST face exposed (1) or blocked (0)
+   INTEGER :: SURF_INDEX_INTERIOR=0                  !< SURFace properties for a newly exposed interior cell
+   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)            !< Color indices for Smokeview
 
    REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
    REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume
@@ -1056,6 +1093,7 @@ TYPE OBSTRUCTION_TYPE
    INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
    INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
    INTEGER :: N_LAYER_CELLS_MAX=-1 !< Maximum number of cells allowed in the layer, used in HT3D applications
+   INTEGER :: RAMP_IHS_INDEX=0    !< Index for internal heat source RAMP
    INTEGER, DIMENSION(MAX_MATERIALS) :: MATL_INDEX=-1       !< Index of material
 
    LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview
@@ -1394,10 +1432,10 @@ TYPE CC_REGFACEZ_TYPE
    INTEGER                               ::                IWC=0 !< WALL CELL index (if present) in location of REG Face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::               NOMICF !< OMESH face info for mesh boundary REG face.
    REAL(EB)                              ::         FN_H_S=0._EB !< Stores components FX_H_S, FY_H_S, FZ_H_S as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::        RHOZZ_U=0._EB !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::          FN_ZZ=0._EB !< Stores computed FX_ZZ(I,J,K), etc. as needed.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::     RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in REG face.
-   REAL(EB), DIMENSION(MAX_SPECIES)      ::   H_RHO_D_DZDN=0._EB !< OMESH face info for mesh boundary REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::              RHOZZ_U !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::                FN_ZZ !< Stores computed FX_ZZ(I,J,K), etc. as needed.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           RHO_D_DZDN !< Species diffusive mass fluxes in REG face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         H_RHO_D_DZDN !< OMESH face info for mesh boundary REG face.
 END TYPE CC_REGFACEZ_TYPE
 
 !> \brief Regular faces type, contains information for reg faces connecting regular and cut-cells.
@@ -1414,9 +1452,9 @@ TYPE CC_RCFACE_TYPE
    INTEGER,  DIMENSION(1:2,1:2)                    ::                JDH !< Index matrix for H Poisson matrix coefficients.
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND) ::          CELL_LIST !< Cell type/location of connected cells. [RC_TYPE I J K ]
    REAL(EB)                                        ::     TMP_FACE=0._EB !< Temperature in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::      ZZ_FACE=0._EB !< Species mass fractions in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                ::   RHO_D_DZDN=0._EB !< Species diffusive mass fluxes in RC face.
-   REAL(EB), DIMENSION(MAX_SPECIES)                :: H_RHO_D_DZDN=0._EB !< Species heat fluxes due to RHO_D_DZDN in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::            ZZ_FACE !< Species mass fractions in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::         RHO_D_DZDN !< Species diffusive mass fluxes in RC face.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::       H_RHO_D_DZDN !< Species heat fluxes due to RHO_D_DZDN in RC face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::             NOMICF !< OMESH face info for mesh boundary RC face.
 END TYPE CC_RCFACE_TYPE
 
@@ -1450,7 +1488,7 @@ TYPE VENTS_TYPE
                X1_ORIG=0._EB,X2_ORIG=0._EB,Y1_ORIG=0._EB,Y2_ORIG=0._EB,Z1_ORIG=0._EB,Z2_ORIG=0._EB, &
                X0=-9.E6_EB,Y0=-9.E6_EB,Z0=-9.E6_EB,FIRE_SPREAD_RATE,UNDIVIDED_INPUT_AREA=0._EB,INPUT_AREA=0._EB,&
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
-   LOGICAL :: ACTIVATED=.TRUE.,GHOST_CELLS_ONLY=.FALSE.,GEOM=.FALSE.
+   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
@@ -1500,7 +1538,7 @@ TYPE (RESERVED_RAMPS_TYPE), DIMENSION(10), TARGET :: RESERVED_RAMPS
 
 TYPE SLICE_TYPE
    INTEGER :: I1,I2,J1,J2,K1,K2,GEOM_INDEX=-1,INDEX,INDEX2=0,Z_INDEX=-999,Y_INDEX=-999,MATL_INDEX=-999,&
-              PART_INDEX=0,VELO_INDEX=0,PROP_INDEX=0,REAC_INDEX=0,SLCF_INDEX
+              PART_INDEX=0,VELO_INDEX=0,PROP_INDEX=0,REAC_INDEX=0,SLCF_INDEX,IOR
    REAL(FB), DIMENSION(2) :: MINMAX
    REAL(FB) :: RLE_MIN, RLE_MAX
    REAL(EB):: AGL_SLICE
@@ -1515,13 +1553,13 @@ TYPE RAD_FILE_TYPE
 END TYPE RAD_FILE_TYPE
 
 TYPE PATCH_TYPE
-   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR,OBST_INDEX
+   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,VENT_INDEX=0,MESH_INDEX=0
 END TYPE PATCH_TYPE
 
 TYPE BOUNDARY_FILE_TYPE
-   INTEGER :: DEBUG=0,INDEX,PROP_INDEX,Z_INDEX=-999,Y_INDEX=-999,PART_INDEX=0,TIME_INTEGRAL_INDEX=0
+   INTEGER :: DEBUG=0,INDEX,PROP_INDEX,Z_INDEX=-999,Y_INDEX=-999,PART_INDEX=0,TIME_INTEGRAL_INDEX=0,MATL_INDEX=0
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL
-   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,UNITS,MATL_ID='null'
+   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,UNITS
    LOGICAL :: CELL_CENTERED=.FALSE.
 END TYPE BOUNDARY_FILE_TYPE
 
@@ -1549,8 +1587,8 @@ TYPE (ISOSURFACE_FILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ISOSURFACE_FIL
 
 TYPE PROFILE_TYPE
    REAL(EB) :: X,Y,Z
-   INTEGER  :: IOR=0,WALL_INDEX=0,LP_TAG=0,ORDINAL,MESH,FORMAT_INDEX=1,PART_CLASS_INDEX=-1,QUANTITY_INDEX
-   CHARACTER(LABEL_LENGTH) :: ID='null',QUANTITY='TEMPERATURE',INIT_ID='null',MATL_ID='null'
+   INTEGER  :: IOR=0,WALL_INDEX=0,LP_TAG=0,ORDINAL,MESH,FORMAT_INDEX=1,PART_CLASS_INDEX=-1,QUANTITY_INDEX,MATL_INDEX=0
+   CHARACTER(LABEL_LENGTH) :: ID='null',QUANTITY='TEMPERATURE',INIT_ID='null'
    LOGICAL :: CELL_CENTERED=.FALSE.
 END TYPE PROFILE_TYPE
 
@@ -1561,7 +1599,6 @@ TYPE (PROFILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: PROFILE
 
 TYPE INITIALIZATION_TYPE
    REAL(EB) :: TEMPERATURE      !< Temperature (K) of the initialized region
-   REAL(EB) :: DENSITY          !< Density (kg/m3) of the initialized region
    REAL(EB) :: X1               !< Lower x boundary of the initialized region (m)
    REAL(EB) :: X2               !< Upper x boundary of the initialized region (m)
    REAL(EB) :: Y1               !< Lower y boundary of the initialized region (m)
@@ -1591,19 +1628,23 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_FRACTION        !< Volume fraction of gas components
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_ADJUST          !< Multiplicative factor to account for FDS grid snap
-   INTEGER  :: PART_INDEX=0     !< Particle class index of inserted particles
-   INTEGER  :: N_PARTICLES      !< Number of particles to insert
-   INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
-   INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
-   INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
-   INTEGER  :: ORIENTATION_RAMP_INDEX(3)=0 !< Ramp index for particle orientation
-   INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
-   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
-   INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
-   LOGICAL :: ADJUST_DENSITY=.FALSE.
-   LOGICAL :: ADJUST_TEMPERATURE=.FALSE.
-   LOGICAL :: ADJUST_SPECIES_CONCENTRATION=.FALSE.
+   INTEGER :: PART_INDEX=0                                       !< Particle class index of inserted particles
+   INTEGER :: N_PARTICLES                                        !< Number of particles to insert
+   INTEGER :: DEVC_INDEX=0                                       !< Index of the device that uses this INITIALIZATION variable
+   INTEGER :: CTRL_INDEX=0                                       !< Index of the controller that uses this INITIALIZATION variable
+   INTEGER :: N_PARTICLES_PER_CELL=0                             !< Number of particles to insert in each cell
+   INTEGER :: ORIENTATION_RAMP_INDEX(3)=0                        !< Ramp index for particle orientation
+   INTEGER :: PATH_RAMP_INDEX(3)=0                               !< Ramp index of a particle path
+   INTEGER :: RAMP_Q_INDEX=0                                     !< Ramp index for HRRPUV
+   INTEGER :: RAMP_PART_INDEX=0                                  !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
+   INTEGER :: RAMP_TMP_Z_INDEX=0                                 !< Ramp index for temperature vertical profile (K)
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_MF_Z_INDEX         !< Ramp index for species mass fraction vertical profile
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_VF_Z_INDEX         !< Ramp index for species volume fraction vertical profile
+   LOGICAL :: ADJUST_INITIAL_CONDITIONS=.FALSE.
+   LOGICAL :: VOLUME_FRACTIONS_SPECIFIED=.FALSE.
+   LOGICAL :: MASS_FRACTIONS_SPECIFIED=.FALSE.
    LOGICAL :: SINGLE_INSERTION=.TRUE.
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
@@ -1662,6 +1703,11 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZM
+#else
+   INTEGER :: HYPRE_ZM
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE
@@ -1686,6 +1732,11 @@ TYPE ZONE_SOLVE_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZSL
+#else
+   INTEGER :: HYPRE_ZSL
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.
@@ -1776,7 +1827,7 @@ TYPE DUCTNODE_TYPE
    INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
    INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
    INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
-   INTEGER :: DUCTRUN                                      !< Ductrun node belongs to
+   INTEGER :: DUCTRUN=-1                                   !< Ductrun node belongs to
    INTEGER :: DUCTRUN_INDEX=-1                             !< Index in ductrun node belongs to
    INTEGER :: DUCTRUN_M_INDEX=-1                           !< Index of node in ductrun solution matrix
    INTEGER :: CONNECTIVITY_INDEX=-1                        !< Index of node connectivity for Smokeview display

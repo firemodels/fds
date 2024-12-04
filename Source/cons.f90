@@ -68,13 +68,14 @@ INTEGER, PARAMETER :: NO_SLIP_BC=4                 !< Flag for SF\%VELOCITY_BC_I
 INTEGER, PARAMETER :: BOUNDARY_FUEL_MODEL_BC=5     !< Flag for SF\%VELOCITY_BC_INDEX
 INTEGER, PARAMETER :: INTERPOLATED_VELOCITY_BC=6   !< Flag for SF\%VELOCITY_BC_INDEX
 
-INTEGER, PARAMETER :: EXPOSED=0                    !< Flag for SF\%BACKING: Exposed to conditions on the other sidd
+INTEGER, PARAMETER :: EXPOSED=0                    !< Flag for SF\%BACKING: Exposed to conditions on the other side
 INTEGER, PARAMETER :: VOID=1                       !< Flag for SF\%BACKING: Exposed to ambient void
 INTEGER, PARAMETER :: INSULATED=2                  !< Flag for SF\%BACKING: Insulated, no heat transfer out the back
 
-INTEGER, PARAMETER :: SURF_CARTESIAN=0             !< Flag for SF\%GEOMETRY: Flat
-INTEGER, PARAMETER :: SURF_CYLINDRICAL=1           !< Flag for SF\%GEOMETRY: Cylinder
-INTEGER, PARAMETER :: SURF_SPHERICAL=2             !< Flag for SF\%GEOMETRY: Sphere
+INTEGER, PARAMETER :: SURF_CARTESIAN=0             !< Flag for SF\%GEOMETRY: Flat surface
+INTEGER, PARAMETER :: SURF_CYLINDRICAL=1           !< Flag for SF\%GEOMETRY: Outer surface of cylinder
+INTEGER, PARAMETER :: SURF_INNER_CYLINDRICAL=-1    !< Flag for SF\%GEOMETRY: Inner surface of cylinder
+INTEGER, PARAMETER :: SURF_SPHERICAL=2             !< Flag for SF\%GEOMETRY: Outer surface of sphere
 
 INTEGER, PARAMETER :: NO_MASS_FLUX=1               !< Flag for SF\%SPECIES_BC_INDEX
 INTEGER, PARAMETER :: SPECIFIED_MASS_FRACTION=2    !< Flag for SF\%SPECIES_BC_INDEX
@@ -126,6 +127,7 @@ INTEGER, PARAMETER :: LEVELSET_STOP=7                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: ODE_STOP=11                      !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: HEARTBEAT_STOP=12                !< Flag for STATUS_STOP
 
 INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
 INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
@@ -173,6 +175,7 @@ INTEGER :: RND_SEED=0                      !< User RANDOM_SEED
 
 LOGICAL :: HVAC_DEBUG=.FALSE.               !< Output known hvac values to smokeview
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
+LOGICAL :: INCLUDE_PYROLYSIS=.FALSE.        !< Solid phase pyrolysis is included in the simulation
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
 LOGICAL :: CYLINDRICAL=.FALSE.              !< Cylindrical domain option
@@ -202,12 +205,14 @@ LOGICAL :: MASS_FILE=.FALSE.                !< Output a comma-delimited file of 
 LOGICAL :: STRATIFICATION=.TRUE.            !< Assume that the atmosphere decreases in pressure with height
 LOGICAL :: SOLID_PHASE_ONLY=.FALSE.         !< Only perform a solid phase heat transfer and pyrolysis simulation
 LOGICAL :: AEROSOL_AL2O3=.FALSE.            !< Assume that the SOOT is Al_2 O_3
-LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on computers with a shared file system
 LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
+LOGICAL :: CHECK_FO=.FALSE.                 !< Check the solid phase Fourier number
+LOGICAL :: LIQUID_DROPLETS=.FALSE.          !< Indicates the existence of liquid droplets
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
+LOGICAL :: ORIENTED_PARTICLES=.FALSE.       !< Indicates the existence of particles with a specified orientation
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
 LOGICAL :: BAROCLINIC=.TRUE.                !< Include the baroclinic terms in the momentum equation
 LOGICAL :: GRAVITATIONAL_DEPOSITION=.TRUE.  !< Allow aerosol gravitational deposition
@@ -230,7 +235,7 @@ LOGICAL :: TMP_RESTART=.FALSE.              !< Initialize temperature field with
 LOGICAL :: SPEC_RESTART=.FALSE.             !< Initialize tracked species field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
-LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
+LOGICAL :: OBST_CREATED_OR_REMOVED=.TRUE.   !< An obstruction has just been created or removed and wall cells must be reassigned
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
 LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
 LOGICAL :: MAX_DEVICES_EXIST=.FALSE.
@@ -245,16 +250,16 @@ LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
 LOGICAL :: HVAC_QFAN=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
+LOGICAL :: NEAR_WALL_PARTICLE_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
 LOGICAL :: STORE_PRESSURE_POISSON_RESIDUAL=.FALSE.
-LOGICAL :: CHAR_OXIDATION=.FALSE.
+LOGICAL :: OXIDATION_REACTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
 LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
@@ -263,6 +268,9 @@ LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that of
 LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
 LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
+LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
+LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
+LOGICAL :: TEST_FLUX_LIMITER_FACE_CORRECTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -301,7 +309,6 @@ REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
 REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ direction (m/s)
 REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
 REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
-REAL(EB) :: INITIAL_SPEED=-1._EB               !< Initial wind speed (m/s) which is assumed to die off
 REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
 REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
 REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
@@ -425,7 +432,6 @@ INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of
 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
-LOGICAL :: PILOT_FUEL_MODEL=.FALSE.                                 !< Allow pilot fuel with low AIT
 LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.FALSE.              !< Report adiabatic flame temperature per REAC in LU_OUTPUT
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
@@ -441,6 +447,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
 !< MU_RSQMW_Z(I,J) Viscosity (m^2/s)  of lumped species J at temperature I (K) divided by SM%MW^0.5
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temp I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: S_Z          !< Entropy (J/K) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Sensible enthalpy (J/kg) of lumped species J at temp I (K)
 REAL(EB) :: DZZ_CLIP                                  !< Value for processing DZZ in combustion
 
@@ -460,16 +467,17 @@ INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiatio
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
 REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$
 REAL(EB) :: KFST4_SUM=0._EB   !< \f$ \sum_{ijk} 4 \kappa_{ijk} \sigma T_{ijk}^4 V_{ijk} \f$
-REAL(EB) :: QR_CLIP           !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
+REAL(EB) :: QR_CLIP=10._EB    !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
 REAL(EB) :: C_MAX=100._EB     !< Maximum value of RAD_Q_SUM/KFST4_SUM
-REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
+REAL(EB) :: C_MIN=0.1_EB      !< Minimum value of RAD_Q_SUM/KFST4_SUM
 
 ! Ramping parameters
 
 CHARACTER(LABEL_LENGTH), POINTER, DIMENSION(:) :: RAMP_ID,RAMP_TYPE
 INTEGER :: MAX_RAMPS=100,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
            I_RAMP_PGF_T,I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
-           I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0
+           I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0,&
+           I_RAMP_UX,I_RAMP_UY,I_RAMP_UZ,I_RAMP_VX,I_RAMP_VY,I_RAMP_VZ,I_RAMP_WX,I_RAMP_WY,I_RAMP_WZ
 INTEGER, PARAMETER :: MAX_QDOTPP_REF=10                    !< Maximum number of REFERENCE_HEAT_FLUX curves for Spyro
 INTEGER, PARAMETER :: TIME_HEAT=-11,TIME_VELO=-2,TIME_TEMP=-3,TIME_EFLUX=-4,TIME_PART=-5,TANH_RAMP=-2,TSQR_RAMP=-1,&
                       VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8,TIME_TGF=-9,TIME_TGB=-10,TIME_TB=-1,&
@@ -508,6 +516,11 @@ INTEGER, PARAMETER :: FFT_FLAG=0                                 !< Integer pres
 INTEGER, PARAMETER :: GLMAT_FLAG=1                               !< Integer pressure solver parameter GLMAT
 INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pressure solver parameter UGLMAT
 INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
+INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matrix solver library flag for MKL PARDISO
+INTEGER, PARAMETER :: MKL_CPARDISO_FLAG=1                        !< Integer matrix solver library flag for MKL CLUSTER PARDISO
+INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
+INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
+INTEGER :: UGLMAT_SOLVER_LIBRARY=MKL_CPARDISO_FLAG               !< Integer UGLMAT library flag (defaults to MKL CPARDISO)
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
 INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
@@ -526,7 +539,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial inde
 
 ! Miscellaneous integer constants
 
-INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
+INTEGER :: ICYC,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
            STOP_AT_ITER=0,WALL_INCREMENT=2,WALL_COUNTER=0,&
            CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
 
@@ -573,7 +586,7 @@ INTEGER,  ALLOCATABLE, DIMENSION(:) :: EDGE_COUNT
 
 ! Divergence Arrays
 
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSUM,USUM,PSUM
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DSUM,USUM,PSUM
 
 ! Level Set vegetation fire spread
 
@@ -597,7 +610,7 @@ INTEGER, PARAMETER :: RM_NO_B        = -1 !< Ranz-Marshall no B number
 INTEGER, PARAMETER :: RM_B           =  0 !< Ranz-Marshall with B number
 INTEGER, PARAMETER :: RM_LEWIS_B     =  1 !< Ranz-Marshall with Lewis number based B Number
 INTEGER, PARAMETER :: RM_FL_LEWIS_B  =  2 !< Ranz-Marshall with flux limited, Lewis number based B Number
-LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
+LOGICAL :: POROUS_FLOOR=.TRUE.
 
 ! Particles
 
@@ -623,8 +636,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_PARTICLE_DIAMETER,MAX_PARTICLE_DIAMET
 ! Number of initial value, pressure zone, and multiplier derived types
 
 INTEGER :: N_INIT,N_ZONE,N_MULT,N_MOVE
-LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CONNECTED_ZONES
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES_LOC
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES
 REAL(EB) :: MINIMUM_ZONE_VOLUME=0._EB
 REAL(EB) :: PRESSURE_RELAX_TIME=1._EB
 
@@ -719,25 +731,26 @@ LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
 REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
-REAL(EB), POINTER, DIMENSION(:) :: ORIENTATION_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_AREA        !< View angle area ORIENTATION_VECTOR
+REAL(EB), POINTER, DIMENSION(:) :: COS_HALF_VIEW_ANGLE     !< View angle of the given ORIENTATION_VECTOR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_FACTOR        !< View angle area ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
-INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation
-INTEGER :: TGA_WALL_INDEX=-100             !< Wall index to use for special TGA calculation
-INTEGER :: TGA_PARTICLE_INDEX=-100         !< Particle index to use for special TGA calculation
-REAL(EB) :: TGA_HEATING_RATE=5._EB         !< Heat rate (K/min) to use for special TGA calculation
-REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB  !< Final Temperature (C) to use for special TGA calculation
+INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calculation
+INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
+INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
+INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
+REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
 
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
 ! External file control
-CHARACTER(250) :: EXTERNAL_FILENAME
-LOGICAL :: READ_EXTERNAL = .FALSE.
-INTEGER :: LU_EXTERNAL
+CHARACTER(250) :: EXTERNAL_FILENAME='null',EXTERNAL_HEARTBEAT_FILENAME='null'
+LOGICAL :: READ_EXTERNAL = .FALSE.,HEARTBEAT_FAIL=.TRUE.
+INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
-LOGICAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
 
 END MODULE GLOBAL_CONSTANTS
 
@@ -767,9 +780,11 @@ INTEGER :: RAMP_RSRT_INDEX=0  !< Ramp index for restart file time series
 INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
 INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
 INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
-INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
-INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
 INTEGER :: RAMP_SPEC_INDEX=0  !< Ramp index for species file time series
+INTEGER :: RAMP_TIME_INDEX=0  !< Ramp index for specified simulation time steps
+INTEGER :: RAMP_DT_INDEX=0    !< Ramp index for specified minimum simulation time step
+INTEGER :: RAMP_TMP_INDEX =0  !< Ramp index for temperature file time series
+INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,HVAC_CLOCK,&
                                        ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
                                        SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK ,TMP_CLOCK ,SPEC_CLOCK
@@ -850,12 +865,16 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
 END MODULE RADCONS
 
 !> \brief Variables for DVODE solver usage
-MODULE DVODECONS
+MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
-DOUBLE PRECISION :: ODE_MIN_ATOL=DBLE(-1._EB)
+REAL(EB) :: ODE_MIN_ATOL= -1._EB
+LOGICAL  :: EQUIV_RATIO_CHECK = .FALSE.
+REAL(EB) :: MIN_EQUIV_RATIO=0.0_EB
+REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
+LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 
-END MODULE DVODECONS
 
-   
+END MODULE CHEMCONS
+

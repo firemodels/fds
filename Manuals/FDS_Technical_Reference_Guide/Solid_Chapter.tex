@@ -295,7 +295,7 @@ The mass per unit volume of material component $\alpha$, $\rho_{\rm s,\alpha}(\b
   \dod{\rho_{\rm s,\alpha} }{t}  = -\sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta} + S_\alpha
   \label{solid_species_conservation}
 \ee
-where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{1/s}, and $S_\alpha$ is the production rate of material component $\alpha$ as a result of the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius and power functions:
+where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{kg/m^3 s}, and $S_\alpha$ is the production rate of material component $\alpha$ as a result of the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius and power functions:
 \be
 r_{\alpha \beta} =
     \underbrace{ \rho_{\rm s,\alpha}^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
@@ -304,16 +304,17 @@ r_{\alpha \beta} =
     \underbrace{T_{\rm s}^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
+The first factor describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second factor is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.  Note that the units of $A_{\alpha \beta}$ depend on the order of the reaction, that is, the value of $n_{\rm s,\alpha\beta}$, and must be consistent with the reaction rate having units of \si{kg/m^3 s}.  For first-order reactions ($n_{\rm s,\alpha\beta}=1$) the units of $A_{\alpha \beta}$ are simply 1/s.
 
-The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
-The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
+The third factor can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
+
+The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as follows.  First, the surface value of the oxygen mole fraction, $X_{\rm O_2,f}$, is determined such that the rate of oxygen mass transfer into the solid is balanced by the rate of consumption of the oxygen within the solid phase reactions.  The scheme to compute $X_{\rm O_2,f}$ is iterative and uses a Newton method, which we discuss below after a few more terms have been introduced.  Once $X_{\rm O_2,f}$ is known, the value of oxygen mole fraction in-depth is computed by
 \be
-X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
+X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place only at the surface of the material.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ m means that the reaction takes place only at the surface of the material.  The defaul value is $L_{\rm g,\alpha\beta}=0.001$ m.
 
-The fourth term is a power function for temperature.
+The fourth factor is a power function for temperature.
 
 The production term $S_\alpha$ is the sum over all the reactions where the solid residue is material $\alpha$
 \be
@@ -337,7 +338,15 @@ mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the 
 \label{eq:1dmassflux_solid}
 \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
 \ee
-where $L$ is the thickness of the solid. The chemical source term in the heat conduction equation is
+where $L$ is the thickness of the solid.
+
+If the material reaction involves oxygen, then we balance the rate of mass flux from reaction $\dm_{\rm O_2}'''$ with the rate of mass transfer of oxygen into the solid,
+\be
+\dm_{\rm O_2}'' = h_{\rm m}(Y_{\rm O_2,f} - Y_{\rm O_2,g}) \quad \longrightarrow \quad Y_{\rm O_2,f} = Y_{\rm O_2,g} + \frac{\dm_{\rm O_2}''}{h_{\rm m}}
+\ee
+where $h_m$ is the mass transfer coefficient computed from the heat transfer coefficient as $h/c_p(T_{\rm film})$.  The mass flux of oxygen will be a negative value, so this formula reduces the surface value of oxygen from the gas phase cell value and hence limits the oxygen available for the material reaction.  The Newtwon method uses the value of $Y_{\rm O_2,f}$ from the previous time step as an initial guess and usually converges in a few iterations.
+
+The chemical source term in the heat conduction equation is
 \be
 \label{eq:qchem_solid}
 \dot{q}_{\rm s,c}'''(x) = - \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}  r_{\alpha \beta}(x) H_{\rm r,\alpha \beta}

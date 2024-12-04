@@ -781,7 +781,7 @@ TYPE(CFACE_TYPE), POINTER :: CFA
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: GEOM_AREA_SURF
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW
 INTEGER,  ALLOCATABLE, DIMENSION(:)   :: GEOM_SURF
-INTEGER :: ICF, SURF_INDEX
+INTEGER :: ICF, SURF_INDEX, SUM_CC
 
 LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
 
@@ -802,6 +802,9 @@ CC_NCUTCELL   = 0
 
 IF (FIRST_CALL) THEN
 
+   ! Check Meshes Boundaries match, requirement to get consistent ghost and internal cut-cells.
+   CALL CHECK_WALL_CELL_PLANE_MATCH; IF (STOP_STATUS==SETUP_STOP) RETURN
+
    ! Get geometry triangle bins in Cartesian directions:
    CALL GET_GEOM_TRIBIN
 
@@ -809,8 +812,7 @@ IF (FIRST_CALL) THEN
    CALL SNAP_GEOM_NODES
 
    ! Initialize GEOMETRY fields used by CC_IBM:
-   CALL CC_INIT_GEOM
-   IF (STOP_STATUS==SETUP_STOP) RETURN
+   CALL CC_INIT_GEOM; IF (STOP_STATUS==SETUP_STOP) RETURN
    FIRST_CALL = .FALSE.
 
 ENDIF
@@ -1709,6 +1711,15 @@ MAIN_MESH_LOOP_4 : DO NM=1,NMESHES
       CC%ALPHA_CC = SUM(CC%VOLUME(1:CC%NCELL))/(DX(I)*DY(J)*DZ(K))
       CALL ALLOC_CELL_STATE_VARS(NM,ICC,CC%NCELL)
    ENDDO
+
+   ! Allocate array of indexes of chemically active cut-cells
+   SUM_CC = 0
+   DO ICC=1,M%N_CUTCELL_MESH
+      SUM_CC = SUM_CC + CC%NCELL
+   ENDDO
+   ALLOCATE(M%CHEM_ACTIVE_CC(SUM_CC,2))
+   M%CHEM_ACTIVE_CC=-1
+
 ENDDO MAIN_MESH_LOOP_4
 
 ! Add to SET_CUTCELLS_3D loop time:
@@ -2137,132 +2148,6 @@ ENDIF CCVERBOSE_COND
 RETURN
 
 CONTAINS
-
-SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
-
-USE MPI_F08
-
-! Local Variables:
-INTEGER :: NM,NOM,N,IERR
-TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0
-INTEGER :: N_REQ0
-LOGICAL :: PROCESS_SENDREC
-
-! Define cut-cells to be blocked for exchange:
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL POINT_TO_MESH(NM)
-   M => MESHES(NM)
-   ! Count cut-cells for blocking in mesh:
-   M%N_CC_BLOCKED = 0
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      CC => CUT_CELL(ICC)
-      DO JCC=1,CC%NCELL
-        IF(CC%NOADVANCE(JCC)>0) M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
-      ENDDO
-   ENDDO
-   IF (M%N_CC_BLOCKED>0) THEN
-      ALLOCATE(M%XYZ_CC_BLOCKED(3,M%N_CC_BLOCKED))
-      ALLOCATE(M%JBT_CC_BLOCKED(2,M%N_CC_BLOCKED))
-      ! Fill in blocked cut-cell info:
-      M%N_CC_BLOCKED = 0
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         CC => CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-         DO JCC=1,CC%NCELL
-           IF(CC%NOADVANCE(JCC)>0) THEN
-              M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
-              M%XYZ_CC_BLOCKED(1:3,M%N_CC_BLOCKED) = (/XC(I),YC(J),ZC(K)/)
-              M%JBT_CC_BLOCKED(1:2,M%N_CC_BLOCKED) = (/JCC,CC%NOADVANCE(JCC)/)
-           ENDIF
-         ENDDO
-      ENDDO
-   ENDIF
-ENDDO
-
-! MPI Exchange:
-IF (N_MPI_PROCESSES>1) THEN
-   ALLOCATE(REQ0(2*NMESHES**2)); N_REQ0 = 0
-   ! Exchange number of cut-cells information to be exchanged between MESH and OMESHES:
-   ! Receive from neighbors:
-   DO NM=1,NMESHES
-      DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-         PROCESS_SENDREC = .FALSE.
-         DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
-            IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
-         ENDDO
-         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
-            N_REQ0 = N_REQ0 + 1
-            CALL MPI_IRECV(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-         ENDIF
-      ENDDO
-   ENDDO
-   ! Send to neighbors:
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      DO NOM=1,NMESHES
-         PROCESS_SENDREC = .FALSE.
-         DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
-            IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
-         ENDDO
-         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
-            N_REQ0 = N_REQ0 + 1
-            CALL MPI_ISEND(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-         ENDIF
-      ENDDO
-   ENDDO
-   IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-   ! At this point values of MESHES(NM)%N_CC_BLOCKED are populated for PROCESSSED and NEIGNBORING meshes.
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)==MY_RANK) CYCLE ! already done for this mesh at the beginning of the routine.
-      IF(MESHES(NM)%N_CC_BLOCKED>0) THEN
-         ALLOCATE(MESHES(NM)%XYZ_CC_BLOCKED(3,MESHES(NM)%N_CC_BLOCKED))
-         ALLOCATE(MESHES(NM)%JBT_CC_BLOCKED(2,MESHES(NM)%N_CC_BLOCKED))
-      ENDIF
-   ENDDO
-
-   ! Exchange blocked cutcells lists:
-   ! Receive from neighbors:
-   N_REQ0 = 0
-   DO NM=1,NMESHES
-      DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-         PROCESS_SENDREC = .FALSE.
-         DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
-            IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
-         ENDDO
-         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
-         N_REQ0 = N_REQ0 + 1
-         CALL MPI_IRECV(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
-                        MPI_DOUBLE_PRECISION,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-         N_REQ0 = N_REQ0 + 1
-         CALL MPI_IRECV(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
-                        MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-         ENDIF
-      ENDDO
-   ENDDO
-   ! Send to neighbors:
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      DO NOM=1,NMESHES
-         PROCESS_SENDREC = .FALSE.
-         DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
-            IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
-         ENDDO
-         IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. PROCESS_SENDREC) THEN
-            N_REQ0 = N_REQ0 + 1
-            CALL MPI_ISEND(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
-                           MPI_DOUBLE_PRECISION,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-            N_REQ0 = N_REQ0 + 1
-            CALL MPI_ISEND(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
-                           MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-         ENDIF
-      ENDDO
-   ENDDO
-   IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-   ! Deallocate REQ0:
-   IF(ALLOCATED(REQ0)) DEALLOCATE(REQ0)
-ENDIF
-
-END SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
-
 
 SUBROUTINE ADD_NEIGHBOR_BLOCKED_CELLS
 
@@ -5031,6 +4916,200 @@ ENDIF
 END SUBROUTINE SNAP_GEOM_NODES
 
 END SUBROUTINE SET_CUTCELLS_3D
+
+! ----------------------- CHECK_WALL_CELL_PLANE_MATCH ----------------------------
+
+SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
+
+! Routine checks that external boundaries match among neighboring meshes. This is not strictly enforced
+! by FDS but is required to compute same cut-cells on mesh ghost-cells and other mesh internal cells.
+
+USE MPI_F08
+
+! Local variables:
+INTEGER :: NM,NOM,IW,IOR,IERR
+REAL(EB):: XM,XOM,MSIZE
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: BUFF
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(MESH_TYPE), POINTER :: M2
+
+ALLOCATE(BUFF(2,NMESHES)); BUFF=0
+MESH_LP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   EXT_WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP_1
+      EWC=>EXTERNAL_WALL(IW)
+      BC =>BOUNDARY_COORD(WC%BC_INDEX)
+      IOR = BC%IOR; NOM = EWC%NOM; IF(NOM<1 .OR. NOM==NM) CYCLE EXT_WALL_LOOP_1
+      M2 => MESHES(NOM)
+      SELECT CASE(IOR)
+         CASE( IAXIS); XM=X(0);    XOM=M2%X(M2%IBAR); MSIZE=X(IBAR)-X(0) ! Low X for mesh NM, high X for mesh NOM
+         CASE(-IAXIS); XM=X(IBAR); XOM=M2%X(0)      ; MSIZE=X(IBAR)-X(0) ! High X for mesh NM, low X for mesh NOM
+         CASE( JAXIS); XM=Y(0);    XOM=M2%Y(M2%JBAR); MSIZE=Y(JBAR)-Y(0) ! Low Y for mesh NM, high Y for mesh NOM
+         CASE(-JAXIS); XM=Y(JBAR); XOM=M2%Y(0)      ; MSIZE=Y(JBAR)-Y(0) ! High Y for mesh NM, low Y for mesh NOM
+         CASE( KAXIS); XM=Z(0);    XOM=M2%Z(M2%KBAR); MSIZE=Z(KBAR)-Z(0) ! Low Z for mesh NM, high Z for mesh NOM
+         CASE(-KAXIS); XM=Z(KBAR); XOM=M2%Z(0)      ; MSIZE=Z(KBAR)-Z(0) ! High Z for mesh NM, low Z for mesh NOM
+      END SELECT
+      IF(ABS(XM-XOM)>10._EB*GEOMEPS .AND. ABS(XM-XOM)<0.5_EB*MSIZE) THEN
+         BUFF(1:2,NM) = (/NM,NOM/)
+         CYCLE MESH_LP
+      ENDIF
+   ENDDO EXT_WALL_LOOP_1
+ENDDO MESH_LP
+
+! Now All-Reduce mismatch
+CALL MPI_ALLREDUCE(MPI_IN_PLACE,BUFF(1,1),2*NMESHES,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+DO NM=1,NMESHES
+   IF(BUFF(1,NM)>0) THEN ! First Mismatched meshes found.
+      IF (MY_RANK==0) THEN
+        WRITE(LU_ERR,'(A,I5,A,I5,A)') "ERROR(734): Mismatched mesh boundary location between meshes ",BUFF(1,NM),&
+        " and ",BUFF(2,NM),". Check your mesh MULT line. Mesh boundary locations must strictly match with &GEOM."
+      ENDIF
+      DEALLOCATE(BUFF)
+      CALL SHUTDOWN("") ; RETURN
+   ENDIF
+ENDDO
+DEALLOCATE(BUFF)
+END SUBROUTINE CHECK_WALL_CELL_PLANE_MATCH
+
+! ----------------------- EXCHANGE_CC_NOADVANCE_INFO ----------------------------
+
+SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
+
+   USE MPI_F08
+
+   ! Local Variables:
+   INTEGER :: NM,NOM,N,IERR,I,J,K,ICC,JCC
+   TYPE(MESH_TYPE), POINTER :: M
+   TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
+   INTEGER :: N_REQ0
+   LOGICAL :: PROCESS_SENDREC
+
+   ! Define cut-cells to be blocked for exchange:
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL POINT_TO_MESH(NM)
+      M => MESHES(NM)
+      ! Count cut-cells for blocking in mesh:
+      M%N_CC_BLOCKED = 0
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         CC => CUT_CELL(ICC)
+         DO JCC=1,CC%NCELL
+           IF(CC%NOADVANCE(JCC)>0) M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
+         ENDDO
+      ENDDO
+      IF (M%N_CC_BLOCKED>0) THEN
+         ALLOCATE(M%XYZ_CC_BLOCKED(3,M%N_CC_BLOCKED))
+         ALLOCATE(M%JBT_CC_BLOCKED(2,M%N_CC_BLOCKED))
+         ! Fill in blocked cut-cell info:
+         M%N_CC_BLOCKED = 0
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            CC => CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+            DO JCC=1,CC%NCELL
+              IF(CC%NOADVANCE(JCC)>0) THEN
+                 M%N_CC_BLOCKED = M%N_CC_BLOCKED + 1
+                 M%XYZ_CC_BLOCKED(1:3,M%N_CC_BLOCKED) = (/XC(I),YC(J),ZC(K)/)
+                 M%JBT_CC_BLOCKED(1:2,M%N_CC_BLOCKED) = (/JCC,CC%NOADVANCE(JCC)/)
+              ENDIF
+            ENDDO
+         ENDDO
+      ENDIF
+   ENDDO
+
+   ! MPI Exchange:
+   IF (N_MPI_PROCESSES>1) THEN
+      ALLOCATE(REQ0(NMESHES)); N_REQ0 = 0
+      ! Exchange number of cut-cells information to be exchanged between MESH and OMESHES:
+      ! Receive from neighbors:
+      DO NM=1,NMESHES
+         DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            PROCESS_SENDREC = .FALSE.
+            DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
+               IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
+            ENDDO
+            IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+               N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+               CALL MPI_IRECV(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            ENDIF
+         ENDDO
+      ENDDO
+      ! Send to neighbors:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         DO NOM=1,NMESHES
+            PROCESS_SENDREC = .FALSE.
+            DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
+               IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N)) PROCESS_SENDREC = .TRUE.
+            ENDDO
+            IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+               N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+               CALL MPI_ISEND(MESHES(NM)%N_CC_BLOCKED,1,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            ENDIF
+         ENDDO
+      ENDDO
+      IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+      ! At this point values of MESHES(NM)%N_CC_BLOCKED are populated for PROCESSSED and NEIGNBORING meshes.
+      DO NM=1,NMESHES
+         IF (PROCESS(NM)==MY_RANK) CYCLE ! already done for this mesh at the beginning of the routine.
+         IF(MESHES(NM)%N_CC_BLOCKED>0) THEN
+            ALLOCATE(MESHES(NM)%XYZ_CC_BLOCKED(3,MESHES(NM)%N_CC_BLOCKED))
+            ALLOCATE(MESHES(NM)%JBT_CC_BLOCKED(2,MESHES(NM)%N_CC_BLOCKED))
+         ENDIF
+      ENDDO
+
+      ! Exchange blocked cutcells lists:
+      ! Receive from neighbors:
+      N_REQ0 = 0
+      DO NM=1,NMESHES
+         DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            PROCESS_SENDREC = .FALSE.
+            DO N=1,MESHES(NM)%N_NEIGHBORING_MESHES
+               IF (NOM==MESHES(NM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
+            ENDDO
+            IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK  .AND. PROCESS_SENDREC) THEN
+            N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+            CALL MPI_IRECV(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
+                           MPI_DOUBLE_PRECISION,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+            CALL MPI_IRECV(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
+                           MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            ENDIF
+         ENDDO
+      ENDDO
+      ! Send to neighbors:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         DO NOM=1,NMESHES
+            PROCESS_SENDREC = .FALSE.
+            DO N=1,MESHES(NOM)%N_NEIGHBORING_MESHES
+               IF (NM==MESHES(NOM)%NEIGHBORING_MESH(N) .AND. MESHES(NM)%N_CC_BLOCKED>0) PROCESS_SENDREC=.TRUE.
+            ENDDO
+            IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. PROCESS_SENDREC) THEN
+               N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+               CALL MPI_ISEND(MESHES(NM)%XYZ_CC_BLOCKED(1,1),3*MESHES(NM)%N_CC_BLOCKED,&
+                              MPI_DOUBLE_PRECISION,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+               N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+               CALL MPI_ISEND(MESHES(NM)%JBT_CC_BLOCKED(1,1),2*MESHES(NM)%N_CC_BLOCKED,&
+                              MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+            ENDIF
+         ENDDO
+      ENDDO
+      IF (N_REQ0>0) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+      ! Deallocate REQ0:
+      IF(ALLOCATED(REQ0)) DEALLOCATE(REQ0)
+   ENDIF
+
+   CONTAINS
+   SUBROUTINE CHECK_REQ0_SIZE
+   IF(N_REQ0>SIZE(REQ0,DIM=1)) THEN
+      ALLOCATE(REQ0DUM(SIZE(REQ0,DIM=1)+NMESHES))
+      REQ0DUM(1:N_REQ0-1) = REQ0(1:N_REQ0-1)
+      CALL MOVE_ALLOC(REQ0DUM,REQ0)
+   ENDIF
+   END SUBROUTINE CHECK_REQ0_SIZE
+
+   END SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
 
 ! ----------------------- BLOCK_SMALL_UNLINKED_CUTCELLS ----------------------------
 
@@ -8679,7 +8758,7 @@ INTEGER, OPTIONAL, INTENT(IN) :: IW
 INTEGER :: IBOD, IWSEL, ICC, JCC
 
 INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, IIV(3), JJV(3), KKV(3), ICF2, JCF2, JCF22, ICF3, JCF3, &
-           II, JJ, KK, III, JJJ, KKK, ICFACE, ICFF, IOR
+           II, JJ, KK, III, JJJ, KKK, ICFACE, ICFF, IOR, X1AXIS
 REAL(EB):: XP(IAXIS:KAXIS),RDIR(IAXIS:KAXIS),V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS),DIST,DIST2
 LOGICAL :: IS_INTERSECT=.FALSE., BACK_CFACE_FOUND=.FALSE.
 TYPE (SURFACE_TYPE), POINTER :: SF
@@ -8728,6 +8807,8 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
          IWSEL=CF%BODTRI(2,IFACE)
          BC%NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
       ENDIF
+      X1AXIS = MAXLOC(ABS(BC%NVEC(IAXIS:KAXIS)),DIM=1)
+      BC%IOR = INT(SIGN(1._EB,BC%NVEC(X1AXIS)))*X1AXIS
 
       ! Boundary CFACES processed are defined of type SOLID_BOUNDARY
       CFA%BOUNDARY_TYPE = SOLID_BOUNDARY
@@ -12223,7 +12304,7 @@ IDCR_DO_2 : DO IDCR=1,CRS_NUM(CC_N_CRS)
                                                       ! defined as left_media:
          CC_IS_CRS2_AUX(LOW_IND:HIGH_IND,CC_N_CRS_AUX)     = LEFT_MEDIA
       ELSEIF (IND_LEFT == LEFT_MEDIA) THEN
-         CC_IS_CRS2_AUX(LOW_IND:HIGH_IND,CC_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
+         CC_IS_CRS2_AUX((/ LOW_IND, HIGH_IND/),CC_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
       ELSE
          IF (ITITLE==1) THEN
          WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: DROP_SS_GG = .TRUE., Didn't find left side continuity."
@@ -15613,7 +15694,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              NEWSEG = ISEG
              COUNT= 1
              CTSTART=COUNT
-             SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
+             SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
              SEG_FLAG(ISEG) = .FALSE.
              NSEG_LEFT      = NSEG - 1
 
@@ -15644,7 +15725,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ! Found a seg add to SEG_FACE2:
                 IF ( FOUNDSEG ) THEN
                    COUNT          = COUNT + 1
-                   SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
+                   SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG),SEG_FACE(NOD2,NEWSEG),ICF,NEWSEG /)
                    SEG_FLAG(NEWSEG) = .FALSE.
                    NSEG_LEFT      = NSEG_LEFT - 1
                 ENDIF
@@ -15665,7 +15746,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
-                      SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF, ISEG /)
+                      SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF, ISEG /)
                       SEG_FLAG(ISEG) = .FALSE.
                       NSEG_LEFT      = NSEG_LEFT - 1
                       EXIT
@@ -15716,12 +15797,12 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
                    ! Define closed Polygon centered in First Point:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                                  XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -15767,7 +15848,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
-                XYZCEN(IAXIS:KAXIS,ICF) = (/  X1FACE(II), CX2, CX3 /)
+                XYZCEN((/IAXIS,JAXIS,KAXIS/),ICF) = (/  X1FACE(II), CX2, CX3 /)
 
                 ! Fields for cut-cell volume/centroid computation:
                 ! dot(e1,nc)*int(x1)dA, where x=x1face(ii) constant and nc=e1:
@@ -15822,7 +15903,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                       DO IPT=2,NP2+1
                          ICF_PT = CFELEM(IPT,ICF2)
                          ! Define closed Polygon:
-                         XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                         XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
                       ENDDO
 
                       CALL TEST_PT_INPOLY(NP2,XY,XYC1,PTSFLAG)
@@ -16167,7 +16248,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                    ! ADD segment:
                    NSSEG = NSSEG + 1
-                   SEG_FACE(NOD1:NOD2,NSSEG) = (/ INOD1, INOD2 /)
+                   SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ INOD1, INOD2 /)
                    DX3 = XYZVERT(X3AXIS,INOD2)-XYZVERT(X3AXIS,INOD1)
                    DX2 = XYZVERT(X2AXIS,INOD2)-XYZVERT(X2AXIS,INOD1)
                    ANGSEG(NSSEG) = ATAN2(DX3,DX2)
@@ -16232,7 +16313,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X2FACE(JJ-FCELL+1),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = PI / 2._EB
              ENDDO
 
@@ -16243,7 +16324,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X3FACE(KK-FCELL+1),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = PI
              ENDDO
 
@@ -16254,7 +16335,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X2FACE(JJ-FCELL),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = - PI / 2._EB
              ENDDO
 
@@ -16265,7 +16346,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X3FACE(KK-FCELL),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = 0._EB
              ENDDO
 
@@ -16388,7 +16469,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              NEWSEG = ISEG
              COUNT= 1
              CTSTART=COUNT
-             SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
+             SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG),SEG_FACE(NOD2,NEWSEG),ICF /)
              SEG_FLAG(ISEG) = .FALSE.
              NSEG_LEFT      = NSSEG - 1
 
@@ -16420,7 +16501,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ! Found a seg add to SEG_FACE2:
                 IF ( FOUNDSEG ) THEN
                    COUNT          = COUNT + 1
-                   SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
+                   SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
                    SEG_FLAG(NEWSEG) = .FALSE.
                    NSEG_LEFT      = NSEG_LEFT - 1
                 ENDIF
@@ -16441,7 +16522,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
-                      SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF /)
+                      SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF /)
                       SEG_FLAG(ISEG) = .FALSE.
                       NSEG_LEFT      = NSEG_LEFT - 1
                       EXIT
@@ -16475,10 +16556,10 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,COUNT)
                    ! Define closed Polygon:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
                 ENDDO
                 ICF_PT = CFELEM(2,COUNT)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
                 AREA = 0._EB
                 DO II2=1,NP
                    AREA = AREA + ( XY(IAXIS,II2) * XY(JAXIS,II2+1) - &
@@ -16500,12 +16581,12 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
                    ! Define closed Polygon centered in First Point:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                                  XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -16539,7 +16620,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
-                XYZCEN(IAXIS:KAXIS,ICF) = (/  X1FACE(II), CX2, CX3 /)
+                XYZCEN((/IAXIS,JAXIS,KAXIS/),ICF) = (/  X1FACE(II), CX2, CX3 /)
 
              ENDDO
 
@@ -21559,9 +21640,9 @@ DO ITRI=1,BODINT_PLANE%NTRIS
    ! Define and Insertion add segments to CFELEM, indseg
    EDGETRI = CC_UNDEFINED
    DO IEDGE=1,NINTP_TRI-1
-        EDGETRI(NOD1:NOD2,IEDGE) = (/ TRINODS(IEDGE), TRINODS(IEDGE+1) /)
+        EDGETRI((/NOD1,NOD2/),IEDGE) = (/ TRINODS(IEDGE), TRINODS(IEDGE+1) /)
    ENDDO
-   EDGETRI(NOD1:NOD2,NINTP_TRI) = (/ TRINODS(NINTP_TRI), TRINODS(1) /)
+   EDGETRI((/NOD1,NOD2/),NINTP_TRI) = (/ TRINODS(NINTP_TRI), TRINODS(1) /)
 
    LOCTRI = BODINT_PLANE%INDTRI(1,ITRI)
    LOCBOD = BODINT_PLANE%INDTRI(2,ITRI)
@@ -21631,9 +21712,9 @@ DO ITRI=1,BODINT_PLANE%NTRIS
             VEC3(1)  = GEOMETRY(LOCBOD)%EDGE_FACES(1,EDGE_TRI) ! WSEDTRI
             VEC3(2)  = GEOMETRY(LOCBOD)%EDGE_FACES(2,EDGE_TRI)
             VEC3(3)  = GEOMETRY(LOCBOD)%EDGE_FACES(4,EDGE_TRI)
-            INDSEG(1:4,NEDGE) = (/ VEC3(1), VEC3(2), VEC3(3), LOCBOD /)
+            INDSEG((/1,2,3,4/),NEDGE) = (/ VEC3(1), VEC3(2), VEC3(3), LOCBOD /)
          ELSE
-            INDSEG(1:4,NEDGE) = (/ 1, LOCTRI, 0, LOCBOD /)
+            INDSEG((/1,2,3,4/),NEDGE) = (/ 1, LOCTRI, 0, LOCBOD /)
          ENDIF
       ENDIF
    ENDDO
@@ -21875,6 +21956,7 @@ END SUBROUTINE DEBUG_WAIT
 SUBROUTINE READ_GEOM
 USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+USE MISC_FUNCTIONS, ONLY: GET_MATL_INDEX
 USE MPI_F08
 USE OUTPUT_DATA, ONLY: COLOR2RGB
 
@@ -24042,6 +24124,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    RGB=-1
    CELL_BLOCK_IOR=0
    CELL_BLOCK_ORIENTATION = 0._EB
+   COLOR='null'
 
 END SUBROUTINE SET_GEOM_DEFAULTS
 
@@ -24641,34 +24724,6 @@ DO N=1,N_LAST
    ENDIF
 ENDDO
 END FUNCTION GET_GEOM_ID
-
-! ---------------------------- GET_MATL_INDEX ----------------------------------------
-
-INTEGER FUNCTION GET_MATL_INDEX(ID)
-CHARACTER(30), INTENT(IN) :: ID
-INTEGER :: N
-
-DO N = 1, N_MATL
-   IF (TRIM(MATERIAL(N)%ID)/=TRIM(ID)) CYCLE
-   GET_MATL_INDEX = N
-   RETURN
-ENDDO
-GET_MATL_INDEX = 0
-END FUNCTION GET_MATL_INDEX
-
-! ---------------------------- GET_SURF_INDEX ----------------------------------------
-
-INTEGER FUNCTION GET_SURF_INDEX(ID)
-CHARACTER(30), INTENT(IN) :: ID
-INTEGER :: N
-
-DO N = 1, N_SURF
-   IF (TRIM(SURFACE(N)%ID)/=TRIM(ID)) CYCLE
-   GET_SURF_INDEX = N
-   RETURN
-ENDDO
-GET_SURF_INDEX = 0
-END FUNCTION GET_SURF_INDEX
 
 ! ---------------------------- SETUP_TRANSFORM ----------------------------------------
 
@@ -25845,9 +25900,9 @@ VERT_LIST(0) = VERT_LIST(NLIST)
 VERT_LIST(NLIST+1) = VERT_LIST(1)
 NODE_EXISTS(1:NLIST+1) = .TRUE.
 DO I = 1, NLIST-1
-   EDGE_LIST(1:2,I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
+   EDGE_LIST((/1,2/),I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
 ENDDO
-EDGE_LIST(1:2,NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
+EDGE_LIST((/1,2/),NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
 FACES(1:3*(NVERTS-2)) = VERT_OFFSET+VERT_LIST(NLIST)
 
 IF (DIR == 0) THEN ! INBOUNDARY cut-face, always convex polygon.

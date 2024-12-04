@@ -7,11 +7,13 @@ The purpose of this case is to test functionality of the droplet routine.
 
 &TIME T_END=100.0 /
 
-&MISC HUMIDITY=0., ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
+&MISC HUMIDITY=0. /
 
-&OBST XB=-1.5, 1.5,-1.5, 1.5, 1.0, 3.0, COLOR='TAN'  /  
-&OBST XB=-1.5, 1.5,-1.5, 1.5, 4.0, 6.0, COLOR='TAN'  /  
-&OBST XB=-1.5, 1.5,-1.5, 1.5, 7.0, 9.0, COLOR='TAN'  /  
+&SURF ID='BOX', COLOR='TAN', ALLOW_UNDERSIDE_PARTICLES=T /
+
+&OBST XB=-1.5, 1.5,-1.5, 1.5, 1.0, 3.0, SURF_ID='BOX' /
+&OBST XB=-1.5, 1.5,-1.5, 1.5, 4.0, 6.0, SURF_ID='BOX' /
+&OBST XB=-1.5, 1.5,-1.5, 1.5, 7.0, 9.0, SURF_ID='BOX' /
 
  VENT MB='XMIN', SURF_ID='OPEN' /
  VENT MB='XMAX', SURF_ID='OPEN' /
@@ -29,7 +31,7 @@ The purpose of this case is to test functionality of the droplet routine.
 
 &DEVC ID='N-1', XYZ=0.0,0.0,13.7, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0.0  /
 
-&DUMP DT_DEVC=1. /
+&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=1. /
 
 &DEVC ID='water liquid', QUANTITY='AMPUA', PART_ID='WATER PARTICLES', SPATIAL_STATISTIC='SURFACE INTEGRAL', XB=-2,2,-2,2,0,1 /
 &DEVC ID='water vapor',  QUANTITY='DENSITY', SPEC_ID='WATER VAPOR',   SPATIAL_STATISTIC='VOLUME INTEGRAL', XB=-2,2,-2,2,0,14 /

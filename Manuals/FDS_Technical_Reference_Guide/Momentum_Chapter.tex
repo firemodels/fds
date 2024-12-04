@@ -660,22 +660,22 @@ The well-known CFL constraint given by
 \end{equation}
 places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for the purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \ct{MISC}):
 \vskip\baselineskip
 \noindent
-\textct{CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=1} (DNS and LES default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=1} (DNS and LES default, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 } + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
@@ -709,7 +709,7 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \label{eqn_divstability}
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \textct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \ct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
 \subsection{Realizable Fluid Volume Constraint}
 

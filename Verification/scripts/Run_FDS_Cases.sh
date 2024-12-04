@@ -36,6 +36,7 @@ fi
 WAIT=
 CHECKCASES=
 RESTART=
+FDSEXEC=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -q queue_name -s "
@@ -44,6 +45,7 @@ echo ""
 echo "Options"
 echo "-C - check that cases ran (used by firebot)"
 echo "-d - use debug version of FDS"
+echo "-e exe - override the full path of FDS used to run cases"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-J - use Intel MPI version of FDS"
@@ -55,7 +57,6 @@ echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-r - run restart test cases"
 echo "-s - stop FDS runs"
 echo "-W - wait for cases to complete before returning"
-exit
 }
 
 function get_full_path {
@@ -98,7 +99,7 @@ export SVNROOT=`pwd`
 cd $CURDIR
 RUN_PICTURES=
 
-while getopts 'Cdhj:Jm:Opq:rsW' OPTION
+while getopts 'Cdhj:e:Jm:Opq:rsW' OPTION
 do
 case $OPTION in
   C)
@@ -108,8 +109,12 @@ case $OPTION in
    DEBUG="1"
    SINGLE="1"
    ;;
+  e)
+   FDSEXEC="-e $OPTARG"
+   ;;
   h)
    usage;
+   exit
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -142,6 +147,10 @@ case $OPTION in
   W)
    WAIT="1"
    ;;
+  *)
+   usage
+   exit 1
+   ;;
 esac
 done
 
@@ -150,7 +159,7 @@ if [ "$JOBPREFIX" == "" ]; then
 fi
 export JOBPREFIX
 
-export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh"
+QFDSSH="$(pwd)/../../Utilities/Scripts/qfds.sh"
 
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
@@ -164,10 +173,11 @@ if [ "$DEBUG" != "" ]; then
 fi
 
 if [ "$CHECKCASES" == "1" ]; then
-  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
+  QFDS="$(pwd)/Check_FDS_Cases.sh"
 else
-  export QFDS="$QFDSSH $INTEL2 $QUEUE $DEBUG" 
+  QFDS="$QFDSSH $INTEL2 $QUEUE $DEBUG $FDSEXEC"
 fi
+export QFDS
 
 cd $CURDIR
 cd ..
