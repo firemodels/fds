@@ -9911,7 +9911,6 @@ ANGLE_INCREMENT      = -1
 MIE_MAXIMUM_DIAMETER = 0._EB
 MIE_MINIMUM_DIAMETER = 0._EB
 MIE_NDG              = 50
-QR_CLIP              = 10._EB  ! kW/m3, lower bound for radiation source correction
 OPTICALLY_THIN       = .FALSE.
 
 ! Read radiation parameters
@@ -12579,7 +12578,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    ELSE
 
-      ! Use information from DEVC line to create an INIT line for 'RADIATIVE HEAT FLUX GAS', 'ADIABATIC SURFACE TEMPERATURE GAS', etc.
+      ! Use information from DEVC line to create an INIT for 'RADIATIVE HEAT FLUX GAS', 'ADIABATIC SURFACE TEMPERATURE GAS', etc.
 
       CALL SET_INIT_DEFAULTS
       DV => DEVICE(INIT_RESERVED(N-N_INIT_READ)%DEVC_INDEX)  ! First device in the line of POINTS
