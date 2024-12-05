@@ -725,7 +725,8 @@ INTEGER :: GROUP_RS_MASTERS
 TYPE(MPI_COMM) :: MPI_COMM_RS, MPI_COMM_RS_MASTERS
 TYPE(MPI_GROUP):: GROUP_RS_MASTERS
 #endif
-
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MASTERS_RS
+LOGICAL :: IN_MASTERS_RS
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
