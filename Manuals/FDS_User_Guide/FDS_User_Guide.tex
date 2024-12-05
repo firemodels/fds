@@ -5506,11 +5506,30 @@ An important consideration for the time integration of chemical reactions is the
 
 If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]\ct{CHECK_REALIZABILITY} to be \ct{T} on the \ct{COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
 
-For solving the chemistry with a detailed chemical mechanism (see Section \ref{info:detailedChemMech}), the recommended ODE solver is CVODE from Sundials \cite{cvodeDoc:2024}. The following line instructs FDS to solve the chemistry with the CVODE solver using an absolute error tolerance of $10^{-10}$ and a relative error tolerance of $10^{-8}$:
+To solve chemistry using a detailed chemical mechanism (see Section \ref{info:detailedChemMech}), it is recommended to use the CVODE ODE solver from Sundials \cite{cvodeDoc:2024}. The following input line configures FDS to use CVODE for chemistry calculations:
+\begin{lstlisting}
+&COMB ODE_SOLVER='CVODE'/
+\end{lstlisting}
+Internally, CVODE assigns default values to several key parameters, as listed below:
+\begin{itemize}
+\setlength{\itemsep}{-4pt}   
+\item \ct{FINITE_RATE_MIN_TEMP}=300~$^\circ$C 
+\item \ct{ODE_MIN_ATOL}=1E-10 
+\item \ct{ODE_REL_ERROR}=1E-6 
+\item \ct{ZZ_MIN_GLOBAL}=1E-10 
+\item \ct{EQUIV_RATIO_CHECK}=F 
+\item \ct{MIN_EQUIV_RATIO}=0.0 
+\item \ct{MAX_EQUIV_RATIO}=20.0 
+\item \ct{DO_CHEM_LOAD_BALANCE}=T 
+\end{itemize}
+The parameter \ct{FINITE_RATE_MIN_TEMP} defines the minimum temperature (in ~$^\circ$C) above which chemistry calculation will be performed. CVODE allows specification of relative and absolute tolerances at the species-level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters in the \ct{SPEC} input line. These tolerances can also be set globally in the \ct{COMB} input line, with species-level settings taking precedence. Currently, CVODE only allows absolute tolerance at the species level. The minimum concentration of a species is determined as the product of \ct{ODE_REL_ERROR} and \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are treated as zero. 
+
+Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (set to true), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes. 
+User can modify the default values of any or all of these parameters as needed using the following line in the FDS input file:
 \begin{lstlisting}
 &COMB
+   ODE_SOLVER='CVODE'
    FINITE_RATE_MIN_TEMP=300,
-   ODE_SOLVER='CVODE',
    ZZ_MIN_GLOBAL=1E-15,
    ODE_MIN_ATOL=1E-12,
    ODE_REL_ERROR=1E-6,
@@ -5519,23 +5538,7 @@ For solving the chemistry with a detailed chemical mechanism (see Section \ref{i
    MAX_EQUIV_RATIO=20.0,
    DO_CHEM_LOAD_BALANCE=T /
 \end{lstlisting}
-However, the relative and absolute tolerances for ODEs can be specified at the species level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters. Currently, CVODE only supports absolute tolerance at the species level. The parameters \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO} are optional. The purpose of \ct{EQUIV_RATIO_CHECK} (when true) is to save computational time by calling the chemistry solver only for cells where the equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits. Additionally, setting the parameter \ct{DO_CHEM_LOAD_BALANCE} to true can significantly accelerate chemistry calculations by evenly distributing the chemistry workload across all MPI processes. The minimum concentration limit of a species is determined by multiplying \ct{ODE_REL_ERROR} to \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are considered to be zero.
 
-For CVODE, the default parameter values are as follows: 
-\begin{itemize}
-\item \ct{FINITE_RATE_MIN_TEMP}=300~$^\circ$C 
-\item \ct{ZZ_MIN_GLOBAL}=1E-10 
-\item \ct{ODE_MIN_ATOL}=1E-10 
-\item \ct{ODE_REL_ERROR}=1E-6 
-\item \ct{EQUIV_RATIO_CHECK}=F 
-\item \ct{MIN_EQUIV_RATIO}=0.0 
-\item \ct{MAX_EQUIV_RATIO}=20.0 
-\item \ct{DO_CHEM_LOAD_BALANCE}=T 
-\end{itemize}
-To use these default values, simply add the following lines to the FDS input file:
-\begin{lstlisting}
-&COMB ODE_SOLVER='CVODE'/
-\end{lstlisting}
 
 \newpage
 
