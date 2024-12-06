@@ -13,7 +13,7 @@ MESH IJK=111,111,121, XB=-1.5,1.5,-1.5,1.5,-.3,3 / single mesh equivalent
 
 &TIME T_END=30. /
 
-&RADI C_MIN=0.5 /
+
 
 &SURF ID='burner', HRRPUA=160., TMP_FRONT=750., COLOR='RED' /
 &OBST XB=-0.15,0.15,-.15,0.15,-.10,0.00,SURF_IDS='burner','INERT','INERT' /
