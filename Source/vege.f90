@@ -513,7 +513,7 @@ IF (.NOT.PREDICTOR) THEN
                DO IW=1,CUT_FACE(ICF)%NFACE ! All CC_INBOUNDARY CFACES on this cell.
                   CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
                   B1  => BOUNDARY_PROP1(CFA%B1_INDEX)
-                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
+                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
                   B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
                   B2%PHI_LS = PHI_LS(IIG,JJG)
                ENDDO
@@ -530,7 +530,7 @@ IF (.NOT.PREDICTOR) THEN
             IW = CELL(IC)%WALL_INDEX(-3)
             WC => WALL(IW)
             B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-            IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
+            IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
             B2 => BOUNDARY_PROP2(WC%B2_INDEX)
             B2%PHI_LS = PHI_LS(IIG,JJG)
          ENDDO
