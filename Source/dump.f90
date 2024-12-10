@@ -6372,6 +6372,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    IF (DV%SUBDEVICE_INDEX(NM)==0) CYCLE DEVICE_LOOP
 
    SDV => DV%SUBDEVICE(DV%SUBDEVICE_INDEX(NM))
+   SDV%N_VALUES = 0  ! Count the number of values for Device N in Mesh NM
 
    ! Check to see if the device is tied to an INIT line, in which case it is tied to a specific particle. Test to see if the
    ! particle is in the current mesh.
@@ -6407,11 +6408,13 @@ DEVICE_LOOP: DO N=1,N_DEVC
       IF (DV%NO_UPDATE_DEVC_INDEX>0) THEN
          IF (DEVICE(DV%NO_UPDATE_DEVC_INDEX)%CURRENT_STATE) THEN
             SDV%VALUE_1 = DV%SMOOTHED_VALUE
+            SDV%N_VALUES = SDV%N_VALUES + 1
             CYCLE DEVICE_LOOP
          ENDIF
       ELSEIF (DV%NO_UPDATE_CTRL_INDEX>0) THEN
          IF (CONTROL(DV%NO_UPDATE_CTRL_INDEX)%CURRENT_STATE) THEN
             SDV%VALUE_1 = DV%SMOOTHED_VALUE
+            SDV%N_VALUES = SDV%N_VALUES + 1
             CYCLE DEVICE_LOOP
          ENDIF
       ENDIF
@@ -6447,6 +6450,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   SDV%VALUE_1 = SOLID_PHASE_OUTPUT(ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                                    OPT_CFACE_INDEX=DV%CFACE_INDEX,OPT_DEVC_INDEX=N)
                ENDIF
+               SDV%N_VALUES = SDV%N_VALUES + 1
 
             CASE DEFAULT SOLID_STATS_SELECT
 
@@ -6483,6 +6487,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   VALUE = SOLID_PHASE_OUTPUT(ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                              OPT_WALL_INDEX=IW,OPT_DEVC_INDEX=N,OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
                   CALL SELECT_SPATIAL_STATISTIC(OPT_CUT_FACE_INDEX=WC%CUT_FACE_INDEX)
+                  SDV%N_VALUES = SDV%N_VALUES + 1
                ENDDO WALL_CELL_LOOP
 
                CFACE_LOOP : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
@@ -6499,6 +6504,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   VALUE = SOLID_PHASE_OUTPUT(ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                              OPT_CFACE_INDEX=ICF,OPT_DEVC_INDEX=N)
                   CALL SELECT_SPATIAL_STATISTIC
+                  SDV%N_VALUES = SDV%N_VALUES + 1
                ENDDO CFACE_LOOP
 
                PARTICLE_LOOP: DO IP=1,NLP
@@ -6515,6 +6521,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   VALUE = SOLID_PHASE_OUTPUT(ABS(DV%QUANTITY_INDEX(1)),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                              OPT_LP_INDEX=IP,OPT_DEVC_INDEX=N)
                   CALL SELECT_SPATIAL_STATISTIC(OPT_LP_INDEX=IP)
+                  SDV%N_VALUES = SDV%N_VALUES + 1
                ENDDO PARTICLE_LOOP
 
                ! If no WALL, CFACE, or PARTICLE is found, set the value of the device to 0
@@ -6534,6 +6541,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                K = MIN( KBP1, MAX(0, DV%K(1)) )
                SDV%VALUE_1 = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                               DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
+               SDV%N_VALUES = SDV%N_VALUES + 1
 
                IF (DV%N_QUANTITY>1) &
                   SDV%VALUE_2 = GAS_PHASE_OUTPUT(T,DT,NM,DV%I(2),DV%J(2),DV%K(2),DV%QUANTITY_INDEX(2),0,DV%Y_INDEX,DV%Z_INDEX,&
@@ -6577,6 +6585,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
                         VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                                  DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
+                        SDV%N_VALUES = SDV%N_VALUES + 1
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
                            CASE('MAX','MAXLOC X','MAXLOC Y','MAXLOC Z')
                               IF (VALUE>SDV%VALUE_1) THEN
@@ -6658,6 +6667,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       CASE(300:350) OUTPUT_INDEX_SELECT  ! HVAC output
 
          SDV%VALUE_1 = HVAC_OUTPUT(DV%QUANTITY_INDEX(1),DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX,DV%DUCT_CELL_INDEX)
+         SDV%N_VALUES = SDV%N_VALUES + 1
 
       CASE(400:454) OUTPUT_INDEX_SELECT  ! Particle-specific output
 
@@ -6665,7 +6675,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE('null')
 
-               IF (LP_INDEX>0) SDV%VALUE_1 = PARTICLE_OUTPUT(T,ABS(DV%QUANTITY_INDEX(1)),LP_INDEX)
+               IF (LP_INDEX>0) THEN
+                  SDV%VALUE_1 = PARTICLE_OUTPUT(T,ABS(DV%QUANTITY_INDEX(1)),LP_INDEX)
+                  SDV%N_VALUES = SDV%N_VALUES + 1
+               ENDIF
 
             CASE DEFAULT
 
@@ -6682,6 +6695,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   VALUE = PARTICLE_OUTPUT(T,ABS(DV%QUANTITY_INDEX(1)),IP)
                   B1 => BOUNDARY_PROP1(LP%B1_INDEX)
                   CALL SELECT_SPATIAL_STATISTIC(OPT_LP_INDEX=IP)
+                  SDV%N_VALUES = SDV%N_VALUES + 1
                ENDDO PARTICLE_LOOP2
 
                ! If no appropriate particles are found, set the value of the device to 0
