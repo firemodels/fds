@@ -59,7 +59,7 @@ function usage {
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -P use PBS/Torque"
   echo " -s   - stop job"
-  echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
+  echo " -t   - used for timing studies, run a job alone on a node"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
@@ -105,11 +105,6 @@ if [ "$QFDS_NCORES" == "" ]; then
   n_cores=`grep processor /proc/cpuinfo | wc -l`
 else
   n_cores=$QFDS_NCORES
-fi
-if [ "$NCORES_COMPUTENODE" == "" ]; then
-  NCORES_COMPUTENODE=$n_cores
-else
-  n_cores=$NCORES_COMPUTENODE
 fi
 
 #*** set default parameter values
