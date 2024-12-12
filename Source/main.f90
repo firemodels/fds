@@ -3276,7 +3276,11 @@ ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ1>0) THEN
    CALL MPI_STARTALL(N_REQ1,REQ1(1:N_REQ1),IERR)
-   CALL TIMEOUT('MPI exchange of gas species densities',N_REQ1,REQ1(1:N_REQ1))
+   IF (CODE==1) THEN
+      CALL TIMEOUT('MPI exchange of gas species densities (CODE=1)',N_REQ1,REQ1(1:N_REQ1))
+   ELSE
+      CALL TIMEOUT('MPI exchange of gas species densities (CODE=4)',N_REQ1,REQ1(1:N_REQ1))
+   ENDIF
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==7 .AND. N_REQ2>0) THEN
