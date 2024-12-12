@@ -385,8 +385,8 @@ ompi_intel_osx_openmp_dv : setup $(obj_mpi)
 
 #*** Intel compiler and OpenMPI in Linux ****
 
-ompi_intel_linux : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL_OPENMPI) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT  -diag-disable=10448
-ompi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
+ompi_intel_linux : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL_OPENMPI) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_PETSC) $(FFLAGS_HDF5) -DUSE_IFPORT  -diag-disable=10448
+ompi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_PETSC) $(LFLAGS_HDF5)
 ompi_intel_linux : FCOMPL = $(COMP_FC)
 ompi_intel_linux : obj = fds_ompi_intel_linux
 ompi_intel_linux : setup $(obj_mpi)
