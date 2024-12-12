@@ -214,7 +214,7 @@ IF (SOLID_PARTICLES) THEN
 
       IF (LPC%SOLID_PARTICLE) THEN
          CALL CALCULATE_ZZ_F(T,DT,PARTICLE_INDEX=IP)
-         IF (CORRECTOR) CALL DEPOSIT_PARTICLE_MASS(NM,LP,LPC)  ! Add the particle off-gas to the gas phase mesh
+         IF (CORRECTOR) CALL DEPOSIT_PARTICLE_MASS(LP,LPC)  ! Add the particle off-gas to the gas phase mesh
       ENDIF
 
    ENDDO PARTICLE_LOOP
@@ -1412,16 +1412,14 @@ END SUBROUTINE CALCULATE_ZZ_F
 
 
 !> \brief Deposit particle off-gas onto mesh
-!> \param NM Mesh number
 !> \param LP Pointer to Lagrangian Particle derived type variable
 !> \param LPC Pointer to Lagrangian Particle Class
 !> \details Deposit the particle off-gas onto the mesh
 
-SUBROUTINE DEPOSIT_PARTICLE_MASS(NM,LP,LPC)
+SUBROUTINE DEPOSIT_PARTICLE_MASS(LP,LPC)
 
 USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
-INTEGER, INTENT(IN) :: NM
 REAL(EB) :: RADIUS,M_DOT_SINGLE,CP,MW_RATIO,H_G,ZZ_GET(1:N_TRACKED_SPECIES),M_GAS,LENGTH,WIDTH,H_S_B
 INTEGER :: NS
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
@@ -1476,7 +1474,7 @@ DO NS=1,N_TRACKED_SPECIES
    ZZ_GET(NS) = 1._EB
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,B1%TMP_F)
    !$OMP CRITICAL
-   Q_DOT(4,NM) = Q_DOT(4,NM) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
+   Q_DOT(4) = Q_DOT(4) + B1%M_DOT_G_PP_ADJUST(NS)*B1%AREA*H_S_B*LP%PWT    ! Q_CONV
    !$OMP END CRITICAL
 ENDDO
 
@@ -1495,8 +1493,8 @@ D_SOURCE(BC%IIG,BC%JJG,BC%KKG) = D_SOURCE(BC%IIG,BC%JJG,BC%KKG) - B1%Q_CON_F*B1%
 
 ! Add energy losses and gains to overall energy budget array
 
-Q_DOT(8,NM) = Q_DOT(8,NM) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
-Q_DOT(3,NM) = Q_DOT(3,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
+Q_DOT(8) = Q_DOT(8) - (B1%Q_CON_F + B1%Q_RAD_IN - B1%Q_RAD_OUT)*B1%AREA*LP%PWT      ! Q_PART
+Q_DOT(3) = Q_DOT(3) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT                        ! Q_RADI
 !$OMP END CRITICAL
 
 ! Calculate the mass flux of fuel gas from particles
@@ -1504,7 +1502,7 @@ Q_DOT(3,NM) = Q_DOT(3,NM) + (B1%Q_RAD_IN-B1%Q_RAD_OUT)*B1%AREA*LP%PWT           
 IF (CORRECTOR) THEN
    DO NS=1,N_TRACKED_SPECIES
       !$OMP CRITICAL
-      M_DOT(NS,NM) = M_DOT(NS,NM) + B1%M_DOT_G_PP_ACTUAL(NS)*B1%AREA*LP%PWT
+      M_DOT(NS) = M_DOT(NS) + B1%M_DOT_G_PP_ACTUAL(NS)*B1%AREA*LP%PWT
       !$OMP END CRITICAL
    ENDDO
 ENDIF
