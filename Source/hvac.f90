@@ -56,7 +56,7 @@ REAL(EB), POINTER, DIMENSION(:)   :: NODE_Z    !< Area-weighted z position of ea
 REAL(EB), POINTER, DIMENSION(:)   :: NODE_TMP  !< Area-weighted temperature of each NODE
 REAL(EB), POINTER, DIMENSION(:,:) :: NODE_ZZ   !< Area-weighted tracked species mass fractions of each NODE
 
-REAL(EB), PUBLIC, ALLOCATABLE, DIMENSION(:) :: NODE_ZONE !< Array of NODEs belonging to each ZONE
+INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:) :: NODE_ZONE !< Array of NODEs belonging to each ZONE
 
 REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_ZZ_EX !<Area weighted tracked species mass fractions of each NODE per MESH
 !< Contains sum of area weighted tracked species mass fractions over all MPI processes for all VENTs assigned to each NODE
