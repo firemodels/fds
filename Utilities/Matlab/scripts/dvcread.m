@@ -38,7 +38,9 @@ while ierror==0
     if textline == -1
         ierror = 1;
     else
-        [X ierror]=str2num(textline);
+        % Remove hyphens before calling str2num
+        cleanline = strrep(textline, '-', '');
+        [X ierror]=str2num(cleanline);
     end
 end
 fclose(fid);
