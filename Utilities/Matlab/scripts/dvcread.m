@@ -39,7 +39,7 @@ while ierror==0
         ierror = 1;
     else
         % Remove hyphens before calling str2num
-        cleanline = strrep(textline, '-', '');
+        cleanline = regexprep(textline, '(?<!E)-', ' ');
         [X ierror]=str2num(cleanline);
     end
 end
