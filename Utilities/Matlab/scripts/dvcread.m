@@ -38,9 +38,7 @@ while ierror==0
     if textline == -1
         ierror = 1;
     else
-        % Remove hyphens before calling str2num
-        cleanline = regexprep(textline, '(?<!E)-', ' ');
-        [X ierror]=str2num(cleanline);
+        [X ierror]=str2num(textline);
     end
 end
 fclose(fid);
