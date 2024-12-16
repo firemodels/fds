@@ -1,8 +1,8 @@
-&HEAD CHID='particle_heating_radiation', TITLE='Test of particle energy conservation' /
+&HEAD CHID='particle_heating_radiation_noht', TITLE='Test of particle energy conservation' /
 
-&TIME T_END=900, DT=0.1, WALL_INCREMENT=1 /
+&TIME T_END=900, DT=0.02, WALL_INCREMENT=1 /
 
-&MISC TMPA=800., CHECK_HT=T /
+&MISC TMPA=800. /
 
 &MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
@@ -25,8 +25,8 @@
 
 &INIT ID                   = 'ball',
       PART_ID              = 'ball'
-      XYZ                  = 0.45,0.45,0.45
-      N_PARTICLES          = 1 /
+      XB                   = 0.0,1.0,0.0,1.0,0.0,1.0
+      N_PARTICLES          = 10 /
 
 &MATL ID                 = 'metal'
       DENSITY            = 5000.
@@ -41,5 +41,7 @@
 &DEVC XB=0,1,0,1,0,1, QUANTITY='NET HEAT FLUX', ID='wall net flux', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
 &DEVC XB=0,1,0,1,0,1, QUANTITY='CONVECTIVE HEAT FLUX', ID='wall con flux', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
 &DEVC XB=0,1,0,1,0,1, QUANTITY='RADIATIVE HEAT FLUX', ID='wall rad flux', SURF_ID='WALL', SPATIAL_STATISTIC='SURFACE INTEGRAL' /
+
+&BNDF QUANTITY='CONVECTIVE HEAT FLUX', CELL_CENTERED=T /
 
 &TAIL /
