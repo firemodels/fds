@@ -88,7 +88,7 @@ cd $SVNROOT/fds/Verification/Miscellaneous
 if [ -e obst_single.smv ]; then
   cp obst_single.smv obst_multi.smo
 fi
-cd %CURDIR
+cd $CURDIR
 
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/fds/Utilities/Scripts/startXserver.sh 2>/dev/null
