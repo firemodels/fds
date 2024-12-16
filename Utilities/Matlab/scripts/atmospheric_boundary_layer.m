@@ -67,6 +67,11 @@ T = theta.*(p_0./(p_0-rho_0*g*(z-z_0{i}))).^-0.285;
 
 T = T + (theta_0-T(12));
 
+ERROR = abs(u(end)-M2.data(end,2));
+if ERROR>2.
+   display(['Matlab Warning: atmospheric_boundary_layer Case ',num2str(i),' velocity out of tolerance. ERROR = ',num2str(ERROR),' m/s'])
+end
+
 plot(u,z,'ko'); hold on
 plot(M2.data(:,2),M2.data(:,1),'k-'); hold off
 set(gca,'FontName',Font_Name)
@@ -98,6 +103,11 @@ print(f1,'-dpdf',[outfile '_vel'])
 f2=figure;
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+ERROR = abs(T(end)-273.15-M2.data(end,3));
+if ERROR>1.0
+   display(['Matlab Warning: atmospheric_boundary_layer Case ',num2str(i),' temperature out of tolerance. ERROR = ',num2str(ERROR),' K'])
+end
 
 plot(T-273.15,z,'ko'); hold on
 plot(M2.data(:,3),M2.data(:,1),'k-'); hold off
