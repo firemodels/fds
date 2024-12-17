@@ -3634,7 +3634,7 @@ IF (LIQUID_DROPLETS) THEN
    
    RHO_INTERIM => WORK1 ; RHO_INTERIM = RHO
    TMP_INTERIM => WORK2 ; TMP_INTERIM = TMP
-   ZZ_INTERIM  => SCALAR_WORK1 ; ZZ_INTERIM = ZZ
+   ZZ_INTERIM  => SWORK1 ; ZZ_INTERIM = ZZ
 
 ENDIF
 
@@ -3909,11 +3909,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(8,NM) = Q_DOT(8,NM) - Q_RAD*WGT/DT  ! Q_PART
-               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(8) = Q_DOT(8) - Q_RAD*WGT/DT  ! Q_PART
+               Q_DOT(4) = Q_DOT(4) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3) = Q_DOT(3) + Q_RAD*WGT/DT                             ! Q_RADI
 
-               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX) = M_DOT(LPC%Z_INDEX) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
@@ -4284,12 +4284,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(8,NM) = Q_DOT(8,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
-               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
-               Q_DOT(5,NM) = Q_DOT(5,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
+               Q_DOT(8) = Q_DOT(8) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
+               Q_DOT(4) = Q_DOT(4) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3) = Q_DOT(3) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(5) = Q_DOT(5) + Q_CON_WALL*WGT/DT                        ! Q_COND
 
-               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX) = M_DOT(LPC%Z_INDEX) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
