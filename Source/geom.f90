@@ -12304,7 +12304,7 @@ IDCR_DO_2 : DO IDCR=1,CRS_NUM(CC_N_CRS)
                                                       ! defined as left_media:
          CC_IS_CRS2_AUX(LOW_IND:HIGH_IND,CC_N_CRS_AUX)     = LEFT_MEDIA
       ELSEIF (IND_LEFT == LEFT_MEDIA) THEN
-         CC_IS_CRS2_AUX(LOW_IND:HIGH_IND,CC_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
+         CC_IS_CRS2_AUX((/ LOW_IND, HIGH_IND/),CC_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
       ELSE
          IF (ITITLE==1) THEN
          WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: DROP_SS_GG = .TRUE., Didn't find left side continuity."
@@ -15694,7 +15694,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              NEWSEG = ISEG
              COUNT= 1
              CTSTART=COUNT
-             SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
+             SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
              SEG_FLAG(ISEG) = .FALSE.
              NSEG_LEFT      = NSEG - 1
 
@@ -15725,7 +15725,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ! Found a seg add to SEG_FACE2:
                 IF ( FOUNDSEG ) THEN
                    COUNT          = COUNT + 1
-                   SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF, NEWSEG /)
+                   SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG),SEG_FACE(NOD2,NEWSEG),ICF,NEWSEG /)
                    SEG_FLAG(NEWSEG) = .FALSE.
                    NSEG_LEFT      = NSEG_LEFT - 1
                 ENDIF
@@ -15746,7 +15746,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
-                      SEG_FACE2(NOD1:NOD3+1,COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF, ISEG /)
+                      SEG_FACE2((/NOD1,NOD2,NOD3,NOD3+1/),COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF, ISEG /)
                       SEG_FLAG(ISEG) = .FALSE.
                       NSEG_LEFT      = NSEG_LEFT - 1
                       EXIT
@@ -15797,12 +15797,12 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
                    ! Define closed Polygon centered in First Point:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                                  XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -15848,7 +15848,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
-                XYZCEN(IAXIS:KAXIS,ICF) = (/  X1FACE(II), CX2, CX3 /)
+                XYZCEN((/IAXIS,JAXIS,KAXIS/),ICF) = (/  X1FACE(II), CX2, CX3 /)
 
                 ! Fields for cut-cell volume/centroid computation:
                 ! dot(e1,nc)*int(x1)dA, where x=x1face(ii) constant and nc=e1:
@@ -15903,7 +15903,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                       DO IPT=2,NP2+1
                          ICF_PT = CFELEM(IPT,ICF2)
                          ! Define closed Polygon:
-                         XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                         XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
                       ENDDO
 
                       CALL TEST_PT_INPOLY(NP2,XY,XYC1,PTSFLAG)
@@ -16248,7 +16248,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                    ! ADD segment:
                    NSSEG = NSSEG + 1
-                   SEG_FACE(NOD1:NOD2,NSSEG) = (/ INOD1, INOD2 /)
+                   SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ INOD1, INOD2 /)
                    DX3 = XYZVERT(X3AXIS,INOD2)-XYZVERT(X3AXIS,INOD1)
                    DX2 = XYZVERT(X2AXIS,INOD2)-XYZVERT(X2AXIS,INOD1)
                    ANGSEG(NSSEG) = ATAN2(DX3,DX2)
@@ -16313,7 +16313,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X2FACE(JJ-FCELL+1),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = PI / 2._EB
              ENDDO
 
@@ -16324,7 +16324,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X3FACE(KK-FCELL+1),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = PI
              ENDDO
 
@@ -16335,7 +16335,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X2FACE(JJ-FCELL),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = - PI / 2._EB
              ENDDO
 
@@ -16346,7 +16346,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              CALL SORT_VERTS(CC_MAXVERTS_FACE,NSVERT,XVERT1,XVERT2,X3FACE(KK-FCELL),ASCDESC,NV,V)
              DO IV=1,NV-1
                 NSSEG=NSSEG + 1
-                SEG_FACE(NOD1:NOD2,NSSEG) = (/ V(IV), V(IV+1) /)
+                SEG_FACE((/NOD1,NOD2/),NSSEG) = (/ V(IV), V(IV+1) /)
                 ANGSEG(NSSEG) = 0._EB
              ENDDO
 
@@ -16469,7 +16469,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              NEWSEG = ISEG
              COUNT= 1
              CTSTART=COUNT
-             SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
+             SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG),SEG_FACE(NOD2,NEWSEG),ICF /)
              SEG_FLAG(ISEG) = .FALSE.
              NSEG_LEFT      = NSSEG - 1
 
@@ -16501,7 +16501,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ! Found a seg add to SEG_FACE2:
                 IF ( FOUNDSEG ) THEN
                    COUNT          = COUNT + 1
-                   SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
+                   SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF /)
                    SEG_FLAG(NEWSEG) = .FALSE.
                    NSEG_LEFT      = NSEG_LEFT - 1
                 ENDIF
@@ -16522,7 +16522,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
-                      SEG_FACE2(NOD1:NOD3,COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF /)
+                      SEG_FACE2((/NOD1,NOD2,NOD3/),COUNT) = (/ SEG_FACE(NOD1,ISEG), SEG_FACE(NOD2,ISEG), ICF /)
                       SEG_FLAG(ISEG) = .FALSE.
                       NSEG_LEFT      = NSEG_LEFT - 1
                       EXIT
@@ -16556,10 +16556,10 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,COUNT)
                    ! Define closed Polygon:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
                 ENDDO
                 ICF_PT = CFELEM(2,COUNT)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
                 AREA = 0._EB
                 DO II2=1,NP
                    AREA = AREA + ( XY(IAXIS,II2) * XY(JAXIS,II2+1) - &
@@ -16581,12 +16581,12 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
                    ! Define closed Polygon centered in First Point:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                   XY((/IAXIS,JAXIS/),IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                                  XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
-                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
+                XY((/IAXIS,JAXIS/),NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -16620,7 +16620,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
-                XYZCEN(IAXIS:KAXIS,ICF) = (/  X1FACE(II), CX2, CX3 /)
+                XYZCEN((/IAXIS,JAXIS,KAXIS/),ICF) = (/  X1FACE(II), CX2, CX3 /)
 
              ENDDO
 
@@ -21640,9 +21640,9 @@ DO ITRI=1,BODINT_PLANE%NTRIS
    ! Define and Insertion add segments to CFELEM, indseg
    EDGETRI = CC_UNDEFINED
    DO IEDGE=1,NINTP_TRI-1
-        EDGETRI(NOD1:NOD2,IEDGE) = (/ TRINODS(IEDGE), TRINODS(IEDGE+1) /)
+        EDGETRI((/NOD1,NOD2/),IEDGE) = (/ TRINODS(IEDGE), TRINODS(IEDGE+1) /)
    ENDDO
-   EDGETRI(NOD1:NOD2,NINTP_TRI) = (/ TRINODS(NINTP_TRI), TRINODS(1) /)
+   EDGETRI((/NOD1,NOD2/),NINTP_TRI) = (/ TRINODS(NINTP_TRI), TRINODS(1) /)
 
    LOCTRI = BODINT_PLANE%INDTRI(1,ITRI)
    LOCBOD = BODINT_PLANE%INDTRI(2,ITRI)
@@ -21712,9 +21712,9 @@ DO ITRI=1,BODINT_PLANE%NTRIS
             VEC3(1)  = GEOMETRY(LOCBOD)%EDGE_FACES(1,EDGE_TRI) ! WSEDTRI
             VEC3(2)  = GEOMETRY(LOCBOD)%EDGE_FACES(2,EDGE_TRI)
             VEC3(3)  = GEOMETRY(LOCBOD)%EDGE_FACES(4,EDGE_TRI)
-            INDSEG(1:4,NEDGE) = (/ VEC3(1), VEC3(2), VEC3(3), LOCBOD /)
+            INDSEG((/1,2,3,4/),NEDGE) = (/ VEC3(1), VEC3(2), VEC3(3), LOCBOD /)
          ELSE
-            INDSEG(1:4,NEDGE) = (/ 1, LOCTRI, 0, LOCBOD /)
+            INDSEG((/1,2,3,4/),NEDGE) = (/ 1, LOCTRI, 0, LOCBOD /)
          ENDIF
       ENDIF
    ENDDO
@@ -25900,9 +25900,9 @@ VERT_LIST(0) = VERT_LIST(NLIST)
 VERT_LIST(NLIST+1) = VERT_LIST(1)
 NODE_EXISTS(1:NLIST+1) = .TRUE.
 DO I = 1, NLIST-1
-   EDGE_LIST(1:2,I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
+   EDGE_LIST((/1,2/),I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
 ENDDO
-EDGE_LIST(1:2,NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
+EDGE_LIST((/1,2/),NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
 FACES(1:3*(NVERTS-2)) = VERT_OFFSET+VERT_LIST(NLIST)
 
 IF (DIR == 0) THEN ! INBOUNDARY cut-face, always convex polygon.

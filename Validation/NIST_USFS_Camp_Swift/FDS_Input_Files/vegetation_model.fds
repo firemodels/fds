@@ -15,7 +15,7 @@
       HEAT_OF_REACTION      = 418. /
 
 &MATL ID                    = 'CHAR'
-      DENSITY               = 300.
+      DENSITY               = 125.
       CONDUCTIVITY          = 0.052
       SPECIFIC_HEAT_RAMP    = 'c_v'
       SURFACE_OXIDATION_MODEL = T
@@ -28,7 +28,7 @@
       HEAT_OF_REACTION      = -25000. /
 
 &MATL ID                    = 'ASH'
-      DENSITY               = 67.
+      DENSITY               = 5.
       CONDUCTIVITY          = 0.1
       SPECIFIC_HEAT_RAMP    = 'c_v' /
 
@@ -44,7 +44,7 @@
 &SURF ID = 'bluestem_lower_blade'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 8439
-      MOISTURE_FRACTION = 0.25
+      MOISTURE_FRACTION = 0.259
       LENGTH =0.3
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -55,6 +55,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 141,30,30 /
 
 &INIT PART_ID = 'bluestem_lower_blade',
@@ -67,16 +71,9 @@
 &SURF ID = 'bluestem_lower_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 1850
-      MOISTURE_FRACTION = 0.25
+      MOISTURE_FRACTION = 0.259
       LENGTH =0.3
       GEOMETRY = 'CYLINDRICAL' /
-
-&INIT PART_ID='bluestem_lower_cyl',
-      BULK_DENSITY_FILE='../../../../cad/Case_Studies/NIST_USFS_Camp_Swift/bluestem_lower_25cm.bdf',
-      N_PARTICLES_PER_CELL=1,
-      CELL_CENTERED=T,
-      DRY=T,
-      BULK_DENSITY_FACTOR=0.367/
 
 &PART ID = 'bluestem_lower_cyl'
       SAMPLING_FACTOR = 10
@@ -85,14 +82,25 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 141,30,30 /
+
+&INIT PART_ID='bluestem_lower_cyl',
+      BULK_DENSITY_FILE='../../../../cad/Case_Studies/NIST_USFS_Camp_Swift/bluestem_lower_25cm.bdf',
+      N_PARTICLES_PER_CELL=1,
+      CELL_CENTERED=T,
+      DRY=T,
+      BULK_DENSITY_FACTOR=0.367/
 
 ---------- Bluestem upper layer ---------
 
 &SURF ID = 'bluestem_upper_blade'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 9147
-      MOISTURE_FRACTION = 0.096
+      MOISTURE_FRACTION = 0.107
       LENGTH =0.5
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -103,6 +111,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 141,30,30 /
 
 &INIT PART_ID='bluestem_upper_blade',
@@ -115,7 +127,7 @@
 &SURF ID = 'bluestem_upper_small_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 6768
-      MOISTURE_FRACTION = 0.096
+      MOISTURE_FRACTION = 0.107
       LENGTH =0.5
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -126,6 +138,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 141,30,30 /
 
 &INIT PART_ID='bluestem_upper_small_cyl',
@@ -138,7 +154,7 @@
 &SURF ID = 'bluestem_upper_large_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 2438
-      MOISTURE_FRACTION = 0.096
+      MOISTURE_FRACTION = 0.107
       LENGTH =0.5 
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -149,6 +165,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 141,30,30 /
 
 &INIT PART_ID='bluestem_upper_large_cyl',
@@ -174,6 +194,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 111,131,78 /
 
 &INIT PART_ID='camphorweed_leaf',
@@ -197,6 +221,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 111,131,78 /
 
 &INIT PART_ID='camphorweed_small_cyl',
@@ -220,6 +248,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 111,131,78 /
 
 &INIT PART_ID='camphorweed_large_cyl',
@@ -238,13 +270,6 @@
       LENGTH =0.41
       GEOMETRY = 'CYLINDRICAL' /
 
-&INIT PART_ID = 'threeawn_blade',
-      BULK_DENSITY_FILE='../../../../cad/Case_Studies/NIST_USFS_Camp_Swift/threeawn_25cm.bdf',
-      N_PARTICLES_PER_CELL=1,
-      CELL_CENTERED=T,
-      DRY=T,
-      BULK_DENSITY_FACTOR=0.210/
-
 &PART ID = 'threeawn_blade'
       SAMPLING_FACTOR = 10
       SURF_ID = 'threeawn_blade'
@@ -252,7 +277,18 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 185,183,142 /
+
+&INIT PART_ID = 'threeawn_blade',
+      BULK_DENSITY_FILE='../../../../cad/Case_Studies/NIST_USFS_Camp_Swift/threeawn_25cm.bdf',
+      N_PARTICLES_PER_CELL=1,
+      CELL_CENTERED=T,
+      DRY=T,
+      BULK_DENSITY_FACTOR=0.200/
 
 &SURF ID = 'threeawn_cyl'
       MATL_ID = 'GENERIC VEGETATION'
@@ -268,6 +304,10 @@
       DRAG_COEFFICIENT =2.8
       QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE MASS'
       STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
       RGB   = 185,183,142 /
 
 &INIT PART_ID='threeawn_cyl',
@@ -275,19 +315,10 @@
       N_PARTICLES_PER_CELL=1,
       CELL_CENTERED=T,
       DRY=T,
-      BULK_DENSITY_FACTOR=0.200/
+      BULK_DENSITY_FACTOR=0.210/
 
 
 ---------- Borderveg (bluestem with average properties over entire plant height) ---------
-
-&PART ID = 'borderveg'
-      SAMPLING_FACTOR = 10
-      SURF_ID = 'borderveg'
-      PROP_ID = 'grass image '
-      DRAG_COEFFICIENT=2.8
-      QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE BULK DENSITY'
-      STATIC = T
-      RGB   = 141,30,30 /
 
 &SURF ID = 'borderveg'
       MATL_ID = 'GENERIC VEGETATION'
@@ -297,6 +328,19 @@
       MOISTURE_FRACTION = 0.21
       LENGTH = 0.1
       GEOMETRY = 'CYLINDRICAL' /
+
+&PART ID = 'borderveg'
+      SAMPLING_FACTOR = 10
+      SURF_ID = 'borderveg'
+      PROP_ID = 'grass image '
+      DRAG_COEFFICIENT=2.8
+      QUANTITIES = 'PARTICLE BULK DENSITY', 'PARTICLE BULK DENSITY'
+      STATIC = T
+      EMBER_PARTICLE = T
+      EMBER_DENSITY_THRESHOLD = 62.5
+      EMBER_VELOCITY_THRESHOLD = 0
+      TRACK_EMBERS = F
+      RGB   = 141,30,30 /
 
 ! Total bluestem biomass distibuted over 80cm ((.653+.367)*.3+(.046+.110+.080)*.5)/.8 = 0.53
 &INIT PART_ID='borderveg',

@@ -48,7 +48,7 @@ theta_star = u_star^2*theta_0/(g*kappa*L);
 
 z = [z_0{i} 10*z_0{i} 1 2 3 4 5 6 7 8 9 10 15 20 25 30 50 100];
 
-figure(1)
+f1=figure;
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
@@ -67,8 +67,13 @@ T = theta.*(p_0./(p_0-rho_0*g*(z-z_0{i}))).^-0.285;
 
 T = T + (theta_0-T(12));
 
+ERROR = abs(u(end)-M2.data(end,2));
+if ERROR>2.
+   display(['Matlab Warning: atmospheric_boundary_layer Case ',num2str(i),' velocity out of tolerance. ERROR = ',num2str(ERROR),' m/s'])
+end
+
 plot(u,z,'ko'); hold on
-plot(M2.data(:,2),M2.data(:,1),'k-'); hold on
+plot(M2.data(:,2),M2.data(:,1),'k-'); hold off
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0 u_high{i} 0 100])
@@ -88,21 +93,24 @@ legend({'M-O Theory','FDS'}, 'Location', 'SouthEast');
 git_file = [datafile, '_git.txt'];
 addverstr(gca,git_file,'linear')
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[outfile '_vel'])
+set(f1,'Visible',Figure_Visibility);
+set(f1,'Units',Paper_Units);
+set(f1,'PaperUnits',Paper_Units);
+set(f1,'PaperSize',[Paper_Width Paper_Height]);
+set(f1,'Position',[0 0 Paper_Width Paper_Height]);
+print(f1,'-dpdf',[outfile '_vel'])
 
-clf('reset')
-
-figure(2)
+f2=figure;
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
+ERROR = abs(T(end)-273.15-M2.data(end,3));
+if ERROR>1.0
+   display(['Matlab Warning: atmospheric_boundary_layer Case ',num2str(i),' temperature out of tolerance. ERROR = ',num2str(ERROR),' K'])
+end
+
 plot(T-273.15,z,'ko'); hold on
-plot(M2.data(:,3),M2.data(:,1),'k-'); hold on
+plot(M2.data(:,3),M2.data(:,1),'k-'); hold off
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([T_low{i} T_high{i} 0 100])
@@ -114,13 +122,11 @@ legend({'M-O Theory','FDS'}, 'Location', 'SouthWest');
 
 addverstr(gca,git_file,'linear')
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[outfile '_tmp'])
-
-clf('reset')
+set(f2,'Visible',Figure_Visibility);
+set(f2,'Units',Paper_Units);
+set(f2,'PaperUnits',Paper_Units);
+set(f2,'PaperSize',[Paper_Width Paper_Height]);
+set(f2,'Position',[0 0 Paper_Width Paper_Height]);
+print(f2,'-dpdf',[outfile '_tmp'])
 
 end

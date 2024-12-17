@@ -131,9 +131,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: NEAREST_RAD_ANGLE_INDEX=0   !< Index of the radiation angle nearest the given orientation vector
    INTEGER :: CNF_RAMP_INDEX=-1           !< Ramp index for Cumulative Number Fraction function
    INTEGER :: BREAKUP_CNF_RAMP_INDEX=-1   !< Ramp index for break-up Cumulative Number Fraction function
-   INTEGER :: N_STORAGE_REALS=0           !< Number of reals to store for this particle class
-   INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
-   INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
+   INTEGER :: N_REALS=0                   !< Number of reals to store for this particle class
+   INTEGER :: N_INTEGERS=0                !< Number of integers to store for this particle class
+   INTEGER :: N_LOGICALS=0                !< Number of logicals to store for this particle class
    INTEGER :: NEW_PARTICLE_INCREMENT=1000 !< Number of new storage slots to allocate when NPLDIM is exceeded
    INTEGER :: EVAP_MODEL                  !< Evaporation correlation
 
@@ -400,9 +400,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
-   INTEGER :: N_REALS=0              !< Number of reals to pack into restart or send/recv buffer
-   INTEGER :: N_INTEGERS=0           !< Number of integers to pack into restart or send/recv buffer
-   INTEGER :: N_LOGICALS=0           !< Number of logicals to pack into restart or send/recv buffer
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -543,8 +540,8 @@ TYPE SPECIES_TYPE
    REAL(EB) :: ODE_REL_ERROR                      !< Relative error for finite rate chemistry
    REAL(EB) :: POLYNOMIAL_TEMP(4)                 !< Temperature bands for user polynomial
    REAL(EB) :: POLYNOMIAL_COEFF(9,3)              !< Coefficients for user polynomial
-   REAL(EB) :: REAL_REFRACTIVE_INDEX            
-   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX            
+   REAL(EB) :: REAL_REFRACTIVE_INDEX
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
 
    LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
    LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
@@ -1048,7 +1045,7 @@ TYPE OMESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
 
    ! Level Set
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS,TOA
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_SEND_PKG14,REAL_RECV_PKG14
 
 END TYPE OMESH_TYPE
@@ -1744,6 +1741,11 @@ TYPE ZONE_SOLVE_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
+#ifdef WITH_HYPRE
+   TYPE(HYPRE_ZM_TYPE) HYPRE_ZSL
+#else
+   INTEGER :: HYPRE_ZSL
+#endif /* WITH_HYPRE */
    INTEGER :: NUNKH_LOCAL=0                           !< SUM(NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: NUNKH_TOTAL=0                           !< SUM(NUNKH_TOT(LOWER_MESH_INDEX:UPPER_MESH_INDEX)).
    INTEGER :: TOT_NNZ_H=0                             !< Total number of non-zeros owned by this process for a pres zone.

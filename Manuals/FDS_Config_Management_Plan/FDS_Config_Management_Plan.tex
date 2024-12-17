@@ -176,7 +176,7 @@ Version 1 of FDS was publicly released in February 2000, version 2 in December 2
 
 Starting with FDS 5, a formal revision management system was implemented to track changes to the FDS source code. The open-source program development tools are provided by GitHub (https://github.com/).
 
-Wiki files (accessible through the \emph{Wiki Pages} button at \href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}), maintained by the developers, details the changes made for each release. A separate file is provided for both FDS and Smokeview.
+Wiki files (accessible through the \emph{Wiki Pages} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}), maintained by the developers, details the changes made for each release. A separate file is provided for both FDS and Smokeview.
 
 
 \section{Model Developers}
@@ -309,7 +309,7 @@ Most decisions concerning these various tasks are made individually or by consen
 
 Review and approval of software and documentation is part of the standard review process for any report or other product developed by NIST. A minimum of five reviews are required prior to release of reports or software, including two independent technical peer reviews, technical and management reviews at the technical workgroup and division level, and a policy review at the NIST-wide level.  This review is documented and recorded on the NIST standard form NIST 114 along with official approval notification provided to the primary author of the product.
 
-FDS/Smokeview is distributed exclusively through a NIST website dedicated to the model \linebreak (\href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}).  Content of the website is the responsibility of the FDS project leader. Additions and changes to the website are made through the same SQA process documented in this plan.
+FDS/Smokeview is distributed exclusively through a NIST website dedicated to the model \linebreak (\href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}).  Content of the website is the responsibility of the FDS project leader. Additions and changes to the website are made through the same SQA process documented in this plan.
 
 
 \section{Document Identification and Control}
@@ -326,7 +326,7 @@ The FDS manuals are typeset using \LaTeX, specifically, pdf\LaTeX. The \LaTeX\ f
 
 Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
 
-Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
 \begin{tabbing}
 fds \hspace{0.5in} \= FDS source code, verification and validation tests, wikis, and documentation \\
 smv                \> Smokeview source code, integration tests, and documentation \\
@@ -342,7 +342,7 @@ Each member of the development team has an account and password access~\footnote
 
 In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site.
 
-Additional details on the use of GitHub for the models are available on the wiki pages for the models accessible via the \emph{Wiki Pages} button at \href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}.
+Additional details on the use of GitHub for the models are available on the wiki pages for the models accessible via the \emph{Wiki Pages} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}.
 
 \subsection{Version Identification and Numbering}
 
@@ -365,7 +365,7 @@ Changes are made to the FDS source code daily, and tracked via revision control 
 
 The software development process for FDS/Smokeview is intentionally simple. The process can be defined in five basic steps:
 \begin{description}
-\item [1. Identify and document the need for a change:] Improvements to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model. Significant changes to FDS/Smokeview, guided by available research road maps \linebreak (see \href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}), are made based on the following criteria, in no particular order:
+\item [1. Identify and document the need for a change:] Improvements to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model. Significant changes to FDS/Smokeview, guided by available research road maps \linebreak (see \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}), are made based on the following criteria, in no particular order:
 \begin{description}
 \item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable or superior accuracy to its empirical counterpart.
 \item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance (Baum's Rule\footnote{After Howard Baum, NIST Fellow and one of the original developers of the mathematical foundation of FDS.}). For example, the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy is emitted as thermal radiation.
@@ -381,7 +381,7 @@ The software development process for FDS/Smokeview is intentionally simple. The 
 
 \section{Problem Reporting and Resolution}
 
-NIST has developed an automated reporting and resolution tracking website for use with the FDS model to facilitate tracking and cataloging of inquires, problems, and model enhancements / revisions. This is included as part of the FDS website via the \emph{Issues} button at \href{https://pages.nist.gov/fds-smv} {\textct{https://pages.nist.gov/fds-smv}}.
+NIST has developed an automated reporting and resolution tracking website for use with the FDS model to facilitate tracking and cataloging of inquires, problems, and model enhancements / revisions. This is included as part of the FDS website via the \emph{Issues} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}.
 
 \section{Software Change Implementation}
 

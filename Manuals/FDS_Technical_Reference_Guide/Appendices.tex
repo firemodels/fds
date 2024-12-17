@@ -352,7 +352,7 @@ where $c_{p,\alpha}$ is the specific heat of $\alpha$ at constant pressure, $c_{
 \begin{align}
 \rho h_s = \rho c_p T = \rho T \sum_\alpha Y_\alpha c_{p,\alpha} = \rho R T \left(\frac{\gamma}{\gamma-1}\right)\sum_\alpha \frac{Y_\alpha}{W_\alpha} = \rho \frac{R T}{\overline{W}} \left(\frac{\gamma}{\gamma-1}\right) = \bar{p}\left(\frac{\gamma}{\gamma-1}\right)
 \end{align}
-Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and uniform.  Consequently, $\partial (\rho h_s)/\partial t = 0$ and $\nabla (\rho h_s) = 0$, so we require no corrections to the divergence expression.  This improves the speed of the code since these divergence corrections are rather expensive.  To employ this simplification, the user enters \emph{both} {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} and {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line of the input file.
+Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and uniform.  Consequently, $\partial (\rho h_s)/\partial t = 0$ and $\nabla (\rho h_s) = 0$, so we require no corrections to the divergence expression.  This improves the speed of the code since these divergence corrections are rather expensive.  To employ this simplification, the user enters \emph{both} \ct{CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} and \ct{STRATIFICATION=.FALSE.} on the \ct{MISC} line of the input file.
 
 
 %\chapter{Multi-environment Extension of Reactor Model}
@@ -1754,10 +1754,10 @@ and therefore the boundary condition becomes
 Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
-  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{\rm s,1}^{n+1} +
- \underbrace{ \frac{  h^{n+1} \, T_{\rm g}^{n+1} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_\textct{QDXKF}
+  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_{\hbox{\ct{RFACF2}}} T_{\rm s,1}^{n+1} +
+ \underbrace{ \frac{  h^{n+1} \, T_{\rm g}^{n+1} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_{\hbox{\ct{QDXKF}}}
 \end{equation}
-Note that \textct{RFACF2} and similar names are used in the actual source code to represent these quantities.
+Note that \ct{RFACF2} and similar names are used in the actual source code to represent these quantities.
 In case of non-insulated backing in Cartesian geometry, the temperature of virtual node $N+1$ is calculated the same way.
 For a Cartesian geometry with an insulated backing or for cylindrical and spherical geometries, $\epsilon$, $\dot{q}_{\rm r,in}''$, and $h$ are set to 0.
 
@@ -1779,11 +1779,11 @@ where
 To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal linear solver is used:
 \begin{equation}
 \begin{split}
-& C_1 = C_1 - B_1 \cdot \textct{QDXKF} \\
-& C_N = C_N - A_N \cdot \textct{QDXKB} \\
+& C_1 = C_1 - B_1 \cdot \hbox{\ct{QDXKF}} \\
+& C_N = C_N - A_N \cdot \hbox{\ct{QDXKB}} \\
 & \\
-& D_1 = D_1 + B_1 \cdot \textct{RFACF2} \\
-& D_N = D_N + A_N \cdot \textct{RFACB2} \\
+& D_1 = D_1 + B_1 \cdot \hbox{\ct{RFACF2}} \\
+& D_N = D_N + A_N \cdot \hbox{\ct{RFACB2}} \\
 & \\
 & D_i = D_i - \frac{B_i \; A_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1 \\
 & C_i = C_i - \frac{B_i \; C_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1\\
@@ -1819,8 +1819,8 @@ The ghost cell value at $n+1$ may then be written in terms of the wall temperatu
 \end{align}
 Comparing Eq.~(\ref{T_ghost}) with Eq.~(\ref{T0}), it is apparent that
 \begin{align}
-\textct{RFACF2} &= -1 \\
-\textct{QDXKF}  &= 2\, T_{\rm w}
+\hbox{\ct{RFACF2}} &= -1 \\
+\hbox{\ct{QDXKF}}  &= 2\, T_{\rm w}
 \end{align}
 
 
