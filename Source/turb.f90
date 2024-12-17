@@ -1651,9 +1651,9 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
    ! SGS scalar flux
    ! CAUTION: The flux arrays must point to the same work arrays used in DIVERGENCE_PART_1
    ! Note: Do not reinitialize!  RHO_D_DZDX, etc., already store molecular diffusive flux
-   RHO_D_DZDX=>SCALAR_WORK1
-   RHO_D_DZDY=>SCALAR_WORK2
-   RHO_D_DZDZ=>SCALAR_WORK3
+   RHO_D_DZDX=>SWORK1
+   RHO_D_DZDY=>SWORK2
+   RHO_D_DZDZ=>SWORK3
 
    IF (PREDICTOR) THEN
       UU=>U

@@ -59,7 +59,7 @@ In Western-States Section of the Combustion Institute, Paper No. WSS/CT 81-15, 1
 
 &TIME T_END=30. /
 
-&RADI C_MIN=0.5 /
+
 
 &SURF ID='burner', HRRPUA=367., TMP_FRONT=630., COLOR='RED' /
 &OBST XB=-0.15,0.15,-.15,0.15,-.10,0.00,SURF_IDS='burner','INERT','INERT' /

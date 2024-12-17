@@ -2252,7 +2252,7 @@ Below we plot the results for the \ct{ribbed_channel_geom} test series.  These c
 \label{MO_velocity_profile_stable}
 \label{MO_velocity_profile_unstable}
 
-Atmospheric turbulence is affected by the stability of the boundary layer.  A stable layer (cool, heavy air at ground level) will suppress turbulence, while an unstable layer (warm, light air at ground level) will enhance turbulent mixing as buoyant plumes rise.  The theory governing these flows, Monin-Obukhov similarity theory, is discussed at some length in the FDS User Guide \cite{FDS_Users_Guide}.  Here we examine velocity profiles from a stable boundary layer and an unstable boundary layer.  When mean forcing is used for driving the wind field the Monin-Obukhov parameters determine the shape of the mean streamwise velocity profile.  These cases use a very tight \ct{DT_MEAN_FORCING_2} of 0.1 s in order to drive the flow field directly to the specified profile, therefore comfirming the target profile is being computed correctly in FDS.
+Atmospheric turbulence is affected by the stability of the boundary layer.  A stable layer (cool, heavy air at ground level) will suppress turbulence, while an unstable layer (warm, light air at ground level) will enhance turbulent mixing as buoyant plumes rise.  The theory governing these flows, Monin-Obukhov similarity theory, is discussed at some length in the FDS User Guide \cite{FDS_Users_Guide}.  Here we examine velocity profiles from a stable boundary layer and an unstable boundary layer. The Monin-Obukhov parameters determine the shape of the mean streamwise velocity profile.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5941,11 +5941,11 @@ $\beta=m'''/\rho_{\rm p}$ is the ``packing ratio,'' the vegetation mass per unit
 \label{particle_heating_convection}
 \label{particle_heating_radiation}
 
-A small metal sphere with mass, $m_{\rm s}=0.005$~kg, is suspended in a 1~m cube filled with $m_{\rm g}=0.318$~kg nitrogen with a specified specific heat, $c_p=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm g,i}=1073.15$~K. The metal has a specified specific heat, $c_{\rm s}=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm s,i}=293.15$~K. The walls of the box are adiabatic. In the first case, \ct{particle\_heating\_convection}, the sphere is heated via convection only and there is no radiation heat transfer. In the second case, \ct{particle\_heating\_radiation}, the sphere is heated via radiation only. The initial heat flux in both cases is approximately 75~kW/m$^2$, and the final temperature in both cases, $T_{\rm f}$, is found from solving an equation that equates the internal energy gained by the solid with the internal energy lost by the gas:
+Ten small metal spheres, each with mass, $m_{\rm s}=0.005$~kg, are suspended in a 1~m cube filled with $m_{\rm g}=0.318$~kg nitrogen with a specified specific heat, $c_p=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm g,i}=1073.15$~K. The metal has a specified specific heat, $c_{\rm s}=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm s,i}=293.15$~K. The walls of the box are adiabatic. In the first case, \ct{particle\_heating\_convection}, the spheres are heated via convection only and there is no radiation heat transfer. In the second case, \ct{particle\_heating\_radiation}, the spheres are heated via radiation only. The initial heat flux in both cases is approximately 75~kW/m$^2$, and the final temperature in both cases, $T_{\rm f}$, is found from solving an equation that equates the internal energy gained by the solid with the internal energy lost by the gas:
 \be
-   m_{\rm s} \, c_{\rm s} \, (T_{\rm f}-T_{\rm s,i}) = m_{\rm g} \, c_{v} \, (T_{\rm g,i}-T_{\rm f})  \quad ; \quad  c_v = c_p - \frac{R}{W} = 1 - \frac{8.3145}{28} \approx 0.703 \; \hbox{kJ/(kg}\cdot\hbox{K})
+   10 \, m_{\rm s} \, c_{\rm s} \, (T_{\rm f}-T_{\rm s,i}) = m_{\rm g} \, c_{v} \, (T_{\rm g,i}-T_{\rm f})  \quad ; \quad  c_v = c_p - \frac{R}{W} = 1 - \frac{8.3145}{28} \approx 0.703 \; \hbox{kJ/(kg}\cdot\hbox{K})
 \ee
-The final temperature, $T_{\rm f}=1056.1$~K or 782.9~$^\circ$C, as shown in Fig.~\ref{particle_heating_figs}.
+The final temperature, $T_{\rm f}=931.4$~K or 658.3~$^\circ$C, as shown in Fig.~\ref{particle_heating_figs}.
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_heating_convection}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_heating_radiation}

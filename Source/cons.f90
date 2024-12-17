@@ -279,8 +279,6 @@ LOGICAL :: VTK_HDF=.TRUE.                           !< Flag that indicates VTK o
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
 LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
 LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vtk files should be generated
-LOGICAL :: TEST_CHAR_MASS_TRANSFER_MODEL=.FALSE.    !< Experimental flag to test mass transfer resistence in char model
-LOGICAL :: AGL_TIMERS(1:2)=(/.FALSE.,.FALSE./)      !< AGL_TIMERS(1) for TIME OF ARRIVAL, AGL_TIMERS(2) for RESIDENCE TIME
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
 LOGICAL :: WROTE_SL3D=.FALSE.                       !< Flag indicating if a SL3D file was written during primary out
@@ -288,7 +286,9 @@ LOGICAL :: WROTE_SL2D=.FALSE.                       !< Flag indicating if a SL2D
 LOGICAL :: WROTE_SMOKE3D=.FALSE.                    !< Flag indicating if a Smoke3D file was written during primary out
 LOGICAL :: WROTE_BNDF=.FALSE.                       !< Flag indicating if a BNDF file was written during primary out
 LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART file was written during primary out
-LOGICAL :: TEST_FLUX_LIMITER_FACE_CORRECTION=.FALSE.
+LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.
+LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
+LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -401,8 +401,7 @@ TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI co
 #endif
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,&
-                                      COUNTS_QM,DISPLS_QM,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20
 
 ! Time parameters
 
