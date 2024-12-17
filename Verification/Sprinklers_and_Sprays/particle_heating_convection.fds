@@ -1,4 +1,4 @@
-&HEAD CHID='particle_heating_convection_noht', TITLE='Test of particle energy conservation' /
+&HEAD CHID='particle_heating_convection', TITLE='Test of particle energy conservation' /
 
 &TIME T_END=900, DT=0.02, WALL_INCREMENT=1 /
 
