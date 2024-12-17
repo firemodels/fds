@@ -1,4 +1,4 @@
-&HEAD CHID='back_wall_test_2_noht', TITLE='Test 1-D heat transfer through rotated GEOM obstruction' /
+&HEAD CHID='back_wall_test_2', TITLE='Test 1-D heat transfer through rotated GEOM obstruction' /
 
 &MESH XB=0,1,0,1,0,1, IJK=40,40,40 /
 &MESH XB=2,3,0,1,0,1, IJK=40,40,40 /
