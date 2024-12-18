@@ -1704,7 +1704,6 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ENDIF
 
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
-            WRITE(*,*) I,J,K,TMP_G,CP,ZZ_GET
             TMP_N = TMP_G
             EVAP_LOOP: DO
                TMP_N2 = TMP_N
