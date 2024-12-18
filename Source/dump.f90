@@ -12330,6 +12330,12 @@ CONTAINS
       ! Interpolate the boundary quantity PP at cell corners, PPN
 
       IF (.NOT.BF%CELL_CENTERED) THEN
+         
+         ! Dont include undetermined values in interpolation for FIRE ARRIVAL TIME
+         IF (OUTPUT_QUANTITY(BF%INDEX)%NAME=='FIRE ARRIVAL TIME') THEN
+            WHERE(PP>9.E5_FB) IBK=0
+         ENDIF
+
          DO N=N1-1,N2
             DO L=L1-1,L2
                IF (IBK(L,N)==1)     PPN(L,N) = PPN(L,N) + PP(L,N)
@@ -12342,6 +12348,7 @@ CONTAINS
                ELSE
                   PPN(L,N) = REAL(SOLID_PHASE_OUTPUT(IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0,&
                                                      OPT_BNDF_INDEX=NF),FB)
+                  IF (OUTPUT_QUANTITY(BF%INDEX)%NAME=='FIRE ARRIVAL TIME') PPN(L,N) = 1.E6_FB
                ENDIF
             ENDDO
          ENDDO
