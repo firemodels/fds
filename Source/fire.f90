@@ -1617,7 +1617,7 @@ TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 CALL POINT_TO_MESH(NM)
 
 ZZ_INTERIM=> SWORK1
-ZZ_INTERIM = ZZ
+ZZ_INTERIM(:,:,:,1:) = ZZ(:,:,:,1:) ! Lower bound may be zero for MW flux correction
 RHO_INTERIM => WORK1
 RHO_INTERIM = RHO
 TMP_INTERIM => WORK2
@@ -1704,6 +1704,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ENDIF
 
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
+            WRITE(*,*) I,J,K,TMP_G,CP,ZZ_GET
             TMP_N = TMP_G
             EVAP_LOOP: DO
                TMP_N2 = TMP_N
