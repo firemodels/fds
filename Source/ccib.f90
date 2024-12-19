@@ -24,7 +24,6 @@ LOGICAL, PARAMETER :: TIME_CC_IBM=.FALSE. ! Enable timers for main CC_IBM routin
 INTEGER :: LU_DB_CCIB
 
 ! Forcing and Inseparable pressure residual computation parameters:
-LOGICAL, PARAMETER :: GRADH_ON_CARTESIAN = .FALSE.
 REAL(EB), PARAMETER:: A_THRESH_FORCING     = 0.05_EB
 REAL(EB), PARAMETER:: STM_THRESH_EXTRP     = 0.005_EB
 REAL(EB), PARAMETER:: V_THRESH_INSPRES     = 0.005_EB
@@ -112,7 +111,7 @@ PUBLIC :: ADD_CUTCELL_D_PBAR_DT, ADD_LINKEDCELL_D_PBAR_DT,ADD_CUTCELL_PSUM,ADD_L
           GET_CUTCELL_DDDT,GET_H_CUTFACES,GET_H_MATRIX_CC,GET_H_GUARD_CUTCELL,GET_CRTCFCC_INT_STENCILS,GET_RCFACES_H, &
           GET_CC_MATRIXGRAPH_H,GET_CC_IROW,GET_CC_UNKH,GET_CUTCELL_HP, GET_LINKED_FV, GET_PRES_CFACE_BCS, &
           GET_PRES_CFACE, GET_PRES_CFACE_TEST, GET_UVWGAS_CFACE, GET_MUDNS_CFACE, GET_BOUNDFACE_GEOM_INFO_H, &
-          GET_FH_FROM_PRHS_AND_BCS,GET_LINKED_VELOCITIES,GRADH_ON_CARTESIAN, &
+          GET_FH_FROM_PRHS_AND_BCS,GET_LINKED_VELOCITIES, &
           FINISH_CC, INIT_CUTCELL_DATA,MESH_CC_EXCHANGE,NUMBER_UNKH_CUTCELLS,&
           ROTATED_CUBE_ANN_SOLN,ROTATED_CUBE_VELOCITY_FLUX,ROTATED_CUBE_RHS_ZZ,&
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,&
@@ -733,10 +732,7 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
       FCT  = 2*ILH+1
       RDN  = RDXN(I+ILH)
       IRC  = FCVAR(I+ILH,J,K,CC_IDRC,X1AXIS)
-      IF (IRC>0) THEN
-         IF(.NOT.GRADH_ON_CARTESIAN) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - &
-                                                  RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-      ENDIF
+      IF (IRC>0) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
       H1   = HP(I+ILH,J,K); H2 = HP(I+ILH+1,J,K)
       FBC = 1._EB; IF (WALL(CELL(CELL_INDEX(I,J,K))%WALL_INDEX(FCT*X1AXIS))%BOUNDARY_TYPE==SOLID_BOUNDARY) FBC = 0._EB
       DIV_FN_VOL = DIV_FN_VOL + REAL(FCT,EB)* FVX(I+ILH,J,K) * AF
@@ -748,10 +744,7 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
       FCT  = 2*ILH+1
       RDN  = RDYN(J+ILH)
       IRC  = FCVAR(I,J+ILH,K,CC_IDRC,X1AXIS)
-      IF (IRC>0) THEN
-         IF(.NOT.GRADH_ON_CARTESIAN) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - &
-                                                  RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-      ENDIF
+      IF (IRC>0) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
       H1   = HP(I,J+ILH,K); H2 = HP(I,J+ILH+1,K)
       FBC = 1._EB; IF (WALL(CELL(CELL_INDEX(I,J,K))%WALL_INDEX(FCT*X1AXIS))%BOUNDARY_TYPE==SOLID_BOUNDARY) FBC = 0._EB
       DIV_FN_VOL = DIV_FN_VOL + REAL(FCT,EB)* FVY(I,J+ILH,K) * AF
@@ -763,10 +756,7 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
       FCT  = 2*ILH+1
       RDN  = RDZN(K+ILH)
       IRC  = FCVAR(I,J,K+ILH,CC_IDRC,X1AXIS)
-      IF (IRC>0) THEN
-         IF(.NOT.GRADH_ON_CARTESIAN) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - &
-                                                  RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-      ENDIF
+      IF (IRC>0) RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND) - RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
       H1   = HP(I,J,K+ILH); H2 = HP(I,J,K+ILH+1)
       FBC = 1._EB; IF (WALL(CELL(CELL_INDEX(I,J,K))%WALL_INDEX(FCT*X1AXIS))%BOUNDARY_TYPE==SOLID_BOUNDARY) FBC = 0._EB
       DIV_FN_VOL = DIV_FN_VOL + REAL(FCT,EB)* FVZ(I,J,K+ILH) * AF
@@ -799,11 +789,9 @@ ELSE DO_SEPARABLE_IF
             ANY(WALL(RC_FACE(IRC)%IWC)%BOUNDARY_TYPE==(/NULL_BOUNDARY,MIRROR_BOUNDARY,SOLID_BOUNDARY/))) THEN
             FN_B = 0._EB
          ELSE
-            IF(.NOT.GRADH_ON_CARTESIAN) THEN
-               RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-               CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-X(I+ILH))
-               CCP1= RDN*(X(I+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
-            ENDIF
+            RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
+            CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-X(I+ILH))
+            CCP1= RDN*(X(I+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
             IF(RC_FACE(IRC)%CELL_LIST(1,LOW_IND)==CC_FTYPE_CFGAS) THEN
                ICC  = RC_FACE(IRC)%CELL_LIST(2,LOW_IND)
                JCC  = RC_FACE(IRC)%CELL_LIST(3,LOW_IND)
@@ -852,11 +840,9 @@ ELSE DO_SEPARABLE_IF
             ANY(WALL(RC_FACE(IRC)%IWC)%BOUNDARY_TYPE==(/NULL_BOUNDARY,MIRROR_BOUNDARY,SOLID_BOUNDARY/))) THEN
             FN_B = 0._EB
          ELSE
-            IF(.NOT.GRADH_ON_CARTESIAN) THEN
-               RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-               CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-Y(J+ILH))
-               CCP1= RDN*(Y(J+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
-            ENDIF
+            RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
+            CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-Y(J+ILH))
+            CCP1= RDN*(Y(J+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
             IF(RC_FACE(IRC)%CELL_LIST(1,LOW_IND)==CC_FTYPE_CFGAS) THEN
                ICC  = RC_FACE(IRC)%CELL_LIST(2,LOW_IND)
                JCC  = RC_FACE(IRC)%CELL_LIST(3,LOW_IND)
@@ -905,11 +891,9 @@ ELSE DO_SEPARABLE_IF
             ANY(WALL(RC_FACE(IRC)%IWC)%BOUNDARY_TYPE==(/NULL_BOUNDARY,MIRROR_BOUNDARY,SOLID_BOUNDARY/))) THEN
             FN_B = 0._EB
          ELSE
-            IF(.NOT.GRADH_ON_CARTESIAN) THEN
-               RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
-               CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-Z(K+ILH))
-               CCP1= RDN*(Z(K+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
-            ENDIF
+            RDN = 1._EB/(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND))
+            CCM1= RDN*(RC_FACE(IRC)%XCEN(X1AXIS,HIGH_IND)-Z(K+ILH))
+            CCP1= RDN*(Z(K+ILH)-RC_FACE(IRC)%XCEN(X1AXIS,LOW_IND) )
             IF(RC_FACE(IRC)%CELL_LIST(1,LOW_IND)==CC_FTYPE_CFGAS) THEN
                ICC  = RC_FACE(IRC)%CELL_LIST(2,LOW_IND)
                JCC  = RC_FACE(IRC)%CELL_LIST(3,LOW_IND)
@@ -1078,45 +1062,45 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
             IF(LOWHIGH==HIGH_IND) THEN
                HC1  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                HC2  = HP(I+1,J,K)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = XC(I)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                X2   = XC(I+1); IRC  = FCVAR(I,J,K,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
             ELSE
                HC1  = HP(I-1,J,K)
                HC2  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                X1   = XC(I-1); IRC  = FCVAR(I-1,J,K,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = XC(I)
+               IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
             ENDIF
          CASE(JAXIS)
             AF   = DX(I)*DZ(K)
             IF(LOWHIGH==HIGH_IND) THEN
                HC1  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                HC2  = HP(I,J+1,K)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = YC(J)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                X2   = YC(J+1); IRC  = FCVAR(I,J,K,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
             ELSE
                HC1  = HP(I,J-1,K)
                HC2  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                X1   = YC(J-1); IRC  = FCVAR(I,J-1,K,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = YC(J)
+               IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
             ENDIF
          CASE(KAXIS)
             AF   = DX(I)*DY(J)
             IF(LOWHIGH==HIGH_IND) THEN
                HC1  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                HC2  = HP(I,J,K+1)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = ZC(K)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                X2   = ZC(K+1); IRC  = FCVAR(I,J,K,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
             ELSE
                HC1  = HP(I,J,K-1)
                HC2  = PRFCT*CUT_CELL(ICC)%H(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%HS(JCC)
                X1   = ZC(K-1); IRC  = FCVAR(I,J,K-1,CC_IDRC,X1AXIS)
-               IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = ZC(K)
+               IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
             ENDIF
          END SELECT
          IF(IRC>0) THEN
@@ -1144,16 +1128,8 @@ DO_SEPARABLE_IF : IF (DO_SEPARABLE) THEN
          HC2  = PRFCT*CUT_CELL(ICHI)%H(JCHI) + (1._EB-PRFCT)*CUT_CELL(ICHI)%HS(JCHI)
 
          X1AXIS = CUT_FACE(IFC2)%IJK(KAXIS+1)
-         IF(.NOT.GRADH_ON_CARTESIAN) THEN
-            X1   = CUT_FACE(IFC2)%XCENLOW(X1AXIS,IFACE2)
-            X2   = CUT_FACE(IFC2)%XCENHIGH(X1AXIS,IFACE2)
-         ELSE
-            SELECT CASE(X1AXIS)
-            CASE(IAXIS); X1=XC(CUT_CELL(ICLO)%IJK(IAXIS)); X2=XC(CUT_CELL(ICHI)%IJK(IAXIS))
-            CASE(JAXIS); X1=YC(CUT_CELL(ICLO)%IJK(JAXIS)); X2=YC(CUT_CELL(ICHI)%IJK(JAXIS))
-            CASE(KAXIS); X1=ZC(CUT_CELL(ICLO)%IJK(KAXIS)); X2=ZC(CUT_CELL(ICHI)%IJK(KAXIS))
-            END SELECT
-         ENDIF
+         X1   = CUT_FACE(IFC2)%XCENLOW(X1AXIS,IFACE2)
+         X2   = CUT_FACE(IFC2)%XCENHIGH(X1AXIS,IFACE2)
          FN   = FCT*(HC2-HC1)/(X2-X1) ! Grad H dot n
       CASE(CC_FTYPE_CFINB) ! INBOUNDARY CUT FACE
          FCT     = 1._EB    ! Normal vector defined into the body.
@@ -1189,13 +1165,13 @@ ELSE DO_SEPARABLE_IF
             IRC  = FCVAR(I-1+ILH,J,K,CC_IDRC,X1AXIS)
             IF(LOWHIGH==HIGH_IND) THEN
                P2   = P(I+1,J,K); KR2 = KRES(I+1,J,K)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = XC(I)
-               X2   = XC(I+1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
+               X2   = XC(I+1); IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
                RHO2 = RHOP(I+1,J,K)
             ELSE
                P1   = P(I-1,J,K); KR1 = KRES(I-1,J,K)
-               X1   = XC(I-1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = XC(I)
+               X1   = XC(I-1); IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                RHO1 = RHOP(I-1,J,K)
             ENDIF
          CASE(JAXIS)
@@ -1204,13 +1180,13 @@ ELSE DO_SEPARABLE_IF
             IRC  = FCVAR(I,J-1+ILH,K,CC_IDRC,X1AXIS)
             IF(LOWHIGH==HIGH_IND) THEN
                P2   = P(I,J+1,K); KR2 = KRES(I,J+1,K)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = YC(J)
-               X2   = YC(J+1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
+               X2   = YC(J+1); IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
                RHO2 = RHOP(I,J+1,K)
             ELSE
                P1   = P(I,J-1,K); KR1 = KRES(I,J-1,K)
-               X1   = YC(J-1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = YC(J)
+               X1   = YC(J-1); IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                RHO1 = RHOP(I,J-1,K)
             ENDIF
          CASE(KAXIS)
@@ -1219,13 +1195,13 @@ ELSE DO_SEPARABLE_IF
             IRC  = FCVAR(I,J,K-1+ILH,CC_IDRC,X1AXIS)
             IF(LOWHIGH==HIGH_IND) THEN
                P2   = P(I,J,K+1); KR2 = KRES(I,J,K+1)
-               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X1   = ZC(K)
-               X2   = ZC(K+1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X1   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
+               X2   = ZC(K+1); IF(IRC>0) X2=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
                RHO2 = RHOP(I,J,K+1)
             ELSE
                P1   = P(I,J,K-1); KR1 = KRES(I,J,K-1)
-               X1   = ZC(K-1); IF(.NOT.GRADH_ON_CARTESIAN .AND. IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
-               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC); IF(GRADH_ON_CARTESIAN) X2   = ZC(K)
+               X1   = ZC(K-1); IF(IRC>0) X1=RC_FACE(IRC)%XCEN(X1AXIS,LOWHIGH)
+               X2   = CUT_CELL(ICC)%XYZCEN(X1AXIS,JCC)
                RHO1 = RHOP(I,J,K-1)
             ENDIF
          END SELECT
@@ -1264,17 +1240,8 @@ ELSE DO_SEPARABLE_IF
 
          X1AXIS = CUT_FACE(IFC2)%IJK(KAXIS+1)
          XFC    = CUT_FACE(IFC2)%XYZCEN(X1AXIS,IFACE2)
-
-         IF(.NOT.GRADH_ON_CARTESIAN) THEN
-            X1   = CUT_FACE(IFC2)%XCENLOW( X1AXIS,IFACE2)
-            X2   = CUT_FACE(IFC2)%XCENHIGH(X1AXIS,IFACE2)
-         ELSE
-            SELECT CASE(X1AXIS)
-            CASE(IAXIS); X1=XC(CUT_CELL(ICLO)%IJK(IAXIS)); X2=XC(CUT_CELL(ICHI)%IJK(IAXIS))
-            CASE(JAXIS); X1=YC(CUT_CELL(ICLO)%IJK(JAXIS)); X2=YC(CUT_CELL(ICHI)%IJK(JAXIS))
-            CASE(KAXIS); X1=ZC(CUT_CELL(ICLO)%IJK(KAXIS)); X2=ZC(CUT_CELL(ICHI)%IJK(KAXIS))
-            END SELECT
-         ENDIF
+         X1   = CUT_FACE(IFC2)%XCENLOW( X1AXIS,IFACE2)
+         X2   = CUT_FACE(IFC2)%XCENHIGH(X1AXIS,IFACE2)
          RHOF = (X2-XFC)/(X2-X1)*RHO1 + (XFC-X1)/(X2-X1)*RHO2 ! CCM1*RHO1 + CCM2*RHO2
          !FN   = FCT * ( 1._EB/RHOF * (P2-P1) + (KR2-KR1) )/(X2-X1) ! (1/rho*Grad(p)+Grad(Kres))
          !FN   = FCT*((P2/RHO2-P1/RHO1+KR2-KR1)/(X2-X1)+CUT_FACE(IFC2)%FN_B(IFACE2)) ! (Grad(p/rho) -
@@ -1436,13 +1403,11 @@ INTEGER :: ICC,JCC,X1AXIS
 REAL(EB):: X1F,RHO1,RHO2,P1,P2,RHOF
 
 X1AXIS = CF%IJK(KAXIS+1)
-IF(.NOT.GRADH_ON_CARTESIAN) THEN
-   IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-   ! Interpolation weights:
-   X1F = CF%XYZCEN(X1AXIS,JCF)
-   WG1 = IDX*(CF%XCENHIGH(X1AXIS,JCF)-X1F)
-   WG2 = IDX*(X1F-CF%XCENLOW(X1AXIS, JCF))
-ENDIF
+IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+! Interpolation weights:
+X1F = CF%XYZCEN(X1AXIS,JCF)
+WG1 = IDX*(CF%XCENHIGH(X1AXIS,JCF)-X1F)
+WG2 = IDX*(X1F-CF%XCENLOW(X1AXIS, JCF))
 ! Cut-cell pressure on low side:
 ICC = CF%CELL_LIST(2,LOW_IND,JCF); JCC = CF%CELL_LIST(3,LOW_IND,JCF);
 RHO1= PRFCT*CUT_CELL(ICC)%RHO(JCC)+(1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
@@ -1484,12 +1449,10 @@ CASE(IAXIS); X1F=X(I); IDX = RDXN(I); II2 = II2+1
 CASE(JAXIS); X1F=Y(J); IDX = RDYN(J); JJ2 = JJ2+1
 CASE(KAXIS); X1F=Z(K); IDX = RDZN(K); KK2 = KK2+1
 END SELECT
-IF(.NOT.GRADH_ON_CARTESIAN) THEN
-   IDX=1._EB/(RC_FACE(ICF)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(ICF)%XCEN(X1AXIS,LOW_IND))
-   ! Interpolation weights:
-   WG1 = IDX*(RC_FACE(ICF)%XCEN(X1AXIS,HIGH_IND)-X1F)
-   WG2 = IDX*(X1F-RC_FACE(ICF)%XCEN(X1AXIS, LOW_IND))
-ENDIF
+IDX=1._EB/(RC_FACE(ICF)%XCEN(X1AXIS,HIGH_IND)-RC_FACE(ICF)%XCEN(X1AXIS,LOW_IND))
+! Interpolation weights:
+WG1 = IDX*(RC_FACE(ICF)%XCEN(X1AXIS,HIGH_IND)-X1F)
+WG2 = IDX*(X1F-RC_FACE(ICF)%XCEN(X1AXIS, LOW_IND))
 RHO1 = RHOP(II1,JJ1,KK1); RHO2 = RHOP(II2,JJ2,KK2)
 IF(RC_FACE(ICF)%CELL_LIST(1,LOW_IND)==CC_FTYPE_CFGAS) THEN
    ICC = RC_FACE(ICF)%CELL_LIST(2,LOW_IND); JCC = RC_FACE(ICF)%CELL_LIST(3,LOW_IND)
@@ -1715,7 +1678,7 @@ INTEGER :: JCF,X1AXIS
 
 BIJ = 0._EB; X1AXIS=ABS(IOR)
 DO JCF=1,CUT_FACE(ICF)%NFACE
-   IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CUT_FACE(ICF)%XCENHIGH(X1AXIS,JCF)-CUT_FACE(ICF)%XCENLOW(X1AXIS,JCF))
+   IDX = 1._EB/(CUT_FACE(ICF)%XCENHIGH(X1AXIS,JCF)-CUT_FACE(ICF)%XCENLOW(X1AXIS,JCF))
    BIJ = BIJ + IDX*CUT_FACE(ICF)%AREA(JCF)
 ENDDO
 
@@ -1780,18 +1743,7 @@ CFACE_LOOP_1 : DO ICFACE=1,N_EXTERNAL_CFACE_CELLS
       BC => BOUNDARY_COORD(WC%BC_INDEX); IF(ZONE_SOLVE(PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
       IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
       ! Define centroid to centroid distance, normal to WC:
-      IF(.NOT.GRADH_ON_CARTESIAN) THEN
-         IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
-      ELSE
-         SELECT CASE (IOR)
-         CASE(-1); IDX = 1._EB / DXN(IIG);
-         CASE( 1); IDX = 1._EB / DXN(IIG-1)
-         CASE(-2); IDX = 1._EB / DYN(JJG)
-         CASE( 2); IDX = 1._EB / DYN(JJG-1)
-         CASE(-3); IDX = 1._EB / DZN(KKG)
-         CASE( 3); IDX = 1._EB / DZN(KKG-1)
-         END SELECT
-      ENDIF
+      IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
 
       VAL = -2._EB*IDX * CFA%AREA * CFA%PRES_BXN
 
@@ -1884,7 +1836,7 @@ WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
       END SELECT
       ! Address case of RC face in the boundary:
-      IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+      IF (CC_IBM) THEN
          IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
          IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
       ENDIF
@@ -2378,15 +2330,13 @@ T_NOW = CURRENT_TIME()
 
 STORE_IF : IF (STORE_FLG) THEN
 
-   IF (.NOT.GRADH_ON_CARTESIAN) THEN
-      ALLOCATE(U_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','U_STORE',IZERO)
-      ALLOCATE(V_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','V_STORE',IZERO)
-      ALLOCATE(W_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','W_STORE',IZERO)
+   ALLOCATE(U_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','U_STORE',IZERO)
+   ALLOCATE(V_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','V_STORE',IZERO)
+   ALLOCATE(W_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','W_STORE',IZERO)
 
-      U_STORE = U
-      V_STORE = V
-      W_STORE = W
-   ENDIF
+   U_STORE = U
+   V_STORE = V
+   W_STORE = W
 
 ELSE STORE_IF
 
@@ -2398,176 +2348,126 @@ ELSE STORE_IF
          CF%VELS(1:CF%NFACE) = CF%VEL(1:CF%NFACE) - DT*CF%FN(1:CF%NFACE)
       ENDDO
 
-      GRADH_ON_CARTESIAN_IF_1 : IF(GRADH_ON_CARTESIAN) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
-                     DO JCF=1,CF%NFACE ! NOTE: At this point FV+FB are stored in FN(JCF) similar to FVX,FVY,FVZ.
-                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
-                     ENDDO
-                     US(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
                      DO JCF=1,CF%NFACE
-                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
+                        IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I+1,J,K)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(  I,J,K)
+                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
                      ENDDO
-                     VS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
+                  ELSE
                      DO JCF=1,CF%NFACE
-                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
+                        IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) +FCTH*IDX*(H(I+1,J,K)-H(I,J,K)) )
                      ENDDO
-                     WS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DY(J))
                   ENDIF
-               ENDDO
+                  US(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
+
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-      ELSE GRADH_ON_CARTESIAN_IF_1
-
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I+1,J,K)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(  I,J,K)
-                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX  = 1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) +FCTH*IDX*(H(I+1,J,K)-H(I,J,K)) )
-                        ENDDO
-                     ENDIF
-                     US(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
-
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
+                     DO JCF=1,CF%NFACE
+                        IDX  = 1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J+1,K)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,  J,K)
+                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
+                     ENDDO
+                  ELSE
+                     DO JCF=1,CF%NFACE
+                        IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) +FCTH*IDX*(H(I,J+1,K)-H(I,J,K)) )
+                     ENDDO
                   ENDIF
-               ENDDO
+                  VS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX  = 1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J+1,K)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,  J,K)
-                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) +FCTH*IDX*(H(I,J+1,K)-H(I,J,K)) )
-                        ENDDO
-                     ENDIF
-                     VS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
+                     DO JCF=1,CF%NFACE
+                        IDX  = 1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J,K+1)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,J,K  )
+                        CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
+                     ENDDO
+                  ELSE
+                     DO JCF=1,CF%NFACE
+                        IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                        CF%VELS(JCF) = CF%VEL(JCF) -  DT*( CF%FN(JCF)+FCTH*IDX*(H(I,J,K+1)-H(I,J,K)) )
+                     ENDDO
                   ENDIF
-               ENDDO
+                  WS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX  = 1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%H(CF%CELL_LIST(3,HIGH_IND,JCF)) ! H(I,J,K+1)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%H(CF%CELL_LIST(3, LOW_IND,JCF)) ! H(I,J,K  )
-                           CF%VELS(JCF) = CF%VEL(JCF) - DT*( CF%FN(JCF) + FCTH*IDX*(H_HI-H_LO) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                           CF%VELS(JCF) = CF%VEL(JCF) -  DT*( CF%FN(JCF)+FCTH*IDX*(H(I,J,K+1)-H(I,J,K)) )
-                        ENDDO
-                     ENDIF
-                     WS(I,J,K) = DOT_PRODUCT(CF%VELS(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
+      ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+      DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
+         RCF => RC_FACE(MESHES(NM)%RCF_H(IFACE));
+         FCTH = 1._EB; IF(RCF%IWC>0 .AND. &
+                        ANY(WALL(RCF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+         I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
+         IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               US(I,J,K)= U(I,J,K) - DT*( FVX(I,J,K) + FCTH*IDX*(H(I+1,J,K)-H(I,J,K)) )
+            CASE(JAXIS)
+               VS(I,J,K)= V(I,J,K) - DT*( FVY(I,J,K) + FCTH*IDX*(H(I,J+1,K)-H(I,J,K)) )
+            CASE(KAXIS)
+               WS(I,J,K)= W(I,J,K) - DT*( FVZ(I,J,K) + FCTH*IDX*(H(I,J,K+1)-H(I,J,K)) )
+         END SELECT
+      ENDDO
 
-         ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
-         DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
-            RCF => RC_FACE(MESHES(NM)%RCF_H(IFACE));
-            FCTH = 1._EB; IF(RCF%IWC>0 .AND. &
-                          ANY(WALL(RCF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-            I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
-            IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
-            SELECT CASE(X1AXIS)
-               CASE(IAXIS)
-                  US(I,J,K)= U(I,J,K) - DT*( FVX(I,J,K) + FCTH*IDX*(H(I+1,J,K)-H(I,J,K)) )
-               CASE(JAXIS)
-                  VS(I,J,K)= V(I,J,K) - DT*( FVY(I,J,K) + FCTH*IDX*(H(I,J+1,K)-H(I,J,K)) )
-               CASE(KAXIS)
-                  WS(I,J,K)= W(I,J,K) - DT*( FVZ(I,J,K) + FCTH*IDX*(H(I,J,K+1)-H(I,J,K)) )
-            END SELECT
-         ENDDO
-
-         ! Finally RC faces in OPEN Boundaries:
-         WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. & ! Drop if boundary type is not OPEN_BOUNDARY.
-                    (PRES_FLAG==ULMAT_FLAG .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) ) CYCLE WALL_CELL_LOOP_1
-            BC  => BOUNDARY_COORD(WC%BC_INDEX)
-            ! Gasphase cell indexes:
-            I = BC%IIG; J = BC%JJG; K = BC%KKG; IOR = BC%IOR
-            SELECT CASE (IOR)
-            CASE( 1); I = BC%IIG-1
-            CASE( 2); J = BC%JJG-1
-            CASE( 3); K = BC%KKG-1
-            END SELECT
-            IRC = FCVAR(I,J,K,CC_IDRC,ABS(IOR)); IF(IRC < 1) CYCLE WALL_CELL_LOOP_1 ! Case of RC face in the boundary.
-            IDX = 1._EB/( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
-            SELECT CASE (ABS(IOR))
-            CASE(1); US(I,J,K)= U(I,J,K) - DT*( FVX(I,J,K) + IDX*(H(I+1,J,K)-H(I,J,K)) )
-            CASE(2); VS(I,J,K)= V(I,J,K) - DT*( FVY(I,J,K) + IDX*(H(I,J+1,K)-H(I,J,K)) )
-            CASE(3); WS(I,J,K)= W(I,J,K) - DT*( FVZ(I,J,K) + IDX*(H(I,J,K+1)-H(I,J,K)) )
-            END SELECT
-         ENDDO WALL_CELL_LOOP_1
-
-      ENDIF GRADH_ON_CARTESIAN_IF_1
+      ! Finally RC faces in OPEN Boundaries:
+      WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. & ! Drop if boundary type is not OPEN_BOUNDARY.
+                  (PRES_FLAG==ULMAT_FLAG .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) ) CYCLE WALL_CELL_LOOP_1
+         BC  => BOUNDARY_COORD(WC%BC_INDEX)
+         ! Gasphase cell indexes:
+         I = BC%IIG; J = BC%JJG; K = BC%KKG; IOR = BC%IOR
+         SELECT CASE (IOR)
+         CASE( 1); I = BC%IIG-1
+         CASE( 2); J = BC%JJG-1
+         CASE( 3); K = BC%KKG-1
+         END SELECT
+         IRC = FCVAR(I,J,K,CC_IDRC,ABS(IOR)); IF(IRC < 1) CYCLE WALL_CELL_LOOP_1 ! Case of RC face in the boundary.
+         IDX = 1._EB/( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+         SELECT CASE (ABS(IOR))
+         CASE(1); US(I,J,K)= U(I,J,K) - DT*( FVX(I,J,K) + IDX*(H(I+1,J,K)-H(I,J,K)) )
+         CASE(2); VS(I,J,K)= V(I,J,K) - DT*( FVY(I,J,K) + IDX*(H(I,J+1,K)-H(I,J,K)) )
+         CASE(3); WS(I,J,K)= W(I,J,K) - DT*( FVZ(I,J,K) + IDX*(H(I,J,K+1)-H(I,J,K)) )
+         END SELECT
+      ENDDO WALL_CELL_LOOP_1
 
       IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
          DO K=1,KBAR
@@ -2601,187 +2501,135 @@ ELSE STORE_IF
          CF%VEL(1:CF%NFACE) = 0.5_EB*( CF%VEL(1:CF%NFACE)+CF%VELS(1:CF%NFACE) - DT*CF%FN(1:CF%NFACE) )
       ENDDO
 
-      GRADH_ON_CARTESIAN_IF_2 : IF(GRADH_ON_CARTESIAN) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
                      DO JCF=1,CF%NFACE
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) +CF%VELS(JCF) - DT*( CF%FN(JCF) + &
-                                                            RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
+                        IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I+1,J,K)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I  ,J,K)
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
                      ENDDO
-                     U(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
+                  ELSE
                      DO JCF=1,CF%NFACE
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) +CF%VELS(JCF) - DT*( CF%FN(JCF) + &
-                                                            RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
+                        IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(HS(I+1,J,K)-HS(I,J,K))) )
                      ENDDO
-                     V(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
                   ENDIF
-               ENDDO
+                  U(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF)
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
                      DO JCF=1,CF%NFACE
-                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) +CF%VELS(JCF) - DT*( CF%FN(JCF) + &
-                                                            RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
+                        IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J+1,K)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J  ,K)
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
                      ENDDO
-                     W(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DY(J))
+                  ELSE
+                     DO JCF=1,CF%NFACE
+                        IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(HS(I,J+1,K)-HS(I,J,K))) )
+                     ENDDO
                   ENDIF
-               ENDDO
+                  V(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-      ELSE GRADH_ON_CARTESIAN_IF_2
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,IAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I+1,J,K)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I  ,J,K)
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(IAXIS,JCF)-CF%XCENLOW(IAXIS,JCF))
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(HS(I+1,J,K)-HS(I,J,K))) )
-                        ENDDO
-                     ENDIF
-                     U(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DZ(K))
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
+               IF (ICF>0) THEN
+                  CF => CUT_FACE(ICF); FCTH = 1._EB
+                  IF(CF%IWC>0 .AND. &
+                     ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+                  IF (ONE_UNKH_PER_CUTCELL) THEN
+                     DO JCF=1,CF%NFACE
+                        IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                        H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J,K+1)
+                        H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J,K  )
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
+                     ENDDO
+                  ELSE
+                     DO JCF=1,CF%NFACE
+                        IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
+                        CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
+                                          DT*( CF%FN( JCF) + FCTH*IDX*(HS(I,J,K+1)-HS(I,J,K))) )
+                     ENDDO
                   ENDIF
-               ENDDO
+                  W(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
+               ENDIF
             ENDDO
          ENDDO
+      ENDDO
 
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,JAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J+1,K)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J  ,K)
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(JAXIS,JCF)-CF%XCENLOW(JAXIS,JCF))
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(HS(I,J+1,K)-HS(I,J,K))) )
-                        ENDDO
-                     ENDIF
-                     V(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DX(I)*DZ(K))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
+      ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+      DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
+         RCF => RC_FACE(MESHES(NM)%RCF_H(IFACE));
+         FCTH = 1._EB; IF(RCF%IWC>0 .AND. &
+                        ANY(WALL(RCF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
+         I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
+         IDX = 1._EB/( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               U(I,J,K)= 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - &
+                                    DT*(FVX(I,J,K) + FCTH*IDX*(HS(I+1,J,K)-HS(I,J,K))) )
+            CASE(JAXIS)
+               V(I,J,K)= 0.5_EB*( V_STORE(I,J,K) + VS(I,J,K) - &
+                                    DT*(FVY(I,J,K) + FCTH*IDX*(HS(I,J+1,K)-HS(I,J,K))) )
+            CASE(KAXIS)
+               W(I,J,K)= 0.5_EB*( W_STORE(I,J,K) + WS(I,J,K) - &
+                                    DT*(FVZ(I,J,K) + FCTH*IDX*(HS(I,J,K+1)-HS(I,J,K))) )
+         END SELECT
+      ENDDO
 
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,CC_IDCF,KAXIS)
-                  IF (ICF>0) THEN
-                     CF => CUT_FACE(ICF); FCTH = 1._EB
-                     IF(CF%IWC>0 .AND. &
-                        ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-                     IF (ONE_UNKH_PER_CUTCELL) THEN
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                           H_HI = CUT_CELL(CF%CELL_LIST(2,HIGH_IND,JCF))%HS(CF%CELL_LIST(3,HIGH_IND,JCF)) ! HS(I,J,K+1)
-                           H_LO = CUT_CELL(CF%CELL_LIST(2, LOW_IND,JCF))%HS(CF%CELL_LIST(3, LOW_IND,JCF)) ! HS(I,J,K  )
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(H_HI-H_LO)) )
-                        ENDDO
-                     ELSE
-                        DO JCF=1,CF%NFACE
-                           IDX=1._EB/(CF%XCENHIGH(KAXIS,JCF)-CF%XCENLOW(KAXIS,JCF))
-                           CF%VEL(JCF) = 0.5_EB*( CF%VEL(JCF) + CF%VELS(JCF)   - &
-                                             DT*( CF%FN( JCF) + FCTH*IDX*(HS(I,J,K+1)-HS(I,J,K))) )
-                        ENDDO
-                     ENDIF
-                     W(I,J,K) = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE)) / (DY(J)*DX(I))
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
+      WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. & ! Drop if boundary type is not OPEN_BOUNDARY.
+                  (PRES_FLAG==ULMAT_FLAG .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) ) CYCLE WALL_CELL_LOOP_2
+         BC  => BOUNDARY_COORD(WC%BC_INDEX)
+         ! Gasphase cell indexes:
+         I = BC%IIG; J = BC%JJG; K = BC%KKG; IOR = BC%IOR
+         SELECT CASE (IOR)
+         CASE( 1); I = BC%IIG-1
+         CASE( 2); J = BC%JJG-1
+         CASE( 3); K = BC%KKG-1
+         END SELECT
+         IRC = FCVAR(I,J,K,CC_IDRC,ABS(IOR)); IF(IRC < 1) CYCLE WALL_CELL_LOOP_2 ! Case of RC face in the boundary.
+         IDX = 1._EB/( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+         SELECT CASE (ABS(IOR))
+         CASE(1); U(I,J,K)= 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + IDX*(HS(I+1,J,K)-HS(I,J,K))) )
+         CASE(2); V(I,J,K)= 0.5_EB*( V_STORE(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + IDX*(HS(I,J+1,K)-HS(I,J,K))) )
+         CASE(3); W(I,J,K)= 0.5_EB*( W_STORE(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + IDX*(HS(I,J,K+1)-HS(I,J,K))) )
+         END SELECT
+      ENDDO WALL_CELL_LOOP_2
 
-         ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
-         DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
-            RCF => RC_FACE(MESHES(NM)%RCF_H(IFACE));
-            FCTH = 1._EB; IF(RCF%IWC>0 .AND. &
-                          ANY(WALL(RCF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) FCTH=0._EB
-            I   = RCF%IJK(IAXIS); J = RCF%IJK(JAXIS); K = RCF%IJK(KAXIS); X1AXIS = RCF%IJK(KAXIS+1)
-            IDX = 1._EB/( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
-            SELECT CASE(X1AXIS)
-               CASE(IAXIS)
-                  U(I,J,K)= 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - &
-                                     DT*(FVX(I,J,K) + FCTH*IDX*(HS(I+1,J,K)-HS(I,J,K))) )
-               CASE(JAXIS)
-                  V(I,J,K)= 0.5_EB*( V_STORE(I,J,K) + VS(I,J,K) - &
-                                     DT*(FVY(I,J,K) + FCTH*IDX*(HS(I,J+1,K)-HS(I,J,K))) )
-               CASE(KAXIS)
-                  W(I,J,K)= 0.5_EB*( W_STORE(I,J,K) + WS(I,J,K) - &
-                                     DT*(FVZ(I,J,K) + FCTH*IDX*(HS(I,J,K+1)-HS(I,J,K))) )
-            END SELECT
-         ENDDO
-
-         WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. & ! Drop if boundary type is not OPEN_BOUNDARY.
-                    (PRES_FLAG==ULMAT_FLAG .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) ) CYCLE WALL_CELL_LOOP_2
-            BC  => BOUNDARY_COORD(WC%BC_INDEX)
-            ! Gasphase cell indexes:
-            I = BC%IIG; J = BC%JJG; K = BC%KKG; IOR = BC%IOR
-            SELECT CASE (IOR)
-            CASE( 1); I = BC%IIG-1
-            CASE( 2); J = BC%JJG-1
-            CASE( 3); K = BC%KKG-1
-            END SELECT
-            IRC = FCVAR(I,J,K,CC_IDRC,ABS(IOR)); IF(IRC < 1) CYCLE WALL_CELL_LOOP_2 ! Case of RC face in the boundary.
-            IDX = 1._EB/( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
-            SELECT CASE (ABS(IOR))
-            CASE(1); U(I,J,K)= 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + IDX*(HS(I+1,J,K)-HS(I,J,K))) )
-            CASE(2); V(I,J,K)= 0.5_EB*( V_STORE(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + IDX*(HS(I,J+1,K)-HS(I,J,K))) )
-            CASE(3); W(I,J,K)= 0.5_EB*( W_STORE(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + IDX*(HS(I,J,K+1)-HS(I,J,K))) )
-            END SELECT
-         ENDDO WALL_CELL_LOOP_2
-
-         DEALLOCATE(U_STORE,V_STORE,W_STORE)
-
-      ENDIF GRADH_ON_CARTESIAN_IF_2
+      DEALLOCATE(U_STORE,V_STORE,W_STORE)
 
       IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
          DO K=1,KBAR
@@ -6961,10 +6809,9 @@ SUBROUTINE CC_H_INTERP
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,HP
-INTEGER :: NM, ICC, NCELL, ICELL, I, J ,K
-REAL(EB):: VAL_CC, U_IBM, V_IBM, W_IBM, VCRT
+INTEGER :: NM, ICC, NCELL, I, J ,K
+REAL(EB):: U_IBM, V_IBM, W_IBM, VCRT
 LOGICAL :: VOLFLG
-INTEGER :: INPE,INT_NPE_LO,INT_NPE_HI,EP,VIND
 
 ! This routine interpolates H to cut cells/Cartesian cells at the end of step.
 ! Makes use of dH/dXn boundary condition on immersed solid surfaces.
@@ -7007,33 +6854,12 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CYCLE
       ENDIF
 
-      ! Interpolate values of H to corresponding cut-cell centroids:
-      IF (GRADH_ON_CARTESIAN) THEN
-         VIND = 0
-         DO ICELL=1,NCELL
-            VAL_CC = 0._EB
-            DO EP=1,INT_N_EXT_PTS  ! External point for cell ICELL
-               INT_NPE_LO = CUT_CELL(ICC)%INT_NPE(LOW_IND,VIND,EP,ICELL)
-               INT_NPE_HI = CUT_CELL(ICC)%INT_NPE(HIGH_IND,VIND,EP,ICELL)
-               DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                  VAL_CC = VAL_CC + CUT_CELL(ICC)%INT_COEF(INPE)* &
-                                    CUT_CELL(ICC)%INT_CCVARS(INT_H_IND,INPE)
-               ENDDO
-            ENDDO
-            IF (PREDICTOR) THEN
-               CUT_CELL(ICC)%H(ICELL) = VAL_CC
-            ELSE
-               CUT_CELL(ICC)%HS(ICELL) = VAL_CC
-            ENDIF
-         ENDDO
-      ELSE
-         ! Unstructured projection and .NOT.GRADH_ON_CARTESIAN:
-         IF (.NOT.ONE_UNKH_PER_CUTCELL) THEN
-            IF (PREDICTOR) THEN
-               CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K) ! Use underlying value of HP.
-            ELSE
-               CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
-            ENDIF
+      ! Unstructured projection:
+      IF (.NOT.ONE_UNKH_PER_CUTCELL) THEN
+         IF (PREDICTOR) THEN
+            CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K) ! Use underlying value of HP.
+         ELSE
+            CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
          ENDIF
       ENDIF
 
@@ -15141,7 +14967,7 @@ FORCE_IF : IF (FORCE_FLG) THEN
                   DO JCF=1,CF%NFACE
                      IF (PREDICTOR) DUUDT = (U_IBM-CF%VEL(JCF))/DT
                      IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(CF%VEL(JCF)+CF%VELS(JCF)))/DT
-                     IF (.NOT.GRADH_ON_CARTESIAN) IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
+                     IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
                      CF%FN(JCF)   = -IDX*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
                      CF%FN_B(JCF) = 0._EB
                   ENDDO
@@ -15152,7 +14978,7 @@ FORCE_IF : IF (FORCE_FLG) THEN
                   DO JCF=1,CF%NFACE
                      IF (PREDICTOR) DVVDT = (V_IBM-CF%VEL(JCF))/DT
                      IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(CF%VEL(JCF)+CF%VELS(JCF)))/DT
-                     IF (.NOT.GRADH_ON_CARTESIAN) IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
+                     IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
                      CF%FN(JCF)   = -IDX*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
                      CF%FN_B(JCF) = 0._EB
                   ENDDO
@@ -15163,7 +14989,7 @@ FORCE_IF : IF (FORCE_FLG) THEN
                   DO JCF=1,CF%NFACE
                      IF (PREDICTOR) DWWDT = (W_IBM-CF%VEL(JCF))/DT
                      IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(CF%VEL(JCF)+CF%VELS(JCF)))/DT
-                     IF (.NOT.GRADH_ON_CARTESIAN) IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
+                     IDX=1._EB/(CF%XCENHIGH(X1AXIS,JCF) - CF%XCENLOW( X1AXIS,JCF))
                      CF%FN(JCF)   = -IDX*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
                      CF%FN_B(JCF) = 0._EB
                   ENDDO
@@ -15355,42 +15181,36 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    IF (PREDICTOR) THEN
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
-         IDX = RDXN(I)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I+1,J,K)-H(I,J,K))))*CF%AREA(JCF)
          ENDDO
       CASE(JAXIS)
-         IDX = RDYN(J)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J+1,K)-H(I,J,K))))*CF%AREA(JCF)
          ENDDO
       CASE(KAXIS)
-         IDX = RDZN(K)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J,K+1)-H(I,J,K))))*CF%AREA(JCF)
          ENDDO
       END SELECT
    ELSE
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
-         IDX = RDXN(I)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I+1,J,K)-HS(I,J,K))))*CF%AREA(JCF)
          ENDDO
       CASE(JAXIS)
-         IDX = RDYN(J)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J+1,K)-HS(I,J,K))))*CF%AREA(JCF)
          ENDDO
       CASE(KAXIS)
-         IDX = RDZN(K)
          DO JCF=1,CF%NFACE
-            IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
             UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J,K+1)-HS(I,J,K))))*CF%AREA(JCF)
          ENDDO
       END SELECT
@@ -15427,7 +15247,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDXN(IIO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DUDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DUDT)*CF2%AREA(JCF)
@@ -15452,7 +15271,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDXN(IIO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DUDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DUDT)*CF2%AREA(JCF)
@@ -15477,7 +15295,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDYN(JJO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DVDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DVDT)*CF2%AREA(JCF)
@@ -15502,7 +15319,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDYN(JJO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DVDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DVDT)*CF2%AREA(JCF)
@@ -15527,7 +15343,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDZN(KKO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DWDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DWDT)*CF2%AREA(JCF)
@@ -15552,7 +15367,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDZN(KKO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DWDT = -CF2%FN_OMESH(JCF) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
                               UN_NEW_OTHER = UN_NEW_OTHER + (CF2%VEL_OMESH(JCF) + DT*DWDT)*CF2%AREA(JCF)
@@ -15580,7 +15394,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDXN(IIO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DUDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15607,7 +15420,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDXN(IIO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DUDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15634,7 +15446,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDYN(JJO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DVDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15661,7 +15472,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDYN(JJO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DVDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15688,7 +15498,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDZN(KKO)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DWDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15715,7 +15524,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         CF2 =>M2%CUT_FACE(ICF); IDX = M2%RDZN(KKO-1)
                         DO JCF=1,CF2%NFACE
                               DA_OTHER = DA_OTHER  + CF2%AREA(JCF)
-                              IF (.NOT.GRADH_ON_CARTESIAN) &
                               IDX = 1._EB/(CF2%XCENHIGH(X1AXIS,JCF)-CF2%XCENLOW(X1AXIS,JCF))
                               DWDT = -CF2%FN_OMESH(JCF) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
                               UN_NEW_OTHER = UN_NEW_OTHER + &
@@ -15739,14 +15547,11 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
    B1%VEL_ERR_NEW = VELOCITY_ERROR
-   IDX = B1%RDN
-   IF(.NOT.GRADH_ON_CARTESIAN) THEN
-      IDX = 0._EB
-      DO JCF=1,CF%NFACE
-         IDX = IDX + 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))*CF%AREA(JCF)
-      ENDDO
-      IDX = IDX / SUM(CF%AREA(1:CF%NFACE))
-   ENDIF
+   IDX = 0._EB
+   DO JCF=1,CF%NFACE
+      IDX = IDX + 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))*CF%AREA(JCF)
+   ENDDO
+   IDX = IDX / SUM(CF%AREA(1:CF%NFACE))
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(IDX*DT)
 
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
@@ -20139,7 +19944,7 @@ DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
          IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
          IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
    ENDSELECT
-   IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
+   IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
 
    ! Now add to Adiff corresponding coeff:
    BIJ   = IDX*AF
@@ -20188,8 +19993,7 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
       IND_LOC(LOW_IND) = IND(LOW_IND) - ZONE_SOLVE(IPZ)%UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
       AF = CF%AREA(IFACE)
-      IF(.NOT.GRADH_ON_CARTESIAN) IDX= 1._EB/ ( CF%XCENHIGH(X1AXIS,IFACE) - &
-                                                CF%XCENLOW(X1AXIS, IFACE) )
+      IDX= 1._EB/ ( CF%XCENHIGH(X1AXIS,IFACE) - CF%XCENLOW(X1AXIS, IFACE) )
 
       ! Now add to Adiff corresponding coeff:
       BIJ   = IDX*AF

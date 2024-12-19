@@ -1435,7 +1435,7 @@ END SUBROUTINE ULMAT_SOLVER
 SUBROUTINE ULMAT_SOLVE_ZONE(NM,IPZ)
 
 USE COMPLEX_GEOMETRY, ONLY : CC_IDCC,CC_IDRC
-USE CC_SCALARS, ONLY : GET_FN_DIVERGENCE_CUTCELL,GET_H_GUARD_CUTCELL,GRADH_ON_CARTESIAN
+USE CC_SCALARS, ONLY : GET_FN_DIVERGENCE_CUTCELL,GET_H_GUARD_CUTCELL
 #ifdef WITH_HYPRE
 USE HYPRE_INTERFACE
 #endif
@@ -1515,27 +1515,14 @@ CFACE_LOOP : DO ICFACE=1,N_EXTERNAL_CFACE_CELLS
       IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
       IF(ZONE_MESH(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE CFACE_LOOP
       IROW = MUNKH(IIG,JJG,KKG)
-      IF(CC_IBM) THEN
-         IF (IROW <= 0) THEN
-            ICC = CCVAR(IIG,JJG,KKG,CC_IDCC); IF(ICC<1) CYCLE CFACE_LOOP
-            ! Note: this only works with single pressure unknown per cartesian cell.
-            IROW = CUT_CELL(ICC)%UNKH(1)
-         ENDIF
+      IF (IROW <= 0) THEN
+         ICC = CCVAR(IIG,JJG,KKG,CC_IDCC); IF(ICC<1) CYCLE CFACE_LOOP
+         ! Note: this only works with single pressure unknown per cartesian cell.
+         IROW = CUT_CELL(ICC)%UNKH(1)
       ENDIF
       IOR   = BC%IOR
       ! Define centroid to centroid distance, normal to WC:
-      IF(.NOT.GRADH_ON_CARTESIAN) THEN
-         IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
-      ELSE
-         SELECT CASE (IOR)
-         CASE(-1); IDX = RDXN(IIG)
-         CASE( 1); IDX = RDXN(IIG-1)
-         CASE(-2); IDX = RDYN(JJG)
-         CASE( 2); IDX = RDYN(JJG-1)
-         CASE(-3); IDX = RDZN(KKG)
-         CASE( 3); IDX = RDZN(KKG-1)
-         END SELECT
-      ENDIF
+      IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
       ! Add to F_H:
       ZM%F_H(IROW) = ZM%F_H(IROW) + (-2._EB*IDX * CFA%AREA * CFA%PRES_BXN)
    ENDIF IF_CFACE_DIRICHLET
@@ -1622,7 +1609,7 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
       END SELECT
       ! Address case of RC face in the boundary:
-      IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+      IF (CC_IBM) THEN
          IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
          IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
       ENDIF
@@ -2398,8 +2385,6 @@ END SUBROUTINE ADD_INPLACE_NNZ_H
 SUBROUTINE ULMAT_H_MATRIX(NM,IPZ)
 
 USE COMPLEX_GEOMETRY, ONLY : CC_GASPHASE
-USE CC_SCALARS, ONLY : GRADH_ON_CARTESIAN
-
 INTEGER, INTENT(IN) :: NM,IPZ
 
 ! Local Variables:
@@ -2502,19 +2487,19 @@ CC_IF : IF ( CC_IBM ) THEN
       LOCROW_1 = LOW_IND; LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
-            AF  = DY(J)*DZ(K); IDX = RDXN(I)
+            AF  = DY(J)*DZ(K)
             IF ( I == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( I == IBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
          CASE(JAXIS)
-            AF  = DX(I)*DZ(K); IDX = RDYN(J)
+            AF  = DX(I)*DZ(K)
             IF ( J == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( J == JBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
          CASE(KAXIS)
-            AF  = DX(I)*DY(J); IDX = RDZN(K)
+            AF  = DX(I)*DY(J)
             IF ( K == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
-      IF(.NOT.GRADH_ON_CARTESIAN) IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
+      IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
       ! Now add to Adiff corresponding coeff:
       BIJ   = IDX*AF
       !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
@@ -2531,25 +2516,22 @@ CC_IF : IF ( CC_IBM ) THEN
 
    ! Now Gasphase CUT_FACES:
    CF_LOOP_1 : DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
-         IF ( CUT_FACE(ICF)%STATUS/=CC_GASPHASE .OR. CUT_FACE(ICF)%IWC>0) CYCLE CF_LOOP_1
-         IF ( CUT_FACE(ICF)%PRES_ZONE/=IPZ) CYCLE CF_LOOP_1
-         I = CUT_FACE(ICF)%IJK(IAXIS)
-         J = CUT_FACE(ICF)%IJK(JAXIS)
-         K = CUT_FACE(ICF)%IJK(KAXIS)
-         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      IF ( CUT_FACE(ICF)%STATUS/=CC_GASPHASE .OR. CUT_FACE(ICF)%IWC>0) CYCLE CF_LOOP_1
+      IF ( CUT_FACE(ICF)%PRES_ZONE/=IPZ) CYCLE CF_LOOP_1
+      I = CUT_FACE(ICF)%IJK(IAXIS)
+      J = CUT_FACE(ICF)%IJK(JAXIS)
+      K = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND; LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
-            IDX = RDXN(I)
             IF ( I == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( I == IBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
          CASE(JAXIS)
-            IDX = RDYN(J)
             IF ( J == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( J == JBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
          CASE(KAXIS)
-            IDX = RDZN(K)
             IF ( K == 0    ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KBAR ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
@@ -2557,8 +2539,7 @@ CC_IF : IF ( CC_IBM ) THEN
          IND(LOW_IND)  = CUT_FACE(ICF)%UNKH(LOW_IND,IFACE)
          IND(HIGH_IND) = CUT_FACE(ICF)%UNKH(HIGH_IND,IFACE)
          AF = CUT_FACE(ICF)%AREA(IFACE)
-         IF(.NOT.GRADH_ON_CARTESIAN) IDX= 1._EB/ ( CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
-                                                   CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+         IDX= 1._EB/ ( CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
          ! Now add to Adiff corresponding coeff:
          BIJ   = IDX*AF
          !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
@@ -2584,7 +2565,7 @@ END SUBROUTINE ULMAT_H_MATRIX
 SUBROUTINE ULMAT_BCS_H_MATRIX(NM,IPZ)
 
 USE COMPLEX_GEOMETRY, ONLY : CC_IDCC, CC_IDRC
-USE CC_SCALARS, ONLY : GET_CFACE_OPEN_BC_COEF,GRADH_ON_CARTESIAN
+USE CC_SCALARS, ONLY : GET_CFACE_OPEN_BC_COEF
 INTEGER, INTENT(IN) :: NM,IPZ
 
 ! Local Variables:
@@ -2636,7 +2617,7 @@ WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    CASE(-KAXIS)
       AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);           IDX= RDZN(KKG+KLH)
    END SELECT
-   IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+   IF (CC_IBM) THEN
       IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
       IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
    ENDIF
@@ -4189,7 +4170,7 @@ SUBROUTINE GET_BCS_H_MATRIX
 USE MPI_F08
 USE MESH_POINTERS
 USE COMPLEX_GEOMETRY, ONLY : CC_IDRC
-USE CC_SCALARS, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF, GRADH_ON_CARTESIAN
+USE CC_SCALARS, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF
 
 ! Local Variables:
 INTEGER :: NM,NM1,JLOC,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),IERR,IIG,JJG,KKG,II,JJ,KK,IW,ILH,JLH,KLH,IRC
@@ -4245,7 +4226,7 @@ IPZ_LOOP : DO IPZ=0,N_ZONE
          CASE(-KAXIS)
             AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);           IDX= RDZN(KKG+KLH)
          END SELECT
-         IF (CC_IBM .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+         IF (CC_IBM) THEN
             IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,CC_IDRC,ABS(BC%IOR))
             IF(IRC > 0) IDX = 1._EB / ( RC_FACE(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - RC_FACE(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
          ENDIF
