@@ -43,6 +43,9 @@ jobs:
     - name: Check Current Memory Limit
       run: ulimit -a  # Check the memory limits
 
+    - name: free -h command
+      run: free -h  
+
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
@@ -50,8 +53,8 @@ jobs:
         ./make_fds.sh
         ./fds_impi_intel_linux_db
 
-    - name: Check Current Memory Limit
-      run: ulimit -a  # Check the memory limits
+    - name: free -h command
+      run: free -h  
 
     - name: build fds release
       run: |
@@ -59,6 +62,10 @@ jobs:
         cd ./Build/impi_intel_linux
         ./make_fds.sh
         ./fds_impi_intel_linux
+
+    - name: free -h command
+      run: free -h  
+
     # Setup python
     - uses: actions/setup-python@v5
       with:
