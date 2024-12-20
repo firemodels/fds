@@ -176,12 +176,11 @@ if [ ! $STOPFDS ] ; then
       # Check for files in $INDIR (Current_Results) directory
       if [[ "$(ls -A $INDIR)" && ! $OVERWRITE ]]; then
           echo "Directory $INDIR already exists with files."
-          echo "Use the -y option to overwrite files."
+          echo "Use the -y option to REMOVE existing files."
           echo "Exiting."
           exit
       elif [[ "$(ls -A $INDIR)" && $OVERWRITE ]]; then
-        # Continue along
-        :
+          rm $INDIR/*
       fi
   # Create $INDIR (Current_Results) directory if it doesn't exist
   else
