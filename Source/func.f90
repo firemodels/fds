@@ -3248,65 +3248,122 @@ IF (FDS_VOLUME>TWO_EPSILON_EB) VOLUME_ADJUST = ACTUAL_VOLUME/FDS_VOLUME
 END SUBROUTINE BLOCK_MESH_INTERSECTION_VOLUME
 
 
-!> \brief Estimate area of intersection of circle and rectangle
+!> \brief Estimate area of intersection of circle and grid cell
 !> \param X0 x-coordinate of the center of the circle (m)
 !> \param Y0 y-coordinate of the center of the circle (m)
 !> \param RAD Radius of the circle (m)
-!> \param X1 Lower x-coordinate of the rectangle (m)
-!> \param X2 Upper x-coordinate of the rectangle (m)
-!> \param Y1 Lower y-coordinate of the rectangle (m)
-!> \param Y2 Upper y-coordinate of the rectangle (m)
+!> \param X1 Lower x-coordinate of the grid cell (m)
+!> \param X2 Upper x-coordinate of the grid cell (m)
+!> \param Y1 Lower y-coordinate of the grid cell (m)
+!> \param Y2 Upper y-coordinate of the grid cell (m)
 
 REAL(EB) FUNCTION CIRCLE_CELL_INTERSECTION_AREA(X0,Y0,RAD,X1,X2,Y1,Y2)
 
 REAL(EB), INTENT(IN) :: X0,Y0,RAD,X1,X2,Y1,Y2
-INTEGER :: NX,NY,II,JJ
-REAL(EB) :: DELTA_AREA,XX,YY,CIRCLE_BBOX_AREA,RECT_BBOX_AREA,CX1,CY1,BBDX,BBDY
+INTEGER :: FC
+REAL(EB) :: XC,YC,XP1,XP2,YP1,YP2
+REAL(EB) :: RC,R2,THETA
 
-CIRCLE_BBOX_AREA = 4._EB*RAD*RAD
-RECT_BBOX_AREA = (X2-X1)*(Y2-Y1)
+R2 = RAD**2
+FC = 0
 
-CIRCLE_CELL_INTERSECTION_AREA = 0._EB
+! No overlap
 
-BBOX_IF: IF (RECT_BBOX_AREA<CIRCLE_BBOX_AREA) THEN ! more efficient to descretize the rectangle
-   ! make area elements nominally square
-   IF ((X2-X1)<(Y2-Y1)) THEN
-      NX = 50
-      BBDX = (X2-X1)/REAL(NX,EB)
-      NY = NINT((Y2-Y1)/BBDX)
-      BBDY = (Y2-Y1)/REAL(NY,EB)
-   ELSE
-      NY = 50
-      BBDY = (Y2-Y1)/REAL(NY,EB)
-      NX = NINT((X2-X1)/BBDY)
-      BBDX = (X2-X1)/REAL(NX,EB)
-   ENDIF
-   DELTA_AREA = BBDX*BBDY
-   DO JJ=1,NY
-      DO II=1,NX
-         XX = X1 + BBDX*(II-0.5_EB)
-         YY = Y1 + BBDY*(JJ-0.5_EB)
-         IF ( ((XX-X0)**2+(YY-Y0)**2)<RAD**2 ) CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA + DELTA_AREA
-      ENDDO
-   ENDDO
-ELSE BBOX_IF ! more efficient to descretize the circle
-   NX = 50
-   NY = 50
-   CX1 = X0-RAD
-   CY1 = Y0-RAD
-   BBDX = 2._EB*RAD/REAL(NX,EB)
-   BBDY = BBDX
-   DELTA_AREA = BBDX*BBDY
-   DO JJ=1,NY
-      DO II=1,NX
-         XX = CX1 + BBDX*(II-0.5_EB)
-         YY = CY1 + BBDY*(JJ-0.5_EB)
-         IF ( ((XX-X0)**2+(YY-Y0)**2)<RAD**2 .AND. &
-                XX>=X1 .AND. XX<=X2          .AND. &
-                YY>=Y1 .AND. YY<=Y2                ) CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA + DELTA_AREA
-      ENDDO
-   ENDDO
-ENDIF BBOX_IF
+IF ((X2 < X0-RAD) .OR. (X1 > X0+RAD) .OR. (Y2 < Y0-RAD) .OR. (Y1 > Y0+RAD)) THEN
+   CIRCLE_CELL_INTERSECTION_AREA = 0._EB
+   RETURN
+ENDIF
+
+! Count corners inside circle
+RC = (X1-X0)**2+(Y1-Y0)**2
+IF (RC <= R2) FC=IBSET(FC,0)
+RC = (X1-X0)**2+(Y2-Y0)**2
+IF (RC <= R2) FC=IBSET(FC,1)
+RC = (X2-X0)**2+(Y2-Y0)**2
+IF (RC <= R2) FC=IBSET(FC,2)
+RC = (X2-X0)**2+(Y1-Y0)**2
+IF (RC <= R2) FC=IBSET(FC,3)
+
+SELECT CASE(FC)
+   ! Grid cell surrounds the circle: area of circle
+   CASE (0)
+      CIRCLE_CELL_INTERSECTION_AREA = PI*R2
+   ! One corner in the circle: chord + area of triangle
+   CASE(1,2,4,8)
+      SELECT CASE(FC)
+         CASE(1)
+            XC=X1
+            YC=Y1
+            YP1=SQRT(R2-(X1-X0)**2)+Y0
+            XP1=SQRT(R2-(Y1-Y0)**2)+X0
+         CASE(2)
+            XC=X1
+            YC=Y2
+            YP1=Y0-SQRT(R2-(X1-X0)**2)
+            XP1=SQRT(R2-(Y2-Y0)**2)+X0
+         CASE(4)
+            XC=X2
+            YC=Y2
+            YP1=Y0-SQRT(R2-(X2-X0)**2)
+            XP1=X0-SQRT(R2-(Y2-Y0)**2)
+         CASE(8)
+            XC=X2
+            YC=Y1
+            YP1=SQRT(R2-(X2-X0)**2)+Y0
+            XP1=X0-SQRT(R2-(Y1-Y0)**2)
+      END SELECT
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XC-XP1)**2+(YC-YP1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + 0.5_EB*ABS(XC-XP1)*ABS(YC-YP1)
+   ! Two corners in the circle: chord + trapezoid
+   CASE(3)
+      XP1=SQRT(R2-(Y1-Y0)**2)+X0
+      XP2=SQRT(R2-(Y2-Y0)**2)+X0
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-XP2)**2+(Y2-Y1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + 0.5_EB*(Y2-Y1)*(XP1+XP2-2._EB*X1)
+   CASE(6)
+      YP1=Y0-SQRT(R2-(X1-X0)**2)
+      YP2=Y0-SQRT(R2-(X2-X0)**2)
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((X2-X1)**2+(YP2-YP1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + 0.5_EB*(X2-X1)*(2._EB*Y2-YP1-YP2)
+   CASE(9)
+      YP1=SQRT(R2-(X1-X0)**2)+Y0
+      YP2=SQRT(R2-(X2-X0)**2)+Y0
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((X2-X1)**2+(YP2-YP1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + 0.5_EB*(X2-X1)*(YP1+YP2-2._EB*Y1)
+   CASE(12)
+      XP1=X0-SQRT(R2-(Y1-Y0)**2)
+      XP2=X0-SQRT(R2-(Y2-Y0)**2)
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-XP2)**2+(Y2-Y1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + 0.5_EB*(Y2-Y1)*(2._EB*X2-XP1-XP2)
+   ! Three corners in the circle: chord + irregular pentagon (two rectangles and a triangle)
+   CASE(7)
+      YP1=Y0-SQRT(R2-(X2-X0)**2)
+      XP1=SQRT(R2-(Y1-Y0)**2)+X0
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-X2)**2+(YP1-Y1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + (Y2-Y1)*(XP1-X1) + (X2-XP1)*(Y2-YP1) + &
+         0.5_EB*(X2-XP1)*(YP1-Y1)
+   CASE(11)
+      YP1=SQRT(R2-(X2-X0)**2)+Y0
+      XP1=SQRT(R2-(Y2-Y0)**2)+X0
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-X2)**2+(YP1-Y2)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + (Y2-Y1)*(XP1-X1) + (X2-XP1)*(YP1-Y1) + &
+         0.5_EB*(X2-XP1)*(Y2-YP1)
+   CASE(13)
+      YP1=SQRT(R2-(X1-X0)**2)+Y0
+      XP1=X0-SQRT(R2-(Y2-Y0)**2)
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-X1)**2+(YP1-Y2)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + (Y2-Y1)*(X2-XP1) + (XP1-X1)*(YP1-Y1) + &
+         0.5_EB*(XP1-X1)*(Y2-YP1)
+   CASE(14)
+      YP1=Y0-SQRT(R2-(X1-X0)**2)
+      XP1=X0-SQRT(R2-(Y1-Y0)**2)
+      THETA = 2._EB*ASIN(0.5_EB*SQRT((XP1-X1)**2+(YP1-Y1)**2)/RAD)
+      CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA)) + (Y2-Y1)*(X2-XP1) + (XP1-X1)*(Y2-YP1) + &
+         0.5_EB*(XP1-X1)*(YP1-Y1)
+   ! Entire grid cell is in circle: area of grid cell
+   CASE(15)
+      CIRCLE_CELL_INTERSECTION_AREA = (X2-X1)*(Y2-Y1)
+END SELECT
 
 END FUNCTION CIRCLE_CELL_INTERSECTION_AREA
 

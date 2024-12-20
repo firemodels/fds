@@ -1739,7 +1739,7 @@ Circular or semi-circular vents may be specified as the intersection of a rectan
 \begin{lstlisting}
 &SURF ID='BURNER', MASS_FLUX(1)=0.02, SPEC_ID(1)='PROPANE', TAU_MF(1)=0.01 /
 &VENT XB=-0.6,0.6,-0.6,0.6,0,0, XYZ=0,0,0, RADIUS=0.5, SURF_ID='BURNER',
-      SPREAD_RATE=0.05 /
+      SPREAD_RATE=0.05/
 \end{lstlisting}
 The \ct{XB} coordinates designate the orientation of the vent. In this case, the extent of the area specified by \ct{XB} is large enough to contain the entire circle. Note also in this example that the parameter \ct{SPREAD_RATE} causes the fire to spread outward at a rate of 0.05~m/s. The mass flux of propane through the vent is plotted in Fig.~\ref{circ_burn}. Notice that the mass flux increases following a ``t-squared'' profile. This is what is expected of a fire which spreads radially at a linear rate. In this case, the fire reaches the \ct{RADIUS} of the circle in 10~s, as expected. Note also that the parameter \ct{TAU_MF} indicates that the fuel should ramp up quickly once the flame front reaches a given grid cell. In other words, \ct{TAU_MF} controls the local ramp-up of fuel; the \ct{SPREAD_RATE} controls the global ramp-up. Following the ramp-up, the fuel flows at a rate equal to the area of the circle times the mass flux of fuel per unit area. Even if the circle is crudely resolved on a coarse grid, the fuel flow rate will be adjusted to produce the desired value governed by the circular vent.
 \begin{figure}[h]
@@ -8700,9 +8700,9 @@ It should be noted that devices are updated sequentially in the order that they 
 \subsection{Example Case: Heat Release Rate of a Spreading Fire}
 \label{spreading_fire}
 
-In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
+In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.  
 \begin{lstlisting}
-&VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1 /
+&VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1, AREA_ADJUST=F /
 
 &SURF ID='FIRE', HRRPUA=1., RAMP_Q='HRRPUA RAMP' /
 &RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
@@ -13621,6 +13621,7 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
+\ct{AREA_ADJUST}           & Logical           & Section~\ref{spreading_fire}                            &               &  \ct{F}            \\ \hline
 \ct{COLOR    }             & Character         & Section~\ref{info:colors}                                 &               &                     \\ \hline
 \ct{CTRL_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 \ct{DB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
