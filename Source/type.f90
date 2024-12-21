@@ -362,6 +362,7 @@ TYPE BOUNDARY_PROP2_TYPE
    INTEGER :: SURF_INDEX=-1          !< Surface index
    INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection, 4=Resolved
    INTEGER :: Y_O2_ITER=0            !< Number of iterations for surface O2 solve
+   INTEGER :: I_CHAR_FRONT=1         !< Index of solid cell where char formation starts
 
 END TYPE BOUNDARY_PROP2_TYPE
 
