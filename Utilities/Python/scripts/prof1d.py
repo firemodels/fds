@@ -17,7 +17,6 @@ $ python prof1d.py --with_slider
 """
 
 import sys
-import csv
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
