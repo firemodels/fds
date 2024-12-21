@@ -11,13 +11,9 @@ Usage: Copy this script to your working directory and add your
        Use option --save_animation to save the animation (no slider) to a movie file
 
 Example:
+
 $ python prof1d.py --with_slider
 
-       Or you can specify a specific time
-
-$ python prof1d.py --time=10 --prof='../Current_Results/pine_21O2_40_1C_cat_prof_4.csv'
-
-       will plot the profile at t=10 s.
 """
 
 import sys
