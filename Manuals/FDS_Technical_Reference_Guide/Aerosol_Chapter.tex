@@ -111,11 +111,11 @@ Using this binning, the agglomeration equation becomes:
 \be
 \frac{\d N_i}{\d t} = \sum_{k=1}^{M} \sum_{j=k}^{M} \left( 1- \frac{1}{2} \delta_{j,k} \right) \eta \Phi(j,k) N_j N_k - N_i \sum_{k=1}^M \Phi(j,k) N_k - R_i + S_i
 \ee
-where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
+where $\eta$, shown below, is a function for apportioning the new particle mass, $m_{j+k}=x_j+x_k$, between adjacent particle bins.
 \be
 \eta = \begin{cases}
-   \frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
-   \frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
+   \frac{x_{i+1}-m_{j+k}}{x_{i+1}-x_i} & x_i< m_{j+k} \leq x_{i+1} \\
+   \frac{m_{j+k}-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_{j+k} \leq x_i
 \end{cases}
 \ee
 The agglomeration kernel is given by the sum of the Brownian (Br), gravitational (Gr), shear (Sh), and inertial (In) agglomeration  terms.
