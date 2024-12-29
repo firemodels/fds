@@ -3916,7 +3916,7 @@ The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ dir
 \subsection{HVAC Mass Transport}
 \label{info:hvacmasstransport}
 
-FDS can account for the time delay of species and enthalpy transport through HVAC networks by discretizing individual HVAC ducts. This can by done using either \ct{N_CELLS} on an HVAC duct input or by setting \ct{HVAC_MASS_TRANSPORT_CELL_L}. The input \ct{N_CELLS} divides the length on the duct into \ct{N_CELLS} uniform segments. The parameter \ct{HVAC_MASS_TRANSPORT_CELL_L} defines a cell length that is applied to all ducts in an input file unless overridden by \ct{N_CELLS}. IF specified, the number of cells for a duct is taken as the nearest integer of the duct \ct{LENGTH} divided by \ct{HVAC_MASS_TRANSPORT_CELL_L}. The current HVAC solver does not account for heat loss in the HVAC network.
+FDS can account for the time delay of species and enthalpy transport through HVAC networks by discretizing individual HVAC ducts. This can by done using either \ct{N_CELLS} on an HVAC duct input or by setting \ct{HVAC_MASS_TRANSPORT_CELL_L} on \ct{MISC}. The input \ct{N_CELLS} divides the length on the duct into \ct{N_CELLS} uniform segments. The parameter \ct{HVAC_MASS_TRANSPORT_CELL_L} defines a cell length that is applied to all ducts in an input file unless overridden by \ct{N_CELLS}. When specified, the number of cells for a duct is the duct \ct{LENGTH} divided by \ct{HVAC_MASS_TRANSPORT_CELL_L} rounded to the nearest integer (minimum of 1 cell). The current HVAC solver does not account for heat loss in the HVAC network.
 
 If a duct is discretized, then all other ducts in that ductrun must also be discretized. There is no requirement that the same cell size be used for all ducts in a ductrun. A ductrun is any collection of interconnected HVAC components where a path exists between two components via traversing ducts in the ductrun.
 
@@ -12577,7 +12577,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{H_F_REFERENCE_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
 \ct{HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
 \ct{HVAC_LOCAL_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
-\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Logical      & Section ~\ref{info:hvacmasstransport}   &            & \ct{F}           \\ \hline
+\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Real          & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
 \ct{HVAC_PRES_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
 \ct{HVAC_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & \ct{F}           \\ \hline
 \ct{IBLANK_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & \ct{T}           \\ \hline
