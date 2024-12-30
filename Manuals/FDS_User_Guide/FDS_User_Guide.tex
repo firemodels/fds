@@ -2280,14 +2280,14 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set \ct{HEAT_TRANSFER_MODEL} equal to \ct{'LOGLAW'} on the \ct{SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
 \subsubsection{Blowing Heat Transfer}
-\label{blowing}
+\label{info:blowing}
 
 If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. Adding \ct{BLOWING=T} to the \ct{SURF} line will account for this effect, except for DNS simulations where empirical heat transfer correlations are not used. When \ct{BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
 \begin{equation}
       \Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
 \begin{equation}
-      h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
+      h_{\rm blowing} = \underbrace{\left[\frac{\Phi_h}{{\exp}(\Phi_h)-1}\right]}_{{\mbox{\scriptsize \tt BLOWING CORRECTION}}} h
 \end{equation}
 where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
 
@@ -8700,7 +8700,7 @@ It should be noted that devices are updated sequentially in the order that they 
 \subsection{Example Case: Heat Release Rate of a Spreading Fire}
 \label{spreading_fire}
 
-In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.  
+In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
 \begin{lstlisting}
 &VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1, AREA_ADJUST=F /
 
@@ -11447,15 +11447,16 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \endhead
 \ct{ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C          & B,D          \\ \hline
 \ct{AMPUA}$^2$                                 & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
-\ct{AMPUA_Z}$^1$                              & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
+\ct{AMPUA_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 \ct{BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
+\ct{BLOWING CORRECTION}                        & Section~\ref{info:blowing}                    &                    & B,D          \\ \hline
 \ct{BURNING RATE}                              & Mass loss rate of fuel                        & \unit{kg/(m^2.s)}  & B,D          \\ \hline
 \ct{CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{CONVECTIVE HEAT FLUX GAUGE}                & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 {\scriptsize\tt CONVECTIVE HEAT TRANSFER REGIME}           & Section \ref{info:convection}                 &                    & B,D          \\ \hline
 \ct{CPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
-\ct{CPUA_Z}$^1$                               & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
+\ct{CPUA_Z}$^1$                                & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s                & B,D          \\ \hline
 \ct{FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s                & B,D          \\ \hline
 \ct{GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
