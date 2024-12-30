@@ -1,8 +1,8 @@
 """
 McDermott
-6-10-2024
+12-20-2024
 
-Animate a 3D scatterplot of FDS in-depth profile (CHID_prof_n.csv)
+Animate a 1D plot of FDS in-depth profile (CHID_prof_n.csv)
 
 Usage: Copy this script to your working directory and add your
        profiles to the filenames list.
@@ -11,17 +11,17 @@ Usage: Copy this script to your working directory and add your
        Use option --save_animation to save the animation (no slider) to a movie file
 
 Example:
-$ python prof3d.py --with_slider
+
+$ python prof1d.py --with_slider
+
 """
 
 import sys
-import csv
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.animation as animation
+from matplotlib.animation import FuncAnimation
 from matplotlib.widgets import Slider
-from mpl_toolkits.mplot3d import Axes3D
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -40,10 +40,16 @@ args = parser.parse_args()
 # Close all previously opened figures
 plt.close('all')
 
-scalar_min = 0.
-scalar_max = 120.
+scalar_min = [20  ,  0,   0,   0,  0, 0]
+scalar_max = [1000, 20, 400, 120, 10, 1]
+scalar_lab = ['T','H2O','PINE','CHAR','ASH','O2']
 
-filenames = ['../Current_Results/pine_21O2_40_1C_cat_prof_4.csv']
+filenames = ['../Test/pine_21O2_40_1C_cat_prof_1.csv',
+             '../Test/pine_21O2_40_1C_cat_prof_2.csv',
+             '../Test/pine_21O2_40_1C_cat_prof_3.csv',
+             '../Test/pine_21O2_40_1C_cat_prof_4.csv',
+             '../Test/pine_21O2_40_1C_cat_prof_5.csv',
+             '../Test/pine_21O2_40_1C_cat_prof_6.csv']
 
 # create lists to store information about each profile
 IOR = []
@@ -66,10 +72,10 @@ for i, filename in enumerate(filenames):
         first_line = f.readline().strip('\n')
 
         header=first_line.split(",")[1:5]
-        IOR.append(int(header[0])) ; print(IOR)
-        X.append(float(header[1])) ; print(X)
-        Y.append(float(header[2])) ; print(Y)
-        Z.append(float(header[3])) ; print(Z)
+        IOR.append(int(header[0])) #; print(IOR)
+        X.append(float(header[1])) #; print(X)
+        Y.append(float(header[2])) #; print(Y)
+        Z.append(float(header[3])) #; print(Z)
         next(f)
 
         # Read lines one at a time
@@ -104,14 +110,15 @@ time_diff = np.diff(t)  # Calculate time difference between consecutive frames
 
 n_points = len(t)
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-colormap = plt.jet() # see https://matplotlib.org/stable/gallery/color/colormap_reference.html
+fig, ax = plt.subplots(3, 2, figsize=(12, 8))
+ax = ax.flatten()  # Flatten the array for easier indexing
 
-# Plot the scatter plot (initially empty)
-scatter = ax.scatter([], [], [], c=[], cmap=colormap, vmin=scalar_min, vmax=scalar_max)
-cbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=5)
-cbar.set_label('Scalar Values')
+# Initialize the figure and axis
+# fig, ax = plt.subplots()
+for i in range(len(filenames)):
+    line, = ax[i].plot([], [], marker='o', label="Scalar vs X")
+
+time_text = fig.text(0.5, 0.95, "", ha="center", va="center", fontsize=14, weight="bold")
 
 if args.with_slider:
     # Create a slider for controlling time
@@ -119,34 +126,33 @@ if args.with_slider:
     time_slider = Slider(axslider, 'Time', t[0], t[-1], valinit=t[0])
 
 def update(frame):
-    # Clear the previous plot
-    ax.cla()
 
     for i in range(len(filenames)):
         n = int(df[i].values[frame,1])
-        x = df[i].values[frame,2:2+n] # in-depth positions
-        xs = X[i] + np.zeros(len(x))
-        ys = Y[i] + np.zeros(len(x))
-        zs = Z[i] + np.zeros(len(x))
-        match IOR[i]:
-            case -1: xs = X[i] + x
-            case  1: xs = X[i] - x
-            case -2: ys = Y[i] + x
-            case  2: ys = Y[i] - x
-            case -3: zs = Z[i] + x
-            case  3: zs = Z[i] - x
-
+        x = df[i].values[frame,2:2+n]*100. # in-depth positions (cm)
         scalar_values = df[i].values[frame,2+n:2+2*n]
 
-        # Plot the scatter plot for the current frame
-        scatter = ax.scatter(xs, ys, zs, c=scalar_values, cmap=colormap, marker='.', s=100, vmin=scalar_min, vmax=scalar_max, alpha=1, depthshade=False)
+        # Clear the previous plot
+        ax[i].cla()
 
-    # Set appropriate labels
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    # Display current time
-    ax.text2D(0.05, 0.95, 'Time: {:.2f}'.format(t[frame]), size=16, zorder=1, transform=ax.transAxes)
+        # Plot the scatter plot for the current frame
+        ax[i].plot(x, scalar_values, marker='o')
+        if scalar_lab[i]=='O2' and np.max(scalar_values)>scalar_min[i]:
+            ax[i].set_ylim(scalar_min[i], np.max(scalar_values)*1.1)
+        else:
+            ax[i].set_ylim(scalar_min[i], scalar_max[i])
+
+        # Set appropriate labels
+        ax[i].set_ylabel(scalar_lab[i])
+
+        # Only show X-axis labels and ticks on the bottom row
+        if i >= len(filenames) - 2:  # Adjust based on layout (3 rows, 2 columns)
+            ax[i].set_xlabel('x (cm)')
+        else:
+            ax[i].set_xticklabels([])  # Remove labels
+
+    # Update the shared time text
+    time_text.set_text('Time: {:.2f}'.format(t[frame]))
 
 if args.with_slider:
     # Function to update the plot when the slider is moved
@@ -161,13 +167,14 @@ if args.with_slider:
 else:
     # Create the animation
     interval = 200 # milliseconds
-    ani = animation.FuncAnimation(fig, update, frames=n_points, interval=interval, blit=False, repeat=False)
+    ani = FuncAnimation(fig, update, frames=n_points, interval=interval, blit=False, repeat=False)
 
     if args.save_animation:
         # Save the animation as an mp4 file
         ani.save('animation.mp4', writer='ffmpeg')
 
 plt.show()
+
 
 
 

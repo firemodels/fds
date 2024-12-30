@@ -165,6 +165,7 @@ INTEGER :: NO_INDEX=0                      !< Index for NO
 INTEGER :: NO2_INDEX=0                     !< Index for NO2
 INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
 INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
+INTEGER :: CHAR_INDEX=0                    !< Index for MATL CHAR
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -270,9 +271,10 @@ LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that 
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
-LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.
+LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
+LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -378,7 +380,7 @@ TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI co
 TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20,COUNTS_VENT,DISPLS_VENT
 
 ! Time parameters
 
@@ -752,6 +754,9 @@ INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
+
+! VENT array
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: VENT_TOTAL_AREA
 
 END MODULE GLOBAL_CONSTANTS
 

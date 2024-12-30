@@ -1,78 +1,55 @@
+&MATL ID                 = 'MOISTURE'
+      DENSITY            = 1000.
+      CONDUCTIVITY       = 0.062
+      SPECIFIC_HEAT      = 4.184
+      N_REACTIONS        = 1
+      N_S                = 1.0
+      N_T                = 0.
+      A                  = 4.29E+03
+      E                  = 4.38E+04
+      SPEC_ID            = 'WATER VAPOR'
+      NU_SPEC            = 1.0
+      HEAT_OF_REACTION   = 2410./
 
-&MATL ID                 = 'PINE 1' ! peak of anaerobic curve (T_ref approx 360 C)
+&MATL ID                 = 'PINE'
+      FYI                = 'Properties from Lautenberger and Pello CNF 2009'
       DENSITY            = 360.
       CONDUCTIVITY_RAMP  = 'k dry wood'
       SPECIFIC_HEAT_RAMP = 'c_v dry wood'
       N_REACTIONS        = 2
-      N_S                = 0.56,0.50
-      N_O2               = 0.00,0.61
-      A                  = 1.00E+11,1.00E+16
-      E                  = 1.50E+05,1.89E+05
+      N_S                = 1.0,1.0
+      N_T                = 0.0,0.0
+      N_O2               = 0.0,1.0
+      A                  = 2.5E+04,0
+      E                  = 0.8E+05,1.0E+05 !!! sensitive !!!
       MATL_ID(1,1)       = 'CHAR'
-      NU_MATL(1,1)       = 0.25
+      NU_MATL(1,1)       = 0.3
       MATL_ID(1,2)       = 'CHAR'
-      NU_MATL(1,2)       = 0.25
+      NU_MATL(1,2)       = 0.3
       SPEC_ID(1,1)       = 'FUEL VAPOR'
-      NU_SPEC(1,1)       = 0.75
+      NU_SPEC(1,1)       = 0.7
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
-      NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./
-
-&MATL ID                 = 'PINE 2' ! first hump of anaerobic curve
-      DENSITY            = 360.
-      CONDUCTIVITY_RAMP  = 'k dry wood'
-      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
-      N_REACTIONS        = 2
-      N_S                = 1,1
-      N_O2               = 0.00,0.49
-      A                  = 1.00E+15,1.00E+05
-      E                  = 1.93E+05,8.50E+04
-      MATL_ID(1,1)       = 'CHAR'
-      NU_MATL(1,1)       = 0.25
-      MATL_ID(1,2)       = 'CHAR'
-      NU_MATL(1,2)       = 0.25
-      SPEC_ID(1,1)       = 'FUEL VAPOR'
-      NU_SPEC(1,1)       = 0.75
-      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
-      NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./ AC Tab 8
-
-&MATL ID                 = 'PINE 3' ! broad third peak (tail of anaerobic curve)
-      DENSITY            = 360.
-      CONDUCTIVITY_RAMP  = 'k dry wood'
-      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
-      N_REACTIONS        = 2
-      N_S                = 1.25,5.67
-      N_O2               = 0.00,0.66
-      A                  = 1.00,0.00
-      E                  = 4.00E+04,1.67E+05
-      MATL_ID(1,1)       = 'CHAR'
-      NU_MATL(1,1)       = 0.25
-      MATL_ID(1,2)       = 'CHAR'
-      NU_MATL(1,2)       = 0.25
-      SPEC_ID(1,1)       = 'FUEL VAPOR'
-      NU_SPEC(1,1)       = 0.75
-      SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
-      NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./
+      NU_SPEC(1:2,2)     = -0.1, 0.8
+      HEAT_OF_REACTION(1:2) = 600.,-900./
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 90.
       CONDUCTIVITY_RAMP  = 'k + k_r char'
       SPECIFIC_HEAT_RAMP = 'c_v char'
       N_REACTIONS        = 1
-      N_S                = 0.56
-      N_O2               = 0.68
-      A                  = 8.31E+07
-      E                  = 1.24E+05
+      N_S                = 1.00 ! 0.56
+      N_O2               = 1.00 ! 0.68
+      A                  = 8.0E+10
+      E                  = 1.0E+05
       MATL_ID            = 'ASH'
-      NU_MATL            = 0.02
+      NU_MATL            = 0.06
       SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
-      NU_SPEC            = -2.67,3.65
-      HEAT_OF_REACTION   = -32000. /
+      NU_SPEC            = -2.67,3.61
+      HEAT_OF_REACTION   = -11000.
+      GAS_DIFFUSION_DEPTH(1) = 0.01/
 
 &MATL ID                 = 'ASH'
-      DENSITY            = 2.0
+      DENSITY            = 5.7
       CONDUCTIVITY_RAMP  = 'k + k_r ash'
       SPECIFIC_HEAT_RAMP = 'c_v ash'/
 
@@ -113,4 +90,14 @@
 &RAMP ID='c_v ash', T= 600.0, F=1.741593 /
 &RAMP ID='c_v ash', T= 900.0, F=1.911420 /
 &RAMP ID='c_v ash', T=1200.0, F=2.053577 /
+
+
+
+
+
+
+
+
+
+
 
