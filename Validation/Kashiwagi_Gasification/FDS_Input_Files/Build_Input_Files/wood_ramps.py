@@ -30,7 +30,7 @@ print('dry wood properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
 # print(cdf)
-T_values = T
+T_values = T-273.
 F_values = c
 print('')
 for TT, FF in zip(T_values, F_values):
@@ -38,7 +38,7 @@ for TT, FF in zip(T_values, F_values):
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
 # print(kdf)
-T_values = T
+T_values = T-273.
 F_values = k
 print('')
 for TT, FF in zip(T_values, F_values):
@@ -68,7 +68,7 @@ print('char properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
 # print(cdf)
-T_values = T
+T_values = T-273.
 F_values = c
 print('')
 for TT, FF in zip(T_values, F_values):
@@ -76,7 +76,7 @@ for TT, FF in zip(T_values, F_values):
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
 # print(kdf)
-T_values = T
+T_values = T-273.
 F_values = k
 print('')
 for TT, FF in zip(T_values, F_values):
@@ -98,7 +98,7 @@ print('ash properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
 # print(cdf)
-T_values = T
+T_values = T-273.
 F_values = c
 print('')
 for TT, FF in zip(T_values, F_values):
@@ -106,7 +106,7 @@ for TT, FF in zip(T_values, F_values):
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
 # print(kdf)
-T_values = T
+T_values = T-273.
 F_values = k
 print('')
 for TT, FF in zip(T_values, F_values):
