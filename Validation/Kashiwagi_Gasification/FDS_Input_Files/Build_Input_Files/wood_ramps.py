@@ -29,10 +29,20 @@ print('')
 print('dry wood properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
-print(cdf)
+# print(cdf)
+T_values = T-273.
+F_values = c
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='c_v dry wood', T={TT}, F={FF:.4g}/")
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
-print(kdf)
+# print(kdf)
+T_values = T-273.
+F_values = k
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='k dry wood', T={TT}, F={FF:.4g}/")
 
 # plt.figure(1)
 # plt.plot(T,c)
@@ -57,10 +67,20 @@ print('')
 print('char properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
-print(cdf)
+# print(cdf)
+T_values = T-273.
+F_values = c
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='c_v char', T={TT}, F={FF:.4g}/")
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
-print(kdf)
+# print(kdf)
+T_values = T-273.
+F_values = k
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='k + k_r char', T={TT}, F={FF:.4g}/")
 
 # ash
 
@@ -77,10 +97,20 @@ print('')
 print('ash properties:')
 
 cdf = pd.DataFrame({'T': T-273., 'c': c})
-print(cdf)
+# print(cdf)
+T_values = T-273.
+F_values = c
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='c_v ash', T={TT}, F={FF:.4g}/")
 
 kdf = pd.DataFrame({'T': T-273., 'k': k})
-print(kdf)
+# print(kdf)
+T_values = T-273.
+F_values = k
+print('')
+for TT, FF in zip(T_values, F_values):
+    print(f"&RAMP ID='k + k_r ash', T={TT}, F={FF:.4g}/")
 
 
 
