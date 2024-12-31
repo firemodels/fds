@@ -3391,8 +3391,8 @@ The \ct{HEAT_OF_REACTION} is the energy gained or lost in converting the materia
 
 FDS will attempt to adjust all material enthalpies so that internal energy is conserved. For each material reaction a linear equation is defined:
 \be
-H_{\rm x} \left(T_{\rm ref} \right) + H_{\rm x,adj} + H_{\rm x,r} \left(T_{\rm ref} \right) = \sum_{i=1}^{N_{\rm residues}} \nu_{\rm i} \left( H_{\rm i} \left(T_{\rm ref} \right) + H_{\rm i,adj}  \right) +
-\sum_{j=1}^{N_{\rm species}} \nu_{\rm j}  H_{\rm j} \left(T_{\rm ref} \right)
+H_{x} \left(T_{\rm ref} \right) + H_{x,\rm adj} + H_{x,\rm r} \left(T_{\rm ref} \right) = \sum_{i=1}^{N_{\rm residues}} \nu_{i} \left( H_{i} \left(T_{\rm ref} \right) + H_{i,\rm adj}  \right) +
+\sum_{j=1}^{N_{\rm species}} \nu_{j}  H_{j} \left(T_{\rm ref} \right)
 \ee
 where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the \ct{HEAT_OF_REACTION}, $T_{\rm ref}$ is the temperature at which the \ct{HEAT_OF_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct enthalpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined \ct{SPECIFIC_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Sec.~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pyrolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on \ct{REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on \ct{REAC}, FDS adjusts the species enthalpy so that the correct \ct{HEAT_OF_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
 
