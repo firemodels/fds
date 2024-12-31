@@ -2282,14 +2282,11 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsubsection{Blowing Heat Transfer}
 \label{info:blowing}
 
-If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. Adding \ct{BLOWING=T} to the \ct{SURF} line will account for this effect, except for DNS simulations where empirical heat transfer correlations are not used. When \ct{BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
+If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. Adding \ct{BLOWING=T} to the \ct{SURF} line will account for this effect, except for DNS simulations where empirical heat transfer correlations are not used. When \ct{BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing,Taylor&Krishna}:
 \begin{equation}
-      \Phi_h = \frac{\dot{m}'' c_p}{h}
+      h_{\rm blowing} = \underbrace{\left[\frac{\Phi_h}{{\exp}(\Phi_h)-1}\right]}_{{\mbox{\scriptsize \tt BLOWING CORRECTION}}} h \quad ; \quad \Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
-\begin{equation}
-      h_{\rm blowing} = \underbrace{\left[\frac{\Phi_h}{{\exp}(\Phi_h)-1}\right]}_{{\mbox{\scriptsize \tt BLOWING CORRECTION}}} h
-\end{equation}
-where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
+where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.,
 
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -13359,7 +13356,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{ALLOW_UNDERSIDE_PARTICLES}                         & Logical         & Section~\ref{info:surface_droplets}       &            & \ct{F}                          \\ \hline
 \ct{AREA_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 \ct{BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & \ct{'EXPOSED'}         \\ \hline
-\ct{BLOWING}                                             & Logical         & Section~\ref{blowing}                     &                     &                         \\ \hline
+\ct{BLOWING}                                             & Logical         & Section~\ref{info:blowing}                     &                     &                         \\ \hline
 \ct{BURN_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & \ct{F}                 \\ \hline
 \ct{BURN_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 \ct{CELL_SIZE(:)}                                       & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
