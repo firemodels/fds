@@ -359,10 +359,12 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: V_DEP=0._EB           !< Deposition velocity (m/s)
    REAL(EB) :: Y_O2_F=0._EB          !< Oxygen mass fraction at the surface
+   REAL(EB) :: BLOWING_CORRECTION=0._EB !< Ackermann blowing correction to heat transfer coefficient
 
    INTEGER :: SURF_INDEX=-1          !< Surface index
    INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection, 4=Resolved
    INTEGER :: Y_O2_ITER=0            !< Number of iterations for surface O2 solve
+   INTEGER :: I_CHAR_FRONT=1         !< Index of solid cell where char formation starts
 
 END TYPE BOUNDARY_PROP2_TYPE
 
@@ -1554,7 +1556,7 @@ TYPE RAD_FILE_TYPE
 END TYPE RAD_FILE_TYPE
 
 TYPE PATCH_TYPE
-   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,VENT_INDEX=0,MESH_INDEX=0
+   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,MESH_INDEX=0
 END TYPE PATCH_TYPE
 
 TYPE BOUNDARY_FILE_TYPE

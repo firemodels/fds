@@ -2469,29 +2469,9 @@ ELSE STORE_IF
          END SELECT
       ENDDO WALL_CELL_LOOP_1
 
-      IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,IAXIS)==CC_SOLID) US(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,JAXIS)==CC_SOLID) VS(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,KAXIS)==CC_SOLID) WS(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
+      WHERE(FCVAR(0:IBAR,1:JBAR,1:KBAR,CC_FGSC,IAXIS)==CC_SOLID) US(0:IBAR,1:JBAR,1:KBAR) = 0._EB
+      WHERE(FCVAR(1:IBAR,0:JBAR,1:KBAR,CC_FGSC,JAXIS)==CC_SOLID) VS(1:IBAR,0:JBAR,1:KBAR) = 0._EB
+      WHERE(FCVAR(1:IBAR,1:JBAR,0:KBAR,CC_FGSC,KAXIS)==CC_SOLID) WS(1:IBAR,1:JBAR,0:KBAR) = 0._EB
 
    ELSE PRED_CORR_IF
 
@@ -2631,29 +2611,9 @@ ELSE STORE_IF
 
       DEALLOCATE(U_STORE,V_STORE,W_STORE)
 
-      IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,IAXIS)==CC_SOLID) U(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,JAXIS)==CC_SOLID) V(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF(FCVAR(I,J,K,CC_FGSC,KAXIS)==CC_SOLID) W(I,J,K) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
+      WHERE(FCVAR(0:IBAR,1:JBAR,1:KBAR,CC_FGSC,IAXIS)==CC_SOLID) U(0:IBAR,1:JBAR,1:KBAR) = 0._EB
+      WHERE(FCVAR(1:IBAR,0:JBAR,1:KBAR,CC_FGSC,JAXIS)==CC_SOLID) V(1:IBAR,0:JBAR,1:KBAR) = 0._EB
+      WHERE(FCVAR(1:IBAR,1:JBAR,0:KBAR,CC_FGSC,KAXIS)==CC_SOLID) W(1:IBAR,1:JBAR,0:KBAR) = 0._EB
 
    ENDIF PRED_CORR_IF
 
@@ -6527,43 +6487,16 @@ INTEGER,  INTENT( IN) :: IND1, IND2
 REAL(EB), INTENT(OUT) :: PRESS
 
 ! Local Variables:
-INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
-! REAL(EB):: VVEL(IAXIS:KAXIS), U_NORM
+INTEGER :: ICC, IIG, JJG, KKG
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
 
-! Cell-centered variables:
-VIND=0; EP  = 1
-INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
-IF (INT_NPE_HI > 0) THEN
-   ! ! First normal velocity:
-   ! VVEL(IAXIS:KAXIS) = 0._EB
-   ! DO VIND=IAXIS,KAXIS
-   !    INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
-   !    INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
-   !    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-   !       VVEL(VIND) = VVEL(VIND) + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_FVARS(INT_VEL_IND,INPE)
-   !    ENDDO
-   ! ENDDO
-   ! U_NORM = DOT_PRODUCT(VVEL , CFACE(CUT_FACE(IND1)%CFACE_INDEX(IND2))%NVEC)
-
-   ! Now Pressure:
-   ! VIND=0;
-   PRESS=0._EB
-   INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
-   ! INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
-   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-      PRESS = PRESS + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_P_IND,INPE)
-   ENDDO
-   ! PRESS = PRESS + B1%RHO_F*U_NORM**2._EB
-ELSE
-   B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-   ! Underlying cell approximate value:
-   ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
-   IIG = CUT_CELL(ICC)%IJK(1)
-   JJG = CUT_CELL(ICC)%IJK(2)
-   KKG = CUT_CELL(ICC)%IJK(3)
-   PRESS=B1%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
-ENDIF
+B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
+! Underlying cell values corresponding to cut-cell:
+ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+IIG = CUT_CELL(ICC)%IJK(IAXIS)
+JJG = CUT_CELL(ICC)%IJK(JAXIS)
+KKG = CUT_CELL(ICC)%IJK(KAXIS)
+PRESS=B1%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
 
 RETURN
 END SUBROUTINE GET_PRES_CFACE
@@ -6810,7 +6743,7 @@ SUBROUTINE CC_H_INTERP
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,HP
 INTEGER :: NM, ICC, NCELL, I, J ,K
-REAL(EB):: U_IBM, V_IBM, W_IBM, VCRT
+REAL(EB):: VCRT
 LOGICAL :: VOLFLG
 
 ! This routine interpolates H to cut cells/Cartesian cells at the end of step.
@@ -6866,52 +6799,12 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO ICC_LOOP
 
    ! Finally set HP to zero inside immersed solids:
-   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-   DO K=0,KBP1
-     DO J=0,JBP1
-        DO I=0,IBP1
-           IF (MESHES(NM)%CCVAR(I,J,K,CC_CGSC) /= CC_SOLID) CYCLE
-           HP(I,J,K) = 0._EB
-        ENDDO
-     ENDDO
-   ENDDO
-   ENDIF
+   WHERE(MESHES(NM)%CCVAR(0:IBP1,0:JBP1,0:KBP1,CC_CGSC)==CC_SOLID) HP(0:IBP1,0:JBP1,0:KBP1) = 0._EB
 
-   ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
-   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-   ! Force U velocities in CC_SOLID faces to zero
-   U_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,IAXIS) /= CC_SOLID ) CYCLE
-            UP(I,J,K) = U_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force V velocities in CC_SOLID faces to zero
-   V_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,JAXIS) /= CC_SOLID ) CYCLE
-            VP(I,J,K) = V_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force W velocities in CC_SOLID faces to zero
-   W_IBM = 0._EB ! Body doesn't move.
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,KAXIS) /= CC_SOLID ) CYCLE
-            WP(I,J,K) = W_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-   ENDIF
+   ! Set velocities on solid faces to zero:
+   WHERE(MESHES(NM)%FCVAR(0:IBAR,1:JBAR,1:KBAR,CC_FGSC,IAXIS)==CC_SOLID) UP(0:IBAR,1:JBAR,1:KBAR) = 0._EB
+   WHERE(MESHES(NM)%FCVAR(1:IBAR,0:JBAR,1:KBAR,CC_FGSC,JAXIS)==CC_SOLID) VP(1:IBAR,0:JBAR,1:KBAR) = 0._EB
+   WHERE(MESHES(NM)%FCVAR(1:IBAR,1:JBAR,0:KBAR,CC_FGSC,KAXIS)==CC_SOLID) WP(1:IBAR,1:JBAR,0:KBAR) = 0._EB
 
    NULLIFY(UP,VP,WP,HP)
 
@@ -7356,11 +7249,9 @@ REAL(EB), INTENT(IN) :: T, DT
 LOGICAL, INTENT(IN)  :: FIRST_CALL
 
 ! Local Variables:
-INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
+INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF
 REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF !,Z_CC,TMP_0_CC,P_0_CC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
-INTEGER :: INDADD, INDF, IFC, IFACE2, ICFC
-REAL(EB):: FSCU, AREATOT
 INTEGER :: IW,IROW_LOC
 
 REAL(EB) :: TNOW
@@ -7599,57 +7490,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO
       ENDDO
 
-      ! Then INBOUNDARY cut-faces:
-      ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         FSCU = 0._EB
-
-         ! Loop on cells neighbors and test if they are of type CC_SOLID, if so
-         ! Add to velocity flux:
-         ! X faces
-         DO INDADD=-1,1,2
-            INDF = I - 1 + (INDADD+1)/2
-            IF( FCVAR(INDF,J,K,CC_FGSC,IAXIS) /= CC_SOLID) CYCLE
-            FSCU = FSCU + REAL(INDADD,EB)*U(INDF,J,K)*DY(J)*DZ(K)
-         ENDDO
-         ! Y faces
-         DO INDADD=-1,1,2
-            INDF = J - 1 + (INDADD+1)/2
-            IF( FCVAR(I,INDF,K,CC_FGSC,JAXIS) /= CC_SOLID ) CYCLE
-            FSCU = FSCU + REAL(INDADD,EB)*V(I,INDF,K)*DX(I)*DZ(K)
-         ENDDO
-         ! Z faces
-         DO INDADD=-1,1,2
-            INDF = K - 1 + (INDADD+1)/2
-            IF( FCVAR(I,J,INDF,CC_FGSC,KAXIS) /= CC_SOLID ) CYCLE
-            FSCU = FSCU + REAL(INDADD,EB)*W(I,J,INDF)*DX(I)*DY(J)
-         ENDDO
-
-         ! Now Define total area of INBOUNDARY cut-faces:
-         ICF=CCVAR(I,J,K,CC_IDCF);
-         ICF_COND : IF (ICF > 0) THEN
-            NFACE = CUT_FACE(ICF)%NFACE
-            AREATOT = SUM ( CUT_FACE(ICF)%AREA(1:NFACE) )
-            DO JCC =1,CUT_CELL(ICC)%NCELL
-               IFC_LOOP : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-                  IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-                  IF (CUT_CELL(ICC)%FACE_LIST(1,IFACE) == CC_FTYPE_CFINB) THEN
-                     IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-                     ICFC    = CUT_FACE(ICF)%CFACE_INDEX(IFACE2)
-                     IF(PRES_ON_WHOLE_DOMAIN) THEN
-                        CUT_FACE(ICF)%VELS(IFACE2)  = 1._EB/AREATOT*FSCU ! +ve into the solid Velocity error
-                        CUT_FACE(ICF)%VEL( IFACE2)  = 1._EB/AREATOT*FSCU
-                     ELSE
-                        CUT_FACE(ICF)%VELS(IFACE2)  = 0._EB
-                        CUT_FACE(ICF)%VEL( IFACE2)  = 0._EB
-                     ENDIF
-                  ENDIF
-               ENDDO IFC_LOOP
-            ENDDO
-         ENDIF ICF_COND
-      ENDDO ICC_LOOP
+      ! INBOUNDARY cut-faces are initialized with 0._EB velocity, that will be changed in
+      ! CFACE_PREDICT_NORMAL_VELOCITY.
 
    ENDIF PERIODIC_TEST_COND
 
@@ -11590,7 +11432,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       F_Z(:) = 0._EB
       CALL GET_EXPLICIT_ADVDIFFVECTOR_SCALAR_3D(N)
 
-      ! Add Advective fluxes due to PRES_ON_WHOLE_DOMAIN for F_Z:
+      ! Add Advective fluxes for F_Z:
       CALL GET_ADVDIFFVECTOR_SCALAR_3D(N)
 
       ! Here add the reaction source term M_DOT_PPP, treated explicitly:
@@ -12143,9 +11985,6 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDDO
 
    ENDDO
-
-   ! Case of PRES_ON_WHOLE_DOMAIN, we have non-zero velocities on INBOUNDARY cut-faces:
-   ! Done on CALL GET_ADVDIFFVECTOR_SCALAR_3D(N)
 
    ! Then add (Del rho D Del Z)*dv computed on CCDIVERGENCE_PART_1:
    ! Loop over regular cells on CC region:
@@ -15800,7 +15639,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
    ENDDO ICC_LOOP
 
-   IF(.NOT.PRES_ON_WHOLE_DOMAIN .AND. STORE_CARTESIAN_DIVERGENCE) THEN
+   IF(STORE_CARTESIAN_DIVERGENCE) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -19774,16 +19613,11 @@ INTEGER, INTENT(OUT):: IUNKH
 INTEGER :: ICC
 
 IUNKH    = CC_UNDEFINED ! This is < 0.
-IF(.NOT.PRES_ON_WHOLE_DOMAIN ) THEN
-
-   ! Regular gas cell, taken care of before.
-   ! Check cut-cell:
-   ICC = CCVAR(I,J,K,CC_IDCC)
-   ! If theres is a cut-cell ICC then CUT_CELL(ICC)%UNKH(1) has been populated.
-   IF (ICC > 0) IUNKH = CUT_CELL(ICC)%UNKH(1)
-
-ENDIF
-
+! Regular gas cell, taken care of before.
+! Check cut-cell:
+ICC = CCVAR(I,J,K,CC_IDCC)
+! If theres is a cut-cell ICC then CUT_CELL(ICC)%UNKH(1) has been populated.
+IF (ICC > 0) IUNKH = CUT_CELL(ICC)%UNKH(1)
 
 RETURN
 END SUBROUTINE GET_CC_UNKH
@@ -19798,12 +19632,10 @@ INTEGER, INTENT(OUT):: IROW
 
 ! Local variable:
 INTEGER :: ICC
-IROW    = CC_UNDEFINED ! This is < 0.
-IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-   ICC = CCVAR(I,J,K,CC_IDCC)
-   ! If theres is a cut-cell ICC then CUT_CELL(ICC)%UNKH(1) has been populated.
-   IF (ICC > 0) IROW     = CUT_CELL(ICC)%UNKH(1) - ZONE_SOLVE(IPZ)%UNKH_IND(NM_START)
-ENDIF
+IROW = CC_UNDEFINED ! This is < 0.
+ICC  = CCVAR(I,J,K,CC_IDCC)
+! If theres is a cut-cell ICC then CUT_CELL(ICC)%UNKH(1) has been populated.
+IF (ICC > 0) IROW     = CUT_CELL(ICC)%UNKH(1) - ZONE_SOLVE(IPZ)%UNKH_IND(NM_START)
 
 RETURN
 END SUBROUTINE GET_CC_IROW
@@ -21836,14 +21668,14 @@ FLAG12_COND : IF (FLAG12) THEN
    ENDDO
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
       CC => CUT_CELL(ICC); I=CC%IJK(IAXIS); J=CC%IJK(JAXIS); K=CC%IJK(KAXIS); IF(CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-      IF(.NOT.PRES_ON_WHOLE_DOMAIN .AND. ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ ) CYCLE
+      IF(ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ ) CYCLE
       NUNKH_LC(NM) = NUNKH_LC(NM) + 1
       CUT_CELL(ICC)%UNKH(1:CC%NCELL) = NUNKH_LC(NM)
    ENDDO
 ELSE
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
       CC => CUT_CELL(ICC); I=CC%IJK(IAXIS); J=CC%IJK(JAXIS); K=CC%IJK(KAXIS); IF(CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-      IF(.NOT.PRES_ON_WHOLE_DOMAIN .AND. ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ ) CYCLE
+      IF(ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ ) CYCLE
       DO JCC=1,CC%NCELL
          CUT_CELL(ICC)%UNKH(JCC) = CUT_CELL(ICC)%UNKH(JCC) + ZONE_SOLVE(IPZ)%UNKH_IND(NM)
       ENDDO
@@ -21885,15 +21717,10 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    ICC=CCVAR(II,JJ,KK,CC_IDCC)
 
-   IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-      IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
-         MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
-      ELSE
-         MESHES(NM)%CCVAR(II,JJ,KK,CC_UNKH) = INT(OM%HS(IIO,JJO,KKO))
-      ENDIF
+   IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
+      MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
    ELSE
       MESHES(NM)%CCVAR(II,JJ,KK,CC_UNKH) = INT(OM%HS(IIO,JJO,KKO))
-      IF (ICC > 0) MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = MESHES(NM)%CCVAR(II,JJ,KK,CC_UNKH)
    ENDIF
 
 ENDDO EXTERNAL_WALL_LOOP
@@ -21920,21 +21747,12 @@ INTEGER, INTENT(IN) :: NM
 ! Local Variables:
 INTEGER :: I,J,K,ICC
 
-IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
-      J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
-      K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
-      HS(I,J,K)= REAL(MESHES(NM)%CUT_CELL(ICC)%UNKH(1),EB)
-   ENDDO
-ELSE
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
-      J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
-      K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
-      MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(HS(I,J,K))
-   ENDDO
-ENDIF
+DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+   I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
+   J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
+   K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
+   HS(I,J,K)= REAL(MESHES(NM)%CUT_CELL(ICC)%UNKH(1),EB)
+ENDDO
 
 RETURN
 END SUBROUTINE COPY_CC_UNKH_TO_HS

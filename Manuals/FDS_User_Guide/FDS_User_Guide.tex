@@ -2280,16 +2280,13 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set \ct{HEAT_TRANSFER_MODEL} equal to \ct{'LOGLAW'} on the \ct{SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
 \subsubsection{Blowing Heat Transfer}
-\label{blowing}
+\label{info:blowing}
 
-If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. Adding \ct{BLOWING=T} to the \ct{SURF} line will account for this effect, except for DNS simulations where empirical heat transfer correlations are not used. When \ct{BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing}:
+If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow normal to the surface disrupts the thermal boundary layer. Blowing tends to decrease the heat transfer coefficient while sucking tends to increase it. Adding \ct{BLOWING=T} to the \ct{SURF} line will account for this effect, except for DNS simulations where empirical heat transfer correlations are not used. When \ct{BLOWING=T}, the heat transfer coefficient is adjusted as follows~\cite{Plate_blowing,Taylor&Krishna}:
 \begin{equation}
-      \Phi_h = \frac{\dot{m}'' c_p}{h}
+      h_{\rm blowing} = \underbrace{\left[\frac{\Phi_h}{{\exp}(\Phi_h)-1}\right]}_{{\mbox{\scriptsize \tt BLOWING CORRECTION}}} h \quad ; \quad \Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
-\begin{equation}
-      h_{\rm blowing} = \frac{\Phi_h}{{\rm e}^{\Phi_h}-1} h
-\end{equation}
-where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.
+where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.,
 
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -3394,12 +3391,12 @@ The \ct{HEAT_OF_REACTION} is the energy gained or lost in converting the materia
 
 FDS will attempt to adjust all material enthalpies so that internal energy is conserved. For each material reaction a linear equation is defined:
 \be
-H_{\rm x} \left(T_{\rm ref} \right) + H_{\rm x,adj} + H_{\rm x,r} \left(T_{\rm ref} \right) = \sum_{i=1}^{\rm N_residues} \nu_{\rm i} \left( H_{\rm i} \left(T_{\rm ref} \right) + H_{\rm i,adj}  \right) +
-\sum_{j=1}^{\rm N_species} \nu_{\rm j}  H_{\rm j} \left(T_{\rm ref} \right)
+H_{x} \left(T_{\rm ref} \right) + H_{x,\rm adj} + H_{x,\rm r} \left(T_{\rm ref} \right) = \sum_{i=1}^{N_{\rm residues}} \nu_{i} \left( H_{i} \left(T_{\rm ref} \right) + H_{i,\rm adj}  \right) +
+\sum_{j=1}^{N_{\rm species}} \nu_{j}  H_{j} \left(T_{\rm ref} \right)
 \ee
-where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the \ct{HEAT_OF_REACTION}, $T_{\rm ref}$ is the temperature at which the \ct{HEAT_OF_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct entahlpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined \ct{SPECIFIC_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Sec.~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pryolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on \ct{REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on \ct{REAC}, FDS adjusts the species enthalpy so that the correct \ct{HEAT_OF_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
+where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the \ct{HEAT_OF_REACTION}, $T_{\rm ref}$ is the temperature at which the \ct{HEAT_OF_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct enthalpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined \ct{SPECIFIC_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Sec.~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pyrolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on \ct{REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on \ct{REAC}, FDS adjusts the species enthalpy so that the correct \ct{HEAT_OF_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
 
-The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is overdetermined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactios, then the system is underdetertmined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude.
+The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is over-determined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactions, then the system is under-determined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude.
 
 In the case of a singular matrix, a warning is written that no adjustment is done. A singular matrix happens when a row in the matrix is a linear combination of one or more other rows. If this happens, there is likely an error in one of the \ct{MATL} definitions.
 
@@ -3916,7 +3913,7 @@ The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ dir
 \subsection{HVAC Mass Transport}
 \label{info:hvacmasstransport}
 
-FDS can account for the time delay of species and enthalpy transport through HVAC networks by discretizing individual HVAC ducts. This can by done using either \ct{N_CELLS} on an HVAC duct input or by setting \ct{HVAC_MASS_TRANSPORT_CELL_L}. The input \ct{N_CELLS} divides the length on the duct into \ct{N_CELLS} uniform segments. The parameter \ct{HVAC_MASS_TRANSPORT_CELL_L} defines a cell length that is applied to all ducts in an input file unless overridden by \ct{N_CELLS}. IF specified, the number of cells for a duct is taken as the nearest integer of the duct \ct{LENGTH} divided by \ct{HVAC_MASS_TRANSPORT_CELL_L}. The current HVAC solver does not account for heat loss in the HVAC network.
+FDS can account for the time delay of species and enthalpy transport through HVAC networks by discretizing individual HVAC ducts. This can by done using either \ct{N_CELLS} on an HVAC duct input or by setting \ct{HVAC_MASS_TRANSPORT_CELL_L} on \ct{MISC}. The input \ct{N_CELLS} divides the length on the duct into \ct{N_CELLS} uniform segments. The parameter \ct{HVAC_MASS_TRANSPORT_CELL_L} defines a cell length that is applied to all ducts in an input file unless overridden by \ct{N_CELLS}. When specified, the number of cells for a duct is the duct \ct{LENGTH} divided by \ct{HVAC_MASS_TRANSPORT_CELL_L} rounded to the nearest integer (minimum of 1 cell). The current HVAC solver does not account for heat loss in the HVAC network.
 
 If a duct is discretized, then all other ducts in that ductrun must also be discretized. There is no requirement that the same cell size be used for all ducts in a ductrun. A ductrun is any collection of interconnected HVAC components where a path exists between two components via traversing ducts in the ductrun.
 
@@ -8700,7 +8697,7 @@ It should be noted that devices are updated sequentially in the order that they 
 \subsection{Example Case: Heat Release Rate of a Spreading Fire}
 \label{spreading_fire}
 
-In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.  
+In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
 \begin{lstlisting}
 &VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1, AREA_ADJUST=F /
 
@@ -11447,15 +11444,16 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \endhead
 \ct{ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C          & B,D          \\ \hline
 \ct{AMPUA}$^2$                                 & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
-\ct{AMPUA_Z}$^1$                              & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
+\ct{AMPUA_Z}$^1$                               & Section~\ref{bucket_test_1}                   & kg/m$^2$           & B,D          \\ \hline
 \ct{BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C          & B,D          \\ \hline
+\ct{BLOWING CORRECTION}                        & Section~\ref{info:blowing}                    &                    & B,D          \\ \hline
 \ct{BURNING RATE}                              & Mass loss rate of fuel                        & \unit{kg/(m^2.s)}  & B,D          \\ \hline
 \ct{CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{CONVECTIVE HEAT FLUX GAUGE}                & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
 {\scriptsize\tt CONVECTIVE HEAT TRANSFER REGIME}           & Section \ref{info:convection}                 &                    & B,D          \\ \hline
 \ct{CPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
-\ct{CPUA_Z}$^1$                               & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
+\ct{CPUA_Z}$^1$                                & Section~\ref{bucket_test_1}                   & \unit{kW/m^2}           & B,D          \\ \hline
 \ct{DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s                & B,D          \\ \hline
 \ct{FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s                & B,D          \\ \hline
 \ct{GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}           & B,D          \\ \hline
@@ -12577,7 +12575,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{H_F_REFERENCE_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
 \ct{HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
 \ct{HVAC_LOCAL_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
-\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Logical      & Section ~\ref{info:hvacmasstransport}   &            & \ct{F}           \\ \hline
+\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Real          & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
 \ct{HVAC_PRES_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
 \ct{HVAC_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & \ct{F}           \\ \hline
 \ct{IBLANK_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & \ct{T}           \\ \hline
@@ -13358,7 +13356,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{ALLOW_UNDERSIDE_PARTICLES}                         & Logical         & Section~\ref{info:surface_droplets}       &            & \ct{F}                          \\ \hline
 \ct{AREA_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 \ct{BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & \ct{'EXPOSED'}         \\ \hline
-\ct{BLOWING}                                             & Logical         & Section~\ref{blowing}                     &                     &                         \\ \hline
+\ct{BLOWING}                                             & Logical         & Section~\ref{info:blowing}                     &                     &                         \\ \hline
 \ct{BURN_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & \ct{F}                 \\ \hline
 \ct{BURN_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 \ct{CELL_SIZE(:)}                                       & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
