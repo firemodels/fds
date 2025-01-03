@@ -11704,13 +11704,13 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 
 INTEGER :: N,N_TOTAL,NM,NNN,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,II,JJ,KK,OBST_INDEX,N_EXPLICIT,N_IMPLICIT_VENTS,I_MODE,&
-           N_ORIGINAL_VENTS,IC0,IC1
+           N_ORIGINAL_VENTS,IC0,IC1,IC
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB_USER(6),XB_MESH(6), &
             REYNOLDS_STRESS(3,3),L_EDDY,VEL,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-LOGICAL :: REJECT_VENT,OUTLINE,GEOM,SOLID_FOUND,AREA_ADJUST
+LOGICAL :: REJECT_VENT,OUTLINE,GEOM,SOLID_FOUND,AREA_ADJUST,BLOCKED
 TYPE IMPLICIT_VENT_TYPE
    REAL(EB) :: XB(6)
    INTEGER, DIMENSION(3) :: RGB=-1
@@ -11959,6 +11959,45 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (ABS(XB_MESH(5)-XB_MESH(6))<=SPACING(XB_MESH(6))) THEN
                   IF (I1==I2  .OR. J1==J2) REJECT_VENT=.TRUE.
                   IF (K1>KBAR .OR. K2<0)   REJECT_VENT=.TRUE.
+               ENDIF
+
+               ! Look for vents that are completely blocked by non-removable obstructions
+
+               IF (I1==I2 .AND. (I1==0 .OR. I2==IBAR)) THEN
+                  BLOCKED = .TRUE.
+                  DO K=K1+1,K2
+                     DO J=J1+1,J2
+                        IC = CELL_INDEX(I1+1,J,K)
+                        IF (I1==0    .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                        IC = CELL_INDEX(I2,J,K)
+                        IF (I2==IBAR .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                     ENDDO
+                  ENDDO
+                  IF (BLOCKED) REJECT_VENT = .TRUE.
+               ENDIF
+               IF (J1==J2 .AND. (J1==0 .OR. J2==JBAR)) THEN
+                  BLOCKED = .TRUE.
+                  DO K=K1+1,K2
+                     DO I=I1+1,I2
+                        IC = CELL_INDEX(I,J1+1,K)
+                        IF (J1==0    .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                        IC = CELL_INDEX(I,J2,K)
+                        IF (J2==JBAR .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                     ENDDO
+                  ENDDO
+                  IF (BLOCKED) REJECT_VENT = .TRUE.
+               ENDIF
+               IF (K1==K2 .AND. (K1==0 .OR. K2==KBAR)) THEN
+                  BLOCKED = .TRUE.
+                  DO J=J1+1,J2
+                     DO I=I1+1,I2
+                        IC = CELL_INDEX(I,J,K1+1)
+                        IF (K1==0    .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                        IC = CELL_INDEX(I,J,K2)
+                        IF (K2==KBAR .AND. (.NOT.CELL(IC)%SOLID.OR.OBSTRUCTION(CELL(IC)%OBST_INDEX)%REMOVABLE)) BLOCKED = .FALSE.
+                     ENDDO
+                  ENDDO
+                  IF (BLOCKED) REJECT_VENT = .TRUE.
                ENDIF
 
                ! If the VENT is rejected, cycle
