@@ -110,24 +110,27 @@ IF (CC_IBM) THEN
       ENDDO
    ENDDO
    DEALLOCATE(SUM_AREA)
-
-ELSE
-
-   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      BC => BOUNDARY_COORD(WC%BC_INDEX)
-      IF (BC%IOR==3 .AND. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         IF (WC%OBST_INDEX>0) THEN
-            Z_LS(BC%IIG,BC%JJG) = OBSTRUCTION(WC%OBST_INDEX)%Z2
-         ELSE
-            Z_LS(BC%IIG,BC%JJG) = Z(BC%KKG-1)
-         ENDIF
-         K_LS(BC%IIG,BC%JJG) = BC%KKG
-         LS_SURF_INDEX(BC%IIG,BC%JJG)= WC%SURF_INDEX
-      ENDIF
-   ENDDO
-
 ENDIF
+
+! Set up level set on cartesian faces only where they are not under a GEOM
+DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   IF (BC%IOR==3 .AND. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+      IF (WC%OBST_INDEX>0) THEN
+         IF (OBSTRUCTION(WC%OBST_INDEX)%Z2<Z_LS(BC%IIG,BC%JJG)) CYCLE
+         Z_LS(BC%IIG,BC%JJG) = OBSTRUCTION(WC%OBST_INDEX)%Z2
+      ELSE
+         IF (Z(BC%KKG-1)<Z_LS(BC%IIG,BC%JJG)) CYCLE
+         Z_LS(BC%IIG,BC%JJG) = Z(BC%KKG-1)
+      ENDIF
+      K_LS(BC%IIG,BC%JJG) = BC%KKG
+      IF (CC_IBM) THEN
+         LS_KLO_TERRAIN(BC%IIG,BC%JJG) = BC%KKG; LS_KHI_TERRAIN(BC%IIG,BC%JJG) = BC%KKG
+      ENDIF
+      LS_SURF_INDEX(BC%IIG,BC%JJG)= WC%SURF_INDEX
+   ENDIF
+ENDDO
 
 Z_LS(1:IBAR,   0) = 2._EB*Z_LS(1:IBAR,   1) - Z_LS(1:IBAR,   2)
 Z_LS(1:IBAR,JBP1) = 2._EB*Z_LS(1:IBAR,JBAR) - Z_LS(1:IBAR,JBM1)
@@ -308,6 +311,7 @@ DO JJG=1,JBAR
 
    ENDDO
 ENDDO
+
 
 T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2
@@ -509,14 +513,25 @@ IF (.NOT.PREDICTOR) THEN
             IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
             DO IKT=LS_KLO_TERRAIN(IIG,JJG),LS_KHI_TERRAIN(IIG,JJG)
                ! Loop over all CFACEs corresponding to IIG,JJG and set B1%T_IGN and B2%PHI_LS as below
-               ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! CC_IDCF = 3 CUT_FACE container for this cell.
-               DO IW=1,CUT_FACE(ICF)%NFACE ! All CC_INBOUNDARY CFACES on this cell.
-                  CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
-                  B1  => BOUNDARY_PROP1(CFA%B1_INDEX)
+               ICF = CCVAR(IIG,JJG,IKT,3) ! CC_IDCF = 3 CUT_FACE container for this cell.
+               IF (ICF<1) THEN
+                  IF (K_LS(IIG,JJG)<1) CYCLE
+                  IC = CELL_INDEX(IIG,JJG,K_LS(IIG,JJG))
+                  IW = CELL(IC)%WALL_INDEX(-3)
+                  WC => WALL(IW)
+                  B1 => BOUNDARY_PROP1(WC%B1_INDEX)
                   IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
-                  B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+                  B2 => BOUNDARY_PROP2(WC%B2_INDEX)
                   B2%PHI_LS = PHI_LS(IIG,JJG)
-               ENDDO
+               ELSE  
+                  DO IW=1,CUT_FACE(ICF)%NFACE ! All CC_INBOUNDARY CFACES on this cell.
+                     CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
+                     B1  => BOUNDARY_PROP1(CFA%B1_INDEX)
+                     IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
+                     B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
+                     B2%PHI_LS = PHI_LS(IIG,JJG)
+                  ENDDO
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
