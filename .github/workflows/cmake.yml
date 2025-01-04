@@ -33,7 +33,7 @@ permissions:
 jobs:
   cmake-linux:
     name: ${{ matrix.container }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
-    runs-on: [ubuntu-latest]
+    runs-on: [ubuntu-24.04]
     container: ${{ matrix.container }}
     strategy:
       matrix:
