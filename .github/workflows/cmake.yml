@@ -271,7 +271,7 @@ jobs:
     - name: build fds
       run: |
         call Build\Scripts\setup_intel_compilers.bat
-        cmake -B builddir -S . -G Ninja -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_SUNDIALS=OFF -DUSE_HYPRE=ON -DHYPRE_FMANGLE=4 -DUSE_OPENMP=${{matrix.openmp}}
+        cmake -B builddir -S . -G Ninja -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_SUNDIALS=OFF -DUSE_HYPRE=ON -DUSE_OPENMP=${{matrix.openmp}}
         cmake --build builddir -j --target fds
 
     - name: Test
