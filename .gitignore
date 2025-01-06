@@ -99,3 +99,8 @@ Validation/*/FDS_Output_Files/*.csv
 
 # Verification script generated fds files
 Verification/Timing_Benchmarks/t*.fds
+
+# Local cmake configuration
+CMakeUserPresets.json
+Build/cmakeb/
+.vscode/

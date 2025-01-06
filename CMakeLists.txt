@@ -151,16 +151,17 @@ if(USE_HYPRE)
         set(HYPRE_GIT_VERSION "2.32.0" )
         FetchContent_Declare(
             HYPRE
-            # GIT_REPOSITORY https://github.com/hypre-space/hypre.git
-            # GIT_TAG        b6d8c3085af64988f8f8bc21b7aef12ab49c5430 # v${HYPRE_GIT_VERSION}
-
+            GIT_REPOSITORY https://github.com/hypre-space/hypre.git
             # Currently we need to refer directly to a commit which contains a
             # patch to handle HYPRE_FMANGLE
-            GIT_REPOSITORY https://github.com/JakeOShannessy/hypre.git
-            GIT_TAG        b6d8c3085af64988f8f8bc21b7aef12ab49c5430 # v2.32.0
+            GIT_TAG        6d01417697aa84d118eb1e1eb91315df42575be5 # v${HYPRE_GIT_VERSION}
             SOURCE_SUBDIR  src
             OVERRIDE_FIND_PACKAGE
         )
+        # Set some options for building hypre
+        if (WIN32)
+            set(HYPRE_ENABLE_FMANGLE CAPS)
+        endif()
         FetchContent_MakeAvailable(HYPRE)
     endif()
 

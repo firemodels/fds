@@ -1,0 +1,422 @@
+{
+    "version": 9,
+    "configurePresets": [
+        {
+            "name": "impi_intel",
+            "hidden": true,
+            "environment": {
+                "CC": "mpiicx",
+                "CXX": "mpiicx",
+                "FC": "mpiifx"
+            }
+        },
+        {
+            "name": "ompi_gnu",
+            "hidden": true,
+            "environment": {
+                "CC": "mpicc",
+                "CXX": "mpic++",
+                "FC": "mpifort"
+            }
+        },
+        {
+            "name": "impi_intel_rel",
+            "binaryDir": "./Build/cmakeb/impi_intel_rel",
+            "inherits": "impi_intel",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "condition": {
+                "type": "notEquals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_db",
+            "binaryDir": "./Build/cmakeb/impi_intel_db",
+            "inherits": "impi_intel",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "impi_intel_dv",
+            "binaryDir": "./Build/cmakeb/impi_intel_dv",
+            "inherits": "impi_intel",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "impi_intel_win_rel",
+            "binaryDir": "./Build/cmakeb/impi_intel_win_rel",
+            "generator": "NMake Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_db",
+            "binaryDir": "./Build/cmakeb/impi_intel_win_db",
+            "generator": "NMake Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_dv",
+            "binaryDir": "./Build/cmakeb/impi_intel_win_dv",
+            "generator": "NMake Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "ompi_gnu_rel",
+            "binaryDir": "./Build/cmakeb/ompi_gnu_rel",
+            "inherits": "ompi_gnu",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "ompi_gnu_db",
+            "binaryDir": "./Build/cmakeb/ompi_gnu_db",
+            "inherits": "ompi_gnu",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "ompi_gnu_dv",
+            "binaryDir": "./Build/cmakeb/ompi_gnu_dv",
+            "inherits": "ompi_gnu",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "impi_intel_rel",
+            "configurePreset": "impi_intel_rel",
+            "jobs": 0,
+            "condition": {
+                "type": "notEquals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_db",
+            "configurePreset": "impi_intel_db",
+            "jobs": 0
+        },
+        {
+            "name": "impi_intel_dv",
+            "configurePreset": "impi_intel_dv",
+            "jobs": 0
+        },
+        {
+            "name": "impi_intel_win_rel",
+            "configurePreset": "impi_intel_win_rel",
+            "jobs": 0,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_db",
+            "configurePreset": "impi_intel_win_db",
+            "jobs": 0,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_dv",
+            "configurePreset": "impi_intel_win_dv",
+            "jobs": 0,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "ompi_gnu_rel",
+            "configurePreset": "ompi_gnu_rel",
+            "jobs": 0
+        },
+        {
+            "name": "ompi_gnu_db",
+            "configurePreset": "ompi_gnu_db",
+            "jobs": 0
+        },
+        {
+            "name": "ompi_gnu_dv",
+            "configurePreset": "ompi_gnu_dv",
+            "jobs": 0
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "impi_intel_rel",
+            "configurePreset": "impi_intel_rel",
+            "execution": {
+                "jobs": 0
+            },
+            "condition": {
+                "type": "notEquals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_db",
+            "configurePreset": "impi_intel_db",
+            "execution": {
+                "jobs": 0
+            }
+        },
+        {
+            "name": "impi_intel_dv",
+            "configurePreset": "impi_intel_dv",
+            "execution": {
+                "jobs": 0
+            }
+        },
+        {
+            "name": "impi_intel_win_rel",
+            "configurePreset": "impi_intel_win_rel",
+            "execution": {
+                "jobs": 0
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_db",
+            "configurePreset": "impi_intel_win_db",
+            "execution": {
+                "jobs": 0
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "impi_intel_win_dv",
+            "configurePreset": "impi_intel_win_dv",
+            "execution": {
+                "jobs": 0
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "ompi_gnu_rel",
+            "configurePreset": "ompi_gnu_rel",
+            "execution": {
+                "jobs": 0
+            }
+        },
+        {
+            "name": "ompi_gnu_db",
+            "configurePreset": "ompi_gnu_db",
+            "execution": {
+                "jobs": 0
+            }
+        },
+        {
+            "name": "ompi_gnu_dv",
+            "configurePreset": "ompi_gnu_dv",
+            "execution": {
+                "jobs": 0
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "impi_intel_rel",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_rel"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_rel"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_rel"
+                }
+            ]
+        },
+        {
+            "name": "impi_intel_db",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_db"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_db"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_db"
+                }
+            ]
+        },
+        {
+            "name": "impi_intel_dv",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_dv"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_dv"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_dv"
+                }
+            ]
+        },
+        {
+            "name": "impi_intel_win_rel",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_win_rel"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_win_rel"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_win_rel"
+                }
+            ]
+        },
+        {
+            "name": "impi_intel_win_db",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_win_db"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_win_db"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_win_db"
+                }
+            ]
+        },
+        {
+            "name": "impi_intel_win_dv",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "impi_intel_win_dv"
+                },
+                {
+                    "type": "build",
+                    "name": "impi_intel_win_dv"
+                },
+                {
+                    "type": "test",
+                    "name": "impi_intel_win_dv"
+                }
+            ]
+        },
+        {
+            "name": "ompi_gnu_rel",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ompi_gnu_rel"
+                },
+                {
+                    "type": "build",
+                    "name": "ompi_gnu_rel"
+                },
+                {
+                    "type": "test",
+                    "name": "ompi_gnu_rel"
+                }
+            ]
+        },
+        {
+            "name": "ompi_gnu_db",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ompi_gnu_db"
+                },
+                {
+                    "type": "build",
+                    "name": "ompi_gnu_db"
+                },
+                {
+                    "type": "test",
+                    "name": "ompi_gnu_db"
+                }
+            ]
+        },
+        {
+            "name": "ompi_gnu_dv",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ompi_gnu_dv"
+                },
+                {
+                    "type": "build",
+                    "name": "ompi_gnu_dv"
+                },
+                {
+                    "type": "test",
+                    "name": "ompi_gnu_dv"
+                }
+            ]
+        }
+    ]
+}
