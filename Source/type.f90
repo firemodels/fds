@@ -499,7 +499,6 @@ END TYPE THIN_WALL_TYPE
 TYPE SPECIES_TYPE
 
    REAL(EB) :: MW=0._EB                           !< Molecular weight (g/mol)
-   REAL(EB) :: YY0=0._EB                          !< Inital mass fraction
    REAL(EB) :: RCON                               !< Gas constant divided by molecular weight, \f$ R_0/W \f$ (J/kg/K)
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB  !< Light extinction coefficient (m2/kg)
    REAL(EB) :: SPECIFIC_HEAT=-1._EB               !< Specific heat input by user (J/kg/K)
@@ -1556,7 +1555,7 @@ TYPE RAD_FILE_TYPE
 END TYPE RAD_FILE_TYPE
 
 TYPE PATCH_TYPE
-   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,MESH_INDEX=0
+   INTEGER :: I1,I2,J1,J2,K1,K2,IG1,IG2,JG1,JG2,KG1,KG2,IOR=0,OBST_INDEX=0,VENT_INDEX=0,MESH_INDEX=0
 END TYPE PATCH_TYPE
 
 TYPE BOUNDARY_FILE_TYPE
