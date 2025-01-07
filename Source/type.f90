@@ -498,7 +498,6 @@ END TYPE THIN_WALL_TYPE
 TYPE SPECIES_TYPE
 
    REAL(EB) :: MW=0._EB                           !< Molecular weight (g/mol)
-   REAL(EB) :: YY0=0._EB                          !< Inital mass fraction
    REAL(EB) :: RCON                               !< Gas constant divided by molecular weight, \f$ R_0/W \f$ (J/kg/K)
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB  !< Light extinction coefficient (m2/kg)
    REAL(EB) :: SPECIFIC_HEAT=-1._EB               !< Specific heat input by user (J/kg/K)
