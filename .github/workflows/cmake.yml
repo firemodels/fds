@@ -78,10 +78,10 @@ jobs:
       # if: endsWith(matrix.compiler_mpi, '_intelmpi')
       with:
         components: |
-          ifx
+          ifx@2025.0.1
           icx
           impi
-          mkl
+          mkl@2025.0.1
 
     - name: install openmpi
       if: endsWith(matrix.compiler_mpi, '_openmpi') && (startsWith(matrix.container, 'rockylinux') || startsWith(matrix.container, 'fedora'))
