@@ -63,6 +63,7 @@ cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SP_Wood_Cribs;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
+cd TUS_Facade;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..
