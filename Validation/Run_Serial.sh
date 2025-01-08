@@ -18,6 +18,7 @@ cd FM_Parallel_Panels; ./Run_All.sh $OPTIONS; cd ..
 cd Hamins_Gas_Burners; ./Run_All.sh $OPTIONS; cd ..
 cd Heskestad_Flame_Height; ./Run_All.sh $OPTIONS; cd ..
 cd Insulation_Materials; ./Run_All.sh $OPTIONS; cd ..
+cd Kashiwagi_Gasification; ./Run_All.sh $OPTIONS; cd ..
 cd LEMTA_Spray; ./Run_All.sh $OPTIONS; cd ..
 cd LLNL_Enclosure; ./Run_All.sh $OPTIONS; cd ..
 cd NIST_He_2009; ./Run_All.sh $OPTIONS; cd ..
