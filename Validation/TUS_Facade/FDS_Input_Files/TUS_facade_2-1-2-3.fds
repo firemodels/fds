@@ -36,7 +36,7 @@ ISO max 5.6 MW
       HRRPUA=3783.8
       RAMP_Q='fireramp',
       MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
-      
+
 &RAMP ID='fireramp', T=0.0, F=0.0 /
 &RAMP ID='fireramp', T=10.0, F=0.125 /
 &RAMP ID='fireramp', T=300.0, F=0.125 /
@@ -97,7 +97,7 @@ ISOWOOL 1260
 &RAMP ID = 'c-ceramic', T = 0., F = 0.1/
 &RAMP ID = 'c-ceramic', T = 600., F = 0.15/
 &RAMP ID = 'c-ceramic', T = 800., F = 0.22/
-	
+
 ISOURU BOARD 1260
 http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
 &MATL ID = 'CERAMIC_FIBRE_BOARD'
@@ -106,7 +106,7 @@ http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
       CONDUCTIVITY_RAMP = 'c-board'
       SPECIFIC_HEAT= 1.0/
 
-&RAMP ID = 'c-board', T = 0., F = 0.07/	  
+&RAMP ID = 'c-board', T = 0., F = 0.07/
 &RAMP ID = 'c-board', T = 400., F = 0.07/
 &RAMP ID = 'c-board', T = 600., F = 0.12/
 &RAMP ID = 'c-board', T = 800., F = 0.16/
@@ -167,7 +167,7 @@ According to EN 1094-4:1995
 Static objects
 
 &VENT 	MB = 'ZMIN',					SURF_ID = 'FLOOR'	/	Floor
-&OBST	XB = 0.0,4.0,-0.1,4.1,1.7,1.8 COLOR='INVISIBLE'	SURF_ID = 'CEILING'	/ 	Ceiling
+&OBST	XB = 0.0,4.0,-0.1,4.1,1.7,1.8, COLOR='INVISIBLE',	SURF_ID = 'CEILING'	/ 	Ceiling
 &VENT	MB = 'XMIN', MESH_ID='m1',			SURF_ID = 'WALL'	/ 	Wall 1(side left)
 &VENT	MB = 'XMAX', MESH_ID='m1',			SURF_ID = 'WALL'	/ 	Wall 2(side right)
 &OBST	XB = -0.1,4.2, 4.0,4.1, -0.1,1.8,		SURF_ID = 'WALL'	/ 	Wall 2(back)
@@ -178,10 +178,10 @@ Static objects
 
 &OBST	XB = 3.05,3.15, -1.4,-0.2, 0.0,6.0,	SURF_ID = 'FACADE'		/ 	Side wall(wing)
 
-&VENT	MB='YMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/	
+&VENT	MB='YMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/
 &VENT	MB='XMIN', MESH_ID ='m2',			SURF_ID = 'OPEN'	/	Open surfaces Room back Mesh 2
-&VENT	MB='XMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/	
-&VENT	MB='ZMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/		
+&VENT	MB='XMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/
+&VENT	MB='ZMAX', MESH_ID ='m2',			SURF_ID = 'OPEN'	/
 
 &VENT	MB='YMIN', MESH_ID ='m3',			SURF_ID = 'OPEN'	/ front
 &VENT	MB='XMIN', MESH_ID ='m3',			SURF_ID = 'OPEN'	/ left
@@ -208,44 +208,44 @@ Window
 Gas Temperatures at the facade
 
 Line a
-&DEVC 	XYZ=1.1,-0.25,1.75,	PROP_ID = 'TC', ID='TC_23' / 
-&DEVC 	XYZ=1.1,-0.25,2.6,	PROP_ID = 'TC', ID='TC_20' / 
+&DEVC 	XYZ=1.1,-0.25,1.75,	PROP_ID = 'TC', ID='TC_23' /
+&DEVC 	XYZ=1.1,-0.25,2.6,	PROP_ID = 'TC', ID='TC_20' /
 &DEVC 	XYZ=1.1,-0.25,2.9,	PROP_ID = 'TC', ID='TC_17' /
 &DEVC 	XYZ=1.1,-0.25,3.2,	PROP_ID = 'TC', ID='TC_14' /
-&DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_3' / 
+&DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_3' /
 
 Line b
-&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' / 
-&DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_19' / 
-&DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_16' / 
-&DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_13' / 
-&DEVC 	XYZ=2.0,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_11' / 
-&DEVC 	XYZ=2.0,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_2' / 
+&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' /
+&DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_19' /
+&DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_16' /
+&DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_13' /
+&DEVC 	XYZ=2.0,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_11' /
+&DEVC 	XYZ=2.0,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_2' /
 
 Line c
-&DEVC 	XYZ=2.9,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_21' / 
-&DEVC 	XYZ=2.9,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_18' / 
-&DEVC 	XYZ=2.9,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_15' / 
-&DEVC 	XYZ=2.9,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_12' / 
-&DEVC 	XYZ=2.9,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_10' / 
-&DEVC 	XYZ=2.9,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_1' / 
+&DEVC 	XYZ=2.9,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_21' /
+&DEVC 	XYZ=2.9,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_18' /
+&DEVC 	XYZ=2.9,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_15' /
+&DEVC 	XYZ=2.9,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_12' /
+&DEVC 	XYZ=2.9,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_10' /
+&DEVC 	XYZ=2.9,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_1' /
 
 Gauge Heat fluxes
 Line a
-&DEVC XYZ=1.1,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_10', IOR = -2 / 
-&DEVC XYZ=1.1,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_5', IOR = -2 / 
+&DEVC XYZ=1.1,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_10', IOR = -2 /
+&DEVC XYZ=1.1,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_5', IOR = -2 /
 
 Line b
-&DEVC XYZ=2.0,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_9', IOR = -2 / 
-&DEVC XYZ=2.0,-0.2,2.9, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_7', IOR = -2 / 
-&DEVC XYZ=2.0,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_4', IOR = -2 / 
-&DEVC XYZ=2.0,-0.2,3.7, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_2', IOR = -2 / 
+&DEVC XYZ=2.0,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_9', IOR = -2 /
+&DEVC XYZ=2.0,-0.2,2.9, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_7', IOR = -2 /
+&DEVC XYZ=2.0,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_4', IOR = -2 /
+&DEVC XYZ=2.0,-0.2,3.7, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_2', IOR = -2 /
 
 Line c
-&DEVC XYZ=2.9,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_8', IOR = -2 / 
-&DEVC XYZ=2.9,-0.2,2.9, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_6', IOR = -2 / 
-&DEVC XYZ=2.9,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_3', IOR = -2 / 
-&DEVC XYZ=2.9,-0.2,3.7, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_1', IOR = -2 / 
+&DEVC XYZ=2.9,-0.2,2.6, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_8', IOR = -2 /
+&DEVC XYZ=2.9,-0.2,2.9, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_6', IOR = -2 /
+&DEVC XYZ=2.9,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_3', IOR = -2 /
+&DEVC XYZ=2.9,-0.2,3.7, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_1', IOR = -2 /
 
 Temperature inside chamber
 POLE_A
