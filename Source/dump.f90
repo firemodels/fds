@@ -1230,7 +1230,11 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. M%BNDF_DUMP) THEN
 
       ! Count and allocate the PATCHes
 
-      M%N_PATCH = M%N_EXTERIOR_PATCH
+      IF (BNDF_DEFAULT) THEN
+         M%N_PATCH = M%N_EXTERIOR_PATCH
+      ELSE
+         M%N_PATCH = 0
+      ENDIF
 
       DO N=1,M%N_OBST
          OB=>M%OBSTRUCTION(N)
@@ -1248,16 +1252,22 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. M%BNDF_DUMP) THEN
 
       M%N_BNDF_POINTS = 0
 
-      DO IP=1,M%N_EXTERIOR_PATCH
-         PA => M%PATCH(IP)
-         M%PATCH(IP) = M%EXTERIOR_PATCH(IP)
-         M%N_BNDF_POINTS = M%N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
-         PA%MESH_INDEX = NM
-      ENDDO
+      IF (BNDF_DEFAULT) THEN
+         DO IP=1,M%N_EXTERIOR_PATCH
+            PA => M%PATCH(IP)
+            M%PATCH(IP) = M%EXTERIOR_PATCH(IP)
+            M%N_BNDF_POINTS = M%N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+            PA%MESH_INDEX = NM
+         ENDDO
+      ENDIF
 
       ! Assign coordinate indices for PATCHes that live on the boundaries of obstructions
 
-      IP = M%N_EXTERIOR_PATCH
+      IF (BNDF_DEFAULT) THEN
+         IP = M%N_EXTERIOR_PATCH
+      ELSE
+         IP = 0
+      ENDIF
 
       DO OBST_INDEX=1,M%N_OBST
          OB => M%OBSTRUCTION(OBST_INDEX)
