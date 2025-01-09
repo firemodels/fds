@@ -2296,7 +2296,7 @@ MESH_LOOP: DO NM=1,NMESHES
          WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = -1
       ELSE  ! Tag user-specified vents
          WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = N
-         IF (VT%OBST_INDEX==0) THEN  ! a dummy vent will be created and drawn rather than the actual vent.
+         IF (.NOT.VT%DRAW) THEN  ! a dummy vent will be created and drawn rather than the actual vent.
             VT%COLOR_INDICATOR =  8
             VT%TYPE_INDICATOR  = -2
             VT%TRANSPARENCY    =  0._EB
