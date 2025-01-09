@@ -424,6 +424,9 @@ $QFDS -d Pyrolysis cable_11_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_23_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_701_jacket_mcc.fds
 $QFDS -d Pyrolysis cell_burn_away.fds
+$QFDS -d Pyrolysis cellulose_TGA_1KPM_Air.fds
+$QFDS -d Pyrolysis cellulose_TGA_3KPM_Air.fds
+$QFDS -d Pyrolysis cellulose_TGA_5KPM_Air.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds

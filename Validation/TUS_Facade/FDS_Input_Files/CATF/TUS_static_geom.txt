@@ -1,0 +1,29 @@
+Static objects
+
+&VENT 	DB = 'ZMIN',                            SURF_ID = 'FLOOR'  /	Floor
+
+ROOM    mesh 0.0,4.0, -0.1,4.1, 0.0,1.8 / Room
+
+&OBST   XB = 0.0,4.0, -0.1,4.1, 1.7,1.8,   SURF_ID='CEILING', COLOR='INVISIBLE' /  Ceiling
+&VENT   XB = 0.0,0.0, -0.1,4.1, 0.0,1.8    SURF_ID = 'WALL'   / 	Wall 1(side left)
+&VENT   XB = 4.0,4.0  -0.1,4.1, 0.0,1.8    SURF_ID = 'WALL'   / 	Wall 2(side right)
+&OBST   XB = 0.0,4.0,  4.0,4.1, 0.0,1.8,   SURF_ID = 'WALL'   / 	Wall 2(back)
+
+Facade   mesh 0.0,3.5, -3.0,-0.1, 0.0,6.0 
+&OBST   XB =  0.0,4.0, -0.2, 0.0, 0.0,1.8, SURF_ID6 = 'WALL','WALL','FACADE','FRONTWALL' / Facade SPECIMEN(lower part)
+&OBST   XB =  0.0,3.5, -0.2,-0.1, 1.8,6.0, SURF_ID = 'FACADE' / 	Facade SPECIMEN(upper part)
+&OBST   XB = 3.05,3.15,-1.4,-0.2, 0.0,6.0, SURF_ID = 'FACADE' / 	Side wall(wing)
+
+Space behind the room
+         mesh 0.0,4.0,  4.1,5.1, 0.0,1.8 
+&VENT    XB = 0.0,4.0,  5.1,5.1, 0.0,1.8,  SURF_ID = 'OPEN' /	Open surfaces Room back Mesh 2
+&VENT    XB = 0.0,0.0,  4.1,5.1, 0.0,1.8,  SURF_ID = 'OPEN' /	
+&VENT    XB = 4.0,4.0,  4.1,5.1, 0.0,1.8,  SURF_ID = 'OPEN' /	
+&VENT    XB = 0.0,4.0,  4.1,5.1, 1.8,1.8   SURF_ID = 'OPEN' /		
+
+Space in fron tof the facade
+         mesh 0.0,3.5, -3.0,-0.1, 0.0,6.0 
+&VENT    XB = 0.0,3.5, -3.0,-3.0, 0.0,6.0, SURF_ID = 'OPEN' / front	
+&VENT    XB = 0.0,0.0, -3.0,-0.1, 0.0,6.0, SURF_ID = 'OPEN' / left
+&VENT    XB = 3.5,3.5, -3.0,-0.1, 0.0,6.0, SURF_ID = 'OPEN' / right
+&VENT    XB = 0.0,3.5, -3.0,-0.1, 6.0,6.0  SURF_ID = 'OPEN' / above				

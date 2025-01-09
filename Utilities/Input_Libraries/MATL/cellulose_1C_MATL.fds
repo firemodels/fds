@@ -1,0 +1,107 @@
+&MATL ID                 = 'MOISTURE'
+      DENSITY            = 1000.
+      CONDUCTIVITY       = 0.062
+      SPECIFIC_HEAT      = 4.184
+      N_REACTIONS        = 1
+      N_S                = 1.0
+      N_T                = 0.
+      A                  = 4.29E+03
+      E                  = 4.38E+04
+      SPEC_ID            = 'WATER VAPOR'
+      NU_SPEC            = 1.0
+      HEAT_OF_REACTION   = 2410./
+
+&MATL ID                 = 'CELLULOSE'
+      FYI                = 'Kashiwagi and Nambu CNF 1992, Table 1'
+      DENSITY            = 360.
+      CONDUCTIVITY_RAMP  = 'k dry wood'
+      SPECIFIC_HEAT_RAMP = 'c_v dry wood'
+      N_REACTIONS        = 2
+      N_S                = 1.8,1.3
+      N_T                = 0,0
+      N_O2               = 0.0,0.5
+      A                  = 1.803e+15,4.276e+11
+      E                  = 2.2E+05,1.6E+05
+      MATL_ID(1,1)       = 'CHAR'
+      NU_MATL(1,1)       = 0.24
+      SPEC_ID(1:4,1)     = 'WATER VAPOR','CARBON MONOXIDE','CARBON DIOXIDE','FUEL VAPOR'
+      NU_SPEC(1:4,1)     = 0.5,0.01,0.03,0.22
+      MATL_ID(1,2)       = 'CHAR'
+      NU_MATL(1,2)       = 0.21
+      SPEC_ID(1:5,2)     = 'OXYGEN','WATER VAPOR','CARBON MONOXIDE','CARBON DIOXIDE','FUEL VAPOR'
+      NU_SPEC(1:5,2)     = -0.41,0.8,0.08,0.24,0.08
+      HEAT_OF_REACTION(1:2) = 570.,-5700.
+      ADJUST_H           = F/
+
+&MATL ID                 = 'CHAR'
+      DENSITY            = 75.
+      CONDUCTIVITY_RAMP  = 'k + k_r char'
+      SPECIFIC_HEAT_RAMP = 'c_v char'
+      N_REACTIONS        = 1
+      N_S                = 1
+      N_O2               = 0.78
+      A                  = 5.667e+09
+      E                  = 1.6E+05
+      MATL_ID(1,1)       = 'ASH'
+      NU_MATL(1,1)       = 0.03
+      SPEC_ID(1:4,1)     = 'OXYGEN','WATER VAPOR','CARBON MONOXIDE','CARBON DIOXIDE'
+      NU_SPEC(1:4,1)     = -1.65,0.3,0.5,1.82
+      HEAT_OF_REACTION(1) = -25000.
+      ADJUST_H           = F
+      GAS_DIFFUSION_DEPTH = 0.001/
+
+&MATL ID                 = 'ASH'
+      DENSITY            = 5.0
+      CONDUCTIVITY_RAMP  = 'k + k_r ash'
+      SPECIFIC_HEAT_RAMP = 'c_v ash'/
+
+! from Lautenberger
+&RAMP ID='k dry wood', T=  20.0, F=0.173549 /
+&RAMP ID='k dry wood', T= 300.0, F=0.258492 /
+&RAMP ID='k dry wood', T= 600.0, F=0.331944 /
+&RAMP ID='k dry wood', T= 900.0, F=0.395609 /
+&RAMP ID='k dry wood', T=1200.0, F=0.452913 /
+
+! 1.15 from Kashiwagi paper
+&RAMP ID='c_v dry wood', T=  20.0, F=2.5 /
+&RAMP ID='c_v dry wood', T= 300.0, F=2.5 /
+&RAMP ID='c_v dry wood', T= 600.0, F=2.5 /
+&RAMP ID='c_v dry wood', T= 900.0, F=2.5 /
+&RAMP ID='c_v dry wood', T=1200.0, F=2.5 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r char', T=  20.0, F=0.069043 /
+&RAMP ID='k + k_r char', T= 300.0, F=0.121335 /
+&RAMP ID='k + k_r char', T= 600.0, F=0.227944 /
+&RAMP ID='k + k_r char', T= 900.0, F=0.419637 /
+&RAMP ID='k + k_r char', T=1200.0, F=0.727922 /
+
+&RAMP ID='c_v char', T=  20.0, F=1.5 /
+&RAMP ID='c_v char', T= 300.0, F=1.5 /
+&RAMP ID='c_v char', T= 600.0, F=1.5 /
+&RAMP ID='c_v char', T= 900.0, F=1.5 /
+&RAMP ID='c_v char', T=1200.0, F=1.5 /
+
+# includes effective radiative conductivity
+&RAMP ID='k + k_r ash', T=  20.0, F=0.066647 /
+&RAMP ID='k + k_r ash', T= 300.0, F=0.141158 /
+&RAMP ID='k + k_r ash', T= 600.0, F=0.326017 /
+&RAMP ID='k + k_r ash', T= 900.0, F=0.679571 /
+&RAMP ID='k + k_r ash', T=1200.0, F=1.261558 /
+
+&RAMP ID='c_v ash', T=  20.0, F=1.5 /
+&RAMP ID='c_v ash', T= 300.0, F=1.5 /
+&RAMP ID='c_v ash', T= 600.0, F=1.5 /
+&RAMP ID='c_v ash', T= 900.0, F=1.5 /
+&RAMP ID='c_v ash', T=1200.0, F=1.5 /
+
+
+
+
+
+
+
+
+
+
+
