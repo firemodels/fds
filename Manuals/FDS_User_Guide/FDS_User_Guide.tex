@@ -3365,9 +3365,25 @@ The two \ct{TGA} entries will force FDS to perform a numerical version of the TG
 Note: If applying \ct{TGA_ANALYSIS} to a case where the \ct{SURF} is associated with a \ct{PART} class yet to be inserted into the calculation, FDS may not find the \ct{SURF} and hence throw an error. In this case, create a simple case with a single particle that is inserted at the start.
 \end{warning}
 
-The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
+The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the rate of heat absorbed by the sample normalized by its {\it original} mass, also in units of W/g, typical of a DSC measurement. 
 
 Details of the output quantities are discussed in Sec.~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+
+\subsubsection{Example}
+
+Results for an analysis (\ct{Pyrolysis/tga_analysis.fds}) of a simplified version of wood are shown in Fig.~\ref{tga_results}. The sample, referred to as ``wet wood'', contains 10~\% ``water'' by mass. It is heated at a rate of $\beta=5/60$~K/s and undergoes three reactions: the evaporation of ``water'', the conversion of ``dry wood'' to ``char'', and the conversion of ``char'' to ``ash''.
+
+The upper two plots in Fig.~\ref{tga_results} show the results of the TGA analysis; that is, the decrease in mass as a function of sample temperature. The left plot shows the total sample mass and the right shows the individual components. Below these are two plots that show the mass loss rates of the total sample and its components. These plots are simply the (negative) values of the first derivative of the upper plots.
+
+The lower left plot in Fig.~\ref{tga_analysis} shows the results of the MCC analysis; that is, the gas phase combustion heat release rate per unit mass of the original sample. Note that this MCC plot does not include evidence of the evaporation of water because water vapor does not combust. The integral (with respect to time) under the MCC curve yields $Q=12\,680$~J/g. The heat of combustion of the ``cellulose,'' which is the assumed gas phase fuel resulting from the pyrolysis of dry wood and char, is $h_{\rm c}=14\,988$~J/g. The dry wood and char constitute $Y=0.846$ of the original sample, thus $h_{\rm c} \, Y \approx Q$. 
+
+The lower right plot Fig.~\ref{tga_analysis} shows the results of the DSC analysis. The curve represents the rate of heat absorbed by the sample. The three peaks represent the endothermic reactions where heat from the hot gas is used to evaporate water or pyrolyze the wood and char. The plateaus between the reaction peaks represent the heating of the solid only. For example, at a temperature of 200~$^\circ$C, the value is $\dot{q}(200)=0.075$~W/g which corresponds to the specific heat of the dry wood which has not yet undergone its conversion to char:
+\be
+   c_p = \frac{\dot{q}(200)}{Y(200) \, \beta} = 1 \; \hbox{kJ/(kg K)}
+\ee
+The term $Y(200)=0.9$ in the denominator is the ratio of mass of the sample at 200~$^\circ$C to the original mass.
+
+
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
