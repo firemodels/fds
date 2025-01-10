@@ -13,9 +13,9 @@ $QFDS $DEBUG $QUEUE -p 64    -d $INDIR UWO_Test7_Case1_270_2p50mm.fds
 $QFDS $DEBUG $QUEUE -p 120   -d $INDIR UWO_Test7_Case1_270_1p25mm.fds
 $QFDS $DEBUG $QUEUE -p 8     -d $INDIR UWO_SS21_Test6_40ft_0_20mm.fds
 $QFDS $DEBUG $QUEUE -p 64    -d $INDIR UWO_SS21_Test6_40ft_0_10mm.fds
-$QFDS $DEBUG $QUEUE -p 120   -d $INDIR UWO_SS21_Test6_40ft_0_5mm.fds
+$QFDS $DEBUG $QUEUE -p 128   -d $INDIR UWO_SS21_Test6_40ft_0_5mm.fds
 $QFDS $DEBUG $QUEUE -p 8     -d $INDIR UWO_SS21_Test6_40ft_45_20mm.fds
 $QFDS $DEBUG $QUEUE -p 64    -d $INDIR UWO_SS21_Test6_40ft_45_10mm.fds
-$QFDS $DEBUG $QUEUE -p 120   -d $INDIR UWO_SS21_Test6_40ft_45_5mm.fds
+$QFDS $DEBUG $QUEUE -p 128   -d $INDIR UWO_SS21_Test6_40ft_45_5mm.fds
 
 echo FDS cases submitted
