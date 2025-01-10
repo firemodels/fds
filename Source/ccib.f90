@@ -7460,41 +7460,17 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          END SELECT
       ENDDO
 
-      ! Force U velocities in CC_SOLID faces to zero
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=0,IBAR
-               IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,IAXIS) /= CC_SOLID ) CYCLE
-               U(I,J,K) = 0._EB; US(I,J,K)= 0._EB
-            ENDDO
-         ENDDO
-      ENDDO
-
-      ! Force V velocities in CC_SOLID faces to zero
-      DO K=1,KBAR
-         DO J=0,JBAR
-            DO I=1,IBAR
-               IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,JAXIS) /= CC_SOLID ) CYCLE
-               V(I,J,K) = 0._EB; VS(I,J,K)= 0._EB
-            ENDDO
-         ENDDO
-      ENDDO
-
-      ! Force W velocities in CC_SOLID faces to zero
-      DO K=0,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (MESHES(NM)%FCVAR(I,J,K,CC_FGSC,KAXIS) /= CC_SOLID ) CYCLE
-               W(I,J,K) = 0._EB; WS(I,J,K)= 0._EB
-            ENDDO
-         ENDDO
-      ENDDO
-
       ! INBOUNDARY cut-faces are initialized with 0._EB velocity, that will be changed in
       ! CFACE_PREDICT_NORMAL_VELOCITY.
 
    ENDIF PERIODIC_TEST_COND
 
+   ! Force velocities in CC_SOLID faces to zero
+   WHERE(FCVAR(0:IBP1,0:JBP1,0:KBP1,CC_FGSC,IAXIS)==CC_SOLID) U(0:IBP1,0:JBP1,0:KBP1) = 0._EB
+   WHERE(FCVAR(0:IBP1,0:JBP1,0:KBP1,CC_FGSC,JAXIS)==CC_SOLID) V(0:IBP1,0:JBP1,0:KBP1) = 0._EB
+   WHERE(FCVAR(0:IBP1,0:JBP1,0:KBP1,CC_FGSC,KAXIS)==CC_SOLID) W(0:IBP1,0:JBP1,0:KBP1) = 0._EB
+   US = U; VS = V; WS = W
+   
    ! External mesh CFACEs initialize P1 BCs:
    DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTWALL_CFACE_CELLS
       CFA  => CFACE(ICF)
