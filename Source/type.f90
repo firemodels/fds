@@ -363,7 +363,7 @@ TYPE BOUNDARY_PROP2_TYPE
    INTEGER :: SURF_INDEX=-1          !< Surface index
    INTEGER :: HEAT_TRANSFER_REGIME=0 !< 1=Forced convection, 2=Natural convection, 3=Impact convection, 4=Resolved
    INTEGER :: Y_O2_ITER=0            !< Number of iterations for surface O2 solve
-   INTEGER :: I_CHAR_FRONT=1         !< Index of solid cell where char formation starts
+   INTEGER :: I_ASH_DEPTH=1          !< Index of solid cell where char formation starts
 
 END TYPE BOUNDARY_PROP2_TYPE
 
@@ -498,7 +498,6 @@ END TYPE THIN_WALL_TYPE
 TYPE SPECIES_TYPE
 
    REAL(EB) :: MW=0._EB                           !< Molecular weight (g/mol)
-   REAL(EB) :: YY0=0._EB                          !< Inital mass fraction
    REAL(EB) :: RCON                               !< Gas constant divided by molecular weight, \f$ R_0/W \f$ (J/kg/K)
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB  !< Light extinction coefficient (m2/kg)
    REAL(EB) :: SPECIFIC_HEAT=-1._EB               !< Specific heat input by user (J/kg/K)
@@ -1490,7 +1489,7 @@ TYPE VENTS_TYPE
                X1_ORIG=0._EB,X2_ORIG=0._EB,Y1_ORIG=0._EB,Y2_ORIG=0._EB,Z1_ORIG=0._EB,Z2_ORIG=0._EB, &
                X0=-9.E6_EB,Y0=-9.E6_EB,Z0=-9.E6_EB,FIRE_SPREAD_RATE,UNDIVIDED_INPUT_AREA=0._EB,INPUT_AREA=0._EB,&
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
-   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.,AREA_ADJUST=.TRUE.
+   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0

@@ -8808,6 +8808,7 @@ Key Parameter                          & Section                        & \ct{'D
 \ct{CHECK_VN}                        & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
 \ct{FLUX_LIMITER}                    & \ref{info:flux_limiters}       & \ct{'CHARM'} & \ct{'CHARM'}  & \ct{'SUPERBEE'}  & \ct{'SUPERBEE'} \\ \hline
 \ct{CONSTANT_SPECIFIC_HEAT_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
+\ct{EXTINCTION_MODEL}              & ~\ref{info:extinction}         & 2             & 2              & 1                 & 1                \\ \hline
 \end{tabular}
 \end{table}
 
@@ -13976,6 +13977,7 @@ Keyword             & Type     & Description                      & Units       
 373  \> \ct{Cannot have FISHPAK_BC>0.                                             } \> Section~\ref{sec:periodic}  \\
 374  \> \ct{Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
 375  \> \ct{OBST ... is VARIABLE_THICKNESS or HT3D and needs a MATL_ID.      } \> Section~\ref{info:HT3D_Limitations}  \\
+376  \> \ct{Meshes must have the same y/z bounds for TUNNEL_PRECONDITIONER.  } \> Section~\ref{tunnel_solver}  \\
      \>                                                                               \>                                     \\
 381  \> \ct{Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> \ct{Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
