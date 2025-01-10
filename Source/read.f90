@@ -4445,7 +4445,7 @@ IF(TRIM(ODE_SOLVER)=='CVODE') THEN
    ODE_MIN_ATOL = 1.E-10_EB
    ODE_REL_ERROR = 1.E-6_EB
    INITIAL_UNMIXED_FRACTION=0.0_EB
-   IF (FINITE_RATE_MIN_TEMP<-273._EB) FINITE_RATE_MIN_TEMP=300._EB
+   !IF (FINITE_RATE_MIN_TEMP<-273._EB) FINITE_RATE_MIN_TEMP=300._EB
    COMB_LOOP2: DO
       CALL CHECKREAD('COMB',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
       IF (IOS==1) EXIT COMB_LOOP2
@@ -4825,23 +4825,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       ALLOCATE(RN%SPEC_ID_NU_READ(RN%N_SMIX))
       RN%SPEC_ID_NU_READ = 'null'
       RN%SPEC_ID_NU_READ(1:RN%N_SMIX)=SPEC_ID_NU(1:RN%N_SMIX)
-
-      SUMNU = 0._EB
-      DO NS = 1, RN%N_SMIX
-         IF (NU(NS) .LT. 0._EB) THEN
-            SUMNU = SUMNU - NU(NS)
-         ENDIF
-      ENDDO
-
-      IF (RN%REACTYPE==THREE_BODY_ARRHENIUS_TYPE) THEN
-         RN%A_SI = RN%A_IN*(1000._EB)**(-SUMNU)  ![kmol/m3]^(-sum(nu)). Here 1000 is for conversion from mol/cm3 to kmol/m3
-      ELSE
-         RN%A_SI = RN%A_IN*(1000._EB)**(1-SUMNU) ![kmol/m3]^(1-sum(nu))
-      ENDIF
-
-      IF (RN%REACTYPE == FALLOFF_LINDEMANN_TYPE .OR. RN%REACTYPE == FALLOFF_TROE_TYPE) THEN
-         RN%A_LOW_PR = RN%A_LOW_PR*(1000._EB)**(-SUMNU)
-      ENDIF
+      
    ELSE SIMPLE_IF
       RN%N_SMIX = 3
       RN%N_SPEC_READ = 0
@@ -5252,6 +5236,21 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       RN%A_PRIME      = RN%A_PRIME * (1000._EB*SPECIES(RN%N_S_INDEX(NS))%MW)**(-RN%N_S(NS)) ! Convert form mol/cm3 to kmol/m3
       RN%RHO_EXPONENT = RN%RHO_EXPONENT + RN%N_S(NS)
    ENDDO
+
+   IF(.NOT. RN%REVERSE) THEN
+      IF (RN%REACTYPE==THREE_BODY_ARRHENIUS_TYPE) THEN
+         RN%A_SI = RN%A_IN*(1000._EB)**(-RN%RHO_EXPONENT)  ![kmol/m3]^(-sum(nu)). Here 1000 is for conversion from mol/cm3 to kmol/m3
+      ELSE
+         RN%A_SI = RN%A_IN*(1000._EB)**(1-RN%RHO_EXPONENT) ![kmol/m3]^(1-sum(nu))
+      ENDIF
+
+      IF (RN%REACTYPE == FALLOFF_LINDEMANN_TYPE .OR. RN%REACTYPE == FALLOFF_TROE_TYPE) THEN
+         RN%A_LOW_PR = RN%A_LOW_PR*(1000._EB)**(-RN%RHO_EXPONENT)
+      ENDIF
+   ELSE
+      RN%A_SI = REACTION(RN%REVERSE_INDEX)%A_SI
+      RN%A_LOW_PR = REACTION(RN%REVERSE_INDEX)%A_LOW_PR
+   ENDIF
 
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.40)
    RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.37)
