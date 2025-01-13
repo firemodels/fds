@@ -27,6 +27,7 @@ CONTAINS
 !> \param TN_C is the current time
 !> \param SUNVEC_Y is the current array of molar concentrations, temperature and pressure.
 !> \param SUNVEC_F is the array of derivatives returned
+!> \param USER_DATA ??
 
 INTEGER(C_INT) FUNCTION RHSFN(TN_C, SUNVEC_Y, SUNVEC_F, USER_DATA) &
     RESULT(IERR) BIND(C,NAME='RHSFN')
@@ -771,7 +772,7 @@ IERR_C = FSUNCONTEXT_FREE(SUNCTX)
 END SUBROUTINE CVODE_SERIAL
 
 
-!> \cvode error handler function, such that CVODE() doesn't output the error directly to stderr. 
+!> \brief error handler function, such that CVODE() doesn't output the error directly to stderr. 
 SUBROUTINE FDS_CVODE_ERR_HANDLER( ERR_CODE, MOD_NAME, FUNC_NAME, MESSAGE, USER_DATA) &
    BIND(C,NAME='FDS_CVODE_ERR_HANDLER')
 INTEGER(C_INT), VALUE :: ERR_CODE
@@ -836,8 +837,6 @@ END SUBROUTINE FDS_CVODE_ERR_HANDLER
 
 
 
-
-!> \Print CVODE stats.
 SUBROUTINE CVODESTATS(CVODE_MEM)
 
 !======= INCLUSIONS ===========

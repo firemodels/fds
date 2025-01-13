@@ -1,0 +1,79 @@
+&HEAD CHID='TUS_facade_I-1-2'/
+
+Grid cell size: dx = dy = dz = 0.1 m
+
+Combustion chamber 4.0m x 4.0m x 1,7m
+Facade test specimen 5.7m high, 3.0m wide (main wall)
+Facade test specimen 5.7m high, 1.2m wide (side wall)
+Opening 1.2m high, 2.0m wide
+
+Fire mesh(es).
+&MESH ID = 'm1', IJK=40,45,18, XB= 0.0,4.0, -0.1, 4.1, 0.0,1.8 / Room
+&MESH ID = 'm2', IJK=40,10,18, XB= 0.0,4.0,  4.1, 5.1, 0.0,1.8 / Rear area
+&MESH ID = 'm3', IJK=35,30,60, XB= 0.0,3.5, -3.0,-0.1, 0.0,6.0 /Front wall + side wall
+
+&MISC TMPA=40.0/
+
+&TIME T_END=1800.0  /
+
+&DUMP SMOKE3D  = .TRUE.,
+    NFRAMES    = 1800,
+    DT_PART    = 1.0,
+    DT_HRR     = 1.0,
+    DT_SLCF    = 1.0,
+    DT_BNDF    = 1.0,
+    DT_PL3D    = 6000.0,
+    DT_DEVC    = 10.0,
+    DT_ISOF    = 1000000.0 /
+
+&CATF OTHER_FILES = 'TUS_MATL.txt','TUS_static_geom.txt','TUS_devices.txt' /
+
+-------------------------------FIRE SOURCE----------------------------------
+
+&REAC FUEL = 'PROPANE', SOOT_YIELD=0.015, CO_YIELD=0.015, RADIATIVE_FRACTION = 0.20/
+
+ISO max 5.6 MW
+&SURF ID='BURNER',
+      HRRPUA=3783.8
+      RAMP_Q='fireramp',
+      MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
+      
+&RAMP ID='fireramp', T=0.0, F=0.0 /
+&RAMP ID='fireramp', T=50.0, F=0.1 /
+&RAMP ID='fireramp', T=60.0, F=0.5 /
+&RAMP ID='fireramp', T=300.0, F=0.5 /
+&RAMP ID='fireramp', T=315.0, F=0.0 /
+&RAMP ID='fireramp', T=915.0, F=0.0 /
+&RAMP ID='fireramp', T=940.0, F=0.75 /
+&RAMP ID='fireramp', T=1200.0, F=0.75 /
+&RAMP ID='fireramp', T=1220.0, F=0.0 /
+&RAMP ID='fireramp', T=1800.0, F=0.0 /
+
+Burner area 4 = 0.1 x 3.7 m = 1.48 m2
+Nominal HRR = 5.6 MW
+HRRPUA = 3783.8 kW/m2
+
+&OBST XB= 0.5,0.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 1.5,1.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 2.4,2.5, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 3.3,3.4, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+
+-------------------------------------------GEOMETRY-------------------------------------------------
+
+Back side windows, one open
+ HOLE   XB = 0.3,0.9, 3.9,4.2, 0.4,0.9 /
+ HOLE   XB = 1.2,1.8, 3.9,4.2, 0.4,0.9 /
+ HOLE   XB = 2.2,2.8, 3.9,4.2, 0.4,0.9 /
+&HOLE   XB = 3.1,3.7, 3.9,4.2, 0.4,0.9 /
+
+Window to facade wall open all the time
+&HOLE   XB = 1.0,3.0, -0.2,0.1, 0.5,1.7 / Window opening on facade
+
+------------------------
+
+BNDF QUANTITY = 'GAUGE HEAT FLUX'/
+BNDF QUANTITY = 'WALL TEMPERATURE'/
+SLCF QUANTITY = 'TEMPERATURE', PBX = 2.0 /
+SLCF QUANTITY = 'TEMPERATURE', PBY = 2.0 /
+
+&TAIL /
