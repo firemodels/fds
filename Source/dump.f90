@@ -8509,8 +8509,6 @@ END FUNCTION GAS_PHASE_OUTPUT
 
 
 !> \brief Compute solid phase device output quantities
-!>
-!> \param NM Mesh number
 !> \param INDX Output quantity index
 !> \param Y_INDEX Index of primitive gas species
 !> \param Z_INDEX Index of gas species mixture
@@ -10891,7 +10889,6 @@ END SUBROUTINE DUMP_UVW
 
 
 !> \brief Dump TMP file
-!> \param NM Mesh number
 !> \param FN_TMP File name
 
 SUBROUTINE DUMP_TMP(FN_TMP)

@@ -294,6 +294,9 @@ END SUBROUTINE ASSIGN_GHOST_VALUE
 !> \param SF Pointer to SURFACE derived type
 !> \param BC Pointer to BOUNDARY_COORD derived type
 !> \param B1 Pointer to BOUNDARY_PROP1 derived type
+!> \param LP Pointer to LAGRANGIAN_PARTICLE derived type
+!> \param WALL_INDEX Index of wall cell
+!> \param PARTICLE_INDEX Index of particle
 
 SUBROUTINE NEAR_SURFACE_GAS_VARIABLES(T,SF,BC,B1,LP,WALL_INDEX,PARTICLE_INDEX)
 
@@ -349,6 +352,9 @@ END SUBROUTINE NEAR_SURFACE_GAS_VARIABLES
 !> \brief Calculate the surface temperature TMP_F
 !> \param NM Mesh number
 !> \param T Time (s)
+!> \param SF Pointer to SURFACE derived type variable
+!> \param BC Pointer to BOUNDARY_COORD derived type variable
+!> \param B1 Pointer to BOUNDARY_PROP1 derived type variable
 !> \param WALL_INDEX Optional WALL cell index
 !> \param CFACE_INDEX Optional immersed boundary (CFACE) index
 !> \param PARTICLE_INDEX Optional Lagrangian particle index
@@ -1740,6 +1746,7 @@ END SUBROUTINE CALC_HVAC_BC
 !> \param PARTICLE_INDEX Index of a Lagrangian particle
 !> \param WALL_INDEX Index of a Cartesian WALL cell
 !> \param CFACE_INDEX Index of an immersed boundary CFACE
+!> \param THIN_WALL_INDEX Index of thin wall boundary
 
 SUBROUTINE SOLID_HEAT_TRANSFER(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX,THIN_WALL_INDEX)
 
