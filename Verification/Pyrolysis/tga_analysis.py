@@ -89,7 +89,7 @@ h_w_ref = h_w(ref_tw)
 f = open('tga_analysis_exact.csv','w')
 
 f.write('s,C,g/g,g/g,g/g,g/g,g/g,1/s,1/s,1/s,1/s,1/s,W/g,W/g\n')
-f.write('Time,Temp,Total Mass,component 1 Mass,water Mass,component 2 Mass,residue Mass,Total MLR, component 1 MLR, water MLR, component 2 MLR, residue MLR,MCC,DSC\n')
+f.write('Time,Temp,Total Mass,dry wood Mass,water Mass,char Mass,ash Mass,Total MLR, dry wood MLR, water MLR, char MLR, ash MLR,MCC,DSC\n')
 
 outstr=[str('{:.4e}'.format(t)),str('{:.4e}'.format(Temp)),str('{:.4e}'.format(msum/m0)),str('{:.4e}'.format(m1/m0)),str('{:.4e}'.format(mw/m0)),str('{:.4e}'.format(m2/m0)),str('{:.4e}'.format(mr/m0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0)),str('{:.4e}'.format(0))]
 outstr2 = ','.join(outstr)+'\n'
