@@ -821,7 +821,6 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          ! May be used with N_FIXED_CHEMISTRY_SUBSTEPS, but default mode is to use error estimator and variable DT_SUB
 
          RICH_EX_LOOP: DO RICH_ITER = 1,RICH_ITER_MAX
-
             DT_SUB = MIN(DT_SUB_NEW,DT-DT_ITER)
             ! FDS Tech Guide (E.3), (E.4), (E.5)
             CALL FIRE_RK2(A1,ZZ_MIXED,ZZ_0,ZETA_1,ZETA_0,DT_SUB,1,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
@@ -869,6 +868,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          DO NS =1,N_TRACKED_SPECIES
             ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
          ENDDO
+         CUR_CFD_TIME = T ! Set current cfd time in cvode, for logging purpose.
          CALL  CVODE(ZZ_MIXED,TMP_IN,PRES_IN, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL)
          Q_REAC_SUB = 0._EB
    END SELECT INTEGRATOR_SELECT
@@ -996,7 +996,7 @@ RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K,
 ! Convert to concentration
 CC = 0._EB
 DO NS =1,N_TRACKED_SPECIES
-  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = gm/mol = kg/kmol, [CC] = kmol/m3
+  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = g/mol = kg/kmol, [CC] = kmol/m3
 ENDDO
 WHERE(CC<0._EB) CC=0._EB
 
