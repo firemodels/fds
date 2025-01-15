@@ -490,7 +490,7 @@ END SUBROUTINE PRINT_JMAT
 !> \param K0 is the low pressure rate coeff.
 !> \param KINF is the high pressure rate coeff.
 !> \param PR is the pressure ratio.
-!> \param F is the falloff function value. 
+!> \param F is the falloff function value.
 !> \param DBIDC is the derivative of modification factor w.r.t concentration (out).
 !> \param DBIDT is the derivative of modification factor w.r.t temperature (out).
 
@@ -616,7 +616,7 @@ END FUNCTION DDTMP_TROE
 !> \param TEND is the end time in seconds
 !> \param RTOL is the relative error for all the species (REAL_EB)
 !> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
-!> \details This is the interface subroutine to the other modules. 
+!> \details This is the interface subroutine to the other modules.
 
 SUBROUTINE CVODE_SERIAL(CC,TMP_IN, PR_IN, TCUR,TEND, RTOL, ATOL)
 USE PHYSICAL_FUNCTIONS, ONLY : MOLAR_CONC_TO_MASS_FRAC, CALC_EQUIV_RATIO
@@ -795,7 +795,7 @@ IERR_C = FSUNCONTEXT_FREE(SUNCTX)
 END SUBROUTINE CVODE_SERIAL
 
 
-!> \brief CVODE error handler callback function, such that CVODE() doesn't output the error directly to stderr. 
+!> \brief CVODE error handler callback function, such that CVODE() doesn't output the error directly to stderr.
 !> \param ERR_CODE The error code send by CVODE
 !> \param MOD_NAME The module name where error occured send by CVODE
 !> \param FUNC_NAME The functio name where error occured send by CVODE
