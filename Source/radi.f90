@@ -3294,7 +3294,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                   IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
                      RADCAL_SPECIES2KAPPA(NS,J,K,1) = MIN(AMEAN,AP0)
                   ELSE
-                     RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = AP0/BBF
+                     RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = AMEAN/BBF
                   ENDIF
                END DO RADCAL_SPECIES_LOOP
             ENDDO Y_LOOP_Z
