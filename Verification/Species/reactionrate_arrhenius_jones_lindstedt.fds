@@ -1,0 +1,92 @@
+The original Jones and Lindstedt (1988) paper suggests that Reaction R3 is reversible with custom reaction orders for H2 and O2. However, it does not specify how to calculate the reverse reaction rate. Determining the reverse rate from the equilibrium constant is more complicated when custom orders are involved. Moreover, Cantera does not support reversible reactions with custom orders. Therefore, instead of setting REVERSE=True, R3 is represented by two separate forward reactions (R3 and R3_R). The pre-exponential factor and activation energy for the reverse reaction are chosen arbitrarily. Users who have accurate rate constants for the reverse reaction (R3_R) should update these values accordingly.
+
+&HEAD CHID='reactionrate_arrhenius_jones_lindstedt', TITLE='finite rate equilibrium with Jones-Lindstedt mechanism' /
+
+&MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
+
+&TIME T_END=5, DT=0.001 /
+
+&DUMP FLUSH_FILE_BUFFERS=T, MASS_FILE=.TRUE. /
+
+&MISC GVEC(3)=0.0
+      TMPA=450
+      STRATIFICATION=.FALSE./
+
+&COMB INITIAL_UNMIXED_FRACTION = 0.0, ODE_REL_ERROR=1e-9/
+
+&SURF ID= 'adiabatic wall', HEAT_TRANSFER_COEFFICIENT=0., COLOR='GRAY', DEFAULT=.TRUE. /
+
+&RADI RADIATION=.FALSE./ 
+
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE./
+&SPEC ID='PROPANE', MASS_FRACTION_0 = 0.060321 /
+&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.218851 /
+&SPEC ID='HYDROGEN' /
+&SPEC ID='WATER VAPOR', MASS_FRACTION_0=0.00722/
+&SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.000591 /
+&SPEC ID='CARBON MONOXIDE' /
+
+&REAC ID = 'R1'
+      FUEL = 'PROPANE'
+      A = 0.4e12 
+      E = 125520.
+      RADIATIVE_FRACTION=0.0 
+      SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','HYDROGEN'
+      SPEC_ID_N_S='PROPANE','OXYGEN'
+      NU= -1,-1.5,3,4
+      N_S = 0.5,1.25  /
+
+&REAC ID = 'R2'
+      FUEL = 'PROPANE'
+      A = 0.3e9 
+      E = 125520.
+      RADIATIVE_FRACTION=0.0 
+      SPEC_ID_NU='PROPANE','WATER VAPOR','CARBON MONOXIDE','HYDROGEN'
+      SPEC_ID_N_S='PROPANE','WATER VAPOR'
+      NU= -1,-3,3,7
+      N_S = 1,1 /
+
+&REAC ID = 'R3'
+      FUEL = 'HYDROGEN'
+      A = 0.85e16
+      E = 167360.
+      RADIATIVE_FRACTION=0.0 
+      SPEC_ID_NU='HYDROGEN','OXYGEN','WATER VAPOR'
+      SPEC_ID_N_S='HYDROGEN','OXYGEN'
+      NU= -1,-0.5,1
+      N_S = 0.25,1.5
+      N_T = -1 /
+
+&REAC ID = 'R3_R'
+      FUEL = 'HYDROGEN'
+      A = 1E+8
+      E = 669440.
+      RADIATIVE_FRACTION=0.0
+      SPEC_ID_NU='WATER VAPOR','HYDROGEN','OXYGEN'
+      SPEC_ID_N_S='WATER VAPOR'
+      NU= -1,1,0.5
+      N_S = 1. /
+
+&REAC ID = 'R4'
+      RADIATIVE_FRACTION=0.0 
+      FUEL = 'CARBON MONOXIDE'
+      A = 0.275e10
+      E = 83680
+      SPEC_ID_NU='CARBON MONOXIDE','WATER VAPOR','CARBON DIOXIDE','HYDROGEN'
+      NU= -1,-1,1,1
+      REVERSE=T /
+
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='OXYGEN',  ID='O2' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='PROPANE',  ID='C3H8' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='CARBON MONOXIDE',  ID='CO' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE',  ID='CO2' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR',  ID='H2O' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='HYDROGEN',  ID='H2' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='NITROGEN',  ID='N2' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='TEMPERATURE', ID='TEMP' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='PRESSURE', ID='PRES' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='CHEMISTRY SUBITERATIONS', ID='ITER' /
+
+&SLCF PBY= 0.0125, QUANTITY='TEMPERATURE' /
+
+&TAIL /

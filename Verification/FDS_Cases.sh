@@ -602,10 +602,17 @@ $QFDS -d Species propane_flame_2reac_simple.fds
 $QFDS -d Species multiple_reac_hrrpua.fds
 $QFDS -d Species multiple_reac_n_simple.fds
 $QFDS -d Species reactionrate_arrhenius_0order_1step.fds
+$QFDS -d Species reactionrate_arrhenius_0order_1step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_2order_1step.fds
+$QFDS -d Species reactionrate_arrhenius_2order_1step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2step.fds
+$QFDS -d Species reactionrate_arrhenius_1p75order_2step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2stepr.fds
+$QFDS -d Species reactionrate_arrhenius_1p75order_2stepr_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_equilibrium.fds
+$QFDS -d Species reactionrate_arrhenius_equilibrium_cvode.fds
+$QFDS -d Species reactionrate_arrhenius_jones_lindstedt.fds
+$QFDS -d Species reactionrate_arrhenius_jones_lindstedt_cvode.fds
 $QFDS -d Species reactionrate_EDC_1step_CH4_nonmix.fds
 $QFDS -d Species reactionrate_EDC_flim_1step_C3H8.fds
 $QFDS -d Species reactionrate_EDC_flim_1step_CH4.fds
