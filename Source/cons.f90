@@ -170,6 +170,7 @@ INTEGER :: NO_INDEX=0                      !< Index for NO
 INTEGER :: NO2_INDEX=0                     !< Index for NO2
 INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
 INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
+INTEGER :: CHAR_INDEX=0                    !< Index for MATL CHAR
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -201,6 +202,7 @@ LOGICAL :: TWO_D=.FALSE.                    !< Perform a 2-D simulation
 LOGICAL :: SETUP_ONLY=.FALSE.               !< Indicates that the calculation should be stopped before time-stepping
 LOGICAL :: CHECK_MESH_ALIGNMENT=.FALSE.     !< Indicates that the user wants to check the mesh alignment and then stop
 LOGICAL :: SMOKE3D=.TRUE.                   !< Indicates that the 3D smoke and fire output is desired
+LOGICAL :: SMV_PARALLEL_WRITE=.TRUE.        !< If true, the CHID.smv file is written in parallel using MPI-IO.
 LOGICAL :: STATUS_FILES=.FALSE.             !< Produce an output file CHID.notready which is deleted if the simulation completes
 LOGICAL :: LOCK_TIME_STEP=.FALSE.           !< Do not allow time step to change for diagnostic purposes
 LOGICAL :: RESTRICT_TIME_STEP=.TRUE.        !< Do not let the time step increase above its intial value
@@ -286,9 +288,10 @@ LOGICAL :: WROTE_SL2D=.FALSE.                       !< Flag indicating if a SL2D
 LOGICAL :: WROTE_SMOKE3D=.FALSE.                    !< Flag indicating if a Smoke3D file was written during primary out
 LOGICAL :: WROTE_BNDF=.FALSE.                       !< Flag indicating if a BNDF file was written during primary out
 LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART file was written during primary out
-LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.
+LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
+LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -401,7 +404,7 @@ TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI co
 #endif
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20,COUNTS_VENT,DISPLS_VENT
 
 ! Time parameters
 
@@ -799,6 +802,9 @@ INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
+
+! VENT array
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: VENT_TOTAL_AREA
 
 END MODULE GLOBAL_CONSTANTS
 

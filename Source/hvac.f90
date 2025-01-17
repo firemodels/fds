@@ -3514,17 +3514,18 @@ DUCT_LOOP: DO ND = 1,DUCTRUN(NR)%N_DUCTS
    MASS_FLUX = DU%RHO_D * DU%VEL(NEW)
 
    ! Set up of CFL and sub time step
-   DT_CFL = DU%DX/(2*DU%VEL(NEW)) ! CFL for Godunov pure upwinding scheme
+   DT_CFL = ABS(DU%DX/(2*DU%VEL(NEW))) ! CFL for Godunov pure upwinding scheme
    N_SUBSTEPS = MAX(1,CEILING(DT/DT_CFL))
    DT_DUCT = DT/REAL(N_SUBSTEPS,EB)
 
+   ! Set upwind face indices and allocate flux arrays
+   ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
+   ALLOCATE(CPT_F(0:DU%N_CELLS))
+   ALLOCATE(CPT_C(DU%N_CELLS))
+   ALLOCATE(RHOCPT_C(DU%N_CELLS))
+   ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
+
    SUBSTEP_LOOP: DO NS = 1,N_SUBSTEPS
-      ! Set upwind face indices and allocate flux arrays
-      ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
-      ALLOCATE(CPT_F(0:DU%N_CELLS))
-      ALLOCATE(CPT_C(DU%N_CELLS))
-      ALLOCATE(RHOCPT_C(DU%N_CELLS))
-      ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
       ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
       IF (DU%VEL(NEW)>0._EB) THEN
@@ -3560,13 +3561,14 @@ DUCT_LOOP: DO ND = 1,DUCTRUN(NR)%N_DUCTS
          DU%CP_C(NC) = HGAS / DU%TMP_C(NC)
       ENDDO DU_UPDATE_LOOP
 
-      DEALLOCATE(RHOZZ_C)
-      DEALLOCATE(ZZ_F)
-      DEALLOCATE(CPT_F)
-      DEALLOCATE(CPT_C)
-      DEALLOCATE(RHOCPT_C)
-
    ENDDO SUBSTEP_LOOP
+
+   DEALLOCATE(RHOZZ_C)
+   DEALLOCATE(ZZ_F)
+   DEALLOCATE(CPT_F)
+   DEALLOCATE(CPT_C)
+   DEALLOCATE(RHOCPT_C)
+   
 ENDDO DUCT_LOOP
 
 

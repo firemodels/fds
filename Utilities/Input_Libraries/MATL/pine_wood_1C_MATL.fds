@@ -5,10 +5,10 @@
       CONDUCTIVITY_RAMP  = 'k dry wood'
       SPECIFIC_HEAT_RAMP = 'c_v dry wood'
       N_REACTIONS        = 2
-      N_S                = 0.87,0.63
-      N_O2               = 0.0,0.72
-      A                  = 4.70E+6,1.45E+10
-      E                  = 1.05E+05,1.27E+05
+      N_S                = 0.50,0.63
+      N_O2               = 0.00,0.72
+      A                  = 1.00E+07,1.00E+13
+      E                  = 1.00E+05,1.58E+05
       MATL_ID(1,1)       = 'CHAR'
       NU_MATL(1,1)       = 0.31
       MATL_ID(1,2)       = 'CHAR'
@@ -17,25 +17,25 @@
       NU_SPEC(1,1)       = 0.69
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
       NU_SPEC(1:2,2)     = -0.1, 0.79
-      HEAT_OF_REACTION   = 416. /
+      HEAT_OF_REACTION(1:2) = 416./
 
 &MATL ID                 = 'CHAR'
-      DENSITY            = 73.
+      DENSITY            = 112.     ! 112/360 = 0.31 to match yield from AC Tab 7
       CONDUCTIVITY_RAMP  = 'k + k_r char'
       SPECIFIC_HEAT_RAMP = 'c_v char'
       N_REACTIONS        = 1
       N_S                = 0.56
       N_O2               = 0.68
-      A                  = 8.31E+07
-      E                  = 1.24E+05
+      A                  = 7.00E+06
+      E                  = 1.09E+05
       MATL_ID            = 'ASH'
       NU_MATL            = 0.02
       SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
       NU_SPEC            = -2.67,3.65
-      HEAT_OF_REACTION   = -32000. /
+      HEAT_OF_REACTION   = -32000./
 
 &MATL ID                 = 'ASH'
-      DENSITY            = 5.7
+      DENSITY            = 2.0
       CONDUCTIVITY_RAMP  = 'k + k_r ash'
       SPECIFIC_HEAT_RAMP = 'c_v ash'/
 

@@ -1,0 +1,280 @@
+name: cmake
+env:
+  # update urls for oneapi packages according to
+  # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/ae29263e-38b9-4d43-86c3-376d6e0668e7/intel-oneapi-base-toolkit-2025.0.1.47_offline.exe
+  WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/a37c30c3-a846-4371-a85d-603e9a9eb94c/intel-oneapi-hpc-toolkit-2025.0.1.48_offline.exe
+  WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
+
+on:
+  push:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+    - CMakeLists.txt
+  pull_request:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+    - CMakeLists.txt
+
+
+concurrency:
+  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+permissions:
+  contents: read
+
+jobs:
+  cmake-linux:
+    name: ${{ matrix.container }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
+    runs-on: [ubuntu-24.04]
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container:
+          # - "fedora:40"
+          - "rockylinux:9"
+          - "ubuntu:24.04"
+        compiler_mpi:
+          - "intel_intelmpi"
+          # - "intel_openmpi"
+          - "gnu_openmpi"
+        openmp:
+          - "ON"
+          - "OFF"
+        build_type:
+          - "Debug"
+          - "Release"
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: Install prerequisites (dnf)
+      if: matrix.container != 'ubuntu:24.04'
+      run: dnf install -y git gcc make cmake sudo environment-modules
+    - name: Install prerequisites (apt)
+      if: matrix.container == 'ubuntu:24.04'
+      run: |
+        apt-get -y update
+        apt-get -y install -y git gcc make cmake sudo environment-modules
+
+    # # Setup OneAPI, icx is necessary for third-party libs
+    # - uses: rscohn2/setup-oneapi@v0
+    #   if: endsWith(matrix.compiler_mpi, '_intelmpi') !=  true
+    #   with:
+    #     components: |
+    #       ifx
+    #       icx
+    #       mkl
+
+    # Setup OneAPI, icx is necessary for third-party libs
+    - uses: rscohn2/setup-oneapi@v0
+      # if: endsWith(matrix.compiler_mpi, '_intelmpi')
+      with:
+        components: |
+          ifx@2025.0.1
+          icx@2025.0.1
+          impi@2021.14.1
+          mkl@2025.0.1
+
+    - name: install openmpi
+      if: endsWith(matrix.compiler_mpi, '_openmpi') && (startsWith(matrix.container, 'rockylinux') || startsWith(matrix.container, 'fedora'))
+      run: dnf install -y openmpi-devel
+
+    - name: install openmpi
+      if: endsWith(matrix.compiler_mpi, '_openmpi') && startsWith(matrix.container, 'ubuntu')
+      run: |
+        sudo apt-get -y update
+        sudo apt-get -y install libopenmpi-dev openmpi-bin
+
+    - uses: actions/checkout@v4
+    - run: git config --global --add safe.directory /__w/fds/fds
+
+    - name: set linux-gnu compiler
+      if: startsWith(matrix.compiler_mpi, 'gnu_')
+      shell: bash
+      run: |
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+
+    - name: set linux-gnu compiler
+      if: startsWith(matrix.compiler_mpi, 'intel_')
+      shell: bash
+      run: |
+        echo "CC=mpiicx" >> $GITHUB_ENV
+        echo "CXX=mpiicx" >> $GITHUB_ENV
+        echo "FC=mpiifx" >> $GITHUB_ENV
+
+    - name: build fds
+      if: endsWith(matrix.compiler_mpi, '_intelmpi')
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        cmake -B builddir -S . -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DMKL_LINK=dynamic -DUSE_OPENMP=${{matrix.openmp}}
+        cmake --build builddir -j --target fds
+
+    - name: build fds
+      if: endsWith(matrix.compiler_mpi, '_openmpi')
+      run: |
+        # source /opt/intel/oneapi/setvars.sh
+        if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /etc/profile.d/modules.sh
+            module load mpi/openmpi-x86_64
+        fi
+        cmake -B builddir -S . -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DMKL_LINK=dynamic -DUSE_OPENMP=${{matrix.openmp}}
+        cmake --build builddir -j --target fds
+
+    - name: Test
+      if: endsWith(matrix.compiler_mpi, '_intelmpi')
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        ctest --test-dir builddir -j --output-on-failure -V
+
+    - name: Test
+      if: endsWith(matrix.compiler_mpi, '_openmpi')
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /etc/profile.d/modules.sh
+            module load mpi/openmpi-x86_64
+        fi
+        ctest --test-dir builddir -j --output-on-failure -V
+
+  cmake-osx:
+    # Set the name of this build, variable depending on the OS
+    name: ${{ matrix.os }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
+    strategy:
+      fail-fast: false
+      # The matrix sets all the different combinations of builds, e.g. platforms
+      # and build configurations
+      matrix:
+        os:
+          - macos-latest
+        compiler_mpi:
+          - "gnu_openmpi"
+        openmp:
+          - "ON"
+          - "OFF"
+        build_type:
+          - "Debug"
+          - "Release"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: install openmpi
+        run: brew install open-mpi
+
+      - name: set macos gcc
+        if: startsWith(matrix.compiler_mpi, 'gnu_')
+        shell: bash
+        run: |
+          echo "CC=gcc-14" >> $GITHUB_ENV
+          echo "CXX=g++-14" >> $GITHUB_ENV
+          echo "FC=gfortran-14" >> $GITHUB_ENV
+          echo "OMPI_FC=gfortran-14" >> $GITHUB_ENV
+          brew install glew gd zlib json-c
+
+      - name: set macos intel
+        if: startsWith(matrix.compiler_mpi, 'intel_')
+        shell: bash
+        run: |
+          echo "CC=icx" >> $GITHUB_ENV
+          echo "CXX=icx" >> $GITHUB_ENV
+          echo "FC=mpiifx" >> $GITHUB_ENV
+          echo "OMPI_FC=mpiifx" >> $GITHUB_ENV
+
+      - name: Build
+        if: startsWith(matrix.compiler_mpi, 'gnu_')
+        shell: bash
+        run: |
+          cmake -B builddir -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_OPENMP=${{matrix.openmp}}
+          cmake --build builddir -j1 --target fds
+
+      - name: Build
+        if: startsWith(matrix.compiler_mpi, 'intel_')
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          cmake -B builddir -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_OPENMP=${{matrix.openmp}}
+          cmake --build builddir -j1 --target fds
+
+      - name: Test
+        if: startsWith(matrix.compiler_mpi, 'gnu_')
+        run: ctest --test-dir builddir -j --output-on-failure -V
+
+      - name: Test
+        if: startsWith(matrix.compiler_mpi, 'intel_')
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          ctest --test-dir builddir -j --output-on-failure -V
+
+  cmake-windows:
+    # build on windows using ifort with intelmpi and mkl based on
+    # https://github.com/oneapi-src/oneapi-ci
+
+    name: windows ${{matrix.compiler}} intelmpi openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
+    runs-on: [windows-latest]
+    strategy:
+      fail-fast: false
+      # The matrix sets all the different combinations of builds, e.g. platforms
+      # and build configurations
+      matrix:
+        build_type:
+          - "Debug"
+          - "Release"
+        openmp:
+          - "ON"
+          - "OFF"
+        compiler:
+          - "mpiifort"
+          - "mpiifx"
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - uses: actions/checkout@v4
+
+      # install oneapi components from web installer based on
+      # oneapi-ci/scripts/install_windows.bat
+    - name: cache install oneapi
+      id: cache-install
+      uses: actions/cache@v4
+      with:
+        path: C:\Program Files (x86)\Intel\oneAPI\
+        key: install-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_BASEKIT_COMPONENTS }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_HPCKIT_COMPONENTS }}
+    - name: install oneapi mkl
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: |
+        curl.exe --output %TEMP%\webimage_base.exe --url %WINDOWS_BASEKIT_URL% --retry 5 --retry-delay 5
+        start /b /wait %TEMP%\webimage_base.exe -s -x -f webimage_base_extracted --log extract_base.log
+        del %TEMP%\webimage_base.exe
+        webimage_base_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_BASEKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
+        rd /s/q "webimage_base_extracted"
+    - name: install oneapi compiler, mpi
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: |
+        curl.exe --output %TEMP%\webimage_hpc.exe --url %WINDOWS_HPCKIT_URL% --retry 5 --retry-delay 5
+        start /b /wait %TEMP%\webimage_hpc.exe -s -x -f webimage_hpc_extracted --log extract_hpc.log
+        del %TEMP%\webimage_hpc.exe
+        webimage_hpc_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_HPCKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
+        rd /s/q "webimage_hpc_extracted"
+
+    - name: build fds
+      run: |
+        call Build\Scripts\setup_intel_compilers.bat
+        cmake -B builddir -S . -G Ninja -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_SUNDIALS=OFF -DUSE_HYPRE=ON -DUSE_OPENMP=${{matrix.openmp}}
+        cmake --build builddir -j --target fds
+
+    - name: Test
+      run: |
+        call Build\Scripts\setup_intel_compilers.bat
+        ctest --test-dir builddir -j --output-on-failure -V
