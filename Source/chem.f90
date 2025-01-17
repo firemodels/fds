@@ -30,7 +30,6 @@ CONTAINS
 !> \param SUNVEC_F is the array of derivatives returned
 !> \param USER_DATA is the user data array. Not yet used in FDS.
 !> \details The right hand side function of the ode d[c]/dt = wdot (=f). Provides the Derivative function to CVODE.
-
 INTEGER(C_INT) FUNCTION RHSFN(TN_C, SUNVEC_Y, SUNVEC_F, USER_DATA) &
     RESULT(IERR) BIND(C,NAME='RHSFN')
 
@@ -801,7 +800,6 @@ END SUBROUTINE CVODE_SERIAL
 !> \param FUNC_NAME The functio name where error occured send by CVODE
 !> \param MESSAGE The error message
 !> \param USER_DATA User data, not used in FDS.
-
 SUBROUTINE FDS_CVODE_ERR_HANDLER( ERR_CODE, MOD_NAME, FUNC_NAME, MESSAGE, USER_DATA) &
    BIND(C,NAME='FDS_CVODE_ERR_HANDLER')
 INTEGER(C_INT), VALUE :: ERR_CODE
@@ -863,7 +861,6 @@ IF (DEBUG) THEN
 ENDIF
 
 END SUBROUTINE FDS_CVODE_ERR_HANDLER
-
 
 
 

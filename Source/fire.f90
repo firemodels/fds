@@ -962,11 +962,10 @@ ENDIF
 
 END SUBROUTINE COMBUSTION_MODEL
 
-!> \call cvode_interface after converting mass fraction to molar concentration.
-!> \during return revert back the molar concentration to mass fraction.
+!> \brief call cvode_interface after converting mass fraction to molar concentration.
 !> \param ZZ species mass fraction array
 !> \param TMP_IN is the temperature
-!> \param PR_IN is the pressure
+!> \param PRES_IN is the pressure
 !> \param TCUR is the start time in seconds
 !> \param TEND is the end time in seconds
 !> \param GLOBAL_ODE_REL_ERROR is the relative error for all the species (REAL_EB)
@@ -1898,7 +1897,7 @@ END SUBROUTINE CONDENSATION_EVAPORATION
 !> \brief Calculate fall-off function
 !> \param TMP is the current temperature.
 !> \param P_RI is the reduced pressure
-!> \param RN is the reaction
+!> \param I is the reaction
 
 REAL(EB) FUNCTION CALC_FCENT(TMP, P_RI, I)
 REAL(EB), INTENT(IN) :: TMP, P_RI

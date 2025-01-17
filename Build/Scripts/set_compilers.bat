@@ -58,7 +58,7 @@ if not defined CMAKE_MAKE_PROGRAM (
 )
 
 echo.
-echo make proram is %CMAKE_MAKE_PROGRAM%
+echo make program is %CMAKE_MAKE_PROGRAM%
 echo.
 
 

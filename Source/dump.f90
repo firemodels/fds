@@ -8509,8 +8509,6 @@ END FUNCTION GAS_PHASE_OUTPUT
 
 
 !> \brief Compute solid phase device output quantities
-!>
-!> \param NM Mesh number
 !> \param INDX Output quantity index
 !> \param Y_INDEX Index of primitive gas species
 !> \param Z_INDEX Index of gas species mixture
@@ -8927,6 +8925,13 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = DV%DEPTH
       ELSE
          SOLID_PHASE_OUTPUT = 0.5_EB*( ONE_D%X(I_DEPTH-1) + ONE_D%X(I_DEPTH) )
+      ENDIF
+
+   CASE(48) ! PYROLYSIS DEPTH
+      IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+         SOLID_PHASE_OUTPUT = ONE_D%PYROLYSIS_DEPTH
+      ELSE
+         SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
 
    CASE(51)  ! ENTHALPY FLUX WALL
@@ -9793,7 +9798,7 @@ PROF_LOOP: DO N=1,N_PROF
       IF (NWP==0) CYCLE PROF_LOOP
       CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,ONE_D%N_LAYER_CELLS,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
          ONE_D%X(0:NWP),SF%LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,LAYER_INDEX,MF_FRAC,&
-         SF%INNER_RADIUS)
+         SF%INNER_RADIUS,ONE_D%PYROLYSIS_DEPTH)
    ELSE
       NWP = SF%N_CELLS_INI
       IF (NWP==0) CYCLE PROF_LOOP
@@ -10884,7 +10889,6 @@ END SUBROUTINE DUMP_UVW
 
 
 !> \brief Dump TMP file
-!> \param NM Mesh number
 !> \param FN_TMP File name
 
 SUBROUTINE DUMP_TMP(FN_TMP)

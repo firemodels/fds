@@ -995,6 +995,80 @@ The materials studied in this work included black poly(methyl methacrylate) (PMM
 The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
 
+\section{Kashiwagi Gasification}
+\label{Kashiwagi_Gasification_Description}
+
+In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8 cm on a side were irradiated at 25 \si{kW/m^2} and 40 \si{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5 \% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
+
+\subsubsection{Modeling Notes}
+
+The FDS domain is specified as a box twice as wide as the block, 0.076 m, with the cube centered in the domain.  The FDS grid resolution is 0.00475 m (16 cubic cells in each direction), which puts 8 cells across the width of the solid block (64 total wall cells).  The $-x$ face of the block is exposed to radiation using an \ct{EXTERNAL_FLUX}.  The lateral domain boundaries are specified as free slip, transparent walls (emissivity zero) with zero convective heat transfer.  The bottom boundary is a vent with a small coflow velocity of 0.005 m/s at $T_{\rm amb} = 30\;\si{\degreeCelsius}$ and the specified ${\rm O}_2$ concentration for the specific case.  The top boundary is set to \ct{OPEN}.  The radiation field is solved completely on each time step and the number of solid angles is set to 16.  The \ct{WALL_INCREMENT} is set to 1, meaning the solid phase is updated at every FDS time step.  The simulation is run to 900 s.
+
+The exposed surface specifies a convective length scale of 0.038 m with blowing. The solid phase model is 1D in depth from the center of an exposed wall cell.  The backing is ``exposed'', meaning the backside boundary condition considers convective heat transfer to the ambient.  The 1D domain is uniform (\ct{STRETCH_FACTOR=1}).  The default 1D grid resolution is automatically selected to satisfy the condition $\delta x_{\rm s}^2/\tau < k/(\rho c_v)$ with $\tau=1\;\si{s}$.  With the chosen physical parameters (see Table~\ref{tab:thermophysical_props}) this works out to $\delta x_{\rm s} = 1.2 \times 10^{-4}$ m, or 312 cells across the 3.8 cm block at the start of the simulation (note that there is a small amount of shrinking in the oxidative cases and the solid phase is remeshed accordingly).  Both the default resolution and 10 times this resolution are tested with no significant difference in the results.  Hence, the default resolution is considered converged.  The results presented below, however, are for the higher resolution runs.
+
+A device measuring the surface integral of surface density (which yields the total solid mass) is positioned in the center of the exposed face.  Also, devices for in-depth profiles of temperature, material component densities, and ${\rm O}_2$ mass fraction are positioned in the same location.  Time histories of temperature are recorded at the in-depth positions reported in \cite{Kashiwagi:1987} for comparison.
+
+\paragraph{Thermophysical Properties}
+
+The thermophsyical properties of the pine wood are adopted from \cite{Lautenberger:2009}.  The values of of the thermal conductivity and specific heat at a reference temperature, $T_{\rm ref}=300 \;\si{K}$, are denoted by $k_0$ and $c_{v,0}$, respectively. The temperature dependence is based on a power law as follows:
+\begin{align}
+k(T)   &= k_0 (T/T_{\rm ref})^{n_k} + \gamma \sigma T^3 \\
+c_v(T) &= c_{v,0} (T/T_{\rm ref})^{n_c}
+\end{align}
+where $\sigma=5.67\times10^{-8} \;\si{W/m^2/K^4}$ is the Stefan-Boltzmann constant. The reference values, exponents, and internal radiation factor, $\gamma$, are given in Table \ref{tab:thermophysical_props}.  For simplicity in adjusting the reaction energies, we opted to use constant specific heats ($n_c=0$), taken from the range obtained by \cite{Lautenberger:2009}.
+
+\begin{table}[h]
+\begin{center}
+\caption{Thermophysical properties.}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccccc}
+\hline
+Component& $\rho$ & $k_{0}$ & $n_k$ & $c_{v,0}$ & $n_c$ & $\gamma$ \\
+\hline
+moisture & 1000                         & 0.062 & 0     & 4.18 & 0 & 0       \\
+pine     & 360                          & 0.176 & 0.594 & 2.50 & 0 & 0       \\
+char     & 108$^{\mbox{\scriptsize a}}$ & 0.065 & 0.435 & 1.50 & 0 & 3.3E-03 \\
+ash      & 5.0                          & 0.058 & 0.353 & 1.50 & 0 & 6.4E-03 \\
+\hline
+\multicolumn{7}{l}{$^{\mbox{\scriptsize a}}$ Used to approximate yield in Anca-Couce \cite{Anca-Couce:2012}.}
+\end{tabular}
+\label{tab:thermophysical_props}
+\end{center}
+\end{table}
+
+\paragraph{Material Model}
+
+The reaction model and kinetics parameters are based on the single component models from \cite{Anca-Couce:2012} (pine) and \cite{Kashiwagi:CF1992} (cellulose).  The model consists of four reactions (including moisture evaporation) as shown below.  The pine wood undergoes both aerobic and anaerobic pyrolysis.  The reaction energy for the anaerobic pyrolysis was taken from Anca-Couce et al.~\cite{Anca-Couce:2012} Table 8.  The heats of reaction for aerobic pyrolysis and char oxidation were based on \cite{Kashiwagi:CF1992}.  The activation energies and rate constants were optimized for the Kashiwagi gasification case \cite{Kashiwagi:1987} through a trial and error process that first looked at the nitrogen only case, then both aerobic and anaerobic pyrolysis (without char oxidation), and finally the full case including char oxidation.  The ash yield was chosen to be small based on the orientation of the block (horizontal relative to the exposed radiant panel) and comments in \cite{Kashiwagi:1987}.
+\begin{align}
+\mathrm{R1} &: \mbox{moisture} \rightarrow \mbox{water vapor} \\
+\mathrm{R2} &: \mbox{pine} \rightarrow \nu_{\rm char,2} \,\mbox{char} + \nu_{\rm fv,2} \,\mbox{fuel vapor} \\
+\mathrm{R3} &: \mbox{pine} + \nu_{{\rm O}_2,3} \, {\rm O}_2 \rightarrow \nu_{\rm char,3} \,\mbox{char} + \nu_{\rm fv,3} \,\mbox{fuel vapor} \\
+\mathrm{R4} &: \mbox{char} + \nu_{{\rm O}_2,4}\,{\rm O}_2 \rightarrow \nu_{\rm ash,4} \,\mbox{ash} + \nu_{{\rm C}{\rm O}_2,4} \,{\rm C}{\rm O}_2
+\end{align}
+
+\begin{table}[h]
+\begin{center}
+\caption{Kinetic parameters and yields.}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccccccccr}
+\hline
+Reaction  & $A$ & $E$ & $n_{\rm s}$ & $n_{{\rm O}_2}$ & \multicolumn{5}{c}{component $\nu$} & $H_{\rm r}$ \\
+ \cmidrule(rl){6-10}
+  & \si{(kg/m^3)^{1-n_s}/s} & J/mol & & & $\nu_{{\rm O}_2}$ & $\nu_{\rm char}$ & $\nu_{\rm fv}$ & $\nu_{\rm ash}$ & $\nu_{{\rm C}{\rm O}_2}$ & kJ/kg\\
+\hline
+R1  & 4.29E+03 & 4.38E+04 & 1  & 0    &          &       &       &      &      & $2\,410$   \\
+R2  & 1.00E+06 & 1.05E+05 & 1  & 0    &          & 0.30  & 0.70  &      &      & $200$      \\
+R3  & 1.10E+05 & 8.80E+04 & 1  & 0.7  & $-0.5$   & 0.30  & 1.20  &      &      & $-5\,700$  \\
+R4  & 5.00e+08 & 1.40E+05 & 1  & 0.8  & $-2.67$  &       &       & 0.01 & 3.66 & $-20\,000$ \\
+\hline
+\end{tabular}
+\label{tab:m1_kinetics}
+\end{center}
+\end{table}
+
+
 \section{Lattimer Tilted Wall}
 \label{Lattimer_Tilted_Wall_Description}
 

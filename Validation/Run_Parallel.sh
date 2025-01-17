@@ -18,7 +18,7 @@ cd Crown_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSTB_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd DelCo_Trainers;  ./Run_All.sh $OPTIONS; cd ..
-cd Edinburgh_Vegetation_Drag ./Run_All.sh $OPTIONS; cd..
+cd Edinburgh_Vegetation_Drag; ./Run_All.sh $OPTIONS; cd..
 cd FAA_Cargo_Compartments;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh $OPTIONS; cd ..
