@@ -26,6 +26,7 @@ def save_csv_file(fullFilePath, csvdata):
 
 # Perform the reaction calculation
 def calc_reaction_rate(mechanismFile, T0, P0, Y0, tstart, tend, dt, caseName, conditionalStop=False, condtionalSpeciesName=''):
+    print("Running case:"+caseName)
     current_working_directory = os.getcwd()
     Cantera_DIR = os.path.join(current_working_directory, "../Input_Libraries/Chemical_Mechanisms/Cantera/")
     Species_DIR = os.path.join(current_working_directory, "../../Verification/Species/")
@@ -63,6 +64,8 @@ def calc_reaction_rate(mechanismFile, T0, P0, Y0, tstart, tend, dt, caseName, co
     save_csv_file(Species_DIR+caseName+"_soln.csv",csvdata)
 
 
+
+print("Running reactionrate_arrhenius cases...")
 
 #------------------------------------------------------------------
 # reactionrate_arrhenius_0order_1step
