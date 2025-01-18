@@ -32,6 +32,14 @@ echo "Checking for hypre repository..."
 if [ -d "$FIREMODELS/hypre" ]; then
   echo "Hypre repository exists. Building hypre library."
   cd $FIREMODELS/hypre
+  # Handle possible corrupted state of repository
+  if git branch | grep -q "* master"; then
+    echo "On master branch"
+  else
+    git checkout master
+  fi
+  git checkout .
+  git clean -dxf
   if [[ "$(git tag -l $HYPRE_LIB_TAG)" == $HYPRE_LIB_TAG ]]; then
     echo "Checking out $HYPRE_LIB_TAG"
     git checkout $HYPRE_LIB_TAG

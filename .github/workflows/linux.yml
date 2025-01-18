@@ -24,6 +24,8 @@ permissions:
 
 jobs:
   linux-intel-intelmpi:
+    if: false # skip this run until ifx issue is sorted out
+
     # build on ubuntu using ifort with intelmpi and mkl based on
     # https://github.com/oneapi-src/oneapi-ci
 

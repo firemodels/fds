@@ -9560,7 +9560,7 @@ FDS has various types of output files that store computed data. Some of the file
 \item A list of HVAC output quantities is given in Sec.~\ref{info:hvacoutputquantities}.
 \end{itemize}
 The namelist group \ct{DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one \ct{DUMP} line in the input file.
-By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line.
+By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line. A single text file \ct{CHID.smv} is always written with high level information about the case~\cite{Smokeview_Users_Guide}. By default, this file is written in parallel using MPI I/O routines. This feature can be disable setting \ct{SMV_PARALLEL_WRITE=F} in the \ct{DUMP} line, in which case, MPI rank 0 will write the file.
 
 
 \section{Controlling the Frequency of Output}
@@ -12085,6 +12085,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
 \ct{DT_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
+\ct{SMV_PARALLEL_WRITE}           & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
 \ct{DT_SPEC}                      & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline

@@ -33,6 +33,14 @@ echo "Checking for sundials repository..."
 if [ -d "$FIREMODELS/sundials" ]; then
   echo "Sundials repository exists. Building sundials library."
   cd $FIREMODELS/sundials
+  # Handle possible corrupted state of repository
+  if git branch | grep -q "* main"; then
+    echo "On main branch"
+  else
+    git checkout main
+  fi
+  git checkout .
+  git clean -dxf
   if [[ "$(git tag -l $SUNDIALS_LIB_TAG)" == $SUNDIALS_LIB_TAG ]]; then
     echo "Checking out $SUNDIALS_LIB_TAG"
     git checkout $SUNDIALS_LIB_TAG
