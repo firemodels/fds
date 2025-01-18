@@ -20,7 +20,7 @@ def save_csv_file(fullFilePath, csvdata):
     csvdata = csvdata.apply(lambda x: x.str.strip() if x.dtype == 'object' else x)
     csvdata.replace('nan','',inplace=True)
     csvdata.replace('NAN','',inplace=True)
-    csvdata = csvdata.map(lambda x: f'{x:12.5f}' if isinstance(x, (float)) else x)
+    csvdata = csvdata.map(lambda x: f'{x:10.5f}' if isinstance(x, (float)) else x)
     csvdata.to_csv(fullFilePath,index=False)
 
 
