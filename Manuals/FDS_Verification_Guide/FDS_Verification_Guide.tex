@@ -3550,10 +3550,17 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 \subsection{Finite Rate Reactions (\texorpdfstring{\ct{reactionrate\_arrhenius}}{reactionrate\_arrhenius})}
 \label{finite_rate_reactions}
 \label{reactionrate_arrhenius_equilibrium}
+\label{reactionrate_arrhenius_equilibrium_cvode}
 \label{reactionrate_arrhenius_0order_1step}
+\label{reactionrate_arrhenius_0order_1step_cvode}
 \label{reactionrate_arrhenius_2order_1step}
+\label{reactionrate_arrhenius_2order_1step_cvode}
 \label{reactionrate_arrhenius_1p75order_2step}
+\label{reactionrate_arrhenius_1p75order_2step_cvode}
 \label{reactionrate_arrhenius_1p75order_2stepr}
+\label{reactionrate_arrhenius_1p75order_2stepr_cvode}
+\label{reactionrate_arrhenius_jones_lindstedt}
+\label{reactionrate_arrhenius_jones_lindstedt_cvode}
 
 
 The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Eq.~(\ref{eq:finite_rate1}) are specific to each reaction and for non-zero values, $\d Y_{\alpha}/ \d t$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
@@ -3573,8 +3580,11 @@ The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha
 \end{table}
 \begin{figure}[h!]
 \centering
+\begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
-\caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step_cvode}
+\end{tabular*}
+\caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
 The second finite rate test case is a one-step, second-order propane reaction, Eq.~(\ref{eq:1step_propane}). The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Fig.~\ref{fig:Arrhenius_2Order_1step}.
@@ -3583,15 +3593,19 @@ The second finite rate test case is a one-step, second-order propane reaction, E
 \caption[Arrhenius values for a single step C$_3$H$_8$ reaction]{Arrhenius values for a single step C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathrm{H_2O}$].}
 \label{single_step_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:1step_propane} & [-1 -5 3 4] & 0 & 4e5 & [1 1 0 0] & [0 0 0 0] \\ \hline
+\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_i$  \\ \hline \hline
+\ref{eq:1step_propane} & [-1 -5 3 4] & 0 & 4e5 & [1 1 0 0] & 0 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
-\caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
+\setlength{\tabcolsep}{-10pt}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step_cvode}
+\end{tabular*}
+\caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
@@ -3610,9 +3624,9 @@ with the following reaction input parameters:
 \caption[Arrhenius values for a two-step C$_3$H$_8$ reaction]{Arrhenius values for a two-step C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_a} & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_b} & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_i$  \\ \hline \hline
+\ref{eq:2step_propane_a} & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & 0 \\ \hline
+\ref{eq:2step_propane_b} & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & 0 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -3634,10 +3648,10 @@ with the following reaction input parameters:
 \caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reversible C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_rev_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 0 & 5e2  & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
+\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_i$  \\ \hline \hline
+\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 0 & 5e2  & [0.1 1.65 0 0 0] & 0 \\ \hline
+\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & 0 \\ \hline
+\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & 0 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -3647,15 +3661,23 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
-\caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
+\setlength{\tabcolsep}{-10pt}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step_cvode}
+\end{tabular*}
+\caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_2step}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
-\caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
+\setlength{\tabcolsep}{-10pt}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
+\includegraphics[height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr_cvode}
+\end{tabular*}
+\caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
 
@@ -3665,29 +3687,89 @@ To couple verification of species mass fraction, compartment temperature, and co
 \caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reversible C$_3$H$_8$ reaction for equilibrium; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_eq_rev_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 125520 & 1.5e12 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
+\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_i$  \\ \hline \hline
+\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 125520 & 1.5e12 & [0.1 1.65 0 0 0] & 0 \\ \hline
+\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & 0 \\ \hline
+\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & 0 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA)~\cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.  The results are shown in Figs.~\ref{fig:Arrhenius_2Order_1stepb} and \ref{fig:Arrhenius_175Order_23stepb}.
+Equilibrium values were determined using Cantera \cite{cantera:2023}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.  The results are shown in Figs.~\ref{fig:Arrhenius_2Order_1stepb} and \ref{fig:Arrhenius_175Order_23stepb}.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
-\caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
+\setlength{\tabcolsep}{-10pt}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_equilibrium_species_cvode}
+\end{tabular*}
+\caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature_cvode} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure_cvode} \\
 \end{tabular*}
-\caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
+\caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values. The top row is using RK2-Richardson ODE solver and the bottom row is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_23stepb}
+\end{figure}
+
+
+
+Equlibrium calculation using Jones-Lindstedt mechanism \cite{Jones_Lindstedt:1988} with propane as fuel is also shown here:
+\begin{subequations}
+\begin{align}
+\label{eq:jones_lindstedt_r1}
+\mathrm{C_3H_8+1.5 \, O_2} &\rightarrow \mathrm{3 \, CO+4 \, H_2} \\
+\label{eq:jones_lindstedt_r2}
+\mathrm{C_3H_8+3 \, H_2O} &\rightarrow \mathrm{3 \, CO+7 \, H_2} \\
+\label{eq:jones_lindstedt_r3}
+\mathrm{H_2+0.5 \, O_2} &\Leftrightarrow \mathrm{H_2O} \\
+\label{eq:jones_lindstedt_r4}
+\mathrm{CO+ \, H_2O} &\Leftrightarrow \mathrm{CO_2+ \, H_2}
+\end{align}
+\end{subequations}
+with the following reaction input parameters: 
+\begin{table}[ht]
+\begin{center}
+\caption[Arrhenius values for Jones-Lindstedt four-step reversible C$_3$H$_8$ reaction]{Arrhenius values for Jones-Lindstedt four-step C$_3$H$_8$ reaction for equilibrium; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$  $\mathrm{CO_2}$ $\mathrm{H_2}$].}
+\label{two_step_eq_rev_c3h8}
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+\hline Reaction & $\nu_{\alpha}$ & E (J/mol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_i$  \\ \hline \hline
+\ref{eq:jones_lindstedt_r1} & [-1 -1.5 3 0 0 4] & 125520 & 0.4e12 & [0.5 1.25 0 0 0 0] & 0 \\ \hline
+\ref{eq:jones_lindstedt_r2} & [-1 0 3 -3 0 0 7] & 125520 & 0.3e9 & [1 0 0 1 0 0] & 0 \\ \hline
+\ref{eq:jones_lindstedt_r3} & [0 -0.5 0 1 0 -1]  & 167360 & 0.85e16    & [0 1.5 0 0 0 0.25]    & -1 \\ \hline
+\ref{eq:jones_lindstedt_r3} reverse & [0 0.5 0 -1 0 1]  & 669440 & 1e8    & [0 0 0 1 0 0]    & 0 \\ \hline
+\ref{eq:jones_lindstedt_r4} reversible& [0 0 -1 -1 1 1]  & 83680 & 0.275e10    & [0 0 1 1 -1 -1]    & 0  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+The original Jones and Lindstedt (1988) paper \cite{Jones_Lindstedt:1988} suggests that Reaction \ref{eq:jones_lindstedt_r3} is reversible with custom reaction orders for $\mathrm{H_2}$ and $\mathrm{O_2}$. However, it does not specify how exactly to calculate the reverse reaction rate. Determining the reverse rate from the equilibrium constant is more complicated when custom orders are involved. Moreover, Cantera does not support reversible reactions with custom orders. Therefore, instead of setting  Reaction \ref{eq:jones_lindstedt_r3} as reversible, it is represented by two reactions (forward and rverse). The pre-exponential factor and activation energy for the reverse reaction are chosen arbitrarily. Users who have accurate rate constants for the reverse reaction should update these values accordingly. Reaction \ref{eq:jones_lindstedt_r4} is modeled as reversible reaction with stoichiometric coefficents. A constant volume, constant internal energy equilibrium calculation was performed in Cantera \cite{cantera:2023}. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, $\mathrm{CO_2}$ and $\mathrm{H_2}$; the same species tracked in the FDS simulation.  The results are shown in Figs.~\ref{fig:jones_lindstedt_species} and \ref{fig:jones_lindstedt_PT}.
+
+\begin{figure}[h!]
+\centering
+\setlength{\tabcolsep}{-10pt}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species}
+\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species_cvode}
+\end{tabular*}
+\caption[Species evolution in Jones-Lindstedt case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\label{fig:jones_lindstedt_species}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_temperature} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_pressure} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_temperature_cvode} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_pressure_cvode} \\
+\end{tabular*}
+\caption[Temperature and pressure evolution for Jones-Lindstedt case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values. The top row is using RK2-Richardson ODE solver and the bottom row is using CVODE ODE solver.}
+\label{fig:jones_lindstedt_PT}
 \end{figure}
 
 
@@ -5584,7 +5666,7 @@ Rather than use the parameters proposed by Anca-Couce et al.~\cite{Anca-Couce:20
 \begin{tabular}{|l|l|l|l|l|l|l|l|}
 \hline 
 Model & Reaction & A & E & $n_{s}$ & $n_{\rm O_2}$ & $\nu_{\rm char}$ & $\nu_{\rm ash}$\\ 
- & & \si{(kg/m^3)^{1-n_s}/s} & J/mol & (-) & (-) & kg/kg & kg/kg & 
+ & & \si{(kg/m^3)^{1-n_s}/s} & J/mol & (-) & (-) & kg/kg & kg/kg \\
  \hline \hline
 1-component & R1 & \num{1e7} & \num{1e5} & 0.5 & 0.0 & 0.31 & - \\
 1-component & R2 & \num{1e13} & \num{1.58e5} & 0.63 & 0.72 & 0.31 & - \\
