@@ -9006,7 +9006,7 @@ CASE(INTEGER_THREE)
       B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
       IF (RADIATION) THEN
-         B1%Q_RAD_OUT = SF%EMISSIVITY*SIGMA*B1%TMP_F**4
+         B1%Q_RAD_OUT = B1%EMISSIVITY*SIGMA*B1%TMP_F**4
       ELSE
          B1%Q_RAD_OUT = 0._EB
       ENDIF

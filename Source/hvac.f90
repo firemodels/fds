@@ -73,8 +73,7 @@ CONTAINS
 
 SUBROUTINE READ_HVAC
 
-USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
-USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
+USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER,GET_RAMP_INDEX
 INTEGER , PARAMETER :: MAX_DUCTS = 20 !< Maximum number of ducts connected to a node
 INTEGER :: IOS !< Used for returning the status of a READ statement
 INTEGER :: IZERO !< Used for returning the status of an ALLOCATE statement
