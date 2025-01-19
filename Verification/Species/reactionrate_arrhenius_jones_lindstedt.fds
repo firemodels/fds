@@ -58,7 +58,7 @@ The original Jones and Lindstedt (1988) paper suggests that Reaction R3 is rever
       N_T = -1 /
 
 &REAC ID = 'R3_R'
-      FUEL = 'HYDROGEN'
+      FUEL = 'WATER VAPOR'
       A = 1E+8
       E = 669440.
       RADIATIVE_FRACTION=0.0
