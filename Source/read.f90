@@ -5240,7 +5240,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    IF(.NOT. RN%REVERSE) THEN
       IF (RN%REACTYPE==THREE_BODY_ARRHENIUS_TYPE) THEN
-         RN%A_SI = RN%A_IN*(1000._EB)**(-RN%RHO_EXPONENT)  ![kmol/m3]^(-sum(nu)). Here 1000 is for conversion from mol/cm3 to kmol/m3
+         RN%A_SI = RN%A_IN*(1000._EB)**(-RN%RHO_EXPONENT)  ![kmol/m3]^(-sum(nu)).
       ELSE
          RN%A_SI = RN%A_IN*(1000._EB)**(1-RN%RHO_EXPONENT) ![kmol/m3]^(1-sum(nu))
       ENDIF
