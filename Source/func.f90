@@ -729,6 +729,2183 @@ END SUBROUTINE EQUATE_LOGICAL_VECTORS
 END MODULE COMP_OPERATORS
 
 
+!> \brief Routines that do various mathematical manipulations
+
+MODULE MATH_FUNCTIONS
+
+USE PRECISION_PARAMETERS
+IMPLICIT NONE (TYPE,EXTERNAL)
+
+CONTAINS
+
+
+!> \brief Add new value to a growing histogram
+!> \param NBINS Number of bins in the histogram
+!> \param LIMITS The range of values underlying the histogram
+!> \param COUNTS Array of weight currently assigned to each bin
+!> \param VAL New value to be added
+!> \param WEIGHT Relative weight associated with the new value
+
+SUBROUTINE UPDATE_HISTOGRAM(NBINS,LIMITS,COUNTS,VAL,WEIGHT)
+INTEGER,INTENT(IN)::NBINS
+REAL(EB), INTENT(IN)::LIMITS(2),VAL,WEIGHT
+REAL(EB), INTENT(INOUT) :: COUNTS(NBINS)
+INTEGER::IND=0
+IND=MIN(NBINS,MAX(CEILING((VAL-LIMITS(1))/(LIMITS(2)-LIMITS(1))*NBINS),1))
+COUNTS(IND)=COUNTS(IND)+WEIGHT
+END SUBROUTINE UPDATE_HISTOGRAM
+
+!> \brief Calculate the value of polynomial function.
+!> \param N Number of coefficients in the polynomial
+!> \param TEMP The independent variable
+!> \param COEF The array of coefficients
+
+REAL(EB) FUNCTION POLYVAL(N,TEMP,COEF)
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: TEMP,COEF(N)
+INTEGER :: I
+POLYVAL = 0._EB
+DO I=1,N
+   POLYVAL  = POLYVAL  + COEF(I)*TEMP**(I-1)
+ENDDO
+END FUNCTION POLYVAL
+
+
+!> \brief Determine the index of a table with a given name
+!> \param ID Name of the table
+!> \param TYPE Kind of table
+!> \param TABLE_INDEX Index of the table
+
+SUBROUTINE GET_TABLE_INDEX(ID,TYPE,TABLE_INDEX)
+
+USE GLOBAL_CONSTANTS, ONLY: N_TABLE,TABLE_ID,TABLE_TYPE
+CHARACTER(*), INTENT(IN) :: ID
+INTEGER, INTENT(IN) :: TYPE
+INTEGER, INTENT(OUT) :: TABLE_INDEX
+INTEGER :: NT
+
+IF (ID=='null') THEN
+   TABLE_INDEX = 0
+   RETURN
+ENDIF
+
+SEARCH: DO NT=1,N_TABLE
+   IF (ID==TABLE_ID(NT)) THEN
+      TABLE_INDEX = NT
+      RETURN
+   ENDIF
+ENDDO SEARCH
+
+N_TABLE                = N_TABLE + 1
+TABLE_INDEX            = N_TABLE
+TABLE_ID(TABLE_INDEX)   = ID
+TABLE_TYPE(TABLE_INDEX) = TYPE
+
+END SUBROUTINE GET_TABLE_INDEX
+
+
+!> \brief Return an interpolated value from a given RAMP function
+!> \param RAMP_INPUT Independent variable of the RAMP function
+!> \param RAMP_INDEX Index of the RAMP function
+!> \param TAU Time scale used for reserved t-squared or tanh ramps
+
+REAL(EB) FUNCTION EVALUATE_RAMP(RAMP_INPUT,RAMP_INDEX,TAU)
+
+USE GLOBAL_CONSTANTS, ONLY : EXTERNAL_RAMP
+USE TYPES, ONLY: RAMPS
+USE DEVICE_VARIABLES, ONLY: DEVICE
+USE CONTROL_VARIABLES, ONLY: CONTROL
+REAL(EB), INTENT(IN) :: RAMP_INPUT
+REAL(EB), INTENT(IN), OPTIONAL :: TAU
+REAL(EB):: RAMP_POSITION
+INTEGER:: I
+INTEGER, INTENT(IN)  :: RAMP_INDEX
+
+SELECT CASE(RAMP_INDEX)
+   CASE(-2)
+      EVALUATE_RAMP = MAX( TANH(RAMP_INPUT/TAU), 0._EB )
+   CASE(-1)
+      EVALUATE_RAMP = MIN( (RAMP_INPUT/TAU)**2 , 1.0_EB )
+   CASE( 0)
+      EVALUATE_RAMP = 1._EB
+   CASE(1:)
+      IF (RAMPS(RAMP_INDEX)%DEVC_INDEX > 0) THEN
+         RAMP_POSITION = &
+            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,DEVICE(RAMPS(RAMP_INDEX)%DEVC_INDEX)%SMOOTHED_VALUE - RAMPS(RAMP_INDEX)%T_MIN))
+      ELSEIF (RAMPS(RAMP_INDEX)%CTRL_INDEX > 0) THEN
+         RAMP_POSITION = &
+            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,CONTROL(RAMPS(RAMP_INDEX)%CTRL_INDEX)%INSTANT_VALUE - RAMPS(RAMP_INDEX)%T_MIN))
+      ELSEIF (RAMPS(RAMP_INDEX)%DEVC_DEP_INDEX > 0) THEN
+         EVALUATE_RAMP = DEVICE(RAMPS(RAMP_INDEX)%DEVC_DEP_INDEX)%SMOOTHED_VALUE
+         RETURN
+      ELSEIF (RAMPS(RAMP_INDEX)%CTRL_DEP_INDEX > 0) THEN
+         EVALUATE_RAMP = CONTROL(RAMPS(RAMP_INDEX)%CTRL_DEP_INDEX)%INSTANT_VALUE
+         RAMPS(RAMP_INDEX)%LAST = EVALUATE_RAMP
+         RETURN
+      ELSEIF (RAMPS(RAMP_INDEX)%EXTERNAL_FILE) THEN
+         EVALUATE_RAMP = EXTERNAL_RAMP(RAMP_INDEX)
+         RETURN
+      ELSE
+         RAMP_POSITION = &
+            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,RAMP_INPUT - RAMPS(RAMP_INDEX)%T_MIN))
+      ENDIF
+      I = MIN(UBOUND(RAMPS(RAMP_INDEX)%INTERPOLATED_DATA,1),&
+          MAX(LBOUND(RAMPS(RAMP_INDEX)%INTERPOLATED_DATA,1),NINT(RAMP_POSITION*RAMPS(RAMP_INDEX)%RDT)))
+      EVALUATE_RAMP = RAMPS(RAMP_INDEX)%INTERPOLATED_DATA(I)
+END SELECT
+
+END FUNCTION EVALUATE_RAMP
+
+
+!> \brief Compute inverse erfc function
+!> \param Y Y=ERFC(X), where X is returned by IERFC(Y)
+
+REAL(EB) FUNCTION IERFC(Y)
+
+REAL(EB), INTENT(IN) :: Y
+REAL(EB) :: QA,QB,QC,QD,Q0,Q1,Q2,Q3,Q4,PA,PB,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10, &
+            P11,P12,P13,P14,P15,P16,P17,P18,P19,P20,P21,P22,X,S,T,U,W,Z
+PARAMETER ( &
+QA = 9.16461398268964-01_EB, &
+QB = 2.31729200323405-01_EB, &
+QC = 4.88826640273108-01_EB, &
+QD = 1.24610454613712-01_EB, &
+Q0 = 4.99999303439796-01_EB, &
+Q1 = 1.16065025341614-01_EB, &
+Q2 = 1.50689047360223-01_EB, &
+Q3 = 2.69999308670029-01_EB, &
+Q4 = -7.28846765585675-02_EB)
+PARAMETER ( &
+PA = 3.97886080735226000+00_EB, &
+PB = 1.20782237635245222-01_EB, &
+P0 = 2.44044510593190935-01_EB, &
+P1 = 4.34397492331430115-01_EB, &
+P2 = 6.86265948274097816-01_EB, &
+P3 = 9.56464974744799006-01_EB, &
+P4 = 1.16374581931560831+00_EB, &
+P5 = 1.21448730779995237+00_EB, &
+P6 = 1.05375024970847138+00_EB, &
+P7 = 7.13657635868730364-01_EB, &
+P8 = 3.16847638520135944-01_EB, &
+P9 = 1.47297938331485121-02_EB, &
+P10 = -1.05872177941595488-01_EB, &
+P11 = -7.43424357241784861-02_EB)
+PARAMETER ( &
+P12 = 2.20995927012179067-03_EB, &
+P13 = 3.46494207789099922-02_EB, &
+P14 = 1.42961988697898018-02_EB, &
+P15 = -1.18598117047771104-02_EB, &
+P16 = -1.12749169332504870-02_EB, &
+P17 = 3.39721910367775861-03_EB, &
+P18 = 6.85649426074558612-03_EB, &
+P19 = -7.71708358954120939-04_EB, &
+P20 = -3.51287146129100025-03_EB, &
+P21 = 1.05739299623423047-04_EB, &
+P22 = 1.12648096188977922-03_EB)
+
+Z = Y
+IF (Y  > 1._EB) Z = 2._EB - Y
+W = QA - LOG(Z)
+U = SQRT(W)
+S = (QC + LOG(U)) / W
+T = 1._EB / (U + QB)
+
+X = U * (1._EB - S * (0.5_EB + S * QD)) - ((((Q4 * T + Q3) * T + Q2) * T + Q1) * T + Q0) * T
+T = PA / (PA + X)
+U = T - 0.5_EB
+
+S = (((((((((P22 * U + P21) * U + P20) * U + P19) * U + P18) * U + P17) * U + P16) * U + P15) * U + P14) * U + P13) * U + P12
+
+S = ((((((((((((S * U + P11) * U + P10) * U +  P9) * U + P8) * U + P7) * U + P6) * U + P5) * U + P4) * U + P3) &
+    * U + P2) * U + P1) * U + P0) * T - Z * EXP(X * X - PB)
+
+X = X + S * (1._EB + X * S)
+
+IF (Y > 1._EB) X = -X
+
+IERFC = X
+
+END FUNCTION IERFC
+
+
+!> \brief Solve a linear system of equations with Gauss-Jordon elimination (Press, Numerical Recipes)
+!> \param A Primary matrix of A*x=b
+!> \param N Dimension of A
+!> \param NP Dimension of array containing A
+!> \param B Array of vectors B of the linear system
+!> \param M Number of columns of B
+!> \param MP Number of columns of the array holding the B vectors
+!> \param IERROR Error code
+
+SUBROUTINE GAUSSJ(A,N,NP,B,M,MP,IERROR)
+
+INTEGER, INTENT(IN) :: M,MP,N,NP
+REAL(EB), INTENT(INOUT) :: A(NP,NP),B(NP,MP)
+INTEGER, INTENT(OUT) :: IERROR
+REAL(EB) :: BIG,DUM,PIVINV
+INTEGER :: I,ICOL=0,IROW=0,J,K,L,LL,INDXC(NP),INDXR(NP),IPIV(NP)
+
+IERROR = 0
+IPIV(1:N) = 0
+
+DO I=1,N
+   BIG = 0._EB
+   DO J=1,N
+      IF (IPIV(J)/=1) THEN
+         DO K=1,N
+            IF (IPIV(K)==0) THEN
+               IF (ABS(A(J,K))>=BIG) THEN
+                  BIG = ABS(A(J,K))
+                  IROW = J
+                  ICOL = K
+               ENDIF
+            ELSE IF (IPIV(K)>1) THEN
+               IERROR = 103   ! Singular matrix in gaussj
+               RETURN
+            ENDIF
+         ENDDO
+      ENDIF
+   ENDDO
+   IPIV(ICOL) = IPIV(ICOL) + 1
+   IF (IROW/=ICOL) THEN
+      DO L=1,N
+         DUM = A(IROW,L)
+         A(IROW,L) = A(ICOL,L)
+         A(ICOL,L) = DUM
+      ENDDO
+      DO L=1,M
+         DUM = B(IROW,L)
+         B(IROW,L) = B(ICOL,L)
+         B(ICOL,L) = DUM
+      ENDDO
+   ENDIF
+   INDXR(I) = IROW
+   INDXC(I) = ICOL
+   IF (ABS(A(ICOL,ICOL))<=TWO_EPSILON_EB) THEN
+      IERROR = 103  ! Singular matrix in gaussj
+      RETURN
+      ENDIF
+   PIVINV = 1._EB/A(ICOL,ICOL)
+   A(ICOL,ICOL) = 1._EB
+   A(ICOL,1:N) = A(ICOL,1:N) * PIVINV
+   B(ICOL,1:M) = B(ICOL,1:M) * PIVINV
+   DO LL=1,N
+      IF (LL/=ICOL) THEN
+         DUM = A(LL,ICOL)
+         A(LL,ICOL) = 0._EB
+         A(LL,1:N) = A(LL,1:N) - A(ICOL,1:N)*DUM
+         B(LL,1:M) = B(LL,1:M) - B(ICOL,1:M)*DUM
+      ENDIF
+   ENDDO
+ENDDO
+DO L=N,1,-1
+   IF (INDXR(L)/=INDXC(L)) THEN
+      DO K=1,N
+         DUM = A(K,INDXR(L))
+         A(K,INDXR(L)) = A(K,INDXC(L))
+         A(K,INDXC(L)) = DUM
+      ENDDO
+   ENDIF
+ENDDO
+
+END SUBROUTINE GAUSSJ
+
+
+!> \brief Solve a linear system of equations for m=n and m/=n
+!> \param A Primary matrix of A*x=b
+!> \param X Solution vector of A*x=b
+!> \param M Column dimension of A and dimension of x
+!> \param N Row dimension of A and dimension of b
+!> \param B Constant vector of b A*x=b
+!> \param IERR Error code
+
+SUBROUTINE LINEAR_SYSTEM_SOLVE(M,N,A,B,X,IERR)
+INTEGER, INTENT(IN) :: M,N
+REAL(EB), INTENT(INOUT) :: A(N,M),B(N),X(M)
+REAL(EB) :: AT(M,N),AAT(N,N),ATA(M,M),ATB(M)
+INTEGER, INTENT(OUT) :: IERR
+
+IERR = 0
+! System is underdetermined - find a minimal solution
+! Solution is given by x = A^T t, solve t = (A A^T)**-1 b, get x as A^T t.
+IF (M > N) THEN
+   AT = TRANSPOSE(A)
+   AAT = MATMUL(A,AT)
+   CALL GAUSSJ(AAT,N,N,B,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      X = MATMUL(AT,B)
+   ENDIF
+! System is overdetermined - find least squares solution
+! Solution is x = (A^T A)**-1 A^T b
+ELSEIF (N > M) THEN
+   AT = TRANSPOSE(A)
+   ATA = MATMUL(AT,A)
+   ATB = MATMUL(AT,B)
+   CALL GAUSSJ(ATA,M,M,ATB,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      IERR = 200
+      X = ATB
+   ENDIF
+! Solution is x = A**-1 b
+ELSE
+   CALL GAUSSJ(A,M,M,B,1,1,IERR)
+   IF (IERR > 0) THEN
+      X = 0._EB
+   ELSE
+      X = B
+   ENDIF
+ENDIF
+
+END SUBROUTINE LINEAR_SYSTEM_SOLVE
+
+
+!> \brief Linearly interpolate the value of a given function at a given point
+!> \param X Independent variable
+!> \param Y Dependent variable
+!> \param XI Point to interpolate
+!> \param ANS Value of the function at the point XI
+
+SUBROUTINE INTERPOLATE1D(X,Y,XI,ANS)
+
+REAL(EB), INTENT(IN), DIMENSION(:) :: X, Y
+REAL(EB), INTENT(IN) :: XI
+REAL(EB), INTENT(OUT) :: ANS
+INTEGER I, UX,LX
+
+UX = UBOUND(X,1)
+LX = LBOUND(X,1)
+
+IF (XI <= X(LX)) THEN
+   ANS = Y(LX)
+ELSEIF (XI >= X(UX)) THEN
+   ANS = Y(UX)
+ELSE
+   L1: DO I=LX,UX-1
+      IF (ABS(XI -X(I)) <= SPACING(X(I))) THEN
+         ANS = Y(I)
+         EXIT L1
+      ELSEIF (X(I+1)>XI) THEN
+         ANS = Y(I)+(XI-X(I))/(X(I+1)-X(I)) * (Y(I+1)-Y(I))
+         EXIT L1
+      ENDIF
+   ENDDO L1
+ENDIF
+
+END SUBROUTINE INTERPOLATE1D
+
+
+!> \brief Interpolate a 1D array of numbers
+!> \param LOWER Lower index of the array X
+!> \param X Array of numbers
+!> \param XI Real number representing a fractional array index
+!> \param ANS Interpolated value at XI
+
+SUBROUTINE INTERPOLATE1D_UNIFORM(LOWER,X,XI,ANS)
+
+INTEGER, INTENT(IN) :: LOWER
+REAL(EB), INTENT(IN), DIMENSION(LOWER:) :: X
+REAL(EB), INTENT(IN) :: XI
+REAL(EB), INTENT(OUT) :: ANS
+INTEGER I, UX,LX
+REAL(EB) :: FRAC
+
+UX = UBOUND(X,1)
+LX = LBOUND(X,1)
+
+IF (XI <= LX) THEN
+   ANS = X(LX)
+ELSEIF (XI >= UX) THEN
+   ANS = X(UX)
+ELSE
+   I = INT(XI)
+   FRAC = XI - REAL(I,EB)
+   ANS = X(I) + FRAC*(X(I+1)-X(I))
+ENDIF
+
+END SUBROUTINE INTERPOLATE1D_UNIFORM
+
+
+!> \brief Randomly choose a point from a normal distribution
+!> \param MEAN Mean of the normal distribution
+!> \param SIGMA Standard deviation
+
+REAL(EB) FUNCTION NORMAL(MEAN,SIGMA)
+
+REAL(EB), INTENT(IN) :: MEAN,SIGMA
+REAL(EB) :: TMP,FAC,GSAVE,RSQ,R1,R2
+REAL     :: RN
+INTEGER :: FLAG
+SAVE FLAG,GSAVE
+DATA FLAG /0/
+
+IF (FLAG==0) THEN
+   RSQ=2.0_EB
+   DO WHILE(RSQ>=1.0_EB.OR.RSQ==0.0_EB)
+      CALL RANDOM_NUMBER(RN)
+      R1=2.0_EB*REAL(RN,EB)-1.0_EB
+      CALL RANDOM_NUMBER(RN)
+      R2=2.0_EB*REAL(RN,EB)-1.0_EB
+      RSQ=R1*R1+R2*R2
+   ENDDO
+   FAC=SQRT(-2.0_EB*LOG(RSQ)/RSQ)
+   GSAVE=R1*FAC
+   TMP=R2*FAC
+   FLAG=1
+ELSE
+   TMP=GSAVE
+   FLAG=0
+ENDIF
+NORMAL=TMP*SIGMA+MEAN
+
+END FUNCTION NORMAL
+
+
+!> \brief Compute the cross product of two triplets, A x B = C
+!> \param C The resulting vector
+!> \param A First vector
+!> \param B Second vector
+
+SUBROUTINE CROSS_PRODUCT(C,A,B)
+
+REAL(EB), INTENT(IN) :: A(3),B(3)
+REAL(EB), INTENT(OUT) :: C(3)
+
+C(1) = A(2)*B(3)-A(3)*B(2)
+C(2) = A(3)*B(1)-A(1)*B(3)
+C(3) = A(1)*B(2)-A(2)*B(1)
+
+END SUBROUTINE CROSS_PRODUCT
+
+
+!> \brief Randomly choose a value from the distribution with given CDF
+!> \param CDF Cumulative Distribution Function
+!> \param VAR Independent variable
+!> \param NPTS Number of points in the CDF
+!> \param CHOICE Randomly chosen value
+
+SUBROUTINE RANDOM_CHOICE(CDF,VAR,NPTS,CHOICE)
+
+INTEGER,  INTENT(IN)  :: NPTS
+REAL(EB), INTENT(IN)  :: CDF(0:NPTS),VAR(0:NPTS)
+REAL(EB), INTENT(OUT) :: CHOICE
+INTEGER  :: IT
+REAL(EB) :: CFRAC,A,B
+REAL(EB) :: RN
+REAL     :: RN2
+
+CALL RANDOM_NUMBER(RN2)
+RN = REAL(RN2,EB)
+A = MINVAL(CDF)
+B = MAXVAL(CDF)
+RN = A + (B-A)*RN
+
+CDF_LOOP: DO IT=1,NPTS
+   IF (CDF(IT) > RN) THEN
+      CFRAC  = (RN-CDF(IT-1))/(CDF(IT)-CDF(IT-1))
+      CHOICE = VAR(IT-1) + (VAR(IT)-VAR(IT-1))*CFRAC
+      EXIT CDF_LOOP
+   ENDIF
+ENDDO CDF_LOOP
+
+END SUBROUTINE RANDOM_CHOICE
+
+
+REAL(EB) FUNCTION MINMOD2(X,Y)
+REAL(EB), INTENT(IN) :: X,Y
+MINMOD2 = 0.5_EB*(SIGN(1._EB,X)+SIGN(1._EB,Y))*MIN(ABS(X),ABS(Y))
+END FUNCTION MINMOD2
+
+
+REAL(EB) FUNCTION MINMOD4(W,X,Y,Z)
+REAL(EB), INTENT(IN) :: W,X,Y,Z
+MINMOD4 = 0.125_EB*(SIGN(1._EB,W)+SIGN(1._EB,X))* &
+          ABS( (SIGN(1._EB,W)+SIGN(1._EB,Y))*(SIGN(1._EB,W)+SIGN(1._EB,Z)) )* &
+          MIN(ABS(W),ABS(X),ABS(Y),ABS(Z))
+END FUNCTION MINMOD4
+
+
+!> \brief Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance based on the
+!> Box-Muller transformation.
+!> \param Z0 Output value 1
+!> \param Z1 Output value 2
+
+SUBROUTINE BOX_MULLER(Z0,Z1)
+
+REAL(EB), INTENT(OUT) :: Z0,Z1
+REAL(EB) :: U1,U2,A
+
+CALL RANDOM_NUMBER(U1)
+CALL RANDOM_NUMBER(U2)
+A = SQRT(-2._EB*LOG(U1))
+Z0 = A*COS(TWOPI*U2)
+Z1 = A*SIN(TWOPI*U2)
+
+END SUBROUTINE BOX_MULLER
+
+
+!> \brief Flux-limiting function related to mass transfer B-number
+
+REAL(EB) FUNCTION F_B(B)
+REAL(EB), INTENT(IN) :: B
+
+IF (B<=0._EB) THEN
+   F_B = 1._EB
+ELSE
+   F_B = (1._EB+B)**0.7_EB*LOG(1._EB+B)/B
+ENDIF
+END FUNCTION F_B
+
+
+!> \brief This subroutine computes the flux-limited scalar value on a face.
+!> \param A Array of velocity components (m/s)
+!> \param U Array of scalars
+!> \param F Array of flux-limited scalars
+!> \param I1 Lower I index
+!> \param I2 Upper I index
+!> \param J1 Lower J index
+!> \param J2 Upper J index
+!> \param K1 Lower K index
+!> \param K2 Upper K index
+!> \param IOR Orientation index (1, 2, or 3)
+!> \param LIMITER Indicator of the flux limiting scheme
+
+!> There are 6 options for flux LIMITER:
+!>
+!> CENTRAL_LIMITER  = 0
+!> GODUNOV_LIMITER  = 1
+!> SUPERBEE_LIMITER = 2
+!> MINMOD_LIMITER   = 3
+!> CHARM_LIMITER    = 4
+!> MP5_LIMITER      = 5
+!>
+!> Example: x-direction (IOR=1)
+!>
+!>                   location of face
+!>
+!>                        F(I,J,K)
+!>   |     o     |     o     |     o     |     o     |
+!>                        A(I,J,K)
+!>     U(I-1,J,K)   U(I,J,K)   U(I+1,J,K)  U(I+2,J,K)
+
+SUBROUTINE GET_SCALAR_FACE_VALUE(A,U,F,I1,I2,J1,J2,K1,K2,IOR,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(0:,0:,0:),U(0:,0:,0:)
+REAL(EB), INTENT(OUT) :: F(0:,0:,0:)
+INTEGER, INTENT(IN) :: LIMITER,I1,I2,J1,J2,K1,K2,IOR
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+INTEGER :: I,J,K,IM1,JM1,KM1,IP1,JP1,KP1,IP2,JP2,KP2
+
+SELECT CASE(IOR)
+   CASE(1) ; IM1=-1 ; JM1= 0 ; KM1= 0 ; IP1=1 ; JP1=0 ; KP1=0 ; IP2=2 ; JP2=0 ; KP2=0
+   CASE(2) ; IM1= 0 ; JM1=-1 ; KM1= 0 ; IP1=0 ; JP1=1 ; KP1=0 ; IP2=0 ; JP2=2 ; KP2=0
+   CASE(3) ; IM1= 0 ; JM1= 0 ; KM1=-1 ; IP1=0 ; JP1=0 ; KP1=1 ; IP2=0 ; JP2=0 ; KP2=2
+END SELECT
+
+!$OMP PARALLEL IF(I2>1)
+SELECT CASE(LIMITER)
+   CASE(0) ! central differencing
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+                  F(I,J,K) = 0.5_EB*(U(I,J,K) + U(I+IP1,J+JP1,K+KP1))
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(1) ! first-order upwinding
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  F(I,J,K) = U(I,J,K)
+               ELSE
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(2) ! SUPERBEE, Roe (1986)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(3) ! MINMOD
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(4) ! CHARM
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_UP
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_UP
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(5) ! MP5, Suresh and Huynh (1997)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  V = (/2._EB*U(I+IM1,J+JM1,K+KM1)-U(I,J,K),&
+                       U(I+IM1,J+JM1,K+KM1),U(I,J,K),U(I+IP1,J+JP1,K+KP1),U(I+IP2,J+JP2,K+KP2)/)
+                  F(I,J,K) = MP5()
+               ELSE
+                  V = (/2._EB*U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1),&
+                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
+                  F(I,J,K) = MP5()
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+END SELECT
+!$OMP END PARALLEL
+
+CONTAINS
+
+REAL(EB) FUNCTION MP5()
+REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
+REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
+
+! Monotonicity preserving 5th-order scheme (MP5) of Suresh and Huynh, JCP 136, 83-99 (1997)
+
+VOR = B1*(2._EB*V(-2)-13._EB*V(-1)+47._EB*V(0)+27._EB*V(1)-3._EB*V(2))
+VMP = V(0) + MINMOD2(V(1)-V(0),ALPHA*(V(0)-V(-1)))
+IF ((VOR-V(0))*(VOR-VMP)<EPSM) THEN
+   MP5=VOR
+ELSE
+   DJM1 = V(-2)-2._EB*V(-1)+V(0)
+   DJ   = V(-1)-2._EB*V(0) +V(1)
+   DJP1 = V(0) -2._EB*V(1) +V(2)
+   DM4JPH = MINMOD4(4._EB*DJ-DJP1,4._EB*DJP1-DJ,DJ,DJP1)
+   DM4JMH = MINMOD4(4._EB*DJ-DJM1,4._EB*DJM1-DJ,DJ,DJM1)
+   VUL = V(0) + ALPHA*(V(0)-V(-1))
+   VAV = 0.5_EB*(V(0)+V(1))
+   VMD = VAV - 0.5_EB*DM4JPH
+   VLC = V(0) + 0.5_EB*(V(0)-V(-1)) + B2*DM4JMH
+   VMIN = MAX(MIN(V(0),V(1),VMD),MIN(V(0),VUL,VLC))
+   VMAX = MIN(MAX(V(0),V(1),VMD),MAX(V(0),VUL,VLC))
+   MP5 = VOR + MINMOD2(VMIN-VOR,VMAX-VOR)
+ENDIF
+
+END FUNCTION MP5
+
+END SUBROUTINE GET_SCALAR_FACE_VALUE
+
+
+!> \brief Random fluctuation, Theta'(t+dt) = R^2*Theta'(t) + Normal(0,sqrt(1-R^2)*SIGMA) ; R = exp(-dt/TAU)
+!> \param SIGMA Standard deviation of time series
+!> \param TAU Time scale or period of the time function (s)
+
+SUBROUTINE RANDOM_WIND_FLUCTUATIONS(SIGMA,TAU)
+
+USE TYPES, ONLY: RESERVED_RAMPS_TYPE,RESERVED_RAMPS,N_RESERVED_RAMPS
+USE GLOBAL_CONSTANTS, ONLY: T_END,T_BEGIN
+TYPE(RESERVED_RAMPS_TYPE), POINTER :: RRP
+REAL(EB), INTENT(IN) :: SIGMA,TAU
+REAL(EB) :: LCC,DT_THETA
+INTEGER :: I
+
+N_RESERVED_RAMPS = N_RESERVED_RAMPS + 1
+RRP => RESERVED_RAMPS(N_RESERVED_RAMPS)
+RRP%NUMBER_DATA_POINTS = 1001
+ALLOCATE(RRP%INDEPENDENT_DATA(RRP%NUMBER_DATA_POINTS))
+ALLOCATE(RRP%DEPENDENT_DATA(RRP%NUMBER_DATA_POINTS))
+DT_THETA = (T_END-T_BEGIN)/REAL(RRP%NUMBER_DATA_POINTS-1,EB)
+RRP%INDEPENDENT_DATA(1) = T_BEGIN
+RRP%DEPENDENT_DATA(1)   = 0._EB
+LCC = EXP(-DT_THETA/TAU)  ! Lagrangian Correlation Coefficient, R
+DO I=2,RRP%NUMBER_DATA_POINTS
+   RRP%INDEPENDENT_DATA(I) = RRP%INDEPENDENT_DATA(I-1) + DT_THETA
+   RRP%DEPENDENT_DATA(I)   = LCC**2*RRP%DEPENDENT_DATA(I-1) + NORMAL(0._EB,SQRT(1._EB-LCC**2)*SIGMA)
+ENDDO
+
+END SUBROUTINE RANDOM_WIND_FLUCTUATIONS
+
+END MODULE MATH_FUNCTIONS
+
+
+!> \brief Functions for physical quantities
+
+MODULE PHYSICAL_FUNCTIONS
+
+USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS
+USE MESH_VARIABLES
+IMPLICIT NONE (TYPE,EXTERNAL)
+
+CONTAINS
+
+
+!> \brief Check if the species mass fractions are in bounds
+!> \param ZZ_IN Array of mass fractions
+
+LOGICAL FUNCTION IS_REALIZABLE(ZZ_IN)
+
+REAL(EB), INTENT(IN) :: ZZ_IN(1:N_TRACKED_SPECIES)
+REAL(EB), PARAMETER:: ZERO_MINUS=-EPSILON(0._FB),ONE_PLUS=1._EB+EPSILON(1._FB)
+
+IF (ANY(ZZ_IN<ZERO_MINUS) .OR. SUM(ZZ_IN)>ONE_PLUS) THEN
+   IS_REALIZABLE=.FALSE.
+ELSE
+   IS_REALIZABLE=.TRUE.
+ENDIF
+
+END FUNCTION IS_REALIZABLE
+
+
+!> \brief Clip mass fractions between zero and one and redistribute clipped mass to most abundant species
+!> \param ZZ_GET Array of mass fractions
+
+SUBROUTINE GET_REALIZABLE_MF(ZZ_GET)
+
+REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: SUM_OTHER_SPECIES
+INTEGER :: N_ZZ_MAX
+
+! clip mass fractions
+ZZ_GET=MAX(0._EB,MIN(1._EB,ZZ_GET))
+
+! absorb all error in most abundant species
+N_ZZ_MAX = MAXLOC(ZZ_GET,1)
+
+SUM_OTHER_SPECIES = SUM(ZZ_GET) - ZZ_GET(N_ZZ_MAX)
+ZZ_GET(N_ZZ_MAX) = 1._EB - SUM_OTHER_SPECIES
+
+END SUBROUTINE GET_REALIZABLE_MF
+
+
+!> \brief Determine the mass fraction of a primitive species
+!> \param Z_IN Array of lumped mass fractions
+!> \param INDEX Index of desired primitive species
+!> \param Y_OUT Mass fraction of desired primitive species
+
+SUBROUTINE GET_MASS_FRACTION(Z_IN,INDEX,Y_OUT)
+
+INTEGER, INTENT(IN) :: INDEX
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: Y_OUT
+
+Y_OUT = DOT_PRODUCT(Z2Y(INDEX,1:N_TRACKED_SPECIES),Z_IN)
+Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
+
+END SUBROUTINE GET_MASS_FRACTION
+
+
+!> \brief Determine the mass fractions of all primitive species
+!> \param Z_IN Array of lumped species mass fractions
+!> \param Y_OUT Array of primitive species mass fractions
+
+SUBROUTINE GET_MASS_FRACTION_ALL(Z_IN,Y_OUT)
+
+REAL(EB), INTENT(IN)  :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: Y_OUT(1:N_SPECIES)
+INTEGER :: I
+
+DO I=1,N_SPECIES
+   Y_OUT(I) = DOT_PRODUCT(Z2Y(I,1:N_TRACKED_SPECIES),Z_IN)
+ENDDO
+
+Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
+
+END SUBROUTINE GET_MASS_FRACTION_ALL
+
+
+!> \brief Compute ratio of molecular weight of all gas components except the one specified to the mol. wgt. of the one specified
+!> \param INDEX_IN Index of the gas species
+!> \param MW_RATIO W_all/W_in
+!> \param Y_IN Optional mass fraction of primitive species
+!> \param Z_IN Optional mass fraction of lumped species
+
+SUBROUTINE GET_MW_RATIO(INDEX_IN,MW_RATIO,Y_IN,Z_IN)
+
+REAL(EB), INTENT(IN), OPTIONAL :: Y_IN(1:N_SPECIES), Z_IN(1:N_TRACKED_SPECIES)
+INTEGER, INTENT(IN):: INDEX_IN
+REAL(EB), INTENT(OUT) :: MW_RATIO
+INTEGER:: NS
+
+MW_RATIO = 0._EB
+IF (PRESENT(Y_IN)) THEN
+   IF (ABS(Y_IN(INDEX_IN)-1._EB) > TWO_EPSILON_EB) THEN
+      DO NS=1,N_SPECIES
+         IF (NS==INDEX_IN) CYCLE
+         MW_RATIO = MW_RATIO + Y_IN(NS)/SPECIES(NS)%MW
+      ENDDO
+      IF (MW_RATIO<=TWO_EPSILON_EB) THEN
+         MW_RATIO=SPECIES_MIXTURE(1)%MW
+      ELSE
+         MW_RATIO = (1._EB-Y_IN(INDEX_IN))/MW_RATIO
+      ENDIF
+   ELSE
+      MW_RATIO=SPECIES_MIXTURE(1)%MW
+   ENDIF
+   MW_RATIO = MW_RATIO/SPECIES(INDEX_IN)%MW
+ELSE
+   IF (ABS(Z_IN(INDEX_IN)-1._EB) > TWO_EPSILON_EB) THEN
+      DO NS=1,N_TRACKED_SPECIES
+         IF (NS==INDEX_IN) CYCLE
+         MW_RATIO = MW_RATIO + Z_IN(NS)/SPECIES_MIXTURE(NS)%MW
+      ENDDO
+      IF (MW_RATIO<=TWO_EPSILON_EB) THEN
+         MW_RATIO=SPECIES_MIXTURE(1)%MW
+      ELSE
+         MW_RATIO = (1._EB-Z_IN(INDEX_IN))/MW_RATIO
+      ENDIF
+   ELSE
+      MW_RATIO=SPECIES_MIXTURE(1)%MW
+   ENDIF
+   MW_RATIO = MW_RATIO/SPECIES_MIXTURE(INDEX_IN)%MW
+ENDIF
+
+END SUBROUTINE GET_MW_RATIO
+
+
+SUBROUTINE GET_EQUIL_DATA(MW,TMP_L,PRES_IN,H_V,H_V_EFF,T_BOIL_EFF,X_EQ,H_V_DATA)
+
+REAL(EB), INTENT(IN):: MW,TMP_L,PRES_IN
+REAL(EB), INTENT(IN) :: H_V_DATA(:)
+REAL(EB), INTENT(INOUT):: T_BOIL_EFF
+REAL(EB), INTENT(OUT):: H_V,H_V_EFF,X_EQ
+REAL(EB):: DHOR
+
+H_V=H_V_DATA(MIN(I_MAX_TEMP,NINT(TMP_L)))
+H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
+DHOR = H_V_EFF*MW/R0
+T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
+H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
+H_V_EFF = 0.5_EB*(H_V+H_V_EFF)
+X_EQ = MIN(1._EB,EXP(H_V_EFF*MW/R0*(1._EB/T_BOIL_EFF-1._EB/TMP_L)))
+
+END SUBROUTINE GET_EQUIL_DATA
+
+
+!> \brief Compute volume fraction of a primitive species
+!> \param Y_INDEX Index of primitive species
+!> \param ZZ_ARRAY Array of lumped species
+!> \param R_MIX R/W of species mixture
+
+REAL(EB) FUNCTION GET_VOLUME_FRACTION(Y_INDEX,ZZ_ARRAY,R_MIX)
+
+INTEGER, INTENT(IN) :: Y_INDEX
+REAL(EB), INTENT(IN) :: R_MIX,ZZ_ARRAY(:)
+REAL(EB) :: MASS_FRACTION,RCON
+
+CALL GET_MASS_FRACTION(ZZ_ARRAY,Y_INDEX,MASS_FRACTION)
+RCON = SPECIES(Y_INDEX)%RCON
+GET_VOLUME_FRACTION = RCON*MASS_FRACTION/R_MIX
+
+END FUNCTION GET_VOLUME_FRACTION
+
+
+!> \brief Determine molecular weight of the gas mixture
+!> \param Z_IN Array of lumped species mass fractions
+!> \param MW_OUT Average molecular weight (g/mol)
+
+SUBROUTINE GET_MOLECULAR_WEIGHT(Z_IN,MW_OUT)
+
+REAL(EB), INTENT(IN)  :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: MW_OUT
+
+MW_OUT =  1._EB/DOT_PRODUCT(MWR_Z,Z_IN)
+
+END SUBROUTINE GET_MOLECULAR_WEIGHT
+
+
+!> \brief Compute R/W for a gas mixture
+!> \param Z_IN Array of lumped species mass fractions
+!> \param RSUM_OUT R/W_avg
+
+SUBROUTINE GET_SPECIFIC_GAS_CONSTANT(Z_IN,RSUM_OUT)
+
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: RSUM_OUT
+
+RSUM_OUT =  R0 * DOT_PRODUCT(MWR_Z,Z_IN)
+
+END SUBROUTINE GET_SPECIFIC_GAS_CONSTANT
+
+
+!> \brief Get specific heat of the gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param CP_OUT Specific heat of the mixture (J/kg/K)
+!> \param TMPG Gas mixture temperature (K)
+
+SUBROUTINE GET_SPECIFIC_HEAT(Z_IN,CP_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: CP_OUT
+
+ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
+CP_OUT  = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+
+END SUBROUTINE GET_SPECIFIC_HEAT
+
+SUBROUTINE GET_SPECIFIC_HEAT_INTERP(Z_IN,CP_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: CP_OUT
+
+ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+CP_OUT = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)+(TMPG-REAL(ITMP,EB))* &
+          DOT_PRODUCT(CP_Z(ITMP+1,1:N_TRACKED_SPECIES)-CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+
+END SUBROUTINE GET_SPECIFIC_HEAT_INTERP
+
+SUBROUTINE GET_SPECIFIC_HEAT_Z(N,CP_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(OUT) :: CP_OUT
+
+ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+CP_OUT  = CP_Z(ITMP,N) + (TMPG-REAL(ITMP,EB))*(CP_Z(ITMP+1,N)-CP_Z(ITMP,N))
+
+END SUBROUTINE  GET_SPECIFIC_HEAT_Z
+
+SUBROUTINE GET_SPECIFIC_HEAT_TMP_DERIVATIVE(Z_IN,DCPDT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: DCPDT
+REAL(EB) :: CP_OUT_1, CP_OUT_2
+
+ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+CP_OUT_1  = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+CP_OUT_2  = DOT_PRODUCT(CP_Z(ITMP+1,1:N_TRACKED_SPECIES),Z_IN)
+DCPDT = (CP_OUT_2-CP_OUT_1)
+
+END SUBROUTINE GET_SPECIFIC_HEAT_TMP_DERIVATIVE
+
+!> \brief Get sensible enthalpy of the gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param H_S_OUT Specific heat of the mixture (J/kg)
+!> \param TMPG Gas mixture temperature (K)
+
+SUBROUTINE GET_SENSIBLE_ENTHALPY(Z_IN,H_S_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: H_S_OUT
+
+ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+
+H_S_OUT = DOT_PRODUCT(H_SENS_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)+(TMPG-REAL(ITMP,EB))* &
+          DOT_PRODUCT(H_SENS_Z(ITMP+1,1:N_TRACKED_SPECIES)-H_SENS_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+
+END SUBROUTINE GET_SENSIBLE_ENTHALPY
+
+!> \brief Get average specific heat of the gas mixture up to a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param CPBAR_OUT Average specific heat of the mixture (J/kg/K)
+!> \param TMPG Gas mixture temperature (K)
+
+SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT(Z_IN,CPBAR_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: CPBAR_OUT
+
+ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
+CPBAR_OUT = DOT_PRODUCT(CPBAR_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+
+END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT
+
+
+!> \brief Get sensible enthalpy of lumped species N at a specified temperature
+!> \param N Index of lumped species
+!> \param TMPG Gas mixture temperature (K)
+!> \param H_S Sensible enthalpy of lumped species N (J/kg)
+
+SUBROUTINE GET_SENSIBLE_ENTHALPY_Z(N,TMPG,H_S)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(OUT) :: H_S
+
+ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+H_S = H_SENS_Z(ITMP,N)+(TMPG-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,N)-H_SENS_Z(ITMP,N))
+
+END SUBROUTINE GET_SENSIBLE_ENTHALPY_Z
+
+
+!> \brief Get average specific heat of lumped species N up to a specified temperature
+!> \param N Index of lumped species
+!> \param TMPG Gas mixture temperature (K)
+!> \param CPBAR_OUT Average specific heat of lumped species N (J/kg/K)
+
+SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z(N,TMPG,CPBAR_OUT)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(OUT) :: CPBAR_OUT
+
+ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
+CPBAR_OUT = CPBAR_Z(ITMP,N)
+
+END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z
+
+
+!> \brief Get thermal conductivity of gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param K_OUT Conductivity of gas mixture (W/m/K)
+!> \param TMPG Gas mixture temperature (K)
+
+SUBROUTINE GET_CONDUCTIVITY(Z_IN,K_OUT,TMPG)
+
+REAL(EB), INTENT(IN) :: Z_IN(1:N_TRACKED_SPECIES), TMPG
+REAL(EB), INTENT(OUT) :: K_OUT
+INTEGER :: ITMP
+
+ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
+K_OUT = DOT_PRODUCT(K_RSQMW_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)/DOT_PRODUCT(Z_IN,RSQ_MW_Z)
+
+END SUBROUTINE GET_CONDUCTIVITY
+
+
+!> \brief Get enthalpy (J/kg) of a particle at a specified uniform temperature
+!> \param I_LPC Index of particle class
+!> \param TMP_S Particle temperature (K)
+
+REAL(EB) FUNCTION GET_PARTICLE_ENTHALPY(I_LPC,TMP_S)
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+REAL(EB), INTENT(IN) :: TMP_S
+REAL(EB) :: RHO,RHO_H,VOL,DTMP,H_S,THICKNESS
+INTEGER :: I,N,ITMP,I_GRAD
+INTEGER, INTENT(IN) :: I_LPC
+TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+
+LPC=>LAGRANGIAN_PARTICLE_CLASS(I_LPC)
+
+IF (LPC%LIQUID_DROPLET) THEN
+   CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%H_L,1),SPECIES(LPC%Y_INDEX)%H_L,TMP_S,GET_PARTICLE_ENTHALPY)
+ELSE
+   SF=>SURFACE(LPC%SURF_INDEX)
+   SELECT CASE(SF%GEOMETRY)
+      CASE(SURF_CARTESIAN)                          ; I_GRAD = 1
+      CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL) ; I_GRAD = 2
+      CASE(SURF_SPHERICAL)                          ; I_GRAD = 3
+   END SELECT
+   RHO_H = 0._EB
+   RHO = 0._EB
+   ITMP = MIN(I_MAX_TEMP-1,INT(TMP_S))
+   DTMP = TMP_S-REAL(ITMP,EB)
+   THICKNESS = SUM(SF%LAYER_THICKNESS)
+   DO I=1,SUM(SF%N_LAYER_CELLS)
+      IF (SF%GEOMETRY==SURF_INNER_CYLINDRICAL) THEN
+         VOL = (SF%INNER_RADIUS+SF%X_S(I))**I_GRAD - (SF%INNER_RADIUS+SF%X_S(I-1))**I_GRAD
+      ELSE
+         VOL = (THICKNESS+SF%INNER_RADIUS-SF%X_S(I-1))**I_GRAD - (THICKNESS+SF%INNER_RADIUS-SF%X_S(I))**I_GRAD
+      ENDIF
+      MATL_REMESH: DO N=1,SF%N_MATL
+         IF (SF%RHO_0(I,N)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
+         ML  => MATERIAL(SF%MATL_INDEX(N))
+         H_S = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
+         RHO_H = RHO_H + SF%RHO_0(I,N) * H_S * VOL
+         RHO = RHO + SF%RHO_0(I,N) * VOL
+      ENDDO MATL_REMESH
+   ENDDO
+   GET_PARTICLE_ENTHALPY = RHO_H/RHO
+ENDIF
+
+END FUNCTION GET_PARTICLE_ENTHALPY
+
+
+!> \brief Get viscosity of gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param MU_OUT Viscosity of gas mixture (kg/m/s)
+!> \param TMPG Gas mixture temperature (K)
+
+SUBROUTINE GET_VISCOSITY(Z_IN,MU_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN)  :: TMPG,Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: MU_OUT
+
+ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
+
+MU_OUT = DOT_PRODUCT(MU_RSQMW_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)/DOT_PRODUCT(Z_IN,RSQ_MW_Z)
+
+END SUBROUTINE GET_VISCOSITY
+
+
+SUBROUTINE GET_ENTHALPY(Z_IN,H_OUT,TMPG)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES),DTMP
+REAL(EB), INTENT(OUT) :: H_OUT
+
+IF (TMPG>=REAL(I_MAX_TEMP,EB)) THEN
+   H_OUT = DOT_PRODUCT(CPBAR_Z(I_MAX_TEMP,1:N_TRACKED_SPECIES),Z_IN)*REAL(I_MAX_TEMP,EB) + &
+           DOT_PRODUCT(CP_Z(I_MAX_TEMP,1:N_TRACKED_SPECIES),Z_IN)*(TMPG-REAL(I_MAX_TEMP,EB))
+ELSE
+   ITMP = INT(TMPG)
+   DTMP = TMPG-REAL(ITMP)
+   H_OUT = DOT_PRODUCT(CPBAR_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
+   H_OUT = H_OUT+DTMP*(DOT_PRODUCT(CPBAR_Z(ITMP+1,1:N_TRACKED_SPECIES),Z_IN)-H_OUT)
+   H_OUT = H_OUT*TMPG
+ENDIF
+
+END SUBROUTINE GET_ENTHALPY
+
+
+SUBROUTINE GET_ENTHALPY_Z(N,TMPG,H_OUT)
+
+INTEGER :: ITMP
+REAL(EB), INTENT(IN) :: TMPG
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(OUT) :: H_OUT
+
+IF (TMPG>=REAL(I_MAX_TEMP,EB)) THEN
+   H_OUT = CPBAR_Z(I_MAX_TEMP,N)*REAL(I_MAX_TEMP,EB) + &
+           CP_Z(I_MAX_TEMP,N)*(TMPG-REAL(I_MAX_TEMP,EB))
+ELSE
+   ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
+   H_OUT = CPBAR_Z(ITMP,N)+(TMPG-REAL(ITMP,EB))*(CPBAR_Z(ITMP+1,N)-CPBAR_Z(ITMP,N))
+   H_OUT = H_OUT*TMPG
+ENDIF
+
+END SUBROUTINE GET_ENTHALPY_Z
+
+
+!> \brief Compute surface emissivity
+!> \param ONE_D Pointer to BOUNDARY_ONE_D derived type variable
+!> \param NODE_INDEX Interior node index
+
+SUBROUTINE GET_EMISSIVITY(ONE_D,NODE_INDEX,EMISSIVITY)
+
+INTEGER, INTENT(IN) :: NODE_INDEX
+INTEGER :: N
+REAL(EB), INTENT(OUT) :: EMISSIVITY
+REAL(EB) :: VOLSUM
+TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+TYPE (MATERIAL_TYPE), POINTER :: ML
+
+EMISSIVITY = 0._EB
+VOLSUM     = 0._EB
+
+DO N=1,ONE_D%N_MATL
+   IF (ONE_D%MATL_COMP(N)%RHO(NODE_INDEX)<=TWO_EPSILON_EB) CYCLE
+   ML => MATERIAL(ONE_D%MATL_INDEX(N))
+   VOLSUM  = VOLSUM  + ONE_D%MATL_COMP(N)%RHO(NODE_INDEX)/ML%RHO_S
+   EMISSIVITY = EMISSIVITY + ONE_D%MATL_COMP(N)%RHO(NODE_INDEX)*ML%EMISSIVITY/ML%RHO_S
+ENDDO
+IF (VOLSUM > 0._EB) EMISSIVITY = EMISSIVITY/VOLSUM
+
+END SUBROUTINE GET_EMISSIVITY
+
+
+!> \brief Extract temperature given species mass fractions and enthalpy
+
+SUBROUTINE GET_TEMPERATURE(TMP,ETOT,ZZ_GET)
+REAL(EB), INTENT(IN) :: ETOT, ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(INOUT) :: TMP
+INTEGER :: ITCOUNT
+REAL(EB) :: CP, CP2, DCPDT, HGAS, TGUESS
+
+TGUESS = TMP
+ITCOUNT = 0
+CP_LOOP: DO ! Newton method to find solution of T (and hence cpbar) from enthalpy
+   ITCOUNT = ITCOUNT + 1
+   CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
+   IF (TGUESS>1._EB) THEN
+      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
+      DCPDT = CP - CP2
+   ELSE
+      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
+      DCPDT = CP2- CP
+   ENDIF
+   CP = HGAS / TGUESS
+   TMP =TGUESS+(ETOT-HGAS)/(CP+TGUESS*DCPDT)
+   IF (ABS(TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
+   IF (ABS(TMP - TGUESS)/(TMP+TWO_EPSILON_EB) < 0.0005_EB) EXIT CP_LOOP
+   IF (ITCOUNT > 10) THEN
+      TMP = 0.5_EB*(TMP+TGUESS)
+      EXIT CP_LOOP
+   ENDIF
+   TGUESS = MAX(0._EB,TMP)
+ENDDO CP_LOOP
+
+END SUBROUTINE GET_TEMPERATURE
+
+SUBROUTINE MOLAR_CONC_TO_MASS_FRAC(CC_IN,ZZ_OUT)
+   REAL(EB) :: CC_IN(1:N_TRACKED_SPECIES),ZZ_OUT(1:N_TRACKED_SPECIES)
+   ZZ_OUT(1:N_TRACKED_SPECIES) = CC_IN(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW
+   ! Check for negative mass fraction, and rescale to accomodate negative values
+   WHERE(ZZ_OUT<0._EB) ZZ_OUT=0._EB
+   ZZ_OUT = ZZ_OUT / SUM(ZZ_OUT)
+END SUBROUTINE MOLAR_CONC_TO_MASS_FRAC
+
+SUBROUTINE CALC_EQUIV_RATIO (ZZ, EQUIV)
+REAL(EB), INTENT(IN) :: ZZ(N_TRACKED_SPECIES)
+REAL(EB), INTENT(OUT) :: EQUIV
+REAL(EB) :: NUMER, DENOM
+INTEGER :: NS
+
+NUMER = 0._EB
+DENOM = 0._EB
+
+DO NS=1, N_TRACKED_SPECIES
+   NUMER = NUMER + ZZ(NS)*SPECIES_MIXTURE(NS)%OXR
+   DENOM = DENOM + ZZ(NS)*SPECIES_MIXTURE(NS)%OXA
+ENDDO
+
+IF (DENOM < TWO_EPSILON_EB) THEN
+   EQUIV= 0._EB;
+ELSE
+   EQUIV = NUMER/ DENOM;
+ENDIF
+END SUBROUTINE CALC_EQUIV_RATIO
+
+
+REAL(EB) FUNCTION DRAG(RE,DRAG_LAW,KN)
+
+! drag coefficient
+
+INTEGER, INTENT(IN) :: DRAG_LAW
+REAL(EB), INTENT(IN) :: RE
+REAL(EB), OPTIONAL, INTENT(IN) :: KN
+
+IF (RE<TWO_EPSILON_EB) THEN
+   DRAG = 0._EB
+   RETURN
+ENDIF
+
+SELECT CASE(DRAG_LAW)
+
+   ! see J.P. Holman 7th Ed. Fig. 6-10
+   CASE(SPHERE_DRAG)
+      IF (RE<1._EB) THEN
+         IF (PRESENT(KN)) THEN
+            DRAG = 24._EB/RE/CUNNINGHAM(KN)
+         ELSE
+            DRAG = MIN(240000._EB,24._EB/RE)
+         ENDIF
+      ELSEIF (RE<1000._EB) THEN
+         !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE ! see Crowe, Sommerfeld, Tsuji, 1998, Eq. (4.51)
+         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! matches Stokes drag at RE=1 (RJM)
+      ELSEIF (RE>=1000._EB) THEN
+         DRAG = 0.44_EB
+      ENDIF
+
+   ! see J.P. Holman 7th Ed. Fig. 6-9
+   CASE(CYLINDER_DRAG)
+      IF (RE<=1._EB) THEN
+         DRAG = 10._EB/(RE**0.8_EB)
+      ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
+         DRAG = 10._EB*(0.6_EB+0.4_EB*RE**0.8_EB)/RE
+      ELSEIF (RE>=1000._EB) THEN
+         DRAG = 1._EB
+      ENDIF
+
+   ! see Hoerner 1965, Fig. 3-26
+   CASE(DISK_DRAG)
+      DRAG=20.37_EB/RE+1.17_EB/(1._EB+1._EB/RE)
+
+   CASE(USER_DRAG)
+      DRAG = 1._EB ! PC%DRAG_COEFFICIENT set elsewhere
+
+   CASE DEFAULT
+      DRAG = 0._EB
+
+END SELECT
+
+END FUNCTION DRAG
+
+
+REAL(EB) FUNCTION CUNNINGHAM(KN)
+REAL(EB), INTENT(IN) :: KN
+REAL(EB), PARAMETER :: K1=1.257_EB,K2=0.4_EB,K3=1.1_EB
+
+CUNNINGHAM = 1._EB+K1*KN+K2*KN*EXP(-K3/KN)
+
+END FUNCTION CUNNINGHAM
+
+
+!> \brief Compute the surface (mass or energy) density of a wall cell
+!> \param MODE Indicator of returned quantity (0) kg/m2, (1) kg/m3, (2) kJ/m2, (3) kJ/m3
+!> \param SF Pointer to SURFACE
+!> \param ONE_D Pointer to BOUNDARY_ONE_D
+!> \param MATL_INDEX (Optional) Index of the material component
+
+REAL(EB) FUNCTION SURFACE_DENSITY(MODE,SF,ONE_D,MATL_INDEX)
+
+INTEGER, INTENT(IN) :: MODE
+INTEGER, INTENT(IN), OPTIONAL :: MATL_INDEX
+INTEGER :: I_GRAD,NWP,II2,N,ITMP
+REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM,DTMP
+TYPE(BOUNDARY_ONE_D_TYPE), INTENT(IN), POINTER :: ONE_D
+TYPE(SURFACE_TYPE), INTENT(IN), POINTER :: SF
+TYPE(MATERIAL_TYPE), POINTER :: ML
+
+THERMALLY_THICK_IF: IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
+
+   SURFACE_DENSITY = 0._EB
+
+ELSE THERMALLY_THICK_IF
+
+   SELECT CASE(SF%GEOMETRY)
+      CASE(SURF_CARTESIAN)                           ; I_GRAD = 1
+      CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)  ; I_GRAD = 2
+      CASE(SURF_SPHERICAL)                           ; I_GRAD = 3
+   END SELECT
+
+   NWP = SUM(ONE_D%N_LAYER_CELLS)
+   IF (SF%GEOMETRY==SURF_INNER_CYLINDRICAL) THEN
+      R_S(0:NWP) = SF%INNER_RADIUS + ONE_D%X(0:NWP)
+   ELSE
+      R_S(0:NWP) = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0:NWP)
+   ENDIF
+
+   SURFACE_DENSITY = 0._EB
+   NUMBER_WALL_POINTS_LOOP: DO II2=1,NWP
+      AREA_VOLUME_SELECT: SELECT CASE(MODE)
+         CASE(0,2); WGT = ABS(R_S(II2-1)**I_GRAD-R_S(II2)**I_GRAD)/(REAL(I_GRAD,EB)*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
+         CASE(1,3); WGT = ABS(R_S(II2-1)**I_GRAD-R_S(II2)**I_GRAD)/(SF%INNER_RADIUS+SF%THICKNESS)**I_GRAD
+      END SELECT AREA_VOLUME_SELECT
+
+      EPUM = 1._EB ! energy per unit mass
+      ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(II2)))
+      DTMP = ONE_D%TMP(II2) - REAL(ITMP,EB)
+      IF (PRESENT(MATL_INDEX)) THEN
+         ENERGY_SELECT_1: SELECT CASE(MODE)
+            CASE(2,3)
+               ML => MATERIAL(MATL_INDEX)
+               EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
+         END SELECT ENERGY_SELECT_1
+         SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(MATL_INDEX)%RHO(II2)*WGT*EPUM
+      ELSE
+         DO N=1,SF%N_MATL
+            ENERGY_SELECT_2: SELECT CASE(MODE)
+               CASE(2,3)
+                  ML => MATERIAL(N)
+                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
+            END SELECT ENERGY_SELECT_2
+            SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
+         ENDDO
+      ENDIF
+
+   ENDDO NUMBER_WALL_POINTS_LOOP
+
+ENDIF THERMALLY_THICK_IF
+
+END FUNCTION SURFACE_DENSITY
+
+
+!> \brief Compute particle Cumulative Number Fraction (CNF) and Cumulative Volume Fraction (CVF)
+!> \param DM Median particle diameter (m)
+!> \param RR Array of particle radii (m)
+!> \param CNF Cumulative Number Fraction
+!> \param CVF Cumulative Volume Fraction
+!> \param NPT Number of points in the distribution
+!> \param GAMMA Parameter in the distribution function
+!> \param SIGMA Parameter in the distribution function
+!> \param DISTRIBUTION Type of distribution
+
+SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,CVF,NPT,GAMMA,SIGMA,DISTRIBUTION)
+
+USE MATH_FUNCTIONS, ONLY: IERFC
+CHARACTER(LABEL_LENGTH), INTENT(IN) :: DISTRIBUTION
+REAL(EB), INTENT(IN) :: DM,GAMMA,SIGMA
+INTEGER, INTENT(IN) :: NPT
+REAL(EB) :: SUM1,SUM2,DD1,DI,ETRM,GFAC,SFAC,DMIN,X1
+INTEGER  :: J
+REAL(EB), INTENT(OUT) :: RR(0:NPT),CNF(0:NPT),CVF(0:NPT)
+
+RR(0)  = 0._EB
+CNF(0) = 0._EB
+SUM1   = 0._EB
+SUM2   = 0._EB
+
+X1     = IERFC(2._EB*CNF_CUTOFF)
+DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
+DD1    = (-LOG(CNF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
+DD1    = (DD1-DMIN)/REAL(NPT,EB)
+GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
+SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
+
+INTLOOP: DO J=1,NPT
+   DI = DMIN + (J-0.5_EB)*DD1
+   RR(J) = 0.5_EB*DI
+   IF ((DI<=DM .OR. DISTRIBUTION=='LOGNORMAL') .AND. DISTRIBUTION/='ROSIN-RAMMLER') THEN
+      ETRM = EXP(-(LOG(DI/DM))**2/(2._EB*SIGMA**2))
+      SUM1 = SUM1 + (SFAC/DI**4)*ETRM
+      SUM2 = SUM2 + (SFAC/DI)*ETRM
+   ELSE
+      ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)
+      SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
+      SUM2 = 1._EB - ETRM
+   ENDIF
+   CNF(J) = SUM1
+   CVF(J) = SUM2
+ENDDO INTLOOP
+
+CNF = CNF/SUM1
+CVF = CVF/SUM2
+
+END SUBROUTINE PARTICLE_SIZE_DISTRIBUTION
+
+
+SUBROUTINE SPRAY_ANGLE_DISTRIBUTION(LON,LAT,LON_CDF,LAT_CDF,BETA,MU,SPRAY_ANGLE,DISTRIBUTION_TYPE,NPT)
+
+INTEGER,INTENT(IN) :: NPT
+REAL(EB),INTENT(OUT) :: LON_CDF(0:NPT),LON(0:NPT),LAT(0:NPT),LAT_CDF(0:NPT,0:NPT)
+REAL(EB),INTENT(IN) :: BETA,MU,SPRAY_ANGLE(2,2)
+CHARACTER(LABEL_LENGTH),INTENT(IN) :: DISTRIBUTION_TYPE
+INTEGER :: I,J
+REAL(EB) :: DLON,DLAT,PDF(0:NPT,0:NPT),THETA_MAX,THETA_MIN
+
+THETA_MAX=MAXVAL(SPRAY_ANGLE)
+THETA_MIN=MINVAL(SPRAY_ANGLE)
+
+DLAT=(THETA_MAX-THETA_MIN)/REAL(NPT,EB)
+DLON=2._EB*PI/REAL(NPT,EB)
+!Discretize latitude and longtitude
+LAT=(/ (THETA_MIN+I*DLAT,I=0,NPT) /)
+LON=(/ (0._EB+I*DLON, I=0,NPT) /)
+
+! SPRAY_ANGLE May be different in X and Y directions
+! i.e spray angle is dependent on longtitude
+! SPRAY_AGLE_MIN and MAX form ellipses with semi-axes defined by
+! SPRAY_ANGLE(1,1:2) and SPRAY_ANGLE(2,1:2) respectively
+
+DO I=0,NPT
+   THETA_MIN=SPRAY_ANGLE(1,1)*SPRAY_ANGLE(1,2)
+   IF (THETA_MIN>0._EB) THEN
+      THETA_MIN=THETA_MIN/SQRT((SPRAY_ANGLE(1,2)*COS(LON(I)))**2+(SPRAY_ANGLE(1,1)*SIN(LON(I)))**2)
+   ENDIF
+   THETA_MAX=SPRAY_ANGLE(2,1)*SPRAY_ANGLE(2,2)
+   THETA_MAX=THETA_MAX/SQRT((SPRAY_ANGLE(2,2)*COS(LON(I)))**2+(SPRAY_ANGLE(2,1)*SIN(LON(I)))**2)
+   SELECT CASE(DISTRIBUTION_TYPE)
+   CASE("TRIANGLE")
+      DO J=0,NPT
+         IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
+           PDF(J,I)=0._EB
+         ELSE
+           IF(LON(I)<MU) THEN
+              PDF(J,I)=2*(LAT(J)-THETA_MIN)/((THETA_MAX-THETA_MIN)*(THETA_MAX-MU))
+           ELSE
+              PDF(J,I)=2*(THETA_MAX-LAT(J))/((THETA_MAX-THETA_MIN)*(THETA_MAX-MU))
+           ENDIF
+         ENDIF
+      ENDDO
+   CASE("GAUSSIAN")
+      DO J=0,NPT
+        IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
+           PDF(J,I)=0._EB
+        ELSE
+           PDF(J,I)=EXP(-BETA*((LAT(J)-MU)/(THETA_MAX-THETA_MIN))**2)
+        ENDIF
+      ENDDO
+   CASE DEFAULT ! "UNIFORM"
+       DO J=0,NPT
+        IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
+           PDF(J,I)=0._EB
+        ELSE
+           PDF(J,I)=1._EB
+        ENDIF
+      ENDDO
+   END SELECT
+ENDDO
+
+
+!
+DO I=0,NPT
+PDF(I,:)=PDF(I,:)*SIN(LAT(I))
+ENDDO
+
+LAT_CDF=0._EB
+! Latitude distribution conditional on Longtitude
+DO I=1,NPT
+   LAT_CDF(I,:)=LAT_CDF(I-1,:)+0.5*(PDF(I,:)+PDF(I-1,:))*DLAT
+ENDDO
+
+! Marginal longtitude distribution
+LON_CDF=0._EB
+DO I=1,NPT
+   LON_CDF(I)=LON_CDF(I-1)+0.5*(LAT_CDF(NPT,I-1)+LAT_CDF(NPT,I))*DLON
+ENDDO
+
+! Normalize marginal longtitude distribution
+LON_CDF=LON_CDF/LON_CDF(NPT)
+!Normalize conditional latitude distributions
+DO I=1,NPT
+   LAT_CDF(:,I)=LAT_CDF(:,I)/LAT_CDF(NPT,I)
+ENDDO
+
+END SUBROUTINE SPRAY_ANGLE_DISTRIBUTION
+
+
+REAL(EB) FUNCTION FED(Y_IN,RSUM,FED_ACTIVITY)
+
+! Returns the integrand of FED (Fractional Effective Dose) calculation.
+
+REAL(EB), INTENT(IN) :: Y_IN(1:N_TRACKED_SPECIES),RSUM
+INTEGER, INTENT(IN) :: FED_ACTIVITY
+INTEGER  :: N
+REAL(EB) :: Y_MF_INT, TMP_1
+REAL(EB), DIMENSION(3) :: CO_FED_FAC
+!                at rest           light work(default) heavy work
+DATA CO_FED_FAC /0.70486250E-5_EB, 2.7641667E-5_EB,    8.2925E-5_EB/
+
+! All equations from D.A. Purser, Sec. 2, Chap. 6, SFPE Handbook, 4th Ed.
+! Note: Purser uses minutes, here dt is in seconds. Conversion at the end of the function.
+! Total FED dose:
+! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
+
+FED = 0._EB
+
+! Carbon monoxide (CO)
+!          at rest    light work heavy work
+! RMV_FED /8.5_EB,    25.0_EB,   50.0_EB /
+! D_FED   /40.0_EB,   30.0_EB,   20.0_EB /
+! RMV/D   /0.2125_EB, 0.8333_EB, 2.5_EB/
+!
+! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (dt/60)) / D;
+!   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
+!
+IF (CO_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
+   ! FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
+   FED   = CO_FED_FAC(FED_ACTIVITY)*TMP_1**(1.036_EB)
+ENDIF
+
+! Nitrogen oxides (NOx, here NO + NO2)
+! FED_LNOx = C_NOx/1500 * (dt/60);
+!   with C_NOx = C_NO + C_NO2, all in ppm
+TMP_1 = 0._EB
+IF (NO_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,NO_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(NO_INDEX)%RCON*Y_MF_INT/RSUM
+ENDIF
+IF (NO2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,NO2_INDEX,Y_MF_INT)
+   TMP_1 = TMP_1 + SPECIES(NO2_INDEX)%RCON*Y_MF_INT/RSUM
+ENDIF
+IF (TMP_1 > 0._EB) FED = FED + TMP_1/0.001500_EB
+
+! Cyanide
+! FED_LCN = (exp(C_CN/43)/220 - 0.0045) * (dt/60);
+!   with C_CN = C_HCN - C_NOx, all in ppm
+IF (HCN_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,HCN_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(HCN_INDEX)%RCON*Y_MF_INT/RSUM - TMP_1
+   IF (TMP_1 > 0._EB) FED = FED + (Exp(TMP_1/0.000043_EB)/220.0_EB-0.00454545_EB)
+ENDIF
+
+! Irritants
+! FLD_irr = (C_HCl/F_HCl + C_HBr/F_HBr + C_HF/F_HF + C_SO2/F_SO2 + C_NO2/F_NO2 + C_C3H4O/F_C3H4O + C_CH2O/F_CH2O) * (dt/60);
+!   all in ppm
+TMP_1 = 0._EB
+DO N=1,N_SPECIES
+   IF (SPECIES(N)%FLD_LETHAL_DOSE > 0._EB) THEN
+      Call GET_MASS_FRACTION(Y_IN,N,Y_MF_INT)
+      TMP_1 = TMP_1 + SPECIES(N)%RCON*Y_MF_INT/RSUM / SPECIES(N)%FLD_LETHAL_DOSE
+   ENDIF
+ENDDO
+FED = FED + TMP_1
+
+! Carbon dioxide (CO2) induced hyperventilation:
+! FED_VCO2 = exp(0.1903*C_CO2/1E4 + 2.0004)/7.1;
+!   C_CO2 in ppm
+IF (CO2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,CO2_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(CO2_INDEX)%RCON*Y_MF_INT/RSUM
+   If ( TMP_1 > 0.0_EB ) FED = FED * Exp( 0.1903_EB*TMP_1*100.0_EB + 2.0004_EB )/7.1_EB
+ENDIF
+
+! Low oxygen (O2)
+! FED_LO2 = 1/exp(8.13 - 0.54*(0.209 - C_O2/1E6)) * (dt/60);
+!   C_O2 in ppm
+IF (O2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(O2_INDEX)%RCON*Y_MF_INT/RSUM
+   IF ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1))
+ENDIF
+
+! Convert the FED integrand for minutes.
+FED = FED / 60._EB
+
+END FUNCTION FED
+
+
+REAL(EB) FUNCTION FIC(Y_IN,RSUM)
+! Returns FIC (Fractional Incapacitating Concentration)
+
+REAL(EB), INTENT(IN) :: Y_IN(1:N_TRACKED_SPECIES),RSUM
+REAL(EB) :: Y_MF_INT
+INTEGER  :: N
+
+FIC = 0._EB
+DO N=1,N_SPECIES
+   IF (SPECIES(N)%FIC_CONCENTRATION > 0._EB) THEN
+      Call GET_MASS_FRACTION(Y_IN,N,Y_MF_INT)
+      FIC = FIC + SPECIES(N)%RCON*Y_MF_INT/RSUM / SPECIES(N)%FIC_CONCENTRATION
+   ENDIF
+ENDDO
+
+END FUNCTION FIC
+
+
+REAL(EB) FUNCTION WATER_VAPOR_MASS_FRACTION(HUMIDITY,TEMP,PZONE)
+
+! Compute the water vapor mass fraction given the relative humidity and temperature
+
+REAL(EB), INTENT(IN) :: TEMP,HUMIDITY,PZONE
+REAL(EB) :: X_SAT,DHOR_T,DHOR,P_RATIO,T_BOIL_EFF
+REAL(EB),PARAMETER :: T_BOIL=373.15_EB,DHOR_T_B=4916.346083_EB
+
+DHOR_T = (H_V_H2O(INT(TEMP))+(TEMP-REAL(INT(TEMP,EB)))*(H_V_H2O(INT(TEMP)+1)-H_V_H2O(INT(TEMP))))*MW_H2O/R0
+P_RATIO = PZONE/P_STP
+T_BOIL_EFF = MAX(0._EB,DHOR_T_B*T_BOIL/(DHOR_T_B-T_BOIL*LOG(P_RATIO)+TWO_EPSILON_EB))
+DHOR = 0.5_EB*((H_V_H2O(INT(T_BOIL_EFF))+(T_BOIL_EFF-REAL(INT(T_BOIL_EFF,EB)))*&
+       (H_V_H2O(INT(T_BOIL_EFF)+1)-H_V_H2O(INT(T_BOIL_EFF))))*MW_H2O/R0+DHOR_T)
+X_SAT  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TEMP)))
+WATER_VAPOR_MASS_FRACTION = HUMIDITY*0.01_EB*X_SAT/(MW_AIR/MW_H2O+(1._EB-MW_AIR/MW_H2O)*HUMIDITY*0.01_EB*X_SAT)
+
+END FUNCTION WATER_VAPOR_MASS_FRACTION
+
+
+REAL(EB) FUNCTION RELATIVE_HUMIDITY(Y_H2O,TEMP,PZONE)
+
+! Compute the relative humidity given the water vapor mass fraction and temperature
+
+REAL (EB), INTENT(IN) :: TEMP,Y_H2O,PZONE
+REAL (EB) :: X_SAT,X_H2O,DHOR,DHOR_T,T_BOIL_EFF,P_RATIO
+REAL(EB),PARAMETER :: T_BOIL=373.15_EB,DHOR_T_B=4916.346083_EB
+
+P_RATIO = PZONE/P_STP
+T_BOIL_EFF = MAX(0._EB,DHOR_T_B*T_BOIL/(DHOR_T_B-T_BOIL*LOG(P_RATIO)+TWO_EPSILON_EB))
+IF (TEMP >= T_BOIL_EFF) THEN
+   X_SAT = 1._EB
+ELSE
+   DHOR_T = (H_V_H2O(INT(TEMP))+(TEMP-REAL(INT(TEMP,EB)))*(H_V_H2O(INT(TEMP)+1)-H_V_H2O(INT(TEMP))))*MW_H2O/R0
+   DHOR = 0.5_EB*((H_V_H2O(INT(T_BOIL_EFF))+(T_BOIL_EFF-REAL(INT(T_BOIL_EFF,EB)))*&
+          (H_V_H2O(INT(T_BOIL_EFF)+1)-H_V_H2O(INT(T_BOIL_EFF))))*MW_H2O/R0+DHOR_T)
+   X_SAT  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TEMP)))
+ENDIF
+X_H2O = Y_H2O*MW_AIR/(MW_H2O-Y_H2O*(MW_H2O-MW_AIR))
+RELATIVE_HUMIDITY = 100._EB * X_H2O / X_SAT
+
+END FUNCTION RELATIVE_HUMIDITY
+
+
+REAL(EB) FUNCTION LES_FILTER_WIDTH_FUNCTION(DX,DY,DZ)
+USE GLOBAL_CONSTANTS, ONLY : LES_FILTER_WIDTH_TYPE
+REAL(EB), INTENT(IN):: DX,DY,DZ
+
+SELECT CASE(LES_FILTER_WIDTH_TYPE)
+   CASE(MEAN_LES_FILTER)
+      IF (TWO_D) THEN
+         LES_FILTER_WIDTH_FUNCTION = SQRT(DX*DZ)
+      ELSE
+         LES_FILTER_WIDTH_FUNCTION = (DX*DY*DZ)**ONTH
+      ENDIF
+   CASE(MAX_LES_FILTER)
+      IF (TWO_D) THEN
+         LES_FILTER_WIDTH_FUNCTION = MAX(DX,DZ)
+      ELSE
+         LES_FILTER_WIDTH_FUNCTION = MAX(DX,DY,DZ)
+      ENDIF
+   CASE(FIXED_LES_FILTER)
+         LES_FILTER_WIDTH_FUNCTION = FIXED_LES_FILTER_WIDTH
+END SELECT
+
+END FUNCTION LES_FILTER_WIDTH_FUNCTION
+
+
+REAL(EB) FUNCTION GET_POTENTIAL_TEMPERATURE(TMP_IN,Z_IN)
+
+USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
+REAL(EB), INTENT(IN) :: TMP_IN,Z_IN
+REAL(EB) :: PP
+
+IF (STRATIFICATION) THEN
+   PP = EVALUATE_RAMP(Z_IN,I_RAMP_P0_Z)
+ELSE
+   PP = P_INF
+ENDIF
+GET_POTENTIAL_TEMPERATURE = TMP_IN*(1.E5_EB/PP)**GM1OG  ! GM1OG = (GAMMA-1)/GAMMA = R/CP
+
+END FUNCTION GET_POTENTIAL_TEMPERATURE
+
+
+SUBROUTINE MONIN_OBUKHOV_SIMILARITY(Z,Z_0,L,U_STAR,THETA_STAR,THETA_0,U,TMP)
+
+REAL(EB), INTENT(IN) :: Z,Z_0,L,U_STAR,THETA_STAR,THETA_0
+REAL(EB), INTENT(OUT) :: U,TMP
+REAL(EB), PARAMETER :: P_REF=100000._EB,RHO_REF=1.2_EB
+REAL(EB) :: PSI_M,PSI_H,THETA,KAPPA
+
+KAPPA = VON_KARMAN_CONSTANT
+CALL MONIN_OBUKHOV_STABILITY_CORRECTIONS(PSI_M,PSI_H,Z,L)
+U = (U_STAR/KAPPA)*(LOG(Z/Z_0)-PSI_M)
+THETA = THETA_0 + (THETA_STAR/KAPPA)*(LOG(Z/Z_0)-PSI_H)
+TMP = THETA*(P_REF/(P_REF-RHO_REF*GRAV*Z))**(-0.285_EB)
+
+END SUBROUTINE MONIN_OBUKHOV_SIMILARITY
+
+
+SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS(PSI_M,PSI_H,Z,L)
+
+! Reference: A.J. Dyer. A review of flux profile relationships. Boundary-Layer Meteorology, 7:363-372, 1974.
+
+REAL(EB), INTENT(IN) :: Z,L
+REAL(EB), INTENT(OUT) :: PSI_M,PSI_H
+REAL(EB) :: ZETA
+
+IF (L>=0._EB) THEN
+   ! stable boundary layer
+   PSI_M = -5._EB*Z/L
+   PSI_H = PSI_M
+ELSE
+   ! unstable boundary layer
+   ZETA = (1._EB-16._EB*Z/L)**0.25_EB
+   PSI_M = 2._EB*LOG(0.5_EB*(1._EB+ZETA)) + LOG(0.5_EB*(1._EB+ZETA**2)) - 2._EB*ATAN(ZETA) + 0.5_EB*PI
+   PSI_H = 2._EB*LOG(0.5_EB*(1._EB+ZETA**2))
+ENDIF
+
+END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
+
+
+!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in FILM based on the selected EVAP_MODEL on MISC
+!> \param H_MASS The mass transfer coefficient (m2/s)
+!> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
+!> \param D_FILM Diffusivity in the film (m2/s)
+!> \param K_FILM Conductivity in the film (W/m/k)
+!> \param CP_FILM Specific heat in the film (J/kg/K)
+!> \param RHO_FILM Density in in the film (kg/m3)
+!> \param LENGTH Length scale (m)
+!> \param Y_DROP Equilibrium vapor fraction for the current droplet temperature
+!> \param Y_GAS Mass fraction of vapor in the gas
+!> \param B_NUMBER B number for the droplet
+!> \param NU_FAC_GAS Constant factor used in computing  the NUsselt number
+!> \param SH_FAC_GAS Constant factor used in computing  the Sherwood number
+!> \param RE_L Renyolds number
+!> \param TMP_FILM Film temperature for the droplet (K)
+!> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
+!> \param Z_INDEX Droplet species index in ZZ
+!> \param EVAP_MODEL Indicator of evaporation model
+
+SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
+                                     SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX,EVAP_MODEL)
+USE MATH_FUNCTIONS, ONLY: F_B
+REAL(EB), INTENT(IN) :: D_FILM,CP_FILM,K_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
+                        ZZ_GET(1:N_TRACKED_SPECIES)
+INTEGER, INTENT(IN) :: Z_INDEX,EVAP_MODEL
+REAL(EB), INTENT(INOUT) :: B_NUMBER
+REAL(EB), INTENT(OUT) :: H_MASS,H_HEAT
+REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_FILM,ZZ_GET2(1:N_TRACKED_SPECIES)
+
+SELECT CASE (EVAP_MODEL)
+   CASE(RM_NO_B) ! Ranz Marshall
+      NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+      H_HEAT   = NUSSELT*K_FILM/LENGTH
+      IF (Y_DROP <= Y_GAS) THEN
+         H_MASS   = 0._EB
+      ELSE
+         SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+      ENDIF
+   CASE(RM_B) ! Sazhin M0, Eq 106 + 109 with B_T=B_M. This is the default model.
+      IF (Y_DROP <= Y_GAS) THEN
+         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+         H_MASS   = 0._EB
+      ELSE
+         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         ! above we save a divide and multiply of B_NUMBER
+         ! the full model corresponding to Sazhin (108) and (109) would be
+         ! SH = SH_0 * LOG(1+B_M)/B_M
+         ! H_MASS = SH * D/L * B_M/(Y_D-Y_G)
+      ENDIF
+   CASE(RM_LEWIS_B) ! Sazhin M1, Eq 106 + 109 with eq 102.
+      IF (Y_DROP <= Y_GAS) THEN
+         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+         H_MASS   = 0._EB
+      ELSE
+         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
+         ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
+         ZZ_GET2(Z_INDEX) = 1._EB
+         CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
+         B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
+         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+      ENDIF
+   CASE(RM_FL_LEWIS_B) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
+      IF (Y_DROP <= Y_GAS) THEN
+         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+         H_MASS   = 0._EB
+      ELSE
+         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
+         ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
+         ZZ_GET2(Z_INDEX) = 1._EB
+         CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
+         B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
+         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
+      ENDIF
+END SELECT
+
+END SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS
+
+
+!> \brief Compute the components of the prevailing wind
+!> \param T Current time (s)
+!> \param NM Current mesh
+
+SUBROUTINE COMPUTE_WIND_COMPONENTS(T,NM)
+
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+REAL(EB), INTENT(IN) :: T
+REAL(EB) :: THETA, SIN_THETA, COS_THETA
+INTEGER, INTENT(IN) :: NM
+INTEGER :: K
+TYPE (MESH_TYPE), POINTER :: M
+
+M => MESHES(NM)
+
+DO K=0,M%KBP1
+   IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
+      IF (I_RAMP_DIRECTION_T==0) THEN
+         THETA=EVALUATE_RAMP(M%ZC(K),I_RAMP_DIRECTION_Z)*DEG2RAD
+      ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
+         THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
+      ELSE
+         THETA=(EVALUATE_RAMP(M%ZC(K),I_RAMP_DIRECTION_Z)+EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
+      ENDIF
+      SIN_THETA = -SIN(THETA)
+      COS_THETA = -COS(THETA)
+   ELSE
+      SIN_THETA = 1._EB
+      COS_THETA = 1._EB
+   ENDIF
+   M%U_WIND(K) = U0*EVALUATE_RAMP(M%ZC(K),I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
+   M%V_WIND(K) = V0*EVALUATE_RAMP(M%ZC(K),I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
+   M%W_WIND(K) = W0
+ENDDO
+
+END SUBROUTINE COMPUTE_WIND_COMPONENTS
+
+
+!> \brief Compute properties of the gas film for a liquid surface
+!> \param N_VAP Number of evaporating fluids
+!> \param FILM_FAC Linear factor for determining the filn conditions
+!> \param Y_VAP Mass fraciton of the liquid vapors at the surface
+!> \param Y_GAS Mass fraction of the liquid vapors in the gas cell
+!> \param ZZ_INDEX Array of tracked species indicies for the evaporating liquids
+!> \param TMP_S Temperature of the surface (K)
+!> \param TMP_GAS Temperature of the gas cell (K)
+!> \param ZZ_GAS Trakced species mass fractions in the gas cell
+!> \param PB Film pressure (Pa)
+!> \param TMP_FILM Film temperature (K)
+!> \param MU_FILM Film viscosity (kg/m/s)
+!> \param K_FILM Film conductivity (W/m/K)
+!> \param CP_FILM Film specific heat (kJ/kg/K)
+!> \param D_FILM Film diffusivity (m2/)
+!> \param RHO_FILM Film density (kg/m3)
+!> \param PR_FILM Film Prandtl number
+!> \param SC_FILM Film Schmidt number
+
+SUBROUTINE GET_FILM_PROPERTIES(N_VAP,FILM_FAC,Y_VAP,Y_GAS,ZZ_INDEX,TMP_S,TMP_GAS,ZZ_GAS,PB,TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,&
+                               RHO_FILM,PR_FILM,SC_FILM)
+
+INTEGER, INTENT(IN) :: N_VAP,ZZ_INDEX(N_VAP)
+REAL(EB), INTENT(IN) :: FILM_FAC,Y_VAP(N_VAP),Y_GAS(N_VAP),TMP_S,TMP_GAS,ZZ_GAS(1:N_TRACKED_SPECIES),PB
+REAL(EB), INTENT(OUT) :: TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM
+REAL(EB) :: X_SUM,R_FILM,ZZ_FILM(1:N_TRACKED_SPECIES),Y_FILM(N_VAP),SUM_FILM,SUM_GAS,OM_SUM_FILM
+INTEGER :: I
+
+! Take liquid surface Y and gas cell Y and compoute film Y
+Y_FILM = Y_VAP + FILM_FAC*(Y_GAS-Y_VAP)
+SUM_FILM = SUM(Y_FILM)
+SUM_GAS = SUM(Y_GAS)
+OM_SUM_FILM = 1._EB-SUM_FILM
+
+IF (OM_SUM_FILM<TWO_EPSILON_EB) THEN
+   ! If film is all vapor, just set the film Z to the vapor mass fractions.
+   ZZ_FILM = 0._EB
+   LOOP1: DO I=1,N_VAP
+      IF (ZZ_INDEX(I)==0) CYCLE LOOP1
+      ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+   ENDDO LOOP1
+ELSE
+   ! Determine the additional mass fraction of tracked species for each vapor species present
+   IF (ABS(SUM_GAS-1._EB) < TWO_EPSILON_EB) THEN
+      ZZ_FILM = 0._EB
+      DO I=1,N_VAP
+         ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+      ENDDO
+      ZZ_FILM(1) = 1._EB - SUM_FILM
+   ELSE
+      ZZ_FILM = ZZ_GAS
+      LOOP2: DO I=1,N_VAP
+         IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
+         ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
+                                (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
+      ENDDO LOOP2
+      ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
+   ENDIF
+ENDIF
+
+! Use film mass fractions to get properties and non-dimensional parameters. D is weighed by mole fraction.
+
+TMP_FILM = TMP_S + FILM_FAC*(TMP_GAS - TMP_S) ! LC Eq.(18)
+CALL GET_VISCOSITY(ZZ_FILM,MU_FILM,TMP_FILM)
+CALL GET_CONDUCTIVITY(ZZ_FILM,K_FILM,TMP_FILM)
+CALL GET_SPECIFIC_HEAT(ZZ_FILM,CP_FILM,TMP_FILM)
+CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_FILM,R_FILM)
+
+X_SUM = 0._EB
+LOOP3: DO I=1,N_VAP
+   IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP3
+   D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),ZZ_INDEX(I))*ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+   X_SUM=X_SUM+ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+ENDDO LOOP3
+
+IF (X_SUM > TWO_EPSILON_EB) THEN
+   D_FILM = D_FILM/X_SUM
+ELSE
+   D_FILM = D_Z(NINT(TMPA),1)
+ENDIF
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+RHO_FILM = PB/(R_FILM*TMP_FILM)
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+SC_FILM = MU_FILM/(RHO_FILM*D_FILM)
+
+END SUBROUTINE GET_FILM_PROPERTIES
+
+!> \brief Converts an array of liquid vapor mole fractions into mass fractions
+!> \param N_MATS Number of liquids
+!> \param ZZ_GET Gas cell tracked species mass factions
+!> \param X_SV Liquid surface liquid vapor mole fraction
+!> \param Y_SV Liquid surface liquid vapor mass fraction
+!> \param MW Liquid vapor molecular weights
+!> \param SMIX_INDEX Lookup for tracked species the liquids evaporate to
+
+SUBROUTINE GET_Y_SURF(N_MATS,ZZ_GET,X_SV,Y_SV,MW,SMIX_INDEX)
+INTEGER, INTENT(IN) :: N_MATS,SMIX_INDEX(N_MATS)
+REAL(EB), INTENT(IN) :: ZZ_GET(1:N_TRACKED_SPECIES),X_SV(N_MATS),MW(N_MATS)
+REAL(EB), INTENT(OUT) :: Y_SV(N_MATS)
+REAL(EB) :: ZZ_2(1:N_TRACKED_SPECIES),MW_DRY,MASS
+INTEGER :: I
+
+ZZ_2 = ZZ_GET
+Y_SV = 0._EB
+
+!Zero out tracked species that are liquid vapors and get the MW of what is left
+
+Y_ALL_LOOP: DO I=1,N_MATS
+   IF (X_SV(I) < TWO_EPSILON_EB) CYCLE
+   ZZ_2(SMIX_INDEX(I))=0._EB
+ENDDO Y_ALL_LOOP
+
+IF (SUM(ZZ_2) > TWO_EPSILON_EB) THEN
+   ZZ_2 = ZZ_2 / SUM(ZZ_2)
+   MW_DRY = 0._EB
+   DO I=1,N_TRACKED_SPECIES
+      MW_DRY = MW_DRY + ZZ_2(I)/SPECIES_MIXTURE(I)%MW
+   ENDDO
+   MW_DRY = 1._EB/MW_DRY
+ENDIF
+
+! Get mass based on mole fractions and MWs and convert X to Y
+MASS = (1._EB-SUM(X_SV))*MW_DRY
+DO I=1,N_MATS
+   Y_SV(I) = X_SV(I)*MW(I)
+   MASS = MASS + Y_SV(I)
+ENDDO
+
+Y_SV = Y_SV/MASS
+
+END SUBROUTINE GET_Y_SURF
+
+
+!> \brief Estimates the peak reaction temperature for a material reaction
+!> \param N_MATL MATL index
+!> \param NR Reaction index
+
+SUBROUTINE GET_TMP_REF(N_MATL,NR)
+INTEGER, INTENT(IN) :: N_MATL,NR
+REAL(EB) :: HEATING_RATE,DT=0.01_EB,DTDT,RR_MAX,REACTION_RATE,TMP,RHO_S
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+
+ML=> MATERIAL(N_MATL)
+
+IF (ML%RATE_REF(NR) > 0._EB) THEN
+   HEATING_RATE = ML%RATE_REF(NR)
+ELSE
+   HEATING_RATE = TGA_HEATING_RATE
+ENDIF
+
+TMP = 0._EB
+ML%TMP_REF(NR) = 0._EB
+DTDT = HEATING_RATE/60._EB
+RHO_S = ML%RHO_S
+IF (ABS(ML%E(NR)) < TWO_EPSILON_EB) THEN
+   RR_MAX = ML%A(NR)*RHO_S**ML%N_S(NR)
+ELSE
+   RR_MAX = 0._EB
+ENDIF
+DO WHILE (INT(TMP)<I_MAX_TEMP)
+   TMP = TMP + DTDT * DT
+   REACTION_RATE = ML%A(NR)*RHO_S**ML%N_S(NR)*EXP(-ML%E(NR)/(R0*TMP))*TMP**ML%N_T(NR)
+   IF (REACTION_RATE > RR_MAX) THEN
+      ML%TMP_REF(NR) = TMP
+      RR_MAX = REACTION_RATE
+   ENDIF
+   RHO_S = RHO_S - REACTION_RATE * DT
+   IF (RHO_S<0._EB) EXIT
+ENDDO
+
+END SUBROUTINE GET_TMP_REF
+
+
+!> \brief Determine if an ember ignites a substrate
+!> \param NM Mesh number
+!> \param IP Particle index
+
+SUBROUTINE EMBER_IGNITION_MODEL(NM,IP)
+
+INTEGER, INTENT(IN) :: NM,IP
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
+TYPE(SURFACE_TYPE), POINTER :: SF
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+REAL(EB) :: F_N,POWER,X
+
+M  => MESHES(NM)
+LP => M%LAGRANGIAN_PARTICLE(IP)
+BC => M%BOUNDARY_COORD(LP%BC_INDEX)
+SF => SURFACE(M%LS_SURF_INDEX(BC%IIG,BC%JJG))
+IF (SF%EMBER_IGNITION_POWER_MEAN<0._EB) RETURN
+
+! Compute the energy generation rate of the ember
+
+POWER = (M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_RAD_OUT-M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_RAD_IN - M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_CON_F)*&
+         0.001_EB*M%BOUNDARY_PROP1(LP%B1_INDEX)%AREA
+
+! Compute the CDF of the POWER
+F_N = 0.5_EB*(1._EB + ERF((POWER-SF%EMBER_IGNITION_POWER_MEAN)/(SR2*SF%EMBER_IGNITION_POWER_SIGMA)))
+! Adjust for weighting factor
+F_N = 1._EB - (1._EB - F_N)**LP%PWT
+
+CALL RANDOM_NUMBER(X)
+IF (X<F_N) THEN
+   M%PHI_LS(BC%IIG,BC%JJG) = 1._EB
+   BC%Z = -1.E6_EB
+ENDIF
+
+END SUBROUTINE EMBER_IGNITION_MODEL
+
+!> \brief Computes refrence heat flux for S-pyro model using empirical data
+!> \param HRRPUA Current wall cell HRRPUA (W/m2)
+!> \param HOC Effective heat of combustion for all gases emitted by wall cell (J/kg)
+!> \param Y_S Effective soot yield for all gases emitted by wall cell (kg/kg)
+!> \param Q_INC current incident radiation (W/m2)
+
+REAL(EB) FUNCTION Q_REF_FIT(HRRPUA,HOC,Y_S,Q_INC)
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+REAL(EB), INTENT(IN) :: HRRPUA,HOC,Y_S,Q_INC
+REAL(EB) :: HRRPUA_SCALE,QFLAME,RHF_ABS
+REAL(EB), PARAMETER :: HRRPUA_SCALE_DATA(0:16) = (/0.0000_EB,0.4100_EB,0.5900_EB,0.6800_EB,0.7700_EB,0.8050_EB,&
+                                                   0.8400_EB,0.8750_EB,0.9100_EB,0.9225_EB,0.9350_EB,0.9475_EB,&
+                                                   0.9600_EB,0.9625_EB,0.9650_EB,0.9675_EB,0.9700_EB/)
+
+CALL INTERPOLATE1D_UNIFORM(0,HRRPUA_SCALE_DATA,HRRPUA/100000._EB,HRRPUA_SCALE)
+RHF_ABS = 0.02602_EB + 0.3459_EB*HRRPUA/HOC+0.2107_EB*Y_S
+QFLAME = HRRPUA_SCALE * (19.E3_EB + 5.545E-4_EB*HOC - 6.388E-12_EB*HOC**2)
+Q_REF_FIT = QFLAME + Q_INC * (1._EB - RHF_ABS)
+
+END FUNCTION Q_REF_FIT
+
+
+END MODULE PHYSICAL_FUNCTIONS
+
+
 !> \brief A collection of routines that manage memory
 
 MODULE MEMORY_FUNCTIONS
@@ -1201,6 +3378,7 @@ END SUBROUTINE ALLOCATE_BOUNDARY_COORD_ARRAYS
 
 
 SUBROUTINE ALLOCATE_BOUNDARY_ONE_D_ARRAYS
+
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 
 IF (OD_INDEX==0 .AND. M%N_BOUNDARY_ONE_D_DIM>0) THEN
@@ -1341,7 +3519,7 @@ IF (.NOT.ALREADY_ALLOCATED) THEN
    IF (ALLOCATED(B1%Q_IN_SMOOTH_INT)) DEALLOCATE(B1%Q_IN_SMOOTH_INT)
    ALLOCATE(B1%Q_IN_SMOOTH_INT(SURFACE(SURF_INDEX)%N_THICK_REF))
 
-   CALL INITIALIZE_BOUNDARY_PROP1(NM,B1_INDEX,SURF_INDEX)
+   CALL INITIALIZE_BOUNDARY_PROP1(NM,B1_INDEX,OD_INDEX,SURF_INDEX)
 ENDIF
 
 END SUBROUTINE ALLOCATE_BOUNDARY_PROP1_ARRAYS
@@ -1846,7 +4024,7 @@ IF (ALLOCATED(ONE_D%REMESH_NWP)) DEALLOCATE(ONE_D%REMESH_NWP)                 ; 
 IF (ALLOCATED(ONE_D%N_LAYER_CELLS_MAX)) DEALLOCATE(ONE_D%N_LAYER_CELLS_MAX)   ; ALLOCATE(ONE_D%N_LAYER_CELLS_MAX(ONE_D%N_LAYERS))
 IF (ALLOCATED(ONE_D%RAMP_IHS_INDEX)) DEALLOCATE(ONE_D%RAMP_IHS_INDEX)         ; ALLOCATE(ONE_D%RAMP_IHS_INDEX(ONE_D%N_LAYERS))
 IF (ALLOCATED(ONE_D%MATL_INDEX)) DEALLOCATE(ONE_D%MATL_INDEX)                 ; ALLOCATE(ONE_D%MATL_INDEX(ONE_D%N_MATL))
-IF (ALLOCATED(ONE_D%M_DOT_S_PP)) DEALLOCATE(ONE_D%M_DOT_S_PP)                 ; ALLOCATE(ONE_D%M_DOT_S_PP(ONE_D%N_MATL))
+IF (ALLOCATED(ONE_D%M_DOT_S_PP)) DEALLOCATE(ONE_D%M_DOT_S_PP) ; ALLOCATE(ONE_D%M_DOT_S_PP(ONE_D%N_MATL)) ; ONE_D%M_DOT_S_PP=0._EB
 IF (ALLOCATED(ONE_D%X)) DEALLOCATE(ONE_D%X)                                   ; ALLOCATE(ONE_D%X(0:ONE_D%N_CELLS_MAX))
 IF (ALLOCATED(ONE_D%DX_OLD)) DEALLOCATE(ONE_D%DX_OLD)                         ; ALLOCATE(ONE_D%DX_OLD(ONE_D%N_CELLS_OLD))
 IF (ALLOCATED(ONE_D%TMP)) DEALLOCATE(ONE_D%TMP)                               ; ALLOCATE(ONE_D%TMP(0:ONE_D%N_CELLS_MAX+1))
@@ -1955,24 +4133,31 @@ ONE_D%PYROLYSIS_MODEL = SF%PYROLYSIS_MODEL
 END SUBROUTINE INITIALIZE_BOUNDARY_ONE_D
 
 
-SUBROUTINE INITIALIZE_BOUNDARY_PROP1(NM,B1_INDEX,SURF_INDEX)
+SUBROUTINE INITIALIZE_BOUNDARY_PROP1(NM,B1_INDEX,OD_INDEX,SURF_INDEX)
 
+USE PHYSICAL_FUNCTIONS, ONLY: GET_EMISSIVITY
 USE GLOBAL_CONSTANTS, ONLY: SIGMA,TMPA,RHOA,TMPA4,N_TRACKED_SPECIES, RADIATION
-INTEGER, INTENT(IN) :: NM,B1_INDEX,SURF_INDEX
+INTEGER, INTENT(IN) :: NM,B1_INDEX,SURF_INDEX,OD_INDEX
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
+TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE(SURFACE_TYPE), POINTER :: SF
 
 B1 => MESHES(NM)%BOUNDARY_PROP1(B1_INDEX)
 SF => SURFACE(SURF_INDEX)
 
+IF (OD_INDEX==0 .OR. SF%EMISSIVITY_SPECIFIED) THEN
+   B1%EMISSIVITY      = SF%EMISSIVITY
+ELSE
+   ONE_D => MESHES(NM)%BOUNDARY_ONE_D(OD_INDEX)
+   CALL GET_EMISSIVITY(ONE_D,1,B1%EMISSIVITY)
+ENDIF
 IF (RADIATION) THEN
-   B1%Q_RAD_IN        = SF%EMISSIVITY*SIGMA*TMPA4
-   B1%Q_RAD_OUT       = SF%EMISSIVITY*SIGMA*TMPA4
+   B1%Q_RAD_IN        = B1%EMISSIVITY*SIGMA*TMPA4
+   B1%Q_RAD_OUT       = B1%EMISSIVITY*SIGMA*TMPA4
 ELSE
    B1%Q_RAD_IN        = 0._EB
    B1%Q_RAD_OUT       = 0._EB
 ENDIF
-B1%EMISSIVITY      = SF%EMISSIVITY
 B1%T_IGN           = SF%T_IGN
 B1%TMP_F           = SF%TMP_FRONT
 B1%TMP_G           = TMPA
@@ -3509,2202 +5694,6 @@ END SUBROUTINE TRANSFORM_COORDINATES
 END MODULE GEOMETRY_FUNCTIONS
 
 
-!> \brief Routines that do various mathematical manipulations
-
-MODULE MATH_FUNCTIONS
-
-USE PRECISION_PARAMETERS
-IMPLICIT NONE (TYPE,EXTERNAL)
-
-CONTAINS
-
-
-!> \brief Add new value to a growing histogram
-!> \param NBINS Number of bins in the histogram
-!> \param LIMITS The range of values underlying the histogram
-!> \param COUNTS Array of weight currently assigned to each bin
-!> \param VAL New value to be added
-!> \param WEIGHT Relative weight associated with the new value
-
-SUBROUTINE UPDATE_HISTOGRAM(NBINS,LIMITS,COUNTS,VAL,WEIGHT)
-INTEGER,INTENT(IN)::NBINS
-REAL(EB), INTENT(IN)::LIMITS(2),VAL,WEIGHT
-REAL(EB), INTENT(INOUT) :: COUNTS(NBINS)
-INTEGER::IND=0
-IND=MIN(NBINS,MAX(CEILING((VAL-LIMITS(1))/(LIMITS(2)-LIMITS(1))*NBINS),1))
-COUNTS(IND)=COUNTS(IND)+WEIGHT
-END SUBROUTINE UPDATE_HISTOGRAM
-
-!> \brief Calculate the value of polynomial function.
-!> \param N Number of coefficients in the polynomial
-!> \param TEMP The independent variable
-!> \param COEF The array of coefficients
-
-REAL(EB) FUNCTION POLYVAL(N,TEMP,COEF)
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(IN) :: TEMP,COEF(N)
-INTEGER :: I
-POLYVAL = 0._EB
-DO I=1,N
-   POLYVAL  = POLYVAL  + COEF(I)*TEMP**(I-1)
-ENDDO
-END FUNCTION POLYVAL
-
-
-!> \brief Determine the index of a RAMP with a given name (ID)
-!> \param ID The name of the ramp function
-!> \param TYPE The kind of ramp
-!> \param RAMP_INDEX The index of the ramp
-!> \param DUPLICATE_RAMP Optional logical parameter indicating if the ramp has already been processed
-
-SUBROUTINE GET_RAMP_INDEX(ID,TYPE,RAMP_INDEX,DUPLICATE_RAMP)
-
-USE GLOBAL_CONSTANTS, ONLY: N_RAMP,RAMP_ID,RAMP_TYPE
-USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CHARACTER_ARRAY
-CHARACTER(*), INTENT(IN) :: ID,TYPE
-INTEGER, INTENT(OUT) :: RAMP_INDEX
-INTEGER :: NR
-LOGICAL, INTENT(IN), OPTIONAL :: DUPLICATE_RAMP
-
-IF (ID=='null') THEN
-   RAMP_INDEX = 0
-   RETURN
-ENDIF
-
-IF (.NOT.PRESENT(DUPLICATE_RAMP)) THEN
-   SEARCH: DO NR=1,N_RAMP
-      IF (ID==RAMP_ID(NR)) THEN
-         RAMP_INDEX = NR
-         RETURN
-      ENDIF
-   ENDDO SEARCH
-ENDIF
-
-IF (N_RAMP>=SIZE(RAMP_ID)) THEN
-   RAMP_ID   => REALLOCATE_CHARACTER_ARRAY(RAMP_ID,  LABEL_LENGTH,1,SIZE(RAMP_ID)+100)
-   RAMP_TYPE => REALLOCATE_CHARACTER_ARRAY(RAMP_TYPE,LABEL_LENGTH,1,SIZE(RAMP_ID)+100)
-ENDIF
-
-N_RAMP                = N_RAMP + 1
-RAMP_INDEX            = N_RAMP
-RAMP_ID(RAMP_INDEX)   = ID
-RAMP_TYPE(RAMP_INDEX) = TYPE
-
-END SUBROUTINE GET_RAMP_INDEX
-
-
-!> \brief Determine the index of a table with a given name
-!> \param ID Name of the table
-!> \param TYPE Kind of table
-!> \param TABLE_INDEX Index of the table
-
-SUBROUTINE GET_TABLE_INDEX(ID,TYPE,TABLE_INDEX)
-
-USE GLOBAL_CONSTANTS, ONLY: N_TABLE,TABLE_ID,TABLE_TYPE
-CHARACTER(*), INTENT(IN) :: ID
-INTEGER, INTENT(IN) :: TYPE
-INTEGER, INTENT(OUT) :: TABLE_INDEX
-INTEGER :: NT
-
-IF (ID=='null') THEN
-   TABLE_INDEX = 0
-   RETURN
-ENDIF
-
-SEARCH: DO NT=1,N_TABLE
-   IF (ID==TABLE_ID(NT)) THEN
-      TABLE_INDEX = NT
-      RETURN
-   ENDIF
-ENDDO SEARCH
-
-N_TABLE                = N_TABLE + 1
-TABLE_INDEX            = N_TABLE
-TABLE_ID(TABLE_INDEX)   = ID
-TABLE_TYPE(TABLE_INDEX) = TYPE
-
-END SUBROUTINE GET_TABLE_INDEX
-
-
-!> \brief Return an interpolated value from a given RAMP function
-!> \param RAMP_INPUT Independent variable of the RAMP function
-!> \param RAMP_INDEX Index of the RAMP function
-!> \param TAU Time scale used for reserved t-squared or tanh ramps
-
-REAL(EB) FUNCTION EVALUATE_RAMP(RAMP_INPUT,RAMP_INDEX,TAU)
-
-USE GLOBAL_CONSTANTS, ONLY : EXTERNAL_RAMP
-USE TYPES, ONLY: RAMPS
-USE DEVICE_VARIABLES, ONLY: DEVICE
-USE CONTROL_VARIABLES, ONLY: CONTROL
-REAL(EB), INTENT(IN) :: RAMP_INPUT
-REAL(EB), INTENT(IN), OPTIONAL :: TAU
-REAL(EB):: RAMP_POSITION
-INTEGER:: I
-INTEGER, INTENT(IN)  :: RAMP_INDEX
-
-SELECT CASE(RAMP_INDEX)
-   CASE(-2)
-      EVALUATE_RAMP = MAX( TANH(RAMP_INPUT/TAU), 0._EB )
-   CASE(-1)
-      EVALUATE_RAMP = MIN( (RAMP_INPUT/TAU)**2 , 1.0_EB )
-   CASE( 0)
-      EVALUATE_RAMP = 1._EB
-   CASE(1:)
-      IF (RAMPS(RAMP_INDEX)%DEVC_INDEX > 0) THEN
-         RAMP_POSITION = &
-            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,DEVICE(RAMPS(RAMP_INDEX)%DEVC_INDEX)%SMOOTHED_VALUE - RAMPS(RAMP_INDEX)%T_MIN))
-      ELSEIF (RAMPS(RAMP_INDEX)%CTRL_INDEX > 0) THEN
-         RAMP_POSITION = &
-            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,CONTROL(RAMPS(RAMP_INDEX)%CTRL_INDEX)%INSTANT_VALUE - RAMPS(RAMP_INDEX)%T_MIN))
-      ELSEIF (RAMPS(RAMP_INDEX)%DEVC_DEP_INDEX > 0) THEN
-         EVALUATE_RAMP = DEVICE(RAMPS(RAMP_INDEX)%DEVC_DEP_INDEX)%SMOOTHED_VALUE
-         RETURN
-      ELSEIF (RAMPS(RAMP_INDEX)%CTRL_DEP_INDEX > 0) THEN
-         EVALUATE_RAMP = CONTROL(RAMPS(RAMP_INDEX)%CTRL_DEP_INDEX)%INSTANT_VALUE
-         RAMPS(RAMP_INDEX)%LAST = EVALUATE_RAMP
-         RETURN
-      ELSEIF (RAMPS(RAMP_INDEX)%EXTERNAL_FILE) THEN
-         EVALUATE_RAMP = EXTERNAL_RAMP(RAMP_INDEX)
-         RETURN
-      ELSE
-         RAMP_POSITION = &
-            MAX(0._EB,MIN(RAMPS(RAMP_INDEX)%SPAN,RAMP_INPUT - RAMPS(RAMP_INDEX)%T_MIN))
-      ENDIF
-      I = MIN(UBOUND(RAMPS(RAMP_INDEX)%INTERPOLATED_DATA,1),&
-          MAX(LBOUND(RAMPS(RAMP_INDEX)%INTERPOLATED_DATA,1),NINT(RAMP_POSITION*RAMPS(RAMP_INDEX)%RDT)))
-      EVALUATE_RAMP = RAMPS(RAMP_INDEX)%INTERPOLATED_DATA(I)
-END SELECT
-
-END FUNCTION EVALUATE_RAMP
-
-
-!> \brief Compute inverse erfc function
-!> \param Y Y=ERFC(X), where X is returned by IERFC(Y)
-
-REAL(EB) FUNCTION IERFC(Y)
-
-REAL(EB), INTENT(IN) :: Y
-REAL(EB) :: QA,QB,QC,QD,Q0,Q1,Q2,Q3,Q4,PA,PB,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10, &
-            P11,P12,P13,P14,P15,P16,P17,P18,P19,P20,P21,P22,X,S,T,U,W,Z
-PARAMETER ( &
-QA = 9.16461398268964-01_EB, &
-QB = 2.31729200323405-01_EB, &
-QC = 4.88826640273108-01_EB, &
-QD = 1.24610454613712-01_EB, &
-Q0 = 4.99999303439796-01_EB, &
-Q1 = 1.16065025341614-01_EB, &
-Q2 = 1.50689047360223-01_EB, &
-Q3 = 2.69999308670029-01_EB, &
-Q4 = -7.28846765585675-02_EB)
-PARAMETER ( &
-PA = 3.97886080735226000+00_EB, &
-PB = 1.20782237635245222-01_EB, &
-P0 = 2.44044510593190935-01_EB, &
-P1 = 4.34397492331430115-01_EB, &
-P2 = 6.86265948274097816-01_EB, &
-P3 = 9.56464974744799006-01_EB, &
-P4 = 1.16374581931560831+00_EB, &
-P5 = 1.21448730779995237+00_EB, &
-P6 = 1.05375024970847138+00_EB, &
-P7 = 7.13657635868730364-01_EB, &
-P8 = 3.16847638520135944-01_EB, &
-P9 = 1.47297938331485121-02_EB, &
-P10 = -1.05872177941595488-01_EB, &
-P11 = -7.43424357241784861-02_EB)
-PARAMETER ( &
-P12 = 2.20995927012179067-03_EB, &
-P13 = 3.46494207789099922-02_EB, &
-P14 = 1.42961988697898018-02_EB, &
-P15 = -1.18598117047771104-02_EB, &
-P16 = -1.12749169332504870-02_EB, &
-P17 = 3.39721910367775861-03_EB, &
-P18 = 6.85649426074558612-03_EB, &
-P19 = -7.71708358954120939-04_EB, &
-P20 = -3.51287146129100025-03_EB, &
-P21 = 1.05739299623423047-04_EB, &
-P22 = 1.12648096188977922-03_EB)
-
-Z = Y
-IF (Y  > 1._EB) Z = 2._EB - Y
-W = QA - LOG(Z)
-U = SQRT(W)
-S = (QC + LOG(U)) / W
-T = 1._EB / (U + QB)
-
-X = U * (1._EB - S * (0.5_EB + S * QD)) - ((((Q4 * T + Q3) * T + Q2) * T + Q1) * T + Q0) * T
-T = PA / (PA + X)
-U = T - 0.5_EB
-
-S = (((((((((P22 * U + P21) * U + P20) * U + P19) * U + P18) * U + P17) * U + P16) * U + P15) * U + P14) * U + P13) * U + P12
-
-S = ((((((((((((S * U + P11) * U + P10) * U +  P9) * U + P8) * U + P7) * U + P6) * U + P5) * U + P4) * U + P3) &
-    * U + P2) * U + P1) * U + P0) * T - Z * EXP(X * X - PB)
-
-X = X + S * (1._EB + X * S)
-
-IF (Y > 1._EB) X = -X
-
-IERFC = X
-
-END FUNCTION IERFC
-
-
-!> \brief Solve a linear system of equations with Gauss-Jordon elimination (Press, Numerical Recipes)
-!> \param A Primary matrix of A*x=b
-!> \param N Dimension of A
-!> \param NP Dimension of array containing A
-!> \param B Array of vectors B of the linear system
-!> \param M Number of columns of B
-!> \param MP Number of columns of the array holding the B vectors
-!> \param IERROR Error code
-
-SUBROUTINE GAUSSJ(A,N,NP,B,M,MP,IERROR)
-
-INTEGER, INTENT(IN) :: M,MP,N,NP
-REAL(EB), INTENT(INOUT) :: A(NP,NP),B(NP,MP)
-INTEGER, INTENT(OUT) :: IERROR
-REAL(EB) :: BIG,DUM,PIVINV
-INTEGER :: I,ICOL=0,IROW=0,J,K,L,LL,INDXC(NP),INDXR(NP),IPIV(NP)
-
-IERROR = 0
-IPIV(1:N) = 0
-
-DO I=1,N
-   BIG = 0._EB
-   DO J=1,N
-      IF (IPIV(J)/=1) THEN
-         DO K=1,N
-            IF (IPIV(K)==0) THEN
-               IF (ABS(A(J,K))>=BIG) THEN
-                  BIG = ABS(A(J,K))
-                  IROW = J
-                  ICOL = K
-               ENDIF
-            ELSE IF (IPIV(K)>1) THEN
-               IERROR = 103   ! Singular matrix in gaussj
-               RETURN
-            ENDIF
-         ENDDO
-      ENDIF
-   ENDDO
-   IPIV(ICOL) = IPIV(ICOL) + 1
-   IF (IROW/=ICOL) THEN
-      DO L=1,N
-         DUM = A(IROW,L)
-         A(IROW,L) = A(ICOL,L)
-         A(ICOL,L) = DUM
-      ENDDO
-      DO L=1,M
-         DUM = B(IROW,L)
-         B(IROW,L) = B(ICOL,L)
-         B(ICOL,L) = DUM
-      ENDDO
-   ENDIF
-   INDXR(I) = IROW
-   INDXC(I) = ICOL
-   IF (ABS(A(ICOL,ICOL))<=TWO_EPSILON_EB) THEN
-      IERROR = 103  ! Singular matrix in gaussj
-      RETURN
-      ENDIF
-   PIVINV = 1._EB/A(ICOL,ICOL)
-   A(ICOL,ICOL) = 1._EB
-   A(ICOL,1:N) = A(ICOL,1:N) * PIVINV
-   B(ICOL,1:M) = B(ICOL,1:M) * PIVINV
-   DO LL=1,N
-      IF (LL/=ICOL) THEN
-         DUM = A(LL,ICOL)
-         A(LL,ICOL) = 0._EB
-         A(LL,1:N) = A(LL,1:N) - A(ICOL,1:N)*DUM
-         B(LL,1:M) = B(LL,1:M) - B(ICOL,1:M)*DUM
-      ENDIF
-   ENDDO
-ENDDO
-DO L=N,1,-1
-   IF (INDXR(L)/=INDXC(L)) THEN
-      DO K=1,N
-         DUM = A(K,INDXR(L))
-         A(K,INDXR(L)) = A(K,INDXC(L))
-         A(K,INDXC(L)) = DUM
-      ENDDO
-   ENDIF
-ENDDO
-
-END SUBROUTINE GAUSSJ
-
-
-!> \brief Solve a linear system of equations for m=n and m/=n
-!> \param A Primary matrix of A*x=b
-!> \param X Solution vector of A*x=b
-!> \param M Column dimension of A and dimension of x
-!> \param N Row dimension of A and dimension of b
-!> \param B Constant vector of b A*x=b
-!> \param IERR Error code
-
-SUBROUTINE LINEAR_SYSTEM_SOLVE(M,N,A,B,X,IERR)
-INTEGER, INTENT(IN) :: M,N
-REAL(EB), INTENT(INOUT) :: A(N,M),B(N),X(M)
-REAL(EB) :: AT(M,N),AAT(N,N),ATA(M,M),ATB(M)
-INTEGER, INTENT(OUT) :: IERR
-
-IERR = 0
-! System is underdetermined - find a minimal solution
-! Solution is given by x = A^T t, solve t = (A A^T)**-1 b, get x as A^T t.
-IF (M > N) THEN
-   AT = TRANSPOSE(A)
-   AAT = MATMUL(A,AT)
-   CALL GAUSSJ(AAT,N,N,B,1,1,IERR)
-   IF (IERR > 0) THEN
-      X = 0._EB
-   ELSE
-      X = MATMUL(AT,B)
-   ENDIF
-! System is overdetermined - find least squares solution
-! Solution is x = (A^T A)**-1 A^T b
-ELSEIF (N > M) THEN
-   AT = TRANSPOSE(A)
-   ATA = MATMUL(AT,A)
-   ATB = MATMUL(AT,B)
-   CALL GAUSSJ(ATA,M,M,ATB,1,1,IERR)
-   IF (IERR > 0) THEN
-      X = 0._EB
-   ELSE
-      IERR = 200
-      X = ATB
-   ENDIF
-! Solution is x = A**-1 b
-ELSE
-   CALL GAUSSJ(A,M,M,B,1,1,IERR)
-   IF (IERR > 0) THEN
-      X = 0._EB
-   ELSE
-      X = B
-   ENDIF
-ENDIF
-
-END SUBROUTINE LINEAR_SYSTEM_SOLVE
-
-
-!> \brief Linearly interpolate the value of a given function at a given point
-!> \param X Independent variable
-!> \param Y Dependent variable
-!> \param XI Point to interpolate
-!> \param ANS Value of the function at the point XI
-
-SUBROUTINE INTERPOLATE1D(X,Y,XI,ANS)
-
-REAL(EB), INTENT(IN), DIMENSION(:) :: X, Y
-REAL(EB), INTENT(IN) :: XI
-REAL(EB), INTENT(OUT) :: ANS
-INTEGER I, UX,LX
-
-UX = UBOUND(X,1)
-LX = LBOUND(X,1)
-
-IF (XI <= X(LX)) THEN
-   ANS = Y(LX)
-ELSEIF (XI >= X(UX)) THEN
-   ANS = Y(UX)
-ELSE
-   L1: DO I=LX,UX-1
-      IF (ABS(XI -X(I)) <= SPACING(X(I))) THEN
-         ANS = Y(I)
-         EXIT L1
-      ELSEIF (X(I+1)>XI) THEN
-         ANS = Y(I)+(XI-X(I))/(X(I+1)-X(I)) * (Y(I+1)-Y(I))
-         EXIT L1
-      ENDIF
-   ENDDO L1
-ENDIF
-
-END SUBROUTINE INTERPOLATE1D
-
-
-!> \brief Interpolate a 1D array of numbers
-!> \param LOWER Lower index of the array X
-!> \param X Array of numbers
-!> \param XI Real number representing a fractional array index
-!> \param ANS Interpolated value at XI
-
-SUBROUTINE INTERPOLATE1D_UNIFORM(LOWER,X,XI,ANS)
-
-INTEGER, INTENT(IN) :: LOWER
-REAL(EB), INTENT(IN), DIMENSION(LOWER:) :: X
-REAL(EB), INTENT(IN) :: XI
-REAL(EB), INTENT(OUT) :: ANS
-INTEGER I, UX,LX
-REAL(EB) :: FRAC
-
-UX = UBOUND(X,1)
-LX = LBOUND(X,1)
-
-IF (XI <= LX) THEN
-   ANS = X(LX)
-ELSEIF (XI >= UX) THEN
-   ANS = X(UX)
-ELSE
-   I = INT(XI)
-   FRAC = XI - REAL(I,EB)
-   ANS = X(I) + FRAC*(X(I+1)-X(I))
-ENDIF
-
-END SUBROUTINE INTERPOLATE1D_UNIFORM
-
-
-!> \brief Randomly choose a point from a normal distribution
-!> \param MEAN Mean of the normal distribution
-!> \param SIGMA Standard deviation
-
-REAL(EB) FUNCTION NORMAL(MEAN,SIGMA)
-
-REAL(EB), INTENT(IN) :: MEAN,SIGMA
-REAL(EB) :: TMP,FAC,GSAVE,RSQ,R1,R2
-REAL     :: RN
-INTEGER :: FLAG
-SAVE FLAG,GSAVE
-DATA FLAG /0/
-
-IF (FLAG==0) THEN
-   RSQ=2.0_EB
-   DO WHILE(RSQ>=1.0_EB.OR.RSQ==0.0_EB)
-      CALL RANDOM_NUMBER(RN)
-      R1=2.0_EB*REAL(RN,EB)-1.0_EB
-      CALL RANDOM_NUMBER(RN)
-      R2=2.0_EB*REAL(RN,EB)-1.0_EB
-      RSQ=R1*R1+R2*R2
-   ENDDO
-   FAC=SQRT(-2.0_EB*LOG(RSQ)/RSQ)
-   GSAVE=R1*FAC
-   TMP=R2*FAC
-   FLAG=1
-ELSE
-   TMP=GSAVE
-   FLAG=0
-ENDIF
-NORMAL=TMP*SIGMA+MEAN
-
-END FUNCTION NORMAL
-
-
-!> \brief Compute the cross product of two triplets, A x B = C
-!> \param C The resulting vector
-!> \param A First vector
-!> \param B Second vector
-
-SUBROUTINE CROSS_PRODUCT(C,A,B)
-
-REAL(EB), INTENT(IN) :: A(3),B(3)
-REAL(EB), INTENT(OUT) :: C(3)
-
-C(1) = A(2)*B(3)-A(3)*B(2)
-C(2) = A(3)*B(1)-A(1)*B(3)
-C(3) = A(1)*B(2)-A(2)*B(1)
-
-END SUBROUTINE CROSS_PRODUCT
-
-
-!> \brief Randomly choose a value from the distribution with given CDF
-!> \param CDF Cumulative Distribution Function
-!> \param VAR Independent variable
-!> \param NPTS Number of points in the CDF
-!> \param CHOICE Randomly chosen value
-
-SUBROUTINE RANDOM_CHOICE(CDF,VAR,NPTS,CHOICE)
-
-INTEGER,  INTENT(IN)  :: NPTS
-REAL(EB), INTENT(IN)  :: CDF(0:NPTS),VAR(0:NPTS)
-REAL(EB), INTENT(OUT) :: CHOICE
-INTEGER  :: IT
-REAL(EB) :: CFRAC,A,B
-REAL(EB) :: RN
-REAL     :: RN2
-
-CALL RANDOM_NUMBER(RN2)
-RN = REAL(RN2,EB)
-A = MINVAL(CDF)
-B = MAXVAL(CDF)
-RN = A + (B-A)*RN
-
-CDF_LOOP: DO IT=1,NPTS
-   IF (CDF(IT) > RN) THEN
-      CFRAC  = (RN-CDF(IT-1))/(CDF(IT)-CDF(IT-1))
-      CHOICE = VAR(IT-1) + (VAR(IT)-VAR(IT-1))*CFRAC
-      EXIT CDF_LOOP
-   ENDIF
-ENDDO CDF_LOOP
-
-END SUBROUTINE RANDOM_CHOICE
-
-
-REAL(EB) FUNCTION MINMOD2(X,Y)
-REAL(EB), INTENT(IN) :: X,Y
-MINMOD2 = 0.5_EB*(SIGN(1._EB,X)+SIGN(1._EB,Y))*MIN(ABS(X),ABS(Y))
-END FUNCTION MINMOD2
-
-
-REAL(EB) FUNCTION MINMOD4(W,X,Y,Z)
-REAL(EB), INTENT(IN) :: W,X,Y,Z
-MINMOD4 = 0.125_EB*(SIGN(1._EB,W)+SIGN(1._EB,X))* &
-          ABS( (SIGN(1._EB,W)+SIGN(1._EB,Y))*(SIGN(1._EB,W)+SIGN(1._EB,Z)) )* &
-          MIN(ABS(W),ABS(X),ABS(Y),ABS(Z))
-END FUNCTION MINMOD4
-
-
-!> \brief Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance based on the
-!> Box-Muller transformation.
-!> \param Z0 Output value 1
-!> \param Z1 Output value 2
-
-SUBROUTINE BOX_MULLER(Z0,Z1)
-
-REAL(EB), INTENT(OUT) :: Z0,Z1
-REAL(EB) :: U1,U2,A
-
-CALL RANDOM_NUMBER(U1)
-CALL RANDOM_NUMBER(U2)
-A = SQRT(-2._EB*LOG(U1))
-Z0 = A*COS(TWOPI*U2)
-Z1 = A*SIN(TWOPI*U2)
-
-END SUBROUTINE BOX_MULLER
-
-
-!> \brief Flux-limiting function related to mass transfer B-number
-
-REAL(EB) FUNCTION F_B(B)
-REAL(EB), INTENT(IN) :: B
-
-IF (B<=0._EB) THEN
-   F_B = 1._EB
-ELSE
-   F_B = (1._EB+B)**0.7_EB*LOG(1._EB+B)/B
-ENDIF
-END FUNCTION F_B
-
-
-!> \brief This subroutine computes the flux-limited scalar value on a face.
-!> \param A Array of velocity components (m/s)
-!> \param U Array of scalars
-!> \param F Array of flux-limited scalars
-!> \param I1 Lower I index
-!> \param I2 Upper I index
-!> \param J1 Lower J index
-!> \param J2 Upper J index
-!> \param K1 Lower K index
-!> \param K2 Upper K index
-!> \param IOR Orientation index (1, 2, or 3)
-!> \param LIMITER Indicator of the flux limiting scheme
-
-!> There are 6 options for flux LIMITER:
-!>
-!> CENTRAL_LIMITER  = 0
-!> GODUNOV_LIMITER  = 1
-!> SUPERBEE_LIMITER = 2
-!> MINMOD_LIMITER   = 3
-!> CHARM_LIMITER    = 4
-!> MP5_LIMITER      = 5
-!>
-!> Example: x-direction (IOR=1)
-!>
-!>                   location of face
-!>
-!>                        F(I,J,K)
-!>   |     o     |     o     |     o     |     o     |
-!>                        A(I,J,K)
-!>     U(I-1,J,K)   U(I,J,K)   U(I+1,J,K)  U(I+2,J,K)
-
-SUBROUTINE GET_SCALAR_FACE_VALUE(A,U,F,I1,I2,J1,J2,K1,K2,IOR,LIMITER)
-
-REAL(EB), INTENT(IN) :: A(0:,0:,0:),U(0:,0:,0:)
-REAL(EB), INTENT(OUT) :: F(0:,0:,0:)
-INTEGER, INTENT(IN) :: LIMITER,I1,I2,J1,J2,K1,K2,IOR
-REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
-INTEGER :: I,J,K,IM1,JM1,KM1,IP1,JP1,KP1,IP2,JP2,KP2
-
-SELECT CASE(IOR)
-   CASE(1) ; IM1=-1 ; JM1= 0 ; KM1= 0 ; IP1=1 ; JP1=0 ; KP1=0 ; IP2=2 ; JP2=0 ; KP2=0
-   CASE(2) ; IM1= 0 ; JM1=-1 ; KM1= 0 ; IP1=0 ; JP1=1 ; KP1=0 ; IP2=0 ; JP2=2 ; KP2=0
-   CASE(3) ; IM1= 0 ; JM1= 0 ; KM1=-1 ; IP1=0 ; JP1=0 ; KP1=1 ; IP2=0 ; JP2=0 ; KP2=2
-END SELECT
-
-!$OMP PARALLEL IF(I2>1)
-SELECT CASE(LIMITER)
-   CASE(0) ! central differencing
-      !$OMP DO SCHEDULE(STATIC)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-                  F(I,J,K) = 0.5_EB*(U(I,J,K) + U(I+IP1,J+JP1,K+KP1))
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(1) ! first-order upwinding
-      !$OMP DO SCHEDULE(STATIC)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-               IF (A(I,J,K)>0._EB) THEN
-                  F(I,J,K) = U(I,J,K)
-               ELSE
-                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1)
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(2) ! SUPERBEE, Roe (1986)
-      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
-               IF (A(I,J,K)>0._EB) THEN
-                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
-                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
-                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
-               ELSE
-                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
-                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
-                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(3) ! MINMOD
-      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
-               IF (A(I,J,K)>0._EB) THEN
-                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
-                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
-                  B = MAX(0._EB,MIN(R,1._EB))
-                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
-               ELSE
-                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
-                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
-                  B = MAX(0._EB,MIN(R,1._EB))
-                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(4) ! CHARM
-      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
-               IF (A(I,J,K)>0._EB) THEN
-                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
-                  R = 0._EB
-                  B = 0._EB
-                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_UP
-               ELSE
-                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
-                  R = 0._EB
-                  B = 0._EB
-                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_UP
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(5) ! MP5, Suresh and Huynh (1997)
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
-               IF (A(I,J,K)>0._EB) THEN
-                  V = (/2._EB*U(I+IM1,J+JM1,K+KM1)-U(I,J,K),&
-                       U(I+IM1,J+JM1,K+KM1),U(I,J,K),U(I+IP1,J+JP1,K+KP1),U(I+IP2,J+JP2,K+KP2)/)
-                  F(I,J,K) = MP5()
-               ELSE
-                  V = (/2._EB*U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1),&
-                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
-                  F(I,J,K) = MP5()
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-END SELECT
-!$OMP END PARALLEL
-
-CONTAINS
-
-REAL(EB) FUNCTION MP5()
-REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
-REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
-
-! Monotonicity preserving 5th-order scheme (MP5) of Suresh and Huynh, JCP 136, 83-99 (1997)
-
-VOR = B1*(2._EB*V(-2)-13._EB*V(-1)+47._EB*V(0)+27._EB*V(1)-3._EB*V(2))
-VMP = V(0) + MINMOD2(V(1)-V(0),ALPHA*(V(0)-V(-1)))
-IF ((VOR-V(0))*(VOR-VMP)<EPSM) THEN
-   MP5=VOR
-ELSE
-   DJM1 = V(-2)-2._EB*V(-1)+V(0)
-   DJ   = V(-1)-2._EB*V(0) +V(1)
-   DJP1 = V(0) -2._EB*V(1) +V(2)
-   DM4JPH = MINMOD4(4._EB*DJ-DJP1,4._EB*DJP1-DJ,DJ,DJP1)
-   DM4JMH = MINMOD4(4._EB*DJ-DJM1,4._EB*DJM1-DJ,DJ,DJM1)
-   VUL = V(0) + ALPHA*(V(0)-V(-1))
-   VAV = 0.5_EB*(V(0)+V(1))
-   VMD = VAV - 0.5_EB*DM4JPH
-   VLC = V(0) + 0.5_EB*(V(0)-V(-1)) + B2*DM4JMH
-   VMIN = MAX(MIN(V(0),V(1),VMD),MIN(V(0),VUL,VLC))
-   VMAX = MIN(MAX(V(0),V(1),VMD),MAX(V(0),VUL,VLC))
-   MP5 = VOR + MINMOD2(VMIN-VOR,VMAX-VOR)
-ENDIF
-
-END FUNCTION MP5
-
-END SUBROUTINE GET_SCALAR_FACE_VALUE
-
-
-!> \brief Random fluctuation, Theta'(t+dt) = R^2*Theta'(t) + Normal(0,sqrt(1-R^2)*SIGMA) ; R = exp(-dt/TAU)
-!> \param SIGMA Standard deviation of time series
-!> \param TAU Time scale or period of the time function (s)
-
-SUBROUTINE RANDOM_WIND_FLUCTUATIONS(SIGMA,TAU)
-
-USE TYPES, ONLY: RESERVED_RAMPS_TYPE,RESERVED_RAMPS,N_RESERVED_RAMPS
-USE GLOBAL_CONSTANTS, ONLY: T_END,T_BEGIN
-TYPE(RESERVED_RAMPS_TYPE), POINTER :: RRP
-REAL(EB), INTENT(IN) :: SIGMA,TAU
-REAL(EB) :: LCC,DT_THETA
-INTEGER :: I
-
-N_RESERVED_RAMPS = N_RESERVED_RAMPS + 1
-RRP => RESERVED_RAMPS(N_RESERVED_RAMPS)
-RRP%NUMBER_DATA_POINTS = 1001
-ALLOCATE(RRP%INDEPENDENT_DATA(RRP%NUMBER_DATA_POINTS))
-ALLOCATE(RRP%DEPENDENT_DATA(RRP%NUMBER_DATA_POINTS))
-DT_THETA = (T_END-T_BEGIN)/REAL(RRP%NUMBER_DATA_POINTS-1,EB)
-RRP%INDEPENDENT_DATA(1) = T_BEGIN
-RRP%DEPENDENT_DATA(1)   = 0._EB
-LCC = EXP(-DT_THETA/TAU)  ! Lagrangian Correlation Coefficient, R
-DO I=2,RRP%NUMBER_DATA_POINTS
-   RRP%INDEPENDENT_DATA(I) = RRP%INDEPENDENT_DATA(I-1) + DT_THETA
-   RRP%DEPENDENT_DATA(I)   = LCC**2*RRP%DEPENDENT_DATA(I-1) + NORMAL(0._EB,SQRT(1._EB-LCC**2)*SIGMA)
-ENDDO
-
-END SUBROUTINE RANDOM_WIND_FLUCTUATIONS
-
-END MODULE MATH_FUNCTIONS
-
-
-
-!> \brief Functions for physical quantities
-
-MODULE PHYSICAL_FUNCTIONS
-
-USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS
-USE MESH_VARIABLES
-IMPLICIT NONE (TYPE,EXTERNAL)
-
-CONTAINS
-
-
-!> \brief Check if the species mass fractions are in bounds
-!> \param ZZ_IN Array of mass fractions
-
-LOGICAL FUNCTION IS_REALIZABLE(ZZ_IN)
-
-REAL(EB), INTENT(IN) :: ZZ_IN(1:N_TRACKED_SPECIES)
-REAL(EB), PARAMETER:: ZERO_MINUS=-EPSILON(0._FB),ONE_PLUS=1._EB+EPSILON(1._FB)
-
-IF (ANY(ZZ_IN<ZERO_MINUS) .OR. SUM(ZZ_IN)>ONE_PLUS) THEN
-   IS_REALIZABLE=.FALSE.
-ELSE
-   IS_REALIZABLE=.TRUE.
-ENDIF
-
-END FUNCTION IS_REALIZABLE
-
-
-!> \brief Clip mass fractions between zero and one and redistribute clipped mass to most abundant species
-!> \param ZZ_GET Array of mass fractions
-
-SUBROUTINE GET_REALIZABLE_MF(ZZ_GET)
-
-REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB) :: SUM_OTHER_SPECIES
-INTEGER :: N_ZZ_MAX
-
-! clip mass fractions
-ZZ_GET=MAX(0._EB,MIN(1._EB,ZZ_GET))
-
-! absorb all error in most abundant species
-N_ZZ_MAX = MAXLOC(ZZ_GET,1)
-
-SUM_OTHER_SPECIES = SUM(ZZ_GET) - ZZ_GET(N_ZZ_MAX)
-ZZ_GET(N_ZZ_MAX) = 1._EB - SUM_OTHER_SPECIES
-
-END SUBROUTINE GET_REALIZABLE_MF
-
-
-!> \brief Determine the mass fraction of a primitive species
-!> \param Z_IN Array of lumped mass fractions
-!> \param INDEX Index of desired primitive species
-!> \param Y_OUT Mass fraction of desired primitive species
-
-SUBROUTINE GET_MASS_FRACTION(Z_IN,INDEX,Y_OUT)
-
-INTEGER, INTENT(IN) :: INDEX
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: Y_OUT
-
-Y_OUT = DOT_PRODUCT(Z2Y(INDEX,1:N_TRACKED_SPECIES),Z_IN)
-Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
-
-END SUBROUTINE GET_MASS_FRACTION
-
-
-!> \brief Determine the mass fractions of all primitive species
-!> \param Z_IN Array of lumped species mass fractions
-!> \param Y_OUT Array of primitive species mass fractions
-
-SUBROUTINE GET_MASS_FRACTION_ALL(Z_IN,Y_OUT)
-
-REAL(EB), INTENT(IN)  :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: Y_OUT(1:N_SPECIES)
-INTEGER :: I
-
-DO I=1,N_SPECIES
-   Y_OUT(I) = DOT_PRODUCT(Z2Y(I,1:N_TRACKED_SPECIES),Z_IN)
-ENDDO
-
-Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
-
-END SUBROUTINE GET_MASS_FRACTION_ALL
-
-
-!> \brief Compute ratio of molecular weight of all gas components except the one specified to the mol. wgt. of the one specified
-!> \param INDEX_IN Index of the gas species
-!> \param MW_RATIO W_all/W_in
-!> \param Y_IN Optional mass fraction of primitive species
-!> \param Z_IN Optional mass fraction of lumped species
-
-SUBROUTINE GET_MW_RATIO(INDEX_IN,MW_RATIO,Y_IN,Z_IN)
-
-REAL(EB), INTENT(IN), OPTIONAL :: Y_IN(1:N_SPECIES), Z_IN(1:N_TRACKED_SPECIES)
-INTEGER, INTENT(IN):: INDEX_IN
-REAL(EB), INTENT(OUT) :: MW_RATIO
-INTEGER:: NS
-
-MW_RATIO = 0._EB
-IF (PRESENT(Y_IN)) THEN
-   IF (ABS(Y_IN(INDEX_IN)-1._EB) > TWO_EPSILON_EB) THEN
-      DO NS=1,N_SPECIES
-         IF (NS==INDEX_IN) CYCLE
-         MW_RATIO = MW_RATIO + Y_IN(NS)/SPECIES(NS)%MW
-      ENDDO
-      IF (MW_RATIO<=TWO_EPSILON_EB) THEN
-         MW_RATIO=SPECIES_MIXTURE(1)%MW
-      ELSE
-         MW_RATIO = (1._EB-Y_IN(INDEX_IN))/MW_RATIO
-      ENDIF
-   ELSE
-      MW_RATIO=SPECIES_MIXTURE(1)%MW
-   ENDIF
-   MW_RATIO = MW_RATIO/SPECIES(INDEX_IN)%MW
-ELSE
-   IF (ABS(Z_IN(INDEX_IN)-1._EB) > TWO_EPSILON_EB) THEN
-      DO NS=1,N_TRACKED_SPECIES
-         IF (NS==INDEX_IN) CYCLE
-         MW_RATIO = MW_RATIO + Z_IN(NS)/SPECIES_MIXTURE(NS)%MW
-      ENDDO
-      IF (MW_RATIO<=TWO_EPSILON_EB) THEN
-         MW_RATIO=SPECIES_MIXTURE(1)%MW
-      ELSE
-         MW_RATIO = (1._EB-Z_IN(INDEX_IN))/MW_RATIO
-      ENDIF
-   ELSE
-      MW_RATIO=SPECIES_MIXTURE(1)%MW
-   ENDIF
-   MW_RATIO = MW_RATIO/SPECIES_MIXTURE(INDEX_IN)%MW
-ENDIF
-
-END SUBROUTINE GET_MW_RATIO
-
-
-SUBROUTINE GET_EQUIL_DATA(MW,TMP_L,PRES_IN,H_V,H_V_EFF,T_BOIL_EFF,X_EQ,H_V_DATA)
-
-REAL(EB), INTENT(IN):: MW,TMP_L,PRES_IN
-REAL(EB), INTENT(IN) :: H_V_DATA(:)
-REAL(EB), INTENT(INOUT):: T_BOIL_EFF
-REAL(EB), INTENT(OUT):: H_V,H_V_EFF,X_EQ
-REAL(EB):: DHOR
-
-H_V=H_V_DATA(MIN(I_MAX_TEMP,NINT(TMP_L)))
-H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
-DHOR = H_V_EFF*MW/R0
-T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
-H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
-H_V_EFF = 0.5_EB*(H_V+H_V_EFF)
-X_EQ = MIN(1._EB,EXP(H_V_EFF*MW/R0*(1._EB/T_BOIL_EFF-1._EB/TMP_L)))
-
-END SUBROUTINE GET_EQUIL_DATA
-
-
-!> \brief Compute volume fraction of a primitive species
-!> \param Y_INDEX Index of primitive species
-!> \param ZZ_ARRAY Array of lumped species
-!> \param R_MIX R/W of species mixture
-
-REAL(EB) FUNCTION GET_VOLUME_FRACTION(Y_INDEX,ZZ_ARRAY,R_MIX)
-
-INTEGER, INTENT(IN) :: Y_INDEX
-REAL(EB), INTENT(IN) :: R_MIX,ZZ_ARRAY(:)
-REAL(EB) :: MASS_FRACTION,RCON
-
-CALL GET_MASS_FRACTION(ZZ_ARRAY,Y_INDEX,MASS_FRACTION)
-RCON = SPECIES(Y_INDEX)%RCON
-GET_VOLUME_FRACTION = RCON*MASS_FRACTION/R_MIX
-
-END FUNCTION GET_VOLUME_FRACTION
-
-
-!> \brief Determine molecular weight of the gas mixture
-!> \param Z_IN Array of lumped species mass fractions
-!> \param MW_OUT Average molecular weight (g/mol)
-
-SUBROUTINE GET_MOLECULAR_WEIGHT(Z_IN,MW_OUT)
-
-REAL(EB), INTENT(IN)  :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: MW_OUT
-
-MW_OUT =  1._EB/DOT_PRODUCT(MWR_Z,Z_IN)
-
-END SUBROUTINE GET_MOLECULAR_WEIGHT
-
-
-!> \brief Compute R/W for a gas mixture
-!> \param Z_IN Array of lumped species mass fractions
-!> \param RSUM_OUT R/W_avg
-
-SUBROUTINE GET_SPECIFIC_GAS_CONSTANT(Z_IN,RSUM_OUT)
-
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: RSUM_OUT
-
-RSUM_OUT =  R0 * DOT_PRODUCT(MWR_Z,Z_IN)
-
-END SUBROUTINE GET_SPECIFIC_GAS_CONSTANT
-
-
-!> \brief Get specific heat of the gas mixture at a specified temperature
-!> \param Z_IN Array of lumped species mass fractions
-!> \param CP_OUT Specific heat of the mixture (J/kg/K)
-!> \param TMPG Gas mixture temperature (K)
-
-SUBROUTINE GET_SPECIFIC_HEAT(Z_IN,CP_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: CP_OUT
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-CP_OUT  = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-
-END SUBROUTINE GET_SPECIFIC_HEAT
-
-SUBROUTINE GET_SPECIFIC_HEAT_INTERP(Z_IN,CP_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: CP_OUT
-
-ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-CP_OUT = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)+(TMPG-REAL(ITMP,EB))* &
-          DOT_PRODUCT(CP_Z(ITMP+1,1:N_TRACKED_SPECIES)-CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-
-END SUBROUTINE GET_SPECIFIC_HEAT_INTERP
-
-SUBROUTINE GET_SPECIFIC_HEAT_Z(N,CP_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(OUT) :: CP_OUT
-
-ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-CP_OUT  = CP_Z(ITMP,N) + (TMPG-REAL(ITMP,EB))*(CP_Z(ITMP+1,N)-CP_Z(ITMP,N))
-
-END SUBROUTINE  GET_SPECIFIC_HEAT_Z
-
-SUBROUTINE GET_SPECIFIC_HEAT_TMP_DERIVATIVE(Z_IN,DCPDT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: DCPDT
-REAL(EB) :: CP_OUT_1, CP_OUT_2
-
-ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-CP_OUT_1  = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-CP_OUT_2  = DOT_PRODUCT(CP_Z(ITMP+1,1:N_TRACKED_SPECIES),Z_IN)
-DCPDT = (CP_OUT_2-CP_OUT_1)
-
-END SUBROUTINE GET_SPECIFIC_HEAT_TMP_DERIVATIVE
-
-!> \brief Get sensible enthalpy of the gas mixture at a specified temperature
-!> \param Z_IN Array of lumped species mass fractions
-!> \param H_S_OUT Specific heat of the mixture (J/kg)
-!> \param TMPG Gas mixture temperature (K)
-
-SUBROUTINE GET_SENSIBLE_ENTHALPY(Z_IN,H_S_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: H_S_OUT
-
-ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-
-H_S_OUT = DOT_PRODUCT(H_SENS_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)+(TMPG-REAL(ITMP,EB))* &
-          DOT_PRODUCT(H_SENS_Z(ITMP+1,1:N_TRACKED_SPECIES)-H_SENS_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-
-END SUBROUTINE GET_SENSIBLE_ENTHALPY
-
-!> \brief Get average specific heat of the gas mixture up to a specified temperature
-!> \param Z_IN Array of lumped species mass fractions
-!> \param CPBAR_OUT Average specific heat of the mixture (J/kg/K)
-!> \param TMPG Gas mixture temperature (K)
-
-SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT(Z_IN,CPBAR_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: CPBAR_OUT
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-CPBAR_OUT = DOT_PRODUCT(CPBAR_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-
-END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT
-
-
-!> \brief Get sensible enthalpy of lumped species N at a specified temperature
-!> \param N Index of lumped species
-!> \param TMPG Gas mixture temperature (K)
-!> \param H_S Sensible enthalpy of lumped species N (J/kg)
-
-SUBROUTINE GET_SENSIBLE_ENTHALPY_Z(N,TMPG,H_S)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(OUT) :: H_S
-
-ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-H_S = H_SENS_Z(ITMP,N)+(TMPG-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,N)-H_SENS_Z(ITMP,N))
-
-END SUBROUTINE GET_SENSIBLE_ENTHALPY_Z
-
-
-!> \brief Get average specific heat of lumped species N up to a specified temperature
-!> \param N Index of lumped species
-!> \param TMPG Gas mixture temperature (K)
-!> \param CPBAR_OUT Average specific heat of lumped species N (J/kg/K)
-
-SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z(N,TMPG,CPBAR_OUT)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(OUT) :: CPBAR_OUT
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-CPBAR_OUT = CPBAR_Z(ITMP,N)
-
-END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z
-
-
-!> \brief Get thermal conductivity of gas mixture at a specified temperature
-!> \param Z_IN Array of lumped species mass fractions
-!> \param K_OUT Conductivity of gas mixture (W/m/K)
-!> \param TMPG Gas mixture temperature (K)
-
-SUBROUTINE GET_CONDUCTIVITY(Z_IN,K_OUT,TMPG)
-
-REAL(EB), INTENT(IN) :: Z_IN(1:N_TRACKED_SPECIES), TMPG
-REAL(EB), INTENT(OUT) :: K_OUT
-INTEGER :: ITMP
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-K_OUT = DOT_PRODUCT(K_RSQMW_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)/DOT_PRODUCT(Z_IN,RSQ_MW_Z)
-
-END SUBROUTINE GET_CONDUCTIVITY
-
-
-!> \brief Get enthalpy (J/kg) of a particle at a specified uniform temperature
-!> \param I_LPC Index of particle class
-!> \param TMP_S Particle temperature (K)
-
-REAL(EB) FUNCTION GET_PARTICLE_ENTHALPY(I_LPC,TMP_S)
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
-REAL(EB), INTENT(IN) :: TMP_S
-REAL(EB) :: RHO,RHO_H,VOL,DTMP,H_S,THICKNESS
-INTEGER :: I,N,ITMP,I_GRAD
-INTEGER, INTENT(IN) :: I_LPC
-TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
-TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
-
-LPC=>LAGRANGIAN_PARTICLE_CLASS(I_LPC)
-
-IF (LPC%LIQUID_DROPLET) THEN
-   CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%H_L,1),SPECIES(LPC%Y_INDEX)%H_L,TMP_S,GET_PARTICLE_ENTHALPY)
-ELSE
-   SF=>SURFACE(LPC%SURF_INDEX)
-   SELECT CASE(SF%GEOMETRY)
-      CASE(SURF_CARTESIAN)                          ; I_GRAD = 1
-      CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL) ; I_GRAD = 2
-      CASE(SURF_SPHERICAL)                          ; I_GRAD = 3
-   END SELECT
-   RHO_H = 0._EB
-   RHO = 0._EB
-   ITMP = MIN(I_MAX_TEMP-1,INT(TMP_S))
-   DTMP = TMP_S-REAL(ITMP,EB)
-   THICKNESS = SUM(SF%LAYER_THICKNESS)
-   DO I=1,SUM(SF%N_LAYER_CELLS)
-      IF (SF%GEOMETRY==SURF_INNER_CYLINDRICAL) THEN
-         VOL = (SF%INNER_RADIUS+SF%X_S(I))**I_GRAD - (SF%INNER_RADIUS+SF%X_S(I-1))**I_GRAD
-      ELSE
-         VOL = (THICKNESS+SF%INNER_RADIUS-SF%X_S(I-1))**I_GRAD - (THICKNESS+SF%INNER_RADIUS-SF%X_S(I))**I_GRAD
-      ENDIF
-      MATL_REMESH: DO N=1,SF%N_MATL
-         IF (SF%RHO_0(I,N)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
-         ML  => MATERIAL(SF%MATL_INDEX(N))
-         H_S = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
-         RHO_H = RHO_H + SF%RHO_0(I,N) * H_S * VOL
-         RHO = RHO + SF%RHO_0(I,N) * VOL
-      ENDDO MATL_REMESH
-   ENDDO
-   GET_PARTICLE_ENTHALPY = RHO_H/RHO
-ENDIF
-
-END FUNCTION GET_PARTICLE_ENTHALPY
-
-
-!> \brief Get viscosity of gas mixture at a specified temperature
-!> \param Z_IN Array of lumped species mass fractions
-!> \param MU_OUT Viscosity of gas mixture (kg/m/s)
-!> \param TMPG Gas mixture temperature (K)
-
-SUBROUTINE GET_VISCOSITY(Z_IN,MU_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN)  :: TMPG,Z_IN(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: MU_OUT
-
-ITMP = MIN(I_MAX_TEMP,NINT(TMPG))
-
-MU_OUT = DOT_PRODUCT(MU_RSQMW_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)/DOT_PRODUCT(Z_IN,RSQ_MW_Z)
-
-END SUBROUTINE GET_VISCOSITY
-
-
-SUBROUTINE GET_ENTHALPY(Z_IN,H_OUT,TMPG)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES),DTMP
-REAL(EB), INTENT(OUT) :: H_OUT
-
-IF (TMPG>=REAL(I_MAX_TEMP,EB)) THEN
-   H_OUT = DOT_PRODUCT(CPBAR_Z(I_MAX_TEMP,1:N_TRACKED_SPECIES),Z_IN)*REAL(I_MAX_TEMP,EB) + &
-           DOT_PRODUCT(CP_Z(I_MAX_TEMP,1:N_TRACKED_SPECIES),Z_IN)*(TMPG-REAL(I_MAX_TEMP,EB))
-ELSE
-   ITMP = INT(TMPG)
-   DTMP = TMPG-REAL(ITMP)
-   H_OUT = DOT_PRODUCT(CPBAR_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-   H_OUT = H_OUT+DTMP*(DOT_PRODUCT(CPBAR_Z(ITMP+1,1:N_TRACKED_SPECIES),Z_IN)-H_OUT)
-   H_OUT = H_OUT*TMPG
-ENDIF
-
-END SUBROUTINE GET_ENTHALPY
-
-
-SUBROUTINE GET_ENTHALPY_Z(N,TMPG,H_OUT)
-
-INTEGER :: ITMP
-REAL(EB), INTENT(IN) :: TMPG
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(OUT) :: H_OUT
-
-IF (TMPG>=REAL(I_MAX_TEMP,EB)) THEN
-   H_OUT = CPBAR_Z(I_MAX_TEMP,N)*REAL(I_MAX_TEMP,EB) + &
-           CP_Z(I_MAX_TEMP,N)*(TMPG-REAL(I_MAX_TEMP,EB))
-ELSE
-   ITMP = MIN(I_MAX_TEMP-1,INT(TMPG))
-   H_OUT = CPBAR_Z(ITMP,N)+(TMPG-REAL(ITMP,EB))*(CPBAR_Z(ITMP+1,N)-CPBAR_Z(ITMP,N))
-   H_OUT = H_OUT*TMPG
-ENDIF
-
-END SUBROUTINE GET_ENTHALPY_Z
-
-
-
-
-!> \brief Extract temperature given species mass fractions and enthalpy
-
-SUBROUTINE GET_TEMPERATURE(TMP,ETOT,ZZ_GET)
-REAL(EB), INTENT(IN) :: ETOT, ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB), INTENT(INOUT) :: TMP
-INTEGER :: ITCOUNT
-REAL(EB) :: CP, CP2, DCPDT, HGAS, TGUESS
-
-TGUESS = TMP
-ITCOUNT = 0
-CP_LOOP: DO ! Newton method to find solution of T (and hence cpbar) from enthalpy
-   ITCOUNT = ITCOUNT + 1
-   CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
-   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
-   IF (TGUESS>1._EB) THEN
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
-      DCPDT = CP - CP2
-   ELSE
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
-      DCPDT = CP2- CP
-   ENDIF
-   CP = HGAS / TGUESS
-   TMP =TGUESS+(ETOT-HGAS)/(CP+TGUESS*DCPDT)
-   IF (ABS(TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
-   IF (ABS(TMP - TGUESS)/(TMP+TWO_EPSILON_EB) < 0.0005_EB) EXIT CP_LOOP
-   IF (ITCOUNT > 10) THEN
-      TMP = 0.5_EB*(TMP+TGUESS)
-      EXIT CP_LOOP
-   ENDIF
-   TGUESS = MAX(0._EB,TMP)
-ENDDO CP_LOOP
-
-END SUBROUTINE GET_TEMPERATURE
-
-SUBROUTINE MOLAR_CONC_TO_MASS_FRAC(CC_IN,ZZ_OUT)
-   REAL(EB) :: CC_IN(1:N_TRACKED_SPECIES),ZZ_OUT(1:N_TRACKED_SPECIES)
-   ZZ_OUT(1:N_TRACKED_SPECIES) = CC_IN(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%MW
-   ! Check for negative mass fraction, and rescale to accomodate negative values
-   WHERE(ZZ_OUT<0._EB) ZZ_OUT=0._EB
-   ZZ_OUT = ZZ_OUT / SUM(ZZ_OUT)
-END SUBROUTINE MOLAR_CONC_TO_MASS_FRAC
-
-SUBROUTINE CALC_EQUIV_RATIO (ZZ, EQUIV)
-REAL(EB), INTENT(IN) :: ZZ(N_TRACKED_SPECIES)
-REAL(EB), INTENT(OUT) :: EQUIV
-REAL(EB) :: NUMER, DENOM
-INTEGER :: NS
-
-NUMER = 0._EB
-DENOM = 0._EB
-
-DO NS=1, N_TRACKED_SPECIES
-   NUMER = NUMER + ZZ(NS)*SPECIES_MIXTURE(NS)%OXR
-   DENOM = DENOM + ZZ(NS)*SPECIES_MIXTURE(NS)%OXA
-ENDDO
-
-IF (DENOM < TWO_EPSILON_EB) THEN
-   EQUIV= 0._EB;
-ELSE
-   EQUIV = NUMER/ DENOM;
-ENDIF
-END SUBROUTINE CALC_EQUIV_RATIO
-
-
-REAL(EB) FUNCTION DRAG(RE,DRAG_LAW,KN)
-
-! drag coefficient
-
-INTEGER, INTENT(IN) :: DRAG_LAW
-REAL(EB), INTENT(IN) :: RE
-REAL(EB), OPTIONAL, INTENT(IN) :: KN
-
-IF (RE<TWO_EPSILON_EB) THEN
-   DRAG = 0._EB
-   RETURN
-ENDIF
-
-SELECT CASE(DRAG_LAW)
-
-   ! see J.P. Holman 7th Ed. Fig. 6-10
-   CASE(SPHERE_DRAG)
-      IF (RE<1._EB) THEN
-         IF (PRESENT(KN)) THEN
-            DRAG = 24._EB/RE/CUNNINGHAM(KN)
-         ELSE
-            DRAG = MIN(240000._EB,24._EB/RE)
-         ENDIF
-      ELSEIF (RE<1000._EB) THEN
-         !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE ! see Crowe, Sommerfeld, Tsuji, 1998, Eq. (4.51)
-         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! matches Stokes drag at RE=1 (RJM)
-      ELSEIF (RE>=1000._EB) THEN
-         DRAG = 0.44_EB
-      ENDIF
-
-   ! see J.P. Holman 7th Ed. Fig. 6-9
-   CASE(CYLINDER_DRAG)
-      IF (RE<=1._EB) THEN
-         DRAG = 10._EB/(RE**0.8_EB)
-      ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
-         DRAG = 10._EB*(0.6_EB+0.4_EB*RE**0.8_EB)/RE
-      ELSEIF (RE>=1000._EB) THEN
-         DRAG = 1._EB
-      ENDIF
-
-   ! see Hoerner 1965, Fig. 3-26
-   CASE(DISK_DRAG)
-      DRAG=20.37_EB/RE+1.17_EB/(1._EB+1._EB/RE)
-
-   CASE(USER_DRAG)
-      DRAG = 1._EB ! PC%DRAG_COEFFICIENT set elsewhere
-
-   CASE DEFAULT
-      DRAG = 0._EB
-
-END SELECT
-
-END FUNCTION DRAG
-
-
-REAL(EB) FUNCTION CUNNINGHAM(KN)
-REAL(EB), INTENT(IN) :: KN
-REAL(EB), PARAMETER :: K1=1.257_EB,K2=0.4_EB,K3=1.1_EB
-
-CUNNINGHAM = 1._EB+K1*KN+K2*KN*EXP(-K3/KN)
-
-END FUNCTION CUNNINGHAM
-
-
-!> \brief Compute the surface (mass or energy) density of a wall cell
-!> \param MODE Indicator of returned quantity (0) kg/m2, (1) kg/m3, (2) kJ/m2, (3) kJ/m3
-!> \param SF Pointer to SURFACE
-!> \param ONE_D Pointer to BOUNDARY_ONE_D
-!> \param MATL_INDEX (Optional) Index of the material component
-
-REAL(EB) FUNCTION SURFACE_DENSITY(MODE,SF,ONE_D,MATL_INDEX)
-
-INTEGER, INTENT(IN) :: MODE
-INTEGER, INTENT(IN), OPTIONAL :: MATL_INDEX
-INTEGER :: I_GRAD,NWP,II2,N,ITMP
-REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM,DTMP
-TYPE(BOUNDARY_ONE_D_TYPE), INTENT(IN), POINTER :: ONE_D
-TYPE(SURFACE_TYPE), INTENT(IN), POINTER :: SF
-TYPE(MATERIAL_TYPE), POINTER :: ML
-
-THERMALLY_THICK_IF: IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
-
-   SURFACE_DENSITY = 0._EB
-
-ELSE THERMALLY_THICK_IF
-
-   SELECT CASE(SF%GEOMETRY)
-      CASE(SURF_CARTESIAN)                           ; I_GRAD = 1
-      CASE(SURF_CYLINDRICAL,SURF_INNER_CYLINDRICAL)  ; I_GRAD = 2
-      CASE(SURF_SPHERICAL)                           ; I_GRAD = 3
-   END SELECT
-
-   NWP = SUM(ONE_D%N_LAYER_CELLS)
-   IF (SF%GEOMETRY==SURF_INNER_CYLINDRICAL) THEN
-      R_S(0:NWP) = SF%INNER_RADIUS + ONE_D%X(0:NWP)
-   ELSE
-      R_S(0:NWP) = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0:NWP)
-   ENDIF
-
-   SURFACE_DENSITY = 0._EB
-   NUMBER_WALL_POINTS_LOOP: DO II2=1,NWP
-      AREA_VOLUME_SELECT: SELECT CASE(MODE)
-         CASE(0,2); WGT = ABS(R_S(II2-1)**I_GRAD-R_S(II2)**I_GRAD)/(REAL(I_GRAD,EB)*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
-         CASE(1,3); WGT = ABS(R_S(II2-1)**I_GRAD-R_S(II2)**I_GRAD)/(SF%INNER_RADIUS+SF%THICKNESS)**I_GRAD
-      END SELECT AREA_VOLUME_SELECT
-
-      EPUM = 1._EB ! energy per unit mass
-      ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(II2)))
-      DTMP = ONE_D%TMP(II2) - REAL(ITMP,EB)
-      IF (PRESENT(MATL_INDEX)) THEN
-         ENERGY_SELECT_1: SELECT CASE(MODE)
-            CASE(2,3)
-               ML => MATERIAL(MATL_INDEX)
-               EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
-         END SELECT ENERGY_SELECT_1
-         SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(MATL_INDEX)%RHO(II2)*WGT*EPUM
-      ELSE
-         DO N=1,SF%N_MATL
-            ENERGY_SELECT_2: SELECT CASE(MODE)
-               CASE(2,3)
-                  ML => MATERIAL(N)
-                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
-            END SELECT ENERGY_SELECT_2
-            SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
-         ENDDO
-      ENDIF
-
-   ENDDO NUMBER_WALL_POINTS_LOOP
-
-ENDIF THERMALLY_THICK_IF
-
-END FUNCTION SURFACE_DENSITY
-
-
-!> \brief Compute particle Cumulative Number Fraction (CNF) and Cumulative Volume Fraction (CVF)
-!> \param DM Median particle diameter (m)
-!> \param RR Array of particle radii (m)
-!> \param CNF Cumulative Number Fraction
-!> \param CVF Cumulative Volume Fraction
-!> \param NPT Number of points in the distribution
-!> \param GAMMA Parameter in the distribution function
-!> \param SIGMA Parameter in the distribution function
-!> \param DISTRIBUTION Type of distribution
-
-SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,CVF,NPT,GAMMA,SIGMA,DISTRIBUTION)
-
-USE MATH_FUNCTIONS, ONLY: IERFC
-CHARACTER(LABEL_LENGTH), INTENT(IN) :: DISTRIBUTION
-REAL(EB), INTENT(IN) :: DM,GAMMA,SIGMA
-INTEGER, INTENT(IN) :: NPT
-REAL(EB) :: SUM1,SUM2,DD1,DI,ETRM,GFAC,SFAC,DMIN,X1
-INTEGER  :: J
-REAL(EB), INTENT(OUT) :: RR(0:NPT),CNF(0:NPT),CVF(0:NPT)
-
-RR(0)  = 0._EB
-CNF(0) = 0._EB
-SUM1   = 0._EB
-SUM2   = 0._EB
-
-X1     = IERFC(2._EB*CNF_CUTOFF)
-DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
-DD1    = (-LOG(CNF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
-DD1    = (DD1-DMIN)/REAL(NPT,EB)
-GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
-SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
-
-INTLOOP: DO J=1,NPT
-   DI = DMIN + (J-0.5_EB)*DD1
-   RR(J) = 0.5_EB*DI
-   IF ((DI<=DM .OR. DISTRIBUTION=='LOGNORMAL') .AND. DISTRIBUTION/='ROSIN-RAMMLER') THEN
-      ETRM = EXP(-(LOG(DI/DM))**2/(2._EB*SIGMA**2))
-      SUM1 = SUM1 + (SFAC/DI**4)*ETRM
-      SUM2 = SUM2 + (SFAC/DI)*ETRM
-   ELSE
-      ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)
-      SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
-      SUM2 = 1._EB - ETRM
-   ENDIF
-   CNF(J) = SUM1
-   CVF(J) = SUM2
-ENDDO INTLOOP
-
-CNF = CNF/SUM1
-CVF = CVF/SUM2
-
-END SUBROUTINE PARTICLE_SIZE_DISTRIBUTION
-
-
-SUBROUTINE SPRAY_ANGLE_DISTRIBUTION(LON,LAT,LON_CDF,LAT_CDF,BETA,MU,SPRAY_ANGLE,DISTRIBUTION_TYPE,NPT)
-
-INTEGER,INTENT(IN) :: NPT
-REAL(EB),INTENT(OUT) :: LON_CDF(0:NPT),LON(0:NPT),LAT(0:NPT),LAT_CDF(0:NPT,0:NPT)
-REAL(EB),INTENT(IN) :: BETA,MU,SPRAY_ANGLE(2,2)
-CHARACTER(LABEL_LENGTH),INTENT(IN) :: DISTRIBUTION_TYPE
-INTEGER :: I,J
-REAL(EB) :: DLON,DLAT,PDF(0:NPT,0:NPT),THETA_MAX,THETA_MIN
-
-THETA_MAX=MAXVAL(SPRAY_ANGLE)
-THETA_MIN=MINVAL(SPRAY_ANGLE)
-
-DLAT=(THETA_MAX-THETA_MIN)/REAL(NPT,EB)
-DLON=2._EB*PI/REAL(NPT,EB)
-!Discretize latitude and longtitude
-LAT=(/ (THETA_MIN+I*DLAT,I=0,NPT) /)
-LON=(/ (0._EB+I*DLON, I=0,NPT) /)
-
-! SPRAY_ANGLE May be different in X and Y directions
-! i.e spray angle is dependent on longtitude
-! SPRAY_AGLE_MIN and MAX form ellipses with semi-axes defined by
-! SPRAY_ANGLE(1,1:2) and SPRAY_ANGLE(2,1:2) respectively
-
-DO I=0,NPT
-   THETA_MIN=SPRAY_ANGLE(1,1)*SPRAY_ANGLE(1,2)
-   IF (THETA_MIN>0._EB) THEN
-      THETA_MIN=THETA_MIN/SQRT((SPRAY_ANGLE(1,2)*COS(LON(I)))**2+(SPRAY_ANGLE(1,1)*SIN(LON(I)))**2)
-   ENDIF
-   THETA_MAX=SPRAY_ANGLE(2,1)*SPRAY_ANGLE(2,2)
-   THETA_MAX=THETA_MAX/SQRT((SPRAY_ANGLE(2,2)*COS(LON(I)))**2+(SPRAY_ANGLE(2,1)*SIN(LON(I)))**2)
-   SELECT CASE(DISTRIBUTION_TYPE)
-   CASE("TRIANGLE")
-      DO J=0,NPT
-         IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
-           PDF(J,I)=0._EB
-         ELSE
-           IF(LON(I)<MU) THEN
-              PDF(J,I)=2*(LAT(J)-THETA_MIN)/((THETA_MAX-THETA_MIN)*(THETA_MAX-MU))
-           ELSE
-              PDF(J,I)=2*(THETA_MAX-LAT(J))/((THETA_MAX-THETA_MIN)*(THETA_MAX-MU))
-           ENDIF
-         ENDIF
-      ENDDO
-   CASE("GAUSSIAN")
-      DO J=0,NPT
-        IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
-           PDF(J,I)=0._EB
-        ELSE
-           PDF(J,I)=EXP(-BETA*((LAT(J)-MU)/(THETA_MAX-THETA_MIN))**2)
-        ENDIF
-      ENDDO
-   CASE DEFAULT ! "UNIFORM"
-       DO J=0,NPT
-        IF(LAT(J)<THETA_MIN .OR. LAT(J)>THETA_MAX) THEN
-           PDF(J,I)=0._EB
-        ELSE
-           PDF(J,I)=1._EB
-        ENDIF
-      ENDDO
-   END SELECT
-ENDDO
-
-
-!
-DO I=0,NPT
-PDF(I,:)=PDF(I,:)*SIN(LAT(I))
-ENDDO
-
-LAT_CDF=0._EB
-! Latitude distribution conditional on Longtitude
-DO I=1,NPT
-   LAT_CDF(I,:)=LAT_CDF(I-1,:)+0.5*(PDF(I,:)+PDF(I-1,:))*DLAT
-ENDDO
-
-! Marginal longtitude distribution
-LON_CDF=0._EB
-DO I=1,NPT
-   LON_CDF(I)=LON_CDF(I-1)+0.5*(LAT_CDF(NPT,I-1)+LAT_CDF(NPT,I))*DLON
-ENDDO
-
-! Normalize marginal longtitude distribution
-LON_CDF=LON_CDF/LON_CDF(NPT)
-!Normalize conditional latitude distributions
-DO I=1,NPT
-   LAT_CDF(:,I)=LAT_CDF(:,I)/LAT_CDF(NPT,I)
-ENDDO
-
-END SUBROUTINE SPRAY_ANGLE_DISTRIBUTION
-
-
-REAL(EB) FUNCTION FED(Y_IN,RSUM,FED_ACTIVITY)
-
-! Returns the integrand of FED (Fractional Effective Dose) calculation.
-
-REAL(EB), INTENT(IN) :: Y_IN(1:N_TRACKED_SPECIES),RSUM
-INTEGER, INTENT(IN) :: FED_ACTIVITY
-INTEGER  :: N
-REAL(EB) :: Y_MF_INT, TMP_1
-REAL(EB), DIMENSION(3) :: CO_FED_FAC
-!                at rest           light work(default) heavy work
-DATA CO_FED_FAC /0.70486250E-5_EB, 2.7641667E-5_EB,    8.2925E-5_EB/
-
-! All equations from D.A. Purser, Sec. 2, Chap. 6, SFPE Handbook, 4th Ed.
-! Note: Purser uses minutes, here dt is in seconds. Conversion at the end of the function.
-! Total FED dose:
-! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
-
-FED = 0._EB
-
-! Carbon monoxide (CO)
-!          at rest    light work heavy work
-! RMV_FED /8.5_EB,    25.0_EB,   50.0_EB /
-! D_FED   /40.0_EB,   30.0_EB,   20.0_EB /
-! RMV/D   /0.2125_EB, 0.8333_EB, 2.5_EB/
-!
-! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (dt/60)) / D;
-!   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
-!
-IF (CO_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
-   TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
-   ! FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
-   FED   = CO_FED_FAC(FED_ACTIVITY)*TMP_1**(1.036_EB)
-ENDIF
-
-! Nitrogen oxides (NOx, here NO + NO2)
-! FED_LNOx = C_NOx/1500 * (dt/60);
-!   with C_NOx = C_NO + C_NO2, all in ppm
-TMP_1 = 0._EB
-IF (NO_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,NO_INDEX,Y_MF_INT)
-   TMP_1 = SPECIES(NO_INDEX)%RCON*Y_MF_INT/RSUM
-ENDIF
-IF (NO2_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,NO2_INDEX,Y_MF_INT)
-   TMP_1 = TMP_1 + SPECIES(NO2_INDEX)%RCON*Y_MF_INT/RSUM
-ENDIF
-IF (TMP_1 > 0._EB) FED = FED + TMP_1/0.001500_EB
-
-! Cyanide
-! FED_LCN = (exp(C_CN/43)/220 - 0.0045) * (dt/60);
-!   with C_CN = C_HCN - C_NOx, all in ppm
-IF (HCN_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,HCN_INDEX,Y_MF_INT)
-   TMP_1 = SPECIES(HCN_INDEX)%RCON*Y_MF_INT/RSUM - TMP_1
-   IF (TMP_1 > 0._EB) FED = FED + (Exp(TMP_1/0.000043_EB)/220.0_EB-0.00454545_EB)
-ENDIF
-
-! Irritants
-! FLD_irr = (C_HCl/F_HCl + C_HBr/F_HBr + C_HF/F_HF + C_SO2/F_SO2 + C_NO2/F_NO2 + C_C3H4O/F_C3H4O + C_CH2O/F_CH2O) * (dt/60);
-!   all in ppm
-TMP_1 = 0._EB
-DO N=1,N_SPECIES
-   IF (SPECIES(N)%FLD_LETHAL_DOSE > 0._EB) THEN
-      Call GET_MASS_FRACTION(Y_IN,N,Y_MF_INT)
-      TMP_1 = TMP_1 + SPECIES(N)%RCON*Y_MF_INT/RSUM / SPECIES(N)%FLD_LETHAL_DOSE
-   ENDIF
-ENDDO
-FED = FED + TMP_1
-
-! Carbon dioxide (CO2) induced hyperventilation:
-! FED_VCO2 = exp(0.1903*C_CO2/1E4 + 2.0004)/7.1;
-!   C_CO2 in ppm
-IF (CO2_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,CO2_INDEX,Y_MF_INT)
-   TMP_1 = SPECIES(CO2_INDEX)%RCON*Y_MF_INT/RSUM
-   If ( TMP_1 > 0.0_EB ) FED = FED * Exp( 0.1903_EB*TMP_1*100.0_EB + 2.0004_EB )/7.1_EB
-ENDIF
-
-! Low oxygen (O2)
-! FED_LO2 = 1/exp(8.13 - 0.54*(0.209 - C_O2/1E6)) * (dt/60);
-!   C_O2 in ppm
-IF (O2_INDEX > 0) THEN
-   Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
-   TMP_1 = SPECIES(O2_INDEX)%RCON*Y_MF_INT/RSUM
-   IF ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1))
-ENDIF
-
-! Convert the FED integrand for minutes.
-FED = FED / 60._EB
-
-END FUNCTION FED
-
-
-REAL(EB) FUNCTION FIC(Y_IN,RSUM)
-! Returns FIC (Fractional Incapacitating Concentration)
-
-REAL(EB), INTENT(IN) :: Y_IN(1:N_TRACKED_SPECIES),RSUM
-REAL(EB) :: Y_MF_INT
-INTEGER  :: N
-
-FIC = 0._EB
-DO N=1,N_SPECIES
-   IF (SPECIES(N)%FIC_CONCENTRATION > 0._EB) THEN
-      Call GET_MASS_FRACTION(Y_IN,N,Y_MF_INT)
-      FIC = FIC + SPECIES(N)%RCON*Y_MF_INT/RSUM / SPECIES(N)%FIC_CONCENTRATION
-   ENDIF
-ENDDO
-
-END FUNCTION FIC
-
-
-REAL(EB) FUNCTION WATER_VAPOR_MASS_FRACTION(HUMIDITY,TEMP,PZONE)
-
-! Compute the water vapor mass fraction given the relative humidity and temperature
-
-REAL(EB), INTENT(IN) :: TEMP,HUMIDITY,PZONE
-REAL(EB) :: X_SAT,DHOR_T,DHOR,P_RATIO,T_BOIL_EFF
-REAL(EB),PARAMETER :: T_BOIL=373.15_EB,DHOR_T_B=4916.346083_EB
-
-DHOR_T = (H_V_H2O(INT(TEMP))+(TEMP-REAL(INT(TEMP,EB)))*(H_V_H2O(INT(TEMP)+1)-H_V_H2O(INT(TEMP))))*MW_H2O/R0
-P_RATIO = PZONE/P_STP
-T_BOIL_EFF = MAX(0._EB,DHOR_T_B*T_BOIL/(DHOR_T_B-T_BOIL*LOG(P_RATIO)+TWO_EPSILON_EB))
-DHOR = 0.5_EB*((H_V_H2O(INT(T_BOIL_EFF))+(T_BOIL_EFF-REAL(INT(T_BOIL_EFF,EB)))*&
-       (H_V_H2O(INT(T_BOIL_EFF)+1)-H_V_H2O(INT(T_BOIL_EFF))))*MW_H2O/R0+DHOR_T)
-X_SAT  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TEMP)))
-WATER_VAPOR_MASS_FRACTION = HUMIDITY*0.01_EB*X_SAT/(MW_AIR/MW_H2O+(1._EB-MW_AIR/MW_H2O)*HUMIDITY*0.01_EB*X_SAT)
-
-END FUNCTION WATER_VAPOR_MASS_FRACTION
-
-
-REAL(EB) FUNCTION RELATIVE_HUMIDITY(Y_H2O,TEMP,PZONE)
-
-! Compute the relative humidity given the water vapor mass fraction and temperature
-
-REAL (EB), INTENT(IN) :: TEMP,Y_H2O,PZONE
-REAL (EB) :: X_SAT,X_H2O,DHOR,DHOR_T,T_BOIL_EFF,P_RATIO
-REAL(EB),PARAMETER :: T_BOIL=373.15_EB,DHOR_T_B=4916.346083_EB
-
-P_RATIO = PZONE/P_STP
-T_BOIL_EFF = MAX(0._EB,DHOR_T_B*T_BOIL/(DHOR_T_B-T_BOIL*LOG(P_RATIO)+TWO_EPSILON_EB))
-IF (TEMP >= T_BOIL_EFF) THEN
-   X_SAT = 1._EB
-ELSE
-   DHOR_T = (H_V_H2O(INT(TEMP))+(TEMP-REAL(INT(TEMP,EB)))*(H_V_H2O(INT(TEMP)+1)-H_V_H2O(INT(TEMP))))*MW_H2O/R0
-   DHOR = 0.5_EB*((H_V_H2O(INT(T_BOIL_EFF))+(T_BOIL_EFF-REAL(INT(T_BOIL_EFF,EB)))*&
-          (H_V_H2O(INT(T_BOIL_EFF)+1)-H_V_H2O(INT(T_BOIL_EFF))))*MW_H2O/R0+DHOR_T)
-   X_SAT  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TEMP)))
-ENDIF
-X_H2O = Y_H2O*MW_AIR/(MW_H2O-Y_H2O*(MW_H2O-MW_AIR))
-RELATIVE_HUMIDITY = 100._EB * X_H2O / X_SAT
-
-END FUNCTION RELATIVE_HUMIDITY
-
-
-REAL(EB) FUNCTION LES_FILTER_WIDTH_FUNCTION(DX,DY,DZ)
-USE GLOBAL_CONSTANTS, ONLY : LES_FILTER_WIDTH_TYPE
-REAL(EB), INTENT(IN):: DX,DY,DZ
-
-SELECT CASE(LES_FILTER_WIDTH_TYPE)
-   CASE(MEAN_LES_FILTER)
-      IF (TWO_D) THEN
-         LES_FILTER_WIDTH_FUNCTION = SQRT(DX*DZ)
-      ELSE
-         LES_FILTER_WIDTH_FUNCTION = (DX*DY*DZ)**ONTH
-      ENDIF
-   CASE(MAX_LES_FILTER)
-      IF (TWO_D) THEN
-         LES_FILTER_WIDTH_FUNCTION = MAX(DX,DZ)
-      ELSE
-         LES_FILTER_WIDTH_FUNCTION = MAX(DX,DY,DZ)
-      ENDIF
-   CASE(FIXED_LES_FILTER)
-         LES_FILTER_WIDTH_FUNCTION = FIXED_LES_FILTER_WIDTH
-END SELECT
-
-END FUNCTION LES_FILTER_WIDTH_FUNCTION
-
-
-REAL(EB) FUNCTION GET_POTENTIAL_TEMPERATURE(TMP_IN,Z_IN)
-
-USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
-REAL(EB), INTENT(IN) :: TMP_IN,Z_IN
-REAL(EB) :: PP
-
-IF (STRATIFICATION) THEN
-   PP = EVALUATE_RAMP(Z_IN,I_RAMP_P0_Z)
-ELSE
-   PP = P_INF
-ENDIF
-GET_POTENTIAL_TEMPERATURE = TMP_IN*(1.E5_EB/PP)**GM1OG  ! GM1OG = (GAMMA-1)/GAMMA = R/CP
-
-END FUNCTION GET_POTENTIAL_TEMPERATURE
-
-
-SUBROUTINE MONIN_OBUKHOV_SIMILARITY(Z,Z_0,L,U_STAR,THETA_STAR,THETA_0,U,TMP)
-
-REAL(EB), INTENT(IN) :: Z,Z_0,L,U_STAR,THETA_STAR,THETA_0
-REAL(EB), INTENT(OUT) :: U,TMP
-REAL(EB), PARAMETER :: P_REF=100000._EB,RHO_REF=1.2_EB
-REAL(EB) :: PSI_M,PSI_H,THETA,KAPPA
-
-KAPPA = VON_KARMAN_CONSTANT
-CALL MONIN_OBUKHOV_STABILITY_CORRECTIONS(PSI_M,PSI_H,Z,L)
-U = (U_STAR/KAPPA)*(LOG(Z/Z_0)-PSI_M)
-THETA = THETA_0 + (THETA_STAR/KAPPA)*(LOG(Z/Z_0)-PSI_H)
-TMP = THETA*(P_REF/(P_REF-RHO_REF*GRAV*Z))**(-0.285_EB)
-
-END SUBROUTINE MONIN_OBUKHOV_SIMILARITY
-
-
-SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS(PSI_M,PSI_H,Z,L)
-
-! Reference: A.J. Dyer. A review of flux profile relationships. Boundary-Layer Meteorology, 7:363-372, 1974.
-
-REAL(EB), INTENT(IN) :: Z,L
-REAL(EB), INTENT(OUT) :: PSI_M,PSI_H
-REAL(EB) :: ZETA
-
-IF (L>=0._EB) THEN
-   ! stable boundary layer
-   PSI_M = -5._EB*Z/L
-   PSI_H = PSI_M
-ELSE
-   ! unstable boundary layer
-   ZETA = (1._EB-16._EB*Z/L)**0.25_EB
-   PSI_M = 2._EB*LOG(0.5_EB*(1._EB+ZETA)) + LOG(0.5_EB*(1._EB+ZETA**2)) - 2._EB*ATAN(ZETA) + 0.5_EB*PI
-   PSI_H = 2._EB*LOG(0.5_EB*(1._EB+ZETA**2))
-ENDIF
-
-END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
-
-
-!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in FILM based on the selected EVAP_MODEL on MISC
-!> \param H_MASS The mass transfer coefficient (m2/s)
-!> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
-!> \param D_FILM Diffusivity in the film (m2/s)
-!> \param K_FILM Conductivity in the film (W/m/k)
-!> \param CP_FILM Specific heat in the film (J/kg/K)
-!> \param RHO_FILM Density in in the film (kg/m3)
-!> \param LENGTH Length scale (m)
-!> \param Y_DROP Equilibrium vapor fraction for the current droplet temperature
-!> \param Y_GAS Mass fraction of vapor in the gas
-!> \param B_NUMBER B number for the droplet
-!> \param NU_FAC_GAS Constant factor used in computing  the NUsselt number
-!> \param SH_FAC_GAS Constant factor used in computing  the Sherwood number
-!> \param RE_L Renyolds number
-!> \param TMP_FILM Film temperature for the droplet (K)
-!> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
-!> \param Z_INDEX Droplet species index in ZZ
-!> \param EVAP_MODEL Indicator of evaporation model
-
-SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
-                                     SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX,EVAP_MODEL)
-USE MATH_FUNCTIONS, ONLY: F_B
-REAL(EB), INTENT(IN) :: D_FILM,CP_FILM,K_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
-                        ZZ_GET(1:N_TRACKED_SPECIES)
-INTEGER, INTENT(IN) :: Z_INDEX,EVAP_MODEL
-REAL(EB), INTENT(INOUT) :: B_NUMBER
-REAL(EB), INTENT(OUT) :: H_MASS,H_HEAT
-REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_FILM,ZZ_GET2(1:N_TRACKED_SPECIES)
-
-SELECT CASE (EVAP_MODEL)
-   CASE(RM_NO_B) ! Ranz Marshall
-      NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-      H_HEAT   = NUSSELT*K_FILM/LENGTH
-      IF (Y_DROP <= Y_GAS) THEN
-         H_MASS   = 0._EB
-      ELSE
-         SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
-         H_MASS   = SHERWOOD*D_FILM/LENGTH
-      ENDIF
-   CASE(RM_B) ! Sazhin M0, Eq 106 + 109 with B_T=B_M. This is the default model.
-      IF (Y_DROP <= Y_GAS) THEN
-         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-         H_MASS   = 0._EB
-      ELSE
-         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_FILM/LENGTH
-         ! above we save a divide and multiply of B_NUMBER
-         ! the full model corresponding to Sazhin (108) and (109) would be
-         ! SH = SH_0 * LOG(1+B_M)/B_M
-         ! H_MASS = SH * D/L * B_M/(Y_D-Y_G)
-      ENDIF
-   CASE(RM_LEWIS_B) ! Sazhin M1, Eq 106 + 109 with eq 102.
-      IF (Y_DROP <= Y_GAS) THEN
-         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-         H_MASS   = 0._EB
-      ELSE
-         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_FILM/LENGTH
-         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
-         ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
-         ZZ_GET2(Z_INDEX) = 1._EB
-         CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
-         B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-      ENDIF
-   CASE(RM_FL_LEWIS_B) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
-      IF (Y_DROP <= Y_GAS) THEN
-         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-         H_MASS   = 0._EB
-      ELSE
-         SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
-         H_MASS   = SHERWOOD*D_FILM/LENGTH
-         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
-         ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
-         ZZ_GET2(Z_INDEX) = 1._EB
-         CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
-         B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-         NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
-         H_HEAT   = NUSSELT*K_FILM/LENGTH
-      ENDIF
-END SELECT
-
-END SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS
-
-
-!> \brief Compute the components of the prevailing wind
-!> \param T Current time (s)
-!> \param NM Current mesh
-
-SUBROUTINE COMPUTE_WIND_COMPONENTS(T,NM)
-
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-REAL(EB), INTENT(IN) :: T
-REAL(EB) :: THETA, SIN_THETA, COS_THETA
-INTEGER, INTENT(IN) :: NM
-INTEGER :: K
-TYPE (MESH_TYPE), POINTER :: M
-
-M => MESHES(NM)
-
-DO K=0,M%KBP1
-   IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
-      IF (I_RAMP_DIRECTION_T==0) THEN
-         THETA=EVALUATE_RAMP(M%ZC(K),I_RAMP_DIRECTION_Z)*DEG2RAD
-      ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
-         THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
-      ELSE
-         THETA=(EVALUATE_RAMP(M%ZC(K),I_RAMP_DIRECTION_Z)+EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
-      ENDIF
-      SIN_THETA = -SIN(THETA)
-      COS_THETA = -COS(THETA)
-   ELSE
-      SIN_THETA = 1._EB
-      COS_THETA = 1._EB
-   ENDIF
-   M%U_WIND(K) = U0*EVALUATE_RAMP(M%ZC(K),I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
-   M%V_WIND(K) = V0*EVALUATE_RAMP(M%ZC(K),I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
-   M%W_WIND(K) = W0
-ENDDO
-
-END SUBROUTINE COMPUTE_WIND_COMPONENTS
-
-
-!> \brief Compute properties of the gas film for a liquid surface
-!> \param N_VAP Number of evaporating fluids
-!> \param FILM_FAC Linear factor for determining the filn conditions
-!> \param Y_VAP Mass fraciton of the liquid vapors at the surface
-!> \param Y_GAS Mass fraction of the liquid vapors in the gas cell
-!> \param ZZ_INDEX Array of tracked species indicies for the evaporating liquids
-!> \param TMP_S Temperature of the surface (K)
-!> \param TMP_GAS Temperature of the gas cell (K)
-!> \param ZZ_GAS Trakced species mass fractions in the gas cell
-!> \param PB Film pressure (Pa)
-!> \param TMP_FILM Film temperature (K)
-!> \param MU_FILM Film viscosity (kg/m/s)
-!> \param K_FILM Film conductivity (W/m/K)
-!> \param CP_FILM Film specific heat (kJ/kg/K)
-!> \param D_FILM Film diffusivity (m2/)
-!> \param RHO_FILM Film density (kg/m3)
-!> \param PR_FILM Film Prandtl number
-!> \param SC_FILM Film Schmidt number
-
-SUBROUTINE GET_FILM_PROPERTIES(N_VAP,FILM_FAC,Y_VAP,Y_GAS,ZZ_INDEX,TMP_S,TMP_GAS,ZZ_GAS,PB,TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,&
-                               RHO_FILM,PR_FILM,SC_FILM)
-
-INTEGER, INTENT(IN) :: N_VAP,ZZ_INDEX(N_VAP)
-REAL(EB), INTENT(IN) :: FILM_FAC,Y_VAP(N_VAP),Y_GAS(N_VAP),TMP_S,TMP_GAS,ZZ_GAS(1:N_TRACKED_SPECIES),PB
-REAL(EB), INTENT(OUT) :: TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM
-REAL(EB) :: X_SUM,R_FILM,ZZ_FILM(1:N_TRACKED_SPECIES),Y_FILM(N_VAP),SUM_FILM,SUM_GAS,OM_SUM_FILM
-INTEGER :: I
-
-! Take liquid surface Y and gas cell Y and compoute film Y
-Y_FILM = Y_VAP + FILM_FAC*(Y_GAS-Y_VAP)
-SUM_FILM = SUM(Y_FILM)
-SUM_GAS = SUM(Y_GAS)
-OM_SUM_FILM = 1._EB-SUM_FILM
-
-IF (OM_SUM_FILM<TWO_EPSILON_EB) THEN
-   ! If film is all vapor, just set the film Z to the vapor mass fractions.
-   ZZ_FILM = 0._EB
-   LOOP1: DO I=1,N_VAP
-      IF (ZZ_INDEX(I)==0) CYCLE LOOP1
-      ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
-   ENDDO LOOP1
-ELSE
-   ! Determine the additional mass fraction of tracked species for each vapor species present
-   IF (ABS(SUM_GAS-1._EB) < TWO_EPSILON_EB) THEN
-      ZZ_FILM = 0._EB
-      DO I=1,N_VAP
-         ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
-      ENDDO
-      ZZ_FILM(1) = 1._EB - SUM_FILM
-   ELSE
-      ZZ_FILM = ZZ_GAS
-      LOOP2: DO I=1,N_VAP
-         IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
-         ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
-                                (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
-      ENDDO LOOP2
-      ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
-   ENDIF
-ENDIF
-
-! Use film mass fractions to get properties and non-dimensional parameters. D is weighed by mole fraction.
-
-TMP_FILM = TMP_S + FILM_FAC*(TMP_GAS - TMP_S) ! LC Eq.(18)
-CALL GET_VISCOSITY(ZZ_FILM,MU_FILM,TMP_FILM)
-CALL GET_CONDUCTIVITY(ZZ_FILM,K_FILM,TMP_FILM)
-CALL GET_SPECIFIC_HEAT(ZZ_FILM,CP_FILM,TMP_FILM)
-CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_FILM,R_FILM)
-
-X_SUM = 0._EB
-LOOP3: DO I=1,N_VAP
-   IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP3
-   D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),ZZ_INDEX(I))*ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
-   X_SUM=X_SUM+ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
-ENDDO LOOP3
-
-IF (X_SUM > TWO_EPSILON_EB) THEN
-   D_FILM = D_FILM/X_SUM
-ELSE
-   D_FILM = D_Z(NINT(TMPA),1)
-ENDIF
-PR_FILM = MU_FILM*CP_FILM/K_FILM
-RHO_FILM = PB/(R_FILM*TMP_FILM)
-PR_FILM = MU_FILM*CP_FILM/K_FILM
-SC_FILM = MU_FILM/(RHO_FILM*D_FILM)
-
-END SUBROUTINE GET_FILM_PROPERTIES
-
-!> \brief Converts an array of liquid vapor mole fractions into mass fractions
-!> \param N_MATS Number of liquids
-!> \param ZZ_GET Gas cell tracked species mass factions
-!> \param X_SV Liquid surface liquid vapor mole fraction
-!> \param Y_SV Liquid surface liquid vapor mass fraction
-!> \param MW Liquid vapor molecular weights
-!> \param SMIX_INDEX Lookup for tracked species the liquids evaporate to
-
-SUBROUTINE GET_Y_SURF(N_MATS,ZZ_GET,X_SV,Y_SV,MW,SMIX_INDEX)
-INTEGER, INTENT(IN) :: N_MATS,SMIX_INDEX(N_MATS)
-REAL(EB), INTENT(IN) :: ZZ_GET(1:N_TRACKED_SPECIES),X_SV(N_MATS),MW(N_MATS)
-REAL(EB), INTENT(OUT) :: Y_SV(N_MATS)
-REAL(EB) :: ZZ_2(1:N_TRACKED_SPECIES),MW_DRY,MASS
-INTEGER :: I
-
-ZZ_2 = ZZ_GET
-Y_SV = 0._EB
-
-!Zero out tracked species that are liquid vapors and get the MW of what is left
-
-Y_ALL_LOOP: DO I=1,N_MATS
-   IF (X_SV(I) < TWO_EPSILON_EB) CYCLE
-   ZZ_2(SMIX_INDEX(I))=0._EB
-ENDDO Y_ALL_LOOP
-
-IF (SUM(ZZ_2) > TWO_EPSILON_EB) THEN
-   ZZ_2 = ZZ_2 / SUM(ZZ_2)
-   MW_DRY = 0._EB
-   DO I=1,N_TRACKED_SPECIES
-      MW_DRY = MW_DRY + ZZ_2(I)/SPECIES_MIXTURE(I)%MW
-   ENDDO
-   MW_DRY = 1._EB/MW_DRY
-ENDIF
-
-! Get mass based on mole fractions and MWs and convert X to Y
-MASS = (1._EB-SUM(X_SV))*MW_DRY
-DO I=1,N_MATS
-   Y_SV(I) = X_SV(I)*MW(I)
-   MASS = MASS + Y_SV(I)
-ENDDO
-
-Y_SV = Y_SV/MASS
-
-END SUBROUTINE GET_Y_SURF
-
-
-!> \brief Estimates the peak reaction temperature for a material reaction
-!> \param N_MATL MATL index
-!> \param NR Reaction index
-
-SUBROUTINE GET_TMP_REF(N_MATL,NR)
-INTEGER, INTENT(IN) :: N_MATL,NR
-REAL(EB) :: HEATING_RATE,DT=0.01_EB,DTDT,RR_MAX,REACTION_RATE,TMP,RHO_S
-TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
-
-ML=> MATERIAL(N_MATL)
-
-IF (ML%RATE_REF(NR) > 0._EB) THEN
-   HEATING_RATE = ML%RATE_REF(NR)
-ELSE
-   HEATING_RATE = TGA_HEATING_RATE
-ENDIF
-
-TMP = 0._EB
-ML%TMP_REF(NR) = 0._EB
-DTDT = HEATING_RATE/60._EB
-RHO_S = ML%RHO_S
-IF (ABS(ML%E(NR)) < TWO_EPSILON_EB) THEN
-   RR_MAX = ML%A(NR)*RHO_S**ML%N_S(NR)
-ELSE
-   RR_MAX = 0._EB
-ENDIF
-DO WHILE (INT(TMP)<I_MAX_TEMP)
-   TMP = TMP + DTDT * DT
-   REACTION_RATE = ML%A(NR)*RHO_S**ML%N_S(NR)*EXP(-ML%E(NR)/(R0*TMP))*TMP**ML%N_T(NR)
-   IF (REACTION_RATE > RR_MAX) THEN
-      ML%TMP_REF(NR) = TMP
-      RR_MAX = REACTION_RATE
-   ENDIF
-   RHO_S = RHO_S - REACTION_RATE * DT
-   IF (RHO_S<0._EB) EXIT
-ENDDO
-
-END SUBROUTINE GET_TMP_REF
-
-
-!> \brief Determine if an ember ignites a substrate
-!> \param NM Mesh number
-!> \param IP Particle index
-
-SUBROUTINE EMBER_IGNITION_MODEL(NM,IP)
-
-INTEGER, INTENT(IN) :: NM,IP
-TYPE(MESH_TYPE), POINTER :: M
-TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
-TYPE(SURFACE_TYPE), POINTER :: SF
-TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-REAL(EB) :: F_N,POWER,X
-
-M  => MESHES(NM)
-LP => M%LAGRANGIAN_PARTICLE(IP)
-BC => M%BOUNDARY_COORD(LP%BC_INDEX)
-SF => SURFACE(M%LS_SURF_INDEX(BC%IIG,BC%JJG))
-IF (SF%EMBER_IGNITION_POWER_MEAN<0._EB) RETURN
-
-! Compute the energy generation rate of the ember
-
-POWER = (M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_RAD_OUT-M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_RAD_IN - M%BOUNDARY_PROP1(LP%B1_INDEX)%Q_CON_F)*&
-         0.001_EB*M%BOUNDARY_PROP1(LP%B1_INDEX)%AREA
-
-! Compute the CDF of the POWER
-F_N = 0.5_EB*(1._EB + ERF((POWER-SF%EMBER_IGNITION_POWER_MEAN)/(SR2*SF%EMBER_IGNITION_POWER_SIGMA)))
-! Adjust for weighting factor
-F_N = 1._EB - (1._EB - F_N)**LP%PWT
-
-CALL RANDOM_NUMBER(X)
-IF (X<F_N) THEN
-   M%PHI_LS(BC%IIG,BC%JJG) = 1._EB
-   BC%Z = -1.E6_EB
-ENDIF
-
-END SUBROUTINE EMBER_IGNITION_MODEL
-
-!> \brief Computes refrence heat flux for S-pyro model using empirical data
-!> \param HRRPUA Current wall cell HRRPUA (W/m2)
-!> \param HOC Effective heat of combustion for all gases emitted by wall cell (J/kg)
-!> \param Y_S Effective soot yield for all gases emitted by wall cell (kg/kg)
-!> \param Q_INC current incident radiation (W/m2)
-
-REAL(EB) FUNCTION Q_REF_FIT(HRRPUA,HOC,Y_S,Q_INC)
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
-REAL(EB), INTENT(IN) :: HRRPUA,HOC,Y_S,Q_INC
-REAL(EB) :: HRRPUA_SCALE,QFLAME,RHF_ABS
-REAL(EB), PARAMETER :: HRRPUA_SCALE_DATA(0:16) = (/0.0000_EB,0.4100_EB,0.5900_EB,0.6800_EB,0.7700_EB,0.8050_EB,&
-                                                   0.8400_EB,0.8750_EB,0.9100_EB,0.9225_EB,0.9350_EB,0.9475_EB,&
-                                                   0.9600_EB,0.9625_EB,0.9650_EB,0.9675_EB,0.9700_EB/)
-
-CALL INTERPOLATE1D_UNIFORM(0,HRRPUA_SCALE_DATA,HRRPUA/100000._EB,HRRPUA_SCALE)
-RHF_ABS = 0.02602_EB + 0.3459_EB*HRRPUA/HOC+0.2107_EB*Y_S
-QFLAME = HRRPUA_SCALE * (19.E3_EB + 5.545E-4_EB*HOC - 6.388E-12_EB*HOC**2)
-Q_REF_FIT = QFLAME + Q_INC * (1._EB - RHF_ABS)
-
-END FUNCTION Q_REF_FIT
-
-
-END MODULE PHYSICAL_FUNCTIONS
-
-
-
 !> \brief Coordinate transformation functions
 
 MODULE TRAN
@@ -5931,6 +5920,48 @@ USE PRECISION_PARAMETERS
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 CONTAINS
+
+
+!> \brief Determine the index of a RAMP with a given name (ID)
+!> \param ID The name of the ramp function
+!> \param TYPE The kind of ramp
+!> \param RAMP_INDEX The index of the ramp
+!> \param DUPLICATE_RAMP Optional logical parameter indicating if the ramp has already been processed
+
+SUBROUTINE GET_RAMP_INDEX(ID,TYPE,RAMP_INDEX,DUPLICATE_RAMP)
+
+USE GLOBAL_CONSTANTS, ONLY: N_RAMP,RAMP_ID,RAMP_TYPE
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_CHARACTER_ARRAY
+CHARACTER(*), INTENT(IN) :: ID,TYPE
+INTEGER, INTENT(OUT) :: RAMP_INDEX
+INTEGER :: NR
+LOGICAL, INTENT(IN), OPTIONAL :: DUPLICATE_RAMP
+
+IF (ID=='null') THEN
+   RAMP_INDEX = 0
+   RETURN
+ENDIF
+
+IF (.NOT.PRESENT(DUPLICATE_RAMP)) THEN
+   SEARCH: DO NR=1,N_RAMP
+      IF (ID==RAMP_ID(NR)) THEN
+         RAMP_INDEX = NR
+         RETURN
+      ENDIF
+   ENDDO SEARCH
+ENDIF
+
+IF (N_RAMP>=SIZE(RAMP_ID)) THEN
+   RAMP_ID   => REALLOCATE_CHARACTER_ARRAY(RAMP_ID,  LABEL_LENGTH,1,SIZE(RAMP_ID)+100)
+   RAMP_TYPE => REALLOCATE_CHARACTER_ARRAY(RAMP_TYPE,LABEL_LENGTH,1,SIZE(RAMP_ID)+100)
+ENDIF
+
+N_RAMP                = N_RAMP + 1
+RAMP_INDEX            = N_RAMP
+RAMP_ID(RAMP_INDEX)   = ID
+RAMP_TYPE(RAMP_INDEX) = TYPE
+
+END SUBROUTINE GET_RAMP_INDEX
 
 
 SUBROUTINE WRITE_SUMMARY_INFO(LU,INPUT_FILE_INCLUDED)
