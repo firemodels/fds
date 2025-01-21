@@ -107,7 +107,11 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
    INTERFACE CLUSTER_SPARSE_SOLVER
       SUBROUTINE CLUSTER_SPARSE_SOLVER_D(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
          USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
+#ifdef WITHOUT_MPIF08
+         USE MPI
+#else
          USE MPI_F08
+#endif
          TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
          INTEGER,          INTENT(IN)    :: MAXFCT
          INTEGER,          INTENT(IN)    :: MNUM
@@ -124,12 +128,20 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
          REAL(KIND=8),     INTENT(IN)    :: A(*)
          REAL(KIND=8),     INTENT(INOUT) :: B(*)
          REAL(KIND=8),     INTENT(OUT)   :: X(*)
-         TYPE(MPI_COMM),   INTENT(IN)    :: COMM
+#ifdef WITHOUT_MPIF08
+         INTEGER, INTENT(IN)    :: COMM
+#else
+         TYPE (MPI_COMM),  INTENT(IN)    :: COMM
+#endif
       END SUBROUTINE CLUSTER_SPARSE_SOLVER_D
 
       SUBROUTINE CLUSTER_SPARSE_SOLVER_S(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
          USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
+#ifdef WITHOUT_MPIF08
+         USE MPI
+#else
          USE MPI_F08
+#endif
          TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
          INTEGER,          INTENT(IN)    :: MAXFCT
          INTEGER,          INTENT(IN)    :: MNUM
@@ -146,12 +158,20 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
          REAL(KIND=4),     INTENT(IN)    :: A(*)
          REAL(KIND=4),     INTENT(INOUT) :: B(*)
          REAL(KIND=4),     INTENT(OUT)   :: X(*)
-         TYPE(MPI_COMM),   INTENT(IN)    :: COMM
+#ifdef WITHOUT_MPIF08
+         INTEGER, INTENT(IN)    :: COMM
+#else
+         TYPE (MPI_COMM),  INTENT(IN)    :: COMM
+#endif
       END SUBROUTINE CLUSTER_SPARSE_SOLVER_S
 
       SUBROUTINE CLUSTER_SPARSE_SOLVER_D_2D(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
          USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
+#ifdef WITHOUT_MPIF08
+         USE MPI
+#else
          USE MPI_F08
+#endif
          TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
          INTEGER,          INTENT(IN)    :: MAXFCT
          INTEGER,          INTENT(IN)    :: MNUM
@@ -168,12 +188,20 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
          REAL(KIND=8),     INTENT(IN)    :: A(*)
          REAL(KIND=8),     INTENT(INOUT) :: B(N,*)
          REAL(KIND=8),     INTENT(OUT)   :: X(N,*)
-         TYPE(MPI_COMM),   INTENT(IN)    :: COMM
+#ifdef WITHOUT_MPIF08
+         INTEGER, INTENT(IN)    :: COMM
+#else
+         TYPE (MPI_COMM),  INTENT(IN)    :: COMM
+#endif
       END SUBROUTINE CLUSTER_SPARSE_SOLVER_D_2D
 
       SUBROUTINE CLUSTER_SPARSE_SOLVER_S_2D(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
          USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
+#ifdef WITHOUT_MPIF08
+         USE MPI
+#else
          USE MPI_F08
+#endif
          TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
          INTEGER,          INTENT(IN)    :: MAXFCT
          INTEGER,          INTENT(IN)    :: MNUM
@@ -190,11 +218,59 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
          REAL(KIND=4),     INTENT(IN)    :: A(*)
          REAL(KIND=4),     INTENT(INOUT) :: B(N,*)
          REAL(KIND=4),     INTENT(OUT)   :: X(N,*)
-         TYPE(MPI_COMM),   INTENT(IN)    :: COMM
+#ifdef WITHOUT_MPIF08
+         INTEGER, INTENT(IN)    :: COMM
+#else
+         TYPE (MPI_COMM),  INTENT(IN)    :: COMM
+#endif
       END SUBROUTINE CLUSTER_SPARSE_SOLVER_S_2D
    END INTERFACE
 END MODULE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
+
+#ifdef WITH_PETSC
+MODULE PETSC_ZONE_MESH
+#include <petsc/finclude/petsc.h>
+! #include <petsc/finclude/petscsys.h>
+   USE PETSC
+   IMPLICIT NONE
+   PetscErrorCode :: PETSC_IERR
+
+   TYPE PETSC_ZM_TYPE
+      INTEGER :: NNZ
+      Mat :: A_H    ! System Matrix
+      Vec :: F_H    ! RHS
+      Vec :: X_H    ! Solution vector
+      KSP :: LS     ! Linear solver
+      PC  :: PR     ! Preconditioner
+   END TYPE PETSC_ZM_TYPE
+
+   ! PETSc info for ZONE_MESH defined in PETSC_ZM, ZONE_MESH_TYPE, type.f90.
+   PRIVATE
+   PUBLIC :: PETSC_IERR,PETSC_ZM_TYPE
+
+END MODULE PETSC_ZONE_MESH
+
+MODULE PETSC_ZONE_SOLVE
+#include <petsc/finclude/petsc.h>
+! #include <petsc/finclude/petscsys.h>
+   USE PETSC
+
+   IMPLICIT NONE
+   PetscErrorCode :: PETSC_IERR
+
+   TYPE PETSC_ZS_TYPE
+      Mat :: A_H    ! System Matrix
+      Vec :: F_H    ! RHS
+      Vec :: X_H    ! Solution vector
+      KSP :: LS     ! Linear solver
+      PC  :: PR     ! Preconditioner
+   END TYPE PETSC_ZS_TYPE
+
+   PRIVATE
+   PUBLIC :: PETSC_ZS_TYPE,PETSC_IERR
+END MODULE PETSC_ZONE_SOLVE
+#endif /* WITH_PETSC */
 
 #ifdef WITH_HYPRE
 MODULE HYPRE_INTERFACE

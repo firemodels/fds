@@ -173,7 +173,7 @@ Z_LS(IBP1,   0) = Z_LS(IBAR,   1)
 Z_LS(   0,JBP1) = Z_LS(   1,JBAR)
 Z_LS(IBP1,JBP1) = Z_LS(IBAR,JBAR)
 
-IF (MODE==2) RETURN
+IF (MODE==2 .OR. LEVEL_SET_MODE==0) RETURN
 
 ! Allocate some work arrays
 
@@ -591,10 +591,12 @@ SUBROUTINE GET_BOUNDARY_VALUES
 
 INTEGER :: IIG,JJG,II,JJ,IOR
 
-IF (PREDICTOR) THEN
-   PHI_LS_P => PHI_LS
-ELSE
-   PHI_LS_P => PHI1_LS
+IF (LEVEL_SET_MODE>0) THEN
+   IF (PREDICTOR) THEN
+      PHI_LS_P => PHI_LS
+   ELSE
+      PHI_LS_P => PHI1_LS
+   ENDIF
 ENDIF
 
 ! Fetch values of various quantities at six faces of current mesh.
@@ -1293,6 +1295,7 @@ ENDIF
 ROS_NO_WIND_NO_SLOPE = (bigIr*xi)/hsk
 
 END FUNCTION ROS_NO_WIND_NO_SLOPE
+
 
 !> \brief Update quantities which are used to output metrics for quantifying fire spread 
 !>
