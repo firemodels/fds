@@ -9,6 +9,7 @@ Fire Dynamics Simulator (FDS) Plot Library
 Collection of functions for plotting and analysis
 """
 
+import os
 import sys
 import math
 import matplotlib
@@ -998,3 +999,145 @@ def dataplot(config_filename,**kwargs):
             print("Error in row {whichrow}, skipping case...".format(whichrow=irow+1))
             continue
 
+
+def add_version_string(ax, filename, plot_type='linear', scale_x=0.60, scale_y=1.02,
+                       font_name='Times', font_size=10):
+    """
+    Adds a version string to a matplotlib plot.
+
+    Parameters:
+    ax (matplotlib.axes.Axes): The axes to add the version string to.
+    filename (str): Path to the version string file.
+    plot_type (str): Type of plot ('loglog', 'semilogx', 'semilogy', or 'linear').
+    scale_x (float): Scaling factor for X-position.
+    scale_y (float): Scaling factor for Y-position.
+    font_name (str): Font name for the text.
+    font_interpreter (str): Interpreter type (not applicable in matplotlib, kept for compatibility).
+    font_size (int): Font size for the text.
+
+    """
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            version_str = file.read().strip()
+
+        x_lim = ax.get_xlim()
+        y_lim = ax.get_ylim()
+
+        if plot_type == 'loglog':
+            x_pos = 10**(np.log10(x_lim[0]) + scale_x * (np.log10(x_lim[1]) - np.log10(x_lim[0])))
+            y_pos = 10**(np.log10(y_lim[0]) + scale_y * (np.log10(y_lim[1]) - np.log10(y_lim[0])))
+        elif plot_type == 'semilogx':
+            x_pos = 10**(np.log10(x_lim[0]) + scale_x * (np.log10(x_lim[1]) - np.log10(x_lim[0])))
+            y_pos = y_lim[0] + scale_y * (y_lim[1] - y_lim[0])
+        elif plot_type == 'semilogy':
+            x_pos = x_lim[0] + scale_x * (x_lim[1] - x_lim[0])
+            y_pos = 10**(np.log10(y_lim[0]) + scale_y * (np.log10(y_lim[1]) - np.log10(y_lim[0])))
+        else:
+            x_pos = x_lim[0] + scale_x * (x_lim[1] - x_lim[0])
+            y_pos = y_lim[0] + scale_y * (y_lim[1] - y_lim[0])
+
+        ax.text(x_pos, y_pos, version_str, fontsize=font_size, fontname=font_name, verticalalignment='bottom')
+
+
+def get_plot_style(style="fds"):
+    """
+    Returns a dictionary of plot style parameters based on the specified style.
+
+    Parameters:
+    - style (str): The style to use ('fds', 'paper', etc.). Default is 'fds'.
+
+    Returns:
+    - dict: A dictionary containing plot style parameters.
+    """
+    if style == "fds":
+        return {
+            # Font properties
+            "Font_Name": "Times",
+            "Font_Interpreter": "TeX",
+            "Key_Font_Size": 12,
+            "Title_Font_Size": 16,
+            "Label_Font_Size": 16,
+            "Scat_Title_Font_Size": 14,
+            "Scat_Label_Font_Size": 14,
+            "Marker_Size": 4,
+            "D1_Marker_Size": 4,
+            "D2_Marker_Size": 4,
+
+            # Line properties
+            "Line_Width": 1.0,
+            "D1_Line_Width": 1.0,
+            "D2_Line_Width": 1.0,
+
+            # Plot properties
+            "Plot_Units": "inches",
+            "Plot_Width": 5.0,
+            "Plot_Height": 3.4,
+            "Plot_X": 1.2,
+            "Plot_Y": 0.8,
+            "Scat_Plot_Width": 4.75,
+            "Scat_Plot_Height": 4.75,
+            "Scat_Plot_X": 1.00,
+            "Scat_Plot_Y": 0.75,
+            "Subtitle_Text_Offset": 0.05,
+            "VerStr_Scale_X": 0.60,
+            "VerStr_Scale_Y": 1.05,
+
+            # Paper properties
+            "Paper_Units": "inches",
+            "Paper_Width": 6.5,
+            "Paper_Height": 4.5,
+            "Scat_Paper_Height": 6.0,
+            "Scat_Paper_Width": 6.0,
+
+            # Print properties
+            "Figure_Visibility": "off",
+            "Image_File_Type": "-dpdf",
+        }
+
+    elif style == "paper":
+        return {
+            # Font properties
+            "Font_Name": "Helvetica",
+            "Font_Interpreter": "TeX",
+            "Key_Font_Size": 16,
+            "Title_Font_Size": 20,
+            "Label_Font_Size": 20,
+            "Scat_Title_Font_Size": 14,
+            "Scat_Label_Font_Size": 14,
+            "Marker_Size": 10,
+            "D1_Marker_Size": 10,
+            "D2_Marker_Size": 10,
+
+            # Line properties
+            "Line_Width": 1.0,
+            "D1_Line_Width": 1.0,
+            "D2_Line_Width": 1.0,
+
+            # Plot properties
+            "Plot_Units": "normalized",
+            "Plot_X": 0.1500,
+            "Plot_Y": 0.1500,
+            "Plot_Width": 0.7750,
+            "Plot_Height": 0.8150 * 0.95,  # Adjusted for exponential y-axis tick labels
+            "Scat_Plot_Width": 4.75,
+            "Scat_Plot_Height": 4.75,
+            "Scat_Plot_X": 0.75,
+            "Scat_Plot_Y": 0.75,
+            "Subtitle_Text_Offset": 0.05,
+            "VerStr_Scale_X": 0.60,
+            "VerStr_Scale_Y": 1.05,
+
+            # Paper properties
+            "Paper_Units": "inches",
+            "Paper_Width": 8.0,
+            "Paper_Height": 6.0,
+            "Scat_Paper_Height": 6.0,
+            "Scat_Paper_Width": 6.0,
+
+            # Print properties
+            "Figure_Visibility": "on",
+            "Image_File_Type": "-dpdf",
+        }
+
+    else:
+        raise ValueError(f"Unknown style '{style}'. Please choose 'fds' or 'paper'.")
