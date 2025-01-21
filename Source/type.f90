@@ -228,7 +228,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX       !< (1:N_LAYERS) RAMP index for HEAT_SOURCE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX           !< (1:N_MATL) Number of materials
 
-   REAL(EB) :: PYROLYSIS_DEPTH=0._EB !< Distance from surface that divides the direction of evolved pyrolyzates (m)
+   REAL(EB) :: LAYER_DIVIDE_DEPTH=0._EB !< Distance from surface that divides the direction of evolved pyrolyzates (m)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:N_MATL) Mass production rate of solid species
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
