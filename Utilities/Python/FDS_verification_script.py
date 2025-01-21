@@ -28,4 +28,6 @@ fdsplotlib.dataplot(config_filename='FDS_verification_dataplot_config.csv',
 
 # Special cases
 
+print("pyrolysis...");   subprocess.run(["python","./scripts/pyrolysis.py"])
+
 print("verification scripts completed successfully!")

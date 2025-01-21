@@ -23,7 +23,11 @@ You will use this library for the Matlab equivalent of `plot_style` and `addvers
 import fdsplotlib
 ```
 
-For now, we will assume that you are running your scripts from the `fds/Utilities/Python/` directory where `fdsplotlib` lives.  If you need to run your python scripts from another directory, you need to add `fds/Utilities/Python/` to the path or else copy `fdsplotlibl.py` to your working directory.
+To make sure `fdsplotlib` is visible to all your python scripts add the following to your `~/.bashrc`
+```
+# add PYTHONPATH for FDS scripts
+export PYTHONPATH=$FIREMODELS/fds/Utilities/Python:$PYTHONPATH
+```
 
 ## 3. Add the plot style parameters
 
