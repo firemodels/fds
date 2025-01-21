@@ -32,9 +32,8 @@ def reaction_rate(T, Y, dTdt, R0, E, A, residue):
 
     return r
 
-# Example usage:
+# Get plot style parameters
 plot_style = fdsplotlib.get_plot_style("fds")
-# Set the font globally
 plt.rcParams["font.family"] = plot_style["Font_Name"]
 plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
 
