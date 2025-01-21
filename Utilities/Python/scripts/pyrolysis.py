@@ -36,6 +36,7 @@ def reaction_rate(T, Y, dTdt, R0, E, A, residue):
 plot_style = fdsplotlib.get_plot_style("fds")
 plt.rcParams["font.family"] = plot_style["Font_Name"]
 plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
+# print(plot_style)
 
 # Define the base path for files
 base_path = "../../Verification/Pyrolysis/"  # Update this to the relative path of your files
@@ -116,7 +117,7 @@ for i_plot in range(2):
     # Plot attributes
     ax1.set_xlabel("Temperature (°C)",fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
     ax1.set_ylabel("Normalized Mass",color=color1,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-    ax2.set_ylabel("Mass Loss Rate × 1000 (1/s)",color=color2,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
+    ax2.set_ylabel("Normalized Mass Loss Rate × 1000 (1/s)",color=color2,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
     ax1.tick_params(axis="y", colors=color1)
     ax2.tick_params(axis="y", colors=color2)
     ax1.set_ylim([0, 1.1])
