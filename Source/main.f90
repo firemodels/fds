@@ -164,38 +164,6 @@ IF (MAXVAL(MAX_CELL_ASPECT_RATIO)>3.99_EB .AND. .NOT.CFL_VELOCITY_NORM_USER_SPEC
 
 CALL ASSIGN_FILE_NAMES
 
-! Write the Smokeview (.smv) file using parallel MPI writes
-
-CALL WRITE_SMOKEVIEW_FILE
-
-! Write STL file if required
-IF (WRITE_STL) THEN
-   IF (MY_RANK==0) CALL WRITE_STL_FILE
-ENDIF
-
-! Write VTK geometry file if REQUIRED
-!IF (WRITE_VTK_GEOM) THEN
-!   ! MPI call to exchange geometry info for VTK output
-!   CALL EXCHANGE_NOBST_INFO
-!   IF (VTK_HDF) CALL WRITE_VTKHDF_GEOM_FILE
-!   IF (.NOT.VTK_HDF) CALL WRITE_VTK_GEOM_FILE
-!ENDIF
-
-! Shut down the run if it is only for checking the set up
-
-IF (SETUP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) STOP_STATUS = SETUP_ONLY_STOP
-
-! Check for errors and shutdown if found
-
-CALL STOP_CHECK(1)
-
-! MPI process 0 reopens the Smokeview file for additional output
-
-IF (MY_RANK==0) THEN
-   OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
-   CALL WRITE_STATUS_FILES
-ENDIF
-
 ! Start the clock
 
 T = T_BEGIN
@@ -237,6 +205,39 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_VARIABLES_1')
+
+! Write the Smokeview (.smv) file using parallel MPI writes
+
+CALL WRITE_SMOKEVIEW_FILE
+
+! Write STL file if required
+IF (WRITE_STL) THEN
+   IF (MY_RANK==0) CALL WRITE_STL_FILE
+ENDIF
+
+! Write VTK geometry file if REQUIRED
+!IF (WRITE_VTK_GEOM) THEN
+!   ! MPI call to exchange geometry info for VTK output
+!   CALL EXCHANGE_NOBST_INFO
+!   IF (VTK_HDF) CALL WRITE_VTKHDF_GEOM_FILE
+!   IF (.NOT.VTK_HDF) CALL WRITE_VTK_GEOM_FILE
+!ENDIF
+
+! Stop all the processes if this is just a set-up run
+
+IF (SETUP_ONLY .OR. CHECK_MESH_ALIGNMENT) THEN
+   IF (MY_RANK==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
+   STOP_STATUS = SETUP_ONLY_STOP
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
+   CALL STOP_CHECK(1)
+ENDIF
+
+! MPI process 0 reopens the Smokeview file for additional output
+
+IF (MY_RANK==0) THEN
+   OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
+   CALL WRITE_STATUS_FILES
+ENDIF
 
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
