@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout FireX fds repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         persist-credentials: false # Don't persist GitHub token (use a custom token below)
     
@@ -26,11 +26,13 @@ jobs:
 
     - name: Add Upstream Remote
       run: |
+        pwd
         git remote add firemodels https://github.com/firemodels/fds.git
         git fetch firemodels
 
     - name: Merge firemodels Changes
       run: |
+        pwd
         git merge firemodels/master --no-edit
 
     - name: Push Changes to Fork
