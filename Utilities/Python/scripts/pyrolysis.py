@@ -1,157 +1,142 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
 import os
-import sys
+import pandas as pd
 
-# Add path to Verification/Pyrolysis
-sys.path.append('../../Verification/Pyrolysis')
+# include FDS plot styles, etc.
+import fdsplotlib
+import importlib
+importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
 
-# Define global variables
-dTdt = None
-R0 = None
-E = None
-A = None
-residue = None
 
-def plot_style():
-    # Define plot style settings (placeholder)
-    plt.style.use('seaborn-darkgrid')
-    global Plot_Units, Plot_X, Plot_Y, Plot_Width, Plot_Height
-    global Font_Name, Label_Font_Size, Font_Interpreter
-    global Figure_Visibility, Paper_Units, Paper_Width, Paper_Height
-    Plot_Units = 'normalized'
-    Plot_X = 0.1
-    Plot_Y = 0.1
-    Plot_Width = 0.8
-    Plot_Height = 0.8
-    Font_Name = 'Arial'
-    Label_Font_Size = 12
-    Font_Interpreter = 'latex'
-    Figure_Visibility = 'on'
-    Paper_Units = 'inches'
-    Paper_Width = 6
-    Paper_Height = 4
-
-def addverstr(ax, filename, mode):
-    # Placeholder for addverstr function
-    # In Python, you might read the version string from the file and add text to the plot
-    if os.path.exists(filename):
-        with open(filename, 'r') as file:
-            ver_str = file.read().strip()
-            ax.text(0.05, 0.95, ver_str, transform=ax.transAxes, fontsize=8,
-                    verticalalignment='top')
-
-def reaction_rate(T, Y):
+def reaction_rate(T, Y, dTdt, R0, E, A, residue):
     """
-    Defines the ODE system dY/dt = -A * Y * exp(-E / (R * T))
+    Reaction rate function with safety checks and normalization of Y.
     """
-    global A, E, R0
-    return -A * Y * np.exp(-E / (R0 * T))
+    if T <= 0:
+        raise ValueError("Temperature T must be positive.")
 
-def main():
-    global dTdt, R0, E, A, residue
+    # Ensure mass fractions are non-negative
+    Y = np.maximum(Y, 0.0)
 
-    plt.close('all')
-    plt.figure()
+    r = np.zeros(len(Y))
+    r[0] = -A[0] * Y[0] * np.exp(-E[0] / (R0 * T)) / dTdt
+    r[1] = -A[1] * Y[1] * np.exp(-E[1] / (R0 * T)) / dTdt
+    r[2] = -residue[1] * r[1]
 
-    plot_style()
+    # Normalize Y to ensure the total remains valid
+    Y_sum = np.sum(Y)
+    if Y_sum > 0:
+        Y /= Y_sum
 
-    show_fds = True
+    return r
 
-    for i_plot in range(1, 3):
-        fig, ax1 = plt.subplots()
-        fig.set_size_inches(Paper_Width, Paper_Height)
-        ax1.set_position([Plot_X, Plot_Y, Plot_Width, Plot_Height])
+# Get plot style parameters
+plot_style = fdsplotlib.get_plot_style("fds")
+plt.rcParams["font.family"] = plot_style["Font_Name"]
+plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
+# print(plot_style)
 
-        dTdt = 5.0 / 60.0  # degrees C per second
-        R0 = 8314.3  # J/(kmol*K)
+# Define the base path for files
+base_path = "../../Verification/Pyrolysis/"  # Update this to the relative path of your files
 
-        if i_plot == 1:
-            n_components = 3
-            T_p = np.array([100.0 + 273.0, 300.0 + 273.0])
-            Y_0 = np.array([0.00, 1.00, 0.00])
-            delta_T = np.array([10.0, -80.0])
-            r_p = np.zeros(n_components - 1)
-            residue = np.array([0.0, 0.0])
-        else:
-            n_components = 3
-            T_p = np.array([100.0 + 273.0, 300.0 + 273.0])
-            Y_0 = np.array([0.1, 0.9, 0.0])
-            delta_T = np.array([10.0, 80.0])
-            residue = np.array([0.0, 0.2])
-            r_p = np.zeros(n_components - 1)
+# Define parameters
+dTdt = 5.0 / 60.0
+R0 = 8314.3
+show_fds = True
 
-        # Calculate A and E
-        E = np.zeros(n_components - 1)
-        A = np.zeros(n_components - 1)
-        for i in range(n_components - 1):
-            if delta_T[i] > 0:
-                r_p[i] = 2.0 * dTdt * (1.0 - residue[i]) / delta_T[i]
-            E[i] = np.exp(1.0) * r_p[i] * R0 * T_p[i] ** 2 / dTdt
-            A[i] = np.exp(1.0) * r_p[i] * np.exp(E[i] / (R0 * T_p[i]))
+# Set up plots
+for i_plot in range(2):
+    fig, ax1 = plt.subplots(figsize=(plot_style["Paper_Width"], plot_style["Paper_Height"]))
+    ax2 = ax1.twinx()
 
-        # Solve the ODE dY/dT = f(T, Y)
-        # Since dY/dt = f(T, Y) and dT/dt is constant, dY/dT = f(T, Y) / dTdt
-        def dydT(T, Y):
-            return reaction_rate(T, Y) / dTdt
+    # Define parameters for each plot
+    if i_plot == 0:
+        n_components = 3
+        T_p = np.array([100.0 + 273.0, 300.0 + 273.0])
+        Y_0 = np.array([0.00, 1.00, 0.00])
+        delta_T = np.array([10.0, -80.0])
+        r_p = np.array([0.0, 0.002])
+        residue = np.array([0.0, 0.0])
+    else:
+        n_components = 3
+        T_p = np.array([100.0 + 273.0, 300.0 + 273.0])
+        Y_0 = np.array([0.1, 0.9, 0.0])
+        delta_T = np.array([10.0, 80.0])
+        r_p = np.zeros(2)
+        residue = np.array([0.0, 0.2])
 
-        sol = solve_ivp(dydT, [273, 673], Y_0, method='BDF',
-                       rtol=1e-10, atol=1e-8)
-        T = sol.t
-        Y = sol.y.T
+    # Calculate A and E
+    A = np.zeros(n_components - 1)
+    E = np.zeros(n_components - 1)
+    for i in range(n_components - 1):
+        if delta_T[i] > 0:
+            r_p[i] = 2 * dTdt * (1.0 - residue[i]) / delta_T[i]
+        E[i] = np.exp(1.0) * r_p[i] * R0 * T_p[i] ** 2 / dTdt
+        A[i] = np.exp(1.0) * r_p[i] * np.exp(E[i] / (R0 * T_p[i]))
 
-        # Compute dm/dT
-        m = np.sum(Y, axis=1)
-        dmdT = np.gradient(m, T)
-        dmdT[0] = 0.0
-        dmdT[-1] = 0.0
+    # Solve ODE
+    def odes(T, Y):
+        return reaction_rate(T, Y, dTdt, R0, E, A, residue)
 
-        # Plot the solution
-        TC = T - 273.0
-        ax2 = ax1.twinx()
-        line1, = ax1.plot(TC, m, label='Normalized Mass')
-        line2, = ax2.plot(TC, -dmdT * dTdt * 1000.0, label='Normalized Mass Loss Rate × 10³ (s⁻¹)', color='orange')
-        ax1.set_xlabel('Temperature (°C)', fontsize=Label_Font_Size, fontname=Font_Name, 
-                       fontfamily=Font_Interpreter)
-        ax1.set_ylabel('Normalized Mass', fontsize=Label_Font_Size, fontname=Font_Name, 
-                       fontfamily=Font_Interpreter)
-        ax2.set_ylabel('Normalized Mass Loss Rate × 10³ (s⁻¹)', fontsize=Label_Font_Size, fontname=Font_Name,
-                       fontfamily='LaTeX')
-        ax1.set_ylim([0, 1.1])
-        ax2.set_ylim([0, 2.2])
-        ax1.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        ax2.set_yticks([0, 0.4, 0.8, 1.2, 1.6, 2.0])
-        line1.set_linestyle('-')
-        line2.set_linestyle('-')
+    sol = solve_ivp(odes, [273, 673], Y_0, method='BDF', rtol=1e-12, atol=1e-10)
 
-        # Add the FDS solution
-        if show_fds:
-            filename = f'pyrolysis_{i_plot}_devc.csv'
-            if not os.path.exists(filename):
-                print(f'Error: File {filename} does not exist. Skipping case.')
+    T = sol.t
+    Y = sol.y.T
+    m = np.sum(Y, axis=1)
+
+    # Compute dm/dT
+    dmdT = np.gradient(m, T)
+
+    # Plot the solution
+    color1="tab:blue"
+    color2="tab:orange"
+    ax1.plot(T - 273, m, label="Normalized Mass", color=color1)
+    ax2.plot(T - 273, -dmdT * dTdt * 1000, label="Mass Loss Rate", color=color2)
+
+    # Load FDS solution
+    if show_fds:
+        if i_plot == 0:
+            fds_file = os.path.join(base_path, 'pyrolysis_1_devc.csv')
+            if not os.path.exists(fds_file):
+                print(f"Error: File {fds_file} does not exist. Skipping case.")
                 continue
-            FDS = np.genfromtxt(filename, delimiter=',', skip_header=2)
-            ax1.plot(FDS[:, 3], FDS[:, 1], 'b--', label='FDS Mass')
-            ax2.plot(FDS[:, 3], FDS[:, 2] * 500.0, 'r--', label='FDS Mass Loss Rate × 500')
+        else:
+            fds_file = os.path.join(base_path, 'pyrolysis_2_devc.csv')
+            if not os.path.exists(fds_file):
+                print(f"Error: File {fds_file} does not exist. Skipping case.")
+                continue
 
-        # Add vertical lines to indicate the temperature peaks
-        for i in range(n_components - 1):
-            ax2.axvline(x=T_p[i] - 273.0, color='black', linewidth=1)
+        # Read the FDS data using pandas
+        fds_data = pd.read_csv(fds_file, skiprows=2, header=None)
 
-        # Add version string if file is available
-        chid = f'pyrolysis_{i_plot}'
-        git_filename = f'{chid}_git.txt'
-        addverstr(ax1, git_filename, 'linear')
+        # Convert to a NumPy array if required for further processing
+        fds_data = fds_data.to_numpy()
 
-        # Create the PDF files
-        fig.set_visible(True if Figure_Visibility == 'on' else False)
-        fig.set_size_inches(Paper_Width * 1.1, Paper_Height)
-        pdf_filename = f'../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/{chid}.pdf'
-        plt.savefig(pdf_filename, format='pdf')
+    # Plot attributes
+    ax1.set_xlabel("Temperature (°C)",fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
+    ax1.set_ylabel("Normalized Mass",color=color1,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
+    ax2.set_ylabel("Normalized Mass Loss Rate × 1000 (1/s)",color=color2,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
+    ax1.tick_params(axis="y", colors=color1)
+    ax2.tick_params(axis="y", colors=color2)
+    ax1.set_ylim([0, 1.1])
+    ax2.set_ylim([0, 2.2])
 
-    plt.show()
+    # ax1.legend(loc="upper left")
+    # ax2.legend(loc="upper right")
 
-if __name__ == "__main__":
-    main()
+    # Add vertical lines for temperature peaks
+    for i in range(n_components - 1):
+        ax2.axvline(T_p[i] - 273, color="black", linestyle="-", linewidth=1)
 
+    # Add version sting
+    chid = 'pyrolysis_1' if i_plot == 0 else 'pyrolysis_2'
+    git_file = os.path.join(base_path, f"{chid}_git.txt")
+    fdsplotlib.add_version_string(ax1, git_file, plot_type='linear')
+
+    plt.tight_layout()
+
+    # Save the figure
+    plt.savefig(f"../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_{i_plot + 1}.pdf")
+    plt.close()
