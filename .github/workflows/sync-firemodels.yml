@@ -27,6 +27,7 @@ jobs:
     - name: Add Upstream Remote
       run: |
         pwd
+	ls
         git branch
         git remote add firemodels https://github.com/firemodels/fds.git
         git fetch firemodels
