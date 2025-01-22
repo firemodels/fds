@@ -37,6 +37,7 @@ jobs:
         pwd
         ls
         git branch
+        git remote -v
         git merge firemodels/master --no-edit
 
     - name: Push Changes to Fork
