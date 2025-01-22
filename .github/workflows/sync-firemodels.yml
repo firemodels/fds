@@ -1,6 +1,9 @@
 name: Sync FireX with firemodels/fds
 
 on:
+  push:
+    branches:
+      - FireX
   schedule:
     # Run daily at midnight (or adjust as needed)
     - cron: '0 0 * * *'
