@@ -30,7 +30,7 @@ jobs:
         ls
         git branch
         git remote add firemodels https://github.com/firemodels/fds.git
-        git fetch firemodels
+        git remote update
 
     - name: Merge firemodels Changes
       run: |
