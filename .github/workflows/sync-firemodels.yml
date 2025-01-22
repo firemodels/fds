@@ -29,9 +29,8 @@ jobs:
         git remote add firemodels https://github.com/firemodels/fds.git
         git fetch firemodels
 
-    - name: Merge firemodel Changes
+    - name: Merge firemodels Changes
       run: |
-        git checkout FireX
         git merge firemodels/master --no-edit
 
     - name: Push Changes to Fork
