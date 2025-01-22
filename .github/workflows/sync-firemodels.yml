@@ -26,7 +26,7 @@ jobs:
 
     - name: Add Upstream Remote
       run: |
-        git remote add firemodels git@github.com:firemodels/fds.git
+        git remote add firemodels https://github.com/firemodels/fds.git
         git fetch firemodels
 
     - name: Merge firemodel Changes
