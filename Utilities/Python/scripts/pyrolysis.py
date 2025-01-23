@@ -6,8 +6,6 @@ import pandas as pd
 
 # include FDS plot styles, etc.
 import fdsplotlib
-import importlib
-importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
 
 
 def reaction_rate(T, Y, dTdt, R0, E, A, residue):
@@ -34,6 +32,8 @@ def reaction_rate(T, Y, dTdt, R0, E, A, residue):
 
 # Get plot style parameters
 plot_style = fdsplotlib.get_plot_style("fds")
+plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
+plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
 plt.rcParams["font.family"] = plot_style["Font_Name"]
 plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
 # print(plot_style)
@@ -59,6 +59,7 @@ for i_plot in range(2):
         delta_T = np.array([10.0, -80.0])
         r_p = np.array([0.0, 0.002])
         residue = np.array([0.0, 0.0])
+        mlr_peak = np.array([0.0, 2.0])
     else:
         n_components = 3
         T_p = np.array([100.0 + 273.0, 300.0 + 273.0])
@@ -66,6 +67,7 @@ for i_plot in range(2):
         delta_T = np.array([10.0, 80.0])
         r_p = np.zeros(2)
         residue = np.array([0.0, 0.2])
+        mlr_peak = np.array([1.5, 1.2])
 
     # Calculate A and E
     A = np.zeros(n_components - 1)
@@ -117,7 +119,7 @@ for i_plot in range(2):
     # Plot attributes
     ax1.set_xlabel("Temperature (°C)",fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
     ax1.set_ylabel("Normalized Mass",color=color1,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-    ax2.set_ylabel("Normalized Mass Loss Rate × 1000 (1/s)",color=color2,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
+    ax2.set_ylabel(r"Normalized Mass Loss Rate $\times\;10^3$ (s$^{-1}$)",color=color2,fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
     ax1.tick_params(axis="y", colors=color1)
     ax2.tick_params(axis="y", colors=color2)
     ax1.set_ylim([0, 1.1])
@@ -128,12 +130,17 @@ for i_plot in range(2):
 
     # Add vertical lines for temperature peaks
     for i in range(n_components - 1):
-        ax2.axvline(T_p[i] - 273, color="black", linestyle="-", linewidth=1)
+        x = T_p[i] - 273     # X-coordinate for the peak
+        y_min = 0            # Starting height of the line (adjust as needed)
+        y_max = mlr_peak[i]  # Ending height of the line for each peak
+        ax2.plot([x, x], [y_min, y_max], color="black", linestyle="-", linewidth=1)
+
 
     # Add version sting
     chid = 'pyrolysis_1' if i_plot == 0 else 'pyrolysis_2'
     git_file = os.path.join(base_path, f"{chid}_git.txt")
-    fdsplotlib.add_version_string(ax1, git_file, plot_type='linear')
+    version_str = fdsplotlib.get_version_string(git_file)
+    fdsplotlib.add_version_string(ax1, version_str, plot_type='linear')
 
     plt.tight_layout()
 
