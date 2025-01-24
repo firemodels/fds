@@ -3373,6 +3373,8 @@ Note: If applying \ct{TGA_ANALYSIS} to a case where the \ct{SURF} is associated 
 
 The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the rate of heat absorbed by the sample normalized by its {\it original} mass, also in units of W/g, typical of a DSC measurement. 
 
+The timestep used in the TGA analysis can be controlled with \ct{TGA_DT} on the \ct{SURF} line. The output spacing for temperature can be set with \ct{TGA_DUMP} on the \ct{SURF} line.
+
 Details of the output quantities are discussed in Sec.~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \subsubsection{Example}
@@ -3427,6 +3429,8 @@ The value of $T_{\rm ref}$ used for a reaction is the value specified by the \ct
 This process of adjusting enthalpies can be skipped by setting \ct{ADJUST_H=F} on a \ct{MATL} line. This should be done when material reactions do not represent actual chemical reactions. If no \ct{HEAT_OF_REACTION} is specified for a \ct{MATL} with a reaction then \ct{ADJUST_H=F} will be set. Note that this means if a reaction has \ct{HEAT_OF_REACTION} that is actually zero, and enthalpy adjustment is desired, then set \ct{HEAT_OF_REACTION} to 0 in the input file for that reaction.
 
 If the sum of the yields is less than 1, then for the purpose of solving for the $H_{\rm adj}$ values, FDS will assume that the missing mass is a material with the same specific heat as the original material.
+
+If a material has a reaction where \ct{N_O2} is set and the adjustment process needs to determine the \ct{REFERENCE_TEMPERATURE}, then a value for the oxygen concentration is needed. This value will default to the ambient oxygen concentration for the simulation; however, it can be overridden on a material basis by specifying \ct {X_O2_PYRO} for that material. This may be needed if, for example, the kinetics and heat of reaction(s) for a material were developed using a specific oxygen concentration.
 
 \chapter{Ventilation}
 
@@ -12511,6 +12515,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SPECIFIC_HEAT_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 \ct{SPEC_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 \ct{SURFACE_OXIDATION_MODEL}     & Logical         & Section~\ref{vegetation_model}        &                   & \ct{F}       \\ \hline
+\ct{X_O2_PYRO}                    & Logical         & Section~\ref{solid_phase_energy_conservation}       &                   &        \\ \hline
 \end{longtable}
 
 
@@ -13491,7 +13496,9 @@ Keyword             & Type     & Description                      & Units       
 \ct{TEXTURE_HEIGHT}                                     & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
 \ct{TEXTURE_MAP}                                        & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
 \ct{TEXTURE_WIDTH}                                      & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
-\ct{TGA_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & \ct{F}                 \\ \hline
+\ct{TGA_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & \ct{F}                  \\ \hline
+\ct{TGA_DT}                                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & s                   & 0.1                     \\ \hline
+\ct{TGA_DUMP}                                           & Real            & Section~\ref{info:TGA_DSC_MCC}            & K                   & 1                       \\ \hline
 \ct{TGA_FINAL_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 \ct{TGA_HEATING_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 \ct{THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
