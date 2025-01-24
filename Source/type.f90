@@ -776,6 +776,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (K)
    REAL(EB) :: REAC_RATE_DELTA                          !< Allowable jump condition for pyrolysis rate. Determines RENODE_DELTA_T
    REAL(EB) :: RENODE_DELTA_T=1.E9_EB                   !< Temperature change (K) above which no resmeshing
+   REAL(EB) :: X_O2_PYRO                                !< Oxygen mass fraction to use for enthalpy adjustment
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid

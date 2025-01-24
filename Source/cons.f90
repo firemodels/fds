@@ -743,6 +743,8 @@ INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calcula
 INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
 INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_DT=0.1_EB                    !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DUMP=1._EB                   !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
 REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
 REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
 
