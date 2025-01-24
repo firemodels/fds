@@ -4762,7 +4762,7 @@ You need only specify the chemical formula of the fuel along with the yields of 
 \nu_{\CO}      &=& \frac{W_{\rm F}}{W_{\CO}} \, y_{\CO}  \\
 \nu_{\rm s}    &=& \frac{W_{\rm F}}{W_{\rm S}} \, y_{\rm S}  \\
 \nu_{\HCN}     &=& \frac{W_{\rm F}}{W_{\HCN}} \, y_{\HCN}  \\
-\nu_{\NTWO}    &=& \frac{\rm v}{2} - \nu_{\HCN} \\
+\nu_{\NTWO}    &=& \frac{\rm v}{2} - \frac{\nu_{\HCN}}{2} \\
 W_{\rm s}      &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
 \end{eqnarray*}
 The following parameters may be prescribed on the \ct{REAC} line when using the simple chemistry model.
