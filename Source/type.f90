@@ -228,7 +228,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: RAMP_IHS_INDEX       !< (1:N_LAYERS) RAMP index for HEAT_SOURCE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: MATL_INDEX           !< (1:N_MATL) Number of materials
 
-   REAL(EB) :: PYROLYSIS_DEPTH=0._EB !< Distance from surface that divides the direction of evolved pyrolyzates (m)
+   REAL(EB) :: LAYER_DIVIDE_DEPTH=0._EB !< Distance from surface that divides the direction of evolved pyrolyzates (m)
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:N_MATL) Mass production rate of solid species
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
@@ -776,6 +776,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: REFERENCE_ENTHALPY_TEMPERATURE           !< Temperature for the reference enthalpy (K)
    REAL(EB) :: REAC_RATE_DELTA                          !< Allowable jump condition for pyrolysis rate. Determines RENODE_DELTA_T
    REAL(EB) :: RENODE_DELTA_T=1.E9_EB                   !< Temperature change (K) above which no resmeshing
+   REAL(EB) :: X_O2_PYRO                                !< Oxygen mass fraction to use for enthalpy adjustment
    INTEGER :: PYROLYSIS_MODEL                           !< Type of pyrolysis model (SOLID, LIQUID, VEGETATION)
    CHARACTER(LABEL_LENGTH) :: ID                        !< Identifier
    CHARACTER(LABEL_LENGTH) :: RAMP_K_S                  !< Name of RAMP for thermal conductivity of solid
@@ -907,6 +908,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
    REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro
    REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
+   REAL(EB) :: CHI_R_EFF                              !< Effective radiative fraction for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
    REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
 

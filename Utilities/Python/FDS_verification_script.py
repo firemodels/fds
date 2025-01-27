@@ -18,14 +18,16 @@ print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reacti
 
 # Run dataplot and scatplot scripts
 
-fdsplotlib.dataplot(config_filename='FDS_verification_dataplot_config.csv',
+fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.csv',
                     expdir='../../Verification/',
                     cmpdir='../../Verification/',
                     pltdir='../../Manuals/',
                     close_figs=True,
                     verbose=True,
-                    plot_list=['cantera_ignition_delay'])
+                    plot_range=[2])
 
 # Special cases
+
+print("pyrolysis...");   subprocess.run(["python","./scripts/pyrolysis.py"])
 
 print("verification scripts completed successfully!")

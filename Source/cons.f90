@@ -471,7 +471,7 @@ INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiatio
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
 REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$
 REAL(EB) :: KFST4_SUM=0._EB   !< \f$ \sum_{ijk} 4 \kappa_{ijk} \sigma T_{ijk}^4 V_{ijk} \f$
-REAL(EB) :: QR_CLIP=10._EB    !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
+REAL(EB) :: QR_CLIP=1._EB     !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
 REAL(EB) :: C_MAX=100._EB     !< Maximum value of RAD_Q_SUM/KFST4_SUM
 REAL(EB) :: C_MIN=0.1_EB      !< Minimum value of RAD_Q_SUM/KFST4_SUM
 
@@ -743,6 +743,8 @@ INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calcula
 INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
 INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_DT=0.01_EB                   !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DUMP=1._EB                   !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
 REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
 REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
 
