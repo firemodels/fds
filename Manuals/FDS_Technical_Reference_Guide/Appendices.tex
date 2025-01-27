@@ -846,22 +846,22 @@ The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which
 
 The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref{eq:chemistry_ode_system}) and (\ref{eq:TemperatureDerivative})
 \begin{equation}\label{eq:chemistry_ode_system_appendix}
-\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{\text{r}}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{\text{s}}
+\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{\rm r}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{\rm s}
 \end{equation}
 \begin{equation}\label{eq:TemperatureDerivativeAppendix}
-\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \dot{\omega}_j 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j
 \end{equation}
 For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration \si{(kmol/m^3)} of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate_appendix}
-r_i =  k_{f,i} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}
+r_i =  k_{f,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
 For Eq.~(\ref{eq:TemperatureDerivativeAppendix}), $\rho$  is the density \si{(kg/m^3)}, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system_appendix}).
 
 The system of ODEs can be represented by:
 \be
 \begin{aligned}
-f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{\text{s}}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
-  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{\text{s}}} \ \dot{T} \right]^T \
+f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{\rm s}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
+  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{\rm s}} \ \dot{T} \right]^T \
 \end{aligned}
 \ee
 
@@ -870,12 +870,12 @@ Providing an analytical Jacobian to the CVODE solver can significantly accelerat
 \begin{aligned}
 J &=
 \begin{bmatrix}
-\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{\text{s}}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
-\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{\text{s}}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
+\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
+\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
 \ldots & \ldots & \ldots & \ldots & | & \ldots\\
-\frac{\partial \dot{\omega}_1}{\partial C_{N_{\text{s}}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{\text{s}}}} & \ldots & \frac{\partial \dot{\omega}_{N_{\text{s}}}}{\partial C_{N_{\text{s}}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{\text{s}}}}\\
+\frac{\partial \dot{\omega}_1}{\partial C_{N_{\rm s}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{\rm s}}} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_{N_{\rm s}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{\rm s}}}\\
 ---& --- & --- & --- & | & ---\\
-\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{\text{s}}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
+\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
 \end{bmatrix}
 &=\begin{bmatrix}
 \frac{\partial \mathbf{\dot{\omega}}}{\mathbf{\partial C}}& \frac{\partial \dot{T}}{\partial \mathbf{C}}\\
@@ -888,7 +888,7 @@ J &=
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to concentration, we can write:
 \begin{equation}\label{eq:Jac1st}
 \begin{aligned}
-\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
+\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
 \end{aligned}
 \end{equation}
 Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
@@ -896,8 +896,8 @@ Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~
 \subsection*{Calculation of $\frac{\partial \mathbf{\dot{\omega}}}{\partial T}$}
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to temperature, we can write:
 \begin{multline}\label{eq:Jac2nd}
-\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
-- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
+\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
+- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
 \end{multline}
 Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}$ can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
 \begin{equation} \label{eq:kfTmpDerivative}
@@ -912,14 +912,14 @@ Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}
 Here, $K_i$ is the concentration equilibrium constant obtained using Eq.~(\ref{eq:equilibrium_const}). Through mathematical derivation, it can be shown that:
 \begin{equation}\label{eq:EqConstTmpDerivative}
 \begin{aligned}
-\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{\text{s}}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{\text{s}}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right) 
+\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right)
 \end{aligned}
 \end{equation}
 Here, $\Delta S_{\mathrm{rxn}}$ is the change in entropy, and can be calculated similar to the process described in Section \ref{sec:equilChem}.
 \begin{equation}\label{eq:ConcTmpDerivative}
 \begin{aligned}
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\text{s}}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\text{s}}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
 \end{aligned}
 \end{equation}
 In the above derivation, the relation $\frac{\partial C_j}{\partial T} = - \frac{C_j}{T}$ is used.
@@ -930,13 +930,13 @@ Using Eqs.~(\ref{eq:kfTmpDerivative})-(\ref{eq:ConcTmpDerivative}), all the term
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to concentration, we can write:
 \begin{equation} \label{eq:Jac3rd}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \dot{\omega}_j  \right) \\
-&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{aligned}
 \end{equation}
 Using the relations $\frac{\partial \rho}{\partial C_l} = W_l$ and $\frac{\partial c_p}{\partial C_l} = - \frac{W_l}{\rho}\left( c_p -c_{p,l} \right)$, we can rewrite Eq. ~(\ref{eq:Jac3rd}) as:
 \begin{equation} \label{eq:Jac3rd_final}
-\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{equation}
 Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:Jac3rd_final}) can be obtained using Eq. \ref{eq:Jac1st}.
 
@@ -944,8 +944,8 @@ Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to temperature, we can write:
 \begin{equation} \label{eq:Jac4th}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \dot{\omega}_j  \right) \\
-&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{\text{s}}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j 
+\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j
 \end{aligned}
 \end{equation}
 To derive the above equation, the relations $\frac{\partial \rho}{\partial T} = -\frac{\rho}{T}$ and $\frac{\partial h_j}{\partial T} = c_{p,j}$ are used. The term $\frac{\partial \dot{\omega}_j}{\partial T}$ can be obtained using Eq.~(\ref{eq:Jac2nd}).
