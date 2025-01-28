@@ -3371,9 +3371,11 @@ The two \ct{TGA} entries will force FDS to perform a numerical version of the TG
 Note: If applying \ct{TGA_ANALYSIS} to a case where the \ct{SURF} is associated with a \ct{PART} class yet to be inserted into the calculation, FDS may not find the \ct{SURF} and hence throw an error. In this case, create a simple case with a single particle that is inserted at the start.
 \end{warning}
 
-The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the rate of heat absorbed by the sample normalized by its {\it original} mass, also in units of W/g, typical of a DSC measurement. 
+The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final two columns are the rate of heat absorbed by the sample normalized by its {\it original} mass and by its {\it instantaneous} mass, respectively. The former is labelled \ct{DSC} and the latter \ct{STA}, both in units of W/g. \ct{STA} means Simultaneous Thermal Analysis, where a TGA and DSC measurement are made simultaneously, in which case the instantaneous mass of the sample is available.
 
 The timestep used in the TGA analysis can be controlled with \ct{TGA_DT} on the \ct{SURF} line. The output spacing for temperature can be set with \ct{TGA_DUMP} on the \ct{SURF} line.
+
+The \ct{TGA}, \ct{MCC} or \ct{DSC/STA} output can be multiplied by \ct{X_CONVERSION_FACTOR}, where \ct{X} is \ct{TGA}, \ct{MCC}, or \ct{DSC}, respectively. For example, the \ct{DSC} output assumes that an enthermic reaction is represented by a positive peak, and an exothermic reaction by a negative peak. To flip this around, set \ct{DSC_CONVERSION_FACTOR=-1}.
 
 Details of the output quantities are discussed in Sec.~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
@@ -3383,13 +3385,16 @@ Results for an analysis (\ct{Pyrolysis/tga_analysis.fds}) of a simplified versio
 
 The upper two plots in Fig.~\ref{tga_results} show the results of the TGA analysis; that is, the decrease in mass as a function of sample temperature. The left plot shows the total sample mass and the right shows the individual components. Below these are two plots that show the mass loss rates of the total sample and its components. These plots are simply the (negative) values of the first derivative of the upper plots.
 
-The lower left plot in Fig.~\ref{tga_analysis} shows the results of the MCC analysis; that is, the gas phase combustion heat release rate per unit mass of the original sample. Note that this MCC plot does not include evidence of the evaporation of water because water vapor does not combust. The integral (with respect to time) under the MCC curve yields $Q=12\,680$~J/g. The heat of combustion of the ``cellulose,'' which is the assumed gas phase fuel resulting from the pyrolysis of dry wood and char, is $h_{\rm c}=14\,988$~J/g. The dry wood and char constitute $Y=0.846$ of the original sample, thus $h_{\rm c} \, Y \approx Q$. 
+The lower left plot in Fig.~\ref{tga_analysis} shows the results of the MCC analysis; that is, the gas phase combustion heat release rate per unit mass of the original sample. Note that this MCC plot does not include evidence of the evaporation of water because water vapor does not combust. The integral (with respect to time) under the MCC curve yields $Q=12\,680$~J/g. The heat of combustion of the ``cellulose,'' which is the assumed gas phase fuel resulting from the pyrolysis of dry wood and char, is $h_{\rm c}=14\,988$~J/g. The dry wood and char constitute $Y=0.846$ of the original sample, thus $h_{\rm c} \, Y \approx Q$.
 
-The lower right plot Fig.~\ref{tga_analysis} shows the results of the DSC analysis. The curve represents the rate of heat absorbed by the sample. The three peaks represent the endothermic reactions where heat from the hot gas is used to evaporate water or pyrolyze the wood and char. The plateaus between the reaction peaks represent the heating of the solid only. For example, at a temperature of 200~$^\circ$C, the value is $\dot{q}(200)=0.075$~W/g which corresponds to the specific heat of the dry wood which has not yet undergone its conversion to char:
+The lower right plot Fig.~\ref{tga_analysis} shows the results of the DSC/STA analysis. The black curve (DSC) represents the rate of heat absorbed per unit mass of the original sample. The red curve represents the rate of heat absorbed per unit mass of the pyrolyzing sample. The three peaks represent the endothermic reactions where heat from the hot gas is used to evaporate water or pyrolyze the wood and char. The plateaus between the reaction peaks represent the heating of the solid only. For example, at a temperature of 500~$^\circ$C, only ash remains and the value of the DSC curve is $\dot{q}_{\rm DSC}(500)\approx0.0045$~W/g from which the value of the specific heat can be computed:
 \be
-   c_p = \frac{\dot{q}(200)}{Y(200) \, \beta} = 1 \; \hbox{kJ/(kg K)}
+   c_p = \frac{\dot{q}_{\rm DSC}(500)}{Y(500) \, \beta} \approx 1 \; \hbox{kJ/(kg K)}
 \ee
-The term $Y(200)=0.9$ in the denominator is the ratio of mass of the sample at 200~$^\circ$C to the original mass.
+The term $Y(500)\approx0.054$ in the denominator is the ratio of mass of the ash at 500~$^\circ$C to the mass of the original wet wood. For the STA curve, the specific heat is obtained simply by dividing the STA value $\dot{q}_{\rm STA}(500)\approx0.0834$~W/g by the heating rate, $\beta$.
+\be
+   c_p = \frac{\dot{q}_{\rm STA}(500)}{\beta} \approx 1 \; \hbox{kJ/(kg K)}
+\ee
 
 
 
@@ -13398,6 +13403,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DEFAULT}                                             & Logical         & Section~\ref{info:SURF}                   &                     & \ct{F}                 \\ \hline
 \ct{DELTA_TMP_MAX}                                     & Real            & Section~\ref{info:solid_phase_stability}  & $^\circ$C           & 10                      \\ \hline
 \ct{DRAG_COEFFICIENT}                                   & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
+\ct{DSC_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{DT_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 \ct{E_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
 \ct{EMBER_GENERATION_HEIGHT(2)}                        & Real            & Section~\ref{info:ember_generation_surf}  & m                   &                         \\ \hline
@@ -13438,6 +13444,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{MATL_ID(:,:)}                                       & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 \ct{MATL_MASS_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 \ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         &                         \\ \hline
+\ct{MCC_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{MINIMUM_BURNOUT_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
 \ct{MINIMUM_LAYER_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
 \ct{MINIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
@@ -13497,6 +13504,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TEXTURE_MAP}                                        & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
 \ct{TEXTURE_WIDTH}                                      & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
 \ct{TGA_ANALYSIS}                                       & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & \ct{F}                  \\ \hline
+\ct{TGA_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{TGA_DT}                                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & s                   & 0.01                    \\ \hline
 \ct{TGA_DUMP}                                           & Real            & Section~\ref{info:TGA_DSC_MCC}            & K                   & 1                       \\ \hline
 \ct{TGA_FINAL_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
