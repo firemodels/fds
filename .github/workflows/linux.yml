@@ -57,6 +57,7 @@ jobs:
       run: free -h  
 
     - name: build fds release
+      if: false # skip this run until ifx issue is sorted out
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
@@ -79,7 +80,6 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/Utilities/Python
         python hello_world.py
-        python FDS_verification_script.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on

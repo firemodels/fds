@@ -21,7 +21,7 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_STAT := $(shell ..\Scripts\gitstat)
   GIT_DATE := $(shell ..\Scripts\gitlog)
   GIT_BRANCH := $(shell ..\Scripts\gitbranch)
-  BUILD_DATE := $(shell date /t) $(shell time /t)
+  BUILD_DATE := $(shell powershell -Command "(Get-Date).ToString('ddd-MM/dd/yyyy-hh:mm-tt')")
 else
 # linux/osx
   SHELL:=/bin/bash

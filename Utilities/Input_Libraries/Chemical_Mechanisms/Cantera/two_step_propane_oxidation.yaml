@@ -1,0 +1,141 @@
+units: {length: cm, time: s, quantity: mol, activation-energy: cal/mol}
+
+phases:
+- name: 2step_propane_oxidation
+  type: ideal-gas
+  thermo: ideal-gas
+  elements: [H, O, C, N]
+  species: [C3H8, O2, CO, CO2, H2O, N2]
+  reactions: all
+  kinetics: gas
+  transport: mixture-averaged
+  state:
+    T: 300.0
+    P: 101325.0
+
+species:
+- name: O2
+  composition: {O: 2}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [-3.42556342e+04, 484.700097, 1.119010961, 4.29388924e-03, -6.83630052e-07,
+      -2.0233727e-09, 1.039040018e-12, -3391.45487, 18.4969947]
+    - [-1.037939022e+06, 2344.830282, 1.819732036, 1.267847582e-03, -2.188067988e-07,
+      2.053719572e-11, -8.19346705e-16, -1.689010929e+04, 17.38716506]
+    - [4.9752943e+08, -2.866106874e+05, 66.9035225, -6.16995902e-03, 3.016396027e-07,
+      -7.4214166e-12, 7.27817577e-17, 2.293554027e+06, -553.062161]
+    note: Ref-Elm. Gurvich,1989 pt1 p94 pt2 p9. [tpis89]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 107.4
+    diameter: 3.458
+    polarizability: 1.6
+    rotational-relaxation: 3.8  
+- name: N2
+  composition: {N: 2}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [2.210371497e+04, -381.846182, 6.08273836, -8.53091441e-03, 1.384646189e-05,
+      -9.62579362e-09, 2.519705809e-12, 710.846086, -10.76003744]
+    - [5.87712406e+05, -2239.249073, 6.06694922, -6.1396855e-04, 1.491806679e-07,
+      -1.923105485e-11, 1.061954386e-15, 1.283210415e+04, -15.86640027]
+    - [8.31013916e+08, -6.42073354e+05, 202.0264635, -0.03065092046, 2.486903333e-06,
+      -9.70595411e-11, 1.437538881e-15, 4.93870704e+06, -1672.09974]
+    note: Ref-Elm. Gurvich,1978 pt1 p280 pt2 p207. [tpis78]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 97.53
+    diameter: 3.621
+    polarizability: 1.76
+    rotational-relaxation: 4.0  
+- name: CO
+  composition: {C: 1, O: 1}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [1.489045326e+04, -292.2285939, 5.72452717, -8.17623503e-03, 1.456903469e-05,
+      -1.087746302e-08, 3.027941827e-12, -1.303131878e+04, -7.85924135]
+    - [4.61919725e+05, -1944.704863, 5.91671418, -5.66428283e-04, 1.39881454e-07,
+      -1.787680361e-11, 9.62093557e-16, -2466.261084, -13.87413108]
+    - [8.86866296e+08, -7.50037784e+05, 249.5474979, -0.039563511, 3.29777208e-06,
+      -1.318409933e-10, 1.998937948e-15, 5.70142113e+06, -2060.704786]
+    note: Gurvich,1979 pt1 p25 pt2 p29. [tpis79]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 98.1
+    diameter: 3.65
+    polarizability: 1.95
+    rotational-relaxation: 1.8      
+- name: CO2
+  composition: {C: 1, O: 2}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [4.94365054e+04, -626.411601, 5.30172524, 2.503813816e-03, -2.127308728e-07,
+      -7.68998878e-10, 2.849677801e-13, -4.52819846e+04, -7.04827944]
+    - [1.176962419e+05, -1788.791477, 8.29152319, -9.22315678e-05, 4.86367688e-09,
+      -1.891053312e-12, 6.33003659e-16, -3.90835059e+04, -26.52669281]
+    - [-1.544423287e+09, 1.016847056e+06, -256.140523, 0.0336940108, -2.181184337e-06,
+      6.99142084e-11, -8.8423515e-16, -8.04321451e+06, 2254.177493]
+    note: Gurvich,1991 pt1 p27 pt2 p24. [g 9/99]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 244.0
+    diameter: 3.763
+    polarizability: 2.65
+    rotational-relaxation: 2.1  
+- name: C3H8
+  composition: {C: 3, H: 8}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0]
+    data:
+    - [-2.433144337e+05, 4656.27081, -29.39466091, 0.1188952745, -1.376308269e-04,
+      8.81482391e-08, -2.342987994e-11, -3.54033527e+04, 184.1749277]
+    - [6.42073168e+06, -2.659791134e+04, 45.3435684, -5.02066392e-03, 9.47121694e-07,
+      -9.57540523e-11, 4.00967288e-15, 1.455582459e+05, -281.8374734]
+    note: Hf:TRC(10/85) w1350. Chao,1973. [g 2/00]
+  transport:
+    model: gas
+    geometry: nonlinear
+    well-depth: 266.8
+    diameter: 4.982
+    rotational-relaxation: 1.0  
+- name: H2O
+  composition: {H: 2, O: 1}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0]
+    data:
+    - [-3.94796083e+04, 575.573102, 0.931782653, 7.22271286e-03, -7.34255737e-06,
+      4.95504349e-09, -1.336933246e-12, -3.30397431e+04, 17.24205775]
+    - [1.034972096e+06, -2412.698562, 4.64611078, 2.291998307e-03, -6.83683048e-07,
+      9.42646893e-11, -4.82238053e-15, -1.384286509e+04, -7.97814851]
+    note: Hf:Cox,1989. Woolley,1987. TRC(10/88) tuv25. [g 8/89]
+  transport:
+    model: gas
+    geometry: nonlinear
+    well-depth: 572.4
+    diameter: 2.605
+    dipole: 1.844
+    rotational-relaxation: 4.0  
+
+reactions:
+- equation: C3H8 + 3.5 O2 => 3 CO + 4 H2O
+  rate-constant: {A: 5e+2, b: 0, Ea: 0.0}
+  orders: {C3H8: 0.1, O2: 1.65}
+- equation: CO + 0.5 O2 => CO2
+  rate-constant: {A: 8e+3, b: 0, Ea: 0.0}
+  orders: {O2: 0.25, CO: 1.0, H2O: 0.5}
+  nonreactant-orders: true  
+

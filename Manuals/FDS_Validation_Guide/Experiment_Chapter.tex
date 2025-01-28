@@ -619,6 +619,62 @@ The U.S.~Federal Aviation Administration (FAA) has sponsored experiments and mod
 As part of their efforts to characterize the burning behavior of commonly used plastics, the U.S.~Federal Aviation Administration (FAA) conducted measurements of the thermal properties of charring and non-charring polymers with the specific purpose of providing input data for numerical pyrolysis models~\cite{Stoliarov:CF2009,Stoliarov:CF2010}. The study aimed to determine whether a one-dimensional conduction/reaction model could be used as a practical tool for prediction and/or extrapolation of the results of fire calorimetry tests. The non-charring polymers included poly(methyl methacrylate) (PMMA), high-impact polystyrene (HIPS), and high density polyethylene (HDPE). The charring polymers included polycarbonate (PC) and polyvinyl chloride (PVC).
 
 
+\section{FHWA Tunnel}
+\label{FHWA_Tunnel_Description}
+
+Reduced-scale tunnel experiments~\cite{FHWA:test_report} were conducted at the Institute f{\"u}r Angewandte Brandschutzforschung (IFAB), Germany, as part of a research program sponsored by the U.S. Federal Highway Administration (FHWA). The objective of the research was to assess operational integration of highway tunnel emergency ventilation systems with fixed fire fighting systems. The experiments assessed the ability of a sprinkler system to improve smoke management in a longitudinally vented tunnel. Measurements of velocity, temperature, pressure, humidity, and surface temperature were recorded, and video footage was taken. Three different nozzles were used in the tests and measurements of the nozzle spray patterns were reported.
+
+The tunnel was approximately 1/4 scale, with a width of 2.5~m, height of 1.25~m and a length of 12~m. The tunnel was lined with water-resistant and non-combustible cement board. Figure~\ref{FHWAtunnel1} provides a schematic diagram. 
+
+Three fans were used to inject air into the tunnel and generate a longitudinal flow. To correlate fan operation to bulk longitudinal velocity, the inlet velocity profile was measured manually, in a cold flow test, at 25 points distributed over the inlet cross section, 1.5~m into the tunnel, using a handheld rotating vane anemometer. The bulk longitudinal velocity was approximately constant during the experiments, but the transient (fluctuating) profile was used in the simulations in order to better match the actual boundary conditions.
+
+The experiments were conducted using one of two rectangular pans to vary the size of the liquid fuel fires; one with an area of 0.3~m$^2$ and one with an area of 0.5~m$^2$. The heat release rate (HRR) was measured using both a load cell and oxygen consumption calorimetry. The fire was covered with a partially open steel box to mitigate the impact of the water spray on the HRR. The box was approximately 1.1~m wide, 0.68~m tall, 1.1~m long, and open on each side. That is, it was closed on the front, back, and top sides.
+
+Two types of nozzles were used with varying drop sizes and flow rates. The droplet size distribution and spray patterns of both nozzles were measured 1~m below the orifice. Nozzle~A was a standard pendent type sprinkler. Its median volumetric droplet diameter was approximately 1.1~mm and flow rate was 49.9~L/min. A single nozzle was used, mounted directly above the fire. Nozzle~B had a median volumetric droplet diameter of approximately 0.28~mm and a flow rate of 4.9~L/min per nozzle. Eight nozzles in two staggered rows of four were used. The values for median droplet diameter were input directly in the model, while the spray angle was determined by a simple process of trial and error to match the observed radial distribution of water flux 1~m below each nozzle.
+
+\subsubsection{Modeling Notes}
+
+A summary of the experiments is provided in Table~\ref{tab:FHWA_Test_Matrix}. The FDS simulations used a cubic grid resolution of 5~cm throughout. Different spray nozzles were tested to measure the interaction between the water spray and the ventilation. Typically, the nozzles were activated after some back-layering had been visually observed. 
+
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_A.jpg} 
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_B.jpg}
+\caption{Sketches of the two sprinkler configurations in the FHWA/IFAB experiments. The fans and flow straightener are to the left. The cross-hatched squares are access panels. The burner is below Nozzle~A.}
+\label{FHWAtunnel1}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Summary of the FHWA/IFAB experiments. The HRR and Velocity varied throughout the course of each experiment. Shown are nominal values.}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Test          & Fuel        & \textcolor{black}{HRR} & Velocity        & Nozzle & Nozzle           \\
+ID            & Type        & (MW)                 & (m/s)           & Type   & Activation (s)   \\ \hline \hline
+IFAB-07       & n-heptane   & 3.0                  & 1.2             & N/A    & N/A              \\ \hline
+IFAB-08       & n-heptane   & 1.3                  & 1.0             & B      & 400              \\ \hline
+IFAB-09       & n-heptane   & 1.2                  & 1.0             & B      & 400              \\ \hline
+IFAB-10       & n-heptane   & 0.9                  & 1.1             & A      & 340              \\ \hline
+IFAB-11       & Diesel      & 0.6                  & 1.1             & A      & 340              \\ \hline
+IFAB-13       & Diesel      & 1.0                  & 1.0             & B      & 320              \\ \hline
+IFAB-14       & Diesel      & 1.4                  & 1.3             & B      & 390              \\ \hline
+IFAB-15       & Diesel      & 1.9                  & 1.3             & B      & 420              \\ \hline
+IFAB-19       & Diesel      & 2.0                  & 1.2             & B      & 360              \\ \hline
+IFAB-22       & Diesel      & 1.0                  & 1.2             & N/A    & N/A              \\ \hline
+IFAB-24       & Diesel      & 1.8                  & 1.3             & N/A    & N/A              \\ \hline
+\end{tabular}
+\label{tab:FHWA_Test_Matrix}
+\end{table}
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/IFAB_photo.jpg}
+\caption{Photograph taken upwind of the fire in one of the FHWA/IFAB experiments.}
+\label{IFAB_photo}
+\end{figure}
+
+\FloatBarrier
+
+
 \section{Fleury Heat Flux Measurements}
 \label{Fleury_Heat_Flux_Description}
 
@@ -873,15 +929,7 @@ The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detail
 \section{JH/FRA Rail Car Experiments}
 \label{JH_FRA_Description}
 
-The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to large-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
-
-Luo, Kraft, DiDomizio, McKinnon, Hodges, Yazdani, and Lattimer ~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials.
-Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested.
-A set of 7 materials were identified for bench-scale and full-scale testing.
-Each material was tested in a TGA  in nitrogen and air environments, a cone calorimeter at three heat fluxes in accordance with ASTM E1354, radiant panel testing in accordance with ASTM E162, and room-corner testing in accordance with NFPA 286.
-The 7 materials included in this test series are summarized in Table \ref{JH_FRA_materials_table}.
-Optimized material properties for modeling these materials were subsequently presented by Yang, Hodges, Rippe, Kraft, and Lattimer in ~\cite{Yang:FRA20}.
-Data from cone calorimeter and NFPA 286 experiments from these materials are used in validating the scaling-based pyrolysis model. Note that two of the NFPA 286 experiments are not included in the validation (samples 1 and 5) due to significant material deformation and detachment occuring during testing.
+The U.S. Federal Railroad Administration (FRA) sponsored a series of small to large-scale enclosure experiments to evaluate the impact from fire on modern materials in fully-developed railcar fires. Luo~et~al.~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials. Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested. A set of seven materials were identified for bench-scale and full-scale testing. Thermogravimetric analysis (TGA) was conducted for each material, both in nitrogen and air environments. Cone calorimeter was performed at three heat fluxes in accordance with ASTM E1354. Radiant panel testing was performed in accordance with ASTM E162. Room-corner testing was conducted in accordance with NFPA 286. The seven materials are summarized in Table~\ref{JH_FRA_materials_table}. Optimized material properties for modeling these materials were subsequently presented by Yang~et~al.~\cite{Yang:FRA20}. Data from the cone calorimeter and NFPA~286 experiments have been used in validating the scaling-based pyrolysis model (S-Pyro). Note that two of the NFPA 286 experiments are not included in the validation (samples 1 and 5) due to significant material deformation and detachment occuring during testing.
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Materials]{Summary of JH/FRA Rail Car Experiments.~\cite{Luo:FRA2019}}
@@ -901,28 +949,14 @@ Sample 7    & Phenolic Resin FRP    & Fiberglass material, nominally 3.27 mm thi
 \label{JH_FRA_materials_table}
 \end{table}
 
-In a follow-up study, Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire tests consisting of fourteen unique configurations and three repeated tests.
-Tests were conducted at three scales including full-scale, half-scale, and quarter-scale.
-The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
-The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
-The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment.
-The lining material thickness was kept the same at each scale to preserve the burning duration.
+In a follow-up study, Hodges~et~al.~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire experiments consisting of fourteen unique configurations and three replicates. Experiments were conducted at three scales including full-scale, half-scale, and quarter-scale. The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44~m wide, 2.44~m tall, and 3.66~m deep with a single door opening which is 0.9~m wide, and 2.0~m tall. The initiating fire was a propane burner in the back-left corner of the compartment except in Tests~5 and 10 which used a kerosene-type jet fuel, JP-5. The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. The lining material thickness was kept the same at each scale to preserve the burning duration.
 
-Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm).
-A reduced fraction of the surfaces were covered in the combustible lining cases to control the peak HRR from the testing.
-The first lining configuration covered a 2.44 m x 2.44 m section on the back wall, left wall, and ceiling closest to the fire.
-This configuration was used for all FRP experiments, and for one plywood experiment at the quarter scale.
-The second lining configuration covered a 1.22 m wide x 2.44 m tall section on the left and back walls nearest the burner, and a 1.22 m x 1.22 m section on the ceiling above the burner.
-This configuration was used in quarter, half, and full-scale plywood experiments.
-The two lining configurations are shown in Figure ~\ref{JH_FRA_lining_fig}.
+Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm). A reduced fraction of the surfaces were covered in the combustible lining cases to control the peak HRR from the testing. The first lining configuration covered a 2.44 m x 2.44 m section on the back wall, left wall, and ceiling closest to the fire. This configuration was used for all FRP experiments, and for one plywood experiment at the quarter scale. The second lining configuration covered a 1.22~m wide by 2.44~m tall section on the left and back walls nearest the burner, and a 1.22~m by 1.22~m section on the ceiling above the burner. This configuration was used in quarter, half, and full-scale plywood experiments. The two lining configurations are shown in Figure~\ref{JH_FRA_lining_fig}.
 Note the lining coverage numbers are provided for the full-scale and were geometrically scaled down in the half and quarter scales.
 
-Table \ref{JH_FRA_Matrix} provides a summary of the experiments.
-Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
-The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_lining_fig} and Figure ~\ref{JH_FRA_instrumentation_fig}.
+Table~\ref{JH_FRA_Matrix} provides a summary of the experiments. Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., Test~2 had three stages each five minutes long starting at 20~kW, then increasing the burner to 45~kW, then a final five minute stage at 50~kW). The instrumentation plan from the test series is shown in Figure~\ref{JH_FRA_lining_fig} and Figure~\ref{JH_FRA_instrumentation_fig}.
 
-Data from these experiments are used in validating the thermal environment (HGL Temperature and Depth, heat flux to the surface), velocity through the ventilation, and fire growth (HRR).
-The tests with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7.0 mm thickness but a 3.5 mm thickness was used in this study).
+Data from these experiments have been used in validating the thermal environment (HGL Temperature and Depth, Surface Heat Flux), velocity through the ventilation, and fire growth (HRR). The experiments with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7~mm thickness but a 3.5~mm thickness was used in this study).
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Rail Car Experiments]{Summary of JH/FRA Rail Car Experiments.~\cite{Hodges:FRA22}}
@@ -971,34 +1005,25 @@ No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &          
 
 The simulations are performed with a spatial resolution of 2~cm for the quarter-scale, 4~cm for the half scale, and 8~cm for the fullscale.
 
-The combustion reaction is assumed to be propane using the simple chemistry single-step combustion model.
-Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the \ct{AUTO_IGNITION_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
+The combustion reaction is assumed to be propane using the simple chemistry single-step combustion model. Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the \ct{AUTO_IGNITION_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
-The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
-The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_Materials}.
-Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model. The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_Materials}. Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
 
-Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used.
-The test plan and report indicate a 6.35 mm thickness of plywood, but the total energy consumed during the test and the duration of the peak indicates a 12.7 mm thickness of plywood was more plausible.
-The full-scale plywood is modeled with a 12.7 mm thickness.
+Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used. The test plan and report indicate a 6.35~mm thickness of plywood, but the total energy consumed during the test and the duration of the peak indicates a 12.7~mm thickness of plywood was more plausible. The full-scale plywood is modeled with a 12.7~mm thickness.
+
 
 \FloatBarrier
 
 \section{JH/NIJ Materials}
 \label{JH_NIJ_Description}
 
-
-The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}.
-The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization.
-TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials.
-The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB).
-The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
+The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}. The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization. TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials. The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB). The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
 
 \section{Kashiwagi Gasification}
 \label{Kashiwagi_Gasification_Description}
 
-In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8 cm on a side were irradiated at 25 \si{kW/m^2} and 40 \si{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5 \% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
+In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8~cm on a side were irradiated at 25~\si{kW/m^2} and 40~\si{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5~\% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
 
 \subsubsection{Modeling Notes}
 
@@ -1072,16 +1097,7 @@ R4  & 5.00e+08 & 1.40E+05 & 1  & 0.8  & $-2.67$  &       &       & 0.01 & 3.66 &
 \section{Lattimer Tilted Wall}
 \label{Lattimer_Tilted_Wall_Description}
 
-Lattimer with Fire Science Solutions measured the heat flux and gas temperatures from a propane fire against to a tilted wall.
-The experiments were sponsored by Fire Science Solutions, LLC. and were conducted at Virginia Tech in Blacksburg, VA.
-The wall was 1.5~m high and 0.60~m wide, with the sand burner centered on the wall.
-All experiments used a square sand burner with a side length of 0.30~m.
-The fires ranged in size from 20~kW to 75~kW.
-Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall.
-The wall was tilted through a linear actuator attached to the back of the mounting frame.
-The majority of tests moved the wall during exposure to evaluate the impacts on flame separation.
-A picture of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}.
-A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
+Lattimer measured the heat flux and gas temperatures from a propane fire against to a tilted wall. The experiments were sponsored by Fire Science Solutions, LLC, and were conducted at Virginia Tech in Blacksburg, Virginia. The wall was 1.5~m high and 0.60~m wide, with the sand burner centered on the wall. All experiments used a square sand burner with a side length of 0.30~m. The fires ranged in size from 20~kW to 75~kW. Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall. The wall was tilted through a linear actuator attached to the back of the mounting frame. The majority of tests moved the wall during exposure to evaluate the impacts on flame separation. A photograph of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}. A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Rail Car Experiments]{Summary of Lattimer Tilted Wall Experiments.}
@@ -1109,9 +1125,7 @@ No.  & (kW) & (degrees) & Movement (s) & Between Angles (s) & Each Angle (s)   &
 
 \subsubsection{Modeling Notes}
 
-The main case from this study used at this time is case 4 since the wall was held at each angle for close to 5 minutes.
-Each of these tilt angles are simulated neglecting the time history before arriving at the angle.
-The other cases are simulated at the start and end angles since the wall was held at that point for at least 30 seconds.
+Test~4 has been simulated at each individual tilt angle because the wall was held at each angle for approximately 5~min. Each of these tilt angles are simulated neglecting the time history before arriving at the angle. The other cases are simulated at the start and end angles since the wall was held at that point for at least 30~s.
 
 
 \section{LEMTA Spray Test for Radiation Attenuation}
@@ -3004,9 +3018,13 @@ To calibrate the FDS results (this case is a calibration exercise more than a va
 
 Yoshioka and co-workers~\cite{Yoshioka:FST2012} at the Tokyo University of Science (TUS) conducted experiments in a large-scale facade apparatus based on ISO~13785-2. In the experiments, a gas-fueled fire within a compartment extends outside of an opening and impinges on a non-combustible vertical lining above the opening. Quasi-steady measurements of temperature and heat flux were taken.
 
+The compartment dimension were 4.0~m by 4.0~m by 1.7~m. Note that the dimensions are incorrect in Ref.~\cite{Yoshioka:FST2012}. The facade was 5.7~m tall, with a 1.2~m wide side wall made of the same material as the main facade. The fire compartment had one 1.2~m tall and 2.0~m wide window in the facade wall, but the window was partially closed in two of the experiments. The rear of the fire compartment had four 0.5~m by 0.6~m openings that were open or closed according to the desired ventilation condition. These openings were closed by heavy fire blankets, and there was considerable uncertainty in the actual opening area.
+
+A mixture of gaseous fuels supplied by the local utility was used as a fuel. It was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each. 
+
 \subsubsection{Modeling Notes}
 
-Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}.
+Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}. The grid resolution is 10~cm. The fuel is assumed to be propane with a soot yield of 0.015, CO yield of 0.015, and radiative fraction of 0.20. 
 
 
 \section{UL/NIST Vent Experiments}

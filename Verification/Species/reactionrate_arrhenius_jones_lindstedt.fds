@@ -1,4 +1,6 @@
-&HEAD CHID='jones_lindstedt', TITLE='finite rate equilibrium with Jones-Lindstedt mechanism' /
+The original Jones and Lindstedt (1988) paper suggests that Reaction R3 is reversible with custom reaction orders for H2 and O2. However, it does not specify how to calculate the reverse reaction rate. Determining the reverse rate from the equilibrium constant is more complicated when custom orders are involved. Moreover, Cantera does not support reversible reactions with custom orders. Therefore, instead of setting REVERSE=True, R3 is represented by two separate forward reactions (R3 and R3_R). The pre-exponential factor and activation energy for the reverse reaction are chosen arbitrarily. Users who have accurate rate constants for the reverse reaction (R3_R) should update these values accordingly.
+
+&HEAD CHID='reactionrate_arrhenius_jones_lindstedt', TITLE='finite rate equilibrium with Jones-Lindstedt mechanism' /
 
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
 
@@ -53,18 +55,25 @@
       SPEC_ID_N_S='HYDROGEN','OXYGEN'
       NU= -1,-0.5,1
       N_S = 0.25,1.5
-      N_T = -1
-      REVERSE=T /
+      N_T = -1 /
 
-&REAC ID = 'R3'
+&REAC ID = 'R3_R'
+      FUEL = 'WATER VAPOR'
+      A = 1E+8
+      E = 669440.
+      RADIATIVE_FRACTION=0.0
+      SPEC_ID_NU='WATER VAPOR','HYDROGEN','OXYGEN'
+      SPEC_ID_N_S='WATER VAPOR'
+      NU= -1,1,0.5
+      N_S = 1. /
+
+&REAC ID = 'R4'
       RADIATIVE_FRACTION=0.0 
       FUEL = 'CARBON MONOXIDE'
       A = 0.275e10
       E = 83680
       SPEC_ID_NU='CARBON MONOXIDE','WATER VAPOR','CARBON DIOXIDE','HYDROGEN'
-      SPEC_ID_N_S='CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-1,1,1
-      N_S = 1,1
       REVERSE=T /
 
 &DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='OXYGEN',  ID='O2' /

@@ -89,18 +89,18 @@ Chemistry_DIR = current_working_directory+"/../../Verification/Chemistry/"
 csvdata = pd.DataFrame()
 caseCount = 0
 
-# Metahne_grimech 12 
-print("Soving for Metahne_grimech:")
+# Methane_grimech 12
+print("Solving for Methane_grimech:")
 gas = ct.Solution(Cantera_DIR+"Methane_grimech30.yaml")
 equivRatios = np.array([0.6, 1.0,  1.4])
 T = np.array([900, 1000, 1100, 1200])
 estimated_ignition_delay_times = np.ones_like(T, dtype=float)
 estimated_ignition_delay_times[:] = 10
 csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "CH4", estimated_ignition_delay_times, csvdata, caseCount)
-print("Done Metahne_grimech, caseCount=", str(caseCount))
+print("Done Methane_grimech, caseCount=", str(caseCount))
 
 # Methane_TianfengLu
-print("Soving for Methane_TianfengLu:")
+print("Solving for Methane_TianfengLu:")
 gas = ct.Solution(Cantera_DIR+"Methane_TianfengLu.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])
@@ -110,7 +110,7 @@ csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "CH4", estimated_ign
 print("Done Methane_TianfengLu, caseCount=", str(caseCount))
 
 # Methane_Smooke
-print("Soving for Methane_Smooke:")
+print("Solving for Methane_Smooke:")
 gas = ct.Solution(Cantera_DIR+"Methane_Smooke.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])
@@ -120,7 +120,7 @@ csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "CH4", estimated_ign
 print("Done Methane_Smooke, caseCount=", str(caseCount))
 
 # Ethylene_TianfengLu
-print("Soving for Ethylene_TianfengLu:")
+print("Solving for Ethylene_TianfengLu:")
 gas = ct.Solution(Cantera_DIR+"Ethylene_TianfengLu.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])
@@ -130,7 +130,7 @@ csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "C2H4", estimated_ig
 print("Done Ethylene_TianfengLu, caseCount=", str(caseCount))
 
 # Propane_USC
-print("Soving for Propane_USC:")
+print("Solving for Propane_USC:")
 gas = ct.Solution(Cantera_DIR+"Propane_USC.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])
@@ -140,7 +140,7 @@ csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "C3H8", estimated_ig
 print("Done Propane_USC, caseCount=", str(caseCount))
 
 # Propane_Z66
-print("Soving for Propane_Z66:")
+print("Solving for Propane_Z66:")
 gas = ct.Solution(Cantera_DIR+"Propane_Z66.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])
@@ -150,7 +150,7 @@ csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "C3H8", estimated_ig
 print("Done Propane_Z66, caseCount=", str(caseCount))
 
 # nHeptane_Chalmers
-print("Soving for nHeptane_Chalmers:")
+print("Solving for nHeptane_Chalmers:")
 gas = ct.Solution(Cantera_DIR+"nHeptane_Chalmers.yaml")
 equivRatios = np.array([1.0])
 T = np.array([1100])

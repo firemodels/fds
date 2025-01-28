@@ -73,12 +73,13 @@ echo "-v - show script run by qfds.sh for each validation case"
 echo "-V - show qfds.sh command line for each validation case"
 echo "-w walltime - default: empty, PBS: hh:mm:ss, SLURM: dd-hh:mm:ss"
 echo "-x - do not copy FDS input files"
-echo "-y - overwrite existing files"
+echo "-y - remove existing files"
+echo "-z - overwrite existing files"
 exit
 }
 
 DEBUG=
-while getopts 'bCe:EhIj:m:o:Oq:r:suvVw:xy' OPTION
+while getopts 'bCe:EhIj:m:o:Oq:r:suvVw:xyz' OPTION
 do
 case $OPTION in
   b)
@@ -141,7 +142,12 @@ case $OPTION in
    export DONOTCOPY=1
    ;;   
   y)
+   export DELETEFILES=1
+   export OVERWRITE=
+   ;;   
+  z)
    export OVERWRITE=1
+   export DELETEFILES=
    ;;   
 esac
 done
@@ -174,12 +180,12 @@ if [ ! $STOPFDS ] ; then
   # Check for existence of $INDIR (Current_Results) directory
   if [ -d "$INDIR" ]; then
       # Check for files in $INDIR (Current_Results) directory
-      if [[ "$(ls -A $INDIR)" && ! $OVERWRITE ]]; then
-          echo "Directory $INDIR already exists with files."
-          echo "Use the -y option to REMOVE existing files."
+      if [[ "$(ls -A $INDIR)" && "$OVERWRITE" == "" && "$DELETEFILES" == "" ]]; then
+          echo "The directory $INDIR already exists with files."
+          echo "Use the -y option to REMOVE existing files or -z to OVERWRITE existing files"
           echo "Exiting."
           exit
-      elif [[ "$(ls -A $INDIR)" && $OVERWRITE ]]; then
+      elif [[ "$(ls -A $INDIR)" && "$DELETEFILES" == "1" ]]; then
           rm $INDIR/*
       fi
   # Create $INDIR (Current_Results) directory if it doesn't exist
