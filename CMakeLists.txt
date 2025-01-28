@@ -100,29 +100,6 @@ target_compile_definitions(fds PRIVATE GITDATE_PP="${GIT_DATE}")
 find_package(MPI REQUIRED)
 target_link_libraries(fds PRIVATE MPI::MPI_Fortran)
 
-# Check for mpi_f08 module support
-if(MPI_Fortran_FOUND)
-    include(CheckFortranSourceCompiles)
-    set(CMAKE_REQUIRED_INCLUDES ${MPI_Fortran_INCLUDE_PATH})
-    check_fortran_source_compiles("
-        program test
-          use mpi_f08
-          implicit none
-          integer :: ierr
-          call MPI_Init(ierr)
-          call MPI_Finalize(ierr)
-        end program test"
-    MPI_F08_SUPPORTED)
-
-  if(NOT MPI_F08_SUPPORTED)
-    message(FATAL_ERROR "
-MPI Fortran mpi_f08 module is not supported!
-
-Current Fortran compiler: ${CMAKE_Fortran_COMPILER}
-Current MPI Fortran compiler: ${MPI_Fortran_COMPILER}")
-  endif()
-endif()
-
 # FDS use lp64 (4-byte integer), MKL often defaults to ilp64 (8-byte integer)
 set(MKL_INTERFACE lp64)
 # Turn on BLACS
