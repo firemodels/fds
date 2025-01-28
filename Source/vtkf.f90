@@ -12468,7 +12468,7 @@ USE HDF5
 #endif
 USE MPI_F08
 USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,CC_FGSC,CC_IDCF,CC_IDCC,CC_UNKZ,CC_UNKF,CC_FTYPE_RCGAS,&
-                             CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_SOLID,FCELL,CC_CGSC,CC_CUTCFE,TRIANGULATE,&
+                             CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_SOLID,CC_CGSC,CC_CUTCFE,TRIANGULATE,&
                              CC_VGSC,CC_GASPHASE,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -16305,7 +16305,7 @@ SUBROUTINE GET_GEOMINFO_DUP(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,N
                         I=II; J=JJ; K=KK;
                         SELECT CASE(X1AXIS)
                         CASE(IAXIS)
-                           I=II-FCELL+ILH
+                           I=II-1+ILH
                            DO KADD=-1,0
                               DO JADD=-1,0
                                  IVERTCUT = IVERTCUT + 1
@@ -16315,7 +16315,7 @@ SUBROUTINE GET_GEOMINFO_DUP(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,N
                               ENDDO
                            ENDDO
                         CASE(JAXIS)
-                           J=JJ-FCELL+ILH
+                           J=JJ-1+ILH
                            DO IADD=-1,0
                               DO KADD=-1,0
                                  IVERTCUT = IVERTCUT + 1
@@ -16325,7 +16325,7 @@ SUBROUTINE GET_GEOMINFO_DUP(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,N
                               ENDDO
                            ENDDO
                         CASE(KAXIS)
-                           K=KK-FCELL+ILH
+                           K=KK-1+ILH
                            DO JADD=-1,0
                               DO IADD=-1,0
                                  IVERTCUT = IVERTCUT + 1
