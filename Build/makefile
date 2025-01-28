@@ -12,7 +12,7 @@
 VPATH = ../Source
 
 # 3rd part library versions
-HYPRE_VERSION=v2.32.0
+HYPRE_VERSION=master
 SUNDIALS_VERSION=v6.7.0
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
