@@ -209,25 +209,26 @@ MODULE HYPRE_INTERFACE
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETPRINTLEVEL = 0      ! 0=no output, 1=minimal, 2=verbose
    INTEGER, PARAMETER :: HYPRE_SOLVER_SETLOGGING = 0         ! 0=no logging, 1=solver stores intermediate info, norms, etc.
    INTEGER, PARAMETER :: HYPRE_PRECOND_SETPRINTLEVEL = 0     ! 0=no output, 1=minimal, 2=verbose
-   INTEGER, PARAMETER :: HYPRE_PRECOND_COARSENINGTYPE = 10   ! 0   CLJP (Cleary-Luby-Jones-Plassmann) parallel coarsening
+   INTEGER, PARAMETER :: HYPRE_PRECOND_COARSENINGTYPE = 8    ! 0   CLJP (Cleary-Luby-Jones-Plassmann) parallel coarsening
                                                              ! 1   Classical Ruge-Stüben (RS) coarsening
                                                              ! 3   Modified RS coarsening
                                                              ! 6   Falgout coarsening (a combination of CLJP and RS)
                                                              ! 8   PMIS (Parallel Modified Independent Set) coarsening
                                                              ! 10  HMIS (Hybrid Modified Independent Set) coarsening
                                                              ! 21  Falgout coarsening with aggressive coarsening
-   INTEGER, PARAMETER :: HYPRE_PRECOND_SETRELAXTYPE = 8      ! 0   Jacobi (default)
-                                                             ! 1   Gauss-Seidel, sequential (very slow in parallel)
+   INTEGER, PARAMETER :: HYPRE_PRECOND_SETRELAXTYPE = 18     ! 1   Gauss-Seidel, sequential (very slow in parallel)
                                                              ! 2   Gauss-Seidel, interior points first (parallel variant)
-                                                             ! 3   Hybrid Gauss-Seidel or SOR (symmetric in parallel)
-                                                             ! 6   L1-scaled Jacobi
+                                                             ! 3   hybrid Gauss-Seidel or SOR, forward solve
+                                                             ! 4   hybrid Gauss-Seidel or SOR, backward solve
+                                                             ! 6   Hybrid symmetric Gauss-Seidel or SSOR
+                                                             ! 7   Jacobi
                                                              ! 8   L1-scaled hybrid symmetric Gauss-Seidel/SOR
                                                              ! 13  Two-step Jacobi
                                                              ! 16  Chebyshev smoothing (useful for difficult problems)
+                                                             ! 18  L1-scaled Jacobi
    INTEGER, PARAMETER :: HYPRE_PRECOND_NUMSWEEPS = 1         ! Number of sweeps on each level of preconditioner
    REAL(KIND=8), PARAMETER :: HYPRE_PRECOND_TOL = 0.D0       ! Preconditioner convergence tolerance
    INTEGER, PARAMETER :: HYPRE_PRECOND_MAXITER = 1           ! Max number of iterations for preconditioner
-
 
    TYPE HYPRE_ZM_TYPE
       INTEGER(KIND=8) :: A_H                                 ! Matrix handle
@@ -253,7 +254,12 @@ MODULE HYPRE_INTERFACE
          INTEGER, INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_FINALIZE
 
-      SUBROUTINE HYPRE_IJMATRIXCREATE(COMM,I1,I2,I3,I4,A,IERR)
+      SUBROUTINE HYPRE_SETEXECUTIONPOLICY(EXEC_POLICY, IERR)
+         INTEGER, INTENT(IN)  :: EXEC_POLICY
+         INTEGER, INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_SETEXECUTIONPOLICY
+
+      SUBROUTINE HYPRE_IJMATRIXCREATE(COMM, I1, I2, I3, I4, A, IERR)
          USE MPI_F08
          TYPE(MPI_COMM),  INTENT(IN)  :: COMM
          INTEGER,         INTENT(IN)  :: I1,I2,I3,I4
@@ -261,7 +267,7 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJMATRIXCREATE
 
-      SUBROUTINE HYPRE_IJMATRIXSETOBJECTTYPE(A,HYPRE_PARCSR_INT,IERR)
+      SUBROUTINE HYPRE_IJMATRIXSETOBJECTTYPE(A, HYPRE_PARCSR_INT, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: A
          INTEGER,         INTENT(IN)  :: HYPRE_PARCSR_INT
          INTEGER,         INTENT(OUT) :: IERR
@@ -272,6 +278,12 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJMATRIXINITIALIZE
 
+      SUBROUTINE HYPRE_IJMATRIXINITIALIZE_V2(A, MEMORY_LOC, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: A
+         INTEGER,         INTENT(IN)  :: MEMORY_LOC
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_IJMATRIXINITIALIZE_V2
+
       SUBROUTINE HYPRE_IJMATRIXSETVALUES(A, NROWS, NCOLS, ROWS, COLS, VALUES, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: A
          INTEGER,         INTENT(IN)  :: NROWS
@@ -281,6 +293,12 @@ MODULE HYPRE_INTERFACE
          REAL(KIND=8),    INTENT(IN)  :: VALUES(*)
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJMATRIXSETVALUES
+
+      SUBROUTINE HYPRE_IJMATRIXMIGRATE(A, MEMORY_LOC, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: A
+         INTEGER,         INTENT(IN)  :: MEMORY_LOC
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_IJMATRIXMIGRATE
 
       SUBROUTINE HYPRE_IJMATRIXASSEMBLE(A,IERR)
          INTEGER(KIND=8), INTENT(IN)  :: A
@@ -312,6 +330,12 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJVECTORINITIALIZE
 
+      SUBROUTINE HYPRE_IJVECTORINITIALIZE_V2(X, MEMORY_LOC, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: X
+         INTEGER,         INTENT(IN)  :: MEMORY_LOC
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_IJVECTORINITIALIZE_V2
+
       SUBROUTINE HYPRE_IJVECTORSETVALUES(X, LOCAL_SIZE, ROWS, VALUES, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: X
          INTEGER,         INTENT(IN)  :: LOCAL_SIZE
@@ -327,6 +351,12 @@ MODULE HYPRE_INTERFACE
          REAL(KIND=8),    INTENT(OUT) :: VALUES(*)
          INTEGER,         INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_IJVECTORGETVALUES
+
+      SUBROUTINE HYPRE_IJVECTORMIGRATE(A, MEMORY_LOC, IERR)
+         INTEGER(KIND=8), INTENT(IN)  :: A
+         INTEGER,         INTENT(IN)  :: MEMORY_LOC
+         INTEGER,         INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_IJVECTORMIGRATE
 
       SUBROUTINE HYPRE_IJVECTORASSEMBLE(X, IERR)
          INTEGER(KIND=8), INTENT(IN)  :: X
@@ -498,17 +528,22 @@ MODULE HYPRE_INTERFACE
              HYPRE_EXEC_DEVICE,                   &  ! from HYPREf.h
              HYPRE_INITIALIZE,                    &  ! subroutine in HYPRE library
              HYPRE_FINALIZE,                      &  ! subroutine in HYPRE library
+             HYPRE_SETEXECUTIONPOLICY,            &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXCREATE,                &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXSETOBJECTTYPE,         &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXINITIALIZE,            &  ! subroutine in HYPRE library
+             HYPRE_IJMATRIXINITIALIZE_V2,         &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXSETVALUES,             &  ! subroutine in HYPRE library
+             HYPRE_IJMATRIXMIGRATE,               &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXASSEMBLE,              &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXGETOBJECT,             &  ! subroutine in HYPRE library
              HYPRE_IJVECTORCREATE,                &  ! subroutine in HYPRE library
              HYPRE_IJVECTORSETOBJECTTYPE,         &  ! subroutine in HYPRE library
              HYPRE_IJVECTORINITIALIZE,            &  ! subroutine in HYPRE library
+             HYPRE_IJVECTORINITIALIZE_V2,         &  ! subroutine in HYPRE library
              HYPRE_IJVECTORSETVALUES,             &  ! subroutine in HYPRE library
              HYPRE_IJVECTORGETVALUES,             &  ! subroutine in HYPRE library
+             HYPRE_IJVECTORMIGRATE,               &  ! subroutine in HYPRE library
              HYPRE_IJVECTORASSEMBLE,              &  ! subroutine in HYPRE library
              HYPRE_IJVECTORGETOBJECT,             &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGCREATE,               &  ! subroutine in HYPRE library

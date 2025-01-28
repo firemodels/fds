@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
+# Raise an error if the source and binary directories are the same
+if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory.")
+endif ()
+
 project(
     fds
     VERSION 6.9.1
@@ -8,6 +13,9 @@ project(
 enable_language(Fortran)
 
 option(USE_HYPRE           "Use the hypre library"                    ON)
+option(USE_HYPRE_NVIDIA    "Use the hypre library with NVIDIA GPUs"   OFF)
+option(USE_HYPRE_AMDGPU    "Use the hypre library with AMD GPUs"      OFF)
+option(USE_HYPRE_INTELGPU  "Use the hypre library with Intel GPUs"    OFF)
 option(USE_SYSTEM_HYPRE    "Use the hypre library from the system"    OFF)
 
 option(USE_SUNDIALS        "Use the sundials library"                 ON)
@@ -92,6 +100,29 @@ target_compile_definitions(fds PRIVATE GITDATE_PP="${GIT_DATE}")
 find_package(MPI REQUIRED)
 target_link_libraries(fds PRIVATE MPI::MPI_Fortran)
 
+# Check for mpi_f08 module support
+if(MPI_Fortran_FOUND)
+    include(CheckFortranSourceCompiles)
+    set(CMAKE_REQUIRED_INCLUDES ${MPI_Fortran_INCLUDE_PATH})
+    check_fortran_source_compiles("
+        program test
+          use mpi_f08
+          implicit none
+          integer :: ierr
+          call MPI_Init(ierr)
+          call MPI_Finalize(ierr)
+        end program test"
+    MPI_F08_SUPPORTED)
+
+  if(NOT MPI_F08_SUPPORTED)
+    message(FATAL_ERROR "
+MPI Fortran mpi_f08 module is not supported!
+
+Current Fortran compiler: ${CMAKE_Fortran_COMPILER}
+Current MPI Fortran compiler: ${MPI_Fortran_COMPILER}")
+  endif()
+endif()
+
 # FDS use lp64 (4-byte integer), MKL often defaults to ilp64 (8-byte integer)
 set(MKL_INTERFACE lp64)
 # Turn on BLACS
@@ -142,40 +173,61 @@ if(WIN32)
 endif()
 
 # Find or build hypre if the option is set to use it
-if(USE_HYPRE)
+if(USE_HYPRE OR USE_HYPRE_NVIDIA OR USE_HYPRE_AMDGPU OR USE_HYPRE_INTELGPU)
     # Unless forced to use the system version, download and build hypre
     if(NOT(USE_SYSTEM_HYPRE))
         include(FetchContent)
         # As we are not using the system hypre, we need to choose the version we
         # want
-        set(HYPRE_GIT_VERSION "2.32.0" )
+        set(HYPRE_GIT_VERSION "v2.32.0-24-63331f19c" )
         FetchContent_Declare(
             HYPRE
             GIT_REPOSITORY https://github.com/hypre-space/hypre.git
-            # Currently we need to refer directly to a commit which contains a
-            # patch to handle HYPRE_FMANGLE
-            GIT_TAG        6d01417697aa84d118eb1e1eb91315df42575be5 # v${HYPRE_GIT_VERSION}
+            GIT_TAG        63331f19c72b2ec363824907c0575a6edf7bbf3c # From: 01/27/25 # v${HYPRE_GIT_VERSION}
             SOURCE_SUBDIR  src
             OVERRIDE_FIND_PACKAGE
         )
+
         # Set some options for building hypre
         if (WIN32)
             set(HYPRE_ENABLE_FMANGLE CAPS)
         endif()
+        if (USE_HYPRE_NVIDIA AND USE_HYPRE_AMDGPU)
+            message(FATAL_ERROR "Incompatible options: USE_HYPRE_NVIDIA and USE_HYPRE_AMDGPU")
+        elseif (USE_HYPRE_NVIDIA AND USE_HYPRE_INTELGPU)
+            message(FATAL_ERROR "Incompatible options: USE_HYPRE_NVIDIA and USE_HYPRE_INTELGPU")
+        elseif (USE_HYPRE_AMDGPU AND USE_HYPRE_INTELGPU)
+            message(FATAL_ERROR "Incompatible options: USE_HYPRE_AMDGPU and USE_HYPRE_INTELGPU")
+        endif()
+        if (USE_HYPRE_NVIDIA)
+            set(HYPRE_ENABLE_CUDA ON CACHE BOOL "" FORCE)
+        elseif (USE_HYPRE_AMDGPU)
+            set(HYPRE_ENABLE_HIP ON CACHE BOOL "" FORCE)
+        elseif (USE_HYPRE_INTELGPU)
+            set(HYPRE_ENABLE_SYCL ON CACHE BOOL "" FORCE)
+        endif()
+        if (USE_HYPRE_NVIDIA OR USE_HYPRE_AMDGPU OR USE_HYPRE_INTELGPU)
+            set(CMAKE_POSITION_INDEPEDENT_CODE ON CACHE BOOL "" FORCE)
+        endif()
+
+        message(STATUS "Fetching HYPRE")
         FetchContent_MakeAvailable(HYPRE)
     endif()
 
     # Use hypre if found
-    find_package(HYPRE)
+    find_package(HYPRE 2.32.0 REQUIRED)
     if(HYPRE_FOUND)
         if(NOT(HYPRE_VERSION))
             # We aren't using the system version so we'll revert to the git
             # version
             set(HYPRE_VERSION "${HYPRE_GIT_VERSION}")
         endif()
-        target_link_libraries(fds PRIVATE HYPRE)
+        target_link_libraries(fds PRIVATE HYPRE::HYPRE)
         target_compile_definitions(fds PRIVATE WITH_HYPRE)
         target_compile_definitions(fds PRIVATE HYPRE_PP="${HYPRE_VERSION}")
+        if (USE_HYPRE_NVIDIA OR USE_HYPRE_AMDGPU OR USE_HYPRE_INTELGPU)
+            target_compile_definitions(fds PRIVATE WITH_HYPRE_DEVICE)
+        endif()
     endif()
 endif()
 
@@ -202,12 +254,23 @@ if(USE_SUNDIALS)
         set(EXAMPLES_INSTALL OFF CACHE BOOL "" FORCE)
         set(ENABLE_OPENMP ON CACHE BOOL "" FORCE)
         set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-        # if(HYPRE_FOUND)
-        #     set(ENABLE_HYPRE ON CACHE BOOL "" FORCE)
-        #     FetchContent_MakeAvailable(HYPRE SUNDIALS)
-        # else()
-            FetchContent_MakeAvailable(SUNDIALS)
-        # endif()
+        if(HYPRE_FOUND)
+            if(NOT USE_SYSTEM_HYPRE)
+                set(ENABLE_HYPRE OFF CACHE BOOL "" FORCE)
+            else()
+                set(ENABLE_HYPRE ON CACHE BOOL "" FORCE)
+            endif()
+            if(HYPRE_ROOT)
+                set(HYPRE_DIR "${HYPRE_ROOT}")
+            endif()
+            if(HYPRE_DIR)
+                message(STATUS "Sundials using HYPRE_DIR=${HYPRE_DIR}")
+            endif()
+        else()
+            set(ENABLE_HYPRE OFF CACHE BOOL "" FORCE)
+        endif()
+        message(STATUS "Fetching Sundials")
+        FetchContent_MakeAvailable(SUNDIALS)
     endif()
 
     # Use sundials if found
