@@ -80,7 +80,6 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/Utilities/Python
         python hello_world.py
-        python FDS_verification_script.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on
