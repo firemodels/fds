@@ -437,7 +437,7 @@ LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.FALSE.              !< Report ad
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
-INTEGER :: I_MAX_TEMP=5000 !< Maximum dimension in K for temperature arrays
+INTEGER, PARAMETER :: I_MAX_TEMP=5000 !< Maximum dimension in K for temperature arrays (has to be a parameter as it is used to define static arrays)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2Y          !< Matrix that converts lumped species vector to primitive, \f$ AZ=Y \f$
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_Z         !< CP_Z(I,J) Specific heat (J/kg/K) of lumped species J at temperature I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CPBAR_Z
