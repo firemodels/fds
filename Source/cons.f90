@@ -878,3 +878,15 @@ LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 
 END MODULE CHEMCONS
 
+!> \brief Contains scratch arrays that are used to store temporary data in the subroutines.
+!>        For each array, the last dimension is always the number of threads*processes so
+!>        each process has its own memory
+MODULE SCRATCH_ARRAYS
+USE PRECISION_PARAMETERS
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:), TARGET :: SCRATCH_ZZ_GET
+REAL(EB), ALLOCATABLE, DIMENSION(:,:), TARGET :: SCRATCH_Y_ALL
+REAL(EB), ALLOCATABLE, DIMENSION(:,:), TARGET :: SCRATCH_RHO_ZZ_F
+REAL(EB), ALLOCATABLE, DIMENSION(:,:), TARGET :: SCRATCH_RHO_ZZ_OTHER
+
+END MODULE SCRATCH_ARRAYS

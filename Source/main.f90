@@ -409,6 +409,10 @@ IF (RESTART) THEN
    CALL STOP_CHECK(1)
 ENDIF
 
+! Initialize scratch arrays
+
+CALL INITIALIZE_SCRATCH_ARRAYS
+
 ! Initialize output clocks
 
 CALL INITIALIZE_OUTPUT_CLOCKS(T)
