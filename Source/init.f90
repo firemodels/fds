@@ -3979,11 +3979,18 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
       ENDIF
 
       LAYER_THICKNESS_OBST(N_LAYERS_OBST) = LAYER_THICKNESS_OBST(N_LAYERS_OBST) + THICKNESS - OLD_THICKNESS
+
+      ! Add materials to a master list for the whole 1-D array
+
       IF (OBST_INDEX>0) CALL ADD_MATERIAL(MAX_MATERIALS,OB%MATL_INDEX,N_MATL_OBST,MATL_INDEX_OBST)
+
+      ! Decide to start a new layer or just keep the current layer with a similar OBSTruction
+
       IF (OBST_INDEX/=OBST_INDEX_PREVIOUS .AND. OBST_INDEX_PREVIOUS>0 .AND. OBST_INDEX>0) THEN
          OB_PREV => OM_PREV%OBSTRUCTION(OBST_INDEX_PREVIOUS)
          IF ( (ANY(OB%MATL_MASS_FRACTION(:)/=OB_PREV%MATL_MASS_FRACTION(:),DIM=1)) .OR. &
-              (ANY(OB%MATL_INDEX(:)        /=OB_PREV%MATL_INDEX(:)        ,DIM=1)) ) THEN
+              (ANY(OB%MATL_INDEX(:)        /=OB_PREV%MATL_INDEX(:)        ,DIM=1)) .OR. &
+              (OB%HEAT_SOURCE/=OB_PREV%HEAT_SOURCE) ) THEN
             N_LAYERS_OBST = N_LAYERS_OBST + 1
             LAYER_THICKNESS_OBST(N_LAYERS_OBST) = 0._EB
             HEAT_SOURCE_OBST(N_LAYERS_OBST)        = OB%HEAT_SOURCE    
