@@ -426,7 +426,7 @@ In Test 27, a water mist system was manually activated 300~s after ignition. The
 
 \subsubsection{Modeling Notes}
 
-The simulations of these experiments are performed using 12 meshes. To prevent numerical instability due to oscillations in pressure, a common problem for tunnel fire simulations, the {\ct VELOCITY\_TOLERANCE} and {\ct PRESSURE\_TOLERANCE} are reduced to 0.01~m/s and 400~s$^{-2}$, respectively, and the {\ct MAX\_PRESSURE\_ITERATIONS} is increased to 50. The multi-port mist nozzles are each modeled as a collection of single nozzles with varying orientations.
+The simulations of these experiments are performed using 12 meshes. To prevent numerical instability due to oscillations in pressure, a common problem for tunnel fire simulations, the \ct{VELOCITY_TOLERANCE} and \ct{PRESSURE_TOLERANCE} are reduced to 0.01~m/s and 400~s$^{-2}$, respectively, and the \ct{MAX_PRESSURE_ITERATIONS} is increased to 50. The multi-port mist nozzles are each modeled as a collection of single nozzles with varying orientations.
 
 
 
@@ -499,7 +499,7 @@ CFT                  \> Critical Flame Temperature ($^\circ$C)
 
 \subsubsection{Modeling Notes}
 
-Cup burner dimensions, fuel inlet velocity, and co-flow inlet velocity vary slightly amongst the researchers; however, extinguishing concentrations have been shown to be fairly insensitive over the range of typical values. The cup burner model was implemented as a 2D, cylindrical geometry with a 1 cm radius for the burner and a 4 cm radius for the tube. A 1 mm grid resolution was used. For gaseous fuels a 1 cm/s inlet velocity was used for the burner. Liquid fuels used burning rates from the SFPE Handbook; fuels without published burning rates scaled the burning rate of a chemically similar fuel (e.g. alcohol, alkane) using the heat of vaporization for the fuel. The fuel temperature boundary condition was ambient for gaseous fuels and one-half of the boiling point for liquid fuels. The co-flow was set to 12~cm/s. The agent mass fraction was ramped from approximately 10~\% below to 10~\% above the values shown in Table~\ref{Cup_Table}. The {\ct CRITICAL\_FLAME\_TEMPERATURE} was set to the values in Table~\ref{Cup_Table}.
+Cup burner dimensions, fuel inlet velocity, and co-flow inlet velocity vary slightly amongst the researchers; however, extinguishing concentrations have been shown to be fairly insensitive over the range of typical values. The cup burner model was implemented as a 2D, cylindrical geometry with a 1 cm radius for the burner and a 4 cm radius for the tube. A 1 mm grid resolution was used. For gaseous fuels a 1 cm/s inlet velocity was used for the burner. Liquid fuels used burning rates from the SFPE Handbook; fuels without published burning rates scaled the burning rate of a chemically similar fuel (e.g. alcohol, alkane) using the heat of vaporization for the fuel. The fuel temperature boundary condition was ambient for gaseous fuels and one-half of the boiling point for liquid fuels. The co-flow was set to 12~cm/s. The agent mass fraction was ramped from approximately 10~\% below to 10~\% above the values shown in Table~\ref{Cup_Table}. The \ct{CRITICAL_FLAME_TEMPERATURE} was set to the values in Table~\ref{Cup_Table}.
 
 \section{DelCo Trainer Experiments}
 \label{DelCo_Description}
@@ -617,6 +617,62 @@ The U.S.~Federal Aviation Administration (FAA) has sponsored experiments and mod
 \label{FAA_Polymers_Description}
 
 As part of their efforts to characterize the burning behavior of commonly used plastics, the U.S.~Federal Aviation Administration (FAA) conducted measurements of the thermal properties of charring and non-charring polymers with the specific purpose of providing input data for numerical pyrolysis models~\cite{Stoliarov:CF2009,Stoliarov:CF2010}. The study aimed to determine whether a one-dimensional conduction/reaction model could be used as a practical tool for prediction and/or extrapolation of the results of fire calorimetry tests. The non-charring polymers included poly(methyl methacrylate) (PMMA), high-impact polystyrene (HIPS), and high density polyethylene (HDPE). The charring polymers included polycarbonate (PC) and polyvinyl chloride (PVC).
+
+
+\section{FHWA Tunnel}
+\label{FHWA_Tunnel_Description}
+
+Reduced-scale tunnel experiments~\cite{FHWA:test_report} were conducted at the Institute f{\"u}r Angewandte Brandschutzforschung (IFAB), Germany, as part of a research program sponsored by the U.S. Federal Highway Administration (FHWA). The objective of the research was to assess operational integration of highway tunnel emergency ventilation systems with fixed fire fighting systems. The experiments assessed the ability of a sprinkler system to improve smoke management in a longitudinally vented tunnel. Measurements of velocity, temperature, pressure, humidity, and surface temperature were recorded, and video footage was taken. Three different nozzles were used in the tests and measurements of the nozzle spray patterns were reported.
+
+The tunnel was approximately 1/4 scale, with a width of 2.5~m, height of 1.25~m and a length of 12~m. The tunnel was lined with water-resistant and non-combustible cement board. Figure~\ref{FHWAtunnel1} provides a schematic diagram. 
+
+Three fans were used to inject air into the tunnel and generate a longitudinal flow. To correlate fan operation to bulk longitudinal velocity, the inlet velocity profile was measured manually, in a cold flow test, at 25 points distributed over the inlet cross section, 1.5~m into the tunnel, using a handheld rotating vane anemometer. The bulk longitudinal velocity was approximately constant during the experiments, but the transient (fluctuating) profile was used in the simulations in order to better match the actual boundary conditions.
+
+The experiments were conducted using one of two rectangular pans to vary the size of the liquid fuel fires; one with an area of 0.3~m$^2$ and one with an area of 0.5~m$^2$. The heat release rate (HRR) was measured using both a load cell and oxygen consumption calorimetry. The fire was covered with a partially open steel box to mitigate the impact of the water spray on the HRR. The box was approximately 1.1~m wide, 0.68~m tall, 1.1~m long, and open on each side. That is, it was closed on the front, back, and top sides.
+
+Two types of nozzles were used with varying drop sizes and flow rates. The droplet size distribution and spray patterns of both nozzles were measured 1~m below the orifice. Nozzle~A was a standard pendent type sprinkler. Its median volumetric droplet diameter was approximately 1.1~mm and flow rate was 49.9~L/min. A single nozzle was used, mounted directly above the fire. Nozzle~B had a median volumetric droplet diameter of approximately 0.28~mm and a flow rate of 4.9~L/min per nozzle. Eight nozzles in two staggered rows of four were used. The values for median droplet diameter were input directly in the model, while the spray angle was determined by a simple process of trial and error to match the observed radial distribution of water flux 1~m below each nozzle.
+
+\subsubsection{Modeling Notes}
+
+A summary of the experiments is provided in Table~\ref{tab:FHWA_Test_Matrix}. The FDS simulations used a cubic grid resolution of 5~cm throughout. Different spray nozzles were tested to measure the interaction between the water spray and the ventilation. Typically, the nozzles were activated after some back-layering had been visually observed. 
+
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_A.jpg} 
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_B.jpg}
+\caption{Sketches of the two sprinkler configurations in the FHWA/IFAB experiments. The fans and flow straightener are to the left. The cross-hatched squares are access panels. The burner is below Nozzle~A.}
+\label{FHWAtunnel1}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Summary of the FHWA/IFAB experiments. The HRR and Velocity varied throughout the course of each experiment. Shown are nominal values.}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Test          & Fuel        & \textcolor{black}{HRR} & Velocity        & Nozzle & Nozzle           \\
+ID            & Type        & (MW)                 & (m/s)           & Type   & Activation (s)   \\ \hline \hline
+IFAB-07       & n-heptane   & 3.0                  & 1.2             & N/A    & N/A              \\ \hline
+IFAB-08       & n-heptane   & 1.3                  & 1.0             & B      & 400              \\ \hline
+IFAB-09       & n-heptane   & 1.2                  & 1.0             & B      & 400              \\ \hline
+IFAB-10       & n-heptane   & 0.9                  & 1.1             & A      & 340              \\ \hline
+IFAB-11       & Diesel      & 0.6                  & 1.1             & A      & 340              \\ \hline
+IFAB-13       & Diesel      & 1.0                  & 1.0             & B      & 320              \\ \hline
+IFAB-14       & Diesel      & 1.4                  & 1.3             & B      & 390              \\ \hline
+IFAB-15       & Diesel      & 1.9                  & 1.3             & B      & 420              \\ \hline
+IFAB-19       & Diesel      & 2.0                  & 1.2             & B      & 360              \\ \hline
+IFAB-22       & Diesel      & 1.0                  & 1.2             & N/A    & N/A              \\ \hline
+IFAB-24       & Diesel      & 1.8                  & 1.3             & N/A    & N/A              \\ \hline
+\end{tabular}
+\label{tab:FHWA_Test_Matrix}
+\end{table}
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/IFAB_photo.jpg}
+\caption{Photograph taken upwind of the fire in one of the FHWA/IFAB experiments.}
+\label{IFAB_photo}
+\end{figure}
+
+\FloatBarrier
 
 
 \section{Fleury Heat Flux Measurements}
@@ -873,15 +929,7 @@ The numerical simulation is explained in Ref.~\cite{Paudel:2021}. Because detail
 \section{JH/FRA Rail Car Experiments}
 \label{JH_FRA_Description}
 
-The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to large-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
-
-Luo, Kraft, DiDomizio, McKinnon, Hodges, Yazdani, and Lattimer ~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials.
-Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested.
-A set of 7 materials were identified for bench-scale and full-scale testing.
-Each material was tested in a TGA  in nitrogen and air environments, a cone calorimeter at three heat fluxes in accordance with ASTM E1354, radiant panel testing in accordance with ASTM E162, and room-corner testing in accordance with NFPA 286.
-The 7 materials included in this test series are summarized in Table \ref{JH_FRA_materials_table}.
-Optimized material properties for modeling these materials were subsequently presented by Yang, Hodges, Rippe, Kraft, and Lattimer in ~\cite{Yang:FRA20}.
-Data from cone calorimeter and NFPA 286 experiments from these materials are used in validating the scaling-based pyrolysis model. Note that two of the NFPA 286 experiments are not included in the validation (samples 1 and 5) due to significant material deformation and detachment occuring during testing.
+The U.S. Federal Railroad Administration (FRA) sponsored a series of small to large-scale enclosure experiments to evaluate the impact from fire on modern materials in fully-developed railcar fires. Luo~et~al.~\cite{Luo:FRA2019} aggregated existing data from standard tests on historic railcar materials. Based on an analysis of the results, the authors identified a set of new materials representative of modern materials in use in railcars which had not been extensively tested. A set of seven materials were identified for bench-scale and full-scale testing. Thermogravimetric analysis (TGA) was conducted for each material, both in nitrogen and air environments. Cone calorimeter was performed at three heat fluxes in accordance with ASTM E1354. Radiant panel testing was performed in accordance with ASTM E162. Room-corner testing was conducted in accordance with NFPA 286. The seven materials are summarized in Table~\ref{JH_FRA_materials_table}. Optimized material properties for modeling these materials were subsequently presented by Yang~et~al.~\cite{Yang:FRA20}. Data from the cone calorimeter and NFPA~286 experiments have been used in validating the scaling-based pyrolysis model (S-Pyro). Note that two of the NFPA 286 experiments are not included in the validation (samples 1 and 5) due to significant material deformation and detachment occuring during testing.
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Materials]{Summary of JH/FRA Rail Car Experiments.~\cite{Luo:FRA2019}}
@@ -901,28 +949,14 @@ Sample 7    & Phenolic Resin FRP    & Fiberglass material, nominally 3.27 mm thi
 \label{JH_FRA_materials_table}
 \end{table}
 
-In a follow-up study, Hodges, DiDomizio, Lattimer, and Kapahi~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire tests consisting of fourteen unique configurations and three repeated tests.
-Tests were conducted at three scales including full-scale, half-scale, and quarter-scale.
-The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44 m wide, 2.44 m tall, and 3.66 m deep with a single door opening which is 0.9 m wide, and 2.0 m tall.
-The initiating fire was a propane burner in the back-left corner of the compartment except in tests 5 and 10 which used a kerosene-type jet fuel, JP-5.
-The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment.
-The lining material thickness was kept the same at each scale to preserve the burning duration.
+In a follow-up study, Hodges~et~al.~\cite{Hodges:FRA22} conducted a series of seventeen scaled compartment fire experiments consisting of fourteen unique configurations and three replicates. Experiments were conducted at three scales including full-scale, half-scale, and quarter-scale. The baseline full-scale compartment design was based on a standard size National Fire Protection Association (NFPA) 286 fire room, which is 2.44~m wide, 2.44~m tall, and 3.66~m deep with a single door opening which is 0.9~m wide, and 2.0~m tall. The initiating fire was a propane burner in the back-left corner of the compartment except in Tests~5 and 10 which used a kerosene-type jet fuel, JP-5. The reduced-scale compartment designs were geometrically scaled except for the ventilation, which was non-linearly scaled to maintain the equivalence ratio of the compartment. The lining material thickness was kept the same at each scale to preserve the burning duration.
 
-Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm).
-A reduced fraction of the surfaces were covered in the combustible lining cases to control the peak HRR from the testing.
-The first lining configuration covered a 2.44 m x 2.44 m section on the back wall, left wall, and ceiling closest to the fire.
-This configuration was used for all FRP experiments, and for one plywood experiment at the quarter scale.
-The second lining configuration covered a 1.22 m wide x 2.44 m tall section on the left and back walls nearest the burner, and a 1.22 m x 1.22 m section on the ceiling above the burner.
-This configuration was used in quarter, half, and full-scale plywood experiments.
-The two lining configurations are shown in Figure ~\ref{JH_FRA_lining_fig}.
+Six tests used combustible lining with either plywood (note, bare plywood rather than the composite used in the prior study) or the vinyl ester resin FRP from the prior study (note, 3.5 mm thickness used instead of 7.0 mm). A reduced fraction of the surfaces were covered in the combustible lining cases to control the peak HRR from the testing. The first lining configuration covered a 2.44 m x 2.44 m section on the back wall, left wall, and ceiling closest to the fire. This configuration was used for all FRP experiments, and for one plywood experiment at the quarter scale. The second lining configuration covered a 1.22~m wide by 2.44~m tall section on the left and back walls nearest the burner, and a 1.22~m by 1.22~m section on the ceiling above the burner. This configuration was used in quarter, half, and full-scale plywood experiments. The two lining configurations are shown in Figure~\ref{JH_FRA_lining_fig}.
 Note the lining coverage numbers are provided for the full-scale and were geometrically scaled down in the half and quarter scales.
 
-Table \ref{JH_FRA_Matrix} provides a summary of the experiments.
-Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., test 2 had 3 stages each 5 minutes long starting at 20 kW, then increasing the burner to 45 kW, then a final 5-minute stage at 50 kW).
-The instrumentation plan from the test series is shown in Figure ~\ref{JH_FRA_lining_fig} and Figure ~\ref{JH_FRA_instrumentation_fig}.
+Table~\ref{JH_FRA_Matrix} provides a summary of the experiments. Each HRR listed for cases with non-combustible lining (NC) corresponded to a separate 5-minute exposure level (i.e., Test~2 had three stages each five minutes long starting at 20~kW, then increasing the burner to 45~kW, then a final five minute stage at 50~kW). The instrumentation plan from the test series is shown in Figure~\ref{JH_FRA_lining_fig} and Figure~\ref{JH_FRA_instrumentation_fig}.
 
-Data from these experiments are used in validating the thermal environment (HGL Temperature and Depth, heat flux to the surface), velocity through the ventilation, and fire growth (HRR).
-The tests with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7.0 mm thickness but a 3.5 mm thickness was used in this study).
+Data from these experiments have been used in validating the thermal environment (HGL Temperature and Depth, Surface Heat Flux), velocity through the ventilation, and fire growth (HRR). The experiments with FRP lining are omitted from validation due to a lack of bench-scale data at the thickness used in the testing (data is available of the vinyl ester resin FRP at a 7~mm thickness but a 3.5~mm thickness was used in this study).
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Rail Car Experiments]{Summary of JH/FRA Rail Car Experiments.~\cite{Hodges:FRA22}}
@@ -971,43 +1005,99 @@ No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &          
 
 The simulations are performed with a spatial resolution of 2~cm for the quarter-scale, 4~cm for the half scale, and 8~cm for the fullscale.
 
-The combustion reaction is assumed to be propane using the simple chemistry single-step combustion model.
-Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
+The combustion reaction is assumed to be propane using the simple chemistry single-step combustion model. Extinction is modeled using the ``Extinction 2'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the \ct{AUTO_IGNITION_TEMPERATURE} of 450~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 450~$^\circ$C is reported for propane in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
-The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model.
-The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_Materials}.
-Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
+The combustible lining experiments in this study are used to evaluate a scaling-based simplified pyrolysis model. The model input parameters used in simulating these experiments are summarized in Section \ref{sec_JH_Materials}. Additional detail on these properties can be found in previous test reports~\cite{Luo:FRA2019,Lattimer:NIJ19}.
 
-Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used.
-The test plan and report indicate a 6.35 mm thickness of plywood, but the total energy consumed during the test and the duration of the peak indicates a 12.7 mm thickness of plywood was more plausible.
-The full-scale plywood is modeled with a 12.7 mm thickness.
+Note that the full-scale test with plywood lining is included in the validation but there is uncertainty in the material thickness used. The test plan and report indicate a 6.35~mm thickness of plywood, but the total energy consumed during the test and the duration of the peak indicates a 12.7~mm thickness of plywood was more plausible. The full-scale plywood is modeled with a 12.7~mm thickness.
+
 
 \FloatBarrier
 
 \section{JH/NIJ Materials}
 \label{JH_NIJ_Description}
 
+The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}. The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization. TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials. The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB). The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
-The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}.
-The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization.
-TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials.
-The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB).
-The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
+
+\section{Kashiwagi Gasification}
+\label{Kashiwagi_Gasification_Description}
+
+In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8~cm on a side were irradiated at 25~\si{kW/m^2} and 40~\si{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5~\% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
+
+\subsubsection{Modeling Notes}
+
+The FDS domain is specified as a box twice as wide as the block, 0.076 m, with the cube centered in the domain.  The FDS grid resolution is 0.00475 m (16 cubic cells in each direction), which puts 8 cells across the width of the solid block (64 total wall cells).  The $-x$ face of the block is exposed to radiation using an \ct{EXTERNAL_FLUX}.  The lateral domain boundaries are specified as free slip, transparent walls (emissivity zero) with zero convective heat transfer.  The bottom boundary is a vent with a small coflow velocity of 0.005 m/s at $T_{\rm amb} = 30\;\si{\degreeCelsius}$ and the specified ${\rm O}_2$ concentration for the specific case.  The top boundary is set to \ct{OPEN}.  The radiation field is solved completely on each time step and the number of solid angles is set to 16.  The \ct{WALL_INCREMENT} is set to 1, meaning the solid phase is updated at every FDS time step.  The simulation is run to 900 s.
+
+The exposed surface specifies a convective length scale of 0.038 m with blowing. The solid phase model is 1D in depth from the center of an exposed wall cell.  The backing is ``exposed'', meaning the backside boundary condition considers convective heat transfer to the ambient.  The 1D domain is uniform (\ct{STRETCH_FACTOR=1}).  The default 1D grid resolution is automatically selected to satisfy the condition $\delta x_{\rm s}^2/\tau < k/(\rho c_v)$ with $\tau=1\;\si{s}$.  With the chosen physical parameters (see Table~\ref{tab:thermophysical_props}) this works out to $\delta x_{\rm s} = 1.2 \times 10^{-4}$ m, or 312 cells across the 3.8 cm block at the start of the simulation (note that there is a small amount of shrinking in the oxidative cases and the solid phase is remeshed accordingly).  Both the default resolution and 10 times this resolution are tested with no significant difference in the results.  Hence, the default resolution is considered converged.  The results presented below, however, are for the higher resolution runs.
+
+A device measuring the surface integral of surface density (which yields the total solid mass) is positioned in the center of the exposed face.  Also, devices for in-depth profiles of temperature, material component densities, and ${\rm O}_2$ mass fraction are positioned in the same location.  Time histories of temperature are recorded at the in-depth positions reported in \cite{Kashiwagi:1987} for comparison.
+
+\paragraph{Thermophysical Properties}
+
+The thermophsyical properties of the pine wood are adopted from \cite{Lautenberger:2009}.  The values of of the thermal conductivity and specific heat at a reference temperature, $T_{\rm ref}=300 \;\si{K}$, are denoted by $k_0$ and $c_{v,0}$, respectively. The temperature dependence is based on a power law as follows:
+\begin{align}
+k(T)   &= k_0 (T/T_{\rm ref})^{n_k} + \gamma \sigma T^3 \\
+c_v(T) &= c_{v,0} (T/T_{\rm ref})^{n_c}
+\end{align}
+where $\sigma=5.67\times10^{-8} \;\si{W/m^2/K^4}$ is the Stefan-Boltzmann constant. The reference values, exponents, and internal radiation factor, $\gamma$, are given in Table \ref{tab:thermophysical_props}.  For simplicity in adjusting the reaction energies, we opted to use constant specific heats ($n_c=0$), taken from the range obtained by \cite{Lautenberger:2009}.
+
+\begin{table}[h]
+\begin{center}
+\caption{Thermophysical properties.}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccccc}
+\hline
+Component& $\rho$ & $k_{0}$ & $n_k$ & $c_{v,0}$ & $n_c$ & $\gamma$ \\
+\hline
+moisture & 1000                         & 0.062 & 0     & 4.18 & 0 & 0       \\
+pine     & 360                          & 0.176 & 0.594 & 2.50 & 0 & 0       \\
+char     & 108$^{\mbox{\scriptsize a}}$ & 0.065 & 0.435 & 1.50 & 0 & 3.3E-03 \\
+ash      & 5.0                          & 0.058 & 0.353 & 1.50 & 0 & 6.4E-03 \\
+\hline
+\multicolumn{7}{l}{$^{\mbox{\scriptsize a}}$ Used to approximate yield in Anca-Couce \cite{Anca-Couce:2012}.}
+\end{tabular}
+\label{tab:thermophysical_props}
+\end{center}
+\end{table}
+
+\paragraph{Material Model}
+
+The reaction model and kinetics parameters are based on the single component models from \cite{Anca-Couce:2012} (pine) and \cite{Kashiwagi:CF1992} (cellulose).  The model consists of four reactions (including moisture evaporation) as shown below.  The pine wood undergoes both aerobic and anaerobic pyrolysis.  The reaction energy for the anaerobic pyrolysis was taken from Anca-Couce et al.~\cite{Anca-Couce:2012} Table 8.  The heats of reaction for aerobic pyrolysis and char oxidation were based on \cite{Kashiwagi:CF1992}.  The activation energies and rate constants were optimized for the Kashiwagi gasification case \cite{Kashiwagi:1987} through a trial and error process that first looked at the nitrogen only case, then both aerobic and anaerobic pyrolysis (without char oxidation), and finally the full case including char oxidation.  The ash yield was chosen to be small based on the orientation of the block (horizontal relative to the exposed radiant panel) and comments in \cite{Kashiwagi:1987}.
+\begin{align}
+\mathrm{R1} &: \mbox{moisture} \rightarrow \mbox{water vapor} \\
+\mathrm{R2} &: \mbox{pine} \rightarrow \nu_{\rm char,2} \,\mbox{char} + \nu_{\rm fv,2} \,\mbox{fuel vapor} \\
+\mathrm{R3} &: \mbox{pine} + \nu_{{\rm O}_2,3} \, {\rm O}_2 \rightarrow \nu_{\rm char,3} \,\mbox{char} + \nu_{\rm fv,3} \,\mbox{fuel vapor} \\
+\mathrm{R4} &: \mbox{char} + \nu_{{\rm O}_2,4}\,{\rm O}_2 \rightarrow \nu_{\rm ash,4} \,\mbox{ash} + \nu_{{\rm C}{\rm O}_2,4} \,{\rm C}{\rm O}_2
+\end{align}
+
+\begin{table}[h]
+\begin{center}
+\caption{Kinetic parameters and yields.}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccccccccr}
+\hline
+Reaction  & $A$ & $E$ & $n_{\rm s}$ & $n_{{\rm O}_2}$ & \multicolumn{5}{c}{component $\nu$} & $H_{\rm r}$ \\
+ \cmidrule(rl){6-10}
+  & \si{(kg/m^3)^{1-n_s}/s} & J/mol & & & $\nu_{{\rm O}_2}$ & $\nu_{\rm char}$ & $\nu_{\rm fv}$ & $\nu_{\rm ash}$ & $\nu_{{\rm C}{\rm O}_2}$ & kJ/kg\\
+\hline
+R1  & 4.29E+03 & 4.38E+04 & 1  & 0    &          &       &       &      &      & $2\,410$   \\
+R2  & 1.00E+06 & 1.05E+05 & 1  & 0    &          & 0.30  & 0.70  &      &      & $200$      \\
+R3  & 1.10E+05 & 8.80E+04 & 1  & 0.7  & $-0.5$   & 0.30  & 1.20  &      &      & $-5\,700$  \\
+R4  & 5.00e+08 & 1.40E+05 & 1  & 0.8  & $-2.67$  &       &       & 0.01 & 3.66 & $-20\,000$ \\
+\hline
+\end{tabular}
+\label{tab:m1_kinetics}
+\end{center}
+\end{table}
 
 
 \section{Lattimer Tilted Wall}
 \label{Lattimer_Tilted_Wall_Description}
 
-Lattimer with Fire Science Solutions measured the heat flux and gas temperatures from a propane fire against to a tilted wall.
-The experiments were sponsored by Fire Science Solutions, LLC. and were conducted at Virginia Tech in Blacksburg, VA.
-The wall was 1.5~m high and 0.60~m wide, with the sand burner centered on the wall.
-All experiments used a square sand burner with a side length of 0.30~m.
-The fires ranged in size from 20~kW to 75~kW.
-Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall.
-The wall was tilted through a linear actuator attached to the back of the mounting frame.
-The majority of tests moved the wall during exposure to evaluate the impacts on flame separation.
-A picture of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}.
-A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
+Lattimer measured the heat flux and gas temperatures from a propane fire against to a tilted wall. The experiments were sponsored by Fire Science Solutions, LLC, and were conducted at Virginia Tech in Blacksburg, Virginia. The wall was 1.5~m high and 0.60~m wide, with the sand burner centered on the wall. All experiments used a square sand burner with a side length of 0.30~m. The fires ranged in size from 20~kW to 75~kW. Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall. The wall was tilted through a linear actuator attached to the back of the mounting frame. The majority of tests moved the wall during exposure to evaluate the impacts on flame separation. A photograph of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}. A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
 
 \begin{table}[!htb]
 \caption[Summary of JH/FRA Rail Car Experiments]{Summary of Lattimer Tilted Wall Experiments.}
@@ -1035,9 +1125,7 @@ No.  & (kW) & (degrees) & Movement (s) & Between Angles (s) & Each Angle (s)   &
 
 \subsubsection{Modeling Notes}
 
-The main case from this study used at this time is case 4 since the wall was held at each angle for close to 5 minutes.
-Each of these tilt angles are simulated neglecting the time history before arriving at the angle.
-The other cases are simulated at the start and end angles since the wall was held at that point for at least 30 seconds.
+Test~4 has been simulated at each individual tilt angle because the wall was held at each angle for approximately 5~min. Each of these tilt angles are simulated neglecting the time history before arriving at the angle. The other cases are simulated at the start and end angles since the wall was held at that point for at least 30~s.
 
 
 \section{LEMTA Spray Test for Radiation Attenuation}
@@ -1487,7 +1575,7 @@ Simultaneous mechanical and fire loading was applied to the specimens. The measu
 
 \subsubsection{Modeling Notes}
 
-The simulations of the NIST Composite Beam experiments are performed with 5~cm grid cells and 32 meshes. The calculations are sped up by a factor of 10 using {\ct TIME\_SHRINK\_FACTOR=10}, whereby a 60~min experiment is simulated in 6~min of real time because the heat release rate is held steady for most of the experiment. The specific heats of all solid materials are reduced by a factor of 10 automatically to account for the change in time scale.
+The simulations of the NIST Composite Beam experiments are performed with 5~cm grid cells and 32 meshes. The calculations are sped up by a factor of 10 using \ct{TIME_SHRINK_FACTOR=10}, whereby a 60~min experiment is simulated in 6~min of real time because the heat release rate is held steady for most of the experiment. The specific heats of all solid materials are reduced by a factor of 10 automatically to account for the change in time scale.
 
 Because these experiments involve a global equivalence ratio of approximately 1, the two-step simple chemistry model is used, where soot and CO are produced when the fire becomes under-ventilated.
 
@@ -1686,7 +1774,7 @@ In the experiments, the heat release rate was measured via oxygen consumption ca
 
 In all simulations, the model geometry included the compartment interior plus a comparable volume at the exterior to allow for a natural flow into and out of the compartment.
 
-Also, in all simulations, the fire suppression algorithm has been turned off ({\ct SUPPRESSION=.FALSE.}). The reason for this is that the suppression algorithm is not able to distinguish viability of a fire that is close to the point of extinction. Research continues in this area.
+Also, in all simulations, the fire suppression algorithm has been turned off (\ct{SUPPRESSION=.FALSE.}). The reason for this is that the suppression algorithm is not able to distinguish viability of a fire that is close to the point of extinction. Research continues in this area.
 
 
 \FloatBarrier
@@ -1860,7 +1948,7 @@ In the second set of experiments (7-10), the medium-sized cabinet was positioned
 
 In the third set of experiments (11-12), the cabinet was removed, and two 30~cm by 30~cm burners were spaced 0.9~m (3~ft) apart, side to side. One of the burners was centered under the array of thermocouples. Both burners were 2.0~m from the south wall. These experiments used the same heat release rate sequence as the open and closed door large cabinet experiments.
 
-The data files for these experiments are labelled, {\ct NIST\_NRC\_Cabinet\_Test\_n.csv}. These files contain the same measurement positions as the corner and wall experiments, with the following additional measurements:
+The data files for these experiments are labelled, \ct{NIST_NRC_Cabinet_Test_n.csv}. These files contain the same measurement positions as the corner and wall experiments, with the following additional measurements:
 \begin{itemize}
 \item PT-1 through PT-8 are plate thermometers positioned 0.6~m (2 ft) from each side of the cabinet at heights of 0.8~m (2.5~ft) and 1.4~m (4.5~ft). PT-1 is the upper plate on the left side. PT-2 is lower left. PT-3 is upper back. PT-4 is lower back. PT-5 is upper front. PT-6 is lower front. PT-7 is upper right. PT-8 is lower right.
 \item STC-1 through STC-6 are sheathed thermocouples within the cabinet, 15 cm (6 in) from the left side, centered. STC-1 is 6~cm (2.5~in) from the top. STC-2 through STC-6 are 30~cm, 60~cm, 90~cm, 120~cm, and 150~cm from the top, respectively.
@@ -1928,7 +2016,7 @@ The discharge coefficient, $C=0.61$, is recommended by the manufacturer of the c
 
 The combustion of natural gas (assumed to be methane) within the enclosures is modeled using the two-step simple chemistry algorithm. That is, the first reaction converts methane to CO, soot, and water vapor, and the second step converts the CO and soot to CO$_2$, assuming enough oxygen is present following the first reaction. By default, two-thirds of the carbon atoms in the fuel molecule are converted to CO in the first step; the rest to soot.
 
-Extinction is modeled using the ``Extinction 1'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the {\ct AUTO\_IGNITION\_TEMPERATURE} of 540~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 540~$^\circ$C is reported in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
+Extinction is modeled using the ``Extinction 1'' algorithm in which the reactions are assumed to occur if (1) the local gas temperature exceeds the \ct{AUTO_IGNITION_TEMPERATURE} of 540~$^\circ$C, and (2) the local oxygen concentration exceeds a temperature-dependent lower limit. The value of 540~$^\circ$C is reported in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}.
 
 
 \FloatBarrier
@@ -2173,7 +2261,7 @@ Prior to modeling heat fluxes to surfaces with attached flames or modeling ignit
 
 \subsubsection{Modeling Notes}
 
-The burner is roughly 1 m $\times$ 1.5 m with 802 fuel ports 1/8th inch in diameter (see Fig.~\ref{NFRL_8MW_calibration_burner}).  The FDS model of the burner is built from particles (see Fig.~\ref{FDS_NFRL_8MW_particle_burner}).  Each particle has a radius set to give a spherical area equivalent to a 1/8th inch diameter fuel port.  The time ramp in the FDS simulation is compressed by a factor of 10.  The ``gauge heat flux'' is recorded in an orientation pointing toward the burner ($+x$ direction).  The burner flow baffle plates are made from thin {\ct OBST}.  Fictitious manifolds are made from thickened {\ct OBST}.  The number of radiation angles in increased to 400.  The radiation path length is set to 2 m.  Ambient conditions are taken from historical weather data for the day of the experiment.  The natural gas composition is taken from NFRL records on the day.  A radiant fraction of 0.25 is prescribed, which is both consistent with a methane flame with additional ethane and the heat flux data farthest from the fire source under the assumption of a point source model.  The burner has a $D^*$ of approximately 2.2.  As a baseline, a grid resolution of 5 cm provides a $D^*/\Delta x = 44$.  Reasonably high resolution may be necessary if near-flame heat flux values are of interest.  However, we also provide FDS results for 10 cm resolution.
+The burner is roughly 1 m $\times$ 1.5 m with 802 fuel ports 1/8th inch in diameter (see Fig.~\ref{NFRL_8MW_calibration_burner}).  The FDS model of the burner is built from particles (see Fig.~\ref{FDS_NFRL_8MW_particle_burner}).  Each particle has a radius set to give a spherical area equivalent to a 1/8th inch diameter fuel port.  The time ramp in the FDS simulation is compressed by a factor of 10.  The ``gauge heat flux'' is recorded in an orientation pointing toward the burner ($+x$ direction).  The burner flow baffle plates are made from thin \ct{OBST}.  Fictitious manifolds are made from thickened \ct{OBST}.  The number of radiation angles in increased to 400.  The radiation path length is set to 2 m.  Ambient conditions are taken from historical weather data for the day of the experiment.  The natural gas composition is taken from NFRL records on the day.  A radiant fraction of 0.25 is prescribed, which is both consistent with a methane flame with additional ethane and the heat flux data farthest from the fire source under the assumption of a point source model.  The burner has a $D^*$ of approximately 2.2.  As a baseline, a grid resolution of 5 cm provides a $D^*/\Delta x = 44$.  Reasonably high resolution may be necessary if near-flame heat flux values are of interest.  However, we also provide FDS results for 10 cm resolution.
 
 \begin{figure}[h]
 \centering
@@ -2592,7 +2680,7 @@ Dataset             & Mixtures    & Others      & Polymers    & Wood-Based  & To
 Aalto Woods         & 0           & 0           & 0           & 2           & 2           \\ \hline
 FAA Polymers        & 0           & 0           & 8           & 0           & 8           \\ \hline
 FPL Materials       & 0           & 0           & 0           & 8           & 8           \\ \hline
-FSRI Materials      & 0           & 26          & 30          & 15          & 71          \\ \hline
+FSRI Materials      & 0           & 25          & 30          & 15          & 70         \\ \hline
 JH Materials        & 5           & 1           & 4           & 5           & 15          \\ \hline
 RISE Materials      & 37          & 3           & 16          & 5           & 61          \\ \hline
 Total               & 42          & 30          & 58          & 35          & 165         \\ \hline
@@ -2626,9 +2714,9 @@ The Separate Effect Test for Condensation Modeling (SETCOM) facility is located 
 
 \subsubsection{Modeling Notes}
 
-Prior to running the validation cases, a set of five scoping simulations were run with no condensation. These simulations used a short length of the test section with {\ct PERIODIC} boundary conditions. These cases were used to determine the rms velocity as a function of the mean velocity.
+Prior to running the validation cases, a set of five scoping simulations were run with no condensation. These simulations used a short length of the test section with \ct{PERIODIC} boundary conditions. These cases were used to determine the rms velocity as a function of the mean velocity.
 
-The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
+The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an \ct{OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate \ct{TMP_FRONT} was set to derived temperature as a function of length along the plate.
 
 \begin{table}[h]
    \caption[Summary of SETCOM condensation experiments selected for model validation]{Summary of SETCOM condensation experiments selected for model validation.}
@@ -2753,7 +2841,7 @@ Kermit Smyth et al.~conducted diffusion flame experiments at NIST using a methan
 
 A two-step combustion scheme (a modified version of the mechanism by Andersen et al.~\cite{AndersenJ:1}) is used to simulate the Smyth Slot Burner Experiment.  A 2D DNS calculation is run at two different grid resolutions: 0.250~mm and 0.125~mm.  In the modified mechanism, the hydrocarbon/oxygen reaction to CO is assumed to be infinitely fast (mixed is burnt) to avoid complications of modeling ignition.  The reversible CO to CO$_2$ reaction is modeled with Arrhenius kinetics.  As discussed by Westbrook and Dryer~\cite{Westbrook:1}, the kinetic constants for the reduced CO mechanism may be model dependent.  Here, the Arrhenius constant for the forward CO to CO$_2$ reaction is tuned to match the Smyth experimental data.
 
-A second set of simulations is run at the same two spatial resolutions, but in these cases both the first and second reactions are infinitely fast. However, the first reaction, where fuel is converted to CO and H$_2$O, proceeds before the second, where the CO is converted to CO$_2$. That is, the reactions are run serially rather than in parallel to illustrate that while both reactions are relatively fast compared to the mixing time scale, the first reaction is faster than the second. This assumption breaks down when the mixing time scale drops below approximately $3 \times 10^{-4}$~s, which is on the order of $\delta/s_{\rm L}$, the flame thickness divided by the laminar flame speed. For this reason, a lower limit on the time-scale ({\ct TAU\_CHEM=3E-4}) is imposed. This same modeling strategy is used in the large eddy simulations of the NIST Reduced Scale Enclosure (RSE) experiments of 1994 (Sec.~\ref{NIST_RSE_1994_Description}), RSE 2007 (Sec.~\ref{NIST_RSE_2007_Description}), Full-Scale Enclosure (FSE) 2008 (Sec.~\ref{NIST_FSE_2008_Description}), UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}, and Waterloo Methanol Experiments (Sec.~\ref{Waterloo_Methanol_Description}). Note that in these LES simulations, the parameter {\ct TAU\_CHEM} is irrelevant---it is only needed when the grid resolution is on the order of 0.1~mm or less.
+A second set of simulations is run at the same two spatial resolutions, but in these cases both the first and second reactions are infinitely fast. However, the first reaction, where fuel is converted to CO and H$_2$O, proceeds before the second, where the CO is converted to CO$_2$. That is, the reactions are run serially rather than in parallel to illustrate that while both reactions are relatively fast compared to the mixing time scale, the first reaction is faster than the second. This assumption breaks down when the mixing time scale drops below approximately $3 \times 10^{-4}$~s, which is on the order of $\delta/s_{\rm L}$, the flame thickness divided by the laminar flame speed. For this reason, a lower limit on the time-scale (\ct{TAU_CHEM=3E-4}) is imposed. This same modeling strategy is used in the large eddy simulations of the NIST Reduced Scale Enclosure (RSE) experiments of 1994 (Sec.~\ref{NIST_RSE_1994_Description}), RSE 2007 (Sec.~\ref{NIST_RSE_2007_Description}), Full-Scale Enclosure (FSE) 2008 (Sec.~\ref{NIST_FSE_2008_Description}), UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}, and Waterloo Methanol Experiments (Sec.~\ref{Waterloo_Methanol_Description}). Note that in these LES simulations, the parameter \ct{TAU_CHEM} is irrelevant---it is only needed when the grid resolution is on the order of 0.1~mm or less.
 
 Comparisons of the simulations with measurements can be found in Sec.~\ref{Smyth_Reactions}.
 
@@ -2920,9 +3008,23 @@ Fire hose nozzle jets with nominal diameters of 1.3 cm up to 2.5 cm were studied
 
 \subsubsection{Modeling Notes}
 
-FDS models liquid water by means of Lagrangian particles.  This is the same model used to describe sprinkler droplets.  A key difference between sprinklers and hose streams, however, is that sprinkler nozzles purposely atomize the water jet immediately as the water is introduced into the computational domain.  To model hose streams, FDS introduces two new parameters to the {\ct PART} class: {\ct PRIMARY\_BREAKUP\_LENGTH} and {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}.  The particles enter the domain and for the time period before the particle has traveled the distance {\ct PRIMARY\_BREAKUP\_LENGTH}, the particle drag coefficient is multiplied by the specified {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR}, which may be zero.  In this way, FDS can mimic the jet core, which experiences little to no drag before the jet goes unstable.
+FDS models liquid water by means of Lagrangian particles.  This is the same model used to describe sprinkler droplets.  A key difference between sprinklers and hose streams, however, is that sprinkler nozzles purposely atomize the water jet immediately as the water is introduced into the computational domain.  To model hose streams, FDS introduces two new parameters to the \ct{PART} class: \ct{PRIMARY_BREAKUP_LENGTH} and \ct{PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR}.  The particles enter the domain and for the time period before the particle has traveled the distance \ct{PRIMARY_BREAKUP_LENGTH}, the particle drag coefficient is multiplied by the specified \ct{PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR}, which may be zero.  In this way, FDS can mimic the jet core, which experiences little to no drag before the jet goes unstable.
 
-To calibrate the FDS results (this case is a calibration exercise more than a validation), the {\ct PRIMARY\_} {\ct BREAKUP\_LENGTH} was set to twice the value of $Z$ (the value of 50 \% jet breakup) in the paper and the {\ct PRIMARY\_BREAKUP\_DRAG\_REDUCTION\_FACTOR} was set to zero.
+To calibrate the FDS results (this case is a calibration exercise more than a validation), the \ct{PRIMARY_} \ct{BREAKUP_LENGTH} was set to twice the value of $Z$ (the value of 50 \% jet breakup) in the paper and the \ct{PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR} was set to zero.
+
+
+\section{TUS Facade Experiments}
+\label{TUS_Facade_Description}
+
+Yoshioka and co-workers~\cite{Yoshioka:FST2012} at the Tokyo University of Science (TUS) conducted experiments in a large-scale facade apparatus based on ISO~13785-2. In the experiments, a gas-fueled fire within a compartment extends outside of an opening and impinges on a non-combustible vertical lining above the opening. Quasi-steady measurements of temperature and heat flux were taken.
+
+The compartment dimension were 4.0~m by 4.0~m by 1.7~m. Note that the dimensions are incorrect in Ref.~\cite{Yoshioka:FST2012}. The facade was 5.7~m tall, with a 1.2~m wide side wall made of the same material as the main facade. The fire compartment had one 1.2~m tall and 2.0~m wide window in the facade wall, but the window was partially closed in two of the experiments. The rear of the fire compartment had four 0.5~m by 0.6~m openings that were open or closed according to the desired ventilation condition. These openings were closed by heavy fire blankets, and there was considerable uncertainty in the actual opening area.
+
+A mixture of gaseous fuels supplied by the local utility was used as a fuel. It was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each. 
+
+\subsubsection{Modeling Notes}
+
+Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}. The grid resolution is 10~cm. The fuel is assumed to be propane with a soot yield of 0.015, CO yield of 0.015, and radiative fraction of 0.20. 
 
 
 \section{UL/NIST Vent Experiments}
@@ -3490,8 +3592,8 @@ The test parameters for these experiments are given in Table~\ref{Corsica_Parame
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Exp.         & Dry Fuel Loading    & Slope       & Dry Mass per Volume  & Packing & Bed Depth       \\
-No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)          \\ \hline \hline
+Exp.         & Dry Fuel Loading    & Slope     & Dry Mass per Volume  & Packing & Bed Depth       \\
+No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)            \\ \hline \hline
 1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5             \\ \hline
 2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5             \\ \hline
 3\_0         & 1.2                 & 0         & 18                   & 0.035   & 6.5             \\ \hline
@@ -3535,7 +3637,7 @@ U(z) = 9.144 \left(\frac{z}{0.0396}\right)^p
 \end{equation}
 where 9.144 m/s is the reference wind speed at the 0.0396~m roof height of the scale model and the power law exponent $p=0.1173$ was fit to the experimental data.
 
-Fluctuations at the inlet boundary are generated by the Synthetic Eddy Method (SEM) of Jarrin~\cite{Jarrin:2008}. The desired value of {\ct N\_EDDY} (the number of eddies generated at the inlet) is the largest possible value that does not slow down the simulation. This value is determined by running a number of simulations for the same time while varying the {\ct N\_EDDY} input and recording the total run time. The other turbulence parameters, {\ct L\_EDDY} (characteristic eddy length) and {\ct REYNOLDS\_STRESS}, are set based on the turbulence intensity data from the UWO experiments. The Reynolds stresses are found by multiplying the turbulence intensity in each direction by the wind velocity at roof height to determine the root mean square of the velocity fluctuations, and then squaring the root mean square values.
+Fluctuations at the inlet boundary are generated by the Synthetic Eddy Method (SEM) of Jarrin~\cite{Jarrin:2008}. The desired value of \ct{N_EDDY} (the number of eddies generated at the inlet) is the largest possible value that does not slow down the simulation. This value is determined by running a number of simulations for the same time while varying the \ct{N_EDDY} input and recording the total run time. The other turbulence parameters, \ct{L_EDDY} (characteristic eddy length) and \ct{REYNOLDS_STRESS}, are set based on the turbulence intensity data from the UWO experiments. The Reynolds stresses are found by multiplying the turbulence intensity in each direction by the wind velocity at roof height to determine the root mean square of the velocity fluctuations, and then squaring the root mean square values.
 
 The side walls and roof of the wind tunnel are set to free-slip. The roughness length at the ground is specified to be 0.0001~m, 1/100 the full-scale value of 0.01~m. The outlet of the wind tunnel is set to an ``open'' boundary condition, where pressure is set to the ambient pressure.
 

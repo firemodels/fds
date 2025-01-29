@@ -8,7 +8,7 @@ USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE SOOT_ROUTINES, ONLY: SOOT_SURFACE_OXIDATION
 #ifdef WITH_SUNDIALS
-USE CVODE_INTERFACE
+USE CVODE_INTERFACE, ONLY: CUR_CFD_TIME, CVODE_SERIAL
 #endif
 
 IMPLICIT NONE (TYPE,EXTERNAL)
@@ -722,7 +722,7 @@ REAL(EB) :: A1(1:N_TRACKED_SPECIES),A2(1:N_TRACKED_SPECIES),A4(1:N_TRACKED_SPECI
             ZZ_TEMP(1:N_TRACKED_SPECIES), ATOL(1:N_TRACKED_SPECIES)
 INTEGER :: NR,NS,ITER,TVI,RICH_ITER,TIME_ITER,RICH_ITER_MAX
 INTEGER, PARAMETER :: TV_ITER_MIN=5
-LOGICAL :: TV_FLUCT(1:N_TRACKED_SPECIES),EXTINCT,NO_REACTIONS
+LOGICAL :: TV_FLUCT(1:N_TRACKED_SPECIES),EXTINCT,NO_REACTIONS,NO_REAC_2,NO_REAC_4
 DOUBLE PRECISION :: T1,T2
 TYPE(REACTION_TYPE), POINTER :: RN !,R1=>NULL()
 
@@ -731,7 +731,6 @@ EXTINCT = .FALSE.
 NO_REACTIONS = .FALSE.
 
 ! Determine the mixing time for this cell
-
 
 IF (FIXED_MIX_TIME>0._EB) THEN
    MIX_TIME_OUT=FIXED_MIX_TIME
@@ -822,16 +821,15 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          ! May be used with N_FIXED_CHEMISTRY_SUBSTEPS, but default mode is to use error estimator and variable DT_SUB
 
          RICH_EX_LOOP: DO RICH_ITER = 1,RICH_ITER_MAX
-
             DT_SUB = MIN(DT_SUB_NEW,DT-DT_ITER)
             ! FDS Tech Guide (E.3), (E.4), (E.5)
             CALL FIRE_RK2(A1,ZZ_MIXED,ZZ_0,ZETA_1,ZETA_0,DT_SUB,1,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
                         Q_REAC_1,TOTAL_MIXED_MASS_1,NO_REACTIONS)
             IF (NO_REACTIONS) EXIT RICH_EX_LOOP
             CALL FIRE_RK2(A2,ZZ_MIXED,ZZ_0,ZETA_2,ZETA_0,DT_SUB,2,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
-                        Q_REAC_2,TOTAL_MIXED_MASS_2,NO_REACTIONS)
+                        Q_REAC_2,TOTAL_MIXED_MASS_2,NO_REAC_2)
             CALL FIRE_RK2(A4,ZZ_MIXED,ZZ_0,ZETA_4,ZETA_0,DT_SUB,4,TMP_IN,RHO_HAT,CELL_MASS,TAU_MIX,&
-                        Q_REAC_4,TOTAL_MIXED_MASS_4,NO_REACTIONS)
+                        Q_REAC_4,TOTAL_MIXED_MASS_4,NO_REAC_4)
             ! Species Error Analysis
             ERR_EST = ABS((4._EB*A4-5._EB*A2+A1))/45._EB ! FDS Tech Guide (E.8)
             ZZ_TEMP = (4._EB*A4-A2)*ONTH ! FDS Tech Guide (E.7)
@@ -849,7 +847,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
 
          IF (NO_REACTIONS) THEN
             ZZ_MIXED = A1
-            Q_REAC_SUB = 0._EB
+            Q_REAC_SUB = Q_REAC_1
             ZETA = ZETA_1
          ELSE
             IF (ANY(ZZ_TEMP < -TWO_EPSILON_EB))THEN
@@ -870,6 +868,9 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          DO NS =1,N_TRACKED_SPECIES
             ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
          ENDDO
+#ifdef WITH_SUNDIALS
+         CUR_CFD_TIME = T ! Set current cfd time in cvode, for logging purpose.
+#endif
          CALL  CVODE(ZZ_MIXED,TMP_IN,PRES_IN, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL)
          Q_REAC_SUB = 0._EB
    END SELECT INTEGRATOR_SELECT
@@ -963,11 +964,10 @@ ENDIF
 
 END SUBROUTINE COMBUSTION_MODEL
 
-!> \call cvode_interface after converting mass fraction to molar concentration.
-!> \during return revert back the molar concentration to mass fraction.
+!> \brief call cvode_interface after converting mass fraction to molar concentration.
 !> \param ZZ species mass fraction array
 !> \param TMP_IN is the temperature
-!> \param PR_IN is the pressure
+!> \param PRES_IN is the pressure
 !> \param TCUR is the start time in seconds
 !> \param TEND is the end time in seconds
 !> \param GLOBAL_ODE_REL_ERROR is the relative error for all the species (REAL_EB)
@@ -997,7 +997,7 @@ RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K,
 ! Convert to concentration
 CC = 0._EB
 DO NS =1,N_TRACKED_SPECIES
-  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = gm/mol = kg/kmol, [CC] = kmol/m3
+  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = g/mol = kg/kmol, [CC] = kmol/m3
 ENDDO
 WHERE(CC<0._EB) CC=0._EB
 
@@ -1617,8 +1617,8 @@ TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 
 CALL POINT_TO_MESH(NM)
 
-ZZ_INTERIM=> SCALAR_WORK1
-ZZ_INTERIM = ZZ
+ZZ_INTERIM=> SWORK1
+ZZ_INTERIM(:,:,:,1:) = ZZ(:,:,:,1:) ! Lower bound may be zero for MW flux correction
 RHO_INTERIM => WORK1
 RHO_INTERIM = RHO
 TMP_INTERIM => WORK2
@@ -1899,7 +1899,7 @@ END SUBROUTINE CONDENSATION_EVAPORATION
 !> \brief Calculate fall-off function
 !> \param TMP is the current temperature.
 !> \param P_RI is the reduced pressure
-!> \param RN is the reaction
+!> \param I is the reaction
 
 REAL(EB) FUNCTION CALC_FCENT(TMP, P_RI, I)
 REAL(EB), INTENT(IN) :: TMP, P_RI

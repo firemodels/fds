@@ -1,0 +1,10 @@
+The code in main.f90 runs 640 intances of the 3D loops for computation of 
+momentum RHS done in VELOCITY_FLUX. This is done on a single mesh with 64^3 cells.
+----------------------------------------------------------------------------------
+In Spark run the script:
+
+$./make_run_all.sh
+
+To check calculation times given by CPU_TIME() type:
+
+$grep Time *.txt

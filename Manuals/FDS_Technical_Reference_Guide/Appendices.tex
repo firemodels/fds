@@ -352,7 +352,7 @@ where $c_{p,\alpha}$ is the specific heat of $\alpha$ at constant pressure, $c_{
 \begin{align}
 \rho h_s = \rho c_p T = \rho T \sum_\alpha Y_\alpha c_{p,\alpha} = \rho R T \left(\frac{\gamma}{\gamma-1}\right)\sum_\alpha \frac{Y_\alpha}{W_\alpha} = \rho \frac{R T}{\overline{W}} \left(\frac{\gamma}{\gamma-1}\right) = \bar{p}\left(\frac{\gamma}{\gamma-1}\right)
 \end{align}
-Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and uniform.  Consequently, $\partial (\rho h_s)/\partial t = 0$ and $\nabla (\rho h_s) = 0$, so we require no corrections to the divergence expression.  This improves the speed of the code since these divergence corrections are rather expensive.  To employ this simplification, the user enters \emph{both} {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} and {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line of the input file.
+Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and uniform.  Consequently, $\partial (\rho h_s)/\partial t = 0$ and $\nabla (\rho h_s) = 0$, so we require no corrections to the divergence expression.  This improves the speed of the code since these divergence corrections are rather expensive.  To employ this simplification, the user enters \emph{both} \ct{CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} and \ct{STRATIFICATION=.FALSE.} on the \ct{MISC} line of the input file.
 
 
 %\chapter{Multi-environment Extension of Reactor Model}
@@ -846,22 +846,22 @@ The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which
 
 The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref{eq:chemistry_ode_system}) and (\ref{eq:TemperatureDerivative})
 \begin{equation}\label{eq:chemistry_ode_system_appendix}
-\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{reac}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{sp}
+\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{\rm r}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{\rm s}
 \end{equation}
 \begin{equation}\label{eq:TemperatureDerivativeAppendix}
-\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j
 \end{equation}
 For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration \si{(kmol/m^3)} of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate_appendix}
-r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
+r_i =  k_{f,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
 For Eq.~(\ref{eq:TemperatureDerivativeAppendix}), $\rho$  is the density \si{(kg/m^3)}, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system_appendix}).
 
 The system of ODEs can be represented by:
 \be
 \begin{aligned}
-f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{sp}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
-  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{sp}} \ \dot{T} \right]^T \
+f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{\rm s}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
+  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{\rm s}} \ \dot{T} \right]^T \
 \end{aligned}
 \ee
 
@@ -870,12 +870,12 @@ Providing an analytical Jacobian to the CVODE solver can significantly accelerat
 \begin{aligned}
 J &=
 \begin{bmatrix}
-\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
-\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
+\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
+\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
 \ldots & \ldots & \ldots & \ldots & | & \ldots\\
-\frac{\partial \dot{\omega}_1}{\partial C_{N_{sp}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{sp}}} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_{N_{sp}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{sp}}}\\
+\frac{\partial \dot{\omega}_1}{\partial C_{N_{\rm s}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{\rm s}}} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_{N_{\rm s}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{\rm s}}}\\
 ---& --- & --- & --- & | & ---\\
-\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
+\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
 \end{bmatrix}
 &=\begin{bmatrix}
 \frac{\partial \mathbf{\dot{\omega}}}{\mathbf{\partial C}}& \frac{\partial \dot{T}}{\partial \mathbf{C}}\\
@@ -888,7 +888,7 @@ J &=
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to concentration, we can write:
 \begin{equation}\label{eq:Jac1st}
 \begin{aligned}
-\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
+\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
 \end{aligned}
 \end{equation}
 Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
@@ -896,8 +896,8 @@ Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~
 \subsection*{Calculation of $\frac{\partial \mathbf{\dot{\omega}}}{\partial T}$}
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to temperature, we can write:
 \begin{multline}\label{eq:Jac2nd}
-\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
-- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
+\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
+- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
 \end{multline}
 Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}$ can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
 \begin{equation} \label{eq:kfTmpDerivative}
@@ -912,14 +912,14 @@ Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}
 Here, $K_i$ is the concentration equilibrium constant obtained using Eq.~(\ref{eq:equilibrium_const}). Through mathematical derivation, it can be shown that:
 \begin{equation}\label{eq:EqConstTmpDerivative}
 \begin{aligned}
-\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right) 
+\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right)
 \end{aligned}
 \end{equation}
 Here, $\Delta S_{\mathrm{rxn}}$ is the change in entropy, and can be calculated similar to the process described in Section \ref{sec:equilChem}.
 \begin{equation}\label{eq:ConcTmpDerivative}
 \begin{aligned}
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
 \end{aligned}
 \end{equation}
 In the above derivation, the relation $\frac{\partial C_j}{\partial T} = - \frac{C_j}{T}$ is used.
@@ -930,13 +930,13 @@ Using Eqs.~(\ref{eq:kfTmpDerivative})-(\ref{eq:ConcTmpDerivative}), all the term
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to concentration, we can write:
 \begin{equation} \label{eq:Jac3rd}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j  \right) \\
-&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{sp}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{aligned}
 \end{equation}
 Using the relations $\frac{\partial \rho}{\partial C_l} = W_l$ and $\frac{\partial c_p}{\partial C_l} = - \frac{W_l}{\rho}\left( c_p -c_{p,l} \right)$, we can rewrite Eq. ~(\ref{eq:Jac3rd}) as:
 \begin{equation} \label{eq:Jac3rd_final}
-\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{sp}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{equation}
 Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:Jac3rd_final}) can be obtained using Eq. \ref{eq:Jac1st}.
 
@@ -944,8 +944,8 @@ Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to temperature, we can write:
 \begin{equation} \label{eq:Jac4th}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j  \right) \\
-&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j 
+\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j
 \end{aligned}
 \end{equation}
 To derive the above equation, the relations $\frac{\partial \rho}{\partial T} = -\frac{\rho}{T}$ and $\frac{\partial h_j}{\partial T} = c_{p,j}$ are used. The term $\frac{\partial \dot{\omega}_j}{\partial T}$ can be obtained using Eq.~(\ref{eq:Jac2nd}).
@@ -1754,10 +1754,10 @@ and therefore the boundary condition becomes
 Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
-  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{\rm s,1}^{n+1} +
- \underbrace{ \frac{  h^{n+1} \, T_{\rm g}^{n+1} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_\textct{QDXKF}
+  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_{\hbox{\ct{RFACF2}}} T_{\rm s,1}^{n+1} +
+ \underbrace{ \frac{  h^{n+1} \, T_{\rm g}^{n+1} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_{\hbox{\ct{QDXKF}}}
 \end{equation}
-Note that \textct{RFACF2} and similar names are used in the actual source code to represent these quantities.
+Note that \ct{RFACF2} and similar names are used in the actual source code to represent these quantities.
 In case of non-insulated backing in Cartesian geometry, the temperature of virtual node $N+1$ is calculated the same way.
 For a Cartesian geometry with an insulated backing or for cylindrical and spherical geometries, $\epsilon$, $\dot{q}_{\rm r,in}''$, and $h$ are set to 0.
 
@@ -1779,11 +1779,11 @@ where
 To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal linear solver is used:
 \begin{equation}
 \begin{split}
-& C_1 = C_1 - B_1 \cdot \textct{QDXKF} \\
-& C_N = C_N - A_N \cdot \textct{QDXKB} \\
+& C_1 = C_1 - B_1 \cdot \hbox{\ct{QDXKF}} \\
+& C_N = C_N - A_N \cdot \hbox{\ct{QDXKB}} \\
 & \\
-& D_1 = D_1 + B_1 \cdot \textct{RFACF2} \\
-& D_N = D_N + A_N \cdot \textct{RFACB2} \\
+& D_1 = D_1 + B_1 \cdot \hbox{\ct{RFACF2}} \\
+& D_N = D_N + A_N \cdot \hbox{\ct{RFACB2}} \\
 & \\
 & D_i = D_i - \frac{B_i \; A_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1 \\
 & C_i = C_i - \frac{B_i \; C_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1\\
@@ -1819,8 +1819,8 @@ The ghost cell value at $n+1$ may then be written in terms of the wall temperatu
 \end{align}
 Comparing Eq.~(\ref{T_ghost}) with Eq.~(\ref{T0}), it is apparent that
 \begin{align}
-\textct{RFACF2} &= -1 \\
-\textct{QDXKF}  &= 2\, T_{\rm w}
+\hbox{\ct{RFACF2}} &= -1 \\
+\hbox{\ct{QDXKF}}  &= 2\, T_{\rm w}
 \end{align}
 
 
@@ -2003,9 +2003,9 @@ It is noted that the temperature dependence of the heat of reaction is generally
 
 For the first step, reference enthalpies for all the components in a reaction must be determined. FDS has a database for many common gases that includes predefined reference enthalpies. In a typical simulation any gases not in the database are likely fuels participating in combustion reactions where the reference enthalpy can be determined from the heat of combustion and the reference enthalpies of the combustion products. Therefore, gas reference enthalpies are treated as known quantities for the solid phase. A similar rationale applies to liquid particles produced by a solid phase reaction. Definition of a liquid particle includes specifying the gas it evaporates to and the heat of vaporization which means a reference enthalpy for the liquid can be determined. Reference enthalpies for solid materials are generally not known except for some pure substances. Even if available, the published values when placed in Eq.~\ref{eqn_solid_e_cons} may not exactly result in the specified heat of reaction. Reference enthalpies for any solid material participating as a reactant or product in a solid phase reaction must be determined. For solid materials not participating in reactions the assumption that the reference enthalpy is 0~kJ/kg at 0~K suffices as there is no exchange of mass (and its asssociated enthalpy) with the gas phase. Solid phase products for a solid phase reaction include both solid materials that remain part of the reacting surface and solid materials that leave the surface in the form of particles (i.e., a firebrand). Finding these enthalpies is done by solving a system of linear equations where there is one equation for every material reaction and one unknown for the reference enthalpy of every solid material participating in a material reaction as reactant or product. To build the matrix, Eq.~\ref{eqn_solid_e_cons} is applied to every material reaction. The enthalpy of material $\alpha$, $h_{\alpha}$, is given by~\cite{NIST_JANAF}:
 \be
-  h_{\alpha}(T) = h_{\alpha,ref} + \int_{T_{\rm ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T
+  h_{\alpha}(T_{\rm R}) = h_{\alpha,{\rm ref}} + \int_{T_{\rm ref}}^{T_{\rm R}} c_{p,\alpha}(T) \, \mbox{d}T
 \ee
-In this equation $h_{\alpha,ref}$ is the enthalpy at the temperature $T_{\rm ref}$. This is the value being solved for. In many tabulations of solid enthalpies the value of $T_{\rm ref}$ is 298.15~K; however, since it can be determined at any reference temperature, for convenience a temperature of 0~K is picked. The specific heat of a material, $c_{p,\alpha}(T)$, is defined in the input file. Evaluating the integral requires picking the upper bound temperature, T$_R$. This is taken as the reference temperature for the reaction. This may be user defined as part of the input. If not, it can be determined from the reaction $A_{\alpha\beta}$ and $E_{\alpha\beta}$ by performing a TGA simulation for material $\alpha$, reaction $\beta$. The value for $T_R$ is set to the temperature of the peak reaction rate. With $T_R$ defined, the various $\nu_{\alpha',\alpha \beta} h_{\alpha,ref}$ terms can be collected on the left hand side, and the heats of reaction and the various $\nu_{\alpha',\alpha \beta} \int_{T_{\rm ref}}^{T_{R}} c_{p,\alpha}(T) \, \mbox{d}T$ terms can be collected on the right hand side. The result is a system of linear equations $A \bar{x} = \bar{b}$ where the unknowns, $\bar{x}$, are the values of $h_{\alpha,ref}$; however, it is not guaranteed that there are an equal number of reactions and unknown material reference enthalpies. Solving the system of equations depends on the relative numbers of equations and unknowns as follows:
+In this equation $h_{\alpha,{\rm ref}}$ is the enthalpy at the temperature $T_{\rm ref}$. This is the value being solved for. In many tabulations of solid enthalpies the value of $T_{\rm ref}$ is 298.15~K; however, since it can be determined at any reference temperature, for convenience a temperature of 0~K is picked. The specific heat of a material, $c_{p,\alpha}(T)$, is defined in the input file. Evaluating the integral requires picking the upper bound temperature, $T_{\rm R}$. This is taken as the reference temperature for the reaction. This may be user defined as part of the input. If not, it can be determined from the reaction $A_{\alpha\beta}$ and $E_{\alpha\beta}$ by performing a TGA simulation for material $\alpha$, reaction $\beta$. The value for $T_{\rm R}$ is set to the temperature of the peak reaction rate. With $T_{\rm R}$ defined, the various $\nu_{\alpha',\alpha \beta} h_{\alpha',{\rm ref}}$ terms can be collected on the left hand side, and the heats of reaction and the various $\nu_{\alpha',\alpha \beta} \int_{T_{\rm ref}}^{T_{\rm R}} c_{p,\alpha'}(T) \, \mbox{d}T$ terms can be collected on the right hand side. The result is a system of linear equations $A \bar{x} = \bar{b}$ where the unknowns, $\bar{x}$, are the values of $h_{\alpha,ref}$; however, it is not guaranteed that there are an equal number of reactions and unknown material reference enthalpies. Solving the system of equations depends on the relative numbers of equations and unknowns as follows:
 
 \begin{description}
    \item[Reactions = unknowns]{Solution can be found by a simple solution of the linear system: $\bar{x} = A^{-1} \bar{b}$}
@@ -2016,13 +2016,13 @@ The first two cases are typically expected. The first case is where all material
 
 If there is a reaction where mass is destroyed (the LHS of Eq.~\eqref{eq:solid_nusum} is less than 1), this approach must be modified. An assumption must be made about the destroyed mass so that the reaction $\nu$ values balance. In this case, if a reaction looses mass, FDS assumes that the lost mass has the same temperature dependent specific heat as the original material. FDS then adds a virtual material for that product which is included in the solution vector. The virtual material is not tracked outside of determining reference enthalpies.
 
-Once the reference enthalpies are known, the heat of reaction at a specific temperature can be determined by applying Eq.~\ref{eqn_solid_e_cons} at that temperature and solving for the heat of reaction.
+Once the reference enthalpies are known, the heat of reaction at a specific temperature can be determined by applying Eq.~(\ref{eqn_solid_e_cons}) at that temperature and solving for the heat of reaction.
 
 \subsection{Accounting for Solid Cell and Gas Cell Temperature Differences}
 
 The second aspect of energy conservation during a solid phase reaction is accounting for the different temperatures at which reactants and products may exist. In FDS the solid phase reaction occurs at the temperature of the solid cell being evaluated. Therefore, if the reaction consumes a gas, that gas must first be brought to the solid temperature. If the gas is hotter or cooler, an energy source or sink term will exist in the solid phase. Reaction products are produced at the solid temperature. For products that are other solid materials, nothing needs to be done as their solid temperature remains the same. For a Lagrangian particle, particles are produced at the solid temperature as well. Again, no further adjustments are needed. Note, that since particles may not be created every time step, FDS keeps track of the particle mass and particle enthalpy created by material reactions. At the next particle injection time, the particle is created at a temperature that conserves the accumulated enthalpy. For a gas product, the reaction produces the gas at the solid temperature. In FDS, the gas is injected as if it is at the current gas cell temperature. Therefore, the opposite adjustment must be made for gases that are produced as it made for gases that are consumed. In the gas phase if the current gas cell temperature is hotter than the solid, an energy sink term must be generated. In both cases the term is the mass flow rate in kg/s times the difference in enthalpy of the produced or consumed material between the gas temperature and the solid temperature (kJ/kg).
 \be
-\dot{q}_{\alpha'}'''=r_{\alpha \beta}  \nu_{\alpha',\alpha \beta} \left( h_{\alpha'}(T_g) - h_{\alpha'}(T_s) \right)
+\dot{q}_{\alpha'}'''= \sum_\alpha \sum_\beta r_{\alpha \beta}  \nu_{\alpha',\alpha \beta} \left( h_{\alpha'}(T_{\rm g}) - h_{\alpha'}(T_{\rm s}) \right)
 \ee
 This term is added to the solid cell enthalpy for gases that are consumed ($\nu_{\alpha',\alpha \beta}<0$ when $\alpha'$ is a gas). This term is subtracted from the gas cell enthalpy for the gases that are produced ($\nu_{\alpha',\alpha \beta}>0$ when $\alpha'$ is a gas). When a lumped species is specified for a material reaction, FDS will attempt to determine what primitive sub-species is actually involved in the reaction. For example, consider a solid phase combustion reaction where the oxygen in the air lumped species plus a material is converted to products. Assuming the products species is appropriately defined, FDS can examine the difference in the masses of primitive species to determine that oxygen is consumed from air but the other components (e.g., ambient N$_2$, CO$_2$, and H$_2$O) are simply passed through to the products side. In this case the enthalpy correction term for the solid would only include the O$_2$ consumption, and the enthalpy correction term for the gas would only include those products in excess of the original air minus its oxygen.
 
@@ -2131,7 +2131,7 @@ In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:
 
 When using Eq.~\ref{Spyro7} to obtain $\dq_{{\rm net},2}''$ in Eq.~\ref{Spyro4}, an approach is needed to determine $\Gamma$ and $\dq_{\rm flame}''$. In an actual cone test these will depend upon the material being burned as the heat of combustion, burning rate, and soot yield will all influence the flame heat flux and the absorption of the cone radiation. As there is no simple analytical model to predict these, an empirical approach was developed using FDS simulations of a cone calorimeter.
 
-The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\unit{MJ/kg}) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{\rm cone}''=50$~\unit{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\unit{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives
+The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A 5~mm grid size was used putting 20 cells across the sample. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\unit{MJ/kg}), radiative fraction (10, 20, 30, 40, 50, and 60~\%) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{\rm cone}''=50$~\unit{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\unit{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives
 $\dq_{\rm flame}''$, the delta between burning with the cone on and burning with the cone off and on gives the cone flux reaching the sample, and the cone with no burning phase gives $\dq_{\rm cone}''$. The difference between the cone flux reaching the sample and $\dq_{\rm cone}''$ gives $\Gamma$.
 
 \begin{figure}
@@ -2143,25 +2143,5 @@ $\dq_{\rm flame}''$, the delta between burning with the cone on and burning with
 
 A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,100~\unit{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\unit{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\unit{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10, 20 and 30~\unit{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2, resulting in formulas of CH$_{2}$O$_{0.302}$, CH$_{2}$O$_{0.658}$, and CH$_{2}$O$_{1.322}$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,100~\unit{kJ/kg}.
 
-If $\dq_{\rm flame}''$ for each heat of combustion is normalized by the maximum value for all HRRPUA, the results collapse as shown in the left of Fig~\ref{fig:Spyro_hoc}. We can then determine a quadratic fit for the maximum $\dq_{\rm flame}''$ as a function of heat of combustion as shown in the right of Fig~\ref{fig:Spyro_hoc}.
+The simulation results were processed to determine $\dq_{\rm flame}''$ and $\Gamma$ for all permutations of the heat of combustion, the radiative fraction, the soot yield, and the HRRPUA. The processed results were interpolated into two four dimensional arrays with one for $\dq_{\rm flame}''$ and one for $\Gamma$. The array dimensions are the heat of combustion in increments of 10~MJ/kg, the soot yield in increments of 1~\%, the HRRPUA in increments of 100~\unit{kW/m^2}, and the radiative fraction in increments of 10~\%. During input processing, FDS uses the gas phase combustion reactions and the surface boundary conditions to determine the mass flux weighted effective heat of combustion and soot yield for all surfaces using the scaling method. This allows for the mass flux due to the HRRPUA to be defined as multiple gas species at fixed ratios. Then for each cone curve provided for a surface, FDS interpolates the $\dq_{\rm flame}''$ and $\Gamma$ arrays to construct a curve of the reference heat flux.
 
-\begin{figure}
-    \centering
-    \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
-        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_ratio} &
-        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_max}
-    \end{tabular*}
-    \caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA. (Right) Maximum flame heat flux as a function of $\Delta h$.}
-    \label{fig:Spyro_hoc}
-\end{figure}
-
-Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta h + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{\rm ref}''$ for a cone test, first, the maximum $\dq_{\rm flame}''$ is determined using $\Delta h$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second,  $\dq_{\rm flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, third, $\Gamma$ is determined and used to adjust  $\dq_{\rm cone}''$, and finally, $\dq_{\rm ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
-
-\begin{figure}[!ht]
-\centering
-\begin{tabular}{c}
-\includegraphics[height=3.5in]{FIGURES/Spyro_cone_error}
-\end{tabular}
-\caption[Scatterplot for predicted vs. empirical reference heat flux.]{Scatterplot for predicted vs. empirical reference heat flux.}
-\label{fig:Spyro_cone_error}
-\end{figure}

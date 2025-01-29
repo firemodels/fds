@@ -15,9 +15,11 @@ cd Droplet_Evaporation; ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Polymers; ./Run_All.sh $OPTIONS; cd ..
 cd Fleury_Heat_Flux; ./Run_All.sh $OPTIONS; cd ..
 cd FM_Parallel_Panels; ./Run_All.sh $OPTIONS; cd ..
+cd Frankman_Vegetation; ./Run_All.sh $OPTIONS; cd ..
 cd Hamins_Gas_Burners; ./Run_All.sh $OPTIONS; cd ..
 cd Heskestad_Flame_Height; ./Run_All.sh $OPTIONS; cd ..
 cd Insulation_Materials; ./Run_All.sh $OPTIONS; cd ..
+cd Kashiwagi_Gasification; ./Run_All.sh $OPTIONS; cd ..
 cd LEMTA_Spray; ./Run_All.sh $OPTIONS; cd ..
 cd LLNL_Enclosure; ./Run_All.sh $OPTIONS; cd ..
 cd NIST_He_2009; ./Run_All.sh $OPTIONS; cd ..
@@ -31,6 +33,7 @@ cd Restivo_Experiment; ./Run_All.sh $OPTIONS; cd ..
 cd Scaling_Pyrolysis; ./Run_All.sh $OPTIONS; cd ..
 cd SP_AST; ./Run_All.sh $OPTIONS; cd ..
 cd Steckler_Compartment; ./Run_All.sh $OPTIONS; cd ..
+cd Theobald_Hose_Stream; ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIST_Vents; ./Run_All.sh $OPTIONS; cd ..
 cd Ulster_SBI; ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Polymers; ./Run_All.sh $OPTIONS; cd ..

@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH -J loop3d_ifx
+#SBATCH -e /home/mnv/FireModels_fork_home/fds/Utilities/Misc/loop_test/loop3d_ifx.err
+#SBATCH -o /home/mnv/FireModels_fork_home/fds/Utilities/Misc/loop_test/loop3d_ifx.log
+#SBATCH --partition=firebot
+#SBATCH --ntasks=1
+#SBATCH --exclusive
+#SBATCH --cpus-per-task=1
+#SBATCH --time=99-99:99:99
+export OMP_NUM_THREADS=1
+
+cd /home/mnv/FireModels_fork_home/fds/Utilities/Misc/loop_test 
+./loop3d_ifx

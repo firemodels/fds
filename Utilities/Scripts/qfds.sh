@@ -59,7 +59,7 @@ function usage {
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -P use PBS/Torque"
   echo " -s   - stop job"
-  echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
+  echo " -t   - used for timing studies, run a job alone on a node"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
@@ -106,11 +106,6 @@ if [ "$QFDS_NCORES" == "" ]; then
 else
   n_cores=$QFDS_NCORES
 fi
-if [ "$NCORES_COMPUTENODE" == "" ]; then
-  NCORES_COMPUTENODE=$n_cores
-else
-  n_cores=$NCORES_COMPUTENODE
-fi
 
 #*** set default parameter values
 
@@ -124,8 +119,13 @@ max_mpi_processes_per_node=1000
 n_openmp_threads=1
 use_debug=
 use_devel=
-use_intel_mpi=1
-use_gnu_openmpi=
+if [ "$USE_OMPI_GNU" == "1" ]; then
+  use_gnu_openmpi=1
+  use_intel_mpi=
+else
+  use_intel_mpi=1
+  use_gnu_openmpi=
+fi
 EMAIL=
 casedir=
 use_default_casedir=
@@ -159,6 +159,7 @@ case $OPTION  in
    ;;
   G)
    use_gnu_openmpi=1
+   use_intel_mpi=
    ;;
   h)
    usage
@@ -354,7 +355,7 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
      MPIRUN="srun --mpi=pmi2 "
   else
 # use on spark ( USE_MPIRUN variable is set to 1 in /etc/profile )
-     if [ "$use_gnu_openmpi" == "1" ]; then
+     if [ "$use_gnu_openmpi" == "1" ] || [ "$use_intel_mpi" == "" ]; then
         MPIRUN="mpirun --bind-to none "
      else
         MPIRUN="mpirun "

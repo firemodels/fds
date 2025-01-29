@@ -18,7 +18,8 @@ cd Crown_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSTB_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd DelCo_Trainers;  ./Run_All.sh $OPTIONS; cd ..
-cd Edinburgh_Vegetation_Drag ./Run_All.sh $OPTIONS; cd..
+cd DoJ_HAI_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
+cd Edinburgh_Vegetation_Drag; ./Run_All.sh $OPTIONS; cd..
 cd FAA_Cargo_Compartments;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh $OPTIONS; cd ..
@@ -45,6 +46,7 @@ cd NIST_NRC;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_OLIVE-Fire;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_NRC_Transient_Combustibles;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
@@ -63,6 +65,7 @@ cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SP_Wood_Cribs;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
+cd TUS_Facade;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..

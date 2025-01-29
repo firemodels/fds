@@ -427,14 +427,16 @@ Combustion Efficiency   &               &          1                        & As
 \section{NIST Polymers}
 \label{NIST_Polymers_Properties}
 
-Black PMMA was chosen as the first material to be studied by the MaCFP Condenced Phase Subgroup. Its properties are listed in Table~\ref{NIST_PMMA_Properties}. It is assumed that the solid decomposes in two steps~\cite{Fiola:FSJ2021}.
+Black PMMA was chosen as the first material to be studied by the MaCFP Condensed Phase Subgroup. Its solid properties are listed in Table~\ref{NIST_PMMA_Properties} and its gas phase properties are listed in Table~\ref{MMA_Gas_Properties}. 
+
+It is assumed that solid PMMA decomposes in two steps~\cite{Fiola:FSJ2021}.
 \begin{eqnarray}
    \hbox{PMMA}_{\rm melt}   &\to& 0.98 \, \hbox{PMMA}_{\rm int} + 0.02 \, \hbox{MMA}_{\rm gas}  \label{PMMA1of2} \\
    \hbox{PMMA}_{\rm int}    &\to& 0.002 \, \hbox{Char} +         0.998 \, \hbox{MMA}_{\rm gas}   \label{PMMA2of2}
 \end{eqnarray}
 
 \begin{table}[!h]
-\caption[NIST PMMA properties]{Input parameters for PMMA~\cite{Fiola:FSJ2021}.}
+\caption[Solid phase PMMA properties]{Solid phase properties of PMMA~\cite{Fiola:FSJ2021}.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
@@ -451,6 +453,24 @@ Heat of Reaction            & kJ/kg         & $\begin{array}{ll} 5              
 \end{center}
 \label{NIST_PMMA_Properties}
 \end{table}
+
+\begin{table}[!h]
+\caption[Gas phase MMA properties]{Gas phase properties of MMA.}
+\begin{center}
+\begin{tabular}{|l|c|l|}
+\hline
+Property                                      & Value                                                                                                & Reference                         \\ \hline \hline
+Formula                                       & C$_5$H$_8$O$_2$                                                                                      & Table A.30 in Ref.~\cite{SFPE}    \\ \hline
+Heat of Combustion (MJ/kg)                    & 25.61                                                                                                & Table A.30 in Ref.~\cite{SFPE}    \\ \hline
+Specific Heat (kJ/kg/K)                       & $\begin{array}{l} 1.48 @ 114 \; ^\circ \hbox{C} \\ 1.90 @ 300 \; ^\circ \hbox{C} \end{array}$        & \cite{chemeo}                     \\ \hline
+CO Yield                                      & 0.010                                                                                                & Table A.39 in Ref.~\cite{SFPE}    \\ \hline
+Soot Yield                                    & 0.022                                                                                                & Table A.39 in Ref.~\cite{SFPE}    \\ \hline
+Radiative Fraction                            & 0.33                                                                                                 & \cite{Quintiere:FM2016}           \\ \hline
+\end{tabular}
+\end{center}
+\label{MMA_Gas_Properties}
+\end{table}
+
 
 Figure~\ref{NIST_PMMA} displays the results of measurements performed at NIST and FDS simulations of pyrolyzing black PMMA in the TGA (10~K/min), MCC (60~K/min) and DSC (10~K/min). Figure~\ref{NIST_PMMA_Cone} displays results of the Gasification Apparatus (50~kW/m$^2$) and Cone Calorimeter (25~kW/m$^2$).
 
@@ -958,6 +978,32 @@ Figures~\ref{BST_FRS_wood_cribs_Tests_1to2} through \ref{BST_FRS_wood_cribs_Test
 
 \clearpage
 
+\subsection{Kashiwagi Gasification}
+\label{Kashiwagi_Gasification}
+
+In Fig.~\ref{fig:Kashiwagi_Gasification_mass_flux}, mass loss rates for different coflow oxygen concentrations and exposure heat fluxes are shown and compared to the FDS simulations.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_MFLUX_25_1C} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_MFLUX_40_1C}
+\end{tabular*}
+\caption[Kashiwagi Gasification: weigth loss mass flux]{Kashiwagi gasification mass flux (left) 25 \si{kW/m^2} and (right) 40 \si{kW/m^2}.}
+\label{fig:Kashiwagi_Gasification_mass_flux}
+\end{figure}
+
+In Fig.~\ref{fig:Kashiwagi_Gasification_tmp}, we plot time histories of in-depth temperatures.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_TMP_10p5O2_25_1C} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_TMP_10p5O2_40_1C} \\
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_TMP_Air_40_1C} &
+\includegraphics[width=0.49\textwidth]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_TMP_N2_40_1C}
+\end{tabular*}
+\caption[Kashiwagi Gasification: in-depth temperatures]{Kashiwagi Gasification: in-depth temperatures.}
+\label{fig:Kashiwagi_Gasification_tmp}
+\end{figure}
 
 \subsection{NIST/NRC Transient Combustibles}
 
@@ -1526,7 +1572,6 @@ Feather Pillow Feathers$^{b}$                     & 0.8  & 671  & 0.03 & 1.49 & 
 Fiberglass Reinforced Panel                       & 6.4  & 524  & 0.12 & 1.66 & 514 & 27.3 & 0.069 \\\hline
 Gypsum Wallboard                                  & 13.0 & 591  & 0.15 & 1.10 & 448 & 6.3  & 0.001 \\\hline
 Hemp Sheet                                        & 0.4  & 523  & 0.04 & 1.79 & 410 & 17.0 & 0.001 \\\hline
-House Wrap                                        & 0.1  & 714  & 0.15 & 1.57 & 484 & 1.5  & 0.052 \\\hline
 Latex Pillow Foam$^{b}$                           & 3.3  & 677  & 0.13 & 1.58 & 440 & 32.8 & 0.094 \\\hline
 Lightweight Gypsum Wallboard                      & 12.9 & 494  & 0.13 & 1.15 & 547 & 8.1  & 0.001 \\\hline
 Low Density Fiberboard                            & 12.6 & 214  & 0.06 & 1.35 & 503 & 16.6 & 0.003 \\\hline
@@ -1569,9 +1614,8 @@ Wool Rug                                          & 16.6 & 226  & 0.06 & 1.33 & 
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_FRP_Panel_cone_6p4.pdf} \\
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Gypsum_Wallboard_cone_13p0.pdf} &
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Hemp_Sheet_cone_0p4.pdf} \\
-\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_House_Wrap_cone_0p1.pdf} &
-\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Latex_Pillow_Foam_cone_3p3.pdf} \\
-\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Lightweight_Gypsum_Wallboard_cone_12p9.pdf} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Latex_Pillow_Foam_cone_3p3.pdf} &
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_Lightweight_Gypsum_Wallboard_cone_12p9.pdf}\\
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/FSRI_FDNY_LDF_cone_12p6.pdf} \\
 \end{tabular*}
 \caption[HRRPUA of FSRI Materials using scaling model, others materials]

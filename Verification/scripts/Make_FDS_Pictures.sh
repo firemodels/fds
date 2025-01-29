@@ -84,6 +84,12 @@ rm -f $SVNROOT/fds/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/fds/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/fds/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
 
+cd $SVNROOT/fds/Verification/Miscellaneous
+if [ -e obst_single.smv ]; then
+  cp obst_single.smv obst_multi.smo
+fi
+cd $CURDIR
+
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/fds/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi

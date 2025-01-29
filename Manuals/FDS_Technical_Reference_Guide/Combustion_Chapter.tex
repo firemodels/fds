@@ -342,16 +342,16 @@ For reactions other than single step, mixing controlled chemistry, a fourth-orde
 \label{detailed_chemistry_using_mechanism}
 A chemical mechanism represents different chemical pathways using multiple species and reactions. Typically, these mechanisms are available in Chemkin or Cantera YAML formats. Such a mechanism can be represented as:
 \begin{equation}\label{eq:chemistry_mechanism}
-\sum_{j=1}^{N_{sp}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{sp}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_{reac}
+\sum_{j=1}^{N_{\text{s}}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{\text{s}}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_\text{r}
 \end{equation}
-Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{sp}}$ and ${N_{reac}}$ are the total number of species and total number of reactions, respectively.
+Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{\text{s}}}$ and ${N_\text{r}}$ are the total number of species and total number of reactions, respectively.
 The rate of change of the molar concentration \si{(kmol/m^3/s)} of each species can be represented using the following system of ordinary differential equations (ODEs):
 \begin{equation}\label{eq:chemistry_ode_system}
-\frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_{reac}} b_{i} \ \nu_{ki} \ r_i
+\frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_\text{r}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
 The right-hand side of the above equation represents contributions from each reaction to the $j$th species. Here, $C_k$ is the molar concentration \si {(kmol/m^3)} of the $k$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate}
-r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
+r_i =  k_{f,i} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{\text{s}}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
 Here, $k_{f,i}$ and $k_{r,i}$ are the forward and reverse reaction rate coefficients, respectively. The $k_{f,i}$ can be calculated using Eq.~(\ref{eq:rate_cons}), and the $k_{r,i}$ can be calculated by obtaining the equilibrium constant, as shown in Eq.~(\ref{eq:equilibrium_const}).
 
@@ -365,7 +365,7 @@ b_i &= 1, \ \text{for elementary reaction} \\
 \end{equation}
 For third-body reactions, presence of (or collission with) a third body (any other molecule) modify the reaction rate. If the third-body efficiency of species $j$ in reaction $i$ (denoted as $\alpha_{ij}$) is provided, then
 \be
-\eta_{\mathrm{tb},i} = \sum_{j=1}^{N_{sp}} \alpha_{ij}C_{j}
+\eta_{\mathrm{tb},i} = \sum_{j=1}^{N_{\text{s}}} \alpha_{ij}C_{j}
 \ee
 If the third-body efficiency is not provided, the default value of $\alpha_{ij}$ is 1.0.
 
@@ -398,10 +398,10 @@ Please note, the SRI fall-off reaction is not yet implemented and will be incorp
 
 To solve the reactive system, we assume a constant pressure reactor. For that, the concentration ODEs in the form of Eq.~(\ref{eq:chemistry_ode_system}) need to be solved along with a ODE of temperature given by:
 \begin{equation}\label{eq:TemperatureDerivative}
-\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega_j} 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\text{s}}}h_j W_j \dot{\omega_j} 
 \end{equation} 
 Here,  $\rho$  is the density $\mathrm{(kg/m^3)}$, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
-To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
+To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials \cite{cvodeDoc:2024} is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
 
 
 \subsection{Heat Release Rate}
