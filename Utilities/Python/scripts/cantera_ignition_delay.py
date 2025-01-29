@@ -89,15 +89,15 @@ Chemistry_DIR = current_working_directory+"/../../Verification/Chemistry/"
 csvdata = pd.DataFrame()
 caseCount = 0
 
-# Metahne_grimech 12 
-print("Solving for Metahne_grimech:")
+# Methane_grimech 12
+print("Solving for Methane_grimech:")
 gas = ct.Solution(Cantera_DIR+"Methane_grimech30.yaml")
 equivRatios = np.array([0.6, 1.0,  1.4])
 T = np.array([900, 1000, 1100, 1200])
 estimated_ignition_delay_times = np.ones_like(T, dtype=float)
 estimated_ignition_delay_times[:] = 10
 csvdata, caseCount=calc_ignition_delay(gas, equivRatios, T, "CH4", estimated_ignition_delay_times, csvdata, caseCount)
-print("Done Metahne_grimech, caseCount=", str(caseCount))
+print("Done Methane_grimech, caseCount=", str(caseCount))
 
 # Methane_TianfengLu
 print("Solving for Methane_TianfengLu:")

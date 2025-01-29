@@ -12,7 +12,7 @@
 VPATH = ../Source
 
 # 3rd part library versions
-HYPRE_VERSION=v2.32.0
+HYPRE_VERSION=master
 SUNDIALS_VERSION=v6.7.0
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
@@ -161,8 +161,8 @@ endif
 
 FFLAGS_HDF5 =
 ifdef HDF5_HOME # This assumes the HDF5 libary is available
-   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/include" -L"${HDF5_HOME}/lib" -lhdf5_fortran
-   LFLAGS_HDF5 = -DWITH_HDF5 -L"${HDF5_HOME}/lib" -lhdf5_fortran
+   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/include"
+   LFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5.a -lz 
 endif # HDF5_HOME
 
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \

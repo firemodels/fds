@@ -61,7 +61,7 @@ def calc_reaction_rate(mechanismFile, T0, P0, Y0, tstart, tend, dt, caseName, co
     stateArrReduced = stateArr[::writeInterval]
     columnNames = ['Time'] + gas.species_names  + ['Temperature'] + ['Pressure'] 
     csvdata = pd.DataFrame(stateArrReduced, columns=columnNames)
-    save_csv_file(Species_DIR+caseName+"_soln.csv",csvdata)
+    # save_csv_file(Species_DIR+caseName+"_soln.csv",csvdata)
 
 
 

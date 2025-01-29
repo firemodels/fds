@@ -548,6 +548,7 @@ INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matr
 INTEGER, PARAMETER :: MKL_CPARDISO_FLAG=1                        !< Integer matrix solver library flag for MKL CLUSTER PARDISO
 INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
 INTEGER, PARAMETER :: PETSC_FLAG=3                               !< Integer matrix solver library flag for PETSc
+LOGICAL :: HYPRE_DEVICE_RUN=.TRUE.                               !< Offload hypre solver to GPU if available, otherwise run on CPU
 INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
 INTEGER :: UGLMAT_SOLVER_LIBRARY=MKL_CPARDISO_FLAG               !< Integer UGLMAT library flag (defaults to MKL CPARDISO)
 INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
@@ -790,6 +791,8 @@ INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calcula
 INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
 INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_DT=0.01_EB                   !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DUMP=1._EB                   !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
 REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
 REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
 
@@ -939,4 +942,3 @@ LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 
 
 END MODULE CHEMCONS
-

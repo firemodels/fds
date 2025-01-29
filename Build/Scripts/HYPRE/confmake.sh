@@ -25,6 +25,6 @@ if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
 fi
 
 # Run cmake with the arguments
-cmake ../ "${cmake_args[@]}"
+cmake ../src "${cmake_args[@]}"
 
 make install

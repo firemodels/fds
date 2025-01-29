@@ -846,22 +846,22 @@ The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which
 
 The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref{eq:chemistry_ode_system}) and (\ref{eq:TemperatureDerivative})
 \begin{equation}\label{eq:chemistry_ode_system_appendix}
-\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{reac}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{sp}
+\frac{\d C_k}{\d t} =  \dot{\omega}_k = \sum_{i=1}^{N_{\rm r}} b_i \ \nu_{ki} \ r_i,  j=1,2,3,...,N_{\rm s}
 \end{equation}
 \begin{equation}\label{eq:TemperatureDerivativeAppendix}
-\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j 
+\frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j
 \end{equation}
 For Eq.~(\ref{eq:chemistry_ode_system_appendix}), $C_j$ is the molar concentration \si{(kmol/m^3)} of the $j$th species; $b_i$ is the reaction rate modification coefficient of the $i$th reaction due to third-body effects and pressure; $\nu_{ki} = {\nu}_{ki}^{''} - {\nu}_{ki}^{'}$; and $r_i$ is the reaction progress rate of the $i$th reaction.
 \begin{equation}\label{eq:reaction_progress_rate_appendix}
-r_i =  k_{f,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}
+r_i =  k_{f,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  -  k_{r,i} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}
 \end{equation}
 For Eq.~(\ref{eq:TemperatureDerivativeAppendix}), $\rho$  is the density \si{(kg/m^3)}, $c_p$ is the specific heat of the mixture (J/kg/K), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system_appendix}).
 
 The system of ODEs can be represented by:
 \be
 \begin{aligned}
-f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{sp}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
-  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{sp}} \ \dot{T} \right]^T \
+f &= \left[ \frac{\d C_1}{\d t} \ \frac{\d C_2}{\d t} \ldots \ \frac{\d C_{N_{\rm s}}}{\d t} \ \frac{\d T}{\d t} \right]^T \
+  &= \left[  \dot{\omega}_1 \ \dot{\omega}_2 \ldots \ \dot{\omega}_{N_{\rm s}} \ \dot{T} \right]^T \
 \end{aligned}
 \ee
 
@@ -870,12 +870,12 @@ Providing an analytical Jacobian to the CVODE solver can significantly accelerat
 \begin{aligned}
 J &=
 \begin{bmatrix}
-\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
-\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
+\frac{\partial\dot{\omega}_1}{\partial C_1}& \frac{\partial \dot{\omega}_2}{\partial C_1} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_1} & | & \frac{\partial \dot{T}}{\partial C_1}\\
+\frac{\partial\dot{\omega}_1}{\partial C_2}& \frac{\partial \dot{\omega}_2}{\partial C_2} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_2} & | &\frac{\partial \dot{T}}{\partial C_2}\\
 \ldots & \ldots & \ldots & \ldots & | & \ldots\\
-\frac{\partial \dot{\omega}_1}{\partial C_{N_{sp}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{sp}}} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial C_{N_{sp}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{sp}}}\\
+\frac{\partial \dot{\omega}_1}{\partial C_{N_{\rm s}}}& \frac{\partial \dot{\omega}_2}{\partial C_{N_{\rm s}}} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial C_{N_{\rm s}}} & | & \frac{\partial \dot{T}}{\partial C_{N_{\rm s}}}\\
 ---& --- & --- & --- & | & ---\\
-\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{sp}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
+\frac{\partial \dot{\omega}_1}{\partial T}& \frac{\partial \dot{\omega}_2}{\partial T} & \ldots & \frac{\partial \dot{\omega}_{N_{\rm s}}}{\partial T} & | & \frac{\partial \dot{T}}{\partial T}\\
 \end{bmatrix}
 &=\begin{bmatrix}
 \frac{\partial \mathbf{\dot{\omega}}}{\mathbf{\partial C}}& \frac{\partial \dot{T}}{\partial \mathbf{C}}\\
@@ -888,7 +888,7 @@ J &=
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to concentration, we can write:
 \begin{equation}\label{eq:Jac1st}
 \begin{aligned}
-\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
+\frac{\partial \dot{\omega}_k}{\partial C_l} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial C_l} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}} }{C_l}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}} }{C_l} \right) \right],
 \end{aligned}
 \end{equation}
 Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
@@ -896,8 +896,8 @@ Here, the $\frac{\partial b_i}{\partial C_l}$ term can be calculated using Eqs.~
 \subsection*{Calculation of $\frac{\partial \mathbf{\dot{\omega}}}{\partial T}$}
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to temperature, we can write:
 \begin{multline}\label{eq:Jac2nd}
-\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
-- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
+\frac{\partial \dot{\omega}_k}{\partial T} = \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial T} +  b_i \nu_{ki} \  \left\{  \frac{\partial k_{f,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  + k_{f,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \right. \right. \\
+- \left. \left. \frac{\partial k_{r,i}}{\partial T} \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  - k_{r,i} \frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) \right\} \right]
 \end{multline}
 Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}$ can be calculated using Eqs.~(\ref{eq:reac_mod_coeff})-(\ref{eq:falloff_Fi}).
 \begin{equation} \label{eq:kfTmpDerivative}
@@ -912,14 +912,14 @@ Similar to $\frac{\partial b_i}{\partial C_l}$, $\frac{\partial b_i}{\partial T}
 Here, $K_i$ is the concentration equilibrium constant obtained using Eq.~(\ref{eq:equilibrium_const}). Through mathematical derivation, it can be shown that:
 \begin{equation}\label{eq:EqConstTmpDerivative}
 \begin{aligned}
-\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{sp}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right) 
+\frac{1}{K_i} \frac{\partial K_i}{\partial T} = -\frac{1}{T} \left( \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{''} -  \sum_{i=1}^{N_{\rm s}} {\nu}_{ji}^{'}  \right) + \frac{1}{R T} \left(  \frac{\Delta G_{\mathrm{rxn}}}{T} + \Delta S_{\mathrm{rxn}}   \right)
 \end{aligned}
 \end{equation}
 Here, $\Delta S_{\mathrm{rxn}}$ is the change in entropy, and can be calculated similar to the process described in Section \ref{sec:equilChem}.
 \begin{equation}\label{eq:ConcTmpDerivative}
 \begin{aligned}
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
-\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{sp}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{sp}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{'} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{'}}  \right) \\
+\frac{\partial}{\partial T} \left( \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right) &= - \frac{1}{T} \left(  \sum_{j=1}^{N_{\rm s}} {\nu}_{ji}^{''} \right) \left(  \prod_{j=1}^{N_{\rm s}} (C_j)^{{\nu}_{ji}^{''}}  \right){}
 \end{aligned}
 \end{equation}
 In the above derivation, the relation $\frac{\partial C_j}{\partial T} = - \frac{C_j}{T}$ is used.
@@ -930,13 +930,13 @@ Using Eqs.~(\ref{eq:kfTmpDerivative})-(\ref{eq:ConcTmpDerivative}), all the term
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to concentration, we can write:
 \begin{equation} \label{eq:Jac3rd}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j  \right) \\
-&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{sp}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} &= \frac{\partial}{\partial C_l} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&= -\left( \frac{1}{\rho} \frac{\partial \rho}{\partial C_l} +  \frac{1}{c_p} \frac{\partial c_p}{\partial C_l} \right) \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{aligned}
 \end{equation}
 Using the relations $\frac{\partial \rho}{\partial C_l} = W_l$ and $\frac{\partial c_p}{\partial C_l} = - \frac{W_l}{\rho}\left( c_p -c_{p,l} \right)$, we can rewrite Eq. ~(\ref{eq:Jac3rd}) as:
 \begin{equation} \label{eq:Jac3rd_final}
-\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{sp}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l} 
+\frac{\partial \dot{T}}{\partial C_l} = \frac{W_l c_{p,l}}{\rho c_p} \dot{T} - \frac{1}{{\rho} c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \frac{\partial \dot{\omega}_j}{\partial C_l}
 \end{equation}
 Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:Jac3rd_final}) can be obtained using Eq. \ref{eq:Jac1st}.
 
@@ -944,8 +944,8 @@ Here, $c_{p,l}$ is the specific heat of species $l$. The last term Eq.~(\ref{eq:
 By taking derivative of Eq.~(\ref{eq:TemperatureDerivativeAppendix}) with respect to temperature, we can write:
 \begin{equation} \label{eq:Jac4th}
 \begin{aligned}
-\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}}h_j W_j \dot{\omega}_j  \right) \\
-&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{sp}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j 
+\frac{\partial \dot{T}}{\partial T} &= \frac{\partial}{\partial T} \left( -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}}h_j W_j \dot{\omega}_j  \right) \\
+&=\frac{\dot{T}}{T} - \frac{1}{c_p} \frac{\partial c_p}{\partial T} \dot{T} - \frac{1}{\rho c_p} \sum_{j=1}^{N_{\rm s}} \left[ h_j  \frac{\partial \dot{\omega}_j}{\partial T} +  \dot{\omega}_j c_{p,j} \right] W_j
 \end{aligned}
 \end{equation}
 To derive the above equation, the relations $\frac{\partial \rho}{\partial T} = -\frac{\rho}{T}$ and $\frac{\partial h_j}{\partial T} = c_{p,j}$ are used. The term $\frac{\partial \dot{\omega}_j}{\partial T}$ can be obtained using Eq.~(\ref{eq:Jac2nd}).
@@ -2131,7 +2131,7 @@ In the case of constant thickness (i.e., $\Delta_{1}=\Delta_{2}$), Eq.~(\ref{eq:
 
 When using Eq.~\ref{Spyro7} to obtain $\dq_{{\rm net},2}''$ in Eq.~\ref{Spyro4}, an approach is needed to determine $\Gamma$ and $\dq_{\rm flame}''$. In an actual cone test these will depend upon the material being burned as the heat of combustion, burning rate, and soot yield will all influence the flame heat flux and the absorption of the cone radiation. As there is no simple analytical model to predict these, an empirical approach was developed using FDS simulations of a cone calorimeter.
 
-The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\unit{MJ/kg}) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{\rm cone}''=50$~\unit{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\unit{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives
+The simulation geometry is shown in Fig.~\ref{fig:cone_ref_geom} and includes the radiant cone, the sample holder, and a volume above the cone to capture the flame height contribution to the heat feedback. A 5~mm grid size was used putting 20 cells across the sample. A set of 30 simulations were run where the heat of combustion (10, 20, 30, 40, and 50~\unit{MJ/kg}), radiative fraction (10, 20, 30, 40, 50, and 60~\%) and soot yield (0, 1, 2, 5, 10, and 20~\%) were varied (CO yield was assumed to equal the soot yield). Each simulation consisted of three phases: the sample burning at a prescribed rate with the cone off, the sample burning at a prescribed rate with the cone on, and no burning with the cone on ($\dq_{\rm cone}''=50$~\unit{kW/m^2}). The prescribed burning was varied over a range of HRRPUA (100, 200, 400, 800, 1200, 1600, and 2000~\unit{kW/m^2}). The sample was given a fixed temperature of 300~$^\circ$C representing a notional ignition temperature. The cone off phase gives
 $\dq_{\rm flame}''$, the delta between burning with the cone on and burning with the cone off and on gives the cone flux reaching the sample, and the cone with no burning phase gives $\dq_{\rm cone}''$. The difference between the cone flux reaching the sample and $\dq_{\rm cone}''$ gives $\Gamma$.
 
 \begin{figure}
@@ -2143,25 +2143,5 @@ $\dq_{\rm flame}''$, the delta between burning with the cone on and burning with
 
 A notional fuel molecule was created for each heat of combustion and soot yield that provided an oxygen heat of combustion (EPUMO2) of 13,100~\unit{kJ/kg}. For a 0~\% soot yield, the following was done to obtain fuel chemistry. A heat of combustion of 50~\unit{MJ/kg} implies a fuel like methane and the formula CH$_{3.333}$ provides the desired EPUMO2 at a soot yield of 0~\%. A heat of combustion of 40~\unit{MJ/kg} implies a hydrocarbon like fuel, and the resulting formula is CH$_{0.959}$. For 10, 20 and 30~\unit{MJ/kg} oxygen was added while keeping a C:H ratio of 1:2, resulting in formulas of CH$_{2}$O$_{0.302}$, CH$_{2}$O$_{0.658}$, and CH$_{2}$O$_{1.322}$. The H or O values were varied as needed for the different soot yields to keep an EPUMO2 of 13,100~\unit{kJ/kg}.
 
-If $\dq_{\rm flame}''$ for each heat of combustion is normalized by the maximum value for all HRRPUA, the results collapse as shown in the left of Fig~\ref{fig:Spyro_hoc}. We can then determine a quadratic fit for the maximum $\dq_{\rm flame}''$ as a function of heat of combustion as shown in the right of Fig~\ref{fig:Spyro_hoc}.
+The simulation results were processed to determine $\dq_{\rm flame}''$ and $\Gamma$ for all permutations of the heat of combustion, the radiative fraction, the soot yield, and the HRRPUA. The processed results were interpolated into two four dimensional arrays with one for $\dq_{\rm flame}''$ and one for $\Gamma$. The array dimensions are the heat of combustion in increments of 10~MJ/kg, the soot yield in increments of 1~\%, the HRRPUA in increments of 100~\unit{kW/m^2}, and the radiative fraction in increments of 10~\%. During input processing, FDS uses the gas phase combustion reactions and the surface boundary conditions to determine the mass flux weighted effective heat of combustion and soot yield for all surfaces using the scaling method. This allows for the mass flux due to the HRRPUA to be defined as multiple gas species at fixed ratios. Then for each cone curve provided for a surface, FDS interpolates the $\dq_{\rm flame}''$ and $\Gamma$ arrays to construct a curve of the reference heat flux.
 
-\begin{figure}
-    \centering
-    \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
-        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_ratio} &
-        \includegraphics[height=2.2in]{FIGURES/Spyro_hoc_max}
-    \end{tabular*}
-    \caption[Empirical flame heat flux for Spyro]{(Left) Normalized flame heat flux as a function of HRRPUA. (Right) Maximum flame heat flux as a function of $\Delta h$.}
-    \label{fig:Spyro_hoc}
-\end{figure}
-
-Various simple combinations of the heat of combustion, soot yield, and HRRPUA were evaluated to determine a relationship for $\Gamma$. The functional form of $A + B \times \hbox{HRRPUA} / \Delta h + C \times \hbox{soot yield}$ gave a fit with the lowest RMS value. To determine the time-dependent $\dq_{\rm ref}''$ for a cone test, first, the maximum $\dq_{\rm flame}''$ is determined using $\Delta h$ at the fit shown in Fig~\ref{fig:Spyro_hoc}, second,  $\dq_{\rm flame}''$ is adjusted for the current HRRPUA by interpolating the average normalized curve in Fig~\ref{fig:Spyro_hoc}, third, $\Gamma$ is determined and used to adjust  $\dq_{\rm cone}''$, and finally, $\dq_{\rm ref}''$ is determined via Eq.~\ref{Spyro7}. The resulting fit has a 2~\% error compared to the FDS predictions, see Fig.~\ref{fig:Spyro_cone_error}.
-
-\begin{figure}[!ht]
-\centering
-\begin{tabular}{c}
-\includegraphics[height=3.5in]{FIGURES/Spyro_cone_error}
-\end{tabular}
-\caption[Scatterplot for predicted vs. empirical reference heat flux.]{Scatterplot for predicted vs. empirical reference heat flux.}
-\label{fig:Spyro_cone_error}
-\end{figure}

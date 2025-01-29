@@ -27,6 +27,7 @@ while [[ $# -gt 0 ]]; do
             clean_fds=true
             clean_hypre=true
             clean_sundials=true
+            clean_hdf5=true
             shift
             ;;
         --clean-fds)
@@ -49,7 +50,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --no-libs)
-	        no_libs=true
+            no_libs=true
             clean_fds=true
             shift
             ;;
