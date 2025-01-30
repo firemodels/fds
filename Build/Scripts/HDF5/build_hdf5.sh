@@ -34,10 +34,10 @@ if [ -d "$FIREMODELS/hdf5" ]; then
   echo "hdf5 repository exists. Building hdf5 library."
   cd $FIREMODELS/hdf5
   # Handle possible corrupted state of repository
-  if git branch | grep -q "* main"; then
-    echo "On main branch"
+  if git branch | grep -q "* develop"; then
+    echo "On develop branch"
   else
-    git checkout main
+    git checkout develop
   fi
   git checkout .
   git clean -dxf
