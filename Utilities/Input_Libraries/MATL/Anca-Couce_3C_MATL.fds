@@ -1,0 +1,51 @@
+! Reference: A. Anca-Couce et al. / Combustion and Flame 159 (2012) 1708–1719
+
+&MATL ID='CELLULOSE'
+      DENSITY=480
+      SPECIFIC_HEAT=2.5
+      CONDUCTIVITY=0.17
+      N_REACTIONS=1
+      E(1)=146000
+      A(1)=51560175233
+      N_S(1)=0.59
+      N_O2(1)=0.00
+      MATL_ID(1,1)='CHAR'
+      SPEC_ID(1,1)='FUEL'
+      NU_MATL(1,1)=0.25
+      NU_SPEC(1,1)=0.75
+      HEAT_OF_REACTION(1)=200/
+
+&MATL ID='HEMICELLULOSE'
+      DENSITY=480
+      SPECIFIC_HEAT=2.5
+      CONDUCTIVITY=0.17
+      N_REACTIONS=1
+      E(1)=116000
+      A(1)=117489755.5
+      N_S(1)=1.00
+      N_O2(1)=0.00
+      MATL_ID(1,1)='CHAR'
+      SPEC_ID(1,1)='FUEL'
+      NU_MATL(1,1)=0.25
+      NU_SPEC(1,1)=0.75
+      HEAT_OF_REACTION(1)=200/
+
+&MATL ID='LIGNIN',
+      DENSITY=480
+      SPECIFIC_HEAT=2.5
+      CONDUCTIVITY=0.17
+      N_REACTIONS=1
+      E(1)=167000
+      A(1)=78920806.99
+      N_S(1)=2.78
+      N_O2(1)=0.00
+      MATL_ID(1,1)='CHAR'
+      SPEC_ID(1,1)='FUEL'
+      NU_MATL(1,1)=0.25
+      NU_SPEC(1,1)=0.75
+      HEAT_OF_REACTION(1)=200/
+
+&MATL ID='CHAR'
+      DENSITY=120
+      SPECIFIC_HEAT=1.5
+      CONDUCTIVITY=0.069/
