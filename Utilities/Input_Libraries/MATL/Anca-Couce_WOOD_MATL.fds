@@ -1,0 +1,21 @@
+! Reference: A. Anca-Couce et al. / Combustion and Flame 159 (2012) 1708–1719
+
+&MATL ID='WOOD'
+      DENSITY=480
+      SPECIFIC_HEAT=2.5
+      CONDUCTIVITY=0.17
+      N_REACTIONS=1
+      E(1)=107000
+      A(1)=5512031.761
+      N_S(1)=0.91
+      N_O2(1)=0.00
+      SPEC_ID(1,1)='FUEL'
+      NU_SPEC(1,1)=0.75
+      MATL_ID(1,1)='CHAR'
+      NU_MATL(1,1)=0.25
+      HEAT_OF_REACTION(1)=200/
+
+&MATL ID='CHAR'
+      DENSITY=120
+      SPECIFIC_HEAT=1.5
+      CONDUCTIVITY=0.069/
