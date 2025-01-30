@@ -417,6 +417,12 @@ $QFDS -p 4 -d Pressure_Solver obst_activation_default.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_default_gases.fds
 
+$QFDS -d Pyrolysis anca-couce-fig1_10K.fds
+$QFDS -d Pyrolysis anca-couce-fig1_5K.fds
+$QFDS -d Pyrolysis anca-couce-fig1_2p5K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_10K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_5K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_2p5K.fds
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_701_insulation_mcc.fds
