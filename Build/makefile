@@ -14,6 +14,7 @@ VPATH = ../Source
 # 3rd part library versions
 HYPRE_VERSION=master
 SUNDIALS_VERSION=v6.7.0
+HDF5_VERSION=v1.14.5
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -43,6 +44,7 @@ endif
 
 HYPRE_INFO=-DHYPRE_PP=\"$(HYPRE_VERSION)\"
 SUNDIALS_INFO=-DSUNDIALS_PP=\"$(SUNDIALS_VERSION)\"
+HDF5_INFO=-DHDF5_PP=\"$(HDF5_VERSION)\"
 
 GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)$(GIT_STAT)-$(GIT_BRANCH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
@@ -160,9 +162,10 @@ endif
 #endif
 
 FFLAGS_HDF5 =
+LFLAGS_HDF5 =
 ifdef HDF5_HOME # This assumes the HDF5 libary is available
-   FFLAGS_HDF5 = -DWITH_HDF5 -I"${HDF5_HOME}/include"
-   LFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5.a -lz 
+   FFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_INFO} -I"${HDF5_HOME}/include"
+   LFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5_f90cstub.a ${HDF5_HOME}/lib/libhdf5.a -lz 
 endif # HDF5_HOME
 
 obj_mpi = prec.o cons.o chem.o prop.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \

@@ -94,12 +94,14 @@ if [ "$no_libs" == false ]; then
 
    # build sundials
    source ../Scripts/SUNDIALS/build_sundials.sh confmake.sh $clean_sundials
+
+   # build hdf5
+   source ../Scripts/HDF5/build_hdf5.sh confmake.sh $clean_hdf5
 else
    unset SUNDIALS_HOME
    unset HYPRE_HOME
+   unset HDF5_HOME
    echo "Building FDS without third-party libraries."
 fi
 
-## build hdf5
-source ../Scripts/HDF5/build_hdf5.sh confmake.sh $clean_hdf5
 

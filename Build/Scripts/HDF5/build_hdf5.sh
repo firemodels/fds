@@ -1,4 +1,6 @@
 #!/bin/bash
+HDF5_LIB_TAG=hdf5_1.14.5
+
 CONFMAKE=$1
 CLEAN_HDF5=$2
 
@@ -31,10 +33,19 @@ echo "Checking for hdf5 repository..."
 if [ -d "$FIREMODELS/hdf5" ]; then
   echo "hdf5 repository exists. Building hdf5 library."
   cd $FIREMODELS/hdf5
-  if [[ "$(git tag -l "hdf5_1.14.4.3")" == "hdf5_1.14.4.3" ]]; then
-    echo "Checking out hdf5_1.14.4.3"
-    git checkout hdf5_1.14.4.3
+  # Handle possible corrupted state of repository
+  if git branch | grep -q "* main"; then
+    echo "On main branch"
+  else
+    git checkout main
+  fi
+  git checkout .
+  git clean -dxf
+  if [[ "$(git tag -l $HDF5_LIB_TAG)" == $HDF5_LIB_TAG ]]; then
+    echo "Checking out $HDF5_LIB_TAG"
+    git checkout $HDF5_LIB_TAG
   fi 
+
   mkdir $FIREMODELS/hdf5/BUILDDIR
   cd $FIREMODELS/hdf5/BUILDDIR
   echo "Creating library directry..."
@@ -46,7 +57,7 @@ if [ -d "$FIREMODELS/hdf5" ]; then
   ./$CONFMAKE
   # get back from detached HEAD state
   cd $FIREMODELS/hdf5
-  git checkout main
+  git checkout develop
   cd $dir
   export HDF5_HOME=$FIREMODELS/libs/hdf5/$HDF5_VERSION
   echo "HDF5 library:" $FIREMODELS/libs/hdf5/$HDF5_VERSION

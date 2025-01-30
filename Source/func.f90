@@ -9854,6 +9854,11 @@ WRITE(LU,'(A,A)') ' Sundials library version: ',TRIM(SUNDIALS_PP)
 #else
 WRITE(LU,'(A)') ' Sundials library: not used'
 #endif
+#ifdef HDF5_PP
+WRITE(LU,'(A,A)') ' HDF5 library version: ',TRIM(HDF5_PP)
+#else
+WRITE(LU,'(A)') ' HDF5 library: not used'
+#endif
 
 END SUBROUTINE WRITE_SUMMARY_INFO
 
