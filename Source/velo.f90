@@ -1643,7 +1643,7 @@ ELSE FREEZE_VELOCITY_IF
       T_NOW=CURRENT_TIME()
    ENDIF
    SELECT CASE(PRES_FLAG)
-      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -1721,7 +1721,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
+         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
    END SELECT
 
    !$OMP PARALLEL PRIVATE(I,J,K)
@@ -1765,7 +1765,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -3235,10 +3235,11 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 !> \details Ensure that the correct normal derivative of H is used on the projection. It is only used when the Poisson equation
 !> for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
 
-SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
+SUBROUTINE WALL_VELOCITY_NO_GRADH(NM,DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
+INTEGER, INTENT(IN) :: NM
 INTEGER :: II,JJ,KK,IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX,IC,ICG
 REAL(EB) :: DHDN, VEL_N
 TYPE (WALL_TYPE), POINTER :: WC
@@ -3315,8 +3316,12 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
 
      SELECT CASE(IOR)
      CASE( IAXIS)
+        IF (TUNNEL_PRECONDITIONER .AND. IW>N_EXTERNAL_WALL_CELLS) &
+           DHDN = (H_BAR(I_OFFSET(NM)+IIG)-H_BAR(I_OFFSET(NM)+IIG-1))*TP_RDXN(I_OFFSET(NM)+IIG-1)
         US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
      CASE(-IAXIS)
+        IF (TUNNEL_PRECONDITIONER .AND. IW>N_EXTERNAL_WALL_CELLS) &
+           DHDN = (H_BAR(I_OFFSET(NM)+IIG+1)-H_BAR(I_OFFSET(NM)+IIG))*TP_RDXN(I_OFFSET(NM)+IIG)
         US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( JAXIS)
         VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
@@ -3360,9 +3365,13 @@ ELSE ! Corrector
      SELECT CASE(IOR)
      CASE( IAXIS)                                 ! | - Problem with this is it was modified in VELOCITY_CORRECTOR,
                                                   ! V   => Store the untouched U normal on internal WALLs.
+        IF (TUNNEL_PRECONDITIONER.AND. IW>N_EXTERNAL_WALL_CELLS) &
+           DHDN = (H_BAR(I_OFFSET(NM)+IIG)-H_BAR(I_OFFSET(NM)+IIG-1))*TP_RDXN(I_OFFSET(NM)+IIG-1)
          U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
                                         DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
      CASE(-IAXIS)
+        IF (TUNNEL_PRECONDITIONER.AND. IW>N_EXTERNAL_WALL_CELLS) &
+           DHDN = (H_BAR(I_OFFSET(NM)+IIG+1)-H_BAR(I_OFFSET(NM)+IIG))*TP_RDXN(I_OFFSET(NM)+IIG)
          U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
                                         DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( JAXIS)
