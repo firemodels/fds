@@ -1643,7 +1643,7 @@ ELSE FREEZE_VELOCITY_IF
       T_NOW=CURRENT_TIME()
    ENDIF
    SELECT CASE(PRES_FLAG)
-      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
+      CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG); CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -1721,7 +1721,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
+         CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
    END SELECT
 
    !$OMP PARALLEL PRIVATE(I,J,K)
@@ -1765,7 +1765,7 @@ ELSE FREEZE_VELOCITY_IF
    ENDIF
    SELECT CASE(PRES_FLAG)
       CASE(GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG)
-         CALL WALL_VELOCITY_NO_GRADH(NM,DT,.FALSE.)
+         CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
    END SELECT
 
 ENDIF FREEZE_VELOCITY_IF
@@ -3235,13 +3235,12 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 !> \details Ensure that the correct normal derivative of H is used on the projection. It is only used when the Poisson equation
 !> for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
 
-SUBROUTINE WALL_VELOCITY_NO_GRADH(NM,DT,STORE_UN)
+SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
-INTEGER, INTENT(IN) :: NM
 INTEGER :: II,JJ,KK,IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX,IC,ICG
-REAL(EB) :: DHDN, VEL_N
+REAL(EB) :: VEL_N
 TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -3263,10 +3262,7 @@ STORE_UN_COND : IF ( STORE_UN .AND. CORRECTOR) THEN
 
       WC => WALL(IW)
       BC => BOUNDARY_COORD(WC%BC_INDEX)
-      IIG   = BC%IIG
-      JJG   = BC%JJG
-      KKG   = BC%KKG
-      IOR   = BC%IOR
+      IIG= BC%IIG; JJG= BC%JJG; KKG= BC%KKG; IOR= BC%IOR
 
       SELECT CASE(IOR)
       CASE( IAXIS)
@@ -3300,38 +3296,28 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
                   WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) ) CYCLE
 
       BC => BOUNDARY_COORD(WC%BC_INDEX)
-      II  = BC%II
-      JJ  = BC%JJ
-      KK  = BC%KK
-      IIG = BC%IIG
-      JJG = BC%JJG
-      KKG = BC%KKG
+      II  = BC%II; JJ  = BC%JJ; KK  = BC%KK; IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
       IC  = CELL_INDEX(II,JJ,KK)
       ICG = CELL_INDEX(IIG,JJG,KKG)
 
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. .NOT.CELL(ICG)%SOLID .AND. .NOT.CELL(IC)%SOLID) CYCLE
 
       IOR = BC%IOR
-      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
-     SELECT CASE(IOR)
-     CASE( IAXIS)
-        IF (TUNNEL_PRECONDITIONER .AND. IW>N_EXTERNAL_WALL_CELLS) &
-           DHDN = (H_BAR(I_OFFSET(NM)+IIG)-H_BAR(I_OFFSET(NM)+IIG-1))*TP_RDXN(I_OFFSET(NM)+IIG-1)
-        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
-     CASE(-IAXIS)
-        IF (TUNNEL_PRECONDITIONER .AND. IW>N_EXTERNAL_WALL_CELLS) &
-           DHDN = (H_BAR(I_OFFSET(NM)+IIG+1)-H_BAR(I_OFFSET(NM)+IIG))*TP_RDXN(I_OFFSET(NM)+IIG)
-        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
-     CASE( JAXIS)
-        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
-     CASE(-JAXIS)
-        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
-     CASE( KAXIS)
-        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
-     CASE(-KAXIS)
-        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
-     END SELECT
+      SELECT CASE(IOR)
+      CASE( IAXIS)
+         US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) ))
+      CASE(-IAXIS)
+         US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) ))
+      CASE( JAXIS)
+         VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) ))
+      CASE(-JAXIS)
+         VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) ))
+      CASE( KAXIS)
+         WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) ))
+      CASE(-KAXIS)
+         WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) ))
+      END SELECT
 
    ENDDO WALL_CELL_LOOP_1
 
@@ -3358,34 +3344,21 @@ ELSE ! Corrector
      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. .NOT.CELL(ICG)%SOLID .AND. .NOT.CELL(IC)%SOLID) CYCLE
 
      IOR = BC%IOR
-     DHDN=0._EB ! Set the normal derivative of H to zero for solids.
-
      VEL_N = UN_WALLS(IW)
 
      SELECT CASE(IOR)
-     CASE( IAXIS)                                 ! | - Problem with this is it was modified in VELOCITY_CORRECTOR,
-                                                  ! V   => Store the untouched U normal on internal WALLs.
-        IF (TUNNEL_PRECONDITIONER.AND. IW>N_EXTERNAL_WALL_CELLS) &
-           DHDN = (H_BAR(I_OFFSET(NM)+IIG)-H_BAR(I_OFFSET(NM)+IIG-1))*TP_RDXN(I_OFFSET(NM)+IIG-1)
-         U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+     CASE( IAXIS)                                 
+         U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(VEL_N + US(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  )  ))
      CASE(-IAXIS)
-        IF (TUNNEL_PRECONDITIONER.AND. IW>N_EXTERNAL_WALL_CELLS) &
-           DHDN = (H_BAR(I_OFFSET(NM)+IIG+1)-H_BAR(I_OFFSET(NM)+IIG))*TP_RDXN(I_OFFSET(NM)+IIG)
-         U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+         U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(VEL_N + US(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  )  ))
      CASE( JAXIS)
-         V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG-1,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
+         V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(VEL_N + VS(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  )  ))
      CASE(-JAXIS)
-         V(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
+         V(IIG  ,JJG  ,KKG  ) = 0.5_EB*(VEL_N + VS(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  )  ))
      CASE( KAXIS)
-         W(IIG  ,JJG  ,KKG-1) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG-1) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
+         W(IIG  ,JJG  ,KKG-1) = 0.5_EB*(VEL_N + WS(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1)  ))
      CASE(-KAXIS)
-         W(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
+         W(IIG  ,JJG  ,KKG  ) = 0.5_EB*(VEL_N + WS(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  )  ))
      END SELECT
 
   ENDDO WALL_CELL_LOOP_2
