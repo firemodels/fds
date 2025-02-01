@@ -8975,8 +8975,6 @@ IND_SELECT: SELECT CASE(IND)
    CASE( 9)  ! PRESSURE
       GAS_PHASE_OUTPUT_RES = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + &
                              RHO(II,JJ,KK)*(0.5_EB*(H(II,JJ,KK)+HS(II,JJ,KK))-KRES(II,JJ,KK)) - P_0(KK)
-      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
-                                                        RHO(II,JJ,KK)*0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(10)  ! VELOCITY
       SELECT CASE(ABS(VELO_INDEX))
          CASE DEFAULT
@@ -8995,8 +8993,6 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = Q(II,JJ,KK)*0.001_EB
    CASE(12)  ! H
       GAS_PHASE_OUTPUT_RES = 0.5_EB*(HS(II,JJ,KK)+H(II,JJ,KK))
-      IF (TUNNEL_PRECONDITIONER) GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + &
-                                                        0.5_EB*(H_BAR(I_OFFSET(NM)+II)+H_BAR_S(I_OFFSET(NM)+II))
    CASE(13)  ! MIXTURE FRACTION
       ! requires FUEL + AIR --> PROD (SIMPLE_CHEMISTRY, N_SIMPLE_CHEMISTRY_REACTIONS=1)
       ! f = Z_FUEL + Z_PROD/(1+S), where S is the mass stoichiometric coefficient for AIR
