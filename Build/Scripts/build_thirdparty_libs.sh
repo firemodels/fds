@@ -17,8 +17,25 @@ clean_fds=false
 clean_hypre=false
 clean_sundials=false
 clean_hdf5=false
+with_gpu=false
+gpu_arch="-"
 no_libs=false
 ARG=""
+
+# Define an array of allowed GPU architectures
+allowed_gpus=("hip" "cuda" "sycl")
+
+# Function to check if a value exists in the allowed list
+is_valid_gpu() {
+    local value="$1"
+    for gpu in "${allowed_gpus[@]}"; do
+        if [[ "$gpu" == "$value" ]]; then
+            return 0  # Found a match, return success
+        fi
+    done
+    return 1  # No match found, return failure
+}
+
 
 # Loop through the options
 while [[ $# -gt 0 ]]; do
@@ -49,7 +66,23 @@ while [[ $# -gt 0 ]]; do
             clean_hdf5=true
             shift
             ;;
-        --no-libs)
+        --with-gpu=*)
+            with_gpu=true
+            gpu_arch="${1#*=}"
+	    # Check if the value is in the allowed list
+            if ! is_valid_gpu "$gpu_arch"; then
+                echo "Error: Invalid option for --with-gpu. Allowed values: ${allowed_gpus[*]}." >&2
+                exit 1
+            fi
+	    export BUILD_WITH_GPU=ON
+	    export GPU_ARCH="$gpu_arch"
+            shift
+            ;;
+	--with-gpu)  # Error if --with-gpu is provided without a value
+            echo "Error: --with-gpu requires a value (e.g., --with-gpu=hip, --with-gpu=cuda, or --with-gpu=sycl)" >&2
+            exit 1
+            ;;
+	--no-libs)
             no_libs=true
             clean_fds=true
             shift
