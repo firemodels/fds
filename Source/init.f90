@@ -3990,7 +3990,8 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
          OB_PREV => OM_PREV%OBSTRUCTION(OBST_INDEX_PREVIOUS)
          IF ( (ANY(OB%MATL_MASS_FRACTION(:)/=OB_PREV%MATL_MASS_FRACTION(:),DIM=1)) .OR. &
               (ANY(OB%MATL_INDEX(:)        /=OB_PREV%MATL_INDEX(:)        ,DIM=1)) .OR. &
-              (OB%HEAT_SOURCE/=OB_PREV%HEAT_SOURCE) ) THEN
+              (OB%HEAT_SOURCE/=OB_PREV%HEAT_SOURCE) .OR. &
+              (OB%RAMP_IHS_INDEX/=OB_PREV%RAMP_IHS_INDEX) ) THEN
             N_LAYERS_OBST = N_LAYERS_OBST + 1
             LAYER_THICKNESS_OBST(N_LAYERS_OBST) = 0._EB
             HEAT_SOURCE_OBST(N_LAYERS_OBST)        = OB%HEAT_SOURCE    
