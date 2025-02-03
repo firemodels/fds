@@ -154,9 +154,14 @@ LFLAGS_HYPRE =
 #ifndef PETSC_DIR # PETSC is exclusive.
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
-   FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
+	FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
    FFLAGS_HYPRE_WIN = -DWITH_HYPRE ${HYPRE_INFO} /I"${HYPRE_HOME}\include"
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
+   ifeq ($(BUILD_WITH_GPU), ON)
+      ifeq ($(GPU_ARCH), hip)
+         LFLAGS_HYPRE += -L/usr/lib64 -lstdc++ -L${ROCM_PATH}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
+      endif
+   endif
    LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
 endif
 #endif
