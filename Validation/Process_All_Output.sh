@@ -74,6 +74,7 @@ FIREMODELS=../..
 # There should exist a line entry for every directory in the Validation directory of the fds repository.
 # If the case is under development, simply comment out the line below.
 
+PROCESS Aalto_Woods
 PROCESS Arup_Tunnel
 PROCESS ATF_Corridors
 PROCESS Atmospheric_Dispersion
