@@ -155,6 +155,9 @@ LFLAGS_HYPRE =
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
+   ifeq ($(BUILD_WITH_GPU), ON)
+      FFLAGS_HYPRE += -DWITH_HYPRE_DEVICE
+   endif
    FFLAGS_HYPRE_WIN = -DWITH_HYPRE ${HYPRE_INFO} /I"${HYPRE_HOME}\include"
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
    LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
@@ -167,6 +170,7 @@ ifdef HDF5_HOME # This assumes the HDF5 libary is available
    FFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_INFO} -I"${HDF5_HOME}/include"
    LFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5_f90cstub.a ${HDF5_HOME}/lib/libhdf5.a -lz 
 endif # HDF5_HOME
+
 
 LFLAGS_GPU =
 ifeq ($(BUILD_WITH_GPU), ON)
