@@ -5,6 +5,7 @@
 
 OPTIONS="$* -y"
 
+cd Aalto_Woods;  ./Run_All.sh $OPTIONS; cd ..
 cd Arup_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd Askervein_Hill; ./Run_All.sh $OPTIONS; cd ..
 cd ATF_Corridors;  ./Run_All.sh $OPTIONS; cd ..
