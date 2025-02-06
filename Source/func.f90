@@ -9302,22 +9302,22 @@ SELECT CASE(FC)
       ! Intersection area is the area of the chord.
       IF (X2 <= X0 .AND. X2 > X0-RAD) THEN
          THETA = 2._EB*ACOS((X0-X2)/RAD)         
-         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*(THETA-SIN(THETA))
+         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (Y2 <= Y0 .AND. Y2 > Y0-RAD) THEN
          THETA = 2._EB*ACOS((Y0-Y2)/RAD)         
-         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*(THETA-SIN(THETA))
+         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (X1 >= X0 .AND. X1 < X0+RAD) THEN
          THETA = 2._EB*ACOS((X1-X0)/RAD)         
-         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*(THETA-SIN(THETA))
+         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (Y1 >= Y0 .AND. Y1 < Y0+RAD) THEN
          THETA = 2._EB*ACOS((X1-X0)/RAD)         
-         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*(THETA-SIN(THETA))
+         CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       ! Remaining cases is where one or more rectangle edges are inside but the corners are outside
