@@ -176,6 +176,8 @@ LFLAGS_GPU =
 ifeq ($(BUILD_WITH_GPU), ON)
    ifeq ($(GPU_ARCH), hip)
       LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_PATH}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
+   else ifeq ($(GPU_ARCH), cuda)
+      LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${NVIDIA_PATH}/cuda/lib64 -lcudart -lcusparse -lcublas -lcurand -L${NVIDIA_PATH}/math_libs/12.2/lib64 -lcusolver
    endif
 endif
 
