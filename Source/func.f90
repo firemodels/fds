@@ -9296,7 +9296,7 @@ IF (RC <= R2) FC=IBSET(FC,3)
 
 SELECT CASE(FC)
    ! No corners either full area or circle minus one or more chords
-CASE (0)
+   CASE (0)
       ! First four cases are more than half the cirlce outside the rectangle.
       ! Can only have one edge where this is the case without having a corner inside. This edge makes a chord.
       ! Intersection area is the circle area minus the area of the chord.
