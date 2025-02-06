@@ -5,6 +5,7 @@ call ..\Scripts\set_compilers.bat
 
 set clean_hypre=
 set clean_sundials=
+set clean_hdf5=
 set clean_fds=
 set no_libs=
 set stopscript=0
@@ -37,10 +38,15 @@ goto eof
    set clean_sundials=--clean-sundials
    set valid=1
  )
+ if /I "%1" EQU "--clean-hdf5" (
+   set clean_hdf5=--clean-hdf5
+   set valid=1
+ )
  if /I "%1" EQU "--clean-all" (
    set clean_fds=--clean-fds
    set clean_hypre=--clean-hypre
    set clean_sundials=--clean-sundials
+   set clean_hdf5=--clean-hdf5
    set valid=1
  )
  if /I "%1" EQU "--no-libs" (
@@ -80,6 +86,7 @@ echo --clean-all      - rebuild all libraries, remove .obj and .mod files from t
 echo --clean-fds      - remove .obj and .mod files from the fds build directory
 echo --clean-hypre    - rebuild hypre library
 echo --clean-sundials - rebuild sundials library
+echo --clean-hdf5     - rebuild hdf5 library
 echo --no-libs        - build without thirdparty libs
 echo --help           - display this message
 exit /b
@@ -105,9 +112,13 @@ if "x%no_libs%" == "x" (
 
     cd %SCRIPTDIR%\SUNDIALS
     call build_sundials %clean_sundials%
+
+    cd %SCRIPTDIR%\HDF5
+    call build_hdf5 %clean_hdf5%
 ) else (
     set SUNDIALS_HOME=
     set HYPRE_HOME=
+    set HDF5_HOME=
     echo Building FDS without third-party libraries.
 )
 
