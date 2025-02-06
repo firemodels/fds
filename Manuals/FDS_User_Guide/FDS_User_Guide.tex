@@ -8770,7 +8770,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
 
-When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}.
+When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it.
 
 The csv file format is:
 \begin{lstlisting}
@@ -13602,6 +13602,9 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_END_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 \ct{DT_END_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  \ct{2.*EPSILON}  \\ \hline
 \ct{DT_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
+\ct{DT_EXTERNAL_HEARTBEAT}    & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
+\ct{EXTERNAL_HEARTBEAT_FILENAME}  & Character  & Section~\ref{info:external_control}   &             &                 \\ \hline
+\ct{HEARTBEAT_FAIL}           & Logical    & Section~\ref{info:external_control}   &             & \ct{T}          \\ \hline
 \ct{LIMITING_DT_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 \ct{LOCK_TIME_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & \ct{F}         \\ \hline
 \ct{RAMP_TIME}                & Character  & Section~\ref{info:simulation_time_ramp}   &             &                 \\ \hline
