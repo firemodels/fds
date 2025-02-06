@@ -1,5 +1,5 @@
 @echo off
-set LIB_TAG=master
+set LIB_TAG=hdf5_1.14.5
 
 ::*** library and tag name are the same
 
@@ -7,8 +7,7 @@ set LIB_DIR=%LIB_TAG%
 
 ::*** parse options
 
-set clean_hypre=
-
+set clean_hdf5=
 call :getopts %*
 if %stopscript% == 1 exit /b
 
@@ -29,118 +28,122 @@ cd %FIREMODELS%
 set FIREMODELS=%CD%
 cd %CURDIR%
 
-set INSTALLDIR=%FIREMODELS%\libs\hypre\%LIB_DIR%
+set INSTALLDIR=%FIREMODELS%\libs\hdf5\%LIB_DIR%
 
-::*** erase install directory if clean option was specified
+::*** erase directory if it exists and clean option was specified
 
-if "x%clean_hypre%" == "x" goto endif1
+if "x%clean_hdf5%" == "x" goto endif1
   if exist %INSTALLDIR% rmdir /s /q %INSTALLDIR%
 :endif1
 
-::*** if hypre library directory exists exit and use it
+::*** if hdf5 library directory exists exit and use it
 
 if not exist %INSTALLDIR% goto endif2
-  set HYPRE_HOME=%INSTALLDIR%
+  set HDF5_HOME=%INSTALLDIR%
   set buildstatus=prebuilt
   goto eof
 :endif2
 
-::*** if hypre repo exists build library
+::*** hdf5 library doesn't exist, if hdf5 repo exists build hdf5 library
 
-set LIB_REPO=%FIREMODELS%\hypre
+set LIB_REPO=%FIREMODELS%\hdf5
 if exist %LIB_REPO% goto buildlib
 
-::*** if directory pointed to by HYPRE_HOME exists exit and use it
-::    if it doesn't exist then exit and build fds without the hypre library
+::*** if directory pointed to by SUNDIALS_HOME exists exit and use it
 
-if "x%HYPRE_HOME%" == "x" goto else4
-if not exist %HYPRE_HOME%  goto else4
+if "x%HDF5_HOME%" == "x" goto else4
+if not exist %HDF5_HOME%  goto else4
     set buildstatus=prebuilt
     goto endif4
 :else4
-  set HYPRE_HOME=
   set buildstatus=norepo
 :endif4
 goto eof
 
-::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hypre library
+::*** if we've gotten this far the prebuilt libraries do not exist, the repo does exist so build the hdf5 library
 
 :buildlib
-cd %CURDIR%
-
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo building hypre library version %LIB_TAG%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo checking out tag %LIB_TAG%
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
 cd %LIB_REPO%
-git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+
+set buildstatus=build
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo building hdf5 library version %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+
 git checkout %LIB_TAG%
 
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
-echo in the file HYPRE_config.h.cmake.in
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
-
-cd %CURDIR%
-
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo cleaning hypre repo
+echo cleaning hdf5 repo
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
 cd %LIB_REPO%
+set BUILDDIR=%LIB_REPO%\BUILDDIR
 git clean -dxf
 
+mkdir %BUILDDIR%
+cd %BUILDDIR%
+
+::*** configure hdf5
+
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo configuring hypre version %LIB_TAG%
+echo configuring hdf5 version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set BUILDDIR=%LIB_REPO%\build
-cd %BUILDDIR%
-cmake ..\src  ^
+cmake ..\  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
 -DCMAKE_C_COMPILER=%COMP_CC% ^
--DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
--DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
+-DCMAKE_Fortran_COMPILER=%COMP_FC% ^
+-DCMAKE_BUILD_TYPE="Release" ^
+-DBUILD_SHARED_LIBS="OFF" ^
+-DBUILD_TESTING="OFF" ^
+-DHDF5_BUILD_TOOLS="OFF" ^
+-DHDF5_BUILD_FORTRAN="ON" ^
+-DHDF5_ENABLE_PARALLEL="ON" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
--DCMAKE_INSTALL_LIBDIR="lib"
+-DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
+-DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
+
+::*** build and install hdf5
 
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building and installing hypre version %LIB_TAG%
+echo building hdf5 version %LIB_TAG%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+call make 
+
+echo.
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo installing hdf5 version %LIB_TAG% in %INSTALLDIR%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 call make install
 
 echo.
-set HYPRE_HOME=%INSTALLDIR%
-echo The hypre library version %LIB_TAG% was built and installed in %INSTALLDIR%
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo setting HDF5_HOME environment variable to %INSTALLDIR%
+set HDF5_HOME=%INSTALLDIR%
+echo.
+
+echo The hdf5 library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
 
 echo ----------------------------------------------------------
@@ -165,16 +168,16 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
- if /I "%1" EQU "--clean-hypre" (
-    set clean_hypre=1
+if /I "%1" EQU "--clean-hdf5" (
+    set clean_hdf5=1
     set valid=1
  )
- if /I "%1" EQU "--help" (
+if /I "%1" EQU "--help" (
    call :usage
    set stopscript=1
    exit /b
  )
- if /I "%1" EQU "-help" (
+if /I "%1" EQU "-help" (
    call :usage
    set stopscript=1
    exit /b
@@ -210,16 +213,15 @@ exit /b
 :: -------------------------------------------------------------
 :usage  
 :: -------------------------------------------------------------
-echo build hypre
+echo build hdf5
 echo. 
-echo --clean-hypre    - force build of hypre library
+echo --clean-hdf5 - force build of hdf5 library
 echo --help           - display this message
 exit /b
 
 :eof
 echo.
-echo.
-if "%buildstatus%" == "norepo"   echo The hypre git repo does not exist, The hypre library was not built.  FDS will be built without it.
-if "%buildstatus%" == "prebuilt" echo The hypre library exists. Skipping hypre build. FDS will be built using the
-if "%buildstatus%" == "prebuilt" echo hypre library in %HYPRE_HOME%
+if "%buildstatus%" == "norepo"   echo The hdf5 git repo does not exist, The hdf5 library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The hdf5 library exists. Skipping hdf5 build. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo hdf5 library in %HDF5_HOME%
 echo.
