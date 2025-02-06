@@ -9279,7 +9279,7 @@ FC = 0
 
 ! No overlap
 
-IF ((X2 < X0-RAD) .OR. (X1 > X0+RAD) .OR. (Y2 < Y0-RAD) .OR. (Y1 > Y0+RAD)) THEN
+IF ((X2 <= X0-RAD) .OR. (X1 >= X0+RAD) .OR. (Y2 <= Y0-RAD) .OR. (Y1 >= Y0+RAD)) THEN
    CIRCLE_CELL_INTERSECTION_AREA = 0._EB
    RETURN
 ENDIF
@@ -9295,9 +9295,52 @@ RC = (X2-X0)**2+(Y1-Y0)**2
 IF (RC <= R2) FC=IBSET(FC,3)
 
 SELECT CASE(FC)
-   ! Grid cell surrounds the circle: area of circle
-   CASE (0)
+   ! No corners either full area or circle minus one or more chords
+CASE (0)
+      ! First four cases are more than half the cirlce outside the rectangle.
+      ! Can only have one edge where this is the case without having a corner inside. This edge makes a chord.
+      ! Intersection area is the circle area minus the area of the chord.
+      IF (X2 <= X0 .AND. X2 > X0-RAD) THEN
+         THETA = 2._EB*ACOS((X0-X2)/RAD)         
+         CIRCLE_CELL_INTERSECTION_AREA = R2*(PI - 0.5_EB*(THETA-SIN(THETA)))
+         RETURN
+      ENDIF
+      IF (Y2 <= Y0 .AND. Y2 > Y0-RAD) THEN
+         THETA = 2._EB*ACOS((Y0-Y2)/RAD)         
+         CIRCLE_CELL_INTERSECTION_AREA = R2*(PI - 0.5_EB*(THETA-SIN(THETA)))
+         RETURN
+      ENDIF
+      IF (X1 >= X0 .AND. X1 < X0+RAD) THEN
+         THETA = 2._EB*ACOS((X1-X0)/RAD)         
+         CIRCLE_CELL_INTERSECTION_AREA = R2*(PI - 0.5_EB*(THETA-SIN(THETA)))
+         RETURN
+      ENDIF
+      IF (Y1 >= Y0 .AND. Y1 < Y0+RAD) THEN
+         THETA = 2._EB*ACOS((X1-X0)/RAD)         
+         CIRCLE_CELL_INTERSECTION_AREA = R2*(PI - 0.5_EB*(THETA-SIN(THETA)))
+         RETURN
+      ENDIF
+      ! Remaining cases is where one or more rectangle edges are inside but the corners are outside
+      ! With no corner inside each internal edge is a chord
+      ! Intersection area is the circe area minus the area of each chord
       CIRCLE_CELL_INTERSECTION_AREA = PI*R2
+      IF (X1 > X0 - RAD) THEN
+         THETA = 2._EB*ACOS((X0-X1)/RAD)
+         CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA - 0.5_EB*R2*(THETA-SIN(THETA))
+      ENDIF
+      IF (Y1 > Y0 - RAD) THEN
+         THETA = 2._EB*ACOS((Y0-Y1)/RAD)
+         CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA - 0.5_EB*R2*(THETA-SIN(THETA))
+      ENDIF
+      IF (X2 < X0 + RAD) THEN
+         THETA = 2._EB*ACOS((X2-X0)/RAD)
+         CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA - 0.5_EB*R2*(THETA-SIN(THETA))
+      ENDIF
+      IF (Y2 < Y0 + RAD) THEN
+         THETA = 2._EB*ACOS((Y2-Y0)/RAD)
+         CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA - 0.5_EB*R2*(THETA-SIN(THETA))
+      ENDIF
+      RETURN
    ! One corner in the circle: chord + area of triangle
    CASE(1,2,4,8)
       SELECT CASE(FC)
