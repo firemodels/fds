@@ -3278,7 +3278,8 @@ ENDIF
 DO NS=1,MAX_SPECIES
    IF (SPEC_ID(NS)/='null') THEN
       DO N1=1,N_TRACKED_SPECIES
-         IF (SPECIES_MIXTURE(N1)%ID==SPEC_ID(NS)) THEN
+         IF (TRIM(SPECIES_MIXTURE(N1)%ID)==TRIM(SPEC_ID(NS)) .OR. &
+             TRIM(SPECIES_MIXTURE(N1)%ALT_ID)==TRIM(SPEC_ID(NS))) THEN
             SPECIES_MIXTURE(N1)%ZZ0 = MASS_FRACTION(NS)
             EXIT
          ENDIF
@@ -7369,7 +7370,8 @@ PROC_MATL_LOOP: DO N=1,N_MATL
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO NS2=1,N_TRACKED_SPECIES
-            IF (TRIM(ML%SPEC_ID(NS,NR))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+            IF (TRIM(ML%SPEC_ID(NS,NR))==TRIM(SPECIES_MIXTURE(NS2)%ID) .OR. &
+                TRIM(ML%SPEC_ID(NS,NR))==TRIM(SPECIES_MIXTURE(NS2)%ALT_ID)) THEN
                Z_INDEX(NS,NR) = NS2
                ML%NU_GAS(Z_INDEX(NS,NR),NR) = ML%NU_SPEC(NS,NR)
                EXIT
@@ -12784,7 +12786,9 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                DO NS=1,MAX_SPECIES
                   IF (SPEC_ID(NS)=='null') EXIT
                   DO NS2=1,N_TRACKED_SPECIES
-                     IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                     
+                     IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID) .OR. &
+                         TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ALT_ID)) THEN
                         IF (NS2==1) THEN
                            WRITE(MESSAGE,'(3A)') 'ERROR(847): INIT ',TRIM(ID),' cannot use background species for MASS_FRACTION.'
                            CALL SHUTDOWN(MESSAGE) ; RETURN
