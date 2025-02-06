@@ -174,13 +174,18 @@ ifdef HDF5_HOME # This assumes the HDF5 libary is available
    LFLAGS_HDF5_WIN = ${HDF5_HOME}\lib\libhdf5_fortran.lib ${HDF5_HOME}\lib\libhdf5_f90cstub.lib ${HDF5_HOME}\lib\libhdf5.lib
 endif # HDF5_HOME
 
-LFLAGS_LINK_WIN =
-ifneq ($(SUNDIALS_HOME),)
-   LFLAGS_LINK_WIN += /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib Shlwapi.lib
+LFLAGS_LINK_WIN = 
+linkflag = false
+ifdef SUNDIALS_HOME
+   linkflag = true
+endif   
+ifdef HDF5_HOME
+   linkflag = true
+endif  
+ifeq ($(linkflag),true)
+   LFLAGS_LINK_WIN = /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib Shlwapi.lib
 endif
-ifneq ($(HDF5_HOME),)
-   LFLAGS_LINK_WIN += /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib Shlwapi.lib
-endif
+
 
 LFLAGS_GPU =
 ifeq ($(BUILD_WITH_GPU), ON)
