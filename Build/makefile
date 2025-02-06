@@ -103,7 +103,6 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
 # mkl libraries has changed location in Intel oneAPI version 2024 and later
 # MKLLIBDIR location is defined in havemkl.bat script
 ifeq ($(shell ..\Scripts\havemkl),1)
-  $(info MKLLIBDIR is $(MKLLIBDIR))
 # Use cluster_sparse_solver with intelmpi blacs
   FFLAGSMKL_INTEL = -DWITH_MKL /I"$(MKLROOT)"\include
   LFLAGSMKL_INTEL = "$(MKLLIBDIR)"\mkl_intel_lp64.lib "$(MKLLIBDIR)"\mkl_sequential.lib "$(MKLLIBDIR)"\mkl_core.lib "$(MKLLIBDIR)"\mkl_blacs_intelmpi_lp64.lib
