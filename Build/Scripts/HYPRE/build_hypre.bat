@@ -87,16 +87,6 @@ cd %LIB_REPO%
 git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
 git checkout %LIB_TAG%
 
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
-echo in the file HYPRE_config.h.cmake.in
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
-
 cd %CURDIR%
 
 echo.
@@ -127,6 +117,7 @@ cmake ..\src  ^
 -DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
+-DHYPRE_FMANGLE=4 ^
 -DCMAKE_INSTALL_LIBDIR="lib"
 
 echo.

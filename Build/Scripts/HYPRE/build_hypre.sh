@@ -1,5 +1,5 @@
 #!/bin/bash
-HYPRE_LIB_TAG=
+HYPRE_LIB_TAG=master
 
 CONFMAKE=$1
 CLEAN_HYPRE=$2
@@ -40,10 +40,10 @@ if [ -d "$FIREMODELS/hypre" ]; then
   fi
   git checkout .
   git clean -dxf
-#  if [[ "$(git tag -l $HYPRE_LIB_TAG)" == $HYPRE_LIB_TAG ]]; then
-#    echo "Checking out $HYPRE_LIB_TAG"
-#    git checkout $HYPRE_LIB_TAG
-#  fi
+  if [[ "$(git tag -l $HYPRE_LIB_TAG)" == $HYPRE_LIB_TAG ]]; then
+    echo "Checking out $HYPRE_LIB_TAG"
+    git checkout $HYPRE_LIB_TAG
+  fi
   cd $FIREMODELS/hypre/build
   export HYPRE_VERSION=$(git describe)
   echo "Cleaning hypre repository..."

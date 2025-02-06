@@ -140,13 +140,14 @@ endif # OS test
 endif # MKLROOT test
 #endif # PETSc test
 
+
 FFLAGS_SUNDIALS =
 LFLAGS_SUNDIALS =
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    FFLAGS_SUNDIALS = -DWITH_SUNDIALS ${SUNDIALS_INFO} -I"${SUNDIALS_HOME}/fortran"
    FFLAGS_SUNDIALS_WIN = -DWITH_SUNDIALS ${SUNDIALS_INFO} /I"${SUNDIALS_HOME}\fortran"
    LFLAGS_SUNDIALS = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
-   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib  /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
+   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib
 endif
 
 FFLAGS_HYPRE =
@@ -168,9 +169,18 @@ FFLAGS_HDF5 =
 LFLAGS_HDF5 =
 ifdef HDF5_HOME # This assumes the HDF5 libary is available
    FFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_INFO} -I"${HDF5_HOME}/include"
-   LFLAGS_HDF5 = -DWITH_HDF5 ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5_f90cstub.a ${HDF5_HOME}/lib/libhdf5.a -lz 
+   FFLAGS_HDF5_WIN = -DWITH_HDF5 ${HDF5_INFO} /I"${HDF5_HOME}\include"
+   LFLAGS_HDF5 = ${HDF5_HOME}/lib/libhdf5_fortran.a ${HDF5_HOME}/lib/libhdf5_f90cstub.a ${HDF5_HOME}/lib/libhdf5.a -lz
+   LFLAGS_HDF5_WIN = ${HDF5_HOME}\lib\libhdf5_fortran.lib ${HDF5_HOME}\lib\libhdf5_f90cstub.lib ${HDF5_HOME}\lib\libhdf5.lib
 endif # HDF5_HOME
 
+LFLAGS_LINK_WIN =
+ifneq ($(SUNDIALS_HOME),)
+   LFLAGS_LINK_WIN += /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib Shlwapi.lib
+endif
+ifneq ($(HDF5_HOME),)
+   LFLAGS_LINK_WIN += /link /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib Shlwapi.lib
+endif
 
 LFLAGS_GPU =
 ifeq ($(BUILD_WITH_GPU), ON)
@@ -241,37 +251,37 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 
 impi_intel_win : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448
 impi_intel_win : FCOMPL = $(COMP_FC)
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_vt : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_vt : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448 /Zi /D "TBB_USE_THREADING_TOOLS"
+impi_intel_win_vt : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448 /Zi /D "TBB_USE_THREADING_TOOLS"
 impi_intel_win_vt : FCOMPL = $(COMP_FC)
 impi_intel_win_vt : obj = fds_impi_intel_win_vt
 impi_intel_win_vt : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 
 impi_intel_win_openmp : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_openmp : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_openmp : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win_openmp : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448
 impi_intel_win_openmp : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp : FCOMPL = $(COMP_FC)
 impi_intel_win_openmp : obj = fds_impi_intel_win_openmp
 impi_intel_win_openmp : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 impi_intel_win_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_dv : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_dv : FFLAGS = -D_WIN32 /O1 /I$(MPIINCLUDE) /Z7 /traceback /debug:full /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win_dv : FFLAGS = -D_WIN32 /O1 /I$(MPIINCLUDE) /Z7 /traceback /debug:full /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448
 impi_intel_win_dv : FCOMPL = $(COMP_FC)
 impi_intel_win_dv : obj = fds_impi_intel_win_dv
 impi_intel_win_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 impi_intel_win_openmp_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_openmp_dv : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
@@ -280,24 +290,24 @@ impi_intel_win_openmp_dv : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp_dv : FCOMPL = $(COMP_FC)
 impi_intel_win_openmp_dv : obj = fds_impi_intel_win_openmp_dv
 impi_intel_win_openmp_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_LINK_WIN)
 
 impi_intel_win_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448
 impi_intel_win_db : FCOMPL = $(COMP_FC)
 impi_intel_win_db : obj = fds_impi_intel_win_db
 impi_intel_win_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 impi_intel_win_openmp_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_openmp_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
-impi_intel_win_openmp_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) /Qdiag-disable:10448
+impi_intel_win_openmp_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE_WIN) $(FFLAGS_SUNDIALS_WIN) $(FFLAGS_HDF5_WIN) /Qdiag-disable:10448
 impi_intel_win_openmp_db : FOPENMPFLAGS = /Qopenmp_INTEL
 impi_intel_win_openmp_db : FCOMPL = $(COMP_FC)
 impi_intel_win_openmp_db : obj = fds_impi_intel_win_openmp_db
 impi_intel_win_openmp_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
 
 # Linux Intel Fortran Compiler and Intel MPI
 
