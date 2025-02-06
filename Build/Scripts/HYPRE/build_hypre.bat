@@ -1,5 +1,5 @@
 @echo off
-set LIB_TAG=develop
+set LIB_TAG=master
 
 ::*** library and tag name are the same
 
