@@ -35,6 +35,10 @@ if [[ "$BUILD_WITH_GPU" == "ON" && -n "$GPU_ARCH" ]]; then
         echo "Error: Unsupported GPU_ARCH value: $GPU_ARCH" >&2
         exit 1
     fi
+
+    if [[ "$HYPRE_ENABLE_GPU_AWARE_MPI" == "ON" ]]; then
+        cmake_args+=(-DHYPRE_ENABLE_GPU_AWARE_MPI="ON")
+    fi
 fi
 
 # Run cmake with the arguments
