@@ -1,6 +1,7 @@
 &HEAD CHID='tree_shapes', TITLE='test different INIT shapes for tree crowns' /
 
-&MESH IJK=240,40,40,XB=0,6,0,1,0,1/
+&MESH IJK=19,40,40,XB=0,0.475,0,1,0,1, MULT_ID='mm'/
+&MULT ID='mm', DX=0.475, I_UPPER=12/
 
 &TIME T_END=.1 /
 &RADI RADIATION=.FALSE./
