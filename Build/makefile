@@ -190,7 +190,7 @@ endif
 LFLAGS_GPU =
 ifeq ($(BUILD_WITH_GPU), ON)
    ifeq ($(GPU_ARCH), hip)
-      LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_PATH}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
+      LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_DIR}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
    else ifeq ($(GPU_ARCH), cuda)
       LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${CUDA_DIR}/lib64 -lcudart -lcusparse -lcublas -lcurand -L${CUDA_MATH_DIR}/lib64 -lcusolver
    endif
