@@ -10070,7 +10070,6 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
-\label{info:smoke16}
 
 For any simulation involving combustion, FDS automatically creates three output files that are rendered by Smokeview as realistic looking smoke, fire, and/or hot gas. By default, the output quantities are the \ct{'DENSITY'} of \ct{'SOOT'}, the \ct{'HRRPUV'} (Heat Release Rate Per Unit Volume), and the \ct{TEMPERATURE} of the gases. These quantities are rendered as semi-transparent slices that give you the illusion of looking through smoke or fire. The greater the value of the quantity, the darker the slices will appear en masse. For \ct{HRRPUV}, the lowest value rendered is:
 \be
@@ -10085,7 +10084,7 @@ You have the option of rendering the \ct{DENSITY} of any other species besides \
 \end{lstlisting}
 The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
-FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  When higher resolution is desired, set \ct{SMOKE3D_16=T} on the \ct{MISC} line to output these quantities as 16 bit integers.  For each time frame, FDS then outputs the time, the minimum value, the maximum value, and 16 bit integers scaled between the minimum and maximum value.  This data is then output to a file with extension \ct{.s16} rather than \ct{.s3d} . These 16 bit integer values are not compressed.
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  
 
 \newpage
 
@@ -12655,7 +12654,6 @@ Keyword             & Type     & Description                      & Units       
 \ct{RND_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
 \ct{SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
-\ct{SMOKE3D_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & \ct{F}           \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
 \ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
 \ct{SOOT_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
