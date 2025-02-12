@@ -1,30 +1,139 @@
-## Fire Dynamics Simulator and Smokeview
+# FireX: A Research Branch of Fire Dynamics Simulator (FDS)
 
-*Continuous Integration. Continuous Improvement.*
+FireX is a research branch of the Fire Dynamics Simulator (FDS) focused on integrating high-performance computing (HPC) functionalities. We try to keep FireX synchronized with the master branch of FDS, ensuring that any new commits to the master branch are incorporated into FireX within a few days.
 
-Fire Dynamics Simulator ([FDS](https://github.com/firemodels/fds)) is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
+### Key Features of FireX:
 
-Smokeview ([SMV](https://github.com/firemodels/smv)) is a visualization program used to display the output of FDS and [CFAST](https://github.com/firemodels/cfast) simulations.
+1. **GPU-accelerated Pressure Poisson Solver**
+2. **VTK Output in HDF5 Format** – In addition to Smokeview output, enabling visualization in ParaView or other VTK-compatible tools.
 
-For more information, including a link to our discussion forum, please visit the [FDS-SMV website](https://pages.nist.gov/fds-smv/).
+---
 
-Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/firebot_status.html).
+## Compiling FireX
 
-Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/CONTRIBUTING.md) to the FDS and Smokeview project.
+The compilation process for FireX is similar to FDS, as described in the [FDS Wiki](https://github.com/firemodels/fds/wiki). Below are the steps:
 
-Here are some other useful links:
+### **Step 1: Setup Your Environment**
 
-[FDS-SMV Downloads (includes Release Documentation)](https://github.com/firemodels/fds/releases)
+Follow the instructions to set up your system environment:
 
-[Smokeview Downloads](https://github.com/firemodels/smv/releases)
+  - [Setting up Windows environment](https://github.com/firemodels/fds/wiki/Setting-up-Windows-Environment)
+  - [Setting up macOS environment](https://github.com/firemodels/fds/wiki/Setting-up-macOS-Environment)
+  - [Setting up Linux environment](https://github.com/firemodels/fds/wiki/Setting-up-Linux-environment)
 
-[Discussions](https://github.com/firemodels/fds/discussions)
+#### **Additional Environment Variables for GPU Compilation**
 
-[FDS Issues](https://github.com/firemodels/fds/issues)
+Depending on your GPU type, set the following environment variables:
 
-[Smokeview Issues](https://github.com/firemodels/smv/issues)
+- **NVIDIA (CUDA):**
+  ```sh
+  export CUDA_DIR=<Path to CUDA installation (contains lib64)>
+  export CUDA_MATH_DIR=<Path to CUDA math libraries (contains lib64)>
+  ```
+- **AMD (HIP):**
+  ```sh
+  export ROCM_DIR=<Path to ROCM installation (contains lib64)>
+  ```
+- **Intel (SYCL):**
+  ```sh
+  export SYCL_DIR=<Path to SYCL installation (contains lib64)>
+  ```
 
-[Nightly Builds (includes Documentation)](https://github.com/firemodels/test_bundles/releases/tag/FDS_TEST)
+### **Step 2: Clone the Required Repositories**
 
-Pull requests welcome!
+Pick a local directory where you will clone `fds`, `hypre`, `sundials`, and 'hdf5'.  Optionally, you can name this directory `$FIREMODELS` in your startup script (e.g., `~/.bashrc`).  For example, 
+
+```sh
+export FIREMODELS=~/firemodels
+```
+
+Clone the repositories:
+
+```sh
+cd $FIREMODELS
+git clone git@github.com:firemodels/fds.git
+git clone git@github.com:hypre-space/hypre.git
+git clone git@github.com:LLNL/sundials.git
+git clone git@github.com:HDFGroup/hdf5.git
+```
+
+### **Step 3: Build FireX**
+
+Currently, GPU compilation has been tested with **GNU compilers**. We recommend using the GNU OpenMPI Linux target:
+
+```sh
+cd fds/Build/ompi_gnu_linux
+./make_fds.sh --with-gpu=<cuda | hip | sycl>
+```
+
+---
+
+## Verification Cases
+
+- **GPU Verification:** `fds/Verification/test_gpu.fds`
+- **VTK-HDF5 Verification:** `fds/Verification/VTK/beam_detector.fds`
+
+---
+
+## Example Environment Setup for Supercomputing Clusters
+
+### **[Vista-TACC](https://tacc.utexas.edu/systems/vista/)** (NVIDIA - Grace Hopper)
+
+To compile FireX using **GNU compilers**, add the following to your `~/.bash_profile`:
+
+```sh
+module load gcc/13.2.0
+module load cuda
+module load nvidia_math
+export FIREMODELS_FC=mpif90
+export MPICH_DIR=$MPI_ROOT
+export CUDA_DIR=$TACC_CUDA_DIR
+export CUDA_MATH_DIR=$TACC_NVIDIA_MATH_DIR
+export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+export NO_M64_FLAG=ON
+```
+
+### **[Polaris-ALCF](https://www.alcf.anl.gov/polaris)** (NVIDIA - A100)
+
+To compile FireX using **GNU compilers**, add the following to your `~/.bash_profile`:
+
+```sh
+module use /soft/modulefiles
+module load spack-pe-base cmake
+module load PrgEnv-gnu
+module load nvhpc-mixed
+export FIREMODELS_CC=cc
+export FIREMODELS_CXX=CC
+export FIREMODELS_FC=ftn
+export CUDA_DIR=$NVIDIA_PATH/cuda/12.2
+export CUDA_MATH_DIR=$NVIDIA_PATH/math_libs/12.2
+export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+```
+
+### **[Frontier-OLCF](https://www.olcf.ornl.gov/frontier/)** (AMD - MI250)
+
+To compile FireX using **GNU compilers**, add the following to your `~/.bash_profile`:
+
+```sh
+module load cmake/3.27.9
+module load PrgEnv-gnu
+module load rocm
+module load craype-accel-amd-gfx90a
+export FIREMODELS_CC=cc
+export FIREMODELS_CXX=CC
+export FIREMODELS_FC=ftn
+export ROCM_DIR=$ROCM_PATH
+export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+```
+
+---
+
+## Contact & Contributions
+
+If you would like to contribute to FireX or report issues, feel free to open a GitHub issue or reach out to the maintainers via the FDS repository.
+
+
+
+
+
 
