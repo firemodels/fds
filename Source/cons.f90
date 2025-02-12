@@ -267,7 +267,6 @@ LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SU
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
 LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that off-gas are present
-LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
 LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
@@ -736,17 +735,17 @@ REAL(EB), POINTER, DIMENSION(:) :: COS_HALF_VIEW_ANGLE     !< View angle of the 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_FACTOR        !< View angle area ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
-INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calculation
-INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
-INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
-INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
-REAL(EB) :: TGA_DT=0.01_EB                   !< Time step (s) to use for special TGA calculation
-REAL(EB) :: TGA_DUMP=1._EB                   !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
-REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
-REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
-REAL(EB) :: TGA_CONVERSION_FACTOR=1._EB      !< Conversion factor for TGA output
-REAL(EB) :: MCC_CONVERSION_FACTOR=1._EB      !< Conversion factor for MCC output
-REAL(EB) :: DSC_CONVERSION_FACTOR=1._EB      !< Conversion factor for DSC output
+INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE) !< Mesh for the special TGA calculation
+INTEGER :: TGA_SURF_INDEX=-100              !< Surface properties to use for special TGA calculation
+INTEGER :: TGA_WALL_INDEX=-100              !< Wall index to use for special TGA calculation
+INTEGER :: TGA_PARTICLE_INDEX=-100          !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_DT=0.01_EB                  !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DUMP=1._EB                  !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
+REAL(EB) :: TGA_HEATING_RATE=5._EB          !< Heat rate (K/min) to use for special TGA calculation
+REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB   !< Final Temperature (C) to use for special TGA calculation
+REAL(EB) :: TGA_CONVERSION_FACTOR=1._EB     !< Conversion factor for TGA output
+REAL(EB) :: MCC_CONVERSION_FACTOR=1._EB     !< Conversion factor for MCC output
+REAL(EB) :: DSC_CONVERSION_FACTOR=1._EB     !< Conversion factor for DSC output
 
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
