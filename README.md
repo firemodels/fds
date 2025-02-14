@@ -36,7 +36,7 @@ Depending on your GPU type, set the following environment variables:
   ```
 - **Intel (SYCL):**
   ```sh
-  export SYCL_DIR=<Path to SYCL installation (contains lib64)>
+  # Nothing needs to be done other than enabling OneAPI module.
   ```
 
 ### **Step 2: Clone the Required Repositories**
@@ -59,11 +59,16 @@ git clone git@github.com:HDFGroup/hdf5.git
 
 ### **Step 3: Build FireX**
 
-Currently, GPU compilation has been tested with **GNU compilers**. We recommend using the GNU OpenMPI Linux target:
-
+For compilation using **GNU compilers** use the GNU OpenMPI Linux target:
 ```sh
 cd fds/Build/ompi_gnu_linux
-./make_fds.sh --with-gpu=<cuda | hip | sycl>
+./make_fds.sh --with-gpu=<cuda | hip>
+```
+
+For compilation using **Intel compilers** use the Intel Linux target:
+```sh
+cd fds/Build/impi_intel_linux
+./make_fds.sh --with-gpu=sycl
 ```
 
 ---
