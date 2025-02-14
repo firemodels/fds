@@ -93,6 +93,14 @@ export HYPRE_ENABLE_GPU_AWARE_MPI=ON
 export NO_M64_FLAG=ON
 ```
 
+### [Stampede-TACC](https://tacc.utexas.edu/systems/stampede3/) (INTEL Data Center GPU Max 1550s)
+To compile FireX using INTEL compilers, add the following to your ~/.bash_profile:
+```sh
+module load intel/24.0
+export MPICH_DIR=$MPI_ROOT
+export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+```
+
 ### **[Polaris-ALCF](https://www.alcf.anl.gov/polaris)** (NVIDIA - A100)
 
 To compile FireX using **GNU compilers**, add the following to your `~/.bash_profile`:
