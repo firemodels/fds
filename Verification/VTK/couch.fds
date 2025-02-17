@@ -8,7 +8,7 @@ The case is meant as a teaching tool and to test functionality.
 
 &TIME T_END=600. /
 
-&DUMP NFRAMES=3000, DT_HRR=5., DT_DEVC=5., WRITE_VTK=T, RESULTS_DIR='couch_results' /
+&DUMP NFRAMES=3000, DT_HRR=5., DT_DEVC=5., WRITE_FORMAT='VTK', RESULTS_DIR='couch_results' /
 
 &SPEC ID='POLYURETHANE',FORMULA='C6.3H7.1N1.0O2.1'/
 
