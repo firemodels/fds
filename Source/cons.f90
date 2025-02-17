@@ -281,6 +281,7 @@ LOGICAL :: VTK_HDF=.TRUE.                           !< Flag that indicates VTK o
 LOGICAL :: PARAVIEW_PROJECT=.FALSE.                 !< Flag that indicates if a paraview project script should be generated
 LOGICAL :: WRITE_VTK_GEOM=.FALSE.                   !< Flag that indicates if a vtk geometry file should be generated
 LOGICAL :: WRITE_VTK=.FALSE.                        !< Flag that indicates if vtk files should be generated
+LOGICAL :: WRITE_SMV=.TRUE.                         !< Flag that indicates if smv files should be generated
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
 LOGICAL :: WROTE_SL3D=.FALSE.                       !< Flag indicating if a SL3D file was written during primary out
