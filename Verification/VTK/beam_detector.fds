@@ -1,5 +1,5 @@
 &HEAD CHID='beam_detector', TITLE='Test a Beam Detector and Verify Smokeview Smoke3D Feature' /
-&DUMP DT_VTK=0.1, RESULTS_DIR='beam_detector_results' /
+&DUMP WRITE_FORMAT='VTK', RESULTS_DIR='beam_detector_results' /
 &MESH IJK=50,50,20, XB=0.0,5.0,0.0,5.0,0.0,2.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=5., DY=5., DZ=2., I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
