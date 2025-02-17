@@ -3307,8 +3307,8 @@ The \ct{SURF} and \ct{MATL} lines describing the pyrolysis of real materials con
 
 This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. While a full 3-D simulation of the cone heater and sample holder can be created in FDS, such a simulation would take some time to complete and would not disentangle issues with the solid phase model from uncertainties in the gas phase. It is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
-\item Create a trivially small mesh, just enough to let FDS run. Since the gas phase calculation is essentially being shut off, you just need nine cells total (\ct{IJK=3,1,3}) for the pressure solver to function properly.
-\item On the \ct{MISC} line, set \ct{SOLID_PHASE_ONLY=T} to turn off all gas phase computation and speed up the simulation.  Note that convective heat transfer to/from the surface is still applied using the ambient temperature.  In this case the heat transfer coefficient is either specified or taken from the gas phase thermal conductivity divided by the wall-normal grid spacing.
+\item Create a trivially small mesh, just enough to allow FDS to run. Since the gas phase calculation is essentially being shut off, you just need nine cells total (\ct{IJK=3,1,3}) for the pressure solver to function properly.
+\item On the \ct{MISC} line, set \ct{SOLID_PHASE_ONLY=T} to turn off the gas phase fluid flow computation. This reduces the CPU time. Note that convective and radiative heat transfer to/from the surface is still applied using the ambient temperature as the assumed gas and far-field temperature. The \ct{HEAT_TRANSFER_COEFFICIENT} is either specified or computed from the gas phase thermal conductivity divided by the wall-normal grid spacing. It is be best to specify it explicitly.
 \item Create \ct{SPEC} lines to list any gas species created in the pyrolysis process. A \ct{REAC} line is not needed, as there is no gas phase combustion allowed.
 \item On the \ct{TIME} line, set \ct{WALL_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set \ct{DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate \ct{MATL} lines, plus a single \ct{SURF} line, as you normally would, except add \ct{EXTERNAL_FLUX} to the \ct{SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the \ct{EXTERNAL_FLUX} using either \ct{TAU_EF} or \ct{RAMP_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Sec.~\ref{info:RAMP_Time} for more details about ramps.
@@ -8770,7 +8770,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
 
-When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}.
+When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it.
 
 The csv file format is:
 \begin{lstlisting}
@@ -10074,7 +10074,6 @@ Stereolithography (STL) is a commonly used file format in computer-aided design 
 
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
-\label{info:smoke16}
 
 For any simulation involving combustion, FDS automatically creates three output files that are rendered by Smokeview as realistic looking smoke, fire, and/or hot gas. By default, the output quantities are the \ct{'DENSITY'} of \ct{'SOOT'}, the \ct{'HRRPUV'} (Heat Release Rate Per Unit Volume), and the \ct{TEMPERATURE} of the gases. These quantities are rendered as semi-transparent slices that give you the illusion of looking through smoke or fire. The greater the value of the quantity, the darker the slices will appear en masse. For \ct{HRRPUV}, the lowest value rendered is:
 \be
@@ -10089,7 +10088,7 @@ You have the option of rendering the \ct{DENSITY} of any other species besides \
 \end{lstlisting}
 The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
-FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  When higher resolution is desired, set \ct{SMOKE3D_16=T} on the \ct{MISC} line to output these quantities as 16 bit integers.  For each time frame, FDS then outputs the time, the minimum value, the maximum value, and 16 bit integers scaled between the minimum and maximum value.  This data is then output to a file with extension \ct{.s16} rather than \ct{.s3d} . These 16 bit integer values are not compressed.
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  
 
 \newpage
 
@@ -12660,7 +12659,6 @@ Keyword             & Type     & Description                      & Units       
 \ct{RND_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
 \ct{SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
-\ct{SMOKE3D_16}                                   & Logical      & Section~\ref{info:smoke16}              &            & \ct{F}           \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
 \ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
 \ct{SOOT_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
@@ -13607,6 +13605,9 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_END_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 \ct{DT_END_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  \ct{2.*EPSILON}  \\ \hline
 \ct{DT_EXTERNAL}              & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
+\ct{DT_EXTERNAL_HEARTBEAT}    & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
+\ct{EXTERNAL_HEARTBEAT_FILENAME}  & Character  & Section~\ref{info:external_control}   &             &                 \\ \hline
+\ct{HEARTBEAT_FAIL}           & Logical    & Section~\ref{info:external_control}   &             & \ct{T}          \\ \hline
 \ct{LIMITING_DT_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 \ct{LOCK_TIME_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & \ct{F}         \\ \hline
 \ct{RAMP_TIME}                & Character  & Section~\ref{info:simulation_time_ramp}   &             &                 \\ \hline

@@ -3,7 +3,7 @@
 &MESH ID='MESH2',        IJK=5,19,24,  XB = 0,  0.5, 0.5,2.4, 0.0, 2.4,  MPI_PROCESS = 2 /
 &MESH ID='MESH3',        IJK=48,24,24, XB = 0.5,5.3, 0,  2.4, 0.0, 2.4,  MPI_PROCESS = 3 /
 
-&REAC ID = 'initialfire', SOOT_YIELD=0.01, FUEL='PROPANE' /
+&REAC ID = 'initialfire', SOOT_YIELD=0.01, FUEL='PROPANE', RADIATIVE_FRACTION=0 /
 
 &SPEC ID='WATER VAPOR' /
 
