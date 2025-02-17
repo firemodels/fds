@@ -208,7 +208,7 @@ IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_V
 
 ! Write the Smokeview (.smv) file using parallel MPI writes
 
-CALL WRITE_SMOKEVIEW_FILE
+IF (WRITE_SMV) CALL WRITE_SMOKEVIEW_FILE
 
 ! Write STL file if required
 IF (WRITE_STL) THEN
@@ -234,7 +234,7 @@ ENDIF
 
 ! MPI process 0 reopens the Smokeview file for additional output
 
-IF (MY_RANK==0) THEN
+IF (MY_RANK==0 .AND. WRITE_SMV) THEN
    OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
    CALL WRITE_STATUS_FILES
 ENDIF
@@ -602,7 +602,7 @@ ENDIF
 
 ! Write out character strings to .smv file
 
-CALL WRITE_STRINGS
+IF (WRITE_SMV) CALL WRITE_STRINGS
 
 ! Sprinkler piping calculation
 

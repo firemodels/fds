@@ -2414,6 +2414,9 @@ SELECT CASE(WRITE_FORMAT)
    CASE('BOTH')
       WRITE_SMV=.TRUE.
       WRITE_VTK=.TRUE.
+   CASE DEFAULT
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR(###): WRITE_FORMAT, ',TRIM(WRITE_FORMAT),', is not recognized.'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
 END SELECT
 
 ! Keep track of whether the output timing intervals are specified by the user or not
