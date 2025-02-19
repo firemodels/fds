@@ -99,7 +99,7 @@ def buildInputFile(testnum, HRR, H, convmodel, dx, wind=0.015, debugOutputs=Fals
     import numpy as np
     chid = getChid(testnum, convmodel, dx)
     if convmodel == 'jet':
-        suffix2 = "HEAT_TRANSFER_MODEL='IMPINGING JET', CONVECTION_LENGTH_SCALE=0.3, CONVECTION_LENGTH_SCALE2=0.3, "
+        suffix2 = "HEAT_TRANSFER_MODEL='IMPINGING JET', CONVECTION_LENGTH_SCALE=0.3, "
     else:
         suffix2 = ""
     NZ1 = np.round(H/dx)
@@ -274,14 +274,13 @@ def buildInputFile(testnum, HRR, H, convmodel, dx, wind=0.015, debugOutputs=Fals
     txt = txt + "&DEVC ID='THF',   XYZ=0.0318,0.0,%0.4f, IOR=-3, QUANTITY='TOTAL HEAT FLUX', /\n"%(H)
     txt = txt + "&DEVC ID='CHF',   XYZ=0.0318,0.0,%0.4f, IOR=-3, QUANTITY='CONVECTIVE HEAT FLUX', /\n"%(H)
     txt = txt + "&DEVC ID='IHF',   XYZ=0.0318,0.0,%0.4f, IOR=-3, QUANTITY='INCIDENT HEAT FLUX', /\n"%(H)
-    txt = txt + "&DEVC ID='UIMPACT',   XYZ=0.0318,0.0,%0.4f, IOR=-3, QUANTITY='IMPACT VELOCITY', /\n"%(H)
     txt = txt + "&DEVC ID='HTC',   XYZ=0.0318,0.0,%0.4f, IOR=-3, QUANTITY='HEAT TRANSFER COEFFICIENT', /\n"%(H)
     txt = txt + "&DEVC ID='GHF2', XYZ=-0.0254,0.0,%0.4f, IOR=-3, QUANTITY='GAUGE HEAT FLUX', /\n"%(H)
     txt = txt + "&DEVC ID='RTE_C', XYZ=0.0,0.0,0.5, QUANTITY='RTE SOURCE CORRECTION FACTOR' /\n"
     if debugOutputs:
         specs = ['PROPANE PILOT', 'PROPANE FUEL']
         spec_counter = 0
-        for qty in ['IMPACT VELOCITY','HEAT TRANSFER COEFFICIENT', 'GAS TEMPERATURE', 'MASS FLUX', 'MASS FLUX', 'HRRPUA', 'ADIABATIC SURFACE TEMPERATURE', 'GAUGE HEAT FLUX', 'INCIDENT HEAT FLUX', 'CONVECTIVE HEAT FLUX', 'WALL TEMPERATURE', 'EMISSIVITY', 'TOTAL HEAT FLUX','CONVECTIVE HEAT TRANSFER REGIME']:
+        for qty in ['HEAT TRANSFER COEFFICIENT', 'GAS TEMPERATURE', 'MASS FLUX', 'MASS FLUX', 'HRRPUA', 'ADIABATIC SURFACE TEMPERATURE', 'GAUGE HEAT FLUX', 'INCIDENT HEAT FLUX', 'CONVECTIVE HEAT FLUX', 'WALL TEMPERATURE', 'EMISSIVITY', 'TOTAL HEAT FLUX','CONVECTIVE HEAT TRANSFER REGIME']:
             txt = txt + "&BNDF QUANTITY='%s', "%(qty)
             if qty == 'MASS FLUX':
                 txt = txt + "SPEC_ID='%s', "%(specs[spec_counter])

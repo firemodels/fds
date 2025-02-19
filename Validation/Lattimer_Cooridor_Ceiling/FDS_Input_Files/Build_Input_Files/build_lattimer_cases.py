@@ -111,7 +111,7 @@ def buildInputFile(testnum, HRR, H, convmodel, dx):
     import numpy as np
     chid = getChid(testnum, convmodel, dx)
     if convmodel == 'jet':
-        suffix2 = "HEAT_TRANSFER_MODEL='IMPINGING JET', CONVECTION_LENGTH_SCALE=0.77, CONVECTION_LENGTH_SCALE2=0.77, "
+        suffix2 = "HEAT_TRANSFER_MODEL='IMPINGING JET', CONVECTION_LENGTH_SCALE=0.77, "
     else:
         suffix2 = ""
         
@@ -137,7 +137,7 @@ def buildInputFile(testnum, HRR, H, convmodel, dx):
         coarse_dx = dx*1
         coarse_dz = dz*1
     if dx == 0.025: 
-        numProcesses = 56
+        numProcesses = 16
         coarse_dx = dx*2
         coarse_dz = dz*2
     if dx == 0.0125: 
@@ -216,14 +216,13 @@ def buildInputFile(testnum, HRR, H, convmodel, dx):
         txt = txt + "&DEVC ID='HTC%d', XYZ=%0.4f,0.0,2.1, IOR=-3, QUANTITY='HEAT TRANSFER COEFFICIENT', /\n"%(i, xx)
         txt = txt + "&DEVC ID='TGAS%d', XYZ=%0.4f,0.0,2.1, IOR=-3, QUANTITY='GAS TEMPERATURE', /\n"%(i, xx)
         txt = txt + "&DEVC ID='TWALL%d', XYZ=%0.4f,0.0,2.1, IOR=-3, QUANTITY='WALL TEMPERATURE', /\n"%(i, xx)
-        txt = txt + "&DEVC ID='UIMPACT%d', XYZ=%0.4f,0.0,2.1, IOR=-3, QUANTITY='IMPACT VELOCITY', /\n"%(i, xx)
         txt = txt + "&DEVC ID='VELOCITY%d', XYZ=%0.4f,0.0,2.05, QUANTITY='VELOCITY', /\n"%(i, xx)
         txt = txt + "&DEVC ID='VELOCITY%d', XYZ=%0.4f,0.0,2.075, QUANTITY='TEMPERATURE', /\n"%(i, xx)
         
     
     specs = ['PROPANE PILOT', 'PROPANE FUEL']
     spec_counter = 0
-    for qty in ['IMPACT VELOCITY','HEAT TRANSFER COEFFICIENT', 'GAS TEMPERATURE', 'ADIABATIC SURFACE TEMPERATURE', 'GAUGE HEAT FLUX', 'INCIDENT HEAT FLUX', 'CONVECTIVE HEAT FLUX', 'WALL TEMPERATURE', 'CONVECTIVE HEAT TRANSFER REGIME']:
+    for qty in ['HEAT TRANSFER COEFFICIENT', 'GAS TEMPERATURE', 'ADIABATIC SURFACE TEMPERATURE', 'GAUGE HEAT FLUX', 'INCIDENT HEAT FLUX', 'CONVECTIVE HEAT FLUX', 'WALL TEMPERATURE', 'CONVECTIVE HEAT TRANSFER REGIME']:
         txt = txt + "&BNDF QUANTITY='%s', "%(qty)
         if qty == 'MASS FLUX':
             txt = txt + "SPEC_ID='%s', "%(specs[spec_counter])
