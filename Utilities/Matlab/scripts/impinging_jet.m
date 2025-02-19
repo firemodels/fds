@@ -132,7 +132,7 @@ for i=1:length(Re_str)
 
         K(j)=plot(x,Nu_x,style{j}); hold on
     end
-    xlabel('{\itx}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    xlabel('{\itx} (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('Nu_{Dh}({\itx})','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
     axis([-.5 .5 0 1000])
