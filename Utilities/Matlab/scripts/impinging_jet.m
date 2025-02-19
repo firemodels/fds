@@ -7,13 +7,11 @@ clear all
 
 figure
 plot_style
-Figure_Visibility = 'off';
-
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-outdir = '../../../../out/Convection/';
-pltdir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+outdir = '../../../out/Convection/';
+pltdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 chid = 'impinging_jet';
 
 % plot the correlation
@@ -31,7 +29,6 @@ rho_j = rho_a * (T_w+273)/(T_j+273);  % jet fluid density [kg/m3]
 nu = mu/rho_j;                        % kinematic viscosity [m2/s]
 U_j = [10,40];                        % jet exit velocity [m/s]
 A_r  = 0.01;                          % D_h^2/(4 r^2), where r defines the outer extent of the averaging region
-plot_type = 1;
 
 % Plot correlation versus Re_j for a given geometry
 
@@ -40,13 +37,8 @@ G = 2*sqrt(A_r)*( (1-2.2*sqrt(A_r))/(1+0.2*(H/D_h-6)*sqrt(A_r)) );
 
 RE = linspace(2e3,5e5);
 NU = G*2*sqrt(RE).*sqrt(1+0.005*RE.^0.55).* Pr^0.42;
-h_cor = NU*k/D_h;
 
-if plot_type == 1
-    K(1)=plot(RE,h_cor,'k-','linewidth',2); hold on
-else
-    K(1)=plot(RE,NU,'k-','linewidth',2); hold on
-end
+K(1)=plot(RE,NU,'k-','linewidth',2); hold on
 
 res_str = {'coarse','medium','fine'};
 Re_str  = {'1e5','4e5'};
@@ -73,34 +65,29 @@ for j=1:length(res_str)
 
         qconv = HF * 1000; % W/m2
         h_fds = qconv/(T_j-T_w);
-        h_fds = mean(M.data(floor(end/2):end,find(strcmp(M.colheaders,'"HTC"'))));
-        Nu_fds = h_fds*H/k;
+        Nu_fds = h_fds*D_h/k;
 
-        error_j = abs(Nu - Nu_fds)/abs(Nu);
+        E_FDS(i,j) = abs(Nu - Nu_fds)/abs(Nu);
 
-        if error_j > E(i,j)*1.1
-            disp(['Matlab Warning: impinging jet error = ',num2str(error_j),' at Re_j=',Re_str{i},', Res=',res_str{j}])
+        if E_FDS(i,j) > E(i,j)*1.1
+            disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
         end
-        if plot_type == 1
-            pltvar = h_fds;
-        else
-            pltvar = Nu_fds;
-        end
+
         if i==1
             if j==1
-                K(2)=plot(Re_j,pltvar,'bsq','linewidth',2); Key={'FDS coarse'};
+                K(2)=plot(Re_j,Nu_fds,'bsq','linewidth',2); Key={'FDS coarse'};
             elseif j==2
-                K(3)=plot(Re_j,pltvar,'rsq','linewidth',2); Key={'FDS coarse','FDS medium'};
+                K(3)=plot(Re_j,Nu_fds,'rsq','linewidth',2); Key={'FDS coarse','FDS medium'};
             elseif j==3
-                K(4)=plot(Re_j,pltvar,'gsq','linewidth',2); Key={'FDS coarse','FDS medium','FDS fine'};
+                K(4)=plot(Re_j,Nu_fds,'gsq','linewidth',2); Key={'FDS coarse','FDS medium','FDS fine'};
             end
         elseif i==2
             if j==1
-                plot(Re_j,pltvar,'bsq','linewidth',2)
+                plot(Re_j,Nu_fds,'bsq','linewidth',2)
             elseif j==2
-                plot(Re_j,pltvar,'rsq','linewidth',2)
+                plot(Re_j,Nu_fds,'rsq','linewidth',2)
             elseif j==3
-                plot(Re_j,pltvar,'gsq','linewidth',2)
+                plot(Re_j,Nu_fds,'gsq','linewidth',2)
             end
         end
 
@@ -111,17 +98,13 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
 xlabel('Re','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-if plot_type == 1
-    ylabel('h (W/m^{2}K)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-else
-    ylabel('Nu','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-end
+ylabel('Nu','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend(K,['Martin',Key],'location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size);
 
 Git_Filename = [outdir,'impinging_jet_Re_1e5_coarse_git.txt'];
 addverstr(gca,Git_Filename,'linear')
-ylim([0, 85]);
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
@@ -146,26 +129,13 @@ for i=1:length(Re_str)
         x = M.data(:,1);
         q_x = M.data(:,find(strcmp(M.colheaders,'QCONV'))) * 1000;
         Nu_x = q_x/(T_j-T_w)*D_h/k;
-        h_x = q_x/(T_j-T_w);
-        if plot_type == 1
-            pltvar = h_x;
-        else
-            pltvar = Nu_x;
-        end
-        K(j)=plot(x,pltvar,style{j}); hold on
+
+        K(j)=plot(x,Nu_x,style{j}); hold on
     end
-    xlabel('{\itx}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-    if plot_type == 1
-        ylabel('h_{Dh}({\itx})','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-    else
-        ylabel('Nu_{Dh}({\itx})','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-    end
-    
-    if plot_type == 1
-        axis([-.5 .5 0 85])
-    else
-        axis([-.5 .5 0 85])
-    end
+    xlabel('{\itx} (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    ylabel('Nu_{Dh}({\itx})','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+
+    axis([-.5 .5 0 1000])
 
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
@@ -185,3 +155,8 @@ for i=1:length(Re_str)
 
     hold off
 end
+
+
+
+
+
