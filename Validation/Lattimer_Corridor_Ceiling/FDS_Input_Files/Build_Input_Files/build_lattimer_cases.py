@@ -58,7 +58,7 @@ def buildInputFile(testnum, HRR, H, dx):
     txt = txt + "&VENT DB='ZMAX', SURF_ID='OPEN', /\n\n"
     
     for ID, QTY in zip(['GHF_profile','HTC_profile','CHF_profile'], ['GAUGE HEAT FLUX', 'HEAT TRANSFER COEFFICIENT', 'CONVECTIVE HEAT FLUX']):
-        txt = txt + "&DEVC ID='%s', XB=-0.59,0.59,0.0,0.0,1.12,1.12, IOR=-3, POINTS=101, QUANTITY='%s', STATISTICS_START=50. /\n"%(ID, QTY)
+        txt = txt + "&DEVC ID='%s', XB=-2.4,0.0,0.0,0.0,2.1,2.1, IOR=-3, POINTS=101, QUANTITY='%s', STATISTICS_START=50. /\n"%(ID, QTY)
     txt = txt + "\n"
     
     for qty in ['HEAT TRANSFER COEFFICIENT', 'GAUGE HEAT FLUX', 'CONVECTIVE HEAT FLUX', 'WALL TEMPERATURE']:
