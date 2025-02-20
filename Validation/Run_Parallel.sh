@@ -76,5 +76,6 @@ cd USFS_Corsica;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..
 cd UWO_Wind_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd VTT;  ./Run_All.sh $OPTIONS; cd ..
+cd Wasson_Impinging_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Waterloo_Methanol;  ./Run_All.sh $OPTIONS; cd ..
 cd Wu_Bakar_Tunnels;  ./Run_All.sh $OPTIONS; cd ..

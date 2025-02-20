@@ -8,6 +8,4 @@ WDIR=$PDIR/$DIR
 
 cp $DDIR/*git.txt $WDIR
 cp $DDIR/*line.csv $WDIR
-cp $DDIR/*hrr.csv $WDIR
-cp $DDIR/*devc.csv $WDIR
 
