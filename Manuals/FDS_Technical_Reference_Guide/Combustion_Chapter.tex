@@ -121,7 +121,7 @@ The remaining coefficients come from an atom balance.
 \end{tabular}
 \end{center}
 
-\noindent The preceding table shows that the addition of carbon monoxide and soot increases the number of primitive species in the reaction from five to seven. The number of lumped species, however, remains at three---the composition of Products has changed to include to the two additional species.  Note that FDS prints the $A$ matrix in the {\ct CHID.out} file so that the user can double check the reaction system.
+\noindent The preceding table shows that the addition of carbon monoxide and soot increases the number of primitive species in the reaction from five to seven. The number of lumped species, however, remains at three---the composition of Products has changed to include to the two additional species.  Note that FDS prints the $A$ matrix in the \ct{CHID.out} file so that the user can double check the reaction system.
 
 
 \clearpage
@@ -463,7 +463,7 @@ Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler} includes $X_{\OI}$ and 
 \subsection{Extinction Based Mainly on Oxygen Concentration}
 \label{o2_based_model}
 
-The first of two optional extinction models (referred to as {\ct 'EXTINCTION 1'} in the FDS input file) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen concentration\footnote{The extinction model is written in terms of the oxygen {\em volume} fraction, $X_\OTWO$, because usually experimental results are reported as such. However, within the numerical algorithm, all values are converted into mass fraction, $Y_\OTWO$.} that is a piecewise-linear function of the cell bulk temperature, $T_{ijk}$ (see Fig.~\ref{extinction_1_sketch}):
+The first of two optional extinction models (referred to as \ct{'EXTINCTION 1'} in the FDS input file) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen concentration\footnote{The extinction model is written in terms of the oxygen {\em volume} fraction, $X_\OTWO$, because usually experimental results are reported as such. However, within the numerical algorithm, all values are converted into mass fraction, $Y_\OTWO$.} that is a piecewise-linear function of the cell bulk temperature, $T_{ijk}$ (see Fig.~\ref{extinction_1_sketch}):
 \be
    X_{\OTWO,\lim}(T_{ijk}) = \left\{ \begin{array}{c@{\quad \quad}l} X_{\OI} \, \left( \frac{T_{\OI}-T_{ijk}}{T_{\OI}-T_\infty} \right) & T_{ijk}<T_{\rm fb} \\[.1in]  0 &  T_{ijk} \ge T_{\rm fb} \end{array} \right.  \label{extinction_model}
 \ee
@@ -471,17 +471,17 @@ The first of two optional extinction models (referred to as {\ct 'EXTINCTION 1'}
 \centering
 \includegraphics[width=4.5in]{FIGURES/extinction_1_sketch}
 \vskip-.2cm
-\caption{Extinction criteria for the {\ct 'EXTINCTION 1'} model.}
+\caption{Extinction criteria for the \ct{'EXTINCTION 1'} model.}
 \label{extinction_1_sketch}
 \end{figure}
 If $X_{\OTWO,ijk}<X_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell at that time step. At an ambient temperature of 20~$^\circ$C, the default limiting oxygen volume fraction is 0.135.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen volume fractions of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
-The {\ct 'EXTINCTION 1'} model is intended for relatively coarse fire simulations where the grid cell cannot resolve details of the flame structure or capture flame temperatures. The ``free-burn'' temperature, $T_{\rm fb}$, in Eq.~(\ref{extinction_model}) is needed for simulations in which the characteristic grid cell size, $\dx$, is much larger than 1~cm. In such cases, the combustion occurs within a fraction of the grid cell and its energy cannot raise the cell bulk temperature to the critical value. Its default value is 600~$^\circ$C. Measurements of Pitts~\cite{Pitts:1995}, Bundy~\cite{Bundy:1}, and others, have shown that the upper layer oxygen concentration drops to zero in flashover compartment fire experiments when the temperature increases above approximately 600~$^\circ$C.
+The \ct{'EXTINCTION 1'} model is intended for relatively coarse fire simulations where the grid cell cannot resolve details of the flame structure or capture flame temperatures. The ``free-burn'' temperature, $T_{\rm fb}$, in Eq.~(\ref{extinction_model}) is needed for simulations in which the characteristic grid cell size, $\dx$, is much larger than 1~cm. In such cases, the combustion occurs within a fraction of the grid cell and its energy cannot raise the cell bulk temperature to the critical value. Its default value is 600~$^\circ$C. Measurements of Pitts~\cite{Pitts:1995}, Bundy~\cite{Bundy:1}, and others, have shown that the upper layer oxygen concentration drops to zero in flashover compartment fire experiments when the temperature increases above approximately 600~$^\circ$C.
 
 
 \subsection{Extinction Based on Both Fuel and Oxygen}
 
-The second optional extinction model in FDS, referred to as {\ct 'EXTINCTION 2'}, considers both the oxygen and the fuel content of a given grid cell at the start of a time step. If the potential heat release from the reactants cannot raise the temperature of the cell above the empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the mixed portion of the grid cell at the beginning and the end of the reaction part of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
+The second optional extinction model in FDS, referred to as \ct{'EXTINCTION 2'}, considers both the oxygen and the fuel content of a given grid cell at the start of a time step. If the potential heat release from the reactants cannot raise the temperature of the cell above the empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the mixed portion of the grid cell at the beginning and the end of the reaction part of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
 \be
    \label{eq:dza}
    \tilde{\phi} \equiv  \min \left( \, 1 \, , \, \frac{s \, Z_{\rm F}^0}{Z_{\rm A}^0} \, \right) = \frac{Z_{\rm A}^0-Z_{\rm A}}{Z_{\rm A}^0}
