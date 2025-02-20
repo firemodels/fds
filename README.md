@@ -62,6 +62,7 @@ git clone git@github.com:HDFGroup/hdf5.git
 For compilation using **GNU compilers** use the GNU OpenMPI Linux target:
 ```sh
 cd fds/Build/ompi_gnu_linux
+git checkout FireX
 ./make_fds.sh --with-gpu=<cuda | hip>
 ```
 
