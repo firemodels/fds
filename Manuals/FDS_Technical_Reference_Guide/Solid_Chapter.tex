@@ -145,7 +145,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{center}
 \end{table}
 
-The impinging jet heat transfer model uses the stagnation pressure to define the velocity scale, $U_{\rm imp} = \sqrt{2 H}$, in the Reynolds number, but otherwise uses the forced convection Nusselt correlation with slightly modified default constants, $C_1 = 0.55$ and $n=0.8$.  As with the forced convection model, custom coefficients may be used, as discussed in the FDS User Guide \cite{FDS_Users_Guide}.  If the impinging jet model is implemented by the user, $\NU_{\rm impinge}$ gets added to the list of max arguments in Eq.~(\ref{q_con}).
+To avoid the artificial dissipation caused by averaging velocity components in a diverging flow, the impinging jet heat transfer model uses the staggered cell's maximum velocity components to define the velocity scale in the Reynolds number, but otherwise uses the forced convection Nusselt correlation with slightly modified default constants, $C_1 = 0.55$ and $n=0.8$.  As with the forced convection model, custom coefficients may be used, as discussed in the FDS User Guide \cite{FDS_Users_Guide}.  If the impinging jet model is implemented by the user, $\NU_{\rm impinge}$ gets added to the list of max arguments in Eq.~(\ref{q_con}).
 
 \be
    \NU_{\rm impinge} = C_0 + \left( C_1 \, \RE_{\rm imp}^n - C_2 \right) \, \PR^m  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm imp} L}{\mu}  \quad ; \quad m=1/3
