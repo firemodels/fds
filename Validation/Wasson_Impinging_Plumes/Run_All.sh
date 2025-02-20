@@ -5,23 +5,13 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test1_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test1_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test1_jet_050mm.fds
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test2_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test2_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test2_jet_050mm.fds
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test3_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test3_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test3_jet_050mm.fds
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test4_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test4_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test4_jet_050mm.fds
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test5_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test5_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test5_jet_050mm.fds
-$QFDS $DEBUG -p 37  $QUEUE -d $INDIR wasson_test6_jet_012mm.fds
-$QFDS $DEBUG -p 21  $QUEUE -d $INDIR wasson_test6_jet_025mm.fds
-$QFDS $DEBUG -p 6   $QUEUE -d $INDIR wasson_test6_jet_050mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test1_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test2_12mm.fds
+$QFDS $DEBUG -p 50  $QUEUE -d $INDIR wasson_test3_12mm.fds
+$QFDS $DEBUG -p 50  $QUEUE -d $INDIR wasson_test3_25mm.fds
+$QFDS $DEBUG -p 9   $QUEUE -d $INDIR wasson_test3_50mm.fds
+$QFDS $DEBUG -p 100 $QUEUE -d $INDIR wasson_test4_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test5_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test6_12mm.fds
 
 echo FDS cases submitted
