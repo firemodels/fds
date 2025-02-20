@@ -6178,7 +6178,7 @@ Note that if the \ct{GEOMETRY} is set to \ct{'SPHERICAL'} and a \ct{BOILING_TEMP
 \subsection{Drag}
 \label{info:particle_drag}
 
-The drag force exerted by moving or stationary particles is detailed in the FDS Technical Reference Guide, chapter ``Lagrangian Particles''~\cite{FDS_Math_Guide}. For solid particles, the default drag law is that of a solitary sphere. To invoke a different drag law, that of a solitary cylinder for example, set \ct{DRAG_LAW = 'CYLINDER'} on the \ct{PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific \ct{PART_ID}) by setting a \ct{DRAG_COEFFICIENT} on the \ct{PART} line. The \ct{DRAG_COEFFICIENT} over-rides the \ct{DRAG_LAW}.
+The drag force exerted by moving or stationary particles is detailed in the FDS Technical Reference Guide, chapter ``Lagrangian Particles''~\cite{FDS_Math_Guide}. For solid particles, the default drag law is that of a solitary sphere. To invoke a different drag law, that of a solitary cylinder for example, set \ct{DRAG_LAW='CYLINDER'} on the \ct{PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific \ct{PART_ID}) by setting a \ct{DRAG_COEFFICIENT} on the \ct{PART} line. The \ct{DRAG_COEFFICIENT} over-rides the \ct{DRAG_LAW}.
 
 \begin{table}[ht]
 \begin{center}
@@ -6197,6 +6197,8 @@ The drag force exerted by moving or stationary particles is detailed in the FDS 
 \end{table}
 
 If you are modeling a relatively dense collection of solid particles, like vegetation, you should set the \ct{DRAG_COEFFICIENT} explicitly and not rely on the correlations for spheres and cylinders which were developed for relatively independent bodies, not clusters.
+
+\paragraph{Near Wall Particle Interpolation} The momentum exchange between a particle and the fluid depends on the local fluid velocity at the particle position.  Normally, the velocity at the particle position is taken from a trilinear interpolation from the staggered velocity components nearest the particle.  Thus, the particle lives in a different staggered cell for each component of velocity.  When the particle position is within half a grid cell from the wall the default behavior is to use fluid velocity component tangential to the wall when computing the drag force in that component direction.  This approximation is justified based on the plug flow profile seen in highly turbulent flows.  However, as the flow becomes more resoled, this approximation may not be appropriate.  If you specify \ct{NEAR_WALL_PARTICLE_INTERPOLTION=T} on \ct{MISC} then the fluid velocity will be linearly interpolated between the staggered component value and the no slip condition at the wall.
 
 
 \subsection{Radiation Absorption and Emission}
@@ -10088,7 +10090,7 @@ You have the option of rendering the \ct{DENSITY} of any other species besides \
 \end{lstlisting}
 The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
-FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.  
+FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.
 
 \newpage
 
@@ -11752,10 +11754,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /ISOF/DEBUG
 % ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
-% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK
-% ignorenamelistkw: /PART/DEBUG
+% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/TEST_NEW_CHAR_MODEL, /MISC/FLUX_LIMITER_MW_CORRECTION
+% ignorenamelistkw: /PART/DEBUG, /PART/EMBER_SNAG_FACTOR
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
+% ignorenamelistkw: /TIME/RAMP_DT
 
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI
@@ -12626,7 +12629,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{MAX_LEAK_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 \ct{MAX_RAMPS}                                    & Integer      & Section~\ref{info:RAMP}                 &            &  100              \\ \hline
 \ct{MINIMUM_ZONE_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
-\ct{MPI_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
+\ct{MPI_TIMEOUT}                                 & Real          & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
+\ct{NEAR_WALL_PARTICLE_INTERPOLATION}            & Logical       & Section~\ref{info:particle_drag}        &            & \ct{F}            \\ \hline
 \ct{NEIGHBOR_SEPARATION_DISTANCE}                & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
 \ct{NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & \ct{T}           \\ \hline
 \ct{NOISE_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
