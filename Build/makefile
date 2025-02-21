@@ -193,6 +193,8 @@ ifeq ($(BUILD_WITH_GPU), ON)
       LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_DIR}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
    else ifeq ($(GPU_ARCH), cuda)
       LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${CUDA_DIR}/lib64 -lcudart -lcusparse -lcublas -lcurand -L${CUDA_MATH_DIR}/lib64 -lcusolver
+   else ifeq ($(GPU_ARCH), sycl)
+      LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${MKLROOT}/lib -lmkl_sycl -lsycl
    endif
 endif
 
@@ -337,7 +339,7 @@ impi_intel_linux_openmp : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_db : FFLAGS = $(M64_FLAG) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT -diag-disable=10448_INTEL
-impi_intel_linux_db : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
+impi_intel_linux_db : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5) $(LFLAGS_GPU)
 impi_intel_linux_db : FCOMPL = $(COMP_FC)
 impi_intel_linux_db : obj = fds_impi_intel_linux_db
 impi_intel_linux_db : setup $(obj_mpi)
