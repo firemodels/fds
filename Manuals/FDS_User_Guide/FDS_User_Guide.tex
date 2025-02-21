@@ -13182,7 +13182,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{AIT_EXCLUSION_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 \ct{AIT_EXCLUSION_ZONE_CTRL_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & \ct{'null'}      \\ \hline
 \ct{AIT_EXCLUSION_ZONE_DEVC_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & \ct{'null'}      \\ \hline
-\ct{AIT_EXCLUSION_ZONE_TEMPERATURE}   & Real           & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
+\ct{AIT_EXCLUSION_ZONE_TEMPERATURE(:)}   & Real Array   & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
 \ct{AUTO_IGNITION_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 \ct{CHECK_ATOM_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & \ct{T}           \\ \hline
 \ct{CO_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -13211,7 +13211,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{RAMP_CHI_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 \ct{REAC_ATOM_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
 \ct{REAC_MASS_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
-\ct{REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
+\ct{REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & \ct{'ARRHENIUS-TYPE'}   \\ \hline
 \ct{REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & \ct{F}           \\ \hline
 \ct{SOOT_YIELD}                         & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0.0               \\ \hline
 \ct{SPEC_ID_N_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
