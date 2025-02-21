@@ -10570,7 +10570,7 @@ The quantity \ct{RADIOMETER} is based on the {\em ellipsoidal radiometer} concep
 
 \item \ct{'RADIOMETER GAS'} The same as \ct{'RADIOMETER'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-	&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
+&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
 \end{lstlisting}
 Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
 
@@ -11764,21 +11764,21 @@ properties be specified as well. Simply prescribing as many properties as possib
 \section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-	\caption[Background species (\ct{BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
-	\label{tbl:BACK} \\
-	\hline
-	\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
-	\hline
-	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
-	\endfirsthead
-	\caption[]{Continued} \\
-	\hline
-	\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
-	\hline
-	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
-	\endhead
-	\ct{SPEC_ID}                   & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
-	\ct{MASS_FRACTION}             & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+\caption[Background species (\ct{BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
+\label{tbl:BACK} \\
+\hline
+\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
+\hline
+Keyword              & Type         & Description                                & Units     & Default   \\ \hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
+\hline
+Keyword              & Type         & Description                                & Units     & Default   \\ \hline \hline
+\endhead
+\ct{SPEC_ID}         & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
+\ct{MASS_FRACTION}   & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
 \end{longtable}
 
 
@@ -14080,7 +14080,7 @@ Keyword             & Type     & Description                      & Units       
 505 \> \ct{Duct has no AREA, DIAMETER, or PERIMTER ...                          } \> Section~\ref{info:HVACduct}  \\
 506 \> \ct{Duct without AREA has no DIAMETER ...                                } \> Section~\ref{info:HVACduct}  \\
 507 \> \ct{If both ROUND and SQUARE are FALSE, Duct with DIAMETER must             } \> Section~\ref{info:HVACduct} \\
-	\> \ct{also have PERIMETER ...}   \\
+    \> \ct{also have PERIMETER ...}   \\
 508 \> \ct{Duct cannot input both PERIMETER and DIAMETER with AREA ...          } \> Section~\ref{info:HVACduct}  \\
 509 \> \ct{Can only specify one of CTRL_ID or DEVC_ID. ...                    } \> Section~\ref{info:HVACduct}  \\
 510 \> \ct{Duct can only have one of damper, fan or aircoil ...                 } \> Section~\ref{info:HVACduct}  \\
@@ -14095,7 +14095,7 @@ Keyword             & Type     & Description                      & Units       
 519 \> \ct{Fan has no ID ...                                                    } \> Section~\ref{info:HVAC}  \\
 520 \> \ct{FAN can only be one of constant volume, quadratic or ramp ...        } \> Section~\ref{info:HVACfan}  \\
 521 \> \ct{IF one of MAX_PRESSURE or MAX_FLOW given, both must be                } \> Section~\ref{info:HVACfan}\\
-	\> \ct{specified ...}   \\
+    \> \ct{specified ...}   \\
 522 \> \ct{MAX_PRESSURE must be > 0 ...                                        } \> Section~\ref{info:HVACfan}  \\
 523 \> \ct{MAX_FLOW must be > 0 ...                                            } \> Section~\ref{info:HVACfan}  \\
 524 \> \ct{Filter has no ID ...                                                 } \> Section~\ref{info:HVAC}  \\
@@ -14109,7 +14109,7 @@ Keyword             & Type     & Description                      & Units       
 532 \> \ct{Can only have one HVAC input with TYPE_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
     \> \ct{DUCT QUANTITY LIST ...  }  \\
 533 \> \ct{Can only have one HVAC input with TYPE_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
-	\> \ct{NODE QUANTITY LIST ... }    \\
+    \> \ct{NODE QUANTITY LIST ... }    \\
 534 \> \ct{Both nodes have the same ID ...                                      } \> Section~\ref{info:HVACduct}  \\
 535 \> \ct{Two ducts with the same ID ...                                       } \> Section~\ref{info:HVAC}  \\
 536 \> \ct{Duct ... Node ... does not contain the duct in its duct list.     } \> Section~\ref{info:HVACnode}  \\
