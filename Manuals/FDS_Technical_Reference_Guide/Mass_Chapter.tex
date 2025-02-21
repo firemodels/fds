@@ -209,14 +209,14 @@ Note that the value $\smash{Z_{\alpha,1,j'k'}^{(2)}}$ is directly injected from 
 
 \subsubsection{Special Topic: Vertical Mesh Coarsening in Atmospheric Flows}
 
-In atmospheric flows, it may be beneficial to coarsen the mesh in the vertical direction.  Matching the heat flux at the mesh interface is not trivial due to the background pressure stratification and the relative coarse grid resolution usually applied to atmospheric flow calculations.  FDS does not explicitly match the flux.  Instead, it relies on the temperature gradient constructed from the interior ({\ct KKG}) and ghost cell ({\ct KK}) values to be equivalent (additionally, the interpolation of the transport coefficient at the mesh boundary must match, but this is less of a problem than the temperature gradient).  To further complicate matters, FDS always extracts the gas phase temperature value from the ideal gas law, given the cell species composition, density, and background pressure.
+In atmospheric flows, it may be beneficial to coarsen the mesh in the vertical direction.  Matching the heat flux at the mesh interface is not trivial due to the background pressure stratification and the relative coarse grid resolution usually applied to atmospheric flow calculations.  FDS does not explicitly match the flux.  Instead, it relies on the temperature gradient constructed from the interior (\ct{KKG}) and ghost cell (\ct{KK}) values to be equivalent (additionally, the interpolation of the transport coefficient at the mesh boundary must match, but this is less of a problem than the temperature gradient).  To further complicate matters, FDS always extracts the gas phase temperature value from the ideal gas law, given the cell species composition, density, and background pressure.
 
 \begin{equation}
 \label{eq:EOScode}
 T(z) = \frac{P(z) \overline{W}(z)}{\rho(z) \, R} = \frac{\mathtt{PBAR}(z)}{\mathtt{RHO}(z) \, \mathtt{RSUM}(z)}
 \end{equation}
 
-At {\ct INTERPOLATED} boundaries with mesh coarsening (or refinement) the positions of the ghost cell values do not match positions of the interior gas phase cell values from the neighboring mesh.  This is depicted for our problem in Fig.~\ref{fig:vertmeshcoarsening}.  Let $\delta z^{(1)}_{kkg}$ denote the cell height for the interior gas phase cell on Mesh 1, for example.  To match the temperature gradient at the mesh interface we require
+At \ct{INTERPOLATED} boundaries with mesh coarsening (or refinement) the positions of the ghost cell values do not match positions of the interior gas phase cell values from the neighboring mesh.  This is depicted for our problem in Fig.~\ref{fig:vertmeshcoarsening}.  Let $\delta z^{(1)}_{kkg}$ denote the cell height for the interior gas phase cell on Mesh 1, for example.  To match the temperature gradient at the mesh interface we require
 
 \begin{equation}
 \label{eq:TMPatminterp}
@@ -237,7 +237,7 @@ A similar expression is obtained when viewing the interpolation from Mesh 2.
 
 Note that this interpolation may be thought of as a central difference for the temperature gradient.  The corresponding density variation is nonlinear.  The mass fluxes computed by the flux limiter scheme described above still match at the refined mesh interface and therefore do not require adjustment.
 
-This special treatment of the ghost cell density may be accessed in the source code by searching on the logical flag {\ct ATMOSPHERIC\_INTERPOLATION}.  By default, the procedure is invoked at vertical mesh refinement boundaries only if {\ct STRATIFICATION=.TRUE.} and if the vertical cell spacing {\ct DZ} on any mesh exceeds 2 m.  For smaller grid spacing the spurious temperature effect is not noticeable and it is deemed more appropriate to keep the temperature variation consistent with the flux limited interface density.  Setting the developer logical flag {\ct USE\_ATMOSPHERIC\_INTERPOLATION} on the {\ct WIND} line overrides the default behavior.
+This special treatment of the ghost cell density may be accessed in the source code by searching on the logical flag \ct{ATMOSPHERIC\_INTERPOLATION}.  By default, the procedure is invoked at vertical mesh refinement boundaries only if \ct{STRATIFICATION=.TRUE.} and if the vertical cell spacing \ct{DZ} on any mesh exceeds 2 m.  For smaller grid spacing the spurious temperature effect is not noticeable and it is deemed more appropriate to keep the temperature variation consistent with the flux limited interface density.  Setting the developer logical flag \ct{USE\_ATMOSPHERIC\_INTERPOLATION} on the \ct{WIND} line overrides the default behavior.
 
 \begin{figure}[h!]
 
@@ -270,21 +270,21 @@ This special treatment of the ghost cell density may be accessed in the source c
 \put(100,0){\makebox(0,0){Mesh Interface}}
 
 \put(174,-10){\line(1,0){21}}
-\put(225,-10){\makebox(0,0){\ct M(1)\%TMP(KKG)}}
+\put(225,-10){\makebox(0,0){\ct{M(1)\%TMP(KKG)}}}
 \put(253,-10){\vector(1,0){10}}
 \put(272,-10){\makebox(0,0){$T^{(1)}_{kkg}$}}
 \put(174,10){\line(1,0){21}}
-\put(223,10){\makebox(0,0){\ct M(1)\%TMP(KK)}}
+\put(223,10){\makebox(0,0){\ct{M(1)\%TMP(KK)}}}
 \put(253,10){\vector(1,0){10}}
 \put(272,10){\makebox(0,0){$T^{(1)}_{kk}$}}
 
 \put(170,-30){\line(1,0){17}}
-\put(216,-30){\makebox(0,0){\ct M(2)\%TMP(KK)}}
+\put(216,-30){\makebox(0,0){\ct{M(2)\%TMP(KK)}}}
 \put(242,-30){\vector(1,0){10}}
 \put(261,-30){\makebox(0,0){$T^{(2)}_{kk}$}}
 
 \put(170,30){\line(1,0){17}}
-\put(218,30){\makebox(0,0){\ct M(2)\%TMP(KKG)}}
+\put(218,30){\makebox(0,0){\ct{M(2)\%TMP(KKG)}}}
 \put(246,30){\vector(1,0){10}}
 \put(265,30){\makebox(0,0){$T^{(2)}_{kkg}$}}
 
@@ -323,7 +323,7 @@ D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp - \Div \dot{
 
 The volumetric source terms in the divergence expression require extended discussion.  The heat release rate per unit volume, $\dq'''$, and the mass generation rate of species $\alpha$ per unit volume, $\dot{m}_\alpha'''$, are detailed in Chapter~\ref{chapter:combustion}, Combustion. The flux term, $\dot{\mathbf{q}}^\pp$, is defined in Eq.~(\ref{bqdot_def}). The radiative source term, $\dq_{\rm r}'''$, that is included in $\nabla \cdot \dot{\mathbf{q}}^\pp$ is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}'''$, which accounts for convective heat transfer and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}'''$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
 
-The source terms are computed in the corrector stage of the time step, following the update of the density and species mass fractions. The terms in Eq.~(\ref{eqn_fdsD1}) involving $\dq_{\rm b}'''$, $\dot{m}_\alpha'''$, and $\dot{m}_{\rm b,\alpha}'''$ are stored in an array called {\ct D\_SOURCE} and applied in the construction of the divergence expression required for the corrected update of the velocity.
+The source terms are computed in the corrector stage of the time step, following the update of the density and species mass fractions. The terms in Eq.~(\ref{eqn_fdsD1}) involving $\dq_{\rm b}'''$, $\dot{m}_\alpha'''$, and $\dot{m}_{\rm b,\alpha}'''$ are stored in an array called \ct{D\_SOURCE} and applied in the construction of the divergence expression required for the corrected update of the velocity.
 
 \subsection{Diffusion Terms}
 \label{div_discret}

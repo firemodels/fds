@@ -215,7 +215,7 @@ The condensation rate is computed assuming the same mass transfer coefficient as
 
 The total mass evaporated or condensed is added to the bulk mass source terms, $\dot{m}_{{\rm b},\alpha}^{\ppp}$, for the condensed and vapor phase species. The bulk energy source term, $\dot{q}_{\rm b}^{\ppp}$, is taken as the mass source term multiplied by the heat of vaporization, $h_v$ where condensation results in positive energy source term and evaporation results in a negative energy source term.
 
-The contribution to divergence is added to the {\ct D\_SOURCE} term following Eq~(\ref{eq:D_SOURCE_vap}). Since the condensed and vapor phases have the same molecular weight, the first term in the equation is zero.
+The contribution to divergence is added to the \ct{D_SOURCE} term following Eq~(\ref{eq:D_SOURCE_vap}). Since the condensed and vapor phases have the same molecular weight, the first term in the equation is zero.
 
 For the condensed phase, the radiation absorption is computed following Sec.~\ref{droplet-radiation}.
 
@@ -239,5 +239,5 @@ The total mass evaporated or condensed is added to the deposition wall mass sour
 \be
 \dot{q}_{{\rm dep},\alpha}^{\pp} = \dot{m}_{{\rm dep},\alpha}^{\pp} (h_v(T_w)+h_{s,\alpha}(T_g)-h_{s,\alpha}(T_w))
 \ee
-For the {\ct D\_SOURCE} term only the first term in Eq~(\ref{eq:D_SOURCE_vap}) applies since all the phase change energy comes from the wall cell.
+For the \ct{D\_SOURCE} term only the first term in Eq~(\ref{eq:D_SOURCE_vap}) applies since all the phase change energy comes from the wall cell.
 

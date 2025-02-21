@@ -248,7 +248,7 @@ where $n$ represents the sub-time step in the integration of the droplet mass an
 
 \subsection{Lagrangian Contribution to the Velocity Divergence}
 
-In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_SOURCE} within the code,
+In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted \ct{D\_SOURCE} within the code,
 \begin{equation}
 D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
 \label{eq:D_SOURCE_vap}
