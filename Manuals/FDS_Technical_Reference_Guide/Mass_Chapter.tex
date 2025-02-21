@@ -126,6 +126,27 @@ In practice, we set $r=0$ initially and only compute $r$ if the denominator is n
 
 The Central Difference, Godunov, and MINMOD limiters are included for completeness, debugging, and educational purposes.  These schemes have little utility for typical FDS applications.
 
+\subsubsection{Dealing with Variable Molecular Weights}
+
+Maintaining isothermal flow requires
+\begin{equation}
+T = \frac{\overline{W} \bar{p}}{\rho R} = \frac{\bar{p}}{R \rho \sum_\alpha \frac{Z_\alpha}{W_\alpha}} = \frac{\bar{p}}{R \sum_\alpha \frac{\rho Z_\alpha}{W_\alpha}}
+\end{equation}
+to be constant and uniform at all cells and faces. Therefore, with $\bar{p}$ and $R$ constant and uniform, we must maintain
+\begin{equation}
+\label{eq:rho_mw}
+\sum_\alpha \frac{(\rho Z_\alpha)}{W_\alpha} = \frac{\rho}{\overline{W}}
+\end{equation}
+
+The above condition is automatically satisfied in the cases of using Godunov or Central differencing or in the case of binary flow (two species).  However, if we apply a second-order flux limiter, such as Superbee or CHARM, independently to each species in a multi-component (three or more species) flow with variable molecular weights, then this condition is easily violated.
+
+To handle this situation, in LES mode, FDS will apply a correction to the most abundant species locally.  We first compute the flux-limited face values of the mass density over the mixture-average molecular weight.  Then we compute flux-limited face values of the species densities.  Finally, the error in Eq.~(\ref{eq:rho_mw}) is absorbed into the most abundant species locally,
+\begin{equation}
+\label{eq:rhoZ_cor}
+\overline{\rho Z_\alpha}^{\rm COR} = W_\alpha \left( \overline{\left\{\frac{\rho}{\overline{W}}\right\}}^{\rm FL} - \sum_{\beta \ne \alpha} \frac{\overline{\{\rho Z_\beta\}}^{\rm FL}}{W_\beta} \right)
+\end{equation}
+where $\alpha$ is the most abundant species on the face.
+
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
 
