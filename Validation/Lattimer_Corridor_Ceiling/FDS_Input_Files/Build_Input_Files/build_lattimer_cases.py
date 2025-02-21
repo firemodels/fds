@@ -16,17 +16,17 @@ def buildInputFile(testnum, HRR, H, dx):
     suffix2 = "HEAT_TRANSFER_MODEL='IMPINGING JET', CONVECTION_LENGTH_SCALE=0.77, "
         
     txt = "&HEAD CHID='%s', /\n"%(chid)
-    txt = txt + "&TIME T_END=200. /\n"
-    txt = txt + "&DUMP DT_DEVC=10., DT_HRR=10., /\n"
+    txt = txt + "&TIME T_END=200., TIME_SHRINK_FACTOR=10 /\n"
+    txt = txt + "&DUMP DT_DEVC=10., DT_HRR=10., SMV_PARALLEL_WRITE=F  /\n"
     
     if dx == 0.05: 
         numProcesses = 7
         txt = txt + "&MESH XB=-3.2,-2.7,-0.875,0.925,0.0,2.4, IJK=10,36,48, MULT_ID='MESH' /\n"
         txt = txt + "&MULT ID='MESH', DX=0.5, I_UPPER=6, /\n\n"
     if dx == 0.025:
-        txt = txt + "&MESH XB=-3.2,-2.7,-0.8875,0.0125,0.0,1.2, IJK=20,36,48, MULT_ID='MESH' /\n"
-        txt = txt + "&MULT ID='MESH', DX=0.5, DY=0.9, DZ=1.2, I_UPPER=6, J_UPPER=1, K_UPPER=1 /\n\n"
-        numProcesses = 28
+        txt = txt + "&MESH XB=-3.2,-2.325,-0.8875,0.0125,0.0,1.2, IJK=35,36,48, MULT_ID='MESH' /\n"
+        txt = txt + "&MULT ID='MESH', DX=0.875, DY=0.9, DZ=1.2, I_UPPER=3, J_UPPER=1, K_UPPER=1 /\n\n"
+        numProcesses = 16
     dz = dx
     
     txt = txt + "&REAC FUEL='PROPANE', SOOT_YIELD=0.024, CO_YIELD=0.005, RADIATIVE_FRACTION=0.29, / \n\n"
