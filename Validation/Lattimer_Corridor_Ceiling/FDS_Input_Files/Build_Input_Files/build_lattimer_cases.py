@@ -17,7 +17,7 @@ def buildInputFile(testnum, HRR, H, dx):
         
     txt = "&HEAD CHID='%s', /\n"%(chid)
     txt = txt + "&TIME T_END=200., TIME_SHRINK_FACTOR=10 /\n"
-    txt = txt + "&DUMP DT_DEVC=10., DT_HRR=10., SMV_PARALLEL_WRITE=F  /\n"
+    txt = txt + "&DUMP DT_DEVC=10., DT_HRR=10.,  /\n"
     
     if dx == 0.05: 
         numProcesses = 7
