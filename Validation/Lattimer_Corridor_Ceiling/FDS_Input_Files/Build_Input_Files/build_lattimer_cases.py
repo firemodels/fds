@@ -81,7 +81,7 @@ if __name__ == "__main__":
              [6, 200, 0.6],
              [7, 300, 0.6],
              [8, 400, 0.6]]
-    outdir = "../"
+    outdir = ".." + os.sep
     try:
         os.mkdir(outdir)
     except:
