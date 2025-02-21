@@ -1941,6 +1941,7 @@ END SUBROUTINE GET_ENTHALPY_Z
 !> \brief Compute surface emissivity
 !> \param ONE_D Pointer to BOUNDARY_ONE_D derived type variable
 !> \param NODE_INDEX Interior node index
+!> \param EMISSIVITY Surface emissivity on output
 
 SUBROUTINE GET_EMISSIVITY(ONE_D,NODE_INDEX,EMISSIVITY)
 
