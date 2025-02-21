@@ -290,7 +290,6 @@ END SUBROUTINE ASSIGN_GHOST_VALUE
 
 
 !> \brief Set various near-surface variables to be used for boundary conditions
-!> \param NM Mesh index
 !> \param T Time (s)
 !> \param SF Pointer to SURFACE derived type
 !> \param BC Pointer to BOUNDARY_COORD derived type

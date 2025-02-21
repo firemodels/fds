@@ -611,7 +611,7 @@ END FUNCTION DDTMP_TROE
 
 
 !> \brief cvode interface for ODE integrator. Call sundials cvode in serial mode.
-!> \param ZZ species mass fraction array
+!> \param CC species mass fraction array
 !> \param TMP_IN is the temperature
 !> \param PR_IN is the pressure
 !> \param TCUR is the start time in seconds
