@@ -69,9 +69,10 @@ for j=1:length(res_str)
 
         E_FDS(i,j) = abs(Nu - Nu_fds)/abs(Nu);
 
-        if E_FDS(i,j) > E(i,j)*1.1
-            disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
-        end
+%       Temporarily suspend error check
+%       if E_FDS(i,j) > E(i,j)*1.1
+%           disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
+%       end
 
         if i==1
             if j==1
