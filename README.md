@@ -1,6 +1,6 @@
-## Fire Dynamics Simulator and Smokeview
+## Fire Dynamics Simulator and Smokeview 
 
-*Continuous Integration. Continuous Improvement.*
+*Continuous Integration. Continuous Improvement.* 
 
 Fire Dynamics Simulator ([FDS](https://github.com/firemodels/fds)) is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
 
