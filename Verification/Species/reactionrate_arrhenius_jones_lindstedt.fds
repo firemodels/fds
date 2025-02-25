@@ -6,7 +6,7 @@ The original Jones and Lindstedt (1988) paper suggests that Reaction R3 is rever
 
 &TIME T_END=5, DT=0.001 /
 
-&DUMP FLUSH_FILE_BUFFERS=T, MASS_FILE=.TRUE. /
+&DUMP MASS_FILE=.TRUE. /
 
 &MISC GVEC(3)=0.0
       TMPA=450
