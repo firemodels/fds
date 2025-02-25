@@ -46,6 +46,8 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHI_R   !< Radiative fraction, \f$ \chi_{{\rm r},ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR      !< Radiation source term, \f$ -\nabla \cdot \dot{\mathbf{q}}_{\rm r}'' \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR_W    !< Radiation source term, particles and droplets
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RADIATION_EMISSION   !< Radiation source term, emission
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RADIATION_ABSORPTION !< Radiation source term, absorption
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UII     !< Integrated intensity, \f$ U_{ijk}=\sum_{l=1}^N I_{ijk}^l\delta\Omega^l\f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RSUM    !< \f$ R_0 \sum_\alpha Z_{\alpha,ijk}/W_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE!< Source terms in the expression for the divergence
@@ -348,7 +350,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: &
    U,V,W,US,VS,WS,DDDT,D,DS,H,HS,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,FVX_D,FVY_D,FVZ_D,RHO,RHOS, &
-   MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE, &
+   MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,RADIATION_EMISSION,RADIATION_ABSORPTION,UII,RSUM,D_SOURCE, &
    CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,PP_RESIDUAL,LES_FILTER_WIDTH
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                          SWORK1,SWORK2,SWORK3,SWORK4, &
@@ -525,6 +527,8 @@ Q_REAC=>M%Q_REAC
 CHI_R => M%CHI_R
 QR=>M%QR
 QR_W=>M%QR_W
+RADIATION_EMISSION=>M%RADIATION_EMISSION
+RADIATION_ABSORPTION=>M%RADIATION_ABSORPTION
 KAPPA_GAS=>M%KAPPA_GAS
 UII=>M%UII
 PP_RESIDUAL=>M%PP_RESIDUAL
