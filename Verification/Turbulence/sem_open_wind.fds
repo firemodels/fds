@@ -4,7 +4,7 @@
 
 &TIME T_END=60. /
 
-&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=1. /
+&DUMP DT_DEVC=1. /
 
 ! Without LES mode, the temperature field shows noticable (though not catastrophic)
 ! checkerboard (dispersion) errors.

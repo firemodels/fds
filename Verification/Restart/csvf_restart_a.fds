@@ -7,7 +7,7 @@
 
 &TIME T_END=10/
 
-&DUMP FLUSH_FILE_BUFFERS=T, DT_UVW=10, DT_TMP=10, DT_SPEC=10 /
+&DUMP DT_UVW=10, DT_TMP=10, DT_SPEC=10 /
 
 CSVF UVWFILE='csvf_restart_uvw_t1_m1.csv',
       TMPFILE='csvf_restart_tmp_t1_m1.csv',

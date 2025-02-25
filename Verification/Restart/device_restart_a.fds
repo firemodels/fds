@@ -1,7 +1,7 @@
 &HEAD CHID='device_restart_a' /
 
 &TIME T_END=40.0 /
-&DUMP FLUSH_FILE_BUFFERS=T, DT_RESTART=40., DT_DEVC=2 /
+&DUMP DT_RESTART=40., DT_DEVC=2 /
 
 &MESH IJK=25, 5,7, XB=-12.8,-2.8, 5.2, 7.2,0,2.8 /
 &MESH IJK=25,19,7, XB= -2.8, 7.2,-0.4, 7.2,0,2.8 /
