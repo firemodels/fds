@@ -11405,7 +11405,9 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{PRESSURE ZONE}                             & Section~\ref{info:ZONE}                           &                   & D,S          \\ \hline
 \ct{Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 \ct{RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s               & D,I,P,S      \\ \hline
-\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION ABSORPTION}                      & $\kappa U$                                        & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION EMISSION}                        & $4 \kappa \sigma T^4$                             & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''=\kappa (U-4 \sigma T^4)$    & kW/m$^3$          & D,I,P,S      \\ \hline
 \ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}          & D            \\ \hline
 \ct{REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
