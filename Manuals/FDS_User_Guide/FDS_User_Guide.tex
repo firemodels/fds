@@ -11361,30 +11361,30 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{CFL}                                       & Section~\ref{info:TIMING}                         &                   & D,I,P,S      \\ \hline
 \ct{CFL MAX}                                   & Section~\ref{info:TIMING}                         &                   & D            \\ \hline
 \ct{CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
-\ct{CHI_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
+\ct{CHI_R}                                     & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
 \ct{COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
 \ct{CONDUCTIVITY}                              & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
-\ct{C_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
+\ct{C_SMAG}                                    & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
 \ct{DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVITY}$^1$                           & Section~\ref{info:diffusivity}                    & m$^2$/s           & D,I,P,S      \\ \hline
-\ct{DISSIPATION RATE}                          & $\mu / \rho \times $ \ct{STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
+\ct{DISSIPATION RATE}                          & $(\mu / \rho)\, S_{ij}S_{ij}$                     & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 \ct{DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
 \ct{EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{ENTHALPY}                                  & Section~\ref{info:Enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                   & D,S          \\ \hline
 \ct{EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
-\ct{F_X, F_Y, F_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
+\ct{F_X, F_Y, F_Z}                             & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
 \ct{H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{HRRPUV}                                    & $\dq'''$                                          & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                       & kW/m$^3$          & D,S          \\ \hline
+\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                         & kW/m$^3$          & D,S          \\ \hline
 \ct{IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa                & D,I,P,S      \\ \hline
-\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{INTERNAL ENERGY}                           & $\rho h - \bar{p}$                                & kJ/m$^3$          & D,I,P,S      \\ \hline
 \ct{KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m                 & D,I,P,S      \\ \hline
@@ -11408,7 +11408,7 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{RADIATION ABSORPTION}                      & $\kappa U$                                        & kW/m$^3$          & D,I,P,S      \\ \hline
 \ct{RADIATION EMISSION}                        & $4 \kappa \sigma T^4$                             & kW/m$^3$          & D,I,P,S      \\ \hline
 \ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''=\kappa (U-4 \sigma T^4)$    & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}          & D            \\ \hline
+\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}     & D            \\ \hline
 \ct{REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
 \ct{RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
@@ -11425,7 +11425,7 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 \ct{SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 \ct{SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
+\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
