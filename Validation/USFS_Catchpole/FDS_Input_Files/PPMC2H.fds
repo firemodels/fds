@@ -1,7 +1,7 @@
 &HEAD CHID='PPMC2H', TITLE='Catchpole simulation using Lagrangian particles' /
 
 &MISC TMPA=27 /
-&TIME T_END= 999. /
+&TIME T_END=999.0 /
 
 &MESH IJK=40,20,30, XB=-1.0,1.0,-1.5,-0.5,0.0,1.50, MULT_ID='mesh' /
 &MULT ID='mesh', DX=2.0, DY=1.0, DZ=1.5, I_UPPER=4, J_UPPER=2, K_UPPER=1 /
@@ -60,8 +60,8 @@
 
 &SURF ID                   = 'Regular Excelsior'
       MATL_ID              = 'Dry Regular Excelsior'
-      MOISTURE_FRACTION    = 0.160
-      SURFACE_VOLUME_RATIO = 5710.
+      MOISTURE_FRACTION    = 0.16
+      SURFACE_VOLUME_RATIO = 5710
       LENGTH               = 0.02
       GEOMETRY             = 'CYLINDRICAL' /
 
@@ -81,7 +81,7 @@
 
 &SURF ID                   = 'NO BURN FUEL'
       MATL_ID              = 'NO BURN FUEL'
-      SURFACE_VOLUME_RATIO = 5710.
+      SURFACE_VOLUME_RATIO = 5710
       LENGTH               = 0.02
       GEOMETRY             = 'CYLINDRICAL' /
 
@@ -101,12 +101,12 @@
       DRY                  = T /
 
 &MATL ID                 = 'NO BURN FUEL'
-      DENSITY            = 510.
+      DENSITY            = 510.0
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg' /
 
 &MATL ID                 = 'Dry Regular Excelsior'
-      DENSITY            = 510.
+      DENSITY            = 510.0
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
       A                  = 1040.
@@ -115,7 +115,7 @@
       NU_MATL            = 0.154
       SPEC_ID            = 'WOOD FUEL VAPOR'
       NU_SPEC            = 0.846
-      HEAT_OF_REACTION   = 609. /
+      HEAT_OF_REACTION   = 609.0 /
  
 &MATL ID                 = 'Regular Excelsior Char'
       DENSITY            = 300.
@@ -145,8 +145,8 @@
 
 &RAMP ID='RAMPFIRE',T= 0., F=0.0 /
 &RAMP ID='RAMPFIRE',T= 1., F=1.0 /
-&RAMP ID='RAMPFIRE',T=20., F=1.0 /
-&RAMP ID='RAMPFIRE',T=21., F=0.0 /
+&RAMP ID='RAMPFIRE',T=20.0, F=1.0 /
+&RAMP ID='RAMPFIRE',T=21.0, F=0.0 /
 
 &VENT XB=-0.05,0.05,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
 
@@ -160,6 +160,12 @@
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 
 &DEVC ID='x', QUANTITY='TEMPERATURE', SPATIAL_STATISTIC='MAXLOC X', XB=0,8,-0.1,0.1,0,0.203 /
+
+&DEVC ID='t', QUANTITY='TIME', OUTPUT=F, SETPOINT=21.0/
+&DEVC ID='HRR', QUANTITY='HRRPUV', XB=-1.,9.,-1.5,1.5,0.,3., SPATIAL_STATISTIC='VOLUME_INTEGRAL', 
+      OUTPUT=F, SETPOINT=0.1, LATCH=F, TRIP_DIRECTION=-1/
+&CTRL ID='kill', FUNCTION_TYPE='ALL', INPUT_ID='t','HRR'/
+&CTRL FUNCTION_TYPE='KILL', INPUT_ID='kill' /
 
 &TAIL /
 
