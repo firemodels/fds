@@ -6374,7 +6374,7 @@ The THIEF model assumes that the cable plastic material has a thermal conductivi
 \subsubsection{Target Particles}
 \label{info:target_particles}
 
-To declare solid particle as being just a target for heat transfer, specify \ct{TARGET_ONLY} on \ct{PART}. When this flag is set and material properties are given, then FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
+To declare that a solid particle is only for recording the heat flux to a location away from a solid surface, specify \ct{TARGET_ONLY=T} on the \ct{PART} line. When this flag is set and material properties are given, FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
 
 \newpage
 
@@ -10554,11 +10554,15 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 By default, the heat transfer coefficient, $h_{\rm c}$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed \ct{HEAT_TRANSFER_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the \ct{PROP} line.
 
-\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The \ct{ORIENTATION} vector need not be normalized, as in the following:
+\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
+&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0, 
+      PROP_ID='my gauge' /
+&PROP ID='my gauge', GAUGE_EMISSIVITY=0.85, HEAT_TRANSFER_COEFFICIENT=15. /
 \end{lstlisting}
-Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}). Also, the convective component of the heat flux is calculated based on the assumption that the virtual target is a flat plate normal to the \ct{ORIENTATION} vector, and that the heat transfer coefficient is a function of the local gas temperature and velocity which will not be affected by the virtual device. Alternatively, you can specify \ct{HEAT_TRANSFER_COEFFICIENT} on a \ct{PROP} line whose \ct{ID} is specified on the \ct{DEVC} line.
+The \ct{GAUGE_TEMPERATURE}, $T_{\rm gauge}$, \ct{GAUGE_EMISSIVITY}, $\epsilon_{\rm gauge}$, and \ct{HEAT_TRANSFER_COEFFICIENT}, $h_{\rm c}$ (W/(m$^2$~K)), can be specified using a \ct{PROP} line that is referenced by the \ct{DEVC} line. Their default values are \ct{TMPA}, 1, and 10, respectively.
+
+Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
 
 \item \ct{'RADIOMETER'} Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
