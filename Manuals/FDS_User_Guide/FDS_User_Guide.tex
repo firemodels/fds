@@ -6374,7 +6374,7 @@ The THIEF model assumes that the cable plastic material has a thermal conductivi
 \subsubsection{Target Particles}
 \label{info:target_particles}
 
-To declare solid particle as being just a target for heat transfer, specify \ct{TARGET_ONLY} on \ct{PART}. When this flag is set and material properties are given, then FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
+To declare that a solid particle is only for recording the heat flux to a location away from a solid surface, specify \ct{TARGET_ONLY=T} on the \ct{PART} line. When this flag is set and material properties are given, FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
 
 \newpage
 
@@ -10554,11 +10554,15 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 By default, the heat transfer coefficient, $h_{\rm c}$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed \ct{HEAT_TRANSFER_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the \ct{PROP} line.
 
-\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The \ct{ORIENTATION} vector need not be normalized, as in the following:
+\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
+&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0, 
+      PROP_ID='my gauge' /
+&PROP ID='my gauge', GAUGE_EMISSIVITY=0.85, HEAT_TRANSFER_COEFFICIENT=15. /
 \end{lstlisting}
-Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}). Also, the convective component of the heat flux is calculated based on the assumption that the virtual target is a flat plate normal to the \ct{ORIENTATION} vector, and that the heat transfer coefficient is a function of the local gas temperature and velocity which will not be affected by the virtual device. Alternatively, you can specify \ct{HEAT_TRANSFER_COEFFICIENT} on a \ct{PROP} line whose \ct{ID} is specified on the \ct{DEVC} line.
+The \ct{GAUGE_TEMPERATURE}, $T_{\rm gauge}$, \ct{GAUGE_EMISSIVITY}, $\epsilon_{\rm gauge}$, and \ct{HEAT_TRANSFER_COEFFICIENT}, $h_{\rm c}$ (W/(m$^2$~K)), can be specified using a \ct{PROP} line that is referenced by the \ct{DEVC} line. Their default values are \ct{TMPA}, 1, and 10, respectively.
+
+Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
 
 \item \ct{'RADIOMETER'} Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
@@ -11361,30 +11365,30 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{CFL}                                       & Section~\ref{info:TIMING}                         &                   & D,I,P,S      \\ \hline
 \ct{CFL MAX}                                   & Section~\ref{info:TIMING}                         &                   & D            \\ \hline
 \ct{CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
-\ct{CHI_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
+\ct{CHI_R}                                     & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
 \ct{COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
 \ct{CONDUCTIVITY}                              & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
-\ct{C_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
+\ct{C_SMAG}                                    & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
 \ct{DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVITY}$^1$                           & Section~\ref{info:diffusivity}                    & m$^2$/s           & D,I,P,S      \\ \hline
-\ct{DISSIPATION RATE}                          & $\mu / \rho \times $ \ct{STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
+\ct{DISSIPATION RATE}                          & $(\mu / \rho)\, S_{ij}S_{ij}$                     & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 \ct{DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
 \ct{EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{ENTHALPY}                                  & Section~\ref{info:Enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                   & D,S          \\ \hline
 \ct{EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
-\ct{F_X, F_Y, F_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
+\ct{F_X, F_Y, F_Z}                             & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
 \ct{H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{HRRPUV}                                    & $\dq'''$                                          & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                       & kW/m$^3$          & D,S          \\ \hline
+\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                         & kW/m$^3$          & D,S          \\ \hline
 \ct{IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa                & D,I,P,S      \\ \hline
-\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{INTERNAL ENERGY}                           & $\rho h - \bar{p}$                                & kJ/m$^3$          & D,I,P,S      \\ \hline
 \ct{KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m                 & D,I,P,S      \\ \hline
@@ -11405,8 +11409,10 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{PRESSURE ZONE}                             & Section~\ref{info:ZONE}                           &                   & D,S          \\ \hline
 \ct{Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 \ct{RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s               & D,I,P,S      \\ \hline
-\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}          & D            \\ \hline
+\ct{RADIATION ABSORPTION}                      & $\kappa U$                                        & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION EMISSION}                        & $4 \kappa \sigma T^4$                             & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''=\kappa (U-4 \sigma T^4)$    & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}     & D            \\ \hline
 \ct{REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
 \ct{RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
@@ -11423,7 +11429,7 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 \ct{SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 \ct{SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
+\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline

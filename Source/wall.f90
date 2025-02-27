@@ -411,17 +411,18 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
    LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
    RSUM_G = RSUM(BC%IIG,BC%JJG,BC%KKG)
    MU_G   = MU(BC%IIG,BC%JJG,BC%KKG)
-   IF (LPC%MASSLESS_TARGET) THEN
+   IF (LPC%MASSLESS_TARGET) THEN  ! the particle's sole purpose is to record a heat flux
       PY => PROPERTY(LP%PROP_INDEX)
-      IF (PY%HEAT_TRANSFER_COEFFICIENT>0._EB) THEN
+      IF (PY%HEAT_TRANSFER_COEFFICIENT>0._EB) THEN  ! the user has added a PROP line with a specified HTC
          B1%HEAT_TRANS_COEF = PY%HEAT_TRANSFER_COEFFICIENT
-      ELSE
-         IF (SF%H_FIXED >= 0._EB) THEN
-            SF_HTC = SF%H_FIXED
-            IF (SF%RAMP_H_FIXED_INDEX > 0) SF_HTC = SF_HTC * EVALUATE_RAMP(T-T_BEGIN,SF%RAMP_H_FIXED_INDEX)
-         ELSE
-            SF_HTC = -1._EB
-         ENDIF
+      ELSEIF (SF%H_FIXED>=0._EB) THEN  ! the user has assigned a SURF_ID to the PART line with HTC>0
+         SF_HTC = SF%H_FIXED
+         IF (SF%RAMP_H_FIXED_INDEX>0) SF_HTC = SF_HTC * EVALUATE_RAMP(T-T_BEGIN,SF%RAMP_H_FIXED_INDEX)
+         B1%HEAT_TRANS_COEF = SF_HTC
+      ELSEIF (SF%ID=='MASSLESS TARGET') THEN  ! the particle for the gas phase device is not explicitly defined and needs an HTC
+         B1%HEAT_TRANS_COEF = 10._EB
+      ELSE  ! the HTC will be computed using the surrounding gas phase environment
+         SF_HTC = -1._EB
          B1%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(NM,B1%TMP_G-PY%GAUGE_TEMPERATURE,SF_HTC,SF,&
                               PARTICLE_INDEX_IN=PARTICLE_INDEX)
       ENDIF

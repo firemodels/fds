@@ -59,7 +59,7 @@ Test various devices and actions upon activation.
 &SLCF PBY=0.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBX=3.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 
-&DUMP FLUSH_FILE_BUFFERS=T, DT_PL3D=30. /
+&DUMP DT_PL3D=30. /
 
 &TAIL /
 
