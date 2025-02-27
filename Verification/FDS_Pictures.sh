@@ -32,7 +32,7 @@ $RUNSMV -d Controls activate_vents.fds
 $RUNSMV -d Detectors beam_detector.fds
 $RUNSMV -d Detectors objects_static.fds
 $RUNSMV -d Detectors objects_dynamic.fds
-$RUNSMV -d Fires couch.fds
+$RUNSMV -p 4 -d Fires couch.fds
 $RUNSMV -d Flowfields helium_2d_isothermal.fds
 $RUNSMV -d Flowfields symmetry_test.fds
 $RUNSMV -d Flowfields symmetry_test_2.fds
