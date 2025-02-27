@@ -43,7 +43,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --no-libs)
-	    no_libs=true
+            no_libs=true
             clean_fds=true
             shift
             ;;
@@ -52,7 +52,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         *)
-	    ARG="${ARG} $1"  # Append unrecognized arguments to ARG
+        ARG="${ARG} $1"  # Append unrecognized arguments to ARG
             shift
             ;;
     esac
