@@ -339,7 +339,7 @@ Running FDS using MPI requires shared disk access to each computer on which case
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, macOS, and Linux.
 \begin{description}
 \item[MS Windows] An installation package is available for the 64~bit Windows operating system. Running FDS/Smokeview any version of MS Windows released prior to Windows 7 is not recommended.
-\item[macOS] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (See Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems (M1 and M2 chips); therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), and hence the complex geometry features (\ct{GEOM} namelist) are not available.
+\item[macOS] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (see Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems; therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), instead ULMAT HYPRE may be used (see Sec.~\ref{optional_pressure_solver}).
 \item[Linux] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Chapter~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
 
@@ -1691,7 +1691,7 @@ There are four reserved \ct{SURF_ID}'s that may be applied to a \ct{VENT} -- \ct
 
 The first special \ct{VENT} is invoked by the parameter \ct{SURF_ID='OPEN'}. This is used only if the \ct{VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the \ct{XB}s on the \ct{MESH} line) is a solid wall. To create a totally or partially open domain, use \ct{OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be \ct{OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an \ct{OPEN} boundary. You would still have to use the \ct{OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperture ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperature ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The \ct{OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an \ct{OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an \ct{OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, \ct{OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -2792,7 +2792,7 @@ The parameters \ct{HRRPUA}, \ct{IGNITION_TEMPERATURE}, \ct{EXTINCTION_TEMPERATUR
 
 FDS has a simple scaling-based pyrolysis model (SPyro) that scales burning rate data collected from a cone calorimeter or similar device to a different material thickness and accounts for the dynamic heat feedback during an FDS simulation. The inputs for this model are similar to Section~\ref{info:specified_burning} with some additional parameters. The frequently used parameters for this model are:
 \begin{itemize}
-\item[\ct{HRRPUA}] (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
+\item \ct{HRRPUA} (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
 \item \ct{IGNITION_TEMPERATURE} (Required) Specifies ignition temperature of the material in degrees Celsius.
 \item \ct{INERT_Q_REF} Specifies whether the test data represents an inert test device where pyrolysis occurs without combustion. This flag applies to all specified test data if an array of experimental data is provided. (Default False)
 \item \ct{RAMP_Q} (Required) Specifies the \ct{ID} of a \ct{RAMP} which contains the experimental data with \ct{T} as time and \ct{F} as the measured HRRPUA in \unit{kW/m^2}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning/pyrolyzing in the test.
@@ -3550,7 +3550,7 @@ Here is example of how to specify a surface that blows methane with a velocity o
 \end{lstlisting}
 Note that specifying a combination of \ct{VEL} and \ct{MASS_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use \ct{MASS_FLUX}.
 
-Alternatively, add \ct{CONVERT_VOLUME_TO_MASS=T} for velocity boundaries (\ct{VEL}, \ct{VOLUME_FLOW}, or \ct{MASS_FLUX_TOTAL}), which converts volume flow to a mass flux based on the specified boundary composition (\ct{MASS_FRACTION}) and temperature (\ct{TMP_FRONT}):
+Alternatively, add \ct{CONVERT_VOLUME_TO_MASS=T} for velocity boundaries (\ct{VEL}, \ct{VOLUME_FLOW}, or\\\ct{MASS_FLUX_TOTAL}), which converts volume flow to a mass flux based on the specified boundary composition (\ct{MASS_FRACTION}) and temperature (\ct{TMP_FRONT}):
 \begin{equation}
 \dot{m}_\alpha^{\prime\prime} = \rho Z_\alpha u = \frac{p_\infty \overline{W}}{R T} Z_\alpha \frac{\dot{Q}}{A}
 \end{equation}
@@ -9152,7 +9152,7 @@ The fields are stored in a comma-separated value (.csv) files.  You have the opt
 FDS will then write \ct{CHID_uvw_tN_mM.csv}, etc., for each time, \ct{N}, and mesh, \ct{M}.
 
 \subsection*{Velocity format}
-The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-presicion real data.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, \ct{IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
+The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-precision real data.  The top row just indicates the structured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, \ct{IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -9178,7 +9178,7 @@ Similarly, for temperature, except temperature is a scalar stored at the cell ce
 \end{lstlisting}
 
 \subsection*{Species format}
-Tracked species are written out as a comma-separed list with each cell as a row in the file.  Similar to temperture, species mass fractions are scalars that live at the cell centers.
+Tracked species are written out as a comma-separated list with each cell as a row in the file.  Similar to temperature, species mass fractions are scalars that live at the cell centers.
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -14029,6 +14029,7 @@ Keyword             & Type     & Description                      & Units       
 374  \> \ct{Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
 375  \> \ct{OBST ... is VARIABLE_THICKNESS or HT3D and needs a MATL_ID.      } \> Section~\ref{info:HT3D_Limitations}  \\
 376  \> \ct{Meshes must have the same y/z bounds for TUNNEL_PRECONDITIONER.  } \> Section~\ref{tunnel_solver}  \\
+377  \> \ct{SURF ... IMPINGING JET model requires ...                        } \> Section~\ref{info:impinging_jet}  \\
      \>                                                                               \>                                     \\
 381  \> \ct{Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> \ct{Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
